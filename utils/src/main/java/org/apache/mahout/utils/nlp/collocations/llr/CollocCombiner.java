@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 package org.apache.mahout.utils.nlp.collocations.llr;
 
 import java.io.IOException;
@@ -29,56 +28,54 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 
 /** Combiner for pass1 of the CollocationDriver */
-public class CollocCombiner extends MapReduceBase implements
-  Reducer<Gram, Gram, Gram, Gram> {
-
-  /** collocation finder: pass 1 colloc phase:
-   *  
-   *  given input from the mapper,
-   *  k:h_subgram:1 v:ngram:1
-   *  k:t_subgram:1 v:ngram:1
-   *  
-   *  count ngrams and subgrams. 
-   *  
-   *  output is:
-   *  
-   *  k:h_subgram:subgramfreq v:ngram:ngramfreq
-   *  k:t_subgram:subgramfreq v:ngram:ngramfreq
-   *  
-   *  Each ngram's frequency is essentially counted twice, frequency should
-   *  be the same for the head and tail. Fix this to count only for the head
-   *  and move the count into the value?
+public class CollocCombiner extends MapReduceBase implements Reducer<Gram,Gram,Gram,Gram> {
+  
+  /**
+   * collocation finder: pass 1 colloc phase:
+   * 
+   * given input from the mapper, k:h_subgram:1 v:ngram:1 k:t_subgram:1 v:ngram:1
+   * 
+   * count ngrams and subgrams.
+   * 
+   * output is:
+   * 
+   * k:h_subgram:subgramfreq v:ngram:ngramfreq k:t_subgram:subgramfreq v:ngram:ngramfreq
+   * 
+   * Each ngram's frequency is essentially counted twice, frequency should be the same for the head and tail.
+   * Fix this to count only for the head and move the count into the value?
    */
   @Override
-  public void reduce(Gram subgramKey, Iterator<Gram> ngramValues,
-      OutputCollector<Gram, Gram> output, Reporter reporter) throws IOException {
-
+  public void reduce(Gram subgramKey,
+                     Iterator<Gram> ngramValues,
+                     OutputCollector<Gram,Gram> output,
+                     Reporter reporter) throws IOException {
+    
     HashMap<Gram,Gram> ngramSet = new HashMap<Gram,Gram>();
     int subgramFrequency = 0;
-
+    
     while (ngramValues.hasNext()) {
       Gram ngram = ngramValues.next();
       subgramFrequency += ngram.getFrequency();
-
+      
       Gram ngramCanon = ngramSet.get(ngram);
       if (ngramCanon == null) {
         // t is potentially reused, so create a new object to populate the HashMap
         Gram ngramEntry = new Gram(ngram);
-        ngramSet.put(ngramEntry,ngramEntry);
-      }
-      else {
+        ngramSet.put(ngramEntry, ngramEntry);
+      } else {
         ngramCanon.incrementFrequency(ngram.getFrequency());
       }
     }
-
+    
     // emit subgram:subgramFreq ngram:ngramFreq pairs
     subgramKey.setFrequency(subgramFrequency);
-
-    for (Gram ngram: ngramSet.keySet()) {
-      if(subgramKey.getType() == Type.UNIGRAM)
+    
+    for (Gram ngram : ngramSet.keySet()) {
+      if (subgramKey.getType() == Type.UNIGRAM) {
         ngram.setType(subgramKey.getType());
+      }
       output.collect(subgramKey, ngram);
     }
   }
-
+  
 }

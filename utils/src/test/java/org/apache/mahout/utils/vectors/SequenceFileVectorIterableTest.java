@@ -17,6 +17,10 @@
 
 package org.apache.mahout.utils.vectors;
 
+import java.io.File;
+
+import junit.framework.Assert;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -27,13 +31,11 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 
-import java.io.File;
-
 public class SequenceFileVectorIterableTest extends MahoutTestCase {
-
+  
   private File tmpLoc;
   private File tmpFile;
-
+  
   @Override
   public void setUp() throws Exception {
     super.setUp();
@@ -44,14 +46,14 @@ public class SequenceFileVectorIterableTest extends MahoutTestCase {
     tmpFile = File.createTempFile("sfvit", ".dat", tmpLoc);
     tmpFile.deleteOnExit();
   }
-
+  
   @Override
   public void tearDown() throws Exception {
     tmpFile.delete();
     tmpLoc.delete();
     super.tearDown();
   }
-
+  
   public void testIterable() throws Exception {
     Path path = new Path(tmpFile.getAbsolutePath());
     Configuration conf = new Configuration();
@@ -61,7 +63,7 @@ public class SequenceFileVectorIterableTest extends MahoutTestCase {
     RandomVectorIterable iter = new RandomVectorIterable(50);
     writer.write(iter);
     writer.close();
-
+    
     SequenceFile.Reader seqReader = new SequenceFile.Reader(fs, path, conf);
     SequenceFileVectorIterable sfvi = new SequenceFileVectorIterable(seqReader);
     int count = 0;
@@ -70,6 +72,6 @@ public class SequenceFileVectorIterableTest extends MahoutTestCase {
       count++;
     }
     seqReader.close();
-    assertEquals(50, count);
+    Assert.assertEquals(50, count);
   }
 }

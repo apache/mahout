@@ -36,10 +36,9 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * This class groups a set of input vectors. The Sequence file input should have
- * a {@link WritableComparable} key containing document id and a
- * {@link VectorWritable} value containing the term frequency vector. This class
- * also does normalization of the vector.
+ * This class groups a set of input vectors. The Sequence file input should have a {@link WritableComparable}
+ * key containing document id and a {@link VectorWritable} value containing the term frequency vector. This
+ * class also does normalization of the vector.
  * 
  */
 public final class PartialVectorMerger {
@@ -47,9 +46,9 @@ public final class PartialVectorMerger {
   public static final float NO_NORMALIZING = -1.0f;
   
   public static final String NORMALIZATION_POWER = "normalization.power";
-
+  
   public static final String DIMENSION = "vector.dimension";
-
+  
   public static final String SEQUENTIAL_ACCESS = "vector.sequentialAccess";
   
   /**
@@ -60,17 +59,15 @@ public final class PartialVectorMerger {
   }
   
   /**
-   * Merge all the partial
-   * {@link org.apache.mahout.math.RandomAccessSparseVector}s into the complete
-   * Document {@link org.apache.mahout.math.RandomAccessSparseVector}
+   * Merge all the partial {@link org.apache.mahout.math.RandomAccessSparseVector}s into the complete Document
+   * {@link org.apache.mahout.math.RandomAccessSparseVector}
    * 
    * @param partialVectorPaths
    *          input directory of the vectors in {@link SequenceFile} format
    * @param output
    *          output directory were the partial vectors have to be created
    * @param normPower
-   *          The normalization value. Must be greater than or equal to 0 or
-   *          equal to {@link #NO_NORMALIZING}
+   *          The normalization value. Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
    * @throws IOException
    */
   public static void mergePartialVectors(List<Path> partialVectorPaths,
@@ -78,26 +75,24 @@ public final class PartialVectorMerger {
                                          float normPower,
                                          int dimension,
                                          boolean sequentialAccess) throws IOException {
-    if (normPower != NO_NORMALIZING && normPower < 0) {
+    if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(PartialVectorMerger.class);
-    conf.set("io.serializations",
-      "org.apache.hadoop.io.serializer.JavaSerialization,"
-          + "org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     conf.setJobName("PartialVectorMerger::MergePartialVectors");
-    conf.setBoolean(SEQUENTIAL_ACCESS, sequentialAccess);
-    conf.setInt(DIMENSION, dimension);
-    conf.setFloat(NORMALIZATION_POWER, normPower);
+    conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
+    conf.setInt(PartialVectorMerger.DIMENSION, dimension);
+    conf.setFloat(PartialVectorMerger.NORMALIZATION_POWER, normPower);
     
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     
-    FileInputFormat.setInputPaths(conf,
-      getCommaSeparatedPaths(partialVectorPaths));
+    FileInputFormat.setInputPaths(conf, PartialVectorMerger.getCommaSeparatedPaths(partialVectorPaths));
     
     Path outputPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outputPath);

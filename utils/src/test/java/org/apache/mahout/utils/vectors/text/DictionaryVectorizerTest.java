@@ -52,46 +52,48 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   public static final String DELIM = " .,?;:!\t\n\r";
   
   public static final String ERRORSET = "`1234567890"
-                                        + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
+    + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
   
   private static final Random random = RandomUtils.getRandom();
   
   private FileSystem fs;
   
   private static char getRandomDelimiter() {
-    return DELIM.charAt(random.nextInt(DELIM.length()));
+    return DictionaryVectorizerTest.DELIM.charAt(DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.DELIM.length()));
   }
   
   public static String getRandomDocument() {
-    int length = (AVG_DOCUMENT_LENGTH >> 1)
-                 + random.nextInt(AVG_DOCUMENT_LENGTH);
-    StringBuilder sb = new StringBuilder(length * AVG_SENTENCE_LENGTH
-                                         * AVG_WORD_LENGTH);
+    int length = (DictionaryVectorizerTest.AVG_DOCUMENT_LENGTH >> 1)
+    + DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.AVG_DOCUMENT_LENGTH);
+    StringBuilder sb = new StringBuilder(length * DictionaryVectorizerTest.AVG_SENTENCE_LENGTH
+      * DictionaryVectorizerTest.AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
-      sb.append(getRandomSentence());
+      sb.append(DictionaryVectorizerTest.getRandomSentence());
     }
     return sb.toString();
   }
   
   public static String getRandomSentence() {
-    int length = (AVG_SENTENCE_LENGTH >> 1)
-                 + random.nextInt(AVG_SENTENCE_LENGTH);
-    StringBuilder sb = new StringBuilder(length * AVG_WORD_LENGTH);
+    int length = (DictionaryVectorizerTest.AVG_SENTENCE_LENGTH >> 1)
+    + DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.AVG_SENTENCE_LENGTH);
+    StringBuilder sb = new StringBuilder(length * DictionaryVectorizerTest.AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
-      sb.append(getRandomString()).append(' ');
+      sb.append(DictionaryVectorizerTest.getRandomString()).append(' ');
     }
-    sb.append(getRandomDelimiter());
+    sb.append(DictionaryVectorizerTest.getRandomDelimiter());
     return sb.toString();
   }
   
   public static String getRandomString() {
-    int length = (AVG_WORD_LENGTH >> 1) + random.nextInt(AVG_WORD_LENGTH);
+    int length = (DictionaryVectorizerTest.AVG_WORD_LENGTH >> 1) + DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.AVG_WORD_LENGTH);
     StringBuilder sb = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
-      sb.append(CHARSET.charAt(random.nextInt(CHARSET.length())));
+      sb.append(DictionaryVectorizerTest.CHARSET.charAt(DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.CHARSET.length())));
     }
-    if (random.nextInt(10) == 0) sb.append(ERRORSET.charAt(random
-        .nextInt(ERRORSET.length())));
+    if (DictionaryVectorizerTest.random.nextInt(10) == 0) {
+      sb.append(DictionaryVectorizerTest.ERRORSET.charAt(DictionaryVectorizerTest.random
+        .nextInt(DictionaryVectorizerTest.ERRORSET.length())));
+    }
     return sb.toString();
   }
   
@@ -101,7 +103,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
       if (f.isDirectory()) {
         String[] contents = f.list();
         for (String content : contents) {
-          rmr(f.toString() + File.separator + content);
+          DictionaryVectorizerTest.rmr(f.toString() + File.separator + content);
         }
       }
       f.delete();
@@ -111,31 +113,31 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    rmr("output");
-    rmr("testdata");
+    DictionaryVectorizerTest.rmr("output");
+    DictionaryVectorizerTest.rmr("testdata");
     Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
   }
   
   public void testCreateTermFrequencyVectors() throws IOException,
-                                              InterruptedException,
-                                              ClassNotFoundException,
-                                              URISyntaxException {
+  InterruptedException,
+  ClassNotFoundException,
+  URISyntaxException {
     Configuration conf = new Configuration();
     String pathString = "testdata/documents/docs.file";
     Path path = new Path(pathString);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
-        Text.class, Text.class);
+      Text.class, Text.class);
     
-    for (int i = 0; i < NUM_DOCS; i++) {
+    for (int i = 0; i < DictionaryVectorizerTest.NUM_DOCS; i++) {
       writer.append(new Text("Document::ID::" + i), new Text(
-          getRandomDocument()));
+        DictionaryVectorizerTest.getRandomDocument()));
     }
     writer.close();
     Class<? extends Analyzer> analyzer = new StandardAnalyzer(
-        Version.LUCENE_CURRENT).getClass();
+      Version.LUCENE_CURRENT).getClass();
     DocumentProcessor.tokenizeDocuments(pathString, analyzer,
-      "output/tokenized-documents");
+    "output/tokenized-documents");
     DictionaryVectorizer.createTermFrequencyVectors("output/tokenized-documents",
       "output/wordcount", 2, 1, 0.0f, 1, 100, false);
     TFIDFConverter.processTfIdf("output/wordcount/vectors", "output/tfidf/", 100, 1, 99, 1.0f, false);

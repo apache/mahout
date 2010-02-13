@@ -17,40 +17,40 @@
 
 package org.apache.mahout.utils.vectors;
 
-import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.function.UnaryFunction;
-import org.apache.mahout.math.Vector;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-public class RandomVectorIterable implements Iterable<Vector>{
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.UnaryFunction;
 
+public class RandomVectorIterable implements Iterable<Vector>{
+  
   private int numItems = 100;
   public enum VectorType {DENSE, SPARSE}
-
+  
   private VectorType type = VectorType.SPARSE;
-
+  
   public RandomVectorIterable() {
   }
-
+  
   public RandomVectorIterable(int numItems) {
     this.numItems = numItems;
   }
-
+  
   public RandomVectorIterable(int numItems, VectorType type) {
     this.numItems = numItems;
     this.type = type;
   }
-
+  
   @Override
   public Iterator<Vector> iterator() {
     return new VectIterator();
   }
-
+  
   private class VectIterator implements Iterator<Vector>{
     private int count = 0;
     private final Random random = RandomUtils.getRandom();
@@ -58,7 +58,7 @@ public class RandomVectorIterable implements Iterable<Vector>{
     public boolean hasNext() {
       return count < numItems;
     }
-
+    
     @Override
     public Vector next() {
       if (!hasNext()) {
@@ -74,7 +74,7 @@ public class RandomVectorIterable implements Iterable<Vector>{
       count++;
       return result;
     }
-
+    
     @Override
     public void remove() {
       throw new UnsupportedOperationException();

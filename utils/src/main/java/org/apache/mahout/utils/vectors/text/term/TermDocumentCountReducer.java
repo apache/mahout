@@ -28,8 +28,7 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
 /**
- * Can also be used as a local Combiner. This accumulates all the features and
- * the weights and sums them up.
+ * Can also be used as a local Combiner. This accumulates all the features and the weights and sums them up.
  */
 public class TermDocumentCountReducer extends MapReduceBase implements
     Reducer<IntWritable,LongWritable,IntWritable,LongWritable> {
@@ -40,8 +39,9 @@ public class TermDocumentCountReducer extends MapReduceBase implements
                      OutputCollector<IntWritable,LongWritable> output,
                      Reporter reporter) throws IOException {
     long sum = 0;
-    while (values.hasNext())
+    while (values.hasNext()) {
       sum += values.next().get();
+    }
     output.collect(key, new LongWritable(sum));
   }
 }

@@ -61,29 +61,31 @@ public class CollocMapperTest {
     key.set("dummy-key");
     
     String[] input = {"the", "best", "of", "times", "the", "worst", "of",
-                      "times"};
+    "times"};
     StringTuple inputTuple = new StringTuple();
     for (String i : input) {
       inputTuple.add(i);
     }
     
     String[][] values = new String[][] { {"h_the", "the best"},
-                                        {"t_best", "the best"},
-                                        {"h_of", "of times"},
-                                        {"t_times", "of times"},
-                                        {"h_best", "best of"},
-                                        {"t_of", "best of"},
-                                        {"h_the", "the worst"},
-                                        {"t_worst", "the worst"},
-                                        {"h_times", "times the"},
-                                        {"t_the", "times the"},
-                                        {"h_worst", "worst of"},
-                                        {"t_of", "worst of"},};
+                                         {"t_best", "the best"},
+                                         {"h_of", "of times"},
+                                         {"t_times", "of times"},
+                                         {"h_best", "best of"},
+                                         {"t_of", "best of"},
+                                         {"h_the", "the worst"},
+                                         {"t_worst", "the worst"},
+                                         {"h_times", "times the"},
+                                         {"t_the", "times the"},
+                                         {"h_worst", "worst of"},
+                                         {"t_of", "worst of"},};
     // set up expectations for mocks. ngram max size = 2
     for (String[] v : values) {
       Type p = v[0].startsWith("h") ? HEAD : TAIL;
       int frequency = 1;
-      if (v[1].equals("of times")) frequency = 2;
+      if (v[1].equals("of times")) {
+        frequency = 2;
+      }
       Gram subgram = new Gram(v[0].substring(2), frequency, p);
       Gram ngram = new Gram(v[1], frequency);
       collector.collect(subgram, ngram);
@@ -110,34 +112,36 @@ public class CollocMapperTest {
     key.set("dummy-key");
     
     String[] input = {"the", "best", "of", "times", "the", "worst", "of",
-                      "times"};
+    "times"};
     StringTuple inputTuple = new StringTuple();
     for (String i : input) {
       inputTuple.add(i);
     }
     
     String[][] values = new String[][] { {"h_the", "the best"},
-                                        {"t_best", "the best"},
-                                        {"h_of", "of times"},
-                                        {"t_times", "of times"},
-                                        {"h_best", "best of"},
-                                        {"t_of", "best of"},
-                                        {"h_the", "the worst"},
-                                        {"t_worst", "the worst"},
-                                        {"h_times", "times the"},
-                                        {"t_the", "times the"},
-                                        {"h_worst", "worst of"},
-                                        {"t_of", "worst of"},
-                                        {"u_worst", "worst"}, {"u_of", "of"},
-                                        {"u_the", "the"}, {"u_best", "best"},
-                                        {"u_times", "times"},};
+                                         {"t_best", "the best"},
+                                         {"h_of", "of times"},
+                                         {"t_times", "of times"},
+                                         {"h_best", "best of"},
+                                         {"t_of", "best of"},
+                                         {"h_the", "the worst"},
+                                         {"t_worst", "the worst"},
+                                         {"h_times", "times the"},
+                                         {"t_the", "times the"},
+                                         {"h_worst", "worst of"},
+                                         {"t_of", "worst of"},
+                                         {"u_worst", "worst"}, {"u_of", "of"},
+                                         {"u_the", "the"}, {"u_best", "best"},
+                                         {"u_times", "times"},};
     // set up expectations for mocks. ngram max size = 2
     for (String[] v : values) {
       Type p = v[0].startsWith("h") ? HEAD : TAIL;
       p = v[0].startsWith("u") ? UNIGRAM : p;
       int frequency = 1;
       if (v[1].equals("of times") || v[1].equals("of") || v[1].equals("times")
-          || v[1].equals("the")) frequency = 2;
+          || v[1].equals("the")) {
+        frequency = 2;
+      }
       Gram subgram = new Gram(v[0].substring(2), frequency, p);
       Gram ngram = new Gram(v[1], frequency);
       collector.collect(subgram, ngram);

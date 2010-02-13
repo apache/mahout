@@ -18,10 +18,10 @@
 package org.apache.mahout.utils.vectors;
 
 /**
- * {@link org.apache.mahout.utils.vectors.Weight} based on term frequency only 
+ * {@link org.apache.mahout.utils.vectors.Weight} based on term frequency only
  */
 public class TF implements Weight {
-
+  
   @Override
   public double calculate(int tf, int df, int length, int numDocs) {
     //ignore length

@@ -17,39 +17,39 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import org.apache.mahout.math.Vector;
-
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.mahout.math.Vector;
+
 public class JWriterVectorWriter implements VectorWriter {
   private final Writer writer;
-
+  
   public JWriterVectorWriter(Writer writer) {
     this.writer = writer;
   }
-
+  
   @Override
   public long write(Iterable<Vector> iterable) throws IOException {
     return write(iterable, Long.MAX_VALUE);
   }
-
+  
   @Override
   public long write(Iterable<Vector> iterable, long maxDocs) throws IOException {
     long result = 0;
-
+    
     for (Vector vector : iterable) {
       if (result >= maxDocs) {
         break;
       }
       writer.write(vector.asFormatString());
       writer.write('\n');
-
+      
       result++;
     }
     return result;
   }
-
+  
   @Override
   public void close() throws IOException {
     writer.flush();

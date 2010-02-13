@@ -20,10 +20,10 @@ package org.apache.mahout.utils.vectors;
 import java.util.Iterator;
 
 public interface TermInfo {
-
+  
   int totalTerms(String field);
-
+  
   TermEntry getTermEntry(String field, String term);
-
+  
   Iterator<TermEntry> getAllEntries();
 }

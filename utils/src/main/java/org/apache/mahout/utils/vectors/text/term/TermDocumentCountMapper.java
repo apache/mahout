@@ -28,8 +28,8 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * TextVectorizer Document Frequency Count Mapper. Outputs 1 for each feature
@@ -51,8 +51,8 @@ public class TermDocumentCountMapper extends MapReduceBase implements
     
     while (it.hasNext()) {
       Element e = it.next();
-      output.collect(new IntWritable(e.index()), ONE);
+      output.collect(new IntWritable(e.index()), TermDocumentCountMapper.ONE);
     }
-    output.collect(TOTAL_COUNT, ONE);
+    output.collect(TermDocumentCountMapper.TOTAL_COUNT, TermDocumentCountMapper.ONE);
   }
 }

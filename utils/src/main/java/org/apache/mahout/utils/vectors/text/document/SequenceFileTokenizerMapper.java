@@ -36,20 +36,14 @@ import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 /**
  * Tokenizes a text document and outputs tokens in a StringTuple
  */
-public class SequenceFileTokenizerMapper extends MapReduceBase implements
-    Mapper<Text,Text,Text,StringTuple> {
+public class SequenceFileTokenizerMapper extends MapReduceBase implements Mapper<Text,Text,Text,StringTuple> {
   
   private Analyzer analyzer;
   
   @Override
-  public void map(Text key,
-                  Text value,
-                  OutputCollector<Text,StringTuple> output,
-                  Reporter reporter) throws IOException {
-    TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(
-        value.toString()));
-    TermAttribute termAtt = (TermAttribute) stream
-        .addAttribute(TermAttribute.class);
+  public void map(Text key, Text value, OutputCollector<Text,StringTuple> output, Reporter reporter) throws IOException {
+    TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
+    TermAttribute termAtt = (TermAttribute) stream.addAttribute(TermAttribute.class);
     StringTuple document = new StringTuple();
     while (stream.incrementToken()) {
       if (termAtt.termLength() > 0) {
@@ -64,8 +58,8 @@ public class SequenceFileTokenizerMapper extends MapReduceBase implements
     super.configure(job);
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job.get(DocumentProcessor.ANALYZER_CLASS,
-        StandardAnalyzer.class.getName()));
+      Class<?> cl = ccl
+          .loadClass(job.get(DocumentProcessor.ANALYZER_CLASS, StandardAnalyzer.class.getName()));
       analyzer = (Analyzer) cl.newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);

@@ -17,6 +17,14 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -46,87 +54,83 @@ import org.apache.mahout.utils.vectors.io.VectorWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-
 public class Driver {
   private static final Logger log = LoggerFactory.getLogger(Driver.class);
-
-  private Driver() {
-  }
-
+  
+  private Driver() {}
+  
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option inputOpt = obuilder.withLongName("dir").withRequired(true).withArgument(
-            abuilder.withName("dir").withMinimum(1).withMaximum(1).create()).
-            withDescription("The Lucene directory").withShortName("d").create();
-
+      abuilder.withName("dir").withMinimum(1).withMaximum(1).create())
+        .withDescription("The Lucene directory").withShortName("d").create();
+    
     Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-            abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
-            withDescription("The output file").withShortName("o").create();
-
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The output file")
+        .withShortName("o").create();
+    
     Option fieldOpt = obuilder.withLongName("field").withRequired(true).withArgument(
-            abuilder.withName("field").withMinimum(1).withMaximum(1).create()).
-            withDescription("The field in the index").withShortName("f").create();
-
+      abuilder.withName("field").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The field in the index").withShortName("f").create();
+    
     Option idFieldOpt = obuilder.withLongName("idField").withRequired(false).withArgument(
-            abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).
-            withDescription("The field in the index containing the index.  If null, then the Lucene internal doc " +
-                    "id is used which is prone to error if the underlying index changes").withShortName("i").create();
-
+      abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The field in the index containing the index.  If null, then the Lucene internal doc "
+          + "id is used which is prone to error if the underlying index changes").withShortName("i").create();
+    
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
-            abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).
-            withDescription("The output of the dictionary").withShortName("t").create();
-
+      abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The output of the dictionary").withShortName("t").create();
+    
     Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
-            abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).
-            withDescription("The kind of weight to use. Currently TF or TFIDF").withShortName("w").create();
-
+      abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The kind of weight to use. Currently TF or TFIDF").withShortName("w").create();
+    
     Option delimiterOpt = obuilder.withLongName("delimiter").withRequired(false).withArgument(
-            abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).
-            withDescription("The delimiter for outputing the dictionary").withShortName("l").create();
+      abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The delimiter for outputing the dictionary").withShortName("l").create();
     Option powerOpt = obuilder.withLongName("norm").withRequired(false).withArgument(
-            abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).
-            withDescription("The norm to use, expressed as either a double or \"INF\" if you want to use the Infinite norm.  " +
-                    "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
+      abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The norm to use, expressed as either a double or \"INF\" if you want to use the Infinite norm.  "
+          + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
     Option maxOpt = obuilder.withLongName("max").withRequired(false).withArgument(
-            abuilder.withName("max").withMinimum(1).withMaximum(1).create()).
-            withDescription("The maximum number of vectors to output.  If not specified, then it will loop over all docs").withShortName("m").create();
-
+      abuilder.withName("max").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The maximum number of vectors to output.  If not specified, then it will loop over all docs")
+        .withShortName("m").create();
+    
     Option outWriterOpt = obuilder.withLongName("outputWriter").withRequired(false).withArgument(
-            abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).
-            withDescription("The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or file (Writes to a File using JSON format)").withShortName("e").create();
+      abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The VectorWriter to use, either seq "
+          + "(SequenceFileVectorWriter - default) or file (Writes to a File using JSON format)")
+        .withShortName("e").create();
     Option minDFOpt = obuilder.withLongName("minDF").withRequired(false).withArgument(
-            abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).
-            withDescription("The minimum document frequency.  Default is 1").withShortName("md").create();
+      abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The minimum document frequency.  Default is 1").withShortName("md").create();
     Option maxDFPercentOpt = obuilder.withLongName("maxDFPercent").withRequired(false).withArgument(
-            abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).
-            withDescription("The max percentage of docs for the DF.  Can be used to remove really high frequency terms.  Expressed as an integer between 0 and 100. Default is 99.").withShortName("x").create();
-    Option helpOpt = obuilder.withLongName("help").
-            withDescription("Print out help").withShortName("h").create();
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(outputOpt).withOption(delimiterOpt)
-            .withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt).withOption(dictOutOpt).withOption(powerOpt).withOption(outWriterOpt).withOption(maxDFPercentOpt)
-            .withOption(weightOpt).withOption(minDFOpt).create();
+      abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The max percentage of docs for the DF.  Can be used to remove really high frequency terms."
+          + "  Expressed as an integer between 0 and 100. Default is 99.").withShortName("x").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        .create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(
+      outputOpt).withOption(delimiterOpt).withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt)
+        .withOption(dictOutOpt).withOption(powerOpt).withOption(outWriterOpt).withOption(maxDFPercentOpt)
+        .withOption(weightOpt).withOption(minDFOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       CommandLine cmdLine = parser.parse(args);
-
+      
       if (cmdLine.hasOption(helpOpt)) {
-
+        
         CommandLineUtil.printHelp(group);
         return;
       }
-      //Springify all this
-      if (cmdLine.hasOption(inputOpt)) {//Lucene case
+      // Springify all this
+      if (cmdLine.hasOption(inputOpt)) {// Lucene case
         File file = new File(cmdLine.getValue(inputOpt).toString());
         if (file.exists() && file.isDirectory()) {
           long maxDocs = Long.MAX_VALUE;
@@ -182,8 +186,8 @@ public class Driver {
             iterable = new LuceneIterable(reader, idField, field, mapper, norm);
           }
           String outFile = cmdLine.getValue(outputOpt).toString();
-          log.info("Output File: {}", outFile);
-
+          Driver.log.info("Output File: {}", outFile);
+          
           VectorWriter vectorWriter;
           if (cmdLine.hasOption(outWriterOpt)) {
             String outWriter = cmdLine.getValue(outWriterOpt).toString();
@@ -191,42 +195,44 @@ public class Driver {
               BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
               vectorWriter = new JWriterVectorWriter(writer);
             } else {
-              vectorWriter = getSeqFileWriter(outFile);
+              vectorWriter = Driver.getSeqFileWriter(outFile);
             }
           } else {
-            vectorWriter = getSeqFileWriter(outFile);
+            vectorWriter = Driver.getSeqFileWriter(outFile);
           }
-
+          
           long numDocs = vectorWriter.write(iterable, maxDocs);
           vectorWriter.close();
-          log.info("Wrote: {} vectors", numDocs);
-
-          String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
+          Driver.log.info("Wrote: {} vectors", numDocs);
+          
+          String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString()
+              : "\t";
           File dictOutFile = new File(cmdLine.getValue(dictOutOpt).toString());
-          log.info("Dictionary Output file: {}", dictOutFile);
-          BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOutFile), Charset.forName("UTF8")));
+          Driver.log.info("Dictionary Output file: {}", dictOutFile);
+          BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+              new FileOutputStream(dictOutFile), Charset.forName("UTF8")));
           JWriterTermInfoWriter tiWriter = new JWriterTermInfoWriter(writer, delimiter, field);
           tiWriter.write(termInfo);
           tiWriter.close();
           writer.close();
         }
       }
-
+      
     } catch (OptionException e) {
-      log.error("Exception", e);
+      Driver.log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
-
+  
   private static VectorWriter getSeqFileWriter(String outFile) throws IOException {
     Path path = new Path(outFile);
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    //TODO: Make this parameter driven
-    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class, VectorWritable.class);
-
+    // TODO: Make this parameter driven
+    SequenceFile.Writer seqWriter = SequenceFile.createWriter(fs, conf, path, LongWritable.class,
+      VectorWritable.class);
+    
     return new SequenceFileVectorWriter(seqWriter);
   }
-
-
+  
 }

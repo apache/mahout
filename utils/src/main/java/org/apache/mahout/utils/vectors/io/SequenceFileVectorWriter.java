@@ -17,12 +17,12 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import org.apache.mahout.math.Vector;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.mahout.math.VectorWritable;
-
 import java.io.IOException;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 
 /**
@@ -30,11 +30,11 @@ import java.io.IOException;
  */
 public class SequenceFileVectorWriter implements VectorWriter {
   private final SequenceFile.Writer writer;
-
+  
   public SequenceFileVectorWriter(SequenceFile.Writer writer) {
     this.writer = writer;
   }
-
+  
   @Override
   public long write(Iterable<Vector> iterable, long maxDocs) throws IOException {
     long recNum = 0;
@@ -45,23 +45,23 @@ public class SequenceFileVectorWriter implements VectorWriter {
       if (point != null) {
         writer.append(new LongWritable(recNum++), new VectorWritable(point));
       }
-
+      
     }
     return recNum;
   }
-
+  
   @Override
   public long write(Iterable<Vector> iterable) throws IOException {
     return write(iterable, Long.MAX_VALUE);
   }
-
+  
   @Override
   public void close() throws IOException {
     if (writer != null) {
       writer.close();
     }
   }
-
+  
   public SequenceFile.Writer getWriter() {
     return writer;
   }

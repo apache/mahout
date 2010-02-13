@@ -48,11 +48,10 @@ import org.apache.mahout.utils.vectors.text.term.TermDocumentCountMapper;
 import org.apache.mahout.utils.vectors.text.term.TermDocumentCountReducer;
 
 /**
- * This class converts a set of input vectors with term frequencies to TfIdf
- * vectors. The Sequence file input should have a {@link WritableComparable} key
- * containing and a {@link VectorWritable} value containing the term frequency
- * vector. This is conversion class uses multiple map/reduces to convert the
- * vectors to TfIdf format
+ * This class converts a set of input vectors with term frequencies to TfIdf vectors. The Sequence file input
+ * should have a {@link WritableComparable} key containing and a {@link VectorWritable} value containing the
+ * term frequency vector. This is conversion class uses multiple map/reduces to convert the vectors to TfIdf
+ * format
  * 
  */
 public final class TFIDFConverter {
@@ -91,31 +90,26 @@ public final class TFIDFConverter {
   }
   
   /**
-   * Create Term Frequency-Inverse Document Frequency (Tf-Idf) Vectors from the
-   * input set of vectors in {@link SequenceFile} format. This job uses a fixed
-   * limit on the maximum memory used by the feature chunk per node thereby
-   * splitting the process across multiple map/reduces.
+   * Create Term Frequency-Inverse Document Frequency (Tf-Idf) Vectors from the input set of vectors in
+   * {@link SequenceFile} format. This job uses a fixed limit on the maximum memory used by the feature chunk
+   * per node thereby splitting the process across multiple map/reduces.
    * 
    * @param input
    *          input directory of the vectors in {@link SequenceFile} format
    * @param output
-   *          output directory where
-   *          {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the
-   *          document are generated
+   *          output directory where {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the document
+   *          are generated
    * @param minDf
    *          The minimum document frequency. Default 1
    * @param maxDFPercent
-   *          The max percentage of vectors for the DF. Can be used to remove
-   *          really high frequency features. Expressed as an integer between 0
-   *          and 100. Default 99
+   *          The max percentage of vectors for the DF. Can be used to remove really high frequency features.
+   *          Expressed as an integer between 0 and 100. Default 99
    * @param chunkSizeInMegabytes
-   *          the size in MB of the feature => id chunk to be kept in memory at
-   *          each node during Map/Reduce stage. Its recommended you calculated
-   *          this based on the number of cores and the free memory available to
-   *          you per node. Say, you have 2 cores and around 1GB extra memory to
-   *          spare we recommend you use a split size of around 400-500MB so
-   *          that two simultaneous reducers can create partial vectors without
-   *          thrashing the system due to increased swapping
+   *          the size in MB of the feature => id chunk to be kept in memory at each node during Map/Reduce
+   *          stage. Its recommended you calculated this based on the number of cores and the free memory
+   *          available to you per node. Say, you have 2 cores and around 1GB extra memory to spare we
+   *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
+   *          partial vectors without thrashing the system due to increased swapping
    * @throws IOException
    */
   public static void processTfIdf(String input,
@@ -125,52 +119,48 @@ public final class TFIDFConverter {
                                   int maxDFPercent,
                                   float normPower,
                                   boolean sequentialAccessOutput) throws IOException {
-    if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
-      chunkSizeInMegabytes = MIN_CHUNKSIZE;
-    } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
-      chunkSizeInMegabytes = MAX_CHUNKSIZE;
+    if (chunkSizeInMegabytes < TFIDFConverter.MIN_CHUNKSIZE) {
+      chunkSizeInMegabytes = TFIDFConverter.MIN_CHUNKSIZE;
+    } else if (chunkSizeInMegabytes > TFIDFConverter.MAX_CHUNKSIZE) { // 10GB
+      chunkSizeInMegabytes = TFIDFConverter.MAX_CHUNKSIZE;
     }
     
     if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
     
-    if (minDf < 1) minDf = 1;
-    if (maxDFPercent < 0 || maxDFPercent > 100) maxDFPercent = 99;
+    if (minDf < 1) {
+      minDf = 1;
+    }
+    if (maxDFPercent < 0 || maxDFPercent > 100) {
+      maxDFPercent = 99;
+    }
     
     Path inputPath = new Path(input);
-    Path wordCountPath = new Path(output + WORDCOUNT_OUTPUT_FOLDER);
+    Path wordCountPath = new Path(output + TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
     
-    startDFCounting(inputPath, wordCountPath);
-    Pair<Long[],List<Path>> datasetFeatures = createDictionaryChunks(
-      wordCountPath, output, chunkSizeInMegabytes);
+    TFIDFConverter.startDFCounting(inputPath, wordCountPath);
+    Pair<Long[],List<Path>> datasetFeatures = TFIDFConverter.createDictionaryChunks(wordCountPath, output,
+      chunkSizeInMegabytes);
     
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
     List<Path> dictionaryChunks = datasetFeatures.getSecond();
     for (Path dictionaryChunk : dictionaryChunks) {
-      Path partialVectorOutputPath = getPath(output + VECTOR_OUTPUT_FOLDER,
+      Path partialVectorOutputPath = TFIDFConverter.getPath(output + TFIDFConverter.VECTOR_OUTPUT_FOLDER,
         partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      makePartialVectors(input,
-                         datasetFeatures.getFirst()[0],
-                         datasetFeatures.getFirst()[1],
-                         minDf,
-                         maxDFPercent,
-                         dictionaryChunk,
-                         partialVectorOutputPath);
+      TFIDFConverter.makePartialVectors(input, datasetFeatures.getFirst()[0], datasetFeatures.getFirst()[1],
+        minDf, maxDFPercent, dictionaryChunk, partialVectorOutputPath);
     }
     
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
     
-    String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
+    String outputDir = output + TFIDFConverter.DOCUMENT_VECTOR_OUTPUT_FOLDER;
     if (dictionaryChunks.size() > 1) {
-      PartialVectorMerger.mergePartialVectors(partialVectorPaths,
-                                              outputDir,
-                                              normPower,
-                                              (int)(long)datasetFeatures.getFirst()[0],
-                                              sequentialAccessOutput);
+      PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, normPower,
+        (int) (long) datasetFeatures.getFirst()[0], sequentialAccessOutput);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
@@ -180,9 +170,8 @@ public final class TFIDFConverter {
   }
   
   /**
-   * Read the document frequency List which is built at the end of the DF Count
-   * Job. This will use constant memory and will run at the speed of your disk
-   * read
+   * Read the document frequency List which is built at the end of the DF Count Job. This will use constant
+   * memory and will run at the speed of your disk read
    * 
    * @param featureCountPath
    * @param dictionaryPathBase
@@ -198,16 +187,15 @@ public final class TFIDFConverter {
     Configuration conf = new Configuration();
     
     FileSystem fs = FileSystem.get(featureCountPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath
-        .toString()
-                                                      + OUTPUT_FILES_PATTERN));
+    FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath.toString()
+                                                      + TFIDFConverter.OUTPUT_FILES_PATTERN));
     
     long chunkSizeLimit = chunkSizeInMegabytes * 1024 * 1024;
     int chunkIndex = 0;
-    Path chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
+    Path chunkPath = TFIDFConverter.getPath(dictionaryPathBase + TFIDFConverter.FREQUENCY_FILE, chunkIndex);
     chunkPaths.add(chunkPath);
-    SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf,
-        chunkPath, IntWritable.class, LongWritable.class);
+    SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class,
+        LongWritable.class);
     
     long currentChunkSize = 0;
     long featureCount = 0;
@@ -221,16 +209,14 @@ public final class TFIDFConverter {
           freqWriter.close();
           chunkIndex++;
           
-          chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
+          chunkPath = TFIDFConverter.getPath(dictionaryPathBase + TFIDFConverter.FREQUENCY_FILE, chunkIndex);
           chunkPaths.add(chunkPath);
           
-          freqWriter = new SequenceFile.Writer(fs, conf, chunkPath,
-              IntWritable.class, LongWritable.class);
+          freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
           currentChunkSize = 0;
         }
         
-        int fieldSize = SEQUENCEFILE_BYTE_OVERHEAD + (Integer.SIZE / 8)
-                        + (Long.SIZE / 8);
+        int fieldSize = TFIDFConverter.SEQUENCEFILE_BYTE_OVERHEAD + Integer.SIZE / 8 + Long.SIZE / 8;
         currentChunkSize += fieldSize;
         if (key.get() >= 0) {
           freqWriter.append(key, value);
@@ -251,8 +237,8 @@ public final class TFIDFConverter {
   }
   
   /**
-   * Create a partial tfidf vector using a chunk of features from the input
-   * vectors. The input vectors has to be in the {@link SequenceFile} format
+   * Create a partial tfidf vector using a chunk of features from the input vectors. The input vectors has to
+   * be in the {@link SequenceFile} format
    * 
    * @param input
    *          input directory of the vectors in {@link SequenceFile} format
@@ -263,9 +249,8 @@ public final class TFIDFConverter {
    * @param minDf
    *          The minimum document frequency. Default 1
    * @param maxDFPercent
-   *          The max percentage of vectors for the DF. Can be used to remove
-   *          really high frequency features. Expressed as an integer between 0
-   *          and 100. Default 99
+   *          The max percentage of vectors for the DF. Can be used to remove really high frequency features.
+   *          Expressed as an integer between 0 and 100. Default 99
    * @param dictionaryFilePath
    *          location of the chunk of features and the id's
    * @param output
@@ -282,22 +267,19 @@ public final class TFIDFConverter {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(TFIDFConverter.class);
-    conf.set("io.serializations",
-      "org.apache.hadoop.io.serializer.JavaSerialization,"
-          + "org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.setJobName("TFIDFConverter:: MakePartialVectors: input-folder: "
-                    + input + ", dictionary-file: "
+    conf.setJobName("TFIDFConverter:: MakePartialVectors: input-folder: " + input + ", dictionary-file: "
                     + dictionaryFilePath.toString());
-    conf.setLong(FEATURE_COUNT, featureCount.longValue());
-    conf.setLong(VECTOR_COUNT, vectorCount.longValue());
-    conf.setInt(MIN_DF, minDf);
-    conf.setInt(MAX_DF_PERCENTAGE, maxDFPercent);
+    conf.setLong(TFIDFConverter.FEATURE_COUNT, featureCount.longValue());
+    conf.setLong(TFIDFConverter.VECTOR_COUNT, vectorCount.longValue());
+    conf.setInt(TFIDFConverter.MIN_DF, minDf);
+    conf.setInt(TFIDFConverter.MAX_DF_PERCENTAGE, maxDFPercent);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
-    DistributedCache
-        .setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
+    DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
     FileInputFormat.setInputPaths(conf, new Path(input));
     
     FileOutputFormat.setOutputPath(conf, output);
@@ -316,20 +298,18 @@ public final class TFIDFConverter {
   }
   
   /**
-   * Count the document frequencies of features in parallel using Map/Reduce.
-   * The input documents have to be in {@link SequenceFile} format
+   * Count the document frequencies of features in parallel using Map/Reduce. The input documents have to be
+   * in {@link SequenceFile} format
    */
   private static void startDFCounting(Path input, Path output) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(TFIDFConverter.class);
-    conf.set("io.serializations",
-      "org.apache.hadoop.io.serializer.JavaSerialization,"
-          + "org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.setJobName("VectorTfIdf Document Frequency Count running over input: "
-                    + input.toString());
+    conf.setJobName("VectorTfIdf Document Frequency Count running over input: " + input.toString());
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(LongWritable.class);
     

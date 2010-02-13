@@ -37,15 +37,15 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Test the LLRReducer 
+/** Test the LLRReducer
  *  FIXME: Add negative test cases.
  */
 @SuppressWarnings("deprecation")
 public class LLRReducerTest {
-
-  private static final Logger log = 
+  
+  private static final Logger log =
     LoggerFactory.getLogger(LLRReducerTest.class);
-
+  
   Reporter reporter;
   LLCallback ll;
   LLCallback cl;
@@ -54,11 +54,11 @@ public class LLRReducerTest {
   OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
     @Override
     public void collect(Text key, DoubleWritable value) throws IOException {
-      log.info(key.toString() + " " + value.toString());
+      LLRReducerTest.log.info(key.toString() + " " + value.toString());
     }
   };
-
-
+  
+  
   @Before
   public void setUp() {
     reporter  = EasyMock.createMock(Reporter.class);
@@ -66,7 +66,7 @@ public class LLRReducerTest {
     cl        = new LLCallback() {
       @Override
       public double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
-        log.info("k11:" + k11 + " k12:" + k12 + " k21:" + k21 + " k22:" + k22);
+        LLRReducerTest.log.info("k11:" + k11 + " k12:" + k12 + " k21:" + k21 + " k22:" + k22);
         try {
           return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
         }
@@ -75,48 +75,48 @@ public class LLRReducerTest {
           return -1;
         }
       }
-
+      
     };
   }
-
+  
   @Test
   public void testReduce() throws Exception {
     LLRReducer reducer = new LLRReducer(ll);
-
-    // test input, input[*][0] is the key, 
+    
+    // test input, input[*][0] is the key,
     // input[*][1..n] are the values passed in via
     // the iterator.
     
     
     Gram[][] input = {
-        {new Gram("the best",  1), new Gram("the",   2, HEAD), new Gram("best",  1, TAIL) },
-        {new Gram("best of",   1), new Gram("best",  1, HEAD), new Gram("of",    2, TAIL) },
-        {new Gram("of times",  2), new Gram("of",    2, HEAD), new Gram("times", 2, TAIL) },
-        {new Gram("times the", 1), new Gram("times", 1, HEAD), new Gram("the",   1, TAIL) },
-        {new Gram("the worst", 1), new Gram("the",   2, HEAD), new Gram("worst", 1, TAIL) },
-        {new Gram("worst of",  1), new Gram("worst", 1, HEAD), new Gram("of",    2, TAIL) }
+                      {new Gram("the best",  1), new Gram("the",   2, HEAD), new Gram("best",  1, TAIL) },
+                      {new Gram("best of",   1), new Gram("best",  1, HEAD), new Gram("of",    2, TAIL) },
+                      {new Gram("of times",  2), new Gram("of",    2, HEAD), new Gram("times", 2, TAIL) },
+                      {new Gram("times the", 1), new Gram("times", 1, HEAD), new Gram("the",   1, TAIL) },
+                      {new Gram("the worst", 1), new Gram("the",   2, HEAD), new Gram("worst", 1, TAIL) },
+                      {new Gram("worst of",  1), new Gram("worst", 1, HEAD), new Gram("of",    2, TAIL) }
     };
-
+    
     int[][] expectations = {
-        // A+B, A+!B, !A+B, !A+!B
-        {1, 1, 0, 5}, // the best
-        {1, 0, 1, 5}, // best of
-        {2, 0, 0, 5}, // of times
-        {1, 0, 0, 6}, // times the
-        {1, 1, 0, 5}, // the worst
-        {1, 0, 1, 5}  // worst of
+                            // A+B, A+!B, !A+B, !A+!B
+                            {1, 1, 0, 5}, // the best
+                            {1, 0, 1, 5}, // best of
+                            {2, 0, 0, 5}, // of times
+                            {1, 0, 0, 6}, // times the
+                            {1, 1, 0, 5}, // the worst
+                            {1, 0, 1, 5}  // worst of
     };
-
+    
     for (int[] ee: expectations) {
       EasyMock.expect(ll.logLikelihoodRatio(ee[0], ee[1], ee[2], ee[3])).andDelegateTo(cl);
     }
-
+    
     EasyMock.replay(ll);
-
+    
     JobConf config = new JobConf(CollocDriver.class);
     config.set(LLRReducer.NGRAM_TOTAL, "7");
     reducer.configure(config);
-
+    
     for (Gram[] ii: input) {
       List<Gram> vv = new LinkedList<Gram>();
       for (int i = 1; i < ii.length; i++) {
@@ -124,7 +124,7 @@ public class LLRReducerTest {
       }
       reducer.reduce(ii[0], vv.iterator(), collector, reporter);
     }
-
+    
     EasyMock.verify(ll);
   }
 }

@@ -42,41 +42,41 @@ import org.junit.Test;
  */
 @SuppressWarnings("deprecation")
 public class NGramCollectorTest {
-
+  
   OutputCollector<Gram,Gram> collector;
   Reporter reporter;
-
+  
   @Before
   @SuppressWarnings("unchecked")
   public void setUp() {
     collector = EasyMock.createMock(OutputCollector.class);
     reporter  = EasyMock.createMock(Reporter.class);
   }
-
+  
   @Test
   public void testCollectNgrams() throws Exception {
-
+    
     String input = "the best of times the worst of times";
-
-    String[][] values = 
+    
+    String[][] values =
       new String[][]{
-        {"h_the",   "the best"},
-        {"t_best",  "the best"},
-        {"h_best",  "best of"},
-        {"t_of",    "best of"},
-        {"h_of",    "of times"},
-        {"t_times", "of times"},
-        {"h_times", "times the"},
-        {"t_the",   "times the"},
-        {"h_the",   "the worst"},
-        {"t_worst", "the worst"},
-        {"h_worst", "worst of"},
-        {"t_of",    "worst of"},
-        {"h_of",    "of times"},
-        {"t_times", "of times"}
+                     {"h_the",   "the best"},
+                     {"t_best",  "the best"},
+                     {"h_best",  "best of"},
+                     {"t_of",    "best of"},
+                     {"h_of",    "of times"},
+                     {"t_times", "of times"},
+                     {"h_times", "times the"},
+                     {"t_the",   "times the"},
+                     {"h_the",   "the worst"},
+                     {"t_worst", "the worst"},
+                     {"h_worst", "worst of"},
+                     {"t_of",    "worst of"},
+                     {"h_of",    "of times"},
+                     {"t_times", "of times"}
     };
     // set up expectations for mocks. ngram max size = 2
-
+    
     // setup expectations
     for (String[] v: values) {
       Type p = v[0].startsWith("h") ? HEAD : TAIL;
@@ -84,24 +84,24 @@ public class NGramCollectorTest {
       Gram ngram = new Gram(v[1]);
       collector.collect(subgram, ngram);
     }
-
+    
     reporter.incrCounter(NGRAM_TOTAL, 7);
     EasyMock.replay(reporter, collector);
     
     Reader r = new StringReader(input);
-
+    
     JobConf conf = new JobConf();
     conf.set(NGramCollector.MAX_SHINGLE_SIZE, "2");
     conf.set(NGramCollector.ANALYZER_CLASS, TestAnalyzer.class.getName());
-
+    
     NGramCollector c = new NGramCollector();
     c.configure(conf);
     
     c.collectNgrams(r, collector, reporter);
-
+    
     EasyMock.verify(reporter, collector);
   }
-
+  
   /** A lucene 2.9 standard analyzer with no stopwords. */
   public static class TestAnalyzer extends Analyzer {
     final Analyzer a;

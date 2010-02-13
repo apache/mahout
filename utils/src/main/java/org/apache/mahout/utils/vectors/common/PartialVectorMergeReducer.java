@@ -34,8 +34,7 @@ import org.apache.mahout.math.VectorWritable;
 /**
  * Merges partial vectors in to a full sparse vector
  */
-public class PartialVectorMergeReducer extends MapReduceBase
-    implements
+public class PartialVectorMergeReducer extends MapReduceBase implements
     Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
   
   private final VectorWritable vectorWritable = new VectorWritable();
@@ -68,8 +67,7 @@ public class PartialVectorMergeReducer extends MapReduceBase
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    normPower = job.getFloat(PartialVectorMerger.NORMALIZATION_POWER,
-                             PartialVectorMerger.NO_NORMALIZING);
+    normPower = job.getFloat(PartialVectorMerger.NORMALIZATION_POWER, PartialVectorMerger.NO_NORMALIZING);
     dimension = job.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = job.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
   }

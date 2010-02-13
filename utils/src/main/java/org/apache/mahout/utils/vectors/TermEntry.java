@@ -21,7 +21,7 @@ public class TermEntry {
   public final String term;
   public final int termIdx;
   public final int docFreq;
-
+  
   public TermEntry(String term, int termIdx, int docFreq) {
     this.term = term;
     this.termIdx = termIdx;

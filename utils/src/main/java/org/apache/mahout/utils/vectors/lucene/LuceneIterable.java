@@ -17,36 +17,36 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
+
 import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermDocs;
 import org.apache.mahout.math.Vector;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-
 /**
  * A LuceneIterable is an Iterable&lt;Vector&gt; that uses a Lucene index as the source for creating the {@link Vector}.
  * The Field used to create the Vector currently must have Term Vectors stored for it.
  */
 public class LuceneIterable implements Iterable<Vector> {
-
-  private IndexReader indexReader;
-  private String field;
-  private String idField;
-  private FieldSelector idFieldSelector;
-
-  private VectorMapper mapper;
-  private double normPower = NO_NORMALIZING;
-
+  
+  private final IndexReader indexReader;
+  private final String field;
+  private final String idField;
+  private final FieldSelector idFieldSelector;
+  
+  private final VectorMapper mapper;
+  private double normPower = LuceneIterable.NO_NORMALIZING;
+  
   public static final double NO_NORMALIZING = -1.0;
-
+  
   public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper) {
-    this(reader, idField, field, mapper, NO_NORMALIZING);
+    this(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING);
   }
-
+  
   /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
    *
@@ -57,7 +57,7 @@ public class LuceneIterable implements Iterable<Vector> {
    * @param normPower The normalization value.  Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
    */
   public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper, double normPower) {
-    if (normPower != NO_NORMALIZING && normPower < 0) {
+    if (normPower != LuceneIterable.NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
     idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
@@ -67,8 +67,8 @@ public class LuceneIterable implements Iterable<Vector> {
     this.mapper = mapper;
     this.normPower = normPower;
   }
-
-
+  
+  
   @Override
   public Iterator<Vector> iterator() {
     try {
@@ -77,25 +77,25 @@ public class LuceneIterable implements Iterable<Vector> {
       throw new IllegalStateException(e);
     }
   }
-
+  
   private class TDIterator implements Iterator<Vector> {
     private final TermDocs termDocs;
-
+    
     private TDIterator() throws IOException {
       //term docs(null) is a better way of iterating all the docs in Lucene
       this.termDocs = indexReader.termDocs(null);
     }
-
+    
     @Override
     public boolean hasNext() {
-      // TODO this doesn't work with the Iterator contract -- hasNext() cannot have a side effect      
+      // TODO this doesn't work with the Iterator contract -- hasNext() cannot have a side effect
       try {
         return termDocs.next();
       } catch (IOException e) {
         throw new IllegalStateException(e);
       }
     }
-
+    
     @Override
     public Vector next() {
       Vector result;
@@ -114,24 +114,24 @@ public class LuceneIterable implements Iterable<Vector> {
         } else {
           result.setName(String.valueOf(doc));
         }
-        if (normPower != NO_NORMALIZING) {
+        if (normPower != LuceneIterable.NO_NORMALIZING) {
           result = result.normalize(normPower);
         }
       } catch (IOException e) {
         //Log?
         throw new IllegalStateException(e);
       }
-
+      
       return result;
     }
-
-
+    
+    
     @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
-
+    
   }
-
-
+  
+  
 }

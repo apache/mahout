@@ -17,63 +17,65 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexReader;
+import junit.framework.Assert;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.utils.vectors.Weight;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
-import org.apache.mahout.math.Vector;
+import org.apache.mahout.utils.vectors.Weight;
 
 public class LuceneIterableTest extends MahoutTestCase {
   private RAMDirectory directory;
-
+  
   private static final String [] DOCS = {
-        "The quick red fox jumped over the lazy brown dogs.",
-        "Mary had a little lamb whose fleece was white as snow.",
-        "Moby Dick is a story of a whale and a man obsessed.",
-        "The robber wore a black fleece jacket and a baseball cap.",
-        "The English Springer Spaniel is the best of all dogs."
-    };
-
-
+                                         "The quick red fox jumped over the lazy brown dogs.",
+                                         "Mary had a little lamb whose fleece was white as snow.",
+                                         "Moby Dick is a story of a whale and a man obsessed.",
+                                         "The robber wore a black fleece jacket and a baseball cap.",
+                                         "The English Springer Spaniel is the best of all dogs."
+  };
+  
+  
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_CURRENT), true, IndexWriter.MaxFieldLength.UNLIMITED);
-    for (int i = 0; i < DOCS.length; i++){
+    for (int i = 0; i < LuceneIterableTest.DOCS.length; i++){
       Document doc = new Document();
       Field id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
       doc.add(id);
       //Store both position and offset information
-      Field text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
+      Field text = new Field("content", LuceneIterableTest.DOCS[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
       doc.add(text);
       writer.addDocument(doc);
     }
     writer.close();
   }
-
+  
   public void testIterable() throws Exception {
     IndexReader reader = IndexReader.open(directory, true);
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
     LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
-
+    
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
-      assertNotNull(vector);
-      assertTrue("vector is not an instanceof " + RandomAccessSparseVector.class, vector instanceof RandomAccessSparseVector);
-      assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
+      Assert.assertNotNull(vector);
+      Assert.assertTrue("vector is not an instanceof " + RandomAccessSparseVector.class, vector instanceof RandomAccessSparseVector);
+      Assert.assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
     }
   }
-
-
+  
+  
 }

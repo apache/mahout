@@ -36,12 +36,11 @@ import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.utils.vectors.text.document.SequenceFileTokenizerMapper;
 
 /**
- * This class converts a set of input documents in the sequence file format of
- * {@link StringTuple}s.The {@link SequenceFile} input should have a
- * {@link Text} key containing the unique document identifier and a {@link Text}
- * value containing the whole document. The document should be stored in UTF-8
- * encoding which is recognizable by hadoop. It uses the given {@link Analyzer}
- * to process the document into {@link org.apache.lucene.analysis.Token}s.
+ * This class converts a set of input documents in the sequence file format of {@link StringTuple}s.The
+ * {@link SequenceFile} input should have a {@link Text} key containing the unique document identifier and a
+ * {@link Text} value containing the whole document. The document should be stored in UTF-8 encoding which is
+ * recognizable by hadoop. It uses the given {@link Analyzer} to process the document into
+ * {@link org.apache.lucene.analysis.Token}s.
  * 
  */
 public final class DocumentProcessor {
@@ -59,32 +58,27 @@ public final class DocumentProcessor {
   }
   
   /**
-   * Convert the input documents into token array using the {@link StringTuple}
-   * The input documents has to be in the {@link SequenceFile} format
+   * Convert the input documents into token array using the {@link StringTuple} The input documents has to be
+   * in the {@link SequenceFile} format
    * 
    * @param input
    *          input directory of the documents in {@link SequenceFile} format
    * @param output
-   *          output directory were the {@link StringTuple} token array of each
-   *          document has to be created
+   *          output directory were the {@link StringTuple} token array of each document has to be created
    * @param analyzerClass
    *          The Lucene {@link Analyzer} for tokenizing the UTF-8 text
    * @throws IOException
    */
-  public static void tokenizeDocuments(String input,
-                                       Class<? extends Analyzer> analyzerClass,
-                                       String output) throws IOException {
+  public static void tokenizeDocuments(String input, Class<? extends Analyzer> analyzerClass, String output) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DocumentProcessor.class);
-    conf.set("io.serializations",
-      "org.apache.hadoop.io.serializer.JavaSerialization,"
-          + "org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.set(ANALYZER_CLASS, analyzerClass.getName());
-    conf.setJobName("DocumentProcessor::DocumentTokenizer: input-folder: "
-                    + input);
+    conf.set(DocumentProcessor.ANALYZER_CLASS, analyzerClass.getName());
+    conf.setJobName("DocumentProcessor::DocumentTokenizer: input-folder: " + input);
     
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(StringTuple.class);

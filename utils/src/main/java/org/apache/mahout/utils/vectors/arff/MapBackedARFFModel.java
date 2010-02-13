@@ -19,72 +19,73 @@ package org.apache.mahout.utils.vectors.arff;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collections;
 import java.util.regex.Pattern;
-
 
 /**
  * Holds ARFF information in {@link Map}.
  */
 public class MapBackedARFFModel implements ARFFModel {
-
+  
   private static final Pattern QUOTE_PATTERN = Pattern.compile("\"");
-
+  
   private long wordCount = 1;
-
+  
   private String relation;
-
-  private final Map<String, Integer> labelBindings;
-  private final Map<Integer, String> idxLabel;
-  private final Map<Integer, ARFFType> typeMap; //key is the vector index, value is the type
-  private final Map<Integer, DateFormat> dateMap;
-  private final Map<String, Map<String, Integer>> nominalMap;
-  private final Map<String, Long> words;
-
+  
+  private final Map<String,Integer> labelBindings;
+  private final Map<Integer,String> idxLabel;
+  private final Map<Integer,ARFFType> typeMap; // key is the vector index, value is the type
+  private final Map<Integer,DateFormat> dateMap;
+  private final Map<String,Map<String,Integer>> nominalMap;
+  private final Map<String,Long> words;
+  
   public MapBackedARFFModel() {
-    this(new HashMap<String, Long>(), 1, new HashMap<String, Map<String, Integer>>());
+    this(new HashMap<String,Long>(), 1, new HashMap<String,Map<String,Integer>>());
   }
-
-  public MapBackedARFFModel(Map<String, Long> words, long wordCount, Map<String, Map<String, Integer>> nominalMap) {
+  
+  public MapBackedARFFModel(Map<String,Long> words, long wordCount, Map<String,Map<String,Integer>> nominalMap) {
     this.words = words;
     this.wordCount = wordCount;
-    labelBindings = new HashMap<String, Integer>();
-    idxLabel = new HashMap<Integer, String>();
-    typeMap = new HashMap<Integer, ARFFType>();
-    dateMap = new HashMap<Integer, DateFormat>();
+    labelBindings = new HashMap<String,Integer>();
+    idxLabel = new HashMap<Integer,String>();
+    typeMap = new HashMap<Integer,ARFFType>();
+    dateMap = new HashMap<Integer,DateFormat>();
     this.nominalMap = nominalMap;
-
+    
   }
-
+  
   @Override
   public String getRelation() {
     return relation;
   }
-
+  
   @Override
   public void setRelation(String relation) {
     this.relation = relation;
   }
-
+  
   /**
    * Convert a piece of String data at a specific spot into a value
-   *
-   * @param data The data to convert
-   * @param idx  The position in the ARFF data
+   * 
+   * @param data
+   *          The data to convert
+   * @param idx
+   *          The position in the ARFF data
    * @return A double representing the data
    */
   @Override
   public double getValue(String data, int idx) {
     ARFFType type = typeMap.get(idx);
-    data = QUOTE_PATTERN.matcher(data).replaceAll("");
+    data = MapBackedARFFModel.QUOTE_PATTERN.matcher(data).replaceAll("");
     data = data.trim();
     double result = 0.0;
     switch (type) {
       case NUMERIC: {
-        result = processNumeric(data);
+        result = MapBackedARFFModel.processNumeric(data);
         break;
       }
       case DATE: {
@@ -92,7 +93,7 @@ public class MapBackedARFFModel implements ARFFModel {
         break;
       }
       case STRING: {
-        //may have quotes
+        // may have quotes
         result = processString(data);
         break;
       }
@@ -101,15 +102,14 @@ public class MapBackedARFFModel implements ARFFModel {
         result = processNominal(label, data);
         break;
       }
-
-
+        
     }
     return result;
   }
-
+  
   protected double processNominal(String label, String data) {
     double result;
-    Map<String, Integer> classes = nominalMap.get(label);
+    Map<String,Integer> classes = nominalMap.get(label);
     if (classes != null) {
       Integer ord = classes.get(data);
       if (ord != null) {
@@ -120,20 +120,20 @@ public class MapBackedARFFModel implements ARFFModel {
     } else {
       throw new IllegalArgumentException("Invalid nominal label: " + label + " Data: " + data);
     }
-
+    
     return result;
   }
-
+  
   /**
    * Process a String
-   *
+   * 
    * @param data
    * @return
    */
-  //Not sure how scalable this is going to be
+  // Not sure how scalable this is going to be
   protected double processString(String data) {
-    data = QUOTE_PATTERN.matcher(data).replaceAll("");
-    //map it to an long
+    data = MapBackedARFFModel.QUOTE_PATTERN.matcher(data).replaceAll("");
+    // map it to an long
     Long theLong = words.get(data);
     if (theLong == null) {
       theLong = wordCount++;
@@ -141,15 +141,15 @@ public class MapBackedARFFModel implements ARFFModel {
     }
     return theLong;
   }
-
+  
   protected static double processNumeric(String data) {
     return Double.parseDouble(data);
   }
-
+  
   protected double processDate(String data, int idx) {
     DateFormat format = dateMap.get(idx);
     if (format == null) {
-      format = DEFAULT_DATE_FORMAT;
+      format = ARFFModel.DEFAULT_DATE_FORMAT;
     }
     double result;
     try {
@@ -163,105 +163,111 @@ public class MapBackedARFFModel implements ARFFModel {
     }
     return result;
   }
-
+  
   /**
    * The vector attributes (labels in Mahout speak), unmodifiable
+   * 
    * @return the map
    */
   @Override
-  public Map<String, Integer> getLabelBindings() {
+  public Map<String,Integer> getLabelBindings() {
     return Collections.unmodifiableMap(labelBindings);
   }
-
+  
   /**
    * The map of types encountered
+   * 
    * @return the map
    */
-  public Map<Integer, ARFFType> getTypeMap() {
+  public Map<Integer,ARFFType> getTypeMap() {
     return Collections.unmodifiableMap(typeMap);
   }
-
+  
   /**
    * Map of Date formatters used
+   * 
    * @return the map
    */
-  public Map<Integer, DateFormat> getDateMap() {
+  public Map<Integer,DateFormat> getDateMap() {
     return Collections.unmodifiableMap(dateMap);
   }
-
+  
   /**
-   * Map nominals to ids.  Should only be modified by calling {@link ARFFModel#addNominal(String, String, int)}
+   * Map nominals to ids. Should only be modified by calling {@link ARFFModel#addNominal(String, String, int)}
+   * 
    * @return the map
    */
   @Override
-  public Map<String, Map<String, Integer>> getNominalMap() {
+  public Map<String,Map<String,Integer>> getNominalMap() {
     return nominalMap;
   }
-
+  
   /**
    * Immutable map of words to the long id used for those words
+   * 
    * @return The map
    */
   @Override
-  public Map<String, Long> getWords() {
+  public Map<String,Long> getWords() {
     return words;
   }
-
+  
   @Override
-  public Integer getNominalValue(String label, String nominal){
+  public Integer getNominalValue(String label, String nominal) {
     return nominalMap.get(label).get(nominal);
   }
-
+  
   @Override
   public void addNominal(String label, String nominal, int idx) {
-    Map<String, Integer> noms = nominalMap.get(label);
+    Map<String,Integer> noms = nominalMap.get(label);
     if (noms == null) {
-      noms = new HashMap<String, Integer>();
+      noms = new HashMap<String,Integer>();
       nominalMap.put(label, noms);
     }
     noms.put(nominal, idx);
   }
-
+  
   @Override
-  public DateFormat getDateFormat(Integer idx){
+  public DateFormat getDateFormat(Integer idx) {
     return dateMap.get(idx);
   }
-
+  
   @Override
   public void addDateFormat(Integer idx, DateFormat format) {
     dateMap.put(idx, format);
   }
-
+  
   @Override
-  public Integer getLabelIndex(String label){
+  public Integer getLabelIndex(String label) {
     return labelBindings.get(label);
   }
-
+  
   @Override
   public void addLabel(String label, Integer idx) {
     labelBindings.put(label, idx);
     idxLabel.put(idx, label);
   }
-
+  
   @Override
-  public ARFFType getARFFType(Integer idx){
+  public ARFFType getARFFType(Integer idx) {
     return typeMap.get(idx);
   }
-
+  
   @Override
   public void addType(Integer idx, ARFFType type) {
     typeMap.put(idx, type);
   }
-
+  
   /**
    * The count of the number of words seen
+   * 
    * @return the count
    */
   @Override
   public long getWordCount() {
     return wordCount;
   }
-
+  
   @Override
   public int getLabelSize() {
     return labelBindings.size();

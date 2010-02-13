@@ -17,11 +17,6 @@
 
 package org.apache.mahout.utils.vectors.arff;
 
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.IOUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,11 +26,16 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
+
+import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
 
 /**
  * Read in ARFF (http://www.cs.waikato.ac.nz/~ml/weka/arff.html) and create {@link Vector}s
@@ -52,25 +52,25 @@ import java.util.regex.Pattern;
  * bindings, call {@link MapBackedARFFModel#getLabelBindings()}, as they are the same for every vector.
  */
 public class ARFFVectorIterable implements Iterable<Vector> {
-
+  
   private static final Pattern COMMA_PATTERN = Pattern.compile(",");
   private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
-
+  
   private final BufferedReader buff;
   private final ARFFModel model;
-
+  
   public ARFFVectorIterable(File file, ARFFModel model) throws IOException {
     this(new FileReader(file), model);
   }
-
+  
   public ARFFVectorIterable(File file, Charset encoding, ARFFModel model) throws IOException {
     this(new InputStreamReader(new FileInputStream(file), encoding), model);
   }
-
+  
   public ARFFVectorIterable(String arff, ARFFModel model) throws IOException {
     this(new StringReader(arff), model);
   }
-
+  
   public ARFFVectorIterable(Reader reader, ARFFModel model) throws IOException {
     if (reader instanceof BufferedReader) {
       buff = (BufferedReader) reader;
@@ -79,7 +79,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
     }
     //grab the attributes, then start the iterator at the first line of data
     this.model = model;
-
+    
     int labelNumber = 0;
     String line;
     //boolean inData = false; // TODO not used?
@@ -101,24 +101,24 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           label = ARFFType.STRING.getLabel(lower);
           type = ARFFType.STRING;
           //TODO: create a map so we know which
-
+          
         } else if (lower.contains(ARFFType.NOMINAL.getIndicator())) {
           label = ARFFType.NOMINAL.getLabel(lower);
           type = ARFFType.NOMINAL;
           //@ATTRIBUTE class        {Iris-setosa,Iris-versicolor,Iris-virginica}
           int classIdx = lower.indexOf(ARFFType.NOMINAL.getIndicator());
-          String [] classes = COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
+          String [] classes = ARFFVectorIterable.COMMA_PATTERN.split(line.substring(classIdx + 1, line.length() - 1));
           for (int i = 0; i < classes.length; i++) {
             model.addNominal(label, classes[i].trim(), i);
           }
-
+          
         } else if (lower.contains(ARFFType.DATE.getIndicator())) {
           label = ARFFType.DATE.getLabel(lower);
           type = ARFFType.DATE;
           //TODO: DateFormatter map
           DateFormat format = ARFFModel.DEFAULT_DATE_FORMAT;
           int idx = lower.indexOf(ARFFType.DATE.getIndicator());
-          String[] split = SPACE_PATTERN.split(line);
+          String[] split = ARFFVectorIterable.SPACE_PATTERN.split(line);
           if (split.length >= 4) {//we have a date format
             String formStr = line.substring(idx + ARFFType.DATE.getIndicator().length()).trim();
             if (formStr.startsWith("\"")) {
@@ -139,23 +139,23 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         break;//skip it
       }
     }
-
+    
   }
-
-
+  
+  
   @Override
   public Iterator<Vector> iterator() {
     return new ARFFIterator();
   }
-
+  
   private class ARFFIterator implements Iterator<Vector> {
-
+    
     private String line;
-
+    
     private ARFFIterator() {
       goToNext();
     }
-
+    
     private void goToNext() {
       line = null;
       try {
@@ -172,12 +172,12 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         IOUtils.quietClose(buff);
       }
     }
-
+    
     @Override
     public boolean hasNext() {
       return line != null;
     }
-
+    
     @Override
     public Vector next() {
       if (line == null) {
@@ -186,16 +186,16 @@ public class ARFFVectorIterable implements Iterable<Vector> {
       Vector result;
       if (line.startsWith(ARFFModel.ARFF_SPARSE)) {
         line = line.substring(1, line.length() - 1);
-        String[] splits = COMMA_PATTERN.split(line);
+        String[] splits = ARFFVectorIterable.COMMA_PATTERN.split(line);
         result = new RandomAccessSparseVector(model.getLabelSize());
         for (String split : splits) {
-          String[] data = SPACE_PATTERN.split(split); // first is index, second is
+          String[] data = ARFFVectorIterable.SPACE_PATTERN.split(split); // first is index, second is
           int idx = Integer.parseInt(data[0]);
           result.setQuick(idx, model.getValue(data[1], idx));
         }
       } else {
         result = new DenseVector(model.getLabelSize());
-        String[] splits = COMMA_PATTERN.split(line);
+        String[] splits = ARFFVectorIterable.COMMA_PATTERN.split(line);
         for (int i = 0; i < splits.length; i++) {
           result.setQuick(i, model.getValue(splits[i], i));
         }
@@ -204,13 +204,13 @@ public class ARFFVectorIterable implements Iterable<Vector> {
       goToNext();
       return result;
     }
-
+    
     @Override
     public void remove() {
       throw new UnsupportedOperationException("remove not supported");
     }
   }
-
+  
   /**
    * Returns info about the ARFF content that was parsed.
    * @return the model

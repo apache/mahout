@@ -17,13 +17,13 @@
 
 package org.apache.mahout.utils.vectors;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-
-import java.util.Iterator;
-import java.io.IOException;
 
 
 /**
@@ -35,16 +35,16 @@ import java.io.IOException;
 public class SequenceFileVectorIterable implements Iterable<Vector> {
   private final SequenceFile.Reader reader;
   private boolean transpose = false;
-
+  
   public SequenceFileVectorIterable(SequenceFile.Reader reader) {
     this.reader = reader;
   }
-
+  
   public SequenceFileVectorIterable(SequenceFile.Reader reader, boolean transpose) {
     this.reader = reader;
     this.transpose = transpose;
   }
-
+  
   @Override
   public Iterator<Vector> iterator() {
     try {
@@ -55,11 +55,11 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
       throw new IllegalStateException(e);
     }
   }
-
+  
   public class SeqFileIterator implements Iterator<Vector> {
     private final Writable key;
     private final Writable value;
-
+    
     private SeqFileIterator() throws IllegalAccessException, InstantiationException {
       if (transpose) {
         value = (Writable) reader.getValueClass().newInstance();
@@ -69,7 +69,7 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
         value = (Writable) reader.getValueClass().newInstance();
       }
     }
-
+    
     @Override
     public boolean hasNext() {
       // TODO this doesn't work with the Iterator contract -- hasNext() cannot have a side effect
@@ -79,13 +79,13 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
         throw new IllegalStateException(e);
       }
     }
-
+    
     @Override
     public Vector next() {
       
       return (transpose ? (VectorWritable)key : (VectorWritable)value).get();
     }
-
+    
     /**
      * Only valid when {@link #next()} is also valid
      * @return The current Key
@@ -93,7 +93,7 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
     public Writable key(){
       return transpose ? value : key;
     }
-
+    
     @Override
     public void remove() {
       throw new UnsupportedOperationException();

@@ -41,16 +41,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Runs pass 1 of the Collocation discovery job on input of
- * SequeceFile<Text,Text>, where the key is a document id and the value is the
- * document contents. . Delegates to NGramCollector to perform tokenization,
+ * Runs pass 1 of the Collocation discovery job on input of SequeceFile<Text,Text>, where the key is a
+ * document id and the value is the document contents. . Delegates to NGramCollector to perform tokenization,
  * ngram-creation and output collection.
  * 
  * @see org.apache.mahout.text.SequenceFilesFromDirectory
  * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.NGramCollector
  */
-public class CollocMapper extends MapReduceBase implements
-    Mapper<Text,StringTuple,Gram,Gram> {
+public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTuple,Gram,Gram> {
   
   public static final String MAX_SHINGLE_SIZE = "maxShingleSize";
   public static final int DEFAULT_MAX_SHINGLE_SIZE = 2;
@@ -68,41 +66,36 @@ public class CollocMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     
-    this.maxShingleSize = job.getInt(CollocMapper.MAX_SHINGLE_SIZE,
-      DEFAULT_MAX_SHINGLE_SIZE);
+    this.maxShingleSize = job.getInt(CollocMapper.MAX_SHINGLE_SIZE, CollocMapper.DEFAULT_MAX_SHINGLE_SIZE);
     
-    this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS,
-      CollocDriver.DEFAULT_EMIT_UNIGRAMS);
+    this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
     
-    if (log.isInfoEnabled()) {
-      log.info("Max Ngram size is {}", this.maxShingleSize);
-      log.info("Emit Unitgrams is {}", emitUnigrams);
+    if (CollocMapper.log.isInfoEnabled()) {
+      CollocMapper.log.info("Max Ngram size is {}", this.maxShingleSize);
+      CollocMapper.log.info("Emit Unitgrams is {}", emitUnigrams);
     }
   }
   
   /**
    * Collocation finder: pass 1 map phase.
    * 
-   * Receives a token stream which gets passed through the ShingleFilter. The
-   * ShingleFilter delivers ngrams of the appropriate size which are then
-   * decomposed into head and tail subgrams which are collected in the following
-   * manner
+   * Receives a token stream which gets passed through the ShingleFilter. The ShingleFilter delivers ngrams of
+   * the appropriate size which are then decomposed into head and tail subgrams which are collected in the
+   * following manner
    * 
    * k:h_subgram v:ngram k:t_subgram v:ngram
    * 
-   * The 'h_' or 't_' prefix is used to specify whether the subgram in question
-   * is the head or tail of the ngram. In this implementation the head of the
-   * ngram is a (n-1)gram, and the tail is a (1)gram.
+   * The 'h_' or 't_' prefix is used to specify whether the subgram in question is the head or tail of the
+   * ngram. In this implementation the head of the ngram is a (n-1)gram, and the tail is a (1)gram.
    * 
-   * For example, given 'click and clack' and an ngram length of 3: k:'h_click
-   * and' v:'click and clack' k;'t_clack' v:'click and clack'
+   * For example, given 'click and clack' and an ngram length of 3: k:'h_click and' v:'click and clack'
+   * k;'t_clack' v:'click and clack'
    * 
-   * Also counts the total number of ngrams encountered and adds it to the
-   * counter CollocDriver.Count.NGRAM_TOTAL
+   * Also counts the total number of ngrams encountered and adds it to the counter
+   * CollocDriver.Count.NGRAM_TOTAL
    * 
    * @param r
-   *          The reader to read input from -- used to create a tokenstream from
-   *          the analyzer
+   *          The reader to read input from -- used to create a tokenstream from the analyzer
    * 
    * @param collector
    *          The collector to send output to
@@ -111,28 +104,21 @@ public class CollocMapper extends MapReduceBase implements
    *          Used to deliver the final ngram-count.
    * 
    * @throws IOException
-   *           if there's a problem with the ShingleFilter reading data or the
-   *           collector collecting output.
+   *           if there's a problem with the ShingleFilter reading data or the collector collecting output.
    */
   @Override
-  public void map(Text key,
-                  StringTuple value,
-                  final OutputCollector<Gram,Gram> collector,
-                  Reporter reporter) throws IOException {
+  public void map(Text key, StringTuple value, final OutputCollector<Gram,Gram> collector, Reporter reporter) throws IOException {
     
-    ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value
-        .getEntries().iterator()), maxShingleSize);
+    ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()),
+        maxShingleSize);
     int count = 0; // ngram count
-    OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(
-        value.getEntries().size() * (maxShingleSize - 1));
-    OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(
-        value.getEntries().size());
+    OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(value.getEntries().size()
+                                                                           * (maxShingleSize - 1));
+    OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
     
     do {
-      String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
-          .term();
-      String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class))
-          .type();
+      String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
+      String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class)).type();
       if ("shingle".equals(type)) {
         count++;
         if (ngrams.containsKey(term) == false) {
@@ -158,10 +144,8 @@ public class CollocMapper extends MapReduceBase implements
         int i = term.lastIndexOf(' ');
         if (i != -1) { // bigram, trigram etc
           try {
-            collector.collect(new Gram(term.substring(0, i), frequency, HEAD),
-              ngram);
-            collector.collect(new Gram(term.substring(i + 1), frequency, TAIL),
-              ngram);
+            collector.collect(new Gram(term.substring(0, i), frequency, HEAD), ngram);
+            collector.collect(new Gram(term.substring(i + 1), frequency, TAIL), ngram);
           } catch (IOException e) {
             throw new RuntimeException(e);
           }

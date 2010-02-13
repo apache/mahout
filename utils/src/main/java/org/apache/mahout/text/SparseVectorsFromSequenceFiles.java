@@ -43,8 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class SparseVectorsFromSequenceFiles {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(SparseVectorsFromSequenceFiles.class);
+  private static final Logger log = LoggerFactory.getLogger(SparseVectorsFromSequenceFiles.class);
   
   private SparseVectorsFromSequenceFiles() {}
   
@@ -53,108 +52,74 @@ public final class SparseVectorsFromSequenceFiles {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option inputDirOpt = obuilder.withLongName("input").withRequired(true)
-        .withArgument(
-          abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "input dir containing the documents in sequence file format")
-        .withShortName("i").create();
+    Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+      "input dir containing the documents in sequence file format").withShortName("i").create();
     
-    Option outputDirOpt = obuilder
-        .withLongName("output")
-        .withRequired(true)
-        .withArgument(
-          abuilder.withName("output").withMinimum(1).withMaximum(1).create())
-        .withDescription("The output directory").withShortName("o").create();
+    Option outputDirOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The output directory").withShortName("o").create();
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
-      abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create())
-        .withDescription("(Optional) Minimum Support. Default Value: 2")
-        .withShortName("s").create();
+      abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) Minimum Support. Default Value: 2").withShortName("s").create();
     
-    Option analyzerNameOpt = obuilder.withLongName("analyzerName")
-        .withArgument(
-          abuilder.withName("analyzerName").withMinimum(1).withMaximum(1)
-              .create()).withDescription("The class name of the analyzer")
-        .withShortName("a").create();
+    Option analyzerNameOpt = obuilder.withLongName("analyzerName").withArgument(
+      abuilder.withName("analyzerName").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The class name of the analyzer").withShortName("a").create();
     
     Option chunkSizeOpt = obuilder.withLongName("chunkSize").withArgument(
-      abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create())
-        .withDescription("The chunkSize in MegaBytes. 100-10000 MB")
-        .withShortName("chunk").create();
+      abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The chunkSize in MegaBytes. 100-10000 MB").withShortName("chunk").create();
     
-    Option weightOpt = obuilder.withLongName("weight").withRequired(false)
-        .withArgument(
-          abuilder.withName("weight").withMinimum(1).withMaximum(1).create())
-        .withDescription("The kind of weight to use. Currently TF or TFIDF")
-        .withShortName("wt").create();
+    Option weightOpt = obuilder.withLongName("weight").withRequired(false).withArgument(
+      abuilder.withName("weight").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The kind of weight to use. Currently TF or TFIDF").withShortName("wt").create();
     
-    Option minDFOpt = obuilder.withLongName("minDF").withRequired(false)
-        .withArgument(
-          abuilder.withName("minDF").withMinimum(1).withMaximum(1).create())
-        .withDescription("The minimum document frequency.  Default is 1")
-        .withShortName("md").create();
+    Option minDFOpt = obuilder.withLongName("minDF").withRequired(false).withArgument(
+      abuilder.withName("minDF").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The minimum document frequency.  Default is 1").withShortName("md").create();
     
     Option maxDFPercentOpt = obuilder
         .withLongName("maxDFPercent")
         .withRequired(false)
-        .withArgument(
-          abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1)
-              .create())
+        .withArgument(abuilder.withName("maxDFPercent").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "The max percentage of docs for the DF.  Can be used to remove really high frequency terms.  Expressed as an integer between 0 and 100. Default is 99.")
         .withShortName("x").create();
     
-    Option minLLROpt = obuilder.withLongName("minLLR").withRequired(false)
-        .withArgument(
-          abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "(Optional)The minimum Log Likelihood Ratio(Float)  Default is "
-              + LLRReducer.DEFAULT_MIN_LLR).withShortName("ml").create();
+    Option minLLROpt = obuilder.withLongName("minLLR").withRequired(false).withArgument(
+      abuilder.withName("minLLR").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR)
+        .withShortName("ml").create();
     
-    Option numReduceTasksOpt = obuilder.withLongName("numReducers")
-        .withArgument(
-          abuilder.withName("numReducers").withMinimum(1).withMaximum(1)
-              .create()).withDescription(
-          "(Optional) Number of reduce tasks. Default Value: 1").withShortName(
-          "nr").create();
+    Option numReduceTasksOpt = obuilder.withLongName("numReducers").withArgument(
+      abuilder.withName("numReducers").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) Number of reduce tasks. Default Value: 1").withShortName("nr").create();
     
-    Option powerOpt = obuilder
-        .withLongName("norm")
-        .withRequired(false)
-        .withArgument(
-          abuilder.withName("norm").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
-              + "Must be greater or equal to 0.  The default is not to normalize")
-        .withShortName("n").create();
-    Option maxNGramSizeOpt = obuilder
-        .withLongName("maxNGramSize")
-        .withRequired(false)
-        .withArgument(
-          abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
+    Option powerOpt = obuilder.withLongName("norm").withRequired(false).withArgument(
+      abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
+          + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
+    Option maxNGramSizeOpt = obuilder.withLongName("maxNGramSize").withRequired(false).withArgument(
+      abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "(Optional) The maximum size of ngrams to create"
-              + " (2 = bigrams, 3 = trigrams, etc) Default Value:2")
-        .withShortName("ng").create();
-    Option sequentialAccessVectorOpt = obuilder.withLongName("sequentialAccessVector")
-        .withRequired(false)
-        .withDescription("(Optional) Whether output vectors should be SequentialAccessVectors If set true else false")
+              + " (2 = bigrams, 3 = trigrams, etc) Default Value:2").withShortName("ng").create();
+    Option sequentialAccessVectorOpt = obuilder.withLongName("sequentialAccessVector").withRequired(false)
+        .withDescription(
+          "(Optional) Whether output vectors should be SequentialAccessVectors If set true else false")
         .withShortName("seq").create();
     
-    Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(
-      false).withDescription("If set, overwrite the output directory")
-        .withShortName("w").create();
-    Option helpOpt = obuilder.withLongName("help").withDescription(
-      "Print out help").withShortName("h").create();
-    
-    Group group = gbuilder.withName("Options").withOption(minSupportOpt)
-        .withOption(analyzerNameOpt).withOption(chunkSizeOpt).withOption(
-          outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
-        .withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt)
-        .withOption(minLLROpt).withOption(numReduceTasksOpt).withOption(
-          maxNGramSizeOpt).withOption(overwriteOutput).withOption(helpOpt)
-        .withOption(sequentialAccessVectorOpt)
+    Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
+      "If set, overwrite the output directory").withShortName("w").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
+    
+    Group group = gbuilder.withName("Options").withOption(minSupportOpt).withOption(analyzerNameOpt)
+        .withOption(chunkSizeOpt).withOption(outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
+        .withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt).withOption(minLLROpt)
+        .withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput).withOption(
+          helpOpt).withOption(sequentialAccessVectorOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -182,8 +147,7 @@ public final class SparseVectorsFromSequenceFiles {
       
       if (cmdLine.hasOption(maxNGramSizeOpt) == true) {
         try {
-          maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt)
-              .toString());
+          maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt).toString());
         } catch (NumberFormatException ex) {
           log.warn("Could not parse ngram size option");
         }
@@ -202,8 +166,7 @@ public final class SparseVectorsFromSequenceFiles {
       
       int reduceTasks = 1;
       if (cmdLine.hasOption(numReduceTasksOpt)) {
-        reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt)
-            .toString());
+        reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
       }
       log.info("Pass1 reduce tasks: {}", reduceTasks);
       
@@ -237,8 +200,7 @@ public final class SparseVectorsFromSequenceFiles {
       }
       int maxDFPercent = 99;
       if (cmdLine.hasOption(maxDFPercentOpt)) {
-        maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt)
-            .toString());
+        maxDFPercent = Integer.parseInt(cmdLine.getValue(maxDFPercentOpt).toString());
       }
       
       float norm = PartialVectorMerger.NO_NORMALIZING;
@@ -251,23 +213,20 @@ public final class SparseVectorsFromSequenceFiles {
         }
       }
       HadoopUtil.overwriteOutput(outputDir);
-      String tokenizedPath = outputDir
-                             + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
-      DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass,
-        tokenizedPath);
-
+      String tokenizedPath = outputDir + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
+      DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath);
+      
       boolean sequentialAccessOutput = false;
       if (cmdLine.hasOption(sequentialAccessVectorOpt)) {
         sequentialAccessOutput = true;
       }
       
-      DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir,
-        minSupport, maxNGramSize, minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput);
+      DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, minSupport, maxNGramSize,
+        minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput);
       if (processIdf) {
-        TFIDFConverter.processTfIdf(
-          outputDir + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
-          outputDir + TFIDFConverter.TFIDF_OUTPUT_FOLDER, chunkSize, minDf,
-          maxDFPercent, norm, sequentialAccessOutput);
+        TFIDFConverter.processTfIdf(outputDir + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
+          outputDir + TFIDFConverter.TFIDF_OUTPUT_FOLDER, chunkSize, minDf, maxDFPercent, norm,
+          sequentialAccessOutput);
       }
     } catch (OptionException e) {
       log.error("Exception", e);

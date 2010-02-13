@@ -38,9 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Performs tokenization, ngram generation + collection for the first pass of
- * the LLR collocation discovery job. Factors this code out of the mappers so
- * that different input formats can be supported.
+ * Performs tokenization, ngram generation + collection for the first pass of the LLR collocation discovery
+ * job. Factors this code out of the mappers so that different input formats can be supported.
  * 
  * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.CollocMapperTextFile
  */
@@ -53,12 +52,10 @@ public class NGramCollector {
     NGRAM_TOTAL;
   }
   
-  private static final Logger log = LoggerFactory
-      .getLogger(NGramCollector.class);
+  private static final Logger log = LoggerFactory.getLogger(NGramCollector.class);
   
   /**
-   * An analyzer to perform tokenization. A ShingleFilter will be wrapped around
-   * its output to create ngrams
+   * An analyzer to perform tokenization. A ShingleFilter will be wrapped around its output to create ngrams
    */
   private Analyzer a;
   
@@ -70,12 +67,10 @@ public class NGramCollector {
   /**
    * Configure the NGramCollector.
    * 
-   * Reads NGramCollector.ANALYZER_CLASS and instantiates that class if it is
-   * provided. Otherwise a lucene StandardAnalyzer will be used that is set to
-   * be compatible to LUCENE_24.
+   * Reads NGramCollector.ANALYZER_CLASS and instantiates that class if it is provided. Otherwise a lucene
+   * StandardAnalyzer will be used that is set to be compatible to LUCENE_24.
    * 
-   * Reads NGramCollector.MAX_SHINGLE_SIZE and uses this as the parameter to the
-   * ShingleFilter.
+   * Reads NGramCollector.MAX_SHINGLE_SIZE and uses this as the parameter to the ShingleFilter.
    * 
    * @param job
    */
@@ -104,33 +99,30 @@ public class NGramCollector {
     
     this.maxShingleSize = job.getInt(NGramCollector.MAX_SHINGLE_SIZE, 2);
     
-    if (log.isInfoEnabled()) {
-      log.info("Analyzer is {}", this.a.toString());
-      log.info("Max Ngram size is {}", this.maxShingleSize);
+    if (NGramCollector.log.isInfoEnabled()) {
+      NGramCollector.log.info("Analyzer is {}", this.a.toString());
+      NGramCollector.log.info("Max Ngram size is {}", this.maxShingleSize);
     }
   }
   
   /**
-   * Receives a document and uses a lucene analyzer to tokenize them. The
-   * ShingleFilter delivers ngrams of the appropriate size which aren then
-   * decomposed into head and tail subgrams which are collected in the following
-   * manner
+   * Receives a document and uses a lucene analyzer to tokenize them. The ShingleFilter delivers ngrams of the
+   * appropriate size which aren then decomposed into head and tail subgrams which are collected in the
+   * following manner
    * 
    * k:h_subgram v:ngram k:t_subgram v:ngram
    * 
-   * The 'h_' or 't_' prefix is used to specify whether the subgram in question
-   * is the head or tail of the ngram. In this implementation the head of the
-   * ngram is a (n-1)gram, and the tail is a (1)gram.
+   * The 'h_' or 't_' prefix is used to specify whether the subgram in question is the head or tail of the
+   * ngram. In this implementation the head of the ngram is a (n-1)gram, and the tail is a (1)gram.
    * 
-   * For example, given 'click and clack' and an ngram length of 3: k:'h_click
-   * and' v:'clack and clack' k;'t_clack' v:'click and clack'
+   * For example, given 'click and clack' and an ngram length of 3: k:'h_click and' v:'clack and clack'
+   * k;'t_clack' v:'click and clack'
    * 
-   * Also counts the total number of ngrams encountered and adds it to the
-   * counter CollocDriver.Count.NGRAM_TOTAL
+   * Also counts the total number of ngrams encountered and adds it to the counter
+   * CollocDriver.Count.NGRAM_TOTAL
    * 
    * @param r
-   *          The reader to read input from -- used to create a tokenstream from
-   *          the analyzer
+   *          The reader to read input from -- used to create a tokenstream from the analyzer
    * 
    * @param collector
    *          The collector to send output to
@@ -139,12 +131,9 @@ public class NGramCollector {
    *          Used to deliver the final ngram-count.
    * 
    * @throws IOException
-   *           if there's a problem with the ShingleFilter reading data or the
-   *           collector collecting output.
+   *           if there's a problem with the ShingleFilter reading data or the collector collecting output.
    */
-  public void collectNgrams(Reader r,
-                            OutputCollector<Gram,Gram> collector,
-                            Reporter reporter) throws IOException {
+  public void collectNgrams(Reader r, OutputCollector<Gram,Gram> collector, Reporter reporter) throws IOException {
     TokenStream st = a.tokenStream("text", r);
     ShingleFilter sf = new ShingleFilter(st, maxShingleSize);
     
@@ -152,10 +141,8 @@ public class NGramCollector {
     int count = 0; // ngram count
     
     do {
-      String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
-          .term();
-      String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class))
-          .type();
+      String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
+      String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class)).type();
       
       if ("shingle".equals(type)) {
         count++;

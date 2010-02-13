@@ -58,8 +58,7 @@ import org.slf4j.LoggerFactory;
 
 public final class ClusterDumper {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(ClusterDumper.class);
+  private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
   
   private final String seqFileDir;
   private final String pointsDir;
@@ -80,15 +79,13 @@ public final class ClusterDumper {
     if (this.pointsDir != null) {
       JobConf conf = new JobConf(Job.class);
       // read in the points
-      clusterIdToPoints = readPoints(this.pointsDir, conf);
+      clusterIdToPoints = ClusterDumper.readPoints(this.pointsDir, conf);
     } else {
       clusterIdToPoints = Collections.emptyMap();
     }
   }
   
-  public void printClusters() throws IOException,
-                             InstantiationException,
-                             IllegalAccessException {
+  public void printClusters() throws IOException, InstantiationException, IllegalAccessException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
     client.setConf(conf);
@@ -96,13 +93,10 @@ public final class ClusterDumper {
     String[] dictionary = null;
     if (this.termDictionary != null) {
       if (dictionaryFormat.equals("text")) {
-        dictionary = VectorHelper.loadTermDictionary(new File(
-            this.termDictionary));
+        dictionary = VectorHelper.loadTermDictionary(new File(this.termDictionary));
       } else if (dictionaryFormat.equals("sequencefile")) {
-        FileSystem fs = FileSystem.get(new Path(this.termDictionary).toUri(),
-          conf);
-        dictionary = VectorHelper.loadTermDictionary(conf, fs,
-          this.termDictionary);
+        FileSystem fs = FileSystem.get(new Path(this.termDictionary).toUri(), conf);
+        dictionary = VectorHelper.loadTermDictionary(conf, fs, this.termDictionary);
       } else {
         throw new IllegalArgumentException("Invalid dictionary format");
       }
@@ -115,13 +109,12 @@ public final class ClusterDumper {
       writer = new OutputStreamWriter(System.out);
     }
     
-    File[] seqFileList = new File(this.seqFileDir)
-        .listFiles(new FilenameFilter() {
-          @Override
-          public boolean accept(File file, String name) {
-            return name.endsWith(".crc") == false;
-          }
-        });
+    File[] seqFileList = new File(this.seqFileDir).listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File file, String name) {
+        return name.endsWith(".crc") == false;
+      }
+    });
     for (File seqFile : seqFileList) {
       if (!seqFile.isFile()) {
         continue;
@@ -134,27 +127,25 @@ public final class ClusterDumper {
       ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
       while (reader.next(key, value)) {
         Vector center = value.getCenter();
-        String fmtStr = useJSON ? center.asFormatString() : VectorHelper
-            .vectorToString(center, dictionary);
+        String fmtStr = useJSON ? center.asFormatString() : VectorHelper.vectorToString(center, dictionary);
         writer.append("Id: ").append(String.valueOf(value.getId())).append(":");
         writer.append("name:").append(center.getName());
-        if (subString > 0) writer.append(":").append(
-          fmtStr.substring(0, Math.min(subString, fmtStr.length())));
+        if (subString > 0) {
+          writer.append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length())));
+        }
         writer.append('\n');
-
+        
         if (dictionary != null) {
-          String topTerms = getTopFeatures(center, dictionary, 10);
+          String topTerms = ClusterDumper.getTopFeatures(center, dictionary, 10);
           writer.write("\tTop Terms: ");
           writer.write(topTerms);
           writer.write('\n');
         }
         
-        List<String> points = clusterIdToPoints.get(String.valueOf(value
-            .getId()));
+        List<String> points = clusterIdToPoints.get(String.valueOf(value.getId()));
         if (points != null) {
           writer.write("\tPoints: ");
-          for (Iterator<String> iterator = points.iterator(); iterator
-              .hasNext();) {
+          for (Iterator<String> iterator = points.iterator(); iterator.hasNext();) {
             String point = iterator.next();
             writer.append(point);
             if (iterator.hasNext()) {
@@ -202,65 +193,40 @@ public final class ClusterDumper {
     this.dictionaryFormat = dictionaryType;
   }
   
-  public static void main(String[] args) throws IOException,
-                                        IllegalAccessException,
-                                        InstantiationException {
+  public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option seqOpt = obuilder.withLongName("seqFileDir").withRequired(false)
-        .withArgument(
-          abuilder.withName("seqFileDir").withMinimum(1).withMaximum(1)
-              .create()).withDescription(
-          "The directory containing Sequence Files for the Clusters")
-        .withShortName("s").create();
-    Option outputOpt = obuilder.withLongName("output").withRequired(false)
-        .withArgument(
-          abuilder.withName("output").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "The output file.  If not specified, dumps to the console")
-        .withShortName("o").create();
-    Option substringOpt = obuilder
-        .withLongName("substring")
-        .withRequired(false)
-        .withArgument(
-          abuilder.withName("substring").withMinimum(1).withMaximum(1).create())
-        .withDescription("The number of chars of the asFormatString() to print")
-        .withShortName("b").create();
-    Option centroidJSonOpt = obuilder
-        .withLongName("json")
-        .withRequired(false)
-        .withDescription(
-          "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries")
+    Option seqOpt = obuilder.withLongName("seqFileDir").withRequired(false).withArgument(
+      abuilder.withName("seqFileDir").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The directory containing Sequence Files for the Clusters").withShortName("s").create();
+    Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The output file.  If not specified, dumps to the console").withShortName("o").create();
+    Option substringOpt = obuilder.withLongName("substring").withRequired(false).withArgument(
+      abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The number of chars of the asFormatString() to print").withShortName("b").create();
+    Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
+      "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries")
         .withShortName("j").create();
-    Option pointsOpt = obuilder
-        .withLongName("pointsDir")
-        .withRequired(false)
-        .withArgument(
-          abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "The directory containing points sequence files mapping input vectors to their cluster.  "
-              + "If specified, then the program will output the points associated with a cluster")
-        .withShortName("p").create();
-    Option dictOpt = obuilder.withLongName("dictionary").withRequired(false)
-        .withArgument(
-          abuilder.withName("dictionary").withMinimum(1).withMaximum(1)
-              .create()).withDescription("The dictionary file. ")
-        .withShortName("d").create();
-    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(
-      false).withArgument(
-      abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1)
-          .create()).withDescription(
-      "The dictionary file type (text|sequencefile)").withShortName("dt")
+    Option pointsOpt = obuilder.withLongName("pointsDir").withRequired(false).withArgument(
+      abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The directory containing points sequence files mapping input vectors to their cluster.  "
+          + "If specified, then the program will output the points associated with a cluster").withShortName(
+      "p").create();
+    Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
+      abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The dictionary file. ").withShortName("d").create();
+    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
+      abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The dictionary file type (text|sequencefile)").withShortName("dt").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
-    Option helpOpt = obuilder.withLongName("help").withDescription(
-      "Print out help").withShortName("h").create();
     
-    Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(
-      seqOpt).withOption(outputOpt).withOption(substringOpt).withOption(
-      pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).withOption(
-      dictTypeOpt).create();
+    Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(seqOpt).withOption(outputOpt)
+        .withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt)
+        .withOption(dictTypeOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -314,7 +280,7 @@ public final class ClusterDumper {
       }
       clusterDumper.printClusters();
     } catch (OptionException e) {
-      log.error("Exception", e);
+      ClusterDumper.log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -323,8 +289,7 @@ public final class ClusterDumper {
     this.useJSON = json;
   }
   
-  private static Map<String,List<String>> readPoints(String pointsPathDir,
-                                                     JobConf conf) throws IOException {
+  private static Map<String,List<String>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
     SortedMap<String,List<String>> result = new TreeMap<String,List<String>>();
     
     File[] children = new File(pointsPathDir).listFiles(new FilenameFilter() {
@@ -358,9 +323,9 @@ public final class ClusterDumper {
           pointList.add(key.toString());
         }
       } catch (InstantiationException e) {
-        log.error("Exception", e);
+        ClusterDumper.log.error("Exception", e);
       } catch (IllegalAccessException e) {
-        log.error("Exception", e);
+        ClusterDumper.log.error("Exception", e);
       }
     }
     
@@ -377,9 +342,7 @@ public final class ClusterDumper {
     }
   }
   
-  private static String getTopFeatures(Vector vector,
-                                       String[] dictionary,
-                                       int numTerms) {
+  private static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
     
     List<TermIndexWeight> vectorTerms = new ArrayList<TermIndexWeight>();
     
@@ -403,7 +366,7 @@ public final class ClusterDumper {
       int index = vectorTerms.get(i).index;
       String dictTerm = dictionary[index];
       if (dictTerm == null) {
-        log.error("Dictionary entry missing for {}", index);
+        ClusterDumper.log.error("Dictionary entry missing for {}", index);
         continue;
       }
       topTerms.add(dictTerm);

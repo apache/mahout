@@ -21,46 +21,46 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermVectorOffsetInfo;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
+import org.apache.mahout.utils.vectors.Weight;
 
 
 /**
  * Not thread-safe
  */
 public class TFDFMapper extends VectorMapper {
-
+  
   //public static final int DEFAULT_CACHE_SIZE = 256;
-
+  
   //private final IndexReader reader; // TODO never used?
   private Vector vector;
-
+  
   private final Weight weight;
   private int numTerms;
   private final TermInfo termInfo;
   private String field;
   private final int numDocs;
-
+  
   public TFDFMapper(IndexReader reader, Weight weight, TermInfo termInfo) {
     //this.reader = reader;
     this.weight = weight;
     this.termInfo = termInfo;
     this.numDocs = reader.numDocs();
   }
-
+  
   @Override
   public Vector getVector() {
     return vector;
   }
-
+  
   @Override
   public void setExpectations(String field, int numTerms, boolean storeOffsets, boolean storePositions) {
     this.field = field;
     vector = new RandomAccessSparseVector(termInfo.totalTerms(field));
     this.numTerms = numTerms;
   }
-
+  
   @Override
   public void map(String term, int frequency, TermVectorOffsetInfo[] offsets, int[] positions) {
     TermEntry entry = termInfo.getTermEntry(field, term);
@@ -68,12 +68,12 @@ public class TFDFMapper extends VectorMapper {
       vector.setQuick(entry.termIdx, weight.calculate(frequency, entry.docFreq, numTerms, numDocs));
     }
   }
-
+  
   @Override
   public boolean isIgnoringPositions() {
     return true;
   }
-
+  
   @Override
   public boolean isIgnoringOffsets() {
     return true;

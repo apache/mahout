@@ -21,19 +21,18 @@ import org.apache.lucene.search.DefaultSimilarity;
 import org.apache.lucene.search.Similarity;
 
 public class TFIDF implements Weight {
-
+  
   private Similarity sim = new DefaultSimilarity();
-
-  public TFIDF() {
-  }
-
+  
+  public TFIDF() { }
+  
   public TFIDF(Similarity sim) {
     this.sim = sim;
   }
-
+  
   @Override
   public double calculate(int tf, int df, int length, int numDocs) {
-    //ignore length
+    // ignore length
     return sim.tf(tf) * sim.idf(df, numDocs);
   }
 }

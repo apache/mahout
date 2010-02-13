@@ -6,13 +6,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
@@ -33,66 +33,67 @@ import org.junit.Before;
 
 
 public class TestL1ModelClustering extends MahoutTestCase {
-
-  @SuppressWarnings("unchecked")
+  
   private class MapElement implements Comparable<MapElement> {
-
+    
     MapElement(double pdf, String doc) {
       super();
       this.pdf = pdf;
       this.doc = doc;
     }
-
+    
     private final Double pdf;
-
+    
     private final String doc;
-
+    
     @Override
     // reverse compare to sort in reverse order
     public int compareTo(MapElement e) {
-      if (e.pdf > pdf)
+      if (e.pdf > pdf) {
         return 1;
-      else if (e.pdf < pdf)
+      } else if (e.pdf < pdf) {
         return -1;
-      else
+      } else {
         return 0;
+      }
     }
-
+    
+    @Override
     public String toString() {
       return pdf.toString() + ' ' + doc.toString();
     }
-
+    
   }
-
+  
   private static final String[] DOCS = { "The quick red fox jumped over the lazy brown dogs.",
-      "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
-      "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
-      "Moby Dick is a story of a whale and a man obsessed.", "The robber wore a black fleece jacket and a baseball cap.",
-      "The English Springer Spaniel is the best of all dogs." };
-
+                                         "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
+                                         "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
+                                         "Moby Dick is a story of a whale and a man obsessed.", "The robber wore a black fleece jacket and a baseball cap.",
+  "The English Springer Spaniel is the best of all dogs." };
+  
   private List<VectorWritable> sampleData;
-
+  
   private static final String[] DOCS2 = { "The quick red fox jumped over the lazy brown dogs.",
-      "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
-      "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
-      "Mary had a little goat whose fleece was white as snow.", "Mary had a little lamb whose fleece was black as tar.",
-      "Dick had a little goat whose fleece was white as snow.", "Moby Dick is a story of a whale and a man obsessed.",
-      "Moby Bob is a story of a walrus and a man obsessed.", "Moby Dick is a story of a whale and a crazy man.",
-      "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
-      "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
-
+                                          "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
+                                          "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
+                                          "Mary had a little goat whose fleece was white as snow.", "Mary had a little lamb whose fleece was black as tar.",
+                                          "Dick had a little goat whose fleece was white as snow.", "Moby Dick is a story of a whale and a man obsessed.",
+                                          "Moby Bob is a story of a walrus and a man obsessed.", "Moby Dick is a story of a whale and a crazy man.",
+                                          "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
+                                          "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
+  
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
     RandomUtils.useTestSeed();
   }
-
+  
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_CURRENT), true,
-        IndexWriter.MaxFieldLength.UNLIMITED);
+      IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < docs2.length; i++) {
       Document doc = new Document();
       Field id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
@@ -108,15 +109,15 @@ public class TestL1ModelClustering extends MahoutTestCase {
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
     LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
-
+    
     int i = 0;
     for (Vector vector : iterable) {
-      assertNotNull(vector);
-      System.out.println("Vector[" + i++ + "]=" + formatVector(vector));
+      Assert.assertNotNull(vector);
+      System.out.println("Vector[" + i++ + "]=" + TestL1ModelClustering.formatVector(vector));
       sampleData.add(new VectorWritable(vector));
     }
   }
-
+  
   private static String formatVector(Vector v) {
     StringBuilder buf = new StringBuilder();
     int nzero = 0;
@@ -131,17 +132,19 @@ public class TestL1ModelClustering extends MahoutTestCase {
     int nextIx = 0;
     for (int i = 0; i < v.size(); i++) {
       double elem = v.get(i);
-      if (elem == 0.0)
+      if (elem == 0.0) {
         continue;
-      if (i > nextIx)
+      }
+      if (i > nextIx) {
         buf.append("..{").append(i).append("}=");
+      }
       buf.append(String.format("%.2f", elem)).append(", ");
       nextIx = i + 1;
     }
     buf.append(']');
     return buf.toString();
   }
-
+  
   private static void printSamples(List<Model<VectorWritable>[]> result, int significant) {
     int row = 0;
     for (Model<VectorWritable>[] r : result) {
@@ -161,13 +164,14 @@ public class TestL1ModelClustering extends MahoutTestCase {
     }
     System.out.println();
   }
-
+  
   private void printClusters(Model<VectorWritable>[] models, List<VectorWritable> samples, String[] docs) {
     for (int m = 0; m < models.length; m++) {
       Model<VectorWritable> model = models[m];
       int count = model.count();
-      if (count == 0)
+      if (count == 0) {
         continue;
+      }
       System.out.println("Model[" + m + "] had " + count + " hits (!) and " + (samples.size()-count) + " misses (? in pdf order) during the last iteration:");
       MapElement[] map = new MapElement[samples.size()];
       // sort the samples by pdf
@@ -178,35 +182,36 @@ public class TestL1ModelClustering extends MahoutTestCase {
       Arrays.sort(map);
       // now find the n=model.count() most likely docs and output them
       for (int i = 0; i < map.length; i++) {
-        if (i < count)
+        if (i < count) {
           System.out.print("! ");
-        else
+        } else {
           System.out.print("? ");
+        }
         System.out.println(map[i].doc);
       }
     }
   }
-
+  
   public void testDocs() throws Exception {
     System.out.println("testDocs");
-    getSampleData(DOCS);
+    getSampleData(TestL1ModelClustering.DOCS);
     DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData, new L1ModelDistribution(sampleData
-        .get(0)), 1.0, 15, 1, 0);
+      .get(0)), 1.0, 15, 1, 0);
     List<Model<VectorWritable>[]> result = dc.cluster(10);
-    assertNotNull(result);
-    printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, DOCS);
+    Assert.assertNotNull(result);
+    TestL1ModelClustering.printSamples(result, 0);
+    printClusters(result.get(result.size() - 1), sampleData, TestL1ModelClustering.DOCS);
   }
-
+  
   public void testDocs2() throws Exception {
     System.out.println("testDocs2");
-    getSampleData(DOCS2);
+    getSampleData(TestL1ModelClustering.DOCS2);
     DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData, new L1ModelDistribution(sampleData
-        .get(0)), 1.0, 15, 1, 0);
+      .get(0)), 1.0, 15, 1, 0);
     List<Model<VectorWritable>[]> result = dc.cluster(10);
-    assertNotNull(result);
-    printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, DOCS2);
+    Assert.assertNotNull(result);
+    TestL1ModelClustering.printSamples(result, 0);
+    printClusters(result.get(result.size() - 1), sampleData, TestL1ModelClustering.DOCS2);
   }
-
+  
 }

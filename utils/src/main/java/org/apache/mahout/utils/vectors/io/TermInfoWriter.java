@@ -17,13 +17,13 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import org.apache.mahout.utils.vectors.TermInfo;
-
 import java.io.IOException;
 
+import org.apache.mahout.utils.vectors.TermInfo;
+
 public interface TermInfoWriter {
-
+  
   void write(TermInfo ti) throws IOException;
-
+  
   void close();
 }

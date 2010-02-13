@@ -1,5 +1,4 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
@@ -17,34 +16,33 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import org.apache.mahout.utils.vectors.TermEntry;
-import org.apache.mahout.utils.vectors.TermInfo;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 
+import org.apache.mahout.utils.vectors.TermEntry;
+import org.apache.mahout.utils.vectors.TermInfo;
 
 /**
  * Write ther TermInfo out to a {@link java.io.Writer}
  */
 public class JWriterTermInfoWriter implements TermInfoWriter {
-
+  
   private final Writer writer;
   private final String delimiter;
   private final String field;
-
+  
   public JWriterTermInfoWriter(Writer writer, String delimiter, String field) {
     this.writer = writer;
     this.delimiter = delimiter;
     this.field = field;
   }
-
+  
   @Override
   public void write(TermInfo ti) throws IOException {
-
+    
     Iterator<TermEntry> entIter = ti.getAllEntries();
-
+    
     writer.write(String.valueOf(ti.totalTerms(field)));
     writer.write("\n");
     writer.write("#term" + delimiter + "doc freq" + delimiter + "idx");
@@ -61,7 +59,7 @@ public class JWriterTermInfoWriter implements TermInfoWriter {
     writer.flush();
     writer.close();
   }
-
+  
   /**
    * Does NOT close the underlying writer
    */

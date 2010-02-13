@@ -35,16 +35,15 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.utils.vectors.TFIDF;
 
 /**
  * Converts a document in to a sparse vector
  */
-public class TFIDFPartialVectorReducer extends MapReduceBase
-    implements
+public class TFIDFPartialVectorReducer extends MapReduceBase implements
     Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
   
   private final OpenIntLongHashMap dictionary = new OpenIntLongHashMap();
@@ -60,19 +59,27 @@ public class TFIDFPartialVectorReducer extends MapReduceBase
                      Iterator<VectorWritable> values,
                      OutputCollector<WritableComparable<?>,VectorWritable> output,
                      Reporter reporter) throws IOException {
-    if (!values.hasNext()) return;
+    if (!values.hasNext()) {
+      return;
+    }
     Vector value = values.next().get();
     Iterator<Element> it = value.iterateNonZero();
-    Vector vector = new RandomAccessSparseVector(key
-        .toString(), (int)featureCount, value.getNumNondefaultElements());
+    Vector vector = new RandomAccessSparseVector(key.toString(), (int) featureCount, value
+        .getNumNondefaultElements());
     while (it.hasNext()) {
       Element e = it.next();
-      if (!dictionary.containsKey(e.index())) continue;
+      if (!dictionary.containsKey(e.index())) {
+        continue;
+      }
       long df = dictionary.get(e.index());
-      if (df / vectorCount > maxDfPercent) continue;
-      if (df < minDf) df = minDf;
-      vector.setQuick(e.index(), tfidf.calculate((int) e.get(), (int) df,
-        (int) featureCount, (int) vectorCount));
+      if (df / vectorCount > maxDfPercent) {
+        continue;
+      }
+      if (df < minDf) {
+        df = minDf;
+      }
+      vector.setQuick(e.index(), tfidf.calculate((int) e.get(), (int) df, (int) featureCount,
+        (int) vectorCount));
     }
     
     vectorWritable.set(vector);
@@ -86,8 +93,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase
       
       URI[] localFiles = DistributedCache.getCacheFiles(job);
       if (localFiles == null || localFiles.length < 1) {
-        throw new IllegalArgumentException(
-            "missing paths from the DistributedCache");
+        throw new IllegalArgumentException("missing paths from the DistributedCache");
       }
       
       vectorCount = job.getLong(TFIDFConverter.VECTOR_COUNT, 1);
@@ -97,8 +103,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase
       
       Path dictionaryFile = new Path(localFiles[0].getPath());
       FileSystem fs = dictionaryFile.getFileSystem(job);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile,
-          job);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, job);
       IntWritable key = new IntWritable();
       LongWritable value = new LongWritable();
       

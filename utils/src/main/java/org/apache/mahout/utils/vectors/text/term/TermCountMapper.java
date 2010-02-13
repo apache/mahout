@@ -30,12 +30,10 @@ import org.apache.mahout.math.function.ObjectLongProcedure;
 import org.apache.mahout.math.map.OpenObjectLongHashMap;
 
 /**
- * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs the
- * count of the words
+ * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs the count of the words
  * 
  */
-public class TermCountMapper extends MapReduceBase implements
-    Mapper<Text,StringTuple,Text,LongWritable> {
+public class TermCountMapper extends MapReduceBase implements Mapper<Text,StringTuple,Text,LongWritable> {
   @Override
   public void map(Text key,
                   StringTuple value,
@@ -45,7 +43,9 @@ public class TermCountMapper extends MapReduceBase implements
     for (String word : value.getEntries()) {
       if (wordCount.containsKey(word) == false) {
         wordCount.put(word, 1);
-      } else wordCount.put(word, wordCount.get(word) + 1);
+      } else {
+        wordCount.put(word, wordCount.get(word) + 1);
+      }
     }
     wordCount.forEachPair(new ObjectLongProcedure<String>() {
       @Override

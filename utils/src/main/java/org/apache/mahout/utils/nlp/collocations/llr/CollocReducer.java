@@ -31,11 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reducer for Pass 1 of the collocation identification job. Generates counts
- * for ngrams and subgrams.
+ * Reducer for Pass 1 of the collocation identification job. Generates counts for ngrams and subgrams.
  */
-public class CollocReducer extends MapReduceBase implements
-    Reducer<Gram,Gram,Gram,Gram> {
+public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gram,Gram> {
   
   public static final String MIN_SUPPORT = "minSupport";
   public static final int DEFAULT_MIN_SUPPORT = 2;
@@ -53,14 +51,13 @@ public class CollocReducer extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     
-    this.minSupport = job.getInt(MIN_SUPPORT, DEFAULT_MIN_SUPPORT);
+    this.minSupport = job.getInt(CollocReducer.MIN_SUPPORT, CollocReducer.DEFAULT_MIN_SUPPORT);
     
-    this.emitUnigrams =
-      job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
+    this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
     
-    if (log.isInfoEnabled()) {
-      log.info("Min support is {}", minSupport);
-      log.info("Emit Unitgrams is {}", emitUnigrams);
+    if (CollocReducer.log.isInfoEnabled()) {
+      CollocReducer.log.info("Min support is {}", minSupport);
+      CollocReducer.log.info("Emit Unitgrams is {}", emitUnigrams);
     }
     
   }
@@ -68,20 +65,16 @@ public class CollocReducer extends MapReduceBase implements
   /**
    * collocation finder: pass 1 reduce phase:
    * 
-   * given input from the mapper, 
-   *   k:h_subgram v:ngram 
-   *   k:t_subgram v:ngram
+   * given input from the mapper, k:h_subgram v:ngram k:t_subgram v:ngram
    * 
    * count ngrams and subgrams.
    * 
    * output is:
    * 
-   * k:ngram:ngramfreq v:h_subgram:h_subgramfreq 
-   * k:ngram:ngramfreq v:t_subgram:t_subgramfreq
+   * k:ngram:ngramfreq v:h_subgram:h_subgramfreq k:ngram:ngramfreq v:t_subgram:t_subgramfreq
    * 
-   * Each ngram's frequency is essentially counted twice, frequency should be
-   * the same for the head and tail. Fix this to count only for the head and
-   * move the count into the value?
+   * Each ngram's frequency is essentially counted twice, frequency should be the same for the head and tail.
+   * Fix this to count only for the head and move the count into the value?
    */
   @Override
   public void reduce(Gram subgramKey,
@@ -115,8 +108,9 @@ public class CollocReducer extends MapReduceBase implements
         reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
         continue;
       }
-      if(subgramKey.getType() == Type.UNIGRAM)
+      if (subgramKey.getType() == Type.UNIGRAM) {
         ngram.setType(subgramKey.getType());
+      }
       output.collect(ngram, subgramKey);
     }
   }

@@ -40,8 +40,8 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
-import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
 import org.apache.mahout.utils.nlp.collocations.llr.CollocMapper.IteratorTokenStream;
+import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
 import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 
 /**
@@ -52,7 +52,7 @@ public class TFPartialVectorReducer extends MapReduceBase implements
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
   
   private final VectorWritable vectorWritable = new VectorWritable();
-
+  
   private int dimension;
   private boolean sequentialAccess;
   
@@ -63,22 +63,24 @@ public class TFPartialVectorReducer extends MapReduceBase implements
                      Iterator<StringTuple> values,
                      OutputCollector<Text,VectorWritable> output,
                      Reporter reporter) throws IOException {
-    if (values.hasNext() == false) return;
+    if (values.hasNext() == false) {
+      return;
+    }
     StringTuple value = values.next();
     
-    Vector vector = new RandomAccessSparseVector(key.toString(),
-                                                 dimension,
-                                                 value.length()); // guess at initial size
+    Vector vector = new RandomAccessSparseVector(key.toString(), dimension, value.length()); // guess at
+                                                                                             // initial size
     
     if (maxNGramSize >= 2) {
-      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value
-          .getEntries().iterator()), maxNGramSize);
+      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()),
+          maxNGramSize);
       
       do {
-        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
-            .term();
+        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
         if (term.length() > 0) { // ngram
-          if (dictionary.containsKey(term) == false) continue;
+          if (dictionary.containsKey(term) == false) {
+            continue;
+          }
           int termId = dictionary.get(term);
           vector.setQuick(termId, vector.getQuick(termId) + 1);
         }
@@ -89,7 +91,9 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     } else {
       for (String term : value.getEntries()) {
         if (term.length() > 0) { // unigram
-          if (dictionary.containsKey(term) == false) continue;
+          if (dictionary.containsKey(term) == false) {
+            continue;
+          }
           int termId = dictionary.get(term);
           vector.setQuick(termId, vector.getQuick(termId) + 1);
         }
@@ -112,13 +116,11 @@ public class TFPartialVectorReducer extends MapReduceBase implements
       maxNGramSize = job.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
       URI[] localFiles = DistributedCache.getCacheFiles(job);
       if (localFiles == null || localFiles.length < 1) {
-        throw new IllegalArgumentException(
-            "missing paths from the DistributedCache");
+        throw new IllegalArgumentException("missing paths from the DistributedCache");
       }
       Path dictionaryFile = new Path(localFiles[0].getPath());
       FileSystem fs = dictionaryFile.getFileSystem(job);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile,
-          job);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, job);
       Text key = new Text();
       IntWritable value = new IntWritable();
       

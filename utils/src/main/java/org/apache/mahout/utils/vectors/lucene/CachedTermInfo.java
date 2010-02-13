@@ -17,26 +17,26 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.TermEnum;
-import org.apache.lucene.index.Term;
-import org.apache.mahout.utils.vectors.TermInfo;
-import org.apache.mahout.utils.vectors.TermEntry;
-
-import java.util.Map;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.io.IOException;
+import java.util.Map;
+
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermEnum;
+import org.apache.mahout.utils.vectors.TermEntry;
+import org.apache.mahout.utils.vectors.TermInfo;
 
 
 /**
  * Caches TermEntries from a single field.  Materializes all values in the TermEnum to memory (much like FieldCache)
  */
 public class CachedTermInfo implements TermInfo {
-
+  
   private final Map<String, TermEntry> termEntries;
   private final String field;
-
+  
   public CachedTermInfo(IndexReader reader, String field, int minDf, int maxDfPercent) throws IOException {
     this.field = field;
     TermEnum te = reader.terms(new Term(field, ""));
@@ -59,18 +59,18 @@ public class CachedTermInfo implements TermInfo {
     } while (te.next());
     te.close();
   }
-
+  
   @Override
   public int totalTerms(String field) {
     return termEntries.size();
   }
-
+  
   @Override
   public TermEntry getTermEntry(String field, String term) {
     if (this.field.equals(field) == false){ return null;}
     return termEntries.get(term);
   }
-
+  
   @Override
   public Iterator<TermEntry> getAllEntries() {
     return termEntries.values().iterator();

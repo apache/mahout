@@ -30,11 +30,9 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 
 /**
- * Can also be used as a local Combiner. This accumulates all the words and the
- * weights and sums them up.
+ * Can also be used as a local Combiner. This accumulates all the words and the weights and sums them up.
  */
-public class TermCountReducer extends MapReduceBase implements
-    Reducer<Text,LongWritable,Text,LongWritable> {
+public class TermCountReducer extends MapReduceBase implements Reducer<Text,LongWritable,Text,LongWritable> {
   
   private static int minSupport;
   
@@ -44,9 +42,10 @@ public class TermCountReducer extends MapReduceBase implements
                      OutputCollector<Text,LongWritable> output,
                      Reporter reporter) throws IOException {
     long sum = 0;
-    while (values.hasNext())
+    while (values.hasNext()) {
       sum += values.next().get();
-    if (sum >= minSupport) {
+    }
+    if (sum >= TermCountReducer.minSupport) {
       output.collect(key, new LongWritable(sum));
     }
   }
@@ -54,7 +53,7 @@ public class TermCountReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    minSupport = job.getInt(DictionaryVectorizer.MIN_SUPPORT,
+    TermCountReducer.minSupport = job.getInt(DictionaryVectorizer.MIN_SUPPORT,
       DictionaryVectorizer.DEFAULT_MIN_SUPPORT);
   }
 }
