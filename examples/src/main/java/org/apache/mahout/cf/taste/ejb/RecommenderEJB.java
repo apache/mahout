@@ -29,8 +29,10 @@ import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 /**
- * <p>Recommender EJB component interface.</p>
- *
+ * <p>
+ * Recommender EJB component interface.
+ * </p>
+ * 
  * @see RecommenderEJBLocal
  * @see org.apache.mahout.cf.taste.recommender.Recommender
  */
@@ -44,8 +46,8 @@ public interface RecommenderEJB extends EJBObject {
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(long, int, IDRescorer)
    */
-  List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-  throws TasteException, RemoteException;
+  List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException,
+                                                                                RemoteException;
   
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#estimatePreference(long, long)
@@ -55,8 +57,7 @@ public interface RecommenderEJB extends EJBObject {
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(long, long, float)
    */
-  void setPreference(long userID, long itemID, float value)
-  throws TasteException, RemoteException;
+  void setPreference(long userID, long itemID, float value) throws TasteException, RemoteException;
   
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#removePreference(long, long)

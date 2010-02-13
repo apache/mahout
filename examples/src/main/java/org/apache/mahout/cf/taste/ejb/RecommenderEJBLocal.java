@@ -28,8 +28,10 @@ import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 /**
- * <p>Recommender EJB local component interface.</p>
- *
+ * <p>
+ * Recommender EJB local component interface.
+ * </p>
+ * 
  * @see RecommenderEJB
  * @see org.apache.mahout.cf.taste.recommender.Recommender
  */

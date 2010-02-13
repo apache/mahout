@@ -23,8 +23,10 @@ import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 
 /**
- * <p>Recommender EJB home interface.</p>
- *
+ * <p>
+ * Recommender EJB home interface.
+ * </p>
+ * 
  * @see RecommenderEJBLocalHome
  */
 public interface RecommenderEJBHome extends EJBHome {

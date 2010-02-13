@@ -34,11 +34,14 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 /**
- * <p>Recommender EJB bean implementation.</p>
- *
- * <p>This class exposes a subset of the {@link Recommender} API. In particular it
- * does not support {@link Recommender#getDataModel()}
- * since it doesn't make sense to access this via an EJB component.</p>
+ * <p>
+ * Recommender EJB bean implementation.
+ * </p>
+ * 
+ * <p>
+ * This class exposes a subset of the {@link Recommender} API. In particular it does not support
+ * {@link Recommender#getDataModel()} since it doesn't make sense to access this via an EJB component.
+ * </p>
  */
 public class RecommenderEJBBean implements SessionBean {
   
@@ -48,11 +51,9 @@ public class RecommenderEJBBean implements SessionBean {
     return recommender.recommend(userID, howMany);
   }
   
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-  throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
-  
   
   public double estimatePreference(long userID, long itemID) throws TasteException {
     return recommender.estimatePreference(userID, itemID);
@@ -72,7 +73,7 @@ public class RecommenderEJBBean implements SessionBean {
   
   @Override
   public void setSessionContext(SessionContext sessionContext) {
-    // Do nothing
+  // Do nothing
   }
   
   public void ejbCreate() throws CreateException {
@@ -112,17 +113,17 @@ public class RecommenderEJBBean implements SessionBean {
   
   @Override
   public void ejbRemove() {
-    // Do nothing
+  // Do nothing
   }
   
   @Override
   public void ejbActivate() {
-    // Do nothing: stateless session beans are not passivated/activated
+  // Do nothing: stateless session beans are not passivated/activated
   }
   
   @Override
   public void ejbPassivate() {
-    // Do nothing: stateless session beans are not passivated/activated
+  // Do nothing: stateless session beans are not passivated/activated
   }
   
   @Override

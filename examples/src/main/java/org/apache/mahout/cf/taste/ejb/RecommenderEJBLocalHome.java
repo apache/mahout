@@ -21,8 +21,10 @@ import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
 
 /**
- * <p>Recommender EJB local home interface.</p>
- *
+ * <p>
+ * Recommender EJB local home interface.
+ * </p>
+ * 
  * @see RecommenderEJBHome
  */
 public interface RecommenderEJBLocalHome extends EJBLocalHome {
