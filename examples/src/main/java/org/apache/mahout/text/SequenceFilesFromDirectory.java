@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
+import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
@@ -37,6 +38,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.CommandLineUtil;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Converts a directory of text documents into SequenceFiles of Specified
@@ -50,6 +54,8 @@ import org.apache.mahout.common.FileLineIterable;
  * 
  */
 public final class SequenceFilesFromDirectory {
+
+  private transient static Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectory.class);
   
   private static ChunkedWriter createNewChunkedWriter(int chunkSizeInMB,
                                                String outputDir) throws IOException {
@@ -194,31 +200,41 @@ public final class SequenceFilesFromDirectory {
                     .create()).withDescription(
                 "The name of the character encoding of the input files")
             .withShortName("c").create();
-    
+
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
+
     Group group =
         gbuilder.withName("Options").withOption(keyPrefixOpt).withOption(
-            chunkSizeOpt).withOption(charsetOpt).withOption(outputDirOpt)
+            chunkSizeOpt).withOption(charsetOpt).withOption(outputDirOpt).withOption(helpOpt)
             .withOption(parentOpt).create();
-    
-    Parser parser = new Parser();
-    parser.setGroup(group);
-    CommandLine cmdLine = parser.parse(args);
-    
-    File parentDir = new File((String) cmdLine.getValue(parentOpt));
-    String outputDir = (String) cmdLine.getValue(outputDirOpt);
-    
-    int chunkSize = 64;
-    if (cmdLine.hasOption(chunkSizeOpt)) {
-      chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
-    }
-    
-    String prefix = "";
-    if (cmdLine.hasOption(keyPrefixOpt)) {
-      prefix = (String) cmdLine.getValue(keyPrefixOpt);
-    }
-    Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
-    SequenceFilesFromDirectory dir = new SequenceFilesFromDirectory();
-    
-    dir.createSequenceFiles(parentDir, outputDir, prefix, chunkSize, charset);
+
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+      File parentDir = new File((String) cmdLine.getValue(parentOpt));
+      String outputDir = (String) cmdLine.getValue(outputDirOpt);
+
+      int chunkSize = 64;
+      if (cmdLine.hasOption(chunkSizeOpt)) {
+        chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
+      }
+
+      String prefix = "";
+      if (cmdLine.hasOption(keyPrefixOpt)) {
+        prefix = (String) cmdLine.getValue(keyPrefixOpt);
+      }
+      Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
+      SequenceFilesFromDirectory dir = new SequenceFilesFromDirectory();
+
+      dir.createSequenceFiles(parentDir, outputDir, prefix, chunkSize, charset);
+    } catch (OptionException e) {
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
+    } 
   }
 }
