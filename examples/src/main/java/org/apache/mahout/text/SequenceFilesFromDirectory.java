@@ -168,14 +168,14 @@ public final class SequenceFilesFromDirectory {
     GroupBuilder gbuilder = new GroupBuilder();
     
     Option parentOpt =
-        obuilder.withLongName("parent").withRequired(true).withArgument(
-            abuilder.withName("parent").withMinimum(1).withMaximum(1).create())
-            .withDescription("Parent dir containing the documents")
+        obuilder.withLongName("input").withRequired(true).withArgument(
+            abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+            .withDescription("The input dir containing the documents")
             .withShortName("p").create();
     
     Option outputDirOpt =
-        obuilder.withLongName("outputDir").withRequired(true).withArgument(
-            abuilder.withName("outputDir").withMinimum(1).withMaximum(1)
+        obuilder.withLongName("output").withRequired(true).withArgument(
+            abuilder.withName("output").withMinimum(1).withMaximum(1)
                 .create()).withDescription("The output directory")
             .withShortName("o").create();
     
