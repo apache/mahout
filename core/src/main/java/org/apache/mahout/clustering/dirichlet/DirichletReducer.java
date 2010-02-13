@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -26,25 +30,22 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-
 public class DirichletReducer extends MapReduceBase implements
-    Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>> {
-
+    Reducer<Text,VectorWritable,Text,DirichletCluster<VectorWritable>> {
+  
   private DirichletState<VectorWritable> state;
-
+  
   private Model<VectorWritable>[] newModels;
-
+  
   public Model<VectorWritable>[] getNewModels() {
     return newModels;
   }
-
+  
   @Override
-  public void reduce(Text key, Iterator<VectorWritable> values,
-                     OutputCollector<Text, DirichletCluster<VectorWritable>> output, Reporter reporter)
-      throws IOException {
+  public void reduce(Text key,
+                     Iterator<VectorWritable> values,
+                     OutputCollector<Text,DirichletCluster<VectorWritable>> output,
+                     Reporter reporter) throws IOException {
     int k = Integer.parseInt(key.toString());
     Model<VectorWritable> model = newModels[k];
     while (values.hasNext()) {
@@ -56,12 +57,12 @@ public class DirichletReducer extends MapReduceBase implements
     cluster.setModel(model);
     output.collect(key, cluster);
   }
-
+  
   public void configure(DirichletState<VectorWritable> state) {
     this.state = state;
     this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
@@ -80,5 +81,5 @@ public class DirichletReducer extends MapReduceBase implements
     }
     this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
-
+  
 }

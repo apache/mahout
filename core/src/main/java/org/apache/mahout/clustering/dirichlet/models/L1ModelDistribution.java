@@ -21,19 +21,19 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm. Uses a
- * L1Distribution
+ * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
+ * Uses a L1Distribution
  */
 public class L1ModelDistribution extends VectorModelDistribution {
-
+  
   public L1ModelDistribution(VectorWritable modelPrototype) {
     super(modelPrototype);
   }
-
+  
   public L1ModelDistribution() {
     super();
   }
-
+  
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
     Model<VectorWritable>[] result = new L1Model[howMany];
@@ -43,7 +43,7 @@ public class L1ModelDistribution extends VectorModelDistribution {
     }
     return result;
   }
-
+  
   @Override
   public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
     Model<VectorWritable>[] result = new L1Model[posterior.length];

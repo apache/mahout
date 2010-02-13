@@ -19,15 +19,19 @@ package org.apache.mahout.clustering.lda;
 import org.apache.mahout.math.Matrix;
 
 public class LDAState {
-  public final int numTopics; 
-  public final int numWords; 
+  public final int numTopics;
+  public final int numWords;
   public final double topicSmoothing;
   private final Matrix topicWordProbabilities; // log p(w|t) for topic=1..nTopics
   private final double[] logTotals; // log \sum p(w|t) for topic=1..nTopics
   public final double logLikelihood; // log \sum p(w|t) for topic=1..nTopics
-
-  public LDAState(int numTopics, int numWords, double topicSmoothing,
-      Matrix topicWordProbabilities, double[] logTotals, double ll) {
+  
+  public LDAState(int numTopics,
+                  int numWords,
+                  double topicSmoothing,
+                  Matrix topicWordProbabilities,
+                  double[] logTotals,
+                  double ll) {
     this.numWords = numWords;
     this.numTopics = numTopics;
     this.topicSmoothing = topicSmoothing;
@@ -35,10 +39,9 @@ public class LDAState {
     this.logTotals = logTotals;
     this.logLikelihood = ll;
   }
-
+  
   public double logProbWordGivenTopic(int word, int topic) {
     double logProb = topicWordProbabilities.getQuick(topic, word);
-    return logProb == Double.NEGATIVE_INFINITY ? -100.0 
-      : logProb - logTotals[topic];
+    return logProb == Double.NEGATIVE_INFINITY ? -100.0 : logProb - logTotals[topic];
   }
 }

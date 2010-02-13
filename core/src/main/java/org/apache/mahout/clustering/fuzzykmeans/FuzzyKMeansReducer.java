@@ -17,13 +17,6 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,28 +24,37 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class FuzzyKMeansReducer extends MapReduceBase implements
-    Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
 
-  private final Map<String, SoftCluster> clusterMap = new HashMap<String, SoftCluster>();
-  private FuzzyKMeansClusterer clusterer; 
+public class FuzzyKMeansReducer extends MapReduceBase implements
+    Reducer<Text,FuzzyKMeansInfo,Text,SoftCluster> {
+  
+  private final Map<String,SoftCluster> clusterMap = new HashMap<String,SoftCluster>();
+  private FuzzyKMeansClusterer clusterer;
   
   @Override
-  public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
-                     OutputCollector<Text, SoftCluster> output, Reporter reporter) throws IOException {
-
+  public void reduce(Text key,
+                     Iterator<FuzzyKMeansInfo> values,
+                     OutputCollector<Text,SoftCluster> output,
+                     Reporter reporter) throws IOException {
+    
     SoftCluster cluster = clusterMap.get(key.toString());
-
+    
     while (values.hasNext()) {
       FuzzyKMeansInfo value = values.next();
-
+      
       if (value.getCombinerPass() == 0) // escaped from combiner
       {
         cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), clusterer.getM()));
       } else {
         cluster.addPoints(value.getVector(), value.getProbability());
       }
-
+      
     }
     // force convergence calculation
     boolean converged = clusterer.computeConvergence(cluster);
@@ -61,16 +63,16 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
     }
     output.collect(new Text(cluster.getIdentifier()), cluster);
   }
-
+  
   @Override
   public void configure(JobConf job) {
-
+    
     super.configure(job);
     clusterer = new FuzzyKMeansClusterer(job);
-
+    
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
     String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
-    if (clusterPath != null && clusterPath.length() > 0) {
+    if ((clusterPath != null) && (clusterPath.length() > 0)) {
       FuzzyKMeansUtil.configureWithClusterInfo(clusterPath, clusters);
       setClusterMap(clusters);
     }
@@ -79,7 +81,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
       throw new IllegalStateException("Cluster is empty!!!");
     }
   }
-
+  
   private void setClusterMap(List<SoftCluster> clusters) {
     clusterMap.clear();
     for (SoftCluster cluster : clusters) {
@@ -87,9 +89,9 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
     }
     clusters.clear();
   }
-
+  
   public void config(List<SoftCluster> clusters) {
     setClusterMap(clusters);
   }
-
+  
 }

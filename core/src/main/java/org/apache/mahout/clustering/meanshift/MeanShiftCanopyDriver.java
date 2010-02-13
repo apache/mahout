@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.IOException;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -39,43 +41,38 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-public class MeanShiftCanopyDriver {
-
-  private static final Logger log = LoggerFactory
-      .getLogger(MeanShiftCanopyDriver.class);
-
-  private MeanShiftCanopyDriver() {
-  }
-
+public final class MeanShiftCanopyDriver {
+  
+  private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyDriver.class);
+  
+  private MeanShiftCanopyDriver() { }
+  
   public static void main(String[] args) {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-
-    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d").
-        withArgument(abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).
-        withDescription("The distance measure class name.").create();
-
-
-    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(true).withShortName("t1").
-        withArgument(abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create()).
-        withDescription("The T1 distance threshold.").create();
-
-    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(true).withShortName("t2").
-        withArgument(abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create()).
-        withDescription("The T1 distance threshold.").create();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).
-        withOption(helpOpt).withOption(convergenceDeltaOpt).withOption(threshold1Opt).
-        withOption(threshold2Opt).create();
-
+    
+    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d")
+        .withArgument(abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create())
+        .withDescription("The distance measure class name.").create();
+    
+    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(true).withShortName("t1")
+        .withArgument(abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create())
+        .withDescription("The T1 distance threshold.").create();
+    
+    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(true).withShortName("t2")
+        .withArgument(abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create())
+        .withDescription("The T1 distance threshold.").create();
+    
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(modelOpt).withOption(helpOpt).withOption(convergenceDeltaOpt).withOption(threshold1Opt)
+        .withOption(threshold2Opt).create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -84,45 +81,57 @@ public class MeanShiftCanopyDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-
+      
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
       String measureClassName = cmdLine.getValue(modelOpt).toString();
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
-      runJob(input, output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
+      MeanShiftCanopyDriver.runJob(input, output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
         measureClassName, t1, t2, convergenceDelta);
     } catch (OptionException e) {
-      log.error("Exception parsing command line: ", e);
+      MeanShiftCanopyDriver.log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
-
+  
   /**
    * Run the job
-   *
-   * @param input            the input pathname String
-   * @param output           the output pathname String
-   * @param control          the control path
-   * @param measureClassName the DistanceMeasure class name
-   * @param t1               the T1 distance threshold
-   * @param t2               the T2 distance threshold
-   * @param convergenceDelta the double convergence criteria
+   * 
+   * @param input
+   *          the input pathname String
+   * @param output
+   *          the output pathname String
+   * @param control
+   *          the control path
+   * @param measureClassName
+   *          the DistanceMeasure class name
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
+   * @param convergenceDelta
+   *          the double convergence criteria
    */
-  public static void runJob(String input, String output, String control,
-                            String measureClassName, double t1, double t2, double convergenceDelta) {
-
+  public static void runJob(String input,
+                            String output,
+                            String control,
+                            String measureClassName,
+                            double t1,
+                            double t2,
+                            double convergenceDelta) {
+    
     Configurable client = new JobClient();
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
-
+    
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(MeanShiftCanopy.class);
-
+    
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
-
+    
     conf.setMapperClass(MeanShiftCanopyMapper.class);
     conf.setReducerClass(MeanShiftCanopyReducer.class);
     conf.setNumReduceTasks(1);
@@ -133,12 +142,12 @@ public class MeanShiftCanopyDriver {
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, control);
-
+    
     client.setConf(conf);
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
-      log.warn(e.toString(), e);
+      MeanShiftCanopyDriver.log.warn(e.toString(), e);
     }
   }
 }

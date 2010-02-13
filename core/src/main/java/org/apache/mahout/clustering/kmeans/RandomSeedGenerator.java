@@ -17,6 +17,11 @@
 
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,28 +34,23 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-
 /**
- * Given an Input Path containing a {@link org.apache.hadoop.io.SequenceFile}, randomly select k vectors and write them
- * to the output file as a {@link org.apache.mahout.clustering.kmeans.Cluster} representing the initial centroid to use.
+ * Given an Input Path containing a {@link org.apache.hadoop.io.SequenceFile}, randomly select k vectors and
+ * write them to the output file as a {@link org.apache.mahout.clustering.kmeans.Cluster} representing the
+ * initial centroid to use.
  * <p/>
  */
 public final class RandomSeedGenerator {
-
+  
   private static final Logger log = LoggerFactory.getLogger(RandomSeedGenerator.class);
-
+  
   public static final String K = "k";
-
-  private RandomSeedGenerator() {
-  }
-
-  public static Path buildRandom(String input, String output,
-                                 int k) throws IOException, IllegalAccessException, InstantiationException {
+  
+  private RandomSeedGenerator() { }
+  
+  public static Path buildRandom(String input, String output, int k) throws IOException,
+                                                                    IllegalAccessException,
+                                                                    InstantiationException {
     // delete the output directory
     JobConf conf = new JobConf(RandomSeedGenerator.class);
     Path outPath = new Path(output);
@@ -61,7 +61,7 @@ public final class RandomSeedGenerator {
     fs.mkdirs(outPath);
     Path outFile = new Path(outPath, "part-randomSeed");
     if (fs.exists(outFile)) {
-      log.warn("Deleting {}", outFile);
+      RandomSeedGenerator.log.warn("Deleting {}", outFile);
       fs.delete(outFile, false);
     }
     boolean newFile = fs.createNewFile(outFile);
@@ -83,7 +83,9 @@ public final class RandomSeedGenerator {
       int nextClusterId = 0;
       
       for (FileStatus fileStatus : inputFiles) {
-        if(fileStatus.isDir() == true) continue; // select only the top level files
+        if (fileStatus.isDir() == true) {
+          continue; // select only the top level files
+        }
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, fileStatus.getPath(), conf);
         Writable key = (Writable) reader.getKeyClass().newInstance();
         VectorWritable value = (VectorWritable) reader.getValueClass().newInstance();
@@ -109,10 +111,10 @@ public final class RandomSeedGenerator {
       for (int i = 0; i < k; i++) {
         writer.append(chosenTexts.get(i), chosenClusters.get(i));
       }
-      log.info("Wrote {} vectors to {}", k, outFile);
+      RandomSeedGenerator.log.info("Wrote {} vectors to {}", k, outFile);
       writer.close();
     }
-
+    
     return outFile;
   }
 }

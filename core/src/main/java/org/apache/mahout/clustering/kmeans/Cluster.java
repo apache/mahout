@@ -16,31 +16,31 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
-import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.function.SquareRootFunction;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.VectorWritable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class Cluster extends ClusterBase {
+import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.SquareRootFunction;
 
+public class Cluster extends ClusterBase {
+  
   /** Error message for unknown cluster format in output. */
   private static final String ERROR_UNKNOWN_CLUSTER_FORMAT = "Unknown cluster format:\n";
-
+  
   /** The current centroid is lazy evaluated and may be null */
   private Vector centroid = null;
-
+  
   /** The total of all the points squared, used for std computation */
   private Vector pointSquaredTotal = null;
-
+  
   /** Has the centroid converged with the center? */
   private boolean converged = false;
-
+  
   /**
    * Format the cluster for output
    * 
@@ -49,15 +49,14 @@ public class Cluster extends ClusterBase {
    * @return the String representation of the Cluster
    */
   public static String formatCluster(Cluster cluster) {
-    return cluster.getIdentifier() + ": "
-        + cluster.computeCentroid().asFormatString();
+    return cluster.getIdentifier() + ": " + cluster.computeCentroid().asFormatString();
   }
-
+  
   @Override
   public String asFormatString() {
-    return formatCluster(this);
+    return Cluster.formatCluster(this);
   }
-
+  
   /**
    * Decodes and returns a Cluster from the formattedString.
    * 
@@ -70,34 +69,31 @@ public class Cluster extends ClusterBase {
   public static Cluster decodeCluster(String formattedString) {
     int beginIndex = formattedString.indexOf('{');
     if (beginIndex <= 0) {
-      throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT
-          + formattedString);
+      throw new IllegalArgumentException(Cluster.ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
     }
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
     char firstChar = id.charAt(0);
     boolean startsWithV = firstChar == 'V';
     Cluster cluster;
-    if (firstChar == 'C' || startsWithV) {
-      int clusterId = Integer.parseInt(formattedString.substring(1,
-          beginIndex - 2));
+    if ((firstChar == 'C') || startsWithV) {
+      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector clusterCenter = AbstractVector.decodeVector(center);
       cluster = new Cluster(clusterCenter, clusterId);
       cluster.setConverged(startsWithV);
     } else {
-      throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT
-          + formattedString);
+      throw new IllegalArgumentException(Cluster.ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
     }
     return cluster;
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
     out.writeBoolean(converged);
     VectorWritable.writeVector(out, computeCentroid());
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
@@ -109,7 +105,7 @@ public class Cluster extends ClusterBase {
     this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();
   }
-
+  
   /**
    * Compute the centroid by averaging the pointTotals
    * 
@@ -125,7 +121,7 @@ public class Cluster extends ClusterBase {
     }
     return centroid;
   }
-
+  
   /**
    * Construct a new cluster with the given point as its center
    * 
@@ -139,11 +135,10 @@ public class Cluster extends ClusterBase {
     this.setPointTotal(center.like());
     this.pointSquaredTotal = center.like();
   }
-
+  
   /** For (de)serialization as a Writable */
-  public Cluster() {
-  }
-
+  public Cluster() { }
+  
   /**
    * Construct a new cluster with the given point as its center
    * 
@@ -158,25 +153,25 @@ public class Cluster extends ClusterBase {
     this.setPointTotal(center.like());
     this.pointSquaredTotal = center.like();
   }
-
+  
   /** Construct a new clsuter with the given id as identifier */
   public Cluster(String clusterId) {
-
-    this.setId(Integer.parseInt((clusterId.substring(1))));
+    
+    this.setId(Integer.parseInt(clusterId.substring(1)));
     this.setNumPoints(0);
     this.converged = clusterId.startsWith("V");
   }
-
+  
   @Override
   public String toString() {
     return getIdentifier() + " - " + getCenter().asFormatString();
   }
-
+  
   @Override
   public String getIdentifier() {
     return (converged ? "V" : "C") + getId();
   }
-
+  
   /**
    * Add the point to the cluster
    * 
@@ -186,7 +181,7 @@ public class Cluster extends ClusterBase {
   public void addPoint(Vector point) {
     addPoints(1, point);
   }
-
+  
   /**
    * Add the point to the cluster
    * 
@@ -206,14 +201,14 @@ public class Cluster extends ClusterBase {
       delta.times(delta).addTo(pointSquaredTotal);
     }
   }
-
+  
   /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
     setCenter(computeCentroid());
     setNumPoints(0);
     setPointTotal(getCenter().like());
   }
-
+  
   /**
    * Return if the cluster is converged by comparing its center and centroid.
    * 
@@ -223,28 +218,25 @@ public class Cluster extends ClusterBase {
    *          the convergence delta to use for stopping.
    * @return if the cluster is converged
    */
-  public boolean computeConvergence(DistanceMeasure measure,
-      double convergenceDelta) {
+  public boolean computeConvergence(DistanceMeasure measure, double convergenceDelta) {
     Vector centroid = computeCentroid();
-    converged = measure.distance(centroid.getLengthSquared(), centroid,
-        getCenter()) <= convergenceDelta;
+    converged = measure.distance(centroid.getLengthSquared(), centroid, getCenter()) <= convergenceDelta;
     return converged;
   }
-
+  
   public boolean isConverged() {
     return converged;
   }
-
+  
   private void setConverged(boolean converged) {
     this.converged = converged;
   }
-
+  
   /** @return the std */
   public double getStd() {
-    Vector stds = pointSquaredTotal.times(getNumPoints()).minus(
-        getPointTotal().times(getPointTotal()))
+    Vector stds = pointSquaredTotal.times(getNumPoints()).minus(getPointTotal().times(getPointTotal()))
         .assign(new SquareRootFunction()).divide(getNumPoints());
     return stds.zSum() / stds.size();
   }
-
+  
 }

@@ -17,6 +17,9 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -30,39 +33,37 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.function.TimesFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import org.apache.mahout.math.function.TimesFunction;
 
 public class DirichletMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
-
+    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable> {
+  
   private DirichletState<VectorWritable> state;
-
+  
   @Override
-  public void map(WritableComparable<?> key, VectorWritable v,
-      OutputCollector<Text, VectorWritable> output, Reporter reporter)
-      throws IOException {
+  public void map(WritableComparable<?> key,
+                  VectorWritable v,
+                  OutputCollector<Text,VectorWritable> output,
+                  Reporter reporter) throws IOException {
     // compute a normalized vector of probabilities that v is described by each model
-    Vector pi = normalizedProbabilities(state, v);
+    Vector pi = DirichletMapper.normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
     // see: http://en.wikipedia.org/wiki/Multinomial_distribution
     int k = UncommonDistributions.rMultinom(pi);
     output.collect(new Text(String.valueOf(k)), v);
   }
-
+  
   public void configure(DirichletState<VectorWritable> state) {
     this.state = state;
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     try {
-      state = getDirichletState(job);
+      state = DirichletMapper.getDirichletState(job);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -75,27 +76,27 @@ public class DirichletMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-
-  public static DirichletState<VectorWritable> getDirichletState(JobConf job)
-      throws SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  
+  public static DirichletState<VectorWritable> getDirichletState(JobConf job) throws SecurityException,
+                                                                             IllegalArgumentException,
+                                                                             NoSuchMethodException,
+                                                                             InvocationTargetException {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
     String modelPrototype = job.get(DirichletDriver.MODEL_PROTOTYPE_KEY);
     String prototypeSize = job.get(DirichletDriver.PROTOTYPE_SIZE_KEY);
     String numClusters = job.get(DirichletDriver.NUM_CLUSTERS_KEY);
     String alpha_0 = job.get(DirichletDriver.ALPHA_0_KEY);
-
+    
     try {
       double alpha = Double.parseDouble(alpha_0);
-      DirichletState<VectorWritable> state = DirichletDriver.createState(
-          modelFactory, modelPrototype, Integer.parseInt(prototypeSize),
-          Integer.parseInt(numClusters), alpha);
+      DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory, modelPrototype,
+        Integer.parseInt(prototypeSize), Integer.parseInt(numClusters), alpha);
       Path path = new Path(statePath);
       FileSystem fs = FileSystem.get(path.toUri(), job);
       FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
       for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(),
-            job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
         try {
           Text key = new Text();
           DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();
@@ -121,17 +122,18 @@ public class DirichletMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-
+  
   /**
-   * Compute a normalized vector of probabilities that v is described by each model using the mixture and the model
-   * pdfs
-   *
-   * @param state the DirichletState<Vector> of this iteration
-   * @param v     an Vector
+   * Compute a normalized vector of probabilities that v is described by each model using the mixture and the
+   * model pdfs
+   * 
+   * @param state
+   *          the DirichletState<Vector> of this iteration
+   * @param v
+   *          an Vector
    * @return the Vector of probabilities
    */
-  private static Vector normalizedProbabilities(
-      DirichletState<VectorWritable> state, VectorWritable v) {
+  private static Vector normalizedProbabilities(DirichletState<VectorWritable> state, VectorWritable v) {
     Vector pi = new DenseVector(state.getNumClusters());
     double max = 0;
     for (int k = 0; k < state.getNumClusters(); k++) {

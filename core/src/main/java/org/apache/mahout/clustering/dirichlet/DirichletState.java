@@ -17,28 +17,31 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class DirichletState<O> {
-
+  
   private int numClusters; // the number of clusters
-
+  
   private ModelDistribution<O> modelFactory; // the factory for models
-
+  
   private List<DirichletCluster<O>> clusters; // the clusters for this iteration
-
+  
   private Vector mixture; // the mixture vector
-
+  
   private double alpha_0; // alpha_0
-
+  
   public DirichletState(ModelDistribution<O> modelFactory,
-                        int numClusters, double alpha_0, int thin, int burnin) {
+                        int numClusters,
+                        double alpha_0,
+                        int thin,
+                        int burnin) {
     this.numClusters = numClusters;
     this.modelFactory = modelFactory;
     this.alpha_0 = alpha_0;
@@ -47,45 +50,44 @@ public class DirichletState<O> {
     for (Model<O> m : modelFactory.sampleFromPrior(numClusters)) {
       clusters.add(new DirichletCluster<O>(m));
     }
-    // sample the mixture parameters from a Dirichlet distribution on the totalCounts 
+    // sample the mixture parameters from a Dirichlet distribution on the totalCounts
     mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha_0);
   }
-
-  public DirichletState() {
-  }
-
+  
+  public DirichletState() { }
+  
   public int getNumClusters() {
     return numClusters;
   }
-
+  
   public void setNumClusters(int numClusters) {
     this.numClusters = numClusters;
   }
-
+  
   public ModelDistribution<O> getModelFactory() {
     return modelFactory;
   }
-
+  
   public void setModelFactory(ModelDistribution<O> modelFactory) {
     this.modelFactory = modelFactory;
   }
-
+  
   public List<DirichletCluster<O>> getClusters() {
     return clusters;
   }
-
+  
   public void setClusters(List<DirichletCluster<O>> clusters) {
     this.clusters = clusters;
   }
-
+  
   public Vector getMixture() {
     return mixture;
   }
-
+  
   public void setMixture(Vector mixture) {
     this.mixture = mixture;
   }
-
+  
   public Vector totalCounts() {
     Vector result = new DenseVector(numClusters);
     for (int i = 0; i < numClusters; i++) {
@@ -93,11 +95,12 @@ public class DirichletState<O> {
     }
     return result;
   }
-
+  
   /**
    * Update the receiver with the new models
-   *
-   * @param newModels a Model<Observation>[] of new models
+   * 
+   * @param newModels
+   *          a Model<Observation>[] of new models
    */
   public void update(Model<O>[] newModels) {
     // compute new model parameters based upon observations and update models
@@ -108,12 +111,14 @@ public class DirichletState<O> {
     // update the mixture
     mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha_0);
   }
-
+  
   /**
    * return the adjusted probability that x is described by the kth model
-   *
-   * @param x an Observation
-   * @param k an int index of a model
+   * 
+   * @param x
+   *          an Observation
+   * @param k
+   *          an int index of a model
    * @return the double probability
    */
   public double adjustedProbability(O x, int k) {
@@ -121,13 +126,13 @@ public class DirichletState<O> {
     double mix = mixture.get(k);
     return mix * pdf;
   }
-
+  
   public Model<O>[] getModels() {
-    Model<O>[] result = (Model<O>[]) new Model[numClusters];
+    Model<O>[] result = new Model[numClusters];
     for (int i = 0; i < numClusters; i++) {
       result[i] = clusters.get(i).getModel();
     }
     return result;
   }
-
+  
 }

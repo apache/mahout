@@ -21,30 +21,30 @@ import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.Vector;
 
 public class SampledNormalModel extends NormalModel {
-
+  
   public SampledNormalModel() {
     super();
   }
-
+  
   public SampledNormalModel(Vector mean, double sd) {
     super(mean, sd);
   }
-
+  
   @Override
   public String toString() {
     return asFormatString(null);
   }
-
+  
   /**
    * Return an instance with the same parameters
-   *
+   * 
    * @return an SampledNormalModel
    */
   @Override
   public NormalModel sample() {
     return new SampledNormalModel(getMean(), getStdDev());
   }
-
+  
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();

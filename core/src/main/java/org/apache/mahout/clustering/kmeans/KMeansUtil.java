@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -30,26 +34,20 @@ import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 final class KMeansUtil {
-
+  
   private static final Logger log = LoggerFactory.getLogger(KMeansUtil.class);
-
-  private KMeansUtil() {
-  }
-
+  
+  private KMeansUtil() { }
+  
   /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(String clusterPathStr,
-                                              List<Cluster> clusters) {
-
+  public static void configureWithClusterInfo(String clusterPathStr, List<Cluster> clusters) {
+    
     // Get the path location where the cluster Info is stored
     JobConf job = new JobConf(KMeansUtil.class);
     Path clusterPath = new Path(clusterPathStr + "/*");
     List<Path> result = new ArrayList<Path>();
-
+    
     // filter out the files
     PathFilter clusterFileFilter = new PathFilter() {
       @Override
@@ -57,17 +55,17 @@ final class KMeansUtil {
         return path.getName().startsWith("part");
       }
     };
-
+    
     try {
       // get all filtered file names in result list
       FileSystem fs = clusterPath.getFileSystem(job);
-      FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(
-          clusterPath, clusterFileFilter)), clusterFileFilter);
-
+      FileStatus[] matches = fs.listStatus(
+        FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
+      
       for (FileStatus match : matches) {
         result.add(fs.makeQualified(match.getPath()));
       }
-
+      
       // iterate thru the result path list
       for (Path path : result) {
         SequenceFile.Reader reader = null;
@@ -77,11 +75,11 @@ final class KMeansUtil {
           Writable key;
           try {
             key = (Writable) reader.getKeyClass().newInstance();
-          } catch (InstantiationException e) {//Should not be possible
-            log.error("Exception", e);
+          } catch (InstantiationException e) { // Should not be possible
+            KMeansUtil.log.error("Exception", e);
             throw new IllegalStateException(e);
           } catch (IllegalAccessException e) {
-            log.error("Exception", e);
+            KMeansUtil.log.error("Exception", e);
             throw new IllegalStateException(e);
           }
           if (valueClass.equals(Cluster.class)) {
@@ -104,11 +102,11 @@ final class KMeansUtil {
           IOUtils.quietClose(reader);
         }
       }
-
+      
     } catch (IOException e) {
-      log.info("Exception occurred in loading clusters:", e);
+      KMeansUtil.log.info("Exception occurred in loading clusters:", e);
       throw new IllegalStateException(e);
     }
   }
-
+  
 }

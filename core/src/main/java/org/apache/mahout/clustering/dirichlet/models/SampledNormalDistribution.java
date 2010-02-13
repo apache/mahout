@@ -22,19 +22,19 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm. Uses a
- * Normal Distribution to sample the prior model values.
+ * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
+ * Uses a Normal Distribution to sample the prior model values.
  */
 public class SampledNormalDistribution extends NormalModelDistribution {
-
+  
   public SampledNormalDistribution() {
     super();
   }
-
+  
   public SampledNormalDistribution(VectorWritable modelPrototype) {
     super(modelPrototype);
   }
-
+  
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
     Model<VectorWritable>[] result = new SampledNormalModel[howMany];
@@ -42,18 +42,18 @@ public class SampledNormalDistribution extends NormalModelDistribution {
       Vector prototype = getModelPrototype().get();
       int card = prototype.size();
       double[] m = new double[card];
-      for (int j = 0; j < card; j++)
+      for (int j = 0; j < card; j++) {
         m[j] = UncommonDistributions.rNorm(0, 1);
+      }
       Vector mean = prototype.like();
       mean.assign(m);
       result[i] = new SampledNormalModel(mean, 1);
     }
     return result;
   }
-
+  
   @Override
-  public Model<VectorWritable>[] sampleFromPosterior(
-      Model<VectorWritable>[] posterior) {
+  public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
     Model<VectorWritable>[] result = new SampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
       SampledNormalModel m = (SampledNormalModel) posterior[i];

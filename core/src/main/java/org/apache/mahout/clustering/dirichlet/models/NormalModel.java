@@ -17,43 +17,41 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
-import org.apache.mahout.math.function.SquareRootFunction;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.SquareRootFunction;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 public class NormalModel implements Model<VectorWritable> {
-
+  
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
-
+  
   // the parameters
   private Vector mean;
-
+  
   private double stdDev;
-
+  
   // the observation statistics, initialized by the first observation
   private int s0 = 0;
-
+  
   private Vector s1;
-
+  
   private Vector s2;
-
-  private static final Type modelType = new TypeToken<Model<Vector>>() {
-  }.getType();
-
-  public NormalModel() {
-  }
-
+  
+  private static final Type modelType = new TypeToken<Model<Vector>>() { }.getType();
+  
+  public NormalModel() { }
+  
   public NormalModel(Vector mean, double stdDev) {
     this.mean = mean;
     this.stdDev = stdDev;
@@ -61,28 +59,28 @@ public class NormalModel implements Model<VectorWritable> {
     this.s1 = mean.like();
     this.s2 = mean.like();
   }
-
+  
   int getS0() {
     return s0;
   }
-
+  
   public Vector getMean() {
     return mean;
   }
-
+  
   public double getStdDev() {
     return stdDev;
   }
-
+  
   /**
    * TODO: Return a proper sample from the posterior. For now, return an instance with the same parameters
-   *
+   * 
    * @return an NormalModel
    */
   public NormalModel sample() {
     return new NormalModel(mean, stdDev);
   }
-
+  
   @Override
   public void observe(VectorWritable x) {
     s0++;
@@ -98,7 +96,7 @@ public class NormalModel implements Model<VectorWritable> {
       s2 = s2.plus(v.times(v));
     }
   }
-
+  
   @Override
   public void computeParameters() {
     if (s0 == 0) {
@@ -113,26 +111,26 @@ public class NormalModel implements Model<VectorWritable> {
       stdDev = Double.MIN_VALUE;
     }
   }
-
+  
   @Override
   public double pdf(VectorWritable v) {
     Vector x = v.get();
     double sd2 = stdDev * stdDev;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (stdDev * sqrt2pi);
+    return ex / (stdDev * NormalModel.sqrt2pi);
   }
-
+  
   @Override
   public int count() {
     return s0;
   }
-
+  
   @Override
   public String toString() {
     return asFormatString(null);
   }
-
+  
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
@@ -143,7 +141,7 @@ public class NormalModel implements Model<VectorWritable> {
     buf.append(" sd=").append(String.format("%.2f", stdDev)).append('}');
     return buf.toString();
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     VectorWritable temp = new VectorWritable();
@@ -156,7 +154,7 @@ public class NormalModel implements Model<VectorWritable> {
     temp.readFields(in);
     this.s2 = temp.get();
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     VectorWritable.writeVector(out, mean);
@@ -165,12 +163,12 @@ public class NormalModel implements Model<VectorWritable> {
     VectorWritable.writeVector(out, s1);
     VectorWritable.writeVector(out, s2);
   }
-
+  
   @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, modelType);
+    return gson.toJson(this, NormalModel.modelType);
   }
 }

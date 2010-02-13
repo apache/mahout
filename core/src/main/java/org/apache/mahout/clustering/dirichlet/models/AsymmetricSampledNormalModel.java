@@ -33,29 +33,27 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
-
+  
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
-
+  
   // the parameters
   private Vector mean;
-
+  
   private Vector stdDev;
-
+  
   // the observation statistics, initialized by the first observation
   private int s0 = 0;
-
-  private Vector s1;
-
-  private Vector s2;
-
   
-  private static final Type modelType = new TypeToken<Model<Vector>>() {
-  }.getType();
-
+  private Vector s1;
+  
+  private Vector s2;
+  
+  private static final Type modelType = new TypeToken<Model<Vector>>() { }.getType();
+  
   public AsymmetricSampledNormalModel() {
     super();
   }
-
+  
   public AsymmetricSampledNormalModel(Vector mean, Vector stdDev) {
     super();
     this.mean = mean;
@@ -64,24 +62,24 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     this.s1 = mean.like();
     this.s2 = mean.like();
   }
-
+  
   public Vector getMean() {
     return mean;
   }
-
+  
   public Vector getStdDev() {
     return stdDev;
   }
-
+  
   /**
    * Return an instance with the same parameters
-   *
+   * 
    * @return an AsymmetricSampledNormalModel
    */
   AsymmetricSampledNormalModel sample() {
     return new AsymmetricSampledNormalModel(mean, stdDev);
   }
-
+  
   @Override
   public void observe(VectorWritable v) {
     Vector x = v.get();
@@ -97,7 +95,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
       s2 = s2.plus(x.times(x));
     }
   }
-
+  
   @Override
   public void computeParameters() {
     if (s0 == 0) {
@@ -111,20 +109,22 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
       stdDev.assign(Double.MIN_NORMAL);
     }
   }
-
+  
   /**
    * Calculate a pdf using the supplied sample and stdDev
-   *
-   * @param x  a Vector sample
-   * @param sd a double std deviation
+   * 
+   * @param x
+   *          a Vector sample
+   * @param sd
+   *          a double std deviation
    */
   private double pdf(Vector x, double sd) {
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (sd * sqrt2pi);
+    return ex / (sd * AsymmetricSampledNormalModel.sqrt2pi);
   }
-
+  
   @Override
   public double pdf(VectorWritable v) {
     Vector x = v.get();
@@ -136,17 +136,17 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     }
     return pdf;
   }
-
+  
   @Override
   public int count() {
     return s0;
   }
-
+  
   @Override
   public String toString() {
     return asFormatString(null);
   }
-
+  
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
@@ -161,7 +161,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     buf.append('}');
     return buf.toString();
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     VectorWritable temp = new VectorWritable();
@@ -175,7 +175,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     temp.readFields(in);
     this.s2 = temp.get();
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     VectorWritable.writeVector(out, mean);
@@ -184,12 +184,12 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     VectorWritable.writeVector(out, s1);
     VectorWritable.writeVector(out, s2);
   }
-
+  
   @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, modelType);
+    return gson.toJson(this, AsymmetricSampledNormalModel.modelType);
   }
 }

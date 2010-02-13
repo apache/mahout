@@ -17,6 +17,9 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -24,22 +27,21 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.Iterator;
-
 public class FuzzyKMeansCombiner extends MapReduceBase implements
-    Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo> {
-
+    Reducer<Text,FuzzyKMeansInfo,Text,FuzzyKMeansInfo> {
+  
   private FuzzyKMeansClusterer clusterer;
   
   @Override
-  public void reduce(Text key, Iterator<FuzzyKMeansInfo> values,
-                     OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<FuzzyKMeansInfo> values,
+                     OutputCollector<Text,FuzzyKMeansInfo> output,
+                     Reporter reporter) throws IOException {
     SoftCluster cluster = new SoftCluster(key.toString().trim());
     while (values.hasNext()) {
-      //String pointInfo = values.next().toString();
+      // String pointInfo = values.next().toString();
       FuzzyKMeansInfo info = values.next();
-
+      
       if (info.getCombinerPass() == 0) // first time thru combiner
       {
         cluster.addPoint(info.getVector(), Math.pow(info.getProbability(), clusterer.getM()));
@@ -48,14 +50,14 @@ public class FuzzyKMeansCombiner extends MapReduceBase implements
       }
       info.setCombinerPass(info.getCombinerPass() + 1);
     }
-    //TODO: how do we pass along the combinerPass?  Or do we not need to?
+    // TODO: how do we pass along the combinerPass? Or do we not need to?
     output.collect(key, new FuzzyKMeansInfo(cluster.getPointProbSum(), cluster.getWeightedPointTotal(), 1));
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     clusterer = new FuzzyKMeansClusterer(job);
   }
-
+  
 }

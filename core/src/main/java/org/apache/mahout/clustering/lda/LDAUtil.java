@@ -20,17 +20,14 @@ package org.apache.mahout.clustering.lda;
  * Various utility classes for doing LDA inference..
  */
 final class LDAUtil {
-  private LDAUtil() {
-  } // no creation
-
+  private LDAUtil() { } // no creation
+  
   /**
    * @return log(exp(a) + exp(b))
    */
   static double logSum(double a, double b) {
-    return (a == Double.NEGATIVE_INFINITY) ? b
-      : (b == Double.NEGATIVE_INFINITY) ? a
-      : (a < b) ? b + Math.log(1 + Math.exp(a - b))
-      : a + Math.log(1 + Math.exp(b - a));    
+    return a == Double.NEGATIVE_INFINITY ? b : b == Double.NEGATIVE_INFINITY ? a
+        : a < b ? b + Math.log(1 + Math.exp(a - b)) : a + Math.log(1 + Math.exp(b - a));
   }
-
+  
 }

@@ -18,34 +18,34 @@ package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.math.VectorWritable;
 
-public abstract class VectorModelDistribution implements
-    ModelDistribution<VectorWritable> {
-
+public abstract class VectorModelDistribution implements ModelDistribution<VectorWritable> {
+  
   protected VectorModelDistribution() {
     super();
   }
-
+  
   protected VectorModelDistribution(VectorWritable modelPrototype) {
     super();
     this.modelPrototype = modelPrototype;
   }
-
+  
   // a prototype instance used for creating prior model distributions using like(). It
   // should be of the class and cardinality desired for the particular application.
   private VectorWritable modelPrototype;
-
+  
   /**
    * @return the modelPrototype
    */
   public VectorWritable getModelPrototype() {
     return modelPrototype;
   }
-
+  
   /**
-   * @param modelPrototype the modelPrototype to set
+   * @param modelPrototype
+   *          the modelPrototype to set
    */
   public void setModelPrototype(VectorWritable modelPrototype) {
     this.modelPrototype = modelPrototype;
   }
-
+  
 }

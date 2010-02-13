@@ -16,28 +16,28 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-public class KMeansCombiner extends MapReduceBase implements
-    Reducer<Text, KMeansInfo, Text, KMeansInfo> {
-
+public class KMeansCombiner extends MapReduceBase implements Reducer<Text,KMeansInfo,Text,KMeansInfo> {
+  
   @Override
-  public void reduce(Text key, Iterator<KMeansInfo> values,
-                     OutputCollector<Text, KMeansInfo> output, Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<KMeansInfo> values,
+                     OutputCollector<Text,KMeansInfo> output,
+                     Reporter reporter) throws IOException {
     Cluster cluster = new Cluster(key.toString());
     while (values.hasNext()) {
       KMeansInfo next = values.next();
-      cluster.addPoints(next.getPoints(),
-          next.getPointTotal());
+      cluster.addPoints(next.getPoints(), next.getPointTotal());
     }
     output.collect(key, new KMeansInfo(cluster.getNumPoints(), cluster.getPointTotal()));
   }
-
+  
 }

@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -28,44 +32,43 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class FuzzyKMeansMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo> {
-
+    Mapper<WritableComparable<?>,VectorWritable,Text,FuzzyKMeansInfo> {
+  
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
-
+  
   private final List<SoftCluster> clusters = new ArrayList<SoftCluster>();
-  private FuzzyKMeansClusterer clusterer; 
+  private FuzzyKMeansClusterer clusterer;
   
   @Override
-  public void map(WritableComparable<?> key, VectorWritable point,
-                  OutputCollector<Text, FuzzyKMeansInfo> output, Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key,
+                  VectorWritable point,
+                  OutputCollector<Text,FuzzyKMeansInfo> output,
+                  Reporter reporter) throws IOException {
     clusterer.emitPointProbToCluster(point.get(), clusters, output);
   }
-
+  
   /**
    * Configure the mapper by providing its clusters. Used by unit tests.
-   *
-   * @param clusters a List<Cluster>
+   * 
+   * @param clusters
+   *          a List<Cluster>
    */
   void config(List<SoftCluster> clusters) {
     this.clusters.clear();
     this.clusters.addAll(clusters);
   }
-
+  
   @Override
   public void configure(JobConf job) {
-
+    
     super.configure(job);
     clusterer = new FuzzyKMeansClusterer(job);
-
-    log.info("In Mapper Configure:");
-
+    
+    FuzzyKMeansMapper.log.info("In Mapper Configure:");
+    
     String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
-    if (clusterPath != null && clusterPath.length() > 0) {
+    if ((clusterPath != null) && (clusterPath.length() > 0)) {
       FuzzyKMeansUtil.configureWithClusterInfo(clusterPath, clusters);
     }
     
@@ -73,5 +76,5 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
       throw new IllegalStateException("Cluster is empty!!!");
     }
   }
-
+  
 }

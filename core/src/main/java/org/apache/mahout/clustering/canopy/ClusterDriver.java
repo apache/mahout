@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -42,58 +44,54 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-public class ClusterDriver {
-
-  private static final Logger log = LoggerFactory.getLogger(ClusterDriver.class);
-
+public final class ClusterDriver {
+  
   public static final String DEFAULT_CLUSTER_OUTPUT_DIRECTORY = "/clusters";
-
-  private ClusterDriver() {
-  }
-
+  
+  private static final Logger log = LoggerFactory.getLogger(ClusterDriver.class);
+  
+  private ClusterDriver() { }
+  
   public static void main(String[] args) throws IOException {
-
+    
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
-        abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).
-        withDescription("The Vector implementation class name.  Default is RandomAccessSparseVector.class")
-        .withShortName("v").create();
+      abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v")
+        .create();
     Option t1Opt = obuilder.withLongName("t1").withRequired(true).withArgument(
-        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).
-        withDescription("t1").withShortName("t1").create();
+      abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1").withShortName(
+      "t1").create();
     Option t2Opt = obuilder.withLongName("t2").withRequired(true).withArgument(
-        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).
-        withDescription("t2").withShortName("t2").create();
-
+      abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("t2").withShortName(
+      "t2").create();
+    
     Option pointsOpt = obuilder.withLongName("points").withRequired(true).withArgument(
-        abuilder.withName("points").withMinimum(1).withMaximum(1).create()).
-        withDescription("The path containing the points").withShortName("p").create();
-
+      abuilder.withName("points").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The path containing the points").withShortName("p").create();
+    
     Option canopiesOpt = obuilder.withLongName("canopies").withRequired(true).withArgument(
-        abuilder.withName("canopies").withMinimum(1).withMaximum(1).create()).
-        withDescription("The location of the canopies, as a Path").withShortName("c").create();
-
+      abuilder.withName("canopies").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The location of the canopies, as a Path").withShortName("c").create();
+    
     Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
-        abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).
-        withDescription("The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
-
+      abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
+    
     Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).
-        withDescription("The Path to put the output in").withShortName("o").create();
-
-    Option helpOpt = obuilder.withLongName("help").
-        withDescription("Print out help").withShortName("h").create();
-
-    Group group = gbuilder.withName("Options").withOption(vectorClassOpt)
-        .withOption(t1Opt).withOption(t2Opt)
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The Path to put the output in").withShortName("o").create();
+    
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        .create();
+    
+    Group group = gbuilder.withName("Options").withOption(vectorClassOpt).withOption(t1Opt).withOption(t2Opt)
         .withOption(pointsOpt).withOption(canopiesOpt).withOption(measureClassOpt).withOption(outputOpt)
         .withOption(helpOpt).create();
-
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -102,7 +100,7 @@ public class ClusterDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-
+      
       String measureClass = SquaredEuclideanDistanceMeasure.class.getName();
       if (cmdLine.hasOption(measureClassOpt)) {
         measureClass = cmdLine.getValue(measureClassOpt).toString();
@@ -110,57 +108,67 @@ public class ClusterDriver {
       String output = cmdLine.getValue(outputOpt).toString();
       String canopies = cmdLine.getValue(canopiesOpt).toString();
       String points = cmdLine.getValue(pointsOpt).toString();
-      //Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
-      //    RandomAccessSparseVector.class
-      //    : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
+      // Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
+      // RandomAccessSparseVector.class
+      // : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
-
-      runJob(points, canopies, output, measureClass, t1, t2);
-
+      
+      ClusterDriver.runJob(points, canopies, output, measureClass, t1, t2);
+      
     } catch (OptionException e) {
-      log.error("Exception", e);
+      ClusterDriver.log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
-
-
+    
   }
-
+  
   /**
    * Run the job
-   *
-   * @param points           the input points directory pathname String
-   * @param canopies         the input canopies directory pathname String
-   * @param output           the output directory pathname String
-   * @param measureClassName the DistanceMeasure class name
-   * @param t1               the T1 distance threshold
-   * @param t2               the T2 distance threshold
+   * 
+   * @param points
+   *          the input points directory pathname String
+   * @param canopies
+   *          the input canopies directory pathname String
+   * @param output
+   *          the output directory pathname String
+   * @param measureClassName
+   *          the DistanceMeasure class name
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
    */
-  public static void runJob(String points, String canopies, String output,
-                            String measureClassName, double t1, double t2) throws IOException {
+  public static void runJob(String points,
+                            String canopies,
+                            String output,
+                            String measureClassName,
+                            double t1,
+                            double t2) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(ClusterDriver.class);
-
+    
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies);
-
+    
     conf.setInputFormat(SequenceFileInputFormat.class);
-
-    /*conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(RandomAccessSparseVector.class);*/
+    
+    /*
+     * conf.setMapOutputKeyClass(Text.class); conf.setMapOutputValueClass(RandomAccessSparseVector.class);
+     */
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-
+    
     FileInputFormat.setInputPaths(conf, new Path(points));
-    Path outPath = new Path(output + DEFAULT_CLUSTER_OUTPUT_DIRECTORY);
+    Path outPath = new Path(output + ClusterDriver.DEFAULT_CLUSTER_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
-
+    
     conf.setMapperClass(ClusterMapper.class);
     conf.setReducerClass(IdentityReducer.class);
-
+    
     client.setConf(conf);
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
@@ -168,5 +176,5 @@ public class ClusterDriver {
     }
     JobClient.runJob(conf);
   }
-
+  
 }

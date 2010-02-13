@@ -17,6 +17,11 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -26,30 +31,26 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class MeanShiftCanopyReducer extends MapReduceBase implements
-    Reducer<Text, MeanShiftCanopy, Text, MeanShiftCanopy> {
-
+    Reducer<Text,MeanShiftCanopy,Text,MeanShiftCanopy> {
+  
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
   private MeanShiftCanopyClusterer clusterer;
   private boolean allConverged = true;
-
+  
   private JobConf conf;
-
+  
   @Override
-  public void reduce(Text key, Iterator<MeanShiftCanopy> values,
-                     OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
-      throws IOException {
-
+  public void reduce(Text key,
+                     Iterator<MeanShiftCanopy> values,
+                     OutputCollector<Text,MeanShiftCanopy> output,
+                     Reporter reporter) throws IOException {
+    
     while (values.hasNext()) {
       MeanShiftCanopy canopy = values.next();
       clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
     }
-
+    
     for (MeanShiftCanopy canopy : canopies) {
       boolean converged = clusterer.shiftToMean(canopy);
       if (converged) {
@@ -58,16 +59,16 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
       allConverged = converged && allConverged;
       output.collect(new Text(canopy.getIdentifier()), canopy);
     }
-
+    
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     this.conf = job;
     clusterer = new MeanShiftCanopyClusterer(job);
   }
-
+  
   @Override
   public void close() throws IOException {
     if (allConverged) {
@@ -76,5 +77,5 @@ public class MeanShiftCanopyReducer extends MapReduceBase implements
     }
     super.close();
   }
-
+  
 }

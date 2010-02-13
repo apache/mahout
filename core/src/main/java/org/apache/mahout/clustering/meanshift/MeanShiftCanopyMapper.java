@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.meanshift;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -25,26 +29,23 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MeanShiftCanopyMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, MeanShiftCanopy, Text, MeanShiftCanopy> {
-
+    Mapper<WritableComparable<?>,MeanShiftCanopy,Text,MeanShiftCanopy> {
+  
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
   
   private MeanShiftCanopyClusterer clusterer;
-  private OutputCollector<Text, MeanShiftCanopy> output;
-
+  private OutputCollector<Text,MeanShiftCanopy> output;
+  
   @Override
-  public void map(WritableComparable<?> key, MeanShiftCanopy canopy,
-                  OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter)
-      throws IOException {
+  public void map(WritableComparable<?> key,
+                  MeanShiftCanopy canopy,
+                  OutputCollector<Text,MeanShiftCanopy> output,
+                  Reporter reporter) throws IOException {
     this.output = output;
     clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
   }
-
+  
   @Override
   public void close() throws IOException {
     for (MeanShiftCanopy canopy : canopies) {
@@ -53,11 +54,11 @@ public class MeanShiftCanopyMapper extends MapReduceBase implements
     }
     super.close();
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     clusterer = new MeanShiftCanopyClusterer(job);
   }
-
+  
 }

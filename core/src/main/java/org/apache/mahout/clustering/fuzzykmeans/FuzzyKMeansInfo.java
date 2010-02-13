@@ -17,57 +17,56 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class FuzzyKMeansInfo implements Writable {
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
+public class FuzzyKMeansInfo implements Writable {
+  
   private double probability;
   private Vector pointTotal;
-
-  private int combinerPass = 0;
-
-  public FuzzyKMeansInfo() {
-  }
-
+  
+  private int combinerPass;
+  
+  public FuzzyKMeansInfo() { }
+  
   public FuzzyKMeansInfo(double probability, Vector pointTotal) {
     this.probability = probability;
     this.pointTotal = pointTotal;
   }
-
+  
   public FuzzyKMeansInfo(double probability, Vector pointTotal, int combinerPass) {
     this.probability = probability;
     this.pointTotal = pointTotal;
     this.combinerPass = combinerPass;
   }
-
+  
   public int getCombinerPass() {
     return combinerPass;
   }
-
+  
   public void setCombinerPass(int combinerPass) {
     this.combinerPass = combinerPass;
   }
-
+  
   public Vector getVector() {
     return pointTotal;
   }
-
+  
   public double getProbability() {
     return probability;
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(probability);
     VectorWritable.writeVector(out, pointTotal);
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     this.probability = in.readDouble();

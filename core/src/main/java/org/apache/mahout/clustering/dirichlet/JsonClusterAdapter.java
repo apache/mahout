@@ -35,10 +35,11 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>, JsonDeserializer<DirichletCluster<?>> {
-
+public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>,
+    JsonDeserializer<DirichletCluster<?>> {
+  
   private static final Logger log = LoggerFactory.getLogger(JsonClusterAdapter.class);
-
+  
   @Override
   public JsonElement serialize(DirichletCluster<?> src, Type typeOfSrc, JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
@@ -50,10 +51,9 @@ public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>, 
     obj.add("modelJson", new JsonPrimitive(gson.toJson(src)));
     return obj;
   }
-
+  
   @Override
-  public DirichletCluster<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-      throws JsonParseException {
+  public DirichletCluster<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -66,7 +66,7 @@ public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>, 
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
-      log.warn("Error while loading class", e);
+      JsonClusterAdapter.log.warn("Error while loading class", e);
     }
     Model<Vector> model = (Model<Vector>) gson.fromJson(modelJson, cl);
     return new DirichletCluster<Vector>(model, total);

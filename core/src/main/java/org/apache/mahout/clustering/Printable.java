@@ -15,29 +15,29 @@
  */
 package org.apache.mahout.clustering;
 
-
 /**
- * Implementations of this interface have a printable representation. This representation 
- * may be enhanced by an optional Vector label bindings dictionary.
- *
+ * Implementations of this interface have a printable representation. This representation may be enhanced by
+ * an optional Vector label bindings dictionary.
+ * 
  */
 public interface Printable {
-
+  
   /**
    * Produce a custom, printable representation of the receiver.
    * 
-   * @param bindings an optional String[] containing labels used to format the primary 
-   *    Vector/s of this implementation.
+   * @param bindings
+   *          an optional String[] containing labels used to format the primary Vector/s of this
+   *          implementation.
    * @return a String
    */
-  public String asFormatString(String[] bindings);
-
+  String asFormatString(String[] bindings);
+  
   /**
-   * Produce a printable representation of the receiver using Json. (Label bindings
-   * are transient and not part of the Json representation)
+   * Produce a printable representation of the receiver using Json. (Label bindings are transient and not part
+   * of the Json representation)
    * 
    * @return a Json String
    */
-  public String asJsonString();
-
+  String asJsonString();
+  
 }

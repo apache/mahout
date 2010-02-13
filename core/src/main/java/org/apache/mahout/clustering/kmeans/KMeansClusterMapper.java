@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -27,22 +31,20 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class KMeansClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, Text, Text> {
-
+    Mapper<WritableComparable<?>,VectorWritable,Text,Text> {
+  
   private final List<Cluster> clusters = new ArrayList<Cluster>();
   private KMeansClusterer clusterer;
-
+  
   @Override
-  public void map(WritableComparable<?> key, VectorWritable point,
-      OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key,
+                  VectorWritable point,
+                  OutputCollector<Text,Text> output,
+                  Reporter reporter) throws IOException {
     this.clusterer.outputPointWithClusterInfo(point.get(), clusters, output);
   }
-
+  
   /**
    * Configure the mapper by providing its clusters. Used by unit tests.
    * 
@@ -53,26 +55,25 @@ public class KMeansClusterMapper extends MapReduceBase implements
     this.clusters.clear();
     this.clusters.addAll(clusters);
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-
+    
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job
-          .get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(job.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
       DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
-
+      
       String clusterPath = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
-      if (clusterPath != null && clusterPath.length() > 0) {
+      if ((clusterPath != null) && (clusterPath.length() > 0)) {
         KMeansUtil.configureWithClusterInfo(clusterPath, clusters);
         if (clusters.isEmpty()) {
           throw new IllegalStateException("Cluster is empty!");
         }
       }
-
+      
       this.clusterer = new KMeansClusterer(measure);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -82,5 +83,5 @@ public class KMeansClusterMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-
+  
 }

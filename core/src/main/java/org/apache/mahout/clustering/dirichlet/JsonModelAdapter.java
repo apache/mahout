@@ -35,14 +35,12 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class JsonModelAdapter implements JsonSerializer<Model<?>>,
-    JsonDeserializer<Model<?>> {
-
+public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeserializer<Model<?>> {
+  
   private static final Logger log = LoggerFactory.getLogger(JsonModelAdapter.class);
-
+  
   @Override
-  public JsonElement serialize(Model<?> src, Type typeOfSrc,
-                               JsonSerializationContext context) {
+  public JsonElement serialize(Model<?> src, Type typeOfSrc, JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -51,10 +49,9 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>,
     obj.add("model", new JsonPrimitive(gson.toJson(src)));
     return obj;
   }
-
+  
   @Override
-  public Model<?> deserialize(JsonElement json, Type typeOfT,
-                              JsonDeserializationContext context) throws JsonParseException {
+  public Model<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -66,7 +63,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>,
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
-      log.warn("Error while loading class", e);
+      JsonModelAdapter.log.warn("Error while loading class", e);
     }
     return (Model<?>) gson.fromJson(model, cl);
   }

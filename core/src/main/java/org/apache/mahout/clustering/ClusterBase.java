@@ -34,12 +34,100 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public abstract class ClusterBase implements Writable, Printable {
-
+  // this cluster's clusterId
+  private int id;
+  
+  // the current cluster center
+  private Vector center = new RandomAccessSparseVector(0);
+  
+  // the number of points in the cluster
+  private int numPoints;
+  
+  // the Vector total of all points added to the cluster
+  private Vector pointTotal;
+  
+  public int getId() {
+    return id;
+  }
+  
+  public void setId(int id) {
+    this.id = id;
+  }
+  
+  public Vector getCenter() {
+    return center;
+  }
+  
+  public void setCenter(Vector center) {
+    this.center = center;
+  }
+  
+  public int getNumPoints() {
+    return numPoints;
+  }
+  
+  public void setNumPoints(int numPoints) {
+    this.numPoints = numPoints;
+  }
+  
+  public Vector getPointTotal() {
+    return pointTotal;
+  }
+  
+  public void setPointTotal(Vector pointTotal) {
+    this.pointTotal = pointTotal;
+  }
+  
   /**
-   * Return a human-readable formatted string representation of the vector, not intended
-   * to be complete nor usable as an input/output representation such as Json
+   * @deprecated
+   * @return
+   */
+  @Deprecated
+  public abstract String asFormatString();
+  
+  @Override
+  public String asFormatString(String[] bindings) {
+    StringBuilder buf = new StringBuilder();
+    buf.append(getIdentifier()).append(": ").append(ClusterBase.formatVector(computeCentroid(), bindings));
+    return buf.toString();
+  }
+  
+  public abstract Vector computeCentroid();
+  
+  public abstract Object getIdentifier();
+  
+  @Override
+  public String asJsonString() {
+    Type vectorType = new TypeToken<Vector>() { }.getType();
+    GsonBuilder gBuilder = new GsonBuilder();
+    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    Gson gson = gBuilder.create();
+    return gson.toJson(this, this.getClass());
+  }
+  
+  /**
+   * Simply writes out the id, and that's it!
    * 
-   * @param v a Vector
+   * @param out
+   *          The {@link java.io.DataOutput}
+   */
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(id);
+  }
+  
+  /** Reads in the id, nothing else */
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    id = in.readInt();
+  }
+  
+  /**
+   * Return a human-readable formatted string representation of the vector, not intended to be complete nor
+   * usable as an input/output representation such as Json
+   * 
+   * @param v
+   *          a Vector
    * @return a String
    */
   public static String formatVector(Vector v, String[] bindings) {
@@ -51,17 +139,19 @@ public abstract class ClusterBase implements Writable, Printable {
       nzero++;
     }
     // if vector is sparse or if we have bindings, use sparse notation
-    if (nzero < v.size() || bindings != null) {
+    if ((nzero < v.size()) || (bindings != null)) {
       buf.append('[');
       for (int i = 0; i < v.size(); i++) {
         double elem = v.get(i);
-        if (elem == 0.0)
+        if (elem == 0.0) {
           continue;
+        }
         String label;
-        if (bindings != null && (label = bindings[i]) != null)
+        if ((bindings != null) && ((label = bindings[i]) != null)) {
           buf.append(label).append(':');
-        else
+        } else {
           buf.append(i).append(':');
+        }
         buf.append(String.format("%.3f", elem)).append(", ");
       }
     } else {
@@ -74,93 +164,5 @@ public abstract class ClusterBase implements Writable, Printable {
     buf.setLength(buf.length() - 2);
     buf.append(']');
     return buf.toString();
-  }
-
-  // this cluster's clusterId
-  private int id;
-
-  // the current cluster center
-  private Vector center = new RandomAccessSparseVector(0);
-
-  // the number of points in the cluster
-  private int numPoints = 0;
-
-  // the Vector total of all points added to the cluster
-  private Vector pointTotal = null;
-
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
-  }
-
-  public Vector getCenter() {
-    return center;
-  }
-
-  public void setCenter(Vector center) {
-    this.center = center;
-  }
-
-  public int getNumPoints() {
-    return numPoints;
-  }
-
-  public void setNumPoints(int numPoints) {
-    this.numPoints = numPoints;
-  }
-
-  public Vector getPointTotal() {
-    return pointTotal;
-  }
-
-  public void setPointTotal(Vector pointTotal) {
-    this.pointTotal = pointTotal;
-  }
-
-  /**
-   * @deprecated
-   * @return
-   */
-  @Deprecated
-  public abstract String asFormatString();
-
-  @Override
-  public String asFormatString(String[] bindings) {
-    StringBuilder buf = new StringBuilder();
-    buf.append(getIdentifier()).append(": ").append(formatVector(computeCentroid(), bindings));
-    return buf.toString();
-  }
-
-  public abstract Vector computeCentroid();
-
-  public abstract Object getIdentifier();
-
-  @Override
-  public String asJsonString() {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
-    GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
-    Gson gson = gBuilder.create();
-    return gson.toJson(this, this.getClass());
-  }
-
-  /**
-   * Simply writes out the id, and that's it!
-   *
-   * @param out The {@link java.io.DataOutput}
-   */
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeInt(id);
-  }
-
-  /** Reads in the id, nothing else */
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    id = in.readInt();
   }
 }

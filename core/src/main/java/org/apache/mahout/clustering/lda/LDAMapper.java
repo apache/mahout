@@ -29,39 +29,35 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
-* Runs inference on the input documents (which are
-* sparse vectors of word counts) and outputs
-* the sufficient statistics for the word-topic
-* assignments.
-*/
-public class LDAMapper extends 
-    Mapper<WritableComparable<?>, VectorWritable, IntPairWritable, DoubleWritable> {
-
+ * Runs inference on the input documents (which are sparse vectors of word counts) and outputs the sufficient
+ * statistics for the word-topic assignments.
+ */
+public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPairWritable,DoubleWritable> {
+  
   private LDAState state;
   private LDAInference infer;
-
+  
   @Override
-  public void map(WritableComparable<?> key, VectorWritable wordCountsWritable, Context context)
-      throws IOException, InterruptedException {
+  public void map(WritableComparable<?> key, VectorWritable wordCountsWritable, Context context) throws IOException,
+                                                                                                InterruptedException {
     Vector wordCounts = wordCountsWritable.get();
     LDAInference.InferredDocument doc = infer.infer(wordCounts);
-
+    
     double[] logTotals = new double[state.numTopics];
     Arrays.fill(logTotals, Double.NEGATIVE_INFINITY);
-
+    
     // Output sufficient statistics for each word. == pseudo-log counts.
     IntPairWritable kw = new IntPairWritable();
     DoubleWritable v = new DoubleWritable();
-    for (Iterator<Vector.Element> iter = wordCounts.iterateNonZero();
-        iter.hasNext();) {
+    for (Iterator<Vector.Element> iter = wordCounts.iterateNonZero(); iter.hasNext();) {
       Vector.Element e = iter.next();
       int w = e.index();
       kw.setY(w);
       for (int k = 0; k < state.numTopics; ++k) {
         v.set(doc.phi(k, w) + Math.log(e.get()));
-
+        
         kw.setX(k);
-
+        
         // ouput (topic, word)'s logProb contribution
         context.write(kw, v);
         logTotals[k] = LDAUtil.logSum(logTotals[k], v.get());
@@ -77,19 +73,19 @@ public class LDAMapper extends
       assert !Double.isNaN(v.get());
       context.write(kw, v);
     }
-
+    
     // Output log-likelihoods.
     kw.setX(LDADriver.LOG_LIKELIHOOD_KEY);
     kw.setY(LDADriver.LOG_LIKELIHOOD_KEY);
     v.set(doc.logLikelihood);
     context.write(kw, v);
   }
-
+  
   public void configure(LDAState myState) {
     this.state = myState;
     this.infer = new LDAInference(state);
   }
-
+  
   public void configure(Configuration job) {
     try {
       LDAState myState = LDADriver.createState(job);
@@ -98,11 +94,10 @@ public class LDAMapper extends
       throw new IllegalStateException("Error creating LDA State!", e);
     }
   }
-
+  
   @Override
   protected void setup(Context context) {
     configure(context.getConfiguration());
   }
-
-
+  
 }

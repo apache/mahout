@@ -23,45 +23,46 @@ import java.util.List;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class CanopyClusterer {
-
+  
   private int nextCanopyId;
   
   // the T1 distance threshold
   private double t1;
-
+  
   // the T2 distance threshold
   private double t2;
-
+  
   // the distance measure
   private DistanceMeasure measure;
-
-  //private int nextClusterId = 0;
+  
+  // private int nextClusterId = 0;
   
   public CanopyClusterer(DistanceMeasure measure, double t1, double t2) {
     this.t1 = t1;
     this.t2 = t2;
     this.measure = measure;
   }
-
+  
   public CanopyClusterer(JobConf job) {
     this.configure(job);
   }
-
+  
   /**
    * Configure the Canopy and its distance measure
    * 
-   * @param job the JobConf for this job
+   * @param job
+   *          the JobConf for this job
    */
   public void configure(JobConf job) {
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job
-          .get(CanopyConfigKeys.DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(job.get(CanopyConfigKeys.DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
     } catch (ClassNotFoundException e) {
@@ -75,55 +76,61 @@ public class CanopyClusterer {
     t2 = Double.parseDouble(job.get(CanopyConfigKeys.T2_KEY));
     nextCanopyId = 0;
   }
-
+  
   /** Configure the Canopy for unit tests */
   public void config(DistanceMeasure aMeasure, double aT1, double aT2) {
     measure = aMeasure;
     t1 = aT1;
     t2 = aT2;
   }
-
+  
   /**
-   * This is the same algorithm as the reference but inverted to iterate over
-   * existing canopies instead of the points. Because of this it does not need
-   * to actually store the points, instead storing a total points vector and the
-   * number of points. From this a centroid can be computed.
+   * This is the same algorithm as the reference but inverted to iterate over existing canopies instead of the
+   * points. Because of this it does not need to actually store the points, instead storing a total points
+   * vector and the number of points. From this a centroid can be computed.
    * <p/>
    * This method is used by the CanopyReducer.
    * 
-   * @param point the point to be added
-   * @param canopies the List<Canopy> to be appended
+   * @param point
+   *          the point to be added
+   * @param canopies
+   *          the List<Canopy> to be appended
+   * @param reporter
+   *          Object to report status to the MR interface
    */
-  public void addPointToCanopies(Vector point, List<Canopy> canopies) {
+  public void addPointToCanopies(Vector point, List<Canopy> canopies, Reporter reporter) {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter().getLengthSquared(),
-          canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
         canopy.addPoint(point);
       }
       pointStronglyBound = pointStronglyBound || (dist < t2);
     }
     if (!pointStronglyBound) {
+      reporter.setStatus("Created new Canopy:" + nextCanopyId);
       canopies.add(new Canopy(point, nextCanopyId++));
     }
   }
-
+  
   /**
-   * This method is used by the CanopyMapper to perform canopy inclusion tests
-   * and to emit the point and its covering canopies to the output. The
-   * CanopyCombiner will then sum the canopy points and produce the centroids.
+   * This method is used by the CanopyMapper to perform canopy inclusion tests and to emit the point and its
+   * covering canopies to the output. The CanopyCombiner will then sum the canopy points and produce the
+   * centroids.
    * 
-   * @param point the point to be added
-   * @param canopies the List<Canopy> to be appended
-   * @param collector an OutputCollector in which to emit the point
+   * @param point
+   *          the point to be added
+   * @param canopies
+   *          the List<Canopy> to be appended
+   * @param collector
+   *          an OutputCollector in which to emit the point
    */
-  public void emitPointToNewCanopies(Vector point, List<Canopy> canopies,
-      OutputCollector<Text, Vector> collector) throws IOException {
+  public void emitPointToNewCanopies(Vector point,
+                                     List<Canopy> canopies,
+                                     OutputCollector<Text,Vector> collector) throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter().getLengthSquared(),
-          canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
         canopy.emitPoint(point, collector);
       }
@@ -135,26 +142,28 @@ public class CanopyClusterer {
       canopy.emitPoint(point, collector);
     }
   }
-
+  
   /**
-   * This method is used by the CanopyMapper to perform canopy inclusion tests
-   * and to emit the point keyed by its covering canopies to the output. if the
-   * point is not covered by any canopies (due to canopy centroid clustering),
-   * emit the point to the closest covering canopy.
+   * This method is used by the CanopyMapper to perform canopy inclusion tests and to emit the point keyed by
+   * its covering canopies to the output. if the point is not covered by any canopies (due to canopy centroid
+   * clustering), emit the point to the closest covering canopy.
    * 
-   * @param point the point to be added
-   * @param canopies the List<Canopy> to be appended
-   * @param collector an OutputCollector in which to emit the point
+   * @param point
+   *          the point to be added
+   * @param canopies
+   *          the List<Canopy> to be appended
+   * @param collector
+   *          an OutputCollector in which to emit the point
    */
-  public void emitPointToExistingCanopies(Vector point, List<Canopy> canopies,
-      OutputCollector<Text, VectorWritable> collector) throws IOException {
+  public void emitPointToExistingCanopies(Vector point,
+                                          List<Canopy> canopies,
+                                          OutputCollector<Text,VectorWritable> collector) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
     VectorWritable vw = new VectorWritable();
     for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter().getLengthSquared(),
-          canopy.getCenter(), point);
+      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
         isCovered = true;
         vw.set(point);
@@ -171,15 +180,15 @@ public class CanopyClusterer {
       collector.collect(new Text(closest.getIdentifier()), vw);
     }
   }
-
+  
   /**
    * Return if the point is covered by the canopy
    * 
-   * @param point a point
+   * @param point
+   *          a point
    * @return if the point is covered
    */
   public boolean canopyCovers(Canopy canopy, Vector point) {
-    return measure.distance(canopy.getCenter().getLengthSquared(), 
-        canopy.getCenter(), point) < t1;
+    return measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point) < t1;
   }
 }

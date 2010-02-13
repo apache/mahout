@@ -16,6 +16,13 @@
  */
 package org.apache.mahout.clustering.kmeans;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -24,25 +31,19 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-public class KMeansReducer extends MapReduceBase implements
-    Reducer<Text, KMeansInfo, Text, Cluster> {
-
-  private Map<String, Cluster> clusterMap;
+public class KMeansReducer extends MapReduceBase implements Reducer<Text,KMeansInfo,Text,Cluster> {
+  
+  private Map<String,Cluster> clusterMap;
   private double convergenceDelta;
   private DistanceMeasure measure;
-
+  
   @Override
-  public void reduce(Text key, Iterator<KMeansInfo> values,
-                     OutputCollector<Text, Cluster> output, Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<KMeansInfo> values,
+                     OutputCollector<Text,Cluster> output,
+                     Reporter reporter) throws IOException {
     Cluster cluster = clusterMap.get(key.toString());
-
+    
     while (values.hasNext()) {
       KMeansInfo delta = values.next();
       cluster.addPoints(delta.getPoints(), delta.getPointTotal());
@@ -54,23 +55,21 @@ public class KMeansReducer extends MapReduceBase implements
     }
     output.collect(new Text(cluster.getIdentifier()), cluster);
   }
-
+  
   @Override
   public void configure(JobConf job) {
-
+    
     super.configure(job);
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job
-          .get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(job.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
       this.measure = (DistanceMeasure) cl.newInstance();
       this.measure.configure(job);
-
-      this.convergenceDelta = Double.parseDouble(job
-          .get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
-
-      this.clusterMap = new HashMap<String, Cluster>();
-
+      
+      this.convergenceDelta = Double.parseDouble(job.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
+      
+      this.clusterMap = new HashMap<String,Cluster>();
+      
       String path = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if (path.length() > 0) {
         List<Cluster> clusters = new ArrayList<Cluster>();
@@ -88,18 +87,18 @@ public class KMeansReducer extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-
+  
   private void setClusterMap(List<Cluster> clusters) {
-    clusterMap = new HashMap<String, Cluster>();
+    clusterMap = new HashMap<String,Cluster>();
     for (Cluster cluster : clusters) {
       clusterMap.put(cluster.getIdentifier(), cluster);
     }
     clusters.clear();
   }
-
+  
   public void config(List<Cluster> clusters) {
     setClusterMap(clusters);
-
+    
   }
-
+  
 }

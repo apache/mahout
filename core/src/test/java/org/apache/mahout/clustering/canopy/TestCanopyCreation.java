@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.common.DummyReporter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -254,7 +255,7 @@ public class TestCanopyCreation extends MahoutTestCase {
 
     List<Canopy> canopies = new ArrayList<Canopy>();
     for (VectorWritable point : points) {
-      clusterer.addPointToCanopies(point.get(), canopies);
+      clusterer.addPointToCanopies(point.get(), canopies, new DummyReporter());
     }
 
     System.out.println("testIterativeManhattan");
@@ -269,7 +270,7 @@ public class TestCanopyCreation extends MahoutTestCase {
 
     List<Canopy> canopies = new ArrayList<Canopy>();
     for (VectorWritable point : points) {
-      clusterer.addPointToCanopies(point.get(), canopies);
+      clusterer.addPointToCanopies(point.get(), canopies, new DummyReporter());
     }
 
     System.out.println("testIterativeEuclidean");

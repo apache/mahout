@@ -28,7 +28,7 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 
 public class FuzzyKMeansClusterer {
-
+  
   private static final double MINIMAL_VALUE = 0.0000000001; // using it for
   // adding
   // exception
@@ -36,11 +36,11 @@ public class FuzzyKMeansClusterer {
   // zero valued
   // variable to avoid
   // divide by Zero
-
-  //private int nextClusterId = 0;
+  
+  // private int nextClusterId = 0;
   
   private DistanceMeasure measure;
-
+  
   private double convergenceDelta = 0;
   
   private double m = 2.0; // default value
@@ -66,20 +66,23 @@ public class FuzzyKMeansClusterer {
   
   /**
    * Configure the distance measure directly. Used by unit tests.
-   *
-   * @param aMeasure          the DistanceMeasure
-   * @param aConvergenceDelta the delta value used to define convergence
+   * 
+   * @param aMeasure
+   *          the DistanceMeasure
+   * @param aConvergenceDelta
+   *          the delta value used to define convergence
    */
   private void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
     measure = aMeasure;
     convergenceDelta = aConvergenceDelta;
-    //nextClusterId = 0;
+    // nextClusterId = 0;
   }
   
   /**
    * Configure the distance measure from the job
-   *
-   * @param job the JobConf for the job
+   * 
+   * @param job
+   *          the JobConf for the job
    */
   private void configure(JobConf job) {
     try {
@@ -88,7 +91,7 @@ public class FuzzyKMeansClusterer {
       measure = (DistanceMeasure) cl.newInstance();
       measure.configure(job);
       convergenceDelta = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
-      //nextClusterId = 0;
+      // nextClusterId = 0;
       m = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.M_KEY));
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -101,81 +104,87 @@ public class FuzzyKMeansClusterer {
   
   /**
    * Emit the point and its probability of belongingness to each cluster
-   *
-   * @param point    a point
-   * @param clusters a List<SoftCluster>
-   * @param output   the OutputCollector to emit into
+   * 
+   * @param point
+   *          a point
+   * @param clusters
+   *          a List<SoftCluster>
+   * @param output
+   *          the OutputCollector to emit into
    */
   public void emitPointProbToCluster(Vector point,
-    List<SoftCluster> clusters,
-    OutputCollector<Text, FuzzyKMeansInfo> output) throws IOException {
+                                     List<SoftCluster> clusters,
+                                     OutputCollector<Text,FuzzyKMeansInfo> output) throws IOException {
     
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
       clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
     }
-
+    
     for (int i = 0; i < clusters.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
       Text key = new Text(clusters.get(i).getIdentifier()); // just output the
       // identifier,avoids
       // too much data
       // traffic
-      /*Text value = new Text(Double.toString(probWeight)
-          + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR + values.toString());*/
+      /*
+       * Text value = new Text(Double.toString(probWeight) + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR +
+       * values.toString());
+       */
       FuzzyKMeansInfo value = new FuzzyKMeansInfo(probWeight, point);
       output.collect(key, value);
     }
   }
-
+  
   /**
    * Output point with cluster info (Cluster and probability)
-   *
-   * @param point    a point
-   * @param clusters a List<SoftCluster> to test
-   * @param output   the OutputCollector to emit into
+   * 
+   * @param point
+   *          a point
+   * @param clusters
+   *          a List<SoftCluster> to test
+   * @param output
+   *          the OutputCollector to emit into
    */
   public void outputPointWithClusterProbabilities(String key,
-    Vector point, List<SoftCluster> clusters,
-    OutputCollector<Text, FuzzyKMeansOutput> output) throws IOException {
+                                                  Vector point,
+                                                  List<SoftCluster> clusters,
+                                                  OutputCollector<Text,FuzzyKMeansOutput> output) throws IOException {
     
     List<Double> clusterDistanceList = new ArrayList<Double>();
-
+    
     for (SoftCluster cluster : clusters) {
       clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
     }
     FuzzyKMeansOutput fOutput = new FuzzyKMeansOutput(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
-      double probWeight = computeProbWeight(clusterDistanceList.get(i),
-          clusterDistanceList);
+      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
       fOutput.add(i, clusters.get(i), probWeight);
     }
     String name = point.getName();
-    output.collect(new Text(name != null && name.length() != 0 ? name
-        : point.asFormatString()),
-        fOutput);
+    output.collect(new Text((name != null) && (name.length() != 0) ? name : point.asFormatString()), fOutput);
   }
-
+  
   /** Computes the probability of a point belonging to a cluster */
   public double computeProbWeight(double clusterDistance, List<Double> clusterDistanceList) {
     if (clusterDistance == 0) {
-      clusterDistance = MINIMAL_VALUE;
+      clusterDistance = FuzzyKMeansClusterer.MINIMAL_VALUE;
     }
     double denom = 0.0;
     for (double eachCDist : clusterDistanceList) {
       if (eachCDist == 0.0) {
-        eachCDist = MINIMAL_VALUE;
+        eachCDist = FuzzyKMeansClusterer.MINIMAL_VALUE;
       }
-
+      
       denom += Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));
-
+      
     }
     return 1.0 / denom;
   }
   
   /**
    * Return if the cluster is converged by comparing its center and centroid.
-   *
+   * 
    * @return if the cluster is converged
    */
   public boolean computeConvergence(SoftCluster cluster) {

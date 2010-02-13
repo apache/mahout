@@ -19,20 +19,16 @@ package org.apache.mahout.clustering.lda;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
-
 /**
-* A very simple reducer which simply logSums the
-* input doubles and outputs a new double for sufficient
-* statistics, and sums log likelihoods.
-*/
-public class LDAReducer extends
-    Reducer<IntPairWritable, DoubleWritable, IntPairWritable, DoubleWritable> {
-
+ * A very simple reducer which simply logSums the input doubles and outputs a new double for sufficient
+ * statistics, and sums log likelihoods.
+ */
+public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWritable,DoubleWritable> {
+  
   @Override
-  public void reduce(IntPairWritable topicWord, Iterable<DoubleWritable> values,
-      Context context) 
-      throws java.io.IOException, InterruptedException {
-
+  public void reduce(IntPairWritable topicWord, Iterable<DoubleWritable> values, Context context) throws java.io.IOException,
+                                                                                                 InterruptedException {
+    
     // sum likelihoods
     if (topicWord.getY() == LDADriver.LOG_LIKELIHOOD_KEY) {
       double accum = 0.0;
@@ -58,7 +54,7 @@ public class LDAReducer extends
       }
       context.write(topicWord, new DoubleWritable(accum));
     }
-
+    
   }
-
+  
 }

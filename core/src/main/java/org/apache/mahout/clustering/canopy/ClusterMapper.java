@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -30,39 +34,38 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class ClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
-
+    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable> {
+  
   private CanopyClusterer canopyClusterer;
   private final List<Canopy> canopies = new ArrayList<Canopy>();
-
+  
   @Override
-  public void map(WritableComparable<?> key, VectorWritable point,
-                  OutputCollector<Text, VectorWritable> output, Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key,
+                  VectorWritable point,
+                  OutputCollector<Text,VectorWritable> output,
+                  Reporter reporter) throws IOException {
     canopyClusterer.emitPointToExistingCanopies(point.get(), canopies, output);
   }
-
+  
   /**
    * Configure the mapper by providing its canopies. Used by unit tests.
-   *
-   * @param canopies a List<Canopy>
+   * 
+   * @param canopies
+   *          a List<Canopy>
    */
   public void config(List<Canopy> canopies) {
     this.canopies.clear();
     this.canopies.addAll(canopies);
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     canopyClusterer = new CanopyClusterer(job);
-
+    
     String canopyPath = job.get(CanopyConfigKeys.CANOPY_PATH_KEY);
-    if (canopyPath != null && canopyPath.length() > 0) {
+    if ((canopyPath != null) && (canopyPath.length() > 0)) {
       try {
         Path path = new Path(canopyPath + "/part-00000");
         FileSystem fs = FileSystem.get(path.toUri(), job);
@@ -86,7 +89,7 @@ public class ClusterMapper extends MapReduceBase implements
       }
     }
   }
-
+  
   public boolean canopyCovers(Canopy canopy, Vector point) {
     return canopyClusterer.canopyCovers(canopy, point);
   }

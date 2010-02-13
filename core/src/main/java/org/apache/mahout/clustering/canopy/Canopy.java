@@ -17,6 +17,10 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusterBase;
@@ -24,26 +28,23 @@ import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
 /**
- * This class models a canopy as a center point, the number of points that are contained within it according to the
- * application of some distance metric, and a point total which is the sum of all the points and is used to compute the
- * centroid when needed.
+ * This class models a canopy as a center point, the number of points that are contained within it according
+ * to the application of some distance metric, and a point total which is the sum of all the points and is
+ * used to compute the centroid when needed.
  */
 public class Canopy extends ClusterBase {
-
+  
   /** Used for deserializaztion as a writable */
-  public Canopy() {
-  }
-
+  public Canopy() { }
+  
   /**
    * Create a new Canopy containing the given point and canopyId
-   *
-   * @param point    a point in vector space
-   * @param canopyId an int identifying the canopy local to this process only
+   * 
+   * @param point
+   *          a point in vector space
+   * @param canopyId
+   *          an int identifying the canopy local to this process only
    */
   public Canopy(Vector point, int canopyId) {
     this.setId(canopyId);
@@ -51,13 +52,13 @@ public class Canopy extends ClusterBase {
     this.setPointTotal(point.clone());
     this.setNumPoints(1);
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
     VectorWritable.writeVector(out, computeCentroid());
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
@@ -67,22 +68,22 @@ public class Canopy extends ClusterBase {
     this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }
-
+  
   /** Format the canopy for output */
   public static String formatCanopy(Canopy canopy) {
-    return "C" + canopy.getId() + ": "
-        + canopy.computeCentroid().asFormatString();
+    return "C" + canopy.getId() + ": " + canopy.computeCentroid().asFormatString();
   }
-
+  
   @Override
   public String asFormatString() {
-    return formatCanopy(this);
+    return Canopy.formatCanopy(this);
   }
-
+  
   /**
    * Decodes and returns a Canopy from the formattedString
-   *
-   * @param formattedString a String prouced by formatCanopy
+   * 
+   * @param formattedString
+   *          a String prouced by formatCanopy
    * @return a new Canopy
    */
   public static Canopy decodeCanopy(String formattedString) {
@@ -90,49 +91,48 @@ public class Canopy extends ClusterBase {
     String id = formattedString.substring(0, beginIndex);
     String centroid = formattedString.substring(beginIndex);
     if (id.charAt(0) == 'C') {
-      int canopyId = Integer.parseInt(formattedString.substring(1,
-          beginIndex - 2));
+      int canopyId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector canopyCentroid = AbstractVector.decodeVector(centroid);
       return new Canopy(canopyCentroid, canopyId);
     }
     return null;
   }
-
+  
   /**
    * Add a point to the canopy
-   *
-   * @param point some point to add
+   * 
+   * @param point
+   *          some point to add
    */
   public void addPoint(Vector point) {
     setNumPoints(getNumPoints() + 1);
     setPointTotal(getPointTotal().plus(point));
-
+    
   }
-
+  
   /**
    * Emit the point to the collector, keyed by the canopy's formatted representation
-   *
-   * @param point a point to emit.
+   * 
+   * @param point
+   *          a point to emit.
    */
-  public void emitPoint(Vector point, OutputCollector<Text, Vector> collector)
-      throws IOException {
+  public void emitPoint(Vector point, OutputCollector<Text,Vector> collector) throws IOException {
     collector.collect(new Text(this.getIdentifier()), point);
   }
-
+  
   @Override
   public String toString() {
     return getIdentifier() + " - " + getCenter().asFormatString();
   }
-
+  
   @Override
   public String getIdentifier() {
     return "C" + getId();
   }
-
-
+  
   /**
    * Compute the centroid by averaging the pointTotals
-   *
+   * 
    * @return a RandomAccessSparseVector (required by Mapper) which is the new centroid
    */
   @Override

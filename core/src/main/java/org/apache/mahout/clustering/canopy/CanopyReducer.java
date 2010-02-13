@@ -17,6 +17,11 @@
 
 package org.apache.mahout.clustering.canopy;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -26,34 +31,30 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-public class CanopyReducer extends MapReduceBase implements
-    Reducer<Text, VectorWritable, Text, Canopy> {
-
+public class CanopyReducer extends MapReduceBase implements Reducer<Text,VectorWritable,Text,Canopy> {
+  
   private final List<Canopy> canopies = new ArrayList<Canopy>();
-
+  
   private CanopyClusterer canopyClusterer;
   
   @Override
-  public void reduce(Text key, Iterator<VectorWritable> values,
-                     OutputCollector<Text, Canopy> output, Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<VectorWritable> values,
+                     OutputCollector<Text,Canopy> output,
+                     Reporter reporter) throws IOException {
     while (values.hasNext()) {
       Vector point = values.next().get();
-      canopyClusterer.addPointToCanopies(point, canopies);
+      canopyClusterer.addPointToCanopies(point, canopies, reporter);
     }
     for (Canopy canopy : canopies) {
       output.collect(new Text(canopy.getIdentifier()), canopy);
     }
   }
-
+  
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     canopyClusterer = new CanopyClusterer(job);
   }
-
+  
 }
