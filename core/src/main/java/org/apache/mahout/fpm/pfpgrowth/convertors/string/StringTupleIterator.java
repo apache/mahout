@@ -27,27 +27,27 @@ import org.apache.mahout.common.StringTuple;
  *
  */
 public final class StringTupleIterator implements Iterator<List<String>> {
-
+  
   private final Iterator<StringTuple> iterator;
-
+  
   public StringTupleIterator(Iterator<StringTuple> iterator) {
     this.iterator = iterator;
   }
-
+  
   @Override
   public boolean hasNext() {
     return iterator.hasNext();
   }
-
+  
   @Override
   public List<String> next() {
     StringTuple transaction = iterator.next();
     return transaction.getEntries();
   }
-
+  
   @Override
   public void remove() {
     iterator.remove();
   }
-
+  
 }

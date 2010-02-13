@@ -18,9 +18,9 @@
 package org.apache.mahout.classifier.bayes.common;
 
 import org.apache.mahout.common.Parameters;
+
 /**
- * BayesParameter used for passing parameters to the Map/Reduce Jobs
- * parameters include gramSize, 
+ * BayesParameter used for passing parameters to the Map/Reduce Jobs parameters include gramSize,
  */
 public class BayesParameters extends Parameters {
   

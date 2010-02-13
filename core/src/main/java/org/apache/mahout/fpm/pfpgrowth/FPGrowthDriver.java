@@ -54,10 +54,9 @@ import org.slf4j.LoggerFactory;
 
 public final class FPGrowthDriver {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(FPGrowthDriver.class);
+  private static final Logger log = LoggerFactory.getLogger(FPGrowthDriver.class);
   
-  private FPGrowthDriver() {}
+  private FPGrowthDriver() { }
   
   /**
    * Run TopK FPGrowth given the input file,
@@ -67,12 +66,9 @@ public final class FPGrowthDriver {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option inputDirOpt = obuilder.withLongName("input").withRequired(true)
-        .withArgument(
-          abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "The Directory on HDFS containing the transaction files")
-        .withShortName("i").create();
+    Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The Directory on HDFS containing the transaction files").withShortName("i").create();
     
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     
@@ -80,66 +76,42 @@ public final class FPGrowthDriver {
     
     // minSupport(3), maxHeapSize(50), numGroups(1000)
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
-      abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create())
-        .withDescription("(Optional) Minimum Support. Default Value: 3")
-        .withShortName("s").create();
+      abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) Minimum Support. Default Value: 3").withShortName("s").create();
     
-    Option maxHeapSizeOpt = obuilder
-        .withLongName("maxHeapSize")
-        .withArgument(
-          abuilder.withName("maxHeapSize").withMinimum(1).withMaximum(1)
-              .create())
-        .withDescription(
-          "(Optional) Maximum Heap Size k, to denote the requirement to mine top K items. Default value: 50")
+    Option maxHeapSizeOpt = obuilder.withLongName("maxHeapSize").withArgument(
+      abuilder.withName("maxHeapSize").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) Maximum Heap Size k, to denote the requirement to mine top K items. Default value: 50")
         .withShortName("k").create();
     
-    Option numGroupsOpt = obuilder
-        .withLongName("numGroups")
-        .withArgument(
-          abuilder.withName("numGroups").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "(Optional) Number of groups the features should be divided in the map-reduce version."
-              + " Doesn't work in sequential version Default Value:1000")
-        .withShortName("g").create();
+    Option numGroupsOpt = obuilder.withLongName("numGroups").withArgument(
+      abuilder.withName("numGroups").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) Number of groups the features should be divided in the map-reduce version."
+          + " Doesn't work in sequential version Default Value:1000").withShortName("g").create();
     
-    Option recordSplitterOpt = obuilder
-        .withLongName("splitterPattern")
-        .withArgument(
-          abuilder.withName("splitterPattern").withMinimum(1).withMaximum(1)
-              .create())
-        .withDescription(
-          "Regular Expression pattern used to split given string transaction into itemsets."
-              + " Default value splits comma separated itemsets.  Default Value:"
-              + " \"[ ,\\t]*[,|\\t][ ,\\t]*\" ").withShortName("regex")
-        .create();
+    Option recordSplitterOpt = obuilder.withLongName("splitterPattern").withArgument(
+      abuilder.withName("splitterPattern").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Regular Expression pattern used to split given string transaction into itemsets."
+          + " Default value splits comma separated itemsets.  Default Value:"
+          + " \"[ ,\\t]*[,|\\t][ ,\\t]*\" ").withShortName("regex").create();
     
-    Option treeCacheOpt = obuilder
-        .withLongName("numTreeCacheEntries")
-        .withArgument(
-          abuilder.withName("numTreeCacheEntries").withMinimum(1)
-              .withMaximum(1).create())
-        .withDescription(
-          "(Optional) Number of entries in the tree cache to prevent duplicate tree building. "
-              + "(Warning) a first level conditional FP-Tree might consume a lot of memory, "
-              + "so keep this value small, but big enough to prevent duplicate tree building. "
-              + "Default Value:5 Recommended Values: [5-10]").withShortName(
-          "tc").create();
+    Option treeCacheOpt = obuilder.withLongName("numTreeCacheEntries").withArgument(
+      abuilder.withName("numTreeCacheEntries").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) Number of entries in the tree cache to prevent duplicate tree building. "
+          + "(Warning) a first level conditional FP-Tree might consume a lot of memory, "
+          + "so keep this value small, but big enough to prevent duplicate tree building. "
+          + "Default Value:5 Recommended Values: [5-10]").withShortName("tc").create();
     
-    Option methodOpt = obuilder.withLongName("method").withRequired(true)
-        .withArgument(
-          abuilder.withName("method").withMinimum(1).withMaximum(1).create())
-        .withDescription("Method of processing: sequential|mapreduce")
-        .withShortName("method").create();
+    Option methodOpt = obuilder.withLongName("method").withRequired(true).withArgument(
+      abuilder.withName("method").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Method of processing: sequential|mapreduce").withShortName("method").create();
     Option encodingOpt = obuilder.withLongName("encoding").withArgument(
-      abuilder.withName("encoding").withMinimum(1).withMaximum(1).create())
-        .withDescription("(Optional) The file encoding.  Default value: UTF-8")
-        .withShortName("e").create();
+      abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) The file encoding.  Default value: UTF-8").withShortName("e").create();
     
-    Group group = gbuilder.withName("Options").withOption(minSupportOpt)
-        .withOption(inputDirOpt).withOption(outputOpt).withOption(
-          maxHeapSizeOpt).withOption(numGroupsOpt).withOption(methodOpt)
-        .withOption(encodingOpt).withOption(helpOpt).withOption(treeCacheOpt)
-        .withOption(recordSplitterOpt).create();
+    Group group = gbuilder.withName("Options").withOption(minSupportOpt).withOption(inputDirOpt).withOption(
+      outputOpt).withOption(maxHeapSizeOpt).withOption(numGroupsOpt).withOption(methodOpt).withOption(
+      encodingOpt).withOption(helpOpt).withOption(treeCacheOpt).withOption(recordSplitterOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -188,7 +160,7 @@ public final class FPGrowthDriver {
       
       String classificationMethod = (String) cmdLine.getValue(methodOpt);
       if (classificationMethod.equalsIgnoreCase("sequential")) {
-        runFPGrowth(params);
+        FPGrowthDriver.runFPGrowth(params);
       } else if (classificationMethod.equalsIgnoreCase("mapreduce")) {
         HadoopUtil.overwriteOutput(outputDir);
         PFPGrowth.runPFPGrowth(params);
@@ -199,7 +171,7 @@ public final class FPGrowthDriver {
   }
   
   private static void runFPGrowth(Parameters params) throws IOException {
-    log.info("Starting Sequential FPGrowth");
+    FPGrowthDriver.log.info("Starting Sequential FPGrowth");
     int maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
     int minSupport = Integer.valueOf(params.get("minSupport", "3"));
     
@@ -214,26 +186,22 @@ public final class FPGrowthDriver {
     
     String pattern = params.get("splitPattern", PFPGrowth.SPLITTER.toString());
     
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
-        Text.class, TopKStringPatterns.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
     
     FPGrowth<String> fp = new FPGrowth<String>();
     Set<String> features = new HashSet<String>();
     
-    fp.generateTopKFrequentPatterns(new StringRecordIterator(
-        new FileLineIterable(new File(input), encoding, false), pattern), fp
-        .generateFList(new StringRecordIterator(new FileLineIterable(new File(
-            input), encoding, false), pattern), minSupport), minSupport,
-      maxHeapSize, features, new StringOutputConverter(
-          new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
+    fp.generateTopKFrequentPatterns(new StringRecordIterator(new FileLineIterable(new File(input), encoding,
+        false), pattern), fp.generateFList(new StringRecordIterator(new FileLineIterable(new File(input),
+        encoding, false), pattern), minSupport), minSupport, maxHeapSize, features,
+      new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
       new ContextStatusUpdater(null));
     writer.close();
     
-    List<Pair<String,TopKStringPatterns>> frequentPatterns = FPGrowth
-        .readFrequentPattern(fs, conf, path);
+    List<Pair<String,TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
     for (Pair<String,TopKStringPatterns> entry : frequentPatterns) {
-      log.info("Dumping Patterns for Feature: {} \n{}", entry.getFirst(), entry
-          .getSecond().toString());
+      FPGrowthDriver.log.info("Dumping Patterns for Feature: {} \n{}", entry.getFirst(), entry.getSecond()
+          .toString());
     }
   }
 }

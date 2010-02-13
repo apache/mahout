@@ -42,16 +42,16 @@ import org.slf4j.LoggerFactory;
 
 /** Create and run the Bayes Classifier */
 public final class BayesClassifierDriver {
-
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesClassifierDriver.class);
+  
+  private static final Logger log = LoggerFactory.getLogger(BayesClassifierDriver.class);
   
   private BayesClassifierDriver() { }
-
+  
   /**
    * Run the job
    * 
-   * @param params The Job parameters containing the gramSize, input output folders, defaultCat, encoding
+   * @param params
+   *          The Job parameters containing the gramSize, input output folders, defaultCat, encoding
    */
   public static void runJob(Parameters params) throws IOException {
     Configurable client = new JobClient();
@@ -59,55 +59,54 @@ public final class BayesClassifierDriver {
     conf.setJobName("Bayes Classifier Driver running over input: " + params.get("testDirPath"));
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
-
+    
     FileInputFormat.setInputPaths(conf, new Path(params.get("testDirPath")));
     Path outPath = new Path(params.get("testDirPath") + "-output");
     FileOutputFormat.setOutputPath(conf, outPath);
-
+    
     conf.setInputFormat(KeyValueTextInputFormat.class);
     conf.setMapperClass(BayesClassifierMapper.class);
     conf.setCombinerClass(BayesClassifierReducer.class);
     conf.setReducerClass(BayesClassifierReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    conf.set("io.serializations",
-      "org.apache.hadoop.io.serializer.JavaSerialization,"
-          + "org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
     
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
     }
     conf.set("bayes.parameters", params.toString());
-
+    
     client.setConf(conf);
     JobClient.runJob(conf);
-
+    
     Path outputFiles = new Path(outPath.toString() + "/part*");
-    ConfusionMatrix matrix = readResult(dfs, outputFiles, conf, params);
-    log.info("{}",matrix.summarize());
+    ConfusionMatrix matrix = BayesClassifierDriver.readResult(dfs, outputFiles, conf, params);
+    BayesClassifierDriver.log.info("{}", matrix.summarize());
   }
   
   private static ConfusionMatrix readResult(FileSystem fs,
                                             Path pathPattern,
                                             Configuration conf,
                                             Parameters params) throws IOException {
-   
+    
     StringTuple key = new StringTuple();
     DoubleWritable value = new DoubleWritable();
     String defaultLabel = params.get("defaultCat");
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
-    Map<String, Map<String, Integer>> confusionMatrix = new HashMap<String, Map<String, Integer>>();
+    Map<String,Map<String,Integer>> confusionMatrix = new HashMap<String,Map<String,Integer>>();
     
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      while (reader.next(key, value)) {        
+      while (reader.next(key, value)) {
         String correctLabel = key.stringAt(1);
         String classifiedLabel = key.stringAt(2);
-        Map<String, Integer> rowMatrix = confusionMatrix.get(correctLabel);
+        Map<String,Integer> rowMatrix = confusionMatrix.get(correctLabel);
         if (rowMatrix == null) {
-          rowMatrix = new HashMap<String, Integer>();
+          rowMatrix = new HashMap<String,Integer>();
         }
         Integer count = Double.valueOf(value.get()).intValue();
         rowMatrix.put(classifiedLabel, count);
@@ -117,10 +116,9 @@ public final class BayesClassifierDriver {
     }
     
     ConfusionMatrix matrix = new ConfusionMatrix(confusionMatrix.keySet(), defaultLabel);
-    for (Map.Entry<String,Map<String,Integer>> correctLabelSet : confusionMatrix.entrySet())  {
-      Map<String, Integer> rowMatrix = correctLabelSet.getValue();
-      for (Map.Entry<String, Integer> classifiedLabelSet : rowMatrix.entrySet())
-      {
+    for (Map.Entry<String,Map<String,Integer>> correctLabelSet : confusionMatrix.entrySet()) {
+      Map<String,Integer> rowMatrix = correctLabelSet.getValue();
+      for (Map.Entry<String,Integer> classifiedLabelSet : rowMatrix.entrySet()) {
         matrix.addInstance(correctLabelSet.getKey(), classifiedLabelSet.getKey());
         matrix.putCount(correctLabelSet.getKey(), classifiedLabelSet.getKey(), classifiedLabelSet.getValue());
       }

@@ -63,8 +63,8 @@ public class BayesAlgorithm implements Algorithm {
                                              String defaultCategory,
                                              int numResults) throws InvalidDatastoreException {
     Collection<String> categories = datastore.getKeys("labelWeight");
-    PriorityQueue<ClassifierResult> pq = new PriorityQueue<ClassifierResult>(
-        numResults, new ByScoreLabelResultComparator());
+    PriorityQueue<ClassifierResult> pq = new PriorityQueue<ClassifierResult>(numResults,
+        new ByScoreLabelResultComparator());
     for (String category : categories) {
       double prob = documentWeight(datastore, category, document);
       if (prob > 0.0) {
@@ -111,8 +111,7 @@ public class BayesAlgorithm implements Algorithm {
   public double documentWeight(final Datastore datastore,
                                final String label,
                                String[] document) throws InvalidDatastoreException {
-    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(
-        document.length / 2);
+    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(document.length / 2);
     for (String word : document) {
       if (wordList.containsKey(word) == false) {
         wordList.put(word, 1);

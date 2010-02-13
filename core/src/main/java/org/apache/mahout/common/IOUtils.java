@@ -17,9 +17,6 @@
 
 package org.apache.mahout.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
@@ -27,68 +24,77 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/** <p>I/O-related utility methods that don't have a better home.</p> */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * <p>
+ * I/O-related utility methods that don't have a better home.
+ * </p>
+ */
 public final class IOUtils {
-
+  
   private static final Logger log = LoggerFactory.getLogger(IOUtils.class);
-
-  private IOUtils() {
-  }
-
+  
+  private IOUtils() { }
+  
   public static void quietClose(Closeable closeable) {
     if (closeable != null) {
       try {
         closeable.close();
       } catch (IOException ioe) {
-        log.warn("Unexpected exception while closing; continuing", ioe);
+        IOUtils.log.warn("Unexpected exception while closing; continuing", ioe);
       }
     }
   }
-
+  
   // Sheez, why can't ResultSet, Statement and Connection implement Closeable?
-
+  
   public static void quietClose(ResultSet closeable) {
     if (closeable != null) {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.warn("Unexpected exception while closing; continuing", sqle);
+        IOUtils.log.warn("Unexpected exception while closing; continuing", sqle);
       }
     }
   }
-
+  
   public static void quietClose(Statement closeable) {
     if (closeable != null) {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.warn("Unexpected exception while closing; continuing", sqle);
+        IOUtils.log.warn("Unexpected exception while closing; continuing", sqle);
       }
     }
   }
-
+  
   public static void quietClose(Connection closeable) {
     if (closeable != null) {
       try {
         closeable.close();
       } catch (SQLException sqle) {
-        log.warn("Unexpected exception while closing; continuing", sqle);
+        IOUtils.log.warn("Unexpected exception while closing; continuing", sqle);
       }
     }
   }
-
+  
   /**
-   * Closes a {@link ResultSet}, {@link Statement} and {@link Connection} (if not null) and logs (but does not rethrow)
-   * any resulting {@link SQLException}. This is useful for cleaning up after a database query.
-   *
-   * @param resultSet  {@link ResultSet} to close
-   * @param statement  {@link Statement} to close
-   * @param connection {@link Connection} to close
+   * Closes a {@link ResultSet}, {@link Statement} and {@link Connection} (if not null) and logs (but does not
+   * rethrow) any resulting {@link SQLException}. This is useful for cleaning up after a database query.
+   * 
+   * @param resultSet
+   *          {@link ResultSet} to close
+   * @param statement
+   *          {@link Statement} to close
+   * @param connection
+   *          {@link Connection} to close
    */
   public static void quietClose(ResultSet resultSet, Statement statement, Connection connection) {
-    quietClose(resultSet);
-    quietClose(statement);
-    quietClose(connection);
+    IOUtils.quietClose(resultSet);
+    IOUtils.quietClose(statement);
+    IOUtils.quietClose(connection);
   }
-
+  
 }

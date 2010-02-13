@@ -17,38 +17,41 @@
 
 package org.apache.mahout.common.cache;
 
-public interface Cache<K, V> {
+public interface Cache<K,V> {
   /**
-   * Gets the Value from the Cache, If the object doesnt exist default behaviour
-   * is to return null.
+   * Gets the Value from the Cache, If the object doesnt exist default behaviour is to return null.
    * 
    * @param key
    * @return V
    */
   V get(K key);
-
+  
   /**
    * returns true if the Cache contains the key
+   * 
    * @param key
    * @return boolean
    */
   boolean contains(K key);
-
+  
   /**
    * puts the key and its value into the cache
+   * 
    * @param key
    * @param value
    */
   void set(K key, V value);
-
+  
   /**
    * returns the current size of the cache
+   * 
    * @return long
    */
   long size();
-
+  
   /**
    * returns the total capacity of the cache defined at contruction time
+   * 
    * @return long
    */
   long capacity();

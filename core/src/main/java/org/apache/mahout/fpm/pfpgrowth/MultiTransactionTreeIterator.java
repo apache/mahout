@@ -22,14 +22,11 @@ import java.util.List;
 
 import org.apache.mahout.common.Pair;
 
-
 /**
- * Iterates over multiple transaction trees to produce a single iterator of
- * transactions
+ * Iterates over multiple transaction trees to produce a single iterator of transactions
  * 
  */
-public final class MultiTransactionTreeIterator implements
-    Iterator<List<Integer>> {
+public final class MultiTransactionTreeIterator implements Iterator<List<Integer>> {
   
   private Iterator<Pair<List<Integer>,Long>> pIterator;
   

@@ -51,14 +51,14 @@ public class BayesWeightSummerMapper extends MapReduceBase implements
     StringTuple featureSum = new StringTuple(BayesConstants.FEATURE_SUM);
     featureSum.add(feature);
     output.collect(featureSum, value); // sum of weight for all labels for a
-                                       // feature Sigma_j
+    // feature Sigma_j
     StringTuple labelSum = new StringTuple(BayesConstants.LABEL_SUM);
     labelSum.add(label);
     output.collect(labelSum, value); // sum of weight for all features for a
-                                     // label Sigma_k
+    // label Sigma_k
     StringTuple totalSum = new StringTuple(BayesConstants.TOTAL_SUM);
     output.collect(totalSum, value); // sum of weight of all features for all
-                                     // label Sigma_kSigma_j
+    // label Sigma_kSigma_j
     
   }
 }

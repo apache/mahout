@@ -34,13 +34,11 @@ import org.apache.mahout.common.Parameters;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
- * {@link TransactionSortingMapper} maps each transaction to all unique items
- * groups in the transaction. mapper outputs the group id as key and the
- * transaction as value
+ * {@link TransactionSortingMapper} maps each transaction to all unique items groups in the transaction.
+ * mapper outputs the group id as key and the transaction as value
  * 
  */
-public class TransactionSortingMapper extends
-    Mapper<LongWritable,Text,LongWritable,TransactionTree> {
+public class TransactionSortingMapper extends Mapper<LongWritable,Text,LongWritable,TransactionTree> {
   
   private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   
@@ -65,27 +63,22 @@ public class TransactionSortingMapper extends
     Integer[] prunedItems = itemSet.toArray(new Integer[itemSet.size()]);
     
     if (prunedItems.length > 0) {
-      context.write(new LongWritable(prunedItems[0]), new TransactionTree(
-          prunedItems, 1L));
+      context.write(new LongWritable(prunedItems[0]), new TransactionTree(prunedItems, 1L));
     }
     
   }
   
   @Override
-  protected void setup(Context context) throws IOException,
-                                       InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get(
-      "pfp.parameters", ""));
+    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
     
     int i = 0;
-    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList",
-      context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList", context.getConfiguration())) {
       fMap.put(e.getFirst(), i++);
     }
     
-    splitter = Pattern.compile(params.get("splitPattern", PFPGrowth.SPLITTER
-        .toString()));
+    splitter = Pattern.compile(params.get("splitPattern", PFPGrowth.SPLITTER.toString()));
     
   }
 }

@@ -17,24 +17,24 @@
 
 package org.apache.mahout.common.iterator;
 
-import org.apache.mahout.common.RandomUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
+
 /**
- * Sample a fixed number of elements from an Iterator.  The results will appear in the original order at some
+ * Sample a fixed number of elements from an Iterator. The results will appear in the original order at some
  * cost in time and memory relative to a FixedSizeSampler.
  */
 public class StableFixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
-
+  
   public StableFixedSizeSamplingIterator(int size, Iterator<T> source) {
-    super(buildDelegate(size, source));
+    super(StableFixedSizeSamplingIterator.buildDelegate(size, source));
   }
-
+  
   private static <T> Iterator<T> buildDelegate(int size, Iterator<T> source) {
     List<Entry<T>> buf = new ArrayList<Entry<T>>(size);
     int sofar = 0;
@@ -51,30 +51,31 @@ public class StableFixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
         }
       }
     }
-
+    
     Collections.sort(buf);
     return new DelegateIterator(buf);
   }
-
+  
   private static class Entry<T> implements Comparable<Entry<T>> {
     
     private final int originalIndex;
     private T value;
-
+    
     private Entry(int originalIndex, T value) {
       this.originalIndex = originalIndex;
       this.value = value;
     }
-
+    
     @Override
     public boolean equals(Object other) {
-      return other instanceof Entry && originalIndex == ((Entry<T>) other).originalIndex;
+      return other instanceof Entry<?> && originalIndex == ((Entry<T>) other).originalIndex;
     }
-
+    
+    @Override
     public int hashCode() {
       return originalIndex;
     }
-
+    
     @Override
     public int compareTo(Entry<T> other) {
       if (originalIndex < other.originalIndex) {
@@ -86,25 +87,25 @@ public class StableFixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
       }
     }
   }
-
+  
   private static class DelegateIterator<T> implements Iterator<T> {
-
+    
     private final Iterator<Entry<T>> iterator;
-
+    
     private DelegateIterator(List<Entry<T>> buf) {
       iterator = buf.iterator();
     }
-
+    
     @Override
     public boolean hasNext() {
       return iterator.hasNext();
     }
-
+    
     @Override
     public T next() {
       return iterator.next().value;
     }
-
+    
     @Override
     public void remove() {
       throw new UnsupportedOperationException("Can't change sampler contents");

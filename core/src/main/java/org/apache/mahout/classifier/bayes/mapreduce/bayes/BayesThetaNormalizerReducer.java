@@ -37,14 +37,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Can also be used as a local Combiner beacuse only two values should be there
- * inside the values
+ * Can also be used as a local Combiner beacuse only two values should be there inside the values
  */
 public class BayesThetaNormalizerReducer extends MapReduceBase implements
     Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesThetaNormalizerReducer.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerReducer.class);
   
   private HTable table;
   
@@ -66,14 +64,13 @@ public class BayesThetaNormalizerReducer extends MapReduceBase implements
       reporter.setStatus("Bayes Theta Normalizer Reducer: " + key);
       weightSumPerLabel += values.next().get();
     }
-    reporter.setStatus("Bayes Theta Normalizer Reducer: " + key + " => "
-                       + weightSumPerLabel);
+    reporter.setStatus("Bayes Theta Normalizer Reducer: " + key + " => " + weightSumPerLabel);
     if (useHbase) {
       if (key.stringAt(0).equals(BayesConstants.LABEL_THETA_NORMALIZER)) {
         String label = key.stringAt(1);
         Put bu = new Put(Bytes.toBytes(BayesConstants.LABEL_THETA_NORMALIZER));
-        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
-            .toBytes(label), Bytes.toBytes(weightSumPerLabel));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(label), Bytes
+            .toBytes(weightSumPerLabel));
         table.put(bu);
       }
     }
@@ -84,15 +81,17 @@ public class BayesThetaNormalizerReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters
-          .fromString(job.get("bayes.parameters", ""));
-      if (params.get("dataSource").equals("hbase")) useHbase = true;
-      else return;
+      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      if (params.get("dataSource").equals("hbase")) {
+        useHbase = true;
+      } else {
+        return;
+      }
       
       HBaseConfiguration hBconf = new HBaseConfiguration(job);
       table = new HTable(hBconf, job.get("output.table"));
     } catch (IOException e) {
-      log.error("Unexpected error during configuration", e);
+      BayesThetaNormalizerReducer.log.error("Unexpected error during configuration", e);
     }
   }
   

@@ -17,22 +17,22 @@
 
 package org.apache.mahout.common.iterator;
 
-import org.apache.mahout.common.RandomUtils;
-
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
+
 /**
- * Sample a fixed number of elements from an Iterator.  The results can appear in any order.
+ * Sample a fixed number of elements from an Iterator. The results can appear in any order.
  */
 public final class FixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
-
+  
   public FixedSizeSamplingIterator(int size, Iterator<T> source) {
-    super(buildDelegate(size, source));
+    super(FixedSizeSamplingIterator.buildDelegate(size, source));
   }
-
+  
   private static <T> Iterator<T> buildDelegate(int size, Iterator<T> source) {
     List<T> buf = new ArrayList<T>(size);
     int sofar = 0;
@@ -51,5 +51,5 @@ public final class FixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
     }
     return buf.iterator();
   }
-
+  
 }

@@ -43,10 +43,8 @@ public interface Algorithm {
    * @param datastore
    *          The data store(InMemory, HBase)
    * @param defaultCategory
-   *          The default category to assign Ties are broken by comparing the
-   *          category
-   * @return A Collection of
-   *         {@link org.apache.mahout.classifier.ClassifierResult}s.
+   *          The default category to assign Ties are broken by comparing the category
+   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
   ClassifierResult classifyDocument(String[] document,
@@ -59,16 +57,13 @@ public interface Algorithm {
    * @param document
    *          The document to classify
    * @param datastore
-   *          The
-   *          {@link org.apache.mahout.classifier.bayes.interfaces.Datastore}
-   *          (InMemory, HBase)
+   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory, HBase)
    * @param defaultCategory
    *          The default category to assign
    * @param numResults
-   *          The maximum number of results to return, ranked by score. Ties are
-   *          broken by comparing the category
-   * @return A Collection of
-   *         {@link org.apache.mahout.classifier.ClassifierResult}s.
+   *          The maximum number of results to return, ranked by score. Ties are broken by comparing the
+   *          category
+   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
   ClassifierResult[] classifyDocument(String[] document,
@@ -80,9 +75,7 @@ public interface Algorithm {
    * Get the weighted probability of the feature.
    * 
    * @param datastore
-   *          The
-   *          {@link org.apache.mahout.classifier.bayes.interfaces.Datastore}
-   *          (InMemory, HBase)
+   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory, HBase)
    * @param label
    *          The label of the feature
    * @param feature
@@ -93,13 +86,11 @@ public interface Algorithm {
   double featureWeight(Datastore datastore, String label, String feature) throws InvalidDatastoreException;
   
   /**
-   * Calculate the document weight as the dot product of document vector and the
-   * corresponding weight vector of a particular class
+   * Calculate the document weight as the dot product of document vector and the corresponding weight vector
+   * of a particular class
    * 
    * @param datastore
-   *          The
-   *          {@link org.apache.mahout.classifier.bayes.interfaces.Datastore}
-   *          (InMemory, HBase)
+   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory, HBase)
    * @param label
    *          The label to calculate the probability of
    * @param document
@@ -114,9 +105,7 @@ public interface Algorithm {
    * Returns the labels in the given Model
    * 
    * @param datastore
-   *          The
-   *          {@link org.apache.mahout.classifier.bayes.interfaces.Datastore}
-   *          (InMemory, HBase)
+   *          The {@link org.apache.mahout.classifier.bayes.interfaces.Datastore} (InMemory, HBase)
    * @throws InvalidDatastoreException
    * @return {@link Collection} of labels
    */

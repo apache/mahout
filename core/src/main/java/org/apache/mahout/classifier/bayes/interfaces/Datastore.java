@@ -18,46 +18,49 @@
 package org.apache.mahout.classifier.bayes.interfaces;
 
 import java.util.Collection;
+
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
+
 /**
  * The Datastore interface for the {@link Algorithm} to use
- *
+ * 
  */
 public interface Datastore {
   /**
-   * Gets a double value from the Matrix pointed to by the
-   * <code>matrixName</code> from its cell pointed to by the <code>row</code>
-   * and <code>column</code> string
+   * Gets a double value from the Matrix pointed to by the <code>matrixName</code> from its cell pointed to by
+   * the <code>row</code> and <code>column</code> string
    * 
    * @param matrixName
    * @param row
    * @param column
    * @return double value
-   * @throws InvalidDatastoreException 
+   * @throws InvalidDatastoreException
    */
   double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException;
-
+  
   /**
-   * Gets a double value from the Vector pointed to by the
-   * <code>vectorName</code> from its cell pointed to by the <code>index</code>
+   * Gets a double value from the Vector pointed to by the <code>vectorName</code> from its cell pointed to by
+   * the <code>index</code>
    * 
    * @param vectorName
    * @param index
    * @return double value
-   * @throws InvalidDatastoreException 
+   * @throws InvalidDatastoreException
    */
   double getWeight(String vectorName, String index) throws InvalidDatastoreException;
   
   /**
    * get the keySet of a given Matrix/Vector as given by <code>name</code>
+   * 
    * @param name
    * @return Collection of keys of Matrix/Vector
-   * @throws InvalidDatastoreException 
+   * @throws InvalidDatastoreException
    */
   Collection<String> getKeys(String name) throws InvalidDatastoreException;
   
   /**
    * Initializes the {@link Datastore} and loads the model into memory/cache if necessary
+   * 
    * @throws InvalidDatastoreException
    */
   void initialize() throws InvalidDatastoreException;

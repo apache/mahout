@@ -21,27 +21,27 @@ import java.io.Serializable;
 
 /** A simple (ordered) pair of longs. */
 public final class LongPair implements Comparable<LongPair>, Serializable {
-
+  
   private final long first;
   private final long second;
-
+  
   public LongPair(long first, long second) {
     this.first = first;
     this.second = second;
   }
-
+  
   public long getFirst() {
     return first;
   }
-
+  
   public long getSecond() {
     return second;
   }
-
+  
   public LongPair swap() {
     return new LongPair(second, first);
   }
-
+  
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof LongPair)) {
@@ -50,7 +50,7 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
     LongPair otherPair = (LongPair) obj;
     return first == otherPair.getFirst() && second == otherPair.getSecond();
   }
-
+  
   @Override
   public int hashCode() {
     int firstHash = RandomUtils.hashLong(first);
@@ -58,12 +58,12 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
     // for (a,b) versus (b,a)
     return (firstHash >>> 16 | firstHash << 16) ^ RandomUtils.hashLong(second);
   }
-
+  
   @Override
   public String toString() {
     return '(' + String.valueOf(first) + ',' + second + ')';
   }
-
+  
   @Override
   public int compareTo(LongPair o) {
     if (first < o.getFirst()) {
@@ -74,5 +74,5 @@ public final class LongPair implements Comparable<LongPair>, Serializable {
       return second < o.getSecond() ? -1 : second > o.getSecond() ? 1 : 0;
     }
   }
-
+  
 }

@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -32,27 +32,22 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
- * {@link ParallelFPGrowthMapper} maps each transaction to all unique items
- * groups in the transaction. mapper outputs the group id as key and the
- * transaction as value
+ * {@link ParallelFPGrowthMapper} maps each transaction to all unique items groups in the transaction. mapper
+ * outputs the group id as key and the transaction as value
  * 
  */
-public class ParallelFPGrowthMapper extends
-    Mapper<LongWritable,TransactionTree,LongWritable,TransactionTree> {
+public class ParallelFPGrowthMapper extends Mapper<LongWritable,TransactionTree,LongWritable,TransactionTree> {
   
   private final OpenIntLongHashMap gListInt = new OpenIntLongHashMap();
   
   @Override
-  protected void map(LongWritable offset,
-                     TransactionTree input,
-                     Context context) throws IOException,
-                                     InterruptedException {
+  protected void map(LongWritable offset, TransactionTree input, Context context) throws IOException,
+                                                                                 InterruptedException {
     
     Iterator<Pair<List<Integer>,Long>> it = input.getIterator();
     while (it.hasNext()) {
       Pair<List<Integer>,Long> pattern = it.next();
-      Integer[] prunedItems = pattern.getFirst().toArray(
-        new Integer[pattern.getFirst().size()]);
+      Integer[] prunedItems = pattern.getFirst().toArray(new Integer[pattern.getFirst().size()]);
       
       Set<Long> groups = new HashSet<Long>();
       for (int j = prunedItems.length - 1; j >= 0; j--) { // generate group
@@ -64,11 +59,8 @@ public class ParallelFPGrowthMapper extends
         if (groups.contains(groupID) == false) {
           Integer[] tempItems = new Integer[j + 1];
           System.arraycopy(prunedItems, 0, tempItems, 0, j + 1);
-          context.setStatus(
-            "Parallel FPGrowth: Generating Group Dependent transactions for: "
-            + item);
-          context.write(new LongWritable(groupID), new TransactionTree(
-              tempItems, pattern.getSecond()));
+          context.setStatus("Parallel FPGrowth: Generating Group Dependent transactions for: " + item);
+          context.write(new LongWritable(groupID), new TransactionTree(tempItems, pattern.getSecond()));
         }
         groups.add(groupID);
       }
@@ -77,21 +69,18 @@ public class ParallelFPGrowthMapper extends
   }
   
   @Override
-  protected void setup(Context context) throws IOException,
-                                       InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get(
-      "pfp.parameters", ""));
+    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
     
     OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
     int i = 0;
-    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList",
-      context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList", context.getConfiguration())) {
       fMap.put(e.getFirst(), i++);
     }
     
-    for (Entry<String,Long> e : PFPGrowth.deserializeMap(params, "gList",
-      context.getConfiguration()).entrySet()) {
+    for (Entry<String,Long> e : PFPGrowth.deserializeMap(params, "gList", context.getConfiguration())
+        .entrySet()) {
       gListInt.put(fMap.get(e.getKey()), e.getValue());
     }
     

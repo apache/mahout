@@ -61,58 +61,41 @@ public final class Classify {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option pathOpt = obuilder.withLongName("path").withRequired(true)
-        .withArgument(
-            abuilder.withName("path").withMinimum(1).withMaximum(1).create())
-        .withDescription("The local file system path").withShortName("m")
-        .create();
+    Option pathOpt = obuilder.withLongName("path").withRequired(true).withArgument(
+      abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The local file system path").withShortName("m").create();
     
-    Option classifyOpt = obuilder.withLongName("classify").withRequired(true)
-        .withArgument(
-            abuilder.withName("classify").withMinimum(1).withMaximum(1)
-                .create()).withDescription("The doc to classify")
-        .withShortName("").create();
+    Option classifyOpt = obuilder.withLongName("classify").withRequired(true).withArgument(
+      abuilder.withName("classify").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The doc to classify").withShortName("").create();
     
-    Option encodingOpt = obuilder.withLongName("encoding").withRequired(true)
-        .withArgument(
-            abuilder.withName("encoding").withMinimum(1).withMaximum(1)
-                .create())
-        .withDescription("The file encoding.  Default: UTF-8").withShortName(
-            "e").create();
+    Option encodingOpt = obuilder.withLongName("encoding").withRequired(true).withArgument(
+      abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The file encoding.  Default: UTF-8").withShortName("e").create();
     
-    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true)
-        .withArgument(
-            abuilder.withName("analyzer").withMinimum(1).withMaximum(1)
-                .create()).withDescription("The Analyzer to use")
-        .withShortName("a").create();
+    Option analyzerOpt = obuilder.withLongName("analyzer").withRequired(true).withArgument(
+      abuilder.withName("analyzer").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The Analyzer to use").withShortName("a").create();
     
-    Option defaultCatOpt = obuilder.withLongName("defaultCat").withRequired(
-        true).withArgument(
-        abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create())
-        .withDescription("The default category").withShortName("d").create();
+    Option defaultCatOpt = obuilder.withLongName("defaultCat").withRequired(true).withArgument(
+      abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The default category").withShortName("d").create();
     
-    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true)
-        .withArgument(
-            abuilder.withName("gramSize").withMinimum(1).withMaximum(1)
-                .create()).withDescription("Size of the n-gram").withShortName(
-            "ng").create();
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
+      abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Size of the n-gram").withShortName("ng").create();
     
-    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true)
-        .withArgument(
-            abuilder.withName("classifierType").withMinimum(1).withMaximum(1)
-                .create()).withDescription("Type of classifier").withShortName(
-            "type").create();
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
+      abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Type of classifier").withShortName("type").create();
     
-    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(
-        true).withArgument(
-        abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create())
-        .withDescription("Location of model: hdfs|hbase").withShortName(
-            "source").create();
+    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(true).withArgument(
+      abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Location of model: hdfs|hbase").withShortName("source").create();
     
-    Group options = gbuilder.withName("Options").withOption(pathOpt)
-        .withOption(classifyOpt).withOption(encodingOpt)
-        .withOption(analyzerOpt).withOption(defaultCatOpt).withOption(
-            gramSizeOpt).withOption(typeOpt).withOption(dataSourceOpt).create();
+    Group options = gbuilder.withName("Options").withOption(pathOpt).withOption(classifyOpt).withOption(
+      encodingOpt).withOption(analyzerOpt).withOption(defaultCatOpt).withOption(gramSizeOpt).withOption(
+      typeOpt).withOption(dataSourceOpt).create();
     
     Parser parser = new Parser();
     parser.setGroup(options);
@@ -128,7 +111,7 @@ public final class Classify {
     
     String modelBasePath = (String) cmdLine.getValue(pathOpt);
     
-    log.info("Loading model from: {}", params.print());
+    Classify.log.info("Loading model from: {}", params.print());
     
     Algorithm algorithm;
     Datastore datastore;
@@ -138,35 +121,32 @@ public final class Classify {
     String dataSource = (String) cmdLine.getValue(dataSourceOpt);
     if (dataSource.equals("hdfs")) {
       if (classifierType.equalsIgnoreCase("bayes")) {
-        log.info("Using Bayes Classifier");
+        Classify.log.info("Using Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else if (classifierType.equalsIgnoreCase("cbayes")) {
-        log.info("Using Complementary Bayes Classifier");
+        Classify.log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: "
-            + classifierType);
+        throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
       }
       
     } else if (dataSource.equals("hbase")) {
       if (classifierType.equalsIgnoreCase("bayes")) {
-        log.info("Using Bayes Classifier");
+        Classify.log.info("Using Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new HBaseBayesDatastore(modelBasePath, params);
       } else if (classifierType.equalsIgnoreCase("cbayes")) {
-        log.info("Using Complementary Bayes Classifier");
+        Classify.log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new HBaseBayesDatastore(modelBasePath, params);
       } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: "
-            + classifierType);
+        throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
       }
       
     } else {
-      throw new IllegalArgumentException("Unrecognized dataSource type: "
-          + dataSource);
+      throw new IllegalArgumentException("Unrecognized dataSource type: " + dataSource);
     }
     ClassifierContext classifier = new ClassifierContext(algorithm, datastore);
     classifier.initialize();
@@ -182,30 +162,26 @@ public final class Classify {
     Analyzer analyzer = null;
     if (cmdLine.hasOption(analyzerOpt)) {
       String className = (String) cmdLine.getValue(analyzerOpt);
-      analyzer = Class.forName(className).asSubclass(Analyzer.class)
-          .newInstance();
+      analyzer = Class.forName(className).asSubclass(Analyzer.class).newInstance();
     }
     if (analyzer == null) {
       analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
     }
     
-    log.info("Converting input document to proper format");
-    String[] document = BayesFileFormatter.readerToDocument(analyzer,
-        new InputStreamReader(new FileInputStream(docPath), Charset
-            .forName(encoding)));
+    Classify.log.info("Converting input document to proper format");
+    String[] document = BayesFileFormatter.readerToDocument(analyzer, new InputStreamReader(
+        new FileInputStream(docPath), Charset.forName(encoding)));
     StringBuilder line = new StringBuilder();
     for (String token : document) {
       line.append(token).append(' ');
     }
     
-    List<String> doc = new NGrams(line.toString(), gramSize)
-        .generateNGramsWithoutLabel();
+    List<String> doc = new NGrams(line.toString(), gramSize).generateNGramsWithoutLabel();
     
-    log.info("Done converting");
-    log.info("Classifying document: {}", docPath);
-    ClassifierResult category = classifier.classifyDocument(doc
-        .toArray(new String[doc.size()]), defaultCat);
-    log.info("Category for {} is {}", docPath, category);
+    Classify.log.info("Done converting");
+    Classify.log.info("Classifying document: {}", docPath);
+    ClassifierResult category = classifier.classifyDocument(doc.toArray(new String[doc.size()]), defaultCat);
+    Classify.log.info("Category for {} is {}", docPath, category);
     
   }
 }

@@ -17,28 +17,32 @@
 
 package org.apache.mahout.common.iterator;
 
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/** <p>{@link java.util.Iterator}-related methods without a better home.</p> */
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+
+/**
+ * <p>
+ * {@link java.util.Iterator}-related methods without a better home.
+ * </p>
+ */
 public final class IteratorUtils {
-
-  private IteratorUtils() {
-  }
-
+  
+  private IteratorUtils() { }
+  
   /**
-   * @param iterable {@link Iterable} whose contents are to be put into a {@link List}
+   * @param iterable
+   *          {@link Iterable} whose contents are to be put into a {@link List}
    * @return a {@link List} with the objects one gets by iterating over the given {@link Iterable}
    */
   public static <K> List<K> iterableToList(Iterable<K> iterable) {
-    return iterableToList(iterable, null);
+    return IteratorUtils.iterableToList(iterable, null);
   }
-
+  
   public static long[] longIteratorToList(LongPrimitiveIterator iterator) {
     long[] result = new long[5];
     int size = 0;
@@ -57,20 +61,22 @@ public final class IteratorUtils {
     }
     return result;
   }
-
+  
   /**
-   * @param iterable   {@link Iterable} whose contents are to be put into a {@link List}
-   * @param comparator {@link Comparator} defining the sort order of the returned {@link List}
-   * @return a {@link List} with the objects one gets by iterating over the given {@link Iterable}, sorted according to
-   *         the given {@link Comparator}
+   * @param iterable
+   *          {@link Iterable} whose contents are to be put into a {@link List}
+   * @param comparator
+   *          {@link Comparator} defining the sort order of the returned {@link List}
+   * @return a {@link List} with the objects one gets by iterating over the given {@link Iterable}, sorted
+   *         according to the given {@link Comparator}
    */
   public static <K> List<K> iterableToList(Iterable<K> iterable, Comparator<K> comparator) {
     if (iterable == null) {
       throw new IllegalArgumentException("iterable is null");
     }
     List<K> list;
-    if (iterable instanceof Collection) {
-      if (iterable instanceof List) {
+    if (iterable instanceof Collection<?>) {
+      if (iterable instanceof List<?>) {
         list = (List<K>) iterable;
       } else {
         Collection<K> collection = (Collection<K>) iterable;
@@ -88,5 +94,5 @@ public final class IteratorUtils {
     }
     return list;
   }
-
+  
 }

@@ -40,17 +40,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A compact representation of transactions modeled on the lines to
- * {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPTree} This reduces plenty of space and speeds up Map/Reduce of
- * {@link PFPGrowth} algorithm by reducing data size passed from the Mapper to
- * the reducer where {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth} mining is done
+ * {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPTree} This reduces plenty of space and speeds up
+ * Map/Reduce of {@link PFPGrowth} algorithm by reducing data size passed from the Mapper to the reducer where
+ * {@link org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth} mining is done
  */
 public final class TransactionTree implements Writable {
   /**
-   * Generates a List of transactions view of Transaction Tree by doing Depth
-   * First Traversal on the tree structure
+   * Generates a List of transactions view of Transaction Tree by doing Depth First Traversal on the tree
+   * structure
    */
-  public final class TransactionTreeIterator implements
-      Iterator<Pair<List<Integer>,Long>> {
+  public final class TransactionTreeIterator implements Iterator<Pair<List<Integer>,Long>> {
     
     private final Stack<int[]> depth = new Stack<int[]>();
     
@@ -94,8 +93,7 @@ public final class TransactionTree implements Writable {
         data.add(attribute[it.next()[0]]);
       }
       
-      Pair<List<Integer>,Long> returnable = new Pair<List<Integer>,Long>(data,
-          nodeCount[childId] - sum);
+      Pair<List<Integer>,Long> returnable = new Pair<List<Integer>,Long>(data, nodeCount[childId] - sum);
       
       int[] top = depth.peek();
       while (top[1] + 1 == childCount[top[0]]) {
@@ -121,8 +119,7 @@ public final class TransactionTree implements Writable {
   
   private static final float GROWTH_RATE = 1.5f;
   
-  private static final Logger log = LoggerFactory
-      .getLogger(TransactionTree.class);
+  private static final Logger log = LoggerFactory.getLogger(TransactionTree.class);
   
   private static final int ROOTNODEID = 0;
   
@@ -141,13 +138,13 @@ public final class TransactionTree implements Writable {
   private List<Pair<List<Integer>,Long>> transactionSet = new ArrayList<Pair<List<Integer>,Long>>();
   
   public TransactionTree() {
-    this(DEFAULT_INITIAL_SIZE);
+    this(TransactionTree.DEFAULT_INITIAL_SIZE);
     representedAsList = false;
   }
   
   public TransactionTree(int size) {
-    if (size < DEFAULT_INITIAL_SIZE) {
-      size = DEFAULT_INITIAL_SIZE;
+    if (size < TransactionTree.DEFAULT_INITIAL_SIZE) {
+      size = TransactionTree.DEFAULT_INITIAL_SIZE;
     }
     childCount = new int[size];
     attribute = new int[size];
@@ -159,8 +156,7 @@ public final class TransactionTree implements Writable {
   
   public TransactionTree(Integer[] items, Long support) {
     representedAsList = true;
-    transactionSet.add(new Pair<List<Integer>,Long>(Arrays.asList(items),
-        support));
+    transactionSet.add(new Pair<List<Integer>,Long>(Arrays.asList(items), support));
   }
   
   public TransactionTree(List<Pair<List<Integer>,Long>> transactionSet) {
@@ -187,7 +183,7 @@ public final class TransactionTree implements Writable {
   }
   
   public int addPattern(List<Integer> myList, long addCount) {
-    int temp = ROOTNODEID;
+    int temp = TransactionTree.ROOTNODEID;
     int ret = 0;
     boolean addCountMode = true;
     for (int attributeValue : myList) {
@@ -290,14 +286,13 @@ public final class TransactionTree implements Writable {
       size += p.getFirst().size() + 2;
     }
     
-    log.debug("Nodes in UnCompressed Tree: {} ", nodes);
-    log.debug("UnCompressed Tree Size: {}", (this.nodes * 4 * 4 + this
-        .childCount() * 4)
-                                            / (double) 1000000);
-    log.debug("Nodes in Compressed Tree: {} ", node);
-    log.debug("Compressed Tree Size: {}",
-      (node * 4 * 4 + ctree.childCount() * 4) / (double) 1000000);
-    log.debug("TransactionSet Size: {}", (size * 4) / (double) 1000000);
+    TransactionTree.log.debug("Nodes in UnCompressed Tree: {} ", nodes);
+    TransactionTree.log.debug("UnCompressed Tree Size: {}", (this.nodes * 4 * 4 + this.childCount() * 4)
+                                                            / (double) 1000000);
+    TransactionTree.log.debug("Nodes in Compressed Tree: {} ", node);
+    TransactionTree.log.debug("Compressed Tree Size: {}", (node * 4 * 4 + ctree.childCount() * 4)
+                                                          / (double) 1000000);
+    TransactionTree.log.debug("TransactionSet Size: {}", size * 4 / (double) 1000000);
     if (node * 4 * 4 + ctree.childCount() * 4 <= size * 4) {
       return ctree;
     } else {
@@ -308,8 +303,7 @@ public final class TransactionTree implements Writable {
   
   public Iterator<Pair<List<Integer>,Long>> getIterator() {
     if (this.isTreeEmpty() && !representedAsList) {
-      throw new IllegalStateException(
-          "This is a bug. Please report this to mahout-user list");
+      throw new IllegalStateException("This is a bug. Please report this to mahout-user list");
     } else if (representedAsList) {
       return transactionSet.iterator();
     } else {
@@ -344,8 +338,7 @@ public final class TransactionTree implements Writable {
           vInt.readFields(in);
           items[j] = vInt.get();
         }
-        Pair<List<Integer>,Long> transaction = new Pair<List<Integer>,Long>(
-            Arrays.asList(items), support);
+        Pair<List<Integer>,Long> transaction = new Pair<List<Integer>,Long>(Arrays.asList(items), support);
         transactionSet.add(transaction);
       }
     } else {
@@ -420,7 +413,7 @@ public final class TransactionTree implements Writable {
     this.attribute[nodes] = attributeValue;
     nodeCount[nodes] = count;
     if (nodeChildren[nodes] == null) {
-      nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
+      nodeChildren[nodes] = new int[TransactionTree.DEFAULT_CHILDREN_INITIAL_SIZE];
     }
     
     int childNodeId = nodes++;
@@ -433,15 +426,15 @@ public final class TransactionTree implements Writable {
     attribute[nodes] = -1;
     nodeCount[nodes] = 0;
     if (nodeChildren[nodes] == null) {
-      nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
+      nodeChildren[nodes] = new int[TransactionTree.DEFAULT_CHILDREN_INITIAL_SIZE];
     }
     return nodes++;
   }
   
   private void resize() {
-    int size = (int) (GROWTH_RATE * nodes);
-    if (size < DEFAULT_INITIAL_SIZE) {
-      size = DEFAULT_INITIAL_SIZE;
+    int size = (int) (TransactionTree.GROWTH_RATE * nodes);
+    if (size < TransactionTree.DEFAULT_INITIAL_SIZE) {
+      size = TransactionTree.DEFAULT_INITIAL_SIZE;
     }
     
     int[] oldChildCount = childCount;
@@ -462,9 +455,9 @@ public final class TransactionTree implements Writable {
   
   private void resizeChildren(int nodeId) {
     int length = childCount[nodeId];
-    int size = (int) (GROWTH_RATE * length);
-    if (size < DEFAULT_CHILDREN_INITIAL_SIZE) {
-      size = DEFAULT_CHILDREN_INITIAL_SIZE;
+    int size = (int) (TransactionTree.GROWTH_RATE * length);
+    if (size < TransactionTree.DEFAULT_CHILDREN_INITIAL_SIZE) {
+      size = TransactionTree.DEFAULT_CHILDREN_INITIAL_SIZE;
     }
     int[] oldNodeChildren = nodeChildren[nodeId];
     nodeChildren[nodeId] = new int[size];

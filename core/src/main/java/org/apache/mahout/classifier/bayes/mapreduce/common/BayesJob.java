@@ -21,8 +21,7 @@ import java.io.IOException;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 
 /**
- * Implementors of this interface provide a way for running bayes training jobs
- * on a hadoop cluster.
+ * Implementors of this interface provide a way for running bayes training jobs on a hadoop cluster.
  * */
 public interface BayesJob {
   

@@ -30,11 +30,10 @@ import org.apache.hadoop.util.Progressable;
 import org.apache.mahout.common.StringTuple;
 
 /**
- * This class extends the MultipleOutputFormat, allowing to write the output
- * data to different output files in sequence file output format.
+ * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in
+ * sequence file output format.
  */
-public class BayesTfIdfOutputFormat extends
-    MultipleOutputFormat<WritableComparable<?>,Writable> {
+public class BayesTfIdfOutputFormat extends MultipleOutputFormat<WritableComparable<?>,Writable> {
   
   private SequenceFileOutputFormat<WritableComparable<?>,Writable> theSequenceFileOutputFormat;
   
@@ -50,15 +49,14 @@ public class BayesTfIdfOutputFormat extends
   }
   
   @Override
-  protected String generateFileNameForKeyValue(WritableComparable<?> k,
-                                               Writable v,
-                                               String name) {
+  protected String generateFileNameForKeyValue(WritableComparable<?> k, Writable v, String name) {
     StringTuple key = (StringTuple) k;
     
-    if (key.length() == 1
-        && key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE)) {
+    if ((key.length() == 1) && key.stringAt(0).equals(BayesConstants.FEATURE_SET_SIZE)) {
       return "trainer-vocabCount/" + name;
-    } else return "trainer-tfIdf/" + name;
+    } else {
+      return "trainer-tfIdf/" + name;
+    }
   }
   
 }

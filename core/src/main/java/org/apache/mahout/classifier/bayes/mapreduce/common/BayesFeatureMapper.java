@@ -42,33 +42,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads the input train set(preprocessed using the
- * {@link org.apache.mahout.classifier.BayesFileFormatter}).
+ * Reads the input train set(preprocessed using the {@link org.apache.mahout.classifier.BayesFileFormatter}).
  */
-public class BayesFeatureMapper extends MapReduceBase implements
-    Mapper<Text,Text,StringTuple,DoubleWritable> {
+public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Text,StringTuple,DoubleWritable> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesFeatureMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesFeatureMapper.class);
   
   private static final DoubleWritable ONE = new DoubleWritable(1.0);
   
   private int gramSize = 1;
   
   /**
-   * We need to count the number of times we've seen a term with a given label
-   * and we need to output that. But this Mapper does more than just outputing
-   * the count. It first does weight normalisation. Secondly, it outputs for
-   * each unique word in a document value 1 for summing up as the Term Document
-   * Frequency. Which later is used to calculate the Idf Thirdly, it outputs for
-   * each label the number of times a document was seen(Also used in Idf
-   * Calculation)
+   * We need to count the number of times we've seen a term with a given label and we need to output that. But
+   * this Mapper does more than just outputing the count. It first does weight normalisation. Secondly, it
+   * outputs for each unique word in a document value 1 for summing up as the Term Document Frequency. Which
+   * later is used to calculate the Idf Thirdly, it outputs for each label the number of times a document was
+   * seen(Also used in Idf Calculation)
    * 
    * @param key
    *          The label
    * @param value
-   *          the features (all unique) associated w/ this label in stringtuple
-   *          format
+   *          the features (all unique) associated w/ this label in stringtuple format
    * @param output
    *          The OutputCollector to write the results to
    * @param reporter
@@ -82,15 +76,12 @@ public class BayesFeatureMapper extends MapReduceBase implements
     // String line = value.toString();
     final String label = key.toString();
     List<String> tokens = Arrays.asList(value.toString().split("[ ]+"));
-    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(
-        tokens.size() * gramSize);
+    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(tokens.size() * gramSize);
     
     if (gramSize > 1) {
-      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(tokens
-          .iterator()), gramSize);
+      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(tokens.iterator()), gramSize);
       do {
-        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class))
-            .term();
+        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
         if (term.length() > 0) {
           if (wordList.containsKey(term) == false) {
             wordList.put(term, 1);
@@ -117,8 +108,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
       }
     });
     
-    final double lengthNormalisation = Math.sqrt(lengthNormalisationMut
-        .doubleValue());
+    final double lengthNormalisation = Math.sqrt(lengthNormalisationMut.doubleValue());
     
     // Output Length Normalized + TF Transformed Frequency per Word per Class
     // Log(1 + D_ij)/SQRT( SIGMA(k, D_kj) )
@@ -130,8 +120,7 @@ public class BayesFeatureMapper extends MapReduceBase implements
           tuple.add(BayesConstants.WEIGHT);
           tuple.add(label);
           tuple.add(token);
-          DoubleWritable f = new DoubleWritable(Math.log(1.0 + dKJ)
-                                                / lengthNormalisation);
+          DoubleWritable f = new DoubleWritable(Math.log(1.0 + dKJ) / lengthNormalisation);
           output.collect(tuple, f);
         } catch (IOException e) {
           throw new RuntimeException(e);
@@ -150,12 +139,12 @@ public class BayesFeatureMapper extends MapReduceBase implements
           dfTuple.add(BayesConstants.DOCUMENT_FREQUENCY);
           dfTuple.add(label);
           dfTuple.add(token);
-          output.collect(dfTuple, ONE);
+          output.collect(dfTuple, BayesFeatureMapper.ONE);
           
           StringTuple tokenCountTuple = new StringTuple();
           tokenCountTuple.add(BayesConstants.FEATURE_COUNT);
           tokenCountTuple.add(token);
-          output.collect(tokenCountTuple, ONE);
+          output.collect(tokenCountTuple, BayesFeatureMapper.ONE);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -168,19 +157,18 @@ public class BayesFeatureMapper extends MapReduceBase implements
     StringTuple labelCountTuple = new StringTuple();
     labelCountTuple.add(BayesConstants.LABEL_COUNT);
     labelCountTuple.add(label);
-    output.collect(labelCountTuple, ONE);
+    output.collect(labelCountTuple, BayesFeatureMapper.ONE);
   }
   
   @Override
   public void configure(JobConf job) {
     try {
-      log.info("Bayes Parameter {}", job.get("bayes.parameters"));
-      Parameters params = Parameters
-          .fromString(job.get("bayes.parameters", ""));
+      BayesFeatureMapper.log.info("Bayes Parameter {}", job.get("bayes.parameters"));
+      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
       gramSize = Integer.valueOf(params.get("gramSize"));
       
     } catch (IOException ex) {
-      log.warn(ex.toString(), ex);
+      BayesFeatureMapper.log.warn(ex.toString(), ex);
     }
   }
   

@@ -22,41 +22,40 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-public class LeastKCache<K extends Comparable<? super K>, V> implements
-    Cache<K, V> {
-
-  private int capacity = 0;
-
-  private Map<K, V> cache = null;
-
-  private PriorityQueue<K> queue = null;
-
+public class LeastKCache<K extends Comparable<? super K>,V> implements Cache<K,V> {
+  
+  private int capacity;
+  
+  private Map<K,V> cache;
+  
+  private PriorityQueue<K> queue;
+  
   public LeastKCache(int capacity) {
-
+    
     this.capacity = capacity;
-
-    cache = new HashMap<K, V>(capacity);
+    
+    cache = new HashMap<K,V>(capacity);
     queue = new PriorityQueue<K>(capacity, new Comparator<K>() {
-
+      
       @Override
       public int compare(K o1, K o2) {
         return o2.compareTo(o1);
       }
-
+      
     });
-
+    
   }
-
+  
   @Override
   public final long capacity() {
     return capacity;
   }
-
+  
   @Override
   public final V get(K key) {
     return cache.get(key);
   }
-
+  
   @Override
   public final void set(K key, V value) {
     if (contains(key) == false) {
@@ -68,15 +67,15 @@ public class LeastKCache<K extends Comparable<? super K>, V> implements
       cache.remove(k);
     }
   }
-
+  
   @Override
   public final long size() {
     return cache.size();
   }
-
+  
   @Override
   public final boolean contains(K key) {
-    return (cache.containsKey(key));
+    return cache.containsKey(key);
   }
-
+  
 }

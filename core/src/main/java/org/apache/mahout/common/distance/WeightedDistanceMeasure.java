@@ -17,16 +17,6 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.parameters.ClassParameter;
-import org.apache.mahout.common.parameters.Parameter;
-import org.apache.mahout.common.parameters.PathParameter;
-import org.apache.mahout.math.VectorWritable;
-
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -34,28 +24,40 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.parameters.ClassParameter;
+import org.apache.mahout.common.parameters.Parameter;
+import org.apache.mahout.common.parameters.PathParameter;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+
 /** Abstract implementation of DistanceMeasure with support for weights. */
 public abstract class WeightedDistanceMeasure implements DistanceMeasure {
-
+  
   private List<Parameter<?>> parameters;
   private Parameter<Path> weightsFile;
   private ClassParameter vectorClass;
   private Vector weights;
-
+  
   @Override
   public void createParameters(String prefix, JobConf jobConf) {
     parameters = new ArrayList<Parameter<?>>();
-    weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null, "Path on DFS to a file containing the weights.");
+    weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null,
+        "Path on DFS to a file containing the weights.");
     parameters.add(weightsFile);
-    vectorClass = new ClassParameter(prefix, "vectorClass", jobConf, DenseVector.class, "Class<Vector> file specified in parameter weightsFile has been serialized with.");
+    vectorClass = new ClassParameter(prefix, "vectorClass", jobConf, DenseVector.class,
+        "Class<Vector> file specified in parameter weightsFile has been serialized with.");
     parameters.add(vectorClass);
   }
-
+  
   @Override
   public Collection<Parameter<?>> getParameters() {
     return parameters;
   }
-
+  
   @Override
   public void configure(JobConf jobConf) {
     if (parameters == null) {
@@ -84,14 +86,13 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
       throw new IllegalStateException(e);
     }
   }
-
+  
   public Vector getWeights() {
     return weights;
   }
-
+  
   public void setWeights(Vector weights) {
     this.weights = weights;
   }
-
-
+  
 }

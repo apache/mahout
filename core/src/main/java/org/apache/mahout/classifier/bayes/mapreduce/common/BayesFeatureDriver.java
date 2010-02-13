@@ -61,8 +61,7 @@ public class BayesFeatureDriver implements BayesJob {
     conf.setReducerClass(BayesFeatureReducer.class);
     conf.setOutputFormat(BayesFeatureOutputFormat.class);
     conf
-        .set(
-          "io.serializations",
+        .set("io.serializations",
           "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     

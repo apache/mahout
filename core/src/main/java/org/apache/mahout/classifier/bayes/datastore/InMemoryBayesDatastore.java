@@ -39,8 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class InMemoryBayesDatastore implements Datastore {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(InMemoryBayesDatastore.class);
+  private static final Logger log = LoggerFactory.getLogger(InMemoryBayesDatastore.class);
   
   private final OpenObjectIntHashMap<String> featureDictionary = new OpenObjectIntHashMap<String>();
   
@@ -52,9 +51,7 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private final OpenIntDoubleHashMap thetaNormalizerPerLabel = new OpenIntDoubleHashMap();
   
-  private double sigma_jSigma_k = 1.0;
-  
-  private final SparseMatrix weightMatrix = new SparseMatrix(new int[] {1,0});
+  private final SparseMatrix weightMatrix = new SparseMatrix(new int[] {1, 0});
   
   private final Parameters params;
   
@@ -62,13 +59,14 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private double alphaI = 1.0;
   
+  private double sigma_jSigma_k = 1.0;
+  
   public InMemoryBayesDatastore(Parameters params) {
     String basePath = params.get("basePath");
     this.params = params;
     params.set("sigma_j", basePath + "/trainer-weights/Sigma_j/part-*");
     params.set("sigma_k", basePath + "/trainer-weights/Sigma_k/part-*");
-    params.set("sigma_kSigma_j", basePath
-                                 + "/trainer-weights/Sigma_kSigma_j/part-*");
+    params.set("sigma_kSigma_j", basePath + "/trainer-weights/Sigma_kSigma_j/part-*");
     params.set("thetaNormalizer", basePath + "/trainer-thetaNormalizer/part-*");
     params.set("weight", basePath + "/trainer-tfIdf/trainer-tfIdf/part-*");
     alphaI = Double.valueOf(params.get("alpha_i", "1.0"));
@@ -79,20 +77,18 @@ public class InMemoryBayesDatastore implements Datastore {
     Configuration conf = new Configuration();
     String basePath = params.get("basePath");
     try {
-      SequenceFileModelReader.loadModel(this, FileSystem.get(new Path(basePath)
-          .toUri(), conf), params, conf);
+      SequenceFileModelReader.loadModel(this, FileSystem.get(new Path(basePath).toUri(), conf), params, conf);
     } catch (IOException e) {
       throw new InvalidDatastoreException(e.getMessage());
     }
     for (String label : getKeys("")) {
-      log.info("{} {} {} {}", new Object[] {
-                                            label,
-                                            thetaNormalizerPerLabel
-                                                .get(getLabelID(label)),
-                                            thetaNormalizer,
-                                            thetaNormalizerPerLabel
-                                                .get(getLabelID(label))
-                                                / thetaNormalizer});
+      InMemoryBayesDatastore.log.info("{} {} {} {}", new Object[] {label,
+                                                                   thetaNormalizerPerLabel
+                                                                       .get(getLabelID(label)),
+                                                                   thetaNormalizer,
+                                                                   thetaNormalizerPerLabel
+                                                                       .get(getLabelID(label))
+                                                                       / thetaNormalizer});
     }
   }
   
@@ -106,9 +102,12 @@ public class InMemoryBayesDatastore implements Datastore {
     if (matrixName.equals("weight")) {
       if (column.equals("sigma_j")) {
         return sigma_j.get(getFeatureID(row));
-      } else return weightMatrix.getQuick(getFeatureID(row), getLabelID(column));
-    } else throw new InvalidDatastoreException("Matrix not found: "
-                                               + matrixName);
+      } else {
+        return weightMatrix.getQuick(getFeatureID(row), getLabelID(column));
+      }
+    } else {
+      throw new InvalidDatastoreException("Matrix not found: " + matrixName);
+    }
   }
   
   @Override
@@ -118,16 +117,22 @@ public class InMemoryBayesDatastore implements Datastore {
         return sigma_jSigma_k;
       } else if (index.equals("vocabCount")) {
         return featureDictionary.size();
-      } else throw new InvalidDatastoreException();
+      } else {
+        throw new InvalidDatastoreException();
+      }
     } else if (vectorName.equals("thetaNormalizer")) {
       return thetaNormalizerPerLabel.get(getLabelID(index)) / thetaNormalizer;
     } else if (vectorName.equals("params")) {
       if (index.equals("alpha_i")) {
         return alphaI;
-      } else throw new InvalidDatastoreException();
+      } else {
+        throw new InvalidDatastoreException();
+      }
     } else if (vectorName.equals("labelWeight")) {
       return sigma_k.get(getLabelID(index));
-    } else throw new InvalidDatastoreException();
+    } else {
+      throw new InvalidDatastoreException();
+    }
   }
   
   private int getFeatureID(String feature) {

@@ -28,22 +28,23 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringTuple;
 
 /** Can also be used as a local Combiner. A simple summing reducer */
-public class BayesClassifierReducer extends MapReduceBase
-    implements Reducer<StringTuple, DoubleWritable, StringTuple, DoubleWritable> {
-
+public class BayesClassifierReducer extends MapReduceBase implements
+    Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
+  
   @Override
   public void reduce(StringTuple key,
                      Iterator<DoubleWritable> values,
-                     OutputCollector<StringTuple, DoubleWritable> output,
+                     OutputCollector<StringTuple,DoubleWritable> output,
                      Reporter reporter) throws IOException {
-    // Key is label,word, value is the number of times we've seen this label word per local node.  Output is the same
-
+    // Key is label,word, value is the number of times we've seen this label word per local node. Output is
+    // the same
+    
     double sum = 0.0;
     while (values.hasNext()) {
-      reporter.setStatus("Classifier Reducer:" + key);  
+      reporter.setStatus("Classifier Reducer:" + key);
       sum += values.next().get();
     }
-    reporter.setStatus("Bayes Classifier Reducer: " + key + " => " + sum);  
+    reporter.setStatus("Bayes Classifier Reducer: " + key + " => " + sum);
     output.collect(key, new DoubleWritable(sum));
   }
 }

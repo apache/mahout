@@ -17,23 +17,30 @@
 
 package org.apache.mahout.common.iterator;
 
-import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** <p>Simple, fast {@link Iterator} for an array.</p> */
-public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> {
+import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 
+/**
+ * <p>
+ * Simple, fast {@link Iterator} for an array.
+ * </p>
+ */
+public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> {
+  
   private final T[] array;
   private int position;
   private final int max;
-
+  
   /**
-   * <p>Creates an {@link ArrayIterator} over an entire array.</p>
-   *
-   * @param array array to iterate over
+   * <p>
+   * Creates an {@link ArrayIterator} over an entire array.
+   * </p>
+   * 
+   * @param array
+   *          array to iterate over
    */
   public ArrayIterator(T[] array) {
     if (array == null) {
@@ -43,12 +50,12 @@ public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> 
     this.position = 0;
     this.max = array.length;
   }
-
+  
   @Override
   public boolean hasNext() {
     return position < max;
   }
-
+  
   @Override
   public T next() {
     if (position >= array.length) {
@@ -56,7 +63,7 @@ public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> 
     }
     return array[position++];
   }
-
+  
   /**
    * @throws UnsupportedOperationException
    */
@@ -64,22 +71,22 @@ public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> 
   public void remove() {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void skip(int n) {
     if (n > 0) {
       position += n;
     }
   }
-
+  
   @Override
   public Iterator<T> iterator() {
     return this;
   }
-
+  
   @Override
   public String toString() {
     return "ArrayIterator[" + Arrays.toString(array) + '@' + position + ']';
   }
-
+  
 }

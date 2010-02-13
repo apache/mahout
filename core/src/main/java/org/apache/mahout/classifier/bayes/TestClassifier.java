@@ -55,95 +55,67 @@ import org.slf4j.LoggerFactory;
 /**
  * Test the Naive Bayes classifier with improved weighting
  * <p/>
- * To run the twenty newsgroups example: refer
- * http://cwiki.apache.org/MAHOUT/twentynewsgroups.html
+ * To run the twenty newsgroups example: refer http://cwiki.apache.org/MAHOUT/twentynewsgroups.html
  */
 public final class TestClassifier {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(TestClassifier.class);
+  private static final Logger log = LoggerFactory.getLogger(TestClassifier.class);
   
   private TestClassifier() {
   // do nothing
   }
   
-  public static void main(String[] args) throws IOException,
-                                        InvalidDatastoreException {
+  public static void main(String[] args) throws IOException, InvalidDatastoreException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option pathOpt = obuilder
-        .withLongName("model")
-        .withRequired(true)
-        .withArgument(
-          abuilder.withName("model").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "The path on HDFS / Name of Hbase Table as defined by the -source parameter")
-        .withShortName("m").create();
+    Option pathOpt = obuilder.withLongName("model").withRequired(true).withArgument(
+      abuilder.withName("model").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The path on HDFS / Name of Hbase Table as defined by the -source parameter").withShortName("m")
+        .create();
     
-    Option dirOpt = obuilder.withLongName("testDir").withRequired(true)
-        .withArgument(
-          abuilder.withName("testDir").withMinimum(1).withMaximum(1).create())
-        .withDescription("The directory where test documents resides in")
-        .withShortName("d").create();
+    Option dirOpt = obuilder.withLongName("testDir").withRequired(true).withArgument(
+      abuilder.withName("testDir").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The directory where test documents resides in").withShortName("d").create();
     
     Option helpOpt = DefaultOptionCreator.helpOption();
     
     Option encodingOpt = obuilder.withLongName("encoding").withArgument(
-      abuilder.withName("encoding").withMinimum(1).withMaximum(1).create())
-        .withDescription("The file encoding.  Defaults to UTF-8")
-        .withShortName("e").create();
+      abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The file encoding.  Defaults to UTF-8").withShortName("e").create();
     
     Option defaultCatOpt = obuilder.withLongName("defaultCat").withArgument(
-      abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create())
-        .withDescription("The default category Default Value: unknown")
-        .withShortName("default").create();
+      abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The default category Default Value: unknown").withShortName("default").create();
     
-    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true)
-        .withArgument(
-          abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create())
-        .withDescription("Size of the n-gram. Default Value: 1").withShortName(
-          "ng").create();
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
+      abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Size of the n-gram. Default Value: 1").withShortName("ng").create();
     
-    Option alphaOpt = obuilder.withLongName("alpha").withRequired(false)
-        .withArgument(
-          abuilder.withName("a").withMinimum(1).withMaximum(1).create())
-        .withDescription("Smoothing parameter Default Value: 1.0")
-        .withShortName("a").create();
+    Option alphaOpt = obuilder.withLongName("alpha").withRequired(false).withArgument(
+      abuilder.withName("a").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Smoothing parameter Default Value: 1.0").withShortName("a").create();
     
-    Option verboseOutputOpt = obuilder.withLongName("verbose").withRequired(
-      false).withDescription(
-      "Output which values were correctly and incorrectly classified")
-        .withShortName("v").create();
+    Option verboseOutputOpt = obuilder.withLongName("verbose").withRequired(false).withDescription(
+      "Output which values were correctly and incorrectly classified").withShortName("v").create();
     
-    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true)
-        .withArgument(
-          abuilder.withName("classifierType").withMinimum(1).withMaximum(1)
-              .create()).withDescription(
-          "Type of classifier: bayes|cbayes. Default Value: bayes")
-        .withShortName("type").create();
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
+      abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Type of classifier: bayes|cbayes. Default Value: bayes").withShortName("type").create();
     
-    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(
-      true).withArgument(
-      abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create())
-        .withDescription("Location of model: hdfs|hbase Default Value: hdfs")
-        .withShortName("source").create();
+    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(true).withArgument(
+      abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Location of model: hdfs|hbase Default Value: hdfs").withShortName("source").create();
     
-    Option methodOpt = obuilder
-        .withLongName("method")
-        .withRequired(true)
-        .withArgument(
-          abuilder.withName("method").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "Method of Classification: sequential|mapreduce. Default Value: sequential")
-        .withShortName("method").create();
+    Option methodOpt = obuilder.withLongName("method").withRequired(true).withArgument(
+      abuilder.withName("method").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Method of Classification: sequential|mapreduce. Default Value: sequential").withShortName("method")
+        .create();
     
-    Group group = gbuilder.withName("Options").withOption(defaultCatOpt)
-        .withOption(dirOpt).withOption(encodingOpt).withOption(gramSizeOpt)
-        .withOption(pathOpt).withOption(typeOpt).withOption(dataSourceOpt)
-        .withOption(helpOpt).withOption(methodOpt).withOption(verboseOutputOpt)
-        .withOption(alphaOpt).create();
+    Group group = gbuilder.withName("Options").withOption(defaultCatOpt).withOption(dirOpt).withOption(
+      encodingOpt).withOption(gramSizeOpt).withOption(pathOpt).withOption(typeOpt).withOption(dataSourceOpt)
+        .withOption(helpOpt).withOption(methodOpt).withOption(verboseOutputOpt).withOption(alphaOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -197,18 +169,18 @@ public final class TestClassifier {
       params.set("alpha_i", alphaI);
       params.set("testDirPath", testDirPath);
       
-      if (classificationMethod.equalsIgnoreCase("sequential"))
-        classifySequential(params);
-      else if (classificationMethod.equalsIgnoreCase("mapreduce"))
-        classifyParallel(params);
+      if (classificationMethod.equalsIgnoreCase("sequential")) {
+        TestClassifier.classifySequential(params);
+      } else if (classificationMethod.equalsIgnoreCase("mapreduce")) {
+        TestClassifier.classifyParallel(params);
+      }
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
     }
   }
   
-  public static void classifySequential(BayesParameters params) throws IOException,
-                                                               InvalidDatastoreException {
-    log.info("Loading model from: {}", params.print());
+  public static void classifySequential(BayesParameters params) throws IOException, InvalidDatastoreException {
+    TestClassifier.log.info("Loading model from: {}", params.print());
     boolean verbose = Boolean.valueOf(params.get("verbose"));
     File dir = new File(params.get("testDirPath"));
     File[] subdirs = dir.listFiles(new FilenameFilter() {
@@ -223,93 +195,76 @@ public final class TestClassifier {
     
     if (params.get("dataSource").equals("hdfs")) {
       if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-        log.info("Testing Bayes Classifier");
+        TestClassifier.log.info("Testing Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-        log.info("Testing Complementary Bayes Classifier");
+        TestClassifier.log.info("Testing Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: "
-                                           + params.get("classifierType"));
+        throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
       }
       
     } else if (params.get("dataSource").equals("hbase")) {
       if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-        log.info("Testing Bayes Classifier");
+        TestClassifier.log.info("Testing Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new HBaseBayesDatastore(params.get("basePath"), params);
       } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-        log.info("Testing Complementary Bayes Classifier");
+        TestClassifier.log.info("Testing Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new HBaseBayesDatastore(params.get("basePath"), params);
       } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: "
-                                           + params.get("classifierType"));
+        throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
       }
       
     } else {
-      throw new IllegalArgumentException("Unrecognized dataSource type: "
-                                         + params.get("dataSource"));
+      throw new IllegalArgumentException("Unrecognized dataSource type: " + params.get("dataSource"));
     }
     ClassifierContext classifier = new ClassifierContext(algorithm, datastore);
     classifier.initialize();
-    ResultAnalyzer resultAnalyzer = new ResultAnalyzer(classifier.getLabels(),
-        params.get("defaultCat"));
+    ResultAnalyzer resultAnalyzer = new ResultAnalyzer(classifier.getLabels(), params.get("defaultCat"));
     TimingStatistics totalStatistics = new TimingStatistics();
     if (subdirs != null) {
       
       for (File file : subdirs) {
-        log.info("--------------");
-        log.info("Testing: {}", file);
+        TestClassifier.log.info("--------------");
+        TestClassifier.log.info("Testing: {}", file);
         String correctLabel = file.getName().split(".txt")[0];
         TimingStatistics operationStats = new TimingStatistics();
         
         long lineNum = 0;
-        for (String line : new FileLineIterable(new File(file.getPath()),
-            Charset.forName(params.get("encoding")), false)) {
+        for (String line : new FileLineIterable(new File(file.getPath()), Charset.forName(params
+            .get("encoding")), false)) {
           
-          Map<String,List<String>> document = new NGrams(line, Integer
-              .parseInt(params.get("gramSize"))).generateNGrams();
-          for (Map.Entry<String,List<String>> stringListEntry : document
-              .entrySet()) {
+          Map<String,List<String>> document = new NGrams(line, Integer.parseInt(params.get("gramSize")))
+              .generateNGrams();
+          for (Map.Entry<String,List<String>> stringListEntry : document.entrySet()) {
             List<String> strings = stringListEntry.getValue();
             TimingStatistics.Call call = operationStats.newCall();
             TimingStatistics.Call outercall = totalStatistics.newCall();
-            ClassifierResult classifiedLabel = classifier.classifyDocument(
-              strings.toArray(new String[strings.size()]), params
-                  .get("defaultCat"));
+            ClassifierResult classifiedLabel = classifier.classifyDocument(strings.toArray(new String[strings
+                .size()]), params.get("defaultCat"));
             call.end();
             outercall.end();
-            boolean correct = resultAnalyzer.addInstance(correctLabel,
-              classifiedLabel);
+            boolean correct = resultAnalyzer.addInstance(correctLabel, classifiedLabel);
             if (verbose) {
               // We have one document per line
-              log.info("Line Number: {} Line(30): {} Expected Label: {} Classified Label: {} Correct: {}",
-                       new Object[] {
-                           lineNum,
-                           (line.length() > 30 ? line.substring(0, 30) : line),
-                           correctLabel,
-                           classifiedLabel.getLabel(),
-                           correct,
-                       });
+              TestClassifier.log.info(
+                "Line Number: {} Line(30): {} Expected Label: {} Classified Label: {} Correct: {}",
+                new Object[] {lineNum, line.length() > 30 ? line.substring(0, 30) : line, correctLabel,
+                              classifiedLabel.getLabel(), correct,});
             }
             // log.info("{} {}", correctLabel, classifiedLabel);
             
           }
           lineNum++;
         }
-        log.info("{}\t{}\t{}/{}", new Object[] {correctLabel,
-                                                resultAnalyzer
-                                                    .getConfusionMatrix()
-                                                    .getAccuracy(correctLabel),
-                                                resultAnalyzer
-                                                    .getConfusionMatrix()
-                                                    .getCorrect(correctLabel),
-                                                resultAnalyzer
-                                                    .getConfusionMatrix()
-                                                    .getTotal(correctLabel)});
+        log.info("{}\t{}\t{}/{}",
+          new Object[] {correctLabel, resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
+                        resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
+                        resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)});
         log.info("{}", operationStats.toString());
       }
       

@@ -23,9 +23,10 @@ import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
+
 /**
  * The Classifier Wrapper used for choosing the {@link Algorithm} and {@link Datastore}
- *
+ * 
  */
 public class ClassifierContext {
   
@@ -38,8 +39,7 @@ public class ClassifierContext {
   }
   
   /**
-   * Initializes the Context. Gets the necessary data and checks if the
-   * Datastore is valid
+   * Initializes the Context. Gets the necessary data and checks if the Datastore is valid
    * 
    * @throws InvalidDatastoreException
    */
@@ -54,14 +54,11 @@ public class ClassifierContext {
    * @param document
    *          The document to classify
    * @param defaultCategory
-   *          The default category to assign Ties are broken by comparing the
-   *          category
-   * @return A Collection of
-   *         {@link org.apache.mahout.classifier.ClassifierResult}s.
+   *          The default category to assign Ties are broken by comparing the category
+   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
-  public ClassifierResult classifyDocument(String[] document,
-                                           String defaultCategory) throws InvalidDatastoreException {
+  public ClassifierResult classifyDocument(String[] document, String defaultCategory) throws InvalidDatastoreException {
     return algorithm.classifyDocument(document, datastore, defaultCategory);
   }
   
@@ -73,17 +70,15 @@ public class ClassifierContext {
    * @param defaultCategory
    *          The default category to assign
    * @param numResults
-   *          The maximum number of results to return, ranked by score. Ties are
-   *          broken by comparing the category
-   * @return A Collection of
-   *         {@link org.apache.mahout.classifier.ClassifierResult}s.
+   *          The maximum number of results to return, ranked by score. Ties are broken by comparing the
+   *          category
+   * @return A Collection of {@link org.apache.mahout.classifier.ClassifierResult}s.
    * @throws InvalidDatastoreException
    */
   public ClassifierResult[] classifyDocument(String[] document,
                                              String defaultCategory,
                                              int numResults) throws InvalidDatastoreException {
-    return algorithm.classifyDocument(document, datastore, defaultCategory,
-      numResults);
+    return algorithm.classifyDocument(document, datastore, defaultCategory, numResults);
   }
   
   /**

@@ -30,9 +30,10 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Base class for executing the Bayes Map/Reduce Jobs
- *
+ * 
  */
 public final class JobExecutor {
   /** Logger for this class. */
@@ -41,8 +42,7 @@ public final class JobExecutor {
   private JobExecutor() { }
   
   /**
-   * Execute a bayes classification job. Input and output path are parsed from
-   * the input parameters.
+   * Execute a bayes classification job. Input and output path are parsed from the input parameters.
    * 
    * @param args
    *          input parameters.
@@ -58,8 +58,8 @@ public final class JobExecutor {
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
     
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
-      outputOpt).withOption(helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt)
+        .create();
     
     try {
       Parser parser = new Parser();
@@ -76,7 +76,7 @@ public final class JobExecutor {
       
       job.runJob(input, output, new BayesParameters(1));
     } catch (OptionException e) {
-      log.error(e.getMessage());
+      JobExecutor.log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }

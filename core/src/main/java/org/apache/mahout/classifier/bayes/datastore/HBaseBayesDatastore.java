@@ -45,8 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HBaseBayesDatastore implements Datastore {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(HBaseBayesDatastore.class);
+  private static final Logger log = LoggerFactory.getLogger(HBaseBayesDatastore.class);
   
   private HBaseConfiguration config;
   
@@ -129,33 +128,40 @@ public class HBaseBayesDatastore implements Datastore {
         BayesConstants.LABEL_THETA_NORMALIZER, label)));
     }
     for (String label : labels) {
-      log.info("{} {} {} {}",
-        new Object[] {label,
-                      getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER,
-                        label),
-                      thetaNormalizer,
-                      getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER,
-                        label) / thetaNormalizer});
+      HBaseBayesDatastore.log.info("{} {} {} {}", new Object[] {
+                                                                label,
+                                                                getWeightFromHbase(
+                                                                  BayesConstants.LABEL_THETA_NORMALIZER,
+                                                                  label),
+                                                                thetaNormalizer,
+                                                                getWeightFromHbase(
+                                                                  BayesConstants.LABEL_THETA_NORMALIZER,
+                                                                  label)
+                                                                    / thetaNormalizer});
     }
   }
   
   @Override
   public Collection<String> getKeys(String name) throws InvalidDatastoreException {
-    if (keys.containsKey(name)) return keys.get(name);
+    if (keys.containsKey(name)) {
+      return keys.get(name);
+    }
     Result r;
     if (name.equals("labelWeight")) {
       r = getRowFromHbase(BayesConstants.LABEL_SUM);
     } else if (name.equals("thetaNormalizer")) {
       r = getRowFromHbase(BayesConstants.LABEL_THETA_NORMALIZER);
-    } else r = getRowFromHbase(name);
+    } else {
+      r = getRowFromHbase(name);
+    }
     
     if (r == null) {
-      log.error("Encountered NULL");
+      HBaseBayesDatastore.log.error("Encountered NULL");
       throw new InvalidDatastoreException("Encountered NULL");
     }
     
-    Set<byte[]> labelBytes = r.getNoVersionMap().get(
-      Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY)).keySet();
+    Set<byte[]> labelBytes = r.getNoVersionMap().get(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY))
+        .keySet();
     Set<String> keySet = new HashSet<String>();
     for (byte[] key : labelBytes) {
       keySet.add(Bytes.toString(key));
@@ -167,26 +173,37 @@ public class HBaseBayesDatastore implements Datastore {
   @Override
   public double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException {
     if ("weight".equals(matrixName)) {
-      if (column.equals("sigma_j")) return getSigmaJFromHbase(row);
-      else return getWeightFromHbase(row, column);
-    } else throw new InvalidDatastoreException();
+      if (column.equals("sigma_j")) {
+        return getSigmaJFromHbase(row);
+      } else {
+        return getWeightFromHbase(row, column);
+      }
+    } else {
+      throw new InvalidDatastoreException();
+    }
   }
   
   @Override
   public double getWeight(String vectorName, String index) throws InvalidDatastoreException {
     if (vectorName.equals("sumWeight")) {
-      if (index.equals("vocabCount")) return getVocabCountFromHbase();
-      else if (index.equals("sigma_jSigma_k")) return getSigmaJSigmaKFromHbase();
-      else throw new InvalidDatastoreException();
+      if (index.equals("vocabCount")) {
+        return getVocabCountFromHbase();
+      } else if (index.equals("sigma_jSigma_k")) {
+        return getSigmaJSigmaKFromHbase();
+      } else {
+        throw new InvalidDatastoreException();
+      }
       
     } else if (vectorName.equals("labelWeight")) {
       return getWeightFromHbase(BayesConstants.LABEL_SUM, index);
     } else if (vectorName.equals("thetaNormalizer")) {
-      return getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, index)
-             / thetaNormalizer;
+      return getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, index) / thetaNormalizer;
     } else if (vectorName.equals("params")) {
-      if (index.equals("alpha_i")) return alphaI;
-      else throw new InvalidDatastoreException();
+      if (index.equals("alpha_i")) {
+        return alphaI;
+      } else {
+        throw new InvalidDatastoreException();
+      }
     } else {
       
       throw new InvalidDatastoreException();
@@ -206,9 +223,10 @@ public class HBaseBayesDatastore implements Datastore {
       }
       tableCache.set(row, r);
     }
-    byte[] value = r.getValue(
-      Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(column));
-    if (value == null) return 0.0;
+    byte[] value = r.getValue(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(column));
+    if (value == null) {
+      return 0.0;
+    }
     return Bytes.toDouble(value);
     
   }
@@ -226,7 +244,9 @@ public class HBaseBayesDatastore implements Datastore {
         r = table.get(g);
         tableCache.set(feature, r);
         return r;
-      } else return r;
+      } else {
+        return r;
+      }
       
     } catch (IOException e) {
       return r;
@@ -234,14 +254,13 @@ public class HBaseBayesDatastore implements Datastore {
   }
   
   protected double getSigmaJFromHbase(String feature) {
-    return getCachedCell(feature, BayesConstants.HBASE_COLUMN_FAMILY,
-      BayesConstants.FEATURE_SUM);
+    return getCachedCell(feature, BayesConstants.HBASE_COLUMN_FAMILY, BayesConstants.FEATURE_SUM);
   }
   
   protected double getVocabCountFromHbase() {
     if (vocabCount == -1.0) {
-      vocabCount = getCachedCell(BayesConstants.HBASE_COUNTS_ROW,
-        BayesConstants.HBASE_COLUMN_FAMILY, BayesConstants.FEATURE_SET_SIZE);
+      vocabCount = getCachedCell(BayesConstants.HBASE_COUNTS_ROW, BayesConstants.HBASE_COLUMN_FAMILY,
+        BayesConstants.FEATURE_SET_SIZE);
       return vocabCount;
     } else {
       return vocabCount;
@@ -250,8 +269,8 @@ public class HBaseBayesDatastore implements Datastore {
   
   protected double getSigmaJSigmaKFromHbase() {
     if (sigmaJSigmaK == -1.0) {
-      sigmaJSigmaK = getCachedCell(BayesConstants.HBASE_COUNTS_ROW,
-        BayesConstants.HBASE_COLUMN_FAMILY, BayesConstants.TOTAL_SUM);
+      sigmaJSigmaK = getCachedCell(BayesConstants.HBASE_COUNTS_ROW, BayesConstants.HBASE_COLUMN_FAMILY,
+        BayesConstants.TOTAL_SUM);
       return sigmaJSigmaK;
     } else {
       return sigmaJSigmaK;

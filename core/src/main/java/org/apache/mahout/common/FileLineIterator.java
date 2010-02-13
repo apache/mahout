@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,56 +32,62 @@ import java.util.zip.ZipInputStream;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 
 /**
- * Iterates over the lines of a text file. This assumes the text file's lines are delimited in a manner consistent with
- * how {@link BufferedReader} defines lines.
- *
+ * Iterates over the lines of a text file. This assumes the text file's lines are delimited in a manner
+ * consistent with how {@link BufferedReader} defines lines.
+ * 
  * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
 public final class FileLineIterator implements SkippingIterator<String>, Closeable {
-
+  
   private static final Charset UTF8 = Charset.forName("UTF-8");
-
+  
   private final BufferedReader reader;
   private String nextLine;
-
+  
   /**
    * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
-   *
-   * @throws FileNotFoundException if the file does not exist
-   * @throws IOException           if the file cannot be read
+   * 
+   * @throws FileNotFoundException
+   *           if the file does not exist
+   * @throws IOException
+   *           if the file cannot be read
    */
   public FileLineIterator(File file) throws IOException {
-    this(file, UTF8, false);
+    this(file, FileLineIterator.UTF8, false);
   }
-
+  
   /**
    * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
-   *
-   * @throws FileNotFoundException if the file does not exist
-   * @throws IOException           if the file cannot be read
+   * 
+   * @throws FileNotFoundException
+   *           if the file does not exist
+   * @throws IOException
+   *           if the file cannot be read
    */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
-    this(file, UTF8, skipFirstLine);
+    this(file, FileLineIterator.UTF8, skipFirstLine);
   }
-
+  
   /**
    * Creates a {@link FileLineIterator} over a given file, using the given encoding.
-   *
-   * @throws FileNotFoundException if the file does not exist
-   * @throws IOException           if the file cannot be read
+   * 
+   * @throws FileNotFoundException
+   *           if the file does not exist
+   * @throws IOException
+   *           if the file cannot be read
    */
   public FileLineIterator(File file, Charset encoding, boolean skipFirstLine) throws IOException {
-    this(getFileInputStream(file), encoding, skipFirstLine);
+    this(FileLineIterator.getFileInputStream(file), encoding, skipFirstLine);
   }
-
+  
   public FileLineIterator(InputStream is) throws IOException {
-    this(is, UTF8, false);
+    this(is, FileLineIterator.UTF8, false);
   }
-
+  
   public FileLineIterator(InputStream is, boolean skipFirstLine) throws IOException {
-    this(is, UTF8, skipFirstLine);
+    this(is, FileLineIterator.UTF8, skipFirstLine);
   }
-
+  
   public FileLineIterator(InputStream is, Charset encoding, boolean skipFirstLine) throws IOException {
     reader = new BufferedReader(new InputStreamReader(is, encoding));
     if (skipFirstLine) {
@@ -90,7 +95,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
     }
     nextLine = reader.readLine();
   }
-
+  
   static InputStream getFileInputStream(File file) throws IOException {
     InputStream is = new FileInputStream(file);
     String name = file.getName();
@@ -102,16 +107,16 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
       return is;
     }
   }
-
+  
   public String peek() {
     return nextLine;
   }
-
+  
   @Override
   public boolean hasNext() {
     return nextLine != null;
   }
-
+  
   @Override
   public String next() {
     if (nextLine == null) {
@@ -130,7 +135,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
     }
     return result;
   }
-
+  
   /**
    * @throws UnsupportedOperationException
    */
@@ -138,7 +143,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
   public void remove() {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void skip(int n) {
     try {
@@ -149,11 +154,11 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
       close();
     }
   }
-
+  
   @Override
   public void close() {
     nextLine = null;
     IOUtils.quietClose(reader);
   }
-
+  
 }

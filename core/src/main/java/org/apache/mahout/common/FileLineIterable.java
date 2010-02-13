@@ -24,48 +24,49 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 
 /**
- * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines. This assumes the
- * text file's lines are delimited in a manner consistent with how {@link java.io.BufferedReader} defines lines.
- *
+ * Iterable representing the lines of a text file. It can produce an {@link Iterator} over those lines. This
+ * assumes the text file's lines are delimited in a manner consistent with how {@link java.io.BufferedReader}
+ * defines lines.
+ * 
  * This class will uncompress files that end in .zip or .gz accordingly, too.
  */
 public final class FileLineIterable implements Iterable<String> {
-
+  
   private static final Charset UTF8 = Charset.forName("UTF-8");
-
+  
   private final InputStream is;
   private final Charset encoding;
   private final boolean skipFirstLine;
-
+  
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file) throws IOException {
-    this(file, UTF8, false);
+    this(file, FileLineIterable.UTF8, false);
   }
-
+  
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file, boolean skipFirstLine) throws IOException {
-    this(file, UTF8, skipFirstLine);
+    this(file, FileLineIterable.UTF8, skipFirstLine);
   }
-
+  
   /** Creates a {@link FileLineIterable} over a given file, using the given encoding. */
   public FileLineIterable(File file, Charset encoding, boolean skipFirstLine) throws IOException {
     this(FileLineIterator.getFileInputStream(file), encoding, skipFirstLine);
   }
-
+  
   public FileLineIterable(InputStream is) {
-    this(is, UTF8, false);
+    this(is, FileLineIterable.UTF8, false);
   }
-
+  
   public FileLineIterable(InputStream is, boolean skipFirstLine) {
-    this(is, UTF8, skipFirstLine);
+    this(is, FileLineIterable.UTF8, skipFirstLine);
   }
-
+  
   public FileLineIterable(InputStream is, Charset encoding, boolean skipFirstLine) {
     this.is = is;
     this.encoding = encoding;
     this.skipFirstLine = skipFirstLine;
   }
-
+  
   @Override
   public Iterator<String> iterator() {
     try {
@@ -74,5 +75,5 @@ public final class FileLineIterable implements Iterable<String> {
       throw new IllegalStateException(ioe);
     }
   }
-
+  
 }

@@ -36,14 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Can also be used as a local Combiner beacuse only two values should be there
- * inside the values
+ * Can also be used as a local Combiner beacuse only two values should be there inside the values
  */
 public class BayesTfIdfReducer extends MapReduceBase implements
     Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesTfIdfReducer.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfReducer.class);
   
   private HTable table;
   
@@ -65,12 +63,11 @@ public class BayesTfIdfReducer extends MapReduceBase implements
         vocabCount += values.next().get();
       }
       
-      log.info("{}\t{}", key, vocabCount);
+      BayesTfIdfReducer.log.info("{}\t{}", key, vocabCount);
       if (useHbase) {
         Put bu = new Put(Bytes.toBytes(BayesConstants.HBASE_COUNTS_ROW));
         bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
-            .toBytes(BayesConstants.FEATURE_SET_SIZE), Bytes
-            .toBytes(vocabCount));
+            .toBytes(BayesConstants.FEATURE_SET_SIZE), Bytes.toBytes(vocabCount));
         table.put(bu);
       }
       output.collect(key, new DoubleWritable(vocabCount));
@@ -86,14 +83,13 @@ public class BayesTfIdfReducer extends MapReduceBase implements
         String feature = key.stringAt(2);
         if (useHbase) {
           Put bu = new Put(Bytes.toBytes(feature));
-          bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
-              .toBytes(label), Bytes.toBytes(idfTimesDIJ));
+          bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(label), Bytes
+              .toBytes(idfTimesDIJ));
           table.put(bu);
         }
         
       }
-      reporter
-          .setStatus("Bayes TfIdf Reducer: " + key + " => " + idfTimesDIJ);
+      reporter.setStatus("Bayes TfIdf Reducer: " + key + " => " + idfTimesDIJ);
       output.collect(key, new DoubleWritable(idfTimesDIJ));
     } else {
       throw new IllegalArgumentException("Unexpected StringTuple: " + key);
@@ -103,17 +99,19 @@ public class BayesTfIdfReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters
-          .fromString(job.get("bayes.parameters", ""));
-      if (params.get("dataSource").equals("hbase")) useHbase = true;
-      else return;
+      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      if (params.get("dataSource").equals("hbase")) {
+        useHbase = true;
+      } else {
+        return;
+      }
       
       HBaseConfiguration hBconf = new HBaseConfiguration(job);
       
       table = new HTable(hBconf, job.get("output.table"));
       
     } catch (IOException e) {
-      log.error("Unexpected error during configuration", e);
+      BayesTfIdfReducer.log.error("Unexpected error during configuration", e);
     }
     
   }

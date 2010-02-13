@@ -28,26 +28,21 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 
 /**
  * 
- * {@link AggregatorMapper} outputs the pattern for each item in the pattern, so
- * that reducer can group them and select the top K frequent patterns
+ * {@link AggregatorMapper} outputs the pattern for each item in the pattern, so that reducer can group them
+ * and select the top K frequent patterns
  * 
  */
-public class AggregatorMapper extends
-    Mapper<Text,TopKStringPatterns,Text,TopKStringPatterns> {
+public class AggregatorMapper extends Mapper<Text,TopKStringPatterns,Text,TopKStringPatterns> {
   
   @Override
-  protected void map(Text key,
-                     TopKStringPatterns values,
-                     Context context) throws IOException,
-                                     InterruptedException {
+  protected void map(Text key, TopKStringPatterns values, Context context) throws IOException,
+                                                                          InterruptedException {
     for (Pair<List<String>,Long> pattern : values.getPatterns()) {
       for (String item : pattern.getFirst()) {
-        List<Pair<List<String>,Long>> patternSingularList
-            = new ArrayList<Pair<List<String>,Long>>();
+        List<Pair<List<String>,Long>> patternSingularList = new ArrayList<Pair<List<String>,Long>>();
         patternSingularList.add(pattern);
         context.setStatus("Aggregator Mapper:Grouping Patterns for " + item);
-        context.write(new Text(item), new TopKStringPatterns(
-            patternSingularList));
+        context.write(new Text(item), new TopKStringPatterns(patternSingularList));
       }
     }
     

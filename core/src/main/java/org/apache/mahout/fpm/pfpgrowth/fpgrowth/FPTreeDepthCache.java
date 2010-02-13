@@ -34,10 +34,10 @@ public class FPTreeDepthCache {
   private static int firstLevelCacheSize = 5;
   
   private static final Logger log = LoggerFactory.getLogger(
-      FPTreeDepthCache.class);
+    FPTreeDepthCache.class);
   
-  private final LeastKCache<Integer,FPTree> firstLevelCache 
-      = new LeastKCache<Integer,FPTree>(firstLevelCacheSize);
+  private final LeastKCache<Integer,FPTree> firstLevelCache
+  = new LeastKCache<Integer,FPTree>(FPTreeDepthCache.firstLevelCacheSize);
   
   private int hits;
   
@@ -46,12 +46,12 @@ public class FPTreeDepthCache {
   private final List<FPTree> treeCache = new ArrayList<FPTree>();
   
   public FPTreeDepthCache() {
-    log.info("Initializing FPTreeCache with firstLevelCacheSize: {}",
-      firstLevelCacheSize);
+    FPTreeDepthCache.log.info("Initializing FPTreeCache with firstLevelCacheSize: {}",
+      FPTreeDepthCache.firstLevelCacheSize);
   }
   
   public static int getFirstLevelCacheSize() {
-    return firstLevelCacheSize;
+    return FPTreeDepthCache.firstLevelCacheSize;
   }
   
   public static void setFirstLevelCacheSize(int firstLevelCacheSize) {

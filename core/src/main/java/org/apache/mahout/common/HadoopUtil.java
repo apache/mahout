@@ -31,24 +31,24 @@ public final class HadoopUtil {
   
   private static final Logger log = LoggerFactory.getLogger(HadoopUtil.class);
   
-  private HadoopUtil() {}
+  private HadoopUtil() { }
   
   public static void overwriteOutput(String output) throws IOException {
     Configuration conf = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {
-      log.warn("Deleting {}", outPath);
+      HadoopUtil.log.warn("Deleting {}", outPath);
       fs.delete(outPath, true);
     }
-    log.warn("Creating dir {}", outPath);
+    HadoopUtil.log.warn("Creating dir {}", outPath);
     fs.mkdirs(outPath);
   }
   
   public static void deletePath(String output, FileSystem fs) throws IOException {
     Path outPath = new Path(output);
     if (fs.exists(outPath)) {
-      log.warn("Deleting {}", outPath);
+      HadoopUtil.log.warn("Deleting {}", outPath);
       fs.delete(outPath, true);
     }
   }
@@ -56,14 +56,14 @@ public final class HadoopUtil {
   public static void deletePaths(Iterable<Path> paths, FileSystem fs) throws IOException {
     for (Path path : paths) {
       if (fs.exists(path)) {
-        log.warn("Deleting {}", path);
+        HadoopUtil.log.warn("Deleting {}", path);
         fs.delete(path, true);
       }
     }
   }
   
   public static void rename(Path from, Path to, FileSystem fs) throws IOException {
-    log.warn("Renaming " + from.toUri() + " to " + to.toUri());
+    HadoopUtil.log.warn("Renaming " + from.toUri() + " to " + to.toUri());
     fs.rename(from, to);
   }
 }

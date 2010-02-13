@@ -17,21 +17,21 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.parameters.Parameter;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.parameters.Parameter;
+import org.apache.mahout.math.CardinalityException;
+import org.apache.mahout.math.Vector;
+
 /**
- * This class implements a "manhattan distance" metric by summing the absolute values of the difference between each
- * coordinate
+ * This class implements a "manhattan distance" metric by summing the absolute values of the difference
+ * between each coordinate
  */
 public class ManhattanDistanceMeasure implements DistanceMeasure {
-
+  
   public static double distance(double[] p1, double[] p2) {
     double result = 0.0;
     for (int i = 0; i < p1.length; i++) {
@@ -39,22 +39,22 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     }
     return result;
   }
-
+  
   @Override
   public void configure(JobConf job) {
-    // nothing to do
+  // nothing to do
   }
-
+  
   @Override
   public Collection<Parameter<?>> getParameters() {
     return Collections.emptyList();
   }
-
+  
   @Override
   public void createParameters(String prefix, JobConf jobConf) {
-    // nothing to do
+  // nothing to do
   }
-
+  
   @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size()) {
@@ -62,17 +62,19 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     }
     double result = 0;
     Vector vector = v1.minus(v2);
-    Iterator<Vector.Element> iter = vector.iterateNonZero();//this contains all non zero elements between the two
+    Iterator<Vector.Element> iter = vector.iterateNonZero(); // this contains all non zero elements between
+                                                             // the
+    // two
     while (iter.hasNext()) {
       Vector.Element e = iter.next();
       result += Math.abs(v2.getQuick(e.index()) - v1.getQuick(e.index()));
     }
     return result;
   }
-
+  
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
     return distance(centroid, v); // TODO
   }
-
+  
 }

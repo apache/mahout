@@ -18,15 +18,14 @@
 package org.apache.mahout.classifier;
 
 /**
- * Result of a Document Classification. The label and the associated
- * score(Usually probabilty)
+ * Result of a Document Classification. The label and the associated score(Usually probabilty)
  */
 public class ClassifierResult {
   private String label;
   private double score;
   
   public ClassifierResult() { }
-
+  
   public ClassifierResult(String label, double score) {
     this.label = label;
     this.score = score;
@@ -54,7 +53,6 @@ public class ClassifierResult {
   
   @Override
   public String toString() {
-    return "ClassifierResult{" + "category='" + label + '\'' + ", score="
-        + score + '}';
+    return "ClassifierResult{" + "category='" + label + '\'' + ", score=" + score + '}';
   }
 }

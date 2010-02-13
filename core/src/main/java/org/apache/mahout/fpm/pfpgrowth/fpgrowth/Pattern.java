@@ -43,12 +43,12 @@ public class Pattern implements Comparable<Pattern> {
   private long[] supportValues;
   
   public Pattern() {
-    this(DEFAULT_INITIAL_SIZE);
+    this(Pattern.DEFAULT_INITIAL_SIZE);
   }
   
   private Pattern(int size) {
-    if (size < DEFAULT_INITIAL_SIZE) {
-      size = DEFAULT_INITIAL_SIZE;
+    if (size < Pattern.DEFAULT_INITIAL_SIZE) {
+      size = Pattern.DEFAULT_INITIAL_SIZE;
     }
     this.pattern = new int[size];
     this.supportValues = new long[size];
@@ -61,7 +61,7 @@ public class Pattern implements Comparable<Pattern> {
     }
     this.pattern[length] = id;
     this.supportValues[length++] = supportCount;
-    this.support = (supportCount > this.support) ? this.support : supportCount;
+    this.support = supportCount > this.support ? this.support : supportCount;
     dirty = true;
   }
   
@@ -144,9 +144,9 @@ public class Pattern implements Comparable<Pattern> {
   }
   
   private void resize() {
-    int size = (int) (GROWTH_RATE * length);
-    if (size < DEFAULT_INITIAL_SIZE) {
-      size = DEFAULT_INITIAL_SIZE;
+    int size = (int) (Pattern.GROWTH_RATE * length);
+    if (size < Pattern.DEFAULT_INITIAL_SIZE) {
+      size = Pattern.DEFAULT_INITIAL_SIZE;
     }
     int[] oldpattern = pattern;
     long[] oldSupport = supportValues;

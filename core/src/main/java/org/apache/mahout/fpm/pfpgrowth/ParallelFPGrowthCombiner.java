@@ -26,18 +26,16 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.Pair;
 
 /**
- * {@link ParallelFPGrowthCombiner} takes each group of dependent transactions
- * and\ compacts it in a TransactionTree structure
+ * {@link ParallelFPGrowthCombiner} takes each group of dependent transactions and\ compacts it in a
+ * TransactionTree structure
  */
 
 public class ParallelFPGrowthCombiner extends
     Reducer<LongWritable,TransactionTree,LongWritable,TransactionTree> {
   
   @Override
-  protected void reduce(LongWritable key,
-                        Iterable<TransactionTree> values,
-                        Context context) throws IOException,
-                                        InterruptedException {
+  protected void reduce(LongWritable key, Iterable<TransactionTree> values, Context context) throws IOException,
+                                                                                            InterruptedException {
     TransactionTree cTree = new TransactionTree();
     int count = 0;
     int node = 0;

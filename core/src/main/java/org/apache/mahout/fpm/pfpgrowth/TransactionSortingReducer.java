@@ -23,9 +23,8 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
 /**
- * {@link TransactionSortingReducer} takes each group of transactions and runs
- * Vanilla FPGrowth on it and outputs the the Top K frequent Patterns for each
- * group.
+ * {@link TransactionSortingReducer} takes each group of transactions and runs Vanilla FPGrowth on it and
+ * outputs the the Top K frequent Patterns for each group.
  * 
  */
 
@@ -35,12 +34,10 @@ public class TransactionSortingReducer extends
   private static final LongWritable ONE = new LongWritable(1);
   
   @Override
-  protected void reduce(LongWritable key,
-                        Iterable<TransactionTree> values,
-                        Context context) throws IOException,
-                                        InterruptedException {
+  protected void reduce(LongWritable key, Iterable<TransactionTree> values, Context context) throws IOException,
+                                                                                            InterruptedException {
     for (TransactionTree tr : values) {
-      context.write(ONE, tr);
+      context.write(TransactionSortingReducer.ONE, tr);
     }
   }
 }

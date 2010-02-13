@@ -33,26 +33,27 @@ import org.apache.hadoop.io.WritableComparable;
  * 
  */
 public class IntegerTuple implements WritableComparable<IntegerTuple> {
-
+  
   private List<Integer> tuple = new ArrayList<Integer>();
-
-  public IntegerTuple() {
-  }
-
+  
+  public IntegerTuple() { }
+  
   public IntegerTuple(Integer firstEntry) {
     add(firstEntry);
   }
   
   public IntegerTuple(Collection<Integer> entries) {
-    for(Integer entry: entries)
+    for (Integer entry : entries) {
       add(entry);
+    }
   }
   
   public IntegerTuple(Integer[] entries) {
-    for(Integer entry: entries)
+    for (Integer entry : entries) {
       add(entry);
+    }
   }
-
+  
   /**
    * add an entry to the end of the list
    * 
@@ -62,7 +63,7 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
   public boolean add(Integer entry) {
     return tuple.add(entry);
   }
-
+  
   /**
    * Fetches the string at the given location
    * 
@@ -72,7 +73,7 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
   public Integer integerAt(int index) {
     return tuple.get(index);
   }
-
+  
   /**
    * Replaces the string at the given index with the given newString
    * 
@@ -83,7 +84,7 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
   public Integer replaceAt(int index, Integer newInteger) {
     return tuple.set(index, newInteger);
   }
-
+  
   /**
    * Fetch the list of entries from the tuple
    * 
@@ -92,7 +93,7 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
   public List<Integer> getEntries() {
     return Collections.unmodifiableList(this.tuple);
   }
-
+  
   /**
    * Returns the length of the tuple
    * 
@@ -101,34 +102,39 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
   public int length() {
     return this.tuple.size();
   }
-
+  
   @Override
   public String toString() {
     return tuple.toString();
   }
-
+  
   @Override
   public int hashCode() {
     return tuple.hashCode();
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     IntegerTuple other = (IntegerTuple) obj;
     if (tuple == null) {
-      if (other.tuple != null)
+      if (other.tuple != null) {
         return false;
-    } else if (!tuple.equals(other.tuple))
+      }
+    } else if (!tuple.equals(other.tuple)) {
       return false;
+    }
     return true;
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     int len = in.readInt();
@@ -138,15 +144,15 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
       tuple.add(data);
     }
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(tuple.size());
-    for (Integer entry : tuple) {     
-      out.writeInt(entry);     
+    for (Integer entry : tuple) {
+      out.writeInt(entry);
     }
   }
-
+  
   @Override
   public int compareTo(IntegerTuple otherTuple) {
     int thisLength = length();
@@ -154,8 +160,9 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
     int min = Math.min(thisLength, otherLength);
     for (int i = 0; i < min; i++) {
       int ret = this.tuple.get(i).compareTo(otherTuple.integerAt(i));
-      if (ret == 0)
+      if (ret == 0) {
         continue;
+      }
       return ret;
     }
     if (thisLength < otherLength) {
@@ -166,5 +173,5 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
       return 0;
     }
   }
-
+  
 }

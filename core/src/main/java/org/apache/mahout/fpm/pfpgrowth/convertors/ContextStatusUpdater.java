@@ -19,16 +19,17 @@ package org.apache.mahout.fpm.pfpgrowth.convertors;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Reducer;
+
 /**
  * Updates the Context object of a {@link Reducer} class
- *
+ * 
  * @param <IK>
  * @param <IV>
  * @param <K>
  * @param <V>
  */
-public class ContextStatusUpdater<IK extends Writable,IV extends Writable,
-    K extends Writable,V extends Writable> implements StatusUpdater {
+public class ContextStatusUpdater<IK extends Writable,IV extends Writable,K extends Writable,V extends Writable>
+    implements StatusUpdater {
   
   private static final long PERIOD = 10000; // Update every 10 seconds
   
@@ -43,7 +44,7 @@ public class ContextStatusUpdater<IK extends Writable,IV extends Writable,
   @Override
   public void update(String status) {
     long curTime = System.currentTimeMillis();
-    if (curTime - time > PERIOD && context != null) {
+    if (curTime - time > ContextStatusUpdater.PERIOD && context != null) {
       time = curTime;
       context.setStatus("Processing FPTree: " + status);
     }

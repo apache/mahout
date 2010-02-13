@@ -35,13 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This Class reads the different interim files created during the Training
- * stage as well as the Model File during testing.
+ * This Class reads the different interim files created during the Training stage as well as the Model File
+ * during testing.
  */
 public final class SequenceFileModelReader {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(SequenceFileModelReader.class);
+  private static final Logger log = LoggerFactory.getLogger(SequenceFileModelReader.class);
   
   private SequenceFileModelReader() { }
   
@@ -50,12 +49,11 @@ public final class SequenceFileModelReader {
                                Parameters params,
                                Configuration conf) throws IOException {
     
-    loadFeatureWeights(datastore, fs, new Path(params.get("sigma_j")), conf);
-    loadLabelWeights(datastore, fs, new Path(params.get("sigma_k")), conf);
-    loadSumWeight(datastore, fs, new Path(params.get("sigma_kSigma_j")), conf);
-    loadThetaNormalizer(datastore, fs, new Path(params.get("thetaNormalizer")),
-      conf);
-    loadWeightMatrix(datastore, fs, new Path(params.get("weight")), conf);
+    SequenceFileModelReader.loadFeatureWeights(datastore, fs, new Path(params.get("sigma_j")), conf);
+    SequenceFileModelReader.loadLabelWeights(datastore, fs, new Path(params.get("sigma_k")), conf);
+    SequenceFileModelReader.loadSumWeight(datastore, fs, new Path(params.get("sigma_kSigma_j")), conf);
+    SequenceFileModelReader.loadThetaNormalizer(datastore, fs, new Path(params.get("thetaNormalizer")), conf);
+    SequenceFileModelReader.loadWeightMatrix(datastore, fs, new Path(params.get("weight")), conf);
     
   }
   
@@ -70,14 +68,13 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      log.info("{}", path);
+      SequenceFileModelReader.log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       // the key is label,feature
       while (reader.next(key, value)) {
         
-        datastore.loadFeatureWeight(key.stringAt(2), key.stringAt(1), value
-            .get());
+        datastore.loadFeatureWeight(key.stringAt(2), key.stringAt(1), value.get());
         
       }
     }
@@ -94,7 +91,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      log.info("{}", path);
+      SequenceFileModelReader.log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       // the key is either _label_ or label,feature
@@ -105,7 +102,7 @@ public final class SequenceFileModelReader {
           datastore.setSumFeatureWeight(key.stringAt(1), value.get());
           count++;
           if (count % 50000 == 0) {
-            log.info("Read {} feature weights", count);
+            SequenceFileModelReader.log.info("Read {} feature weights", count);
           }
         }
       }
@@ -123,7 +120,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      log.info("{}", path);
+      SequenceFileModelReader.log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       long count = 0;
@@ -133,7 +130,7 @@ public final class SequenceFileModelReader {
           datastore.setSumLabelWeight(key.stringAt(1), value.get());
           count++;
           if (count % 10000 == 0) {
-            log.info("Read {} label weights", count);
+            SequenceFileModelReader.log.info("Read {} label weights", count);
           }
         }
       }
@@ -151,7 +148,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      log.info("{}", path);
+      SequenceFileModelReader.log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       long count = 0;
@@ -161,7 +158,7 @@ public final class SequenceFileModelReader {
           datastore.setThetaNormalizer(key.stringAt(1), value.get());
           count++;
           if (count % 50000 == 0) {
-            log.info("Read {} theta norms", count);
+            SequenceFileModelReader.log.info("Read {} theta norms", count);
           }
         }
       }
@@ -179,7 +176,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      log.info("{}", path);
+      SequenceFileModelReader.log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       // the key is _label
@@ -189,7 +186,7 @@ public final class SequenceFileModelReader {
           // weights for
           // all Features and all Labels
           datastore.setSigmaJSigmaK(value.get());
-          log.info("{}", value.get());
+          SequenceFileModelReader.log.info("{}", value.get());
         }
       }
     }
@@ -244,9 +241,7 @@ public final class SequenceFileModelReader {
     return labelDocumentCounts;
   }
   
-  public static double readSigmaJSigmaK(FileSystem fs,
-                                        Path pathPattern,
-                                        Configuration conf) throws IOException {
+  public static double readSigmaJSigmaK(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
     Map<String,Double> weightSum = new HashMap<String,Double>();
     StringTuple key = new StringTuple();
     DoubleWritable value = new DoubleWritable();
@@ -268,9 +263,7 @@ public final class SequenceFileModelReader {
     return weightSum.get(BayesConstants.TOTAL_SUM);
   }
   
-  public static double readVocabCount(FileSystem fs,
-                                      Path pathPattern,
-                                      Configuration conf) throws IOException {
+  public static double readVocabCount(FileSystem fs, Path pathPattern, Configuration conf) throws IOException {
     Map<String,Double> weightSum = new HashMap<String,Double>();
     StringTuple key = new StringTuple();
     DoubleWritable value = new DoubleWritable();

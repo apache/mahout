@@ -26,24 +26,20 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 
 /**
  * 
- * {@link AggregatorReducer} groups all Frequent Patterns containing an item and
- * outputs the top K patterns containing that particular item
+ * {@link AggregatorReducer} groups all Frequent Patterns containing an item and outputs the top K patterns
+ * containing that particular item
  * 
  */
-public class AggregatorReducer extends
-    Reducer<Text,TopKStringPatterns,Text,TopKStringPatterns> {
+public class AggregatorReducer extends Reducer<Text,TopKStringPatterns,Text,TopKStringPatterns> {
   
   private int maxHeapSize = 50;
   
   @Override
-  protected void reduce(Text key,
-                        Iterable<TopKStringPatterns> values,
-                        Context context) throws IOException,
-                                        InterruptedException {
+  protected void reduce(Text key, Iterable<TopKStringPatterns> values, Context context) throws IOException,
+                                                                                       InterruptedException {
     TopKStringPatterns patterns = new TopKStringPatterns();
     for (TopKStringPatterns value : values) {
-      context.setStatus("Aggregator Reducer: Selecting TopK patterns for: "
-                        + key);
+      context.setStatus("Aggregator Reducer: Selecting TopK patterns for: " + key);
       patterns = patterns.merge(value, maxHeapSize);
     }
     context.write(key, patterns);
@@ -51,11 +47,9 @@ public class AggregatorReducer extends
   }
   
   @Override
-  protected void setup(Context context) throws IOException,
-                                       InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get(
-      "pfp.parameters", ""));
+    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
     maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
     
   }

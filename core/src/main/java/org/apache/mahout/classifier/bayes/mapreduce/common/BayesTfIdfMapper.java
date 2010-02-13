@@ -41,22 +41,19 @@ import org.slf4j.LoggerFactory;
 public class BayesTfIdfMapper extends MapReduceBase implements
     Mapper<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesTfIdfMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesTfIdfMapper.class);
   
-  private static final StringTuple VOCAB_COUNT = new StringTuple(
-      BayesConstants.FEATURE_SET_SIZE);
+  private static final StringTuple VOCAB_COUNT = new StringTuple(BayesConstants.FEATURE_SET_SIZE);
   
   private static final DoubleWritable ONE = new DoubleWritable(1.0);
   
-  private OpenObjectDoubleHashMap<String> labelDocumentCounts = new OpenObjectDoubleHashMap<String>();
+  private final OpenObjectDoubleHashMap<String> labelDocumentCounts = new OpenObjectDoubleHashMap<String>();
   
   /**
    * We need to calculate the Tf-Idf of each feature in each label
    * 
    * @param key
-   *          The label,feature pair (can either be the freq Count or the term
-   *          Document count
+   *          The label,feature pair (can either be the freq Count or the term Document count
    */
   @Override
   public void map(StringTuple key,
@@ -75,12 +72,16 @@ public class BayesTfIdfMapper extends MapReduceBase implements
         key.replaceAt(0, BayesConstants.WEIGHT);
         output.collect(key, new DoubleWritable(logIdf));
         reporter.setStatus("Bayes TfIdf Mapper: log(Idf): " + key);
-      } else throw new IllegalArgumentException("Unrecognized Tuple: " + key);
+      } else {
+        throw new IllegalArgumentException("Unrecognized Tuple: " + key);
+      }
     } else if (key.length() == 2) {
       if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
-        output.collect(VOCAB_COUNT, ONE);
+        output.collect(BayesTfIdfMapper.VOCAB_COUNT, BayesTfIdfMapper.ONE);
         reporter.setStatus("Bayes TfIdf Mapper: vocabCount");
-      } else throw new IllegalArgumentException("Unexpected Tuple: " + key);
+      } else {
+        throw new IllegalArgumentException("Unexpected Tuple: " + key);
+      }
     }
     
   }
@@ -91,13 +92,11 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       this.labelDocumentCounts.clear();
       Map<String,Double> labelDocCountTemp = new HashMap<String,Double>();
       
-      DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
-          job, GenericsUtil.getClass(labelDocCountTemp));
+      DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(job,
+          GenericsUtil.getClass(labelDocCountTemp));
       
-      String labelDocumentCountString = mapStringifier
-          .toString(labelDocCountTemp);
-      labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts",
-        labelDocumentCountString);
+      String labelDocumentCountString = mapStringifier.toString(labelDocCountTemp);
+      labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
       
       labelDocCountTemp = mapStringifier.fromString(labelDocumentCountString);
       for (String key : labelDocCountTemp.keySet()) {
@@ -105,7 +104,7 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       }
       
     } catch (IOException ex) {
-      log.warn(ex.toString(), ex);
+      BayesTfIdfMapper.log.warn(ex.toString(), ex);
     }
   }
   

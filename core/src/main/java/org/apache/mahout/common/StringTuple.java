@@ -31,12 +31,11 @@ import org.apache.hadoop.io.WritableComparable;
  * An Ordered List of Strings which can be used in a Hadoop Map/Reduce Job
  */
 public final class StringTuple implements WritableComparable<StringTuple> {
-
+  
   private List<String> tuple = new ArrayList<String>();
-
-  public StringTuple() {
-  }
-
+  
+  public StringTuple() { }
+  
   public StringTuple(String firstEntry) {
     add(firstEntry);
   }
@@ -46,13 +45,13 @@ public final class StringTuple implements WritableComparable<StringTuple> {
       add(entry);
     }
   }
-
+  
   public StringTuple(String[] entries) {
     for (String entry : entries) {
       add(entry);
     }
   }
-
+  
   /**
    * add an entry to the end of the list
    * 
@@ -62,7 +61,7 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   public boolean add(String entry) {
     return tuple.add(entry);
   }
-
+  
   /**
    * Fetches the string at the given location
    * 
@@ -72,7 +71,7 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   public String stringAt(int index) {
     return tuple.get(index);
   }
-
+  
   /**
    * Replaces the string at the given index with the given newString
    * 
@@ -83,7 +82,7 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   public String replaceAt(int index, String newString) {
     return tuple.set(index, newString);
   }
-
+  
   /**
    * Fetch the list of entries from the tuple
    * 
@@ -92,7 +91,7 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   public List<String> getEntries() {
     return Collections.unmodifiableList(this.tuple);
   }
-
+  
   /**
    * Returns the length of the tuple
    * 
@@ -101,34 +100,39 @@ public final class StringTuple implements WritableComparable<StringTuple> {
   public int length() {
     return this.tuple.size();
   }
-
+  
   @Override
   public String toString() {
     return tuple.toString();
   }
-
+  
   @Override
   public int hashCode() {
     return tuple.hashCode();
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     StringTuple other = (StringTuple) obj;
     if (tuple == null) {
-      if (other.tuple != null)
+      if (other.tuple != null) {
         return false;
-    } else if (!tuple.equals(other.tuple))
+      }
+    } else if (!tuple.equals(other.tuple)) {
       return false;
+    }
     return true;
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     int len = in.readInt();
@@ -139,7 +143,7 @@ public final class StringTuple implements WritableComparable<StringTuple> {
       tuple.add(value.toString());
     }
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(tuple.size());
@@ -149,7 +153,7 @@ public final class StringTuple implements WritableComparable<StringTuple> {
       value.write(out);
     }
   }
-
+  
   @Override
   public int compareTo(StringTuple otherTuple) {
     int thisLength = length();
@@ -169,5 +173,5 @@ public final class StringTuple implements WritableComparable<StringTuple> {
       return 0;
     }
   }
-
+  
 }

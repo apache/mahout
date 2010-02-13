@@ -17,16 +17,16 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.mahout.math.Vector;
-
 import java.util.Iterator;
 
+import org.apache.mahout.math.Vector;
+
 /**
- * This class implements a Euclidean distance metric by summing the square root of the squared differences between each
- * coordinate,  optionally adding weights.
+ * This class implements a Euclidean distance metric by summing the square root of the squared differences
+ * between each coordinate, optionally adding weights.
  */
 public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
-
+  
   @Override
   public double distance(Vector p1, Vector p2) {
     double result = 0;
@@ -47,10 +47,10 @@ public class WeightedEuclideanDistanceMeasure extends WeightedDistanceMeasure {
     }
     return Math.sqrt(result);
   }
-
+  
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
     return distance(centroid, v); // TODO
   }
-
+  
 }

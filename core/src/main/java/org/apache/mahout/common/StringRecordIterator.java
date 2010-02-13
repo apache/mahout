@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class StringRecordIterator implements Iterator<Pair<List<String>,Long>> {
-
+  
   private static final Long ONE = 1L;
   
   private final Iterator<String> lineIterator;
@@ -43,7 +43,7 @@ public class StringRecordIterator implements Iterator<Pair<List<String>,Long>> {
   public Pair<List<String>,Long> next() {
     String line = lineIterator.next();
     String[] items = splitter.split(line);
-    return new Pair<List<String>,Long>(Arrays.asList(items), ONE);
+    return new Pair<List<String>,Long>(Arrays.asList(items), StringRecordIterator.ONE);
   }
   
   @Override

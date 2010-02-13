@@ -20,92 +20,91 @@ package org.apache.mahout.common;
 import java.io.Serializable;
 
 public final class TimingStatistics implements Serializable {
-
+  
   private int nCalls;
   private long minTime;
   private long maxTime;
   private long sumTime;
   private double sumSquaredTime;
-
+  
   /** Creates a new instance of CallStats */
-  public TimingStatistics() {
-  }
-
-  public TimingStatistics(int nCalls, long minTime, long maxTime, long sumTime,
-                          double sumSquaredTime) {
+  public TimingStatistics() { }
+  
+  public TimingStatistics(int nCalls, long minTime, long maxTime, long sumTime, double sumSquaredTime) {
     this.nCalls = nCalls;
     this.minTime = minTime;
     this.maxTime = maxTime;
     this.sumTime = sumTime;
     this.sumSquaredTime = sumSquaredTime;
   }
-
+  
   public synchronized int getNCalls() {
     return nCalls;
   }
-
+  
   public synchronized long getMinTime() {
     return Math.max(0, minTime);
   }
-
+  
   public synchronized long getMaxTime() {
     return maxTime;
   }
-
+  
   public synchronized long getSumTime() {
     return sumTime;
   }
-
+  
   public synchronized double getSumSquaredTime() {
     return sumSquaredTime;
   }
-
+  
   public synchronized long getMeanTime() {
     return nCalls == 0 ? 0 : sumTime / nCalls;
   }
-
+  
   public synchronized long getStdDevTime() {
-    if (nCalls == 0)
+    if (nCalls == 0) {
       return 0;
+    }
     double mean = getMeanTime();
     double meanSquared = mean * mean;
     double meanOfSquares = sumSquaredTime / nCalls;
     double variance = meanOfSquares - meanSquared;
-    if (variance < 0)
-      return 0;  // might happen due to rounding error
+    if (variance < 0) {
+      return 0; // might happen due to rounding error
+    }
     return (long) Math.sqrt(variance);
   }
-
+  
+  @Override
   public synchronized String toString() {
-    return '\n' +
-        "nCalls = " + nCalls + ";\n" +
-        "sumTime = " + sumTime / 1000000000.0f + "s;\n" +
-        "minTime = " + minTime / 1000000.0f + "ms;\n" +
-        "maxTime = " + maxTime / 1000000.0f + "ms;\n" +
-        "meanTime = " + getMeanTime() / 1000000.0f + "ms;\n" +
-        "stdDevTime = " + getStdDevTime() / 1000000.0f + "ms;";
+    return '\n' + "nCalls = " + nCalls + ";\n" + "sumTime = " + sumTime / 1000000000.0f + "s;\n"
+           + "minTime = " + minTime / 1000000.0f + "ms;\n" + "maxTime = " + maxTime / 1000000.0f + "ms;\n"
+           + "meanTime = " + getMeanTime() / 1000000.0f + "ms;\n" + "stdDevTime = " + getStdDevTime()
+           / 1000000.0f + "ms;";
   }
-
+  
   public Call newCall() {
     return new Call();
   }
-
+  
   public class Call {
     private final long startTime = System.nanoTime();
-
-    private Call() {
-    }
-
+    
+    private Call() { }
+    
     public void end() {
       long elapsed = System.nanoTime() - startTime;
       synchronized (TimingStatistics.this) {
         nCalls++;
-        if (elapsed < minTime || nCalls == 1)
+        if (elapsed < minTime || nCalls == 1) {
           minTime = elapsed;
-        if (elapsed > maxTime)
+        }
+        if (elapsed > maxTime) {
           maxTime = elapsed;
+        }
         sumTime += elapsed;
-        sumSquaredTime += (double) (elapsed * elapsed);
+        sumSquaredTime += elapsed * elapsed;
       }
     }
   }

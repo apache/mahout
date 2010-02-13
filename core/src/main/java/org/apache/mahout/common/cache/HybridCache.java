@@ -17,75 +17,78 @@
 
 package org.apache.mahout.common.cache;
 
-public class HybridCache<K, V> implements Cache<K, V> {
-
-  private int LFUCapacity = 0;
-
-  private int LRUCapacity = 0;
-
-  private LRUCache<K, V> lruCache = null;
-
-  private LFUCache<K, V> lfuCache = null;
-
+public class HybridCache<K,V> implements Cache<K,V> {
+  
+  private int lfuCapacity;
+  
+  private int lruCapacity;
+  
+  private LRUCache<K,V> lruCache;
+  
+  private LFUCache<K,V> lfuCache;
+  
   public HybridCache(int lfuCapacity, int lruCapacity) {
-
-    this.LFUCapacity = lfuCapacity;
-    this.LRUCapacity = lruCapacity;
-
-    lruCache = new LRUCache<K, V>(LRUCapacity);
-    lfuCache = new LFUCache<K, V>(LFUCapacity);
-
+    
+    this.lfuCapacity = lfuCapacity;
+    this.lruCapacity = lruCapacity;
+    
+    lruCache = new LRUCache<K,V>(lruCapacity);
+    lfuCache = new LFUCache<K,V>(lfuCapacity);
+    
   }
-
+  
   @Override
   public long capacity() {
-    return LFUCapacity + LRUCapacity;
+    return lfuCapacity + lruCapacity;
   }
-
+  
   @Override
   public V get(K key) {
     V LRUObject = LRUGet(key);
-    if (LRUObject != null)
+    if (LRUObject != null) {
       return LRUObject;
-
+    }
+    
     V lFUObject = LFUGet(key);
-    if (lFUObject != null)
+    if (lFUObject != null) {
       return lFUObject;
-
+    }
+    
     return null;
   }
-
+  
   private V LFUGet(K key) {
-    if (lfuCache.getEvictionCount() >= LFUCapacity)
+    if (lfuCache.getEvictionCount() >= lfuCapacity) {
       return lfuCache.quickGet(key);
+    }
     return lfuCache.get(key);
   }
-
+  
   private V LRUGet(K key) {
     return lruCache.get(key);
   }
-
+  
   @Override
   public void set(K key, V value) {
-
-    if (lfuCache.size() < LFUCapacity)
+    
+    if (lfuCache.size() < lfuCapacity) {
       lfuCache.set(key, value);
-    else if (lfuCache.getEvictionCount() < LFUCapacity) {
+    } else if (lfuCache.getEvictionCount() < lfuCapacity) {
       lfuCache.set(key, value);
       lruCache.set(key, value);
     } else {
       lruCache.set(key, value);
     }
   }
-
+  
   @Override
   public long size() {
     return lfuCache.size() + lruCache.size();
   }
-
+  
   @Override
   public boolean contains(K key) {
     return lruCache.contains(key) || lfuCache.contains(key);
   }
-
+  
 }

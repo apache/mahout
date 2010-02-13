@@ -21,56 +21,56 @@ import java.io.Serializable;
 
 /** A simple (ordered) pair of two objects. Elements may be null. */
 public final class Pair<A, B> implements Serializable {
-
+  
   private final A first;
   private final B second;
-
+  
   public Pair(A first, B second) {
     this.first = first;
     this.second = second;
   }
-
+  
   public A getFirst() {
     return first;
   }
-
+  
   public B getSecond() {
     return second;
   }
-
+  
   public Pair<B, A> swap() {
     return new Pair<B, A>(second, first);
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof Pair)) {
+    if (!(obj instanceof Pair<?, ?>)) {
       return false;
     }
     Pair<?, ?> otherPair = (Pair<?, ?>) obj;
-    return isEqualOrNulls(first, otherPair.getFirst()) &&
-           isEqualOrNulls(second, otherPair.getSecond());
+    return Pair.isEqualOrNulls(first, otherPair.getFirst()) &&
+    Pair.isEqualOrNulls(second, otherPair.getSecond());
   }
-
+  
   private static boolean isEqualOrNulls(Object obj1, Object obj2) {
     return obj1 == null ? obj2 == null : obj1.equals(obj2);
   }
-
+  
   @Override
   public int hashCode() {
-    int firstHash = hashCodeNull(first);
+    int firstHash = Pair.hashCodeNull(first);
     // Flip top and bottom 16 bits; this makes the hash function probably different
     // for (a,b) versus (b,a)
-    return (firstHash >>> 16 | firstHash << 16) ^ hashCodeNull(second);
+    return (firstHash >>> 16 | firstHash << 16) ^ Pair.hashCodeNull(second);
   }
-
+  
   private static int hashCodeNull(Object obj) {
     return obj == null ? 0 : obj.hashCode();
   }
-
+  
   @Override
   public String toString() {
     return '(' + String.valueOf(first) + ',' + second + ')';
   }
-
+  
 }

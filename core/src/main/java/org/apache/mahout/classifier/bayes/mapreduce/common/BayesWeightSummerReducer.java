@@ -39,8 +39,7 @@ import org.slf4j.LoggerFactory;
 public class BayesWeightSummerReducer extends MapReduceBase implements
     Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesWeightSummerReducer.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesWeightSummerReducer.class);
   
   private HTable table;
   
@@ -70,20 +69,19 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
         String feature = key.stringAt(1);
         
         Put bu = new Put(Bytes.toBytes(feature));
-        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
-            .toBytes(BayesConstants.FEATURE_SUM), Bytes.toBytes(sum));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(BayesConstants.FEATURE_SUM),
+          Bytes.toBytes(sum));
         table.put(bu);
         
       } else if (key.stringAt(0).equals(BayesConstants.LABEL_SUM)) {
         String label = key.stringAt(1);
         Put bu = new Put(Bytes.toBytes(BayesConstants.LABEL_SUM));
-        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
-            .toBytes(label), Bytes.toBytes(sum));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(label), Bytes.toBytes(sum));
         table.put(bu);
       } else if (key.stringAt(0).equals(BayesConstants.TOTAL_SUM)) {
         Put bu = new Put(Bytes.toBytes(BayesConstants.HBASE_COUNTS_ROW));
-        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
-            .toBytes(BayesConstants.TOTAL_SUM), Bytes.toBytes(sum));
+        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(BayesConstants.TOTAL_SUM),
+          Bytes.toBytes(sum));
         table.put(bu);
       }
     }
@@ -94,15 +92,17 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters
-          .fromString(job.get("bayes.parameters", ""));
-      if (params.get("dataSource").equals("hbase")) useHbase = true;
-      else return;
+      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      if (params.get("dataSource").equals("hbase")) {
+        useHbase = true;
+      } else {
+        return;
+      }
       
       HBaseConfiguration hBconf = new HBaseConfiguration(job);
       table = new HTable(hBconf, job.get("output.table"));
     } catch (IOException e) {
-      log.error("Unexpected error during configuration", e);
+      BayesWeightSummerReducer.log.error("Unexpected error during configuration", e);
     }
     
   }

@@ -17,21 +17,21 @@
 
 package org.apache.mahout.common.parameters;
 
-import org.apache.hadoop.mapred.JobConf;
-
 import java.io.File;
 
-public class FileParameter extends AbstractParameter<File> {
+import org.apache.hadoop.mapred.JobConf;
 
+public class FileParameter extends AbstractParameter<File> {
+  
   public FileParameter(String prefix, String name, JobConf jobConf, File defaultValue, String description) {
     super(File.class, prefix, name, jobConf, defaultValue, description);
   }
-
+  
   @Override
   public void setStringValue(String stringValue) {
     set(new File(stringValue));
   }
-
+  
   @Override
   public String getStringValue() {
     if (get() == null) {

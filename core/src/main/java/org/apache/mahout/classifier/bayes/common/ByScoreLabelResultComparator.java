@@ -26,8 +26,7 @@ import org.apache.mahout.classifier.ClassifierResult;
  * Compare two results of classification and return the lowest valued one
  * 
  */
-public final class ByScoreLabelResultComparator implements
-    Comparator<ClassifierResult>, Serializable {
+public final class ByScoreLabelResultComparator implements Comparator<ClassifierResult>, Serializable {
   
   @Override
   public int compare(ClassifierResult cr1, ClassifierResult cr2) {

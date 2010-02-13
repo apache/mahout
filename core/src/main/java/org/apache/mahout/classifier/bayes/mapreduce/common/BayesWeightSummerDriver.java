@@ -51,8 +51,7 @@ public class BayesWeightSummerDriver implements BayesJob {
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
     
-    FileInputFormat.addInputPath(conf, new Path(
-        output + "/trainer-tfIdf/trainer-tfIdf"));
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-weights");
     FileOutputFormat.setOutputPath(conf, outPath);
     // conf.setNumReduceTasks(1);

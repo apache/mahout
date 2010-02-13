@@ -20,18 +20,20 @@ package org.apache.mahout.common.distance;
 import org.apache.mahout.math.Vector;
 
 /**
- * This class implements a Euclidean distance metric by summing the square root of the squared differences between each
- * coordinate. <p/> If you don't care about the true distance and only need the values for comparison, then the base
- * class, {@link SquaredEuclideanDistanceMeasure}, will be faster since it doesn't do the actual square root of the
+ * This class implements a Euclidean distance metric by summing the square root of the squared differences
+ * between each coordinate.
+ * <p/>
+ * If you don't care about the true distance and only need the values for comparison, then the base class,
+ * {@link SquaredEuclideanDistanceMeasure}, will be faster since it doesn't do the actual square root of the
  * squared differences.
  */
 public class EuclideanDistanceMeasure extends SquaredEuclideanDistanceMeasure {
-
+  
   @Override
   public double distance(Vector v1, Vector v2) {
     return Math.sqrt(super.distance(v1, v2));
   }
-
+  
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
     return Math.sqrt(super.distance(centroidLengthSquare, centroid, v));

@@ -20,48 +20,48 @@ package org.apache.mahout.common.cache;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class LRUCache<K, V> implements Cache<K, V> {
-
-  private int capacity = 0;
+public class LRUCache<K,V> implements Cache<K,V> {
   
-  private Map<K, V> lruCache = null;
+  private int capacity;
+  
+  private Map<K,V> lruCache;
   
   public LRUCache(final int capacity) {
-
+    
     this.capacity = capacity;
-
-    lruCache = new LinkedHashMap<K,V>( (int)(capacity/0.75f + 1), 0.75f, true) { 
+    
+    lruCache = new LinkedHashMap<K,V>((int) (capacity / 0.75f + 1), 0.75f, true) {
       @Override
-      protected boolean removeEldestEntry (Map.Entry<K,V> eldest) {
+      protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
         return size() > capacity;
       }
     };
-      
+    
   }
-
+  
   @Override
   public long capacity() {
     return capacity;
   }
-
+  
   @Override
   public V get(K key) {
     return lruCache.get(key);
   }
-
+  
   @Override
   public void set(K key, V value) {
-      lruCache.put(key,value);
+    lruCache.put(key, value);
   }
-
+  
   @Override
   public long size() {
     return lruCache.size();
   }
-
+  
   @Override
   public boolean contains(K key) {
-    return (lruCache.containsKey(key));  
+    return lruCache.containsKey(key);
   }
-
+  
 }

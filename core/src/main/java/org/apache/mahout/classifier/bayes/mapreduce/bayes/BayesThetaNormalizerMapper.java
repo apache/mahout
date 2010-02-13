@@ -37,17 +37,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Mapper for Calculating the ThetaNormalizer for a label in Naive Bayes
- * Algorithm
+ * Mapper for Calculating the ThetaNormalizer for a label in Naive Bayes Algorithm
  * 
  */
 public class BayesThetaNormalizerMapper extends MapReduceBase implements
     Mapper<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(BayesThetaNormalizerMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(BayesThetaNormalizerMapper.class);
   
-  private OpenObjectDoubleHashMap<String> labelWeightSum = new OpenObjectDoubleHashMap<String>();
+  private final OpenObjectDoubleHashMap<String> labelWeightSum = new OpenObjectDoubleHashMap<String>();
   private double sigmaJSigmaK;
   private double vocabCount;
   private double alphaI = 1.0;
@@ -70,10 +68,8 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
     
     reporter.setStatus("Bayes Theta Normalizer Mapper: " + label);
     
-    double weight = Math.log((value.get() + alphaI)
-                             / (labelWeightSum.get(label) + vocabCount));
-    StringTuple thetaNormalizerTuple = new StringTuple(
-        BayesConstants.LABEL_THETA_NORMALIZER);
+    double weight = Math.log((value.get() + alphaI) / (labelWeightSum.get(label) + vocabCount));
+    StringTuple thetaNormalizerTuple = new StringTuple(BayesConstants.LABEL_THETA_NORMALIZER);
     thetaNormalizerTuple.add(label);
     output.collect(thetaNormalizerTuple, new DoubleWritable(weight));
   }
@@ -84,33 +80,30 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
       labelWeightSum.clear();
       Map<String,Double> labelWeightSumTemp = new HashMap<String,Double>();
       
-      DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
-          job, GenericsUtil.getClass(labelWeightSumTemp));
+      DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(job,
+          GenericsUtil.getClass(labelWeightSumTemp));
       
       String labelWeightSumString = mapStringifier.toString(labelWeightSumTemp);
-      labelWeightSumString = job.get("cnaivebayes.sigma_k",
-        labelWeightSumString);
+      labelWeightSumString = job.get("cnaivebayes.sigma_k", labelWeightSumString);
       labelWeightSumTemp = mapStringifier.fromString(labelWeightSumString);
       for (String key : labelWeightSumTemp.keySet()) {
         this.labelWeightSum.put(key, labelWeightSumTemp.get(key));
       }
-      DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(
-          job, GenericsUtil.getClass(sigmaJSigmaK));
+      DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(job, GenericsUtil
+          .getClass(sigmaJSigmaK));
       String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
-      sigmaJSigmaKString = job.get("cnaivebayes.sigma_jSigma_k",
-        sigmaJSigmaKString);
+      sigmaJSigmaKString = job.get("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
       sigmaJSigmaK = stringifier.fromString(sigmaJSigmaKString);
       
       String vocabCountString = stringifier.toString(vocabCount);
       vocabCountString = job.get("cnaivebayes.vocabCount", vocabCountString);
       vocabCount = stringifier.fromString(vocabCountString);
       
-      Parameters params = Parameters
-          .fromString(job.get("bayes.parameters", ""));
+      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
       alphaI = Double.valueOf(params.get("alpha_i", "1.0"));
       
     } catch (IOException ex) {
-      log.warn(ex.toString(), ex);
+      BayesThetaNormalizerMapper.log.warn(ex.toString(), ex);
     }
   }
   

@@ -24,8 +24,8 @@ import java.util.Map;
 import org.apache.mahout.common.Pair;
 
 /**
- * Iterates over a Transaction and outputs the transaction integer id mapping
- * and the support of the transaction
+ * Iterates over a Transaction and outputs the transaction integer id mapping and the support of the
+ * transaction
  * 
  * @param <AP>
  */
@@ -36,8 +36,7 @@ public class TransactionIterator<AP> implements Iterator<Pair<int[],Long>> {
   
   private final int[] transactionBuffer;
   
-  public TransactionIterator(Iterator<Pair<List<AP>,Long>> iterator,
-                             Map<AP,Integer> attributeIdMapping) {
+  public TransactionIterator(Iterator<Pair<List<AP>,Long>> iterator, Map<AP,Integer> attributeIdMapping) {
     this.attributeIdMapping = attributeIdMapping;
     this.iterator = iterator;
     transactionBuffer = new int[attributeIdMapping.size()];

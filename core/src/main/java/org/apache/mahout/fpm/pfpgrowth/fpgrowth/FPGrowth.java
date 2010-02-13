@@ -27,8 +27,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
@@ -57,8 +57,8 @@ public class FPGrowth<A extends Comparable<? super A>> {
   private static final Logger log = LoggerFactory.getLogger(FPGrowth.class);
   
   public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(FileSystem fs,
-                                                                          Configuration conf,
-                                                                          Path path) throws IOException {
+    Configuration conf,
+    Path path) throws IOException {
     
     List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
     Text key = new Text();
@@ -83,7 +83,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
    * @return the List of features and their associated frequency as a Pair
    */
   public final List<Pair<A,Long>> generateFList(Iterator<Pair<List<A>,Long>> transactions,
-                                                int minSupport) {
+    int minSupport) {
     
     Map<A,MutableLong> attributeSupport = new HashMap<A,MutableLong>();
     // int count = 0;
@@ -92,7 +92,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       for (A attribute : transaction.getFirst()) {
         if (attributeSupport.containsKey(attribute) == false) {
           attributeSupport.put(attribute, new MutableLong(transaction
-              .getSecond()));
+            .getSecond()));
         } else {
           attributeSupport.get(attribute).add(
             transaction.getSecond().longValue());
@@ -174,15 +174,15 @@ public class FPGrowth<A extends Comparable<? super A>> {
       attributeFrequency[attributeIdMapping.get(attrib)] = frequency;
     }
     
-    log.info("Number of unique items {}", frequencyList.size());
+    FPGrowth.log.info("Number of unique items {}", frequencyList.size());
     
     Set<Integer> returnFeatures = new HashSet<Integer>();
     if (returnableFeatures.isEmpty() == false) {
       for (A attrib : returnableFeatures) {
         if (attributeIdMapping.containsKey(attrib)) {
           returnFeatures.add(attributeIdMapping.get(attrib));
-          log.info("Adding Pattern {}=>{}", attrib, attributeIdMapping
-              .get(attrib));
+          FPGrowth.log.info("Adding Pattern {}=>{}", attrib, attributeIdMapping
+            .get(attrib));
         }
       }
     } else {
@@ -191,11 +191,11 @@ public class FPGrowth<A extends Comparable<? super A>> {
       }
     }
     
-    log.info("Number of unique pruned items {}", attributeIdMapping.size());
+    FPGrowth.log.info("Number of unique pruned items {}", attributeIdMapping.size());
     generateTopKFrequentPatterns(new TransactionIterator<A>(transactionStream,
         attributeIdMapping), attributeFrequency, minSupport, k, reverseMapping
         .size(), returnFeatures, new TopKPatternsOutputConverter<A>(output,
-        reverseMapping), updater);
+            reverseMapping), updater);
     
   }
   
@@ -216,11 +216,11 @@ public class FPGrowth<A extends Comparable<? super A>> {
    * @return Top K Frequent Patterns for each feature and their support
    */
   private Map<Integer,FrequentPatternMaxHeap> fpGrowth(FPTree tree,
-                                                       MutableLong minSupportMutable,
-                                                       int k,
-                                                       Set<Integer> requiredFeatures,
-                                                       TopKPatternsOutputConverter<A> outputCollector,
-                                                       StatusUpdater updater) throws IOException {
+    MutableLong minSupportMutable,
+    int k,
+    Set<Integer> requiredFeatures,
+    TopKPatternsOutputConverter<A> outputCollector,
+    StatusUpdater updater) throws IOException {
     
     long minSupportValue = minSupportMutable.longValue();
     
@@ -231,18 +231,18 @@ public class FPGrowth<A extends Comparable<? super A>> {
       if (requiredFeatures.contains(attribute) == false) {
         continue;
       }
-      log.info("Mining FTree Tree for all patterns with {}", attribute);
+      FPGrowth.log.info("Mining FTree Tree for all patterns with {}", attribute);
       MutableLong minSupport = new MutableLong(minSupportValue);
-      FrequentPatternMaxHeap frequentPatterns = growth(tree, minSupport, k,
+      FrequentPatternMaxHeap frequentPatterns = FPGrowth.growth(tree, minSupport, k,
         treeCache, 0, attribute, updater);
       patterns.put(attribute, frequentPatterns);
       outputCollector.collect(attribute, frequentPatterns);
       
       minSupportValue = Math.max(minSupportValue, minSupport.longValue() / 2);
-      log.info("Found {} Patterns with Least Support {}", patterns.get(
+      FPGrowth.log.info("Found {} Patterns with Least Support {}", patterns.get(
         attribute).count(), patterns.get(attribute).leastSupport());
     }
-    log.info("Tree Cache: First Level: Cache hits={} Cache Misses={}",
+    FPGrowth.log.info("Tree Cache: First Level: Cache hits={} Cache Misses={}",
       treeCache.getHits(), treeCache.getMisses());
     return patterns;
   }
@@ -251,13 +251,13 @@ public class FPGrowth<A extends Comparable<? super A>> {
                                                                    int k,
                                                                    MutableLong minSupportMutable) {
     FrequentPatternMaxHeap frequentPatterns = new FrequentPatternMaxHeap(k,
-        false);
+      false);
     
     int tempNode = FPTree.ROOTNODEID;
     Pattern frequentItem = new Pattern();
     while (tree.childCount(tempNode) != 0) {
       if (tree.childCount(tempNode) > 1) {
-        log.info("This should not happen {} {}", tree.childCount(tempNode),
+        FPGrowth.log.info("This should not happen {} {}", tree.childCount(tempNode),
           tempNode);
       }
       tempNode = tree.childAtIndex(tempNode, 0);
@@ -295,13 +295,13 @@ public class FPGrowth<A extends Comparable<? super A>> {
    * @return Top K frequent patterns for each attribute
    */
   private Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(Iterator<Pair<int[],Long>> transactions,
-                                                                           long[] attributeFrequency,
-                                                                           long minSupport,
-                                                                           int k,
-                                                                           int featureSetSize,
-                                                                           Set<Integer> returnFeatures,
-                                                                           TopKPatternsOutputConverter<A> topKPatternsOutputCollector,
-                                                                           StatusUpdater updater) throws IOException {
+    long[] attributeFrequency,
+    long minSupport,
+    int k,
+    int featureSetSize,
+    Set<Integer> returnFeatures,
+    TopKPatternsOutputConverter<A> topKPatternsOutputCollector,
+    StatusUpdater updater) throws IOException {
     
     FPTree tree = new FPTree(featureSetSize);
     for (int i = 0; i < featureSetSize; i++) {
@@ -317,15 +317,15 @@ public class FPGrowth<A extends Comparable<? super A>> {
       Pair<int[],Long> transaction = transactions.next();
       Arrays.sort(transaction.getFirst());
       // attribcount += transaction.length;
-      nodecount += treeAddCount(tree, transaction.getFirst(), transaction
-          .getSecond(), minSupportMutable, attributeFrequency);
+      nodecount += FPGrowth.treeAddCount(tree, transaction.getFirst(), transaction
+        .getSecond(), minSupportMutable, attributeFrequency);
       i++;
       if (i % 10000 == 0) {
-        log.info("FPTree Building: Read {} Transactions", i);
+        FPGrowth.log.info("FPTree Building: Read {} Transactions", i);
       }
     }
     
-    log.info("Number of Nodes in the FP Tree: {}", nodecount);
+    FPGrowth.log.info("Number of Nodes in the FP Tree: {}", nodecount);
     
     return fpGrowth(tree, minSupportMutable, k, returnFeatures,
       topKPatternsOutputCollector, updater);
@@ -340,7 +340,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
                                                StatusUpdater updater) {
     
     FrequentPatternMaxHeap frequentPatterns = new FrequentPatternMaxHeap(k,
-        true);
+      true);
     
     int i = Arrays.binarySearch(tree.getHeaderTableAttributes(),
       currentAttribute);
@@ -360,7 +360,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       updater.update("FPGrowth Algorithm for a given feature: " + attribute);
       FPTree conditionalTree = treeCache.getFirstLevelTree(attribute);
       if (conditionalTree.isEmpty()) {
-        traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+        FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
           minSupportMutable, conditionalTree, tree);
         // printTree(conditionalTree);
         
@@ -369,15 +369,15 @@ public class FPGrowth<A extends Comparable<? super A>> {
       FrequentPatternMaxHeap returnedPatterns;
       if (attribute == currentAttribute) {
         
-        returnedPatterns = growthTopDown(conditionalTree, minSupportMutable, k,
+        returnedPatterns = FPGrowth.growthTopDown(conditionalTree, minSupportMutable, k,
           treeCache, level + 1, true, currentAttribute, updater);
         
-        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, true, true);
       } else {
-        returnedPatterns = growthTopDown(conditionalTree, minSupportMutable, k,
+        returnedPatterns = FPGrowth.growthTopDown(conditionalTree, minSupportMutable, k,
           treeCache, level + 1, false, currentAttribute, updater);
-        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, false, true);
       }
       if (frequentPatterns.isFull()) {
@@ -401,7 +401,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
                                                        StatusUpdater updater) {
     
     FrequentPatternMaxHeap frequentPatterns = new FrequentPatternMaxHeap(k,
-        false);
+      false);
     
     if (conditionalOfCurrentAttribute == false) {
       int index = Arrays.binarySearch(tree.getHeaderTableAttributes(),
@@ -418,7 +418,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     }
     
     if (tree.singlePath()) {
-      return generateSinglePathPatterns(tree, k, minSupportMutable);
+      return FPGrowth.generateSinglePathPatterns(tree, k, minSupportMutable);
     }
     
     updater.update("Bottom Up FP Growth");
@@ -432,28 +432,28 @@ public class FPGrowth<A extends Comparable<? super A>> {
       
       FrequentPatternMaxHeap returnedPatterns;
       if (conditionalOfCurrentAttribute) {
-        traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+        FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
           minSupportMutable, conditionalTree, tree);
-        returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
+        returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
           k, treeCache, level + 1, true, currentAttribute, updater);
         
-        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, true, false);
       } else {
         if (attribute == currentAttribute) {
-          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, true, currentAttribute, updater);
           
-          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, true, false);
         } else if (attribute > currentAttribute) {
-          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, false, currentAttribute, updater);
-          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, false, false);
         }
       }
@@ -478,7 +478,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
                                                       StatusUpdater updater) {
     
     FrequentPatternMaxHeap frequentPatterns = new FrequentPatternMaxHeap(k,
-        true);
+      true);
     
     if (conditionalOfCurrentAttribute == false) {
       int index = Arrays.binarySearch(tree.getHeaderTableAttributes(),
@@ -495,7 +495,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     }
     
     if (tree.singlePath()) {
-      return generateSinglePathPatterns(tree, k, minSupportMutable);
+      return FPGrowth.generateSinglePathPatterns(tree, k, minSupportMutable);
     }
     
     updater.update("Top Down Growth:");
@@ -511,29 +511,29 @@ public class FPGrowth<A extends Comparable<? super A>> {
       
       FrequentPatternMaxHeap returnedPatterns;
       if (conditionalOfCurrentAttribute) {
-        traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+        FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
           minSupportMutable, conditionalTree, tree);
         
-        returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
+        returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
           k, treeCache, level + 1, true, currentAttribute, updater);
-        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, true, true);
         
       } else {
         if (attribute == currentAttribute) {
-          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, true, currentAttribute, updater);
-          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, true, false);
           
         } else if (attribute > currentAttribute) {
-          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, false, currentAttribute, updater);
-          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, false, true);
           
         }
@@ -622,7 +622,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     
     tree.clearConditional();
     conditionalTree.reorderHeaderTable();
-    pruneFPTree(minSupportMutable, conditionalTree);
+    FPGrowth.pruneFPTree(minSupportMutable, conditionalTree);
     // prune Conditional Tree
     
   }

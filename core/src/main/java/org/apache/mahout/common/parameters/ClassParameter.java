@@ -20,11 +20,11 @@ package org.apache.mahout.common.parameters;
 import org.apache.hadoop.mapred.JobConf;
 
 public class ClassParameter extends AbstractParameter<Class> {
-
+  
   public ClassParameter(String prefix, String name, JobConf jobConf, Class<?> defaultValue, String description) {
     super(Class.class, prefix, name, jobConf, defaultValue, description);
   }
-
+  
   @Override
   public void setStringValue(String stringValue) {
     try {
@@ -33,7 +33,7 @@ public class ClassParameter extends AbstractParameter<Class> {
       throw new IllegalStateException(e);
     }
   }
-
+  
   @Override
   public String getStringValue() {
     if (get() == null) {

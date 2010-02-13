@@ -17,40 +17,41 @@
 
 package org.apache.mahout.common.distance;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.parameters.Parameter;
-
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.parameters.Parameter;
+import org.apache.mahout.math.Vector;
+
 /**
- * Like {@link EuclideanDistanceMeasure} but it does not take the square root. <p/> Thus, it is
- * not actually the Euclidean Distance, but it is saves on computation when you only need the distance for comparison
- * and don't care about the actual value as a distance.
+ * Like {@link EuclideanDistanceMeasure} but it does not take the square root.
+ * <p/>
+ * Thus, it is not actually the Euclidean Distance, but it is saves on computation when you only need the
+ * distance for comparison and don't care about the actual value as a distance.
  */
 public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
-
+  
   @Override
   public void configure(JobConf job) {
-    // nothing to do
+  // nothing to do
   }
-
+  
   @Override
   public Collection<Parameter<?>> getParameters() {
     return Collections.emptyList();
   }
-
+  
   @Override
   public void createParameters(String prefix, JobConf jobConf) {
-    // nothing to do
+  // nothing to do
   }
-
+  
   @Override
   public double distance(Vector v1, Vector v2) {
     return v1.getDistanceSquared(v2);
   }
-
+  
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
     return centroidLengthSquare - 2 * v.dot(centroid) + v.getLengthSquared();

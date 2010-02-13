@@ -25,8 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.common.Summarizable;
 
 /**
- * The ConfusionMatrix Class stores the result of Classification of a Test
- * Dataset.
+ * The ConfusionMatrix Class stores the result of Classification of a Test Dataset.
  * 
  * See http://en.wikipedia.org/wiki/Confusion_matrix for background
  */
@@ -94,11 +93,9 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public int getCount(String correctLabel, String classifiedLabel) {
-    if (labels.contains(correctLabel)
-        && labels.contains(classifiedLabel) == false
-        && defaultLabel.equals(classifiedLabel) == false) {
-      throw new IllegalArgumentException("Label not found " + correctLabel
-          + ' ' + classifiedLabel);
+    if (labels.contains(correctLabel) && (labels.contains(classifiedLabel) == false)
+        && (defaultLabel.equals(classifiedLabel) == false)) {
+      throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
     }
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
@@ -106,9 +103,8 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public void putCount(String correctLabel, String classifiedLabel, int count) {
-    if (labels.contains(correctLabel)
-        && labels.contains(classifiedLabel) == false
-        && defaultLabel.equals(classifiedLabel) == false) {
+    if (labels.contains(correctLabel) && (labels.contains(classifiedLabel) == false)
+        && (defaultLabel.equals(classifiedLabel) == false)) {
       throw new IllegalArgumentException("Label not found");
     }
     int correctId = labelMap.get(correctLabel);
@@ -116,10 +112,8 @@ public class ConfusionMatrix implements Summarizable {
     confusionMatrix[correctId][classifiedId] = count;
   }
   
-  public void incrementCount(String correctLabel, String classifiedLabel,
-      int count) {
-    putCount(correctLabel, classifiedLabel, count
-        + getCount(correctLabel, classifiedLabel));
+  public void incrementCount(String correctLabel, String classifiedLabel, int count) {
+    putCount(correctLabel, classifiedLabel, count + getCount(correctLabel, classifiedLabel));
   }
   
   public void incrementCount(String correctLabel, String classifiedLabel) {
@@ -135,8 +129,7 @@ public class ConfusionMatrix implements Summarizable {
     // ;
     for (String correctLabel : this.labels) {
       for (String classifiedLabel : this.labels) {
-        incrementCount(correctLabel, classifiedLabel, b.getCount(correctLabel,
-            classifiedLabel));
+        incrementCount(correctLabel, classifiedLabel, b.getCount(correctLabel, classifiedLabel));
       }
     }
     return this;
@@ -145,15 +138,12 @@ public class ConfusionMatrix implements Summarizable {
   @Override
   public String summarize() {
     StringBuilder returnString = new StringBuilder();
-    returnString.append(
-        "=======================================================").append('\n');
+    returnString.append("=======================================================").append('\n');
     returnString.append("Confusion Matrix\n");
-    returnString.append(
-        "-------------------------------------------------------").append('\n');
+    returnString.append("-------------------------------------------------------").append('\n');
     
     for (String correctLabel : this.labels) {
-      returnString.append(
-          StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)), 5))
+      returnString.append(StringUtils.rightPad(ConfusionMatrix.getSmallLabel(labelMap.get(correctLabel)), 5))
           .append('\t');
     }
     
@@ -163,19 +153,15 @@ public class ConfusionMatrix implements Summarizable {
       int labelTotal = 0;
       for (String classifiedLabel : this.labels) {
         returnString.append(
-            StringUtils.rightPad(Integer.toString(getCount(correctLabel,
-                classifiedLabel)), 5)).append('\t');
+          StringUtils.rightPad(Integer.toString(getCount(correctLabel, classifiedLabel)), 5)).append('\t');
         labelTotal += getCount(correctLabel, classifiedLabel);
       }
-      returnString.append(" |  ").append(
-          StringUtils.rightPad(String.valueOf(labelTotal), 6)).append('\t')
-          .append(
-              StringUtils
-                  .rightPad(getSmallLabel(labelMap.get(correctLabel)), 5))
-          .append(" = ").append(correctLabel).append('\n');
+      returnString.append(" |  ").append(StringUtils.rightPad(String.valueOf(labelTotal), 6)).append('\t')
+          .append(StringUtils.rightPad(ConfusionMatrix.getSmallLabel(labelMap.get(correctLabel)), 5)).append(
+            " = ").append(correctLabel).append('\n');
     }
-    returnString.append("Default Category: ").append(defaultLabel).append(": ")
-        .append(labelMap.get(defaultLabel)).append('\n');
+    returnString.append("Default Category: ").append(defaultLabel).append(": ").append(
+      labelMap.get(defaultLabel)).append('\n');
     returnString.append('\n');
     return returnString.toString();
   }

@@ -20,14 +20,15 @@ package org.apache.mahout.fpm.pfpgrowth.convertors.integer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 
 /**
- * Collects the Patterns with Integer id and Long support and converts them to
- * Pattern of Strings based on a reverse feature lookup map.
+ * Collects the Patterns with Integer id and Long support and converts them to Pattern of Strings based on a
+ * reverse feature lookup map.
  */
 public final class IntegerStringOutputConverter implements
     OutputCollector<Integer,List<Pair<List<Integer>,Long>>> {
@@ -54,8 +55,7 @@ public final class IntegerStringOutputConverter implements
       stringValues.add(new Pair<List<String>,Long>(pattern, e.getSecond()));
     }
     
-    collector
-        .collect(new Text(stringKey), new TopKStringPatterns(stringValues));
+    collector.collect(new Text(stringKey), new TopKStringPatterns(stringValues));
   }
   
 }

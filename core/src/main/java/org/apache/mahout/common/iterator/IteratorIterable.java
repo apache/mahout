@@ -20,17 +20,22 @@ package org.apache.mahout.common.iterator;
 import java.util.Iterator;
 
 /**
- * <p>Simple utility class that makes an {@link Iterator} {@link Iterable} by returning the {@link Iterator}
- * itself.</p>
+ * <p>
+ * Simple utility class that makes an {@link Iterator} {@link Iterable} by returning the {@link Iterator}
+ * itself.
+ * </p>
  */
 public final class IteratorIterable<T> implements Iterable<T> {
-
+  
   private Iterator<T> iterator;
-
+  
   /**
-   * <p>Constructs an {@link IteratorIterable} for an {@link Iterator}.</p>
-   *
-   * @param iterator {@link Iterator} on which to base this {@link IteratorIterable}
+   * <p>
+   * Constructs an {@link IteratorIterable} for an {@link Iterator}.
+   * </p>
+   * 
+   * @param iterator
+   *          {@link Iterator} on which to base this {@link IteratorIterable}
    */
   public IteratorIterable(Iterator<T> iterator) {
     if (iterator == null) {
@@ -38,7 +43,7 @@ public final class IteratorIterable<T> implements Iterable<T> {
     }
     this.iterator = iterator;
   }
-
+  
   @Override
   public Iterator<T> iterator() {
     if (iterator == null) {
@@ -48,10 +53,10 @@ public final class IteratorIterable<T> implements Iterable<T> {
     iterator = null;
     return result;
   }
-
+  
   @Override
   public String toString() {
     return "IteratorIterable[iterator:" + iterator + ']';
   }
-
+  
 }

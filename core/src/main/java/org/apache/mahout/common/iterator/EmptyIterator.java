@@ -20,21 +20,25 @@ package org.apache.mahout.common.iterator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** <p>An empty {@link Iterator}, which iterates over nothing.</p> */
+/**
+ * <p>
+ * An empty {@link Iterator}, which iterates over nothing.
+ * </p>
+ */
 public final class EmptyIterator<T> implements Iterator<T> {
-
+  
   /** @return false */
   @Override
   public boolean hasNext() {
     return false;
   }
-
+  
   /** @return never returns anything */
   @Override
   public T next() {
     throw new NoSuchElementException();
   }
-
+  
   /**
    * @throws UnsupportedOperationException
    */
@@ -42,10 +46,10 @@ public final class EmptyIterator<T> implements Iterator<T> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public String toString() {
     return "EmptyIterator";
   }
-
+  
 }

@@ -30,13 +30,13 @@ import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.Pattern;
 
 /**
- * An output converter which converts the output patterns and collectes them in
- * a {@link FrequentPatternMaxHeap}
+ * An output converter which converts the output patterns and collectes them in a
+ * {@link FrequentPatternMaxHeap}
  * 
  * @param <A>
  */
-public final class TopKPatternsOutputConverter<A extends Comparable<? super A>>
-    implements OutputCollector<Integer,FrequentPatternMaxHeap> {
+public final class TopKPatternsOutputConverter<A extends Comparable<? super A>> implements
+    OutputCollector<Integer,FrequentPatternMaxHeap> {
   
   private OutputCollector<A,List<Pair<List<A>,Long>>> collector = null;
   
@@ -60,8 +60,7 @@ public final class TopKPatternsOutputConverter<A extends Comparable<? super A>>
       }
       Collections.sort(frequentPattern);
       
-      Pair<List<A>,Long> returnItemSet = new Pair<List<A>,Long>(
-          frequentPattern, itemSet.support());
+      Pair<List<A>,Long> returnItemSet = new Pair<List<A>,Long>(frequentPattern, itemSet.support());
       perAttributePatterns.add(returnItemSet);
     }
     Collections.reverse(perAttributePatterns);

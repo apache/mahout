@@ -29,7 +29,7 @@ import org.apache.mahout.common.Pair;
  * 
  */
 public final class StringOutputConverter implements
-    OutputCollector<String,List<Pair<List<String>,Long>>> {
+OutputCollector<String,List<Pair<List<String>,Long>>> {
   
   private final OutputCollector<Text,TopKStringPatterns> collector;
   

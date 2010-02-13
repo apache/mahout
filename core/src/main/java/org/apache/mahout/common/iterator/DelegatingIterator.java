@@ -23,29 +23,29 @@ import java.util.Iterator;
  * An iterator that delegates to another iterator.
  */
 public abstract class DelegatingIterator<T> implements Iterator<T> {
-
+  
   private final Iterator<? extends T> delegate;
-
+  
   protected DelegatingIterator(Iterator<T> delegate) {
     if (delegate == null) {
       throw new IllegalArgumentException("delegate is null");
     }
     this.delegate = delegate;
   }
-
+  
   @Override
   public final boolean hasNext() {
     return delegate.hasNext();
   }
-
+  
   @Override
   public final T next() {
     return delegate.next();
   }
-
+  
   @Override
   public final void remove() {
     delegate.remove();
   }
-
+  
 }

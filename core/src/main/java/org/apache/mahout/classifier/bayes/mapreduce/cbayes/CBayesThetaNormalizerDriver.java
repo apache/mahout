@@ -42,8 +42,7 @@ import org.slf4j.LoggerFactory;
 /** Create and run the Bayes Trainer. */
 public class CBayesThetaNormalizerDriver implements BayesJob {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(CBayesThetaNormalizerDriver.class);
+  private static final Logger log = LoggerFactory.getLogger(CBayesThetaNormalizerDriver.class);
   
   /**
    * Run the job
@@ -57,16 +56,12 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
   public void runJob(String input, String output, BayesParameters params) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CBayesThetaNormalizerDriver.class);
-    conf
-        .setJobName("Complementary Bayes Theta Normalizer Driver running over input: "
-                    + input);
+    conf.setJobName("Complementary Bayes Theta Normalizer Driver running over input: " + input);
     
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    FileInputFormat.addInputPath(conf, new Path(output
-                                                + "/trainer-weights/Sigma_j"));
-    FileInputFormat.addInputPath(conf, new Path(
-        output + "/trainer-tfIdf/trainer-tfIdf"));
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-weights/Sigma_j"));
+    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
     Path outPath = new Path(output + "/trainer-thetaNormalizer");
     FileOutputFormat.setOutputPath(conf, outPath);
     // conf.setNumMapTasks(100);
@@ -77,8 +72,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     conf.setReducerClass(CBayesThetaNormalizerReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf
-        .set(
-          "io.serializations",
+        .set("io.serializations",
           "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters and make or break a piece of code
@@ -89,40 +83,34 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     }
     
     Path sigmaKFiles = new Path(output + "/trainer-weights/Sigma_k/*");
-    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(
-      dfs, sigmaKFiles, conf);
-    DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(
-        conf, GenericsUtil.getClass(labelWeightSum));
+    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(dfs, sigmaKFiles, conf);
+    DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(conf,
+        GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
     
-    log.info("Sigma_k for Each Label");
+    CBayesThetaNormalizerDriver.log.info("Sigma_k for Each Label");
     Map<String,Double> c = mapStringifier.fromString(labelWeightSumString);
-    log.info("{}", c);
+    CBayesThetaNormalizerDriver.log.info("{}", c);
     conf.set("cnaivebayes.sigma_k", labelWeightSumString);
     
-    Path sigmaKSigmaJFile = new Path(output
-                                     + "/trainer-weights/Sigma_kSigma_j/*");
-    double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(dfs,
-      sigmaKSigmaJFile, conf);
-    DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(
-        conf, Double.class);
+    Path sigmaKSigmaJFile = new Path(output + "/trainer-weights/Sigma_kSigma_j/*");
+    double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(dfs, sigmaKSigmaJFile, conf);
+    DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
     String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
     
-    log.info("Sigma_kSigma_j for each Label and for each Features");
+    CBayesThetaNormalizerDriver.log.info("Sigma_kSigma_j for each Label and for each Features");
     double retSigmaJSigmaK = stringifier.fromString(sigmaJSigmaKString);
-    log.info("{}", retSigmaJSigmaK);
+    CBayesThetaNormalizerDriver.log.info("{}", retSigmaJSigmaK);
     conf.set("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
     
-    Path vocabCountFile = new Path(output
-                                   + "/trainer-tfIdf/trainer-vocabCount/*");
-    double vocabCount = SequenceFileModelReader.readVocabCount(dfs,
-      vocabCountFile, conf);
+    Path vocabCountFile = new Path(output + "/trainer-tfIdf/trainer-vocabCount/*");
+    double vocabCount = SequenceFileModelReader.readVocabCount(dfs, vocabCountFile, conf);
     String vocabCountString = stringifier.toString(vocabCount);
     
-    log.info("Vocabulary Count");
+    CBayesThetaNormalizerDriver.log.info("Vocabulary Count");
     conf.set("cnaivebayes.vocabCount", vocabCountString);
     double retvocabCount = stringifier.fromString(vocabCountString);
-    log.info("{}", retvocabCount);
+    CBayesThetaNormalizerDriver.log.info("{}", retvocabCount);
     conf.set("bayes.parameters", params.toString());
     conf.set("output.table", output);
     client.setConf(conf);
