@@ -120,7 +120,7 @@ public abstract class AbstractVector implements Vector {
 
   public double dot(Vector x) {
     if (size() != x.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(size(), x.size());
     }
     double result = 0;
     Iterator<Element> iter = iterateNonZero();
