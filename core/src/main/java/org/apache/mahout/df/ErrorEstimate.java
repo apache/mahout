@@ -21,46 +21,49 @@ package org.apache.mahout.df;
  * various methods to compute from the output of a random forest
  */
 public class ErrorEstimate {
-  private ErrorEstimate() {
-  }
-
+  private ErrorEstimate() {}
+  
   public static double errorRate(int[] labels, int[] predictions) {
     if (labels.length != predictions.length) {
       throw new IllegalArgumentException("labels.length != predictions.length");
     }
-
+    
     double nberrors = 0; // number of instance that got bad predictions
     double datasize = 0; // number of classified instances
-
+    
     for (int index = 0; index < labels.length; index++) {
-      if (predictions[index] == -1)
+      if (predictions[index] == -1) {
         continue; // instance not classified
-
-      if (predictions[index] != labels[index])
+      }
+      
+      if (predictions[index] != labels[index]) {
         nberrors++;
-
+      }
+      
       datasize++;
     }
-
+    
     return nberrors / datasize;
   }
-
+  
   /**
    * Counts the number of classified instances (prediction != -1)
+   * 
    * @param predictions
    * @return
    */
   public static int nbPredicted(int[] predictions) {
     int nbpredicted = 0;
-
+    
     for (int prediction : predictions) {
-      if (prediction != -1)
+      if (prediction != -1) {
         nbpredicted++;
+      }
     }
-
+    
     return nbpredicted;
   }
-
+  
   /**
    * Counts the number of instance that got bad predictions
    * 
@@ -72,17 +75,19 @@ public class ErrorEstimate {
     if (labels.length != predictions.length) {
       throw new IllegalArgumentException("labels.length != predictions.length");
     }
-
+    
     int nberrors = 0;
-
+    
     for (int index = 0; index < labels.length; index++) {
-      if (predictions[index] == -1)
+      if (predictions[index] == -1) {
         continue; // instance not classified
-
-      if (predictions[index] != labels[index])
+      }
+      
+      if (predictions[index] != labels[index]) {
         nberrors++;
+      }
     }
-
+    
     return nberrors;
   }
 }

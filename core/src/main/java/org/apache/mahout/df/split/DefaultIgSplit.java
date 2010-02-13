@@ -26,17 +26,17 @@ import org.apache.mahout.df.data.conditions.Condition;
  * Default, not optimized, implementation of IgSplit
  */
 public class DefaultIgSplit extends IgSplit {
-
+  
   /** used by entropy() */
   private int[] counts;
-
+  
   @Override
   public Split computeSplit(Data data, int attr) {
     if (data.getDataset().isNumerical(attr)) {
       double[] values = data.values(attr);
       double bestIg = -1;
       double bestSplit = 0.0;
-
+      
       for (double value : values) {
         double ig = numericalIg(data, attr, value);
         if (ig > bestIg) {
@@ -44,15 +44,15 @@ public class DefaultIgSplit extends IgSplit {
           bestSplit = value;
         }
       }
-
+      
       return new Split(attr, bestIg, bestSplit);
     } else {
       double ig = categoricalIg(data, attr);
-
+      
       return new Split(attr, ig);
     }
   }
-
+  
   /**
    * Computes the Information Gain for a CATEGORICAL attribute
    * 
@@ -65,18 +65,17 @@ public class DefaultIgSplit extends IgSplit {
     double hy = entropy(data); // H(Y)
     double hyx = 0.0; // H(Y|X)
     double invDataSize = 1.0 / data.size();
-
+    
     for (double value : values) {
       Data subset = data.subset(Condition.equals(attr, value));
       hyx += subset.size() * invDataSize * entropy(subset);
     }
-
+    
     return hy - hyx;
   }
-
+  
   /**
-   * Computes the Information Gain for a NUMERICAL attribute given a splitting
-   * value
+   * Computes the Information Gain for a NUMERICAL attribute given a splitting value
    * 
    * @param data
    * @param attr
@@ -86,18 +85,18 @@ public class DefaultIgSplit extends IgSplit {
   protected double numericalIg(Data data, int attr, double split) {
     double hy = entropy(data);
     double invDataSize = 1.0 / data.size();
-
+    
     // LO subset
     Data subset = data.subset(Condition.lesser(attr, split));
     hy -= subset.size() * invDataSize * entropy(subset);
-
+    
     // HI subset
     subset = data.subset(Condition.greaterOrEquals(attr, split));
     hy -= subset.size() * invDataSize * entropy(subset);
-
+    
     return hy;
   }
-
+  
   /**
    * Computes the Entropy
    * 
@@ -106,23 +105,25 @@ public class DefaultIgSplit extends IgSplit {
    */
   protected double entropy(Data data) {
     double invDataSize = 1.0 / data.size();
-
-    if (counts == null)
+    
+    if (counts == null) {
       counts = new int[data.getDataset().nblabels()];
-
+    }
+    
     Arrays.fill(counts, 0);
     data.countLabels(counts);
-
+    
     double entropy = 0.0;
     for (int label = 0; label < data.getDataset().nblabels(); label++) {
       int count = counts[label];
-      if (count == 0)
+      if (count == 0) {
         continue; // otherwise we get a NaN
+      }
       double p = count * invDataSize;
-      entropy += -p * Math.log(p) / LOG2;
+      entropy += -p * Math.log(p) / IgSplit.LOG2;
     }
-
+    
     return entropy;
   }
-
+  
 }

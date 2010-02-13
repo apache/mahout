@@ -19,22 +19,21 @@ package org.apache.mahout.df.node;
 import org.apache.mahout.df.data.Instance;
 
 /**
- * Custom Leaf node that returns for each instance its own label. Used mainly
- * for testing purposes
+ * Custom Leaf node that returns for each instance its own label. Used mainly for testing purposes
  * 
  */
 public class MockLeaf extends Leaf {
-
+  
   @Override
   public int classify(Instance instance) {
     return instance.label;
   }
-
+  
   @Override
   protected Type getType() {
     return Type.MOCKLEAF;
   }
-
+  
   @Override
   protected String getString() {
     return "[MockLeaf]";

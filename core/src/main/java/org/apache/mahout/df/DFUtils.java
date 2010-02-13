@@ -30,9 +30,8 @@ import org.apache.mahout.ga.watchmaker.OutputUtils;
  * Utility class that contains various helper methods
  */
 public class DFUtils {
-  private DFUtils() {
-  }
-
+  private DFUtils() {}
+  
   /**
    * Writes an Node[] into a DataOutput
    * 
@@ -40,8 +39,7 @@ public class DFUtils {
    * @param array
    * @throws IOException
    */
-  public static void writeArray(DataOutput out, Node[] array)
-      throws IOException {
+  public static void writeArray(DataOutput out, Node[] array) throws IOException {
     out.writeInt(array.length);
     for (Node w : array) {
       w.write(out);
@@ -61,10 +59,10 @@ public class DFUtils {
     for (int index = 0; index < length; index++) {
       nodes[index] = Node.read(in);
     }
-
+    
     return nodes;
   }
-
+  
   /**
    * Writes a double[] into a DataOutput
    * 
@@ -72,14 +70,13 @@ public class DFUtils {
    * @param array
    * @throws IOException
    */
-  public static void writeArray(DataOutput out, double[] array)
-      throws IOException {
+  public static void writeArray(DataOutput out, double[] array) throws IOException {
     out.writeInt(array.length);
     for (double value : array) {
       out.writeDouble(value);
     }
   }
-
+  
   /**
    * Reads a double[] from a DataInput
    * 
@@ -93,10 +90,10 @@ public class DFUtils {
     for (int index = 0; index < length; index++) {
       array[index] = in.readDouble();
     }
-
+    
     return array;
   }
-
+  
   /**
    * Writes an int[] into a DataOutput
    * 
@@ -110,7 +107,7 @@ public class DFUtils {
       out.writeInt(value);
     }
   }
-
+  
   /**
    * Reads an int[] from a DataInput
    * 
@@ -124,10 +121,10 @@ public class DFUtils {
     for (int index = 0; index < length; index++) {
       array[index] = in.readInt();
     }
-
+    
     return array;
   }
-
+  
   /**
    * Return a list of all files in the output directory
    * 
@@ -135,21 +132,20 @@ public class DFUtils {
    * @param outputPath
    * @return
    * @throws IOException
-   * @throws RuntimeException if no file is found
+   * @throws RuntimeException
+   *           if no file is found
    */
-  public static Path[] listOutputFiles(FileSystem fs, Path outputPath)
-      throws IOException {
+  public static Path[] listOutputFiles(FileSystem fs, Path outputPath) throws IOException {
     Path[] outfiles = OutputUtils.listOutputFiles(fs, outputPath);
     if (outfiles.length == 0) {
       throw new IOException("No output found !");
     }
-
+    
     return outfiles;
   }
-
+  
   /**
-   * Formats a time interval in milliseconds to a String in the form
-   * "hours:minutes:seconds:millis"
+   * Formats a time interval in milliseconds to a String in the form "hours:minutes:seconds:millis"
    * 
    * @param milli
    * @return
@@ -157,14 +153,14 @@ public class DFUtils {
   public static String elapsedTime(long milli) {
     long seconds = milli / 1000;
     milli %= 1000;
-  
+    
     long minutes = seconds / 60;
     seconds %= 60;
-  
+    
     long hours = minutes / 60;
     minutes %= 60;
-  
+    
     return hours + "h " + minutes + "m " + seconds + "s " + milli;
   }
-
+  
 }

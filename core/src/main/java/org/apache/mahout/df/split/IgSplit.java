@@ -23,9 +23,9 @@ import org.apache.mahout.df.data.Data;
  * Computes the best split using the Information Gain measure
  */
 public abstract class IgSplit {
-
+  
   protected static final double LOG2 = Math.log(2.0);
-
+  
   /**
    * Computes the best split for the given attribute
    * 
@@ -34,5 +34,5 @@ public abstract class IgSplit {
    * @return
    */
   public abstract Split computeSplit(Data data, int attr);
-
+  
 }

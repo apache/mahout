@@ -23,63 +23,66 @@ import org.apache.mahout.math.Vector;
  * Represents one data instance.
  */
 public class Instance {
-
+  
   /** instance unique id */
   public final int id;
-
+  
   /** attributes, except LABEL and IGNORED */
   private final Vector attrs;
-
+  
   /**
    * instance label code.<br>
    * use Dataset.labels to get the real label value
    * 
    */
   public final int label;
-
+  
   public Instance(int id, Vector attrs, int label) {
     this.id = id;
     this.attrs = attrs;
     this.label = label;
   }
-
+  
   /**
    * Return the attribute at the specified position
    * 
-   * @param index position of the attribute to retrieve
+   * @param index
+   *          position of the attribute to retrieve
    * @return value of the attribute
    */
   public double get(int index) {
     return attrs.getQuick(index);
   }
-
+  
   /**
    * Set the value at the given index
    * 
    * @param index
-   * @param value a double value to set
+   * @param value
+   *          a double value to set
    */
   public void set(int index, double value) {
     attrs.set(index, value);
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof Instance))
+    }
+    if ((obj == null) || !(obj instanceof Instance)) {
       return false;
+    }
     
-    Instance instance = (Instance)obj;
+    Instance instance = (Instance) obj;
     
-    return id == instance.id && label == instance.label && attrs.equals(instance.attrs);
+    return (id == instance.id) && (label == instance.label) && attrs.equals(instance.attrs);
     
   }
-
+  
   @Override
   public int hashCode() {
     return id + label + attrs.hashCode();
   }
-  
   
 }

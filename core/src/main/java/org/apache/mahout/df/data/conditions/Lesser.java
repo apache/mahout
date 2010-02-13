@@ -23,19 +23,19 @@ import org.apache.mahout.df.data.Instance;
  * True if a given attribute has a value "lesser" than a given value
  */
 public class Lesser extends Condition {
-
+  
   private final int attr;
-
+  
   private final double value;
-
+  
   public Lesser(int attr, double value) {
     this.attr = attr;
     this.value = value;
   }
-
+  
   @Override
   public boolean isTrueFor(Instance instance) {
     return instance.get(attr) < value;
   }
-
+  
 }

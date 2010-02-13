@@ -17,18 +17,20 @@
 
 package org.apache.mahout.df.callback;
 
-
 /**
  * Called each time an instance has been classified
  */
 public interface PredictionCallback {
-
+  
   /**
    * called when an instance has been classified
    * 
-   * @param treeId tree that classified the instance
-   * @param instanceId classified instance
-   * @param prediction predicted label
+   * @param treeId
+   *          tree that classified the instance
+   * @param instanceId
+   *          classified instance
+   * @param prediction
+   *          predicted label
    */
   void prediction(int treeId, int instanceId, int prediction);
 }

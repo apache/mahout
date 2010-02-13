@@ -39,26 +39,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Custom InputFormat that generates InputSplits given the desired number of
- * trees.<br>
+ * Custom InputFormat that generates InputSplits given the desired number of trees.<br>
  * each input split contains a subset of the trees.<br>
  * The number of splits is equal to the number of requested splits
  */
-public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
-
-  private static final Logger log = LoggerFactory
-      .getLogger(InMemInputSplit.class);
-
+public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
+  
+  private static final Logger log = LoggerFactory.getLogger(InMemInputSplit.class);
+  
   private Random rng;
-
+  
   private Long seed;
-
+  
   private boolean isSingleSeed;
-
+  
   /**
-   * Used for DEBUG purposes only. if true and a seed is available, all the
-   * mappers use the same seed, thus all the mapper should take the same time to
-   * build their trees.
+   * Used for DEBUG purposes only. if true and a seed is available, all the mappers use the same seed, thus
+   * all the mapper should take the same time to build their trees.
    * 
    * @param conf
    * @return
@@ -66,69 +63,68 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
   private static boolean isSingleSeed(Configuration conf) {
     return conf.getBoolean("debug.mahout.rf.single.seed", false);
   }
-
+  
   @Override
-  public RecordReader<IntWritable, NullWritable> createRecordReader(
-      InputSplit split, TaskAttemptContext context) throws IOException,
-      InterruptedException {
+  public RecordReader<IntWritable,NullWritable> createRecordReader(InputSplit split,
+                                                                   TaskAttemptContext context) throws IOException,
+                                                                                              InterruptedException {
     return new InMemRecordReader((InMemInputSplit) split);
   }
-
+  
   @Override
-  public List<InputSplit> getSplits(JobContext context) throws IOException,
-      InterruptedException {
+  public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
     int numSplits = conf.getInt("mapred.map.tasks", -1);
-
+    
     return getSplits(conf, numSplits);
   }
-
+  
   public List<InputSplit> getSplits(Configuration conf, int numSplits) {
     int nbTrees = Builder.getNbTrees(conf);
     int splitSize = nbTrees / numSplits;
-
+    
     seed = Builder.getRandomSeed(conf);
-    isSingleSeed = isSingleSeed(conf);
-
-    if (rng != null && seed != null) {
-      log.warn("getSplits() was called more than once and the 'seed' is set, "
-          + "this can lead to no-repeatable behavior");
+    isSingleSeed = InMemInputFormat.isSingleSeed(conf);
+    
+    if ((rng != null) && (seed != null)) {
+      InMemInputFormat.log.warn("getSplits() was called more than once and the 'seed' is set, "
+                                + "this can lead to no-repeatable behavior");
     }
-
-    rng = (seed == null || isSingleSeed) ? null : RandomUtils.getRandom(seed);
-
+    
+    rng = (seed == null) || isSingleSeed ? null : RandomUtils.getRandom(seed);
+    
     int id = 0;
-
+    
     List<InputSplit> splits = new ArrayList<InputSplit>(numSplits);
-
+    
     for (int index = 0; index < numSplits - 1; index++) {
       splits.add(new InMemInputSplit(id, splitSize, nextSeed()));
       id += splitSize;
     }
-
+    
     // take care of the remainder
     splits.add(new InMemInputSplit(id, nbTrees - id, nextSeed()));
-
+    
     return splits;
   }
-
+  
   /**
    * Return the seed for the next InputSplit
    * 
    * @return
    */
   private Long nextSeed() {
-    if (seed == null)
+    if (seed == null) {
       return null;
-    else if (isSingleSeed)
+    } else if (isSingleSeed) {
       return seed;
-    else
+    } else {
       return rng.nextLong();
+    }
   }
-
-  public static class InMemRecordReader extends
-      RecordReader<IntWritable, NullWritable> {
-
+  
+  public static class InMemRecordReader extends RecordReader<IntWritable,NullWritable> {
+    
     private final InMemInputSplit split;
     private int pos;
     private IntWritable key;
@@ -137,31 +133,32 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
     public InMemRecordReader(InMemInputSplit split) {
       this.split = split;
     }
-
+    
     @Override
     public float getProgress() throws IOException {
-      if (pos == 0)
+      if (pos == 0) {
         return 0.0f;
-      else
+      } else {
         return (float) (pos - 1) / split.nbTrees;
+      }
     }
-
+    
     @Override
     public IntWritable getCurrentKey() throws IOException, InterruptedException {
       return key;
     }
-
+    
     @Override
     public NullWritable getCurrentValue() throws IOException, InterruptedException {
       return value;
     }
-
+    
     @Override
     public void initialize(InputSplit arg0, TaskAttemptContext arg1) throws IOException, InterruptedException {
       key = new IntWritable();
       value = NullWritable.get();
     }
-
+    
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
       if (pos < split.nbTrees) {
@@ -172,36 +169,34 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
         return false;
       }
     }
-
+    
     @Override
-    public void close() throws IOException {
-    }
-
+    public void close() throws IOException {}
+    
   }
-
+  
   /**
    * Custom InputSplit that indicates how many trees are built by each mapper
    */
   public static class InMemInputSplit extends InputSplit implements Writable {
-
+    
     private static final String[] NO_LOCATIONS = new String[0];
-
+    
     /** Id of the first tree of this split */
     private int firstId;
-
+    
     private int nbTrees;
-
+    
     private Long seed;
-
-    public InMemInputSplit() {
-    }
-
+    
+    public InMemInputSplit() {}
+    
     public InMemInputSplit(int firstId, int nbTrees, Long seed) {
       this.firstId = firstId;
       this.nbTrees = nbTrees;
       this.seed = seed;
     }
-
+    
     /**
      * Return the Id of the first tree of this split
      * 
@@ -210,7 +205,7 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
     public int getFirstId() {
       return firstId;
     }
-
+    
     /**
      * Return the number of trees
      * 
@@ -219,7 +214,7 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
     public int getNbTrees() {
       return nbTrees;
     }
-
+    
     /**
      * Return the random seed
      * 
@@ -228,52 +223,54 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
     public Long getSeed() {
       return seed;
     }
-
+    
     @Override
     public long getLength() throws IOException {
       return nbTrees;
     }
-
+    
     @Override
     public String[] getLocations() throws IOException {
-      return NO_LOCATIONS;
+      return InMemInputSplit.NO_LOCATIONS;
     }
-
+    
     @Override
     public boolean equals(Object obj) {
-      if (this == obj)
+      if (this == obj) {
         return true;
-      if (obj == null || !(obj instanceof InMemInputSplit))
+      }
+      if ((obj == null) || !(obj instanceof InMemInputSplit)) {
         return false;
-
+      }
+      
       InMemInputSplit split = (InMemInputSplit) obj;
-
-      if (seed == null && split.seed != null)
+      
+      if ((seed == null) && (split.seed != null)) {
         return false;
-
-      return firstId == split.firstId && nbTrees == split.nbTrees
-          && (seed == null || seed.equals(split.seed));
+      }
+      
+      return (firstId == split.firstId) && (nbTrees == split.nbTrees)
+             && ((seed == null) || seed.equals(split.seed));
     }
-
+    
     @Override
     public int hashCode() {
       return firstId + nbTrees + (seed == null ? 0 : seed.intValue());
     }
-
+    
     @Override
     public String toString() {
-      return String.format("[firstId:%d, nbTrees:%d, seed:%d]", firstId,
-          nbTrees, seed);
+      return String.format("[firstId:%d, nbTrees:%d, seed:%d]", firstId, nbTrees, seed);
     }
-
+    
     @Override
     public void readFields(DataInput in) throws IOException {
       firstId = in.readInt();
       nbTrees = in.readInt();
       boolean isSeed = in.readBoolean();
-      seed = (isSeed) ? in.readLong() : null;
+      seed = isSeed ? in.readLong() : null;
     }
-
+    
     @Override
     public void write(DataOutput out) throws IOException {
       out.writeInt(firstId);
@@ -283,7 +280,7 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
         out.writeLong(seed);
       }
     }
-
+    
     public static InMemInputSplit read(DataInput in) throws IOException {
       InMemInputSplit split = new InMemInputSplit();
       split.readFields(in);
@@ -291,5 +288,5 @@ public class InMemInputFormat extends InputFormat<IntWritable, NullWritable> {
     }
     
   }
-
+  
 }

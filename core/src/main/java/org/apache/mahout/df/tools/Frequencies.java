@@ -17,6 +17,9 @@
 
 package org.apache.mahout.df.tools;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -35,97 +38,90 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 /**
  * Compute the frequency distribution of the "class label"
  */
-public class Frequencies extends Configured implements Tool  {
-
+public class Frequencies extends Configured implements Tool {
+  
   private static final Logger log = LoggerFactory.getLogger(Frequencies.class);
-
-  private Frequencies() {
-  }
-
+  
+  private Frequencies() {}
+  
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-
+    
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
-    Option dataOpt = obuilder.withLongName("data").withShortName("d")
-        .withRequired(true).withArgument(
-            abuilder.withName("path").withMinimum(1).withMaximum(1).create())
-        .withDescription("Data path").create();
-
-    Option datasetOpt = obuilder.withLongName("dataset").withShortName(
-        "ds").withRequired(true).withArgument(
-        abuilder.withName("path").withMinimum(1).create())
-        .withDescription("dataset path").create();
-
-    Option helpOpt = obuilder.withLongName("help").withDescription(
-        "Print out help").withShortName("h").create();
-
-    Group group = gbuilder.withName("Options").withOption(dataOpt).withOption(
-        datasetOpt).withOption(helpOpt).create();
-
+    
+    Option dataOpt = obuilder.withLongName("data").withShortName("d").withRequired(true).withArgument(
+      abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
+    
+    Option datasetOpt = obuilder.withLongName("dataset").withShortName("ds").withRequired(true).withArgument(
+      abuilder.withName("path").withMinimum(1).create()).withDescription("dataset path").create();
+    
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        .create();
+    
+    Group group = gbuilder.withName("Options").withOption(dataOpt).withOption(datasetOpt).withOption(helpOpt)
+        .create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       CommandLine cmdLine = parser.parse(args);
-
+      
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
         return 0;
       }
-
+      
       String dataPath = cmdLine.getValue(dataOpt).toString();
       String datasetPath = cmdLine.getValue(datasetOpt).toString();
-
-      log.debug("Data path : {}", dataPath);
-      log.debug("Dataset path : {}", datasetPath);
-
+      
+      Frequencies.log.debug("Data path : {}", dataPath);
+      Frequencies.log.debug("Dataset path : {}", datasetPath);
+      
       runTool(dataPath, datasetPath);
     } catch (OptionException e) {
-      log.warn(e.toString(), e);
+      Frequencies.log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
-
+    
     return 0;
   }
-
-  private void runTool(String data, String dataset)
-          throws IOException, ClassNotFoundException, InterruptedException {
-
+  
+  private void runTool(String data, String dataset) throws IOException,
+                                                   ClassNotFoundException,
+                                                   InterruptedException {
+    
     FileSystem fs = FileSystem.get(getConf());
     Path workingDir = fs.getWorkingDirectory();
-
+    
     Path dataPath = new Path(data);
     Path datasetPath = new Path(dataset);
-
-    log.info("Computing the frequencies...");
+    
+    Frequencies.log.info("Computing the frequencies...");
     FrequenciesJob job = new FrequenciesJob(new Path(workingDir, "output"), dataPath, datasetPath);
-
+    
     int[][] counts = job.run(getConf());
-
+    
     // compute the partitions' sizes
     int numPartitions = counts.length;
-//    int[] sizes = new int[numPartitions]; // TODO this isn't used?
-//    for (int p = 0; p < numPartitions; p++) {
-//      sizes[p] = DataUtils.sum(counts[p]);
-//    }
-
+    // int[] sizes = new int[numPartitions]; // TODO this isn't used?
+    // for (int p = 0; p < numPartitions; p++) {
+    // sizes[p] = DataUtils.sum(counts[p]);
+    // }
+    
     // outputing the frequencies
-    log.info("counts[partition][class]");
+    Frequencies.log.info("counts[partition][class]");
     for (int p = 0; p < numPartitions; p++) {
-      log.info(Arrays.toString(counts[p]));
+      Frequencies.log.info(Arrays.toString(counts[p]));
     }
   }
-
+  
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new Frequencies(), args);
   }
-
+  
 }

@@ -34,41 +34,45 @@ import org.slf4j.LoggerFactory;
  * Builds a Random Decision Forest using a given TreeBuilder to grow the trees
  */
 public class SequentialBuilder {
-
+  
   private static final Logger log = LoggerFactory.getLogger(SequentialBuilder.class);
-
+  
   private final Random rng;
   
   private final Bagging bagging;
-
+  
   /**
    * Constructor
    * 
-   * @param rng random-numbers generator
-   * @param treeBuilder tree builder
-   * @param data training data
+   * @param rng
+   *          random-numbers generator
+   * @param treeBuilder
+   *          tree builder
+   * @param data
+   *          training data
    */
   public SequentialBuilder(Random rng, TreeBuilder treeBuilder, Data data) {
     this.rng = rng;
     bagging = new Bagging(treeBuilder, data);
   }
-
+  
   public DecisionForest build(int nbTrees, PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       trees.add(bagging.build(treeId, rng, callback));
-      logProgress(((float) treeId + 1) / nbTrees);
+      SequentialBuilder.logProgress(((float) treeId + 1) / nbTrees);
     }
-
+    
     return new DecisionForest(trees);
   }
   
   private static void logProgress(float progress) {
     int percent = (int) (progress * 100);
-    if (percent % 10 == 0)
-      log.info(String.format("Building %2d%%", percent));
-
+    if (percent % 10 == 0) {
+      SequentialBuilder.log.info(String.format("Building %2d%%", percent));
+    }
+    
   }
-
+  
 }

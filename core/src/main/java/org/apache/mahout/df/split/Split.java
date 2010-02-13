@@ -17,27 +17,26 @@
 
 package org.apache.mahout.df.split;
 
-
 /**
  * Contains enough information to identify each split
  */
 public class Split {
-
+  
   /** attribute to split for */
   public final int attr;
-
+  
   /** Information Gain of the split */
   public final double ig;
-
+  
   /** split value for NUMERICAL attributes */
   public final double split;
-
+  
   public Split(int attr, double ig, double split) {
     this.attr = attr;
     this.ig = ig;
     this.split = split;
   }
-
+  
   public Split(int attr, double ig) {
     this(attr, ig, Double.NaN);
   }

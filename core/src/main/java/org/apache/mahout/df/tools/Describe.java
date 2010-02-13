@@ -34,11 +34,11 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.DescriptorException;
 import org.apache.mahout.df.data.DescriptorUtils;
-import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,86 +46,81 @@ import org.slf4j.LoggerFactory;
  * Generates a file descriptor for a given dataset
  */
 public class Describe {
-
+  
   private static final Logger log = LoggerFactory.getLogger(Describe.class);
-
-  private Describe() {
-  }
-
+  
+  private Describe() {}
+  
   public static void main(String[] args) throws IOException, DescriptorException {
-
+    
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
-    Option pathOpt = obuilder.withLongName("path").withShortName("p")
-        .withRequired(true).withArgument(
-            abuilder.withName("path").withMinimum(1).withMaximum(1).create())
-        .withDescription("Data path").create();
-
-    Option descriptorOpt = obuilder.withLongName("descriptor").withShortName(
-        "d").withRequired(true).withArgument(
-        abuilder.withName("descriptor").withMinimum(1).create())
-        .withDescription("data descriptor").create();
-
-    Option descPathOpt = obuilder.withLongName("file").withShortName("f")
-        .withRequired(true).withArgument(
-            abuilder.withName("file").withMinimum(1).withMaximum(1).create())
-        .withDescription("Path to generated descriptor file").create();
-
-    Option helpOpt = obuilder.withLongName("help").withDescription(
-        "Print out help").withShortName("h").create();
-
-    Group group = gbuilder.withName("Options").withOption(pathOpt).withOption(
-        descPathOpt).withOption(descriptorOpt).withOption(helpOpt).create();
-
+    
+    Option pathOpt = obuilder.withLongName("path").withShortName("p").withRequired(true).withArgument(
+      abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
+    
+    Option descriptorOpt = obuilder.withLongName("descriptor").withShortName("d").withRequired(true)
+        .withArgument(abuilder.withName("descriptor").withMinimum(1).create()).withDescription(
+          "data descriptor").create();
+    
+    Option descPathOpt = obuilder.withLongName("file").withShortName("f").withRequired(true).withArgument(
+      abuilder.withName("file").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Path to generated descriptor file").create();
+    
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        .create();
+    
+    Group group = gbuilder.withName("Options").withOption(pathOpt).withOption(descPathOpt).withOption(
+      descriptorOpt).withOption(helpOpt).create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       CommandLine cmdLine = parser.parse(args);
-
+      
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
         return;
       }
-
+      
       String dataPath = cmdLine.getValue(pathOpt).toString();
       String descPath = cmdLine.getValue(descPathOpt).toString();
-      List<String> descriptor = convert(cmdLine.getValues(descriptorOpt));
-
-      log.debug("Data path : {}", dataPath);
-      log.debug("Descriptor path : {}", descPath);
-      log.debug("Descriptor : {}", descriptor);
-
-      runTool(dataPath, descriptor, descPath);
+      List<String> descriptor = Describe.convert(cmdLine.getValues(descriptorOpt));
+      
+      Describe.log.debug("Data path : {}", dataPath);
+      Describe.log.debug("Descriptor path : {}", descPath);
+      Describe.log.debug("Descriptor : {}", descriptor);
+      
+      Describe.runTool(dataPath, descriptor, descPath);
     } catch (OptionException e) {
-      log.warn(e.toString(), e);
+      Describe.log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
   }
-
-  private static void runTool(String dataPath, List<String> description,
-      String filePath) throws DescriptorException, IOException {
-    log.info("Generating the descriptor...");
+  
+  private static void runTool(String dataPath, List<String> description, String filePath) throws DescriptorException,
+                                                                                         IOException {
+    Describe.log.info("Generating the descriptor...");
     String descriptor = DescriptorUtils.generateDescriptor(description);
-
-    Path fPath = validateOutput(filePath);
     
-    log.info("generating the dataset...");
-    Dataset dataset = generateDataset(descriptor, dataPath);
-
-    log.info("storing the dataset description");
-    storeWritable(new Configuration(), fPath, dataset);
+    Path fPath = Describe.validateOutput(filePath);
+    
+    Describe.log.info("generating the dataset...");
+    Dataset dataset = Describe.generateDataset(descriptor, dataPath);
+    
+    Describe.log.info("storing the dataset description");
+    Describe.storeWritable(new Configuration(), fPath, dataset);
   }
-
-  private static Dataset generateDataset(String descriptor, String dataPath)
-      throws IOException, DescriptorException {
+  
+  private static Dataset generateDataset(String descriptor, String dataPath) throws IOException,
+                                                                            DescriptorException {
     Path path = new Path(dataPath);
     FileSystem fs = path.getFileSystem(new Configuration());
-
+    
     return DataLoader.generateDataset(descriptor, fs, path);
   }
-
+  
   private static Path validateOutput(String filePath) throws IOException {
     Path path = new Path(filePath);
     FileSystem fs = path.getFileSystem(new Configuration());
@@ -143,11 +138,10 @@ public class Describe {
     }
     return list;
   }
-
-  private static void storeWritable(Configuration conf, Path path, Writable dataset) 
-      throws IOException {
-    FileSystem fs = path.getFileSystem(conf);
   
+  private static void storeWritable(Configuration conf, Path path, Writable dataset) throws IOException {
+    FileSystem fs = path.getFileSystem(conf);
+    
     FSDataOutputStream out = fs.create(path);
     dataset.write(out);
     out.close();

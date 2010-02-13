@@ -23,13 +23,13 @@ import org.apache.mahout.df.data.Data;
  * Computes the error rate for each tree, and returns the mean of all the trees
  */
 public class MeanTreeCollector implements PredictionCallback {
-
+  
   /** number of errors for each tree */
   private final int[] nbErrors;
-
+  
   /** number of predictions for each tree */
   private final int[] nbPredictions;
-
+  
   private final Data data;
   
   public MeanTreeCollector(Data data, int nbtrees) {
@@ -37,29 +37,32 @@ public class MeanTreeCollector implements PredictionCallback {
     nbPredictions = new int[nbtrees];
     this.data = data;
   }
-
+  
   public double meanTreeError() {
     double sumerror = 0.0;
-
+    
     for (int treeId = 0; treeId < nbErrors.length; treeId++) {
-      if (nbPredictions[treeId] == 0)
+      if (nbPredictions[treeId] == 0) {
         continue; // this tree has 0 predictions
-
+      }
+      
       sumerror += (double) nbErrors[treeId] / nbPredictions[treeId];
     }
-
+    
     return sumerror / nbErrors.length;
   }
-
+  
   @Override
   public void prediction(int treeId, int instanceId, int prediction) {
-    if (prediction == -1)
+    if (prediction == -1) {
       return;
-
+    }
+    
     nbPredictions[treeId]++;
-
-    if (data.get(instanceId).label != prediction)
+    
+    if (data.get(instanceId).label != prediction) {
       nbErrors[treeId]++;
+    }
   }
-
+  
 }

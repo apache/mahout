@@ -26,38 +26,47 @@ import org.apache.mahout.df.node.Node;
 
 /**
  * Stores/Loads the intermediate results of step1 needed by step2.<br>
- * This class should not be needed outside of the partial package, so all its
- * methods are protected.<br>
+ * This class should not be needed outside of the partial package, so all its methods are protected.<br>
  */
 public class InterResults {
-  private InterResults() {
-  }
-
+  private InterResults() {}
+  
   /**
    * Load the trees and the keys returned from the first step
    * 
-   * @param fs forest path file system
-   * @param forestPath file path to the (key,tree) file
-   * @param numMaps number of map tasks
-   * @param numTrees total number of trees in the forest
-   * @param partition current partition
-   * @param keys array of size numTrees, will contain the loaded keys
-   * @param trees array of size numTrees, will contain the loaded trees
+   * @param fs
+   *          forest path file system
+   * @param forestPath
+   *          file path to the (key,tree) file
+   * @param numMaps
+   *          number of map tasks
+   * @param numTrees
+   *          total number of trees in the forest
+   * @param partition
+   *          current partition
+   * @param keys
+   *          array of size numTrees, will contain the loaded keys
+   * @param trees
+   *          array of size numTrees, will contain the loaded trees
    * @return number of instances in the current partition
    * @throws IOException
    */
-  public static int load(FileSystem fs, Path forestPath, int numMaps,
-      int numTrees, int partition, TreeID[] keys, Node[] trees)
-      throws IOException {
+  public static int load(FileSystem fs,
+                         Path forestPath,
+                         int numMaps,
+                         int numTrees,
+                         int partition,
+                         TreeID[] keys,
+                         Node[] trees) throws IOException {
     if (keys.length != trees.length) {
       throw new IllegalArgumentException("keys.length != trees.length");
     }
-
+    
     FSDataInputStream in = fs.open(forestPath);
-
+    
     TreeID key = new TreeID();
     int numInstances = -1;
-
+    
     try {
       // get current partition's size
       for (int p = 0; p < numMaps; p++) {
@@ -67,12 +76,12 @@ public class InterResults {
           in.readInt();
         }
       }
-
+      
       // load (key, tree)
       int current = 0;
       for (int index = 0; index < numTrees; index++) {
         key.readFields(in);
-
+        
         if (key.partition() == partition) {
           // skip the trees of the current partition
           Node.read(in);
@@ -82,49 +91,52 @@ public class InterResults {
           current++;
         }
       }
-
+      
       if (current != keys.length) {
         throw new IllegalStateException("loaded less keys/trees than expected");
       }
     } finally {
       in.close();
     }
-
+    
     return numInstances;
   }
-
+  
   /**
    * Write the forest trees into a file
    * 
-   * @param fs File System
-   * @param keys keys returned by the first step
-   * @param trees trees returned by the first step
-   * @param sizes partitions' sizes in hadoop order
+   * @param fs
+   *          File System
+   * @param keys
+   *          keys returned by the first step
+   * @param trees
+   *          trees returned by the first step
+   * @param sizes
+   *          partitions' sizes in hadoop order
    * @throws IOException
    */
-  public static void store(FileSystem fs, Path forestPath,
-      TreeID[] keys, Node[] trees, int[] sizes) throws IOException {
+  public static void store(FileSystem fs, Path forestPath, TreeID[] keys, Node[] trees, int[] sizes) throws IOException {
     if (keys.length != trees.length) {
       throw new IllegalArgumentException("keys.length != trees.length");
     }
-
+    
     int numTrees = keys.length;
     int numMaps = sizes.length;
-
+    
     FSDataOutputStream out = fs.create(forestPath);
-
+    
     // write partitions' sizes
     for (int p = 0; p < numMaps; p++) {
       out.writeInt(sizes[p]);
     }
-
+    
     // write the data
     for (int index = 0; index < numTrees; index++) {
       keys[index].write(out);
       trees[index].write(out);
     }
-
+    
     out.close();
   }
-
+  
 }

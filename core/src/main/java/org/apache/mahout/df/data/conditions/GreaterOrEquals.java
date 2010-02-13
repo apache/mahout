@@ -23,19 +23,19 @@ import org.apache.mahout.df.data.Instance;
  * True if a given attribute has a value "greater or equal" than a given value
  */
 public class GreaterOrEquals extends Condition {
-
+  
   private final int attr;
-
+  
   private final double value;
-
+  
   public GreaterOrEquals(int attr, double value) {
     this.attr = attr;
     this.value = value;
   }
-
+  
   @Override
   public boolean isTrueFor(Instance v) {
     return v.get(attr) >= value;
   }
-
+  
 }

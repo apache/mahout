@@ -23,18 +23,18 @@ import org.apache.mahout.df.data.Instance;
  * Condition on Instance
  */
 public abstract class Condition {
-
+  
   /**
    * Returns true is the checked instance matches the condition
    * 
-   * @param instance checked instance
+   * @param instance
+   *          checked instance
    * @return true is the checked instance matches the condition
    */
   public abstract boolean isTrueFor(Instance instance);
-
+  
   /**
-   * Condition that checks if the given attribute has a value "equal" to the
-   * given value
+   * Condition that checks if the given attribute has a value "equal" to the given value
    * 
    * @param attr
    * @param value
@@ -43,10 +43,9 @@ public abstract class Condition {
   public static Condition equals(int attr, double value) {
     return new Equals(attr, value);
   }
-
+  
   /**
-   * Condition that checks if the given attribute has a value "lesser" than the
-   * given value
+   * Condition that checks if the given attribute has a value "lesser" than the given value
    * 
    * @param attr
    * @param value
@@ -55,10 +54,9 @@ public abstract class Condition {
   public static Condition lesser(int attr, double value) {
     return new Lesser(attr, value);
   }
-
+  
   /**
-   * Condition that checks if the given attribute has a value "greater or equal"
-   * than the given value
+   * Condition that checks if the given attribute has a value "greater or equal" than the given value
    * 
    * @param attr
    * @param value

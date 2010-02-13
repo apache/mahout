@@ -23,11 +23,11 @@ import org.apache.hadoop.io.LongWritable;
  * Indicates both the tree and the data partition used to grow the tree
  */
 public class TreeID extends LongWritable implements Cloneable {
-
+  
   public static final int MAX_TREEID = 100000;
-  public TreeID() {
-  }
-
+  
+  public TreeID() {}
+  
   public TreeID(int partition, int treeId) {
     if (partition < 0) {
       throw new IllegalArgumentException("partition < 0");
@@ -37,21 +37,22 @@ public class TreeID extends LongWritable implements Cloneable {
     }
     set(partition, treeId);
   }
-
+  
   public void set(int partition, int treeId) {
-    super.set((long) partition * MAX_TREEID + treeId);
+    super.set((long) partition * TreeID.MAX_TREEID + treeId);
   }
   
   /**
    * Data partition (InputSplit's index) that was used to grow the tree
+   * 
    * @return
    */
   public int partition() {
-    return (int) (get() / MAX_TREEID);
+    return (int) (get() / TreeID.MAX_TREEID);
   }
   
   public int treeId() {
-    return (int) (get() % MAX_TREEID);
+    return (int) (get() % TreeID.MAX_TREEID);
   }
   
   @Override

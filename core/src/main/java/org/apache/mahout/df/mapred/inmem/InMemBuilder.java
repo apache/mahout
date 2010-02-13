@@ -45,51 +45,51 @@ import org.apache.mahout.df.node.Node;
  * in-memory. The forest trees are splitted across all the mappers
  */
 public class InMemBuilder extends Builder {
-
+  
   public InMemBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath,
-      Long seed, Configuration conf) {
+                      Long seed, Configuration conf) {
     super(treeBuilder, dataPath, datasetPath, seed, conf);
   }
-
+  
   public InMemBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath) {
     this(treeBuilder, dataPath, datasetPath, null, new Configuration());
   }
-
+  
   @Override
   protected void configureJob(JobConf conf, int nbTrees, boolean oobEstimate)
-      throws IOException {
+  throws IOException {
     FileOutputFormat.setOutputPath(conf, getOutputPath(conf));
-
+    
     // put the data in the DistributedCache
     DistributedCache.addCacheFile(getDataPath().toUri(), conf);
-
+    
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(MapredOutput.class);
-
+    
     conf.setMapperClass(InMemMapper.class);
     conf.setNumReduceTasks(0); // no reducers
-
+    
     conf.setInputFormat(InMemInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
   }
-
+  
   @Override
   protected DecisionForest parseOutput(JobConf conf, PredictionCallback callback)
-      throws IOException {
+  throws IOException {
     Map<Integer, MapredOutput> output = new HashMap<Integer, MapredOutput>();
-
+    
     Path outputPath = getOutputPath(conf);
     FileSystem fs = outputPath.getFileSystem(conf);
-
+    
     Path[] outfiles = DFUtils.listOutputFiles(fs, outputPath);
-
+    
     // import the InMemOutputs
     IntWritable key = new IntWritable();
     MapredOutput value = new MapredOutput();
-
+    
     for (Path path : outfiles) {
       Reader reader = new Reader(fs, path, conf);
-
+      
       try {
         while (reader.next(key, value)) {
           output.put(key.get(), value.clone());
@@ -98,10 +98,10 @@ public class InMemBuilder extends Builder {
         reader.close();
       }
     }
-
-    return processOutput(output, callback);
+    
+    return InMemBuilder.processOutput(output, callback);
   }
-
+  
   /**
    * Process the output, extracting the trees and passing the predictions to the
    * callback
@@ -111,14 +111,14 @@ public class InMemBuilder extends Builder {
    * @return
    */
   private static DecisionForest processOutput(Map<Integer, MapredOutput> output,
-      PredictionCallback callback) {
+                                              PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();
-
+    
     for (Map.Entry<Integer, MapredOutput> entry : output.entrySet()) {
       MapredOutput value = entry.getValue();
-
+      
       trees.add(value.getTree());
-
+      
       if (callback != null) {
         int[] predictions = value.getPredictions();
         for (int index = 0; index < predictions.length; index++) {
@@ -126,7 +126,7 @@ public class InMemBuilder extends Builder {
         }
       }
     }
-
+    
     return new DecisionForest(trees);
   }
 }

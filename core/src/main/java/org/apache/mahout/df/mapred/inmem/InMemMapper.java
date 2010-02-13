@@ -44,92 +44,92 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * In-memory mapper that grows the trees using a full copy of the data loaded
- * in-memory. The number of trees to grow is determined by the current
- * InMemInputSplit.
+ * In-memory mapper that grows the trees using a full copy of the data loaded in-memory. The number of trees
+ * to grow is determined by the current InMemInputSplit.
  */
 public class InMemMapper extends MapredMapper implements
-    Mapper<IntWritable, NullWritable, IntWritable, MapredOutput> {
-
+    Mapper<IntWritable,NullWritable,IntWritable,MapredOutput> {
+  
   private static final Logger log = LoggerFactory.getLogger(InMemMapper.class);
-
+  
   private Bagging bagging;
-
+  
   private Random rng;
-
+  
   private Data data;
-
+  
   /**
    * Load the training data
    * 
    * @param conf
    * @return
-   * @throws RuntimeException if the data could not be loaded
+   * @throws RuntimeException
+   *           if the data could not be loaded
    */
   private static Data loadData(JobConf conf, Dataset dataset) throws IOException {
     Path dataPath = Builder.getDistributedCacheFile(conf, 1);
     FileSystem fs = FileSystem.get(dataPath.toUri(), conf);
     return DataLoader.loadData(dataset, fs, dataPath);
   }
-
+  
   @Override
   public void configure(JobConf conf) {
     super.configure(conf);
-
-    log.info("Loading the data...");
+    
+    InMemMapper.log.info("Loading the data...");
     try {
-      data = loadData(conf, getDataset());
+      data = InMemMapper.loadData(conf, getDataset());
     } catch (IOException e) {
-    throw new IllegalStateException("Exception caught while loading the data: "
-        + StringUtils.stringifyException(e));
+      throw new IllegalStateException("Exception caught while loading the data: "
+                                      + StringUtils.stringifyException(e));
     }
-    log.info("Data loaded : {} instances", data.size());
-
+    InMemMapper.log.info("Data loaded : {} instances", data.size());
+    
     bagging = new Bagging(getTreeBuilder(), data);
   }
-
+  
   @Override
-  public void map(IntWritable key, NullWritable value,
-      OutputCollector<IntWritable, MapredOutput> output, Reporter reporter)
-      throws IOException {
+  public void map(IntWritable key,
+                  NullWritable value,
+                  OutputCollector<IntWritable,MapredOutput> output,
+                  Reporter reporter) throws IOException {
     map(key, output, (InMemInputSplit) reporter.getInputSplit());
   }
-
-  public void map(IntWritable key,
-      OutputCollector<IntWritable, MapredOutput> output, InMemInputSplit split)
-      throws IOException {
-
+  
+  public void map(IntWritable key, OutputCollector<IntWritable,MapredOutput> output, InMemInputSplit split) throws IOException {
+    
     SingleTreePredictions callback = null;
     int[] predictions = null;
-
+    
     if (isOobEstimate() && !isNoOutput()) {
       callback = new SingleTreePredictions(data.size());
       predictions = callback.getPredictions();
     }
-
+    
     initRandom(split);
-
-    log.debug("Building...");
+    
+    InMemMapper.log.debug("Building...");
     Node tree = bagging.build(key.get(), rng, callback);
-
+    
     if (!isNoOutput()) {
-      log.debug("Outputing...");
+      InMemMapper.log.debug("Outputing...");
       MapredOutput mrOut = new MapredOutput(tree, predictions);
-
+      
       output.collect(key, mrOut);
     }
   }
-
+  
   protected void initRandom(InMemInputSplit split) {
     if (rng == null) { // first execution of this mapper
       Long seed = split.getSeed();
-      log.debug("Initialising rng with seed {}: ", seed);
-
-      if (seed == null)
+      InMemMapper.log.debug("Initialising rng with seed {}: ", seed);
+      
+      if (seed == null) {
         rng = RandomUtils.getRandom();
-      else
+      } else {
         rng = RandomUtils.getRandom(seed);
+      }
     }
   }
-
+  
 }

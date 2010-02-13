@@ -31,87 +31,89 @@ import org.apache.mahout.df.node.Node;
  * Contains a grown tree and and its oob predictions.
  */
 public class MapredOutput implements Writable, Cloneable {
-
+  
   private Node tree;
-
+  
   private int[] predictions;
-
+  
   public Node getTree() {
     return tree;
   }
-
+  
   public int[] getPredictions() {
     return predictions;
   }
-
-  public MapredOutput() {
-  }
-
+  
+  public MapredOutput() { }
+  
   public MapredOutput(Node tree, int[] predictions) {
     this.tree = tree;
     this.predictions = predictions;
   }
-
+  
   public MapredOutput(Node tree) {
     this(tree, null);
   }
-
+  
   public MapredOutput(int[] predictions) {
     this(null, predictions);
   }
-
+  
   public static MapredOutput read(DataInput in) throws IOException {
     MapredOutput rfOutput = new MapredOutput();
     rfOutput.readFields(in);
     return rfOutput;
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     boolean readTree = in.readBoolean();
     if (readTree) {
       tree = Node.read(in);
     }
-
+    
     boolean readPredictions = in.readBoolean();
     if (readPredictions) {
       predictions = DFUtils.readIntArray(in);
     }
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeBoolean(tree != null);
     if (tree != null) {
       tree.write(out);
     }
-
+    
     out.writeBoolean(predictions != null);
     if (predictions != null) {
       DFUtils.writeArray(out, predictions);
     }
   }
-
+  
   @Override
   public MapredOutput clone() {
     return new MapredOutput(tree, predictions);
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof MapredOutput))
+    }
+    if ((obj == null) || !(obj instanceof MapredOutput)) {
       return false;
-
+    }
+    
     MapredOutput mo = (MapredOutput) obj;
-
-    if (tree != null && tree.equals(mo.getTree()) == false)
+    
+    if ((tree != null) && (tree.equals(mo.getTree()) == false)) {
       return false;
-
+    }
+    
     return Arrays.equals(predictions, mo.getPredictions());
   }
-
+  
   @Override
   public int hashCode() {
     int hashCode = tree == null ? 1 : tree.hashCode();
@@ -120,10 +122,10 @@ public class MapredOutput implements Writable, Cloneable {
     }
     return hashCode;
   }
-
+  
   @Override
   public String toString() {
     return "{" + tree + " | " + Arrays.toString(predictions) + '}';
   }
-
+  
 }

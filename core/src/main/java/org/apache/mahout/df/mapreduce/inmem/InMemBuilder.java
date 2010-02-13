@@ -41,62 +41,59 @@ import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.node.Node;
 
 /**
- * MapReduce implementation where each mapper loads a full copy of the data
- * in-memory. The forest trees are splitted across all the mappers
+ * MapReduce implementation where each mapper loads a full copy of the data in-memory. The forest trees are
+ * splitted across all the mappers
  */
 public class InMemBuilder extends Builder {
-
-  public InMemBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath,
-      Long seed, Configuration conf) {
+  
+  public InMemBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {
     super(treeBuilder, dataPath, datasetPath, seed, conf);
   }
-
+  
   public InMemBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath) {
     this(treeBuilder, dataPath, datasetPath, null, new Configuration());
   }
-
+  
   @Override
-  protected void configureJob(Job job, int nbTrees, boolean oobEstimate)
-      throws IOException {
+  protected void configureJob(Job job, int nbTrees, boolean oobEstimate) throws IOException {
     Configuration conf = job.getConfiguration();
     
     job.setJarByClass(InMemBuilder.class);
     
     FileOutputFormat.setOutputPath(job, getOutputPath(conf));
-
+    
     // put the data in the DistributedCache
     DistributedCache.addCacheFile(getDataPath().toUri(), conf);
-
+    
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(MapredOutput.class);
-
+    
     job.setMapperClass(InMemMapper.class);
     job.setNumReduceTasks(0); // no reducers
-
+    
     job.setInputFormatClass(InMemInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
-
+    
   }
-
+  
   @Override
-  protected DecisionForest parseOutput(Job job, PredictionCallback callback)
-      throws IOException {
+  protected DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException {
     Configuration conf = job.getConfiguration();
     
-    Map<Integer, MapredOutput> output = new HashMap<Integer, MapredOutput>();
-
+    Map<Integer,MapredOutput> output = new HashMap<Integer,MapredOutput>();
+    
     Path outputPath = getOutputPath(conf);
     FileSystem fs = outputPath.getFileSystem(conf);
-
+    
     Path[] outfiles = DFUtils.listOutputFiles(fs, outputPath);
-
+    
     // import the InMemOutputs
     IntWritable key = new IntWritable();
     MapredOutput value = new MapredOutput();
-
+    
     for (Path path : outfiles) {
       Reader reader = new Reader(fs, path, conf);
-
+      
       try {
         while (reader.next(key, value)) {
           output.put(key.get(), value.clone());
@@ -105,27 +102,25 @@ public class InMemBuilder extends Builder {
         reader.close();
       }
     }
-
-    return processOutput(output, callback);
+    
+    return InMemBuilder.processOutput(output, callback);
   }
-
+  
   /**
-   * Process the output, extracting the trees and passing the predictions to the
-   * callback
+   * Process the output, extracting the trees and passing the predictions to the callback
    * 
    * @param output
    * @param callback
    * @return
    */
-  private static DecisionForest processOutput(Map<Integer, MapredOutput> output,
-      PredictionCallback callback) {
+  private static DecisionForest processOutput(Map<Integer,MapredOutput> output, PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();
-
-    for (Map.Entry<Integer, MapredOutput> entry : output.entrySet()) {
+    
+    for (Map.Entry<Integer,MapredOutput> entry : output.entrySet()) {
       MapredOutput value = entry.getValue();
-
+      
       trees.add(value.getTree());
-
+      
       if (callback != null) {
         int[] predictions = value.getPredictions();
         for (int index = 0; index < predictions.length; index++) {
@@ -133,7 +128,7 @@ public class InMemBuilder extends Builder {
         }
       }
     }
-
+    
     return new DecisionForest(trees);
   }
 }

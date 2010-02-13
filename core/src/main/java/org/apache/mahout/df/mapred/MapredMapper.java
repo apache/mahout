@@ -28,15 +28,15 @@ import org.apache.mahout.df.data.Dataset;
  * Base class for Mapred mappers. Loads common parameters from the job
  */
 public class MapredMapper extends MapReduceBase {
-
+  
   private boolean noOutput;
-
+  
   private boolean oobEstimate;
-
+  
   private TreeBuilder treeBuilder;
-
+  
   private Dataset dataset;
-
+  
   /**
    * 
    * @return if false, the mapper does not output
@@ -44,7 +44,7 @@ public class MapredMapper extends MapReduceBase {
   protected boolean isOobEstimate() {
     return oobEstimate;
   }
-
+  
   /**
    * 
    * @return if false, the mapper does not estimate and output predictions
@@ -52,27 +52,27 @@ public class MapredMapper extends MapReduceBase {
   protected boolean isNoOutput() {
     return noOutput;
   }
-
+  
   protected TreeBuilder getTreeBuilder() {
     return treeBuilder;
   }
-
+  
   protected Dataset getDataset() {
     return dataset;
   }
-
+  
   @Override
   public void configure(JobConf conf) {
     super.configure(conf);
-
+    
     try {
-      configure(!Builder.isOutput(conf), Builder.isOobEstimate(conf), Builder
-          .getTreeBuilder(conf), Builder.loadDataset(conf));
+      configure(!Builder.isOutput(conf), Builder.isOobEstimate(conf), Builder.getTreeBuilder(conf), Builder
+          .loadDataset(conf));
     } catch (IOException e) {
       throw new IllegalStateException("Exception caught while configuring the mapper: ", e);
     }
   }
-
+  
   /**
    * Useful for testing
    * 
@@ -81,16 +81,15 @@ public class MapredMapper extends MapReduceBase {
    * @param treeBuilder
    * @param dataset
    */
-  protected void configure(boolean noOutput, boolean oobEstimate,
-      TreeBuilder treeBuilder, Dataset dataset) {
+  protected void configure(boolean noOutput, boolean oobEstimate, TreeBuilder treeBuilder, Dataset dataset) {
     this.noOutput = noOutput;
     this.oobEstimate = oobEstimate;
-
+    
     if (treeBuilder == null) {
       throw new IllegalArgumentException("TreeBuilder not found in the Job parameters");
     }
     this.treeBuilder = treeBuilder;
-
+    
     this.dataset = dataset;
   }
 }

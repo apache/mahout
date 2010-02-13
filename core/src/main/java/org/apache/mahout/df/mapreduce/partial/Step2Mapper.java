@@ -39,27 +39,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Second step of PartialBuilder. Using the trees of the first step, computes
- * the oob predictions for each tree, except those of its own partition, on all
- * instancesof the partition.
+ * Second step of PartialBuilder. Using the trees of the first step, computes the oob predictions for each
+ * tree, except those of its own partition, on all instancesof the partition.
  */
-public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput> {
-
+public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
+  
   private static final Logger log = LoggerFactory.getLogger(Step2Mapper.class);
-
+  
   private TreeID[] keys;
-
+  
   private Node[] trees;
-
+  
   private SingleTreePredictions[] callbacks;
-
+  
   private DataConverter converter;
-
+  
   private int partition = -1;
-
+  
   /** num treated instances */
   private int instanceId;
-
   
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
@@ -67,45 +65,46 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
     
     // get the cached files' paths
     URI[] files = DistributedCache.getCacheFiles(conf);
-
-    log.info("DistributedCache.getCacheFiles(): {}", ArrayUtils.toString(files));
     
-    if (files == null || files.length < 2) {
+    Step2Mapper.log.info("DistributedCache.getCacheFiles(): {}", ArrayUtils.toString(files));
+    
+    if ((files == null) || (files.length < 2)) {
       throw new IllegalArgumentException("missing paths from the DistributedCache");
     }
-
+    
     Path datasetPath = new Path(files[0].getPath());
     Dataset dataset = Dataset.load(conf, datasetPath);
-
+    
     int numMaps = Builder.getNumMaps(conf);
     int p = conf.getInt("mapred.task.partition", -1);
-
+    
     // total number of trees in the forest
     int numTrees = Builder.getNbTrees(conf);
     if (numTrees == -1) {
       throw new IllegalArgumentException("numTrees not found !");
     }
-
-    int nbConcerned = nbConcerned(numMaps, numTrees, p);
+    
+    int nbConcerned = Step2Mapper.nbConcerned(numMaps, numTrees, p);
     keys = new TreeID[nbConcerned];
     trees = new Node[nbConcerned];
-
+    
     Path forestPath = new Path(files[1].getPath());
     FileSystem fs = forestPath.getFileSystem(conf);
-    int numInstances = InterResults.load(fs, forestPath, numMaps, numTrees,
-        p, keys, trees);
-
-    log.debug("partition: {} numInstances: {}", p, numInstances);
+    int numInstances = InterResults.load(fs, forestPath, numMaps, numTrees, p, keys, trees);
+    
+    Step2Mapper.log.debug("partition: {} numInstances: {}", p, numInstances);
     configure(p, dataset, keys, trees, numInstances);
   }
-
+  
   /**
-   * Compute the number of trees that need to classify the instances of this
-   * mapper's partition
+   * Compute the number of trees that need to classify the instances of this mapper's partition
    * 
-   * @param numMaps total number of map tasks
-   * @param numTrees total number of trees in the forest
-   * @param partition mapper's partition
+   * @param numMaps
+   *          total number of map tasks
+   * @param numTrees
+   *          total number of trees in the forest
+   * @param partition
+   *          mapper's partition
    * @return
    */
   public static int nbConcerned(int numMaps, int numTrees, int partition) {
@@ -115,63 +114,64 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
     // the trees of the mapper's partition are not concerned
     return numTrees - Step1Mapper.nbTrees(numMaps, numTrees, partition);
   }
-
+  
   /**
    * Useful for testing. Configures the mapper without using a JobConf<br>
    * TODO we don't need the keys partitions, the tree ids should suffice
    * 
-   * @param partition mapper's partition
+   * @param partition
+   *          mapper's partition
    * @param dataset
-   * @param keys keys returned by the first step
-   * @param trees trees returned by the first step
-   * @param numInstances number of instances in the mapper's partition
+   * @param keys
+   *          keys returned by the first step
+   * @param trees
+   *          trees returned by the first step
+   * @param numInstances
+   *          number of instances in the mapper's partition
    */
-  public void configure(int partition, Dataset dataset, TreeID[] keys,
-      Node[] trees, int numInstances) {
+  public void configure(int partition, Dataset dataset, TreeID[] keys, Node[] trees, int numInstances) {
     this.partition = partition;
     if (partition < 0) {
       throw new IllegalArgumentException("Wrong partition id : " + partition);
     }
-
+    
     converter = new DataConverter(dataset);
-
+    
     if (keys.length != trees.length) {
       throw new IllegalArgumentException("keys.length != trees.length");
     }
     int nbConcerned = keys.length;
-
+    
     this.keys = keys;
     this.trees = trees;
-
+    
     // make sure the trees are not from this partition
     for (TreeID key : keys) {
       if (key.partition() == partition) {
         throw new IllegalArgumentException("a tree from this partition was found !");
       }
     }
-
+    
     // init the callbacks
     callbacks = new SingleTreePredictions[nbConcerned];
     for (int index = 0; index < nbConcerned; index++) {
       callbacks[index] = new SingleTreePredictions(numInstances);
     }
-
+    
   }
-
   
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-
+    
     Instance instance = converter.convert(instanceId, value.toString());
-
+    
     for (int index = 0; index < keys.length; index++) {
       int prediction = trees[index].classify(instance);
       callbacks[index].prediction(index, instanceId, prediction);
     }
-
+    
     instanceId++;
   }
-
   
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -180,5 +180,5 @@ public class Step2Mapper extends Mapper<LongWritable, Text, TreeID, MapredOutput
       context.write(key, new MapredOutput(callbacks[index].getPredictions()));
     }
   }
-
+  
 }

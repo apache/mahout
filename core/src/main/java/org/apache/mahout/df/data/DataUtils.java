@@ -25,9 +25,8 @@ import java.util.Random;
  * Helper methods that deals with data lists and arrays of values
  */
 public class DataUtils {
-  private DataUtils() {
-  }
-
+  private DataUtils() {}
+  
   /**
    * Computes the sum of the values
    * 
@@ -39,12 +38,13 @@ public class DataUtils {
     for (int value : values) {
       sum += value;
     }
-
+    
     return sum;
   }
-
+  
   /**
    * foreach i : array1[i] += array2[i]
+   * 
    * @param array1
    * @param array2
    */
@@ -57,9 +57,10 @@ public class DataUtils {
       array1[index] += array2[index];
     }
   }
-
+  
   /**
    * foreach i : array1[i] -= array2[i]
+   * 
    * @param array1
    * @param array2
    */
@@ -72,18 +73,19 @@ public class DataUtils {
       array1[index] -= array2[index];
     }
   }
-
+  
   /**
    * return the index of the maximum of the array, breaking ties randomly
    * 
-   * @param rng used to break ties
+   * @param rng
+   *          used to break ties
    * @param values
    * @return index of the maximum
    */
   public static int maxindex(Random rng, int[] values) {
     int max = 0;
     List<Integer> maxindices = new ArrayList<Integer>();
-
+    
     for (int index = 0; index < values.length; index++) {
       if (values[index] > max) {
         max = values[index];
@@ -93,7 +95,7 @@ public class DataUtils {
         maxindices.add(index);
       }
     }
-
+    
     int bestind;
     if (maxindices.size() > 1) {
       // break ties randomly
@@ -101,7 +103,7 @@ public class DataUtils {
     } else {
       bestind = maxindices.get(0);
     }
-
+    
     return bestind;
   }
 }

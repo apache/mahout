@@ -30,10 +30,12 @@ public interface TreeBuilder {
   /**
    * Builds a Decision tree using the training data
    * 
-   * @param rng random-numbers generator
-   * @param data training data
+   * @param rng
+   *          random-numbers generator
+   * @param data
+   *          training data
    * @return root Node
    */
   Node build(Random rng, Data data);
-
+  
 }

@@ -29,62 +29,64 @@ import org.apache.mahout.df.data.Instance;
 public class NumericalNode extends Node {
   /** numerical attribute to split for */
   private int attr;
-
+  
   /** split value */
   private double split;
-
+  
   /** child node when attribute's value < split value */
   private Node loChild;
-
+  
   /** child node when attribute's value >= split value */
   private Node hiChild;
-
-  public NumericalNode() {
-  }
-
+  
+  public NumericalNode() {}
+  
   public NumericalNode(int attr, double split, Node loChild, Node hiChild) {
     this.attr = attr;
     this.split = split;
     this.loChild = loChild;
     this.hiChild = hiChild;
   }
-
+  
   @Override
   public int classify(Instance instance) {
-    if (instance.get(attr) < split)
+    if (instance.get(attr) < split) {
       return loChild.classify(instance);
-    else
+    } else {
       return hiChild.classify(instance);
+    }
   }
-
+  
   @Override
   public long maxDepth() {
     return 1 + Math.max(loChild.maxDepth(), hiChild.maxDepth());
   }
-
+  
   @Override
   public long nbNodes() {
     return 1 + loChild.nbNodes() + hiChild.nbNodes();
   }
-
+  
   @Override
   protected Type getType() {
     return Type.NUMERICAL;
-  }  
-
+  }
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof NumericalNode))
+    }
+    if ((obj == null) || !(obj instanceof NumericalNode)) {
       return false;
-
+    }
+    
     NumericalNode node = (NumericalNode) obj;
-
-    return attr == node.attr && split == node.split
-        && loChild.equals(node.loChild) && hiChild.equals(node.hiChild);
+    
+    return (attr == node.attr) && (split == node.split) && loChild.equals(node.loChild)
+           && hiChild.equals(node.hiChild);
   }
-
+  
   @Override
   public int hashCode() {
     return attr + (int) Double.doubleToLongBits(split) + loChild.hashCode() + hiChild.hashCode();
@@ -94,7 +96,7 @@ public class NumericalNode extends Node {
   protected String getString() {
     return loChild.toString() + ',' + hiChild.toString();
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     attr = in.readInt();
@@ -102,7 +104,7 @@ public class NumericalNode extends Node {
     loChild = Node.read(in);
     hiChild = Node.read(in);
   }
-
+  
   @Override
   protected void writeNode(DataOutput out) throws IOException {
     out.writeInt(attr);

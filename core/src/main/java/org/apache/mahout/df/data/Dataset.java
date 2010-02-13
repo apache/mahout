@@ -37,55 +37,58 @@ import org.apache.mahout.df.DFUtils;
  * 
  */
 public class Dataset implements Writable {
-
+  
   /**
    * Attributes type
    */
   public enum Attribute {
-    IGNORED, NUMERICAL, CATEGORICAL, LABEL;
-
+    IGNORED,
+    NUMERICAL,
+    CATEGORICAL,
+    LABEL;
+    
     public boolean isNumerical() {
       return this == NUMERICAL;
     }
-
+    
     public boolean isCategorical() {
       return this == CATEGORICAL;
     }
-
+    
     public boolean isLabel() {
       return this == LABEL;
     }
-
+    
     public boolean isIgnored() {
-      return this == IGNORED; 
+      return this == IGNORED;
     }
   }
-
+  
   private Attribute[] attributes;
-
+  
   /** all distinct labels */
   private String[] labels;
-
+  
   /** list of ignored attributes */
   private int[] ignored;
   
   /** distinct values (CATEGORIAL attributes only) */
   private String[][] values;
-
+  
   /** index of the label attribute in the original data */
   private int labelId;
   
   /** number of instances in the dataset */
   private int nbInstances;
-
+  
   public String[] labels() {
     return Arrays.copyOf(labels, labels.length);
   }
-
+  
   public int nblabels() {
     return labels.length;
   }
-
+  
   public int getLabelId() {
     return labelId;
   }
@@ -97,20 +100,23 @@ public class Dataset implements Writable {
   /**
    * Returns the code used to represent the label value in the data
    * 
-   * @param label label's value to code
+   * @param label
+   *          label's value to code
    * @return label's code
    */
   public int labelCode(String label) {
     return ArrayUtils.indexOf(labels, label);
   }
-
+  
   public String getLabel(int code) {
     return labels[code];
   }
   
   /**
    * Converts a token to its corresponding int code for a given attribute
-   * @param attr attribute's index
+   * 
+   * @param attr
+   *          attribute's index
    * @param token
    * @return
    */
@@ -121,34 +127,35 @@ public class Dataset implements Writable {
     if (values == null) {
       throw new IllegalStateException("Values not found");
     }
-
+    
     return ArrayUtils.indexOf(values[attr], token);
   }
   
   public int[] getIgnored() {
     return ignored;
   }
-
-  private Dataset() {
-  }
-
+  
+  private Dataset() {}
+  
   /**
    * Should only be called by a DataLoader
    * 
-   * @param attrs attributes description
-   * @param values distinct values for all CATEGORICAL attributes
+   * @param attrs
+   *          attributes description
+   * @param values
+   *          distinct values for all CATEGORICAL attributes
    * @param nbInstances
    */
   protected Dataset(Attribute[] attrs, List<String>[] values, int nbInstances) {
-    validateValues(attrs, values);
-
-    int nbattrs = countAttributes(attrs);
+    Dataset.validateValues(attrs, values);
+    
+    int nbattrs = Dataset.countAttributes(attrs);
     
     // the label values are set apart
     attributes = new Attribute[nbattrs];
     this.values = new String[nbattrs][];
     ignored = new int[attrs.length - (nbattrs + 1)]; // nbignored = total - (nbattrs + label)
-
+    
     labelId = -1;
     int ignoredId = 0;
     int ind = 0;
@@ -170,20 +177,20 @@ public class Dataset implements Writable {
         this.values[ind] = new String[values[attr].size()];
         values[attr].toArray(this.values[ind]);
       }
-
+      
       attributes[ind++] = attrs[attr];
     }
     
     if (labelId == -1) {
       throw new IllegalStateException("Label not found");
     }
-
+    
     labels = new String[values[labelId].size()];
     values[labelId].toArray(labels);
     
     this.nbInstances = nbInstances;
   }
-
+  
   /**
    * Counts the number of attributes, except IGNORED and LABEL
    * 
@@ -192,30 +199,30 @@ public class Dataset implements Writable {
    */
   protected static int countAttributes(Attribute[] attrs) {
     int nbattrs = 0;
-
+    
     for (Attribute attr1 : attrs) {
-      if (attr1.isNumerical() || attr1.isCategorical())
+      if (attr1.isNumerical() || attr1.isCategorical()) {
         nbattrs++;
+      }
     }
-  
+    
     return nbattrs;
   }
-
+  
   private static void validateValues(Attribute[] attrs, List<String>[] values) {
     if (attrs.length != values.length) {
       throw new IllegalArgumentException("attrs.length != values.length");
     }
-
+    
     for (int attr = 0; attr < attrs.length; attr++) {
       if (attrs[attr].isCategorical()) {
         if (values[attr] == null) {
-          throw new IllegalArgumentException("values not found for attribute N° "
-              + attr);
+          throw new IllegalArgumentException("values not found for attribute N° " + attr);
         }
       }
     }
   }
-
+  
   /**
    * Number of attributes
    * 
@@ -224,24 +231,27 @@ public class Dataset implements Writable {
   public int nbAttributes() {
     return attributes.length;
   }
-
+  
   /**
    * Is this a numerical attribute ?
    * 
-   * @param attr index of the attribute to check
+   * @param attr
+   *          index of the attribute to check
    * @return true if the attribute is numerical
    */
   public boolean isNumerical(int attr) {
     return attributes[attr].isNumerical();
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof Dataset))
+    }
+    if ((obj == null) || !(obj instanceof Dataset)) {
       return false;
-
+    }
+    
     Dataset dataset = (Dataset) obj;
     
     if (!Arrays.equals(attributes, dataset.attributes)) {
@@ -251,16 +261,17 @@ public class Dataset implements Writable {
     if (!Arrays.equals(labels, dataset.labels)) {
       return false;
     }
-
+    
     for (int attr = 0; attr < nbAttributes(); attr++) {
       if (!Arrays.equals(values[attr], dataset.values[attr])) {
         return false;
       }
     }
-
-    return labelId == dataset.labelId && nbInstances == dataset.nbInstances;
+    
+    return (labelId == dataset.labelId) && (nbInstances == dataset.nbInstances);
   }
-
+  
+  @Override
   public int hashCode() {
     int hashCode = labelId + 31 * nbInstances;
     for (Attribute attr : attributes) {
@@ -276,19 +287,20 @@ public class Dataset implements Writable {
     }
     return hashCode;
   }
-
+  
   /**
    * Loads the dataset from a file
+   * 
    * @throws IOException
    */
   public static Dataset load(Configuration conf, Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);
     
     FSDataInputStream input = fs.open(path);
-
-    Dataset dataset = read(input);
+    
+    Dataset dataset = Dataset.read(input);
     input.close();
-
+    
     return dataset;
   }
   
@@ -323,11 +335,11 @@ public class Dataset implements Writable {
     labelId = in.readInt();
     nbInstances = in.readInt();
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(attributes.length); // nb attributes
-    for (Attribute attr:attributes) {
+    for (Attribute attr : attributes) {
       WritableUtils.writeString(out, attr.name());
     }
     
@@ -345,5 +357,5 @@ public class Dataset implements Writable {
     out.writeInt(labelId);
     out.writeInt(nbInstances);
   }
-
+  
 }

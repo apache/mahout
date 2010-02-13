@@ -17,8 +17,8 @@
 
 package org.apache.mahout.df.data;
 
-import java.util.StringTokenizer;
 import java.util.Arrays;
+import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.math.DenseVector;
@@ -29,27 +29,27 @@ import org.slf4j.LoggerFactory;
  * Converts String to Instance using a Dataset
  */
 public class DataConverter {
-
+  
   private static final Logger log = LoggerFactory.getLogger(DataConverter.class);
-
+  
   private final Dataset dataset;
-
+  
   public DataConverter(Dataset dataset) {
     this.dataset = dataset;
   }
-
+  
   public Instance convert(int id, String string) {
     // all attributes (categorical, numerical), ignored, label
     int nball = dataset.nbAttributes() + dataset.getIgnored().length + 1;
-
+    
     StringTokenizer tokenizer = new StringTokenizer(string, ", ");
     if (tokenizer.countTokens() != nball) {
       throw new IllegalArgumentException("Wrong number of attributes in the string");
     }
-
+    
     int nbattrs = dataset.nbAttributes();
     DenseVector vector = new DenseVector(nbattrs);
-
+    
     int aId = 0;
     int label = -1;
     for (int attr = 0; attr < nball; attr++) {
@@ -58,7 +58,7 @@ public class DataConverter {
       if (ArrayUtils.contains(dataset.getIgnored(), attr)) {
         continue; // IGNORED
       }
-
+      
       if ("?".equals(token)) {
         // missing value
         return null;
@@ -67,9 +67,9 @@ public class DataConverter {
       if (attr == dataset.getLabelId()) {
         label = dataset.labelCode(token);
         if (label == -1) {
-          log.error(String.format("label token: %s\ndataset.labels: %s",
-                  token, Arrays.toString(dataset.labels())));
-          throw new IllegalStateException("Label value ("+token+") not known");
+          DataConverter.log.error(String.format("label token: %s\ndataset.labels: %s", token, Arrays
+              .toString(dataset.labels())));
+          throw new IllegalStateException("Label value (" + token + ") not known");
         }
       } else if (dataset.isNumerical(aId)) {
         vector.set(aId++, Double.parseDouble(token));
@@ -78,12 +78,12 @@ public class DataConverter {
         aId++;
       }
     }
-
+    
     if (label == -1) {
-      log.error(String.format("Label not found, instance id : %d, \nstring : %s", id, string));
+      DataConverter.log.error(String.format("Label not found, instance id : %d, \nstring : %s", id, string));
       throw new IllegalStateException("Label not found!");
     }
-
+    
     return new Instance(id, vector, label);
   }
 }

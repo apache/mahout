@@ -28,20 +28,19 @@ import org.apache.mahout.df.data.Instance;
 
 public class CategoricalNode extends Node {
   private int attr;
-
+  
   private double[] values;
-
+  
   private Node[] childs;
-
-  public CategoricalNode() {
-  }
+  
+  public CategoricalNode() {}
   
   public CategoricalNode(int attr, double[] values, Node[] childs) {
     this.attr = attr;
     this.values = values;
     this.childs = childs;
   }
-
+  
   @Override
   public int classify(Instance instance) {
     int index = ArrayUtils.indexOf(values, instance.get(attr));
@@ -51,49 +50,51 @@ public class CategoricalNode extends Node {
     }
     return childs[index].classify(instance);
   }
-
+  
   @Override
   public long maxDepth() {
     long max = 0;
-
+    
     for (Node child : childs) {
       long depth = child.maxDepth();
-      if (depth > max)
+      if (depth > max) {
         max = depth;
+      }
     }
-
+    
     return 1 + max;
   }
-
+  
   @Override
   public long nbNodes() {
     long nbNodes = 1;
-
+    
     for (Node child : childs) {
       nbNodes += child.nbNodes();
     }
-
+    
     return nbNodes;
   }
-
+  
   @Override
   protected Type getType() {
     return Type.CATEGORICAL;
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof CategoricalNode))
+    }
+    if ((obj == null) || !(obj instanceof CategoricalNode)) {
       return false;
-
+    }
+    
     CategoricalNode node = (CategoricalNode) obj;
-
-    return attr == node.attr && Arrays.equals(values, node.values)
-        && Arrays.equals(childs, node.childs);
+    
+    return (attr == node.attr) && Arrays.equals(values, node.values) && Arrays.equals(childs, node.childs);
   }
-
+  
   @Override
   public int hashCode() {
     int hashCode = attr;
@@ -110,20 +111,20 @@ public class CategoricalNode extends Node {
   protected String getString() {
     StringBuilder buffer = new StringBuilder();
     
-    for (Node child:childs) {
+    for (Node child : childs) {
       buffer.append(child).append(',');
     }
     
     return buffer.toString();
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     attr = in.readInt();
     values = DFUtils.readDoubleArray(in);
     childs = DFUtils.readNodeArray(in);
   }
-
+  
   @Override
   protected void writeNode(DataOutput out) throws IOException {
     out.writeInt(attr);

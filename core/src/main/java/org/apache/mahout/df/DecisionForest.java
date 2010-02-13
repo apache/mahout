@@ -31,21 +31,21 @@ import org.apache.mahout.df.node.Node;
  * Represents a forest of decision trees.
  */
 public class DecisionForest {
-
+  
   private final List<Node> trees;
-
+  
   protected DecisionForest() {
     trees = new ArrayList<Node>();
   }
-
+  
   public DecisionForest(List<Node> trees) {
-    if (!(trees != null && !trees.isEmpty())) {
+    if (!((trees != null) && !trees.isEmpty())) {
       throw new IllegalArgumentException("trees argument must not be null or empty");
     }
-
+    
     this.trees = trees;
   }
-
+  
   public List<Node> getTrees() {
     return trees;
   }
@@ -60,42 +60,46 @@ public class DecisionForest {
     if (callback == null) {
       throw new IllegalArgumentException("callback must not be null");
     }
-
-    if (data.isEmpty())
+    
+    if (data.isEmpty()) {
       return; // nothing to classify
-
+    }
+    
     for (int treeId = 0; treeId < trees.size(); treeId++) {
       Node tree = trees.get(treeId);
-
+      
       for (int index = 0; index < data.size(); index++) {
         int prediction = tree.classify(data.get(index));
         callback.prediction(treeId, index, prediction);
       }
     }
   }
-
+  
   /**
    * predicts the label for the instance
    * 
-   * @param rng Random number generator, used to break ties randomly
+   * @param rng
+   *          Random number generator, used to break ties randomly
    * @param instance
    * @return -1 if the label cannot be predicted
    */
   public int classify(Random rng, Instance instance) {
     int[] predictions = new int[trees.size()];
-
+    
     for (Node tree : trees) {
       int prediction = tree.classify(instance);
-      if (prediction != -1)
+      if (prediction != -1) {
         predictions[prediction]++;
+      }
     }
-
-    if (DataUtils.sum(predictions) == 0)
+    
+    if (DataUtils.sum(predictions) == 0) {
       return -1; // no prediction available
-
+    }
+    
     return DataUtils.maxindex(rng, predictions);
   }
-
+  
   /**
    * Mean number of nodes per tree
    * 
@@ -103,14 +107,14 @@ public class DecisionForest {
    */
   public long meanNbNodes() {
     long sum = 0;
-
+    
     for (Node tree : trees) {
       sum += tree.nbNodes();
     }
-
+    
     return sum / trees.size();
   }
-
+  
   /**
    * Total number of nodes in all the trees
    * 
@@ -118,14 +122,14 @@ public class DecisionForest {
    */
   public long nbNodes() {
     long sum = 0;
-
+    
     for (Node tree : trees) {
       sum += tree.nbNodes();
     }
-
+    
     return sum;
   }
-
+  
   /**
    * Mean maximum depth per tree
    * 
@@ -133,29 +137,31 @@ public class DecisionForest {
    */
   public long meanMaxDepth() {
     long sum = 0;
-
+    
     for (Node tree : trees) {
       sum += tree.maxDepth();
     }
-
+    
     return sum / trees.size();
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (!(obj instanceof DecisionForest))
+    }
+    if (!(obj instanceof DecisionForest)) {
       return false;
+    }
     
-    DecisionForest rf = (DecisionForest)obj;
+    DecisionForest rf = (DecisionForest) obj;
     
-    return trees.size() == rf.getTrees().size() && trees.containsAll(rf.getTrees());
+    return (trees.size() == rf.getTrees().size()) && trees.containsAll(rf.getTrees());
   }
-
+  
   @Override
   public int hashCode() {
     return trees.hashCode();
   }
-
+  
 }

@@ -31,41 +31,43 @@ import org.slf4j.LoggerFactory;
  * Builds a tree using bagging
  */
 public class Bagging {
-
+  
   private static final Logger log = LoggerFactory.getLogger(Bagging.class);
-
+  
   private final TreeBuilder treeBuilder;
-
+  
   private final Data data;
-
+  
   private final boolean[] sampled;
-
+  
   public Bagging(TreeBuilder treeBuilder, Data data) {
     this.treeBuilder = treeBuilder;
     this.data = data;
     sampled = new boolean[data.size()];
   }
-
+  
   /**
    * Builds one tree
    * 
-   * @param treeId tree identifier
+   * @param treeId
+   *          tree identifier
    * @param rng
    * @param callback
    * @return
-   * @throws RuntimeException if the data is not set
+   * @throws RuntimeException
+   *           if the data is not set
    */
   public Node build(int treeId, Random rng, PredictionCallback callback) {
-    log.debug("Bagging...");
+    Bagging.log.debug("Bagging...");
     Arrays.fill(sampled, false);
     Data bag = data.bagging(rng, sampled);
-
-    log.debug("Building...");
+    
+    Bagging.log.debug("Building...");
     Node tree = treeBuilder.build(rng, bag);
-
+    
     // predict the label for the out-of-bag elements
     if (callback != null) {
-      log.debug("Oob error estimation");
+      Bagging.log.debug("Oob error estimation");
       for (int index = 0; index < data.size(); index++) {
         if (sampled[index] == false) {
           int prediction = tree.classify(data.get(index));
@@ -73,8 +75,8 @@ public class Bagging {
         }
       }
     }
-
+    
     return tree;
   }
-
+  
 }

@@ -28,11 +28,14 @@ import org.apache.mahout.df.data.Instance;
  * Represents an abstract node of a decision tree
  */
 public abstract class Node implements Writable {
-
+  
   protected enum Type {
-    MOCKLEAF, LEAF, NUMERICAL, CATEGORICAL
+    MOCKLEAF,
+    LEAF,
+    NUMERICAL,
+    CATEGORICAL
   }
-
+  
   /**
    * predicts the label for the instance
    * 
@@ -40,27 +43,27 @@ public abstract class Node implements Writable {
    * @return -1 if the label cannot be predicted
    */
   public abstract int classify(Instance instance);
-
+  
   /**
    * returns the total number of nodes of the tree
    * 
    * @return
    */
   public abstract long nbNodes();
-
+  
   /**
    * returns the maximum depth of the tree
    * 
    * @return
    */
   public abstract long maxDepth();
-
+  
   protected abstract Type getType();
-
+  
   public static Node read(DataInput in) throws IOException {
     Type type = Type.values()[in.readInt()];
     Node node;
-
+    
     switch (type) {
       case MOCKLEAF:
         node = new MockLeaf();
@@ -75,28 +78,27 @@ public abstract class Node implements Writable {
         node = new CategoricalNode();
         break;
       default:
-        throw new IllegalStateException(
-            "This implementation is not currently supported");
+        throw new IllegalStateException("This implementation is not currently supported");
     }
-
+    
     node.readFields(in);
-
+    
     return node;
   }
-
+  
   @Override
   public final String toString() {
     return getType() + ":" + getString() + ';';
   }
-
+  
   protected abstract String getString();
-
+  
   @Override
   public final void write(DataOutput out) throws IOException {
     out.writeInt(getType().ordinal());
     writeNode(out);
   }
-
+  
   protected abstract void writeNode(DataOutput out) throws IOException;
-
+  
 }

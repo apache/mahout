@@ -29,29 +29,28 @@ import org.apache.mahout.df.data.Instance;
  */
 public class Leaf extends Node {
   private int label;
-
-  protected Leaf() {
-  }
-
+  
+  protected Leaf() {}
+  
   public Leaf(int label) {
     this.label = label;
   }
-
+  
   @Override
   public int classify(Instance instance) {
     return label;
   }
-
+  
   @Override
   public long maxDepth() {
     return 1;
   }
-
+  
   @Override
   public long nbNodes() {
     return 1;
   }
-
+  
   /**
    * Extract a Leaf Node
    * 
@@ -60,42 +59,44 @@ public class Leaf extends Node {
    */
   static Leaf parse(StringTokenizer tokenizer) {
     int label = Integer.parseInt(tokenizer.nextToken());
-
+    
     return new Leaf(label);
   }
-
+  
   @Override
   protected Type getType() {
     return Type.LEAF;
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof Leaf))
+    }
+    if ((obj == null) || !(obj instanceof Leaf)) {
       return false;
-
+    }
+    
     Leaf leaf = (Leaf) obj;
-
+    
     return label == leaf.label;
   }
-
+  
   @Override
   public int hashCode() {
     return label;
   }
- 
+  
   @Override
   protected String getString() {
     return "";
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     label = in.readInt();
   }
-
+  
   @Override
   protected void writeNode(DataOutput out) throws IOException {
     out.writeInt(label);
