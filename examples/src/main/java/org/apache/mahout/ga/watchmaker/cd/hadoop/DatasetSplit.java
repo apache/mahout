@@ -17,6 +17,9 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
+import java.io.IOException;
+import java.util.Random;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileSplit;
@@ -30,191 +33,186 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.StringUtils;
 import org.uncommons.maths.random.RepeatableRNG;
 
-import java.io.IOException;
-import java.util.Random;
-
 /**
  * Separate the input data into a training and testing set.
  */
 public class DatasetSplit {
-
+  
   private static final String SEED = "traintest.seed";
-
+  
   private static final String THRESHOLD = "traintest.threshold";
-
+  
   private static final String TRAINING = "traintest.training";
-
+  
   private final long seed;
-
+  
   private final double threshold;
-
+  
   private boolean training;
-
+  
   /**
    * 
    * @param seed
-   * @param threshold fraction of the total dataset that will be used for
-   *        training
+   * @param threshold
+   *          fraction of the total dataset that will be used for training
    */
   public DatasetSplit(long seed, double threshold) {
     this.seed = seed;
     this.threshold = threshold;
     this.training = true;
   }
-
+  
   public DatasetSplit(double threshold) {
     this(RandomUtils.seedBytesToLong(((RepeatableRNG) RandomUtils.getRandom()).getSeed()), threshold);
   }
-
+  
   public DatasetSplit(JobConf conf) {
-    seed = getSeed(conf);
-    threshold = getThreshold(conf);
-    training = isTraining(conf);
+    seed = DatasetSplit.getSeed(conf);
+    threshold = DatasetSplit.getThreshold(conf);
+    training = DatasetSplit.isTraining(conf);
   }
-
+  
   public long getSeed() {
     return seed;
   }
-
+  
   public double getThreshold() {
     return threshold;
   }
-
+  
   public boolean isTraining() {
     return training;
   }
-
+  
   public void setTraining(boolean training) {
     this.training = training;
   }
-
+  
   public void storeJobParameters(JobConf conf) {
-    conf.set(SEED, StringUtils.toString(seed));
-    conf.set(THRESHOLD, Double.toString(threshold));
-    conf.setBoolean(TRAINING, training);
+    conf.set(DatasetSplit.SEED, StringUtils.toString(seed));
+    conf.set(DatasetSplit.THRESHOLD, Double.toString(threshold));
+    conf.setBoolean(DatasetSplit.TRAINING, training);
   }
-
+  
   static long getSeed(JobConf conf) {
-    String seedstr = conf.get(SEED);
-    if (seedstr == null)
+    String seedstr = conf.get(DatasetSplit.SEED);
+    if (seedstr == null) {
       throw new IllegalArgumentException("SEED job parameter not found");
-
-    return StringUtils.<Long>fromString(seedstr);
+    }
+    
+    return StringUtils.<Long> fromString(seedstr);
   }
-
+  
   static double getThreshold(JobConf conf) {
-    String thrstr = conf.get(THRESHOLD);
-    if (thrstr == null)
+    String thrstr = conf.get(DatasetSplit.THRESHOLD);
+    if (thrstr == null) {
       throw new IllegalArgumentException("THRESHOLD job parameter not found");
-
+    }
+    
     return Double.parseDouble(thrstr);
   }
-
+  
   static boolean isTraining(JobConf conf) {
-    if (conf.get(TRAINING) == null)
+    if (conf.get(DatasetSplit.TRAINING) == null) {
       throw new IllegalArgumentException("TRAINING job parameter not found");
-
-    return conf.getBoolean(TRAINING, true);
+    }
+    
+    return conf.getBoolean(DatasetSplit.TRAINING, true);
   }
-
+  
   /**
-   * a {@link org.apache.hadoop.mapred.LineRecordReader LineRecordReader} that
-   * skips some lines from the input. Uses a Random number generator with a
-   * specific seed to decide if a line will be skipped or not.
+   * a {@link org.apache.hadoop.mapred.LineRecordReader LineRecordReader} that skips some lines from the
+   * input. Uses a Random number generator with a specific seed to decide if a line will be skipped or not.
    */
-  public static class RndLineRecordReader implements
-      RecordReader<LongWritable, Text> {
-
-    private final RecordReader<LongWritable, Text> reader;
-
+  public static class RndLineRecordReader implements RecordReader<LongWritable,Text> {
+    
+    private final RecordReader<LongWritable,Text> reader;
+    
     private final Random rng;
-
+    
     private final double threshold;
-
+    
     private final boolean training;
-
+    
     private final LongWritable k = new LongWritable();
-
+    
     private final Text v = new Text();
-
-    public RndLineRecordReader(RecordReader<LongWritable, Text> reader,
-        JobConf conf) {
+    
+    public RndLineRecordReader(RecordReader<LongWritable,Text> reader, JobConf conf) {
       if (reader == null) {
         throw new IllegalArgumentException("null reader");
       }
-
+      
       this.reader = reader;
-
+      
       DatasetSplit split = new DatasetSplit(conf);
-
+      
       rng = RandomUtils.getRandom(split.getSeed());
       threshold = split.getThreshold();
       training = split.isTraining();
     }
-
+    
     @Override
     public void close() throws IOException {
       reader.close();
     }
-
+    
     @Override
     public LongWritable createKey() {
       return reader.createKey();
     }
-
+    
     @Override
     public Text createValue() {
       return reader.createValue();
     }
-
+    
     @Override
     public long getPos() throws IOException {
       return reader.getPos();
     }
-
+    
     @Override
     public float getProgress() throws IOException {
       return reader.getProgress();
     }
-
+    
     @Override
     public boolean next(LongWritable key, Text value) throws IOException {
       boolean read;
       do {
         read = reader.next(k, v);
       } while (read && !selected());
-
-      if (!read)
+      
+      if (!read) {
         return false;
-
+      }
+      
       key.set(k.get());
       value.set(v);
       return true;
     }
-
+    
     /**
      * 
      * @return true if the current input line is not skipped.
      */
     private boolean selected() {
-      return training ? rng.nextDouble() < threshold
-          : rng.nextDouble() >= threshold;
+      return training ? rng.nextDouble() < threshold : rng.nextDouble() >= threshold;
     }
   }
-
+  
   /**
-   * {@link org.apache.hadoop.mapred.TextInputFormat TextInputFormat that uses a {@link RndLineRecordReader RndLineRecordReader}}
-   * as a RecordReader
+   * {@link org.apache.hadoop.mapred.TextInputFormat TextInputFormat that uses a {@link RndLineRecordReader
+   * RndLineRecordReader} as a RecordReader
    */
   public static class DatasetTextInputFormat extends TextInputFormat {
-
+    
     @Override
-    public RecordReader<LongWritable, Text> getRecordReader(InputSplit split,
-        JobConf job, Reporter reporter) throws IOException {
+    public RecordReader<LongWritable,Text> getRecordReader(InputSplit split, JobConf job, Reporter reporter) throws IOException {
       reporter.setStatus(split.toString());
-
-      return new RndLineRecordReader(new LineRecordReader(job,
-          (FileSplit) split), job);
+      
+      return new RndLineRecordReader(new LineRecordReader(job, (FileSplit) split), job);
     }
   }
 }

@@ -17,10 +17,6 @@
 
 package org.apache.mahout.cf.taste.example.grouplens;
 
-import org.apache.mahout.common.FileLineIterable;
-import org.apache.mahout.common.IOUtils;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,23 +27,27 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
+import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.IOUtils;
+
 public final class GroupLensDataModel extends FileDataModel {
-
+  
   private static final String COLON_DELIMTER = "::";
-  private static final Pattern COLON_DELIMITER_PATTERN = Pattern.compile(COLON_DELIMTER);
-
+  private static final Pattern COLON_DELIMITER_PATTERN = Pattern.compile(GroupLensDataModel.COLON_DELIMTER);
+  
   public GroupLensDataModel() throws IOException {
-    this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"));
+    this(GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"));
   }
-
+  
   /**
    * @param ratingsFile GroupLens ratings.dat file in its native format
    * @throws IOException if an error occurs while reading or writing files
    */
   public GroupLensDataModel(File ratingsFile) throws IOException {
-    super(convertGLFile(ratingsFile));
+    super(GroupLensDataModel.convertGLFile(ratingsFile));
   }
-
+  
   private static File convertGLFile(File originalFile) throws IOException {
     // Now translate the file; remove commas, then convert "::" delimiter to comma
     File resultFile = new File(new File(System.getProperty("java.io.tmpdir")), "ratings.txt");
@@ -58,7 +58,7 @@ public final class GroupLensDataModel extends FileDataModel {
     try {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, false)) {
-        String convertedLine = COLON_DELIMITER_PATTERN.matcher(line.substring(0, line.lastIndexOf(COLON_DELIMTER))).replaceAll(",");
+        String convertedLine = GroupLensDataModel.COLON_DELIMITER_PATTERN.matcher(line.substring(0, line.lastIndexOf(GroupLensDataModel.COLON_DELIMTER))).replaceAll(",");
         writer.println(convertedLine);
       }
       writer.flush();
@@ -70,7 +70,7 @@ public final class GroupLensDataModel extends FileDataModel {
     }
     return resultFile;
   }
-
+  
   public static File readResourceToTempFile(String resourceName) throws IOException {
     InputStream is = GroupLensRecommender.class.getResourceAsStream(resourceName);
     if (is == null) {
@@ -96,11 +96,11 @@ public final class GroupLensDataModel extends FileDataModel {
       IOUtils.quietClose(is);
     }
   }
-
-
+  
+  
   @Override
   public String toString() {
     return "GroupLensDataModel";
   }
-
+  
 }

@@ -37,28 +37,25 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.CommandLineUtil;
-import org.slf4j.LoggerFactory;
+import org.apache.mahout.common.FileLineIterable;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Converts a directory of text documents into SequenceFiles of Specified
- * chunkSize. This class takes in a parent directory containing sub folders of
- * text documents and recursively reads the files and creates the
- * {@link SequenceFile}s of docid => content. The docid is set as the relative
- * path of the document from the parent directory prepended with a specified
- * prefix. You can also specify the input encoding of the text files. The
- * content of the output SequenceFiles are encoded as UTF-8 text.
+ * Converts a directory of text documents into SequenceFiles of Specified chunkSize. This class takes in a
+ * parent directory containing sub folders of text documents and recursively reads the files and creates the
+ * {@link SequenceFile}s of docid => content. The docid is set as the relative path of the document from the
+ * parent directory prepended with a specified prefix. You can also specify the input encoding of the text
+ * files. The content of the output SequenceFiles are encoded as UTF-8 text.
  * 
  * 
  */
 public final class SequenceFilesFromDirectory {
-
+  
   private transient static Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectory.class);
   
-  private static ChunkedWriter createNewChunkedWriter(int chunkSizeInMB,
-                                               String outputDir) throws IOException {
+  private static ChunkedWriter createNewChunkedWriter(int chunkSizeInMB, String outputDir) throws IOException {
     return new ChunkedWriter(chunkSizeInMB, outputDir);
   }
   
@@ -91,9 +88,7 @@ public final class SequenceFilesFromDirectory {
       this.outputDir = outputDir;
       fs = FileSystem.get(conf);
       currentChunkID = 0;
-      writer =
-          new SequenceFile.Writer(fs, conf, getPath(currentChunkID),
-              Text.class, Text.class);
+      writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID), Text.class, Text.class);
     }
     
     private Path getPath(int chunkID) {
@@ -103,9 +98,7 @@ public final class SequenceFilesFromDirectory {
     public void write(String key, String value) throws IOException {
       if (currentChunkSize > maxChunkSizeInBytes) {
         writer.close();
-        writer =
-            new SequenceFile.Writer(fs, conf, getPath(currentChunkID++),
-                Text.class, Text.class);
+        writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID++), Text.class, Text.class);
         currentChunkSize = 0;
         
       }
@@ -127,9 +120,7 @@ public final class SequenceFilesFromDirectory {
     private final ChunkedWriter writer;
     private final Charset charset;
     
-    public PrefixAdditionFilter(String prefix,
-                                ChunkedWriter writer,
-                                Charset charset) {
+    public PrefixAdditionFilter(String prefix, ChunkedWriter writer, Charset charset) {
       this.prefix = prefix;
       this.writer = writer;
       this.charset = charset;
@@ -138,17 +129,15 @@ public final class SequenceFilesFromDirectory {
     @Override
     public boolean accept(File current) {
       if (current.isDirectory()) {
-        current.listFiles(new PrefixAdditionFilter(prefix
-            + File.separator
-            + current.getName(), writer, charset));
+        current.listFiles(new PrefixAdditionFilter(prefix + File.separator + current.getName(), writer,
+            charset));
       } else {
         try {
           StringBuilder file = new StringBuilder();
           for (String aFit : new FileLineIterable(current, charset, false)) {
             file.append(aFit).append('\n');
           }
-          writer.write(prefix + File.separator + current.getName(), file
-              .toString());
+          writer.write(prefix + File.separator + current.getName(), file.toString());
           
         } catch (FileNotFoundException e) {
           // Skip file.
@@ -167,47 +156,32 @@ public final class SequenceFilesFromDirectory {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option parentOpt =
-        obuilder.withLongName("input").withRequired(true).withArgument(
-            abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-            .withDescription("The input dir containing the documents")
-            .withShortName("i").create();
+    Option parentOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The input dir containing the documents").withShortName("i").create();
     
-    Option outputDirOpt =
-        obuilder.withLongName("output").withRequired(true).withArgument(
-            abuilder.withName("output").withMinimum(1).withMaximum(1)
-                .create()).withDescription("The output directory")
-            .withShortName("o").create();
+    Option outputDirOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The output directory").withShortName("o").create();
     
-    Option chunkSizeOpt =
-        obuilder.withLongName("chunkSize").withArgument(
-            abuilder.withName("chunkSize").withMinimum(1).withMaximum(1)
-                .create()).withDescription(
-            "The chunkSize in MegaBytes. Defaults to 64")
-            .withShortName("chunk").create();
+    Option chunkSizeOpt = obuilder.withLongName("chunkSize").withArgument(
+      abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The chunkSize in MegaBytes. Defaults to 64").withShortName("chunk").create();
     
-    Option keyPrefixOpt =
-        obuilder.withLongName("keyPrefix").withArgument(
-            abuilder.withName("keyPrefix").withMinimum(1).withMaximum(1)
-                .create()).withDescription(
-            "The prefix to be prepended to the key").withShortName("prefix")
-            .create();
+    Option keyPrefixOpt = obuilder.withLongName("keyPrefix").withArgument(
+      abuilder.withName("keyPrefix").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The prefix to be prepended to the key").withShortName("prefix").create();
     
-    Option charsetOpt =
-        obuilder.withLongName("charset").withRequired(true)
-            .withArgument(
-                abuilder.withName("charset").withMinimum(1).withMaximum(1)
-                    .create()).withDescription(
-                "The name of the character encoding of the input files")
-            .withShortName("c").create();
-
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
-
-    Group group =
-        gbuilder.withName("Options").withOption(keyPrefixOpt).withOption(
-            chunkSizeOpt).withOption(charsetOpt).withOption(outputDirOpt).withOption(helpOpt)
-            .withOption(parentOpt).create();
-
+    Option charsetOpt = obuilder.withLongName("charset").withRequired(true).withArgument(
+      abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The name of the character encoding of the input files").withShortName("c").create();
+    
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        .create();
+    
+    Group group = gbuilder.withName("Options").withOption(keyPrefixOpt).withOption(chunkSizeOpt).withOption(
+      charsetOpt).withOption(outputDirOpt).withOption(helpOpt).withOption(parentOpt).create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -218,23 +192,23 @@ public final class SequenceFilesFromDirectory {
       }
       File parentDir = new File((String) cmdLine.getValue(parentOpt));
       String outputDir = (String) cmdLine.getValue(outputDirOpt);
-
+      
       int chunkSize = 64;
       if (cmdLine.hasOption(chunkSizeOpt)) {
         chunkSize = Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
       }
-
+      
       String prefix = "";
       if (cmdLine.hasOption(keyPrefixOpt)) {
         prefix = (String) cmdLine.getValue(keyPrefixOpt);
       }
       Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
       SequenceFilesFromDirectory dir = new SequenceFilesFromDirectory();
-
+      
       dir.createSequenceFiles(parentDir, outputDir, prefix, chunkSize, charset);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
-    } 
+    }
   }
 }

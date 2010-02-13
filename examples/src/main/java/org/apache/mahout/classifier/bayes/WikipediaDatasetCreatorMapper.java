@@ -41,47 +41,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maps over Wikipedia xml format and output all document having the category
- * listed in the input category file
+ * Maps over Wikipedia xml format and output all document having the category listed in the input category
+ * file
  * 
  */
 public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     Mapper<LongWritable,Text,Text,Text> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(WikipediaDatasetCreatorMapper.class);
-  private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern
-      .compile("[\\s\\W]");
-  private static final Pattern OPEN_TEXT_TAG_PATTERN = Pattern
-      .compile("<text xml:space=\"preserve\">");
-  private static final Pattern CLOSE_TEXT_TAG_PATTERN = Pattern
-      .compile("</text>");
+  private static final Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorMapper.class);
+  private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern.compile("[\\s\\W]");
+  private static final Pattern OPEN_TEXT_TAG_PATTERN = Pattern.compile("<text xml:space=\"preserve\">");
+  private static final Pattern CLOSE_TEXT_TAG_PATTERN = Pattern.compile("</text>");
   
   private Set<String> inputCategories;
   private boolean exactMatchOnly;
   private Analyzer analyzer;
   
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  OutputCollector<Text,Text> output,
-                  Reporter reporter) throws IOException {
+  public void map(LongWritable key, Text value,
+                  OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
     
     StringBuilder contents = new StringBuilder();
     String document = value.toString();
     String catMatch = findMatchingCategory(document);
     
     if (!catMatch.equals("Unknown")) {
-      document = StringEscapeUtils.unescapeHtml(CLOSE_TEXT_TAG_PATTERN.matcher(
-        OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst(""))
+      document = StringEscapeUtils.unescapeHtml(WikipediaDatasetCreatorMapper.CLOSE_TEXT_TAG_PATTERN.matcher(
+        WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst(""))
           .replaceAll(""));
-      TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(
-          document));
+      TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
       TermAttribute termAtt = (TermAttribute) stream.addAttribute(TermAttribute.class);
       while (stream.incrementToken()) {
         contents.append(termAtt.termBuffer(), 0, termAtt.termLength()).append(' ');
       }
-      output.collect(new Text(SPACE_NON_ALPHA_PATTERN.matcher(catMatch)
+      output.collect(new Text(WikipediaDatasetCreatorMapper.SPACE_NON_ALPHA_PATTERN.matcher(catMatch)
           .replaceAll("_")), new Text(contents.toString()));
     }
   }
@@ -95,8 +88,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       if (endIndex >= document.length() || endIndex < 0) {
         break;
       }
-      String category = document.substring(categoryIndex, endIndex)
-          .toLowerCase().trim();
+      String category = document.substring(categoryIndex, endIndex).toLowerCase().trim();
       // categories.add(category.toLowerCase());
       if (exactMatchOnly && inputCategories.contains(category)) {
         return category;
@@ -118,8 +110,8 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       if (inputCategories == null) {
         Set<String> newCategories = new HashSet<String>();
         
-        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(
-            job, GenericsUtil.getClass(newCategories));
+        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(job,
+            GenericsUtil.getClass(newCategories));
         
         String categoriesStr = setStringifier.toString(newCategories);
         categoriesStr = job.get("wikipedia.categories", categoriesStr);
@@ -128,10 +120,8 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       }
       exactMatchOnly = job.getBoolean("exact.match.only", false);
       if (analyzer == null) {
-        String analyzerStr = job.get("analyzer.class", WikipediaAnalyzer.class
-            .getName());
-        Class<? extends Analyzer> analyzerClass = (Class<? extends Analyzer>) Class
-            .forName(analyzerStr);
+        String analyzerStr = job.get("analyzer.class", WikipediaAnalyzer.class.getName());
+        Class<? extends Analyzer> analyzerClass = (Class<? extends Analyzer>) Class.forName(analyzerStr);
         analyzer = analyzerClass.newInstance();
       }
     } catch (IOException ex) {
@@ -143,7 +133,12 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
-    log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}",
-             new Object[] {inputCategories.size(), exactMatchOnly, analyzer.getClass().getName()});
+    WikipediaDatasetCreatorMapper.log.info(
+      "Configure: Input Categories size: {} Exact Match: {} Analyzer: {}", new Object[] {
+                                                                                         inputCategories
+                                                                                             .size(),
+                                                                                         exactMatchOnly,
+                                                                                         analyzer.getClass()
+                                                                                             .getName()});
   }
 }

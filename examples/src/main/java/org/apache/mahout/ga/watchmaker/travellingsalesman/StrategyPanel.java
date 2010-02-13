@@ -47,30 +47,27 @@ import org.uncommons.watchmaker.framework.selection.TournamentSelection;
 import org.uncommons.watchmaker.framework.selection.TruncationSelection;
 
 /**
- * Panel for configuring a route-finding strategy for the travelling salesman
- * problem.
+ * Panel for configuring a route-finding strategy for the travelling salesman problem.
  * 
  * <br>
- * The original code is from <b>the Watchmaker project</b>
- * (https://watchmaker.dev.java.net/).<br>
- * The <code>EvolutionPanel</code> has been modified to add a "distributed
- * (mahout)" JCheckBox.
+ * The original code is from <b>the Watchmaker project</b> (https://watchmaker.dev.java.net/).<br>
+ * The <code>EvolutionPanel</code> has been modified to add a "distributed (mahout)" JCheckBox.
  */
 final class StrategyPanel extends JPanel {
-
+  
   private final DistanceLookup distances;
-
+  
   private final JRadioButton evolutionOption;
-
+  
   private final JRadioButton bruteForceOption;
-
+  
   private final EvolutionPanel evolutionPanel;
-
+  
   /**
    * Creates a panel with components for controlling the route-finding strategy.
    * 
-   * @param distances Data used by the strategy in order to calculate shortest
-   *        routes.
+   * @param distances
+   *          Data used by the strategy in order to calculate shortest routes.
    */
   StrategyPanel(DistanceLookup distances) {
     super(new BorderLayout());
@@ -92,7 +89,7 @@ final class StrategyPanel extends JPanel {
     add(bruteForceOption, BorderLayout.SOUTH);
     setBorder(BorderFactory.createTitledBorder("Route-Finding Strategy"));
   }
-
+  
   public TravellingSalesmanStrategy getStrategy() {
     if (bruteForceOption.isSelected()) {
       return new BruteForceTravellingSalesman(distances);
@@ -100,7 +97,7 @@ final class StrategyPanel extends JPanel {
       return evolutionPanel.getStrategy();
     }
   }
-
+  
   @Override
   public void setEnabled(boolean b) {
     evolutionOption.setEnabled(b);
@@ -108,91 +105,92 @@ final class StrategyPanel extends JPanel {
     evolutionPanel.setEnabled(b && evolutionOption.isSelected());
     super.setEnabled(b);
   }
-
+  
   /**
    * Panel of evolution controls.
    */
   private final class EvolutionPanel extends JPanel {
     private final JLabel populationLabel;
-
+    
     private final JSpinner populationSpinner;
-
+    
     private final JLabel elitismLabel;
-
+    
     private final JSpinner elitismSpinner;
-
+    
     private final JLabel generationsLabel;
-
+    
     private final JSpinner generationsSpinner;
-
+    
     private final JLabel selectionLabel;
-
+    
     private final JComboBox selectionCombo;
-
+    
     private final JCheckBox crossoverCheckbox;
-
+    
     private final JCheckBox mutationCheckbox;
-
+    
     private final JCheckBox distributedCheckbox;
-
+    
     EvolutionPanel() {
       super(new FlowLayout(FlowLayout.LEFT, 0, 0));
       JPanel innerPanel = new JPanel(new SpringLayout());
-
+      
       populationLabel = new JLabel("Population Size: ");
       populationSpinner = new JSpinner(new SpinnerNumberModel(300, 2, 10000, 1));
       populationLabel.setLabelFor(populationSpinner);
       innerPanel.add(populationLabel);
       innerPanel.add(populationSpinner);
-
+      
       elitismLabel = new JLabel("Elitism: ");
       elitismSpinner = new JSpinner(new SpinnerNumberModel(3, 0, 10000, 1));
       elitismLabel.setLabelFor(elitismSpinner);
       innerPanel.add(elitismLabel);
       innerPanel.add(elitismSpinner);
-
+      
       generationsLabel = new JLabel("Number of Generations: ");
-      generationsSpinner = new JSpinner(
-          new SpinnerNumberModel(100, 1, 10000, 1));
+      generationsSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 10000, 1));
       generationsLabel.setLabelFor(generationsSpinner);
       innerPanel.add(generationsLabel);
       innerPanel.add(generationsSpinner);
-
+      
       selectionLabel = new JLabel("Selection Strategy: ");
       innerPanel.add(selectionLabel);
-
-      SelectionStrategy<?>[] selectionStrategies = {
-          new RankSelection(), new RouletteWheelSelection(),
-          new StochasticUniversalSampling(), new TournamentSelection(new Probability(0.95)),
-          new TruncationSelection(0.5)};
-
+      
+      SelectionStrategy<?>[] selectionStrategies = {new RankSelection(), new RouletteWheelSelection(),
+                                                    new StochasticUniversalSampling(),
+                                                    new TournamentSelection(new Probability(0.95)),
+                                                    new TruncationSelection(0.5)};
+      
       selectionCombo = new JComboBox(selectionStrategies);
       selectionCombo.setRenderer(new DefaultListCellRenderer() {
         @Override
-        public Component getListCellRendererComponent(JList list, Object value,
-            int index, boolean isSelected, boolean hasFocus) {
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean hasFocus) {
           SelectionStrategy<?> strategy = (SelectionStrategy<?>) value;
           String text = strategy.getClass().getSimpleName();
-          return super.getListCellRendererComponent(list, text, index,
-              isSelected, hasFocus);
+          return super.getListCellRendererComponent(list, text, index, isSelected, hasFocus);
         }
       });
       selectionCombo.setSelectedIndex(selectionCombo.getItemCount() - 1);
       innerPanel.add(selectionCombo);
-
+      
       crossoverCheckbox = new JCheckBox("Cross-over", true);
       mutationCheckbox = new JCheckBox("Mutation", true);
       distributedCheckbox = new JCheckBox("Distributed (Mahout)", false);
-
+      
       innerPanel.add(crossoverCheckbox);
       innerPanel.add(mutationCheckbox);
       innerPanel.add(distributedCheckbox);
       innerPanel.add(new JLabel()); // pour avoir un nombre paire de components
-
+      
       SpringUtilities.makeCompactGrid(innerPanel, 6, 2, 30, 6, 6, 6);
       add(innerPanel);
     }
-
+    
     @Override
     public void setEnabled(boolean b) {
       populationLabel.setEnabled(b);
@@ -208,13 +206,12 @@ final class StrategyPanel extends JPanel {
       distributedCheckbox.setEnabled(b);
       super.setEnabled(b);
     }
-
+    
     public TravellingSalesmanStrategy getStrategy() {
       return new EvolutionaryTravellingSalesman(distances,
-          (SelectionStrategy<? super List<String>>) selectionCombo
-              .getSelectedItem(), (Integer) populationSpinner.getValue(),
-          (Integer) elitismSpinner.getValue(), (Integer) generationsSpinner
-              .getValue(), crossoverCheckbox.isSelected(), mutationCheckbox
+          (SelectionStrategy<? super List<String>>) selectionCombo.getSelectedItem(),
+          (Integer) populationSpinner.getValue(), (Integer) elitismSpinner.getValue(),
+          (Integer) generationsSpinner.getValue(), crossoverCheckbox.isSelected(), mutationCheckbox
               .isSelected(), distributedCheckbox.isSelected());
     }
   }

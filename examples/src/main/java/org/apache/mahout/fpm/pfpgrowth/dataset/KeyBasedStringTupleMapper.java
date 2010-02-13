@@ -31,15 +31,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Splits the line using a {@link Pattern} and outputs key as given by the
- * groupingFields
+ * Splits the line using a {@link Pattern} and outputs key as given by the groupingFields
  * 
  */
-public class KeyBasedStringTupleMapper extends
-    Mapper<LongWritable,Text,Text,StringTuple> {
+public class KeyBasedStringTupleMapper extends Mapper<LongWritable,Text,Text,StringTuple> {
   
-  private static final Logger log = LoggerFactory
-      .getLogger(KeyBasedStringTupleMapper.class);
+  private static final Logger log = LoggerFactory.getLogger(KeyBasedStringTupleMapper.class);
   
   private Pattern splitter;
   
@@ -48,27 +45,22 @@ public class KeyBasedStringTupleMapper extends
   private int[] groupingFields;
   
   @Override
-  protected void map(LongWritable key,
-                     Text value,
-                     Context context) throws IOException,
-                                     InterruptedException {
+  protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     String[] fields = splitter.split(value.toString());
     if (fields.length != 4) {
-      log.info("{} {}", fields.length, value.toString());
+      KeyBasedStringTupleMapper.log.info("{} {}", fields.length, value.toString());
       context.getCounter("Map", "ERROR").increment(1);
       return;
     }
     List<String> oKey = new ArrayList<String>();
-    for (int i = 0, groupingFieldCount = groupingFields.length;
-        i < groupingFieldCount; i++) {
-      oKey.add(fields[groupingFields[i]]);
-      context.setStatus(fields[groupingFields[i]]);
+    for (int groupingField : groupingFields) {
+      oKey.add(fields[groupingField]);
+      context.setStatus(fields[groupingField]);
     }
     
     List<String> oValue = new ArrayList<String>();
-    for (int i = 0, selectedFieldCount = selectedFields.length;
-        i < selectedFieldCount; i++) {
-      oValue.add(fields[selectedFields[i]]);
+    for (int selectedField : selectedFields) {
+      oValue.add(fields[selectedField]);
     }
     
     context.write(new Text(oKey.toString()), new StringTuple(oValue));
@@ -76,22 +68,18 @@ public class KeyBasedStringTupleMapper extends
   }
   
   @Override
-  protected void setup(Context context) throws IOException,
-                                       InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(
-        context.getConfiguration().get("job.parameters", ""));
+    Parameters params = Parameters.fromString(context.getConfiguration().get("job.parameters", ""));
     splitter = Pattern.compile(params.get("splitPattern", "[ \t]*\t[ \t]*"));
     
-    int selectedFieldCount = Integer.valueOf(
-        params.get("selectedFieldCount", "0"));
+    int selectedFieldCount = Integer.valueOf(params.get("selectedFieldCount", "0"));
     selectedFields = new int[selectedFieldCount];
     for (int i = 0; i < selectedFieldCount; i++) {
       selectedFields[i] = Integer.valueOf(params.get("field" + i, "0"));
     }
     
-    int groupingFieldCount = Integer.valueOf(
-        params.get("groupingFieldCount", "0"));
+    int groupingFieldCount = Integer.valueOf(params.get("groupingFieldCount", "0"));
     groupingFields = new int[groupingFieldCount];
     for (int i = 0; i < groupingFieldCount; i++) {
       groupingFields[i] = Integer.valueOf(params.get("gfield" + i, "0"));

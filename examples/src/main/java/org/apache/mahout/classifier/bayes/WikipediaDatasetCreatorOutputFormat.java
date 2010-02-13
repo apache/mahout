@@ -21,14 +21,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 
 /**
- * This class extends the MultipleOutputFormat, allowing to write the output data to
- * different output files in sequence file output format.
+ * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in
+ * sequence file output format.
  */
-public class WikipediaDatasetCreatorOutputFormat extends MultipleTextOutputFormat<Text, Text> {
+public class WikipediaDatasetCreatorOutputFormat extends MultipleTextOutputFormat<Text,Text> {
   @Override
   protected String generateFileNameForKeyValue(Text key, Text v, String name) {
     
     return key.toString() + ".txt";
   }
 }
-

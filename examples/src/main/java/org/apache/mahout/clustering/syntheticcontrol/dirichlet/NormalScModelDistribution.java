@@ -29,14 +29,15 @@ import org.apache.mahout.math.VectorWritable;
  * DirichletCluster algorithm. Uses a Normal Distribution
  */
 public class NormalScModelDistribution extends NormalModelDistribution {
-
+  
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
     Model<VectorWritable>[] result = new NormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
       DenseVector mean = new DenseVector(60);
-      for (int j = 0; j < 60; j++)
+      for (int j = 0; j < 60; j++) {
         mean.set(j, UncommonDistributions.rNorm(30, 0.5));
+      }
       result[i] = new NormalModel(mean, 1);
     }
     return result;

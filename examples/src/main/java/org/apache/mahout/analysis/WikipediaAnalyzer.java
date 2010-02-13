@@ -17,6 +17,8 @@
 
 package org.apache.mahout.analysis;
 
+import java.io.Reader;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
@@ -26,20 +28,18 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.wikipedia.analysis.WikipediaTokenizer;
 
-import java.io.Reader;
-
 public class WikipediaAnalyzer extends Analyzer {
-
+  
   private final CharArraySet stopSet;
-
+  
   public WikipediaAnalyzer() {
     stopSet = (CharArraySet) StopFilter.makeStopSet(StopAnalyzer.ENGLISH_STOP_WORDS);
   }
-
+  
   public WikipediaAnalyzer(CharArraySet stopSet) {
     this.stopSet = stopSet;
   }
-
+  
   @Override
   public TokenStream tokenStream(String fieldName, Reader reader) {
     TokenStream result = new WikipediaTokenizer(reader);

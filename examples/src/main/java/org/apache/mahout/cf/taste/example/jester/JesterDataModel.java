@@ -17,28 +17,28 @@
 
 package org.apache.mahout.cf.taste.example.jester;
 
-import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
-import org.apache.mahout.cf.taste.impl.model.GenericPreference;
-import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
-import org.apache.mahout.common.FileLineIterator;
-import org.apache.mahout.cf.taste.model.Preference;
-import org.apache.mahout.cf.taste.model.DataModel;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
+import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.common.FileLineIterator;
+
 public final class JesterDataModel extends FileDataModel {
-
+  
   private long userBeingRead;
-
+  
   public JesterDataModel() throws IOException {
     this(GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/jester/jester-data-1.csv"));
   }
-
+  
   /**
    * @param ratingsFile Jester ratings file in CSV format
    * @throws IOException if an error occurs while reading or writing files
@@ -46,13 +46,13 @@ public final class JesterDataModel extends FileDataModel {
   public JesterDataModel(File ratingsFile) throws IOException {
     super(ratingsFile);
   }
-
+  
   @Override
   public void reload() {
     userBeingRead = 0;
     super.reload();
   }
-
+  
   @Override
   protected DataModel buildModel() throws IOException {
     FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
@@ -60,7 +60,7 @@ public final class JesterDataModel extends FileDataModel {
     processFile(iterator, data);
     return new GenericDataModel(GenericDataModel.toDataMap(data, true));
   }
-
+  
   @Override
   protected void processLine(String line, FastByIDMap<?> rawData) {
     FastByIDMap<Collection<Preference>> data = (FastByIDMap<Collection<Preference>>) rawData;
@@ -77,5 +77,5 @@ public final class JesterDataModel extends FileDataModel {
     data.put(userBeingRead, prefs);
     userBeingRead++;
   }
-
+  
 }

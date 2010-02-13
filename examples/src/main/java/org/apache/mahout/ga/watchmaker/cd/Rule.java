@@ -22,7 +22,7 @@ package org.apache.mahout.ga.watchmaker.cd;
  * Classification rule.
  */
 public interface Rule {
-
+  
   /**
    * Classifies the given dataLine
    * 

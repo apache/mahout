@@ -18,19 +18,18 @@
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 /**
- * Call-back interface for keeping track of the progress of a
- * {@link TravellingSalesmanStrategy} implementation.
+ * Call-back interface for keeping track of the progress of a {@link TravellingSalesmanStrategy}
+ * implementation.
  * 
  * <br>
- * The original code is from <b>the Watchmaker project</b>
- * (https://watchmaker.dev.java.net/).
+ * The original code is from <b>the Watchmaker project</b> (https://watchmaker.dev.java.net/).
  */
-public interface ProgressListener
-{
-    /**
-     * Call-back method that informs the implementing object
-     * of the current completion percentage.
-     * @param percentComplete A percentage between 0 and 100.
-     */
-    void updateProgress(double percentComplete);
+public interface ProgressListener {
+  /**
+   * Call-back method that informs the implementing object of the current completion percentage.
+   * 
+   * @param percentComplete
+   *          A percentage between 0 and 100.
+   */
+  void updateProgress(double percentComplete);
 }

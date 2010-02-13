@@ -26,7 +26,7 @@ import javax.ejb.EJBLocalHome;
  * @see RecommenderEJBHome
  */
 public interface RecommenderEJBLocalHome extends EJBLocalHome {
-
+  
   RecommenderEJBLocal create() throws CreateException;
-
+  
 }

@@ -17,102 +17,104 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.Writable;
+
 /**
- * Fitness of the class discovery problem. 
+ * Fitness of the class discovery problem.
  */
 public class CDFitness implements Writable {
-
+  
   /** True positive */
   private int tp;
-
+  
   /** False positive */
   private int fp;
-
+  
   /** True negative */
   private int tn;
-
+  
   /** False negative */
   private int fn;
-
+  
   public CDFitness() {
-
+    
   }
-
+  
   public CDFitness(CDFitness f) {
     tp = f.getTp();
     fp = f.getFp();
     tn = f.getTn();
     fn = f.getFn();
   }
-
+  
   public CDFitness(int tp, int fp, int tn, int fn) {
     this.tp = tp;
     this.fp = fp;
     this.tn = tn;
     this.fn = fn;
   }
-
+  
   public int getTp() {
     return tp;
   }
-
+  
   public int getFp() {
     return fp;
   }
-
+  
   public int getTn() {
     return tn;
   }
-
+  
   public int getFn() {
     return fn;
   }
-
+  
   public void add(CDFitness f) {
     tp += f.getTp();
     fp += f.getFp();
     tn += f.getTn();
     fn += f.getFn();
   }
-
+  
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null || !(obj instanceof CDFitness))
+    }
+    if (obj == null || !(obj instanceof CDFitness)) {
       return false;
-
+    }
+    
     CDFitness f = (CDFitness) obj;
-
+    
     return tp == f.getTp() && fp == f.getFp() && tn == f.getTn() && fn == f.getFn();
   }
-
+  
   @Override
   public int hashCode() {
-    return tp + 31 * (fp + 31 * (tn + 31 * fn));    
+    return tp + 31 * (fp + 31 * (tn + 31 * fn));
   }
-
+  
   @Override
   public String toString() {
     return "[TP=" + tp + ", FP=" + fp + ", TN=" + tn + ", FN=" + fn + ']';
   }
-
+  
   /**
    * Calculates the fitness corresponding to this evaluation.
    */
   public double get() {
-    double se = ((double) tp) / (tp + fn); // sensitivity
-    double sp = ((double) tn) / (tn + fp); // specificity
+    double se = (double) tp / (tp + fn); // sensitivity
+    double sp = (double) tn / (tn + fp); // specificity
     
     return se * sp;
   }
-
+  
   @Override
   public void readFields(DataInput in) throws IOException {
     tp = in.readInt();
@@ -120,14 +122,14 @@ public class CDFitness implements Writable {
     tn = in.readInt();
     fn = in.readInt();
   }
-
+  
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(tp);
     out.writeInt(fp);
     out.writeInt(tn);
     out.writeInt(fn);
-
+    
   }
-
+  
 }

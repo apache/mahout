@@ -17,6 +17,9 @@
 
 package org.apache.mahout.df.mapred;
 
+import java.io.IOException;
+import java.util.Random;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -46,174 +49,164 @@ import org.apache.mahout.df.mapred.partial.PartialBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Random;
-
 /**
- * Tool to builds a Random Forest using any given dataset (in UCI format). Can
- * use either the in-mem mapred or partial mapred implementations
+ * Tool to builds a Random Forest using any given dataset (in UCI format). Can use either the in-mem mapred or
+ * partial mapred implementations
  */
 public class BuildForest extends Configured implements Tool {
-
+  
   private static final Logger log = LoggerFactory.getLogger(BuildForest.class);
-
+  
   private Path dataPath; // Data path
-
+  
   private Path datasetPath; // Dataset path
-
+  
   private int m; // Number of variables to select at each tree-node
-
+  
   private int nbTrees; // Number of trees to grow
-
+  
   private Long seed = null; // Random seed
-
+  
   private boolean isPartial; // use partial data implementation
-
+  
   private boolean isOob; // estimate oob error;
-
+  
   @Override
   public int run(String[] args) throws IOException {
-
+    
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
-    Option oobOpt = obuilder.withShortName("oob").withRequired(false)
-        .withDescription("Optional, estimate the out-of-bag error").create();
-
-    Option dataOpt = obuilder.withLongName("data").withShortName("d")
-        .withRequired(true).withArgument(
-            abuilder.withName("path").withMinimum(1).withMaximum(1).create())
-        .withDescription("Data path").create();
-
-    Option datasetOpt = obuilder.withLongName("dataset").withShortName("ds").withRequired(true)
-        .withArgument(abuilder.withName("dataset").withMinimum(1).withMaximum(1).create())
-        .withDescription("Dataset path").create();
-
-    Option selectionOpt = obuilder.withLongName("selection")
-        .withShortName("sl").withRequired(true).withArgument(
-            abuilder.withName("m").withMinimum(1).withMaximum(1).create())
-        .withDescription("Number of variables to select randomly at each tree-node")
+    
+    Option oobOpt = obuilder.withShortName("oob").withRequired(false).withDescription(
+      "Optional, estimate the out-of-bag error").create();
+    
+    Option dataOpt = obuilder.withLongName("data").withShortName("d").withRequired(true).withArgument(
+      abuilder.withName("path").withMinimum(1).withMaximum(1).create()).withDescription("Data path").create();
+    
+    Option datasetOpt = obuilder.withLongName("dataset").withShortName("ds").withRequired(true).withArgument(
+      abuilder.withName("dataset").withMinimum(1).withMaximum(1).create()).withDescription("Dataset path")
         .create();
-
-    Option seedOpt = obuilder.withLongName("seed").withShortName("sd").withRequired(false)
-        .withArgument(abuilder.withName("seed").withMinimum(1).withMaximum(1).create())
-        .withDescription("Optional, seed value used to initialise the Random number generator")
+    
+    Option selectionOpt = obuilder.withLongName("selection").withShortName("sl").withRequired(true)
+        .withArgument(abuilder.withName("m").withMinimum(1).withMaximum(1).create()).withDescription(
+          "Number of variables to select randomly at each tree-node").create();
+    
+    Option seedOpt = obuilder.withLongName("seed").withShortName("sd").withRequired(false).withArgument(
+      abuilder.withName("seed").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Optional, seed value used to initialise the Random number generator").create();
+    
+    Option partialOpt = obuilder.withLongName("partial").withShortName("p").withRequired(false)
+        .withDescription("Optional, use the Partial Data implementation").create();
+    
+    Option nbtreesOpt = obuilder.withLongName("nbtrees").withShortName("t").withRequired(true).withArgument(
+      abuilder.withName("nbtrees").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Number of trees to grow").create();
+    
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
-
-    Option partialOpt = obuilder.withLongName("partial").withShortName("p")
-        .withRequired(false).withDescription("Optional, use the Partial Data implementation").create();
-
-    Option nbtreesOpt = obuilder.withLongName("nbtrees").withShortName("t").withRequired(true)
-        .withArgument(abuilder.withName("nbtrees").withMinimum(1).withMaximum(1).create())
-        .withDescription("Number of trees to grow").create();
-
-    Option helpOpt = obuilder.withLongName("help").withDescription(
-        "Print out help").withShortName("h").create();
-
-    Group group = gbuilder.withName("Options").withOption(oobOpt).withOption(
-        dataOpt).withOption(datasetOpt).withOption(selectionOpt).withOption(
-        seedOpt).withOption(partialOpt).withOption(nbtreesOpt).withOption(
-        helpOpt).create();
-
+    
+    Group group = gbuilder.withName("Options").withOption(oobOpt).withOption(dataOpt).withOption(datasetOpt)
+        .withOption(selectionOpt).withOption(seedOpt).withOption(partialOpt).withOption(nbtreesOpt)
+        .withOption(helpOpt).create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       CommandLine cmdLine = parser.parse(args);
-
+      
       if (cmdLine.hasOption("help")) {
         CommandLineUtil.printHelp(group);
         return -1;
       }
-
+      
       isPartial = cmdLine.hasOption(partialOpt);
       isOob = cmdLine.hasOption(oobOpt);
       String dataName = cmdLine.getValue(dataOpt).toString();
       String datasetName = cmdLine.getValue(datasetOpt).toString();
       m = Integer.parseInt(cmdLine.getValue(selectionOpt).toString());
       nbTrees = Integer.parseInt(cmdLine.getValue(nbtreesOpt).toString());
-
+      
       if (cmdLine.hasOption(seedOpt)) {
         seed = Long.valueOf(cmdLine.getValue(seedOpt).toString());
       }
-
-      log.debug("data : {}", dataName);
-      log.debug("dataset : {}", datasetName);
-      log.debug("m : {}", m);
-      log.debug("seed : {}", seed);
-      log.debug("nbtrees : {}", nbTrees);
-      log.debug("isPartial : {}", isPartial);
-      log.debug("isOob : {}", isOob);
-
+      
+      BuildForest.log.debug("data : {}", dataName);
+      BuildForest.log.debug("dataset : {}", datasetName);
+      BuildForest.log.debug("m : {}", m);
+      BuildForest.log.debug("seed : {}", seed);
+      BuildForest.log.debug("nbtrees : {}", nbTrees);
+      BuildForest.log.debug("isPartial : {}", isPartial);
+      BuildForest.log.debug("isOob : {}", isOob);
+      
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
-
+      
     } catch (OptionException e) {
-      log.error("Error while parsing options", e);
+      BuildForest.log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return -1;
     }
-
+    
     buildForest();
-
+    
     return 0;
   }
-
+  
   private DecisionForest buildForest() throws IOException {
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     treeBuilder.setM(m);
-
+    
     Dataset dataset = Dataset.load(getConf(), datasetPath);
-
-    ForestPredictions callback = (isOob) ? new ForestPredictions(dataset
-        .nbInstances(), dataset.nblabels()) : null;
-
+    
+    ForestPredictions callback = isOob ? new ForestPredictions(dataset.nbInstances(), dataset.nblabels())
+        : null;
+    
     Builder forestBuilder;
-
+    
     if (isPartial) {
-      log.info("Partial Mapred implementation");
-      forestBuilder = new PartialBuilder(treeBuilder, dataPath, datasetPath,
-          seed, getConf());
+      BuildForest.log.info("Partial Mapred implementation");
+      forestBuilder = new PartialBuilder(treeBuilder, dataPath, datasetPath, seed, getConf());
     } else {
-      log.info("InMem Mapred implementation");
-      forestBuilder = new InMemBuilder(treeBuilder, dataPath, datasetPath,
-          seed, getConf());
+      BuildForest.log.info("InMem Mapred implementation");
+      forestBuilder = new InMemBuilder(treeBuilder, dataPath, datasetPath, seed, getConf());
     }
-
-    log.info("Building the forest...");
+    
+    BuildForest.log.info("Building the forest...");
     long time = System.currentTimeMillis();
-
+    
     DecisionForest forest = forestBuilder.build(nbTrees, callback);
-
+    
     time = System.currentTimeMillis() - time;
-    log.info("Build Time: {}", DFUtils.elapsedTime(time));
-
+    BuildForest.log.info("Build Time: {}", DFUtils.elapsedTime(time));
+    
     if (isOob) {
       Random rng;
-      if (seed != null)
+      if (seed != null) {
         rng = RandomUtils.getRandom(seed);
-      else
+      } else {
         rng = RandomUtils.getRandom();
-
+      }
+      
       FileSystem fs = dataPath.getFileSystem(getConf());
       int[] labels = Data.extractLabels(dataset, fs, dataPath);
       
-      log.info("oob error estimate : "
-          + ErrorEstimate.errorRate(labels, callback.computePredictions(rng)));
+      BuildForest.log.info("oob error estimate : "
+                           + ErrorEstimate.errorRate(labels, callback.computePredictions(rng)));
     }
-
+    
     return forest;
   }
-
+  
   protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {
-    log.info("Loading the data...");
+    BuildForest.log.info("Loading the data...");
     FileSystem fs = dataPath.getFileSystem(conf);
     Data data = DataLoader.loadData(dataset, fs, dataPath);
-    log.info("Data Loaded");
-
+    BuildForest.log.info("Data Loaded");
+    
     return data;
   }
-
+  
   /**
    * @param args
    * @throws Exception
@@ -221,5 +214,5 @@ public class BuildForest extends Configured implements Tool {
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new BuildForest(), args);
   }
-
+  
 }

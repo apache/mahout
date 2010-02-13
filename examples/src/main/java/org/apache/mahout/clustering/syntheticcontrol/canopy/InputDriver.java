@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.canopy;
 
+import java.io.IOException;
+
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -39,29 +41,28 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class InputDriver {
   /**Logger for this class.*/
   private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
-
+  
   private InputDriver() {
   }
-
+  
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
-        abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The vector implementation to use.").withShortName("v").create();
-
+      abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The vector implementation to use.").withShortName("v").create();
+    
     Option helpOpt = DefaultOptionCreator.helpOption();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(vectorOpt).withOption(helpOpt).create();
+    
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(
+      vectorOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -71,35 +72,35 @@ public class InputDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-
+      
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
       String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
-      runJob(input, output, vectorClassName);
+      InputDriver.runJob(input, output, vectorClassName);
     } catch (OptionException e) {
-      LOG.error("Exception parsing command line: ", e);
+      InputDriver.LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
-
+  
   public static void runJob(String input, String output, String vectorClassName) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(InputDriver.class);
-
+    
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.set("vector.implementation.class.name", vectorClassName);
     FileInputFormat.setInputPaths(conf, new Path(input));
     FileOutputFormat.setOutputPath(conf, new Path(output));
-
+    
     conf.setMapperClass(InputMapper.class);
-
+    
     conf.setReducerClass(Reducer.class);
     conf.setNumReduceTasks(0);
-
+    
     client.setConf(conf);
     JobClient.runJob(conf);
   }
-
+  
 }

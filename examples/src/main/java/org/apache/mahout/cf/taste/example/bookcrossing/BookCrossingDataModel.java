@@ -17,19 +17,19 @@
 
 package org.apache.mahout.cf.taste.example.bookcrossing;
 
-import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
-import org.apache.mahout.common.FileLineIterable;
-import org.apache.mahout.common.IOUtils;
-import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
+
+import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
+import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.IOUtils;
 
 /**
  * See <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/BX-CSV-Dump.zip">download</a> for
@@ -37,20 +37,20 @@ import java.util.regex.Pattern;
  */
 public final class BookCrossingDataModel extends FileDataModel {
   private static final Pattern NON_DIGIT_SEMICOLON_PATTERN = Pattern.compile("[^0-9;]");
-
+  
   public BookCrossingDataModel() throws IOException {
     this(GroupLensDataModel.readResourceToTempFile(
-            "/org/apache/mahout/cf/taste/example/bookcrossing/BX-Book-Ratings.csv"));
+    "/org/apache/mahout/cf/taste/example/bookcrossing/BX-Book-Ratings.csv"));
   }
-
+  
   /**
    * @param ratingsFile BookCrossing ratings file in its native format
    * @throws IOException if an error occurs while reading or writing files
    */
   public BookCrossingDataModel(File ratingsFile) throws IOException {
-    super(convertBCFile(ratingsFile));
+    super(BookCrossingDataModel.convertBCFile(ratingsFile));
   }
-
+  
   private static File convertBCFile(File originalFile) throws IOException {
     if (!originalFile.exists()) {
       throw new FileNotFoundException(originalFile.toString());
@@ -62,7 +62,7 @@ public final class BookCrossingDataModel extends FileDataModel {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, true)) {
         // Delete replace anything that isn't numeric, or a semicolon delimiter. Make comma the delimiter.
-        String convertedLine = NON_DIGIT_SEMICOLON_PATTERN.matcher(line).replaceAll("").replace(';', ',');
+        String convertedLine = BookCrossingDataModel.NON_DIGIT_SEMICOLON_PATTERN.matcher(line).replaceAll("").replace(';', ',');
         // If this means we deleted an entire ID -- few cases like that -- skip the line
         if (convertedLine.contains(",,")) {
           continue;
@@ -78,10 +78,10 @@ public final class BookCrossingDataModel extends FileDataModel {
     }
     return resultFile;
   }
-
+  
   @Override
   public String toString() {
     return "BookCrossingDataModel";
   }
-
+  
 }

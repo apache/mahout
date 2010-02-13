@@ -25,9 +25,9 @@ import java.util.StringTokenizer;
  * Represents one line of a Dataset. Contains only real attributs.
  */
 public class DataLine {
-
+  
   private final double[] attributes;
-
+  
   public DataLine() {
     int nba = DataSet.getDataSet().getNbAttributes();
     attributes = new double[nba];
@@ -46,22 +46,23 @@ public class DataLine {
   public double getAttribut(int index) {
     return attributes[index];
   }
-
+  
   public void set(String dlstr) {
     DataSet dataset = DataSet.getDataSet();
-
+    
     // extract tokens
     StringTokenizer tokenizer = new StringTokenizer(dlstr, ",");
     List<String> tokens = new ArrayList<String>();
     while (tokenizer.hasMoreTokens()) {
       tokens.add(tokenizer.nextToken());
     }
-
+    
     // remove any ignored attribute
     List<Integer> ignored = dataset.getIgnoredAttributes();
-    for (int index = ignored.size() - 1; index >= 0; index--)
+    for (int index = ignored.size() - 1; index >= 0; index--) {
       tokens.remove(index);
-
+    }
+    
     // load attributes
     for (int index = 0; index < dataset.getNbAttributes(); index++) {
       if (dataset.isNumerical(index)) {

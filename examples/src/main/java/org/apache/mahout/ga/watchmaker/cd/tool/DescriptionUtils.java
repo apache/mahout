@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
 public class DescriptionUtils {
   private DescriptionUtils() {
   }
-
+  
   public static class Range {
     public final double min;
     public final double max;
@@ -46,7 +46,7 @@ public class DescriptionUtils {
   public static String createNumericalDescription(double min, double max) {
     return min + "," + max;
   }
-
+  
   /**
    * Create a nominal description from the possible values.
    * 
@@ -55,16 +55,17 @@ public class DescriptionUtils {
   public static String createNominalDescription(Collection<String> values) {
     StringBuilder buffer = new StringBuilder();
     int ind = 0;
-
+    
     for (String value : values) {
       buffer.append(value);
-      if (++ind < values.size())
+      if (++ind < values.size()) {
         buffer.append(',');
+      }
     }
-
+    
     return buffer.toString();
   }
-
+  
   public static Range extractNumericalRange(String description) {
     StringTokenizer tokenizer = new StringTokenizer(description, ",");
     double min = Double.parseDouble(tokenizer.nextToken());
@@ -80,11 +81,11 @@ public class DescriptionUtils {
    *        will not be cleared.
    */
   public static void extractNominalValues(String description,
-      Collection<String> target) {
+                                          Collection<String> target) {
     StringTokenizer tokenizer = new StringTokenizer(description, ",");
     while (tokenizer.hasMoreTokens()) {
       target.add(tokenizer.nextToken());
     }
   }
-
+  
 }

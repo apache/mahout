@@ -30,36 +30,37 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  * 
  */
 public class Descriptors {
-
+  
   private final char[] descriptors;
-
+  
   public Descriptors(char[] descriptors) {
     if (!(descriptors != null && descriptors.length > 0)) {
       throw new IllegalArgumentException();
     }
-
+    
     this.descriptors = descriptors;
-
+    
     // check that all the descriptors are correct ('I', 'N' 'L' or 'C')
     for (int index = 0; index < descriptors.length; index++) {
-      if (!isIgnored(index) && !isNumerical(index) && !isNominal(index))
+      if (!isIgnored(index) && !isNumerical(index) && !isNominal(index)) {
         throw new IllegalArgumentException("Bad descriptor value : "
-            + descriptors[index]);
+          + descriptors[index]);
+      }
     }
   }
-
+  
   public boolean isIgnored(int index) {
     return descriptors[index] == 'i' || descriptors[index] == 'I';
   }
-
+  
   public boolean isNumerical(int index) {
     return descriptors[index] == 'n' || descriptors[index] == 'N';
   }
-
+  
   public boolean isNominal(int index) {
     return descriptors[index] == 'c' || descriptors[index] == 'C' || isLabel(index);
   }
-
+  
   public boolean isLabel(int index) {
     return descriptors[index] == 'l' || descriptors[index] == 'L';
   }

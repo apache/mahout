@@ -41,18 +41,18 @@ import org.slf4j.LoggerFactory;
 public class OutputDriver {
   /** Logger for this class. */
   private static final Logger LOG = LoggerFactory.getLogger(OutputDriver.class);
-
-  private OutputDriver() {
-  }
-
+  
+  private OutputDriver() { }
+  
   public static void main(String[] args) throws IOException {
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt).create();
-
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt)
+        .create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -61,35 +61,34 @@ public class OutputDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-
+      
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      runJob(input, output);
+      OutputDriver.runJob(input, output);
     } catch (OptionException e) {
-      LOG.error("Exception parsing command line: ", e);
+      OutputDriver.LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
-
+  
   public static void runJob(String input, String output) throws IOException {
     JobClient client = new JobClient();
-    JobConf conf = new JobConf(
-        org.apache.mahout.clustering.syntheticcontrol.meanshift.OutputDriver.class);
-
+    JobConf conf = new JobConf(org.apache.mahout.clustering.syntheticcontrol.meanshift.OutputDriver.class);
+    
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Text.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
-
+    
     FileInputFormat.setInputPaths(conf, new Path(input));
     FileOutputFormat.setOutputPath(conf, new Path(output));
-
+    
     conf.setMapperClass(OutputMapper.class);
-
+    
     conf.setReducerClass(Reducer.class);
     conf.setNumReduceTasks(0);
-
+    
     client.setConf(conf);
     JobClient.runJob(conf);
   }
-
+  
 }

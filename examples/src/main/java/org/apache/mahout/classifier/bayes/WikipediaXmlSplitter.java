@@ -45,14 +45,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Splits the wikipedia xml file in to chunks of size as specified by command
- * line parameter
+ * Splits the wikipedia xml file in to chunks of size as specified by command line parameter
  * 
  */
 public final class WikipediaXmlSplitter {
-
+  
   private static final Logger log = LoggerFactory.getLogger(WikipediaXmlSplitter.class);
-
+  
   private WikipediaXmlSplitter() { }
   
   public static void main(String[] args) throws IOException {
@@ -60,58 +59,39 @@ public final class WikipediaXmlSplitter {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option dumpFileOpt = obuilder.withLongName("dumpFile").withRequired(true)
-        .withArgument(
-          abuilder.withName("dumpFile").withMinimum(1).withMaximum(1).create())
-        .withDescription("The path to the wikipedia dump file (.bz2 or uncompressed)").withShortName(
-          "d").create();
+    Option dumpFileOpt = obuilder.withLongName("dumpFile").withRequired(true).withArgument(
+      abuilder.withName("dumpFile").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The path to the wikipedia dump file (.bz2 or uncompressed)").withShortName("d").create();
     
-    Option outputDirOpt = obuilder
-        .withLongName("outputDir")
-        .withRequired(true)
-        .withArgument(
-          abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create())
-        .withDescription("The output directory to place the splits in:\n" +
-                    "local files:\n\t/var/data/wikipedia-xml-chunks or\n\tfile:///var/data/wikipedia-xml-chunks\n" +
-                    "Hadoop DFS:\n\thdfs://wikipedia-xml-chunks\n" +
-                    "AWS S3 (blocks):\n\ts3://bucket-name/wikipedia-xml-chunks\n" +
-                    "AWS S3 (native files):\n\ts3n://bucket-name/wikipedia-xml-chunks\n")
+    Option outputDirOpt = obuilder.withLongName("outputDir").withRequired(true).withArgument(
+      abuilder.withName("outputDir").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The output directory to place the splits in:\n"
+          + "local files:\n\t/var/data/wikipedia-xml-chunks or\n\tfile:///var/data/wikipedia-xml-chunks\n"
+          + "Hadoop DFS:\n\thdfs://wikipedia-xml-chunks\n"
+          + "AWS S3 (blocks):\n\ts3://bucket-name/wikipedia-xml-chunks\n"
+          + "AWS S3 (native files):\n\ts3n://bucket-name/wikipedia-xml-chunks\n")
 
-        .withShortName("o").create();
-
-    Option s3IdOpt = obuilder
-        .withLongName("s3ID")
-        .withRequired(false)
-        .withArgument(
-          abuilder.withName("s3Id").withMinimum(1).withMaximum(1).create())
-        .withDescription("Amazon S3 ID key")
+    .withShortName("o").create();
+    
+    Option s3IdOpt = obuilder.withLongName("s3ID").withRequired(false).withArgument(
+      abuilder.withName("s3Id").withMinimum(1).withMaximum(1).create()).withDescription("Amazon S3 ID key")
         .withShortName("i").create();
-    Option s3SecretOpt = obuilder
-        .withLongName("s3Secret")
-        .withRequired(false)
-        .withArgument(
-          abuilder.withName("s3Secret").withMinimum(1).withMaximum(1).create())
-        .withDescription("Amazon S3 secret key")
-        .withShortName("s").create();
+    Option s3SecretOpt = obuilder.withLongName("s3Secret").withRequired(false).withArgument(
+      abuilder.withName("s3Secret").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Amazon S3 secret key").withShortName("s").create();
     
-    Option chunkSizeOpt = obuilder
-        .withLongName("chunkSize")
-        .withRequired(true)
-        .withArgument(
-          abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create())
-        .withDescription("The Size of the chunk, in megabytes").withShortName(
-          "c").create();
+    Option chunkSizeOpt = obuilder.withLongName("chunkSize").withRequired(true).withArgument(
+      abuilder.withName("chunkSize").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The Size of the chunk, in megabytes").withShortName("c").create();
     Option numChunksOpt = obuilder
         .withLongName("numChunks")
         .withRequired(false)
-        .withArgument(
-          abuilder.withName("numChunks").withMinimum(1).withMaximum(1).create())
+        .withArgument(abuilder.withName("numChunks").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "The maximum number of chunks to create.  If specified, program will only create a subset of the chunks")
         .withShortName("n").create();
-    Group group = gbuilder.withName("Options").withOption(dumpFileOpt)
-        .withOption(outputDirOpt).withOption(chunkSizeOpt).withOption(
-          numChunksOpt).withOption(s3IdOpt).withOption(s3SecretOpt).create();
+    Group group = gbuilder.withName("Options").withOption(dumpFileOpt).withOption(outputDirOpt).withOption(
+      chunkSizeOpt).withOption(numChunksOpt).withOption(s3IdOpt).withOption(s3SecretOpt).create();
     
     Parser parser = new Parser();
     parser.setGroup(group);
@@ -119,15 +99,15 @@ public final class WikipediaXmlSplitter {
     try {
       cmdLine = parser.parse(args);
     } catch (OptionException e) {
-      log.error("Error while parsing options", e);
+      WikipediaXmlSplitter.log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return;
     }
-
+    
     Configuration conf = new Configuration();
     String dumpFilePath = (String) cmdLine.getValue(dumpFileOpt);
     String outputDirPath = (String) cmdLine.getValue(outputDirOpt);
-
+    
     if (cmdLine.hasOption(s3IdOpt)) {
       String id = (String) cmdLine.getValue(s3IdOpt);
       conf.set("fs.s3n.awsAccessKeyId", id);
@@ -142,29 +122,22 @@ public final class WikipediaXmlSplitter {
     conf.set("fs.file.impl", "org.apache.hadoop.fs.RawLocalFileSystem");
     FileSystem fs = FileSystem.get(URI.create(outputDirPath), conf);
     
-    int chunkSize = 1024 * 1024 * Integer.parseInt((String) cmdLine
-        .getValue(chunkSizeOpt));
+    int chunkSize = 1024 * 1024 * Integer.parseInt((String) cmdLine.getValue(chunkSizeOpt));
     
     int numChunks = Integer.MAX_VALUE;
     if (cmdLine.hasOption(numChunksOpt)) {
       numChunks = Integer.parseInt((String) cmdLine.getValue(numChunksOpt));
     }
-
+    
     String header = "<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.3/\" "
                     + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                     + "xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.3/ "
-                    + "http://www.mediawiki.org/xml/export-0.3.xsd\" "
-                    + "version=\"0.3\" "
-                    + "xml:lang=\"en\">\n"
-                    + "  <siteinfo>\n"
-                    + "<sitename>Wikipedia</sitename>\n"
+                    + "http://www.mediawiki.org/xml/export-0.3.xsd\" " + "version=\"0.3\" "
+                    + "xml:lang=\"en\">\n" + "  <siteinfo>\n" + "<sitename>Wikipedia</sitename>\n"
                     + "    <base>http://en.wikipedia.org/wiki/Main_Page</base>\n"
-                    + "    <generator>MediaWiki 1.13alpha</generator>\n"
-                    + "    <case>first-letter</case>\n"
-                    + "    <namespaces>\n"
-                    + "      <namespace key=\"-2\">Media</namespace>\n"
-                    + "      <namespace key=\"-1\">Special</namespace>\n"
-                    + "      <namespace key=\"0\" />\n"
+                    + "    <generator>MediaWiki 1.13alpha</generator>\n" + "    <case>first-letter</case>\n"
+                    + "    <namespaces>\n" + "      <namespace key=\"-2\">Media</namespace>\n"
+                    + "      <namespace key=\"-1\">Special</namespace>\n" + "      <namespace key=\"0\" />\n"
                     + "      <namespace key=\"1\">Talk</namespace>\n"
                     + "      <namespace key=\"2\">User</namespace>\n"
                     + "      <namespace key=\"3\">User talk</namespace>\n"
@@ -181,8 +154,8 @@ public final class WikipediaXmlSplitter {
                     + "      <namespace key=\"14\">Category</namespace>\n"
                     + "      <namespace key=\"15\">Category talk</namespace>\n"
                     + "      <namespace key=\"100\">Portal</namespace>\n"
-                    + "      <namespace key=\"101\">Portal talk</namespace>\n"
-                    + "    </namespaces>\n" + "  </siteinfo>\n";
+                    + "      <namespace key=\"101\">Portal talk</namespace>\n" + "    </namespaces>\n"
+                    + "  </siteinfo>\n";
     
     StringBuilder content = new StringBuilder();
     content.append(header);
@@ -217,8 +190,8 @@ public final class WikipediaXmlSplitter {
           content.append("</mediawiki>");
           filenumber++;
           String filename = outputDirPath + "/chunk-" + decimalFormatter.format(filenumber) + ".xml";
-          BufferedWriter chunkWriter = new BufferedWriter(
-              new OutputStreamWriter(fs.create(new Path(filename)), "UTF-8"));
+          BufferedWriter chunkWriter = new BufferedWriter(new OutputStreamWriter(fs
+              .create(new Path(filename)), "UTF-8"));
           
           chunkWriter.write(content.toString(), 0, content.length());
           chunkWriter.close();
@@ -230,6 +203,5 @@ public final class WikipediaXmlSplitter {
         }
       }
     }
-    
   }
 }

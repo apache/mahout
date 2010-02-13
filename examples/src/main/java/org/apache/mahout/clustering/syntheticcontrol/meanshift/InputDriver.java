@@ -40,20 +40,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class InputDriver {
-  /**Logger for this class.*/
+  /** Logger for this class. */
   private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
-
-  private InputDriver() {
-  }
-
+  
+  private InputDriver() { }
+  
   public static void main(String[] args) throws IOException {
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt).create();
-
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt)
+        .create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -62,34 +62,32 @@ public class InputDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-
+      
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      runJob(input, output);
+      InputDriver.runJob(input, output);
     } catch (OptionException e) {
-      LOG.error("Exception parsing command line: ", e);
+      InputDriver.LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
-
+  
   public static void runJob(String input, String output) throws IOException {
     JobClient client = new JobClient();
-    JobConf conf = new JobConf(
-        org.apache.mahout.clustering.syntheticcontrol.meanshift.InputDriver.class);
-
+    JobConf conf = new JobConf(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputDriver.class);
+    
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(MeanShiftCanopy.class);
-
+    
     FileInputFormat.setInputPaths(conf, new Path(input));
     FileOutputFormat.setOutputPath(conf, new Path(output));
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf
-        .setMapperClass(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputMapper.class);
+    conf.setMapperClass(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputMapper.class);
     conf.setReducerClass(Reducer.class);
     conf.setNumReduceTasks(0);
-
+    
     client.setConf(conf);
     JobClient.runJob(conf);
   }
-
+  
 }

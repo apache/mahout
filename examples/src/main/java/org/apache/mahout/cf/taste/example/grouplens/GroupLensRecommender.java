@@ -17,6 +17,10 @@
 
 package org.apache.mahout.cf.taste.example.grouplens;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
@@ -26,17 +30,13 @@ import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-
 /**
  * A simple {@link Recommender} implemented for the GroupLens demo.
  */
 public final class GroupLensRecommender implements Recommender {
-
+  
   private final Recommender recommender;
-
+  
   /**
    * @throws IOException if an error occurs while creating the {@link GroupLensDataModel}
    * @throws TasteException if an error occurs while initializing this {@link GroupLensRecommender}
@@ -44,7 +44,7 @@ public final class GroupLensRecommender implements Recommender {
   public GroupLensRecommender() throws IOException, TasteException {
     this(new GroupLensDataModel());
   }
-
+  
   /**
    * <p>Alternate constructor that takes a {@link DataModel} argument, which allows this {@link Recommender}
    * to be used with the {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} framework.</p>
@@ -55,46 +55,46 @@ public final class GroupLensRecommender implements Recommender {
   public GroupLensRecommender(DataModel dataModel) throws TasteException {
     recommender = new CachingRecommender(new SlopeOneRecommender(dataModel));
   }
-
+  
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
     return recommender.recommend(userID, howMany);
   }
-
+  
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-          throws TasteException {
+  throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
-
+  
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
     return recommender.estimatePreference(userID, itemID);
   }
-
+  
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
   }
-
+  
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
     recommender.removePreference(userID, itemID);
   }
-
+  
   @Override
   public DataModel getDataModel() {
     return recommender.getDataModel();
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     recommender.refresh(alreadyRefreshed);
   }
-
+  
   @Override
   public String toString() {
     return "GroupLensRecommender[recommender:" + recommender + ']';
   }
-
+  
 }

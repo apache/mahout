@@ -26,91 +26,78 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 /**
- * Component for selecting which cities are to be visited by the
- * travelling salesman.
+ * Component for selecting which cities are to be visited by the travelling salesman.
  * 
  * <br>
- * The original code is from <b>the Watchmaker project</b>
- * (https://watchmaker.dev.java.net/).
+ * The original code is from <b>the Watchmaker project</b> (https://watchmaker.dev.java.net/).
  */
 final class ItineraryPanel extends JPanel {
-
-    private final Collection<JCheckBox> checkBoxes;
-    private final JButton selectAllButton;
-    private final JButton clearButton;
-
-    ItineraryPanel(List<String> cities)
-    {
-        super(new BorderLayout());
-
-        JPanel checkBoxPanel = new JPanel(new GridLayout(0, 1));
-        checkBoxes = new ArrayList<JCheckBox>(cities.size());
-        for (String city : cities)
-        {
-            JCheckBox checkBox = new JCheckBox(city, false);
-            checkBoxes.add(checkBox);
-            checkBoxPanel.add(checkBox);
-        }
-        add(checkBoxPanel, BorderLayout.CENTER);
-
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 1));
-        selectAllButton = new JButton("Select All");
-        buttonPanel.add(selectAllButton);
-        clearButton = new JButton("Clear Selection");
-        buttonPanel.add(clearButton);
-        ActionListener buttonListener = new ActionListener()
-        {
-
-            @Override
-            public void actionPerformed(ActionEvent actionEvent)
-            {
-                boolean select = actionEvent.getSource() == selectAllButton;
-                for (JCheckBox checkBox : checkBoxes)
-                {
-                    checkBox.setSelected(select);
-                }
-            }
-        };
-        selectAllButton.addActionListener(buttonListener);
-        clearButton.addActionListener(buttonListener);
-        add(buttonPanel, BorderLayout.SOUTH);
-
-        setBorder(BorderFactory.createTitledBorder("Itinerary"));
+  
+  private final Collection<JCheckBox> checkBoxes;
+  private final JButton selectAllButton;
+  private final JButton clearButton;
+  
+  ItineraryPanel(List<String> cities) {
+    super(new BorderLayout());
+    
+    JPanel checkBoxPanel = new JPanel(new GridLayout(0, 1));
+    checkBoxes = new ArrayList<JCheckBox>(cities.size());
+    for (String city : cities) {
+      JCheckBox checkBox = new JCheckBox(city, false);
+      checkBoxes.add(checkBox);
+      checkBoxPanel.add(checkBox);
     }
-
-
-    /**
-     * Returns the cities that have been selected as part of the itinerary.
-     */
-    public Collection<String> getSelectedCities()
-    {
-        Set<String> cities = new TreeSet<String>();
-        for (JCheckBox checkBox : checkBoxes)
-        {
-            if (checkBox.isSelected())
-            {
-                cities.add(checkBox.getText());
-            }
+    add(checkBoxPanel, BorderLayout.CENTER);
+    
+    JPanel buttonPanel = new JPanel(new GridLayout(2, 1));
+    selectAllButton = new JButton("Select All");
+    buttonPanel.add(selectAllButton);
+    clearButton = new JButton("Clear Selection");
+    buttonPanel.add(clearButton);
+    ActionListener buttonListener = new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent actionEvent) {
+        boolean select = actionEvent.getSource() == selectAllButton;
+        for (JCheckBox checkBox : checkBoxes) {
+          checkBox.setSelected(select);
         }
-        return cities;
+      }
+    };
+    selectAllButton.addActionListener(buttonListener);
+    clearButton.addActionListener(buttonListener);
+    add(buttonPanel, BorderLayout.SOUTH);
+    
+    setBorder(BorderFactory.createTitledBorder("Itinerary"));
+  }
+  
+  /**
+   * Returns the cities that have been selected as part of the itinerary.
+   */
+  public Collection<String> getSelectedCities() {
+    Set<String> cities = new TreeSet<String>();
+    for (JCheckBox checkBox : checkBoxes) {
+      if (checkBox.isSelected()) {
+        cities.add(checkBox.getText());
+      }
     }
-
-
-    @Override
-    public void setEnabled(boolean b)
-    {
-        for (JCheckBox checkBox : checkBoxes)
-        {
-            checkBox.setEnabled(b);
-        }
-        selectAllButton.setEnabled(b);
-        clearButton.setEnabled(b);
-        super.setEnabled(b);
+    return cities;
+  }
+  
+  @Override
+  public void setEnabled(boolean b) {
+    for (JCheckBox checkBox : checkBoxes) {
+      checkBox.setEnabled(b);
     }
+    selectAllButton.setEnabled(b);
+    clearButton.setEnabled(b);
+    super.setEnabled(b);
+  }
 }

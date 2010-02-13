@@ -23,10 +23,10 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
 final class BookCrossingRecommenderBuilder implements RecommenderBuilder {
-
+  
   @Override
   public Recommender buildRecommender(DataModel dataModel) throws TasteException {
     return new BookCrossingRecommender(dataModel);
   }
-
+  
 }

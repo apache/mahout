@@ -33,34 +33,33 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.fpm.pfpgrowth.dataset.KeyBasedStringTupleGrouper;
 
 public final class DeliciousTagsExample {
-  private DeliciousTagsExample() {
-  }
-
+  private DeliciousTagsExample() { }
+  
   public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     Option inputDirOpt = DefaultOptionCreator.inputOption().create();
-
+    
     Option outputOpt = DefaultOptionCreator.outputOption().create();
-
+    
     Option helpOpt = DefaultOptionCreator.helpOption();
     Option recordSplitterOpt = obuilder.withLongName("splitterPattern").withArgument(
-        abuilder.withName("splitterPattern").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Regular Expression pattern used to split given line into fields."
-            + " Default value splits comma or tab separated fields."
-            + " Default Value: \"[ ,\\t]*\\t[ ,\\t]*\" ").withShortName("regex").create();
+      abuilder.withName("splitterPattern").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Regular Expression pattern used to split given line into fields."
+          + " Default value splits comma or tab separated fields."
+          + " Default Value: \"[ ,\\t]*\\t[ ,\\t]*\" ").withShortName("regex").create();
     Option encodingOpt = obuilder.withLongName("encoding").withArgument(
-        abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).withDescription(
-        "(Optional) The file encoding.  Default value: UTF-8").withShortName("e").create();
+      abuilder.withName("encoding").withMinimum(1).withMaximum(1).create()).withDescription(
+      "(Optional) The file encoding.  Default value: UTF-8").withShortName("e").create();
     Group group = gbuilder.withName("Options").withOption(inputDirOpt).withOption(outputOpt).withOption(
-        helpOpt).withOption(recordSplitterOpt).withOption(encodingOpt).create();
-
+      helpOpt).withOption(recordSplitterOpt).withOption(encodingOpt).create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       CommandLine cmdLine = parser.parse(args);
-
+      
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
         return;
@@ -69,7 +68,7 @@ public final class DeliciousTagsExample {
       if (cmdLine.hasOption(recordSplitterOpt)) {
         params.set("splitPattern", (String) cmdLine.getValue(recordSplitterOpt));
       }
-
+      
       String encoding = "UTF-8";
       if (cmdLine.hasOption(encodingOpt)) {
         encoding = (String) cmdLine.getValue(encodingOpt);
@@ -86,10 +85,10 @@ public final class DeliciousTagsExample {
       params.set("field0", "3");
       params.set("maxTransactionLength", "100");
       KeyBasedStringTupleGrouper.startJob(params);
-
+      
     } catch (OptionException ex) {
       CommandLineUtil.printHelp(group);
     }
-
+    
   }
 }

@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.example.bookcrossing;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
@@ -30,62 +33,59 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.util.Collection;
-import java.util.List;
-
 /**
  * A simple {@link Recommender} implemented for the Book Crossing demo.
  * See the <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/">Book Crossing site</a>.
  */
 public final class BookCrossingRecommender implements Recommender {
-
+  
   private final Recommender recommender;
-
+  
   public BookCrossingRecommender(DataModel bcModel) throws TasteException {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(bcModel);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, 0.0, similarity, bcModel, 0.1);
     recommender = new CachingRecommender(new GenericUserBasedRecommender(bcModel, neighborhood, similarity));
   }
-
+  
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
     return recommender.recommend(userID, howMany);
   }
-
+  
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-          throws TasteException {
+  throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
-
+  
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
     return recommender.estimatePreference(userID, itemID);
   }
-
+  
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     recommender.setPreference(userID, itemID, value);
   }
-
+  
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
     recommender.removePreference(userID, itemID);
   }
-
+  
   @Override
   public DataModel getDataModel() {
     return recommender.getDataModel();
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     recommender.refresh(alreadyRefreshed);
   }
-
+  
   @Override
   public String toString() {
     return "BookCrossingRecommender[recommender:" + recommender + ']';
   }
-
+  
 }

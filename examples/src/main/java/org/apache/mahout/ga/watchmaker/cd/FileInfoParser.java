@@ -17,16 +17,16 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 /**
  * Initializes a DataSet using a special format file.<br>
@@ -43,91 +43,95 @@ import java.util.StringTokenizer;
  * </ul>
  */
 public class FileInfoParser {
-
+  
   public static final String IGNORED_TOKEN = "IGNORED";
-
-  public  static final String LABEL_TOKEN = "LABEL";
-
-  public  static final String NOMINAL_TOKEN = "CATEGORICAL";
-
+  
+  public static final String LABEL_TOKEN = "LABEL";
+  
+  public static final String NOMINAL_TOKEN = "CATEGORICAL";
+  
   public static final String NUMERICAL_TOKEN = "NUMERICAL";
-
-  private FileInfoParser() {
-  }
-
+  
+  private FileInfoParser() { }
+  
   /**
    * Initializes a dataset using an info file.
    * 
-   * @param fs file system
-   * @param inpath info file
+   * @param fs
+   *          file system
+   * @param inpath
+   *          info file
    * @return Initialized Dataset
    */
-  public static DataSet parseFile(FileSystem fs, Path inpath)
-      throws IOException {
-    Path info = getInfoFile(fs, inpath);
-
+  public static DataSet parseFile(FileSystem fs, Path inpath) throws IOException {
+    Path info = FileInfoParser.getInfoFile(fs, inpath);
+    
     FSDataInputStream input = fs.open(info);
     Scanner reader = new Scanner(input);
-
+    
     List<Integer> ignored = new ArrayList<Integer>();
     List<Attribute> attributes = new ArrayList<Attribute>();
     int labelIndex = -1;
-
+    
     int index = 0;
-
+    
     while (reader.hasNextLine()) {
       String line = reader.nextLine();
       StringTokenizer tokenizer = new StringTokenizer(line, ", ");
-      String token = nextToken(tokenizer);
-      if (IGNORED_TOKEN.equals(token)) {
+      String token = FileInfoParser.nextToken(tokenizer);
+      if (FileInfoParser.IGNORED_TOKEN.equals(token)) {
         ignored.add(index);
-      } else if (LABEL_TOKEN.equals(token)) {
+      } else if (FileInfoParser.LABEL_TOKEN.equals(token)) {
         labelIndex = index;
-        attributes.add(parseNominal(tokenizer));
-      } else if (NOMINAL_TOKEN.equals(token)) {
-        attributes.add(parseNominal(tokenizer));
-      } else if (NUMERICAL_TOKEN.equals(token)) {
-        attributes.add(parseNumerical(tokenizer));
+        attributes.add(FileInfoParser.parseNominal(tokenizer));
+      } else if (FileInfoParser.NOMINAL_TOKEN.equals(token)) {
+        attributes.add(FileInfoParser.parseNominal(tokenizer));
+      } else if (FileInfoParser.NUMERICAL_TOKEN.equals(token)) {
+        attributes.add(FileInfoParser.parseNumerical(tokenizer));
       } else {
         throw new IllegalArgumentException("Unknown token (" + token
-            + ") encountered while parsing the info file");
+                                           + ") encountered while parsing the info file");
       }
     }
-
+    
     reader.close();
-
-    if (labelIndex == -1)
+    
+    if (labelIndex == -1) {
       throw new IllegalStateException("Info file does not contain a LABEL");
-
+    }
+    
     return new DataSet(attributes, ignored, labelIndex);
-
+    
   }
-
+  
   /**
    * Prepares the path for the info file corresponding to the input path.
    * 
-   * @param fs file system
+   * @param fs
+   *          file system
    * @param inpath
    * @throws IOException
    */
-  public static Path getInfoFile(FileSystem fs, Path inpath)
-      throws IOException {
+  public static Path getInfoFile(FileSystem fs, Path inpath) throws IOException {
     if (inpath == null) {
       throw new IllegalArgumentException("null inpath parameter");
     }
-    if (!fs.exists(inpath))
+    if (!fs.exists(inpath)) {
       throw new IllegalArgumentException("Input path does not exist");
-    if (!fs.getFileStatus(inpath).isDir())
+    }
+    if (!fs.getFileStatus(inpath).isDir()) {
       throw new IllegalArgumentException("Input path should be a directory");
-
+    }
+    
     // info file name
     Path infoPath = new Path(inpath.getParent(), inpath.getName() + ".infos");
-    if (!fs.exists(infoPath))
+    if (!fs.exists(infoPath)) {
       throw new IllegalArgumentException("Info file does not exist");
-
+    }
+    
     return infoPath;
   }
-
+  
   /**
    * Parse a nominal attribute.
    * 
@@ -135,43 +139,44 @@ public class FileInfoParser {
    */
   private static NominalAttr parseNominal(StringTokenizer tokenizer) {
     List<String> vlist = new ArrayList<String>();
-    while (tokenizer.hasMoreTokens())
-      vlist.add(nextToken(tokenizer));
-
+    while (tokenizer.hasMoreTokens()) {
+      vlist.add(FileInfoParser.nextToken(tokenizer));
+    }
+    
     String[] values = new String[vlist.size()];
     vlist.toArray(values);
-
+    
     return new NominalAttr(values);
   }
-
+  
   /**
    * Parse a numerical attribute.
    * 
    * @param tokenizer
    */
   private static NumericalAttr parseNumerical(StringTokenizer tokenizer) {
-    double min = nextDouble(tokenizer);
-    double max = nextDouble(tokenizer);
+    double min = FileInfoParser.nextDouble(tokenizer);
+    double max = FileInfoParser.nextDouble(tokenizer);
     if (min > max) {
       throw new IllegalArgumentException("min > max");
     }
-
+    
     return new NumericalAttr(min, max);
   }
-
+  
   private static double nextDouble(StringTokenizer tokenizer) {
-    String token = nextToken(tokenizer);
+    String token = FileInfoParser.nextToken(tokenizer);
     double value;
-
+    
     try {
       value = Double.parseDouble(token);
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException("Exception while parsing info file", e);
     }
-
+    
     return value;
   }
-
+  
   private static String nextToken(StringTokenizer tokenizer) {
     String token;
     try {
@@ -179,8 +184,8 @@ public class FileInfoParser {
     } catch (NoSuchElementException e) {
       throw new IllegalArgumentException("Exception while parsing info file", e);
     }
-
+    
     return token;
   }
-
+  
 }

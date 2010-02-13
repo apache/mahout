@@ -17,9 +17,10 @@
 
 package org.apache.mahout.cf.taste.ejb;
 
+import java.rmi.RemoteException;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
-import java.rmi.RemoteException;
 
 /**
  * <p>Recommender EJB home interface.</p>
@@ -27,7 +28,7 @@ import java.rmi.RemoteException;
  * @see RecommenderEJBLocalHome
  */
 public interface RecommenderEJBHome extends EJBHome {
-
+  
   RecommenderEJB create() throws RemoteException, CreateException;
-
+  
 }

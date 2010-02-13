@@ -25,22 +25,22 @@ import java.util.List;
  * into account when calculating attribute's position.
  */
 public class DataSet {
-
+  
   /** Singleton */
   private static DataSet dataset;
-
+  
   private final List<Integer> ignoredAttributes;
-
+  
   private final int labelIndex;
-
+  
   private final List<Attribute> attributes;
-
+  
   // This constructor just exists to satisfy xstream
-
+  
   DataSet() {
     this(null, null, 0);
   }
-
+  
   DataSet(List<Attribute> attributes, List<Integer> ignored, int labelIndex) {
     this.attributes = attributes;
     ignoredAttributes = ignored;
@@ -53,11 +53,12 @@ public class DataSet {
    * @throws RuntimeException if the dataset has not been initialized
    */
   public static DataSet getDataSet() {
-    if (dataset == null)
+    if (DataSet.dataset == null) {
       throw new IllegalStateException("DataSet not initialized");
-    return dataset;
+    }
+    return DataSet.dataset;
   }
-
+  
   /**
    * Initializes the singleton dataset
    * 
@@ -66,28 +67,28 @@ public class DataSet {
   public static void initialize(DataSet dataset) {
     DataSet.dataset = dataset;
   }
-
+  
   /**
    * @return number of non-ignored attributes.
    */
   public int getNbAttributes() {
     return attributes.size();
   }
-
+  
   /**
    * @return Indexes of the ignored attributes, if any.
    */
   public List<Integer> getIgnoredAttributes() {
     return ignoredAttributes;
   }
-
+  
   /**
    * @return zero-based position of the label in the dataset.
    */
   public int getLabelIndex() {
     return labelIndex;
   }
-
+  
   /**
    * Maximum possible value for an attribute
    * 
@@ -95,12 +96,13 @@ public class DataSet {
    * @throws RuntimeException if the attribute is nominal
    */
   public double getMax(int index) {
-    if (!isNumerical(index))
+    if (!isNumerical(index)) {
       throw new IllegalArgumentException("Nominal Attribute");
-
+    }
+    
     return ((NumericalAttr) attributes.get(index)).getMax();
   }
-
+  
   /**
    * Minimum possible value for an attribute
    * 
@@ -108,12 +110,13 @@ public class DataSet {
    * @throws RuntimeException if the attribute is nominal
    */
   public double getMin(int index) {
-    if (!isNumerical(index))
+    if (!isNumerical(index)) {
       throw new IllegalArgumentException("Nominal Attribute");
-
+    }
+    
     return ((NumericalAttr) attributes.get(index)).getMin();
   }
-
+  
   /**
    * Number of values for a nominal attribute
    * 
@@ -121,12 +124,13 @@ public class DataSet {
    * @throws RuntimeException if the attribute is numerical
    */
   public int getNbValues(int index) {
-    if (isNumerical(index))
+    if (isNumerical(index)) {
       throw new IllegalArgumentException("Numerical Attribute");
-
+    }
+    
     return ((NominalAttr) attributes.get(index)).getNbvalues();
   }
-
+  
   /**
    * Is the attribute numerical or nominal ?
    * 
@@ -136,7 +140,7 @@ public class DataSet {
   public boolean isNumerical(int index) {
     return attributes.get(index).isNumerical();
   }
-
+  
   /**
    * Converts a string value of a nominal attribute to an <code>int</code>.
    * 
@@ -146,9 +150,10 @@ public class DataSet {
    * @throws RuntimeException if the value is not found.
    */
   public int valueIndex(int index, String value) {
-    if (isNumerical(index))
+    if (isNumerical(index)) {
       throw new IllegalArgumentException("Numerical Attribute");
-
+    }
+    
     return ((NominalAttr) attributes.get(index)).valueIndex(value);
   }
 }

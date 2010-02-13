@@ -51,18 +51,16 @@ import org.slf4j.LoggerFactory;
  * Create and run the Wikipedia Dataset Creator.
  */
 public final class WikipediaToSequenceFile {
-  private static final Logger log =
-      LoggerFactory.getLogger(WikipediaToSequenceFile.class);
+  private static final Logger log = LoggerFactory.getLogger(WikipediaToSequenceFile.class);
   
-  private WikipediaToSequenceFile() {}
+  private WikipediaToSequenceFile() { }
   
   /**
    * Takes in two arguments:
    * <ol>
-   * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents
-   * live</li>
-   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the
-   * classifier as a {@link org.apache.hadoop.io.SequenceFile}</li>
+   * <li>The input {@link org.apache.hadoop.fs.Path} where the input documents live</li>
+   * <li>The output {@link org.apache.hadoop.fs.Path} where to write the classifier as a
+   * {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
    * 
    * @param args
@@ -73,48 +71,32 @@ public final class WikipediaToSequenceFile {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option dirInputPathOpt =
-        obuilder.withLongName("input").withRequired(true).withArgument(
-            abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-            .withDescription("The input directory path").withShortName("i")
-            .create();
+    Option dirInputPathOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The input directory path").withShortName("i").create();
     
-    Option dirOutputPathOpt =
-        obuilder.withLongName("output").withRequired(true).withArgument(
-            abuilder.withName("output").withMinimum(1).withMaximum(1).create())
-            .withDescription("The output directory Path").withShortName("o")
-            .create();
+    Option dirOutputPathOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The output directory Path").withShortName("o").create();
     
-    Option categoriesOpt =
-        obuilder
-            .withLongName("categories")
-            .withArgument(
-                abuilder.withName("categories").withMinimum(1).withMaximum(1)
-                    .create())
-            .withDescription(
-                "Location of the categories file.  One entry per line. "
-                    + "Will be used to make a string match in Wikipedia Category field")
-            .withShortName("c").create();
+    Option categoriesOpt = obuilder.withLongName("categories").withArgument(
+      abuilder.withName("categories").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Location of the categories file.  One entry per line. "
+          + "Will be used to make a string match in Wikipedia Category field").withShortName("c").create();
     
-    Option exactMatchOpt =
-        obuilder.withLongName("exactMatch").withDescription(
-            "If set, then the category name must exactly match the "
-                + "entry in the categories file. Default is false")
-            .withShortName("e").create();
+    Option exactMatchOpt = obuilder.withLongName("exactMatch").withDescription(
+      "If set, then the category name must exactly match the "
+          + "entry in the categories file. Default is false").withShortName("e").create();
     
-    Option allOpt =
-        obuilder.withLongName("all").withDescription(
-            "If set, Select all files. Default is false").withShortName("all")
-            .create();
+    Option allOpt = obuilder.withLongName("all")
+        .withDescription("If set, Select all files. Default is false").withShortName("all").create();
     
-    Option helpOpt =
-        obuilder.withLongName("help").withDescription("Print out help")
-            .withShortName("h").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        .create();
     
-    Group group =
-        gbuilder.withName("Options").withOption(categoriesOpt).withOption(
-            dirInputPathOpt).withOption(dirOutputPathOpt).withOption(
-            exactMatchOpt).withOption(allOpt).withOption(helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(categoriesOpt).withOption(dirInputPathOpt)
+        .withOption(dirOutputPathOpt).withOption(exactMatchOpt).withOption(allOpt).withOption(helpOpt)
+        .create();
     
     Parser parser = new Parser();
     parser.setGroup(group);
@@ -137,10 +119,9 @@ public final class WikipediaToSequenceFile {
       if (cmdLine.hasOption(allOpt)) {
         all = true;
       }
-      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt),
-          all);
+      WikipediaToSequenceFile.runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all);
     } catch (OptionException e) {
-      log.error("Exception", e);
+      WikipediaToSequenceFile.log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -155,27 +136,18 @@ public final class WikipediaToSequenceFile {
    * @param catFile
    *          the file containing the Wikipedia categories
    * @param exactMatchOnly
-   *          if true, then the Wikipedia category must match exactly instead of
-   *          simply containing the category string
+   *          if true, then the Wikipedia category must match exactly instead of simply containing the
+   *          category string
    * @param all
    *          if true select all categories
    */
-  public static void runJob(String input,
-                            String output,
-                            String catFile,
-                            boolean exactMatchOnly,
-                            boolean all) throws IOException {
+  public static void runJob(String input, String output, String catFile,
+                            boolean exactMatchOnly, boolean all) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaToSequenceFile.class);
-    if (log.isInfoEnabled()) {
-      log.info("Input: "
-          + input
-          + " Out: "
-          + output
-          + " Categories: "
-          + catFile
-          + " All Files: "
-          + all);
+    if (WikipediaToSequenceFile.log.isInfoEnabled()) {
+      WikipediaToSequenceFile.log.info("Input: " + input + " Out: " + output + " Categories: " + catFile
+                                       + " All Files: " + all);
     }
     conf.set("xmlinput.start", "<page>");
     conf.set("xmlinput.end", "</page>");
@@ -190,16 +162,14 @@ public final class WikipediaToSequenceFile {
     conf.setInputFormat(XmlInputFormat.class);
     conf.setReducerClass(IdentityReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.set("io.serializations",
-        "org.apache.hadoop.io.serializer.JavaSerialization,"
-            + "org.apache.hadoop.io.serializer.WritableSerialization");
-
-    /*conf.set("mapred.compress.map.output", "true");
-    conf.set("mapred.map.output.compression.type", "BLOCK");
-    conf.set("mapred.output.compress", "true");
-    conf.set("mapred.output.compression.type", "BLOCK");
-    conf.set("mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec");
-    */
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
+    
+    /*
+     * conf.set("mapred.compress.map.output", "true"); conf.set("mapred.map.output.compression.type",
+     * "BLOCK"); conf.set("mapred.output.compress", "true"); conf.set("mapred.output.compression.type",
+     * "BLOCK"); conf.set("mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec");
+     */
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
@@ -212,9 +182,8 @@ public final class WikipediaToSequenceFile {
       }
     }
     
-    DefaultStringifier<Set<String>> setStringifier =
-        new DefaultStringifier<Set<String>>(conf, GenericsUtil
-            .getClass(categories));
+    DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
+        .getClass(categories));
     
     String categoriesStr = setStringifier.toString(categories);
     

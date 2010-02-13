@@ -17,8 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
-import org.apache.mahout.ga.watchmaker.MahoutFitnessEvaluator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.ga.watchmaker.MahoutFitnessEvaluator;
 import org.uncommons.maths.random.PoissonGenerator;
 import org.uncommons.watchmaker.framework.CandidateFactory;
 import org.uncommons.watchmaker.framework.ConcurrentEvolutionEngine;
@@ -35,68 +41,64 @@ import org.uncommons.watchmaker.framework.operators.ListOrderCrossover;
 import org.uncommons.watchmaker.framework.operators.ListOrderMutation;
 import org.uncommons.watchmaker.framework.termination.GenerationCount;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-
 /**
- * Evolutionary algorithm for finding (approximate) solutions to the travelling
- * salesman problem.
+ * Evolutionary algorithm for finding (approximate) solutions to the travelling salesman problem.
  * 
  * 
  * <br>
- * The original code is from <b>the Watchmaker project</b>
- * (https://watchmaker.dev.java.net/).<br>
+ * The original code is from <b>the Watchmaker project</b> (https://watchmaker.dev.java.net/).<br>
  * Modified to use Mahout whenever requested.
  */
-public class EvolutionaryTravellingSalesman implements
-    TravellingSalesmanStrategy {
+public class EvolutionaryTravellingSalesman implements TravellingSalesmanStrategy {
   private final DistanceLookup distances;
-
+  
   private final SelectionStrategy<? super List<String>> selectionStrategy;
-
+  
   private final int populationSize;
-
+  
   private final int eliteCount;
-
+  
   private final int generationCount;
-
+  
   private final boolean crossover;
-
+  
   private final boolean mutation;
-
+  
   private final boolean mahout;
-
+  
   /**
-   * Creates an evolutionary Travelling Salesman solver with the specified
-   * configuration.
+   * Creates an evolutionary Travelling Salesman solver with the specified configuration.
    * 
-   * @param distances Information about the distances between cities.
-   * @param selectionStrategy The selection implementation to use for the
-   *        evolutionary algorithm.
-   * @param populationSize The number of candidates in the population of evolved
-   *        routes.
-   * @param eliteCount The number of candidates to preserve via elitism at each
-   *        generation.
-   * @param generationCount The number of iterations of evolution to perform.
-   * @param crossover Whether or not to use a cross-over operator in the
-   *        evolution.
-   * @param mutation Whether or not to use a mutation operator in the evolution.
-   * @param mahout Whether or not to use Mahout for evaluation.
+   * @param distances
+   *          Information about the distances between cities.
+   * @param selectionStrategy
+   *          The selection implementation to use for the evolutionary algorithm.
+   * @param populationSize
+   *          The number of candidates in the population of evolved routes.
+   * @param eliteCount
+   *          The number of candidates to preserve via elitism at each generation.
+   * @param generationCount
+   *          The number of iterations of evolution to perform.
+   * @param crossover
+   *          Whether or not to use a cross-over operator in the evolution.
+   * @param mutation
+   *          Whether or not to use a mutation operator in the evolution.
+   * @param mahout
+   *          Whether or not to use Mahout for evaluation.
    */
   public EvolutionaryTravellingSalesman(DistanceLookup distances,
-      SelectionStrategy<? super List<String>> selectionStrategy,
-      int populationSize, int eliteCount, int generationCount,
-      boolean crossover, boolean mutation, boolean mahout) {
+                                        SelectionStrategy<? super List<String>> selectionStrategy,
+                                        int populationSize,
+                                        int eliteCount,
+                                        int generationCount,
+                                        boolean crossover,
+                                        boolean mutation,
+                                        boolean mahout) {
     if (eliteCount < 0 || eliteCount >= populationSize) {
-      throw new IllegalArgumentException(
-          "Elite count must be non-zero and less than population size.");
+      throw new IllegalArgumentException("Elite count must be non-zero and less than population size.");
     }
     if (!crossover && !mutation) {
-      throw new IllegalArgumentException(
-          "At least one of cross-over or mutation must be selected.");
+      throw new IllegalArgumentException("At least one of cross-over or mutation must be selected.");
     }
     this.distances = distances;
     this.selectionStrategy = selectionStrategy;
@@ -107,42 +109,40 @@ public class EvolutionaryTravellingSalesman implements
     this.mutation = mutation;
     this.mahout = mahout;
   }
-
+  
   @Override
   public String getDescription() {
     String selectionName = selectionStrategy.getClass().getSimpleName();
-    return (mahout ? "Mahout " : "") + "Evolution (pop: " + populationSize
-        + ", gen: " + generationCount + ", elite: " + eliteCount + ", "
-        + selectionName + ')';
+    return (mahout ? "Mahout " : "") + "Evolution (pop: " + populationSize + ", gen: " + generationCount
+           + ", elite: " + eliteCount + ", " + selectionName + ')';
   }
-
+  
   /**
-   * Calculates the shortest route using a generational evolutionary algorithm
-   * with a single ordered mutation operator and truncation selection.
+   * Calculates the shortest route using a generational evolutionary algorithm with a single ordered mutation
+   * operator and truncation selection.
    * 
-   * @param cities The list of destinations, each of which must be visited once.
-   * @param progressListener Call-back for receiving the status of the algorithm
-   *        as it progresses.
-   * @return The (approximate) shortest route that visits each of the specified
-   *         cities once.
+   * @param cities
+   *          The list of destinations, each of which must be visited once.
+   * @param progressListener
+   *          Call-back for receiving the status of the algorithm as it progresses.
+   * @return The (approximate) shortest route that visits each of the specified cities once.
    */
   @Override
   public List<String> calculateShortestRoute(Collection<String> cities,
-      final ProgressListener progressListener) {
+                                             final ProgressListener progressListener) {
     Random rng = RandomUtils.getRandom();
-
+    
     // Set-up evolution pipeline (cross-over followed by mutation).
     List<EvolutionaryOperator<List<String>>> operators = new ArrayList<EvolutionaryOperator<List<String>>>(2);
     if (crossover) {
       operators.add(new ListOrderCrossover());
     }
     if (mutation) {
-      operators.add(new ListOrderMutation(new PoissonGenerator(1.5, rng),
-          new PoissonGenerator(1.5, rng)));
+      operators.add(new ListOrderMutation(new PoissonGenerator(1.5, rng), new PoissonGenerator(1.5, rng)));
     }
-
+    
     EvolutionaryOperator<List<String>> pipeline = new EvolutionPipeline<List<String>>(operators);
-
+    
     CandidateFactory<List<String>> candidateFactory = new ListPermutationFactory<String>(
         new LinkedList<String>(cities));
     EvolutionEngine<List<String>> engine = getEngine(candidateFactory, pipeline, rng);
@@ -150,19 +150,16 @@ public class EvolutionaryTravellingSalesman implements
       @Override
       public void populationUpdate(PopulationData<? extends List<String>> data) {
         if (progressListener != null) {
-          progressListener
-              .updateProgress(((double) data.getGenerationNumber() + 1)
-                  / generationCount * 100);
+          progressListener.updateProgress(((double) data.getGenerationNumber() + 1) / generationCount * 100);
         }
       }
     });
-    return engine.evolve(populationSize, eliteCount, new GenerationCount(
-        generationCount));
+    return engine.evolve(populationSize, eliteCount, new GenerationCount(generationCount));
   }
-
-  private EvolutionEngine<List<String>> getEngine(
-      CandidateFactory<List<String>> candidateFactory,
-      EvolutionaryOperator<List<String>> pipeline, Random rng) {
+  
+  private EvolutionEngine<List<String>> getEngine(CandidateFactory<List<String>> candidateFactory,
+                                                  EvolutionaryOperator<List<String>> pipeline,
+                                                  Random rng) {
     if (mahout) {
       // This is what we need to do to distribute the fitness evaluation.
       // First create a STFitnessEvaluator that wraps our FitnessEvaluator
@@ -170,11 +167,11 @@ public class EvolutionaryTravellingSalesman implements
           new RouteEvaluator(distances));
       // Then use a SequentialEvolutionEngine instead of a StandaloneEvolutionEngine.
       // Its parameters remain the same.
-      return new SequentialEvolutionEngine<List<String>>(candidateFactory, pipeline,
-          evaluator, selectionStrategy, rng);
+      return new SequentialEvolutionEngine<List<String>>(candidateFactory, pipeline, evaluator,
+          selectionStrategy, rng);
     } else {
-      return new ConcurrentEvolutionEngine<List<String>>(candidateFactory,
-          pipeline, new RouteEvaluator(distances), selectionStrategy, rng);
+      return new ConcurrentEvolutionEngine<List<String>>(candidateFactory, pipeline, new RouteEvaluator(
+          distances), selectionStrategy, rng);
     }
   }
 }

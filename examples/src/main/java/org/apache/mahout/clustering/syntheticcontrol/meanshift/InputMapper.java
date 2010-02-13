@@ -17,6 +17,11 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -27,33 +32,31 @@ import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-public class InputMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
-
+public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Text,Text,MeanShiftCanopy> {
+  
   private static final Pattern SPACE = Pattern.compile(" ");
   private int nextCanopyId = 0;
   
   @Override
-  public void map(LongWritable key, Text values,
-      OutputCollector<Text, MeanShiftCanopy> output, Reporter reporter) throws IOException {
-    String[] numbers = SPACE.split(values.toString());
+  public void map(LongWritable key,
+                  Text values,
+                  OutputCollector<Text,MeanShiftCanopy> output,
+                  Reporter reporter) throws IOException {
+    String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
     for (String value : numbers) {
-      if (value.length() > 0)
+      if (value.length() > 0) {
         doubles.add(Double.valueOf(value));
+      }
     }
     Vector point = new DenseVector(doubles.size());
     int index = 0;
-    for (Double d : doubles)
+    for (Double d : doubles) {
       point.set(index++, d);
+    }
     MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++);
     output.collect(new Text(), canopy);
   }
-
+  
 }

@@ -17,46 +17,42 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.uncommons.maths.random.Probability;
-import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.uncommons.maths.random.Probability;
+import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
 
 /**
  * Crossover operator.
  */
 public class CDCrossover extends AbstractCrossover<CDRule> {
-
+  
   public CDCrossover(int crossoverPoints) {
     super(crossoverPoints);
   }
-
+  
   public CDCrossover(int crossoverPoints, Probability crossoverProbability) {
     super(crossoverPoints, crossoverProbability);
   }
   
   @Override
-  protected List<CDRule> mate(CDRule parent1, CDRule parent2,
-      int numberOfCrossoverPoints, Random rng) {
-    if (parent1.getNbConditions() != parent2.getNbConditions())
-    {
-        throw new IllegalArgumentException("Cannot perform cross-over with parents of different size.");
+  protected List<CDRule> mate(CDRule parent1, CDRule parent2, int numberOfCrossoverPoints, Random rng) {
+    if (parent1.getNbConditions() != parent2.getNbConditions()) {
+      throw new IllegalArgumentException("Cannot perform cross-over with parents of different size.");
     }
     CDRule offspring1 = new CDRule(parent1);
     CDRule offspring2 = new CDRule(parent2);
     // Apply as many cross-overs as required.
-    for (int i = 0; i < numberOfCrossoverPoints; i++)
-    {
-        // Cross-over index is always greater than zero and less than
-        // the length of the parent so that we always pick a point that
-        // will result in a meaningful cross-over.
-        int crossoverIndex = (1 + rng.nextInt(parent1.getNbConditions() - 1));
-        for (int j = 0; j < crossoverIndex; j++)
-        {
-          swap(offspring1, offspring2, j);
-        }
+    for (int i = 0; i < numberOfCrossoverPoints; i++) {
+      // Cross-over index is always greater than zero and less than
+      // the length of the parent so that we always pick a point that
+      // will result in a meaningful cross-over.
+      int crossoverIndex = 1 + rng.nextInt(parent1.getNbConditions() - 1);
+      for (int j = 0; j < crossoverIndex; j++) {
+        CDCrossover.swap(offspring1, offspring2, j);
+      }
     }
     
     List<CDRule> result = new ArrayList<CDRule>(2);
@@ -64,9 +60,9 @@ public class CDCrossover extends AbstractCrossover<CDRule> {
     result.add(offspring2);
     return result;
   }
-
+  
   static void swap(CDRule ind1, CDRule ind2, int index) {
-
+    
     // swap W
     double dtemp = ind1.getW(index);
     ind1.setW(index, ind2.getW(index));

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
+import java.io.IOException;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -27,27 +29,24 @@ import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-public class OutputMapper extends MapReduceBase implements
-    Mapper<Text, MeanShiftCanopy, Text, Text> {
-
+public class OutputMapper extends MapReduceBase implements Mapper<Text,MeanShiftCanopy,Text,Text> {
+  
   private static final Logger log = LoggerFactory.getLogger(OutputMapper.class);
-
+  
   private int clusters = 0;
-
+  
   @Override
-  public void map(Text key, MeanShiftCanopy canopy, OutputCollector<Text, Text> output,
-      Reporter reporter) throws IOException {
+  public void map(Text key, MeanShiftCanopy canopy, OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
     clusters++;
-    for (Vector point : canopy.getBoundPoints())
+    for (Vector point : canopy.getBoundPoints()) {
       output.collect(key, new Text(point.asFormatString()));
+    }
   }
-
+  
   @Override
   public void close() throws IOException {
-    log.info("+++ Clusters={}", clusters);
+    OutputMapper.log.info("+++ Clusters={}", clusters);
     super.close();
   }
-
+  
 }

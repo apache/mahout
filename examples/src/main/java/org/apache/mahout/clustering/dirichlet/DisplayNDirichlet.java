@@ -24,44 +24,45 @@ import java.awt.Graphics2D;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayNDirichlet extends DisplayDirichlet {
   DisplayNDirichlet() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Normal Distribution (>"
-        + (int) (significance * 100) + "% of population)");
+      + (int) (DisplayDirichlet.significance * 100) + "% of population)");
   }
-
+  
   @Override
   public void paint(Graphics g) {
     super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;
-
+    
     Vector dv = new DenseVector(2);
-    int i = result.size() - 1;
-    for (Model<VectorWritable>[] models : result) {
+    int i = DisplayDirichlet.result.size() - 1;
+    for (Model<VectorWritable>[] models : DisplayDirichlet.result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(colors[Math.min(colors.length - 1, i--)]);
+      g2.setColor(DisplayDirichlet.colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         NormalModel mm = (NormalModel) m;
         dv.assign(mm.getStdDev() * 3);
-        if (isSignificant(mm))
-          plotEllipse(g2, mm.getMean(), dv);
+        if (DisplayDirichlet.isSignificant(mm)) {
+          DisplayDirichlet.plotEllipse(g2, mm.getMean(), dv);
+        }
       }
     }
   }
-
+  
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
-    generateSamples();
-    generateResults();
+    DisplayDirichlet.generateSamples();
+    DisplayNDirichlet.generateResults();
     new DisplayNDirichlet();
   }
-
+  
   static void generateResults() {
     DisplayDirichlet.generateResults(new NormalModelDistribution(new VectorWritable(new DenseVector(2))));
   }

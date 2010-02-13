@@ -17,14 +17,6 @@
 
 package org.apache.mahout.cf.taste.example.netflix;
 
-import org.apache.commons.cli2.OptionException;
-import org.apache.mahout.cf.taste.example.TasteOptionParser;
-import org.apache.mahout.cf.taste.impl.common.FastMap;
-import org.apache.mahout.common.FileLineIterable;
-import org.apache.mahout.common.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,18 +28,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.cli2.OptionException;
+import org.apache.mahout.cf.taste.example.TasteOptionParser;
+import org.apache.mahout.cf.taste.impl.common.FastMap;
+import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class TransposeToByUser {
-
+  
   private static final Logger log = LoggerFactory.getLogger(TransposeToByUser.class);
-
-  private TransposeToByUser() {}
-
+  
+  private TransposeToByUser() { }
+  
   public static void main(String[] args) throws IOException, OptionException {
-
+    
     File dataDirectory = TasteOptionParser.getRatings(args);
     File byItemDirectory = new File(dataDirectory, "training_set");
     File byUserDirectory = new File(dataDirectory, "training_set_by_user");
-
+    
     if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
       throw new IllegalArgumentException(dataDirectory + " is not a directory");
     }
@@ -57,21 +57,21 @@ public final class TransposeToByUser {
     if (byUserDirectory.exists()) {
       throw new IllegalArgumentException(byUserDirectory + " already exists");
     }
-
+    
     byUserDirectory.mkdirs();
-
+    
     Map<String, List<String>> byUserEntryCache = new FastMap<String, List<String>>(100000);
-
+    
     for (File byItemFile : byItemDirectory.listFiles()) {
-      log.info("Processing {}", byItemFile);
+      TransposeToByUser.log.info("Processing {}", byItemFile);
       Iterator<String> lineIterator = new FileLineIterable(byItemFile, false).iterator();
-			String line = lineIterator.next();
-			String movieIDString = line.substring(0, line.length() - 1);
-			while (lineIterator.hasNext()) {
+      String line = lineIterator.next();
+      String movieIDString = line.substring(0, line.length() - 1);
+      while (lineIterator.hasNext()) {
         line = lineIterator.next();
-        int firstComma = line.indexOf((int) ',');
+        int firstComma = line.indexOf(',');
         String userIDString= line.substring(0, firstComma);
-        int secondComma = line.indexOf((int) ',', firstComma + 1);
+        int secondComma = line.indexOf(',', firstComma + 1);
         String ratingString = line.substring(firstComma, secondComma); // keep comma
         List<String> cachedLines = byUserEntryCache.get(userIDString);
         if (cachedLines == null) {
@@ -79,32 +79,32 @@ public final class TransposeToByUser {
           byUserEntryCache.put(userIDString, cachedLines);
         }
         cachedLines.add(movieIDString + ratingString);
-        maybeFlushCache(byUserDirectory, byUserEntryCache);
+        TransposeToByUser.maybeFlushCache(byUserDirectory, byUserEntryCache);
       }
-
+      
     }
-
+    
   }
-
+  
   private static void maybeFlushCache(File byUserDirectory, Map<String, List<String>> byUserEntryCache) throws IOException {
     if (byUserEntryCache.size() >= 100000) {
-      log.info("Flushing cache");
+      TransposeToByUser.log.info("Flushing cache");
       for (Map.Entry<String, List<String>> entry : byUserEntryCache.entrySet()) {
         String userID = entry.getKey();
         List<String> lines = entry.getValue();
         int userIDValue = Integer.parseInt(userID);
         File intermediateDir = new File(byUserDirectory, String.valueOf(userIDValue % 10000));
         intermediateDir.mkdirs();
-        File userIDFile = new File(intermediateDir, (userIDValue / 10000) + ".txt");
-        appendStringsToFile(lines, userIDFile);
+        File userIDFile = new File(intermediateDir, userIDValue / 10000 + ".txt");
+        TransposeToByUser.appendStringsToFile(lines, userIDFile);
       }
       byUserEntryCache.clear();
     }
   }
-
+  
   private static void appendStringsToFile(Iterable<String> strings, File file) throws IOException {
     PrintWriter outputStreamWriter =
-        new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), Charset.forName("UTF-8")));
+      new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, true), Charset.forName("UTF-8")));
     try {
       for (String s : strings) {
         outputStreamWriter.println(s);
@@ -113,5 +113,5 @@ public final class TransposeToByUser {
       IOUtils.quietClose(outputStreamWriter);
     }
   }
-
+  
 }

@@ -48,12 +48,11 @@ public class XmlInputFormat extends TextInputFormat {
   }
   
   /**
-   * XMLRecordReader class to read through a given xml document to output xml
-   * blocks as records as specified by the start tag and end tag
+   * XMLRecordReader class to read through a given xml document to output xml blocks as records as specified
+   * by the start tag and end tag
    * 
    */
-  public static class XmlRecordReader implements
-      RecordReader<LongWritable,Text> {
+  public static class XmlRecordReader implements RecordReader<LongWritable,Text> {
     private final byte[] startTag;
     private final byte[] endTag;
     private final long start;
@@ -62,8 +61,8 @@ public class XmlInputFormat extends TextInputFormat {
     private final DataOutputBuffer buffer = new DataOutputBuffer();
     
     public XmlRecordReader(FileSplit split, JobConf jobConf) throws IOException {
-      startTag = jobConf.get(START_TAG_KEY).getBytes("utf-8");
-      endTag = jobConf.get(END_TAG_KEY).getBytes("utf-8");
+      startTag = jobConf.get(XmlInputFormat.START_TAG_KEY).getBytes("utf-8");
+      endTag = jobConf.get(XmlInputFormat.END_TAG_KEY).getBytes("utf-8");
       
       // open the file and seek to the start of the split
       start = split.getStart();
@@ -123,17 +122,27 @@ public class XmlInputFormat extends TextInputFormat {
       while (true) {
         int b = fsin.read();
         // end of file:
-        if (b == -1) return false;
+        if (b == -1) {
+          return false;
+        }
         // save to buffer:
-        if (withinBlock) buffer.write(b);
+        if (withinBlock) {
+          buffer.write(b);
+        }
         
         // check if we're matching:
         if (b == match[i]) {
           i++;
-          if (i >= match.length) return true;
-        } else i = 0;
+          if (i >= match.length) {
+            return true;
+          }
+        } else {
+          i = 0;
+        }
         // see if we've passed the stop point:
-        if (!withinBlock && i == 0 && fsin.getPos() >= end) return false;
+        if (!withinBlock && i == 0 && fsin.getPos() >= end) {
+          return false;
+        }
       }
     }
   }

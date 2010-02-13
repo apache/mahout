@@ -37,17 +37,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maps over Wikipedia xml format and output all document having the category
- * listed in the input category file
+ * Maps over Wikipedia xml format and output all document having the category listed in the input category
+ * file
  * 
  */
-public class WikipediaMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,Text,Text> {
+public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritable,Text,Text,Text> {
   
-  private static final Logger log =
-      LoggerFactory.getLogger(WikipediaMapper.class);
-  private static final Pattern SPACE_NON_ALPHA_PATTERN =
-      Pattern.compile("[\\s]");
+  private static final Logger log = LoggerFactory.getLogger(WikipediaMapper.class);
+  private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern.compile("[\\s]");
   private static final String START_DOC = "<text xml:space=\"preserve\">";
   private static final String END_DOC = "</text>";
   private static final Pattern TITLE = Pattern.compile("<title>(.*)<\\/title>");
@@ -58,19 +55,17 @@ public class WikipediaMapper extends MapReduceBase implements
   private boolean all;
   
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  OutputCollector<Text,Text> output,
-                  Reporter reporter) throws IOException {
+  public void map(LongWritable key, Text value, OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
     
     String content = value.toString();
-    if (content.contains(REDIRECT))
+    if (content.contains(WikipediaMapper.REDIRECT)) {
       return;
+    }
     String document;
     String title;
     try {
-      document = getDocument(content);
-      title = getTitle(content);
+      document = WikipediaMapper.getDocument(content);
+      title = WikipediaMapper.getTitle(content);
     } catch (RuntimeException e) {
       reporter.getCounter("Wikipedia", "Parse errors").increment(1);
       return;
@@ -78,24 +73,25 @@ public class WikipediaMapper extends MapReduceBase implements
     
     if (!all) {
       String catMatch = findMatchingCategory(document);
-      if (catMatch.equals("Unknown"))
+      if (catMatch.equals("Unknown")) {
         return;
+      }
     }
     document = StringEscapeUtils.unescapeHtml(document);
     
-    output.collect(new Text(SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll(
-        "_")), new Text(document));
+    output.collect(new Text(WikipediaMapper.SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")),
+      new Text(document));
     
   }
   
   private static String getDocument(String xml) {
-    int start = xml.indexOf(START_DOC) + START_DOC.length();
-    int end = xml.indexOf(END_DOC, start);
+    int start = xml.indexOf(WikipediaMapper.START_DOC) + WikipediaMapper.START_DOC.length();
+    int end = xml.indexOf(WikipediaMapper.END_DOC, start);
     return xml.substring(start, end);
   }
   
   private static String getTitle(String xml) {
-    Matcher m = TITLE.matcher(xml);
+    Matcher m = WikipediaMapper.TITLE.matcher(xml);
     String ret = "";
     if (m.find()) {
       ret = m.group(1);
@@ -112,8 +108,7 @@ public class WikipediaMapper extends MapReduceBase implements
       if (endIndex >= document.length() || endIndex < 0) {
         break;
       }
-      String category =
-          document.substring(categoryIndex, endIndex).toLowerCase().trim();
+      String category = document.substring(categoryIndex, endIndex).toLowerCase().trim();
       // categories.add(category.toLowerCase());
       if (exactMatchOnly && inputCategories.contains(category)) {
         return category;
@@ -135,9 +130,8 @@ public class WikipediaMapper extends MapReduceBase implements
       if (inputCategories == null) {
         Set<String> newCategories = new HashSet<String>();
         
-        DefaultStringifier<Set<String>> setStringifier =
-            new DefaultStringifier<Set<String>>(job, GenericsUtil
-                .getClass(newCategories));
+        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(job,
+            GenericsUtil.getClass(newCategories));
         
         String categoriesStr = setStringifier.toString(newCategories);
         categoriesStr = job.get("wikipedia.categories", categoriesStr);
@@ -149,11 +143,7 @@ public class WikipediaMapper extends MapReduceBase implements
     } catch (IOException ex) {
       throw new IllegalStateException(ex);
     }
-    log.info("Configure: Input Categories size: "
-        + inputCategories.size()
-        + " All: "
-        + all
-        + " Exact Match: "
-        + exactMatchOnly);
+    WikipediaMapper.log.info("Configure: Input Categories size: " + inputCategories.size() + " All: " + all
+                             + " Exact Match: " + exactMatchOnly);
   }
 }

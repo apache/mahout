@@ -34,62 +34,58 @@ import java.util.List;
 
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.function.TimesFunction;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.TimesFunction;
 
 public class DisplayDirichlet extends Frame {
-
-  protected int res; //screen resolution
-
-  protected static final int ds = 72; //default scale = 72 pixels per inch
-
-  protected static final int size = 8; // screen size in inches
-
-  protected static final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
-
-  protected static List<Model<VectorWritable>[]> result;
-
-  protected static final double significance = 0.05;
-
   private static final List<Vector> sampleParams = new ArrayList<Vector>();
-
-  protected static final Color[] colors = { Color.red, Color.orange, Color.yellow, Color.green,
-      Color.blue, Color.magenta, Color.lightGray };
-
+   
+  protected static final int ds = 72; // default scale = 72 pixels per inch
+  
+  protected static final int size = 8; // screen size in inches
+  
+  protected static final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+ 
+  protected static final double significance = 0.05;
+  
+  protected static final Color[] colors = {Color.red, Color.orange, Color.yellow, Color.green, Color.blue,
+                                           Color.magenta, Color.lightGray};
+  
+  protected static List<Model<VectorWritable>[]> result;
+  
+  protected int res; // screen resolution
+ 
+  
   /**
-   * Licensed to the Apache Software Foundation (ASF) under one or more
-   * contributor license agreements.  See the NOTICE file distributed with
-   * this work for additional information regarding copyright ownership.
-   * The ASF licenses this file to You under the Apache License, Version 2.0
-   * (the "License"); you may not use this file except in compliance with
-   * the License.  You may obtain a copy of the License at
-   *
-   *     http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
+   * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See
+   * the NOTICE file distributed with this work for additional information regarding copyright ownership. The
+   * ASF licenses this file to You under the Apache License, Version 2.0 (the "License"); you may not use this
+   * file except in compliance with the License. You may obtain a copy of the License at
+   * 
+   * http://www.apache.org/licenses/LICENSE-2.0
+   * 
+   * Unless required by applicable law or agreed to in writing, software distributed under the License is
+   * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and limitations under the License.
    */
-
+  
   public DisplayDirichlet() {
     initialize();
   }
-
+  
   public void initialize() {
-    //Get screen resolution
+    // Get screen resolution
     res = Toolkit.getDefaultToolkit().getScreenResolution();
-
-    //Set Frame size in inches
-    this.setSize(size * res, size * res);
+    
+    // Set Frame size in inches
+    this.setSize(DisplayDirichlet.size * res, DisplayDirichlet.size * res);
     this.setVisible(true);
     this.setTitle("Dirichlet Process Sample Data");
-
-    //Window listener to terminate program.
+    
+    // Window listener to terminate program.
     this.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
@@ -97,13 +93,13 @@ public class DisplayDirichlet extends Frame {
       }
     });
   }
-
+  
   public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
     RandomUtils.useTestSeed();
-    generateSamples();
+    DisplayDirichlet.generateSamples();
     new DisplayDirichlet();
   }
-
+  
   // Override the paint() method
   @Override
   public void paint(Graphics g) {
@@ -112,68 +108,78 @@ public class DisplayDirichlet extends Frame {
     Vector v = new DenseVector(2);
     Vector dv = new DenseVector(2);
     g2.setColor(Color.RED);
-    for (Vector param : sampleParams) {
+    for (Vector param : DisplayDirichlet.sampleParams) {
       v.set(0, param.get(0));
       v.set(1, param.get(1));
       dv.set(0, param.get(2) * 3);
       dv.set(1, param.get(3) * 3);
-      plotEllipse(g2, v, dv);
+      DisplayDirichlet.plotEllipse(g2, v, dv);
     }
   }
-
+  
   public void plotSampleData(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    double sx = (double) res / ds;
+    double sx = (double) res / DisplayDirichlet.ds;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
-
+    
     // plot the axes
     g2.setColor(Color.BLACK);
-    Vector dv = new DenseVector(2).assign(size / 2.0);
-    plotRectangle(g2, new DenseVector(2).assign(2), dv);
-    plotRectangle(g2, new DenseVector(2).assign(-2), dv);
-
+    Vector dv = new DenseVector(2).assign(DisplayDirichlet.size / 2.0);
+    DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(2), dv);
+    DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(-2), dv);
+    
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
-    for (VectorWritable v : sampleData)
-      plotRectangle(g2, v.get(), dv);
+    for (VectorWritable v : DisplayDirichlet.sampleData) {
+      DisplayDirichlet.plotRectangle(g2, v.get(), dv);
+    }
   }
-
+  
   /**
    * Draw a rectangle on the graphics context
-   * @param g2 a Graphics2D context
-   * @param v a Vector of rectangle center
-   * @param dv a Vector of rectangle dimensions
+   * 
+   * @param g2
+   *          a Graphics2D context
+   * @param v
+   *          a Vector of rectangle center
+   * @param dv
+   *          a Vector of rectangle dimensions
    */
   public static void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
-    double[] flip = { 1, -1 };
+    double[] flip = {1, -1};
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
-    int h = size / 2;
+    int h = DisplayDirichlet.size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2.draw(new Rectangle2D.Double(x * ds, y * ds, dv.get(0) * ds, dv.get(1)
-        * ds));
+    g2.draw(new Rectangle2D.Double(x * DisplayDirichlet.ds, y * DisplayDirichlet.ds, dv.get(0)
+                                                                                     * DisplayDirichlet.ds,
+        dv.get(1) * DisplayDirichlet.ds));
   }
-
+  
   /**
    * Draw an ellipse on the graphics context
-   * @param g2 a Graphics2D context
-   * @param v a Vector of ellipse center
-   * @param dv a Vector of ellipse dimensions
+   * 
+   * @param g2
+   *          a Graphics2D context
+   * @param v
+   *          a Vector of ellipse center
+   * @param dv
+   *          a Vector of ellipse dimensions
    */
   public static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
-    double[] flip = { 1, -1 };
+    double[] flip = {1, -1};
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
-    int h = size / 2;
+    int h = DisplayDirichlet.size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2
-        .draw(new Ellipse2D.Double(x * ds, y * ds, dv.get(0) * ds, dv.get(1)
-            * ds));
+    g2.draw(new Ellipse2D.Double(x * DisplayDirichlet.ds, y * DisplayDirichlet.ds, dv.get(0)
+                                                                                   * DisplayDirichlet.ds,
+        dv.get(1) * DisplayDirichlet.ds));
   }
-
+  
   private static void printModels(List<Model<VectorWritable>[]> results, int significant) {
     int row = 0;
     for (Model<VectorWritable>[] r : results) {
@@ -188,66 +194,79 @@ public class DisplayDirichlet extends Frame {
     }
     System.out.println();
   }
-
+  
   public static void generateSamples() {
-    generateSamples(400, 1, 1, 3);
-    generateSamples(300, 1, 0, 0.5);
-    generateSamples(300, 0, 2, 0.1);
+    DisplayDirichlet.generateSamples(400, 1, 1, 3);
+    DisplayDirichlet.generateSamples(300, 1, 0, 0.5);
+    DisplayDirichlet.generateSamples(300, 0, 2, 0.1);
   }
-
+  
   public static void generate2dSamples() {
-    generate2dSamples(400, 1, 1, 3, 1);
-    generate2dSamples(300, 1, 0, 0.5, 1);
-    generate2dSamples(300, 0, 2, 0.1, 0.5);
+    DisplayDirichlet.generate2dSamples(400, 1, 1, 3, 1);
+    DisplayDirichlet.generate2dSamples(300, 1, 0, 0.5, 1);
+    DisplayDirichlet.generate2dSamples(300, 0, 2, 0.1, 0.5);
   }
-
+  
   /**
    * Generate random samples and add them to the sampleData
-   * @param num int number of samples to generate
-   * @param mx double x-value of the sample mean
-   * @param my double y-value of the sample mean
-   * @param sd double standard deviation of the samples
+   * 
+   * @param num
+   *          int number of samples to generate
+   * @param mx
+   *          double x-value of the sample mean
+   * @param my
+   *          double y-value of the sample mean
+   * @param sd
+   *          double standard deviation of the samples
    */
   private static void generateSamples(int num, double mx, double my, double sd) {
-    double[] params = { mx, my, sd, sd };
-    sampleParams.add(new DenseVector(params));
-    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
-        + "] sd=" + sd);
-    for (int i = 0; i < num; i++)
-      sampleData.add(new VectorWritable(new DenseVector(new double[] {
-          UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) })));
+    double[] params = {mx, my, sd, sd};
+    DisplayDirichlet.sampleParams.add(new DenseVector(params));
+    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=" + sd);
+    for (int i = 0; i < num; i++) {
+      DisplayDirichlet.sampleData.add(new VectorWritable(new DenseVector(new double[] {
+                                                                                       UncommonDistributions
+                                                                                           .rNorm(mx, sd),
+                                                                                       UncommonDistributions
+                                                                                           .rNorm(my, sd)})));
+    }
   }
-
+  
   /**
    * Generate random samples and add them to the sampleData
-   * @param num int number of samples to generate
-   * @param mx double x-value of the sample mean
-   * @param my double y-value of the sample mean
-   * @param sdx double x-value standard deviation of the samples
-   * @param sdy double y-value standard deviation of the samples
+   * 
+   * @param num
+   *          int number of samples to generate
+   * @param mx
+   *          double x-value of the sample mean
+   * @param my
+   *          double y-value of the sample mean
+   * @param sdx
+   *          double x-value standard deviation of the samples
+   * @param sdy
+   *          double y-value standard deviation of the samples
    */
-  private static void generate2dSamples(int num, double mx, double my,
-      double sdx, double sdy) {
-    double[] params = { mx, my, sdx, sdy };
-    sampleParams.add(new DenseVector(params));
-    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my
-        + "] sd=[" + sdx + ", " + sdy + ']');
-    for (int i = 0; i < num; i++)
-      sampleData.add(new VectorWritable(new DenseVector(new double[] {
-          UncommonDistributions.rNorm(mx, sdx),
-          UncommonDistributions.rNorm(my, sdy) })));
+  private static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
+    double[] params = {mx, my, sdx, sdy};
+    DisplayDirichlet.sampleParams.add(new DenseVector(params));
+    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy
+                       + ']');
+    for (int i = 0; i < num; i++) {
+      DisplayDirichlet.sampleData
+          .add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sdx),
+                                                                UncommonDistributions.rNorm(my, sdy)})));
+    }
   }
-
+  
   public static void generateResults(ModelDistribution<VectorWritable> modelDist) {
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData,
-        modelDist, 1.0, 10, 2, 2);
-    result = dc.cluster(20);
-    printModels(result, 5);
+    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+        DisplayDirichlet.sampleData, modelDist, 1.0, 10, 2, 2);
+    DisplayDirichlet.result = dc.cluster(20);
+    DisplayDirichlet.printModels(DisplayDirichlet.result, 5);
   }
-
+  
   public static boolean isSignificant(Model<VectorWritable> model) {
-    return (((double) model.count() / sampleData.size()) > significance);
+    return (double) model.count() / DisplayDirichlet.sampleData.size() > DisplayDirichlet.significance;
   }
-
+  
 }

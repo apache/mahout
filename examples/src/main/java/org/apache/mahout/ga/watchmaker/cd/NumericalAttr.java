@@ -18,26 +18,26 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 class NumericalAttr implements Attribute {
-
+  
   private final double min;
   private final double max;
-
+  
   NumericalAttr(double min, double max) {
     this.min = min;
     this.max = max;
   }
-
+  
   public double getMin() {
     return min;
   }
-
+  
   public double getMax() {
     return max;
   }
-
+  
   @Override
   public boolean isNumerical() {
     return true;
   }
-
+  
 }

@@ -31,39 +31,40 @@ import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayOutputState extends DisplayDirichlet {
   DisplayOutputState() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Map/Reduce Results (>"
-        + (int) (significance * 100) + "% of population)");
+      + (int) (DisplayDirichlet.significance * 100) + "% of population)");
   }
-
+  
   @Override
   public void paint(Graphics g) {
     super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;
-
+    
     Vector dv = new DenseVector(2);
-    int i = result.size() - 1;
-    for (Model<VectorWritable>[] models : result) {
+    int i = DisplayDirichlet.result.size() - 1;
+    for (Model<VectorWritable>[] models : DisplayDirichlet.result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(colors[Math.min(colors.length - 1, i--)]);
+      g2.setColor(DisplayDirichlet.colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         NormalModel mm = (NormalModel) m;
         dv.assign(mm.getStdDev() * 3);
-        if (isSignificant(mm))
-          plotEllipse(g2, mm.getMean(), dv);
+        if (DisplayDirichlet.isSignificant(mm)) {
+          DisplayDirichlet.plotEllipse(g2, mm.getMean(), dv);
+        }
       }
     }
   }
-
+  
   /**
    * Return the contents of the given file as a String
    * 
@@ -80,15 +81,16 @@ class DisplayOutputState extends DisplayDirichlet {
     }
     return results;
   }
-
+  
   private static void getSamples() throws IOException {
     File f = new File("input");
-    for (File g : f.listFiles())
-      sampleData.addAll(readFile(g.getCanonicalPath()));
+    for (File g : f.listFiles()) {
+      DisplayDirichlet.sampleData.addAll(DisplayOutputState.readFile(g.getCanonicalPath()));
+    }
   }
-
+  
   private static void getResults() throws IOException, InvocationTargetException, NoSuchMethodException {
-    result = new ArrayList<Model<VectorWritable>[]>();
+    DisplayDirichlet.result = new ArrayList<Model<VectorWritable>[]>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY,
         "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
@@ -100,17 +102,17 @@ class DisplayOutputState extends DisplayDirichlet {
     for (File g : f.listFiles()) {
       conf.set(DirichletDriver.STATE_IN_KEY, g.getCanonicalPath());
       DirichletState<VectorWritable> dirichletState = DirichletMapper.getDirichletState(conf);
-      result.add(dirichletState.getModels());
+      DisplayDirichlet.result.add(dirichletState.getModels());
     }
   }
-
+  
   public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
     RandomUtils.useTestSeed();
-    getSamples();
-    getResults();
+    DisplayOutputState.getSamples();
+    DisplayOutputState.getResults();
     new DisplayOutputState();
   }
-
+  
   static void generateResults() {
     DisplayDirichlet.generateResults(new NormalModelDistribution(new VectorWritable(new DenseVector(2))));
   }

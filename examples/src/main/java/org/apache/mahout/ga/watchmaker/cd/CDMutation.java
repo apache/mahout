@@ -17,29 +17,29 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.uncommons.watchmaker.framework.EvolutionaryOperator;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 
 /**
  * Mutation operator.
  */
 public class CDMutation implements EvolutionaryOperator<CDRule> {
-
+  
   /** probability of mutating a variable */
   private final double rate;
-
+  
   /** max size of the change (step-size) for each mutated variable */
   private final double range;
-
+  
   /**
    * mutation precision. Defines indirectly the minimal step-size and the
    * distribution of mutation steps inside the mutation range.
    */
   private final int k;
-
+  
   /**
    * 
    * @param rate probability of mutating a variable
@@ -50,18 +50,21 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
    * for more information about the parameters
    */
   public CDMutation(double rate, double range, int k) {
-    if (rate <= 0 || rate > 1)
+    if (rate <= 0 || rate > 1) {
       throw new IllegalArgumentException("mutation rate must be in ]0, 1]");
-    if (range <= 0 || range > 1)
+    }
+    if (range <= 0 || range > 1) {
       throw new IllegalArgumentException("mutation range must be in ]0, 1]");
-    if (k < 0)
+    }
+    if (k < 0) {
       throw new IllegalArgumentException("mutation precision must be >= 0");
-
+    }
+    
     this.rate = rate;
     this.range = range;
     this.k = k;
   }
-
+  
   @Override
   public List<CDRule> apply(List<CDRule> selectedCandidates, Random rng) {
     List<CDRule> mutatedPopulation = new ArrayList<CDRule>(selectedCandidates.size());
@@ -70,48 +73,49 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
     }
     return mutatedPopulation;
   }
-
+  
   protected CDRule mutate(CDRule rule, Random rng) {
     DataSet dataset = DataSet.getDataSet();
-
+    
     for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
-      if (rng.nextDouble() > rate)
+      if (rng.nextDouble() > rate) {
         continue;
-
+      }
+      
       int attrInd = CDRule.attributeIndex(condInd);
-
+      
       rule.setW(condInd, rndDouble(rule.getW(condInd), 0.0, 1.0, rng));
-
+      
       if (dataset.isNumerical(attrInd)) {
         rule.setV(condInd, rndDouble(rule.getV(condInd), dataset
-            .getMin(attrInd), dataset.getMax(attrInd), rng));
+          .getMin(attrInd), dataset.getMax(attrInd), rng));
       } else {
-        rule.setV(condInd, rndInt(rule.getV(condInd), dataset
-            .getNbValues(attrInd), rng));
+        rule.setV(condInd, CDMutation.rndInt(rule.getV(condInd), dataset
+          .getNbValues(attrInd), rng));
       }
     }
-
+    
     return rule;
   }
-
+  
   /**
    * returns a random double in the interval [min, max ].
    */
   double rndDouble(double value, double min, double max, Random rng) {
     double s = rng.nextDouble() * 2.0 - 1.0; // [-1, +1]
-    double r = range * ((max - min) / 2);
+    double r = range * (max - min) / 2;
     double a = Math.pow(2, -k * rng.nextDouble());
     double stp = s * r * a;
-
+    
     value += stp;
-
+    
     // clamp value to [min, max]
     value = Math.max(min, value);
     value = Math.min(max, value);
-
+    
     return value;
   }
-
+  
   static int rndInt(double value, int nbcategories, Random rng) {
     return rng.nextInt(nbcategories);
   }

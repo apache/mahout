@@ -17,24 +17,24 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
-
 import java.util.Random;
+
+import org.uncommons.watchmaker.framework.factories.AbstractCandidateFactory;
 
 /**
  * Factory used by Watchmaker to generate the initial population.
  */
 public class CDFactory extends AbstractCandidateFactory<CDRule> {
-
+  
   private final double threshold;
-
+  
   /**
    * @param threshold condition activation threshold
    */
   public CDFactory(double threshold) {
     this.threshold = threshold;
   }
-
+  
   @Override
   public CDRule generateRandomCandidate(Random rng) {
     return new CDRule(threshold, rng);

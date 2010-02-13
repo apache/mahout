@@ -17,6 +17,11 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -26,81 +31,77 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
 /**
  * Extract the attribute values from a dataline. Skip ignored attributes<br>
  * Input:<br>
  * <ul>
- * <li> LongWritable : data row index </li>
- * <li> Text : dataline </li>
+ * <li>LongWritable : data row index</li>
+ * <li>Text : dataline</li>
  * </ul>
  * Output:<br>
  * <ul>
- * <li> LongWritable : attribute index.<br>
+ * <li>LongWritable : attribute index.<br>
  * ignored attributes aren't taken into account when calculating this index.</li>
- * <li> Text : attribute value </li>
+ * <li>Text : attribute value</li>
  * </ul>
  * 
  * See Descriptors, for more informations about the job parameter
  */
-public class ToolMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, LongWritable, Text> {
-
+public class ToolMapper extends MapReduceBase implements Mapper<LongWritable,Text,LongWritable,Text> {
+  
   public static final String ATTRIBUTES = "cdtool.attributes";
-
+  
   private final List<String> attributes = new ArrayList<String>();
-
+  
   private Descriptors descriptors;
   
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-
-    String descrs = job.get(ATTRIBUTES);
-
-    if (descrs != null)
-      configure(StringUtils.<char[]>fromString(descrs));
+    
+    String descrs = job.get(ToolMapper.ATTRIBUTES);
+    
+    if (descrs != null) {
+      configure(StringUtils.<char[]> fromString(descrs));
+    }
   }
-
+  
   void configure(char[] descriptors) {
-    if (descriptors == null || descriptors.length == 0)
+    if (descriptors == null || descriptors.length == 0) {
       throw new IllegalArgumentException("Descriptors's array not found or is empty");
-
+    }
+    
     this.descriptors = new Descriptors(descriptors);
   }
-
+  
   @Override
-  public void map(LongWritable key, Text value,
-      OutputCollector<LongWritable, Text> output, Reporter reporter)
-      throws IOException {
-    extractAttributes(value, attributes);
-    if (attributes.size() != descriptors.size())
+  public void map(LongWritable key, Text value, OutputCollector<LongWritable,Text> output, Reporter reporter) throws IOException {
+    ToolMapper.extractAttributes(value, attributes);
+    if (attributes.size() != descriptors.size()) {
       throw new IllegalArgumentException(
           "Attributes number should be equal to the descriptors's array length");
-
+    }
+    
     // output non ignored attributes
     for (int index = 0; index < attributes.size(); index++) {
-      if (descriptors.isIgnored(index))
+      if (descriptors.isIgnored(index)) {
         continue;
-
+      }
+      
       output.collect(new LongWritable(index), new Text(attributes.get(index)));
     }
   }
-
+  
   /**
-   * Extract attribute values from the input Text. The attributes are separated
-   * by a colon ','. Skips ignored attributes.
+   * Extract attribute values from the input Text. The attributes are separated by a colon ','. Skips ignored
+   * attributes.
    * 
    * @param value
    * @param attributes
    */
   static void extractAttributes(Text value, List<String> attributes) {
     StringTokenizer tokenizer = new StringTokenizer(value.toString(), ",");
-
+    
     attributes.clear();
     while (tokenizer.hasMoreTokens()) {
       attributes.add(tokenizer.nextToken().trim());

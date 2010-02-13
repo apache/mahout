@@ -17,29 +17,29 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.ga.watchmaker.STFitnessEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMahoutEvaluator;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class Discovery Fitness Evaluator. Delegates to Mahout the task of evaluating
  * the fitness.
  */
 public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
-
+  
   private final Path dataset;
-
+  
   private final DatasetSplit split;
-
+  
   private final List<CDFitness> evals = new ArrayList<CDFitness>();
   
   private final int target;
-
+  
   /**
    * 
    * @param dataset dataset path
@@ -50,25 +50,26 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
     this.target = target;
     this.split = split;
   }
-
+  
   @Override
   public boolean isNatural() {
     return true;
   }
-
+  
   @Override
   protected void evaluate(List<? extends Rule> population,
-      List<Double> evaluations) {
+                          List<Double> evaluations) {
     evals.clear();
-
+    
     try {
       CDMahoutEvaluator.evaluate(population, target, dataset, evals, split);
     } catch (IOException e) {
       throw new IllegalStateException("Exception while evaluating the population", e);
     }
-
-    for (CDFitness fitness : evals)
+    
+    for (CDFitness fitness : evals) {
       evaluations.add(fitness.get());
+    }
   }
-
+  
 }

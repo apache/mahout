@@ -17,14 +17,15 @@
 
 package org.apache.mahout.cf.taste.ejb;
 
+import java.util.Collection;
+import java.util.List;
+
+import javax.ejb.EJBLocalObject;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-
-import javax.ejb.EJBLocalObject;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * <p>Recommender EJB local component interface.</p>
@@ -33,35 +34,35 @@ import java.util.List;
  * @see org.apache.mahout.cf.taste.recommender.Recommender
  */
 public interface RecommenderEJBLocal extends EJBLocalObject {
-
+  
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(long, int)
    */
   List<RecommendedItem> recommend(long userID, int howMany) throws TasteException;
-
+  
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#recommend(long, int, IDRescorer)
    */
   List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException;
-
+  
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#estimatePreference(long, long)
    */
   double estimatePreference(long userID, long itemID) throws TasteException;
-
+  
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#setPreference(long, long, float)
    */
   void setPreference(long userID, long itemID, float value) throws TasteException;
-
+  
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#removePreference(long, long)
    */
   void removePreference(long userID, long itemID) throws TasteException;
-
+  
   /**
    * @see org.apache.mahout.cf.taste.recommender.Recommender#refresh(Collection)
    */
   void refresh(Collection<Refreshable> alreadyRefreshed);
-
+  
 }

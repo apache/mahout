@@ -38,41 +38,41 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
  * The class is safe to be used in threaded contexts.
  */
 public final class TasteOptionParser {
-
+  
   private TasteOptionParser() {
   }
-
+  
   /**
    * Parse the given command line arguments.
    * @param args the arguments as given to the application.
-   * @return the input file if a file was given on the command line, null otherwise. 
+   * @return the input file if a file was given on the command line, null otherwise.
    */
   public static File getRatings(String[] args) throws OptionException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option inputOpt = obuilder.withLongName("input").withRequired(false)
-        .withShortName("i").withArgument(
-            abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-        .withDescription("The Path for input data directory.").create();
-
+    .withShortName("i").withArgument(
+      abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+      .withDescription("The Path for input data directory.").create();
+    
     Option helpOpt = DefaultOptionCreator.helpOption();
-
+    
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
-        helpOpt).create();
-
+      helpOpt).create();
+    
     Parser parser = new Parser();
     parser.setGroup(group);
     CommandLine cmdLine = parser.parse(args);
-
+    
     if (cmdLine.hasOption(helpOpt)) {
       CommandLineUtil.printHelp(group);
       return null;
     }
-
+    
     String prefsFile = cmdLine.getValue(inputOpt).toString();
     return new File(prefsFile);
   }
-
+  
 }

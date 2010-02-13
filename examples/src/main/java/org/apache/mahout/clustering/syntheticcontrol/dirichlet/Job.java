@@ -48,43 +48,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Job {
-
-  /**Logger for this class.*/
+  
+  /** Logger for this class. */
   private static final Logger log = LoggerFactory.getLogger(Job.class);
-
-  private Job() {
-  }
-
+  
+  private Job() { }
+  
   public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-
+    
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option maxIterOpt = DefaultOptionCreator.maxIterOption().withRequired(false).create();
     Option topicsOpt = DefaultOptionCreator.kOption().withRequired(false).create();
-
+    
     Option redOpt = obuilder.withLongName("reducerNum").withRequired(false).withArgument(
-        abuilder.withName("r").withMinimum(1).withMaximum(1).create()).withDescription("The number of reducers to use.")
-        .withShortName("r").create();
-
+      abuilder.withName("r").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The number of reducers to use.").withShortName("r").create();
+    
     Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
-        abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription("The vector implementation to use.")
-        .withShortName("v").create();
-
+      abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The vector implementation to use.").withShortName("v").create();
+    
     Option mOpt = obuilder.withLongName("alpha").withRequired(false).withShortName("m").withArgument(
-        abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The alpha0 value for the DirichletDistribution.").create();
-
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d").withArgument(
-        abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create())
+      abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The alpha0 value for the DirichletDistribution.").create();
+    
+    Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d")
+        .withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create())
         .withDescription("The ModelDistribution class name.").create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(
-        maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(redOpt).withOption(helpOpt).create();
-
+    
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(modelOpt).withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt)
+        .withOption(redOpt).withOption(helpOpt).create();
+    
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -93,41 +93,50 @@ public class Job {
         CommandLineUtil.printHelp(group);
         return;
       }
-
+      
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
       String modelFactory = cmdLine.getValue(modelOpt,
-          "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
+        "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt, "10").toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "5").toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
-      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
-      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers, vectorClassName);
+      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector")
+          .toString();
+      Job
+          .runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers,
+            vectorClassName);
     } catch (OptionException e) {
-      log.error("Exception parsing command line: ", e);
+      Job.log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
-
+  
   /**
-   * Run the job using supplied arguments, deleting the output directory if it
-   * exists beforehand
+   * Run the job using supplied arguments, deleting the output directory if it exists beforehand
    * 
-   * @param input the directory pathname for input points
-   * @param output the directory pathname for output points
-   * @param modelFactory the ModelDistribution class name
-   * @param numModels the number of Models
-   * @param maxIterations the maximum number of iterations
-   * @param alpha_0 the alpha0 value for the DirichletDistribution
-   * @param numReducers the desired number of reducers
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws ClassNotFoundException 
-   * @throws InvocationTargetException 
-   * @throws NoSuchMethodException 
-   * @throws IllegalArgumentException 
-   * @throws SecurityException 
+   * @param input
+   *          the directory pathname for input points
+   * @param output
+   *          the directory pathname for output points
+   * @param modelFactory
+   *          the ModelDistribution class name
+   * @param numModels
+   *          the number of Models
+   * @param maxIterations
+   *          the maximum number of iterations
+   * @param alpha_0
+   *          the alpha0 value for the DirichletDistribution
+   * @param numReducers
+   *          the desired number of reducers
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   * @throws ClassNotFoundException
+   * @throws InvocationTargetException
+   * @throws NoSuchMethodException
+   * @throws IllegalArgumentException
+   * @throws SecurityException
    */
   public static void runJob(String input,
                             String output,
@@ -136,9 +145,14 @@ public class Job {
                             int maxIterations,
                             double alpha_0,
                             int numReducers,
-                            String vectorClassName)
-      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+                            String vectorClassName) throws IOException,
+                                                   ClassNotFoundException,
+                                                   InstantiationException,
+                                                   IllegalAccessException,
+                                                   SecurityException,
+                                                   IllegalArgumentException,
+                                                   NoSuchMethodException,
+                                                   InvocationTargetException {
     // delete the output directory
     JobConf conf = new JobConf(DirichletJob.class);
     Path outPath = new Path(output);
@@ -149,33 +163,41 @@ public class Job {
     fs.mkdirs(outPath);
     String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
-    DirichletDriver.runJob(directoryContainingConvertedInput,
-                           output + "/state",
-                           modelFactory,
-                           vectorClassName,
-                           60,
-                           numModels,
-                           maxIterations,
-                           alpha_0,
-                           numReducers);
-    printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
+    DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
+      vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers);
+    Job.printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
   }
-
+  
   /**
    * Prints out all of the clusters during each iteration
-   * @param output the String output directory
-   * @param modelDistribution the String class name of the ModelDistribution
-   * @param vectorClassName the String class name of the Vector to use
-   * @param prototypeSize the size of the Vector prototype for the Dirichlet Models
-   * @param numIterations the int number of Iterations
-   * @param numModels the int number of models
-   * @param alpha_0 the double alpha_0 value
-   * @throws InvocationTargetException 
-   * @throws NoSuchMethodException 
+   * 
+   * @param output
+   *          the String output directory
+   * @param modelDistribution
+   *          the String class name of the ModelDistribution
+   * @param vectorClassName
+   *          the String class name of the Vector to use
+   * @param prototypeSize
+   *          the size of the Vector prototype for the Dirichlet Models
+   * @param numIterations
+   *          the int number of Iterations
+   * @param numModels
+   *          the int number of models
+   * @param alpha_0
+   *          the double alpha_0 value
+   * @throws InvocationTargetException
+   * @throws NoSuchMethodException
    * @throws SecurityException
    */
-  public static void printResults(String output, String modelDistribution, String vectorClassName, int prototypeSize,
-      int numIterations, int numModels, double alpha_0) throws SecurityException, NoSuchMethodException, InvocationTargetException {
+  public static void printResults(String output,
+                                  String modelDistribution,
+                                  String vectorClassName,
+                                  int prototypeSize,
+                                  int numIterations,
+                                  int numModels,
+                                  double alpha_0) throws SecurityException,
+                                                 NoSuchMethodException,
+                                                 InvocationTargetException {
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);
@@ -187,14 +209,17 @@ public class Job {
       conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
       clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
-    printResults(clusters, 0);
-
+    Job.printResults(clusters, 0);
+    
   }
-
+  
   /**
    * Actually prints out the clusters
-   * @param clusters a List of Lists of DirichletClusters
-   * @param significant the minimum number of samples to enable printing a model
+   * 
+   * @param clusters
+   *          a List of Lists of DirichletClusters
+   * @param significant
+   *          the minimum number of samples to enable printing a model
    */
   private static void printResults(List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
     int row = 0;
@@ -211,6 +236,6 @@ public class Job {
       result.append('\n');
     }
     result.append('\n');
-    log.info(result.toString());
+    Job.log.info(result.toString());
   }
 }

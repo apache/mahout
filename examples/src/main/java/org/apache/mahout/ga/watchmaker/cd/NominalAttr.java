@@ -18,25 +18,25 @@
 package org.apache.mahout.ga.watchmaker.cd;
 
 class NominalAttr implements Attribute {
-
+  
   private final String[] values;
-
+  
   NominalAttr(String[] values) {
     if (values.length <= 0) {
       throw new IllegalArgumentException("values is empty");
     }
     this.values = values;
   }
-
+  
   public int getNbvalues() {
     return values.length;
   }
-
+  
   @Override
   public boolean isNumerical() {
     return false;
   }
-
+  
   /**
    * Converts a string value of a nominal attribute to an <code>int</code>.
    *
@@ -46,10 +46,11 @@ class NominalAttr implements Attribute {
    */
   public int valueIndex(String value) {
     for (int index = 0; index < values.length; index++) {
-      if (values[index].equals(value))
+      if (values[index].equals(value)) {
         return index;
+      }
     }
     throw new IllegalArgumentException("Value (" + value + ") not found");
   }
-
+  
 }

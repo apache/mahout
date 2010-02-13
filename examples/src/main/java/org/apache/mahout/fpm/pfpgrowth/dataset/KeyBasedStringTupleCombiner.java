@@ -24,12 +24,11 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.StringTuple;
 
-public class KeyBasedStringTupleCombiner extends
-    Reducer<Text, StringTuple, Text, StringTuple> {
-
+public class KeyBasedStringTupleCombiner extends Reducer<Text,StringTuple,Text,StringTuple> {
+  
   @Override
-  protected void reduce(Text key, Iterable<StringTuple> values,
-      Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException,
+                                                                                InterruptedException {
     HashSet<String> outputValues = new HashSet<String>();
     for (StringTuple value : values) {
       outputValues.addAll(value.getEntries());
@@ -37,4 +36,3 @@ public class KeyBasedStringTupleCombiner extends
     context.write(key, new StringTuple(outputValues));
   }
 }
-

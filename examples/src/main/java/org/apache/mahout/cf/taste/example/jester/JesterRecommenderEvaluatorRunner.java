@@ -17,6 +17,9 @@
 
 package org.apache.mahout.cf.taste.example.jester;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.commons.cli2.OptionException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
@@ -26,17 +29,14 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.File;
-
 public final class JesterRecommenderEvaluatorRunner {
-
+  
   private static final Logger log = LoggerFactory.getLogger(JesterRecommenderEvaluatorRunner.class);
-
+  
   private JesterRecommenderEvaluatorRunner() {
     // do nothing
   }
-
+  
   public static void main(String... args) throws IOException, TasteException, OptionException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
     DataModel model;
@@ -47,11 +47,11 @@ public final class JesterRecommenderEvaluatorRunner {
       model = new JesterDataModel();
     }
     double evaluation = evaluator.evaluate(new JesterRecommenderBuilder(),
-                                           null,
-                                           model,
-                                           0.9,
-                                           0.1);
-    log.info(String.valueOf(evaluation));
+      null,
+      model,
+      0.9,
+      0.1);
+    JesterRecommenderEvaluatorRunner.log.info(String.valueOf(evaluation));
   }
-
+  
 }

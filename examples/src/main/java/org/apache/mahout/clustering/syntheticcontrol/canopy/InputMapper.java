@@ -17,41 +17,43 @@
 
 package org.apache.mahout.clustering.syntheticcontrol.canopy;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-public class InputMapper extends MapReduceBase implements
-    Mapper<LongWritable, Text, Text, VectorWritable> {
-
+public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Text,Text,VectorWritable> {
+  
   private static final Pattern SPACE = Pattern.compile(" ");
-
+  
   private Constructor<?> constructor;
-
+  
   private VectorWritable vectorWritable;
-
+  
   @Override
-  public void map(LongWritable key, Text values,
-      OutputCollector<Text, VectorWritable> output, Reporter reporter) throws IOException {
-    String[] numbers = SPACE.split(values.toString());
+  public void map(LongWritable key,
+                  Text values,
+                  OutputCollector<Text,VectorWritable> output,
+                  Reporter reporter) throws IOException {
+    String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
     for (String value : numbers) {
-      if (value.length() > 0)
+      if (value.length() > 0) {
         doubles.add(Double.valueOf(value));
+      }
     }
     try {
       Vector result = (Vector) constructor.newInstance(doubles.size());
@@ -61,7 +63,7 @@ public class InputMapper extends MapReduceBase implements
       }
       vectorWritable.set(result);
       output.collect(new Text(String.valueOf(index)), vectorWritable);
-
+      
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -70,8 +72,7 @@ public class InputMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-
-
+  
   @Override
   public void configure(JobConf job) {
     vectorWritable = new VectorWritable();
@@ -84,6 +85,6 @@ public class InputMapper extends MapReduceBase implements
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     }
-
+    
   }
 }

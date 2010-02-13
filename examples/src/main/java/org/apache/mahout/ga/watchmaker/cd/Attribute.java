@@ -21,7 +21,7 @@ package org.apache.mahout.ga.watchmaker.cd;
  * An attribute for use with {@link DataSet}
  */
 interface Attribute {
-
+  
   boolean isNumerical();
-
+  
 }
