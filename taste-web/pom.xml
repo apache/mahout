@@ -194,6 +194,12 @@
     </dependency>
 
     <dependency>
+      <groupId>axis</groupId>
+      <artifactId>axis</artifactId>
+      <version>1.4</version>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.4</version>
@@ -210,6 +216,13 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
       <version>1.5.8</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
