@@ -50,6 +50,21 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+        
+      <!-- create test jar so other modules can reuse the math test utility classes. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.4</version>

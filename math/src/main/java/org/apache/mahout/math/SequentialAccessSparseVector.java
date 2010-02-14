@@ -20,7 +20,27 @@ package org.apache.mahout.math;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** Implements vector that only stores non-zero doubles */
+/**
+ * <p>
+ * Implements vector that only stores non-zero doubles as a pair of parallel arrays (OrderedIntDoubleMapping),
+ * one int[], one double[].  If there are <b>k</b> non-zero elements in the vector, this implementation has
+ * O(log(k)) random-access read performance, and O(k) random-access write performance, which is far below that
+ * of the hashmap based {@link org.apache.mahout.math.RandomAccessSparseVector RandomAccessSparseVector}.  This
+ * class is primarily used for operations where the all the elements will be accessed in a read-only fashion
+ * sequentially: methods which operate not via get() or set(), but via iterateNonZero(), such as (but not limited
+ * to) :</p>
+ * <ul>
+ *   <li>dot(Vector)</li>
+ *   <li>addTo(Vector)</li>
+ * </ul>
+ * <p>
+ * Note that the Vector passed to these above methods may (and currently, are) be used in a random access fashion,
+ * so for example, calling SequentialAccessSparseVector.dot(SequentialAccessSparseVector) is slow.
+ * TODO: this need not be the case - both are ordered, so this should be very fast if implmented in this class
+ * </p>
+ *
+ * {@see OrderedIntDoubleMapping}
+ */
 public class SequentialAccessSparseVector extends AbstractVector {
 
   protected OrderedIntDoubleMapping values;
