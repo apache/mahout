@@ -57,6 +57,7 @@ if [ $# = 0 ]; then
   echo "  clusterdump           dump clusters from a sequence file"
   echo "  dirchlet              run Dirchlet clustering"
   echo "  fkmeans               run fuzzy kmeans clustering"
+  echo "  fpg                   run FPGrowth Driver for freq. pattern mining"
   echo "  kmeans                run kmeans clustering"
   echo "  lda                   run LDA clustering"
   echo "  lucenevector          generate vectors from a lucene index"
@@ -183,6 +184,8 @@ elif [ "$COMMAND" = "fkmeans" ] ; then
   CLASS=org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver
 elif [ "$COMMAND" = "lda" ] ; then
   CLASS=org.apache.mahout.clustering.lda.LDADriver
+elif [ "$COMMAND" = "fpg" ] ; then
+  CLASS=org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver  
 elif [ "$COMMAND" = "dirichlet" ] ; then
   CLASS=org.apache.mahout.clustering.dirichlet.DirichletDriver
 elif [ "$COMMAND" = "meanshift" ] ; then
