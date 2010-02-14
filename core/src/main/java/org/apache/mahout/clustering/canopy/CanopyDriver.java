@@ -47,7 +47,7 @@ public final class CanopyDriver {
   
   private static final Logger log = LoggerFactory.getLogger(CanopyDriver.class);
   
-  private CanopyDriver() { }
+  private CanopyDriver() {}
   
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -129,10 +129,10 @@ public final class CanopyDriver {
    * @param t2
    *          the T2 distance threshold
    */
-  public static void runJob(String input, String output, String measureClassName, double t1, double t2) throws IOException {
-    CanopyDriver.log.info("Input: {} Out: {} Measure: {} t1: {} t2: {}", new Object[] {input, output,
-                                                                                       measureClassName, t1,
-                                                                                       t2});
+  public static void runJob(String input, String output,
+                            String measureClassName, double t1, double t2) throws IOException {
+    CanopyDriver.log.info("Input: {} Out: {} " 
+      + "Measure: {} t1: {} t2: {}", new Object[] {input, output, measureClassName, t1, t2});
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CanopyDriver.class);
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);

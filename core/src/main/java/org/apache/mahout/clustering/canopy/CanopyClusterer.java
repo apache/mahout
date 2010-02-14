@@ -154,10 +154,13 @@ public class CanopyClusterer {
    *          the List<Canopy> to be appended
    * @param collector
    *          an OutputCollector in which to emit the point
+   * @param reporter
+   *          to report status of the job
    */
   public void emitPointToExistingCanopies(Vector point,
                                           List<Canopy> canopies,
-                                          OutputCollector<Text,VectorWritable> collector) throws IOException {
+                                          OutputCollector<Text,VectorWritable> collector,
+                                          Reporter reporter) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
@@ -168,6 +171,7 @@ public class CanopyClusterer {
         isCovered = true;
         vw.set(point);
         collector.collect(new Text(canopy.getIdentifier()), vw);
+        reporter.setStatus("Emit Canopy ID:" +canopy.getIdentifier());
       } else if (dist < minDist) {
         minDist = dist;
         closest = canopy;
@@ -178,6 +182,7 @@ public class CanopyClusterer {
     vw.set(point);
     if (!isCovered) {
       collector.collect(new Text(closest.getIdentifier()), vw);
+      reporter.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
     }
   }
   

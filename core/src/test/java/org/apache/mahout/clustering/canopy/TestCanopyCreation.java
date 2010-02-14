@@ -593,7 +593,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     List<VectorWritable> points = getPoints(raw);
     // map the data
     for (VectorWritable point : points) {
-      mapper.map(new Text(), point, collector, null);
+      mapper.map(new Text(), point, collector, new DummyReporter());
     }
     Map<String, List<VectorWritable>> data = collector.getData();
 

@@ -45,7 +45,7 @@ public class ClusterMapper extends MapReduceBase implements
                   VectorWritable point,
                   OutputCollector<Text,VectorWritable> output,
                   Reporter reporter) throws IOException {
-    canopyClusterer.emitPointToExistingCanopies(point.get(), canopies, output);
+    canopyClusterer.emitPointToExistingCanopies(point.get(), canopies, output, reporter);
   }
   
   /**
