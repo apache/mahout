@@ -27,33 +27,33 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import java.util.Collection;
 
 final class DummySimilarity implements UserSimilarity, ItemSimilarity {
-
+  
   private final DataModel dataModel;
-
+  
   DummySimilarity(DataModel dataModel) {
     this.dataModel = dataModel;
   }
-
+  
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
-    return 1.0 / (1.0 + Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue() -
-        dataModel.getPreferencesFromUser(userID2).get(0).getValue()));
+    return 1.0 / (1.0 + Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue()
+                                 - dataModel.getPreferencesFromUser(userID2).get(0).getValue()));
   }
-
+  
   @Override
   public double itemSimilarity(long itemID1, long itemID2) {
     // Make up something wacky
     return 1.0 / (1.0 + Math.abs(itemID1 - itemID2));
   }
-
+  
   @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {
     throw new UnsupportedOperationException();
   }
-
+  
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    // do nothing
+  // do nothing
   }
-
+  
 }

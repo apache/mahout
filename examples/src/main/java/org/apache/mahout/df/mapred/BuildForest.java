@@ -131,19 +131,19 @@ public class BuildForest extends Configured implements Tool {
         seed = Long.valueOf(cmdLine.getValue(seedOpt).toString());
       }
       
-      BuildForest.log.debug("data : {}", dataName);
-      BuildForest.log.debug("dataset : {}", datasetName);
-      BuildForest.log.debug("m : {}", m);
-      BuildForest.log.debug("seed : {}", seed);
-      BuildForest.log.debug("nbtrees : {}", nbTrees);
-      BuildForest.log.debug("isPartial : {}", isPartial);
-      BuildForest.log.debug("isOob : {}", isOob);
+      log.debug("data : {}", dataName);
+      log.debug("dataset : {}", datasetName);
+      log.debug("m : {}", m);
+      log.debug("seed : {}", seed);
+      log.debug("nbtrees : {}", nbTrees);
+      log.debug("isPartial : {}", isPartial);
+      log.debug("isOob : {}", isOob);
       
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
       
     } catch (OptionException e) {
-      BuildForest.log.error("Error while parsing options", e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return -1;
     }
@@ -165,20 +165,20 @@ public class BuildForest extends Configured implements Tool {
     Builder forestBuilder;
     
     if (isPartial) {
-      BuildForest.log.info("Partial Mapred implementation");
+      log.info("Partial Mapred implementation");
       forestBuilder = new PartialBuilder(treeBuilder, dataPath, datasetPath, seed, getConf());
     } else {
-      BuildForest.log.info("InMem Mapred implementation");
+      log.info("InMem Mapred implementation");
       forestBuilder = new InMemBuilder(treeBuilder, dataPath, datasetPath, seed, getConf());
     }
     
-    BuildForest.log.info("Building the forest...");
+    log.info("Building the forest...");
     long time = System.currentTimeMillis();
     
     DecisionForest forest = forestBuilder.build(nbTrees, callback);
     
     time = System.currentTimeMillis() - time;
-    BuildForest.log.info("Build Time: {}", DFUtils.elapsedTime(time));
+    log.info("Build Time: {}", DFUtils.elapsedTime(time));
     
     if (isOob) {
       Random rng;
@@ -191,7 +191,7 @@ public class BuildForest extends Configured implements Tool {
       FileSystem fs = dataPath.getFileSystem(getConf());
       int[] labels = Data.extractLabels(dataset, fs, dataPath);
       
-      BuildForest.log.info("oob error estimate : "
+      log.info("oob error estimate : "
                            + ErrorEstimate.errorRate(labels, callback.computePredictions(rng)));
     }
     
@@ -199,10 +199,10 @@ public class BuildForest extends Configured implements Tool {
   }
   
   protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {
-    BuildForest.log.info("Loading the data...");
+    log.info("Loading the data...");
     FileSystem fs = dataPath.getFileSystem(conf);
     Data data = DataLoader.loadData(dataset, fs, dataPath);
-    BuildForest.log.info("Data Loaded");
+    log.info("Data Loaded");
     
     return data;
   }

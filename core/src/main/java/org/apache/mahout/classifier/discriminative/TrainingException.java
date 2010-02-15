@@ -8,7 +8,7 @@ package org.apache.mahout.classifier.discriminative;
 public class TrainingException extends Exception {
   /** Serialization id. */
   private static final long serialVersionUID = 388611231310145397L;
-
+  
   /**
    * Init with message string describing the cause of the exception.
    * */

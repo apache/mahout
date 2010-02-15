@@ -48,7 +48,7 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable,Text,Text,Str
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     String[] fields = splitter.split(value.toString());
     if (fields.length != 4) {
-      KeyBasedStringTupleMapper.log.info("{} {}", fields.length, value.toString());
+      log.info("{} {}", fields.length, value.toString());
       context.getCounter("Map", "ERROR").increment(1);
       return;
     }

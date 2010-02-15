@@ -135,7 +135,7 @@ public class Dataset implements Writable {
     return ignored;
   }
   
-  private Dataset() {}
+  private Dataset() { }
   
   /**
    * Should only be called by a DataLoader

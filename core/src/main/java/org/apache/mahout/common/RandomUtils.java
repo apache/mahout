@@ -44,16 +44,16 @@ public final class RandomUtils {
   private RandomUtils() { }
   
   public static void useTestSeed() {
-    RandomUtils.testSeed = true;
+    testSeed = true;
   }
   
   public static Random getRandom() {
-    return RandomUtils.testSeed ? new MersenneTwisterRNG(RandomUtils.STANDARD_SEED)
+    return testSeed ? new MersenneTwisterRNG(STANDARD_SEED)
         : new MersenneTwisterRNG();
   }
   
   public static Random getRandom(long seed) {
-    return new MersenneTwisterRNG(RandomUtils.longSeedtoBytes(seed));
+    return new MersenneTwisterRNG(longSeedtoBytes(seed));
   }
   
   public static byte[] longSeedtoBytes(long seed) {
@@ -98,15 +98,15 @@ public final class RandomUtils {
    * </p>
    */
   public static int nextTwinPrime(int n) {
-    if (n > RandomUtils.MAX_INT_SMALLER_TWIN_PRIME) {
+    if (n > MAX_INT_SMALLER_TWIN_PRIME) {
       throw new IllegalArgumentException();
     }
     if (n <= 3) {
       return 3;
     }
-    int next = RandomUtils.nextPrime(n);
-    while (RandomUtils.isNotPrime(next + 2)) {
-      next = RandomUtils.nextPrime(next + 4);
+    int next = nextPrime(n);
+    while (isNotPrime(next + 2)) {
+      next = nextPrime(next + 4);
     }
     return next + 2;
   }
@@ -123,7 +123,7 @@ public final class RandomUtils {
     // Make sure the number is odd. Is this too clever?
     n |= 0x1;
     // There is no problem with overflow since Integer.MAX_INT is prime, as it happens
-    while (RandomUtils.isNotPrime(n)) {
+    while (isNotPrime(n)) {
       n += 2;
     }
     return n;

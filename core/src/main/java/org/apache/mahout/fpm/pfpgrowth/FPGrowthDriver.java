@@ -171,7 +171,7 @@ public final class FPGrowthDriver {
   }
   
   private static void runFPGrowth(Parameters params) throws IOException {
-    FPGrowthDriver.log.info("Starting Sequential FPGrowth");
+    log.info("Starting Sequential FPGrowth");
     int maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
     int minSupport = Integer.valueOf(params.get("minSupport", "3"));
     
@@ -200,7 +200,7 @@ public final class FPGrowthDriver {
     
     List<Pair<String,TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
     for (Pair<String,TopKStringPatterns> entry : frequentPatterns) {
-      FPGrowthDriver.log.info("Dumping Patterns for Feature: {} \n{}", entry.getFirst(), entry.getSecond()
+      log.info("Dumping Patterns for Feature: {} \n{}", entry.getFirst(), entry.getSecond()
           .toString());
     }
   }

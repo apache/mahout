@@ -77,7 +77,7 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       }
     } else if (key.length() == 2) {
       if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
-        output.collect(BayesTfIdfMapper.VOCAB_COUNT, BayesTfIdfMapper.ONE);
+        output.collect(VOCAB_COUNT, ONE);
         reporter.setStatus("Bayes TfIdf Mapper: vocabCount");
       } else {
         throw new IllegalArgumentException("Unexpected Tuple: " + key);
@@ -104,7 +104,7 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       }
       
     } catch (IOException ex) {
-      BayesTfIdfMapper.log.warn(ex.toString(), ex);
+      log.warn(ex.toString(), ex);
     }
   }
   

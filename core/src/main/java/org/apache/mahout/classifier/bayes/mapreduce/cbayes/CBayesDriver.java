@@ -55,23 +55,23 @@ public class CBayesDriver implements BayesJob {
       dfs.delete(outPath, true);
     }
     
-    CBayesDriver.log.info("Reading features...");
+    log.info("Reading features...");
     // Read the features in each document normalized by length of each document
     BayesFeatureDriver feature = new BayesFeatureDriver();
     feature.runJob(input, output, params);
     
-    CBayesDriver.log.info("Calculating Tf-Idf...");
+    log.info("Calculating Tf-Idf...");
     // Calculate the TfIdf for each word in each label
     BayesTfIdfDriver tfidf = new BayesTfIdfDriver();
     tfidf.runJob(input, output, params);
     
-    CBayesDriver.log.info("Calculating weight sums for labels and features...");
+    log.info("Calculating weight sums for labels and features...");
     // Calculate the Sums of weights for each label, for each feature and for
     // each feature and for each label
     BayesWeightSummerDriver summer = new BayesWeightSummerDriver();
     summer.runJob(input, output, params);
     
-    CBayesDriver.log.info("Calculating the weight Normalisation factor for each complement class...");
+    log.info("Calculating the weight Normalisation factor for each complement class...");
     // Calculate the normalization factor Sigma_W_ij for each complement class.
     CBayesThetaNormalizerDriver normalizer = new CBayesThetaNormalizerDriver();
     normalizer.runJob(input, output, params);

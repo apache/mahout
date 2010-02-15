@@ -51,7 +51,7 @@ public final class JesterRecommenderEvaluatorRunner {
       model,
       0.9,
       0.1);
-    JesterRecommenderEvaluatorRunner.log.info(String.valueOf(evaluation));
+    log.info(String.valueOf(evaluation));
   }
   
 }

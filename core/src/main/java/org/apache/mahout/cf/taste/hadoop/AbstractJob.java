@@ -107,7 +107,7 @@ public abstract class AbstractJob implements Tool {
       parser.setGroup(group);
       cmdLine = parser.parse(args);
     } catch (OptionException e) {
-      AbstractJob.log.error(e.getMessage());
+      log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
       return null;
     }

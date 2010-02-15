@@ -29,7 +29,7 @@ import org.apache.mahout.df.node.Node;
  * This class should not be needed outside of the partial package, so all its methods are protected.<br>
  */
 public class InterResults {
-  private InterResults() {}
+  private InterResults() { }
   
   /**
    * Load the trees and the keys returned from the first step

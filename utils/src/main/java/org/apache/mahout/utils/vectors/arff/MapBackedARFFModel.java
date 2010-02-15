@@ -157,7 +157,7 @@ public class MapBackedARFFModel implements ARFFModel {
       synchronized (format) {
         date = format.parse(data);
       }
-      result = date.getTime();// hmmm, what kind of loss casting long to double?
+      result = date.getTime(); // hmmm, what kind of loss casting long to double?
     } catch (ParseException e) {
       throw new IllegalStateException(e);
     }

@@ -49,7 +49,7 @@ public class Describe {
   
   private static final Logger log = LoggerFactory.getLogger(Describe.class);
   
-  private Describe() {}
+  private Describe() { }
   
   public static void main(String[] args) throws IOException, DescriptorException {
     
@@ -88,28 +88,28 @@ public class Describe {
       String descPath = cmdLine.getValue(descPathOpt).toString();
       List<String> descriptor = Describe.convert(cmdLine.getValues(descriptorOpt));
       
-      Describe.log.debug("Data path : {}", dataPath);
-      Describe.log.debug("Descriptor path : {}", descPath);
-      Describe.log.debug("Descriptor : {}", descriptor);
+      log.debug("Data path : {}", dataPath);
+      log.debug("Descriptor path : {}", descPath);
+      log.debug("Descriptor : {}", descriptor);
       
       Describe.runTool(dataPath, descriptor, descPath);
     } catch (OptionException e) {
-      Describe.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
   }
   
   private static void runTool(String dataPath, List<String> description, String filePath) throws DescriptorException,
                                                                                          IOException {
-    Describe.log.info("Generating the descriptor...");
+    log.info("Generating the descriptor...");
     String descriptor = DescriptorUtils.generateDescriptor(description);
     
     Path fPath = Describe.validateOutput(filePath);
     
-    Describe.log.info("generating the dataset...");
+    log.info("generating the dataset...");
     Dataset dataset = Describe.generateDataset(descriptor, dataPath);
     
-    Describe.log.info("storing the dataset description");
+    log.info("storing the dataset description");
     Describe.storeWritable(new Configuration(), fPath, dataset);
   }
   

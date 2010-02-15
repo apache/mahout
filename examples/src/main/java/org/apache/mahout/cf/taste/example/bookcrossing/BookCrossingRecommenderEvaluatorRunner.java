@@ -52,7 +52,7 @@ public final class BookCrossingRecommenderEvaluatorRunner {
       model,
       0.95,
       0.05);
-    BookCrossingRecommenderEvaluatorRunner.log.info(String.valueOf(evaluation));
+    log.info(String.valueOf(evaluation));
   }
   
 }

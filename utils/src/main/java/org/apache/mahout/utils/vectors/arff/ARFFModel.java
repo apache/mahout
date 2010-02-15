@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public interface ARFFModel {
   DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-  String ARFF_SPARSE = "{";//indicates the vector is sparse
+  String ARFF_SPARSE = "{"; //indicates the vector is sparse
   String ARFF_COMMENT = "%";
   String ATTRIBUTE = "@attribute";
   String DATA = "@data";

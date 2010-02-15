@@ -114,10 +114,10 @@ public final class ClusterDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
       
-      ClusterDriver.runJob(points, canopies, output, measureClass, t1, t2);
+      runJob(points, canopies, output, measureClass, t1, t2);
       
     } catch (OptionException e) {
-      ClusterDriver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
     
@@ -163,7 +163,7 @@ public final class ClusterDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     FileInputFormat.setInputPaths(conf, new Path(points));
-    Path outPath = new Path(output + ClusterDriver.DEFAULT_CLUSTER_OUTPUT_DIRECTORY);
+    Path outPath = new Path(output + DEFAULT_CLUSTER_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setMapperClass(ClusterMapper.class);

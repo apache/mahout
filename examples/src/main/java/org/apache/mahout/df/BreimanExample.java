@@ -95,7 +95,7 @@ public class BreimanExample extends Configured implements Tool {
     
     int nblabels = data.getDataset().nblabels();
     
-    BreimanExample.log.info("Splitting the data");
+    log.info("Splitting the data");
     Data train = data.clone();
     Data test = train.rsplit(rng, (int) (data.size() * 0.1));
     
@@ -112,7 +112,7 @@ public class BreimanExample extends Configured implements Tool {
     treeBuilder.setM(m);
     
     long time = System.currentTimeMillis();
-    BreimanExample.log.info("Growing a forest with m={}", m);
+    log.info("Growing a forest with m={}", m);
     DecisionForest forestM = forestBuilder.build(nbtrees, errorM);
     sumTimeM += System.currentTimeMillis() - time;
     numNodesM += forestM.nbNodes();
@@ -125,7 +125,7 @@ public class BreimanExample extends Configured implements Tool {
     treeBuilder.setM(1);
     
     time = System.currentTimeMillis();
-    BreimanExample.log.info("Growing a forest with m=1");
+    log.info("Growing a forest with m=1");
     DecisionForest forestOne = forestBuilder.build(nbtrees, errorOne);
     sumTimeOne += System.currentTimeMillis() - time;
     numNodesOne += forestOne.nbNodes();
@@ -209,7 +209,7 @@ public class BreimanExample extends Configured implements Tool {
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
     } catch (OptionException e) {
-      BreimanExample.log.error("Error while parsing options", e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return -1;
     }
@@ -225,18 +225,18 @@ public class BreimanExample extends Configured implements Tool {
     
     Random rng = RandomUtils.getRandom();
     for (int iteration = 0; iteration < nbIterations; iteration++) {
-      BreimanExample.log.info("Iteration {}", iteration);
+      log.info("Iteration {}", iteration);
       runIteration(rng, data, m, nbTrees);
     }
     
-    BreimanExample.log.info("********************************************");
-    BreimanExample.log.info("Selection error : {}", sumTestErr / nbIterations);
-    BreimanExample.log.info("Single Input error : {}", sumOneErr / nbIterations);
-    BreimanExample.log.info("One Tree error : {}", sumTreeErr / nbIterations);
-    BreimanExample.log.info("Mean Random Input Time : {}", DFUtils.elapsedTime(sumTimeM / nbIterations));
-    BreimanExample.log.info("Mean Single Input Time : {}", DFUtils.elapsedTime(sumTimeOne / nbIterations));
-    BreimanExample.log.info("Mean Random Input Num Nodes : {}", numNodesM / nbIterations);
-    BreimanExample.log.info("Mean Single Input Num Nodes : {}", numNodesOne / nbIterations);
+    log.info("********************************************");
+    log.info("Selection error : {}", sumTestErr / nbIterations);
+    log.info("Single Input error : {}", sumOneErr / nbIterations);
+    log.info("One Tree error : {}", sumTreeErr / nbIterations);
+    log.info("Mean Random Input Time : {}", DFUtils.elapsedTime(sumTimeM / nbIterations));
+    log.info("Mean Single Input Time : {}", DFUtils.elapsedTime(sumTimeOne / nbIterations));
+    log.info("Mean Random Input Num Nodes : {}", numNodesM / nbIterations);
+    log.info("Mean Single Input Num Nodes : {}", numNodesOne / nbIterations);
     
     return 0;
   }

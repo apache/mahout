@@ -82,7 +82,7 @@ public final class RefreshHelper implements Refreshable {
           try {
             refreshRunnable.call();
           } catch (Exception e) {
-            RefreshHelper.log.warn("Unexpected exception while refreshing", e);
+            log.warn("Unexpected exception while refreshing", e);
           }
         }
       } finally {
@@ -115,9 +115,9 @@ public final class RefreshHelper implements Refreshable {
   public static void maybeRefresh(Collection<Refreshable> alreadyRefreshed, Refreshable refreshable) {
     if (!alreadyRefreshed.contains(refreshable)) {
       alreadyRefreshed.add(refreshable);
-      RefreshHelper.log.info("Added refreshable: {}", refreshable);
+      log.info("Added refreshable: {}", refreshable);
       refreshable.refresh(alreadyRefreshed);
-      RefreshHelper.log.info("Refreshed: {}", alreadyRefreshed);
+      log.info("Refreshed: {}", alreadyRefreshed);
     }
   }
 }

@@ -121,7 +121,7 @@ public final class WikipediaToSequenceFile {
       }
       WikipediaToSequenceFile.runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all);
     } catch (OptionException e) {
-      WikipediaToSequenceFile.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -146,7 +146,7 @@ public final class WikipediaToSequenceFile {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaToSequenceFile.class);
     if (WikipediaToSequenceFile.log.isInfoEnabled()) {
-      WikipediaToSequenceFile.log.info("Input: " + input + " Out: " + output + " Categories: " + catFile
+      log.info("Input: " + input + " Out: " + output + " Categories: " + catFile
                                        + " All Files: " + all);
     }
     conf.set("xmlinput.start", "<page>");

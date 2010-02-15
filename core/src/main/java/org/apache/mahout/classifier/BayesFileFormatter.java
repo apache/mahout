@@ -72,7 +72,8 @@ public final class BayesFileFormatter {
    * @param outputFile
    *          The file to collapse to
    */
-  public static void collapse(String label, Analyzer analyzer, File inputDir, Charset charset, File outputFile) throws IOException {
+  public static void collapse(String label, Analyzer analyzer, File inputDir,
+                              Charset charset, File outputFile) throws IOException {
     Writer writer = new OutputStreamWriter(new FileOutputStream(outputFile), charset);
     try {
       inputDir.listFiles(new FileProcessor(label, analyzer, charset, writer));
@@ -97,7 +98,8 @@ public final class BayesFileFormatter {
    * @param outDir
    *          The output directory. Files will be written there with the same name as the input file
    */
-  public static void format(String label, Analyzer analyzer, File input, Charset charset, File outDir) throws IOException {
+  public static void format(String label, Analyzer analyzer, File input,
+                            Charset charset, File outDir) throws IOException {
     if (input.isDirectory()) {
       input.listFiles(new FileProcessor(label, analyzer, charset, outDir));
     } else {
@@ -111,7 +113,8 @@ public final class BayesFileFormatter {
   }
   
   /**
-   * Hack the FileFilter mechanism so that we don't get stuck on large directories and don't have to loop the list twice
+   * Hack the FileFilter mechanism so that we don't get stuck on large directories and 
+   * don't have to loop the list twice
    */
   private static final class FileProcessor implements FileFilter {
     private final String label;
@@ -198,7 +201,8 @@ public final class BayesFileFormatter {
    * @throws java.io.IOException
    *           if there was a problem w/ the reader
    */
-  private static void writeFile(String label, Analyzer analyzer, File inFile, Charset charset, Writer writer) throws IOException {
+  private static void writeFile(String label, Analyzer analyzer, File inFile,
+                                Charset charset, Writer writer) throws IOException {
     Reader reader = new InputStreamReader(new FileInputStream(inFile), charset);
     try {
       TokenStream ts = analyzer.tokenStream(label, reader);
@@ -322,7 +326,7 @@ public final class BayesFileFormatter {
       }
       
     } catch (OptionException e) {
-      BayesFileFormatter.log.error("Exception", e);
+      log.error("Exception", e);
     }
   }
 }

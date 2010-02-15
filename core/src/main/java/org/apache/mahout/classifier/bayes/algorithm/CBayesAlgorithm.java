@@ -111,9 +111,7 @@ public class CBayesAlgorithm implements Algorithm {
   
   @Override
   public void initialize(Datastore datastore) throws InvalidDatastoreException {
-    datastore.getWeight("weight", "test", "test");
-    datastore.getWeight("labelWeight", "test");
-    datastore.getWeight("thetaNormalizer", "test");
+    datastore.getKeys("labelWeight");
   }
   
   @Override

@@ -133,7 +133,7 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
       alphaI = Double.valueOf(params.get("alpha_i", "1.0"));
       
     } catch (IOException ex) {
-      CBayesThetaNormalizerMapper.log.warn(ex.toString(), ex);
+      log.warn(ex.toString(), ex);
     }
   }
   

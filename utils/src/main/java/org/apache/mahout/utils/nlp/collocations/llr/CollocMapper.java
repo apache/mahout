@@ -66,13 +66,13 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
   public void configure(JobConf job) {
     super.configure(job);
     
-    this.maxShingleSize = job.getInt(CollocMapper.MAX_SHINGLE_SIZE, CollocMapper.DEFAULT_MAX_SHINGLE_SIZE);
+    this.maxShingleSize = job.getInt(MAX_SHINGLE_SIZE, DEFAULT_MAX_SHINGLE_SIZE);
     
     this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
     
-    if (CollocMapper.log.isInfoEnabled()) {
-      CollocMapper.log.info("Max Ngram size is {}", this.maxShingleSize);
-      CollocMapper.log.info("Emit Unitgrams is {}", emitUnigrams);
+    if (log.isInfoEnabled()) {
+      log.info("Max Ngram size is {}", this.maxShingleSize);
+      log.info("Emit Unitgrams is {}", emitUnigrams);
     }
   }
   
@@ -107,7 +107,8 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
    *           if there's a problem with the ShingleFilter reading data or the collector collecting output.
    */
   @Override
-  public void map(Text key, StringTuple value, final OutputCollector<Gram,Gram> collector, Reporter reporter) throws IOException {
+  public void map(Text key, StringTuple value,
+                  final OutputCollector<Gram,Gram> collector, Reporter reporter) throws IOException {
     
     ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()),
         maxShingleSize);

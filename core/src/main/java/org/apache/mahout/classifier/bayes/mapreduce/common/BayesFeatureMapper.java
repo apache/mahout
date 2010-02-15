@@ -163,12 +163,12 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
   @Override
   public void configure(JobConf job) {
     try {
-      BayesFeatureMapper.log.info("Bayes Parameter {}", job.get("bayes.parameters"));
+      log.info("Bayes Parameter {}", job.get("bayes.parameters"));
       Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
       gramSize = Integer.valueOf(params.get("gramSize"));
       
     } catch (IOException ex) {
-      BayesFeatureMapper.log.warn(ex.toString(), ex);
+      log.warn(ex.toString(), ex);
     }
   }
   

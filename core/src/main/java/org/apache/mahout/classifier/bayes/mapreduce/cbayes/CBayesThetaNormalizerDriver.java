@@ -88,9 +88,9 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
         GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
     
-    CBayesThetaNormalizerDriver.log.info("Sigma_k for Each Label");
+    log.info("Sigma_k for Each Label");
     Map<String,Double> c = mapStringifier.fromString(labelWeightSumString);
-    CBayesThetaNormalizerDriver.log.info("{}", c);
+    log.info("{}", c);
     conf.set("cnaivebayes.sigma_k", labelWeightSumString);
     
     Path sigmaKSigmaJFile = new Path(output + "/trainer-weights/Sigma_kSigma_j/*");
@@ -98,19 +98,19 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
     String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
     
-    CBayesThetaNormalizerDriver.log.info("Sigma_kSigma_j for each Label and for each Features");
+    log.info("Sigma_kSigma_j for each Label and for each Features");
     double retSigmaJSigmaK = stringifier.fromString(sigmaJSigmaKString);
-    CBayesThetaNormalizerDriver.log.info("{}", retSigmaJSigmaK);
+    log.info("{}", retSigmaJSigmaK);
     conf.set("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
     
     Path vocabCountFile = new Path(output + "/trainer-tfIdf/trainer-vocabCount/*");
     double vocabCount = SequenceFileModelReader.readVocabCount(dfs, vocabCountFile, conf);
     String vocabCountString = stringifier.toString(vocabCount);
     
-    CBayesThetaNormalizerDriver.log.info("Vocabulary Count");
+    log.info("Vocabulary Count");
     conf.set("cnaivebayes.vocabCount", vocabCountString);
     double retvocabCount = stringifier.fromString(vocabCountString);
-    CBayesThetaNormalizerDriver.log.info("{}", retvocabCount);
+    log.info("{}", retvocabCount);
     conf.set("bayes.parameters", params.toString());
     conf.set("output.table", output);
     client.setConf(conf);

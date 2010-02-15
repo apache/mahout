@@ -58,14 +58,14 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
   public void map(LongWritable key, Text value, OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
     
     String content = value.toString();
-    if (content.contains(WikipediaMapper.REDIRECT)) {
+    if (content.contains(REDIRECT)) {
       return;
     }
     String document;
     String title;
     try {
-      document = WikipediaMapper.getDocument(content);
-      title = WikipediaMapper.getTitle(content);
+      document = getDocument(content);
+      title = getTitle(content);
     } catch (RuntimeException e) {
       reporter.getCounter("Wikipedia", "Parse errors").increment(1);
       return;
@@ -79,19 +79,19 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
     }
     document = StringEscapeUtils.unescapeHtml(document);
     
-    output.collect(new Text(WikipediaMapper.SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")),
+    output.collect(new Text(SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")),
       new Text(document));
     
   }
   
   private static String getDocument(String xml) {
-    int start = xml.indexOf(WikipediaMapper.START_DOC) + WikipediaMapper.START_DOC.length();
-    int end = xml.indexOf(WikipediaMapper.END_DOC, start);
+    int start = xml.indexOf(START_DOC) + START_DOC.length();
+    int end = xml.indexOf(END_DOC, start);
     return xml.substring(start, end);
   }
   
   private static String getTitle(String xml) {
-    Matcher m = WikipediaMapper.TITLE.matcher(xml);
+    Matcher m = TITLE.matcher(xml);
     String ret = "";
     if (m.find()) {
       ret = m.group(1);
@@ -143,7 +143,7 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
     } catch (IOException ex) {
       throw new IllegalStateException(ex);
     }
-    WikipediaMapper.log.info("Configure: Input Categories size: " + inputCategories.size() + " All: " + all
+    log.info("Configure: Input Categories size: " + inputCategories.size() + " All: " + all
                              + " Exact Match: " + exactMatchOnly);
   }
 }

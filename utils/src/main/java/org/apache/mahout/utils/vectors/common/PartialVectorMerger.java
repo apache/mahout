@@ -75,7 +75,7 @@ public final class PartialVectorMerger {
                                          float normPower,
                                          int dimension,
                                          boolean sequentialAccess) throws IOException {
-    if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
+    if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
     
@@ -85,14 +85,14 @@ public final class PartialVectorMerger {
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     conf.setJobName("PartialVectorMerger::MergePartialVectors");
-    conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
-    conf.setInt(PartialVectorMerger.DIMENSION, dimension);
-    conf.setFloat(PartialVectorMerger.NORMALIZATION_POWER, normPower);
+    conf.setBoolean(SEQUENTIAL_ACCESS, sequentialAccess);
+    conf.setInt(DIMENSION, dimension);
+    conf.setFloat(NORMALIZATION_POWER, normPower);
     
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     
-    FileInputFormat.setInputPaths(conf, PartialVectorMerger.getCommaSeparatedPaths(partialVectorPaths));
+    FileInputFormat.setInputPaths(conf, getCommaSeparatedPaths(partialVectorPaths));
     
     Path outputPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outputPath);

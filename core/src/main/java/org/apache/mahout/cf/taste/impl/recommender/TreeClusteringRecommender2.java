@@ -162,7 +162,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     }
     checkClustersBuilt();
     
-    TreeClusteringRecommender2.log.debug("Recommending items for user ID '{}'", userID);
+    log.debug("Recommending items for user ID '{}'", userID);
     
     List<RecommendedItem> recommended = topRecsByUserID.get(userID);
     if (recommended == null) {
@@ -307,7 +307,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         }
         
         topRecsByUserID = computeTopRecsPerUserID(clusters);
-        clustersByUserID = TreeClusteringRecommender2.computeClustersPerUserID(clusters);
+        clustersByUserID = computeClustersPerUserID(clusters);
         allClusters = clusters.toArray(new FastIDSet[clusters.size()]);
         
       }
@@ -400,7 +400,8 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     return done;
   }
   
-  private LinkedList<ClusterClusterPair> findClosestClusters(int numUsers, List<FastIDSet> clusters) throws TasteException {
+  private LinkedList<ClusterClusterPair> findClosestClusters(int numUsers,
+                                                             List<FastIDSet> clusters) throws TasteException {
     boolean full = false;
     LinkedList<ClusterClusterPair> queue = new LinkedList<ClusterClusterPair>();
     int i = 0;
@@ -454,10 +455,10 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     
     TopItems.Estimator<Long> estimator = new Estimator(cluster);
     
-    List<RecommendedItem> topItems = TopItems.getTopItems(TreeClusteringRecommender2.NUM_CLUSTER_RECS,
+    List<RecommendedItem> topItems = TopItems.getTopItems(NUM_CLUSTER_RECS,
       possibleItemIDs.iterator(), null, estimator);
     
-    TreeClusteringRecommender2.log.debug("Recommendations are: {}", topItems);
+    log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);
   }
   

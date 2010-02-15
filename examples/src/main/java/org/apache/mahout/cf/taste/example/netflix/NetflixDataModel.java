@@ -67,12 +67,12 @@ public final class NetflixDataModel implements DataModel {
     
     this.useSubset = useSubset;
     
-    NetflixDataModel.log.info("Creating NetflixDataModel for directory: {}", dataDirectory);
+    log.info("Creating NetflixDataModel for directory: {}", dataDirectory);
     
-    NetflixDataModel.log.info("Reading preference data...");
+    log.info("Reading preference data...");
     FastByIDMap<PreferenceArray> users = readUsers(dataDirectory);
     
-    NetflixDataModel.log.info("Creating delegate DataModel...");
+    log.info("Creating delegate DataModel...");
     delegate = new GenericDataModel(users);
   }
   
@@ -88,7 +88,7 @@ public final class NetflixDataModel implements DataModel {
       while (lineIterator.hasNext()) {
         line = lineIterator.next();
         if (++counter % 100000 == 0) {
-          NetflixDataModel.log.info("Processed {} prefs", counter);
+          log.info("Processed {} prefs", counter);
         }
         int firstComma = line.indexOf(',');
         long userID = Long.parseLong(line.substring(0, firstComma));

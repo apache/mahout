@@ -41,7 +41,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InputDriver {
+public final class InputDriver {
   /**Logger for this class.*/
   private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
   
@@ -75,7 +75,8 @@ public class InputDriver {
       
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector").toString();
+      String vectorClassName = cmdLine.getValue(vectorOpt,
+         "org.apache.mahout.math.RandomAccessSparseVector").toString();
       InputDriver.runJob(input, output, vectorClassName);
     } catch (OptionException e) {
       InputDriver.LOG.error("Exception parsing command line: ", e);

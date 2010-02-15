@@ -45,7 +45,7 @@ public class Job {
   
   private static final String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clusteredPoints";
   
-  private Job() { }
+  private Job() {}
   
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -142,8 +142,8 @@ public class Job {
     MeanShiftCanopyJob.runJob(directoryContainingConvertedInput, output + "/meanshift", measureClassName, t1,
       t2, convergenceDelta, maxIterations);
     FileStatus[] status = dfs.listStatus(new Path(output + "/meanshift"));
-    OutputDriver.runJob(status[status.length - 1].getPath().toString(),
-      output + Job.CLUSTERED_POINTS_OUTPUT_DIRECTORY);
+    OutputDriver.runJob(status[status.length - 1].getPath().toString(), output
+                                                                        + CLUSTERED_POINTS_OUTPUT_DIRECTORY);
   }
   
 }

@@ -81,7 +81,7 @@ public class DisplayDirichlet extends Frame {
     res = Toolkit.getDefaultToolkit().getScreenResolution();
     
     // Set Frame size in inches
-    this.setSize(DisplayDirichlet.size * res, DisplayDirichlet.size * res);
+    this.setSize(size * res, size * res);
     this.setVisible(true);
     this.setTitle("Dirichlet Process Sample Data");
     
@@ -96,7 +96,7 @@ public class DisplayDirichlet extends Frame {
   
   public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
     RandomUtils.useTestSeed();
-    DisplayDirichlet.generateSamples();
+    generateSamples();
     new DisplayDirichlet();
   }
   
@@ -108,31 +108,31 @@ public class DisplayDirichlet extends Frame {
     Vector v = new DenseVector(2);
     Vector dv = new DenseVector(2);
     g2.setColor(Color.RED);
-    for (Vector param : DisplayDirichlet.sampleParams) {
+    for (Vector param : sampleParams) {
       v.set(0, param.get(0));
       v.set(1, param.get(1));
       dv.set(0, param.get(2) * 3);
       dv.set(1, param.get(3) * 3);
-      DisplayDirichlet.plotEllipse(g2, v, dv);
+      plotEllipse(g2, v, dv);
     }
   }
   
   public void plotSampleData(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    double sx = (double) res / DisplayDirichlet.ds;
+    double sx = (double) res / ds;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
     
     // plot the axes
     g2.setColor(Color.BLACK);
-    Vector dv = new DenseVector(2).assign(DisplayDirichlet.size / 2.0);
-    DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(2), dv);
-    DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(-2), dv);
+    Vector dv = new DenseVector(2).assign(size / 2.0);
+    plotRectangle(g2, new DenseVector(2).assign(2), dv);
+    plotRectangle(g2, new DenseVector(2).assign(-2), dv);
     
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
-    for (VectorWritable v : DisplayDirichlet.sampleData) {
-      DisplayDirichlet.plotRectangle(g2, v.get(), dv);
+    for (VectorWritable v : sampleData) {
+      plotRectangle(g2, v.get(), dv);
     }
   }
   
@@ -150,12 +150,12 @@ public class DisplayDirichlet extends Frame {
     double[] flip = {1, -1};
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
-    int h = DisplayDirichlet.size / 2;
+    int h = size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2.draw(new Rectangle2D.Double(x * DisplayDirichlet.ds, y * DisplayDirichlet.ds, dv.get(0)
-                                                                                     * DisplayDirichlet.ds,
-        dv.get(1) * DisplayDirichlet.ds));
+    g2.draw(new Rectangle2D.Double(x * ds, y * ds, dv.get(0)
+                                                                                     * ds,
+        dv.get(1) * ds));
   }
   
   /**
@@ -172,12 +172,12 @@ public class DisplayDirichlet extends Frame {
     double[] flip = {1, -1};
     Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
     v2 = v2.minus(dv.divide(2));
-    int h = DisplayDirichlet.size / 2;
+    int h = size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2.draw(new Ellipse2D.Double(x * DisplayDirichlet.ds, y * DisplayDirichlet.ds, dv.get(0)
-                                                                                   * DisplayDirichlet.ds,
-        dv.get(1) * DisplayDirichlet.ds));
+    g2.draw(new Ellipse2D.Double(x * ds, y * ds, dv.get(0)
+                                                                                   * ds,
+        dv.get(1) * ds));
   }
   
   private static void printModels(List<Model<VectorWritable>[]> results, int significant) {
@@ -196,15 +196,15 @@ public class DisplayDirichlet extends Frame {
   }
   
   public static void generateSamples() {
-    DisplayDirichlet.generateSamples(400, 1, 1, 3);
-    DisplayDirichlet.generateSamples(300, 1, 0, 0.5);
-    DisplayDirichlet.generateSamples(300, 0, 2, 0.1);
+    generateSamples(400, 1, 1, 3);
+    generateSamples(300, 1, 0, 0.5);
+    generateSamples(300, 0, 2, 0.1);
   }
   
   public static void generate2dSamples() {
-    DisplayDirichlet.generate2dSamples(400, 1, 1, 3, 1);
-    DisplayDirichlet.generate2dSamples(300, 1, 0, 0.5, 1);
-    DisplayDirichlet.generate2dSamples(300, 0, 2, 0.1, 0.5);
+    generate2dSamples(400, 1, 1, 3, 1);
+    generate2dSamples(300, 1, 0, 0.5, 1);
+    generate2dSamples(300, 0, 2, 0.1, 0.5);
   }
   
   /**
@@ -221,10 +221,10 @@ public class DisplayDirichlet extends Frame {
    */
   private static void generateSamples(int num, double mx, double my, double sd) {
     double[] params = {mx, my, sd, sd};
-    DisplayDirichlet.sampleParams.add(new DenseVector(params));
+    sampleParams.add(new DenseVector(params));
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=" + sd);
     for (int i = 0; i < num; i++) {
-      DisplayDirichlet.sampleData.add(new VectorWritable(new DenseVector(new double[] {
+      sampleData.add(new VectorWritable(new DenseVector(new double[] {
                                                                                        UncommonDistributions
                                                                                            .rNorm(mx, sd),
                                                                                        UncommonDistributions
@@ -248,11 +248,11 @@ public class DisplayDirichlet extends Frame {
    */
   private static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
     double[] params = {mx, my, sdx, sdy};
-    DisplayDirichlet.sampleParams.add(new DenseVector(params));
+    sampleParams.add(new DenseVector(params));
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy
                        + ']');
     for (int i = 0; i < num; i++) {
-      DisplayDirichlet.sampleData
+      sampleData
           .add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sdx),
                                                                 UncommonDistributions.rNorm(my, sdy)})));
     }
@@ -260,13 +260,13 @@ public class DisplayDirichlet extends Frame {
   
   public static void generateResults(ModelDistribution<VectorWritable> modelDist) {
     DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
-        DisplayDirichlet.sampleData, modelDist, 1.0, 10, 2, 2);
-    DisplayDirichlet.result = dc.cluster(20);
-    DisplayDirichlet.printModels(DisplayDirichlet.result, 5);
+        sampleData, modelDist, 1.0, 10, 2, 2);
+    result = dc.cluster(20);
+    printModels(result, 5);
   }
   
   public static boolean isSignificant(Model<VectorWritable> model) {
-    return (double) model.count() / DisplayDirichlet.sampleData.size() > DisplayDirichlet.significance;
+    return (double) model.count() / sampleData.size() > significance;
   }
   
 }

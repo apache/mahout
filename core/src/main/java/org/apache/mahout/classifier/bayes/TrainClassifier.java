@@ -118,18 +118,18 @@ public final class TrainClassifier {
       }
       
       if (classifierType.equalsIgnoreCase("bayes")) {
-        TrainClassifier.log.info("Training Bayes Classifier");
+        log.info("Training Bayes Classifier");
         TrainClassifier.trainNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine
             .getValue(outputOpt), params);
         
       } else if (classifierType.equalsIgnoreCase("cbayes")) {
-        TrainClassifier.log.info("Training Complementary Bayes Classifier");
+        log.info("Training Complementary Bayes Classifier");
         // setup the HDFS and copy the files there, then run the trainer
         TrainClassifier.trainCNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine
             .getValue(outputOpt), params);
       }
     } catch (OptionException e) {
-      TrainClassifier.log.error("Error while parsing options", e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
     }
   }

@@ -75,10 +75,10 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
     int splitSize = nbTrees / numSplits;
     
     seed = Builder.getRandomSeed(conf);
-    isSingleSeed = InMemInputFormat.isSingleSeed(conf);
+    isSingleSeed = isSingleSeed(conf);
     
     if (rng != null && seed != null) {
-      InMemInputFormat.log.warn("getSplits() was called more than once and the 'seed' is set, "
+      log.warn("getSplits() was called more than once and the 'seed' is set, "
         + "this can lead to no-repeatable behavior");
     }
     

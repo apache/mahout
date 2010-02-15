@@ -87,8 +87,8 @@ public interface Parametered extends JobConfigurable {
     
     private static void configureParametersRecusivly(Parametered parametered, String prefix, JobConf jobConf) {
       for (Parameter<?> parameter : parametered.getParameters()) {
-        if (Parametered.log.isDebugEnabled()) {
-          Parametered.log.debug("Configuring {}{}", prefix, parameter.name());
+        if (log.isDebugEnabled()) {
+          log.debug("Configuring {}{}", prefix, parameter.name());
         }
         String name = prefix + parameter.name() + '.';
         parameter.createParameters(name, jobConf);

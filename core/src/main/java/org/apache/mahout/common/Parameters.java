@@ -67,7 +67,7 @@ public class Parameters {
     try {
       return mapStringifier.toString(params);
     } catch (IOException e) {
-      Parameters.log.info("Encountered IOException while deserializing returning empty string", e);
+      log.info("Encountered IOException while deserializing returning empty string", e);
       return "";
     }
     

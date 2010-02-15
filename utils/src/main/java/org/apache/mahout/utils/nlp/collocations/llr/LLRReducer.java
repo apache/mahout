@@ -69,7 +69,7 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
    * 
    * @param ll
    *          the LL to use.
-   * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.LLRReducer.LLCallback
+   * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.LLCallback
    */
   LLRReducer(LLCallback ll) {
     this.ll = ll;
@@ -79,15 +79,15 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
   public void configure(JobConf job) {
     super.configure(job);
     
-    this.ngramTotal = job.getLong(LLRReducer.NGRAM_TOTAL, -1);
-    this.minLLRValue = job.getFloat(LLRReducer.MIN_LLR, LLRReducer.DEFAULT_MIN_LLR);
+    this.ngramTotal = job.getLong(NGRAM_TOTAL, -1);
+    this.minLLRValue = job.getFloat(MIN_LLR, DEFAULT_MIN_LLR);
     
     this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
     
-    if (LLRReducer.log.isInfoEnabled()) {
-      LLRReducer.log.info("NGram Total is {}", ngramTotal);
-      LLRReducer.log.info("Min LLR value is {}", minLLRValue);
-      LLRReducer.log.info("Emit Unitgrams is {}", emitUnigrams);
+    if (log.isInfoEnabled()) {
+      log.info("NGram Total is {}", ngramTotal);
+      log.info("Min LLR value is {}", minLLRValue);
+      log.info("Emit Unitgrams is {}", emitUnigrams);
     }
     
     if (ngramTotal == -1) {
@@ -129,7 +129,7 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
       int pos = value.getType() == Type.HEAD ? 0 : 1;
       
       if (gramFreq[pos] != -1) {
-        LLRReducer.log.warn("Extra {} for {}, skipping", value.getType(), ngram);
+        log.warn("Extra {} for {}, skipping", value.getType(), ngram);
         if (value.getType() == Type.HEAD) {
           reporter.incrCounter(Skipped.EXTRA_HEAD, 1);
         } else {
@@ -143,11 +143,11 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
     }
     
     if (gramFreq[0] == -1) {
-      LLRReducer.log.warn("Missing head for {}, skipping.", ngram);
+      log.warn("Missing head for {}, skipping.", ngram);
       reporter.incrCounter(Skipped.MISSING_HEAD, 1);
       return;
     } else if (gramFreq[1] == -1) {
-      LLRReducer.log.warn("Missing tail for {}, skipping", ngram);
+      log.warn("Missing tail for {}, skipping", ngram);
       reporter.incrCounter(Skipped.MISSING_TAIL, 1);
       return;
     }
@@ -168,11 +168,11 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
       output.collect(t, dd);
     } catch (IllegalArgumentException ex) {
       reporter.incrCounter(Skipped.LLR_CALCULATION_ERROR, 1);
-      LLRReducer.log.error("Problem calculating LLR ratio: " + ex.getMessage());
-      LLRReducer.log.error("NGram: " + ngram);
-      LLRReducer.log.error("HEAD: " + gram[0] + ":" + gramFreq[0]);
-      LLRReducer.log.error("TAIL: " + gram[1] + ":" + gramFreq[1]);
-      LLRReducer.log.error("k11: " + k11 + " k12: " + k12 + " k21: " + k21 + " k22: " + k22);
+      log.error("Problem calculating LLR ratio: " + ex.getMessage());
+      log.error("NGram: " + ngram);
+      log.error("HEAD: " + gram[0] + ":" + gramFreq[0]);
+      log.error("TAIL: " + gram[1] + ":" + gramFreq[1]);
+      log.error("k11: " + k11 + " k12: " + k12 + " k21: " + k21 + " k22: " + k22);
     }
   }
   

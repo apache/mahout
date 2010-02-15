@@ -125,7 +125,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   
   @Override
   public void sortByUser() {
-    selectionSort(GenericItemPreferenceArray.USER);
+    selectionSort(USER);
   }
   
   @Override
@@ -133,12 +133,12 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   
   @Override
   public void sortByValue() {
-    selectionSort(GenericItemPreferenceArray.VALUE);
+    selectionSort(VALUE);
   }
   
   @Override
   public void sortByValueReversed() {
-    selectionSort(GenericItemPreferenceArray.VALUE_REVERSED);
+    selectionSort(VALUE_REVERSED);
   }
   
   @Override

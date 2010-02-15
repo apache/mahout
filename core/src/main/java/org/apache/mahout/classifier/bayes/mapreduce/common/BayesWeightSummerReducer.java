@@ -102,7 +102,7 @@ public class BayesWeightSummerReducer extends MapReduceBase implements
       HBaseConfiguration hBconf = new HBaseConfiguration(job);
       table = new HTable(hBconf, job.get("output.table"));
     } catch (IOException e) {
-      BayesWeightSummerReducer.log.error("Unexpected error during configuration", e);
+      log.error("Unexpected error during configuration", e);
     }
     
   }

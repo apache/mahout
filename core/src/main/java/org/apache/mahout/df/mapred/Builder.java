@@ -282,14 +282,14 @@ public abstract class Builder {
     // put the dataset into the DistributedCache
     DistributedCache.addCacheFile(datasetPath.toUri(), job);
     
-    Builder.log.debug("Configuring the job...");
+    log.debug("Configuring the job...");
     configureJob(job, nbTrees, callback != null);
     
-    Builder.log.debug("Running the job...");
+    log.debug("Running the job...");
     runJob(job);
     
     if (Builder.isOutput(job)) {
-      Builder.log.debug("Parsing the output...");
+      log.debug("Parsing the output...");
       DecisionForest forest = parseOutput(job, callback);
       
       // delete the output path

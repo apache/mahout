@@ -55,10 +55,8 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   private final String getItemItemSimilaritySQL;
   
   protected AbstractJDBCItemSimilarity(DataSource dataSource, String getItemItemSimilaritySQL) {
-    this(dataSource, AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_TABLE,
-        AbstractJDBCItemSimilarity.DEFAULT_ITEM_A_ID_COLUMN,
-        AbstractJDBCItemSimilarity.DEFAULT_ITEM_B_ID_COLUMN,
-        AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_COLUMN, getItemItemSimilaritySQL);
+    this(dataSource, DEFAULT_SIMILARITY_TABLE, DEFAULT_ITEM_A_ID_COLUMN, DEFAULT_ITEM_B_ID_COLUMN,
+        DEFAULT_SIMILARITY_COLUMN, getItemItemSimilaritySQL);
   }
   
   protected AbstractJDBCItemSimilarity(DataSource dataSource,
@@ -75,7 +73,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
     AbstractJDBCComponent.checkNotNullAndLog("getItemItemSimilaritySQL", getItemItemSimilaritySQL);
     
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
-      AbstractJDBCItemSimilarity.log
+      log
           .warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
                 + "to the database itself, or database performance will be severely reduced.");
     }
@@ -130,7 +128,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       stmt.setLong(1, itemID1);
       stmt.setLong(2, itemID2);
       
-      AbstractJDBCItemSimilarity.log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
+      log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
       rs = stmt.executeQuery();
       
       if (rs.next()) {
@@ -140,7 +138,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       }
       
     } catch (SQLException sqle) {
-      AbstractJDBCItemSimilarity.log.warn("Exception while retrieving user", sqle);
+      log.warn("Exception while retrieving user", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);

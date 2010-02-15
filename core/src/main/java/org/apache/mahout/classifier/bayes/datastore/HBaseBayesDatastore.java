@@ -128,7 +128,7 @@ public class HBaseBayesDatastore implements Datastore {
         BayesConstants.LABEL_THETA_NORMALIZER, label)));
     }
     for (String label : labels) {
-      HBaseBayesDatastore.log.info("{} {} {} {}", new Object[] {
+      log.info("{} {} {} {}", new Object[] {
                                                                 label,
                                                                 getWeightFromHbase(
                                                                   BayesConstants.LABEL_THETA_NORMALIZER,
@@ -156,7 +156,7 @@ public class HBaseBayesDatastore implements Datastore {
     }
     
     if (r == null) {
-      HBaseBayesDatastore.log.error("Encountered NULL");
+      log.error("Encountered NULL");
       throw new InvalidDatastoreException("Encountered NULL");
     }
     

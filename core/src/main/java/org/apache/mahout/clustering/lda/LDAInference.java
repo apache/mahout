@@ -89,9 +89,9 @@ public class LDAInference {
     DenseMatrix phi = new DenseMatrix(state.numTopics, docLength);
     
     // digamma is expensive, precompute
-    Vector digammaGamma = LDAInference.digamma(gamma);
+    Vector digammaGamma = digamma(gamma);
     // and log normalize:
-    double digammaSumGamma = LDAInference.digamma(gamma.zSum());
+    double digammaSumGamma = digamma(gamma.zSum());
     digammaGamma = digammaGamma.plus(-digammaSumGamma);
     
     Map<Integer,Integer> columnMap = new HashMap<Integer,Integer>();
@@ -100,7 +100,7 @@ public class LDAInference {
     
     boolean converged = false;
     double oldLL = 1;
-    while (!converged && (iteration < LDAInference.MAX_ITER)) {
+    while (!converged && (iteration < MAX_ITER)) {
       nextGamma.assign(state.topicSmoothing); // nG := alpha, for all topics
       
       int mapping = 0;
@@ -126,14 +126,14 @@ public class LDAInference {
       nextGamma = tempG;
       
       // digamma is expensive, precompute
-      digammaGamma = LDAInference.digamma(gamma);
+      digammaGamma = digamma(gamma);
       // and log normalize:
-      digammaSumGamma = LDAInference.digamma(gamma.zSum());
+      digammaSumGamma = digamma(gamma.zSum());
       digammaGamma = digammaGamma.plus(-digammaSumGamma);
       
       double ll = computeLikelihood(wordCounts, columnMap, phi, gamma, digammaGamma);
       assert !Double.isNaN(ll);
-      converged = (oldLL < 0) && ((oldLL - ll) / oldLL < LDAInference.E_STEP_CONVERGENCE);
+      converged = (oldLL < 0) && ((oldLL - ll) / oldLL < E_STEP_CONVERGENCE);
       
       oldLL = ll;
       iteration++;
@@ -210,7 +210,7 @@ public class LDAInference {
     digammaGamma.assign(v, new BinaryFunction() {
       @Override
       public double apply(double unused, double g) {
-        return LDAInference.digamma(g);
+        return digamma(g);
       }
     });
     return digammaGamma;
@@ -242,14 +242,7 @@ public class LDAInference {
     }
     
     double f = 1.0 / (x * x);
-    double t = f
-               * (-1 / 12.0 + f
-                              * (1 / 120.0 + f
-                                             * (-1 / 252.0 + f
-                                                             * (1 / 240.0 + f
-                                                                            * (-1 / 132.0 + f
-                                                                                            * (691 / 32760.0 + f
-                                                                                                               * (-1 / 12.0 + f * 3617.0 / 8160.0)))))));
+    double t = f * (-1 / 12.0 + f * (1 / 120.0 + f * (-1 / 252.0 + f * (1 / 240.0 + f * (-1 / 132.0 + f * (691 / 32760.0 + f * (-1 / 12.0 + f * 3617.0 / 8160.0)))))));
     return r + Math.log(x) - 0.5 / x + t;
   }
   

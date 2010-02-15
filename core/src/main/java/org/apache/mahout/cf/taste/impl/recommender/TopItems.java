@@ -135,10 +135,11 @@ public final class TopItems {
    * @see GenericItemSimilarity#GenericItemSimilarity(org.apache.mahout.cf.taste.similarity.ItemSimilarity,
    *      org.apache.mahout.cf.taste.model.DataModel, int)
    */
-  public static List<GenericItemSimilarity.ItemItemSimilarity> getTopItemItemSimilarities(int howMany,
-                                                                                          Iterable<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
-    Queue<GenericItemSimilarity.ItemItemSimilarity> topSimilarities = new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(
-        howMany + 1, Collections.reverseOrder());
+  public static List<GenericItemSimilarity.ItemItemSimilarity> getTopItemItemSimilarities(
+    int howMany, Iterable<GenericItemSimilarity.ItemItemSimilarity> allSimilarities) {
+    
+    Queue<GenericItemSimilarity.ItemItemSimilarity> topSimilarities
+      = new PriorityQueue<GenericItemSimilarity.ItemItemSimilarity>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericItemSimilarity.ItemItemSimilarity similarity : allSimilarities) {
@@ -161,10 +162,11 @@ public final class TopItems {
     return result;
   }
   
-  public static List<GenericUserSimilarity.UserUserSimilarity> getTopUserUserSimilarities(int howMany,
-                                                                                          Iterable<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
-    Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities = new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(
-        howMany + 1, Collections.reverseOrder());
+  public static List<GenericUserSimilarity.UserUserSimilarity>getTopUserUserSimilarities(
+    int howMany, Iterable<GenericUserSimilarity.UserUserSimilarity> allSimilarities) {
+    
+    Queue<GenericUserSimilarity.UserUserSimilarity> topSimilarities
+      = new PriorityQueue<GenericUserSimilarity.UserUserSimilarity>(howMany + 1, Collections.reverseOrder());
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     for (GenericUserSimilarity.UserUserSimilarity similarity : allSimilarities) {

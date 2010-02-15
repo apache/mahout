@@ -32,6 +32,8 @@ public class CanopyClusterer {
   
   private int nextCanopyId;
   
+  private int numVectors;
+  
   // the T1 distance threshold
   private double t1;
   
@@ -108,9 +110,10 @@ public class CanopyClusterer {
       pointStronglyBound = pointStronglyBound || (dist < t2);
     }
     if (!pointStronglyBound) {
-      reporter.setStatus("Created new Canopy:" + nextCanopyId);
+      reporter.setStatus("Created new Canopy:" + nextCanopyId + " numPoints:" + numVectors);
       canopies.add(new Canopy(point, nextCanopyId++));
     }
+    numVectors++;
   }
   
   /**

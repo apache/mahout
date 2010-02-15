@@ -87,10 +87,8 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
   private static final int DEFAULT_MIN_DIFF_COUNT = 2;
   
   public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel) throws TasteException {
-    this(dataModel, AbstractJDBCDiffStorage.DEFAULT_DIFF_TABLE,
-        AbstractJDBCDiffStorage.DEFAULT_ITEM_A_COLUMN, AbstractJDBCDiffStorage.DEFAULT_ITEM_B_COLUMN,
-        AbstractJDBCDiffStorage.DEFAULT_COUNT_COLUMN, AbstractJDBCDiffStorage.DEFAULT_AVERAGE_DIFF_COLUMN,
-        MySQLJDBCDiffStorage.DEFAULT_MIN_DIFF_COUNT);
+    this(dataModel, DEFAULT_DIFF_TABLE, DEFAULT_ITEM_A_COLUMN, DEFAULT_ITEM_B_COLUMN, DEFAULT_COUNT_COLUMN,
+        DEFAULT_AVERAGE_DIFF_COLUMN, DEFAULT_MIN_DIFF_COUNT);
   }
   
   public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel,

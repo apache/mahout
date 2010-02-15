@@ -33,10 +33,11 @@ public class OutputMapper extends MapReduceBase implements Mapper<Text,MeanShift
   
   private static final Logger log = LoggerFactory.getLogger(OutputMapper.class);
   
-  private int clusters = 0;
+  private int clusters;
   
   @Override
-  public void map(Text key, MeanShiftCanopy canopy, OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
+  public void map(Text key, MeanShiftCanopy canopy, OutputCollector<Text,Text> output,
+                  Reporter reporter) throws IOException {
     clusters++;
     for (Vector point : canopy.getBoundPoints()) {
       output.collect(key, new Text(point.asFormatString()));
@@ -45,7 +46,7 @@ public class OutputMapper extends MapReduceBase implements Mapper<Text,MeanShift
   
   @Override
   public void close() throws IOException {
-    OutputMapper.log.info("+++ Clusters={}", clusters);
+    log.info("+++ Clusters={}", clusters);
     super.close();
   }
   

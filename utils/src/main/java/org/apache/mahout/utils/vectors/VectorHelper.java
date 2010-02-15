@@ -140,7 +140,7 @@ public class VectorHelper {
       if (tokens.length < 3) {
         continue;
       }
-      int index = Integer.parseInt(tokens[2]);// tokens[1] is the doc freq
+      int index = Integer.parseInt(tokens[2]); // tokens[1] is the doc freq
       result[index] = tokens[0];
     }
     return result;

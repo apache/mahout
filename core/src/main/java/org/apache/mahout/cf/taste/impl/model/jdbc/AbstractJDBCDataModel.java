@@ -136,7 +136,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String getNumPreferenceForItemSQL,
                                   String getNumPreferenceForItemsSQL) {
     
-    AbstractJDBCDataModel.log.debug("Creating AbstractJDBCModel...");
+    log.debug("Creating AbstractJDBCModel...");
     
     AbstractJDBCComponent.checkNotNullAndLog("preferenceTable", preferenceTable);
     AbstractJDBCComponent.checkNotNullAndLog("userIDColumn", userIDColumn);
@@ -212,7 +212,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   
   @Override
   public LongPrimitiveIterator getUserIDs() throws TasteException {
-    AbstractJDBCDataModel.log.debug("Retrieving all users...");
+    log.debug("Retrieving all users...");
     return new ResultSetIDIterator(getUsersSQL);
   }
   
@@ -223,7 +223,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   @Override
   public PreferenceArray getPreferencesFromUser(long id) throws TasteException {
     
-    AbstractJDBCDataModel.log.debug("Retrieving user ID '{}'", id);
+    log.debug("Retrieving user ID '{}'", id);
     
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -236,7 +236,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchSize(getFetchSize());
       setLongParameter(stmt, 1, id);
       
-      AbstractJDBCDataModel.log.debug("Executing SQL query: {}", getUserSQL);
+      log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
       
       List<Preference> prefs = new ArrayList<Preference>();
@@ -251,7 +251,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return new GenericUserPreferenceArray(prefs);
       
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while retrieving user", sqle);
+      log.warn("Exception while retrieving user", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -261,7 +261,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   
   @Override
   public FastByIDMap<PreferenceArray> exportWithPrefs() throws TasteException {
-    AbstractJDBCDataModel.log.debug("Exporting all data");
+    log.debug("Exporting all data");
     
     Connection conn = null;
     Statement stmt = null;
@@ -275,7 +275,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
       
-      AbstractJDBCDataModel.log.debug("Executing SQL query: {}", getAllUsersSQL);
+      log.debug("Executing SQL query: {}", getAllUsersSQL);
       rs = stmt.executeQuery(getAllUsersSQL);
       
       Long currentUserID = null;
@@ -299,7 +299,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return result;
       
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while exporting all data", sqle);
+      log.warn("Exception while exporting all data", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -309,7 +309,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   
   @Override
   public FastByIDMap<FastIDSet> exportWithIDsOnly() throws TasteException {
-    AbstractJDBCDataModel.log.debug("Exporting all data");
+    log.debug("Exporting all data");
     
     Connection conn = null;
     Statement stmt = null;
@@ -323,7 +323,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
       
-      AbstractJDBCDataModel.log.debug("Executing SQL query: {}", getAllUsersSQL);
+      log.debug("Executing SQL query: {}", getAllUsersSQL);
       rs = stmt.executeQuery(getAllUsersSQL);
       
       boolean currentUserIDSet = false;
@@ -349,7 +349,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return result;
       
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while exporting all data", sqle);
+      log.warn("Exception while exporting all data", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -364,7 +364,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   @Override
   public FastIDSet getItemIDsFromUser(long id) throws TasteException {
     
-    AbstractJDBCDataModel.log.debug("Retrieving items for user ID '{}'", id);
+    log.debug("Retrieving items for user ID '{}'", id);
     
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -377,7 +377,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchSize(getFetchSize());
       setLongParameter(stmt, 1, id);
       
-      AbstractJDBCDataModel.log.debug("Executing SQL query: {}", getUserSQL);
+      log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
       
       FastIDSet result = new FastIDSet();
@@ -392,7 +392,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       return result;
       
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while retrieving item s", sqle);
+      log.warn("Exception while retrieving item s", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -402,7 +402,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   
   @Override
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
-    AbstractJDBCDataModel.log.debug("Retrieving preferences for item ID '{}'", itemID);
+    log.debug("Retrieving preferences for item ID '{}'", itemID);
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -414,7 +414,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       setLongParameter(stmt, 1, userID);
       setLongParameter(stmt, 2, itemID);
       
-      AbstractJDBCDataModel.log.debug("Executing SQL query: {}", getPreferenceSQL);
+      log.debug("Executing SQL query: {}", getPreferenceSQL);
       rs = stmt.executeQuery();
       if (rs.next()) {
         return rs.getFloat(1);
@@ -422,7 +422,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         return null;
       }
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while retrieving prefs for item", sqle);
+      log.warn("Exception while retrieving prefs for item", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -431,7 +431,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   
   @Override
   public LongPrimitiveIterator getItemIDs() throws TasteException {
-    AbstractJDBCDataModel.log.debug("Retrieving all items...");
+    log.debug("Retrieving all items...");
     return new ResultSetIDIterator(getItemsSQL);
   }
   
@@ -442,7 +442,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
   
   protected List<Preference> doGetPreferencesForItem(long itemID) throws TasteException {
-    AbstractJDBCDataModel.log.debug("Retrieving preferences for item ID '{}'", itemID);
+    log.debug("Retrieving preferences for item ID '{}'", itemID);
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -454,7 +454,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setFetchSize(getFetchSize());
       setLongParameter(stmt, 1, itemID);
       
-      AbstractJDBCDataModel.log.debug("Executing SQL query: {}", getPrefsForItemSQL);
+      log.debug("Executing SQL query: {}", getPrefsForItemSQL);
       rs = stmt.executeQuery();
       List<Preference> prefs = new ArrayList<Preference>();
       while (rs.next()) {
@@ -462,7 +462,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       }
       return prefs;
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while retrieving prefs for item", sqle);
+      log.warn("Exception while retrieving prefs for item", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -499,7 +499,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   }
   
   private int getNumThings(String name, String sql, long... args) throws TasteException {
-    AbstractJDBCDataModel.log.debug("Retrieving number of {} in model", name);
+    log.debug("Retrieving number of {} in model", name);
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -513,12 +513,12 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
           setLongParameter(stmt, i, args[i - 1]);
         }
       }
-      AbstractJDBCDataModel.log.debug("Executing SQL query: {}", sql);
+      log.debug("Executing SQL query: {}", sql);
       rs = stmt.executeQuery();
       rs.next();
       return rs.getInt(1);
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while retrieving number of {}", name, sqle);
+      log.warn("Exception while retrieving number of {}", name, sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -531,7 +531,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       throw new IllegalArgumentException("Invalid value: " + value);
     }
     
-    AbstractJDBCDataModel.log.debug("Setting preference for user {}, item {}", userID, itemID);
+    log.debug("Setting preference for user {}, item {}", userID, itemID);
     
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -544,11 +544,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt.setDouble(3, value);
       stmt.setDouble(4, value);
       
-      AbstractJDBCDataModel.log.debug("Executing SQL update: {}", setPreferenceSQL);
+      log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
       
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while setting preference", sqle);
+      log.warn("Exception while setting preference", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(null, stmt, conn);
@@ -558,7 +558,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
     
-    AbstractJDBCDataModel.log.debug("Removing preference for user '{}', item '{}'", userID, itemID);
+    log.debug("Removing preference for user '{}', item '{}'", userID, itemID);
     
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -569,11 +569,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       setLongParameter(stmt, 1, userID);
       setLongParameter(stmt, 2, itemID);
       
-      AbstractJDBCDataModel.log.debug("Executing SQL update: {}", removePreferenceSQL);
+      log.debug("Executing SQL update: {}", removePreferenceSQL);
       stmt.executeUpdate();
       
     } catch (SQLException sqle) {
-      AbstractJDBCDataModel.log.warn("Exception while removing preference", sqle);
+      log.warn("Exception while removing preference", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(null, stmt, conn);
@@ -633,7 +633,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         statement.setFetchDirection(ResultSet.FETCH_FORWARD);
         statement.setFetchSize(getFetchSize());
-        AbstractJDBCDataModel.log.debug("Executing SQL query: {}", sql);
+        log.debug("Executing SQL query: {}", sql);
         resultSet = statement.executeQuery(sql);
         boolean anyResults = resultSet.next();
         if (!anyResults) {
@@ -656,7 +656,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
             nextExists = true;
           }
         } catch (SQLException sqle) {
-          AbstractJDBCDataModel.log.warn("Unexpected exception while accessing ResultSet; continuing...",
+          log.warn("Unexpected exception while accessing ResultSet; continuing...",
             sqle);
           close();
         }
@@ -682,7 +682,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         return ID;
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
-        AbstractJDBCDataModel.log.warn("Exception while iterating", sqle);
+        log.warn("Exception while iterating", sqle);
         close();
         throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
       }
@@ -698,7 +698,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         return getLongColumn(resultSet, 1);
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
-        AbstractJDBCDataModel.log.warn("Exception while iterating", sqle);
+        log.warn("Exception while iterating", sqle);
         close();
         throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
       }
@@ -726,7 +726,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
         try {
           advanceResultSet(resultSet, n);
         } catch (SQLException sqle) {
-          AbstractJDBCDataModel.log.warn("Exception while iterating over items", sqle);
+          log.warn("Exception while iterating over items", sqle);
           close();
         }
       }

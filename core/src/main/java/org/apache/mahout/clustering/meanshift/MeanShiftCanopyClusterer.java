@@ -23,20 +23,20 @@ public class MeanShiftCanopyClusterer {
   // the distance measure
   private DistanceMeasure measure;
   
-  public double getT1() {
-    return t1;
-  }
-  
-  public double getT2() {
-    return t2;
+  public MeanShiftCanopyClusterer(JobConf job) {
+    configure(job);
   }
   
   public MeanShiftCanopyClusterer(DistanceMeasure aMeasure, double aT1, double aT2, double aDelta) {
     config(aMeasure, aT1, aT2, aDelta);
   }
   
-  public MeanShiftCanopyClusterer(JobConf job) {
-    configure(job);
+  public double getT1() {
+    return t1;
+  }
+  
+  public double getT2() {
+    return t2;
   }
   
   /**
@@ -111,7 +111,8 @@ public class MeanShiftCanopyClusterer {
   }
   
   /** Emit the new canopy to the collector, keyed by the canopy's Id */
-  static void emitCanopy(MeanShiftCanopy canopy, OutputCollector<Text,WritableComparable<?>> collector) throws IOException {
+  static void emitCanopy(MeanShiftCanopy canopy,
+                         OutputCollector<Text,WritableComparable<?>> collector) throws IOException {
     String identifier = canopy.getIdentifier();
     collector.collect(new Text(identifier), new Text("new " + canopy.toString()));
   }

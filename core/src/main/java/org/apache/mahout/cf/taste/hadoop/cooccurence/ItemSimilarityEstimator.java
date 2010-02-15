@@ -83,7 +83,7 @@ public final class ItemSimilarityEstimator extends Configured implements Tool {
                     OutputCollector<Bigram,Bigram> output,
                     Reporter reporter) throws IOException {
       keyBigram.set(item1.get(), item2.get());
-      valueBigram.set(item2.get(), ItemItemMapper.ONE);
+      valueBigram.set(item2.get(), ONE);
       output.collect(keyBigram, valueBigram);
     }
   }

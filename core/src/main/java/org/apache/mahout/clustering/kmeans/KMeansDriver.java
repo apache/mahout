@@ -52,7 +52,7 @@ public final class KMeansDriver {
   
   private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
   
-  private KMeansDriver() { }
+  private KMeansDriver() {}
   
   /**
    * @param args
@@ -73,8 +73,10 @@ public final class KMeansDriver {
         .withRequired(true)
         .withArgument(abuilder.withName("clusters").withMinimum(1).withMaximum(1).create())
         .withDescription(
-          "The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-              + "If k is also specified, then a random set of vectors will be selected and written out to this path first")
+          "The input centroids, as Vectors. "
+              + "Must be a SequenceFile of Writable, Cluster/Canopy.  "
+              + "If k is also specified, then a random set of vectors will be selected "
+              + "and written out to this path first")
         .withShortName("c").create();
     
     Option kOpt = obuilder
@@ -82,10 +84,11 @@ public final class KMeansDriver {
         .withRequired(false)
         .withArgument(abuilder.withName("k").withMinimum(1).withMaximum(1).create())
         .withDescription(
-          "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen as the Centroid and written to the clusters output path.")
+          "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen "
+              + "as the Centroid and written to the clusters output path.")
         .withShortName("k").create();
-    
-    Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+
+   Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
       abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
       "The Path to put the output in").withShortName("o").create();
     
@@ -161,10 +164,9 @@ public final class KMeansDriver {
         clusters = RandomSeedGenerator.buildRandom(input, clusters,
           Integer.parseInt(cmdLine.getValue(kOpt).toString())).toString();
       }
-      KMeansDriver.runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations,
-        numReduceTasks);
+      runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks);
     } catch (OptionException e) {
-      KMeansDriver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -196,30 +198,26 @@ public final class KMeansDriver {
                             int numReduceTasks) {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
-    if (KMeansDriver.log.isInfoEnabled()) {
-      KMeansDriver.log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input,
-                                                                                            clustersIn,
-                                                                                            output,
-                                                                                            measureClass});
-      KMeansDriver.log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
+    if (log.isInfoEnabled()) {
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output,
+                                                                               measureClass});
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
         new Object[] {convergenceDelta, maxIterations, numReduceTasks, VectorWritable.class.getName()});
     }
     boolean converged = false;
     int iteration = 0;
     while (!converged && (iteration < maxIterations)) {
-      KMeansDriver.log.info("Iteration {}", iteration);
+      log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       String clustersOut = output + "/clusters-" + iteration;
-      converged = KMeansDriver.runIteration(input, clustersIn, clustersOut, measureClass, delta,
-        numReduceTasks, iteration);
+      converged = runIteration(input, clustersIn, clustersOut, measureClass, delta, numReduceTasks, iteration);
       // now point the input to the old output directory
       clustersIn = output + "/clusters-" + iteration;
       iteration++;
     }
     // now actually cluster the points
-    KMeansDriver.log.info("Clustering ");
-    KMeansDriver.runClustering(input, clustersIn, output + KMeansDriver.DEFAULT_OUTPUT_DIRECTORY,
-      measureClass, delta);
+    log.info("Clustering ");
+    runClustering(input, clustersIn, output + DEFAULT_OUTPUT_DIRECTORY, measureClass, delta);
   }
   
   /**
@@ -271,9 +269,9 @@ public final class KMeansDriver {
     try {
       JobClient.runJob(conf);
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
-      return KMeansDriver.isConverged(clustersOut, conf, fs);
+      return isConverged(clustersOut, conf, fs);
     } catch (IOException e) {
-      KMeansDriver.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
       return true;
     }
   }
@@ -297,14 +295,11 @@ public final class KMeansDriver {
                                     String output,
                                     String measureClass,
                                     String convergenceDelta) {
-    if (KMeansDriver.log.isInfoEnabled()) {
-      KMeansDriver.log.info("Running Clustering");
-      KMeansDriver.log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input,
-                                                                                            clustersIn,
-                                                                                            output,
-                                                                                            measureClass});
-      KMeansDriver.log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class
-          .getName());
+    if (log.isInfoEnabled()) {
+      log.info("Running Clustering");
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] {input, clustersIn, output,
+                                                                               measureClass});
+      log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class.getName());
     }
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
@@ -329,7 +324,7 @@ public final class KMeansDriver {
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
-      KMeansDriver.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
     }
   }
   
@@ -356,10 +351,10 @@ public final class KMeansDriver {
         try {
           key = (Writable) reader.getKeyClass().newInstance();
         } catch (InstantiationException e) { // shouldn't happen
-          KMeansDriver.log.error("Exception", e);
+          log.error("Exception", e);
           throw new IllegalStateException(e);
         } catch (IllegalAccessException e) {
-          KMeansDriver.log.error("Exception", e);
+          log.error("Exception", e);
           throw new IllegalStateException(e);
         }
         Cluster value = new Cluster();

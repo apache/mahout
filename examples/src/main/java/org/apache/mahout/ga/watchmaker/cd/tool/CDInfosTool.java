@@ -38,9 +38,9 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -245,17 +245,17 @@ public class CDInfosTool {
       Path inpath = new Path(input);
       FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
       
-      CDInfosTool.log.info("Loading Descriptors...");
+      log.info("Loading Descriptors...");
       Descriptors descriptors = CDInfosTool.loadDescriptors(fs, inpath);
       
-      CDInfosTool.log.info("Gathering informations...");
+      log.info("Gathering informations...");
       List<String> descriptions = new ArrayList<String>();
       CDInfosTool.gatherInfos(descriptors, inpath, descriptions);
       
-      CDInfosTool.log.info("Storing Descriptions...");
+      log.info("Storing Descriptions...");
       CDInfosTool.storeDescriptions(fs, inpath, descriptors, descriptions);
     } catch (OptionException e) {
-      CDInfosTool.log.error("Error while parsing options", e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
     }
   }

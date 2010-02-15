@@ -33,12 +33,12 @@ import org.slf4j.LoggerFactory;
  * Hadoop.
  */
 public abstract class LinearTrainer {
-
+  
   /** Logger for this class. */
   private static final Logger LOG = LoggerFactory.getLogger(LinearTrainer.class);
   /** The model to train. */
   private final LinearModel model;
-
+  
   /**
    * Initialize the trainer. Distance is initialized to cosine distance, all
    * weights are represented through a dense vector.
@@ -54,12 +54,12 @@ public abstract class LinearTrainer {
    *          initial classification bias.
    * */
   protected LinearTrainer(int dimension, double threshold,
-      double init, double initBias) throws CardinalityException {
+                          double init, double initBias) throws CardinalityException {
     DenseVector initialWeights = new DenseVector(dimension);
     initialWeights.assign(init);
     this.model = new LinearModel(initialWeights, initBias, threshold);
   }
-
+  
   /**
    * Initializes training. Runs through all data points in the training set and
    * updates the weight vector whenever a classification error occurs.
@@ -73,31 +73,31 @@ public abstract class LinearTrainer {
    *          of data- and labelset do not match, a CardinalityException is
    *          thrown
    * */
-  public void train(Vector labelset, Matrix dataset)
-      throws IndexException, CardinalityException, TrainingException {
+  public void train(Vector labelset, Matrix dataset) throws IndexException,
+                                                    CardinalityException,
+                                                    TrainingException {
     if (labelset.size() != dataset.size()[1]) {
       throw new CardinalityException();
     }
-
+    
     boolean converged = false;
     int iteration = 0;
     while (!converged) {
       if (iteration > 1000) {
-        throw new TrainingException(
-            "Too many iterations needed to find hyperplane.");
+        throw new TrainingException("Too many iterations needed to find hyperplane.");
       }
-
+      
       converged = true;
       int columnCount = dataset.size()[1];
       for (int i = 0; i < columnCount; i++) {
         Vector dataPoint = dataset.getColumn(i);
-        LOG.debug("Training point: " + dataPoint);
-
+        LinearTrainer.LOG.debug("Training point: " + dataPoint);
+        
         synchronized (this.model) {
           boolean prediction = model.classify(dataPoint);
           double label = labelset.get(i);
-          if ((label <= 0 && prediction) || (label > 0 && !prediction)) {
-            LOG.debug("updating");
+          if (label <= 0 && prediction || label > 0 && !prediction) {
+            LinearTrainer.LOG.debug("updating");
             converged = false;
             update(label, dataPoint, this.model);
           }
@@ -105,14 +105,14 @@ public abstract class LinearTrainer {
       }
     }
   }
-
+  
   /**
    * Retrieves the trained model if called after train, otherwise the raw model.
    * */
   public LinearModel getModel() {
     return this.model;
   }
-
+  
   /**
    * Implement this method to match your training strategy.
    * 
@@ -123,7 +123,6 @@ public abstract class LinearTrainer {
    * @param dataPoint
    *          the data point that was classified incorrectly.
    * */
-  protected abstract void update(double label, Vector dataPoint,
-      LinearModel model);
-
+  protected abstract void update(double label, Vector dataPoint, LinearModel model);
+  
 }

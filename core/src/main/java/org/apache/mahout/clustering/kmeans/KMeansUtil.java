@@ -76,10 +76,10 @@ final class KMeansUtil {
           try {
             key = (Writable) reader.getKeyClass().newInstance();
           } catch (InstantiationException e) { // Should not be possible
-            KMeansUtil.log.error("Exception", e);
+            log.error("Exception", e);
             throw new IllegalStateException(e);
           } catch (IllegalAccessException e) {
-            KMeansUtil.log.error("Exception", e);
+            log.error("Exception", e);
             throw new IllegalStateException(e);
           }
           if (valueClass.equals(Cluster.class)) {
@@ -104,7 +104,7 @@ final class KMeansUtil {
       }
       
     } catch (IOException e) {
-      KMeansUtil.log.info("Exception occurred in loading clusters:", e);
+      log.info("Exception occurred in loading clusters:", e);
       throw new IllegalStateException(e);
     }
   }

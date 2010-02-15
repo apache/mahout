@@ -54,7 +54,7 @@ public class LLRReducerTest {
   OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
     @Override
     public void collect(Text key, DoubleWritable value) throws IOException {
-      LLRReducerTest.log.info(key.toString() + " " + value.toString());
+      log.info(key.toString() + " " + value.toString());
     }
   };
   
@@ -66,7 +66,7 @@ public class LLRReducerTest {
     cl        = new LLCallback() {
       @Override
       public double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
-        LLRReducerTest.log.info("k11:" + k11 + " k12:" + k12 + " k21:" + k21 + " k22:" + k22);
+        log.info("k11:" + k11 + " k12:" + k12 + " k21:" + k21 + " k22:" + k22);
         try {
           return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
         }

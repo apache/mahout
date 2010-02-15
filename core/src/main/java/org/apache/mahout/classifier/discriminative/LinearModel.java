@@ -34,7 +34,7 @@ public class LinearModel {
   private double bias;
   /** Classification threshold. */
   private final double threshold;
-
+  
   /**
    * Init a linear model with a hyperplane, distance and displacement.
    * */
@@ -43,14 +43,14 @@ public class LinearModel {
     this.bias = displacement;
     this.threshold = threshold;
   }
-
+  
   /**
    * Init a linear model with zero displacement and a threshold of 0.5.
    * */
   public LinearModel(Vector hyperplane) {
     this(hyperplane, 0, 0.5);
   }
-
+  
   /**
    * Classify a point to either belong to the class modeled by this linear model or not.
    * @param dataPoint the data point to classify.
@@ -58,20 +58,21 @@ public class LinearModel {
    * */
   public boolean classify(Vector dataPoint) throws CardinalityException, IndexException {
     double product = this.hyperplane.dot(dataPoint);
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("model: " + this + " product: " + product + " Bias: " + this.bias + " threshold: " + this.threshold);
+    if (LinearModel.LOG.isDebugEnabled()) {
+      LinearModel.LOG.debug("model: " + this + " product: " + product + " Bias: " + this.bias
+                            + " threshold: " + this.threshold);
     }
-    return ((product + this.bias) > this.threshold);
+    return product + this.bias > this.threshold;
   }
-
+  
   /**
    * Update the hyperplane by adding delta.
    * @param delta the delta to add to the hyperplane vector.
    * */
   public void addDelta(Vector delta) {
-	  this.hyperplane = this.hyperplane.plus(delta);
+    this.hyperplane = this.hyperplane.plus(delta);
   }
-
+  
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder("Model: ");
@@ -81,7 +82,7 @@ public class LinearModel {
     builder.append(" C: ").append(this.bias);
     return builder.toString();
   }
-
+  
   /**
    * Shift the bias of the model.
    * @param factor factor to multiply the bias by.
@@ -89,7 +90,7 @@ public class LinearModel {
   public synchronized void shiftBias(double factor) {
     this.bias += factor;
   }
-
+  
   /**
    * Multiply the weight at index by delta.
    * @param index the index of the element to update.

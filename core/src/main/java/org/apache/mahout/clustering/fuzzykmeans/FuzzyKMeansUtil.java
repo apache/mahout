@@ -44,7 +44,7 @@ class FuzzyKMeansUtil {
     Configuration job = new Configuration();
     Path clusterPath = new Path(clusterPathStr + "/*");
     List<Path> result = new ArrayList<Path>();
-    // log.info("I am here");
+    //log.info("I am here");
     // filter out the files
     PathFilter clusterFileFilter = new PathFilter() {
       @Override
@@ -75,10 +75,10 @@ class FuzzyKMeansUtil {
           try {
             key = (Writable) reader.getKeyClass().newInstance();
           } catch (InstantiationException e) { // Should not be possible
-            FuzzyKMeansUtil.log.error("Exception", e);
+            log.error("Exception", e);
             throw new IllegalStateException(e);
           } catch (IllegalAccessException e) {
-            FuzzyKMeansUtil.log.error("Exception", e);
+            log.error("Exception", e);
             throw new IllegalStateException(e);
           }
           if (valueClass.equals(Cluster.class)) {
@@ -103,7 +103,7 @@ class FuzzyKMeansUtil {
       }
       
     } catch (IOException e) {
-      FuzzyKMeansUtil.log.info("Exception occurred in loading clusters:", e);
+      log.info("Exception occurred in loading clusters:", e);
       throw new IllegalStateException(e);
     }
   }

@@ -91,7 +91,7 @@ public final class MeanShiftCanopyDriver {
       MeanShiftCanopyDriver.runJob(input, output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
         measureClassName, t1, t2, convergenceDelta);
     } catch (OptionException e) {
-      MeanShiftCanopyDriver.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -147,7 +147,7 @@ public final class MeanShiftCanopyDriver {
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
-      MeanShiftCanopyDriver.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
     }
   }
 }

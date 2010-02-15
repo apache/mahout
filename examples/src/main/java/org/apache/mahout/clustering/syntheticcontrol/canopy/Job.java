@@ -37,7 +37,7 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Job {
+public final class Job {
   /** Logger for this class. */
   private static final Logger LOG = LoggerFactory.getLogger(Job.class);
   
@@ -60,7 +60,8 @@ public class Job {
       "The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
     // Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
     // abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).
-    // withDescription("The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
+    // withDescription("The Vector implementation class name.  Default is RandomAccessSparseVector.class")
+    // .withShortName("v").create();
     
     Option t1Opt = obuilder.withLongName("t1").withRequired(false).withArgument(
       abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1").withShortName(
@@ -123,7 +124,8 @@ public class Job {
    * @param t2
    *          the canopy T2 threshold
    */
-  private static void runJob(String input, String output, String measureClassName, double t1, double t2) throws IOException {
+  private static void runJob(String input, String output, String measureClassName,
+                             double t1, double t2) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
     

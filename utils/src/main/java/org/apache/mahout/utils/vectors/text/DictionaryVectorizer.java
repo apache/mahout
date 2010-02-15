@@ -122,46 +122,46 @@ public final class DictionaryVectorizer {
                                                 int numReducers,
                                                 int chunkSizeInMegabytes,
                                                 boolean sequentialAccess) throws IOException {
-    if (chunkSizeInMegabytes < DictionaryVectorizer.MIN_CHUNKSIZE) {
-      chunkSizeInMegabytes = DictionaryVectorizer.MIN_CHUNKSIZE;
-    } else if (chunkSizeInMegabytes > DictionaryVectorizer.MAX_CHUNKSIZE) { // 10GB
-      chunkSizeInMegabytes = DictionaryVectorizer.MAX_CHUNKSIZE;
+    if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
+      chunkSizeInMegabytes = MIN_CHUNKSIZE;
+    } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
+      chunkSizeInMegabytes = MAX_CHUNKSIZE;
     }
     if (minSupport < 0) {
-      minSupport = DictionaryVectorizer.DEFAULT_MIN_SUPPORT;
+      minSupport = DEFAULT_MIN_SUPPORT;
     }
     
     Path inputPath = new Path(input);
-    Path dictionaryJobPath = new Path(output + DictionaryVectorizer.DICTIONARY_JOB_FOLDER);
+    Path dictionaryJobPath = new Path(output + DICTIONARY_JOB_FOLDER);
     
     int[] maxTermDimension = new int[1];
     List<Path> dictionaryChunks;
     if (maxNGramSize == 1) {
-      DictionaryVectorizer.startWordCounting(inputPath, dictionaryJobPath, minSupport);
-      dictionaryChunks = DictionaryVectorizer.createDictionaryChunks(minSupport, dictionaryJobPath, output,
+      startWordCounting(inputPath, dictionaryJobPath, minSupport);
+      dictionaryChunks = createDictionaryChunks(minSupport, dictionaryJobPath, output,
         chunkSizeInMegabytes, new LongWritable(), maxTermDimension);
     } else {
       CollocDriver.generateAllGrams(inputPath.toString(), dictionaryJobPath.toString(), maxNGramSize,
         minSupport, minLLRValue, numReducers);
-      dictionaryChunks = DictionaryVectorizer.createDictionaryChunks(minSupport, new Path(
-          output + DictionaryVectorizer.DICTIONARY_JOB_FOLDER, CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
+      dictionaryChunks = createDictionaryChunks(minSupport, new Path(
+          output + DICTIONARY_JOB_FOLDER, CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
         chunkSizeInMegabytes, new DoubleWritable(), maxTermDimension);
     }
     
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
     for (Path dictionaryChunk : dictionaryChunks) {
-      Path partialVectorOutputPath = DictionaryVectorizer.getPath(
-        output + DictionaryVectorizer.VECTOR_OUTPUT_FOLDER, partialVectorIndex++);
+      Path partialVectorOutputPath = getPath(
+        output + VECTOR_OUTPUT_FOLDER, partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      DictionaryVectorizer.makePartialVectors(input, maxNGramSize, dictionaryChunk, partialVectorOutputPath,
+      makePartialVectors(input, maxNGramSize, dictionaryChunk, partialVectorOutputPath,
         maxTermDimension[0], sequentialAccess);
     }
     
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
     
-    String outputDir = output + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER;
+    String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, -1, maxTermDimension[0],
         sequentialAccess);
@@ -195,11 +195,11 @@ public final class DictionaryVectorizer {
     
     FileSystem fs = FileSystem.get(wordCountPath.toUri(), conf);
     FileStatus[] outputFiles = fs.globStatus(new Path(wordCountPath.toString()
-                                                      + DictionaryVectorizer.OUTPUT_FILES_PATTERN));
+                                                      + OUTPUT_FILES_PATTERN));
     
     long chunkSizeLimit = chunkSizeInMegabytes * 1024 * 1024;
     int chunkIndex = 0;
-    Path chunkPath = DictionaryVectorizer.getPath(dictionaryPathBase + DictionaryVectorizer.DICTIONARY_FILE,
+    Path chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE,
       chunkIndex);
     chunkPaths.add(chunkPath);
     
@@ -218,7 +218,7 @@ public final class DictionaryVectorizer {
           dictWriter.close();
           chunkIndex++;
           
-          chunkPath = DictionaryVectorizer.getPath(dictionaryPathBase + DictionaryVectorizer.DICTIONARY_FILE,
+          chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE,
             chunkIndex);
           chunkPaths.add(chunkPath);
           
@@ -226,7 +226,7 @@ public final class DictionaryVectorizer {
           currentChunkSize = 0;
         }
         
-        int fieldSize = DictionaryVectorizer.DICTIONARY_BYTE_OVERHEAD + key.toString().length() * 2
+        int fieldSize = DICTIONARY_BYTE_OVERHEAD + key.toString().length() * 2
                         + Integer.SIZE / 8;
         currentChunkSize += fieldSize;
         dictWriter.append(key, new IntWritable(i++));
@@ -273,7 +273,7 @@ public final class DictionaryVectorizer {
                     + ", dictionary-file: " + dictionaryFilePath.toString());
     conf.setInt(PartialVectorMerger.DIMENSION, dimension);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
-    conf.setInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
+    conf.setInt(MAX_NGRAMS, maxNGramSize);
     
     conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(StringTuple.class);
@@ -310,7 +310,7 @@ public final class DictionaryVectorizer {
     // this conf parameter needs to be set enable serialisation of conf values
     
     conf.setJobName("DictionaryVectorizer::WordCount: input-folder: " + input.toString());
-    conf.setInt(DictionaryVectorizer.MIN_SUPPORT, minSupport);
+    conf.setInt(MIN_SUPPORT, minSupport);
     
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(LongWritable.class);

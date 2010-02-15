@@ -184,7 +184,7 @@ public final class FuzzyKMeansDriver {
       }
       
     } catch (OptionException e) {
-      FuzzyKMeansDriver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
     
@@ -228,7 +228,7 @@ public final class FuzzyKMeansDriver {
     
     // iterate until the clusters converge
     while (!converged && (iteration < maxIterations)) {
-      FuzzyKMeansDriver.log.info("Iteration {}", iteration);
+      log.info("Iteration {}", iteration);
       
       // point the output to a new directory per iteration
       String clustersOut = output + File.separator + "clusters-" + iteration;
@@ -241,7 +241,7 @@ public final class FuzzyKMeansDriver {
     }
     
     // now actually cluster the points
-    FuzzyKMeansDriver.log.info("Clustering ");
+    log.info("Clustering ");
     
     FuzzyKMeansDriver.runClustering(input, clustersIn, output + File.separator + "points", measureClass,
       convergenceDelta, numMapTasks, m);
@@ -313,7 +313,7 @@ public final class FuzzyKMeansDriver {
       FileSystem fs = FileSystem.get(outPath.toUri(), conf);
       return FuzzyKMeansDriver.isConverged(clustersOut, conf, fs);
     } catch (IOException e) {
-      FuzzyKMeansDriver.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
       return true;
     }
   }
@@ -370,7 +370,7 @@ public final class FuzzyKMeansDriver {
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
-      FuzzyKMeansDriver.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
     }
   }
   

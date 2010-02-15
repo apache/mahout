@@ -105,7 +105,7 @@ public class FuzzyKMeansJob {
       FuzzyKMeansJob.runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations,
         numMapTasks, numReduceTasks, doCanopy, m);
     } catch (OptionException e) {
-      FuzzyKMeansJob.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }

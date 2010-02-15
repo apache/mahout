@@ -67,7 +67,7 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     // two
     while (iter.hasNext()) {
       Vector.Element e = iter.next();
-      result += Math.abs(v2.getQuick(e.index()) - v1.getQuick(e.index()));
+      result += Math.abs(e.get());
     }
     return result;
   }

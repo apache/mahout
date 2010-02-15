@@ -87,7 +87,7 @@ public final class FileDiffStorage implements DiffStorage {
       throw new IllegalArgumentException("maxEntries must be positive");
     }
     
-    FileDiffStorage.log.info("Creating FileDataModel for file {}", dataFile);
+    log.info("Creating FileDataModel for file {}", dataFile);
     
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
@@ -120,7 +120,7 @@ public final class FileDiffStorage implements DiffStorage {
         updateAllRecommendableItems();
         
       } catch (IOException ioe) {
-        FileDiffStorage.log.warn("Exception while reloading", ioe);
+        log.warn("Exception while reloading", ioe);
       } finally {
         buildAverageDiffsLock.writeLock().unlock();
       }
@@ -316,7 +316,7 @@ public final class FileDiffStorage implements DiffStorage {
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     long mostRecentModification = dataFile.lastModified();
     if (mostRecentModification > lastModified + FileDiffStorage.MIN_RELOAD_INTERVAL_MS) {
-      FileDiffStorage.log.debug("File has changed; reloading...");
+      log.debug("File has changed; reloading...");
       lastModified = mostRecentModification;
       buildDiffs();
     }

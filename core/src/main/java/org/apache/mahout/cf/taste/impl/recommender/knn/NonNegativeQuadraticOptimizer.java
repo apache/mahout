@@ -46,7 +46,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
     double[] x = new double[k];
     Arrays.fill(x, 3.0 / k);
     
-    for (int iteration = 0; iteration < NonNegativeQuadraticOptimizer.MAX_ITERATIONS; iteration++) {
+    for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
       
       double rdot = 0.0;
       for (int n = 0; n < k; n++) {
@@ -60,7 +60,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
         
         // find active variables - those that are pinned due to
         // nonnegativity constraints; set respective ri's to zero
-        if ((x[n] < NonNegativeQuadraticOptimizer.EPSILON) && (rn < 0.0)) {
+        if ((x[n] < EPSILON) && (rn < 0.0)) {
           rn = 0.0;
         } else {
           // max step size numerator
@@ -69,7 +69,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
         r[n] = rn;
       }
       
-      if (rdot <= NonNegativeQuadraticOptimizer.CONVERGENCE_LIMIT) {
+      if (rdot <= CONVERGENCE_LIMIT) {
         break;
       }
       
@@ -88,7 +88,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
       double stepSize = rdot / rArdotSum;
       
       if (Double.isNaN(stepSize)) {
-        stepSize = NonNegativeQuadraticOptimizer.DEFAULT_STEP;
+        stepSize = DEFAULT_STEP;
       }
       
       // adjust step size to prevent negative values
@@ -102,7 +102,7 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
       // update x values
       for (int n = 0; n < k; n++) {
         x[n] += stepSize * r[n];
-        if (x[n] < NonNegativeQuadraticOptimizer.EPSILON) {
+        if (x[n] < EPSILON) {
           x[n] = 0.0;
         }
       }

@@ -65,7 +65,7 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     super.configure(job);
     clusterer = new FuzzyKMeansClusterer(job);
     
-    FuzzyKMeansMapper.log.info("In Mapper Configure:");
+    log.info("In Mapper Configure:");
     
     String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
     if ((clusterPath != null) && (clusterPath.length() > 0)) {

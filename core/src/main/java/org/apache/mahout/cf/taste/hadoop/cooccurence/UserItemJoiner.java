@@ -83,7 +83,7 @@ public final class UserItemJoiner extends Configured implements Tool {
         joinKey.set(itemId, keyID.get());
         output.collect(joinKey, tuple);
       } else {
-        JoinUserMapper.log.warn("No preference found in record: {}", userPrefLine);
+        log.warn("No preference found in record: {}", userPrefLine);
       }
     }
   }
@@ -184,7 +184,7 @@ public final class UserItemJoiner extends Configured implements Tool {
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2
     if (args.length < 3) {
-      UserItemJoiner.log.error("UserItemJoiner <user-input-dirs> <item-input-dir> <output-dir> [reducers]");
+      log.error("UserItemJoiner <user-input-dirs> <item-input-dir> <output-dir> [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }

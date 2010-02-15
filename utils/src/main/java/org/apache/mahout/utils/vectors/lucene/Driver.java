@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class Driver {
   private static final Logger log = LoggerFactory.getLogger(Driver.class);
   
-  private Driver() {}
+  private Driver() { }
   
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -130,7 +130,7 @@ public class Driver {
         return;
       }
       // Springify all this
-      if (cmdLine.hasOption(inputOpt)) {// Lucene case
+      if (cmdLine.hasOption(inputOpt)) { // Lucene case
         File file = new File(cmdLine.getValue(inputOpt).toString());
         if (file.exists() && file.isDirectory()) {
           long maxDocs = Long.MAX_VALUE;
@@ -186,7 +186,7 @@ public class Driver {
             iterable = new LuceneIterable(reader, idField, field, mapper, norm);
           }
           String outFile = cmdLine.getValue(outputOpt).toString();
-          Driver.log.info("Output File: {}", outFile);
+          log.info("Output File: {}", outFile);
           
           VectorWriter vectorWriter;
           if (cmdLine.hasOption(outWriterOpt)) {
@@ -203,12 +203,12 @@ public class Driver {
           
           long numDocs = vectorWriter.write(iterable, maxDocs);
           vectorWriter.close();
-          Driver.log.info("Wrote: {} vectors", numDocs);
+          log.info("Wrote: {} vectors", numDocs);
           
           String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString()
               : "\t";
           File dictOutFile = new File(cmdLine.getValue(dictOutOpt).toString());
-          Driver.log.info("Dictionary Output file: {}", dictOutFile);
+          log.info("Dictionary Output file: {}", dictOutFile);
           BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
               new FileOutputStream(dictOutFile), Charset.forName("UTF8")));
           JWriterTermInfoWriter tiWriter = new JWriterTermInfoWriter(writer, delimiter, field);
@@ -219,7 +219,7 @@ public class Driver {
       }
       
     } catch (OptionException e) {
-      Driver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }

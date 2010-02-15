@@ -50,23 +50,23 @@ public class CDMapper extends MapReduceBase implements Mapper<LongWritable,Text,
   
   @Override
   public void configure(JobConf job) {
-    String rstr = job.get(CDMapper.CLASSDISCOVERY_RULES);
+    String rstr = job.get(CLASSDISCOVERY_RULES);
     if (rstr == null) {
-      throw new IllegalArgumentException("Job Parameter (" + CDMapper.CLASSDISCOVERY_RULES + ") not found!");
+      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_RULES + ") not found!");
     }
     
-    String datastr = job.get(CDMapper.CLASSDISCOVERY_DATASET);
+    String datastr = job.get(CLASSDISCOVERY_DATASET);
     if (datastr == null) {
-      throw new IllegalArgumentException("Job Parameter (" + CDMapper.CLASSDISCOVERY_DATASET + ") not found!");
+      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_DATASET + ") not found!");
     }
     
-    int target = job.getInt(CDMapper.CLASSDISCOVERY_TARGET_LABEL, -1);
+    int target = job.getInt(CLASSDISCOVERY_TARGET_LABEL, -1);
     if (target == -1) {
-      throw new IllegalArgumentException("Job Parameter (" + CDMapper.CLASSDISCOVERY_TARGET_LABEL
+      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_TARGET_LABEL
                                          + ") not found!");
     }
     
-    CDMapper.initializeDataSet(StringUtils.<DataSet> fromString(datastr));
+    initializeDataSet(StringUtils.<DataSet> fromString(datastr));
     configure(StringUtils.<List<Rule>> fromString(rstr), target);
     
     super.configure(job);
@@ -104,7 +104,7 @@ public class CDMapper extends MapReduceBase implements Mapper<LongWritable,Text,
   
   void map(LongWritable key, DataLine dl, OutputCollector<LongWritable,CDFitness> output) throws IOException {
     for (int index = 0; index < rules.size(); index++) {
-      CDFitness eval = CDMapper.evaluate(target, rules.get(index).classify(dl), dl.getLabel());
+      CDFitness eval = evaluate(target, rules.get(index).classify(dl), dl.getLabel());
       output.collect(new LongWritable(index), eval);
     }
   }

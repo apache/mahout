@@ -103,8 +103,8 @@ public class ClusterLabels {
   private String idField;
   private Map<String,List<String>> clusterIdToPoints = null;
   private String output;
-  private int minNumIds = ClusterLabels.DEFAULT_MIN_IDS;
-  private int maxLabels = ClusterLabels.DEFAULT_MAX_LABELS;
+  private int minNumIds = DEFAULT_MIN_IDS;
+  private int maxLabels = DEFAULT_MAX_LABELS;
   
   public ClusterLabels(String seqFileDir,
                        String pointsDir,
@@ -170,24 +170,24 @@ public class ClusterLabels {
   protected List<TermInfoClusterInOut> getClusterLabels(String clusterID, List<String> ids) throws IOException {
     
     if (ids.size() < minNumIds) {
-      ClusterLabels.log.info("Skipping small cluster {} with size: {}", clusterID, ids.size());
+      log.info("Skipping small cluster {} with size: {}", clusterID, ids.size());
       return null;
     }
     
-    ClusterLabels.log.info("Processing Cluster {} with {} documents", clusterID, ids.size());
+    log.info("Processing Cluster {} with {} documents", clusterID, ids.size());
     Directory dir = FSDirectory.open(new File(this.indexDir));
     IndexReader reader = IndexReader.open(dir, false);
     
-    ClusterLabels.log.info("# of documents in the index {}", reader.numDocs());
+    log.info("# of documents in the index {}", reader.numDocs());
     
     Set<String> idSet = new HashSet<String>();
     idSet.addAll(ids);
     
     int numDocs = reader.numDocs();
     
-    OpenBitSet clusterDocBitset = ClusterLabels.getClusterDocBitset(reader, idSet, this.idField);
+    OpenBitSet clusterDocBitset = getClusterDocBitset(reader, idSet, this.idField);
     
-    ClusterLabels.log.info("Populating term infos from the index");
+    log.info("Populating term infos from the index");
     
     /**
      * This code is as that of CachedTermInfo, with one major change, which is to get the document frequency.
@@ -237,7 +237,7 @@ public class ClusterLabels {
       int outDF = corpusDF - termEntry.docFreq;
       int inDF = termEntry.docFreq;
       TermInfoClusterInOut termInfoCluster = new TermInfoClusterInOut(termEntry.term, inDF, outDF);
-      double llr = ClusterLabels.scoreDocumentFrequencies(inDF, outDF, clusterSize, corpusSize);
+      double llr = scoreDocumentFrequencies(inDF, outDF, clusterSize, corpusSize);
       termInfoCluster.logLikelihoodRatio = llr;
       clusteredTermInfo.add(termInfoCluster);
     }
@@ -250,7 +250,9 @@ public class ClusterLabels {
     return clusteredTermInfo.subList(0, Math.min(clusteredTermInfo.size(), maxLabels));
   }
   
-  private static OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField) throws IOException {
+  private static OpenBitSet getClusterDocBitset(IndexReader reader,
+                                                Set<String> idSet,
+                                                String idField) throws IOException {
     int numDocs = reader.numDocs();
     
     OpenBitSet bitset = new OpenBitSet(numDocs);
@@ -270,7 +272,7 @@ public class ClusterLabels {
         bitset.set(i);
       }
     }
-    ClusterLabels.log.info("Created bitset for in-cluster documents : {}", bitset.cardinality());
+    log.info("Created bitset for in-cluster documents : {}", bitset.cardinality());
     return bitset;
   }
   
@@ -366,11 +368,11 @@ public class ClusterLabels {
       if (cmdLine.hasOption(outputOpt)) {
         output = cmdLine.getValue(outputOpt).toString();
       }
-      int maxLabels = ClusterLabels.DEFAULT_MAX_LABELS;
+      int maxLabels = DEFAULT_MAX_LABELS;
       if (cmdLine.hasOption(maxLabelsOpt)) {
         maxLabels = Integer.parseInt(cmdLine.getValue(maxLabelsOpt).toString());
       }
-      int minSize = ClusterLabels.DEFAULT_MIN_IDS;
+      int minSize = DEFAULT_MIN_IDS;
       if (cmdLine.hasOption(minClusterSizeOpt)) {
         minSize = Integer.parseInt(cmdLine.getValue(minClusterSizeOpt).toString());
       }
@@ -387,10 +389,10 @@ public class ClusterLabels {
       clusterLabel.getLabels();
       
     } catch (OptionException e) {
-      ClusterLabels.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     } catch (IOException e) {
-      ClusterLabels.log.error("Exception", e);
+      log.error("Exception", e);
     }
   }
   

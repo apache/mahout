@@ -144,7 +144,7 @@ public class FileDataModel implements DataModel {
       throw new FileNotFoundException(dataFile.toString());
     }
     
-    FileDataModel.log.info("Creating FileDataModel for file {}", dataFile);
+    log.info("Creating FileDataModel for file {}", dataFile);
     
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
@@ -179,7 +179,7 @@ public class FileDataModel implements DataModel {
         delegate = buildModel();
         loaded = true;
       } catch (IOException ioe) {
-        FileDataModel.log.warn("Exception while reloading", ioe);
+        log.warn("Exception while reloading", ioe);
       } finally {
         reloadLock.unlock();
       }
@@ -309,7 +309,7 @@ public class FileDataModel implements DataModel {
   }
   
   protected void processFile(FileLineIterator dataOrUpdateFileIterator, FastByIDMap<?> data) {
-    FileDataModel.log.info("Reading file info...");
+    log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
@@ -317,11 +317,11 @@ public class FileDataModel implements DataModel {
         processLine(line, data);
         int currentCount = count.incrementAndGet();
         if (currentCount % 1000000 == 0) {
-          FileDataModel.log.info("Processed {} lines", currentCount);
+          log.info("Processed {} lines", currentCount);
         }
       }
     }
-    FileDataModel.log.info("Read lines: {}", count.get());
+    log.info("Read lines: {}", count.get());
   }
   
   /**
@@ -483,7 +483,7 @@ public class FileDataModel implements DataModel {
   }
   
   protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator, FastByIDMap<FastIDSet> data) {
-    FileDataModel.log.info("Reading file info...");
+    log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
@@ -491,11 +491,11 @@ public class FileDataModel implements DataModel {
         processLineWithoutID(line, data);
         int currentCount = count.incrementAndGet();
         if (currentCount % 100000 == 0) {
-          FileDataModel.log.info("Processed {} lines", currentCount);
+          log.info("Processed {} lines", currentCount);
         }
       }
     }
-    FileDataModel.log.info("Read lines: {}", count.get());
+    log.info("Read lines: {}", count.get());
   }
   
   protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data) {
@@ -625,7 +625,7 @@ public class FileDataModel implements DataModel {
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     if ((dataFile.lastModified() > lastModified + FileDataModel.MIN_RELOAD_INTERVAL_MS)
         || (readLastUpdateFileModified() > lastUpdateFileModified + FileDataModel.MIN_RELOAD_INTERVAL_MS)) {
-      FileDataModel.log.debug("File has changed; reloading...");
+      log.debug("File has changed; reloading...");
       reload();
     }
   }

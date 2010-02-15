@@ -51,7 +51,8 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeseriali
   }
   
   @Override
-  public Model<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+  public Model<?> deserialize(JsonElement json, Type typeOfT,
+                              JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -63,7 +64,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeseriali
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
-      JsonModelAdapter.log.warn("Error while loading class", e);
+      log.warn("Error while loading class", e);
     }
     return (Model<?>) gson.fromJson(model, cl);
   }

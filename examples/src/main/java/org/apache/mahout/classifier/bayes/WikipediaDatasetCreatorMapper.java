@@ -133,7 +133,7 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
-    WikipediaDatasetCreatorMapper.log.info(
+    log.info(
       "Configure: Input Categories size: {} Exact Match: {} Analyzer: {}", new Object[] {
                                                                                          inputCategories
                                                                                              .size(),

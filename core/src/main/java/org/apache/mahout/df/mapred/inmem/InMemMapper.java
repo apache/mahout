@@ -76,14 +76,14 @@ public class InMemMapper extends MapredMapper implements
   public void configure(JobConf conf) {
     super.configure(conf);
     
-    InMemMapper.log.info("Loading the data...");
+    log.info("Loading the data...");
     try {
       data = InMemMapper.loadData(conf, getDataset());
     } catch (IOException e) {
       throw new IllegalStateException("Exception caught while loading the data: "
                                       + StringUtils.stringifyException(e));
     }
-    InMemMapper.log.info("Data loaded : {} instances", data.size());
+    log.info("Data loaded : {} instances", data.size());
     
     bagging = new Bagging(getTreeBuilder(), data);
   }
@@ -108,11 +108,11 @@ public class InMemMapper extends MapredMapper implements
     
     initRandom(split);
     
-    InMemMapper.log.debug("Building...");
+    log.debug("Building...");
     Node tree = bagging.build(key.get(), rng, callback);
     
     if (!isNoOutput()) {
-      InMemMapper.log.debug("Outputing...");
+      log.debug("Outputing...");
       MapredOutput mrOut = new MapredOutput(tree, predictions);
       
       output.collect(key, mrOut);
@@ -122,7 +122,7 @@ public class InMemMapper extends MapredMapper implements
   protected void initRandom(InMemInputSplit split) {
     if (rng == null) { // first execution of this mapper
       Long seed = split.getSeed();
-      InMemMapper.log.debug("Initialising rng with seed {}: ", seed);
+      log.debug("Initialising rng with seed {}: ", seed);
       
       if (seed == null) {
         rng = RandomUtils.getRandom();

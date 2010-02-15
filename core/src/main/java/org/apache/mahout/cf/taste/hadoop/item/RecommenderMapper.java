@@ -67,13 +67,13 @@ public final class RecommenderMapper extends MapReduceBase implements
   public void configure(JobConf jobConf) {
     try {
       FileSystem fs = FileSystem.get(jobConf);
-      Path cooccurrencePath = new Path(jobConf.get(RecommenderMapper.COOCCURRENCE_PATH)).makeQualified(fs);
-      Path itemIDIndexPath = new Path(jobConf.get(RecommenderMapper.ITEMID_INDEX_PATH)).makeQualified(fs);
-      recommendationsPerUser = jobConf.getInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, 10);
+      Path cooccurrencePath = new Path(jobConf.get(COOCCURRENCE_PATH)).makeQualified(fs);
+      Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
+      recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
       indexItemIDMap = new MapFilesMap<IntWritable,LongWritable>(fs, itemIDIndexPath, new Configuration());
       cooccurrenceColumnMap = new MapFilesMap<IntWritable,VectorWritable>(fs, cooccurrencePath,
           new Configuration());
-      String usersFilePathString = jobConf.get(RecommenderMapper.USERS_FILE);
+      String usersFilePathString = jobConf.get(USERS_FILE);
       if (usersFilePathString == null) {
         usersToRecommendFor = null;
       } else {

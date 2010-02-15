@@ -83,14 +83,14 @@ public final class ItemBigramGenerator extends Configured implements Tool {
           output.collect(user, item);
         } catch (NumberFormatException nfe) {
           reporter.incrCounter(Records.INVALID_IDS, 1);
-          UserItemMapper.log.warn("Invalid IDs in record: {}", userPrefLine);
+          log.warn("Invalid IDs in record: {}", userPrefLine);
         } catch (IllegalArgumentException iae) {
           reporter.incrCounter(Records.INVALID_IDS, 1);
-          UserItemMapper.log.warn("Invalid IDs in record: {}", userPrefLine);
+          log.warn("Invalid IDs in record: {}", userPrefLine);
         }
       } else {
         reporter.incrCounter(Records.INVALID_SCHEMA, 1);
-        UserItemMapper.log.warn("No preference found in record: {}", userPrefLine);
+        log.warn("No preference found in record: {}", userPrefLine);
       }
     }
   }
@@ -164,7 +164,7 @@ public final class ItemBigramGenerator extends Configured implements Tool {
   public int run(String[] args) throws IOException {
     // TODO use Commons CLI 2
     if (args.length < 2) {
-      ItemBigramGenerator.log.error("Usage: ItemBigramGemerator <input-dir> <output-dir> [reducers]");
+      log.error("Usage: ItemBigramGemerator <input-dir> <output-dir> [reducers]");
       ToolRunner.printGenericCommandUsage(System.out);
       return -1;
     }

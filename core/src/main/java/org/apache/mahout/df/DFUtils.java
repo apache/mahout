@@ -30,7 +30,7 @@ import org.apache.mahout.ga.watchmaker.OutputUtils;
  * Utility class that contains various helper methods
  */
 public class DFUtils {
-  private DFUtils() {}
+  private DFUtils() { }
   
   /**
    * Writes an Node[] into a DataOutput

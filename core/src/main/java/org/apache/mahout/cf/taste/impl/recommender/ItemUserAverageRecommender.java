@@ -79,7 +79,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
-    ItemUserAverageRecommender.log.debug("Recommending items for user ID '{}'", userID);
+    log.debug("Recommending items for user ID '{}'", userID);
     checkAverageDiffsBuilt();
     
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
@@ -89,7 +89,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
     
-    ItemUserAverageRecommender.log.debug("Recommendations are: {}", topItems);
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
   

@@ -94,7 +94,7 @@ public final class DirichletJob {
       DirichletJob.runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels,
         maxIterations, alpha_0);
     } catch (OptionException e) {
-      DirichletJob.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
     

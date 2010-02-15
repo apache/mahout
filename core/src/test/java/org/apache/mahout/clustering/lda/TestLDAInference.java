@@ -32,21 +32,24 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
 
 public class TestLDAInference extends MahoutTestCase {
-
+  
   private static final int NUM_TOPICS = 20;
-
+  
   private Random random;
-
+  
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     random = RandomUtils.getRandom();
   }
-
+  
   /**
    * Generate random document vector
-   * @param numWords int number of words in the vocabulary
-   * @param numWords E[count] for each word
+   * 
+   * @param numWords
+   *          int number of words in the vocabulary
+   * @param numWords
+   *          E[count] for each word
    */
   private Vector generateRandomDoc(int numWords, double sparsity) throws MathException {
     Vector v = new DenseVector(numWords);
@@ -57,12 +60,12 @@ public class TestLDAInference extends MahoutTestCase {
     }
     return v;
   }
-
+  
   private LDAState generateRandomState(int numWords, int numTopics) {
     double topicSmoothing = 50.0 / numTopics; // whatever
     Matrix m = new DenseMatrix(numTopics, numWords);
     double[] logTotals = new double[numTopics];
-
+    
     for (int k = 0; k < numTopics; ++k) {
       double total = 0.0; // total number of pseudo counts we made
       for (int w = 0; w < numWords; ++w) {
@@ -71,45 +74,42 @@ public class TestLDAInference extends MahoutTestCase {
         total += pseudocount;
         m.setQuick(k, w, Math.log(pseudocount));
       }
-
+      
       logTotals[k] = Math.log(total);
     }
-
+    
     double ll = Double.NEGATIVE_INFINITY;
     return new LDAState(numTopics, numWords, topicSmoothing, m, logTotals, ll);
   }
-
-
+  
   private void runTest(int numWords, double sparsity, int numTests) throws MathException {
     LDAState state = generateRandomState(numWords, NUM_TOPICS);
     LDAInference lda = new LDAInference(state);
     for (int t = 0; t < numTests; ++t) {
       Vector v = generateRandomDoc(numWords, sparsity);
       LDAInference.InferredDocument doc = lda.infer(v);
-
+      
       assertEquals("wordCounts", doc.getWordCounts(), v);
       assertNotNull("gamma", doc.getGamma());
-      for (Iterator<Vector.Element> iter = v.iterateNonZero();
-          iter.hasNext(); ) {
+      for (Iterator<Vector.Element> iter = v.iterateNonZero(); iter.hasNext();) {
         int w = iter.next().index();
         for (int k = 0; k < NUM_TOPICS; ++k) {
           double logProb = doc.phi(k, w);
-          assertTrue(k + " " + w + " logProb " + logProb, logProb <= 0.0); 
+          assertTrue(k + " " + w + " logProb " + logProb, logProb <= 0.0);
         }
       }
       assertTrue("log likelihood", doc.logLikelihood <= 1.0E-10);
     }
   }
-
-
+  
   public void testLDAEasy() throws MathException {
     runTest(10, 1.0, 5); // 1 word per doc in expectation
   }
-
+  
   public void testLDASparse() throws MathException {
     runTest(100, 0.4, 5); // 40 words per doc in expectation
   }
-
+  
   public void testLDADense() throws MathException {
     runTest(100, 3.0, 5); // 300 words per doc in expectation
   }

@@ -67,9 +67,9 @@ public class DatasetSplit {
   }
   
   public DatasetSplit(JobConf conf) {
-    seed = DatasetSplit.getSeed(conf);
-    threshold = DatasetSplit.getThreshold(conf);
-    training = DatasetSplit.isTraining(conf);
+    seed = getSeed(conf);
+    threshold = getThreshold(conf);
+    training = isTraining(conf);
   }
   
   public long getSeed() {
@@ -89,13 +89,13 @@ public class DatasetSplit {
   }
   
   public void storeJobParameters(JobConf conf) {
-    conf.set(DatasetSplit.SEED, StringUtils.toString(seed));
-    conf.set(DatasetSplit.THRESHOLD, Double.toString(threshold));
-    conf.setBoolean(DatasetSplit.TRAINING, training);
+    conf.set(SEED, StringUtils.toString(seed));
+    conf.set(THRESHOLD, Double.toString(threshold));
+    conf.setBoolean(TRAINING, training);
   }
   
   static long getSeed(JobConf conf) {
-    String seedstr = conf.get(DatasetSplit.SEED);
+    String seedstr = conf.get(SEED);
     if (seedstr == null) {
       throw new IllegalArgumentException("SEED job parameter not found");
     }
@@ -104,7 +104,7 @@ public class DatasetSplit {
   }
   
   static double getThreshold(JobConf conf) {
-    String thrstr = conf.get(DatasetSplit.THRESHOLD);
+    String thrstr = conf.get(THRESHOLD);
     if (thrstr == null) {
       throw new IllegalArgumentException("THRESHOLD job parameter not found");
     }
@@ -113,11 +113,11 @@ public class DatasetSplit {
   }
   
   static boolean isTraining(JobConf conf) {
-    if (conf.get(DatasetSplit.TRAINING) == null) {
+    if (conf.get(TRAINING) == null) {
       throw new IllegalArgumentException("TRAINING job parameter not found");
     }
     
-    return conf.getBoolean(DatasetSplit.TRAINING, true);
+    return conf.getBoolean(TRAINING, true);
   }
   
   /**
@@ -209,7 +209,8 @@ public class DatasetSplit {
   public static class DatasetTextInputFormat extends TextInputFormat {
     
     @Override
-    public RecordReader<LongWritable,Text> getRecordReader(InputSplit split, JobConf job, Reporter reporter) throws IOException {
+    public RecordReader<LongWritable,Text> getRecordReader(InputSplit split, JobConf job,
+                                                           Reporter reporter) throws IOException {
       reporter.setStatus(split.toString());
       
       return new RndLineRecordReader(new LineRecordReader(job, (FileSplit) split), job);

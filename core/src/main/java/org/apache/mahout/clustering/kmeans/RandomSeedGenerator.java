@@ -61,7 +61,7 @@ public final class RandomSeedGenerator {
     fs.mkdirs(outPath);
     Path outFile = new Path(outPath, "part-randomSeed");
     if (fs.exists(outFile)) {
-      RandomSeedGenerator.log.warn("Deleting {}", outFile);
+      log.warn("Deleting {}", outFile);
       fs.delete(outFile, false);
     }
     boolean newFile = fs.createNewFile(outFile);
@@ -111,7 +111,7 @@ public final class RandomSeedGenerator {
       for (int i = 0; i < k; i++) {
         writer.append(chosenTexts.get(i), chosenClusters.get(i));
       }
-      RandomSeedGenerator.log.info("Wrote {} vectors to {}", k, outFile);
+      log.info("Wrote {} vectors to {}", k, outFile);
       writer.close();
     }
     

@@ -85,7 +85,7 @@ public class UDistrib {
       
       UDistrib.runTool(data, dataset, output, numPartitions);
     } catch (OptionException e) {
-      UDistrib.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
     
@@ -148,7 +148,7 @@ public class UDistrib {
     int id = 0;
     while (scanner.hasNextLine()) {
       if (id % 1000 == 0) {
-        UDistrib.log.info(String.format("progress : %d / %d", id, nbInstances));
+        log.info(String.format("progress : %d / %d", id, nbInstances));
       }
       
       String line = scanner.nextLine();
@@ -179,7 +179,7 @@ public class UDistrib {
     FileUtil.copyMerge(pfs, partsPath, fs, outputPath, true, conf, null);
     /*
      * FSDataOutputStream joined = fs.create(new Path(outputPath, "uniform.data")); for (int p = 0; p <
-     * numPartitions; p++) { log.info("Joining part : {}", p); FSDataInputStream partStream =
+     * numPartitions; p++) {log.info("Joining part : {}", p); FSDataInputStream partStream =
      * fs.open(partPaths[p]);
      * 
      * IOUtils.copyBytes(partStream, joined, conf, false);

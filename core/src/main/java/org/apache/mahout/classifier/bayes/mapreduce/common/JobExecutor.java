@@ -76,7 +76,7 @@ public final class JobExecutor {
       
       job.runJob(input, output, new BayesParameters(1));
     } catch (OptionException e) {
-      JobExecutor.log.error(e.getMessage());
+      log.error(e.getMessage());
       CommandLineUtil.printHelp(group);
     }
   }

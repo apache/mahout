@@ -54,7 +54,7 @@ public class Cluster extends ClusterBase {
   
   @Override
   public String asFormatString() {
-    return Cluster.formatCluster(this);
+    return formatCluster(this);
   }
   
   /**
@@ -69,7 +69,7 @@ public class Cluster extends ClusterBase {
   public static Cluster decodeCluster(String formattedString) {
     int beginIndex = formattedString.indexOf('{');
     if (beginIndex <= 0) {
-      throw new IllegalArgumentException(Cluster.ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
+      throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
     }
     String id = formattedString.substring(0, beginIndex);
     String center = formattedString.substring(beginIndex);
@@ -82,7 +82,7 @@ public class Cluster extends ClusterBase {
       cluster = new Cluster(clusterCenter, clusterId);
       cluster.setConverged(startsWithV);
     } else {
-      throw new IllegalArgumentException(Cluster.ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
+      throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
     }
     return cluster;
   }

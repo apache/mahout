@@ -46,7 +46,7 @@ public class FPTreeDepthCache {
   private final List<FPTree> treeCache = new ArrayList<FPTree>();
   
   public FPTreeDepthCache() {
-    FPTreeDepthCache.log.info("Initializing FPTreeCache with firstLevelCacheSize: {}",
+    log.info("Initializing FPTreeCache with firstLevelCacheSize: {}",
       FPTreeDepthCache.firstLevelCacheSize);
   }
   

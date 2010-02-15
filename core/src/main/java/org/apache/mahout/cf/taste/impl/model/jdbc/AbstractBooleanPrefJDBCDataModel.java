@@ -71,7 +71,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       throw new IllegalArgumentException("Invalid value: " + value);
     }
     
-    AbstractBooleanPrefJDBCDataModel.log.debug("Setting preference for user {}, item {}", userID, itemID);
+    log.debug("Setting preference for user {}, item {}", userID, itemID);
     
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -82,11 +82,11 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       setLongParameter(stmt, 1, userID);
       setLongParameter(stmt, 2, itemID);
       
-      AbstractBooleanPrefJDBCDataModel.log.debug("Executing SQL update: {}", setPreferenceSQL);
+      log.debug("Executing SQL update: {}", setPreferenceSQL);
       stmt.executeUpdate();
       
     } catch (SQLException sqle) {
-      AbstractBooleanPrefJDBCDataModel.log.warn("Exception while setting preference", sqle);
+      log.warn("Exception while setting preference", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(null, stmt, conn);

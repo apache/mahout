@@ -120,10 +120,10 @@ public class DirichletDriver {
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
-      DirichletDriver.runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels,
+      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels,
         maxIterations, alpha_0, numReducers);
     } catch (OptionException e) {
-      DirichletDriver.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -161,7 +161,7 @@ public class DirichletDriver {
                                             SecurityException,
                                             NoSuchMethodException,
                                             InvocationTargetException {
-    DirichletDriver.runJob(input, output, modelFactory, "org.apache.mahout.math.DenseVector", 2, numClusters,
+    runJob(input, output, modelFactory, "org.apache.mahout.math.DenseVector", 2, numClusters,
       maxIterations, alpha_0, numReducers);
   }
   
@@ -200,14 +200,14 @@ public class DirichletDriver {
                                             InvocationTargetException {
     
     String stateIn = output + "/state-0";
-    DirichletDriver.writeInitialState(output, stateIn, modelFactory, modelPrototype, prototypeSize,
+    writeInitialState(output, stateIn, modelFactory, modelPrototype, prototypeSize,
       numClusters, alpha_0);
     
     for (int iteration = 0; iteration < maxIterations; iteration++) {
-      DirichletDriver.log.info("Iteration {}", iteration);
+      log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       String stateOut = output + "/state-" + (iteration + 1);
-      DirichletDriver.runIteration(input, stateIn, stateOut, modelFactory, modelPrototype, prototypeSize,
+      runIteration(input, stateIn, stateOut, modelFactory, modelPrototype, prototypeSize,
         numClusters, alpha_0, numReducers);
       // now point the input to the old output directory
       stateIn = stateOut;
@@ -228,7 +228,7 @@ public class DirichletDriver {
                                                        NoSuchMethodException,
                                                        InvocationTargetException {
     
-    DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory, modelPrototype,
+    DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype,
       prototypeSize, numModels, alpha_0);
     JobConf job = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
@@ -329,18 +329,18 @@ public class DirichletDriver {
     conf.setNumReduceTasks(numReducers);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.set(DirichletDriver.STATE_IN_KEY, stateIn);
-    conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelFactory);
-    conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, modelPrototype);
-    conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
-    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(numClusters));
-    conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha_0));
+    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(MODEL_FACTORY_KEY, modelFactory);
+    conf.set(MODEL_PROTOTYPE_KEY, modelPrototype);
+    conf.set(PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
+    conf.set(NUM_CLUSTERS_KEY, Integer.toString(numClusters));
+    conf.set(ALPHA_0_KEY, Double.toString(alpha_0));
     
     client.setConf(conf);
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
-      DirichletDriver.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
     }
   }
   
@@ -372,7 +372,7 @@ public class DirichletDriver {
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
-      DirichletDriver.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
     }
   }
 }

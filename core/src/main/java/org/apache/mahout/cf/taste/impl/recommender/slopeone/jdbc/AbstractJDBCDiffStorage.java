@@ -117,9 +117,9 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     });
     refreshHelper.addDependency(dataModel);
     if (isDiffsExist()) {
-      AbstractJDBCDiffStorage.log.info("Diffs already exist in database; using them instead of recomputing");
+      log.info("Diffs already exist in database; using them instead of recomputing");
     } else {
-      AbstractJDBCDiffStorage.log.info("No diffs exist in database; recomputing...");
+      log.info("No diffs exist in database; recomputing...");
       buildAverageDiffs();
     }
   }
@@ -138,11 +138,11 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setLong(2, itemID2);
       stmt.setLong(3, itemID2);
       stmt.setLong(4, itemID1);
-      AbstractJDBCDiffStorage.log.debug("Executing SQL query: {}", getDiffSQL);
+      log.debug("Executing SQL query: {}", getDiffSQL);
       rs = stmt.executeQuery();
       return rs.next() ? new FixedRunningAverage(rs.getInt(1), rs.getDouble(2)) : null;
     } catch (SQLException sqle) {
-      AbstractJDBCDiffStorage.log.warn("Exception while retrieving diff", sqle);
+      log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -163,7 +163,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setFetchSize(getFetchSize());
       stmt.setLong(1, itemID);
       stmt.setLong(2, userID);
-      AbstractJDBCDiffStorage.log.debug("Executing SQL query: {}", getDiffsSQL);
+      log.debug("Executing SQL query: {}", getDiffsSQL);
       rs = stmt.executeQuery();
       // We should have up to one result for each Preference in prefs
       // They are both ordered by item. Step through and create a RunningAverage[]
@@ -179,7 +179,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
         i++;
       }
     } catch (SQLException sqle) {
-      AbstractJDBCDiffStorage.log.warn("Exception while retrieving diff", sqle);
+      log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -199,7 +199,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
       stmt.setLong(1, itemID);
-      AbstractJDBCDiffStorage.log.debug("Executing SQL query: {}", getAverageItemPrefSQL);
+      log.debug("Executing SQL query: {}", getAverageItemPrefSQL);
       rs = stmt.executeQuery();
       if (rs.next()) {
         int count = rs.getInt(1);
@@ -209,7 +209,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       }
       return null;
     } catch (SQLException sqle) {
-      AbstractJDBCDiffStorage.log.warn("Exception while retrieving average item pref", sqle);
+      log.warn("Exception while retrieving average item pref", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -222,14 +222,14 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     try {
       conn = dataSource.getConnection();
       if (remove) {
-        AbstractJDBCDiffStorage.doPartialUpdate(removeDiffSQLs[0], itemID, prefDelta, conn);
-        AbstractJDBCDiffStorage.doPartialUpdate(removeDiffSQLs[1], itemID, prefDelta, conn);
+        doPartialUpdate(removeDiffSQLs[0], itemID, prefDelta, conn);
+        doPartialUpdate(removeDiffSQLs[1], itemID, prefDelta, conn);
       } else {
-        AbstractJDBCDiffStorage.doPartialUpdate(updateDiffSQLs[0], itemID, prefDelta, conn);
-        AbstractJDBCDiffStorage.doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
+        doPartialUpdate(updateDiffSQLs[0], itemID, prefDelta, conn);
+        doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
       }
     } catch (SQLException sqle) {
-      AbstractJDBCDiffStorage.log.warn("Exception while updating item diff", sqle);
+      log.warn("Exception while updating item diff", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(conn);
@@ -241,7 +241,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     try {
       stmt.setDouble(1, prefDelta);
       stmt.setLong(2, itemID);
-      AbstractJDBCDiffStorage.log.debug("Executing SQL update: {}", sql);
+      log.debug("Executing SQL update: {}", sql);
       stmt.executeUpdate();
     } finally {
       IOUtils.quietClose(stmt);
@@ -262,7 +262,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setLong(1, userID);
       stmt.setLong(2, userID);
       stmt.setLong(3, userID);
-      AbstractJDBCDiffStorage.log.debug("Executing SQL query: {}", getRecommendableItemsSQL);
+      log.debug("Executing SQL query: {}", getRecommendableItemsSQL);
       rs = stmt.executeQuery();
       FastIDSet itemIDs = new FastIDSet();
       while (rs.next()) {
@@ -270,7 +270,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       }
       return itemIDs;
     } catch (SQLException sqle) {
-      AbstractJDBCDiffStorage.log.warn("Exception while retrieving recommendable items", sqle);
+      log.warn("Exception while retrieving recommendable items", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);
@@ -284,7 +284,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       PreparedStatement stmt = null;
       try {
         stmt = conn.prepareStatement(deleteDiffsSQL);
-        AbstractJDBCDiffStorage.log.debug("Executing SQL update: {}", deleteDiffsSQL);
+        log.debug("Executing SQL update: {}", deleteDiffsSQL);
         stmt.executeUpdate();
       } finally {
         IOUtils.quietClose(stmt);
@@ -292,13 +292,13 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       try {
         stmt = conn.prepareStatement(createDiffsSQL);
         stmt.setInt(1, minDiffCount);
-        AbstractJDBCDiffStorage.log.debug("Executing SQL update: {}", createDiffsSQL);
+        log.debug("Executing SQL update: {}", createDiffsSQL);
         stmt.executeUpdate();
       } finally {
         IOUtils.quietClose(stmt);
       }
     } catch (SQLException sqle) {
-      AbstractJDBCDiffStorage.log.warn("Exception while updating/deleting diffs", sqle);
+      log.warn("Exception while updating/deleting diffs", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(conn);
@@ -314,12 +314,12 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      AbstractJDBCDiffStorage.log.debug("Executing SQL query: {}", diffsExistSQL);
+      log.debug("Executing SQL query: {}", diffsExistSQL);
       rs = stmt.executeQuery(diffsExistSQL);
       rs.next();
       return rs.getInt(1) > 0;
     } catch (SQLException sqle) {
-      AbstractJDBCDiffStorage.log.warn("Exception while deleting diffs", sqle);
+      log.warn("Exception while deleting diffs", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(rs, stmt, conn);

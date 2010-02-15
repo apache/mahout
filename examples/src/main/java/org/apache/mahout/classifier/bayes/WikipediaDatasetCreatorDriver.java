@@ -119,14 +119,14 @@ public final class WikipediaDatasetCreatorDriver {
       WikipediaDatasetCreatorDriver.runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt),
         analyzerClass);
     } catch (OptionException e) {
-      WikipediaDatasetCreatorDriver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     } catch (ClassNotFoundException e) {
-      WikipediaDatasetCreatorDriver.log.error("Exception: Analyzer class not found", e);
+      log.error("Exception: Analyzer class not found", e);
     } catch (IllegalAccessException e) {
-      WikipediaDatasetCreatorDriver.log.error("Exception: Couldn't instantiate the class", e);
+      log.error("Exception: Couldn't instantiate the class", e);
     } catch (InstantiationException e) {
-      WikipediaDatasetCreatorDriver.log.error("Exception: Couldn't instantiate the class", e);
+      log.error("Exception: Couldn't instantiate the class", e);
     }
   }
   
@@ -151,7 +151,7 @@ public final class WikipediaDatasetCreatorDriver {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaDatasetCreatorDriver.class);
     if (WikipediaDatasetCreatorDriver.log.isInfoEnabled()) {
-      WikipediaDatasetCreatorDriver.log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output,
+      log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output,
                                                                                                catFile});
     }
     conf.set("key.value.separator.in.input.line", " ");

@@ -269,7 +269,7 @@ public final class PFPGrowth {
       i++;
     }
     
-    PFPGrowth.log.info("No of Features: {}", fList.size());
+    log.info("No of Features: {}", fList.size());
     
     params.set("gList", PFPGrowth.serializeMap(gList, conf));
     params.set("fList", PFPGrowth.serializeList(fList, conf));

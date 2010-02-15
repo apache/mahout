@@ -39,6 +39,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.utils.vectors.SequenceFileVectorIterable.SeqFileIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +133,7 @@ public final class VectorDumper {
           writer = new OutputStreamWriter(System.out);
         }
         boolean printKey = cmdLine.hasOption(printKeyOpt);
-        SequenceFileVectorIterable.SeqFileIterator iterator = (SequenceFileVectorIterable.SeqFileIterator) vectorIterable
+        SeqFileIterator iterator = (SequenceFileVectorIterable.SeqFileIterator) vectorIterable
             .iterator();
         int i = 0;
         while (iterator.hasNext()) {
@@ -155,7 +156,7 @@ public final class VectorDumper {
       }
       
     } catch (OptionException e) {
-      VectorDumper.log.error("Exception", e);
+      log.error("Exception", e);
       VectorDumper.printHelp(group);
     }
     

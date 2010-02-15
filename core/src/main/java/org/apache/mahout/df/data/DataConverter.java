@@ -67,7 +67,7 @@ public class DataConverter {
       if (attr == dataset.getLabelId()) {
         label = dataset.labelCode(token);
         if (label == -1) {
-          DataConverter.log.error(String.format("label token: %s\ndataset.labels: %s", token, Arrays
+          log.error(String.format("label token: %s\ndataset.labels: %s", token, Arrays
               .toString(dataset.labels())));
           throw new IllegalStateException("Label value (" + token + ") not known");
         }
@@ -80,7 +80,7 @@ public class DataConverter {
     }
     
     if (label == -1) {
-      DataConverter.log.error(String.format("Label not found, instance id : %d, \nstring : %s", id, string));
+      log.error(String.format("Label not found, instance id : %d, \nstring : %s", id, string));
       throw new IllegalStateException("Label not found!");
     }
     

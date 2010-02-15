@@ -39,7 +39,7 @@ public class TreeID extends LongWritable implements Cloneable {
   }
   
   public void set(int partition, int treeId) {
-    super.set((long) partition * TreeID.MAX_TREEID + treeId);
+    super.set((long) partition * MAX_TREEID + treeId);
   }
   
   /**
@@ -48,11 +48,11 @@ public class TreeID extends LongWritable implements Cloneable {
    * @return
    */
   public int partition() {
-    return (int) (get() / TreeID.MAX_TREEID);
+    return (int) (get() / MAX_TREEID);
   }
   
   public int treeId() {
-    return (int) (get() % TreeID.MAX_TREEID);
+    return (int) (get() % MAX_TREEID);
   }
   
   @Override

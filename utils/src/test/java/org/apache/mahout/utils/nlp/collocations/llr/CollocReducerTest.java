@@ -50,21 +50,17 @@ public class CollocReducerTest {
     // test input, input[*][0] is the key,
     // input[*][1..n] are the values passed in via
     // the iterator.
-    Gram[][] input = new Gram[][] {
-                                   { new Gram("the",   UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM) },
-                                   { new Gram("the",   HEAD), new Gram("the best"), new Gram("the worst") },
-                                   { new Gram("of",    HEAD), new Gram("of times"), new Gram("of times") },
-                                   { new Gram("times", TAIL), new Gram("of times"), new Gram("of times") }
-    };
+    Gram[][] input = new Gram[][] {{new Gram("the", UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM)},
+                                   {new Gram("the", HEAD), new Gram("the best"), new Gram("the worst")},
+                                   {new Gram("of", HEAD), new Gram("of times"), new Gram("of times")},
+                                   {new Gram("times", TAIL), new Gram("of times"), new Gram("of times")}};
     
     // expected results.
-    Gram[][] values = new Gram[][] {
-                                    { new Gram("the", 4, UNIGRAM), new Gram("the", 2, UNIGRAM) },
-                                    { new Gram("the best",  1), new Gram("the", 2,   HEAD) },
-                                    { new Gram("the worst", 1), new Gram("the", 2,   HEAD) },
-                                    { new Gram("of times",  2), new Gram("of",  2,   HEAD) },
-                                    { new Gram("of times",  2), new Gram("times", 2, TAIL) }
-    };
+    Gram[][] values = new Gram[][] {{new Gram("the", 4, UNIGRAM), new Gram("the", 2, UNIGRAM)},
+                                    {new Gram("the best", 1), new Gram("the", 2, HEAD)},
+                                    {new Gram("the worst", 1), new Gram("the", 2, HEAD)},
+                                    {new Gram("of times", 2), new Gram("of", 2, HEAD)},
+                                    {new Gram("of times", 2), new Gram("times", 2, TAIL)}};
     
     // set up expectations
     for (Gram[] v : values) {

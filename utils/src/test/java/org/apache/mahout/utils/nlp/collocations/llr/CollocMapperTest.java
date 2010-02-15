@@ -118,7 +118,7 @@ public class CollocMapperTest {
       inputTuple.add(i);
     }
     
-    String[][] values = new String[][] { {"h_the", "the best"},
+    String[][] values = new String[][]  {{"h_the", "the best"},
                                          {"t_best", "the best"},
                                          {"h_of", "of times"},
                                          {"t_times", "of times"},

@@ -301,7 +301,7 @@ public final class ClusterDumper {
       }
       clusterDumper.printClusters();
     } catch (OptionException e) {
-      ClusterDumper.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -344,9 +344,9 @@ public final class ClusterDumper {
           pointList.add(key.toString());
         }
       } catch (InstantiationException e) {
-        ClusterDumper.log.error("Exception", e);
+        log.error("Exception", e);
       } catch (IllegalAccessException e) {
-        ClusterDumper.log.error("Exception", e);
+        log.error("Exception", e);
       }
     }
 
@@ -387,7 +387,7 @@ public final class ClusterDumper {
       int index = vectorTerms.get(i).index;
       String dictTerm = dictionary[index];
       if (dictTerm == null) {
-        ClusterDumper.log.error("Dictionary entry missing for {}", index);
+        log.error("Dictionary entry missing for {}", index);
         continue;
       }
       topTerms.add(new Pair<String,Double>(dictTerm, vectorTerms.get(i).weight));

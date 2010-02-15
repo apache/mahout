@@ -75,11 +75,11 @@ public final class ToUserVectorReducer extends MapReduceBase implements
         userVector.set(index, itemPref.getPrefValue());
       }
       
-      if (userVector.getNumNondefaultElements() > ToUserVectorReducer.MAX_PREFS_CONSIDERED) {
-        double cutoff = ToUserVectorReducer.findTopNPrefsCutoff(ToUserVectorReducer.MAX_PREFS_CONSIDERED,
+      if (userVector.getNumNondefaultElements() > MAX_PREFS_CONSIDERED) {
+        double cutoff = findTopNPrefsCutoff(MAX_PREFS_CONSIDERED,
           userVector);
         RandomAccessSparseVector filteredVector = new RandomAccessSparseVector(Integer.MAX_VALUE,
-            ToUserVectorReducer.MAX_PREFS_CONSIDERED);
+            MAX_PREFS_CONSIDERED);
         Iterator<Vector.Element> it = userVector.iterateNonZero();
         while (it.hasNext()) {
           Vector.Element element = it.next();

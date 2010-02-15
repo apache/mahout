@@ -92,7 +92,7 @@ public abstract class Builder {
     // or the mappers won't be able to compute the right indexes
     String tracker = conf.get("mapred.job.tracker", "local");
     if ("local".equals(tracker)) {
-      Builder.log.warn("Hadoop running in 'local' mode, only one map task will be launched");
+      log.warn("Hadoop running in 'local' mode, only one map task will be launched");
       return 1;
     }
     
@@ -325,17 +325,17 @@ public abstract class Builder {
     
     Job job = new Job(conf, "decision forest builder");
     
-    Builder.log.debug("Configuring the job...");
+    log.debug("Configuring the job...");
     configureJob(job, nbTrees, callback != null);
     
-    Builder.log.debug("Running the job...");
+    log.debug("Running the job...");
     if (!runJob(job)) {
-      Builder.log.error("Job failed!");
+      log.error("Job failed!");
       return null;
     }
     
     if (Builder.isOutput(conf)) {
-      Builder.log.debug("Parsing the output...");
+      log.debug("Parsing the output...");
       DecisionForest forest = parseOutput(job, callback);
       
       // delete the output path

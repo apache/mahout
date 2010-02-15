@@ -29,9 +29,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.SequenceFile.Reader;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -132,7 +132,7 @@ public class FrequenciesJob {
     Configuration conf = job.getConfiguration();
     
     int numMaps = conf.getInt("mapred.map.tasks", -1);
-    FrequenciesJob.log.info("mapred.map.tasks = {}", numMaps);
+    log.info("mapred.map.tasks = {}", numMaps);
     
     FileSystem fs = outputPath.getFileSystem(conf);
     
@@ -190,7 +190,7 @@ public class FrequenciesJob {
      */
     protected void setup(Dataset dataset) {
       converter = new DataConverter(dataset);
-      // log.info("labels: {}", Arrays.toString(dataset.labels()));
+      //log.info("labels: {}", Arrays.toString(dataset.labels()));
     }
     
     @Override
@@ -252,7 +252,7 @@ public class FrequenciesJob {
     /** counts[c] = num tuples from the partition with label == c */
     private int[] counts;
     
-    protected Frequencies() {}
+    protected Frequencies() { }
     
     protected Frequencies(long firstId, int[] counts) {
       this.firstId = firstId;

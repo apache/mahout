@@ -43,9 +43,9 @@ public final class NetflixRecommenderEvaluatorRunner {
     if (ratingsFile != null) {
       DataModel model = new NetflixDataModel(ratingsFile, true);
       double evaluation = evaluator.evaluate(new NetflixRecommenderBuilder(), null, model, 0.9, 0.1);
-      NetflixRecommenderEvaluatorRunner.log.info(String.valueOf(evaluation));
+      log.info(String.valueOf(evaluation));
     } else {
-      NetflixRecommenderEvaluatorRunner.log.error("Netflix Recommender needs a ratings file to work. Please provide it with the -i command line option.");
+      log.error("Netflix Recommender needs a ratings file to work. Please provide it with the -i command line option.");
     }
   }
   

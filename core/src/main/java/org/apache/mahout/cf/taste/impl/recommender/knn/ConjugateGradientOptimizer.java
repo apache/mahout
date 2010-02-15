@@ -81,7 +81,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       w[i] = -ri;
     }
     
-    for (int iteration = 0; iteration < ConjugateGradientOptimizer.MAX_ITERATIONS; iteration++) {
+    for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
       
       // z = A*w;
       for (int i = 0; i < k; i++) {
@@ -115,7 +115,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
         double value = r[i];
         rdot += value * value;
       }
-      if (rdot <= ConjugateGradientOptimizer.CONVERGENCE_LIMIT) {
+      if (rdot <= CONVERGENCE_LIMIT) {
         break;
       }
       

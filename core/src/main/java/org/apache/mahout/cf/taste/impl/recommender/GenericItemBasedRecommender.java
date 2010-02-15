@@ -89,7 +89,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
       throw new IllegalArgumentException("howMany must be at least 1");
     }
     
-    GenericItemBasedRecommender.log.debug("Recommending items for user ID '{}'", userID);
+    log.debug("Recommending items for user ID '{}'", userID);
     
     if (getNumPreferences(userID) == 0) {
       return Collections.emptyList();
@@ -102,7 +102,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
     
-    GenericItemBasedRecommender.log.debug("Recommendations are: {}", topItems);
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
   
@@ -122,7 +122,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
   
   @Override
-  public List<RecommendedItem> mostSimilarItems(long itemID, int howMany, Rescorer<LongPair> rescorer) throws TasteException {
+  public List<RecommendedItem> mostSimilarItems(long itemID, int howMany,
+                                                Rescorer<LongPair> rescorer) throws TasteException {
     TopItems.Estimator<Long> estimator = new MostSimilarEstimator(itemID, similarity, rescorer);
     return doMostSimilarItems(new long[] {itemID}, howMany, estimator);
   }
@@ -133,7 +134,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   }
   
   @Override
-  public List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany, Rescorer<LongPair> rescorer) throws TasteException {
+  public List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany,
+                                                Rescorer<LongPair> rescorer) throws TasteException {
     TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, rescorer);
     return doMostSimilarItems(itemIDs, howMany, estimator);
   }

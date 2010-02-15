@@ -64,7 +64,7 @@ public class FileInfoParser {
    * @return Initialized Dataset
    */
   public static DataSet parseFile(FileSystem fs, Path inpath) throws IOException {
-    Path info = FileInfoParser.getInfoFile(fs, inpath);
+    Path info = getInfoFile(fs, inpath);
     
     FSDataInputStream input = fs.open(info);
     Scanner reader = new Scanner(input);
@@ -78,16 +78,16 @@ public class FileInfoParser {
     while (reader.hasNextLine()) {
       String line = reader.nextLine();
       StringTokenizer tokenizer = new StringTokenizer(line, ", ");
-      String token = FileInfoParser.nextToken(tokenizer);
-      if (FileInfoParser.IGNORED_TOKEN.equals(token)) {
+      String token = nextToken(tokenizer);
+      if (IGNORED_TOKEN.equals(token)) {
         ignored.add(index);
-      } else if (FileInfoParser.LABEL_TOKEN.equals(token)) {
+      } else if (LABEL_TOKEN.equals(token)) {
         labelIndex = index;
-        attributes.add(FileInfoParser.parseNominal(tokenizer));
-      } else if (FileInfoParser.NOMINAL_TOKEN.equals(token)) {
-        attributes.add(FileInfoParser.parseNominal(tokenizer));
-      } else if (FileInfoParser.NUMERICAL_TOKEN.equals(token)) {
-        attributes.add(FileInfoParser.parseNumerical(tokenizer));
+        attributes.add(parseNominal(tokenizer));
+      } else if (NOMINAL_TOKEN.equals(token)) {
+        attributes.add(parseNominal(tokenizer));
+      } else if (NUMERICAL_TOKEN.equals(token)) {
+        attributes.add(parseNumerical(tokenizer));
       } else {
         throw new IllegalArgumentException("Unknown token (" + token
                                            + ") encountered while parsing the info file");
@@ -140,7 +140,7 @@ public class FileInfoParser {
   private static NominalAttr parseNominal(StringTokenizer tokenizer) {
     List<String> vlist = new ArrayList<String>();
     while (tokenizer.hasMoreTokens()) {
-      vlist.add(FileInfoParser.nextToken(tokenizer));
+      vlist.add(nextToken(tokenizer));
     }
     
     String[] values = new String[vlist.size()];
@@ -155,8 +155,8 @@ public class FileInfoParser {
    * @param tokenizer
    */
   private static NumericalAttr parseNumerical(StringTokenizer tokenizer) {
-    double min = FileInfoParser.nextDouble(tokenizer);
-    double max = FileInfoParser.nextDouble(tokenizer);
+    double min = nextDouble(tokenizer);
+    double max = nextDouble(tokenizer);
     if (min > max) {
       throw new IllegalArgumentException("min > max");
     }
@@ -165,7 +165,7 @@ public class FileInfoParser {
   }
   
   private static double nextDouble(StringTokenizer tokenizer) {
-    String token = FileInfoParser.nextToken(tokenizer);
+    String token = nextToken(tokenizer);
     double value;
     
     try {

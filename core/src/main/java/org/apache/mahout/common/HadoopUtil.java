@@ -38,17 +38,17 @@ public final class HadoopUtil {
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {
-      HadoopUtil.log.warn("Deleting {}", outPath);
+      log.warn("Deleting {}", outPath);
       fs.delete(outPath, true);
     }
-    HadoopUtil.log.warn("Creating dir {}", outPath);
+    log.warn("Creating dir {}", outPath);
     fs.mkdirs(outPath);
   }
   
   public static void deletePath(String output, FileSystem fs) throws IOException {
     Path outPath = new Path(output);
     if (fs.exists(outPath)) {
-      HadoopUtil.log.warn("Deleting {}", outPath);
+      log.warn("Deleting {}", outPath);
       fs.delete(outPath, true);
     }
   }
@@ -56,14 +56,14 @@ public final class HadoopUtil {
   public static void deletePaths(Iterable<Path> paths, FileSystem fs) throws IOException {
     for (Path path : paths) {
       if (fs.exists(path)) {
-        HadoopUtil.log.warn("Deleting {}", path);
+        log.warn("Deleting {}", path);
         fs.delete(path, true);
       }
     }
   }
   
   public static void rename(Path from, Path to, FileSystem fs) throws IOException {
-    HadoopUtil.log.warn("Renaming " + from.toUri() + " to " + to.toUri());
+    log.warn("Renaming " + from.toUri() + " to " + to.toUri());
     fs.rename(from, to);
   }
 }

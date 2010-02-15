@@ -180,7 +180,7 @@ public final class TestClassifier {
   }
   
   public static void classifySequential(BayesParameters params) throws IOException, InvalidDatastoreException {
-    TestClassifier.log.info("Loading model from: {}", params.print());
+    log.info("Loading model from: {}", params.print());
     boolean verbose = Boolean.valueOf(params.get("verbose"));
     File dir = new File(params.get("testDirPath"));
     File[] subdirs = dir.listFiles(new FilenameFilter() {
@@ -195,11 +195,11 @@ public final class TestClassifier {
     
     if (params.get("dataSource").equals("hdfs")) {
       if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-        TestClassifier.log.info("Testing Bayes Classifier");
+        log.info("Testing Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-        TestClassifier.log.info("Testing Complementary Bayes Classifier");
+        log.info("Testing Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else {
@@ -208,11 +208,11 @@ public final class TestClassifier {
       
     } else if (params.get("dataSource").equals("hbase")) {
       if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-        TestClassifier.log.info("Testing Bayes Classifier");
+        log.info("Testing Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new HBaseBayesDatastore(params.get("basePath"), params);
       } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-        TestClassifier.log.info("Testing Complementary Bayes Classifier");
+        log.info("Testing Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new HBaseBayesDatastore(params.get("basePath"), params);
       } else {
@@ -229,8 +229,8 @@ public final class TestClassifier {
     if (subdirs != null) {
       
       for (File file : subdirs) {
-        TestClassifier.log.info("--------------");
-        TestClassifier.log.info("Testing: {}", file);
+        log.info("--------------");
+        log.info("Testing: {}", file);
         String correctLabel = file.getName().split(".txt")[0];
         TimingStatistics operationStats = new TimingStatistics();
         
@@ -251,26 +251,26 @@ public final class TestClassifier {
             boolean correct = resultAnalyzer.addInstance(correctLabel, classifiedLabel);
             if (verbose) {
               // We have one document per line
-              TestClassifier.log.info(
+              log.info(
                 "Line Number: {} Line(30): {} Expected Label: {} Classified Label: {} Correct: {}",
                 new Object[] {lineNum, line.length() > 30 ? line.substring(0, 30) : line, correctLabel,
                               classifiedLabel.getLabel(), correct,});
             }
-            // log.info("{} {}", correctLabel, classifiedLabel);
+            //log.info("{} {}", correctLabel, classifiedLabel);
             
           }
           lineNum++;
         }
-        log.info("{}\t{}\t{}/{}",
+       log.info("{}\t{}\t{}/{}",
           new Object[] {correctLabel, resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
                         resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
                         resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)});
-        log.info("{}", operationStats.toString());
+       log.info("{}", operationStats.toString());
       }
       
     }
-    log.info("{}", totalStatistics.toString());
-    log.info(resultAnalyzer.summarize());
+   log.info("{}", totalStatistics.toString());
+   log.info(resultAnalyzer.summarize());
   }
   
   public static void classifyParallel(BayesParameters params) throws IOException {

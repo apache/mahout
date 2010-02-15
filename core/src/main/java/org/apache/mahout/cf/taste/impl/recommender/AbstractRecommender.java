@@ -67,7 +67,7 @@ public abstract class AbstractRecommender implements Recommender {
     if (Double.isNaN(value)) {
       throw new IllegalArgumentException("Invalid value: " + value);
     }
-    AbstractRecommender.log.debug("Setting preference for user {}, item {}", userID, itemID);
+    log.debug("Setting preference for user {}, item {}", userID, itemID);
     dataModel.setPreference(userID, itemID, value);
   }
   
@@ -81,7 +81,7 @@ public abstract class AbstractRecommender implements Recommender {
    */
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
-    AbstractRecommender.log.debug("Remove preference for user '{}', item '{}'", userID, itemID);
+    log.debug("Remove preference for user '{}', item '{}'", userID, itemID);
     dataModel.removePreference(userID, itemID);
   }
   

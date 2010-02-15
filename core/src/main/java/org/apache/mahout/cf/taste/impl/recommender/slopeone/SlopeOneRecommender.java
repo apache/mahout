@@ -111,7 +111,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
     
-    SlopeOneRecommender.log.debug("Recommending items for user ID '{}'", userID);
+    log.debug("Recommending items for user ID '{}'", userID);
     
     FastIDSet possibleItemIDs = diffStorage.getRecommendableItemIDs(userID);
     
@@ -120,7 +120,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
     
-    SlopeOneRecommender.log.debug("Recommendations are: {}", topItems);
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
   

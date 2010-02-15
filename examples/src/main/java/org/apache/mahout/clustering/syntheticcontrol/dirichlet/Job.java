@@ -108,7 +108,7 @@ public class Job {
           .runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers,
             vectorClassName);
     } catch (OptionException e) {
-      Job.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -236,6 +236,6 @@ public class Job {
       result.append('\n');
     }
     result.append('\n');
-    Job.log.info(result.toString());
+    log.info(result.toString());
   }
 }

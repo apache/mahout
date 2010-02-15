@@ -63,7 +63,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements
         vocabCount += values.next().get();
       }
       
-      BayesTfIdfReducer.log.info("{}\t{}", key, vocabCount);
+      log.info("{}\t{}", key, vocabCount);
       if (useHbase) {
         Put bu = new Put(Bytes.toBytes(BayesConstants.HBASE_COUNTS_ROW));
         bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes
@@ -111,7 +111,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements
       table = new HTable(hBconf, job.get("output.table"));
       
     } catch (IOException e) {
-      BayesTfIdfReducer.log.error("Unexpected error during configuration", e);
+      log.error("Unexpected error during configuration", e);
     }
     
   }

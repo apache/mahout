@@ -28,23 +28,22 @@ import org.slf4j.LoggerFactory;
  * This class implements training according to the winnow update algorithm.
  */
 public class WinnowTrainer extends LinearTrainer {
-
+  
   private static final Logger log = LoggerFactory.getLogger(WinnowTrainer.class);
-
+  
   /** Promotion step to multiply weights with on update. */
   private final double promotionStep;
-
+  
   public WinnowTrainer(int dimension, double promotionStep,
-      double threshold, double init, double initBias) {
+                       double threshold, double init, double initBias) {
     super(dimension, threshold, init, initBias);
     this.promotionStep = promotionStep;
   }
-
-  public WinnowTrainer(int dimension, double promotionStep)
-      throws CardinalityException {
+  
+  public WinnowTrainer(int dimension, double promotionStep) throws CardinalityException {
     this(dimension, promotionStep, 0.5, 1, 0);
   }
-
+  
   /**
    * Initializes with dimension and promotionStep of 2.
    * 
@@ -54,7 +53,7 @@ public class WinnowTrainer extends LinearTrainer {
   public WinnowTrainer(int dimension) {
     this(dimension, 2);
   }
-
+  
   /**
    * {@inheritDoc} Winnow update works such that in case the predicted label
    * does not match the real label, the weight vector is updated as follows: In

@@ -49,7 +49,7 @@ public class EvalMapper extends MapReduceBase implements
   
   @Override
   public void configure(JobConf job) {
-    String evlstr = job.get(EvalMapper.MAHOUT_GA_EVALUATOR);
+    String evlstr = job.get(MAHOUT_GA_EVALUATOR);
     if (evlstr == null) {
       throw new IllegalArgumentException("'MAHOUT_GA_EVALUATOR' job parameter non found");
     }

@@ -99,7 +99,7 @@ public final class WikipediaXmlSplitter {
     try {
       cmdLine = parser.parse(args);
     } catch (OptionException e) {
-      WikipediaXmlSplitter.log.error("Error while parsing options", e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
       return;
     }

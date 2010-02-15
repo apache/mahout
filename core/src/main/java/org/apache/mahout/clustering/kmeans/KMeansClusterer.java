@@ -66,7 +66,7 @@ public class KMeansClusterer {
       Vector clusterCenter = cluster.getCenter();
       double distance = this.measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
       if (KMeansClusterer.log.isDebugEnabled()) {
-        KMeansClusterer.log.debug("{} Cluster: {}", distance, cluster.getId());
+        log.debug("{} Cluster: {}", distance, cluster.getId());
       }
       if ((distance < nearestDistance) || (nearestCluster == null)) {
         nearestCluster = cluster;

@@ -55,7 +55,7 @@ public final class GroupLensRecommenderEvaluatorRunner {
       model,
       0.9,
       0.3);
-    GroupLensRecommenderEvaluatorRunner.log.info(String.valueOf(evaluation));
+    log.info(String.valueOf(evaluation));
   }
   
 }

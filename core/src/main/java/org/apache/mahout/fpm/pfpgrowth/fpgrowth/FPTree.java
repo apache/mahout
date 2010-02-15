@@ -75,16 +75,16 @@ public class FPTree {
   private final Set<Integer> sortedSet = new TreeSet<Integer>();
   
   public FPTree() {
-    this(FPTree.DEFAULT_INITIAL_SIZE, FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE);
+    this(DEFAULT_INITIAL_SIZE, DEFAULT_HEADER_TABLE_INITIAL_SIZE);
   }
   
   public FPTree(int size) {
-    this(size, FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE);
+    this(size, DEFAULT_HEADER_TABLE_INITIAL_SIZE);
   }
   
   private FPTree(int size, int headersize) {
-    if (size < FPTree.DEFAULT_INITIAL_SIZE) {
-      size = FPTree.DEFAULT_INITIAL_SIZE;
+    if (size < DEFAULT_INITIAL_SIZE) {
+      size = DEFAULT_INITIAL_SIZE;
     }
     
     parent = new int[size];
@@ -96,11 +96,11 @@ public class FPTree {
     nodeChildren = new int[size][];
     conditional = new int[size];
     
-    headerTableAttributes = new int[FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE];
-    headerTableAttributeCount = new long[FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE];
-    headerTableLookup = new int[FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE];
+    headerTableAttributes = new int[DEFAULT_HEADER_TABLE_INITIAL_SIZE];
+    headerTableAttributeCount = new long[DEFAULT_HEADER_TABLE_INITIAL_SIZE];
+    headerTableLookup = new int[DEFAULT_HEADER_TABLE_INITIAL_SIZE];
     Arrays.fill(headerTableLookup, -1);
-    headerTableProperties = new int[FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE][];
+    headerTableProperties = new int[DEFAULT_HEADER_TABLE_INITIAL_SIZE][];
     
     singlePath = true;
     createRootNode();
@@ -134,12 +134,12 @@ public class FPTree {
   
   public final void addHeaderNext(int attributeValue, int nodeId) {
     int index = getHeaderIndex(attributeValue);
-    if (headerTableProperties[index][FPTree.HT_NEXT] == -1) {
-      headerTableProperties[index][FPTree.HT_NEXT] = nodeId;
-      headerTableProperties[index][FPTree.HT_LAST] = nodeId;
+    if (headerTableProperties[index][HT_NEXT] == -1) {
+      headerTableProperties[index][HT_NEXT] = nodeId;
+      headerTableProperties[index][HT_LAST] = nodeId;
     } else {
-      setNext(headerTableProperties[index][FPTree.HT_LAST], nodeId);
-      headerTableProperties[index][FPTree.HT_LAST] = nodeId;
+      setNext(headerTableProperties[index][HT_LAST], nodeId);
+      headerTableProperties[index][HT_LAST] = nodeId;
     }
   }
   
@@ -203,7 +203,7 @@ public class FPTree {
     nodeCount[nodes] = count;
     
     if (nodeChildren[nodes] == null) {
-      nodeChildren[nodes] = new int[FPTree.DEFAULT_CHILDREN_INITIAL_SIZE];
+      nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
     
     return nodes++;
@@ -222,7 +222,7 @@ public class FPTree {
     
     conditional[nodes] = 0;
     if (nodeChildren[nodes] == null) {
-      nodeChildren[nodes] = new int[FPTree.DEFAULT_CHILDREN_INITIAL_SIZE];
+      nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
     
     int childNodeId = nodes++;
@@ -238,7 +238,7 @@ public class FPTree {
     attribute[nodes] = -1;
     nodeCount[nodes] = 0;
     if (nodeChildren[nodes] == null) {
-      nodeChildren[nodes] = new int[FPTree.DEFAULT_CHILDREN_INITIAL_SIZE];
+      nodeChildren[nodes] = new int[DEFAULT_CHILDREN_INITIAL_SIZE];
     }
     return nodes++;
   }
@@ -249,7 +249,7 @@ public class FPTree {
   
   public final int getHeaderNext(int attributeValue) {
     int index = getHeaderIndex(attributeValue);
-    return headerTableProperties[index][FPTree.HT_NEXT];
+    return headerTableProperties[index][HT_NEXT];
   }
   
   public final long getHeaderSupportCount(int attributeValue) {
@@ -281,7 +281,7 @@ public class FPTree {
   
   public final void removeHeaderNext(int attributeValue) {
     int index = getHeaderIndex(attributeValue);
-    headerTableProperties[index][FPTree.HT_NEXT] = -1;
+    headerTableProperties[index][HT_NEXT] = -1;
   }
   
   public final void reorderHeaderTable() {
@@ -351,11 +351,11 @@ public class FPTree {
       }
       headerTableAttributes[headerTableCount] = attributeValue;
       if (headerTableProperties[headerTableCount] == null) {
-        headerTableProperties[headerTableCount] = new int[FPTree.HEADERTABLEBLOCKSIZE];
+        headerTableProperties[headerTableCount] = new int[HEADERTABLEBLOCKSIZE];
       }
       headerTableAttributeCount[headerTableCount] = 0;
-      headerTableProperties[headerTableCount][FPTree.HT_NEXT] = -1;
-      headerTableProperties[headerTableCount][FPTree.HT_LAST] = -1;
+      headerTableProperties[headerTableCount][HT_NEXT] = -1;
+      headerTableProperties[headerTableCount][HT_LAST] = -1;
       index = headerTableCount++;
       headerTableLookup[attributeValue] = index;
       sortedSet.add(attributeValue);
@@ -364,9 +364,9 @@ public class FPTree {
   }
   
   private void resize() {
-    int size = (int) (FPTree.GROWTH_RATE * nodes);
-    if (size < FPTree.DEFAULT_INITIAL_SIZE) {
-      size = FPTree.DEFAULT_INITIAL_SIZE;
+    int size = (int) (GROWTH_RATE * nodes);
+    if (size < DEFAULT_INITIAL_SIZE) {
+      size = DEFAULT_INITIAL_SIZE;
     }
     
     int[] oldChildCount = childCount;
@@ -397,9 +397,9 @@ public class FPTree {
   
   private void resizeChildren(int nodeId) {
     int length = childCount[nodeId];
-    int size = (int) (FPTree.GROWTH_RATE * length);
-    if (size < FPTree.DEFAULT_CHILDREN_INITIAL_SIZE) {
-      size = FPTree.DEFAULT_CHILDREN_INITIAL_SIZE;
+    int size = (int) (GROWTH_RATE * length);
+    if (size < DEFAULT_CHILDREN_INITIAL_SIZE) {
+      size = DEFAULT_CHILDREN_INITIAL_SIZE;
     }
     int[] oldNodeChildren = nodeChildren[nodeId];
     nodeChildren[nodeId] = new int[size];
@@ -407,7 +407,7 @@ public class FPTree {
   }
   
   private void resizeHeaderLookup(int attributeValue) {
-    int size = (int) (attributeValue * FPTree.GROWTH_RATE);
+    int size = (int) (attributeValue * GROWTH_RATE);
     int[] oldLookup = headerTableLookup;
     headerTableLookup = new int[size];
     Arrays.fill(headerTableLookup, oldLookup.length, size, -1);
@@ -415,9 +415,9 @@ public class FPTree {
   }
   
   private void resizeHeaderTable() {
-    int size = (int) (FPTree.GROWTH_RATE * headerTableCount);
-    if (size < FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE) {
-      size = FPTree.DEFAULT_HEADER_TABLE_INITIAL_SIZE;
+    int size = (int) (GROWTH_RATE * headerTableCount);
+    if (size < DEFAULT_HEADER_TABLE_INITIAL_SIZE) {
+      size = DEFAULT_HEADER_TABLE_INITIAL_SIZE;
     }
     
     int[] oldAttributes = headerTableAttributes;

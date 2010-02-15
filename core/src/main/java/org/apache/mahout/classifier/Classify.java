@@ -111,7 +111,7 @@ public final class Classify {
     
     String modelBasePath = (String) cmdLine.getValue(pathOpt);
     
-    Classify.log.info("Loading model from: {}", params.print());
+    log.info("Loading model from: {}", params.print());
     
     Algorithm algorithm;
     Datastore datastore;
@@ -121,11 +121,11 @@ public final class Classify {
     String dataSource = (String) cmdLine.getValue(dataSourceOpt);
     if (dataSource.equals("hdfs")) {
       if (classifierType.equalsIgnoreCase("bayes")) {
-        Classify.log.info("Using Bayes Classifier");
+        log.info("Using Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else if (classifierType.equalsIgnoreCase("cbayes")) {
-        Classify.log.info("Using Complementary Bayes Classifier");
+        log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
       } else {
@@ -134,11 +134,11 @@ public final class Classify {
       
     } else if (dataSource.equals("hbase")) {
       if (classifierType.equalsIgnoreCase("bayes")) {
-        Classify.log.info("Using Bayes Classifier");
+        log.info("Using Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new HBaseBayesDatastore(modelBasePath, params);
       } else if (classifierType.equalsIgnoreCase("cbayes")) {
-        Classify.log.info("Using Complementary Bayes Classifier");
+        log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new HBaseBayesDatastore(modelBasePath, params);
       } else {
@@ -168,7 +168,7 @@ public final class Classify {
       analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
     }
     
-    Classify.log.info("Converting input document to proper format");
+    log.info("Converting input document to proper format");
     String[] document = BayesFileFormatter.readerToDocument(analyzer, new InputStreamReader(
         new FileInputStream(docPath), Charset.forName(encoding)));
     StringBuilder line = new StringBuilder();
@@ -178,10 +178,10 @@ public final class Classify {
     
     List<String> doc = new NGrams(line.toString(), gramSize).generateNGramsWithoutLabel();
     
-    Classify.log.info("Done converting");
-    Classify.log.info("Classifying document: {}", docPath);
+    log.info("Done converting");
+    log.info("Classifying document: {}", docPath);
     ClassifierResult category = classifier.classifyDocument(doc.toArray(new String[doc.size()]), defaultCat);
-    Classify.log.info("Category for {} is {}", docPath, category);
+    log.info("Category for {} is {}", docPath, category);
     
   }
 }

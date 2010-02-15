@@ -208,7 +208,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     }
     checkClustersBuilt();
     
-    TreeClusteringRecommender.log.debug("Recommending items for user ID '{}'", userID);
+    log.debug("Recommending items for user ID '{}'", userID);
     
     List<RecommendedItem> recommended = topRecsByUserID.get(userID);
     if (recommended == null) {
@@ -291,12 +291,12 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
           findClusters(newClusters);
         }
         topRecsByUserID = computeTopRecsPerUserID(newClusters);
-        clustersByUserID = TreeClusteringRecommender.computeClustersPerUserID(newClusters);
+        clustersByUserID = computeClustersPerUserID(newClusters);
         allClusters = newClusters.toArray(new FastIDSet[newClusters.size()]);
       } else {
         topRecsByUserID = new FastByIDMap<List<RecommendedItem>>();
         clustersByUserID = new FastByIDMap<FastIDSet>();
-        allClusters = TreeClusteringRecommender.NO_CLUSTERS;
+        allClusters = NO_CLUSTERS;
       }
       clustersBuilt = true;
     } finally {
@@ -350,7 +350,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     for (int i = 0; i < size; i++) {
       FastIDSet cluster1 = clusters.get(i);
       for (int j = i + 1; j < size; j++) {
-        if ((samplingRate >= 1.0) || (TreeClusteringRecommender.r.nextDouble() < samplingRate)) {
+        if ((samplingRate >= 1.0) || (r.nextDouble() < samplingRate)) {
           FastIDSet cluster2 = clusters.get(j);
           double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
           if (!Double.isNaN(similarity) && (similarity > bestSimilarity)) {
@@ -385,10 +385,10 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     
     TopItems.Estimator<Long> estimator = new Estimator(cluster);
     
-    List<RecommendedItem> topItems = TopItems.getTopItems(TreeClusteringRecommender.NUM_CLUSTER_RECS,
+    List<RecommendedItem> topItems = TopItems.getTopItems(NUM_CLUSTER_RECS,
       possibleItemIDs.iterator(), null, estimator);
     
-    TreeClusteringRecommender.log.debug("Recommendations are: {}", topItems);
+    log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);
   }
   

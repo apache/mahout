@@ -24,7 +24,7 @@ import org.apache.mahout.common.RandomUtils;
 import java.util.Random;
 
 public final class CacheTest extends TasteTestCase {
-
+  
   public void testLotsOfGets() throws TasteException {
     Retriever<Object,Object> retriever = new IdentityRetriever();
     Cache<Object,Object> cache = new Cache<Object,Object>(retriever, 1000);
@@ -32,7 +32,7 @@ public final class CacheTest extends TasteTestCase {
       assertEquals(i, cache.get(i));
     }
   }
-
+  
   public void testMixedUsage() throws TasteException {
     Random random = RandomUtils.getRandom();
     Retriever<Object,Object> retriever = new IdentityRetriever();
@@ -42,13 +42,13 @@ public final class CacheTest extends TasteTestCase {
       if (r < 0.01) {
         cache.clear();
       } else if (r < 0.1) {
-        cache.remove(r-100);
+        cache.remove(r - 100);
       } else {
         assertEquals(i, cache.get(i));
       }
     }
   }
-
+  
   private static class IdentityRetriever implements Retriever<Object,Object> {
     @Override
     public Object get(Object key) {

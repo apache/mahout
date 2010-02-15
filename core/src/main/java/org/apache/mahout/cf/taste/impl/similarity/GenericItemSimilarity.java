@@ -136,7 +136,8 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel} items
    */
-  public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel, int maxToKeep) throws TasteException {
+  public GenericItemSimilarity(ItemSimilarity otherSimilarity,
+                               DataModel dataModel, int maxToKeep) throws TasteException {
     long[] itemIDs = IteratorUtils.longIteratorToList(dataModel.getItemIDs());
     Iterator<ItemItemSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, itemIDs);
     Iterable<ItemItemSimilarity> keptSimilarities = TopItems.getTopItemItemSimilarities(maxToKeep,

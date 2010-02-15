@@ -34,10 +34,10 @@ import org.apache.mahout.common.IOUtils;
 public final class GroupLensDataModel extends FileDataModel {
   
   private static final String COLON_DELIMTER = "::";
-  private static final Pattern COLON_DELIMITER_PATTERN = Pattern.compile(GroupLensDataModel.COLON_DELIMTER);
+  private static final Pattern COLON_DELIMITER_PATTERN = Pattern.compile(COLON_DELIMTER);
   
   public GroupLensDataModel() throws IOException {
-    this(GroupLensDataModel.readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"));
+    this(readResourceToTempFile("/org/apache/mahout/cf/taste/example/grouplens/ratings.dat"));
   }
   
   /**
@@ -45,7 +45,7 @@ public final class GroupLensDataModel extends FileDataModel {
    * @throws IOException if an error occurs while reading or writing files
    */
   public GroupLensDataModel(File ratingsFile) throws IOException {
-    super(GroupLensDataModel.convertGLFile(ratingsFile));
+    super(convertGLFile(ratingsFile));
   }
   
   private static File convertGLFile(File originalFile) throws IOException {
@@ -58,7 +58,7 @@ public final class GroupLensDataModel extends FileDataModel {
     try {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, false)) {
-        String convertedLine = GroupLensDataModel.COLON_DELIMITER_PATTERN.matcher(line.substring(0, line.lastIndexOf(GroupLensDataModel.COLON_DELIMTER))).replaceAll(",");
+        String convertedLine = COLON_DELIMITER_PATTERN.matcher(line.substring(0, line.lastIndexOf(COLON_DELIMTER))).replaceAll(",");
         writer.println(convertedLine);
       }
       writer.flush();

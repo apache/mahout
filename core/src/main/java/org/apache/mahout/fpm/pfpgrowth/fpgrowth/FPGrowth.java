@@ -49,11 +49,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of PFGrowth Algorithm with FP-Bonsai pruning
  * 
- * Generic parameter A is the object type used as the cell items in a
- * transaction list.
+ * Generic parameter A is the object type used as the cell items in a transaction list.
+ * 
+ * @param <A>
+ *          the type used
  */
 public class FPGrowth<A extends Comparable<? super A>> {
-  
+
   private static final Logger log = LoggerFactory.getLogger(FPGrowth.class);
   
   public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(FileSystem fs,
@@ -174,14 +176,14 @@ public class FPGrowth<A extends Comparable<? super A>> {
       attributeFrequency[attributeIdMapping.get(attrib)] = frequency;
     }
     
-    FPGrowth.log.info("Number of unique items {}", frequencyList.size());
+    log.info("Number of unique items {}", frequencyList.size());
     
     Set<Integer> returnFeatures = new HashSet<Integer>();
     if (returnableFeatures.isEmpty() == false) {
       for (A attrib : returnableFeatures) {
         if (attributeIdMapping.containsKey(attrib)) {
           returnFeatures.add(attributeIdMapping.get(attrib));
-          FPGrowth.log.info("Adding Pattern {}=>{}", attrib, attributeIdMapping
+          log.info("Adding Pattern {}=>{}", attrib, attributeIdMapping
             .get(attrib));
         }
       }
@@ -191,7 +193,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       }
     }
     
-    FPGrowth.log.info("Number of unique pruned items {}", attributeIdMapping.size());
+    log.info("Number of unique pruned items {}", attributeIdMapping.size());
     generateTopKFrequentPatterns(new TransactionIterator<A>(transactionStream,
         attributeIdMapping), attributeFrequency, minSupport, k, reverseMapping
         .size(), returnFeatures, new TopKPatternsOutputConverter<A>(output,
@@ -231,7 +233,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       if (requiredFeatures.contains(attribute) == false) {
         continue;
       }
-      FPGrowth.log.info("Mining FTree Tree for all patterns with {}", attribute);
+      log.info("Mining FTree Tree for all patterns with {}", attribute);
       MutableLong minSupport = new MutableLong(minSupportValue);
       FrequentPatternMaxHeap frequentPatterns = FPGrowth.growth(tree, minSupport, k,
         treeCache, 0, attribute, updater);
@@ -239,10 +241,10 @@ public class FPGrowth<A extends Comparable<? super A>> {
       outputCollector.collect(attribute, frequentPatterns);
       
       minSupportValue = Math.max(minSupportValue, minSupport.longValue() / 2);
-      FPGrowth.log.info("Found {} Patterns with Least Support {}", patterns.get(
+      log.info("Found {} Patterns with Least Support {}", patterns.get(
         attribute).count(), patterns.get(attribute).leastSupport());
     }
-    FPGrowth.log.info("Tree Cache: First Level: Cache hits={} Cache Misses={}",
+    log.info("Tree Cache: First Level: Cache hits={} Cache Misses={}",
       treeCache.getHits(), treeCache.getMisses());
     return patterns;
   }
@@ -257,7 +259,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     Pattern frequentItem = new Pattern();
     while (tree.childCount(tempNode) != 0) {
       if (tree.childCount(tempNode) > 1) {
-        FPGrowth.log.info("This should not happen {} {}", tree.childCount(tempNode),
+        log.info("This should not happen {} {}", tree.childCount(tempNode),
           tempNode);
       }
       tempNode = tree.childAtIndex(tempNode, 0);
@@ -294,13 +296,10 @@ public class FPGrowth<A extends Comparable<? super A>> {
    *          format to the corresponding A Format
    * @return Top K frequent patterns for each attribute
    */
-  private Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(Iterator<Pair<int[],Long>> transactions,
-    long[] attributeFrequency,
-    long minSupport,
-    int k,
-    int featureSetSize,
-    Set<Integer> returnFeatures,
-    TopKPatternsOutputConverter<A> topKPatternsOutputCollector,
+  private Map<Integer,FrequentPatternMaxHeap> generateTopKFrequentPatterns(
+    Iterator<Pair<int[],Long>> transactions,
+    long[] attributeFrequency, long minSupport, int k, int featureSetSize,
+    Set<Integer> returnFeatures, TopKPatternsOutputConverter<A> topKPatternsOutputCollector,
     StatusUpdater updater) throws IOException {
     
     FPTree tree = new FPTree(featureSetSize);
@@ -321,11 +320,11 @@ public class FPGrowth<A extends Comparable<? super A>> {
         .getSecond(), minSupportMutable, attributeFrequency);
       i++;
       if (i % 10000 == 0) {
-        FPGrowth.log.info("FPTree Building: Read {} Transactions", i);
+        log.info("FPTree Building: Read {} Transactions", i);
       }
     }
     
-    FPGrowth.log.info("Number of Nodes in the FP Tree: {}", nodecount);
+    log.info("Number of Nodes in the FP Tree: {}", nodecount);
     
     return fpGrowth(tree, minSupportMutable, k, returnFeatures,
       topKPatternsOutputCollector, updater);

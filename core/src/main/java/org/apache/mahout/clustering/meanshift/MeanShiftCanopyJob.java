@@ -87,9 +87,9 @@ public class MeanShiftCanopyJob {
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
-      MeanShiftCanopyJob.runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations);
+      runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations);
     } catch (OptionException e) {
-      MeanShiftCanopyJob.log.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -132,10 +132,10 @@ public class MeanShiftCanopyJob {
     int iteration = 0;
     String clustersIn = input;
     while (!converged && (iteration < maxIterations)) {
-      MeanShiftCanopyJob.log.info("Iteration {}", iteration);
+      log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       String clustersOut = output + "/canopies-" + iteration;
-      String controlOut = output + MeanShiftCanopyJob.CONTROL_CONVERGED;
+      String controlOut = output + CONTROL_CONVERGED;
       MeanShiftCanopyDriver.runJob(clustersIn, clustersOut, controlOut, measureClassName, t1, t2,
         convergenceDelta);
       converged = FileSystem.get(conf).exists(new Path(controlOut));

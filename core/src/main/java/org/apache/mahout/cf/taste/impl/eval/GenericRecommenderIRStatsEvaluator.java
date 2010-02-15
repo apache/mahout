@@ -161,7 +161,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           long end = System.currentTimeMillis();
           GenericRecommenderIRStatsEvaluator.log
               .info("Evaluated with user {} in {}ms", userID, (end - start));
-          GenericRecommenderIRStatsEvaluator.log.info("Precision/recall/fall-out: {} / {} / {}",
+          log.info("Precision/recall/fall-out: {} / {} / {}",
             new Object[] {precision.getAverage(), recall.getAverage(), fallOut.getAverage()});
         }
       }

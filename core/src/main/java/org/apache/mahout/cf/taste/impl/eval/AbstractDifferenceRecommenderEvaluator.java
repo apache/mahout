@@ -106,7 +106,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
       throw new IllegalArgumentException("Invalid evaluationPercentage: " + evaluationPercentage);
     }
     
-    AbstractDifferenceRecommenderEvaluator.log.info("Beginning evaluation using {} of {}",
+    log.info("Beginning evaluation using {} of {}",
       trainingPercentage, dataModel);
     
     int numUsers = dataModel.getNumUsers();
@@ -129,7 +129,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
     
     double result = getEvaluation(testUserPrefs, recommender);
-    AbstractDifferenceRecommenderEvaluator.log.info("Evaluation result: {}", result);
+    log.info("Evaluation result: {}", result);
     return result;
   }
   
@@ -180,7 +180,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     for (Map.Entry<Long,PreferenceArray> entry : testUserPrefs.entrySet()) {
       estimateCallables.add(new PreferenceEstimateCallable(recommender, entry.getKey(), entry.getValue()));
     }
-    AbstractDifferenceRecommenderEvaluator.log.info("Beginning evaluation of {} users", estimateCallables
+    log.info("Beginning evaluation of {} users", estimateCallables
         .size());
     AbstractDifferenceRecommenderEvaluator.execute(estimateCallables);
     return computeFinalEvaluation();
@@ -190,7 +190,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     callables = AbstractDifferenceRecommenderEvaluator.wrapWithStatsCallables(callables);
     int numProcessors = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-    AbstractDifferenceRecommenderEvaluator.log.info("Starting timing of {} tasks in {} threads", callables
+    log.info("Starting timing of {} tasks in {} threads", callables
         .size(), numProcessors);
     try {
       List<Future<Void>> futures = executor.invokeAll(callables);
@@ -247,10 +247,10 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
         } catch (NoSuchUserException nsue) {
           // It's possible that an item exists in the test data but not training data in which case
           // NSEE will be thrown. Just ignore it and move on.
-          AbstractDifferenceRecommenderEvaluator.log.info(
+          log.info(
             "User exists in test data but not training data: {}", testUserID);
         } catch (NoSuchItemException nsie) {
-          AbstractDifferenceRecommenderEvaluator.log.info(
+          log.info(
             "Item exists in test data but not training data: {}", realPref.getItemID());
         }
         if (!Float.isNaN(estimatedPreference)) {
@@ -284,10 +284,10 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
       if (logStats) {
         Runtime runtime = Runtime.getRuntime();
         int average = (int) timing.getAverage();
-        AbstractDifferenceRecommenderEvaluator.log.info("Average time per recommendation: {}ms", average);
+        log.info("Average time per recommendation: {}ms", average);
         long totalMemory = runtime.totalMemory();
         long memory = totalMemory - runtime.freeMemory();
-        AbstractDifferenceRecommenderEvaluator.log.info("Approximate memory used: {}MB / {}MB",
+        log.info("Approximate memory used: {}MB / {}MB",
           memory / 1000000L, totalMemory / 1000000L);
       }
       return null;

@@ -45,7 +45,7 @@ public class Frequencies extends Configured implements Tool {
   
   private static final Logger log = LoggerFactory.getLogger(Frequencies.class);
   
-  private Frequencies() {}
+  private Frequencies() { }
   
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
@@ -79,12 +79,12 @@ public class Frequencies extends Configured implements Tool {
       String dataPath = cmdLine.getValue(dataOpt).toString();
       String datasetPath = cmdLine.getValue(datasetOpt).toString();
       
-      Frequencies.log.debug("Data path : {}", dataPath);
-      Frequencies.log.debug("Dataset path : {}", datasetPath);
+      log.debug("Data path : {}", dataPath);
+      log.debug("Dataset path : {}", datasetPath);
       
       runTool(dataPath, datasetPath);
     } catch (OptionException e) {
-      Frequencies.log.warn(e.toString(), e);
+      log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
     }
     
@@ -101,7 +101,7 @@ public class Frequencies extends Configured implements Tool {
     Path dataPath = new Path(data);
     Path datasetPath = new Path(dataset);
     
-    Frequencies.log.info("Computing the frequencies...");
+    log.info("Computing the frequencies...");
     FrequenciesJob job = new FrequenciesJob(new Path(workingDir, "output"), dataPath, datasetPath);
     
     int[][] counts = job.run(getConf());
@@ -114,9 +114,9 @@ public class Frequencies extends Configured implements Tool {
     // }
     
     // outputing the frequencies
-    Frequencies.log.info("counts[partition][class]");
+    log.info("counts[partition][class]");
     for (int p = 0; p < numPartitions; p++) {
-      Frequencies.log.info(Arrays.toString(counts[p]));
+      log.info(Arrays.toString(counts[p]));
     }
   }
   

@@ -69,7 +69,8 @@ public final class DocumentProcessor {
    *          The Lucene {@link Analyzer} for tokenizing the UTF-8 text
    * @throws IOException
    */
-  public static void tokenizeDocuments(String input, Class<? extends Analyzer> analyzerClass, String output) throws IOException {
+  public static void tokenizeDocuments(String input, Class<? extends Analyzer> analyzerClass,
+                                       String output) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DocumentProcessor.class);
@@ -77,7 +78,7 @@ public final class DocumentProcessor {
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.set(DocumentProcessor.ANALYZER_CLASS, analyzerClass.getName());
+    conf.set(ANALYZER_CLASS, analyzerClass.getName());
     conf.setJobName("DocumentProcessor::DocumentTokenizer: input-folder: " + input);
     
     conf.setOutputKeyClass(Text.class);

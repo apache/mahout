@@ -119,7 +119,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           DateFormat format = ARFFModel.DEFAULT_DATE_FORMAT;
           int idx = lower.indexOf(ARFFType.DATE.getIndicator());
           String[] split = ARFFVectorIterable.SPACE_PATTERN.split(line);
-          if (split.length >= 4) {//we have a date format
+          if (split.length >= 4) { //we have a date format
             String formStr = line.substring(idx + ARFFType.DATE.getIndicator().length()).trim();
             if (formStr.startsWith("\"")) {
               formStr = formStr.substring(1, formStr.length() - 1);
@@ -136,7 +136,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
         labelNumber++;
       } else if (lower.startsWith(ARFFModel.DATA)) {
         //inData = true;
-        break;//skip it
+        break; //skip it
       }
     }
     

@@ -38,8 +38,8 @@ import org.apache.mahout.math.VectorWritable;
 public class TermDocumentCountMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>,VectorWritable,IntWritable,LongWritable> {
   
-  private static LongWritable ONE = new LongWritable(1);
-  private static IntWritable TOTAL_COUNT = new IntWritable(-1);
+  private static final LongWritable ONE = new LongWritable(1);
+  private static final IntWritable TOTAL_COUNT = new IntWritable(-1);
   
   @Override
   public void map(WritableComparable<?> key,

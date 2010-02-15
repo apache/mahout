@@ -412,7 +412,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     Canopy canopy = new Canopy();
     assertTrue("more to come", reader.next(key, canopy));
     assertEquals("1st key", "C0", key.toString());
-    //Canopy canopy = new Canopy(value);//Canopy.decodeCanopy(value.toString());
+    //Canopy canopy = new Canopy(value); //Canopy.decodeCanopy(value.toString());
     assertEquals("1st x value", 1.5, canopy.getCenter().get(0));
     assertEquals("1st y value", 1.5, canopy.getCenter().get(1));
     assertTrue("more to come", reader.next(key, canopy));

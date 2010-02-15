@@ -59,7 +59,7 @@ public class ToolMapper extends MapReduceBase implements Mapper<LongWritable,Tex
   public void configure(JobConf job) {
     super.configure(job);
     
-    String descrs = job.get(ToolMapper.ATTRIBUTES);
+    String descrs = job.get(ATTRIBUTES);
     
     if (descrs != null) {
       configure(StringUtils.<char[]> fromString(descrs));
@@ -75,8 +75,9 @@ public class ToolMapper extends MapReduceBase implements Mapper<LongWritable,Tex
   }
   
   @Override
-  public void map(LongWritable key, Text value, OutputCollector<LongWritable,Text> output, Reporter reporter) throws IOException {
-    ToolMapper.extractAttributes(value, attributes);
+  public void map(LongWritable key, Text value, OutputCollector<LongWritable,Text> output,
+                  Reporter reporter) throws IOException {
+    extractAttributes(value, attributes);
     if (attributes.size() != descriptors.size()) {
       throw new IllegalArgumentException(
           "Attributes number should be equal to the descriptors's array length");

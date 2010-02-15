@@ -52,7 +52,8 @@ public final class GenericUserSimilarity implements UserSimilarity {
     initSimilarityMaps(new IteratorIterable<UserUserSimilarity>(it));
   }
   
-  public GenericUserSimilarity(UserSimilarity otherSimilarity, DataModel dataModel, int maxToKeep) throws TasteException {
+  public GenericUserSimilarity(UserSimilarity otherSimilarity,
+                               DataModel dataModel, int maxToKeep) throws TasteException {
     long[] userIDs = IteratorUtils.longIteratorToList(dataModel.getUserIDs());
     Iterator<UserUserSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, userIDs);
     Iterable<UserUserSimilarity> keptSimilarities = TopItems.getTopUserUserSimilarities(maxToKeep,

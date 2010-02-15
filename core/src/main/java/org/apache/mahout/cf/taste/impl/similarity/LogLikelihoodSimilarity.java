@@ -83,8 +83,9 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   static double twoLogLambda(double k1, double k2, double n1, double n2) {
     double p = (k1 + k2) / (n1 + n2);
     return 2.0 * (LogLikelihoodSimilarity.logL(k1 / n1, k1, n1)
-                  + LogLikelihoodSimilarity.logL(k2 / n2, k2, n2) - LogLikelihoodSimilarity.logL(p, k1, n1) - LogLikelihoodSimilarity
-        .logL(p, k2, n2));
+                  + LogLikelihoodSimilarity.logL(k2 / n2, k2, n2) 
+                  - LogLikelihoodSimilarity.logL(p, k1, n1) 
+                  - LogLikelihoodSimilarity.logL(p, k2, n2));
   }
   
   private static double logL(double p, double k, double n) {

@@ -25,13 +25,13 @@ import org.slf4j.LoggerFactory;
  * Implements training accoring to the perceptron update rule.
  * */
 public class PerceptronTrainer extends LinearTrainer {
-
+  
   /** Logger for this class. */
   private static final Logger LOG = LoggerFactory
-      .getLogger(PerceptronTrainer.class);
+  .getLogger(PerceptronTrainer.class);
   /** Rate the model is to be updated with at each step. */
   private final double learningRate;
-
+  
   /**
    * {@inheritDoc}
    * 
@@ -39,11 +39,11 @@ public class PerceptronTrainer extends LinearTrainer {
    *          rate to update the model with at each step.
    * */
   public PerceptronTrainer(int dimension, double threshold,
-      double learningRate, double init, double initBias) throws CardinalityException {
+                           double learningRate, double init, double initBias) throws CardinalityException {
     super(dimension, threshold, init, initBias);
     this.learningRate = learningRate;
   }
-
+  
   /**
    * {@inheritDoc} Perceptron update works such that in case the predicted label
    * does not match the real label, the weight vector is updated as follows: In
@@ -55,17 +55,17 @@ public class PerceptronTrainer extends LinearTrainer {
    * */
   @Override
   protected void update(double label, Vector dataPoint,
-      LinearModel model) {
+                        LinearModel model) {
     double factor = 1.0;
     if (label == 0.0) {
       factor = -1.0;
     }
-
+    
     Vector updateVector = dataPoint.times(factor).times(this.learningRate);
-    LOG.debug("Updatevec: " + updateVector);
-
+    PerceptronTrainer.LOG.debug("Updatevec: " + updateVector);
+    
     model.addDelta(updateVector);
     model.shiftBias(factor * this.learningRate);
-    LOG.debug(model.toString());
+    PerceptronTrainer.LOG.debug(model.toString());
   }
 }

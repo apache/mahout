@@ -131,7 +131,7 @@ public class SequenceFileDumper {
       }
       
     } catch (OptionException e) {
-      SequenceFileDumper.log.error("Exception", e);
+      log.error("Exception", e);
       SequenceFileDumper.printHelp(group);
     }
     

@@ -48,10 +48,10 @@ import org.apache.mahout.utils.vectors.io.VectorWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Driver {
+public final class Driver {
   private static final Logger log = LoggerFactory.getLogger(Driver.class);
   
-  private Driver() {}
+  private Driver() { }
   
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -84,13 +84,10 @@ public class Driver {
       abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
       "The delimiter for outputing the dictionary").withShortName("l").create();
     
-    Option outWriterOpt = obuilder
-        .withLongName("outputWriter")
-        .withRequired(false)
-        .withArgument(abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create())
-        .withDescription(
-          "The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or file (Writes to a File using JSON format)")
-        .withShortName("e").create();
+    Option outWriterOpt = obuilder.withLongName("outputWriter").withRequired(false).withArgument(
+      abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or"
+          + "file (Writes to a File using JSON format)").withShortName("e").create();
     
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
@@ -107,7 +104,7 @@ public class Driver {
         CommandLineUtil.printHelp(group);
         return;
       }
-      if (cmdLine.hasOption(inputOpt)) {// Lucene case
+      if (cmdLine.hasOption(inputOpt)) { // Lucene case
         File input = new File(cmdLine.getValue(inputOpt).toString());
         long maxDocs = Long.MAX_VALUE;
         if (cmdLine.hasOption(maxOpt)) {
@@ -117,7 +114,7 @@ public class Driver {
           throw new IllegalArgumentException("maxDocs must be >= 0");
         }
         String outDir = cmdLine.getValue(outputOpt).toString();
-        Driver.log.info("Output Dir: {}", outDir);
+        log.info("Output Dir: {}", outDir);
         String outWriter = null;
         if (cmdLine.hasOption(outWriterOpt)) {
           outWriter = cmdLine.getValue(outWriterOpt).toString();
@@ -139,7 +136,7 @@ public class Driver {
         } else {
           Driver.writeFile(outWriter, outDir, input, maxDocs, model);
         }
-        Driver.log.info("Dictionary Output file: {}", dictOut);
+        log.info("Dictionary Output file: {}", dictOut);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOut),
             Charset.forName("UTF8")));
         Map<String,Integer> labels = model.getLabelBindings();
@@ -151,13 +148,14 @@ public class Driver {
       }
       
     } catch (OptionException e) {
-      Driver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
   
-  private static void writeFile(String outWriter, String outDir, File file, long maxDocs, ARFFModel arffModel) throws IOException {
-    Driver.log.info("Converting File: {}", file);
+  private static void writeFile(String outWriter, String outDir, File file,
+                                long maxDocs, ARFFModel arffModel) throws IOException {
+    log.info("Converting File: {}", file);
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1, arffModel
         .getNominalMap());
     ARFFVectorIterable iteratable = new ARFFVectorIterable(file, model);
@@ -177,7 +175,7 @@ public class Driver {
     
     long numDocs = vectorWriter.write(iteratable, maxDocs);
     vectorWriter.close();
-    Driver.log.info("Wrote: {} vectors", numDocs);
+    log.info("Wrote: {} vectors", numDocs);
   }
   
   private static VectorWriter getSeqFileWriter(String outFile) throws IOException {

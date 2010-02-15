@@ -65,12 +65,12 @@ public class NGramCollector {
   public NGramCollector() {}
   
   /**
-   * Configure the NGramCollector.
+   * Configure the 
    * 
-   * Reads NGramCollector.ANALYZER_CLASS and instantiates that class if it is provided. Otherwise a lucene
+   * Reads ANALYZER_CLASS and instantiates that class if it is provided. Otherwise a lucene
    * StandardAnalyzer will be used that is set to be compatible to LUCENE_24.
    * 
-   * Reads NGramCollector.MAX_SHINGLE_SIZE and uses this as the parameter to the ShingleFilter.
+   * Reads MAX_SHINGLE_SIZE and uses this as the parameter to the ShingleFilter.
    * 
    * @param job
    */
@@ -78,7 +78,7 @@ public class NGramCollector {
     this.a = null;
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      String analyzerClass = job.get(NGramCollector.ANALYZER_CLASS);
+      String analyzerClass = job.get(ANALYZER_CLASS);
       if (analyzerClass != null) {
         Class<?> cl = ccl.loadClass(analyzerClass);
         a = (Analyzer) cl.newInstance();
@@ -97,11 +97,11 @@ public class NGramCollector {
       this.a = new StandardAnalyzer(Version.LUCENE_24);
     }
     
-    this.maxShingleSize = job.getInt(NGramCollector.MAX_SHINGLE_SIZE, 2);
+    this.maxShingleSize = job.getInt(MAX_SHINGLE_SIZE, 2);
     
-    if (NGramCollector.log.isInfoEnabled()) {
-      NGramCollector.log.info("Analyzer is {}", this.a.toString());
-      NGramCollector.log.info("Max Ngram size is {}", this.maxShingleSize);
+    if (log.isInfoEnabled()) {
+      log.info("Analyzer is {}", this.a.toString());
+      log.info("Max Ngram size is {}", this.maxShingleSize);
     }
   }
   

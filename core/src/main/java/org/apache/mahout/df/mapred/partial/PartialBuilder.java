@@ -101,7 +101,7 @@ public class PartialBuilder extends Builder {
     // or the mappers won't be able to compute the right indexes
     String tracker = job.get("mapred.job.tracker", "local");
     if ("local".equals(tracker)) {
-      PartialBuilder.log.warn("Hadoop running in 'local' mode, only one map task will be launched");
+      log.warn("Hadoop running in 'local' mode, only one map task will be launched");
       job.setNumMapTasks(1);
     }
   }
@@ -113,11 +113,11 @@ public class PartialBuilder extends Builder {
     
     Path outputPath = getOutputPath(job);
     
-    PartialBuilder.log.info("Computing partitions' first ids...");
+    log.info("Computing partitions' first ids...");
     Step0Job step0 = new Step0Job(getOutputPath(job), getDataPath(), getDatasetPath());
     Step0Output[] partitions = step0.run(getConf());
     
-    PartialBuilder.log.info("Processing the output...");
+    log.info("Processing the output...");
     TreeID[] keys = new TreeID[numTrees];
     Node[] trees = new Node[numTrees];
     int[] firstIds = Step0Output.extractFirstIds(partitions);
@@ -125,9 +125,9 @@ public class PartialBuilder extends Builder {
     
     // call the second step in order to complete the oob predictions
     if ((callback != null) && (numMaps > 1) && PartialBuilder.isStep2(getConf())) {
-      PartialBuilder.log.info("*****************************");
-      PartialBuilder.log.info("Second Step");
-      PartialBuilder.log.info("*****************************");
+      log.info("*****************************");
+      log.info("Second Step");
+      log.info("*****************************");
       Step2Job step2 = new Step2Job(getOutputPath(job), getDataPath(), getDatasetPath(), partitions);
       
       step2.run(job, keys, trees, callback);

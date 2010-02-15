@@ -162,7 +162,7 @@ public final class CachingRecommender implements Recommender {
    *          clear cached data associated with this user ID
    */
   public void clear(long userID) {
-    CachingRecommender.log.debug("Clearing recommendations for user ID '{}'", userID);
+    log.debug("Clearing recommendations for user ID '{}'", userID);
     recommendationCache.remove(userID);
   }
   
@@ -172,7 +172,7 @@ public final class CachingRecommender implements Recommender {
    * </p>
    */
   public void clear() {
-    CachingRecommender.log.debug("Clearing all recommendations...");
+    log.debug("Clearing all recommendations...");
     recommendationCache.clear();
   }
   
@@ -191,7 +191,7 @@ public final class CachingRecommender implements Recommender {
     
     @Override
     public Recommendations get(Long key) throws TasteException {
-      CachingRecommender.log.debug("Retrieving new recommendations for user ID '{}'", key);
+      log.debug("Retrieving new recommendations for user ID '{}'", key);
       int howMany = maxHowMany[0];
       IDRescorer rescorer = getCurrentRescorer();
       List<RecommendedItem> recommendations = rescorer == null ? recommender.recommend(key, howMany)
@@ -212,7 +212,7 @@ public final class CachingRecommender implements Recommender {
     public Float get(LongPair key) throws TasteException {
       long userID = key.getFirst();
       long itemID = key.getSecond();
-      CachingRecommender.log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'",
+      log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'",
         userID, itemID);
       return recommender.estimatePreference(userID, itemID);
     }

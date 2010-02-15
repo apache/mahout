@@ -67,7 +67,7 @@ public class CachedTermInfo implements TermInfo {
   
   @Override
   public TermEntry getTermEntry(String field, String term) {
-    if (this.field.equals(field) == false){ return null;}
+    if (this.field.equals(field) == false){ return null; }
     return termEntries.get(term);
   }
   

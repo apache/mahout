@@ -61,8 +61,8 @@ public class XmlInputFormat extends TextInputFormat {
     private final DataOutputBuffer buffer = new DataOutputBuffer();
     
     public XmlRecordReader(FileSplit split, JobConf jobConf) throws IOException {
-      startTag = jobConf.get(XmlInputFormat.START_TAG_KEY).getBytes("utf-8");
-      endTag = jobConf.get(XmlInputFormat.END_TAG_KEY).getBytes("utf-8");
+      startTag = jobConf.get(START_TAG_KEY).getBytes("utf-8");
+      endTag = jobConf.get(END_TAG_KEY).getBytes("utf-8");
       
       // open the file and seek to the start of the split
       start = split.getStart();

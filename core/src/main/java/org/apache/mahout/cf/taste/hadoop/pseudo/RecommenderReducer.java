@@ -66,8 +66,8 @@ public final class RecommenderReducer extends MapReduceBase implements
   
   @Override
   public void configure(JobConf jobConf) {
-    String dataModelFile = jobConf.get(RecommenderReducer.DATA_MODEL_FILE);
-    String recommenderClassName = jobConf.get(RecommenderReducer.RECOMMENDER_CLASS_NAME);
+    String dataModelFile = jobConf.get(DATA_MODEL_FILE);
+    String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
     FileDataModel fileDataModel;
     try {
       Path dataModelPath = new Path(dataModelFile);
@@ -76,7 +76,7 @@ public final class RecommenderReducer extends MapReduceBase implements
       tempDataFile.deleteOnExit();
       fs.copyToLocalFile(dataModelPath, new Path(tempDataFile.getAbsolutePath()));
       fileDataModel = new FileDataModel(tempDataFile);
-      String usersFilePathString = jobConf.get(RecommenderReducer.USERS_FILE);
+      String usersFilePathString = jobConf.get(USERS_FILE);
       if (usersFilePathString == null) {
         usersToRecommendFor = null;
       } else {
@@ -106,7 +106,7 @@ public final class RecommenderReducer extends MapReduceBase implements
     } catch (InvocationTargetException ite) {
       throw new IllegalStateException(ite.getCause());
     }
-    recommendationsPerUser = jobConf.getInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, 10);
+    recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
   }
   
   @Override

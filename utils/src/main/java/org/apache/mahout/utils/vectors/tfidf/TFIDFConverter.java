@@ -119,10 +119,10 @@ public final class TFIDFConverter {
                                   int maxDFPercent,
                                   float normPower,
                                   boolean sequentialAccessOutput) throws IOException {
-    if (chunkSizeInMegabytes < TFIDFConverter.MIN_CHUNKSIZE) {
-      chunkSizeInMegabytes = TFIDFConverter.MIN_CHUNKSIZE;
-    } else if (chunkSizeInMegabytes > TFIDFConverter.MAX_CHUNKSIZE) { // 10GB
-      chunkSizeInMegabytes = TFIDFConverter.MAX_CHUNKSIZE;
+    if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
+      chunkSizeInMegabytes = MIN_CHUNKSIZE;
+    } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
+      chunkSizeInMegabytes = MAX_CHUNKSIZE;
     }
     
     if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
@@ -137,27 +137,27 @@ public final class TFIDFConverter {
     }
     
     Path inputPath = new Path(input);
-    Path wordCountPath = new Path(output + TFIDFConverter.WORDCOUNT_OUTPUT_FOLDER);
+    Path wordCountPath = new Path(output + WORDCOUNT_OUTPUT_FOLDER);
     
-    TFIDFConverter.startDFCounting(inputPath, wordCountPath);
-    Pair<Long[],List<Path>> datasetFeatures = TFIDFConverter.createDictionaryChunks(wordCountPath, output,
+    startDFCounting(inputPath, wordCountPath);
+    Pair<Long[],List<Path>> datasetFeatures = createDictionaryChunks(wordCountPath, output,
       chunkSizeInMegabytes);
     
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
     List<Path> dictionaryChunks = datasetFeatures.getSecond();
     for (Path dictionaryChunk : dictionaryChunks) {
-      Path partialVectorOutputPath = TFIDFConverter.getPath(output + TFIDFConverter.VECTOR_OUTPUT_FOLDER,
+      Path partialVectorOutputPath = getPath(output + VECTOR_OUTPUT_FOLDER,
         partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
-      TFIDFConverter.makePartialVectors(input, datasetFeatures.getFirst()[0], datasetFeatures.getFirst()[1],
-        minDf, maxDFPercent, dictionaryChunk, partialVectorOutputPath);
+      makePartialVectors(input, datasetFeatures.getFirst()[0], datasetFeatures.getFirst()[1],
+        minDf, maxDFPercent, dictionaryChunk, partialVectorOutputPath, sequentialAccessOutput);
     }
     
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
     
-    String outputDir = output + TFIDFConverter.DOCUMENT_VECTOR_OUTPUT_FOLDER;
+    String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, normPower,
         (int) (long) datasetFeatures.getFirst()[0], sequentialAccessOutput);
@@ -188,11 +188,11 @@ public final class TFIDFConverter {
     
     FileSystem fs = FileSystem.get(featureCountPath.toUri(), conf);
     FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath.toString()
-                                                      + TFIDFConverter.OUTPUT_FILES_PATTERN));
+                                                      + OUTPUT_FILES_PATTERN));
     
     long chunkSizeLimit = chunkSizeInMegabytes * 1024 * 1024;
     int chunkIndex = 0;
-    Path chunkPath = TFIDFConverter.getPath(dictionaryPathBase + TFIDFConverter.FREQUENCY_FILE, chunkIndex);
+    Path chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
     chunkPaths.add(chunkPath);
     SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class,
         LongWritable.class);
@@ -209,14 +209,14 @@ public final class TFIDFConverter {
           freqWriter.close();
           chunkIndex++;
           
-          chunkPath = TFIDFConverter.getPath(dictionaryPathBase + TFIDFConverter.FREQUENCY_FILE, chunkIndex);
+          chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
           chunkPaths.add(chunkPath);
           
           freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
           currentChunkSize = 0;
         }
         
-        int fieldSize = TFIDFConverter.SEQUENCEFILE_BYTE_OVERHEAD + Integer.SIZE / 8 + Long.SIZE / 8;
+        int fieldSize = SEQUENCEFILE_BYTE_OVERHEAD + Integer.SIZE / 8 + Long.SIZE / 8;
         currentChunkSize += fieldSize;
         if (key.get() >= 0) {
           freqWriter.append(key, value);
@@ -263,7 +263,8 @@ public final class TFIDFConverter {
                                          int minDf,
                                          int maxDFPercent,
                                          Path dictionaryFilePath,
-                                         Path output) throws IOException {
+                                         Path output,
+                                         boolean sequentialAccess) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(TFIDFConverter.class);
@@ -271,12 +272,13 @@ public final class TFIDFConverter {
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
     
-    conf.setJobName("TFIDFConverter:: MakePartialVectors: input-folder: " + input + ", dictionary-file: "
+    conf.setJobName(": MakePartialVectors: input-folder: " + input + ", dictionary-file: "
                     + dictionaryFilePath.toString());
-    conf.setLong(TFIDFConverter.FEATURE_COUNT, featureCount.longValue());
-    conf.setLong(TFIDFConverter.VECTOR_COUNT, vectorCount.longValue());
-    conf.setInt(TFIDFConverter.MIN_DF, minDf);
-    conf.setInt(TFIDFConverter.MAX_DF_PERCENTAGE, maxDFPercent);
+    conf.setLong(FEATURE_COUNT, featureCount.longValue());
+    conf.setLong(VECTOR_COUNT, vectorCount.longValue());
+    conf.setInt(MIN_DF, minDf);
+    conf.setInt(MAX_DF_PERCENTAGE, maxDFPercent);
+    conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);

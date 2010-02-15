@@ -103,7 +103,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
       alphaI = Double.valueOf(params.get("alpha_i", "1.0"));
       
     } catch (IOException ex) {
-      BayesThetaNormalizerMapper.log.warn(ex.toString(), ex);
+      log.warn(ex.toString(), ex);
     }
   }
   

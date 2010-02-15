@@ -46,7 +46,7 @@ public class DataLoader {
   
   private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
   
-  private DataLoader() {}
+  private DataLoader() { }
   
   /**
    * Converts a comma-separated String to a Vector.
@@ -63,7 +63,7 @@ public class DataLoader {
   private static Instance parseString(int id, Attribute[] attrs, List<String>[] values, String string) {
     StringTokenizer tokenizer = new StringTokenizer(string, ", ");
     if (tokenizer.countTokens() != attrs.length) {
-      DataLoader.log.error("{}: {}", id, string);
+      log.error("{}: {}", id, string);
       throw new IllegalArgumentException("Wrong number of attributes in the string");
     }
     
@@ -146,14 +146,14 @@ public class DataLoader {
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
       if (line.isEmpty()) {
-        DataLoader.log.warn("{}: empty string", instances.size());
+        log.warn("{}: empty string", instances.size());
         continue;
       }
       
       Instance instance = converter.convert(instances.size(), line);
       if (instance == null) {
         // missing values found
-        DataLoader.log.warn("{}: missing values", instances.size());
+        log.warn("{}: missing values", instances.size());
         continue;
       }
       
@@ -175,14 +175,14 @@ public class DataLoader {
     
     for (String line : data) {
       if (line.isEmpty()) {
-        DataLoader.log.warn("{}: empty string", instances.size());
+        log.warn("{}: empty string", instances.size());
         continue;
       }
       
       Instance instance = converter.convert(instances.size(), line);
       if (instance == null) {
         // missing values found
-        DataLoader.log.warn("{}: missing values", instances.size());
+        log.warn("{}: missing values", instances.size());
         continue;
       }
       

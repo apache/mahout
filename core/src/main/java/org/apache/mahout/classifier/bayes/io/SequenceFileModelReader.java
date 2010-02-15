@@ -68,7 +68,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      SequenceFileModelReader.log.info("{}", path);
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       // the key is label,feature
@@ -91,7 +91,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      SequenceFileModelReader.log.info("{}", path);
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       // the key is either _label_ or label,feature
@@ -102,7 +102,7 @@ public final class SequenceFileModelReader {
           datastore.setSumFeatureWeight(key.stringAt(1), value.get());
           count++;
           if (count % 50000 == 0) {
-            SequenceFileModelReader.log.info("Read {} feature weights", count);
+            log.info("Read {} feature weights", count);
           }
         }
       }
@@ -120,7 +120,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      SequenceFileModelReader.log.info("{}", path);
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       long count = 0;
@@ -130,7 +130,7 @@ public final class SequenceFileModelReader {
           datastore.setSumLabelWeight(key.stringAt(1), value.get());
           count++;
           if (count % 10000 == 0) {
-            SequenceFileModelReader.log.info("Read {} label weights", count);
+            log.info("Read {} label weights", count);
           }
         }
       }
@@ -148,7 +148,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      SequenceFileModelReader.log.info("{}", path);
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       long count = 0;
@@ -158,7 +158,7 @@ public final class SequenceFileModelReader {
           datastore.setThetaNormalizer(key.stringAt(1), value.get());
           count++;
           if (count % 50000 == 0) {
-            SequenceFileModelReader.log.info("Read {} theta norms", count);
+            log.info("Read {} theta norms", count);
           }
         }
       }
@@ -176,7 +176,7 @@ public final class SequenceFileModelReader {
     FileStatus[] outputFiles = fs.globStatus(pathPattern);
     for (FileStatus fileStatus : outputFiles) {
       Path path = fileStatus.getPath();
-      SequenceFileModelReader.log.info("{}", path);
+      log.info("{}", path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       
       // the key is _label
@@ -186,7 +186,7 @@ public final class SequenceFileModelReader {
           // weights for
           // all Features and all Labels
           datastore.setSigmaJSigmaK(value.get());
-          SequenceFileModelReader.log.info("{}", value.get());
+          log.info("{}", value.get());
         }
       }
     }

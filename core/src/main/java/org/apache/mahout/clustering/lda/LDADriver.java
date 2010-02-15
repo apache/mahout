@@ -155,10 +155,10 @@ public final class LDADriver {
         topicSmoothing = 50.0 / numTopics;
       }
       
-      LDADriver.runJob(input, output, numTopics, numWords, topicSmoothing, maxIterations, numReduceTasks);
+      runJob(input, output, numTopics, numWords, topicSmoothing, maxIterations, numReduceTasks);
       
     } catch (OptionException e) {
-      LDADriver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -191,24 +191,24 @@ public final class LDADriver {
                             int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     
     String stateIn = output + "/state-0";
-    LDADriver.writeInitialState(stateIn, numTopics, numWords);
+    writeInitialState(stateIn, numTopics, numWords);
     double oldLL = Double.NEGATIVE_INFINITY;
     boolean converged = false;
     
     for (int iteration = 0; ((maxIterations < 1) || (iteration < maxIterations)) && !converged; iteration++) {
-      LDADriver.log.info("Iteration {}", iteration);
+      log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       String stateOut = output + "/state-" + (iteration + 1);
-      double ll = LDADriver.runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing,
+      double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing,
         numReducers);
       double relChange = (oldLL - ll) / oldLL;
       
       // now point the input to the old output directory
-      LDADriver.log.info("Iteration {} finished. Log Likelihood: {}", iteration, ll);
-      LDADriver.log.info("(Old LL: {})", oldLL);
-      LDADriver.log.info("(Rel Change: {})", relChange);
+      log.info("Iteration {} finished. Log Likelihood: {}", iteration, ll);
+      log.info("(Old LL: {})", oldLL);
+      log.info("(Rel Change: {})", relChange);
       
-      converged = (iteration > 2) && (relChange < LDADriver.OVERALL_CONVERGENCE);
+      converged = (iteration > 2) && (relChange < OVERALL_CONVERGENCE);
       stateIn = stateOut;
       oldLL = ll;
     }
@@ -240,7 +240,7 @@ public final class LDADriver {
         writer.append(kw, v);
       }
       
-      kw.setY(LDADriver.TOPIC_SUM_KEY);
+      kw.setY(TOPIC_SUM_KEY);
       v.set(Math.log(total));
       writer.append(kw, v);
       
@@ -260,7 +260,7 @@ public final class LDADriver {
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
-        if (key.getX() == LDADriver.LOG_LIKELIHOOD_KEY) {
+        if (key.getX() == LOG_LIKELIHOOD_KEY) {
           ll = value.get();
           break;
         }
@@ -295,10 +295,10 @@ public final class LDADriver {
                                                     InterruptedException,
                                                     ClassNotFoundException {
     Configuration conf = new Configuration();
-    conf.set(LDADriver.STATE_IN_KEY, stateIn);
-    conf.set(LDADriver.NUM_TOPICS_KEY, Integer.toString(numTopics));
-    conf.set(LDADriver.NUM_WORDS_KEY, Integer.toString(numWords));
-    conf.set(LDADriver.TOPIC_SMOOTHING_KEY, Double.toString(topicSmoothing));
+    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));
+    conf.set(NUM_WORDS_KEY, Integer.toString(numWords));
+    conf.set(TOPIC_SMOOTHING_KEY, Double.toString(topicSmoothing));
     
     Job job = new Job(conf);
     
@@ -317,14 +317,14 @@ public final class LDADriver {
     job.setJarByClass(LDADriver.class);
     
     job.waitForCompletion(true);
-    return LDADriver.findLL(stateOut, conf);
+    return findLL(stateOut, conf);
   }
   
   static LDAState createState(Configuration job) throws IOException {
-    String statePath = job.get(LDADriver.STATE_IN_KEY);
-    int numTopics = Integer.parseInt(job.get(LDADriver.NUM_TOPICS_KEY));
-    int numWords = Integer.parseInt(job.get(LDADriver.NUM_WORDS_KEY));
-    double topicSmoothing = Double.parseDouble(job.get(LDADriver.TOPIC_SMOOTHING_KEY));
+    String statePath = job.get(STATE_IN_KEY);
+    int numTopics = Integer.parseInt(job.get(NUM_TOPICS_KEY));
+    int numWords = Integer.parseInt(job.get(NUM_WORDS_KEY));
+    double topicSmoothing = Double.parseDouble(job.get(TOPIC_SMOOTHING_KEY));
     
     Path dir = new Path(statePath);
     FileSystem fs = dir.getFileSystem(job);
@@ -341,12 +341,12 @@ public final class LDADriver {
       while (reader.next(key, value)) {
         int topic = key.getX();
         int word = key.getY();
-        if (word == LDADriver.TOPIC_SUM_KEY) {
+        if (word == TOPIC_SUM_KEY) {
           logTotals[topic] = value.get();
           if (Double.isInfinite(value.get())) {
             throw new IllegalArgumentException();
           }
-        } else if (topic == LDADriver.LOG_LIKELIHOOD_KEY) {
+        } else if (topic == LOG_LIKELIHOOD_KEY) {
           ll = value.get();
         } else {
           if (!((topic >= 0) && (word >= 0))) {

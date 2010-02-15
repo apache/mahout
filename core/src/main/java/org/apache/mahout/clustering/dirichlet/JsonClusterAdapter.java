@@ -53,7 +53,9 @@ public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>,
   }
   
   @Override
-  public DirichletCluster<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+  public DirichletCluster<?> deserialize(JsonElement json,
+                                         Type typeOfT,
+                                         JsonDeserializationContext context) throws JsonParseException {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -66,7 +68,7 @@ public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>,
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
-      JsonClusterAdapter.log.warn("Error while loading class", e);
+      log.warn("Error while loading class", e);
     }
     Model<Vector> model = (Model<Vector>) gson.fromJson(modelJson, cl);
     return new DirichletCluster<Vector>(model, total);

@@ -26,8 +26,9 @@ import org.apache.hadoop.mapreduce.Reducer;
 public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWritable,DoubleWritable> {
   
   @Override
-  public void reduce(IntPairWritable topicWord, Iterable<DoubleWritable> values, Context context) throws java.io.IOException,
-                                                                                                 InterruptedException {
+  public void reduce(IntPairWritable topicWord,
+                     Iterable<DoubleWritable> values,
+                     Context context) throws java.io.IOException, InterruptedException {
     
     // sum likelihoods
     if (topicWord.getY() == LDADriver.LOG_LIKELIHOOD_KEY) {

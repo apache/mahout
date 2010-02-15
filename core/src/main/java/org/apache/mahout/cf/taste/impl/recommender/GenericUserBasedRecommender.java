@@ -76,7 +76,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
       throw new IllegalArgumentException("howMany must be at least 1");
     }
     
-    GenericUserBasedRecommender.log.debug("Recommending items for user ID '{}'", userID);
+    log.debug("Recommending items for user ID '{}'", userID);
     
     long[] theNeighborhood = neighborhood.getUserNeighborhood(userID);
     
@@ -91,7 +91,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     List<RecommendedItem> topItems = TopItems
         .getTopItems(howMany, allItemIDs.iterator(), rescorer, estimator);
     
-    GenericUserBasedRecommender.log.debug("Recommendations are: {}", topItems);
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
   

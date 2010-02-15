@@ -177,7 +177,7 @@ public final class SVDRecommender extends AbstractRecommender {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
     
-    SVDRecommender.log.debug("Recommending items for user ID '{}'", userID);
+    log.debug("Recommending items for user ID '{}'", userID);
     
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
     
@@ -186,7 +186,7 @@ public final class SVDRecommender extends AbstractRecommender {
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
     
-    SVDRecommender.log.debug("Recommendations are: {}", topItems);
+    log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
   

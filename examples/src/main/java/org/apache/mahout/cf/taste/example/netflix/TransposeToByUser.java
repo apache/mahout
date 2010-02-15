@@ -63,7 +63,7 @@ public final class TransposeToByUser {
     Map<String, List<String>> byUserEntryCache = new FastMap<String, List<String>>(100000);
     
     for (File byItemFile : byItemDirectory.listFiles()) {
-      TransposeToByUser.log.info("Processing {}", byItemFile);
+      log.info("Processing {}", byItemFile);
       Iterator<String> lineIterator = new FileLineIterable(byItemFile, false).iterator();
       String line = lineIterator.next();
       String movieIDString = line.substring(0, line.length() - 1);
@@ -88,7 +88,7 @@ public final class TransposeToByUser {
   
   private static void maybeFlushCache(File byUserDirectory, Map<String, List<String>> byUserEntryCache) throws IOException {
     if (byUserEntryCache.size() >= 100000) {
-      TransposeToByUser.log.info("Flushing cache");
+      log.info("Flushing cache");
       for (Map.Entry<String, List<String>> entry : byUserEntryCache.entrySet()) {
         String userID = entry.getKey();
         List<String> lines = entry.getValue();

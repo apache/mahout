@@ -234,7 +234,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
   
   private void buildAverageDiffs() throws TasteException {
-    MemoryDiffStorage.log.info("Building average diffs...");
+    log.info("Building average diffs...");
     try {
       buildAverageDiffsLock.writeLock().lock();
       averageDiffs.clear();
@@ -289,7 +289,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
   
   private long processOneUser(long averageCount, long userID) throws TasteException {
-    MemoryDiffStorage.log.debug("Processing prefs for user {}", userID);
+    log.debug("Processing prefs for user {}", userID);
     // Save off prefs for the life of this loop iteration
     PreferenceArray userPreferences = dataModel.getPreferencesFromUser(userID);
     int length = userPreferences.length();

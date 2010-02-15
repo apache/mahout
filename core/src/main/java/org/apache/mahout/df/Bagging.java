@@ -58,16 +58,16 @@ public class Bagging {
    *           if the data is not set
    */
   public Node build(int treeId, Random rng, PredictionCallback callback) {
-    Bagging.log.debug("Bagging...");
+    log.debug("Bagging...");
     Arrays.fill(sampled, false);
     Data bag = data.bagging(rng, sampled);
     
-    Bagging.log.debug("Building...");
+    log.debug("Building...");
     Node tree = treeBuilder.build(rng, bag);
     
     // predict the label for the out-of-bag elements
     if (callback != null) {
-      Bagging.log.debug("Oob error estimation");
+      log.debug("Oob error estimation");
       for (int index = 0; index < data.size(); index++) {
         if (sampled[index] == false) {
           int prediction = tree.classify(data.get(index));

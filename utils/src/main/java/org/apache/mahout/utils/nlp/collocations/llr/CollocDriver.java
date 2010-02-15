@@ -134,16 +134,16 @@ public class CollocDriver {
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
       
-      int maxNGramSize = CollocDriver.DEFAULT_MAX_NGRAM_SIZE;
+      int maxNGramSize = DEFAULT_MAX_NGRAM_SIZE;
       
       if (cmdLine.hasOption(maxNGramSizeOpt) == true) {
         try {
           maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt).toString());
         } catch (NumberFormatException ex) {
-          CollocDriver.log.warn("Could not parse ngram size option");
+          log.warn("Could not parse ngram size option");
         }
       }
-      CollocDriver.log.info("Maximum n-gram size is: {}", maxNGramSize);
+      log.info("Maximum n-gram size is: {}", maxNGramSize);
       
       if (cmdLine.hasOption(overwriteOutput) == true) {
         HadoopUtil.overwriteOutput(output);
@@ -154,24 +154,24 @@ public class CollocDriver {
       if (cmdLine.hasOption(minSupportOpt)) {
         minSupport = Integer.parseInt(cmdLine.getValue(minSupportOpt).toString());
       }
-      CollocDriver.log.info("Minimum Support value: {}", minSupport);
+      log.info("Minimum Support value: {}", minSupport);
       
       float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
       if (cmdLine.hasOption(minLLROpt)) {
         minLLRValue = Float.parseFloat(cmdLine.getValue(minLLROpt).toString());
       }
-      CollocDriver.log.info("Minimum LLR value: {}", minLLRValue);
+      log.info("Minimum LLR value: {}", minLLRValue);
       
-      int reduceTasks = CollocDriver.DEFAULT_PASS1_NUM_REDUCE_TASKS;
+      int reduceTasks = DEFAULT_PASS1_NUM_REDUCE_TASKS;
       if (cmdLine.hasOption(numReduceTasksOpt)) {
         reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
       }
-      CollocDriver.log.info("Number of pass1 reduce tasks: {}", reduceTasks);
+      log.info("Number of pass1 reduce tasks: {}", reduceTasks);
       
       boolean emitUnigrams = cmdLine.hasOption(unigramOpt);
       
       if (cmdLine.hasOption(preprocessOpt)) {
-        CollocDriver.log.info("Input will be preprocessed");
+        log.info("Input will be preprocessed");
         
         Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
         if (cmdLine.hasOption(analyzerNameOpt)) {
@@ -187,18 +187,18 @@ public class CollocDriver {
         DocumentProcessor.tokenizeDocuments(input, analyzerClass, tokenizedPath);
         input = tokenizedPath;
       } else {
-        CollocDriver.log.info("Input will NOT be preprocessed");
+        log.info("Input will NOT be preprocessed");
       }
       
       // parse input and extract collocations
-      long ngramCount = CollocDriver.generateCollocations(input, output, emitUnigrams, maxNGramSize,
+      long ngramCount = generateCollocations(input, output, emitUnigrams, maxNGramSize,
         reduceTasks, minSupport);
       
       // tally collocations and perform LLR calculation
-      CollocDriver.computeNGramsPruneByLLR(ngramCount, output, emitUnigrams, minLLRValue, reduceTasks);
+      computeNGramsPruneByLLR(ngramCount, output, emitUnigrams, minLLRValue, reduceTasks);
       
     } catch (OptionException e) {
-      CollocDriver.log.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
     
@@ -228,11 +228,11 @@ public class CollocDriver {
                                       float minLLRValue,
                                       int reduceTasks) throws IOException {
     // parse input and extract collocations
-    long ngramCount = CollocDriver.generateCollocations(input, output, true, maxNGramSize, reduceTasks,
+    long ngramCount = generateCollocations(input, output, true, maxNGramSize, reduceTasks,
       minSupport);
     
     // tally collocations and perform LLR calculation
-    CollocDriver.computeNGramsPruneByLLR(ngramCount, output, true, minLLRValue, reduceTasks);
+    computeNGramsPruneByLLR(ngramCount, output, true, minLLRValue, reduceTasks);
   }
   
   /**
@@ -254,10 +254,10 @@ public class CollocDriver {
     
     conf.setCombinerClass(CollocCombiner.class);
     
-    conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, emitUnigrams);
+    conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
     
     FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output, CollocDriver.SUBGRAM_OUTPUT_DIRECTORY);
+    Path outPath = new Path(output, SUBGRAM_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setInputFormat(SequenceFileInputFormat.class);
@@ -284,7 +284,7 @@ public class CollocDriver {
     JobConf conf = new JobConf(CollocDriver.class);
     
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
-    conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, emitUnigrams);
+    conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
     
     conf.setMapOutputKeyClass(Gram.class);
     conf.setMapOutputValueClass(Gram.class);
@@ -292,8 +292,8 @@ public class CollocDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(DoubleWritable.class);
     
-    FileInputFormat.setInputPaths(conf, new Path(output, CollocDriver.SUBGRAM_OUTPUT_DIRECTORY));
-    Path outPath = new Path(output, CollocDriver.NGRAM_OUTPUT_DIRECTORY);
+    FileInputFormat.setInputPaths(conf, new Path(output, SUBGRAM_OUTPUT_DIRECTORY));
+    Path outPath = new Path(output, NGRAM_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setMapperClass(IdentityMapper.class);

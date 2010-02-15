@@ -92,7 +92,7 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
       hBconf.set(new HBaseConfiguration(job));
       table = new HTable(hBconf.get(), job.get("output.table"));
     } catch (IOException e) {
-      CBayesThetaNormalizerReducer.log.error("Unexpected error during configuration", e);
+      log.error("Unexpected error during configuration", e);
     }
   }
   

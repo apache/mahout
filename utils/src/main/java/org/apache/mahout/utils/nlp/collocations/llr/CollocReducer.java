@@ -51,13 +51,13 @@ public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gr
   public void configure(JobConf job) {
     super.configure(job);
     
-    this.minSupport = job.getInt(CollocReducer.MIN_SUPPORT, CollocReducer.DEFAULT_MIN_SUPPORT);
+    this.minSupport = job.getInt(MIN_SUPPORT, DEFAULT_MIN_SUPPORT);
     
     this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
     
-    if (CollocReducer.log.isInfoEnabled()) {
-      CollocReducer.log.info("Min support is {}", minSupport);
-      CollocReducer.log.info("Emit Unitgrams is {}", emitUnigrams);
+    if (log.isInfoEnabled()) {
+      log.info("Min support is {}", minSupport);
+      log.info("Emit Unitgrams is {}", emitUnigrams);
     }
     
   }

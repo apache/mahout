@@ -33,7 +33,7 @@ public class CategoricalNode extends Node {
   
   private Node[] childs;
   
-  public CategoricalNode() {}
+  public CategoricalNode() { }
   
   public CategoricalNode(int attr, double[] values, Node[] childs) {
     this.attr = attr;

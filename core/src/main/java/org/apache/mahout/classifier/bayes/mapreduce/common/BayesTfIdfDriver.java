@@ -104,12 +104,12 @@ public class BayesTfIdfDriver implements BayesJob {
         GenericsUtil.getClass(labelDocumentCounts));
     
     String labelDocumentCountString = mapStringifier.toString(labelDocumentCounts);
-    BayesTfIdfDriver.log.info("Counts of documents in Each Label");
+    log.info("Counts of documents in Each Label");
     Map<String,Double> c = mapStringifier.fromString(labelDocumentCountString);
-    BayesTfIdfDriver.log.info("{}", c);
+    log.info("{}", c);
     
     conf.set("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
-    BayesTfIdfDriver.log.info(params.print());
+    log.info(params.print());
     if (params.get("dataSource").equals("hbase")) {
       HBaseConfiguration hc = new HBaseConfiguration(new Configuration());
       HTableDescriptor ht = new HTableDescriptor(output);
@@ -120,9 +120,9 @@ public class BayesTfIdfDriver implements BayesJob {
       hcd.setBlockCacheEnabled(true);
       ht.addFamily(hcd);
       
-      BayesTfIdfDriver.log.info("Connecting to hbase...");
+      log.info("Connecting to hbase...");
       HBaseAdmin hba = new HBaseAdmin(hc);
-      BayesTfIdfDriver.log.info("Creating Table {}", output);
+      log.info("Creating Table {}", output);
       
       if (hba.tableExists(output)) {
         hba.disableTable(output);

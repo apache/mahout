@@ -96,19 +96,19 @@ public class BayesClassifierMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      BayesClassifierMapper.log.info("Bayes Parameter {}", job.get("bayes.parameters"));
+      log.info("Bayes Parameter {}", job.get("bayes.parameters"));
       Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
-      BayesClassifierMapper.log.info("{}", params.print());
+      log.info("{}", params.print());
       Algorithm algorithm;
       Datastore datastore;
       
       if (params.get("dataSource").equals("hdfs")) {
         if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-          BayesClassifierMapper.log.info("Testing Bayes Classifier");
+          log.info("Testing Bayes Classifier");
           algorithm = new BayesAlgorithm();
           datastore = new InMemoryBayesDatastore(params);
         } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-          BayesClassifierMapper.log.info("Testing Complementary Bayes Classifier");
+          log.info("Testing Complementary Bayes Classifier");
           algorithm = new CBayesAlgorithm();
           datastore = new InMemoryBayesDatastore(params);
         } else {
@@ -117,11 +117,11 @@ public class BayesClassifierMapper extends MapReduceBase implements
         
       } else if (params.get("dataSource").equals("hbase")) {
         if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-          BayesClassifierMapper.log.info("Testing Bayes Classifier");
+          log.info("Testing Bayes Classifier");
           algorithm = new BayesAlgorithm();
           datastore = new HBaseBayesDatastore(params.get("basePath"), params);
         } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-          BayesClassifierMapper.log.info("Testing Complementary Bayes Classifier");
+          log.info("Testing Complementary Bayes Classifier");
           algorithm = new CBayesAlgorithm();
           datastore = new HBaseBayesDatastore(params.get("basePath"), params);
         } else {
@@ -137,9 +137,9 @@ public class BayesClassifierMapper extends MapReduceBase implements
       defaultCategory = params.get("defaultCat");
       gramSize = Integer.valueOf(params.get("gramSize"));
     } catch (IOException ex) {
-      BayesClassifierMapper.log.warn(ex.toString(), ex);
+      log.warn(ex.toString(), ex);
     } catch (InvalidDatastoreException e) {
-      BayesClassifierMapper.log.error(e.toString(), e);
+      log.error(e.toString(), e);
     }
   }
 }

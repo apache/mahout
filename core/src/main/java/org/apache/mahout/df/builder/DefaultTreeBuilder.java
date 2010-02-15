@@ -95,7 +95,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     
     if (alreadySelected) {
       // attribute already selected
-      DefaultTreeBuilder.log.warn("attribute {} already selected in a parent node", best.attr);
+      log.warn("attribute {} already selected in a parent node", best.attr);
     }
     
     Node childNode;
@@ -175,7 +175,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     }
     
     if (nbNonSelected == 0) {
-      DefaultTreeBuilder.log.warn("All attributes are selected !");
+      log.warn("All attributes are selected !");
     }
     
     int[] result;

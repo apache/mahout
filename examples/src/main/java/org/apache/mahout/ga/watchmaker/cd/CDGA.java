@@ -154,7 +154,7 @@ public class CDGA {
       
       CDGA.printElapsedTime(end - start);
     } catch (OptionException e) {
-      CDGA.log.error("Error while parsing options", e);
+      log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -194,7 +194,7 @@ public class CDGA {
     engine.addEvolutionObserver(new EvolutionObserver<CDRule>() {
       @Override
       public void populationUpdate(PopulationData<? extends CDRule> data) {
-        CDGA.log.info("Generation {}", data.getGenerationNumber());
+        log.info("Generation {}", data.getGenerationNumber());
       }
     });
     
@@ -209,8 +209,8 @@ public class CDGA {
     CDFitness bestTestFit = CDMahoutEvaluator.evaluate(solution, target, inpath, split);
     
     // evaluate the solution over the testing set
-    CDGA.log.info("Best solution fitness (train set) : {}", bestTrainFit);
-    CDGA.log.info("Best solution fitness (test set) : {}", bestTestFit);
+    log.info("Best solution fitness (train set) : {}", bestTrainFit);
+    log.info("Best solution fitness (test set) : {}", bestTestFit);
   }
   
   private static void printElapsedTime(long milli) {
@@ -223,7 +223,7 @@ public class CDGA {
     long hours = minutes / 60;
     minutes %= 60;
     
-    CDGA.log.info("Elapsed time (Hours:minutes:seconds:milli) : {}:{}:{}:{}", new Object[] {hours, minutes,
+    log.info("Elapsed time (Hours:minutes:seconds:milli) : {}:{}:{}:{}", new Object[] {hours, minutes,
                                                                                             seconds, milli});
   }
 }

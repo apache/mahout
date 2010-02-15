@@ -34,11 +34,13 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.utils.vectors.TFIDF;
+import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
 
 /**
  * Converts a document in to a sparse vector
@@ -53,6 +55,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
   private int maxDfPercent = 99;
   private long vectorCount = 1;
   private long featureCount = 0;
+  private boolean sequentialAccess;
   
   @Override
   public void reduce(WritableComparable<?> key,
@@ -81,7 +84,9 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
       vector.setQuick(e.index(), tfidf.calculate((int) e.get(), (int) df, (int) featureCount,
         (int) vectorCount));
     }
-    
+    if (sequentialAccess) {
+      vector = new SequentialAccessSparseVector(vector);
+    }
     vectorWritable.set(vector);
     output.collect(key, vectorWritable);
   }
@@ -100,6 +105,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
       featureCount = job.getLong(TFIDFConverter.FEATURE_COUNT, 1);
       minDf = job.getInt(TFIDFConverter.MIN_DF, 1);
       maxDfPercent = job.getInt(TFIDFConverter.MAX_DF_PERCENTAGE, 99);
+      sequentialAccess = job.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
       
       Path dictionaryFile = new Path(localFiles[0].getPath());
       FileSystem fs = dictionaryFile.getFileSystem(job);

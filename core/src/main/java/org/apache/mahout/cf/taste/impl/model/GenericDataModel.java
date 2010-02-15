@@ -86,10 +86,10 @@ public final class GenericDataModel implements DataModel, Serializable {
         prefsForItem.add(preference);
       }
       if (++currentCount % 10000 == 0) {
-        GenericDataModel.log.info("Processed {} users", currentCount);
+        log.info("Processed {} users", currentCount);
       }
     }
-    GenericDataModel.log.info("Processed {} users", currentCount);
+    log.info("Processed {} users", currentCount);
     
     this.itemIDs = itemIDSet.toArray();
     itemIDSet = null; // Might help GC -- this is big

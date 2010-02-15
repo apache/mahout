@@ -43,7 +43,7 @@ public abstract class AbstractJDBCComponent {
     if ((value == null) || (value.toString().length() == 0)) {
       throw new IllegalArgumentException(argName + " is null or empty");
     }
-    AbstractJDBCComponent.log.debug("{}: {}", argName, value);
+    log.debug("{}: {}", argName, value);
   }
   
   protected static void checkNotNullAndLog(String argName, Object[] values) {
@@ -51,7 +51,7 @@ public abstract class AbstractJDBCComponent {
       throw new IllegalArgumentException(argName + " is null or zero-length");
     }
     for (Object value : values) {
-      AbstractJDBCComponent.checkNotNullAndLog(argName, value);
+      checkNotNullAndLog(argName, value);
     }
   }
   
@@ -79,14 +79,14 @@ public abstract class AbstractJDBCComponent {
         try {
           context.close();
         } catch (NamingException ne) {
-          AbstractJDBCComponent.log.warn("Error while closing Context; continuing...", ne);
+          log.warn("Error while closing Context; continuing...", ne);
         }
       }
     }
   }
   
   protected int getFetchSize() {
-    return AbstractJDBCComponent.DEFAULT_FETCH_SIZE;
+    return DEFAULT_FETCH_SIZE;
   }
   
   protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
