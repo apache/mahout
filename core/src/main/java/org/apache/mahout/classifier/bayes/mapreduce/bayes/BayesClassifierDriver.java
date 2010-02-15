@@ -45,7 +45,7 @@ public final class BayesClassifierDriver {
   
   private static final Logger log = LoggerFactory.getLogger(BayesClassifierDriver.class);
   
-  private BayesClassifierDriver() { }
+  private BayesClassifierDriver() {}
   
   /**
    * Run the job
@@ -87,10 +87,10 @@ public final class BayesClassifierDriver {
     log.info("{}", matrix.summarize());
   }
   
-  private static ConfusionMatrix readResult(FileSystem fs,
-                                            Path pathPattern,
-                                            Configuration conf,
-                                            Parameters params) throws IOException {
+  public static ConfusionMatrix readResult(FileSystem fs,
+                                           Path pathPattern,
+                                           Configuration conf,
+                                           Parameters params) throws IOException {
     
     StringTuple key = new StringTuple();
     DoubleWritable value = new DoubleWritable();
