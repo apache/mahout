@@ -99,8 +99,8 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
       
       labelDocCountTemp = mapStringifier.fromString(labelDocumentCountString);
-      for (String key : labelDocCountTemp.keySet()) {
-        this.labelDocumentCounts.put(key, labelDocCountTemp.get(key));
+      for (Map.Entry<String, Double> stringDoubleEntry : labelDocCountTemp.entrySet()) {
+        this.labelDocumentCounts.put(stringDoubleEntry.getKey(), stringDoubleEntry.getValue());
       }
       
     } catch (IOException ex) {

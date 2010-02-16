@@ -15,7 +15,7 @@ public class MeanShiftCanopyClusterer {
   
   private double convergenceDelta = 0;
   // the next canopyId to be allocated
-  private int nextCanopyId = 0;
+  //private int nextCanopyId = 0;
   // the T1 distance threshold
   private double t1;
   // the T2 distance threshold
@@ -57,7 +57,7 @@ public class MeanShiftCanopyClusterer {
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
-    nextCanopyId = 0;
+    //nextCanopyId = 0; // never read?
     t1 = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.T1_KEY));
     t2 = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.T2_KEY));
     convergenceDelta = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY));
@@ -70,7 +70,7 @@ public class MeanShiftCanopyClusterer {
    *          the convergence criteria
    */
   public void config(DistanceMeasure aMeasure, double aT1, double aT2, double aDelta) {
-    nextCanopyId = 100; // so canopyIds will sort properly
+    //nextCanopyId = 100; // so canopyIds will sort properly  // never read?
     measure = aMeasure;
     t1 = aT1;
     t2 = aT2;

@@ -187,7 +187,7 @@ public class PartialBuilder extends Builder {
     }
     
     // make sure we got all the keys/values
-    if (index != keys.length) {
+    if (keys != null && index != keys.length) {
       throw new IllegalStateException();
     }
   }

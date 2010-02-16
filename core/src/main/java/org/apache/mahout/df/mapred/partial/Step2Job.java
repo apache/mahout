@@ -143,9 +143,10 @@ public class Step2Job {
     int numTrees = Builder.getNbTrees(job);
     
     // compute the total number of output values
-    int total = 0;
+    //int total = 0;
     for (int partition = 0; partition < numMaps; partition++) {
-      total += Step2Mapper.nbConcerned(numMaps, numTrees, partition);
+      //total += Step2Mapper.nbConcerned(numMaps, numTrees, partition);
+      Step2Mapper.nbConcerned(numMaps, numTrees, partition);
     }
     
     int[] firstIds = Step0Output.extractFirstIds(partitions);

@@ -86,8 +86,8 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
       String labelWeightSumString = mapStringifier.toString(labelWeightSumTemp);
       labelWeightSumString = job.get("cnaivebayes.sigma_k", labelWeightSumString);
       labelWeightSumTemp = mapStringifier.fromString(labelWeightSumString);
-      for (String key : labelWeightSumTemp.keySet()) {
-        this.labelWeightSum.put(key, labelWeightSumTemp.get(key));
+      for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSumTemp.entrySet()) {
+        this.labelWeightSum.put(stringDoubleEntry.getKey(), stringDoubleEntry.getValue());
       }
       DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(job, GenericsUtil
           .getClass(sigmaJSigmaK));
