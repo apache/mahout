@@ -82,7 +82,7 @@ public final class ClusterDumper {
     if (this.pointsDir != null) {
       JobConf conf = new JobConf(Job.class);
       // read in the points
-      clusterIdToPoints = ClusterDumper.readPoints(this.pointsDir, conf);
+      clusterIdToPoints = readPoints(this.pointsDir, conf);
     } else {
       clusterIdToPoints = Collections.emptyMap();
     }
@@ -139,7 +139,7 @@ public final class ClusterDumper {
         writer.append('\n');
 
         if (dictionary != null) {
-          String topTerms = ClusterDumper.getTopFeatures(center, dictionary, numTopFeatures);
+          String topTerms = getTopFeatures(center, dictionary, numTopFeatures);
           writer.write("\tTop Terms: ");
           writer.write(topTerms);
           writer.write('\n');

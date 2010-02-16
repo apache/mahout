@@ -40,7 +40,7 @@ public class OptIgSplit extends IgSplit {
     if (data.getDataset().isNumerical(attr)) {
       return numericalSplit(data, attr);
     } else {
-      return OptIgSplit.categoricalSplit(data, attr);
+      return categoricalSplit(data, attr);
     }
   }
   
@@ -64,13 +64,13 @@ public class OptIgSplit extends IgSplit {
     }
     
     int size = data.size();
-    double hy = OptIgSplit.entropy(countAll, size); // H(Y)
+    double hy = entropy(countAll, size); // H(Y)
     double hyx = 0.0; // H(Y|X)
     double invDataSize = 1.0 / size;
     
     for (int index = 0; index < values.length; index++) {
       size = DataUtils.sum(counts[index]);
-      hyx += size * invDataSize * OptIgSplit.entropy(counts[index], size);
+      hyx += size * invDataSize * entropy(counts[index], size);
     }
     
     double ig = hy - hyx;
@@ -119,14 +119,14 @@ public class OptIgSplit extends IgSplit {
    * @return
    */
   protected Split numericalSplit(Data data, int attr) {
-    double[] values = OptIgSplit.sortedValues(data, attr);
+    double[] values = sortedValues(data, attr);
     
     initCounts(data, values);
     
     computeFrequencies(data, attr, values);
     
     int size = data.size();
-    double hy = OptIgSplit.entropy(countAll, size);
+    double hy = entropy(countAll, size);
     double invDataSize = 1.0 / size;
     
     int best = -1;
@@ -138,11 +138,11 @@ public class OptIgSplit extends IgSplit {
       
       // instance with attribute value < values[index]
       size = DataUtils.sum(countLess);
-      ig -= size * invDataSize * OptIgSplit.entropy(countLess, size);
+      ig -= size * invDataSize * entropy(countLess, size);
       
       // instance with attribute value >= values[index]
       size = DataUtils.sum(countAll);
-      ig -= size * invDataSize * OptIgSplit.entropy(countAll, size);
+      ig -= size * invDataSize * entropy(countAll, size);
       
       if (ig > bestIg) {
         bestIg = ig;
@@ -181,7 +181,7 @@ public class OptIgSplit extends IgSplit {
         continue; // otherwise we get a NaN
       }
       double p = count * invDataSize;
-      entropy += -p * Math.log(p) / IgSplit.LOG2;
+      entropy += -p * Math.log(p) / LOG2;
     }
     
     return entropy;

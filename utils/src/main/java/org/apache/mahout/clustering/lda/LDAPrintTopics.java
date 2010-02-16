@@ -99,11 +99,11 @@ public class LDAPrintTopics {
         int topic = key.getX();
         int word = key.getY();
         
-        LDAPrintTopics.ensureQueueSize(queues, topic);
+        ensureQueueSize(queues, topic);
         if (word >= 0 && topic >= 0) {
           double score = value.get();
           String realWord = wordList.get(word);
-          LDAPrintTopics.maybeEnqueue(queues.get(topic), realWord, score, numWordsToPrint);
+          maybeEnqueue(queues.get(topic), realWord, score, numWordsToPrint);
         }
       }
       reader.close();
@@ -219,7 +219,7 @@ public class LDAPrintTopics {
         throw new IllegalArgumentException("Invalid dictionary format");
       }
       
-      List<List<String>> topWords = LDAPrintTopics.topWordsForTopics(input, config, wordList,
+      List<List<String>> topWords = topWordsForTopics(input, config, wordList,
         numWords);
       
       if (!output.exists()) {

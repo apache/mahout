@@ -64,7 +64,7 @@ public class OutputDriver {
       
       String input = cmdLine.getValue(inputOpt, "testdata").toString();
       String output = cmdLine.getValue(outputOpt, "output").toString();
-      OutputDriver.runJob(input, output);
+      runJob(input, output);
     } catch (OptionException e) {
       OutputDriver.LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);

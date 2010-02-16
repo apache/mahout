@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class SequenceFilesFromDirectory {
   
-  private transient static Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectory.class);
+  private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectory.class);
   
   private static ChunkedWriter createNewChunkedWriter(int chunkSizeInMB, String outputDir) throws IOException {
     return new ChunkedWriter(chunkSizeInMB, outputDir);

@@ -47,7 +47,7 @@ public class ParallelCountingMapper extends Mapper<LongWritable,Text,Text,LongWr
         continue;
       }
       context.setStatus("Parallel Counting Mapper: " + item);
-      context.write(new Text(item), ParallelCountingMapper.ONE);
+      context.write(new Text(item), ONE);
     }
   }
   

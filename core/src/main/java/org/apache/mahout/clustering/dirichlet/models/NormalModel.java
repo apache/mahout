@@ -118,7 +118,7 @@ public class NormalModel implements Model<VectorWritable> {
     double sd2 = stdDev * stdDev;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (stdDev * NormalModel.sqrt2pi);
+    return ex / (stdDev * sqrt2pi);
   }
   
   @Override
@@ -169,6 +169,6 @@ public class NormalModel implements Model<VectorWritable> {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, NormalModel.modelType);
+    return gson.toJson(this, modelType);
   }
 }

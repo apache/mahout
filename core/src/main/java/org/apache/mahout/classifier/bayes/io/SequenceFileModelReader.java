@@ -49,11 +49,11 @@ public final class SequenceFileModelReader {
                                Parameters params,
                                Configuration conf) throws IOException {
     
-    SequenceFileModelReader.loadFeatureWeights(datastore, fs, new Path(params.get("sigma_j")), conf);
-    SequenceFileModelReader.loadLabelWeights(datastore, fs, new Path(params.get("sigma_k")), conf);
-    SequenceFileModelReader.loadSumWeight(datastore, fs, new Path(params.get("sigma_kSigma_j")), conf);
-    SequenceFileModelReader.loadThetaNormalizer(datastore, fs, new Path(params.get("thetaNormalizer")), conf);
-    SequenceFileModelReader.loadWeightMatrix(datastore, fs, new Path(params.get("weight")), conf);
+    loadFeatureWeights(datastore, fs, new Path(params.get("sigma_j")), conf);
+    loadLabelWeights(datastore, fs, new Path(params.get("sigma_k")), conf);
+    loadSumWeight(datastore, fs, new Path(params.get("sigma_kSigma_j")), conf);
+    loadThetaNormalizer(datastore, fs, new Path(params.get("thetaNormalizer")), conf);
+    loadWeightMatrix(datastore, fs, new Path(params.get("weight")), conf);
     
   }
   

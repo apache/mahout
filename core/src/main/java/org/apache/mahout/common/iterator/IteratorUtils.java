@@ -40,7 +40,7 @@ public final class IteratorUtils {
    * @return a {@link List} with the objects one gets by iterating over the given {@link Iterable}
    */
   public static <K> List<K> iterableToList(Iterable<K> iterable) {
-    return IteratorUtils.iterableToList(iterable, null);
+    return iterableToList(iterable, null);
   }
   
   public static long[] longIteratorToList(LongPrimitiveIterator iterator) {

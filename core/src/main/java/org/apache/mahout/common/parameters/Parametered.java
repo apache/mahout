@@ -60,7 +60,7 @@ public interface Parametered extends JobConfigurable {
      *      name as prefix.
      */
     public static void configureParameters(Parametered parametered, JobConf jobConf) {
-      ParameteredGeneralizations.configureParameters(parametered.getClass().getSimpleName() + '.',
+      configureParameters(parametered.getClass().getSimpleName() + '.',
         parametered, jobConf);
       
     }
@@ -82,7 +82,7 @@ public interface Parametered extends JobConfigurable {
      */
     public static void configureParameters(String prefix, Parametered parametered, JobConf jobConf) {
       parametered.createParameters(prefix, jobConf);
-      ParameteredGeneralizations.configureParametersRecusivly(parametered, prefix, jobConf);
+      configureParametersRecusivly(parametered, prefix, jobConf);
     }
     
     private static void configureParametersRecusivly(Parametered parametered, String prefix, JobConf jobConf) {
@@ -94,7 +94,7 @@ public interface Parametered extends JobConfigurable {
         parameter.createParameters(name, jobConf);
         parameter.configure(jobConf);
         if (!parameter.getParameters().isEmpty()) {
-          ParameteredGeneralizations.configureParametersRecusivly(parameter, name, jobConf);
+          configureParametersRecusivly(parameter, name, jobConf);
         }
       }
     }
@@ -137,7 +137,7 @@ public interface Parametered extends JobConfigurable {
         
         recurseCount(parametered);
         
-        numChars += (longestName + Help.distanceBetweenNameAndDescription)
+        numChars += (longestName + distanceBetweenNameAndDescription)
                     * parametered.getParameters().size();
         sb = new StringBuilder(numChars);
         
@@ -150,7 +150,7 @@ public interface Parametered extends JobConfigurable {
           sb.append(parameter.prefix());
           sb.append(parameter.name());
           int max = longestName - parameter.name().length() - parameter.prefix().length()
-                    + Help.distanceBetweenNameAndDescription;
+                    + distanceBetweenNameAndDescription;
           for (int i = 0; i < max; i++) {
             sb.append(' ');
           }

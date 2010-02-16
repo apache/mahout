@@ -131,10 +131,10 @@ public final class Driver {
           });
           
           for (File file : files) {
-            Driver.writeFile(outWriter, outDir, file, maxDocs, model);
+            writeFile(outWriter, outDir, file, maxDocs, model);
           }
         } else {
-          Driver.writeFile(outWriter, outDir, input, maxDocs, model);
+          writeFile(outWriter, outDir, input, maxDocs, model);
         }
         log.info("Dictionary Output file: {}", dictOut);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOut),
@@ -167,10 +167,10 @@ public final class Driver {
         BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
         vectorWriter = new JWriterVectorWriter(writer);
       } else {
-        vectorWriter = Driver.getSeqFileWriter(outFile);
+        vectorWriter = getSeqFileWriter(outFile);
       }
     } else {
-      vectorWriter = Driver.getSeqFileWriter(outFile);
+      vectorWriter = getSeqFileWriter(outFile);
     }
     
     long numDocs = vectorWriter.write(iteratable, maxDocs);

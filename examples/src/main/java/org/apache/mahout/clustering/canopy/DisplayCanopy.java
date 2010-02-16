@@ -49,12 +49,12 @@ class DisplayCanopy extends DisplayDirichlet {
     super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;
     Vector dv = new DenseVector(2);
-    for (Canopy canopy : DisplayCanopy.canopies) {
+    for (Canopy canopy : canopies) {
       if (canopy.getNumPoints() > DisplayDirichlet.sampleData.size() * 0.05) {
-        dv.assign(DisplayCanopy.t1);
-        g2.setColor(DisplayDirichlet.colors[0]);
+        dv.assign(t1);
+        g2.setColor(colors[0]);
         DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv);
-        dv.assign(DisplayCanopy.t2);
+        dv.assign(t2);
         DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv);
       }
     }
@@ -113,9 +113,9 @@ class DisplayCanopy extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    points.addAll(DisplayDirichlet.sampleData);
-    DisplayCanopy.canopies = DisplayCanopy.populateCanopies(new ManhattanDistanceMeasure(), points,
-      DisplayCanopy.t1, DisplayCanopy.t2);
+    points.addAll(sampleData);
+    canopies = populateCanopies(new ManhattanDistanceMeasure(), points,
+      t1, t2);
     new DisplayCanopy();
   }
   

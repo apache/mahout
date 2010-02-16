@@ -42,7 +42,7 @@ class DisplayOutputState extends DisplayDirichlet {
   DisplayOutputState() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Map/Reduce Results (>"
-      + (int) (DisplayDirichlet.significance * 100) + "% of population)");
+      + (int) (significance * 100) + "% of population)");
   }
   
   @Override
@@ -52,9 +52,9 @@ class DisplayOutputState extends DisplayDirichlet {
     
     Vector dv = new DenseVector(2);
     int i = DisplayDirichlet.result.size() - 1;
-    for (Model<VectorWritable>[] models : DisplayDirichlet.result) {
+    for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(DisplayDirichlet.colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         NormalModel mm = (NormalModel) m;
         dv.assign(mm.getStdDev() * 3);
@@ -85,12 +85,12 @@ class DisplayOutputState extends DisplayDirichlet {
   private static void getSamples() throws IOException {
     File f = new File("input");
     for (File g : f.listFiles()) {
-      DisplayDirichlet.sampleData.addAll(DisplayOutputState.readFile(g.getCanonicalPath()));
+      DisplayDirichlet.sampleData.addAll(readFile(g.getCanonicalPath()));
     }
   }
   
   private static void getResults() throws IOException, InvocationTargetException, NoSuchMethodException {
-    DisplayDirichlet.result = new ArrayList<Model<VectorWritable>[]>();
+    result = new ArrayList<Model<VectorWritable>[]>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY,
         "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
@@ -108,8 +108,8 @@ class DisplayOutputState extends DisplayDirichlet {
   
   public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
     RandomUtils.useTestSeed();
-    DisplayOutputState.getSamples();
-    DisplayOutputState.getResults();
+    getSamples();
+    getResults();
     new DisplayOutputState();
   }
   

@@ -63,29 +63,29 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   }
   
   public static String getRandomDocument() {
-    int length = (DictionaryVectorizerTest.AVG_DOCUMENT_LENGTH >> 1)
-    + DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.AVG_DOCUMENT_LENGTH);
-    StringBuilder sb = new StringBuilder(length * DictionaryVectorizerTest.AVG_SENTENCE_LENGTH
-      * DictionaryVectorizerTest.AVG_WORD_LENGTH);
+    int length = (AVG_DOCUMENT_LENGTH >> 1)
+    + DictionaryVectorizerTest.random.nextInt(AVG_DOCUMENT_LENGTH);
+    StringBuilder sb = new StringBuilder(length * AVG_SENTENCE_LENGTH
+      * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
-      sb.append(DictionaryVectorizerTest.getRandomSentence());
+      sb.append(getRandomSentence());
     }
     return sb.toString();
   }
   
   public static String getRandomSentence() {
-    int length = (DictionaryVectorizerTest.AVG_SENTENCE_LENGTH >> 1)
-    + DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.AVG_SENTENCE_LENGTH);
-    StringBuilder sb = new StringBuilder(length * DictionaryVectorizerTest.AVG_WORD_LENGTH);
+    int length = (AVG_SENTENCE_LENGTH >> 1)
+    + DictionaryVectorizerTest.random.nextInt(AVG_SENTENCE_LENGTH);
+    StringBuilder sb = new StringBuilder(length * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
-      sb.append(DictionaryVectorizerTest.getRandomString()).append(' ');
+      sb.append(getRandomString()).append(' ');
     }
-    sb.append(DictionaryVectorizerTest.getRandomDelimiter());
+    sb.append(getRandomDelimiter());
     return sb.toString();
   }
   
   public static String getRandomString() {
-    int length = (DictionaryVectorizerTest.AVG_WORD_LENGTH >> 1) + DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.AVG_WORD_LENGTH);
+    int length = (AVG_WORD_LENGTH >> 1) + DictionaryVectorizerTest.random.nextInt(AVG_WORD_LENGTH);
     StringBuilder sb = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
       sb.append(DictionaryVectorizerTest.CHARSET.charAt(DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.CHARSET.length())));
@@ -103,7 +103,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
       if (f.isDirectory()) {
         String[] contents = f.list();
         for (String content : contents) {
-          DictionaryVectorizerTest.rmr(f.toString() + File.separator + content);
+          rmr(f.toString() + File.separator + content);
         }
       }
       f.delete();
@@ -113,8 +113,8 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    DictionaryVectorizerTest.rmr("output");
-    DictionaryVectorizerTest.rmr("testdata");
+    rmr("output");
+    rmr("testdata");
     Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
   }
@@ -129,9 +129,9 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
       Text.class, Text.class);
     
-    for (int i = 0; i < DictionaryVectorizerTest.NUM_DOCS; i++) {
+    for (int i = 0; i < NUM_DOCS; i++) {
       writer.append(new Text("Document::ID::" + i), new Text(
-        DictionaryVectorizerTest.getRandomDocument()));
+        getRandomDocument()));
     }
     writer.close();
     Class<? extends Analyzer> analyzer = new StandardAnalyzer(

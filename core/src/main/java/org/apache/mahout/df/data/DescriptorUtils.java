@@ -77,7 +77,7 @@ public class DescriptorUtils {
       tokens.add(tokenizer.nextToken());
     }
     
-    return DescriptorUtils.generateDescriptor(tokens);
+    return generateDescriptor(tokens);
   }
   
   /**

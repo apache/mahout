@@ -231,7 +231,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     
     @Override
     public String[] getLocations() throws IOException {
-      return InMemInputSplit.NO_LOCATIONS;
+      return NO_LOCATIONS;
     }
     
     @Override

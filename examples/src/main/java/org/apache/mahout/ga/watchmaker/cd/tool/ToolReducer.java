@@ -87,7 +87,7 @@ public class ToolReducer extends MapReduceBase implements Reducer<LongWritable,T
    */
   String combineDescriptions(int index, Iterator<Text> values) {
     if (descriptors.isNumerical(index)) {
-      return ToolReducer.numericDescription(values);
+      return numericDescription(values);
     } else if (descriptors.isNominal(index)) {
       return nominalDescription(values);
     } else {

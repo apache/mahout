@@ -91,7 +91,7 @@ public final class DirichletJob {
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
-      DirichletJob.runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels,
+      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels,
         maxIterations, alpha_0);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);

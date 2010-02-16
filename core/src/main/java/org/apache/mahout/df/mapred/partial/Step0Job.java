@@ -149,7 +149,7 @@ public class Step0Job {
       }
     }
     
-    return Step0Job.processOutput(keys, values);
+    return processOutput(keys, values);
   }
   
   /**

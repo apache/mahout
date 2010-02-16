@@ -183,7 +183,7 @@ public class MeanShiftCanopy extends ClusterBase {
   
   @Override
   public String toString() {
-    return MeanShiftCanopy.formatCanopy(this);
+    return formatCanopy(this);
   }
   
   /**
@@ -233,7 +233,7 @@ public class MeanShiftCanopy extends ClusterBase {
   
   @Override
   public String asFormatString() {
-    return MeanShiftCanopy.formatCanopy(this);
+    return formatCanopy(this);
   }
   
   public void setBoundPoints(List<Vector> boundPoints) {

@@ -78,7 +78,7 @@ public class InMemMapper extends MapredMapper implements
     
     log.info("Loading the data...");
     try {
-      data = InMemMapper.loadData(conf, getDataset());
+      data = loadData(conf, getDataset());
     } catch (IOException e) {
       throw new IllegalStateException("Exception caught while loading the data: "
                                       + StringUtils.stringifyException(e));

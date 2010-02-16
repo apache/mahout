@@ -139,12 +139,12 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
           dfTuple.add(BayesConstants.DOCUMENT_FREQUENCY);
           dfTuple.add(label);
           dfTuple.add(token);
-          output.collect(dfTuple, BayesFeatureMapper.ONE);
+          output.collect(dfTuple, ONE);
           
           StringTuple tokenCountTuple = new StringTuple();
           tokenCountTuple.add(BayesConstants.FEATURE_COUNT);
           tokenCountTuple.add(token);
-          output.collect(tokenCountTuple, BayesFeatureMapper.ONE);
+          output.collect(tokenCountTuple, ONE);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -157,7 +157,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
     StringTuple labelCountTuple = new StringTuple();
     labelCountTuple.add(BayesConstants.LABEL_COUNT);
     labelCountTuple.add(label);
-    output.collect(labelCountTuple, BayesFeatureMapper.ONE);
+    output.collect(labelCountTuple, ONE);
   }
   
   @Override

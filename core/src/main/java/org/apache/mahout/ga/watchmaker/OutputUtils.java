@@ -90,7 +90,7 @@ public final class OutputUtils {
     Sorter sorter = new Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
     
     // merge and sort the outputs
-    Path[] outfiles = OutputUtils.listOutputFiles(fs, outpath);
+    Path[] outfiles = listOutputFiles(fs, outpath);
     Path output = new Path(outpath, "output.sorted");
     sorter.merge(outfiles, output);
     

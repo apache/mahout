@@ -98,7 +98,7 @@ public final class Job {
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
       
-      Job.runJob(input, output, measureClass, t1, t2);
+      runJob(input, output, measureClass, t1, t2);
     } catch (OptionException e) {
       Job.LOG.error("Exception", e);
       CommandLineUtil.printHelp(group);

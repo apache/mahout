@@ -83,7 +83,7 @@ public final class BayesClassifierDriver {
     JobClient.runJob(conf);
     
     Path outputFiles = new Path(outPath.toString() + "/part*");
-    ConfusionMatrix matrix = BayesClassifierDriver.readResult(dfs, outputFiles, conf, params);
+    ConfusionMatrix matrix = readResult(dfs, outputFiles, conf, params);
     log.info("{}", matrix.summarize());
   }
   

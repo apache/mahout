@@ -92,9 +92,9 @@ public final class IOUtils {
    *          {@link Connection} to close
    */
   public static void quietClose(ResultSet resultSet, Statement statement, Connection connection) {
-    IOUtils.quietClose(resultSet);
-    IOUtils.quietClose(statement);
-    IOUtils.quietClose(connection);
+    quietClose(resultSet);
+    quietClose(statement);
+    quietClose(connection);
   }
   
 }

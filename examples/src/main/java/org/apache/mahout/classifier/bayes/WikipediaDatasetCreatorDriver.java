@@ -116,7 +116,7 @@ public final class WikipediaDatasetCreatorDriver {
         // you can't instantiate it
         analyzerClass.newInstance();
       }
-      WikipediaDatasetCreatorDriver.runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt),
+      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt),
         analyzerClass);
     } catch (OptionException e) {
       log.error("Exception", e);

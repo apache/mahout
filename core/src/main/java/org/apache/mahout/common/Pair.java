@@ -48,8 +48,8 @@ public final class Pair<A, B> implements Serializable {
       return false;
     }
     Pair<?, ?> otherPair = (Pair<?, ?>) obj;
-    return Pair.isEqualOrNulls(first, otherPair.getFirst()) &&
-    Pair.isEqualOrNulls(second, otherPair.getSecond());
+    return isEqualOrNulls(first, otherPair.getFirst()) &&
+    isEqualOrNulls(second, otherPair.getSecond());
   }
   
   private static boolean isEqualOrNulls(Object obj1, Object obj2) {
@@ -58,10 +58,10 @@ public final class Pair<A, B> implements Serializable {
   
   @Override
   public int hashCode() {
-    int firstHash = Pair.hashCodeNull(first);
+    int firstHash = hashCodeNull(first);
     // Flip top and bottom 16 bits; this makes the hash function probably different
     // for (a,b) versus (b,a)
-    return (firstHash >>> 16 | firstHash << 16) ^ Pair.hashCodeNull(second);
+    return (firstHash >>> 16 | firstHash << 16) ^ hashCodeNull(second);
   }
   
   private static int hashCodeNull(Object obj) {

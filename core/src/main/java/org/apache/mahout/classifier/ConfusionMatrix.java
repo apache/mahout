@@ -143,7 +143,7 @@ public class ConfusionMatrix implements Summarizable {
     returnString.append("-------------------------------------------------------").append('\n');
     
     for (String correctLabel : this.labels) {
-      returnString.append(StringUtils.rightPad(ConfusionMatrix.getSmallLabel(labelMap.get(correctLabel)), 5))
+      returnString.append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)), 5))
           .append('\t');
     }
     
@@ -157,7 +157,7 @@ public class ConfusionMatrix implements Summarizable {
         labelTotal += getCount(correctLabel, classifiedLabel);
       }
       returnString.append(" |  ").append(StringUtils.rightPad(String.valueOf(labelTotal), 6)).append('\t')
-          .append(StringUtils.rightPad(ConfusionMatrix.getSmallLabel(labelMap.get(correctLabel)), 5)).append(
+          .append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)), 5)).append(
             " = ").append(correctLabel).append('\n');
     }
     returnString.append("Default Category: ").append(defaultLabel).append(": ").append(

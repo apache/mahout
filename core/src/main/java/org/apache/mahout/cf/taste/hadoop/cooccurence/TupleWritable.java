@@ -17,7 +17,7 @@ public final class TupleWritable extends ArrayWritable {
     
     @Override
     protected Class<? extends Writable>[] getTypes() {
-      return (Class<? extends Writable>[]) Field.CLASSES;
+      return (Class<? extends Writable>[]) CLASSES;
     }
     
     public Field() { }

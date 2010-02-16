@@ -52,8 +52,8 @@ import javax.sql.DataSource;
 public final class MySQLJDBCIDMigrator extends AbstractJDBCIDMigrator {
   
   public MySQLJDBCIDMigrator(DataSource dataSource) {
-    this(dataSource, AbstractJDBCIDMigrator.DEFAULT_MAPPING_TABLE,
-        AbstractJDBCIDMigrator.DEFAULT_LONG_ID_COLUMN, AbstractJDBCIDMigrator.DEFAULT_STRING_ID_COLUMN);
+    this(dataSource, DEFAULT_MAPPING_TABLE,
+        DEFAULT_LONG_ID_COLUMN, DEFAULT_STRING_ID_COLUMN);
   }
   
   public MySQLJDBCIDMigrator(DataSource dataSource,

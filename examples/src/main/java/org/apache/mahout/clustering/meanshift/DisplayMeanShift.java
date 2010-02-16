@@ -48,12 +48,12 @@ class DisplayMeanShift extends DisplayDirichlet {
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    double sx = (double) res / DisplayDirichlet.ds;
+    double sx = (double) res / ds;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
     
     // plot the axes
     g2.setColor(Color.BLACK);
-    Vector dv = new DenseVector(2).assign(DisplayDirichlet.size / 2.0);
+    Vector dv = new DenseVector(2).assign(size / 2.0);
     Vector dv1 = new DenseVector(2).assign(DisplayMeanShift.clusterer.getT1());
     Vector dv2 = new DenseVector(2).assign(DisplayMeanShift.clusterer.getT2());
     DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(2), dv);
@@ -62,13 +62,13 @@ class DisplayMeanShift extends DisplayDirichlet {
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
-    for (VectorWritable v : DisplayDirichlet.sampleData) {
+    for (VectorWritable v : sampleData) {
       DisplayDirichlet.plotRectangle(g2, v.get(), dv);
     }
     int i = 0;
-    for (MeanShiftCanopy canopy : DisplayMeanShift.canopies) {
+    for (MeanShiftCanopy canopy : canopies) {
       if (canopy.getBoundPoints().size() > 0.015 * DisplayDirichlet.sampleData.size()) {
-        g2.setColor(DisplayDirichlet.colors[Math.min(i++, DisplayDirichlet.colors.length - 1)]);
+        g2.setColor(colors[Math.min(i++, DisplayDirichlet.colors.length - 1)]);
         for (Vector v : canopy.getBoundPoints()) {
           DisplayDirichlet.plotRectangle(g2, v, dv);
         }
@@ -81,30 +81,30 @@ class DisplayMeanShift extends DisplayDirichlet {
   private static void testReferenceImplementation() {
     // add all points to the canopies
     int nextCanopyId = 0;
-    for (VectorWritable aRaw : DisplayDirichlet.sampleData) {
+    for (VectorWritable aRaw : sampleData) {
       DisplayMeanShift.clusterer.mergeCanopy(
-          new MeanShiftCanopy(aRaw.get(), nextCanopyId++), DisplayMeanShift.canopies);
+          new MeanShiftCanopy(aRaw.get(), nextCanopyId++), canopies);
     }
     boolean done = false;
     while (!done) { // shift canopies to their centroids
       done = true;
       List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
       //List<Vector> centers = new ArrayList<Vector>();
-      for (MeanShiftCanopy canopy : DisplayMeanShift.canopies) {
+      for (MeanShiftCanopy canopy : canopies) {
         //centers.add(canopy.getCenter());
         done = DisplayMeanShift.clusterer.shiftToMean(canopy) && done;
         DisplayMeanShift.clusterer.mergeCanopy(canopy, migratedCanopies);
       }
       //iterationCenters.add(centers);
-      DisplayMeanShift.canopies = migratedCanopies;
+      canopies = migratedCanopies;
     }
   }
   
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    DisplayMeanShift.testReferenceImplementation();
-    for (MeanShiftCanopy canopy : DisplayMeanShift.canopies) {
+    testReferenceImplementation();
+    for (MeanShiftCanopy canopy : canopies) {
       System.out.println(canopy.toString());
     }
     new DisplayMeanShift();

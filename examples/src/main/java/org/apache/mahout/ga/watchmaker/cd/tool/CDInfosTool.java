@@ -87,10 +87,10 @@ public class CDInfosTool {
     
     Path outpath = OutputUtils.prepareOutput(fs);
     
-    CDInfosTool.configureJob(conf, descriptors, inpath, outpath);
+    configureJob(conf, descriptors, inpath, outpath);
     JobClient.runJob(conf);
     
-    CDInfosTool.importDescriptions(fs, conf, outpath, descriptions);
+    importDescriptions(fs, conf, outpath, descriptions);
   }
   
   /**
@@ -246,14 +246,14 @@ public class CDInfosTool {
       FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
       
       log.info("Loading Descriptors...");
-      Descriptors descriptors = CDInfosTool.loadDescriptors(fs, inpath);
+      Descriptors descriptors = loadDescriptors(fs, inpath);
       
       log.info("Gathering informations...");
       List<String> descriptions = new ArrayList<String>();
-      CDInfosTool.gatherInfos(descriptors, inpath, descriptions);
+      gatherInfos(descriptors, inpath, descriptions);
       
       log.info("Storing Descriptions...");
-      CDInfosTool.storeDescriptions(fs, inpath, descriptors, descriptions);
+      storeDescriptions(fs, inpath, descriptors, descriptions);
     } catch (OptionException e) {
       log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);

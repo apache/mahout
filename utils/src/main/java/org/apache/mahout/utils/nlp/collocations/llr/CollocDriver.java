@@ -95,7 +95,7 @@ public class CollocDriver {
     
     Option numReduceTasksOpt = obuilder.withLongName("numReducers").withRequired(false).withArgument(
       abuilder.withName("numReducers").withMinimum(1).withMaximum(1).create()).withDescription(
-      "(Optional) Number of reduce tasks. Default Value: " + CollocDriver.DEFAULT_PASS1_NUM_REDUCE_TASKS)
+      "(Optional) Number of reduce tasks. Default Value: " + DEFAULT_PASS1_NUM_REDUCE_TASKS)
         .withShortName("nr").create();
     
     Option preprocessOpt = obuilder.withLongName("preprocess").withRequired(false).withDescription(
@@ -150,7 +150,6 @@ public class CollocDriver {
       }
       
       int minSupport = CollocReducer.DEFAULT_MIN_SUPPORT;
-      ;
       if (cmdLine.hasOption(minSupportOpt)) {
         minSupport = Integer.parseInt(cmdLine.getValue(minSupportOpt).toString());
       }

@@ -48,7 +48,7 @@ public final class BookCrossingDataModel extends FileDataModel {
    * @throws IOException if an error occurs while reading or writing files
    */
   public BookCrossingDataModel(File ratingsFile) throws IOException {
-    super(BookCrossingDataModel.convertBCFile(ratingsFile));
+    super(convertBCFile(ratingsFile));
   }
   
   private static File convertBCFile(File originalFile) throws IOException {

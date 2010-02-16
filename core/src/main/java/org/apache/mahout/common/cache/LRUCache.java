@@ -22,9 +22,9 @@ import java.util.Map;
 
 public class LRUCache<K,V> implements Cache<K,V> {
   
-  private int capacity;
+  private final int capacity;
   
-  private Map<K,V> lruCache;
+  private final Map<K,V> lruCache;
   
   public LRUCache(final int capacity) {
     

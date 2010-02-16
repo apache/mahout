@@ -38,10 +38,10 @@ public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gr
   public static final String MIN_SUPPORT = "minSupport";
   public static final int DEFAULT_MIN_SUPPORT = 2;
   
-  public static enum Skipped {
+  public enum Skipped {
     LESS_THAN_MIN_SUPPORT
-  };
-  
+  }
+
   private static final Logger log = LoggerFactory.getLogger(CollocReducer.class);
   
   private int minSupport;

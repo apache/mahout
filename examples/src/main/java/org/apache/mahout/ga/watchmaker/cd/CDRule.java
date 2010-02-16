@@ -85,14 +85,14 @@ public class CDRule implements Rule {
     DataSet dataset = DataSet.getDataSet();
     
     for (int condInd = 0; condInd < nbConditions; condInd++) {
-      int attrInd = CDRule.attributeIndex(condInd);
+      int attrInd = attributeIndex(condInd);
       
       setW(condInd, rng.nextDouble());
       setO(condInd, rng.nextBoolean());
       if (dataset.isNumerical(attrInd)) {
-        setV(condInd, CDRule.randomNumerical(dataset, attrInd, rng));
+        setV(condInd, randomNumerical(dataset, attrInd, rng));
       } else {
-        setV(condInd, CDRule.randomCategorical(dataset, attrInd, rng));
+        setV(condInd, randomCategorical(dataset, attrInd, rng));
       }
     }
   }
@@ -155,7 +155,7 @@ public class CDRule implements Rule {
    * @return
    */
   boolean condition(int condInd, DataLine dl) {
-    int attrInd = CDRule.attributeIndex(condInd);
+    int attrInd = attributeIndex(condInd);
     
     // is the condition active
     if (getW(condInd) < threshold) {
@@ -170,7 +170,7 @@ public class CDRule implements Rule {
   }
   
   boolean numericalCondition(int condInd, DataLine dl) {
-    int attrInd = CDRule.attributeIndex(condInd);
+    int attrInd = attributeIndex(condInd);
     
     if (getO(condInd)) {
       return dl.getAttribut(attrInd) >= getV(condInd);
@@ -180,7 +180,7 @@ public class CDRule implements Rule {
   }
   
   boolean categoricalCondition(int condInd, DataLine dl) {
-    int attrInd = CDRule.attributeIndex(condInd);
+    int attrInd = attributeIndex(condInd);
     
     if (getO(condInd)) {
       return dl.getAttribut(attrInd) == getV(condInd);
@@ -201,7 +201,7 @@ public class CDRule implements Rule {
           buffer.append(" && ");
         }
         
-        buffer.append("attr").append(CDRule.attributeIndex(condInd)).append(' ').append(
+        buffer.append("attr").append(attributeIndex(condInd)).append(' ').append(
           getO(condInd) ? ">=" : "<");
         buffer.append(' ').append(getV(condInd));
         
@@ -265,7 +265,7 @@ public class CDRule implements Rule {
     CDRule rule = (CDRule) obj;
     
     for (int index = 0; index < nbConditions; index++) {
-      if (!CDRule.areGenesEqual(this, rule, index)) {
+      if (!areGenesEqual(this, rule, index)) {
         return false;
       }
     }

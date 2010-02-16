@@ -77,7 +77,7 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 public final class MySQLJDBCItemSimilarity extends AbstractJDBCItemSimilarity {
   
   public MySQLJDBCItemSimilarity() throws TasteException {
-    this(AbstractJDBCComponent.DEFAULT_DATASOURCE_NAME);
+    this(DEFAULT_DATASOURCE_NAME);
   }
   
   public MySQLJDBCItemSimilarity(String dataSourceName) throws TasteException {
@@ -85,10 +85,10 @@ public final class MySQLJDBCItemSimilarity extends AbstractJDBCItemSimilarity {
   }
   
   public MySQLJDBCItemSimilarity(DataSource dataSource) {
-    this(dataSource, AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_TABLE,
-        AbstractJDBCItemSimilarity.DEFAULT_ITEM_A_ID_COLUMN,
-        AbstractJDBCItemSimilarity.DEFAULT_ITEM_B_ID_COLUMN,
-        AbstractJDBCItemSimilarity.DEFAULT_SIMILARITY_COLUMN);
+    this(dataSource, DEFAULT_SIMILARITY_TABLE,
+        DEFAULT_ITEM_A_ID_COLUMN,
+        DEFAULT_ITEM_B_ID_COLUMN,
+        DEFAULT_SIMILARITY_COLUMN);
   }
   
   public MySQLJDBCItemSimilarity(DataSource dataSource,

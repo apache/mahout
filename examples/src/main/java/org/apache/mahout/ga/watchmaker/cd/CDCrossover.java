@@ -51,7 +51,7 @@ public class CDCrossover extends AbstractCrossover<CDRule> {
       // will result in a meaningful cross-over.
       int crossoverIndex = 1 + rng.nextInt(parent1.getNbConditions() - 1);
       for (int j = 0; j < crossoverIndex; j++) {
-        CDCrossover.swap(offspring1, offspring2, j);
+        swap(offspring1, offspring2, j);
       }
     }
     

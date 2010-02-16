@@ -144,7 +144,7 @@ public final class SVDRecommender extends AbstractRecommender {
   }
   
   private void nextTrainStep() {
-    Collections.shuffle(cachedPreferences, SVDRecommender.random);
+    Collections.shuffle(cachedPreferences, random);
     for (int i = 0; i < numFeatures; i++) {
       for (Preference pref : cachedPreferences) {
         int useridx = userMap.get(pref.getUserID());

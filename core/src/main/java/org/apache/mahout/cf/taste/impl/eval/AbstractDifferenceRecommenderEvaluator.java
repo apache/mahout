@@ -182,12 +182,12 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     }
     log.info("Beginning evaluation of {} users", estimateCallables
         .size());
-    AbstractDifferenceRecommenderEvaluator.execute(estimateCallables);
+    execute(estimateCallables);
     return computeFinalEvaluation();
   }
   
   static void execute(Collection<Callable<Void>> callables) throws TasteException {
-    callables = AbstractDifferenceRecommenderEvaluator.wrapWithStatsCallables(callables);
+    callables = wrapWithStatsCallables(callables);
     int numProcessors = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
     log.info("Starting timing of {} tasks in {} threads", callables

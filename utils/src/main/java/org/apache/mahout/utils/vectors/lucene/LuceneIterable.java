@@ -39,12 +39,12 @@ public class LuceneIterable implements Iterable<Vector> {
   private final FieldSelector idFieldSelector;
   
   private final VectorMapper mapper;
-  private double normPower = LuceneIterable.NO_NORMALIZING;
+  private double normPower = NO_NORMALIZING;
   
   public static final double NO_NORMALIZING = -1.0;
   
   public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper) {
-    this(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING);
+    this(reader, idField, field, mapper, NO_NORMALIZING);
   }
   
   /**
@@ -67,7 +67,7 @@ public class LuceneIterable implements Iterable<Vector> {
                         String field,
                         VectorMapper mapper,
                         double normPower) {
-    if (normPower != LuceneIterable.NO_NORMALIZING && normPower < 0) {
+    if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
     idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
@@ -123,7 +123,7 @@ public class LuceneIterable implements Iterable<Vector> {
         } else {
           result.setName(String.valueOf(doc));
         }
-        if (normPower != LuceneIterable.NO_NORMALIZING) {
+        if (normPower != NO_NORMALIZING) {
           result = result.normalize(normPower);
         }
       } catch (IOException e) {

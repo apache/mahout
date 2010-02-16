@@ -31,11 +31,11 @@ import org.apache.mahout.common.Pair;
 
 public class LFUCache<K,V> implements Cache<K,V> {
   
-  private SortedMap<Long,Set<K>> evictionMap;
+  private final SortedMap<Long,Set<K>> evictionMap;
   
-  private Map<K,Pair<V,AtomicLong>> dataMap;
+  private final Map<K,Pair<V,AtomicLong>> dataMap;
   
-  private int capacity;
+  private final int capacity;
   
   private int evictionCount;
   

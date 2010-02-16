@@ -44,7 +44,7 @@ public class ContextStatusUpdater<IK extends Writable,IV extends Writable,K exte
   @Override
   public void update(String status) {
     long curTime = System.currentTimeMillis();
-    if (curTime - time > ContextStatusUpdater.PERIOD && context != null) {
+    if (curTime - time > PERIOD && context != null) {
       time = curTime;
       context.setStatus("Processing FPTree: " + status);
     }

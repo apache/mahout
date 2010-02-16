@@ -53,8 +53,8 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
   public static final String MAX_SHINGLE_SIZE = "maxShingleSize";
   public static final int DEFAULT_MAX_SHINGLE_SIZE = 2;
   
-  public static enum Count {
-    NGRAM_TOTAL;
+  public enum Count {
+    NGRAM_TOTAL
   }
   
   private static final Logger log = LoggerFactory.getLogger(CollocMapper.class);

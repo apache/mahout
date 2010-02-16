@@ -86,13 +86,13 @@ public class Describe {
       
       String dataPath = cmdLine.getValue(pathOpt).toString();
       String descPath = cmdLine.getValue(descPathOpt).toString();
-      List<String> descriptor = Describe.convert(cmdLine.getValues(descriptorOpt));
+      List<String> descriptor = convert(cmdLine.getValues(descriptorOpt));
       
       log.debug("Data path : {}", dataPath);
       log.debug("Descriptor path : {}", descPath);
       log.debug("Descriptor : {}", descriptor);
       
-      Describe.runTool(dataPath, descriptor, descPath);
+      runTool(dataPath, descriptor, descPath);
     } catch (OptionException e) {
       log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
@@ -104,13 +104,13 @@ public class Describe {
     log.info("Generating the descriptor...");
     String descriptor = DescriptorUtils.generateDescriptor(description);
     
-    Path fPath = Describe.validateOutput(filePath);
+    Path fPath = validateOutput(filePath);
     
     log.info("generating the dataset...");
-    Dataset dataset = Describe.generateDataset(descriptor, dataPath);
+    Dataset dataset = generateDataset(descriptor, dataPath);
     
     log.info("storing the dataset description");
-    Describe.storeWritable(new Configuration(), fPath, dataset);
+    storeWritable(new Configuration(), fPath, dataset);
   }
   
   private static Dataset generateDataset(String descriptor, String dataPath) throws IOException,

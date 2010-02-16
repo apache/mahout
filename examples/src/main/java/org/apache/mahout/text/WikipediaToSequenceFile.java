@@ -119,7 +119,7 @@ public final class WikipediaToSequenceFile {
       if (cmdLine.hasOption(allOpt)) {
         all = true;
       }
-      WikipediaToSequenceFile.runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all);
+      runJob(inputPath, outputPath, catFile, cmdLine.hasOption(exactMatchOpt), all);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);

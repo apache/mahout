@@ -103,7 +103,7 @@ public class InMemBuilder extends Builder {
       }
     }
     
-    return InMemBuilder.processOutput(output, callback);
+    return processOutput(output, callback);
   }
   
   /**

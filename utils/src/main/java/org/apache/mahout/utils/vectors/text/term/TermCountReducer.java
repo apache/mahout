@@ -45,7 +45,7 @@ public class TermCountReducer extends MapReduceBase implements Reducer<Text,Long
     while (values.hasNext()) {
       sum += values.next().get();
     }
-    if (sum >= TermCountReducer.minSupport) {
+    if (sum >= minSupport) {
       output.collect(key, new LongWritable(sum));
     }
   }
@@ -53,7 +53,7 @@ public class TermCountReducer extends MapReduceBase implements Reducer<Text,Long
   @Override
   public void configure(JobConf job) {
     super.configure(job);
-    TermCountReducer.minSupport = job.getInt(DictionaryVectorizer.MIN_SUPPORT,
+    minSupport = job.getInt(DictionaryVectorizer.MIN_SUPPORT,
       DictionaryVectorizer.DEFAULT_MIN_SUPPORT);
   }
 }

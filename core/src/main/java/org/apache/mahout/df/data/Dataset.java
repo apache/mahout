@@ -147,9 +147,9 @@ public class Dataset implements Writable {
    * @param nbInstances
    */
   protected Dataset(Attribute[] attrs, List<String>[] values, int nbInstances) {
-    Dataset.validateValues(attrs, values);
+    validateValues(attrs, values);
     
-    int nbattrs = Dataset.countAttributes(attrs);
+    int nbattrs = countAttributes(attrs);
     
     // the label values are set apart
     attributes = new Attribute[nbattrs];
@@ -298,7 +298,7 @@ public class Dataset implements Writable {
     
     FSDataInputStream input = fs.open(path);
     
-    Dataset dataset = Dataset.read(input);
+    Dataset dataset = read(input);
     input.close();
     
     return dataset;

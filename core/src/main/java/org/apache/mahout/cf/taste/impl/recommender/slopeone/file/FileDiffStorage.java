@@ -106,7 +106,7 @@ public final class FileDiffStorage implements DiffStorage {
         
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         String firstLine = iterator.peek();
-        while ((firstLine.length() == 0) || (firstLine.charAt(0) == FileDiffStorage.COMMENT_CHAR)) {
+        while ((firstLine.length() == 0) || (firstLine.charAt(0) == COMMENT_CHAR)) {
           iterator.next();
           firstLine = iterator.peek();
         }
@@ -129,7 +129,7 @@ public final class FileDiffStorage implements DiffStorage {
   
   private long processLine(String line, char delimiter, long averageCount) {
     
-    if ((line.length() == 0) || (line.charAt(0) == FileDiffStorage.COMMENT_CHAR)) {
+    if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
       return averageCount;
     }
     
@@ -315,7 +315,7 @@ public final class FileDiffStorage implements DiffStorage {
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     long mostRecentModification = dataFile.lastModified();
-    if (mostRecentModification > lastModified + FileDiffStorage.MIN_RELOAD_INTERVAL_MS) {
+    if (mostRecentModification > lastModified + MIN_RELOAD_INTERVAL_MS) {
       log.debug("File has changed; reloading...");
       lastModified = mostRecentModification;
       buildDiffs();

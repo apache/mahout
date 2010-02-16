@@ -27,7 +27,7 @@ final class ByItemIDComparator implements Comparator<ItemPrefWritable>, Serializ
   private static final Comparator<ItemPrefWritable> instance = new ByItemIDComparator();
   
   public static Comparator<ItemPrefWritable> getInstance() {
-    return ByItemIDComparator.instance;
+    return instance;
   }
   
   @Override

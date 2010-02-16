@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,DoubleWritable> {
   
-  public static enum Skipped {
+  public enum Skipped {
     EXTRA_HEAD,
     EXTRA_TAIL,
     MISSING_HEAD,
@@ -46,8 +46,8 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
     LESS_THAN_MIN_LLR,
     LLR_CALCULATION_ERROR,
     UNIGRAM_COUNT
-  };
-  
+  }
+
   private static final Logger log = LoggerFactory.getLogger(LLRReducer.class);
   
   public static final String NGRAM_TOTAL = "ngramTotal";
@@ -179,14 +179,14 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
   /**
    * provide interface so the input to the llr calculation can be captured for validation in unit testing
    */
-  public static interface LLCallback {
-    public double logLikelihoodRatio(int k11, int k12, int k21, int k22);
+  public interface LLCallback {
+    double logLikelihoodRatio(int k11, int k12, int k21, int k22);
   }
   
   /** concrete implementation delegates to LogLikelihood class */
   public static final class ConcreteLLCallback implements LLCallback {
     public double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
       return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
-    };
+    }
   }
 }

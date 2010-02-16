@@ -33,19 +33,19 @@ public final class NullRescorer<T> implements Rescorer<T>, IDRescorer {
   private static final Rescorer<LongPair> userUserPairInstance = new NullRescorer<LongPair>();
   
   public static IDRescorer getItemInstance() {
-    return NullRescorer.userOrItemInstance;
+    return userOrItemInstance;
   }
   
   public static IDRescorer getUserInstance() {
-    return NullRescorer.userOrItemInstance;
+    return userOrItemInstance;
   }
   
   public static Rescorer<LongPair> getItemItemPairInstance() {
-    return NullRescorer.itemItemPairInstance;
+    return itemItemPairInstance;
   }
   
   public static Rescorer<LongPair> getUserUserPairInstance() {
-    return NullRescorer.userUserPairInstance;
+    return userUserPairInstance;
   }
   
   private NullRescorer() {

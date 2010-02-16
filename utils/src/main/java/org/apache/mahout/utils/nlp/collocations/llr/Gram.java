@@ -34,12 +34,12 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class Gram implements WritableComparable<Gram> {
   
-  public static enum Type {
+  public enum Type {
     HEAD,
     TAIL,
     UNIGRAM
-  };
-  
+  }
+
   private String gram;
   private int frequency;
   private Type type;
@@ -161,7 +161,7 @@ public class Gram implements WritableComparable<Gram> {
     if (typeValue == 0) {
       type = Type.TAIL;
     } else if (typeValue == 1) {
-      type = Type.HEAD;
+      type = HEAD;
     } else {
       type = Type.UNIGRAM;
     }
@@ -177,7 +177,7 @@ public class Gram implements WritableComparable<Gram> {
     
     if (type == Type.TAIL) {
       out.writeByte(0);
-    } else if (type == Type.HEAD) {
+    } else if (type == HEAD) {
       out.writeByte(1);
     } else {
       out.writeByte(2);
@@ -202,11 +202,11 @@ public class Gram implements WritableComparable<Gram> {
       return 1;
     }
     
-    if (this.type == Type.HEAD && other.type != Type.HEAD) {
+    if (this.type == HEAD && other.type != HEAD) {
       return -1;
     }
     
-    if (this.type != Type.HEAD && other.type == Type.HEAD) {
+    if (this.type != HEAD && other.type == HEAD) {
       return 1;
     }
     
@@ -257,7 +257,7 @@ public class Gram implements WritableComparable<Gram> {
   
   @Override
   public String toString() {
-    return "'" + gram + "'[" + (type == Type.UNIGRAM ? "u" : type == Type.HEAD ? "h" : "t") + "]:"
+    return "'" + gram + "'[" + (type == Type.UNIGRAM ? "u" : type == HEAD ? "h" : "t") + "]:"
            + frequency;
   }
   

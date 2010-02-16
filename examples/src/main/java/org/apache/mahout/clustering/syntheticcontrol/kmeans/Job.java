@@ -99,7 +99,7 @@ public class Job {
       // "org.apache.mahout.math.RandomAccessSparseVector").toString();
       // Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
       
-      Job.runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations);
+      runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations);
     } catch (OptionException e) {
       Job.LOG.error("Exception", e);
       CommandLineUtil.printHelp(group);

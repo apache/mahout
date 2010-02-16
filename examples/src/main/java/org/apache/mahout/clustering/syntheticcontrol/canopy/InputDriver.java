@@ -77,7 +77,7 @@ public final class InputDriver {
       String output = cmdLine.getValue(outputOpt, "output").toString();
       String vectorClassName = cmdLine.getValue(vectorOpt,
          "org.apache.mahout.math.RandomAccessSparseVector").toString();
-      InputDriver.runJob(input, output, vectorClassName);
+      runJob(input, output, vectorClassName);
     } catch (OptionException e) {
       InputDriver.LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);

@@ -120,7 +120,7 @@ public class DefaultIgSplit extends IgSplit {
         continue; // otherwise we get a NaN
       }
       double p = count * invDataSize;
-      entropy += -p * Math.log(p) / IgSplit.LOG2;
+      entropy += -p * Math.log(p) / LOG2;
     }
     
     return entropy;

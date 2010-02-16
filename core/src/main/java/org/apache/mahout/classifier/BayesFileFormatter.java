@@ -105,7 +105,7 @@ public final class BayesFileFormatter {
     } else {
       Writer writer = new OutputStreamWriter(new FileOutputStream(new File(outDir, input.getName())), charset);
       try {
-        BayesFileFormatter.writeFile(label, analyzer, input, charset, writer);
+        writeFile(label, analyzer, input, charset, writer);
       } finally {
         IOUtils.quietClose(writer);
       }
@@ -165,7 +165,7 @@ public final class BayesFileFormatter {
           } else {
             theWriter = writer;
           }
-          BayesFileFormatter.writeFile(label, analyzer, file, charset, theWriter);
+          writeFile(label, analyzer, file, charset, theWriter);
           if (writer != null) {
             // just write a new line
             theWriter.write('\n');
@@ -320,9 +320,9 @@ public final class BayesFileFormatter {
       boolean collapse = cmdLine.hasOption(collapseOpt);
       
       if (collapse) {
-        BayesFileFormatter.collapse(label, analyzer, input, charset, output);
+        collapse(label, analyzer, input, charset, output);
       } else {
-        BayesFileFormatter.format(label, analyzer, input, charset, output);
+        format(label, analyzer, input, charset, output);
       }
       
     } catch (OptionException e) {

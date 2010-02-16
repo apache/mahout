@@ -30,7 +30,7 @@ import org.apache.mahout.common.RandomUtils;
 public final class FixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
   
   public FixedSizeSamplingIterator(int size, Iterator<T> source) {
-    super(FixedSizeSamplingIterator.buildDelegate(size, source));
+    super(buildDelegate(size, source));
   }
   
   private static <T> Iterator<T> buildDelegate(int size, Iterator<T> source) {

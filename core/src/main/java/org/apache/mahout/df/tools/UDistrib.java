@@ -83,7 +83,7 @@ public class UDistrib {
       int numPartitions = Integer.parseInt(cmdLine.getValue(partitionsOpt).toString());
       String output = cmdLine.getValue(outputOpt).toString();
       
-      UDistrib.runTool(data, dataset, output, numPartitions);
+      runTool(data, dataset, output, numPartitions);
     } catch (OptionException e) {
       log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);

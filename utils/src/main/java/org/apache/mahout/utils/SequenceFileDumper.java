@@ -77,7 +77,7 @@ public class SequenceFileDumper {
       
       if (cmdLine.hasOption(helpOpt)) {
         
-        SequenceFileDumper.printHelp(group);
+        printHelp(group);
         return;
       }
       
@@ -132,7 +132,7 @@ public class SequenceFileDumper {
       
     } catch (OptionException e) {
       log.error("Exception", e);
-      SequenceFileDumper.printHelp(group);
+      printHelp(group);
     }
     
   }

@@ -55,7 +55,7 @@ public class LuceneIterableTest extends MahoutTestCase {
       Field id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
       doc.add(id);
       //Store both position and offset information
-      Field text = new Field("content", LuceneIterableTest.DOCS[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
+      Field text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
       doc.add(text);
       writer.addDocument(doc);
     }

@@ -67,8 +67,8 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
   
   @Override
   public int compareTo(ItemItemWritable that) {
-    int aCompare = ItemItemWritable.compare(itemAID, that.getItemAID());
-    return aCompare == 0 ? ItemItemWritable.compare(itemBID, that.getItemBID()) : aCompare;
+    int aCompare = compare(itemAID, that.getItemAID());
+    return aCompare == 0 ? compare(itemBID, that.getItemBID()) : aCompare;
   }
   
   private static int compare(long a, long b) {

@@ -24,11 +24,11 @@ import java.util.PriorityQueue;
 
 public class LeastKCache<K extends Comparable<? super K>,V> implements Cache<K,V> {
   
-  private int capacity;
+  private final int capacity;
   
-  private Map<K,V> cache;
+  private final Map<K,V> cache;
   
-  private PriorityQueue<K> queue;
+  private final PriorityQueue<K> queue;
   
   public LeastKCache(int capacity) {
     

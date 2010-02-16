@@ -170,9 +170,9 @@ public final class TestClassifier {
       params.set("testDirPath", testDirPath);
       
       if (classificationMethod.equalsIgnoreCase("sequential")) {
-        TestClassifier.classifySequential(params);
+        classifySequential(params);
       } else if (classificationMethod.equalsIgnoreCase("mapreduce")) {
-        TestClassifier.classifyParallel(params);
+        classifyParallel(params);
       }
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);

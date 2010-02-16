@@ -80,7 +80,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
       return new Leaf(data.get(0).label);
     }
     
-    int[] attributes = DefaultTreeBuilder.randomAttributes(rng, selected, m);
+    int[] attributes = randomAttributes(rng, selected, m);
     
     // find the best split
     Split best = null;

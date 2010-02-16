@@ -168,12 +168,12 @@ public class FuzzyKMeansClusterer {
   /** Computes the probability of a point belonging to a cluster */
   public double computeProbWeight(double clusterDistance, List<Double> clusterDistanceList) {
     if (clusterDistance == 0) {
-      clusterDistance = FuzzyKMeansClusterer.MINIMAL_VALUE;
+      clusterDistance = MINIMAL_VALUE;
     }
     double denom = 0.0;
     for (double eachCDist : clusterDistanceList) {
       if (eachCDist == 0.0) {
-        eachCDist = FuzzyKMeansClusterer.MINIMAL_VALUE;
+        eachCDist = MINIMAL_VALUE;
       }
       
       denom += Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));

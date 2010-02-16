@@ -53,7 +53,7 @@ public final class ExpectationMaximizationSVD {
    *          default starting values for the SVD vectors
    */
   public ExpectationMaximizationSVD(int m, int n, int k, double defaultValue) {
-    this(m, n, k, defaultValue, ExpectationMaximizationSVD.r);
+    this(m, n, k, defaultValue, r);
   }
   
   public ExpectationMaximizationSVD(int m, int n, int k, double defaultValue, double noise) {
@@ -88,10 +88,10 @@ public final class ExpectationMaximizationSVD {
     double err = value - getDotProduct(i, j);
     double[] leftVectorI = leftVector[i];
     double[] rightVectorJ = rightVector[j];
-    leftVectorI[k] += ExpectationMaximizationSVD.LEARNING_RATE
-                      * (err * rightVectorJ[k] - ExpectationMaximizationSVD.K * leftVectorI[k]);
-    rightVectorJ[k] += ExpectationMaximizationSVD.LEARNING_RATE
-                       * (err * leftVectorI[k] - ExpectationMaximizationSVD.K * rightVectorJ[k]);
+    leftVectorI[k] += LEARNING_RATE
+                      * (err * rightVectorJ[k] - K * leftVectorI[k]);
+    rightVectorJ[k] += LEARNING_RATE
+                       * (err * leftVectorI[k] - K * rightVectorJ[k]);
   }
   
   int getM() {

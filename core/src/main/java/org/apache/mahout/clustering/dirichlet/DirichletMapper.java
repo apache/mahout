@@ -48,7 +48,7 @@ public class DirichletMapper extends MapReduceBase implements
                   OutputCollector<Text,VectorWritable> output,
                   Reporter reporter) throws IOException {
     // compute a normalized vector of probabilities that v is described by each model
-    Vector pi = DirichletMapper.normalizedProbabilities(state, v);
+    Vector pi = normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
     // see: http://en.wikipedia.org/wiki/Multinomial_distribution
     int k = UncommonDistributions.rMultinom(pi);
@@ -63,7 +63,7 @@ public class DirichletMapper extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     try {
-      state = DirichletMapper.getDirichletState(job);
+      state = getDirichletState(job);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {

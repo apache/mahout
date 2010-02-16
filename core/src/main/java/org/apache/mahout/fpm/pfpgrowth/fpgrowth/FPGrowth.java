@@ -235,7 +235,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       }
       log.info("Mining FTree Tree for all patterns with {}", attribute);
       MutableLong minSupport = new MutableLong(minSupportValue);
-      FrequentPatternMaxHeap frequentPatterns = FPGrowth.growth(tree, minSupport, k,
+      FrequentPatternMaxHeap frequentPatterns = growth(tree, minSupport, k,
         treeCache, 0, attribute, updater);
       patterns.put(attribute, frequentPatterns);
       outputCollector.collect(attribute, frequentPatterns);
@@ -316,7 +316,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       Pair<int[],Long> transaction = transactions.next();
       Arrays.sort(transaction.getFirst());
       // attribcount += transaction.length;
-      nodecount += FPGrowth.treeAddCount(tree, transaction.getFirst(), transaction
+      nodecount += treeAddCount(tree, transaction.getFirst(), transaction
         .getSecond(), minSupportMutable, attributeFrequency);
       i++;
       if (i % 10000 == 0) {
@@ -359,7 +359,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
       updater.update("FPGrowth Algorithm for a given feature: " + attribute);
       FPTree conditionalTree = treeCache.getFirstLevelTree(attribute);
       if (conditionalTree.isEmpty()) {
-        FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+        traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
           minSupportMutable, conditionalTree, tree);
         // printTree(conditionalTree);
         
@@ -368,15 +368,15 @@ public class FPGrowth<A extends Comparable<? super A>> {
       FrequentPatternMaxHeap returnedPatterns;
       if (attribute == currentAttribute) {
         
-        returnedPatterns = FPGrowth.growthTopDown(conditionalTree, minSupportMutable, k,
+        returnedPatterns = growthTopDown(conditionalTree, minSupportMutable, k,
           treeCache, level + 1, true, currentAttribute, updater);
         
-        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, true, true);
       } else {
-        returnedPatterns = FPGrowth.growthTopDown(conditionalTree, minSupportMutable, k,
+        returnedPatterns = growthTopDown(conditionalTree, minSupportMutable, k,
           treeCache, level + 1, false, currentAttribute, updater);
-        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, false, true);
       }
       if (frequentPatterns.isFull()) {
@@ -417,7 +417,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     }
     
     if (tree.singlePath()) {
-      return FPGrowth.generateSinglePathPatterns(tree, k, minSupportMutable);
+      return generateSinglePathPatterns(tree, k, minSupportMutable);
     }
     
     updater.update("Bottom Up FP Growth");
@@ -431,28 +431,28 @@ public class FPGrowth<A extends Comparable<? super A>> {
       
       FrequentPatternMaxHeap returnedPatterns;
       if (conditionalOfCurrentAttribute) {
-        FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+        traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
           minSupportMutable, conditionalTree, tree);
-        returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
+        returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
           k, treeCache, level + 1, true, currentAttribute, updater);
         
-        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, true, false);
       } else {
         if (attribute == currentAttribute) {
-          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, true, currentAttribute, updater);
           
-          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, true, false);
         } else if (attribute > currentAttribute) {
-          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, false, currentAttribute, updater);
-          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, false, false);
         }
       }
@@ -494,7 +494,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     }
     
     if (tree.singlePath()) {
-      return FPGrowth.generateSinglePathPatterns(tree, k, minSupportMutable);
+      return generateSinglePathPatterns(tree, k, minSupportMutable);
     }
     
     updater.update("Top Down Growth:");
@@ -510,29 +510,29 @@ public class FPGrowth<A extends Comparable<? super A>> {
       
       FrequentPatternMaxHeap returnedPatterns;
       if (conditionalOfCurrentAttribute) {
-        FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+        traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
           minSupportMutable, conditionalTree, tree);
         
-        returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
+        returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
           k, treeCache, level + 1, true, currentAttribute, updater);
-        frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+        frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
           attribute, count, true, true);
         
       } else {
         if (attribute == currentAttribute) {
-          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, true, currentAttribute, updater);
-          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, true, false);
           
         } else if (attribute > currentAttribute) {
-          FPGrowth.traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
+          traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
-          returnedPatterns = FPGrowth.growthBottomUp(conditionalTree, minSupportMutable,
+          returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, false, currentAttribute, updater);
-          frequentPatterns = FPGrowth.mergeHeap(frequentPatterns, returnedPatterns,
+          frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
             attribute, count, false, true);
           
         }
@@ -621,7 +621,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     
     tree.clearConditional();
     conditionalTree.reorderHeaderTable();
-    FPGrowth.pruneFPTree(minSupportMutable, conditionalTree);
+    pruneFPTree(minSupportMutable, conditionalTree);
     // prune Conditional Tree
     
   }

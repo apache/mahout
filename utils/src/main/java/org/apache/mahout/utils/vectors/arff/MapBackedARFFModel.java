@@ -85,7 +85,7 @@ public class MapBackedARFFModel implements ARFFModel {
     double result = 0.0;
     switch (type) {
       case NUMERIC: {
-        result = MapBackedARFFModel.processNumeric(data);
+        result = processNumeric(data);
         break;
       }
       case DATE: {
@@ -149,7 +149,7 @@ public class MapBackedARFFModel implements ARFFModel {
   protected double processDate(String data, int idx) {
     DateFormat format = dateMap.get(idx);
     if (format == null) {
-      format = ARFFModel.DEFAULT_DATE_FORMAT;
+      format = DEFAULT_DATE_FORMAT;
     }
     double result;
     try {

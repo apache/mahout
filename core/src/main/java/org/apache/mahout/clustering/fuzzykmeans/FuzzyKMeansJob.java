@@ -102,7 +102,7 @@ public class FuzzyKMeansJob {
       float m = Float.parseFloat(cmdLine.getValue(mOpt).toString());
       // String vectorClassName = cmdLine.getValue(vectorClassOpt).toString();
       // Class<? extends Vector> vectorClass = (Class<? extends Vector>) Class.forName(vectorClassName);
-      FuzzyKMeansJob.runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations,
+      runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations,
         numMapTasks, numReduceTasks, doCanopy, m);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);

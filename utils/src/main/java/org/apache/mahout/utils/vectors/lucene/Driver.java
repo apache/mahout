@@ -195,10 +195,10 @@ public class Driver {
               BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
               vectorWriter = new JWriterVectorWriter(writer);
             } else {
-              vectorWriter = Driver.getSeqFileWriter(outFile);
+              vectorWriter = getSeqFileWriter(outFile);
             }
           } else {
-            vectorWriter = Driver.getSeqFileWriter(outFile);
+            vectorWriter = getSeqFileWriter(outFile);
           }
           
           long numDocs = vectorWriter.write(iterable, maxDocs);

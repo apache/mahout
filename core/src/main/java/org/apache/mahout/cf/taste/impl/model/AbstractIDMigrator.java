@@ -45,7 +45,7 @@ public abstract class AbstractIDMigrator implements IDMigrator {
   protected final long hash(String value) {
     byte[] md5hash;
     synchronized (md5Digest) {
-      md5hash = md5Digest.digest(value.getBytes(AbstractIDMigrator.UTF8_CHARSET));
+      md5hash = md5Digest.digest(value.getBytes(UTF8_CHARSET));
       md5Digest.reset();
     }
     long hash = 0L;

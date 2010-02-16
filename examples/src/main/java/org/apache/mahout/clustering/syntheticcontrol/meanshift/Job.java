@@ -91,7 +91,7 @@ public class Job {
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt, "1").toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "10").toString());
-      Job.runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations);
+      runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations);
     } catch (OptionException e) {
       Job.LOG.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);

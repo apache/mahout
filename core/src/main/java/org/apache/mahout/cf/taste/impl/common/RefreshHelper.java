@@ -74,9 +74,9 @@ public final class RefreshHelper implements Refreshable {
     if (!refreshLock.isLocked()) {
       refreshLock.lock();
       try {
-        alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
+        alreadyRefreshed = buildRefreshed(alreadyRefreshed);
         for (Refreshable dependency : dependencies) {
-          RefreshHelper.maybeRefresh(alreadyRefreshed, dependency);
+          maybeRefresh(alreadyRefreshed, dependency);
         }
         if (refreshRunnable != null) {
           try {

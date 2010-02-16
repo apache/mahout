@@ -63,11 +63,11 @@ public abstract class AbstractJob implements Tool {
   }
   
   protected static Option buildOption(String name, String shortName, String description) {
-    return AbstractJob.buildOption(name, shortName, description, true, null);
+    return buildOption(name, shortName, description, true, null);
   }
   
   protected static Option buildOption(String name, String shortName, String description, String defaultValue) {
-    return AbstractJob.buildOption(name, shortName, description, false, defaultValue);
+    return buildOption(name, shortName, description, false, defaultValue);
   }
   
   private static Option buildOption(String name,
@@ -87,10 +87,10 @@ public abstract class AbstractJob implements Tool {
   protected static Map<String,String> parseArguments(String[] args, Option... extraOpts) {
     
     Option inputOpt = DefaultOptionCreator.inputOption().create();
-    Option tempDirOpt = AbstractJob.buildOption("tempDir", "t", "Intermediate output directory", "temp");
+    Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", "temp");
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    Option jarFileOpt = AbstractJob.buildOption("jarFile", "m", "Implementation jar");
+    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar");
     
     GroupBuilder gBuilder = new GroupBuilder().withName("Options").withOption(inputOpt)
         .withOption(tempDirOpt).withOption(outputOpt).withOption(helpOpt).withOption(jarFileOpt);
@@ -118,13 +118,13 @@ public abstract class AbstractJob implements Tool {
     }
     
     Map<String,String> result = new HashMap<String,String>();
-    AbstractJob.maybePut(result, cmdLine, inputOpt);
-    AbstractJob.maybePut(result, cmdLine, tempDirOpt);
-    AbstractJob.maybePut(result, cmdLine, outputOpt);
-    AbstractJob.maybePut(result, cmdLine, helpOpt);
-    AbstractJob.maybePut(result, cmdLine, jarFileOpt);
+    maybePut(result, cmdLine, inputOpt);
+    maybePut(result, cmdLine, tempDirOpt);
+    maybePut(result, cmdLine, outputOpt);
+    maybePut(result, cmdLine, helpOpt);
+    maybePut(result, cmdLine, jarFileOpt);
     for (Option opt : extraOpts) {
-      AbstractJob.maybePut(result, cmdLine, opt);
+      maybePut(result, cmdLine, opt);
     }
     
     return result;

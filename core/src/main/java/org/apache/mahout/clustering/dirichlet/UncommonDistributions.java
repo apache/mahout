@@ -90,8 +90,8 @@ public final class UncommonDistributions {
    * @return a Vector of samples
    */
   public static double rBeta(double shape1, double shape2) {
-    double gam1 = UncommonDistributions.rGamma(shape1, 1);
-    double gam2 = UncommonDistributions.rGamma(shape2, 1);
+    double gam1 = rGamma(shape1, 1);
+    double gam2 = rGamma(shape2, 1);
     return gam1 / (gam1 + gam2);
     
   }
@@ -113,7 +113,7 @@ public final class UncommonDistributions {
     // params.add(Math.max(0, shape2));
     Vector result = new DenseVector(K);
     for (int i = 0; i < K; i++) {
-      result.set(i, UncommonDistributions.rBeta(shape1, shape2));
+      result.set(i, rBeta(shape1, shape2));
     }
     return result;
   }
@@ -126,7 +126,7 @@ public final class UncommonDistributions {
   public static double rChisq(double df) {
     double result = 0.0;
     for (int i = 0; i < df; i++) {
-      double sample = UncommonDistributions.rNorm(0, 1);
+      double sample = rNorm(0, 1);
       result += sample * sample;
     }
     return result;
@@ -142,7 +142,7 @@ public final class UncommonDistributions {
    * @return a double sample
    */
   public static double rNorm(double mean, double sd) {
-    GaussianGenerator dist = new GaussianGenerator(mean, sd, UncommonDistributions.random);
+    GaussianGenerator dist = new GaussianGenerator(mean, sd, random);
     return dist.nextValue();
   }
   
@@ -163,7 +163,7 @@ public final class UncommonDistributions {
     double xms = (x - m) / s;
     double ex = xms * xms / 2;
     double exp = Math.exp(-ex);
-    return exp / (UncommonDistributions.sqrt2pi * s);
+    return exp / (sqrt2pi * s);
   }
   
   /** Returns one sample from a multinomial. */
@@ -206,7 +206,7 @@ public final class UncommonDistributions {
     Vector result = new DenseVector(cardinality);
     for (int i = 0; (total > 0) && (i < cardinality); i++) {
       double p = probabilities.get(i);
-      int ki = UncommonDistributions.rBinomial(size, p / total);
+      int ki = rBinomial(size, p / total);
       total -= p;
       size -= ki;
       result.set(i, ki);
@@ -255,7 +255,7 @@ public final class UncommonDistributions {
     for (int k = 0; k < pi.size(); k++) {
       double countK = totalCounts.get(k);
       total -= countK;
-      double betaK = UncommonDistributions.rBeta(1 + countK, Math.max(0, alpha_0 + total));
+      double betaK = rBeta(1 + countK, Math.max(0, alpha_0 + total));
       double piK = betaK * remainder;
       pi.set(k, piK);
       remainder -= piK;

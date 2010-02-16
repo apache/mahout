@@ -33,7 +33,7 @@ class Display2dASNDirichlet extends DisplayDirichlet {
   Display2dASNDirichlet() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>"
-      + (int) (DisplayDirichlet.significance * 100)
+      + (int) (significance * 100)
       + "% of population)");
   }
   
@@ -44,9 +44,9 @@ class Display2dASNDirichlet extends DisplayDirichlet {
     
     Vector dv = new DenseVector(2);
     int i = DisplayDirichlet.result.size() - 1;
-    for (Model<VectorWritable>[] models : DisplayDirichlet.result) {
+    for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(DisplayDirichlet.colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         AsymmetricSampledNormalModel mm = (AsymmetricSampledNormalModel) m;
         dv.assign(mm.getStdDev().times(3));
@@ -60,7 +60,7 @@ class Display2dASNDirichlet extends DisplayDirichlet {
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generate2dSamples();
-    Display2dASNDirichlet.generateResults();
+    generateResults();
     new Display2dASNDirichlet();
   }
   

@@ -116,7 +116,7 @@ public class L1Model implements Model<VectorWritable> {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, L1Model.modelType);
+    return gson.toJson(this, modelType);
   }
   
 }

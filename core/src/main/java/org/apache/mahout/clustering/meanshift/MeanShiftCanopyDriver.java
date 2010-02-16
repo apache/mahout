@@ -88,7 +88,7 @@ public final class MeanShiftCanopyDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
-      MeanShiftCanopyDriver.runJob(input, output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
+      runJob(input, output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
         measureClassName, t1, t2, convergenceDelta);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);

@@ -40,7 +40,7 @@ public final class ItemIDIndexMapper extends MapReduceBase implements
                   Reporter reporter) throws IOException {
     String[] tokens = ItemIDIndexMapper.COMMA.split(value.toString());
     long itemID = Long.parseLong(tokens[1]);
-    int index = ItemIDIndexMapper.idToIndex(itemID);
+    int index = idToIndex(itemID);
     output.collect(new IntWritable(index), new LongWritable(itemID));
   }
   

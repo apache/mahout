@@ -148,11 +148,11 @@ public class CDGA {
       
       long start = System.currentTimeMillis();
       
-      CDGA.runJob(dataset, target, threshold, crosspnts, mutrate, mutrange, mutprec, popSize, genCount);
+      runJob(dataset, target, threshold, crosspnts, mutrate, mutrange, mutprec, popSize, genCount);
       
       long end = System.currentTimeMillis();
       
-      CDGA.printElapsedTime(end - start);
+      printElapsedTime(end - start);
     } catch (OptionException e) {
       log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);

@@ -35,13 +35,13 @@ public class DirichletCluster<O> implements Writable, Printable {
   @Override
   public void readFields(DataInput in) throws IOException {
     this.totalCount = in.readDouble();
-    this.model = DirichletCluster.readModel(in);
+    this.model = readModel(in);
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(totalCount);
-    DirichletCluster.writeModel(out, model);
+    writeModel(out, model);
   }
   
   private Model<O> model; // the model for this iteration
@@ -112,7 +112,7 @@ public class DirichletCluster<O> implements Writable, Printable {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, DirichletCluster.clusterType);
+    return gson.toJson(this, clusterType);
   }
   
 }

@@ -226,7 +226,7 @@ public abstract class Builder {
    * @throws IOException
    */
   public static Dataset loadDataset(JobConf job) throws IOException {
-    Path datasetPath = Builder.getDistributedCacheFile(job, 0);
+    Path datasetPath = getDistributedCacheFile(job, 0);
     
     return Dataset.load(job, datasetPath);
   }
@@ -273,11 +273,11 @@ public abstract class Builder {
     }
     
     if (seed != null) {
-      Builder.setRandomSeed(job, seed);
+      setRandomSeed(job, seed);
     }
-    Builder.setNbTrees(job, nbTrees);
-    Builder.setTreeBuilder(job, treeBuilder);
-    Builder.setOobEstimate(job, callback != null);
+    setNbTrees(job, nbTrees);
+    setTreeBuilder(job, treeBuilder);
+    setOobEstimate(job, callback != null);
     
     // put the dataset into the DistributedCache
     DistributedCache.addCacheFile(datasetPath.toUri(), job);
@@ -288,7 +288,7 @@ public abstract class Builder {
     log.debug("Running the job...");
     runJob(job);
     
-    if (Builder.isOutput(job)) {
+    if (isOutput(job)) {
       log.debug("Parsing the output...");
       DecisionForest forest = parseOutput(job, callback);
       

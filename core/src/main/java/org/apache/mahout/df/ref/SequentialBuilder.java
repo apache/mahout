@@ -61,7 +61,7 @@ public class SequentialBuilder {
     
     for (int treeId = 0; treeId < nbTrees; treeId++) {
       trees.add(bagging.build(treeId, rng, callback));
-      SequentialBuilder.logProgress(((float) treeId + 1) / nbTrees);
+      logProgress(((float) treeId + 1) / nbTrees);
     }
     
     return new DecisionForest(trees);

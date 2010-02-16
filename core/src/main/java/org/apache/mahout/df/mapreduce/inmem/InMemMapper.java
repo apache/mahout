@@ -74,7 +74,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     Configuration conf = context.getConfiguration();
     
     log.info("Loading the data...");
-    data = InMemMapper.loadData(conf, getDataset());
+    data = loadData(conf, getDataset());
     log.info("Data loaded : {} instances", data.size());
     
     bagging = new Bagging(getTreeBuilder(), data);

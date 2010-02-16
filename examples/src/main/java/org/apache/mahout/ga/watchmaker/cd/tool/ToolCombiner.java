@@ -88,7 +88,7 @@ public class ToolCombiner extends MapReduceBase implements Reducer<LongWritable,
     if (descriptors.isNominal(index)) {
       return nominalDescription(values);
     } else if (descriptors.isNumerical(index)) {
-      return ToolCombiner.numericalDescription(values);
+      return numericalDescription(values);
     } else {
       throw new IllegalArgumentException("An ignored attribute should never reach the Combiner");
     }

@@ -40,12 +40,12 @@ public final class FileLineIterable implements Iterable<String> {
   
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file) throws IOException {
-    this(file, FileLineIterable.UTF8, false);
+    this(file, UTF8, false);
   }
   
   /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file, boolean skipFirstLine) throws IOException {
-    this(file, FileLineIterable.UTF8, skipFirstLine);
+    this(file, UTF8, skipFirstLine);
   }
   
   /** Creates a {@link FileLineIterable} over a given file, using the given encoding. */
@@ -54,11 +54,11 @@ public final class FileLineIterable implements Iterable<String> {
   }
   
   public FileLineIterable(InputStream is) {
-    this(is, FileLineIterable.UTF8, false);
+    this(is, UTF8, false);
   }
   
   public FileLineIterable(InputStream is, boolean skipFirstLine) {
-    this(is, FileLineIterable.UTF8, skipFirstLine);
+    this(is, UTF8, skipFirstLine);
   }
   
   public FileLineIterable(InputStream is, Charset encoding, boolean skipFirstLine) {

@@ -79,7 +79,7 @@ public final class TransposeToByUser {
           byUserEntryCache.put(userIDString, cachedLines);
         }
         cachedLines.add(movieIDString + ratingString);
-        TransposeToByUser.maybeFlushCache(byUserDirectory, byUserEntryCache);
+        maybeFlushCache(byUserDirectory, byUserEntryCache);
       }
       
     }
@@ -96,7 +96,7 @@ public final class TransposeToByUser {
         File intermediateDir = new File(byUserDirectory, String.valueOf(userIDValue % 10000));
         intermediateDir.mkdirs();
         File userIDFile = new File(intermediateDir, userIDValue / 10000 + ".txt");
-        TransposeToByUser.appendStringsToFile(lines, userIDFile);
+        appendStringsToFile(lines, userIDFile);
       }
       byUserEntryCache.clear();
     }

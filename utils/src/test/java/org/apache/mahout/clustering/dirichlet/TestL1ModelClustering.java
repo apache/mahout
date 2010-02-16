@@ -122,7 +122,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
     int i = 0;
     for (Vector vector : iterable) {
       Assert.assertNotNull(vector);
-      System.out.println("Vector[" + i++ + "]=" + TestL1ModelClustering.formatVector(vector));
+      System.out.println("Vector[" + i++ + "]=" + formatVector(vector));
       sampleData.add(new VectorWritable(vector));
     }
   }
@@ -204,24 +204,24 @@ public class TestL1ModelClustering extends MahoutTestCase {
   
   public void testDocs() throws Exception {
     System.out.println("testDocs");
-    getSampleData(TestL1ModelClustering.DOCS);
+    getSampleData(DOCS);
     DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData,
         new L1ModelDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Model<VectorWritable>[]> result = dc.cluster(10);
     Assert.assertNotNull(result);
-    TestL1ModelClustering.printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, TestL1ModelClustering.DOCS);
+    printSamples(result, 0);
+    printClusters(result.get(result.size() - 1), sampleData, DOCS);
   }
   
   public void testDocs2() throws Exception {
     System.out.println("testDocs2");
-    getSampleData(TestL1ModelClustering.DOCS2);
+    getSampleData(DOCS2);
     DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData,
         new L1ModelDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Model<VectorWritable>[]> result = dc.cluster(10);
     Assert.assertNotNull(result);
-    TestL1ModelClustering.printSamples(result, 0);
-    printClusters(result.get(result.size() - 1), sampleData, TestL1ModelClustering.DOCS2);
+    printSamples(result, 0);
+    printClusters(result.get(result.size() - 1), sampleData, DOCS2);
   }
   
 }

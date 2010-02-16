@@ -140,8 +140,8 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
         for (int i = 0; i < size; i++) {
           long itemID = prefs.getItemID(i);
           float value = prefs.getValue(i);
-          ItemUserAverageRecommender.addDatumAndCreateIfNeeded(itemID, value, itemAverages);
-          ItemUserAverageRecommender.addDatumAndCreateIfNeeded(userID, value, userAverages);
+          addDatumAndCreateIfNeeded(itemID, value, itemAverages);
+          addDatumAndCreateIfNeeded(userID, value, userAverages);
           overallAveragePrefValue.addDatum(value);
         }
       }

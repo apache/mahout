@@ -37,7 +37,7 @@ public class TransactionSortingReducer extends
   protected void reduce(LongWritable key, Iterable<TransactionTree> values, Context context) throws IOException,
                                                                                             InterruptedException {
     for (TransactionTree tr : values) {
-      context.write(TransactionSortingReducer.ONE, tr);
+      context.write(ONE, tr);
     }
   }
 }

@@ -107,7 +107,7 @@ public final class TravellingSalesman extends JApplet {
       
       @Override
       protected void postProcessing(List<String> result) {
-        executionPanel.appendOutput(TravellingSalesman.createResultString(strategy.getDescription(), result,
+        executionPanel.appendOutput(createResultString(strategy.getDescription(), result,
           evaluator.getFitness(result, null), elapsedTime));
         setEnabled(true);
       }

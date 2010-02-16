@@ -51,9 +51,9 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     Graphics2D g2 = (Graphics2D) g;
     Vector dv = new DenseVector(2);
     int i = DisplayFuzzyKMeans.clusters.size() - 1;
-    for (List<SoftCluster> cls : DisplayFuzzyKMeans.clusters) {
+    for (List<SoftCluster> cls : clusters) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(DisplayDirichlet.colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
       for (SoftCluster cluster : cls) {
         // if (true || cluster.getWeightedPointTotal().zSum() > sampleData.size() * 0.05) {
         dv.assign(cluster.std() * 3);
@@ -78,7 +78,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
         next.add(new SoftCluster(c.getCenter()));
       }
       DisplayFuzzyKMeans.clusters.add(next);
-      converged = DisplayFuzzyKMeans.iterateReference(points, DisplayFuzzyKMeans.clusters.get(iteration),
+      converged = iterateReference(points, DisplayFuzzyKMeans.clusters.get(iteration),
         clusterer);
     }
   }
@@ -177,18 +177,18 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    points.addAll(DisplayDirichlet.sampleData);
-    List<Canopy> canopies = DisplayFuzzyKMeans.populateCanopies(new ManhattanDistanceMeasure(), points,
-      DisplayFuzzyKMeans.t1, DisplayFuzzyKMeans.t2);
+    points.addAll(sampleData);
+    List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points,
+      t1, t2);
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    DisplayFuzzyKMeans.clusters = new ArrayList<List<SoftCluster>>();
+    clusters = new ArrayList<List<SoftCluster>>();
     DisplayFuzzyKMeans.clusters.add(new ArrayList<SoftCluster>());
     for (Canopy canopy : canopies) {
       if (canopy.getNumPoints() > 0.05 * DisplayDirichlet.sampleData.size()) {
         DisplayFuzzyKMeans.clusters.get(0).add(new SoftCluster(canopy.getCenter()));
       }
     }
-    DisplayFuzzyKMeans.referenceFuzzyKMeans(DisplayDirichlet.sampleData, measure, 0.001, 2, 10);
+    referenceFuzzyKMeans(sampleData, measure, 0.001, 2, 10);
     new DisplayFuzzyKMeans();
   }
 }

@@ -50,7 +50,7 @@ public final class MapFilesMap<K extends WritableComparable,V extends Writable> 
   public MapFilesMap(FileSystem fs, Path parentDir, Configuration conf) throws IOException {
     readers = new ArrayList<MapFile.Reader>();
     try {
-      for (FileStatus status : fs.listStatus(parentDir, MapFilesMap.PARTS_FILTER)) {
+      for (FileStatus status : fs.listStatus(parentDir, PARTS_FILTER)) {
         readers.add(new MapFile.Reader(fs, status.getPath().toString(), conf));
       }
     } catch (IOException ioe) {

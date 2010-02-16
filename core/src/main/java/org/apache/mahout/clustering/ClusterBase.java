@@ -88,7 +88,7 @@ public abstract class ClusterBase implements Writable, Printable {
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
-    buf.append(getIdentifier()).append(": ").append(ClusterBase.formatVector(computeCentroid(), bindings));
+    buf.append(getIdentifier()).append(": ").append(formatVector(computeCentroid(), bindings));
     return buf.toString();
   }
   

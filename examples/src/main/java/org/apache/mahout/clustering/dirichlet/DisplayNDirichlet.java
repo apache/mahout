@@ -33,7 +33,7 @@ class DisplayNDirichlet extends DisplayDirichlet {
   DisplayNDirichlet() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Normal Distribution (>"
-      + (int) (DisplayDirichlet.significance * 100) + "% of population)");
+      + (int) (significance * 100) + "% of population)");
   }
   
   @Override
@@ -43,9 +43,9 @@ class DisplayNDirichlet extends DisplayDirichlet {
     
     Vector dv = new DenseVector(2);
     int i = DisplayDirichlet.result.size() - 1;
-    for (Model<VectorWritable>[] models : DisplayDirichlet.result) {
+    for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(DisplayDirichlet.colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         NormalModel mm = (NormalModel) m;
         dv.assign(mm.getStdDev() * 3);
@@ -59,7 +59,7 @@ class DisplayNDirichlet extends DisplayDirichlet {
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    DisplayNDirichlet.generateResults();
+    generateResults();
     new DisplayNDirichlet();
   }
   

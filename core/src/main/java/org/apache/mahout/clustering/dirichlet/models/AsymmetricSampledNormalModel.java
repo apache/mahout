@@ -122,7 +122,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (sd * AsymmetricSampledNormalModel.sqrt2pi);
+    return ex / (sd * sqrt2pi);
   }
   
   @Override
@@ -190,6 +190,6 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, AsymmetricSampledNormalModel.modelType);
+    return gson.toJson(this, modelType);
   }
 }

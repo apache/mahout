@@ -107,7 +107,7 @@ public final class CanopyDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
       
-      CanopyDriver.runJob(input, output, measureClass, t1, t2);
+      runJob(input, output, measureClass, t1, t2);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);

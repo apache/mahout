@@ -219,7 +219,7 @@ public class DataLoader {
         continue;
       }
       
-      if (DataLoader.parseString(id, attrs, values, line) != null) {
+      if (parseString(id, attrs, values, line) != null) {
         id++;
       }
     }
@@ -248,7 +248,7 @@ public class DataLoader {
         continue;
       }
       
-      if (DataLoader.parseString(id, attrs, values, aData) != null) {
+      if (parseString(id, attrs, values, aData) != null) {
         id++;
       }
     }

@@ -19,13 +19,13 @@ package org.apache.mahout.common.cache;
 
 public class HybridCache<K,V> implements Cache<K,V> {
   
-  private int lfuCapacity;
+  private final int lfuCapacity;
   
-  private int lruCapacity;
+  private final int lruCapacity;
   
-  private LRUCache<K,V> lruCache;
+  private final LRUCache<K,V> lruCache;
   
-  private LFUCache<K,V> lfuCache;
+  private final LFUCache<K,V> lfuCache;
   
   public HybridCache(int lfuCapacity, int lruCapacity) {
     

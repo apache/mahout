@@ -59,7 +59,7 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
       return Double.NaN;
     }
     int numItems = dataModel.getNumItems();
-    double logLikelihood = LogLikelihoodSimilarity.twoLogLambda(intersectionSize, prefs1Size
+    double logLikelihood = twoLogLambda(intersectionSize, prefs1Size
                                                                                   - intersectionSize,
       prefs2Size, numItems - prefs2Size);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
@@ -74,7 +74,7 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     int numUsers = dataModel.getNumUsers();
-    double logLikelihood = LogLikelihoodSimilarity.twoLogLambda(preferring1and2, preferring1
+    double logLikelihood = twoLogLambda(preferring1and2, preferring1
                                                                                  - preferring1and2,
       preferring2, numUsers - preferring2);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
@@ -82,14 +82,14 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   
   static double twoLogLambda(double k1, double k2, double n1, double n2) {
     double p = (k1 + k2) / (n1 + n2);
-    return 2.0 * (LogLikelihoodSimilarity.logL(k1 / n1, k1, n1)
-                  + LogLikelihoodSimilarity.logL(k2 / n2, k2, n2) 
-                  - LogLikelihoodSimilarity.logL(p, k1, n1) 
-                  - LogLikelihoodSimilarity.logL(p, k2, n2));
+    return 2.0 * (logL(k1 / n1, k1, n1)
+                  + logL(k2 / n2, k2, n2)
+                  - logL(p, k1, n1)
+                  - logL(p, k2, n2));
   }
   
   private static double logL(double p, double k, double n) {
-    return k * LogLikelihoodSimilarity.safeLog(p) + (n - k) * LogLikelihoodSimilarity.safeLog(1.0 - p);
+    return k * safeLog(p) + (n - k) * safeLog(1.0 - p);
   }
   
   private static double safeLog(double d) {

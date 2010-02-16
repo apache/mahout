@@ -113,8 +113,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         }
         
         // List some most-preferred items that would count as (most) "relevant" results
-        double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? GenericRecommenderIRStatsEvaluator
-            .computeThreshold(prefs) : relevanceThreshold;
+        double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ?
+            computeThreshold(prefs) : relevanceThreshold;
         prefs.sortByValueReversed();
         for (int i = 0; (i < size) && (relevantItemIDs.size() < at); i++) {
           if (prefs.getValue(i) >= theRelevanceThreshold) {
@@ -127,7 +127,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
               .getNumUsers());
           LongPrimitiveIterator it2 = dataModel.getUserIDs();
           while (it2.hasNext()) {
-            GenericRecommenderIRStatsEvaluator.processOtherUser(userID, relevantItemIDs, trainingUsers, it2
+            processOtherUser(userID, relevantItemIDs, trainingUsers, it2
                 .nextLong(), dataModel);
           }
           

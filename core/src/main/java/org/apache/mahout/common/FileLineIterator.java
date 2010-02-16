@@ -53,7 +53,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    *           if the file cannot be read
    */
   public FileLineIterator(File file) throws IOException {
-    this(file, FileLineIterator.UTF8, false);
+    this(file, UTF8, false);
   }
   
   /**
@@ -65,7 +65,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    *           if the file cannot be read
    */
   public FileLineIterator(File file, boolean skipFirstLine) throws IOException {
-    this(file, FileLineIterator.UTF8, skipFirstLine);
+    this(file, UTF8, skipFirstLine);
   }
   
   /**
@@ -77,15 +77,15 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
    *           if the file cannot be read
    */
   public FileLineIterator(File file, Charset encoding, boolean skipFirstLine) throws IOException {
-    this(FileLineIterator.getFileInputStream(file), encoding, skipFirstLine);
+    this(getFileInputStream(file), encoding, skipFirstLine);
   }
   
   public FileLineIterator(InputStream is) throws IOException {
-    this(is, FileLineIterator.UTF8, false);
+    this(is, UTF8, false);
   }
   
   public FileLineIterator(InputStream is, boolean skipFirstLine) throws IOException {
-    this(is, FileLineIterator.UTF8, skipFirstLine);
+    this(is, UTF8, skipFirstLine);
   }
   
   public FileLineIterator(InputStream is, Charset encoding, boolean skipFirstLine) throws IOException {

@@ -75,10 +75,10 @@ public class CDMahoutEvaluator {
     
     Path outpath = OutputUtils.prepareOutput(fs);
     
-    CDMahoutEvaluator.configureJob(conf, rules, target, inpath, outpath, split);
+    configureJob(conf, rules, target, inpath, outpath, split);
     JobClient.runJob(conf);
     
-    CDMahoutEvaluator.importEvaluations(fs, conf, outpath, evaluations);
+    importEvaluations(fs, conf, outpath, evaluations);
   }
   
   /**
@@ -109,7 +109,7 @@ public class CDMahoutEvaluator {
                                    DatasetSplit split) throws IOException {
     List<CDFitness> evals = new ArrayList<CDFitness>();
     
-    CDMahoutEvaluator.evaluate(Arrays.asList(rule), target, inpath, evals, split);
+    evaluate(Arrays.asList(rule), target, inpath, evals, split);
     
     return evals.get(0);
   }
@@ -127,7 +127,7 @@ public class CDMahoutEvaluator {
    */
   public static void evaluate(List<? extends Rule> rules, int target,
                               Path inpath, List<CDFitness> evaluations) throws IOException {
-    CDMahoutEvaluator.evaluate(rules, target, inpath, evaluations, new DatasetSplit(1));
+    evaluate(rules, target, inpath, evaluations, new DatasetSplit(1));
   }
   
   /**

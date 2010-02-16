@@ -51,9 +51,9 @@ class DisplayKMeans extends DisplayDirichlet {
     Graphics2D g2 = (Graphics2D) g;
     Vector dv = new DenseVector(2);
     int i = DisplayKMeans.clusters.size() - 1;
-    for (List<Cluster> cls : DisplayKMeans.clusters) {
+    for (List<Cluster> cls : clusters) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(DisplayDirichlet.colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
       for (Cluster cluster : cls) {
         // if (true || cluster.getNumPoints() > sampleData.size() * 0.05) {
         dv.assign(cluster.getStd() * 3);
@@ -89,7 +89,7 @@ class DisplayKMeans extends DisplayDirichlet {
         next.add(new Cluster(c.getCenter()));
       }
       clusters.add(next);
-      converged = DisplayKMeans.iterateReference(points, clusters.get(iteration), measure);
+      converged = iterateReference(points, clusters.get(iteration), measure);
     }
   }
   
@@ -190,18 +190,18 @@ class DisplayKMeans extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    points.addAll(DisplayDirichlet.sampleData);
-    List<Canopy> canopies = DisplayKMeans.populateCanopies(new ManhattanDistanceMeasure(), points,
-      DisplayKMeans.t1, DisplayKMeans.t2);
+    points.addAll(sampleData);
+    List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points,
+      t1, t2);
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    DisplayKMeans.clusters = new ArrayList<List<Cluster>>();
+    clusters = new ArrayList<List<Cluster>>();
     DisplayKMeans.clusters.add(new ArrayList<Cluster>());
     for (Canopy canopy : canopies) {
       if (canopy.getNumPoints() > 0.05 * DisplayDirichlet.sampleData.size()) {
         DisplayKMeans.clusters.get(0).add(new Cluster(canopy.getCenter()));
       }
     }
-    DisplayKMeans.referenceKmeans(DisplayDirichlet.sampleData, DisplayKMeans.clusters, measure, 10);
+    referenceKmeans(sampleData, clusters, measure, 10);
     new DisplayKMeans();
   }
 }

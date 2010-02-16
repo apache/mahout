@@ -51,8 +51,8 @@ public class TermDocumentCountMapper extends MapReduceBase implements
     
     while (it.hasNext()) {
       Element e = it.next();
-      output.collect(new IntWritable(e.index()), TermDocumentCountMapper.ONE);
+      output.collect(new IntWritable(e.index()), ONE);
     }
-    output.collect(TermDocumentCountMapper.TOTAL_COUNT, TermDocumentCountMapper.ONE);
+    output.collect(TOTAL_COUNT, ONE);
   }
 }

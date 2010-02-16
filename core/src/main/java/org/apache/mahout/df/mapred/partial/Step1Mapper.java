@@ -111,12 +111,12 @@ public class Step1Mapper extends MapredMapper implements Mapper<LongWritable,Tex
     this.partition = partition;
     
     // compute number of trees to build
-    nbTrees = Step1Mapper.nbTrees(numMapTasks, numTrees, partition);
+    nbTrees = nbTrees(numMapTasks, numTrees, partition);
     
     // compute first tree id
     firstTreeId = 0;
     for (int p = 0; p < partition; p++) {
-      firstTreeId += Step1Mapper.nbTrees(numMapTasks, numTrees, p);
+      firstTreeId += nbTrees(numMapTasks, numTrees, p);
     }
     
     log.debug("partition : {}", partition);

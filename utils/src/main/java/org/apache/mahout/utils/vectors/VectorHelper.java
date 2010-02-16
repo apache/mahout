@@ -84,7 +84,7 @@ public class VectorHelper {
    * @throws IOException
    */
   public static String[] loadTermDictionary(File dictFile) throws IOException {
-    return VectorHelper.loadTermDictionary(new FileInputStream(dictFile));
+    return loadTermDictionary(new FileInputStream(dictFile));
   }
   
   /**

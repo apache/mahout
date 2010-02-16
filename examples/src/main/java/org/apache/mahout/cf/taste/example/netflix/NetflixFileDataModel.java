@@ -152,7 +152,7 @@ public final class NetflixFileDataModel implements DataModel {
     
     @Override
     public long nextLong() {
-      if (next <= MovieIDIterator.COUNT) {
+      if (next <= COUNT) {
         return next++;
       }
       throw new NoSuchElementException();
@@ -160,7 +160,7 @@ public final class NetflixFileDataModel implements DataModel {
     
     @Override
     public long peek() {
-      if (next <= MovieIDIterator.COUNT) {
+      if (next <= COUNT) {
         return next;
       }
       throw new NoSuchElementException();
@@ -168,7 +168,7 @@ public final class NetflixFileDataModel implements DataModel {
     
     @Override
     public boolean hasNext() {
-      return next <= MovieIDIterator.COUNT;
+      return next <= COUNT;
     }
     
     @Override

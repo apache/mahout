@@ -58,10 +58,10 @@ public class MahoutEvaluator {
   public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations) throws IOException {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
-    Path inpath = MahoutEvaluator.prepareInput(fs, population);
+    Path inpath = prepareInput(fs, population);
     Path outpath = OutputUtils.prepareOutput(fs);
     
-    MahoutEvaluator.configureJob(conf, evaluator, inpath, outpath);
+    configureJob(conf, evaluator, inpath, outpath);
     JobClient.runJob(conf);
     
     OutputUtils.importEvaluations(fs, conf, outpath, evaluations);
@@ -86,7 +86,7 @@ public class MahoutEvaluator {
     
     fs.mkdirs(inpath);
     
-    MahoutEvaluator.storePopulation(fs, new Path(inpath, "population"), population);
+    storePopulation(fs, new Path(inpath, "population"), population);
     
     return inpath;
   }

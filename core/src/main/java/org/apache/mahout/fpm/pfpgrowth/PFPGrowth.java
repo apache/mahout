@@ -188,11 +188,11 @@ public final class PFPGrowth {
   public static void runPFPGrowth(Parameters params) throws IOException,
                                                     InterruptedException,
                                                     ClassNotFoundException {
-    PFPGrowth.startParallelCounting(params);
-    PFPGrowth.startGroupingItems(params);
-    PFPGrowth.startTransactionSorting(params);
-    PFPGrowth.startParallelFPGrowth(params);
-    PFPGrowth.startAggregating(params);
+    startParallelCounting(params);
+    startGroupingItems(params);
+    startTransactionSorting(params);
+    startParallelFPGrowth(params);
+    startAggregating(params);
   }
   
   /**
@@ -247,7 +247,7 @@ public final class PFPGrowth {
    */
   public static void startGroupingItems(Parameters params) throws IOException {
     Configuration conf = new Configuration();
-    List<Pair<String,Long>> fList = PFPGrowth.readFList(params);
+    List<Pair<String,Long>> fList = readFList(params);
     Integer numGroups = Integer.valueOf(params.get("numGroups", "50"));
     
     Map<String,Long> gList = new HashMap<String,Long>();
@@ -271,8 +271,8 @@ public final class PFPGrowth {
     
     log.info("No of Features: {}", fList.size());
     
-    params.set("gList", PFPGrowth.serializeMap(gList, conf));
-    params.set("fList", PFPGrowth.serializeList(fList, conf));
+    params.set("gList", serializeMap(gList, conf));
+    params.set("fList", serializeList(fList, conf));
   }
   
   /**

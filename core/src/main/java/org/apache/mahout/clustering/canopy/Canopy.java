@@ -76,7 +76,7 @@ public class Canopy extends ClusterBase {
   
   @Override
   public String asFormatString() {
-    return Canopy.formatCanopy(this);
+    return formatCanopy(this);
   }
   
   /**

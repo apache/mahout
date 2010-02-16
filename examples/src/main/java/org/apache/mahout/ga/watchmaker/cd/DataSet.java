@@ -53,10 +53,10 @@ public class DataSet {
    * @throws RuntimeException if the dataset has not been initialized
    */
   public static DataSet getDataSet() {
-    if (DataSet.dataset == null) {
+    if (dataset == null) {
       throw new IllegalStateException("DataSet not initialized");
     }
-    return DataSet.dataset;
+    return dataset;
   }
   
   /**

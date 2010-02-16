@@ -84,7 +84,7 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
       throw new IllegalArgumentException("numTrees not found !");
     }
     
-    int nbConcerned = Step2Mapper.nbConcerned(numMaps, numTrees, p);
+    int nbConcerned = nbConcerned(numMaps, numTrees, p);
     keys = new TreeID[nbConcerned];
     trees = new Node[nbConcerned];
     

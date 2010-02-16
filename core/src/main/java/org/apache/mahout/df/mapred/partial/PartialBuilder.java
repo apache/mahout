@@ -121,10 +121,10 @@ public class PartialBuilder extends Builder {
     TreeID[] keys = new TreeID[numTrees];
     Node[] trees = new Node[numTrees];
     int[] firstIds = Step0Output.extractFirstIds(partitions);
-    PartialBuilder.processOutput(job, outputPath, firstIds, keys, trees, callback);
+    processOutput(job, outputPath, firstIds, keys, trees, callback);
     
     // call the second step in order to complete the oob predictions
-    if ((callback != null) && (numMaps > 1) && PartialBuilder.isStep2(getConf())) {
+    if ((callback != null) && (numMaps > 1) && isStep2(getConf())) {
       log.info("*****************************");
       log.info("Second Step");
       log.info("*****************************");
@@ -177,7 +177,7 @@ public class PartialBuilder extends Builder {
             trees[index] = value.getTree();
           }
           
-          PartialBuilder.processOutput(firstIds, key, value, callback);
+          processOutput(firstIds, key, value, callback);
           
           index++;
         }

@@ -48,8 +48,8 @@ public class NGramCollector {
   public static final String ANALYZER_CLASS = "analyzerClass";
   public static final String MAX_SHINGLE_SIZE = "maxShingleSize";
   
-  public static enum Count {
-    NGRAM_TOTAL;
+  public enum Count {
+    NGRAM_TOTAL
   }
   
   private static final Logger log = LoggerFactory.getLogger(NGramCollector.class);
@@ -61,9 +61,7 @@ public class NGramCollector {
   
   /** max size of shingles (ngrams) to create */
   private int maxShingleSize;
-  
-  public NGramCollector() {}
-  
+
   /**
    * Configure the 
    * 

@@ -93,7 +93,7 @@ public final class VectorDumper {
       
       if (cmdLine.hasOption(helpOpt)) {
         
-        VectorDumper.printHelp(group);
+        printHelp(group);
         return;
       }
       
@@ -133,7 +133,7 @@ public final class VectorDumper {
           writer = new OutputStreamWriter(System.out);
         }
         boolean printKey = cmdLine.hasOption(printKeyOpt);
-        SeqFileIterator iterator = (SequenceFileVectorIterable.SeqFileIterator) vectorIterable
+        SeqFileIterator iterator = (SeqFileIterator) vectorIterable
             .iterator();
         int i = 0;
         while (iterator.hasNext()) {
@@ -157,7 +157,7 @@ public final class VectorDumper {
       
     } catch (OptionException e) {
       log.error("Exception", e);
-      VectorDumper.printHelp(group);
+      printHelp(group);
     }
     
   }

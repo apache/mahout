@@ -43,7 +43,7 @@ public class StringRecordIterator implements Iterator<Pair<List<String>,Long>> {
   public Pair<List<String>,Long> next() {
     String line = lineIterator.next();
     String[] items = splitter.split(line);
-    return new Pair<List<String>,Long>(Arrays.asList(items), StringRecordIterator.ONE);
+    return new Pair<List<String>,Long>(Arrays.asList(items), ONE);
   }
   
   @Override
