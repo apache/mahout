@@ -165,6 +165,11 @@ public final class NetflixDataModel implements DataModel {
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return delegate.hasPreferenceValues();
+  }
   
   private class MovieFilenameFilter implements FilenameFilter {
     @Override

@@ -31,13 +31,25 @@ import org.apache.mahout.cf.taste.model.DataModel;
  * </p>
  */
 public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
-  
+
+  /**
+   * @throws IllegalArgumentException if {@link DataModel} does not have preference values
+   */
   public EuclideanDistanceSimilarity(DataModel dataModel) throws TasteException {
     super(dataModel);
+    if (!dataModel.hasPreferenceValues()) {
+      throw new IllegalArgumentException("DataModel doesn't have preference values");
+    }
   }
-  
+
+  /**
+   * @throws IllegalArgumentException if {@link DataModel} does not have preference values
+   */
   public EuclideanDistanceSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting);
+    if (!dataModel.hasPreferenceValues()) {
+      throw new IllegalArgumentException("DataModel doesn't have preference values");
+    }
   }
   
   @Override

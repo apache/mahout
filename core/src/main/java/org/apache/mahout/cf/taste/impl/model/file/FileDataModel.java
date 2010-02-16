@@ -152,12 +152,12 @@ public class FileDataModel implements DataModel {
     
     FileLineIterator iterator = new FileLineIterator(dataFile, false);
     String firstLine = iterator.peek();
-    while ((firstLine.length() == 0) || (firstLine.charAt(0) == FileDataModel.COMMENT_CHAR)) {
+    while ((firstLine.length() == 0) || (firstLine.charAt(0) == COMMENT_CHAR)) {
       iterator.next();
       firstLine = iterator.peek();
     }
     iterator.close();
-    delimiter = FileDataModel.determineDelimiter(firstLine, 2);
+    delimiter = determineDelimiter(firstLine, 2);
     hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
     
     this.reloadLock = new ReentrantLock();
@@ -192,7 +192,7 @@ public class FileDataModel implements DataModel {
     long newLastUpdateFileModified = readLastUpdateFileModified();
     
     boolean loadFreshData = (delegate == null)
-                            || (newLastModified > lastModified + FileDataModel.MIN_RELOAD_INTERVAL_MS);
+                            || (newLastModified > lastModified + MIN_RELOAD_INTERVAL_MS);
     
     lastModified = newLastModified;
     lastUpdateFileModified = newLastUpdateFileModified;
@@ -344,7 +344,7 @@ public class FileDataModel implements DataModel {
    */
   protected void processLine(String line, FastByIDMap<?> data) {
     
-    if ((line.length() == 0) || (line.charAt(0) == FileDataModel.COMMENT_CHAR)) {
+    if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
       return;
     }
     
@@ -500,7 +500,7 @@ public class FileDataModel implements DataModel {
   
   protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data) {
     
-    if ((line.length() == 0) || (line.charAt(0) == FileDataModel.COMMENT_CHAR)) {
+    if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
       return;
     }
     
@@ -623,11 +623,16 @@ public class FileDataModel implements DataModel {
   
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    if ((dataFile.lastModified() > lastModified + FileDataModel.MIN_RELOAD_INTERVAL_MS)
-        || (readLastUpdateFileModified() > lastUpdateFileModified + FileDataModel.MIN_RELOAD_INTERVAL_MS)) {
+    if ((dataFile.lastModified() > lastModified + MIN_RELOAD_INTERVAL_MS)
+        || (readLastUpdateFileModified() > lastUpdateFileModified + MIN_RELOAD_INTERVAL_MS)) {
       log.debug("File has changed; reloading...");
       reload();
     }
+  }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return delegate.hasPreferenceValues();
   }
   
   @Override

@@ -162,5 +162,15 @@ public interface DataModel extends Refreshable {
    *           if an error occurs while accessing the data
    */
   void removePreference(long userID, long itemID) throws TasteException;
+
+  /**
+   * @return true iff this implementation actually stores preference values.
+   *  {@link org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel} for example
+   *  does not, and the preference values it returns are always constant. This
+   *  has significant implications for performance and correctness in some situations,
+   *  so the {@link DataModel} advertises this here. If the {@link DataModel} can
+   *  ever return more than one distinct preference value, return <code>false</code>.
+   */
+  boolean hasPreferenceValues();
   
 }

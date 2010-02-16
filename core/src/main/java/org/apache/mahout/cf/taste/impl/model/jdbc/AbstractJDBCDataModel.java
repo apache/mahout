@@ -111,9 +111,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String getPrefsForItemSQL,
                                   String getNumPreferenceForItemSQL,
                                   String getNumPreferenceForItemsSQL) {
-    this(dataSource, AbstractJDBCDataModel.DEFAULT_PREFERENCE_TABLE,
-        AbstractJDBCDataModel.DEFAULT_USER_ID_COLUMN, AbstractJDBCDataModel.DEFAULT_ITEM_ID_COLUMN,
-        AbstractJDBCDataModel.DEFAULT_PREFERENCE_COLUMN, getPreferenceSQL, getUserSQL, getAllUsersSQL,
+    this(dataSource, DEFAULT_PREFERENCE_TABLE,
+        DEFAULT_USER_ID_COLUMN, DEFAULT_ITEM_ID_COLUMN,
+        DEFAULT_PREFERENCE_COLUMN, getPreferenceSQL, getUserSQL, getAllUsersSQL,
         getNumItemsSQL, getNumUsersSQL, setPreferenceSQL, removePreferenceSQL, getUsersSQL, getItemsSQL,
         getPrefsForItemSQL, getNumPreferenceForItemSQL, getNumPreferenceForItemsSQL);
   }
@@ -585,6 +585,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     cachedNumUsers = -1;
     cachedNumItems = -1;
     itemPrefCounts.clear();
+  }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return true;
   }
   
   // Some overrideable methods to customize the class behavior:

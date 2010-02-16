@@ -95,7 +95,7 @@ public final class GenericDataModel implements DataModel, Serializable {
     itemIDSet = null; // Might help GC -- this is big
     Arrays.sort(itemIDs);
     
-    this.preferenceForItems = GenericDataModel.toDataMap(prefsForItems, false);
+    this.preferenceForItems = toDataMap(prefsForItems, false);
     
     for (Map.Entry<Long,PreferenceArray> entry : preferenceForItems.entrySet()) {
       entry.getValue().sortByUser();
@@ -122,7 +122,7 @@ public final class GenericDataModel implements DataModel, Serializable {
    *           if an error occurs while retrieving the other {@link DataModel}'s users
    */
   public GenericDataModel(DataModel dataModel) throws TasteException {
-    this(GenericDataModel.toDataMap(dataModel));
+    this(toDataMap(dataModel));
   }
   
   /**
@@ -268,6 +268,11 @@ public final class GenericDataModel implements DataModel, Serializable {
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
   // Does nothing
+  }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return true;
   }
   
   @Override

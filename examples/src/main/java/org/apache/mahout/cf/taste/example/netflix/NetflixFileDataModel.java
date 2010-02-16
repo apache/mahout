@@ -134,6 +134,11 @@ public final class NetflixFileDataModel implements DataModel {
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     // do nothing
   }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return true;
+  }
   
   @Override
   public String toString() {

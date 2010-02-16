@@ -106,7 +106,7 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
    *           if an error occurs while retrieving the other {@link DataModel}'s users
    */
   public GenericBooleanPrefDataModel(DataModel dataModel) throws TasteException {
-    this(GenericBooleanPrefDataModel.toDataMap(dataModel));
+    this(toDataMap(dataModel));
   }
   
   private static FastByIDMap<FastIDSet> toDataMap(DataModel dataModel) throws TasteException {
@@ -254,6 +254,11 @@ public final class GenericBooleanPrefDataModel implements DataModel, Serializabl
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
   // Does nothing
+  }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return false;
   }
   
   @Override

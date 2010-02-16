@@ -52,13 +52,25 @@ import org.apache.mahout.cf.taste.model.DataModel;
  * </p>
  */
 public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
-  
+
+  /**
+   * @throws IllegalArgumentException if {@link DataModel} does not have preference values
+   */
   public PearsonCorrelationSimilarity(DataModel dataModel) throws TasteException {
     super(dataModel);
+    if (!dataModel.hasPreferenceValues()) {
+      throw new IllegalArgumentException("DataModel doesn't have preference values");
+    }
   }
-  
+
+  /**
+   * @throws IllegalArgumentException if {@link DataModel} does not have preference values
+   */
   public PearsonCorrelationSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting);
+    if (!dataModel.hasPreferenceValues()) {
+      throw new IllegalArgumentException("DataModel doesn't have preference values");
+    }
   }
   
   @Override
@@ -68,9 +80,7 @@ public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
     }
     // Note that sum of X and sum of Y don't appear here since they are assumed to be 0;
     // the data is assumed to be centered.
-    double xTerm = Math.sqrt(sumX2);
-    double yTerm = Math.sqrt(sumY2);
-    double denominator = xTerm * yTerm;
+    double denominator = Math.sqrt(sumX2) * Math.sqrt(sumY2);
     if (denominator == 0.0) {
       // One or both parties has -all- the same ratings;
       // can't really say much similarity under this measure

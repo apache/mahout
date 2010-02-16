@@ -137,7 +137,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
    *           if {@link DataSource} can't be found
    */
   public MySQLJDBCDataModel() throws TasteException {
-    this(AbstractJDBCComponent.DEFAULT_DATASOURCE_NAME);
+    this(DEFAULT_DATASOURCE_NAME);
   }
   
   /**
@@ -153,8 +153,10 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
    */
   public MySQLJDBCDataModel(String dataSourceName) throws TasteException {
     this(AbstractJDBCComponent.lookupDataSource(dataSourceName),
-        AbstractJDBCDataModel.DEFAULT_PREFERENCE_TABLE, AbstractJDBCDataModel.DEFAULT_USER_ID_COLUMN,
-        AbstractJDBCDataModel.DEFAULT_ITEM_ID_COLUMN, AbstractJDBCDataModel.DEFAULT_PREFERENCE_COLUMN);
+         DEFAULT_PREFERENCE_TABLE,
+         DEFAULT_USER_ID_COLUMN,
+         DEFAULT_ITEM_ID_COLUMN,
+         DEFAULT_PREFERENCE_COLUMN);
   }
   
   /**
@@ -166,9 +168,11 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
    *          {@link DataSource} to use
    */
   public MySQLJDBCDataModel(DataSource dataSource) {
-    this(dataSource, AbstractJDBCDataModel.DEFAULT_PREFERENCE_TABLE,
-        AbstractJDBCDataModel.DEFAULT_USER_ID_COLUMN, AbstractJDBCDataModel.DEFAULT_ITEM_ID_COLUMN,
-        AbstractJDBCDataModel.DEFAULT_PREFERENCE_COLUMN);
+    this(dataSource,
+         DEFAULT_PREFERENCE_TABLE,
+         DEFAULT_USER_ID_COLUMN,
+         DEFAULT_ITEM_ID_COLUMN,
+         DEFAULT_PREFERENCE_COLUMN);
   }
   
   /**

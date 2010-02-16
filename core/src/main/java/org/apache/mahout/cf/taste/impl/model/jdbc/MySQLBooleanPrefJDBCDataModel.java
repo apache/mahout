@@ -58,7 +58,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
    *           if {@link javax.sql.DataSource} can't be found
    */
   public MySQLBooleanPrefJDBCDataModel() throws TasteException {
-    this(AbstractJDBCComponent.DEFAULT_DATASOURCE_NAME);
+    this(DEFAULT_DATASOURCE_NAME);
   }
   
   /**
@@ -74,8 +74,9 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
    */
   public MySQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
     this(AbstractJDBCComponent.lookupDataSource(dataSourceName),
-        AbstractJDBCDataModel.DEFAULT_PREFERENCE_TABLE, AbstractJDBCDataModel.DEFAULT_USER_ID_COLUMN,
-        AbstractJDBCDataModel.DEFAULT_ITEM_ID_COLUMN);
+         DEFAULT_PREFERENCE_TABLE,
+         DEFAULT_USER_ID_COLUMN,
+         DEFAULT_ITEM_ID_COLUMN);
   }
   
   /**
@@ -88,8 +89,10 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
    *          {@link javax.sql.DataSource} to use
    */
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource) {
-    this(dataSource, AbstractJDBCDataModel.DEFAULT_PREFERENCE_TABLE,
-        AbstractJDBCDataModel.DEFAULT_USER_ID_COLUMN, AbstractJDBCDataModel.DEFAULT_ITEM_ID_COLUMN);
+    this(dataSource,
+         DEFAULT_PREFERENCE_TABLE,
+         DEFAULT_USER_ID_COLUMN,
+         DEFAULT_ITEM_ID_COLUMN);
   }
   
   /**
@@ -112,7 +115,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
                                        String userIDColumn,
                                        String itemIDColumn) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn,
-        MySQLBooleanPrefJDBCDataModel.NO_SUCH_COLUMN,
+        NO_SUCH_COLUMN,
         // getPreferenceSQL
         "SELECT 1 FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
         // getUserSQL

@@ -66,19 +66,20 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
    *           if anything goes wrong during initialization
    */
   public GenericJDBCDataModel(Properties props) throws TasteException {
-    super(AbstractJDBCComponent.lookupDataSource(props.getProperty(GenericJDBCDataModel.DATA_SOURCE_KEY)),
-        props.getProperty(GenericJDBCDataModel.GET_PREFERENCE_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_USER_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_ALL_USERS_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_NUM_USERS_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_NUM_ITEMS_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.SET_PREFERENCE_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.REMOVE_PREFERENCE_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_USERS_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_ITEMS_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_PREFS_FOR_ITEM_SQL_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_NUM_PREFERENCE_FOR_ITEM_KEY), props
-            .getProperty(GenericJDBCDataModel.GET_NUM_PREFERENCE_FOR_ITEMS_KEY));
+    super(AbstractJDBCComponent.lookupDataSource(
+        props.getProperty(DATA_SOURCE_KEY)),
+        props.getProperty(GET_PREFERENCE_SQL_KEY),
+        props.getProperty(GET_USER_SQL_KEY),
+        props.getProperty(GET_ALL_USERS_SQL_KEY),
+        props.getProperty(GET_NUM_USERS_SQL_KEY),
+        props.getProperty(GET_NUM_ITEMS_SQL_KEY),
+        props.getProperty(SET_PREFERENCE_SQL_KEY),
+        props.getProperty(REMOVE_PREFERENCE_SQL_KEY),
+        props.getProperty(GET_USERS_SQL_KEY),
+        props.getProperty(GET_ITEMS_SQL_KEY),
+        props.getProperty(GET_PREFS_FOR_ITEM_SQL_KEY),
+        props.getProperty(GET_NUM_PREFERENCE_FOR_ITEM_KEY),
+        props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY));
   }
   
   /**
@@ -94,7 +95,7 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
    *           if anything goes wrong during initialization
    */
   public GenericJDBCDataModel(File propertiesFile) throws TasteException {
-    this(GenericJDBCDataModel.getPropertiesFromFile(propertiesFile));
+    this(getPropertiesFromFile(propertiesFile));
   }
   
   /**
@@ -111,13 +112,13 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
    *           if anything goes wrong during initialization
    */
   public GenericJDBCDataModel(String resourcePath) throws TasteException {
-    this(GenericJDBCDataModel.getPropertiesFromStream(GenericJDBCDataModel.class
+    this(getPropertiesFromStream(GenericJDBCDataModel.class
         .getResourceAsStream(resourcePath)));
   }
   
   private static Properties getPropertiesFromFile(File file) throws TasteException {
     try {
-      return GenericJDBCDataModel.getPropertiesFromStream(new FileInputStream(file));
+      return getPropertiesFromStream(new FileInputStream(file));
     } catch (FileNotFoundException fnfe) {
       throw new TasteException(fnfe);
     }
@@ -135,6 +136,11 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
     } catch (IOException ioe) {
       throw new TasteException(ioe);
     }
+  }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return true;
   }
   
 }

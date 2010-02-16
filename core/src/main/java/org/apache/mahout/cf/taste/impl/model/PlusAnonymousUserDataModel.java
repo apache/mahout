@@ -94,26 +94,23 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   
   @Override
   public LongPrimitiveIterator getUserIDs() throws TasteException {
-    return new PlusAnonymousUserLongPrimitiveIterator(delegate.getUserIDs(),
-        PlusAnonymousUserDataModel.TEMP_USER_ID);
+    return new PlusAnonymousUserLongPrimitiveIterator(delegate.getUserIDs(), TEMP_USER_ID);
   }
   
   @Override
   public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
-    if (userID == PlusAnonymousUserDataModel.TEMP_USER_ID) {
+    if (userID == TEMP_USER_ID) {
       return tempPrefs;
-    } else {
-      return delegate.getPreferencesFromUser(userID);
     }
+    return delegate.getPreferencesFromUser(userID);
   }
   
   @Override
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
-    if (userID == PlusAnonymousUserDataModel.TEMP_USER_ID) {
+    if (userID == TEMP_USER_ID) {
       return prefItemIDs;
-    } else {
-      return delegate.getItemIDsFromUser(userID);
     }
+    return delegate.getItemIDsFromUser(userID);
   }
   
   @Override
@@ -146,16 +143,15 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   
   @Override
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
-    if (userID == PlusAnonymousUserDataModel.TEMP_USER_ID) {
+    if (userID == TEMP_USER_ID) {
       for (int i = 0; i < tempPrefs.length(); i++) {
         if (tempPrefs.getItemID(i) == itemID) {
           return tempPrefs.getValue(i);
         }
       }
       return null;
-    } else {
-      return delegate.getPreferenceValue(userID, itemID);
     }
+    return delegate.getPreferenceValue(userID, itemID);
   }
   
   @Override
@@ -189,25 +185,28 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
-    if (userID == PlusAnonymousUserDataModel.TEMP_USER_ID) {
+    if (userID == TEMP_USER_ID) {
       throw new UnsupportedOperationException();
-    } else {
-      delegate.setPreference(userID, itemID, value);
     }
+    delegate.setPreference(userID, itemID, value);
   }
   
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
-    if (userID == PlusAnonymousUserDataModel.TEMP_USER_ID) {
+    if (userID == TEMP_USER_ID) {
       throw new UnsupportedOperationException();
-    } else {
-      delegate.removePreference(userID, itemID);
     }
+    delegate.removePreference(userID, itemID);
   }
   
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     delegate.refresh(alreadyRefreshed);
+  }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return delegate.hasPreferenceValues();
   }
   
 }

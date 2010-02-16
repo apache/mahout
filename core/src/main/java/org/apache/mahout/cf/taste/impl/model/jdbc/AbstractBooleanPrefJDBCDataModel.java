@@ -92,5 +92,10 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
       IOUtils.quietClose(null, stmt, conn);
     }
   }
+
+  @Override
+  public boolean hasPreferenceValues() {
+    return false;
+  }
   
 }

@@ -76,7 +76,11 @@ public final class TopItems {
         }
       }
     }
-    List<RecommendedItem> result = new ArrayList<RecommendedItem>(topItems.size());
+    int size = topItems.size();
+    if (size == 0) {
+      return Collections.emptyList();
+    }
+    List<RecommendedItem> result = new ArrayList<RecommendedItem>(size);
     result.addAll(topItems);
     Collections.sort(result);
     return result;
@@ -112,13 +116,14 @@ public final class TopItems {
         lowestTopValue = topUsers.peek().getSimilarity();
       }
     }
-    if (topUsers.isEmpty()) {
-      return TopItems.NO_IDS;
+    int size = topUsers.size();
+    if (size == 0) {
+      return NO_IDS;
     }
-    List<SimilarUser> sorted = new ArrayList<SimilarUser>(topUsers.size());
+    List<SimilarUser> sorted = new ArrayList<SimilarUser>(size);
     sorted.addAll(topUsers);
     Collections.sort(sorted);
-    long[] result = new long[sorted.size()];
+    long[] result = new long[size];
     int i = 0;
     for (SimilarUser similarUser : sorted) {
       result[i++] = similarUser.getUserID();
@@ -155,8 +160,12 @@ public final class TopItems {
         lowestTopValue = topSimilarities.peek().getValue();
       }
     }
-    List<GenericItemSimilarity.ItemItemSimilarity> result = new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(
-        topSimilarities.size());
+    int size = topSimilarities.size();
+    if (size == 0) {
+      return Collections.emptyList();
+    }
+    List<GenericItemSimilarity.ItemItemSimilarity> result =
+        new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(size);
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
@@ -182,8 +191,12 @@ public final class TopItems {
         lowestTopValue = topSimilarities.peek().getValue();
       }
     }
-    List<GenericUserSimilarity.UserUserSimilarity> result = new ArrayList<GenericUserSimilarity.UserUserSimilarity>(
-        topSimilarities.size());
+    int size = topSimilarities.size();
+    if (size == 0) {
+      return Collections.emptyList();
+    }
+    List<GenericUserSimilarity.UserUserSimilarity> result =
+        new ArrayList<GenericUserSimilarity.UserUserSimilarity>(size);
     result.addAll(topSimilarities);
     Collections.sort(result);
     return result;
