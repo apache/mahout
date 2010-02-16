@@ -394,12 +394,12 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     
     @Override
     public int size() {
-      return this.size();
+      return FastByIDMap.this.size();
     }
     
     @Override
     public boolean isEmpty() {
-      return this.isEmpty();
+      return FastByIDMap.this.isEmpty();
     }
     
     @Override
@@ -439,7 +439,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     
     @Override
     public void clear() {
-      this.clear();
+      FastByIDMap.this.clear();
     }
     
     private final class MapEntry implements Map.Entry<Long,V> {
