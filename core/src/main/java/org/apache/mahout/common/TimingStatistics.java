@@ -78,10 +78,10 @@ public final class TimingStatistics implements Serializable {
   
   @Override
   public synchronized String toString() {
-    return '\n' + "nCalls = " + nCalls + ";\n" + "sumTime = " + sumTime / 1000000000.0f + "s;\n"
-           + "minTime = " + minTime / 1000000.0f + "ms;\n" + "maxTime = " + maxTime / 1000000.0f + "ms;\n"
-           + "meanTime = " + getMeanTime() / 1000000.0f + "ms;\n" + "stdDevTime = " + getStdDevTime()
-           / 1000000.0f + "ms;";
+    return '\n' + "nCalls = " + nCalls + ";\n" + "sumTime = " + sumTime / 1000000000.0d + "s;\n"
+           + "minTime = " + minTime / 1000000.0d + "ms;\n" + "maxTime = " + maxTime / 1000000.0d + "ms;\n"
+           + "meanTime = " + getMeanTime() / 1000000.0d + "ms;\n" + "stdDevTime = " + getStdDevTime()
+           / 1000000.0d + "ms;";
   }
   
   public Call newCall() {
