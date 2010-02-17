@@ -304,7 +304,7 @@ public class VectorBenchmarks implements Summarizable {
         numVectors = Integer.parseInt((String) cmdLine.getValue(numVectorsOpt));
         
       }
-      int loop = 2;
+      int loop = 200;
       if (cmdLine.hasOption(loopOpt)) {
         loop = Integer.parseInt((String) cmdLine.getValue(loopOpt));
         
