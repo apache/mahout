@@ -57,12 +57,12 @@ public final class JesterDataModel extends FileDataModel {
   protected DataModel buildModel() throws IOException {
     FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
     FileLineIterator iterator = new FileLineIterator(getDataFile(), false);
-    processFile(iterator, data);
+    processFile(iterator, data, false);
     return new GenericDataModel(GenericDataModel.toDataMap(data, true));
   }
   
   @Override
-  protected void processLine(String line, FastByIDMap<?> rawData) {
+  protected void processLine(String line, FastByIDMap<?> rawData, boolean fromPriorData) {
     FastByIDMap<Collection<Preference>> data = (FastByIDMap<Collection<Preference>>) rawData;
     String[] jokePrefs = line.split(",");
     int count = Integer.parseInt(jokePrefs[0]);

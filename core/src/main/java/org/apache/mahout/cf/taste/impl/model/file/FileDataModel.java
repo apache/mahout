@@ -98,7 +98,7 @@ import org.slf4j.LoggerFactory;
  * 
  * <p>
  * It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap)} and
+ * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap, boolean)} and
  * {@link #processLineWithoutID(String, FastByIDMap)}
  */
 public class FileDataModel implements DataModel {
@@ -203,10 +203,10 @@ public class FileDataModel implements DataModel {
         
         FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
-        processFile(iterator, data);
+        processFile(iterator, data, false);
         
         for (File updateFile : findUpdateFiles()) {
-          processFile(new FileLineIterator(updateFile, false), data);
+          processFile(new FileLineIterator(updateFile, false), data, false);
         }
         
         return new GenericDataModel(GenericDataModel.toDataMap(data, true));
@@ -216,7 +216,7 @@ public class FileDataModel implements DataModel {
         FastByIDMap<PreferenceArray> rawData = ((GenericDataModel) delegate).getRawUserData();
         
         for (File updateFile : findUpdateFiles()) {
-          processFile(new FileLineIterator(updateFile, false), rawData);
+          processFile(new FileLineIterator(updateFile, false), rawData, true);
         }
         
         return new GenericDataModel(rawData);
@@ -308,13 +308,15 @@ public class FileDataModel implements DataModel {
     return delimiter;
   }
   
-  protected void processFile(FileLineIterator dataOrUpdateFileIterator, FastByIDMap<?> data) {
+  protected void processFile(FileLineIterator dataOrUpdateFileIterator,
+                             FastByIDMap<?> data,
+                             boolean fromPriorData) {
     log.info("Reading file info...");
     AtomicInteger count = new AtomicInteger();
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
       if (line.length() > 0) {
-        processLine(line, data);
+        processLine(line, data, fromPriorData);
         int currentCount = count.incrementAndGet();
         if (currentCount % 1000000 == 0) {
           log.info("Processed {} lines", currentCount);
@@ -341,8 +343,13 @@ public class FileDataModel implements DataModel {
    *          line from input data file
    * @param data
    *          all data read so far, as a mapping from user IDs to preferences
+   * @param fromPriorData an implementation detail -- if true, data will map IDs to
+   *  {@link PreferenceArray} since the framework is attempting to read and update raw
+   *  data that is already in memory. Otherwise it maps to {@link Collection}s of
+   *  {@link Preference}s, since it's reading fresh data. Subclasses must be prepared
+   *  to handle this wrinkle.
    */
-  protected void processLine(String line, FastByIDMap<?> data) {
+  protected void processLine(String line, FastByIDMap<?> data, boolean fromPriorData) {
     
     if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
       return;
@@ -379,7 +386,7 @@ public class FileDataModel implements DataModel {
     
     // This is kind of gross but need to handle two types of storage
     Object maybePrefs = data.get(userID);
-    if (maybePrefs instanceof PreferenceArray) {
+    if (fromPriorData) {
       
       PreferenceArray prefs = (PreferenceArray) maybePrefs;
       if (preferenceValueString.length() == 0) {
