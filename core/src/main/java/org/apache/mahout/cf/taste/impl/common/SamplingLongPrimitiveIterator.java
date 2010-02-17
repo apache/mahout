@@ -75,13 +75,9 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
     if (toSkip > 0) {
       delegate.skip(toSkip);
     }
-    boolean found = false;
     if (delegate.hasNext()) {
       next = delegate.next();
-      found = true;
-    }
-    
-    if (!found) {
+    } else {
       hasNext = false;
     }
   }
@@ -97,6 +93,11 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
   @Override
   public void skip(int n) {
     delegate.skip((int) (n / samplingRate)); // Kind of an approximation, but this is expected skip
+    if (delegate.hasNext()) {
+      next = delegate.next();
+    } else {
+      hasNext = false;
+    }
   }
   
   public static LongPrimitiveIterator maybeWrapIterator(LongPrimitiveIterator delegate, double samplingRate) {
