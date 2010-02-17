@@ -18,7 +18,6 @@
 package org.apache.mahout.benchmark;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.Summarizable;
 import org.apache.mahout.common.TimingStatistics;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -53,18 +53,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class VectorBenchmarks implements Summarizable {
+
   private static final Logger log = LoggerFactory.getLogger(VectorBenchmarks.class);
-  private Vector[][] vectors;
-  private List<Vector> randomVectors = new ArrayList<Vector>();
-  private int cardinality;
-  private int numVectors;
-  private int loop;
-  private int opsPerUnit;
-  private Map<String,Integer> implType = new HashMap<String,Integer>();
-  private Map<String,List<String[]>> statsMap = new HashMap<String,List<String[]>>();
+
+  private final Vector[][] vectors;
+  private final List<Vector> randomVectors = new ArrayList<Vector>();
+  private final int cardinality;
+  private final int numVectors;
+  private final int loop;
+  private final int opsPerUnit;
+  private final Map<String,Integer> implType = new HashMap<String,Integer>();
+  private final Map<String,List<String[]>> statsMap = new HashMap<String,List<String[]>>();
   
   public VectorBenchmarks(int cardinality, int numVectors, int loop, int opsPerUnit) {
-    Random r = new Random();
+    Random r = RandomUtils.getRandom();
     this.cardinality = cardinality;
     this.numVectors = numVectors;
     this.loop = loop;
@@ -116,60 +118,66 @@ public class VectorBenchmarks implements Summarizable {
   
   public void createBenchmark() {
     TimingStatistics stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         vectors[0][i] = new DenseVector(randomVectors.get(i));
         call.end();
       }
+    }
     printStats(stats, "Create", "DenseVector");
     
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         vectors[1][i] = new RandomAccessSparseVector(randomVectors.get(i));
         call.end();
       }
+    }
     printStats(stats, "Create", "RandomAccessSparseVector");
     
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         vectors[2][i] = new SequentialAccessSparseVector(randomVectors.get(i));
         call.end();
       }
+    }
     printStats(stats, "Create", "SequentialAccessSparseVector");
     
   }
   
   public void cloneBenchmark() {
     TimingStatistics stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         vectors[0][i] = vectors[0][i].clone();
         call.end();
       }
+    }
     printStats(stats, "Clone", "DenseVector");
     
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         vectors[1][i] = vectors[1][i].clone();
         call.end();
       }
+    }
     printStats(stats, "Clone", "RandomAccessSparseVector");
     
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         vectors[2][i] = vectors[2][i].clone();
         call.end();
       }
+    }
     printStats(stats, "Clone", "SequentialAccessSparseVector");
     
   }
@@ -177,88 +185,100 @@ public class VectorBenchmarks implements Summarizable {
   public void dotBenchmark() {
     double result = 0;
     TimingStatistics stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         result += vectors[0][i].dot(vectors[0][(i + 1) % numVectors]);
         call.end();
       }
+    }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "DenseVector", "sum = " + result + " ");
+    printStats(stats, "DotProduct", "DenseVector", "sum = " + result + ' ');
     
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         result += vectors[1][i].dot(vectors[1][(i + 1) % numVectors]);
         call.end();
       }
+    }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "RandomAccessSparseVector", "sum = " + result + " ");
+    printStats(stats, "DotProduct", "RandomAccessSparseVector", "sum = " + result + ' ');
     
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         result += vectors[2][i].dot(vectors[2][(i + 1) % numVectors]);
         call.end();
       }
+    }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "SequentialAccessSparseVector", "sum = " + result + " ");
+    printStats(stats, "DotProduct", "SequentialAccessSparseVector", "sum = " + result + ' ');
     
   }
   
   public void distanceMeasureBenchark(DistanceMeasure measure) {
     double result = 0;
     TimingStatistics stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         double minDistance = Double.MAX_VALUE;
         for (int u = 0; u < opsPerUnit; u++) {
           double distance = measure.distance(vectors[0][i], vectors[0][u]);
-          if (distance < minDistance) minDistance = distance;
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
         }
         result += minDistance;
         call.end();
       }
+    }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, measure.getClass().getName(), "DenseVector", "minDistance = " + result + " ");
+    printStats(stats, measure.getClass().getName(), "DenseVector", "minDistance = " + result + ' ');
     
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         double minDistance = Double.MAX_VALUE;
         for (int u = 0; u < opsPerUnit; u++) {
           double distance = measure.distance(vectors[1][i], vectors[1][u]);
-          if (distance < minDistance) minDistance = distance;
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
         }
         result += minDistance;
         call.end();
       }
+    }
     // print result to prevent hotspot from eliminating deadcode
     printStats(stats, measure.getClass().getName(), "RandomAccessSparseVector", "minDistance = " + result
-                                                                                + " ");
+                                                                                + ' ');
     stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++)
+    for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
         TimingStatistics.Call call = stats.newCall();
         double minDistance = Double.MAX_VALUE;
         for (int u = 0; u < opsPerUnit; u++) {
           double distance = measure.distance(vectors[2][i], vectors[2][u]);
-          if (distance < minDistance) minDistance = distance;
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
         }
         result += minDistance;
         call.end();
       }
+    }
     // print result to prevent hotspot from eliminating deadcode
     printStats(stats, measure.getClass().getName(), "SequentialAccessSparseVector", "minDistance = " + result
-                                                                                    + " ");
+                                                                                    + ' ');
     
   }
   
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -338,13 +358,13 @@ public class VectorBenchmarks implements Summarizable {
     sb.append(StringUtils.rightPad("BenchMarks", pad));
     for (int i = 0; i < implType.size(); i++) {
       for (Entry<String,Integer> e : implType.entrySet()) {
-        if (e.getValue().intValue() == i) {
+        if (e.getValue() == i) {
           sb.append(StringUtils.rightPad(e.getKey(), pad));
           break;
         }
       }
     }
-    sb.append("\n");
+    sb.append('\n');
     List<String> keys = new ArrayList<String>(statsMap.keySet());
     Collections.sort(keys);
     for (String benchmarkName : keys) {
@@ -356,8 +376,7 @@ public class VectorBenchmarks implements Summarizable {
       
       for (int i = 0; i < maxStats; i++) {
         boolean printedName = false;
-        for (int j = 0; j < implTokenizedStats.size(); j++) {
-          String[] stats = implTokenizedStats.get(j);
+        for (String[] stats : implTokenizedStats) {
           if (i == 0 && !printedName) {
             sb.append(StringUtils.rightPad(benchmarkName, pad));
             printedName = true;
@@ -370,11 +389,11 @@ public class VectorBenchmarks implements Summarizable {
           } else {
             sb.append(StringUtils.rightPad("", pad));
           }
-          
+
         }
-        sb.append("\n");
+        sb.append('\n');
       }
-      sb.append("\n");
+      sb.append('\n');
     }
     return sb.toString();
   }
