@@ -18,8 +18,13 @@
 package org.apache.mahout.benchmark;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -29,7 +34,9 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.Summarizable;
 import org.apache.mahout.common.TimingStatistics;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
@@ -45,7 +52,7 @@ import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VectorBenchmarks {
+public class VectorBenchmarks implements Summarizable {
   private static final Logger log = LoggerFactory.getLogger(VectorBenchmarks.class);
   private Vector[][] vectors;
   private List<Vector> randomVectors = new ArrayList<Vector>();
@@ -53,6 +60,8 @@ public class VectorBenchmarks {
   private int numVectors;
   private int loop;
   private int opsPerUnit;
+  private Map<String,Integer> implType = new HashMap<String,Integer>();
+  private Map<String,List<String[]>> statsMap = new HashMap<String,List<String[]>>();
   
   public VectorBenchmarks(int cardinality, int numVectors, int loop, int opsPerUnit) {
     Random r = new Random();
@@ -72,14 +81,37 @@ public class VectorBenchmarks {
     
   }
   
-  private void printStats(TimingStatistics stats, String methodName) {
-    printStats(stats, methodName, 1);
+  private void printStats(TimingStatistics stats, String benchmarkName, String implName, String content) {
+    printStats(stats, benchmarkName, implName, content, 1);
   }
   
-  private void printStats(TimingStatistics stats, String methodName, int multiplier) {
-    log.info("Create {} {} \nSpeed: {} UnitsProcessed/sec {} MBytes/sec                                   ",
-      new Object[] {methodName, stats.toString(), loop * numVectors * 1000000000.0f / stats.getSumTime(),
-                    multiplier * loop * numVectors * cardinality * 1000.0f * 12 / stats.getSumTime()});
+  private void printStats(TimingStatistics stats, String benchmarkName, String implName) {
+    printStats(stats, benchmarkName, implName, "", 1);
+  }
+  
+  private void printStats(TimingStatistics stats,
+                          String benchmarkName,
+                          String implName,
+                          String content,
+                          int multiplier) {
+    float speed = multiplier * loop * numVectors * cardinality * 1000.0f * 12 / stats.getSumTime();
+    float opsPerSec = loop * numVectors * 1000000000.0f / stats.getSumTime();
+    log.info("{} {} \n{} {} \nSpeed: {} UnitsProcessed/sec {} MBytes/sec                                   ",
+      new Object[] {benchmarkName, implName, content, stats.toString(), opsPerSec, speed});
+    String info = stats.toString().replaceAll("\n", "\t") + "\tSpeed = " + opsPerSec + " /sec\tRate = "
+                  + speed + " MB/s";
+    if (implType.containsKey(implName) == false) {
+      implType.put(implName, implType.size());
+    }
+    int implId = implType.get(implName);
+    if (statsMap.containsKey(benchmarkName) == false) {
+      statsMap.put(benchmarkName, new ArrayList<String[]>());
+    }
+    List<String[]> implStats = statsMap.get(benchmarkName);
+    while (implStats.size() < implId + 1) {
+      implStats.add(new String[] {});
+    }
+    implStats.set(implId, info.split("\t"));
   }
   
   public void createBenchmark() {
@@ -90,7 +122,7 @@ public class VectorBenchmarks {
         vectors[0][i] = new DenseVector(randomVectors.get(i));
         call.end();
       }
-    printStats(stats, "Create DenseVector");
+    printStats(stats, "Create", "DenseVector");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
@@ -99,7 +131,7 @@ public class VectorBenchmarks {
         vectors[1][i] = new RandomAccessSparseVector(randomVectors.get(i));
         call.end();
       }
-    printStats(stats, "Create RandomAccessSparseVector");
+    printStats(stats, "Create", "RandomAccessSparseVector");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
@@ -108,7 +140,7 @@ public class VectorBenchmarks {
         vectors[2][i] = new SequentialAccessSparseVector(randomVectors.get(i));
         call.end();
       }
-    printStats(stats, "Create SequentialAccessSparseVector");
+    printStats(stats, "Create", "SequentialAccessSparseVector");
     
   }
   
@@ -120,7 +152,7 @@ public class VectorBenchmarks {
         vectors[0][i] = vectors[0][i].clone();
         call.end();
       }
-    printStats(stats, "Clone DenseVector");
+    printStats(stats, "Clone", "DenseVector");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
@@ -129,7 +161,7 @@ public class VectorBenchmarks {
         vectors[1][i] = vectors[1][i].clone();
         call.end();
       }
-    printStats(stats, "Clone RandomAccessSparseVector");
+    printStats(stats, "Clone", "RandomAccessSparseVector");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
@@ -138,7 +170,7 @@ public class VectorBenchmarks {
         vectors[2][i] = vectors[2][i].clone();
         call.end();
       }
-    printStats(stats, "Clone SequentialAccessSparseVector");
+    printStats(stats, "Clone", "SequentialAccessSparseVector");
     
   }
   
@@ -152,7 +184,7 @@ public class VectorBenchmarks {
         call.end();
       }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct DenseVector sum = " + result + " ");
+    printStats(stats, "DotProduct", "DenseVector", "sum = " + result + " ");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
@@ -162,7 +194,7 @@ public class VectorBenchmarks {
         call.end();
       }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct RandomAccessSparseVector sum = " + result + " ");
+    printStats(stats, "DotProduct", "RandomAccessSparseVector", "sum = " + result + " ");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
@@ -172,7 +204,7 @@ public class VectorBenchmarks {
         call.end();
       }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct SequentialAccessSparseVector sum = " + result + " ");
+    printStats(stats, "DotProduct", "SequentialAccessSparseVector", "sum = " + result + " ");
     
   }
   
@@ -191,8 +223,7 @@ public class VectorBenchmarks {
         call.end();
       }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DistanceMeasure " + measure.getClass().getName() + " DenseVector minDistance = "
-                      + result + " ");
+    printStats(stats, measure.getClass().getName(), "DenseVector", "minDistance = " + result + " ");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
@@ -207,8 +238,8 @@ public class VectorBenchmarks {
         call.end();
       }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DistanceMeasure " + measure.getClass().getName()
-                      + " RandomAccessSparseVector minDistance = " + result + " ");
+    printStats(stats, measure.getClass().getName(), "RandomAccessSparseVector", "minDistance = " + result
+                                                                                + " ");
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++)
       for (int i = 0; i < numVectors; i++) {
@@ -222,8 +253,8 @@ public class VectorBenchmarks {
         call.end();
       }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DistanceMeasure " + measure.getClass().getName()
-                      + " SequentialAccessSparseVector minDistance = " + result + " ");
+    printStats(stats, measure.getClass().getName(), "SequentialAccessSparseVector", "minDistance = " + result
+                                                                                    + " ");
     
   }
   
@@ -273,7 +304,7 @@ public class VectorBenchmarks {
         numVectors = Integer.parseInt((String) cmdLine.getValue(numVectorsOpt));
         
       }
-      int loop = 200;
+      int loop = 2;
       if (cmdLine.hasOption(loopOpt)) {
         loop = Integer.parseInt((String) cmdLine.getValue(loopOpt));
         
@@ -292,10 +323,60 @@ public class VectorBenchmarks {
       mark.distanceMeasureBenchark(new EuclideanDistanceMeasure());
       mark.distanceMeasureBenchark(new ManhattanDistanceMeasure());
       mark.distanceMeasureBenchark(new TanimotoDistanceMeasure());
+      
+      log.info("\n{}", mark.summarize());
     } catch (OptionException e) {
       CommandLineUtil.printHelp(group);
     }
     
+  }
+  
+  @Override
+  public String summarize() {
+    int pad = 30;
+    StringBuilder sb = new StringBuilder(1000);
+    sb.append(StringUtils.rightPad("BenchMarks", pad));
+    for (int i = 0; i < implType.size(); i++) {
+      for (Entry<String,Integer> e : implType.entrySet()) {
+        if (e.getValue().intValue() == i) {
+          sb.append(StringUtils.rightPad(e.getKey(), pad));
+          break;
+        }
+      }
+    }
+    sb.append("\n");
+    List<String> keys = new ArrayList<String>(statsMap.keySet());
+    Collections.sort(keys);
+    for (String benchmarkName : keys) {
+      List<String[]> implTokenizedStats = statsMap.get(benchmarkName);
+      int maxStats = 0;
+      for (String[] stat : implTokenizedStats) {
+        maxStats = Math.max(maxStats, stat.length);
+      }
+      
+      for (int i = 0; i < maxStats; i++) {
+        boolean printedName = false;
+        for (int j = 0; j < implTokenizedStats.size(); j++) {
+          String[] stats = implTokenizedStats.get(j);
+          if (i == 0 && !printedName) {
+            sb.append(StringUtils.rightPad(benchmarkName, pad));
+            printedName = true;
+          } else if (!printedName) {
+            printedName = true;
+            sb.append(StringUtils.rightPad("", pad));
+          }
+          if (stats.length > i) {
+            sb.append(StringUtils.rightPad(stats[i], pad));
+          } else {
+            sb.append(StringUtils.rightPad("", pad));
+          }
+          
+        }
+        sb.append("\n");
+      }
+      sb.append("\n");
+    }
+    return sb.toString();
   }
   
 }
