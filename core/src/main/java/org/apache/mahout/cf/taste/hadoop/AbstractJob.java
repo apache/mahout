@@ -118,22 +118,18 @@ public abstract class AbstractJob implements Tool {
     }
     
     Map<String,String> result = new HashMap<String,String>();
-    maybePut(result, cmdLine, inputOpt);
-    maybePut(result, cmdLine, tempDirOpt);
-    maybePut(result, cmdLine, outputOpt);
-    maybePut(result, cmdLine, helpOpt);
-    maybePut(result, cmdLine, jarFileOpt);
-    for (Option opt : extraOpts) {
-      maybePut(result, cmdLine, opt);
-    }
+    maybePut(result, cmdLine, inputOpt, tempDirOpt, outputOpt, helpOpt, jarFileOpt);
+    maybePut(result, cmdLine, extraOpts);
     
     return result;
   }
   
-  private static void maybePut(Map<String,String> args, CommandLine cmdLine, Option opt) {
-    Object value = cmdLine.getValue(opt);
-    if (value != null) {
-      args.put(opt.getPreferredName(), value.toString());
+  protected static void maybePut(Map<String,String> args, CommandLine cmdLine, Option... opt) {
+    for(Option o : opt) {
+      Object value = cmdLine.getValue(o);
+      if (value != null) {
+        args.put(o.getPreferredName(), value.toString());
+      }
     }
   }
   
