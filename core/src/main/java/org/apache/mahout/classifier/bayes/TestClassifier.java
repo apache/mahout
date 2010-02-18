@@ -256,20 +256,21 @@ public final class TestClassifier {
             boolean correct = resultAnalyzer.addInstance(correctLabel, classifiedLabel);
             if (verbose) {
               // We have one document per line
-              log.info(
-                "Line Number: {} Line(30): {} Expected Label: {} Classified Label: {} Correct: {}",
+              log.info("Line Number: {} Line(30): {} Expected Label: {} Classified Label: {} Correct: {}",
                 new Object[] {lineNum, line.length() > 30 ? line.substring(0, 30) : line, correctLabel,
                               classifiedLabel.getLabel(), correct,});
             }
-            //log.info("{} {}", correctLabel, classifiedLabel);
+            // log.info("{} {}", correctLabel, classifiedLabel);
             
           }
           lineNum++;
         }
-       /*log.info("{}\t{}\t{}/{}",
-          new Object[] {correctLabel, resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
-                        resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
-                        resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)});*/
+        /*
+         * log.info("{}\t{}\t{}/{}", new Object[] {correctLabel,
+         * resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
+         * resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
+         * resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)});
+         */
         log.info("Classified instances from {}", file.getName());
         if (verbose) {
           log.info("Performance stats {}", operationStats.toString());
@@ -277,8 +278,10 @@ public final class TestClassifier {
       }
       
     }
-   log.info("{}", totalStatistics.toString());
-   log.info(resultAnalyzer.summarize());
+    if (verbose) {
+      log.info("{}", totalStatistics.toString());
+    }
+    log.info(resultAnalyzer.summarize());
   }
   
   public static void classifyParallel(BayesParameters params) throws IOException {
