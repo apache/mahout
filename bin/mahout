@@ -61,6 +61,8 @@ if [ $# = 0 ]; then
   echo "  kmeans                run kmeans clustering"
   echo "  lda                   run LDA clustering"
   echo "  lucenevector          generate vectors from a lucene index"
+  echo "  trainclassifier       run Bayes/CBayes classifier training job"
+  echo "  testclassifier        test Bayes/CBayes model using a pre-classified data"
   echo "  meanshift             run Mean Shift clustering"
   echo "  seqdirectory          generate sequence files containing the documents beneathe a directory"
   echo "  seqdump               dump a sequence files using the writable toString() method"
@@ -200,6 +202,10 @@ elif [ "$COMMAND" = "seqwiki" ]; then
   CLASS=org.apache.mahout.text.WikipediaToSequenceFile
 elif [ "$COMMAND" = "seq2sparse" ]; then
   CLASS=org.apache.mahout.text.SparseVectorsFromSequenceFiles  
+elif [ "$COMMAND" = "trainclassifier" ]; then
+  CLASS=org.apache.mahout.classifier.bayes.TrainClassifier  
+elif [ "$COMMAND" = "testclassifier" ]; then
+  CLASS=org.apache.mahout.classifier.bayes.TestClassifier
 else
   CLASS=$COMMAND
 fi

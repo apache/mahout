@@ -108,7 +108,7 @@ public final class TestClassifier {
       abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
       "Location of model: hdfs|hbase Default Value: hdfs").withShortName("source").create();
     
-    Option methodOpt = obuilder.withLongName("method").withRequired(true).withArgument(
+    Option methodOpt = obuilder.withLongName("method").withRequired(false).withArgument(
       abuilder.withName("method").withMinimum(1).withMaximum(1).create()).withDescription(
       "Method of Classification: sequential|mapreduce. Default Value: sequential").withShortName("method")
         .create();
@@ -158,7 +158,10 @@ public final class TestClassifier {
       
       String testDirPath = (String) cmdLine.getValue(dirOpt);
       
-      String classificationMethod = (String) cmdLine.getValue(methodOpt);
+      String classificationMethod = "sequential";
+      if (cmdLine.hasOption(methodOpt)) {
+        classificationMethod = (String) cmdLine.getValue(methodOpt);
+      }
       
       params.set("verbose", Boolean.toString(verbose));
       params.set("basePath", modelBasePath);
@@ -229,9 +232,10 @@ public final class TestClassifier {
     if (subdirs != null) {
       
       for (File file : subdirs) {
-        log.info("--------------");
-        log.info("Testing: {}", file);
-        String correctLabel = file.getName().split(".txt")[0];
+        if (verbose) {
+          log.info("--------------");
+          log.info("Testing: {}", file);
+        }
         TimingStatistics operationStats = new TimingStatistics();
         
         long lineNum = 0;
@@ -241,6 +245,7 @@ public final class TestClassifier {
           Map<String,List<String>> document = new NGrams(line, Integer.parseInt(params.get("gramSize")))
               .generateNGrams();
           for (Map.Entry<String,List<String>> stringListEntry : document.entrySet()) {
+            String correctLabel = stringListEntry.getKey();
             List<String> strings = stringListEntry.getValue();
             TimingStatistics.Call call = operationStats.newCall();
             TimingStatistics.Call outercall = totalStatistics.newCall();
@@ -261,11 +266,14 @@ public final class TestClassifier {
           }
           lineNum++;
         }
-       log.info("{}\t{}\t{}/{}",
+       /*log.info("{}\t{}\t{}/{}",
           new Object[] {correctLabel, resultAnalyzer.getConfusionMatrix().getAccuracy(correctLabel),
                         resultAnalyzer.getConfusionMatrix().getCorrect(correctLabel),
-                        resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)});
-       log.info("{}", operationStats.toString());
+                        resultAnalyzer.getConfusionMatrix().getTotal(correctLabel)});*/
+        log.info("Classified instances from {}", file.getName());
+        if (verbose) {
+          log.info("Performance stats {}", operationStats.toString());
+        }
       }
       
     }
