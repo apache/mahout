@@ -223,10 +223,11 @@ public final class TFIDFConverter {
         } else if (key.get() == -1) {
           vectorCount = value.get();
         }
-        featureCount++;
+        featureCount = Math.max(key.get(), featureCount);
         
       }
     }
+    featureCount++;
     freqWriter.close();
     Long[] counts = {Long.valueOf(featureCount), Long.valueOf(vectorCount)};
     return new Pair<Long[],List<Path>>(counts, chunkPaths);
