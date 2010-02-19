@@ -27,12 +27,28 @@ import java.io.PrintWriter;
 /** <p>Tests common classes.</p> */
 public final class CommonTest extends TasteTestCase {
 
-  public void testException() {
+  public void testTasteException() {
     // Just make sure this all doesn't, ah, throw an exception
     TasteException te1 = new TasteException();
     TasteException te2 = new TasteException(te1);
     TasteException te3 = new TasteException(te2.toString(), te2);
     TasteException te4 = new TasteException(te3.toString());
+    te4.printStackTrace(new PrintStream(new ByteArrayOutputStream()));
+    te4.printStackTrace(new PrintWriter(new OutputStreamWriter(new ByteArrayOutputStream())));
+  }
+
+  public void testNSUException() {
+    // Just make sure this all doesn't, ah, throw an exception
+    TasteException te1 = new NoSuchUserException();
+    TasteException te4 = new NoSuchUserException(te1.toString());
+    te4.printStackTrace(new PrintStream(new ByteArrayOutputStream()));
+    te4.printStackTrace(new PrintWriter(new OutputStreamWriter(new ByteArrayOutputStream())));
+  }
+
+  public void testNSIException() {
+    // Just make sure this all doesn't, ah, throw an exception
+    TasteException te1 = new NoSuchItemException();
+    TasteException te4 = new NoSuchItemException(te1.toString());
     te4.printStackTrace(new PrintStream(new ByteArrayOutputStream()));
     te4.printStackTrace(new PrintWriter(new OutputStreamWriter(new ByteArrayOutputStream())));
   }

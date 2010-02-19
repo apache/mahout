@@ -22,9 +22,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomWrapper;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.RndLineRecordReader;
 import org.apache.mahout.common.RandomUtils;
-import org.uncommons.maths.random.MersenneTwisterRNG;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -87,7 +87,7 @@ public class DatasetSplitTest extends MahoutTestCase {
     int n = 20;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      MersenneTwisterRNG rng = (MersenneTwisterRNG) RandomUtils.getRandom();
+      RandomWrapper rng = (RandomWrapper) RandomUtils.getRandom();
       double threshold = rng.nextDouble();
 
       JobConf conf = new JobConf();
@@ -95,7 +95,7 @@ public class DatasetSplitTest extends MahoutTestCase {
       LongWritable key = new LongWritable();
       Text value = new Text();
       
-      DatasetSplit split = new DatasetSplit(RandomUtils.seedBytesToLong(rng.getSeed()), threshold);
+      DatasetSplit split = new DatasetSplit(rng.getSeed(), threshold);
 
       // read the training set
       split.storeJobParameters(conf);
@@ -121,9 +121,9 @@ public class DatasetSplitTest extends MahoutTestCase {
     int n = 20;
 
     for (int nloop = 0; nloop < n; nloop++) {
-      MersenneTwisterRNG rng = (MersenneTwisterRNG) RandomUtils.getRandom();
+      RandomWrapper rng = (RandomWrapper) RandomUtils.getRandom();
 
-      long seed = RandomUtils.seedBytesToLong(rng.getSeed());
+      long seed = rng.getSeed();
       double threshold = rng.nextDouble();
       boolean training = rng.nextBoolean();
 

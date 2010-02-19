@@ -17,10 +17,10 @@
 
 package org.apache.mahout.common;
 
-import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
-
-import org.uncommons.maths.random.MersenneTwisterRNG;
+import java.util.WeakHashMap;
 
 /**
  * <p>
@@ -33,27 +33,34 @@ import org.uncommons.maths.random.MersenneTwisterRNG;
  * </p>
  */
 public final class RandomUtils {
-  
-  private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charset.forName("US-ASCII"));
-  
-  private static boolean testSeed;
-  
+
   /** The largest prime less than 2<sup>31</sup>-1 that is the smaller of a twin prime pair. */
   public static final int MAX_INT_SMALLER_TWIN_PRIME = 2147482949;
+
+  private static final Map<RandomWrapper,Boolean> instances =
+      Collections.synchronizedMap(new WeakHashMap<RandomWrapper,Boolean>());
   
   private RandomUtils() { }
   
   public static void useTestSeed() {
-    testSeed = true;
+    RandomWrapper.useTestSeed();
+    synchronized (instances) {
+      for (RandomWrapper rng : instances.keySet()) {
+        rng.reset();
+      }
+    }
   }
   
   public static Random getRandom() {
-    return testSeed ? new MersenneTwisterRNG(STANDARD_SEED)
-        : new MersenneTwisterRNG();
+    RandomWrapper random = new RandomWrapper();
+    instances.put(random, Boolean.TRUE);
+    return random;
   }
   
   public static Random getRandom(long seed) {
-    return new MersenneTwisterRNG(longSeedtoBytes(seed));
+    RandomWrapper random = new RandomWrapper(seed);
+    instances.put(random, Boolean.TRUE);
+    return random;
   }
   
   public static byte[] longSeedtoBytes(long seed) {
@@ -78,11 +85,11 @@ public final class RandomUtils {
   
   /** @return what {@link Double#hashCode()} would return for the same value */
   public static int hashDouble(double value) {
-    // Just copied from Double.hashCode
     long bits = Double.doubleToLongBits(value);
     return (int) (bits ^ bits >>> 32);
   }
-  
+
+  /** @return what {@link Float#hashCode()} would return for the same value */
   public static int hashFloat(float value) {
     return Float.floatToIntBits(value);
   }

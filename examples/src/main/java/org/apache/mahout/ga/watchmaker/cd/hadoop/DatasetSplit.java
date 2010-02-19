@@ -30,8 +30,8 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.RandomWrapper;
 import org.apache.mahout.common.StringUtils;
-import org.uncommons.maths.random.RepeatableRNG;
 
 /**
  * Separate the input data into a training and testing set.
@@ -63,7 +63,7 @@ public class DatasetSplit {
   }
   
   public DatasetSplit(double threshold) {
-    this(RandomUtils.seedBytesToLong(((RepeatableRNG) RandomUtils.getRandom()).getSeed()), threshold);
+    this(((RandomWrapper) RandomUtils.getRandom()).getSeed(), threshold);
   }
   
   public DatasetSplit(JobConf conf) {
