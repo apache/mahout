@@ -34,7 +34,7 @@ import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
  */
 public class TermCountReducer extends MapReduceBase implements Reducer<Text,LongWritable,Text,LongWritable> {
   
-  private static int minSupport;
+  private int minSupport;
   
   @Override
   public void reduce(Text key,
