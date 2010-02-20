@@ -14,12 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.mahout.math.decomposer.hebbian;
+package org.apache.mahout.math.decomposer;
 
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorIterable;
+import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 
-public interface SingularVectorVerifier {
-  EigenStatus verify(Matrix eigenMatrix, Vector vector);
+public class SimpleEigenVerifier implements SingularVectorVerifier {
+
+  public EigenStatus verify(VectorIterable corpus, Vector vector) {
+    Vector resultantVector = corpus.timesSquared(vector);
+    double newNorm = resultantVector.norm(2);
+    double oldNorm = vector.norm(2);
+    double eigenValue = (newNorm > 0 && oldNorm > 0) ? newNorm / oldNorm : 1;
+    double cosAngle = (newNorm > 0 && oldNorm > 0) ? resultantVector.dot(vector) / (newNorm * oldNorm) : 0;
+    return new EigenStatus(eigenValue, cosAngle, false);
+  }
+
 }

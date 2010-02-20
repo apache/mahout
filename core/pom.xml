@@ -258,6 +258,16 @@
       <artifactId>easymockclassextension</artifactId>
     </dependency>
 
+
+
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-math</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <repositories>

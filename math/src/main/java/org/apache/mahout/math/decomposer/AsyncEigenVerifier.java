@@ -15,35 +15,35 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.decomposer.hebbian;
+package org.apache.mahout.math.decomposer;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorIterable;
 
 
-public class MultiThreadedEigenVerifier extends SimpleEigenVerifier {
+public class AsyncEigenVerifier extends SimpleEigenVerifier {
 
   private final Executor threadPool;
   private EigenStatus status = null;
   private boolean finished = false;
   private boolean started = false;
 
-  public MultiThreadedEigenVerifier() {
+  public AsyncEigenVerifier() {
     threadPool = Executors.newFixedThreadPool(1);
     status = new EigenStatus(-1, 0);
   }
 
   @Override
-  public EigenStatus verify(Matrix eigenMatrix, Vector vector) {
+  public EigenStatus verify(VectorIterable corpus, Vector vector) {
     synchronized (status) {
       if (!finished && !started) // not yet started or finished, so start!
       {
         status = new EigenStatus(-1, 0);
         Vector vectorCopy = vector.clone();
-        threadPool.execute(new VerifierRunnable(eigenMatrix, vectorCopy));
+        threadPool.execute(new VerifierRunnable(corpus, vectorCopy));
         started = true;
       }
       if (finished) finished = false;
@@ -51,23 +51,23 @@ public class MultiThreadedEigenVerifier extends SimpleEigenVerifier {
     }
   }
 
-  protected EigenStatus innerVerify(Matrix eigenMatrix, Vector vector) {
-    return super.verify(eigenMatrix, vector);
+  protected EigenStatus innerVerify(VectorIterable corpus, Vector vector) {
+    return super.verify(corpus, vector);
   }
 
   private class VerifierRunnable implements Runnable {
-    private final Matrix eigenMatrix;
+    private final VectorIterable corpus;
     private final Vector vector;
 
-    protected VerifierRunnable(Matrix eigenMatrix, Vector vector) {
-      this.eigenMatrix = eigenMatrix;
+    protected VerifierRunnable(VectorIterable corpus, Vector vector) {
+      this.corpus = corpus;
       this.vector = vector;
     }
 
     public void run() {
-      EigenStatus status = innerVerify(eigenMatrix, vector);
-      synchronized (MultiThreadedEigenVerifier.this.status) {
-        MultiThreadedEigenVerifier.this.status = status;
+      EigenStatus status = innerVerify(corpus, vector);
+      synchronized (AsyncEigenVerifier.this.status) {
+        AsyncEigenVerifier.this.status = status;
         finished = true;
         started = false;
       }

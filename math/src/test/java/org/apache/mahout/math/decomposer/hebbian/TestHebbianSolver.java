@@ -20,6 +20,8 @@ package org.apache.mahout.math.decomposer.hebbian;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 
+import org.apache.mahout.math.decomposer.AsyncEigenVerifier;
+import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 import org.apache.mahout.math.decomposer.SolverTest;
 
 /**
@@ -51,7 +53,7 @@ public class TestHebbianSolver extends SolverTest {
                                 int desiredRank,
                                 TrainingState state) throws Exception {
     HebbianUpdater updater = new HebbianUpdater();
-    SingularVectorVerifier verifier = new MultiThreadedEigenVerifier();
+    SingularVectorVerifier verifier = new AsyncEigenVerifier();
     HebbianSolver solver = new HebbianSolver(updater,
                                              verifier,
                                              convergence,

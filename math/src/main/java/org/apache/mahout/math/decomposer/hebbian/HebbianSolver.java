@@ -27,6 +27,9 @@ import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.decomposer.AsyncEigenVerifier;
+import org.apache.mahout.math.decomposer.EigenStatus;
+import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 import org.apache.mahout.math.function.TimesFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.PlusMult;
@@ -58,7 +61,7 @@ public class HebbianSolver {
    * @param updater           {@link EigenUpdater} used to do the actual work of iteratively updating the current "best guess"
    *                          singular vector one data-point presentation at a time.
    * @param verifier          {@link SingularVectorVerifier } an object which perpetually tries to check how close to
-   *                          convergence the current singular vector is (typically is a {@link MultiThreadedEigenVerifier } which does this
+   *                          convergence the current singular vector is (typically is a {@link org.apache.mahout.math.decomposer.AsyncEigenVerifier } which does this
    *                          in the background in another thread, while the main thread continues to converge)
    * @param convergenceTarget a small "epsilon" value which tells the solver how small you want the cosine of the
    *                          angle between a proposed eigenvector and that same vector after being multiplied by the (square of the) input
@@ -83,8 +86,8 @@ public class HebbianSolver {
    *
    * @param updater           {@link EigenUpdater} used to do the actual work of iteratively updating the current "best guess"
    *                          singular vector one data-point presentation at a time.
-   * @param verifier          {@link SingularVectorVerifier } an object which perpetually tries to check how close to
-   *                          convergence the current singular vector is (typically is a {@link MultiThreadedEigenVerifier } which does this
+   * @param verifier          {@link org.apache.mahout.math.decomposer.SingularVectorVerifier } an object which perpetually tries to check how close to
+   *                          convergence the current singular vector is (typically is a {@link org.apache.mahout.math.decomposer.AsyncEigenVerifier } which does this
    *                          in the background in another thread, while the main thread continues to converge)
    * @param convergenceTarget a small "epsilon" value which tells the solver how small you want the cosine of the
    *                          angle between a proposed eigenvector and that same vector after being multiplied by the (square of the) input
@@ -102,7 +105,7 @@ public class HebbianSolver {
   /**
    * <b>This is the recommended constructor to use if you're not sure</b>
    * Creates a new HebbianSolver with the default {@link HebbianUpdater } to do the updating work, and the default
-   * {@link MultiThreadedEigenVerifier } to check for convergence in a (single) background thread.
+   * {@link org.apache.mahout.math.decomposer.AsyncEigenVerifier } to check for convergence in a (single) background thread.
    *
    * @param convergenceTarget a small "epsilon" value which tells the solver how small you want the cosine of the
    *                          angle between a proposed eigenvector and that same vector after being multiplied by the (square of the) input
@@ -112,14 +115,14 @@ public class HebbianSolver {
    */
   public HebbianSolver(double convergenceTarget, int maxPassesPerEigen) {
     this(new HebbianUpdater(),
-        new MultiThreadedEigenVerifier(),
+        new AsyncEigenVerifier(),
         convergenceTarget,
         maxPassesPerEigen);
   }
 
   /**
    * Creates a new HebbianSolver with the default {@link HebbianUpdater } to do the updating work, and the default
-   * {@link MultiThreadedEigenVerifier } to check for convergence in a (single) background thread, with
+   * {@link org.apache.mahout.math.decomposer.AsyncEigenVerifier } to check for convergence in a (single) background thread, with
    * maxPassesPerEigen set to Integer.MAX_VALUE.  <b>Not recommended</b> unless only looking for the first few (5, maybe 10?) singular
    * vectors, as small errors which compound early on quickly put a minimum error on subsequent vectors.
    *
@@ -133,7 +136,7 @@ public class HebbianSolver {
 
   /**
    * Creates a new HebbianSolver with the default {@link HebbianUpdater } to do the updating work, and the default
-   * {@link MultiThreadedEigenVerifier } to check for convergence in a (single) background thread, with
+   * {@link org.apache.mahout.math.decomposer.AsyncEigenVerifier } to check for convergence in a (single) background thread, with
    * convergenceTarget set to 0, which means that the solver will not really care about convergence as a loop-exiting
    * criterion (but will be checking for convergence anyways, so it will be logged and singular values will be
    * saved).
@@ -276,10 +279,7 @@ public class HebbianSolver {
      * Step 3: verify how eigen-like the prospective eigen is.  This is potentially asynchronous.
      */
     EigenStatus status = verify(corpus, currentPseudoEigen);
-    /**
-     *  TODO: Having the cosAngle() be zero is not a good signal for an unfinished verification.
-     */
-    if (status.getCosAngle() == 0) {
+    if (status.inProgress()) {
       log.info("Verifier not finished, making another pass...");
     } else {
       log.info("Has 1 - cosAngle: {}, convergence target is: {}", (1 - status.getCosAngle()), convergenceTarget);
@@ -310,7 +310,7 @@ public class HebbianSolver {
     int numThreads = Integer.parseInt(props.getProperty("solver.verifier.numThreads"));
 
     HebbianUpdater updater = new HebbianUpdater();
-    SingularVectorVerifier verifier = new MultiThreadedEigenVerifier();
+    SingularVectorVerifier verifier = new AsyncEigenVerifier();
     HebbianSolver solver = new HebbianSolver(updater,
         verifier,
         convergence,

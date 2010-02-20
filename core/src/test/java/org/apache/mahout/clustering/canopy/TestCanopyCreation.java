@@ -117,7 +117,7 @@ public class TestCanopyCreation extends MahoutTestCase {
   }
 
 
-  private static void rmr(String path) {
+  public static void rmr(String path) {
     File f = new File(path);
     if (f.exists()) {
       if (f.isDirectory()) {

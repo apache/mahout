@@ -15,15 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.decomposer.hebbian;
+package org.apache.mahout.math.decomposer;
 
 public class EigenStatus {
   private final double eigenValue;
   private final double cosAngle;
+  private Boolean inProgress;
 
   public EigenStatus(double eigenValue, double cosAngle) {
+    this(eigenValue, cosAngle, true);
+  }
+
+  public EigenStatus(double eigenValue, double cosAngle, boolean inProgress) {
     this.eigenValue = eigenValue;
     this.cosAngle = cosAngle;
+    this.inProgress = inProgress;
   }
 
   public double getCosAngle() {
@@ -32,5 +38,17 @@ public class EigenStatus {
 
   public double getEigenValue() {
     return eigenValue;
+  }
+
+  public boolean inProgress() {
+    synchronized (inProgress) {
+      return inProgress;
+    }
+  }
+
+  void setInProgress(boolean status) {
+    synchronized (inProgress) {
+      inProgress = status;
+    }
   }
 }

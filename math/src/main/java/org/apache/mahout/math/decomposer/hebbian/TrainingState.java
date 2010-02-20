@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.decomposer.EigenStatus;
 
 
 public class TrainingState {

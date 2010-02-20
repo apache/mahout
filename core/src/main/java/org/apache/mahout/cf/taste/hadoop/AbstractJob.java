@@ -90,7 +90,7 @@ public abstract class AbstractJob implements Tool {
     Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", "temp");
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar");
+    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar", false, null);
     
     GroupBuilder gBuilder = new GroupBuilder().withName("Options").withOption(inputOpt)
         .withOption(tempDirOpt).withOption(outputOpt).withOption(helpOpt).withOption(jarFileOpt);
@@ -150,9 +150,11 @@ public abstract class AbstractJob implements Tool {
     
     Path inputPathPath = new Path(inputPath).makeQualified(fs);
     Path outputPathPath = new Path(outputPath).makeQualified(fs);
-    
-    jobConf.set("mapred.jar", jarFile);
-    jobConf.setJar(jarFile);
+
+    if(jarFile != null) {
+      jobConf.set("mapred.jar", jarFile);
+      jobConf.setJar(jarFile);
+    }
     
     jobConf.setClass("mapred.input.format.class", inputFormat, InputFormat.class);
     jobConf.set("mapred.input.dir", StringUtils.escapeString(inputPathPath.toString()));

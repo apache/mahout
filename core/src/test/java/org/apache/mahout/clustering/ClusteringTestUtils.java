@@ -32,7 +32,7 @@ public class ClusteringTestUtils {
   private ClusteringTestUtils() {
   }
 
-  public static void writePointsToFile(List<VectorWritable> points, String fileName, FileSystem fs, Configuration conf)
+  public static void writePointsToFile(Iterable<VectorWritable> points, String fileName, FileSystem fs, Configuration conf)
       throws IOException {
     Path path = new Path(fileName);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);

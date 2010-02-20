@@ -102,9 +102,13 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    vectorWritable.set(vector);
-    output.collect(key, vectorWritable);
-    
+    // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
+    if(vector.getNumNondefaultElements() > 0) {
+      vectorWritable.set(vector);
+      output.collect(key, vectorWritable);
+    } else {
+      reporter.incrCounter("TFParticalVectorReducer", "emptyVectorCount", 1);
+    }
   }
   
   @Override
