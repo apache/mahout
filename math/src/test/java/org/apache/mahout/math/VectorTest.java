@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import junit.framework.TestCase;
+import org.apache.mahout.math.function.Functions;
 
 import static org.apache.mahout.math.function.Functions.*;
 
@@ -189,6 +190,103 @@ public class VectorTest extends TestCase {
     double expected = v.minus(w).getLengthSquared();
     assertTrue("a.getDistanceSquared(b) != a.minus(b).getLengthSquared",
         Math.abs(expected - v.getDistanceSquared(w)) < 1e-6);
+  }
+
+  public void testGetLengthSquared() throws Exception {
+    Vector v = new DenseVector(5);
+    setUpV(v);
+    doTestGetLengthSquared(v);
+    v = new RandomAccessSparseVector(5);
+    setUpV(v);
+    doTestGetLengthSquared(v);
+    v = new SequentialAccessSparseVector(5);
+    setUpV(v);
+    doTestGetLengthSquared(v);
+  }
+
+  public static double lengthSquaredSlowly(Vector v) {
+    double d = 0;
+    for(int i=0; i<v.size(); i++) {
+      d += (v.get(i) * v.get(i));
+    }
+    return d;
+  }
+
+  public void doTestGetLengthSquared(Vector v) throws Exception {
+    double expected = lengthSquaredSlowly(v);
+    assertTrue("v.getLengthSquared() != sum_of_squared_elements(v)",
+        expected == v.getLengthSquared());
+
+    v.set(v.size()/2, v.get(v.size()/2) + 1.0);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via set() fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.setQuick(v.size()/5, v.get(v.size()/5) + 1.0);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via setQuick() fails to change lengthSquared", expected, v.getLengthSquared());
+
+    Iterator<Vector.Element> it = v.iterateAll();
+    while(it.hasNext()) {
+      Vector.Element e = it.next();
+      if(e.index() == v.size() - 2) {
+        e.set(e.get() - 5.0);
+      }
+    }
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via dense iterator.set fails to change lengthSquared", expected, v.getLengthSquared());
+
+    it = v.iterateNonZero();
+    int i=0;
+    while(it.hasNext()) {
+      i++;
+      Vector.Element e = it.next();
+      if(i == v.getNumNondefaultElements() - 1) {
+        e.set(e.get() - 5.0);
+      }
+    }
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via sparse iterator.set fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.assign(3.0);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via assign(double) fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.assign(Functions.square);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via assign(square) fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.assign(new double[v.size()]);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via assign(double[]) fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.getElement(v.size()/2).set(2.5);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via v.getElement().set() fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.normalize();
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via normalize() fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.set(0, 1.5);
+    v.normalize(1.0);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via normalize(double) fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.times(2.0);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via times(double) fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.times(v);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via times(vector) fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.assign(Functions.pow, 3.0);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via assign(pow, 3.0) fails to change lengthSquared", expected, v.getLengthSquared());
+
+    v.assign(v, Functions.plus);
+    expected = lengthSquaredSlowly(v);
+    assertEquals("mutation via assign(v,plus) fails to change lengthSquared", expected, v.getLengthSquared());
   }
 
   public void testNormalize() throws Exception {

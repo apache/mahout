@@ -107,6 +107,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   public void setQuick(int index, double value) {
+    lengthSquared = -1;
     values.set(index, value);
   }
 
@@ -217,8 +218,8 @@ public class SequentialAccessSparseVector extends AbstractVector {
   private abstract static class AbstractElement implements Element {
     int offset;
     final OrderedIntDoubleMapping mapping;
-    final int[] indices;
-    final double[] values;
+    int[] indices;
+    double[] values;
 
     AbstractElement(int ind, SequentialAccessSparseVector v) {
       offset = ind;
@@ -250,15 +251,19 @@ public class SequentialAccessSparseVector extends AbstractVector {
     }
 
     public void set(double value) {
-      v.lengthSquared = -1;
-      if(value != 0.0) mapping.set(indices[offset], value);
+      v.set(offset, value);
+      // indices and values may have changed, must re-grab them.
+      indices = mapping.getIndices();
+      values = mapping.getValues();
     }
   }
 
   private static final class SparseElement extends AbstractElement {
 
+    SequentialAccessSparseVector v;
     SparseElement(int ind, SequentialAccessSparseVector v) {
       super(ind, v);
+      this.v = v;
     }
 
     public double get() {
@@ -270,6 +275,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     }
 
     public void set(double value) {
+      v.lengthSquared = -1;
       values[offset] = value;
     }
   }
