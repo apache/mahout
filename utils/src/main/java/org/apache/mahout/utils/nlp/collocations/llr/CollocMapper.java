@@ -17,10 +17,6 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.UNIGRAM;
-
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -110,9 +106,9 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
   public void map(Text key, StringTuple value,
                   final OutputCollector<Gram,Gram> collector, Reporter reporter) throws IOException {
     
-    ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()),
-        maxShingleSize);
+    ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize);
     int count = 0; // ngram count
+    
     OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(value.getEntries().size()
                                                                            * (maxShingleSize - 1));
     OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
@@ -122,58 +118,59 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
       String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class)).type();
       if ("shingle".equals(type)) {
         count++;
-        if (ngrams.containsKey(term) == false) {
-          ngrams.put(term, 1);
-        } else {
-          ngrams.put(term, 1 + ngrams.get(term));
-        }
+        ngrams.adjustOrPutValue(term, 1, 1);
       } else if (emitUnigrams && term.length() > 0) { // unigram
-        if (unigrams.containsKey(term) == false) {
-          unigrams.put(term, 1);
-        } else {
-          unigrams.put(term, 1 + unigrams.get(term));
-        }
+        unigrams.adjustOrPutValue(term, 1, 1);
       }
     } while (sf.incrementToken());
     
-    ngrams.forEachPair(new ObjectIntProcedure<String>() {
-      
-      @Override
-      public boolean apply(String term, int frequency) {
-        Gram ngram = new Gram(term, frequency);
-        // obtain components, the leading (n-1)gram and the trailing unigram.
-        int i = term.lastIndexOf(' ');
-        if (i != -1) { // bigram, trigram etc
-          try {
-            collector.collect(new Gram(term.substring(0, i), frequency, HEAD), ngram);
-            collector.collect(new Gram(term.substring(i + 1), frequency, TAIL), ngram);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
+    try {
+      ngrams.forEachPair(new ObjectIntProcedure<String>() {
+        @Override
+        public boolean apply(String term, int frequency) {
+          // obtain components, the leading (n-1)gram and the trailing unigram.
+          int i = term.lastIndexOf(' '); // TODO: fix for non-whitespace delimited languages.
+          if (i != -1) { // bigram, trigram etc
+            Gram ngram = new Gram(term, frequency, Gram.Type.NGRAM);
+            try {
+              collector.collect(new Gram(term.substring(0, i), frequency, Gram.Type.HEAD), ngram);
+              collector.collect(new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL), ngram);
+            } catch (IOException e) {
+              throw new IllegalStateException(e);
+            }
           }
+          return true;
         }
-        return true;
-      }
-    });
-    
-    unigrams.forEachPair(new ObjectIntProcedure<String>() {
-      @Override
-      public boolean apply(String term, int frequency) {
-        try {
-          Gram ngram = new Gram(term, frequency);
-          Gram unigram = new Gram(term, frequency, UNIGRAM);
-          collector.collect(unigram, ngram);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
+      });
+  
+      unigrams.forEachPair(new ObjectIntProcedure<String>() {
+        @Override
+        public boolean apply(String term, int frequency) {
+          try {
+            Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
+            collector.collect(unigram, unigram);
+          } catch (IOException e) {
+            throw new IllegalStateException(e);
+          }
+          return true;
         }
-        return true;
+      });
+    }
+    catch (IllegalStateException ise) {
+      // catch an re-throw original exceptions from the procedures.
+      if (ise.getCause() instanceof IOException) {
+        throw (IOException) ise.getCause();
       }
-    });
+      else {
+        // wasn't what was expected, so re-throw
+        throw ise;
+      }
+    }
     
     reporter.incrCounter(Count.NGRAM_TOTAL, count);
     
     sf.end();
     sf.close();
-    
   }
   
   /** Used to emit tokens from an input string array in the style of TokenStream */

@@ -17,52 +17,106 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.junit.Test;
 
 public class GramTest {
   
   @Test
+  public void testConstructorsGetters() {
+    Gram one = new Gram("foo", 2, Gram.Type.HEAD);
+    
+    Assert.assertEquals("foo", one.getString());
+    Assert.assertEquals(2, one.getFrequency());
+    Assert.assertEquals(Gram.Type.HEAD, one.getType());
+    
+    Gram oneClone = new Gram(one);
+    
+    Assert.assertEquals("foo", oneClone.getString());
+    Assert.assertEquals(2, oneClone.getFrequency());
+    Assert.assertEquals(Gram.Type.HEAD, oneClone.getType());
+    
+    Gram two = new Gram("foo", 3, Gram.Type.TAIL);
+    Assert.assertEquals(Gram.Type.TAIL, two.getType());
+    
+    Gram three = new Gram("foo", 4, Gram.Type.UNIGRAM);
+    Assert.assertEquals(Gram.Type.UNIGRAM, three.getType());
+    
+    Gram four = new Gram("foo", 5, Gram.Type.NGRAM);
+    Assert.assertEquals(Gram.Type.NGRAM, four.getType());
+   
+    try {
+      new Gram(null, 4, Gram.Type.UNIGRAM);
+      Assert.fail("expected exception");
+    }
+    catch (NullPointerException ex) {
+      /* ok */
+    }
+   
+    
+    try {
+      new Gram("foo", 4, null);
+      Assert.fail("expected exception");
+    }
+    catch (NullPointerException ex) {
+      /* ok */
+    }
+  }
+  
+  @Test
   public void testEquality() {
-    Gram one = new Gram("foo", 2, HEAD);
-    Gram two = new Gram("foo", 3, HEAD);
+    Gram one = new Gram("foo", 2, Gram.Type.HEAD);  
+    Gram two = new Gram("foo", 3, Gram.Type.HEAD);
     
     Assert.assertTrue(one.equals(two));
     Assert.assertTrue(two.equals(one));
     
-    Gram three = new Gram("foo", 4, TAIL);
-    Gram four = new Gram("foo");
+    Gram three = new Gram("foo", 4, Gram.Type.TAIL);
+    Gram four = new Gram("foo", Gram.Type.UNIGRAM);
     
     Assert.assertTrue(!three.equals(two));
-    Assert.assertTrue(four.equals(one));
-    Assert.assertTrue(one.equals(four));
+    Assert.assertTrue(!four.equals(one));
+    Assert.assertTrue(!one.equals(four));
     
-    Gram five = new Gram("foobar", 4, TAIL);
+    Gram five = new Gram("foo", 5, Gram.Type.UNIGRAM);
     
-    Assert.assertTrue(!five.equals(four));
-    Assert.assertTrue(!five.equals(three));
-    Assert.assertTrue(!five.equals(two));
-    Assert.assertTrue(!five.equals(one));
+    Assert.assertTrue(four.equals(five));
+    
+    Gram six = new Gram("foo", 6, Gram.Type.NGRAM);
+    Gram seven = new Gram("foo", 7, Gram.Type.NGRAM);
+    
+    Assert.assertTrue(!five.equals(six));
+    Assert.assertTrue(six.equals(seven));
+    
+    Gram eight = new Gram("foobar", 4, Gram.Type.TAIL);
+    
+    Assert.assertTrue(!eight.equals(four));
+    Assert.assertTrue(!eight.equals(three));
+    Assert.assertTrue(!eight.equals(two));
+    Assert.assertTrue(!eight.equals(one));
   }
   
   @Test
   public void testHashing() {
     Gram[] input =
     {
-     new Gram("foo", 2, HEAD),
-     new Gram("foo", 3, HEAD),
-     new Gram("foo", 4, TAIL),
-     new Gram("foo", 5, TAIL),
-     new Gram("bar", 6, HEAD),
-     new Gram("bar", 7, TAIL),
-     new Gram("bar", 8),
-     new Gram("bar")
+     new Gram("foo", 2, Gram.Type.HEAD),
+     new Gram("foo", 3, Gram.Type.HEAD),
+     new Gram("foo", 4, Gram.Type.TAIL),
+     new Gram("foo", 5, Gram.Type.TAIL),
+     new Gram("bar", 6, Gram.Type.HEAD),
+     new Gram("bar", 7, Gram.Type.TAIL),
+     new Gram("bar", 8, Gram.Type.NGRAM),
+     new Gram("bar", Gram.Type.UNIGRAM)
     };
     
     HashMap<Gram,Gram> map = new HashMap<Gram,Gram>();
@@ -81,7 +135,7 @@ public class GramTest {
                   3,
                   9,
                   5,
-                  15,
+                  6,
                   7,
                   8,
                   1
@@ -95,8 +149,8 @@ public class GramTest {
                       false,
                       true,
                       true,
-                      false,
-                      false
+                      true,
+                      true
     };
     
     for (int i = 0; i < input.length; i++) {
@@ -105,4 +159,35 @@ public class GramTest {
       Assert.assertEquals(memb[i], input[i] == map.get(input[i]));
     }
   }
+  
+ @Test
+ public void testWritable() throws IOException {
+   Gram one = new Gram("foo", 2, Gram.Type.HEAD);
+   Gram two = new Gram("foobar", 3, Gram.Type.UNIGRAM);
+   
+   TestCase.assertEquals("foo", one.getString());
+   TestCase.assertEquals(2, one.getFrequency());
+   TestCase.assertEquals(Gram.Type.HEAD, one.getType());
+   
+   TestCase.assertEquals("foobar", two.getString());
+   TestCase.assertEquals(3, two.getFrequency());
+   TestCase.assertEquals(Gram.Type.UNIGRAM, two.getType());
+   
+   ByteArrayOutputStream bout = new ByteArrayOutputStream();
+   DataOutputStream out = new DataOutputStream(bout);
+   
+   two.write(out);
+   
+   byte[] b = bout.toByteArray();
+   
+   ByteArrayInputStream bin = new ByteArrayInputStream(b);
+   DataInputStream din = new DataInputStream(bin);
+   
+   one.readFields(din);
+   
+   TestCase.assertEquals("foobar", one.getString());
+   TestCase.assertEquals(3, one.getFrequency());
+   TestCase.assertEquals(Gram.Type.UNIGRAM, one.getType());
+   
+ }
 }

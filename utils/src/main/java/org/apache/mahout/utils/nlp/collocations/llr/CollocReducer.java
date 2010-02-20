@@ -26,7 +26,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,9 +106,6 @@ public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gr
       if (ngram.getFrequency() < minSupport) {
         reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
         continue;
-      }
-      if (subgramKey.getType() == Type.UNIGRAM) {
-        ngram.setType(subgramKey.getType());
       }
       output.collect(ngram, subgramKey);
     }

@@ -28,7 +28,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.stats.LogLikelihood;
-import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,DoubleWritable> {
   
+  /** Counter to track why a particlar entry was skipped */
   public enum Skipped {
     EXTRA_HEAD,
     EXTRA_TAIL,
@@ -45,7 +45,6 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
     MISSING_TAIL,
     LESS_THAN_MIN_LLR,
     LLR_CALCULATION_ERROR,
-    UNIGRAM_COUNT
   }
 
   private static final Logger log = LoggerFactory.getLogger(LLRReducer.class);
@@ -115,7 +114,7 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
     int[] gramFreq = new int[2];
     gramFreq[0] = gramFreq[1] = -1;
     
-    if (ngram.getType() == Type.UNIGRAM && emitUnigrams) {
+    if (ngram.getType() == Gram.Type.UNIGRAM && emitUnigrams) {
       DoubleWritable dd = new DoubleWritable(ngram.getFrequency());
       Text t = new Text(ngram.getString());
       output.collect(t, dd);
@@ -126,11 +125,11 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
     while (values.hasNext()) {
       Gram value = values.next();
       
-      int pos = value.getType() == Type.HEAD ? 0 : 1;
+      int pos = value.getType() == Gram.Type.HEAD ? 0 : 1;
       
       if (gramFreq[pos] != -1) {
         log.warn("Extra {} for {}, skipping", value.getType(), ngram);
-        if (value.getType() == Type.HEAD) {
+        if (value.getType() == Gram.Type.HEAD) {
           reporter.incrCounter(Skipped.EXTRA_HEAD, 1);
         } else {
           reporter.incrCounter(Skipped.EXTRA_TAIL, 1);

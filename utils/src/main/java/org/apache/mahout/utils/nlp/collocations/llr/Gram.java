@@ -17,14 +17,16 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
 
+import org.apache.hadoop.io.BinaryComparable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableUtils;
 
 /**
  * Writable for holding data generated from the collocation discovery jobs. Depending on the job configuration
@@ -32,63 +34,56 @@ import org.apache.hadoop.io.WritableComparable;
  * holds a part of an existing ngram (subgram). Tracks the frequency of the gram and its position in the ngram
  * in which is was found.
  */
-public class Gram implements WritableComparable<Gram> {
+public class Gram extends BinaryComparable implements WritableComparable<BinaryComparable> {
   
   public enum Type {
-    HEAD,
-    TAIL,
-    UNIGRAM
+    HEAD('h'),
+    TAIL('t'),
+    UNIGRAM('u'),
+    NGRAM('n');
+    
+    char x;
+    Type(char c) {
+      this.x = c;
+    }
   }
 
-  private String gram;
+  private byte[] bytes;
+  private int length;
   private int frequency;
-  private Type type;
   
   public Gram() {
 
   }
   
-  public Gram(Gram other) {
-    this.gram = other.gram;
-    this.frequency = other.frequency;
-    this.type = other.type;
-  }
-  
   /**
-   * Create an gram that is at the head of its text unit with a frequency of 1
+   * Copy constructor
    * 
-   * @param gram
-   *          the gram string
+   * @param other
    */
-  public Gram(String ngram) {
-    this(ngram, 1, HEAD);
+  public Gram(Gram other) {
+    frequency = other.frequency;
+    length = other.length;
+    bytes = new byte[length];
+    System.arraycopy(other.bytes, 0, bytes, 0, length);
   }
-  
+
   /**
    * Create an gram with a frequency of 1
    * 
    * @param gram
    *          the gram string
    * @param type
-   *          whether the gram is at the head of its text unit or tail or unigram
+   *          whether the gram is at the head or tail of its text unit or it is a unigram
    */
   public Gram(String ngram, Type type) {
     this(ngram, 1, type);
   }
   
+
   /**
-   * Create an gram with a frequency of 1
    * 
-   * @param gram
-   *          the gram string
-   * @param part
-   *          whether the gram is at the head of its text unit.
-   */
-  public Gram(String ngram, int frequency) {
-    this(ngram, frequency, HEAD);
-  }
-  
-  /**
+   * Create a gram with the specified frequency.
    * 
    * @param gram
    *          the gram string
@@ -98,41 +93,55 @@ public class Gram implements WritableComparable<Gram> {
    *          whether the gram is at the head of its text unit or tail or unigram
    */
   public Gram(String ngram, int frequency, Type type) {
-    this.gram = ngram;
+    
+    if (ngram == null) {
+      throw new NullPointerException();
+    }
+    
+    try {  
+      // extra character is used for storing type which is part 
+      // of the sort key.
+      ByteBuffer bb = Text.encode(ngram + "\0", true);
+      bytes = bb.array();
+      length = bb.limit();
+    }
+    catch (CharacterCodingException e) {
+      throw new RuntimeException("Should not have happened ",e); 
+    }
+    
+    encodeType(type, bytes, length-1);
     this.frequency = frequency;
-    this.type = type;
   }
   
+  
+  @Override
+  public byte[] getBytes() {
+    return bytes;
+  }
+
+  @Override
+  public int getLength() {
+    return length;
+  }
+
   /**
    * @return the gram is at the head of its text unit or tail or unigram.
    */
   public Type getType() {
-    return this.type;
+    return decodeType(bytes, length-1);
   }
-  
-  /**
-   * @param part
-   *          whether the gram is at the head of its text unit or tail or unigram
-   */
-  public void setType(Type type) {
-    this.type = type;
-  }
-  
+
   /**
    * @return gram term string
    */
   public String getString() {
-    return gram;
+    try {
+      return Text.decode(bytes, 0, length-1);
+    } catch (CharacterCodingException e) {
+      throw new RuntimeException("Should not have happened " + e.toString()); 
+    }
   }
-  
-  /**
-   * @param gram
-   *          gram term string
-   */
-  public void setString(String str) {
-    this.gram = str;
-  }
-  
+
   /**
    * @return gram frequency
    * @return
@@ -155,110 +164,77 @@ public class Gram implements WritableComparable<Gram> {
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    frequency = in.readInt();
-    int typeValue = in.readUnsignedByte();
-    
-    if (typeValue == 0) {
-      type = Type.TAIL;
-    } else if (typeValue == 1) {
-      type = HEAD;
-    } else {
-      type = Type.UNIGRAM;
-    }
-    
-    Text data = new Text();
-    data.readFields(in);
-    gram = data.toString();
+    int newLength = WritableUtils.readVInt(in);
+    setCapacity(newLength, false);
+    in.readFully(bytes, 0, newLength);
+    int newFrequency = WritableUtils.readVInt(in);
+    length = newLength;
+    frequency = newFrequency;
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeInt(frequency);
-    
-    if (type == Type.TAIL) {
-      out.writeByte(0);
-    } else if (type == HEAD) {
-      out.writeByte(1);
-    } else {
-      out.writeByte(2);
-    }
-    
-    Text data = new Text(gram);
-    data.write(out);
+    WritableUtils.writeVInt(out, length);
+    out.write(bytes, 0, length);
+    WritableUtils.writeVInt(out, frequency);
   }
-  
-  @Override
-  public int compareTo(Gram other) {
-    int ret = getString().compareTo(other.getString());
-    if (ret != 0) {
-      return ret;
-    }
-    
-    if (this.type == Type.UNIGRAM && other.type != Type.UNIGRAM) {
-      return -1;
-    }
-    
-    if (this.type != Type.UNIGRAM && other.type == Type.UNIGRAM) {
-      return 1;
-    }
-    
-    if (this.type == HEAD && other.type != HEAD) {
-      return -1;
-    }
-    
-    if (this.type != HEAD && other.type == HEAD) {
-      return 1;
-    }
-    
-    return 0;
-  }
-  
-  /** Generates hashcode, does not include frequency in the hash calculation */
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (gram == null ? 0 : gram.hashCode());
-    result = prime * result + (type == null ? 0 : type.hashCode());
-    return result;
-  }
-  
-  /**
-   * Determines equality, does not include frequency in the equality calculation
+
+  /* Cribbed from o.a.hadoop.io.Text:
+   * Sets the capacity of this object to <em>at least</em>
+   * <code>len</code> bytes. If the current buffer is longer,
+   * then the capacity and existing content of the buffer are
+   * unchanged. If <code>len</code> is larger
+   * than the current capacity, this object's capacity is
+   * increased to match.
+   * @param len the number of bytes we need
+   * @param keepData should the old data be kept
    */
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    Gram other = (Gram) obj;
-    if (gram == null) {
-      if (other.gram != null) {
-        return false;
+  private void setCapacity(int len, boolean keepData) {
+    len+=1; // extra byte to hold type
+    if (bytes == null || bytes.length < len) {
+      byte[] newBytes = new byte[len];
+      if (bytes != null && keepData) {
+        System.arraycopy(bytes, 0, newBytes, 0, length);
       }
-    } else if (!gram.equals(other.gram)) {
-      return false;
+      bytes = newBytes;
     }
-    if (type == null) {
-      if (other.type != null) {
-        return false;
-      }
-    } else if (!type.equals(other.type)) {
-      return false;
-    }
-    return true;
   }
-  
-  @Override
+
   public String toString() {
-    return "'" + gram + "'[" + (type == Type.UNIGRAM ? "u" : type == HEAD ? "h" : "t") + "]:"
-           + frequency;
+    return "'" + getString() + "'[" + getType().x + "]:" + frequency;
   }
   
+  public static void encodeType(Type type, byte[] buf, int offset) {
+    switch (type) {
+      case HEAD:
+        buf[offset] = 0x1;
+        break;
+      case TAIL:
+        buf[offset] = 0x2; 
+        break;
+      case UNIGRAM:
+        buf[offset] = 0x3;
+        break;
+      case NGRAM:
+        buf[offset] = 0x4;
+        break;
+      default:
+        throw new IllegalStateException("switch/case problem in encodeType");  
+    }
+  }
+  
+  public static Type decodeType(byte[] buf, int offset) {
+    switch (buf[offset]) {
+      case 0x1:
+        return Type.HEAD;
+      case 0x2:
+        return Type.TAIL;
+      case 0x3:
+        return Type.UNIGRAM;
+      case 0x4:
+        return Type.NGRAM;
+      default:
+        throw new IllegalStateException("switch/case problem in decodeType");
+    }
+  }
 }

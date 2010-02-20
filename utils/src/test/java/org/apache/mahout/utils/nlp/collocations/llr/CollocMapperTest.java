@@ -17,10 +17,6 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.UNIGRAM;
-
 import java.io.Reader;
 import java.util.Collections;
 
@@ -81,13 +77,13 @@ public class CollocMapperTest {
                                          {"t_of", "worst of"},};
     // set up expectations for mocks. ngram max size = 2
     for (String[] v : values) {
-      Type p = v[0].startsWith("h") ? HEAD : TAIL;
+      Type p = v[0].startsWith("h") ? Gram.Type.HEAD : Gram.Type.TAIL;
       int frequency = 1;
       if (v[1].equals("of times")) {
         frequency = 2;
       }
       Gram subgram = new Gram(v[0].substring(2), frequency, p);
-      Gram ngram = new Gram(v[1], frequency);
+      Gram ngram = new Gram(v[1], frequency, Type.NGRAM);
       collector.collect(subgram, ngram);
     }
     
@@ -135,15 +131,15 @@ public class CollocMapperTest {
                                          {"u_times", "times"},};
     // set up expectations for mocks. ngram max size = 2
     for (String[] v : values) {
-      Type p = v[0].startsWith("h") ? HEAD : TAIL;
-      p = v[0].startsWith("u") ? UNIGRAM : p;
+      Type p = v[0].startsWith("h") ? Gram.Type.HEAD : Gram.Type.TAIL;
+      p = v[0].startsWith("u") ? Gram.Type.UNIGRAM : p;
       int frequency = 1;
       if (v[1].equals("of times") || v[1].equals("of") || v[1].equals("times")
           || v[1].equals("the")) {
         frequency = 2;
       }
       Gram subgram = new Gram(v[0].substring(2), frequency, p);
-      Gram ngram = new Gram(v[1], frequency);
+      Gram ngram = new Gram(v[1], frequency, p == Gram.Type.UNIGRAM ? Gram.Type.UNIGRAM : Gram.Type.NGRAM);
       collector.collect(subgram, ngram);
     }
     

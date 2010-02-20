@@ -71,9 +71,6 @@ public class CollocCombiner extends MapReduceBase implements Reducer<Gram,Gram,G
     subgramKey.setFrequency(subgramFrequency);
     
     for (Gram ngram : ngramSet.keySet()) {
-      if (subgramKey.getType() == Type.UNIGRAM) {
-        ngram.setType(subgramKey.getType());
-      }
       output.collect(subgramKey, ngram);
     }
   }
