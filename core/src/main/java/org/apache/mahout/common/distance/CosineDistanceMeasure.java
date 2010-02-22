@@ -73,7 +73,7 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     double lengthSquaredv1 = v1.getLengthSquared();
     double lengthSquaredv2 = v2.getLengthSquared();
     
-    double dotProduct = v1.dot(v2);
+    double dotProduct = v2.dot(v1);
     double denominator = Math.sqrt(lengthSquaredv1) * Math.sqrt(lengthSquaredv2);
     
     // correct for floating-point rounding errors
@@ -89,7 +89,7 @@ public class CosineDistanceMeasure implements DistanceMeasure {
 
     double lengthSquaredv =  v.getLengthSquared();
     
-    double dotProduct = centroid.dot(v);
+    double dotProduct = v.dot(centroid);
     double denominator = Math.sqrt(centroidLengthSquare) * Math.sqrt(lengthSquaredv);
     
     // correct for floating-point rounding errors
