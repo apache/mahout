@@ -170,10 +170,9 @@ public class TimesSquaredJob {
                     Reporter rep) throws IOException {
       this.out = out;
       double d = scale(v);
-      //if(d == 0) return;
       if (d == 1.0) {
         outputVector.assign(v.get(), Functions.plus);
-      } else {
+      } else if (d != 0.0) {
         outputVector.assign(v.get(), Functions.plusMult(d));
       }
     }
