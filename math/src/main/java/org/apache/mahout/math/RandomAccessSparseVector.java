@@ -276,7 +276,7 @@ public class RandomAccessSparseVector extends AbstractVector {
     if(this == x) return dotSelf();
     
     double result = 0;
-    if (x instanceof SequentialAccessSparseVector || x instanceof RandomAccessSparseVector) {
+    if (x instanceof SequentialAccessSparseVector) {
       Iterator<org.apache.mahout.math.Vector.Element> iter = x.iterateNonZero();
       while (iter.hasNext()) {
         org.apache.mahout.math.Vector.Element element = iter.next();
