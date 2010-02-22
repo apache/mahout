@@ -39,8 +39,16 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
    */
   @Override
   public double distance(Vector a, Vector b) {
-    double ab = dot(a, b);
-    double denominator = dot(a, a) + dot(b, b) - ab;
+    double ab = 0;
+    double denominator = 0;
+    if (getWeights() != null) {
+      ab = dot(b, a); // b is SequentialAccess
+      denominator = dot(a, a) + dot(b, b) - ab;
+    } else {
+      ab = b.dot(a); // b is SequentialAccess
+      denominator = a.getLengthSquared() + b.getLengthSquared() - ab;
+    }
+    
     if (denominator < ab) { // correct for fp round-off: distance >= 0
       denominator = ab;
     }
@@ -61,9 +69,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     while (it.hasNext() && (el = it.next()) != null) {
       double elementValue = el.get();
       double value = elementValue * (sameVector ? elementValue : b.getQuick(el.index()));
-      if (weights != null) {
-        value *= weights.getQuick(el.index());
-      }
+      value *= weights.getQuick(el.index());  
       dot += value;
     }
     return dot;

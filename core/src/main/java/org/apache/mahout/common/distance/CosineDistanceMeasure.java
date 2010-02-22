@@ -19,7 +19,6 @@ package org.apache.mahout.common.distance;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.common.parameters.Parameter;
@@ -71,18 +70,8 @@ public class CosineDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size()) {
       throw new CardinalityException();
     }
-    double lengthSquaredv1 = 0.0;
-    Iterator<Vector.Element> iter = v1.iterateNonZero();
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      lengthSquaredv1 += elt.get() * elt.get();
-    }
-    iter = v2.iterateNonZero();
-    double lengthSquaredv2 = 0.0;
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      lengthSquaredv2 += elt.get() * elt.get();
-    }
+    double lengthSquaredv1 = v1.getLengthSquared();
+    double lengthSquaredv2 = v2.getLengthSquared();
     
     double dotProduct = v1.dot(v2);
     double denominator = Math.sqrt(lengthSquaredv1) * Math.sqrt(lengthSquaredv2);
@@ -97,12 +86,8 @@ public class CosineDistanceMeasure implements DistanceMeasure {
   
   @Override
   public double distance(double centroidLengthSquare, Vector centroid, Vector v) {
-    Iterator<Vector.Element> iter = v.iterateNonZero();
-    double lengthSquaredv = 0.0;
-    while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
-      lengthSquaredv += elt.get() * elt.get();
-    }
+
+    double lengthSquaredv =  v.getLengthSquared();
     
     double dotProduct = centroid.dot(v);
     double denominator = Math.sqrt(centroidLengthSquare) * Math.sqrt(lengthSquaredv);

@@ -49,7 +49,7 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
   
   @Override
   public double distance(Vector v1, Vector v2) {
-    return v1.getDistanceSquared(v2);
+    return v2.getDistanceSquared(v1);
   }
   
   @Override

@@ -62,9 +62,8 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
     }
     double result = 0;
     Vector vector = v1.minus(v2);
-    Iterator<Vector.Element> iter = vector.iterateNonZero(); // this contains all non zero elements between
-                                                             // the
-    // two
+    Iterator<Vector.Element> iter = vector.iterateNonZero(); 
+    // this contains all non zero elements between the two
     while (iter.hasNext()) {
       Vector.Element e = iter.next();
       result += Math.abs(e.get());
