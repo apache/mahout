@@ -28,6 +28,7 @@ import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 /** Implements vector that only stores non-zero doubles */
 public class RandomAccessSparseVector extends AbstractVector {
 
+  private static final int INITIAL_SIZE = 11;
   protected OpenIntDoubleHashMap values;
 
   /** For serialization purposes only. */
@@ -35,7 +36,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   public RandomAccessSparseVector(int cardinality) {
-    this(null, cardinality, cardinality / 8); // arbitrary estimate of
+    this(null, cardinality, INITIAL_SIZE); // arbitrary estimate of
     // 'sparseness'
   }
 
@@ -44,7 +45,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   public RandomAccessSparseVector(String name, int cardinality) {
-    this(name, cardinality, cardinality / 8); // arbitrary estimate of
+    this(name, cardinality, INITIAL_SIZE); // arbitrary estimate of
     // 'sparseness'
   }
 
