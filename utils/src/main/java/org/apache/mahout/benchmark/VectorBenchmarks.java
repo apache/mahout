@@ -298,7 +298,7 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "Dense.dot(Rand)", "sum = " + result + ' ');
+    printStats(stats, "DotProduct", "Dense.fn(Rand)", "sum = " + result + ' ');
     result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -309,7 +309,7 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "Dense.dot(Seq)", "sum = " + result + ' ');
+    printStats(stats, "DotProduct", "Dense.fn(Seq)", "sum = " + result + ' ');
     result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -320,7 +320,7 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "Rand.dot(Dense)", "sum = " + result + ' ');
+    printStats(stats, "DotProduct", "Rand.fn(Dense)", "sum = " + result + ' ');
     result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -331,7 +331,7 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "Rand.dot(Seq)", "sum = " + result + ' ');
+    printStats(stats, "DotProduct", "Rand.fn(Seq)", "sum = " + result + ' ');
     result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -342,7 +342,7 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "Seq.dot(Dense)", "sum = " + result + ' ');
+    printStats(stats, "DotProduct", "Seq.fn(Dense)", "sum = " + result + ' ');
     result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -353,7 +353,7 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "Seq.dot(Rand)", "sum = " + result + ' ');
+    printStats(stats, "DotProduct", "Seq.fn(Rand)", "sum = " + result + ' ');
 
 
   }
@@ -414,6 +414,117 @@ public class VectorBenchmarks implements Summarizable {
     }
     // print result to prevent hotspot from eliminating deadcode
     printStats(stats, measure.getClass().getName(), "SeqSparseVector", "minDistance = " + result
+                                                                                    + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        double minDistance = Double.MAX_VALUE;
+        for (int u = 0; u < opsPerUnit; u++) {
+          double distance = measure.distance(vectors[0][i], vectors[1][u]);
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
+        }
+        result += minDistance;
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, measure.getClass().getName(), "Dense.fn(Rand)", "minDistance = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        double minDistance = Double.MAX_VALUE;
+        for (int u = 0; u < opsPerUnit; u++) {
+          double distance = measure.distance(vectors[0][i], vectors[2][u]);
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
+        }
+        result += minDistance;
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, measure.getClass().getName(), "Dense.fn(Seq)", "minDistance = " + result
+                                                                                + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        double minDistance = Double.MAX_VALUE;
+        for (int u = 0; u < opsPerUnit; u++) {
+          double distance = measure.distance(vectors[1][i], vectors[0][u]);
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
+        }
+        result += minDistance;
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, measure.getClass().getName(), "Rand.fn(Dense)", "minDistance = " + result
+                                                                                    + ' ');
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        double minDistance = Double.MAX_VALUE;
+        for (int u = 0; u < opsPerUnit; u++) {
+          double distance = measure.distance(vectors[1][i], vectors[2][u]);
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
+        }
+        result += minDistance;
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, measure.getClass().getName(), "Rand.fn(Seq)", "minDistance = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        double minDistance = Double.MAX_VALUE;
+        for (int u = 0; u < opsPerUnit; u++) {
+          double distance = measure.distance(vectors[2][i], vectors[0][u]);
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
+        }
+        result += minDistance;
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, measure.getClass().getName(), "Seq.fn(Dense)", "minDistance = " + result
+                                                                                + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        double minDistance = Double.MAX_VALUE;
+        for (int u = 0; u < opsPerUnit; u++) {
+          double distance = measure.distance(vectors[2][i], vectors[1][u]);
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
+        }
+        result += minDistance;
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, measure.getClass().getName(), "Seq.fn(Rand)", "minDistance = " + result
                                                                                     + ' ');
     
   }
@@ -491,7 +602,7 @@ public class VectorBenchmarks implements Summarizable {
       mark.distanceMeasureBenchmark(new CosineDistanceMeasure());
       mark.distanceMeasureBenchmark(new SquaredEuclideanDistanceMeasure());
       mark.distanceMeasureBenchmark(new EuclideanDistanceMeasure());
-      mark.distanceMeasureBenchmark(new ManhattanDistanceMeasure());
+      //mark.distanceMeasureBenchmark(new ManhattanDistanceMeasure());
       mark.distanceMeasureBenchmark(new TanimotoDistanceMeasure());
       
       log.info("\n{}", mark.summarize());
