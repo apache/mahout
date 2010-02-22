@@ -18,6 +18,7 @@
 package org.apache.mahout.common;
 
 import org.uncommons.maths.random.MersenneTwisterRNG;
+import org.uncommons.maths.random.RepeatableRNG;
 
 import java.nio.charset.Charset;
 import java.util.Random;
@@ -64,7 +65,7 @@ public final class RandomWrapper extends Random {
   }
 
   public long getSeed() {
-    return RandomUtils.seedBytesToLong(((MersenneTwisterRNG) random).getSeed());
+    return RandomUtils.seedBytesToLong(((RepeatableRNG) random).getSeed());
   }
 
   @Override

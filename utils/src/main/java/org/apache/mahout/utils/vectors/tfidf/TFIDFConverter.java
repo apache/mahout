@@ -229,7 +229,7 @@ public final class TFIDFConverter {
     }
     featureCount++;
     freqWriter.close();
-    Long[] counts = {Long.valueOf(featureCount), Long.valueOf(vectorCount)};
+    Long[] counts = {featureCount, vectorCount};
     return new Pair<Long[],List<Path>>(counts, chunkPaths);
   }
   
@@ -275,8 +275,8 @@ public final class TFIDFConverter {
     
     conf.setJobName(": MakePartialVectors: input-folder: " + input + ", dictionary-file: "
                     + dictionaryFilePath.toString());
-    conf.setLong(FEATURE_COUNT, featureCount.longValue());
-    conf.setLong(VECTOR_COUNT, vectorCount.longValue());
+    conf.setLong(FEATURE_COUNT, featureCount);
+    conf.setLong(VECTOR_COUNT, vectorCount);
     conf.setInt(MIN_DF, minDf);
     conf.setInt(MAX_DF_PERCENTAGE, maxDFPercent);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
@@ -317,8 +317,7 @@ public final class TFIDFConverter {
     conf.setOutputValueClass(LongWritable.class);
     
     FileInputFormat.setInputPaths(conf, input);
-    Path outPath = output;
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileOutputFormat.setOutputPath(conf, output);
     
     conf.setMapperClass(TermDocumentCountMapper.class);
     
@@ -327,9 +326,9 @@ public final class TFIDFConverter {
     conf.setReducerClass(TermDocumentCountReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
+    FileSystem dfs = FileSystem.get(output.toUri(), conf);
+    if (dfs.exists(output)) {
+      dfs.delete(output, true);
     }
     client.setConf(conf);
     JobClient.runJob(conf);

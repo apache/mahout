@@ -39,15 +39,15 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Job {
-  /** Logger for this class. */
-  private static final Logger LOG = LoggerFactory.getLogger(Job.class);
+public final class Job {
+
+  private static final Logger log = LoggerFactory.getLogger(Job.class);
   
   private static final String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clusteredPoints";
   
   private Job() {}
   
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -93,7 +93,7 @@ public class Job {
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "10").toString());
       runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations);
     } catch (OptionException e) {
-      Job.LOG.error("Exception parsing command line: ", e);
+      log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }

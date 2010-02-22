@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop;
 
 import org.apache.hadoop.filecache.DistributedCache;
@@ -29,10 +46,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
-import static org.apache.mahout.math.function.Functions.plusMult;
-
-
 public class TimesSquaredJob {
+
   private static final Logger log = LoggerFactory.getLogger(TimesSquaredJob.class);
 
   public static final String INPUT_VECTOR = "timesSquared.inputVector";
@@ -40,6 +55,8 @@ public class TimesSquaredJob {
   public static final String OUTPUT_VECTOR_DIMENSION = "timesSquared.output.dimension";
 
   public static final String OUTPUT_VECTOR_FILENAME = "timesSquaredOutputVector";
+
+  private TimesSquaredJob() {}
 
   public static JobConf createTimesSquaredJobConf(Vector v, 
                                                   Path matrixInputPath, 
@@ -63,7 +80,7 @@ public class TimesSquaredJob {
     outputVectorPathBase = fs.makeQualified(outputVectorPathBase);
 
     long now = System.nanoTime();
-    Path inputVectorPath = new Path(outputVectorPathBase, INPUT_VECTOR + "/" + now);
+    Path inputVectorPath = new Path(outputVectorPathBase, INPUT_VECTOR + '/' + now);
     SequenceFile.Writer inputVectorPathWriter = new SequenceFile.Writer(fs,
             conf, inputVectorPath, NullWritable.class, VectorWritable.class);
     VectorWritable inputVW = new VectorWritable(v);
@@ -110,11 +127,11 @@ public class TimesSquaredJob {
   }
 
   public static class TimesSquaredMapper extends MapReduceBase
-      implements Mapper<WritableComparable,VectorWritable, NullWritable,VectorWritable> {
+      implements Mapper<WritableComparable<?>,VectorWritable, NullWritable,VectorWritable> {
 
-    protected Vector inputVector;
-    protected Vector outputVector;
-    protected OutputCollector<NullWritable,VectorWritable> out;
+    private Vector inputVector;
+    private Vector outputVector;
+    private OutputCollector<NullWritable,VectorWritable> out;
 
     @Override
     public void configure(JobConf conf) {
@@ -147,18 +164,17 @@ public class TimesSquaredJob {
     }
 
     @Override
-    public void map(WritableComparable rowNum,
+    public void map(WritableComparable<?> rowNum,
                     VectorWritable v,
                     OutputCollector<NullWritable,VectorWritable> out,
                     Reporter rep) throws IOException {
       this.out = out;
       double d = scale(v);
-      if(d == 0) {
-        return;
-      } else if(d == 1) {
+      //if(d == 0) return;
+      if (d == 1.0) {
         outputVector.assign(v.get(), Functions.plus);
       } else {
-        outputVector.assign(v.get(), plusMult(d));
+        outputVector.assign(v.get(), Functions.plusMult(d));
       }
     }
 
@@ -176,7 +192,7 @@ public class TimesSquaredJob {
   public static class VectorSummingReducer extends MapReduceBase
       implements Reducer<NullWritable,VectorWritable,NullWritable,VectorWritable> {
 
-    protected Vector outputVector;
+    private Vector outputVector;
 
     @Override
     public void configure(JobConf conf) {

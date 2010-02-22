@@ -41,6 +41,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * @param corpus
    * @return
    */
+  @Override
   protected Vector getInitialVector(VectorIterable corpus) {
     Vector initialVector = new DenseVector(corpus.numCols());
     initialVector.assign(1/Math.sqrt(corpus.numCols()));

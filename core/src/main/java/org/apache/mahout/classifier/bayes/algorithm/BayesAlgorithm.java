@@ -111,13 +111,13 @@ public class BayesAlgorithm implements Algorithm {
                                String[] document) throws InvalidDatastoreException {
     OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(document.length / 2);
     for (String word : document) {
-      if (wordList.containsKey(word) == false) {
-        wordList.put(word, 1);
-      } else {
+      if (wordList.containsKey(word)) {
         wordList.put(word, wordList.get(word) + 1);
+      } else {
+        wordList.put(word, 1);
       }
     }
-    final MutableDouble result = new MutableDouble(0.0d);
+    final MutableDouble result = new MutableDouble(0.0);
     
     wordList.forEachPair(new ObjectIntProcedure<String>() {
       

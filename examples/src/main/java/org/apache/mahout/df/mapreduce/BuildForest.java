@@ -143,7 +143,7 @@ public class BuildForest extends Configured implements Tool {
       datasetPath = new Path(datasetName);
       
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
       return -1;
     }

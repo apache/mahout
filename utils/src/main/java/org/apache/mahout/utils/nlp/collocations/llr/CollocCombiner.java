@@ -25,7 +25,6 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 
 /** Combiner for pass1 of the CollocationDriver */
 public class CollocCombiner extends MapReduceBase implements Reducer<Gram,Gram,Gram,Gram> {

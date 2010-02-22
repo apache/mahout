@@ -59,7 +59,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
     
     @Override
     public String toString() {
-      return pdf.toString() + ' ' + doc.toString();
+      return pdf.toString() + ' ' + doc;
     }
     
   }

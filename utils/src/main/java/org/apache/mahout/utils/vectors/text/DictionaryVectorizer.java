@@ -316,8 +316,7 @@ public final class DictionaryVectorizer {
     conf.setOutputValueClass(LongWritable.class);
     
     FileInputFormat.setInputPaths(conf, input);
-    Path outPath = output;
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileOutputFormat.setOutputPath(conf, output);
     
     conf.setMapperClass(TermCountMapper.class);
     
@@ -326,9 +325,9 @@ public final class DictionaryVectorizer {
     conf.setReducerClass(TermCountReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
+    FileSystem dfs = FileSystem.get(output.toUri(), conf);
+    if (dfs.exists(output)) {
+      dfs.delete(output, true);
     }
     
     client.setConf(conf);

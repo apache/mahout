@@ -14,6 +14,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -35,13 +36,14 @@ import java.util.Iterator;
  *
  */
 public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
-  private String inputPathString;
-  private String outputTmpPathString;
+
+  private final String inputPathString;
+  private final String outputTmpPathString;
   private JobConf conf;
   private Path rowPath;
   private Path outputTmpBasePath;
-  private int numRows;
-  private int numCols;
+  private final int numRows;
+  private final int numCols;
 
   @Override
   public void configure(JobConf conf) {
@@ -124,11 +126,11 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   }
 
   public static class DistributedMatrixIterator implements Iterator<MatrixSlice> {
-    private SequenceFile.Reader reader;
+    private final SequenceFile.Reader reader;
     private boolean hasBuffered = false;
     private boolean hasNext = false;
-    private IntWritable i = new IntWritable();
-    private VectorWritable v = new VectorWritable();
+    private final IntWritable i = new IntWritable();
+    private final VectorWritable v = new VectorWritable();
 
     public DistributedMatrixIterator(SequenceFile.Reader reader) {
       this.reader = reader;
@@ -155,11 +157,10 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     @Override
     public MatrixSlice next() {
       if(!hasBuffered && !hasNext()) {
-        return null;
+        throw new NoSuchElementException();
       }
       hasBuffered = false;
-      MatrixSlice slice = new MatrixSlice(v.get(), i.get());
-      return slice;
+      return new MatrixSlice(v.get(), i.get());
     }
 
     @Override

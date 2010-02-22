@@ -27,8 +27,6 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +37,13 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.TimesFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DisplayDirichlet extends Frame {
+
+  private static final Logger log = LoggerFactory.getLogger(DisplayDirichlet.class);
+
   private static final List<Vector> sampleParams = new ArrayList<Vector>();
    
   protected static final int ds = 72; // default scale = 72 pixels per inch
@@ -57,20 +60,6 @@ public class DisplayDirichlet extends Frame {
   protected static List<Model<VectorWritable>[]> result;
   
   protected int res; // screen resolution
- 
-  
-  /**
-   * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See
-   * the NOTICE file distributed with this work for additional information regarding copyright ownership. The
-   * ASF licenses this file to You under the Apache License, Version 2.0 (the "License"); you may not use this
-   * file except in compliance with the License. You may obtain a copy of the License at
-   * 
-   * http://www.apache.org/licenses/LICENSE-2.0
-   * 
-   * Unless required by applicable law or agreed to in writing, software distributed under the License is
-   * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and limitations under the License.
-   */
   
   public DisplayDirichlet() {
     initialize();
@@ -94,7 +83,7 @@ public class DisplayDirichlet extends Frame {
     });
   }
   
-  public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
+  public static void main(String[] args) throws Exception {
     RandomUtils.useTestSeed();
     generateSamples();
     new DisplayDirichlet();
@@ -175,24 +164,24 @@ public class DisplayDirichlet extends Frame {
     int h = size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2.draw(new Ellipse2D.Double(x * ds, y * ds, dv.get(0)
-                                                                                   * ds,
-        dv.get(1) * ds));
+    g2.draw(new Ellipse2D.Double(x * ds, y * ds, dv.get(0) * ds, dv.get(1) * ds));
   }
   
   private static void printModels(List<Model<VectorWritable>[]> results, int significant) {
     int row = 0;
+    StringBuilder models = new StringBuilder();
     for (Model<VectorWritable>[] r : results) {
-      System.out.print("sample[" + row++ + "]= ");
+      models.append("sample[").append(row++).append("]= ");
       for (int k = 0; k < r.length; k++) {
         Model<VectorWritable> model = r[k];
         if (model.count() > significant) {
-          System.out.print("m" + k + model.toString() + ", ");
+          models.append('m').append(k).append(model).append(", ");
         }
       }
-      System.out.println();
+      models.append('\n');
     }
-    System.out.println();
+    models.append('\n');
+    log.info(models.toString());
   }
   
   public static void generateSamples() {
@@ -222,13 +211,12 @@ public class DisplayDirichlet extends Frame {
   private static void generateSamples(int num, double mx, double my, double sd) {
     double[] params = {mx, my, sd, sd};
     sampleParams.add(new DenseVector(params));
-    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=" + sd);
+    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
     for (int i = 0; i < num; i++) {
       sampleData.add(new VectorWritable(new DenseVector(new double[] {
-                                                                                       UncommonDistributions
-                                                                                           .rNorm(mx, sd),
-                                                                                       UncommonDistributions
-                                                                                           .rNorm(my, sd)})));
+          UncommonDistributions.rNorm(mx, sd),
+          UncommonDistributions.rNorm(my, sd)}
+      )));
     }
   }
   
@@ -249,8 +237,7 @@ public class DisplayDirichlet extends Frame {
   private static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
     double[] params = {mx, my, sdx, sdy};
     sampleParams.add(new DenseVector(params));
-    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy
-                       + ']');
+    log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] {num, mx, my, sdx, sdy});
     for (int i = 0; i < num; i++) {
       sampleData
           .add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sdx),

@@ -41,8 +41,10 @@ public class TestDistributedLanczosSolver extends SolverTest {
     assertEigen(eigenVectors, corpus, eigenVectors.numRows() / 2, 0.01);
   }
 
+  @Override
   public void tearDown() throws Exception {
     TestCanopyCreation.rmr("testData");
+    super.tearDown();
   }
 
 

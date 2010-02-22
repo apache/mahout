@@ -109,7 +109,7 @@ class DisplayASNOutputState extends DisplayDirichlet {
     }
   }
   
-  public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException {
+  public static void main(String[] args) throws Exception {
     RandomUtils.useTestSeed();
     getSamples();
     getResults();

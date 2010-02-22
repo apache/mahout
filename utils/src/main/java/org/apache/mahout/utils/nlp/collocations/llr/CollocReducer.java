@@ -33,7 +33,9 @@ import org.slf4j.LoggerFactory;
  * Reducer for Pass 1 of the collocation identification job. Generates counts for ngrams and subgrams.
  */
 public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gram,Gram> {
-  
+
+  private static final Logger log = LoggerFactory.getLogger(CollocReducer.class);
+
   public static final String MIN_SUPPORT = "minSupport";
   public static final int DEFAULT_MIN_SUPPORT = 2;
   
@@ -41,24 +43,19 @@ public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gr
     LESS_THAN_MIN_SUPPORT
   }
 
-  private static final Logger log = LoggerFactory.getLogger(CollocReducer.class);
-  
   private int minSupport;
-  private boolean emitUnigrams;
-  
+
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     
     this.minSupport = job.getInt(MIN_SUPPORT, DEFAULT_MIN_SUPPORT);
+
+    boolean emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
     
-    this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
-    
-    if (log.isInfoEnabled()) {
-      log.info("Min support is {}", minSupport);
-      log.info("Emit Unitgrams is {}", emitUnigrams);
-    }
-    
+    log.info("Min support is {}", minSupport);
+    log.info("Emit Unitgrams is {}", emitUnigrams);
+
   }
   
   /**

@@ -68,7 +68,6 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
    * 
    * @param ll
    *          the LL to use.
-   * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.LLCallback
    */
   LLRReducer(LLCallback ll) {
     this.ll = ll;
@@ -104,13 +103,11 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
    * number of times neither A or B appears (in that order): N - (subgramFreqA + subgramFreqB - ngramFreq)
    */
   @Override
-  public void reduce(Gram key,
+  public void reduce(Gram ngram,
                      Iterator<Gram> values,
                      OutputCollector<Text,DoubleWritable> output,
                      Reporter reporter) throws IOException {
     
-    Gram ngram = key;
-    String[] gram = new String[2];
     int[] gramFreq = new int[2];
     gramFreq[0] = gramFreq[1] = -1;
     
@@ -122,6 +119,7 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
     }
     // FIXME: better way to handle errors? Wouldn't an exception thrown here
     // cause hadoop to re-try the job?
+    String[] gram = new String[2];
     while (values.hasNext()) {
       Gram value = values.next();
       
@@ -169,8 +167,8 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
       reporter.incrCounter(Skipped.LLR_CALCULATION_ERROR, 1);
       log.error("Problem calculating LLR ratio: " + ex.getMessage());
       log.error("NGram: " + ngram);
-      log.error("HEAD: " + gram[0] + ":" + gramFreq[0]);
-      log.error("TAIL: " + gram[1] + ":" + gramFreq[1]);
+      log.error("HEAD: " + gram[0] + ':' + gramFreq[0]);
+      log.error("TAIL: " + gram[1] + ':' + gramFreq[1]);
       log.error("k11: " + k11 + " k12: " + k12 + " k21: " + k21 + " k22: " + k22);
     }
   }
@@ -184,6 +182,7 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
   
   /** concrete implementation delegates to LogLikelihood class */
   public static final class ConcreteLLCallback implements LLCallback {
+    @Override
     public double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
       return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
     }

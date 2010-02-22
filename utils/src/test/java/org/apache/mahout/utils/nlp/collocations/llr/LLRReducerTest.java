@@ -22,6 +22,7 @@ import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.NGRAM;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class LLRReducerTest {
   OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
     @Override
     public void collect(Text key, DoubleWritable value) throws IOException {
-      log.info(key.toString() + " " + value.toString());
+      log.info(key.toString() + ' ' + value.toString());
     }
   };
   
@@ -120,9 +121,7 @@ public class LLRReducerTest {
     
     for (Gram[] ii: input) {
       List<Gram> vv = new LinkedList<Gram>();
-      for (int i = 1; i < ii.length; i++) {
-        vv.add(ii[i]);
-      }
+      vv.addAll(Arrays.asList(ii).subList(1, ii.length));
       reducer.reduce(ii[0], vv.iterator(), collector, reporter);
     }
     

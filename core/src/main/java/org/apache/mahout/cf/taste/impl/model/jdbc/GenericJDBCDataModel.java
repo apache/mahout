@@ -137,10 +137,5 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
       throw new TasteException(ioe);
     }
   }
-
-  @Override
-  public boolean hasPreferenceValues() {
-    return true;
-  }
   
 }

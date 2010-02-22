@@ -47,7 +47,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
   /**
    * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
    * 
-   * @throws FileNotFoundException
+   * @throws java.io.FileNotFoundException
    *           if the file does not exist
    * @throws IOException
    *           if the file cannot be read
@@ -59,7 +59,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
   /**
    * Creates a {@link FileLineIterator} over a given file, assuming a UTF-8 encoding.
    * 
-   * @throws FileNotFoundException
+   * @throws java.io.FileNotFoundException
    *           if the file does not exist
    * @throws IOException
    *           if the file cannot be read
@@ -71,7 +71,7 @@ public final class FileLineIterator implements SkippingIterator<String>, Closeab
   /**
    * Creates a {@link FileLineIterator} over a given file, using the given encoding.
    * 
-   * @throws FileNotFoundException
+   * @throws java.io.FileNotFoundException
    *           if the file does not exist
    * @throws IOException
    *           if the file cannot be read

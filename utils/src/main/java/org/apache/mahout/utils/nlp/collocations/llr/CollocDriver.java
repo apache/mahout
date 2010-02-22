@@ -60,7 +60,10 @@ public class CollocDriver {
   public static final int DEFAULT_PASS1_NUM_REDUCE_TASKS = 1;
   
   private static final Logger log = LoggerFactory.getLogger(CollocDriver.class);
-  
+
+  private CollocDriver() {
+  }
+
   /**
    * @param args
    */
@@ -136,7 +139,7 @@ public class CollocDriver {
       
       int maxNGramSize = DEFAULT_MAX_NGRAM_SIZE;
       
-      if (cmdLine.hasOption(maxNGramSizeOpt) == true) {
+      if (cmdLine.hasOption(maxNGramSizeOpt)) {
         try {
           maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt).toString());
         } catch (NumberFormatException ex) {
@@ -145,7 +148,7 @@ public class CollocDriver {
       }
       log.info("Maximum n-gram size is: {}", maxNGramSize);
       
-      if (cmdLine.hasOption(overwriteOutput) == true) {
+      if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.overwriteOutput(output);
       }
       
@@ -175,7 +178,7 @@ public class CollocDriver {
         Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
         if (cmdLine.hasOption(analyzerNameOpt)) {
           String className = cmdLine.getValue(analyzerNameOpt).toString();
-          analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
+          analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
           // try instantiating it, b/c there isn't any point in setting it if
           // you can't instantiate it
           analyzerClass.newInstance();

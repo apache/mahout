@@ -40,9 +40,6 @@ import org.slf4j.LoggerFactory;
  * Runs pass 1 of the Collocation discovery job on input of SequeceFile<Text,Text>, where the key is a
  * document id and the value is the document contents. . Delegates to NGramCollector to perform tokenization,
  * ngram-creation and output collection.
- * 
- * @see org.apache.mahout.text.SequenceFilesFromDirectory
- * @see org.apache.mahout.utils.nlp.collocations.llr.colloc.NGramCollector
  */
 public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTuple,Gram,Gram> {
   
@@ -89,9 +86,6 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
    * 
    * Also counts the total number of ngrams encountered and adds it to the counter
    * CollocDriver.Count.NGRAM_TOTAL
-   * 
-   * @param r
-   *          The reader to read input from -- used to create a tokenstream from the analyzer
    * 
    * @param collector
    *          The collector to send output to

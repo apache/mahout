@@ -104,8 +104,7 @@ public class Job {
       int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
       String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector")
           .toString();
-      Job
-          .runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers,
+      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers,
             vectorClassName);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
@@ -165,7 +164,7 @@ public class Job {
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
     DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
       vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers);
-    Job.printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
+    printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
   }
   
   /**
@@ -209,7 +208,7 @@ public class Job {
       conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
       clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
-    Job.printResults(clusters, 0);
+    printResults(clusters, 0);
     
   }
   

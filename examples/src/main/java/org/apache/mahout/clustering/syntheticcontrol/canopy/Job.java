@@ -38,12 +38,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class Job {
-  /** Logger for this class. */
-  private static final Logger LOG = LoggerFactory.getLogger(Job.class);
+
+  private static final Logger log = LoggerFactory.getLogger(Job.class);
   
   private Job() { }
   
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -100,7 +100,7 @@ public final class Job {
       
       runJob(input, output, measureClass, t1, t2);
     } catch (OptionException e) {
-      Job.LOG.error("Exception", e);
+      Job.log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }

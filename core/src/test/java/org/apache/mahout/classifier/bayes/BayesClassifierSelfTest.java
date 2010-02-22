@@ -69,9 +69,9 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     for (String[] entry : ClassifierData.DATA) {
       List<String> document = new NGrams(entry[1], Integer.parseInt(params.get("gramSize")))
           .generateNGramsWithoutLabel();
-      assertEquals(3, classifier.classifyDocument(document.toArray(new String[] {}),
+      assertEquals(3, classifier.classifyDocument(document.toArray(new String[document.size()]),
         params.get("defaultCat"), 100).length);
-      ClassifierResult result = classifier.classifyDocument(document.toArray(new String[] {}), params
+      ClassifierResult result = classifier.classifyDocument(document.toArray(new String[document.size()]), params
           .get("defaultCat"));
       assertEquals(entry[0], result.getLabel());
       resultAnalyzer.addInstance(entry[0], result);
@@ -79,8 +79,10 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     int[][] matrix = resultAnalyzer.getConfusionMatrix().getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j) assertEquals(4, matrix[i][j]);
-        else assertEquals(0, matrix[i][j]);
+        if (i == j)
+          assertEquals(4, matrix[i][j]);
+        else
+          assertEquals(0, matrix[i][j]);
       }
     }
     params.set("testDirPath", "testdata/bayesinput");
@@ -91,8 +93,10 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j) assertEquals(4, matrix[i][j]);
-        else assertEquals(0, matrix[i][j]);
+        if (i == j)
+          assertEquals(4, matrix[i][j]);
+        else
+          assertEquals(0, matrix[i][j]);
       }
     }
   }
@@ -119,9 +123,9 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     for (String[] entry : ClassifierData.DATA) {
       List<String> document = new NGrams(entry[1], Integer.parseInt(params.get("gramSize")))
           .generateNGramsWithoutLabel();
-      assertEquals(3, classifier.classifyDocument(document.toArray(new String[] {}),
+      assertEquals(3, classifier.classifyDocument(document.toArray(new String[document.size()]),
         params.get("defaultCat"), 100).length);
-      ClassifierResult result = classifier.classifyDocument(document.toArray(new String[] {}), params
+      ClassifierResult result = classifier.classifyDocument(document.toArray(new String[document.size()]), params
           .get("defaultCat"));
       assertEquals(entry[0], result.getLabel());
       resultAnalyzer.addInstance(entry[0], result);
@@ -129,8 +133,10 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     int[][] matrix = resultAnalyzer.getConfusionMatrix().getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j) assertEquals(4, matrix[i][j]);
-        else assertEquals(0, matrix[i][j]);
+        if (i == j)
+          assertEquals(4, matrix[i][j]);
+        else
+          assertEquals(0, matrix[i][j]);
       }
     }
     params.set("testDirPath", "testdata/bayesinput");
@@ -141,8 +147,10 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j) assertEquals(4, matrix[i][j]);
-        else assertEquals(0, matrix[i][j]);
+        if (i == j)
+          assertEquals(4, matrix[i][j]);
+        else
+          assertEquals(0, matrix[i][j]);
       }
     }
   }

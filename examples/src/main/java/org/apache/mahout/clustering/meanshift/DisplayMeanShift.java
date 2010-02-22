@@ -31,8 +31,12 @@ import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class DisplayMeanShift extends DisplayDirichlet {
+
+  private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);  
   
   private static final MeanShiftCanopyClusterer clusterer =
     new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
@@ -105,7 +109,7 @@ class DisplayMeanShift extends DisplayDirichlet {
     DisplayDirichlet.generateSamples();
     testReferenceImplementation();
     for (MeanShiftCanopy canopy : canopies) {
-      System.out.println(canopy.toString());
+      log.info(canopy.toString());
     }
     new DisplayMeanShift();
   }

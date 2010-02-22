@@ -34,7 +34,7 @@ public interface ClusteringRecommender extends Recommender {
    * 
    * @param userID
    *          user ID for which to find a cluster
-   * @return {@link Collection} of IDs of users in the requested user's cluster
+   * @return {@link FastIDSet} of IDs of users in the requested user's cluster
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
@@ -45,7 +45,7 @@ public interface ClusteringRecommender extends Recommender {
    * Returns all clusters of users.
    * </p>
    * 
-   * @return {@link Collection} of {@link Collection}s of user IDs
+   * @return array of {@link FastIDSet}s of user IDs
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */

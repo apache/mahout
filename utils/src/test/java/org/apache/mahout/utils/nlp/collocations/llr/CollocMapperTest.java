@@ -63,18 +63,18 @@ public class CollocMapperTest {
       inputTuple.add(i);
     }
     
-    String[][] values = new String[][] { {"h_the", "the best"},
-                                         {"t_best", "the best"},
-                                         {"h_of", "of times"},
-                                         {"t_times", "of times"},
-                                         {"h_best", "best of"},
-                                         {"t_of", "best of"},
-                                         {"h_the", "the worst"},
-                                         {"t_worst", "the worst"},
-                                         {"h_times", "times the"},
-                                         {"t_the", "times the"},
-                                         {"h_worst", "worst of"},
-                                         {"t_of", "worst of"},};
+    String[][] values = { {"h_the", "the best"},
+                          {"t_best", "the best"},
+                          {"h_of", "of times"},
+                          {"t_times", "of times"},
+                          {"h_best", "best of"},
+                          {"t_of", "best of"},
+                          {"h_the", "the worst"},
+                          {"t_worst", "the worst"},
+                          {"h_times", "times the"},
+                          {"t_the", "times the"},
+                          {"h_worst", "worst of"},
+                          {"t_of", "worst of"},};
     // set up expectations for mocks. ngram max size = 2
     for (String[] v : values) {
       Type p = v[0].startsWith("h") ? Gram.Type.HEAD : Gram.Type.TAIL;
@@ -114,7 +114,7 @@ public class CollocMapperTest {
       inputTuple.add(i);
     }
     
-    String[][] values = new String[][]  {{"h_the", "the best"},
+    String[][] values = {{"h_the", "the best"},
                                          {"t_best", "the best"},
                                          {"h_of", "of times"},
                                          {"t_times", "of times"},
@@ -163,7 +163,7 @@ public class CollocMapperTest {
     final Analyzer a;
     
     public TestAnalyzer() {
-      a = new StandardAnalyzer(Version.LUCENE_29, Collections.EMPTY_SET);
+      a = new StandardAnalyzer(Version.LUCENE_29, Collections.emptySet());
     }
     
     @Override

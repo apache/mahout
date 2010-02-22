@@ -41,14 +41,13 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Job {
+public final class Job {
   
-  /** Logger for this class. */
-  private static final Logger LOG = LoggerFactory.getLogger(Job.class);
+  private static final Logger log = LoggerFactory.getLogger(Job.class);
   
   private Job() { }
   
-  public static void main(String[] args) throws IOException, ClassNotFoundException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -101,7 +100,7 @@ public class Job {
       
       runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations);
     } catch (OptionException e) {
-      Job.LOG.error("Exception", e);
+      log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     }
   }
@@ -145,14 +144,14 @@ public class Job {
     if (dfs.exists(outPath)) {
       dfs.delete(outPath, true);
     }
-    final String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
-    System.out.println("Preparing Input");
+    String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput,
       "org.apache.mahout.math.RandomAccessSparseVector");
-    System.out.println("Running Canopy to get initial clusters");
+    log.info("Running Canopy to get initial clusters");
     CanopyDriver.runJob(directoryContainingConvertedInput,
       output + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, measureClass, t1, t2);
-    System.out.println("Running KMeans");
+    log.info("Running KMeans");
     KMeansDriver.runJob(directoryContainingConvertedInput,
       output + CanopyClusteringJob.DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output, measureClass, convergenceDelta,
       maxIterations, 1);

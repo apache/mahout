@@ -230,15 +230,13 @@ public class ClusterLabels {
     List<TermInfoClusterInOut> clusteredTermInfo = new LinkedList<TermInfoClusterInOut>();
     
     int clusterSize = ids.size();
-    int corpusSize = numDocs;
-    
+
     for (TermEntry termEntry : termEntryMap.values()) {
       int corpusDF = reader.terms(new Term(this.contentField, termEntry.term)).docFreq();
       int outDF = corpusDF - termEntry.docFreq;
       int inDF = termEntry.docFreq;
       TermInfoClusterInOut termInfoCluster = new TermInfoClusterInOut(termEntry.term, inDF, outDF);
-      double llr = scoreDocumentFrequencies(inDF, outDF, clusterSize, corpusSize);
-      termInfoCluster.logLikelihoodRatio = llr;
+      termInfoCluster.logLikelihoodRatio = scoreDocumentFrequencies(inDF, outDF, clusterSize, numDocs);
       clusteredTermInfo.add(termInfoCluster);
     }
     

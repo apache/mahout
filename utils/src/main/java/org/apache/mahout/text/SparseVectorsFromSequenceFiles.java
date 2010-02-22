@@ -142,7 +142,7 @@ public final class SparseVectorsFromSequenceFiles {
       
       int maxNGramSize = 1;
       
-      if (cmdLine.hasOption(maxNGramSizeOpt) == true) {
+      if (cmdLine.hasOption(maxNGramSizeOpt)) {
         try {
           maxNGramSize = Integer.parseInt(cmdLine.getValue(maxNGramSizeOpt).toString());
         } catch (NumberFormatException ex) {
@@ -151,7 +151,7 @@ public final class SparseVectorsFromSequenceFiles {
       }
       log.info("Maximum n-gram size is: {}", maxNGramSize);
       
-      if (cmdLine.hasOption(overwriteOutput) == true) {
+      if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.overwriteOutput(outputDir);
       }
       

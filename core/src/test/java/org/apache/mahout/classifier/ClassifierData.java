@@ -112,7 +112,7 @@ public final class ClassifierData {
   public static void writeDataToFile(String file, String[][] content) throws IOException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(file));
     for (String[] entry : content) {
-      writer.write(entry[0] + "\t" + entry[1] + "\n");
+      writer.write(entry[0] + '\t' + entry[1] + '\n');
     }
     writer.close();
   }

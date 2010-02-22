@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import org.junit.Test;
 
@@ -76,9 +75,9 @@ public class GramTest {
   public void testEquality() {
     Gram one = new Gram("foo", 2, Gram.Type.HEAD);  
     Gram two = new Gram("foo", 3, Gram.Type.HEAD);
-    
-    Assert.assertTrue(one.equals(two));
-    Assert.assertTrue(two.equals(one));
+
+    Assert.assertEquals(one, two);
+    Assert.assertEquals(two, one);
     
     Gram three = new Gram("foo", 4, Gram.Type.TAIL);
     Gram four = new Gram("foo", Gram.Type.UNIGRAM);
@@ -88,14 +87,14 @@ public class GramTest {
     Assert.assertTrue(!one.equals(four));
     
     Gram five = new Gram("foo", 5, Gram.Type.UNIGRAM);
-    
-    Assert.assertTrue(four.equals(five));
+
+    Assert.assertEquals(four, five);
     
     Gram six = new Gram("foo", 6, Gram.Type.NGRAM);
     Gram seven = new Gram("foo", 7, Gram.Type.NGRAM);
     
     Assert.assertTrue(!five.equals(six));
-    Assert.assertTrue(six.equals(seven));
+    Assert.assertEquals(six, seven);
     
     Gram eight = new Gram("foobar", 4, Gram.Type.TAIL);
     
@@ -164,14 +163,14 @@ public class GramTest {
  public void testWritable() throws IOException {
    Gram one = new Gram("foo", 2, Gram.Type.HEAD);
    Gram two = new Gram("foobar", 3, Gram.Type.UNIGRAM);
-   
-   TestCase.assertEquals("foo", one.getString());
-   TestCase.assertEquals(2, one.getFrequency());
-   TestCase.assertEquals(Gram.Type.HEAD, one.getType());
-   
-   TestCase.assertEquals("foobar", two.getString());
-   TestCase.assertEquals(3, two.getFrequency());
-   TestCase.assertEquals(Gram.Type.UNIGRAM, two.getType());
+
+   Assert.assertEquals("foo", one.getString());
+   Assert.assertEquals(2, one.getFrequency());
+   Assert.assertEquals(Gram.Type.HEAD, one.getType());
+
+   Assert.assertEquals("foobar", two.getString());
+   Assert.assertEquals(3, two.getFrequency());
+   Assert.assertEquals(Gram.Type.UNIGRAM, two.getType());
    
    ByteArrayOutputStream bout = new ByteArrayOutputStream();
    DataOutputStream out = new DataOutputStream(bout);
@@ -184,10 +183,10 @@ public class GramTest {
    DataInputStream din = new DataInputStream(bin);
    
    one.readFields(din);
-   
-   TestCase.assertEquals("foobar", one.getString());
-   TestCase.assertEquals(3, one.getFrequency());
-   TestCase.assertEquals(Gram.Type.UNIGRAM, one.getType());
+
+   Assert.assertEquals("foobar", one.getString());
+   Assert.assertEquals(3, one.getFrequency());
+   Assert.assertEquals(Gram.Type.UNIGRAM, one.getType());
    
  }
 }

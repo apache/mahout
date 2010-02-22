@@ -71,7 +71,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
   /**
    * Create an gram with a frequency of 1
    * 
-   * @param gram
+   * @param ngram
    *          the gram string
    * @param type
    *          whether the gram is at the head or tail of its text unit or it is a unigram
@@ -85,7 +85,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
    * 
    * Create a gram with the specified frequency.
    * 
-   * @param gram
+   * @param ngram
    *          the gram string
    * @param frequency
    *          the gram frequency
@@ -101,7 +101,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     try {  
       // extra character is used for storing type which is part 
       // of the sort key.
-      ByteBuffer bb = Text.encode(ngram + "\0", true);
+      ByteBuffer bb = Text.encode(ngram + '\0', true);
       bytes = bb.array();
       length = bb.limit();
     }
@@ -201,7 +201,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
   }
 
   public String toString() {
-    return "'" + getString() + "'[" + getType().x + "]:" + frequency;
+    return '\'' + getString() + "'[" + getType().x + "]:" + frequency;
   }
   
   public static void encodeType(Type type, byte[] buf, int offset) {

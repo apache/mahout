@@ -22,6 +22,7 @@ import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.UNIGRAM;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.NGRAM;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,13 +52,13 @@ public class CollocReducerTest {
     // test input, input[*][0] is the key,
     // input[*][1..n] are the values passed in via
     // the iterator.
-    Gram[][] input = new Gram[][] {{new Gram("the", UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM)},
+    Gram[][] input = {{new Gram("the", UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM)},
                                    {new Gram("the", HEAD), new Gram("the best", NGRAM), new Gram("the worst", NGRAM)},
                                    {new Gram("of", HEAD), new Gram("of times", NGRAM), new Gram("of times", NGRAM)},
                                    {new Gram("times", TAIL), new Gram("of times", NGRAM), new Gram("of times", NGRAM)}};
     
     // expected results.
-    Gram[][] values = new Gram[][] {{new Gram("the", 2, UNIGRAM), new Gram("the", 2, UNIGRAM)},
+    Gram[][] values = {{new Gram("the", 2, UNIGRAM), new Gram("the", 2, UNIGRAM)},
                                     {new Gram("the best", 1, NGRAM), new Gram("the", 2, HEAD)},
                                     {new Gram("the worst", 1, NGRAM), new Gram("the", 2, HEAD)},
                                     {new Gram("of times", 2, NGRAM), new Gram("of", 2, HEAD)},
@@ -74,9 +75,7 @@ public class CollocReducerTest {
     
     for (Gram[] ii : input) {
       List<Gram> vv = new LinkedList<Gram>();
-      for (int i = 1; i < ii.length; i++) {
-        vv.add(ii[i]);
-      }
+      vv.addAll(Arrays.asList(ii).subList(1, ii.length));
       c.reduce(ii[0], vv.iterator(), output, reporter);
     }
     

@@ -80,7 +80,7 @@ public class CDMapper extends MapReduceBase implements Mapper<LongWritable,Text,
   }
   
   void configure(List<Rule> rules, int target) {
-    if (!(rules != null && !rules.isEmpty())) {
+    if (rules == null || rules.isEmpty()) {
       throw new IllegalArgumentException("bad 'rules' configuration parameter");
     }
     if (target < 0) {
@@ -119,11 +119,11 @@ public class CDMapper extends MapReduceBase implements Mapper<LongWritable,Text,
    *          actual label
    */
   public static CDFitness evaluate(int target, int prediction, int label) {
-    int tp = label == target && prediction == 1 ? 1 : 0;
-    int fp = label != target && prediction == 1 ? 1 : 0;
-    int tn = label != target && prediction == 0 ? 1 : 0;
-    int fn = label == target && prediction == 0 ? 1 : 0;
-    
+    boolean labelIsTarget = label == target;
+    int tp = labelIsTarget && prediction == 1 ? 1 : 0;
+    int fp = !labelIsTarget && prediction == 1 ? 1 : 0;
+    int tn = !labelIsTarget && prediction == 0 ? 1 : 0;
+    int fn = labelIsTarget && prediction == 0 ? 1 : 0;
     return new CDFitness(tp, fp, tn, fn);
   }
 }

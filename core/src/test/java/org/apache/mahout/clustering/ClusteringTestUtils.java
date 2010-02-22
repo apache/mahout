@@ -26,7 +26,6 @@ import org.apache.mahout.math.VectorWritable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public class ClusteringTestUtils {
   private ClusteringTestUtils() {

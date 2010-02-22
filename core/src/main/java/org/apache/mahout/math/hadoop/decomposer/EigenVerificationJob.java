@@ -12,7 +12,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 import org.apache.mahout.common.CommandLineUtil;
@@ -35,7 +34,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +57,8 @@ import java.util.Map;
  * If all the eigenvectors can fit in memory, --inMemory allows for a speedier completion of this task by doing so.
  * </p>
  */
-public class EigenVerificationJob extends AbstractJob implements Tool {
+public class EigenVerificationJob extends AbstractJob {
+
   private static final Logger log = LoggerFactory.getLogger(EigenVerificationJob.class);
 
   private SingularVectorVerifier eigenVerifier;
@@ -230,7 +229,6 @@ public class EigenVerificationJob extends AbstractJob implements Tool {
   }
 
   public static void main(String[] args) throws Exception {
-    int retVal = ToolRunner.run(new EigenVerificationJob(), args);
-    System.exit(retVal);
+    ToolRunner.run(new EigenVerificationJob(), args);
   }
 }
