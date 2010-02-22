@@ -18,6 +18,7 @@
 package org.apache.mahout.benchmark;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -58,25 +59,41 @@ public class VectorBenchmarks implements Summarizable {
 
   private final Vector[][] vectors;
   private final List<Vector> randomVectors = new ArrayList<Vector>();
+  private final List<int[]> randomVectorIndices = new ArrayList<int[]>();
+  private final List<double[]> randomVectorValues = new ArrayList<double[]>();
   private final int cardinality;
+  private final int sparsity;
   private final int numVectors;
   private final int loop;
   private final int opsPerUnit;
   private final Map<String,Integer> implType = new HashMap<String,Integer>();
   private final Map<String,List<String[]>> statsMap = new HashMap<String,List<String[]>>();
   
-  public VectorBenchmarks(int cardinality, int numVectors, int loop, int opsPerUnit) {
+  public VectorBenchmarks(int cardinality, int sparsity, int numVectors, int loop, int opsPerUnit) {
     Random r = RandomUtils.getRandom();
     this.cardinality = cardinality;
+    this.sparsity = sparsity;
     this.numVectors = numVectors;
     this.loop = loop;
     this.opsPerUnit = opsPerUnit;
     for (int i = 0; i < numVectors; i++) {
-      Vector v = new DenseVector(cardinality);
-      for (int j = 0; j < cardinality; j++) {
+      Vector v = new SequentialAccessSparseVector(cardinality, sparsity); // sparsity!
+      BitSet featureSpace = new BitSet(cardinality);
+      int[] indexes = new int[sparsity];
+      double[] values = new double[sparsity];
+      int j = 0;
+      while (j < sparsity) {
         double value = r.nextGaussian();
-        v.set(j, value);
+        int index = r.nextInt(cardinality);
+        if (featureSpace.get(index) == false) {
+          featureSpace.set(index);
+          indexes[j] = index;
+          values[j++] = value;
+          v.set(index, value);
+        }
       }
+      randomVectorIndices.add(indexes);
+      randomVectorValues.add(values);
       randomVectors.add(v);
     }
     vectors = new Vector[3][numVectors];
@@ -96,7 +113,7 @@ public class VectorBenchmarks implements Summarizable {
                           String implName,
                           String content,
                           int multiplier) {
-    float speed = multiplier * loop * numVectors * cardinality * 1000.0f * 12 / stats.getSumTime();
+    float speed = multiplier * loop * numVectors * sparsity * 1000.0f * 12 / stats.getSumTime();
     float opsPerSec = loop * numVectors * 1000000000.0f / stats.getSumTime();
     log.info("{} {} \n{} {} \nSpeed: {} UnitsProcessed/sec {} MBytes/sec                                   ",
       new Object[] {benchmarkName, implName, content, stats.toString(), opsPerSec, speed});
@@ -125,7 +142,7 @@ public class VectorBenchmarks implements Summarizable {
         call.end();
       }
     }
-    printStats(stats, "Create", "DenseVector");
+    printStats(stats, "Create (copy)", "DenseVector");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -135,7 +152,7 @@ public class VectorBenchmarks implements Summarizable {
         call.end();
       }
     }
-    printStats(stats, "Create", "RandomAccessSparseVector");
+    printStats(stats, "Create (copy)", "RandSparseVector");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -145,8 +162,63 @@ public class VectorBenchmarks implements Summarizable {
         call.end();
       }
     }
-    printStats(stats, "Create", "SequentialAccessSparseVector");
+    printStats(stats, "Create (copy)", "SeqSparseVector");
     
+  }
+
+  private void buildVectorIncrementally(TimingStatistics stats, int randomIndex, Vector v, boolean useSetQuick) {
+    int[] indexes = randomVectorIndices.get(randomIndex);
+    double[] values = randomVectorValues.get(randomIndex);
+    List<Integer> randomOrder = new ArrayList<Integer>();
+    for(int i=0; i<indexes.length; i++) {
+      randomOrder.add(i);
+    }
+    Collections.shuffle(randomOrder);
+    int[] permutation = new int[randomOrder.size()];
+    for(int i=0; i<randomOrder.size(); i++) {
+      permutation[i] = randomOrder.get(i);
+    }
+
+    TimingStatistics.Call call = stats.newCall();
+    if(useSetQuick) {
+      for(int i : permutation) {
+        v.setQuick(indexes[i], values[i]);
+      }
+    } else {
+      for(int i : permutation) {
+        v.set(indexes[i], values[i]);
+      }
+    }
+    call.end();
+  }
+
+  public void incrementalCreateBenchmark() {
+    TimingStatistics stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        vectors[0][i] = new DenseVector(cardinality);
+        buildVectorIncrementally(stats, i, vectors[0][i], false);
+      }
+    }
+    printStats(stats, "Create (incrementally)", "DenseVector");
+
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        vectors[1][i] = new RandomAccessSparseVector(cardinality);
+        buildVectorIncrementally(stats, i, vectors[1][i], false);
+      }
+    }
+    printStats(stats, "Create (incrementally)", "RandSparseVector");
+
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        vectors[2][i] = new SequentialAccessSparseVector(cardinality);
+        buildVectorIncrementally(stats, i, vectors[2][i], false);
+      }
+    }
+    printStats(stats, "Create (incrementally)", "SeqSparseVector");
   }
   
   public void cloneBenchmark() {
@@ -168,7 +240,7 @@ public class VectorBenchmarks implements Summarizable {
         call.end();
       }
     }
-    printStats(stats, "Clone", "RandomAccessSparseVector");
+    printStats(stats, "Clone", "RandSparseVector");
     
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -178,7 +250,7 @@ public class VectorBenchmarks implements Summarizable {
         call.end();
       }
     }
-    printStats(stats, "Clone", "SequentialAccessSparseVector");
+    printStats(stats, "Clone", "SeqSparseVector");
     
   }
   
@@ -194,7 +266,7 @@ public class VectorBenchmarks implements Summarizable {
     }
     // print result to prevent hotspot from eliminating deadcode
     printStats(stats, "DotProduct", "DenseVector", "sum = " + result + ' ');
-    
+    result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
@@ -204,8 +276,8 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "RandomAccessSparseVector", "sum = " + result + ' ');
-    
+    printStats(stats, "DotProduct", "RandSparseVector", "sum = " + result + ' ');
+    result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
@@ -215,11 +287,78 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, "DotProduct", "SequentialAccessSparseVector", "sum = " + result + ' ');
-    
+    printStats(stats, "DotProduct", "SeqSparseVector", "sum = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        result += vectors[0][i].dot(vectors[1][(i + 1) % numVectors]);
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, "DotProduct", "Dense.dot(Rand)", "sum = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        result += vectors[0][i].dot(vectors[2][(i + 1) % numVectors]);
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, "DotProduct", "Dense.dot(Seq)", "sum = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        result += vectors[1][i].dot(vectors[0][(i + 1) % numVectors]);
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, "DotProduct", "Rand.dot(Dense)", "sum = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        result += vectors[1][i].dot(vectors[2][(i + 1) % numVectors]);
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, "DotProduct", "Rand.dot(Seq)", "sum = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        result += vectors[2][i].dot(vectors[0][(i + 1) % numVectors]);
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, "DotProduct", "Seq.dot(Dense)", "sum = " + result + ' ');
+    result = 0;
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        result += vectors[2][i].dot(vectors[1][(i + 1) % numVectors]);
+        call.end();
+      }
+    }
+    // print result to prevent hotspot from eliminating deadcode
+    printStats(stats, "DotProduct", "Seq.dot(Rand)", "sum = " + result + ' ');
+
+
   }
   
-  public void distanceMeasureBenchark(DistanceMeasure measure) {
+  public void distanceMeasureBenchmark(DistanceMeasure measure) {
     double result = 0;
     TimingStatistics stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
@@ -238,7 +377,7 @@ public class VectorBenchmarks implements Summarizable {
     }
     // print result to prevent hotspot from eliminating deadcode
     printStats(stats, measure.getClass().getName(), "DenseVector", "minDistance = " + result + ' ');
-    
+    result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
@@ -255,8 +394,9 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, measure.getClass().getName(), "RandomAccessSparseVector", "minDistance = " + result
+    printStats(stats, measure.getClass().getName(), "RandSparseVector", "minDistance = " + result
                                                                                 + ' ');
+    result = 0;
     stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {
@@ -273,7 +413,7 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     // print result to prevent hotspot from eliminating deadcode
-    printStats(stats, measure.getClass().getName(), "SequentialAccessSparseVector", "minDistance = " + result
+    printStats(stats, measure.getClass().getName(), "SeqSparseVector", "minDistance = " + result
                                                                                     + ' ');
     
   }
@@ -287,6 +427,9 @@ public class VectorBenchmarks implements Summarizable {
     Option vectorSizeOpt = obuilder.withLongName("vectorSize").withRequired(false).withArgument(
       abuilder.withName("vs").withMinimum(1).withMaximum(1).create()).withDescription(
       "Cardinality of the vector. Default 1000").withShortName("vs").create();
+    Option vectorSparsityOpt = obuilder.withLongName("sparsity").withRequired(false).withArgument(
+      abuilder.withName("sp").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Sparsity of the vector. Default 1000").withShortName("sp").create();
     Option numVectorsOpt = obuilder.withLongName("numVectors").withRequired(false).withArgument(
       abuilder.withName("nv").withMinimum(1).withMaximum(1).create()).withDescription(
       "Number of Vectors to create. Default: 100").withShortName("nv").create();
@@ -301,8 +444,8 @@ public class VectorBenchmarks implements Summarizable {
     
     Option helpOpt = DefaultOptionCreator.helpOption();
     
-    Group group = gbuilder.withName("Options").withOption(vectorSizeOpt).withOption(numVectorsOpt)
-        .withOption(loopOpt).withOption(numOpsOpt).withOption(helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(vectorSizeOpt).withOption(vectorSparsityOpt)
+        .withOption(numVectorsOpt).withOption(loopOpt).withOption(numOpsOpt).withOption(helpOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -319,12 +462,18 @@ public class VectorBenchmarks implements Summarizable {
         cardinality = Integer.parseInt((String) cmdLine.getValue(vectorSizeOpt));
         
       }
+
+      int sparsity = 1000;
+      if (cmdLine.hasOption(vectorSparsityOpt)) {
+        sparsity = Integer.parseInt((String) cmdLine.getValue(vectorSparsityOpt));
+      }
+
       int numVectors = 100;
       if (cmdLine.hasOption(numVectorsOpt)) {
         numVectors = Integer.parseInt((String) cmdLine.getValue(numVectorsOpt));
         
       }
-      int loop = 200;
+      int loop = 600;
       if (cmdLine.hasOption(loopOpt)) {
         loop = Integer.parseInt((String) cmdLine.getValue(loopOpt));
         
@@ -334,15 +483,16 @@ public class VectorBenchmarks implements Summarizable {
         numOps = Integer.parseInt((String) cmdLine.getValue(numOpsOpt));
         
       }
-      VectorBenchmarks mark = new VectorBenchmarks(cardinality, numVectors, loop, numOps);
+      VectorBenchmarks mark = new VectorBenchmarks(cardinality, sparsity, numVectors, loop, numOps);
       mark.createBenchmark();
+      mark.incrementalCreateBenchmark();
       mark.cloneBenchmark();
       mark.dotBenchmark();
-      mark.distanceMeasureBenchark(new CosineDistanceMeasure());
-      mark.distanceMeasureBenchark(new SquaredEuclideanDistanceMeasure());
-      mark.distanceMeasureBenchark(new EuclideanDistanceMeasure());
-      mark.distanceMeasureBenchark(new ManhattanDistanceMeasure());
-      mark.distanceMeasureBenchark(new TanimotoDistanceMeasure());
+      mark.distanceMeasureBenchmark(new CosineDistanceMeasure());
+      mark.distanceMeasureBenchmark(new SquaredEuclideanDistanceMeasure());
+      mark.distanceMeasureBenchmark(new EuclideanDistanceMeasure());
+      mark.distanceMeasureBenchmark(new ManhattanDistanceMeasure());
+      mark.distanceMeasureBenchmark(new TanimotoDistanceMeasure());
       
       log.info("\n{}", mark.summarize());
     } catch (OptionException e) {
@@ -353,13 +503,13 @@ public class VectorBenchmarks implements Summarizable {
   
   @Override
   public String summarize() {
-    int pad = 30;
+    int pad = 24;
     StringBuilder sb = new StringBuilder(1000);
     sb.append(StringUtils.rightPad("BenchMarks", pad));
     for (int i = 0; i < implType.size(); i++) {
       for (Entry<String,Integer> e : implType.entrySet()) {
         if (e.getValue() == i) {
-          sb.append(StringUtils.rightPad(e.getKey(), pad));
+          sb.append(StringUtils.rightPad(e.getKey(), pad).substring(0, pad));
           break;
         }
       }

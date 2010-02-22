@@ -23,7 +23,6 @@ import java.util.NoSuchElementException;
 import org.apache.mahout.math.function.IntDoubleProcedure;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
-import org.apache.mahout.math.set.OpenIntHashSet;
 
 
 /** Implements vector that only stores non-zero doubles */
@@ -248,52 +247,6 @@ public class RandomAccessSparseVector extends AbstractVector {
       values.put(ind, value);
     }
   }
-  
-  private static class DistanceSquared implements IntDoubleProcedure {
-    final Vector v;
-    final OpenIntHashSet skipSet;
-    public double result = 0.0;
-
-    DistanceSquared(Vector v, OpenIntHashSet skipSet) {
-      this.v = v;
-      this.skipSet = skipSet;
-    }
-
-    public boolean apply(int key, double value) {
-      if(skipSet.contains(key)) {
-        // returning true is ok, yes?  It is ignored.
-        return true;
-      }
-      skipSet.add(key);
-      double centroidValue = v.get(key);
-      double delta = value - centroidValue;
-      result += (delta * delta);// - (centroidValue * centroidValue);
-      return true;
-    }
-  }
-
-  // TODO is this more optimal than the version in AbstractVector?  Should be checked.
-  @Override
-  public double getDistanceSquared(Vector v) {
-    if(v instanceof DenseVector) {
-      // quicker to just use the DenseVector version
-      return v.getDistanceSquared(this);
-    }
-    if (v.size() != size()) {
-      throw new CardinalityException();
-    }
-    OpenIntHashSet used = new OpenIntHashSet();
-    DistanceSquared distanceSquared = new DistanceSquared(v, used);
-    values.forEachPair(distanceSquared);
-    Iterator<Vector.Element> it = v.iterateNonZero();
-    Vector.Element e;
-    DistanceSquared otherHalf = new DistanceSquared(this, used);
-    while(it.hasNext() && (e = it.next()) != null) {
-      otherHalf.apply(e.index(), e.get());
-    }
-    return distanceSquared.result + otherHalf.result;
-  }
-
 
   private static class AddToVector implements IntDoubleProcedure {
     final Vector v;
@@ -315,5 +268,29 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
     values.forEachPair(new AddToVector(v));
   }
-
+  @Override
+  public double dot(Vector x) {
+    if (size() != x.size()) {
+      throw new CardinalityException(size(), x.size());
+    }
+    if(this == x) return dotSelf();
+    
+    double result = 0;
+    if (x instanceof SequentialAccessSparseVector || x instanceof RandomAccessSparseVector) {
+      Iterator<org.apache.mahout.math.Vector.Element> iter = x.iterateNonZero();
+      while (iter.hasNext()) {
+        org.apache.mahout.math.Vector.Element element = iter.next();
+        result += element.get() * getQuick(element.index());
+      }
+      return result;
+    } else { 
+      Iterator<org.apache.mahout.math.Vector.Element> iter = iterateNonZero();
+      while (iter.hasNext()) {
+        org.apache.mahout.math.Vector.Element element = iter.next();
+        result += element.get() * x.getQuick(element.index());
+      }
+      return result;
+    }
+  }
+  
 }

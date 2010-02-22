@@ -20,6 +20,8 @@ package org.apache.mahout.math;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.mahout.math.Vector.Element;
+
 /**
  * <p>
  * Implements vector that only stores non-zero doubles as a pair of parallel arrays (OrderedIntDoubleMapping),
@@ -279,4 +281,48 @@ public class SequentialAccessSparseVector extends AbstractVector {
       values[offset] = value;
     }
   }
+  
+  @Override
+  public double dot(Vector x) {
+    if (size() != x.size()) {
+      throw new CardinalityException(size(), x.size());
+    }
+    if(this == x) return dotSelf();
+    
+    double result = 0;
+    if (x instanceof SequentialAccessSparseVector) {
+      // For sparse SeqAccVectors. do dot product without lookup in a linear fashion
+      Iterator<Element> myIter = iterateNonZero();
+      Iterator<Element> otherIter = x.iterateNonZero();
+      Element myCurrent = null;
+      Element otherCurrent = null;
+      while (myIter.hasNext() && otherIter.hasNext()) {
+        if (myCurrent == null) myCurrent = myIter.next();
+        if (otherCurrent == null) otherCurrent = otherIter.next();
+        
+        int myIndex = myCurrent.index();
+        int otherIndex = otherCurrent.index();
+        
+        if (myIndex < otherIndex) {
+          // due to the sparseness skipping occurs more hence checked before equality
+          myCurrent = null;
+        } else if (myIndex > otherIndex){
+          otherCurrent = null;
+        } else { // both are equal 
+          result += myCurrent.get() * otherCurrent.get();
+          myCurrent = null;
+          otherCurrent = null;
+        } 
+      }
+      return result;
+    } else { // seq.rand. seq.dense
+      Iterator<Element> iter = iterateNonZero();
+      while (iter.hasNext()) {
+        Element element = iter.next();
+        result += element.get() * x.getQuick(element.index());
+      }
+      return result;
+    }
+  }
+  
 }

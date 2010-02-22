@@ -388,6 +388,39 @@ public class VectorTest extends TestCase {
     assertEquals(idx + " does not equal: " + 0, 0, idx);
 
     vec1 = new RandomAccessSparseVector(3);
+
+    vec1.setQuick(0, -1);
+    vec1.setQuick(2, -2);
+    
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal: " + 0, 0d, max, 0.0);
+
+    idx = vec1.maxValueIndex();
+    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    
+    vec1 = new SequentialAccessSparseVector(3);
+
+    vec1.setQuick(0, -1);
+    vec1.setQuick(2, -2);
+    
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal: " + 0, 0d, max, 0.0);
+
+    idx = vec1.maxValueIndex();
+    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    
+    vec1 = new DenseVector(3);
+
+    vec1.setQuick(0, -1);
+    vec1.setQuick(2, -2);
+    
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal: " + 0, 0d, max, 0.0);
+
+    idx = vec1.maxValueIndex();
+    assertEquals(idx + " does not equal: " + 1, 1, idx);
+    
+    vec1 = new RandomAccessSparseVector(3);
     max = vec1.maxValue();
     assertEquals(max + " does not equal 0", 0d, max);
 

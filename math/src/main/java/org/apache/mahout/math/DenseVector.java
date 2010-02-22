@@ -17,12 +17,12 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.PlusMult;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.PlusMult;
 
 /** Implements vector as an array of doubles */
 public class DenseVector extends AbstractVector {
@@ -312,6 +312,30 @@ public class DenseVector extends AbstractVector {
     }
     for (int i = 0; i < values.length; i++) {
       v.setQuick(i, values[i] + v.getQuick(i));
+    }
+  }
+  
+  @Override
+  public double dot(Vector x) {
+    if (size() != x.size()) {
+      throw new CardinalityException(size(), x.size());
+    }
+    if(this == x) return dotSelf();
+    
+    double result = 0;
+    if (x instanceof DenseVector) {
+      for (int i = 0; i < x.size(); i++) {
+        result += this.getQuick(i) * x.getQuick(i);
+      }
+      return result;
+    } else {
+      // Try to get the speed boost associated fast/normal seq access on x and quick lookup on this
+      Iterator<org.apache.mahout.math.Vector.Element> iter = x.iterateNonZero();
+      while (iter.hasNext()) {
+        org.apache.mahout.math.Vector.Element element = iter.next();
+        result += element.get() * getQuick(element.index());
+      }
+      return result;
     }
   }
 }

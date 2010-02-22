@@ -327,7 +327,7 @@ public class TestSparseVector extends TestCase {
     other.set(3, -9);
     other.set(4, 1);
     double expected = test.minus(other).getLengthSquared();
-    assertEquals("a.getDistanceSquared(b) != a.minus(b).getLengthSquared", expected, test.getDistanceSquared(other));
+    assertEquals("a.getDistanceSquared(b) != a.minus(b).getLengthSquared", Math.abs(expected - test.getDistanceSquared(other)) < 10E-7, true);
   }
 
   public void testAssignDouble() {
