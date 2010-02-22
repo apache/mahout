@@ -36,7 +36,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   public RandomAccessSparseVector(int cardinality) {
-    this(null, cardinality, INITIAL_SIZE); // arbitrary estimate of
+    this(null, cardinality, Math.min(cardinality, INITIAL_SIZE)); // arbitrary estimate of
     // 'sparseness'
   }
 
@@ -45,7 +45,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   public RandomAccessSparseVector(String name, int cardinality) {
-    this(name, cardinality, INITIAL_SIZE); // arbitrary estimate of
+    this(name, cardinality, Math.min(cardinality, INITIAL_SIZE)); // arbitrary estimate of
     // 'sparseness'
   }
 
