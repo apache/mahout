@@ -325,7 +325,7 @@ public class DenseVector extends AbstractVector {
     double result = 0;
     if (x instanceof DenseVector) {
       for (int i = 0; i < x.size(); i++) {
-        result += this.getQuick(i) * x.getQuick(i);
+        result += this.values[i] * x.getQuick(i);
       }
       return result;
     } else {
@@ -333,7 +333,7 @@ public class DenseVector extends AbstractVector {
       Iterator<org.apache.mahout.math.Vector.Element> iter = x.iterateNonZero();
       while (iter.hasNext()) {
         org.apache.mahout.math.Vector.Element element = iter.next();
-        result += element.get() * getQuick(element.index());
+        result += element.get() * this.values[element.index()];
       }
       return result;
     }
