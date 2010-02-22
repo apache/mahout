@@ -23,8 +23,10 @@ import java.io.IOException;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
 
 public class Cluster extends ClusterBase {
@@ -33,13 +35,13 @@ public class Cluster extends ClusterBase {
   private static final String ERROR_UNKNOWN_CLUSTER_FORMAT = "Unknown cluster format:\n";
   
   /** The current centroid is lazy evaluated and may be null */
-  private Vector centroid = null;
+  private Vector centroid;
   
   /** The total of all the points squared, used for std computation */
-  private Vector pointSquaredTotal = null;
+  private Vector pointSquaredTotal;
   
   /** Has the centroid converged with the center? */
-  private boolean converged = false;
+  private boolean converged;
   
   /**
    * Format the cluster for output
@@ -100,7 +102,7 @@ public class Cluster extends ClusterBase {
     this.converged = in.readBoolean();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    this.setCenter(temp.get());
+    this.setCenter(new RandomAccessSparseVector(temp.get()));
     this.setNumPoints(0);
     this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();
@@ -130,7 +132,7 @@ public class Cluster extends ClusterBase {
    */
   public Cluster(Vector center) {
     super();
-    this.setCenter(center);
+    this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);
     this.setPointTotal(center.like());
     this.pointSquaredTotal = center.like();
@@ -148,10 +150,10 @@ public class Cluster extends ClusterBase {
   public Cluster(Vector center, int clusterId) {
     super();
     this.setId(clusterId);
-    this.setCenter(center);
+    this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);
     this.setPointTotal(center.like());
-    this.pointSquaredTotal = center.like();
+    this.pointSquaredTotal = getCenter().like();
   }
   
   /** Construct a new clsuter with the given id as identifier */
@@ -195,10 +197,10 @@ public class Cluster extends ClusterBase {
     setNumPoints(getNumPoints() + count);
     if (getPointTotal() == null) {
       setPointTotal(delta.clone());
-      pointSquaredTotal = delta.times(delta);
+      pointSquaredTotal = new RandomAccessSparseVector(delta.clone().assign(Functions.square));
     } else {
       delta.addTo(getPointTotal());
-      delta.times(delta).addTo(pointSquaredTotal);
+      delta.clone().assign(Functions.square).addTo(pointSquaredTotal);
     }
   }
   

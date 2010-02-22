@@ -25,6 +25,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -48,8 +49,8 @@ public class Canopy extends ClusterBase {
    */
   public Canopy(Vector point, int canopyId) {
     this.setId(canopyId);
-    this.setCenter(point.clone());
-    this.setPointTotal(point.clone());
+    this.setCenter(new RandomAccessSparseVector(point.clone()));
+    this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }
   
@@ -64,7 +65,7 @@ public class Canopy extends ClusterBase {
     super.readFields(in);
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    this.setCenter(temp.get());
+    this.setCenter(new RandomAccessSparseVector(temp.get()));
     this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }
@@ -106,8 +107,7 @@ public class Canopy extends ClusterBase {
    */
   public void addPoint(Vector point) {
     setNumPoints(getNumPoints() + 1);
-    setPointTotal(getPointTotal().plus(point));
-    
+    point.addTo(getPointTotal());
   }
   
   /**
