@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * This class will also look for update "delta" files in the same directory, with file names that start the
  * same way (up to the first period). These files should have the same format, and provide updated data that
  * supersedes what is in the main data file. This is a mechanism that allows an application to push updates to
- * {@link FileDataModel} without re-copying the entire data file.
+ *  without re-copying the entire data file.
  * </p>
  * 
  * <p>
@@ -610,7 +610,7 @@ public class FileDataModel implements DataModel {
   }
   
   /**
-   * Note that this method only updates the in-memory preference data that this {@link FileDataModel}
+   * Note that this method only updates the in-memory preference data that this
    * maintains; it does not modify any data on disk. Therefore any updates from this method are only
    * temporary, and lost when data is reloaded from a file. This method should also be considered relatively
    * slow.

@@ -40,7 +40,6 @@ It is provided "as is" without expressed or implied warranty.
  * @see java.util.Comparator
  * @see org.apache.mahout.math.Sorting
  */
-
 public interface ${valueTypeCap}Comparator {
 
   /**
@@ -76,8 +75,7 @@ public interface ${valueTypeCap}Comparator {
    * @param obj the reference object with which to compare.
    * @return <code>true</code> only if the specified object is also a comparator and it imposes the same ordering as
    *         this comparator.
-   * @see java.lang.Object#equals(java.lang.Object)
-   * @see java.lang.Object#hashCode()
+   * @see Object#hashCode()
    */
   boolean equals(Object obj);
 }

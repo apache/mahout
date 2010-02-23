@@ -50,7 +50,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
   
   /**
    * <p>
-   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} (named
+   * Creates a  using the default {@link javax.sql.DataSource} (named
    * {@link #DEFAULT_DATASOURCE_NAME} and default table/column names.
    * </p>
    * 
@@ -63,7 +63,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
   
   /**
    * <p>
-   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the default {@link javax.sql.DataSource} found
+   * Creates a  using the default {@link javax.sql.DataSource} found
    * under the given name, and using default table/column names.
    * </p>
    * 
@@ -81,7 +81,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
   
   /**
    * <p>
-   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
+   * Creates a  using the given {@link javax.sql.DataSource} and default
    * table/column names.
    * </p>
    * 
@@ -97,7 +97,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
   
   /**
    * <p>
-   * Creates a {@link MySQLBooleanPrefJDBCDataModel} using the given {@link javax.sql.DataSource} and default
+   * Creates a  using the given {@link javax.sql.DataSource} and default
    * table/column names.
    * </p>
    * 

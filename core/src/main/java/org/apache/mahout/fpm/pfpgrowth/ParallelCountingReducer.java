@@ -24,7 +24,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 /**
- * {@link ParallelCountingReducer} sums up the item count and output the item and the count This can also be
+ *  sums up the item count and output the item and the count This can also be
  * used as a local Combiner. A simple summing reducer
  */
 public class ParallelCountingReducer extends Reducer<Text,LongWritable,Text,LongWritable> {

@@ -51,14 +51,6 @@ public interface Parametered extends JobConfigurable {
   class ParameteredGeneralizations {
     private ParameteredGeneralizations() { }
     
-    /**
-     * @param parametered
-     *          instance to be configured
-     * @param jobConf
-     *          configuration used for retreiving values
-     * @see #configureParameters(Parametered,org.apache.hadoop.mapred.JobConf) Uses parametered simple class
-     *      name as prefix.
-     */
     public static void configureParameters(Parametered parametered, JobConf jobConf) {
       configureParameters(parametered.getClass().getSimpleName() + '.',
         parametered, jobConf);

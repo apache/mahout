@@ -50,7 +50,7 @@ public class KMeansClusterer {
   
   /**
    * Iterates over all clusters and identifies the one closes to the given point. Distance measure used is
-   * configured at creation time of {@link KMeansClusterer}.
+   * configured at creation time of .
    * 
    * @param point
    *          a point to find a cluster for.

@@ -59,7 +59,7 @@ public interface Datastore {
   Collection<String> getKeys(String name) throws InvalidDatastoreException;
   
   /**
-   * Initializes the {@link Datastore} and loads the model into memory/cache if necessary
+   * Initializes the  and loads the model into memory/cache if necessary
    * 
    * @throws InvalidDatastoreException
    */

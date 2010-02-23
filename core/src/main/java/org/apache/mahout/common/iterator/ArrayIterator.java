@@ -36,7 +36,7 @@ public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> 
   
   /**
    * <p>
-   * Creates an {@link ArrayIterator} over an entire array.
+   * Creates an  over an entire array.
    * </p>
    * 
    * @param array

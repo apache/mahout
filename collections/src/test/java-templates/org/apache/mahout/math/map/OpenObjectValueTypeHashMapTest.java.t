@@ -38,7 +38,7 @@ import org.junit.Test;
 public class OpenObject${valueTypeCap}HashMapTest extends Assert {
 
     private static class NotComparableKey {
-    protected int x;
+    private int x;
     
     public NotComparableKey(int x) {
       this.x = x;

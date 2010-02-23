@@ -34,7 +34,7 @@ public final class CaseAmplification implements SimilarityTransform {
   
   /**
    * <p>
-   * Creates a {@link CaseAmplification} transformation based on the given factor.
+   * Creates a  transformation based on the given factor.
    * </p>
    * 
    * @param factor

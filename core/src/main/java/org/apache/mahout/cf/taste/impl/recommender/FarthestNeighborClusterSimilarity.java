@@ -41,7 +41,7 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
   
   /**
    * <p>
-   * Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}. All
+   * Constructs a  based on the given {@link UserSimilarity}. All
    * user-user similarities are examined.
    * </p>
    */
@@ -51,7 +51,7 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
   
   /**
    * <p>
-   * Constructs a {@link FarthestNeighborClusterSimilarity} based on the given {@link UserSimilarity}. By
+   * Constructs a  based on the given {@link UserSimilarity}. By
    * setting <code>samplingRate</code> to a value less than 1.0, this implementation will only examine that
    * fraction of all user-user similarities between two clusters, increasing performance at the expense of
    * accuracy.

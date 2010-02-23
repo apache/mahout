@@ -39,7 +39,7 @@ public final class FastIDSet implements Serializable, Cloneable {
   private int numEntries;
   private int numSlotsUsed;
   
-  /** Creates a new {@link FastIDSet} with default capacity. */
+  /** Creates a new  with default capacity. */
   public FastIDSet() {
     this(2);
   }
@@ -255,10 +255,10 @@ public final class FastIDSet implements Serializable, Cloneable {
   }
   
   /**
-   * Convenience method to quickly compute just the size of the intersection with another {@link FastIDSet}.
+   * Convenience method to quickly compute just the size of the intersection with another .
    * 
    * @param other
-   *          {@link FastIDSet} to intersect with
+   *           to intersect with
    * @return number of elements in intersection
    */
   public int intersectionSize(FastIDSet other) {

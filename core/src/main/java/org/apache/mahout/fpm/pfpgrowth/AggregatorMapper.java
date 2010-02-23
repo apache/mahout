@@ -28,7 +28,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 
 /**
  * 
- * {@link AggregatorMapper} outputs the pattern for each item in the pattern, so that reducer can group them
+ *  outputs the pattern for each item in the pattern, so that reducer can group them
  * and select the top K frequent patterns
  * 
  */

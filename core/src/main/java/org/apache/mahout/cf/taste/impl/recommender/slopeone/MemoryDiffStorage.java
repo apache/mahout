@@ -67,7 +67,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   
   /**
    * <p>
-   * Creates a new {@link MemoryDiffStorage}.
+   * Creates a new .
    * </p>
    * 
    * <p>

@@ -47,7 +47,6 @@ public interface DoubleMatrix1DComparator {
    * @param obj the reference object with which to compare.
    * @return <code>true</code> only if the specified object is also a comparator and it imposes the same ordering as
    *         this comparator.
-   * @see java.lang.Object#equals(java.lang.Object)
    * @see java.lang.Object#hashCode()
    */
   boolean equals(Object obj);

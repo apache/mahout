@@ -129,7 +129,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
   
   /**
    * <p>
-   * Creates a {@link MySQLJDBCDataModel} using the default {@link DataSource} (named
+   * Creates a  using the default {@link DataSource} (named
    * {@link #DEFAULT_DATASOURCE_NAME} and default table/column names.
    * </p>
    * 
@@ -142,7 +142,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
   
   /**
    * <p>
-   * Creates a {@link MySQLJDBCDataModel} using the default {@link DataSource} found under the given name, and
+   * Creates a  using the default {@link DataSource} found under the given name, and
    * using default table/column names.
    * </p>
    * 
@@ -161,7 +161,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
   
   /**
    * <p>
-   * Creates a {@link MySQLJDBCDataModel} using the given {@link DataSource} and default table/column names.
+   * Creates a  using the given {@link DataSource} and default table/column names.
    * </p>
    * 
    * @param dataSource
@@ -177,7 +177,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
   
   /**
    * <p>
-   * Creates a {@link MySQLJDBCDataModel} using the given {@link DataSource} and default table/column names.
+   * Creates a  using the given {@link DataSource} and default table/column names.
    * </p>
    * 
    * @param dataSource

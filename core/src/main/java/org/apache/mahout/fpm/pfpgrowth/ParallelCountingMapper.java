@@ -27,7 +27,7 @@ import org.apache.mahout.common.Parameters;
 
 /**
  * 
- * {@link ParallelCountingMapper} maps all items in a particular transaction like the way it is done in Hadoop
+ *  maps all items in a particular transaction like the way it is done in Hadoop
  * WordCount example
  * 
  */

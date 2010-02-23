@@ -59,7 +59,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
   
   /**
    * <p>
-   * Creates a {@link InverseUserFrequency} transformation. Computations use the given log base.
+   * Creates a  transformation. Computations use the given log base.
    * </p>
    * 
    * @param dataModel

@@ -30,7 +30,7 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
   
   /**
    * <p>
-   * Creates an {@link LongPrimitiveArrayIterator} over an entire array.
+   * Creates an  over an entire array.
    * </p>
    * 
    * @param array

@@ -26,7 +26,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.Pair;
 
 /**
- * {@link ParallelFPGrowthCombiner} takes each group of dependent transactions and\ compacts it in a
+ *  takes each group of dependent transactions and\ compacts it in a
  * TransactionTree structure
  */
 

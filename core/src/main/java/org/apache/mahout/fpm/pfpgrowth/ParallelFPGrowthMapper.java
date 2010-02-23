@@ -32,7 +32,7 @@ import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
- * {@link ParallelFPGrowthMapper} maps each transaction to all unique items groups in the transaction. mapper
+ *  maps each transaction to all unique items groups in the transaction. mapper
  * outputs the group id as key and the transaction as value
  * 
  */

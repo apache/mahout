@@ -51,7 +51,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
   
   /**
    * <p>
-   * Creates a {@link GenericItemSimilarity} from a precomputed list of {@link ItemItemSimilarity}s. Each
+   * Creates a  from a precomputed list of {@link ItemItemSimilarity}s. Each
    * represents the similarity between two distinct items. Since similarity is assumed to be symmetric, it is
    * not necessary to specify similarity between item1 and item2, and item2 and item1. Both are the same. It
    * is also not necessary to specify a similarity between any item and itself; these are assumed to be 1.0.
@@ -97,7 +97,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * </p>
    * 
    * <p>
-   * It's valid to build a {@link GenericItemSimilarity} this way, but perhaps missing some of the point of an
+   * It's valid to build a  this way, but perhaps missing some of the point of an
    * item-based recommender. Item-based recommenders use the assumption that item-item similarities are
    * relatively fixed, and might be known already independent of user preferences. Hence it is useful to
    * inject that information, using {@link #GenericItemSimilarity(Iterable)}.

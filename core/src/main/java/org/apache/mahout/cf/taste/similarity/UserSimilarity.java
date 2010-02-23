@@ -47,7 +47,7 @@ public interface UserSimilarity extends Refreshable {
   
   /**
    * <p>
-   * Attaches a {@link PreferenceInferrer} to the {@link UserSimilarity} implementation.
+   * Attaches a {@link PreferenceInferrer} to the  implementation.
    * </p>
    * 
    * @param inferrer

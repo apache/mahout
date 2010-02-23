@@ -34,7 +34,7 @@ import org.apache.mahout.common.Parameters;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
- * {@link TransactionSortingMapper} maps each transaction to all unique items groups in the transaction.
+ *  maps each transaction to all unique items groups in the transaction.
  * mapper outputs the group id as key and the transaction as value
  * 
  */

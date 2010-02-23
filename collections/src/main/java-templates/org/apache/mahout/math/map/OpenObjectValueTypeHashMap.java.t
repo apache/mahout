@@ -44,16 +44,16 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
   protected static final Object NO_KEY_VALUE = null;
 
   /** The hash table keys. */
-  protected Object[] table;
+  private Object[] table;
 
   /** The hash table values. */
-  protected ${valueType}[] values;
+  private ${valueType}[] values;
 
   /** The state of each hash table entry (FREE, FULL, REMOVED). */
-  protected byte[] state;
+  private byte[] state;
 
   /** The number of table entries in state==FREE. */
-  protected int freeEntries;
+  private int freeEntries;
 
 
   /** Constructs an empty map with default capacity and default load factors. */
@@ -192,8 +192,8 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
   }
 
   /**
-   * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(double)} whether the given key has a value associated or not, i.e. whether there exists an association
+   * Returns the value associated with the specified key. It is often a good idea to first check with 
+   * containsKey(${keyType}) whether the given key has a value associated or not, i.e. whether there exists an association
    * for the given key or not.
    *
    * @param key the key to be searched for.

@@ -21,7 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
  * <p>
- * An efficient Map-like class which caches values for keys. Values are not "put" into a {@link Cache};
+ * An efficient Map-like class which caches values for keys. Values are not "put" into a ;
  * instead the caller supplies the instance with an implementation of {@link Retriever} which can load the
  * value for a given key.
  * </p>

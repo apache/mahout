@@ -32,12 +32,6 @@ public class PerceptronTrainer extends LinearTrainer {
   /** Rate the model is to be updated with at each step. */
   private final double learningRate;
   
-  /**
-   * {@inheritDoc}
-   * 
-   * @param learningRate
-   *          rate to update the model with at each step.
-   * */
   public PerceptronTrainer(int dimension, double threshold,
                            double learningRate, double init, double initBias) throws CardinalityException {
     super(dimension, threshold, init, initBias);

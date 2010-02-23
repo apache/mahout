@@ -44,7 +44,7 @@ import org.apache.mahout.math.map.OpenLongObjectHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 /**
- * {@link ParallelFPGrowthReducer} takes each group of transactions and runs Vanilla FPGrowth on it and
+ *  takes each group of transactions and runs Vanilla FPGrowth on it and
  * outputs the the Top K frequent Patterns for each group.
  * 
  */

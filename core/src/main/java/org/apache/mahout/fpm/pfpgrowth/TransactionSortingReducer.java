@@ -23,7 +23,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 
 /**
- * {@link TransactionSortingReducer} takes each group of transactions and runs Vanilla FPGrowth on it and
+ *  takes each group of transactions and runs Vanilla FPGrowth on it and
  * outputs the the Top K frequent Patterns for each group.
  * 
  */

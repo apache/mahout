@@ -38,17 +38,17 @@ public final class FileLineIterable implements Iterable<String> {
   private final Charset encoding;
   private final boolean skipFirstLine;
   
-  /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
+  /** Creates a  over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file) throws IOException {
     this(file, UTF8, false);
   }
   
-  /** Creates a {@link FileLineIterable} over a given file, assuming a UTF-8 encoding. */
+  /** Creates a  over a given file, assuming a UTF-8 encoding. */
   public FileLineIterable(File file, boolean skipFirstLine) throws IOException {
     this(file, UTF8, skipFirstLine);
   }
   
-  /** Creates a {@link FileLineIterable} over a given file, using the given encoding. */
+  /** Creates a  over a given file, using the given encoding. */
   public FileLineIterable(File file, Charset encoding, boolean skipFirstLine) throws IOException {
     this(FileLineIterator.getFileInputStream(file), encoding, skipFirstLine);
   }

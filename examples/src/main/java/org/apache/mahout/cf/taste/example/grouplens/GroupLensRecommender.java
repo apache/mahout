@@ -37,10 +37,6 @@ public final class GroupLensRecommender implements Recommender {
   
   private final Recommender recommender;
   
-  /**
-   * @throws IOException if an error occurs while creating the {@link GroupLensDataModel}
-   * @throws TasteException if an error occurs while initializing this {@link GroupLensRecommender}
-   */
   public GroupLensRecommender() throws IOException, TasteException {
     this(new GroupLensDataModel());
   }
@@ -50,7 +46,7 @@ public final class GroupLensRecommender implements Recommender {
    * to be used with the {@link org.apache.mahout.cf.taste.eval.RecommenderEvaluator} framework.</p>
    *
    * @param dataModel data model
-   * @throws TasteException if an error occurs while initializing this {@link GroupLensRecommender}
+   * @throws TasteException if an error occurs while initializing this
    */
   public GroupLensRecommender(DataModel dataModel) throws TasteException {
     recommender = new CachingRecommender(new SlopeOneRecommender(dataModel));

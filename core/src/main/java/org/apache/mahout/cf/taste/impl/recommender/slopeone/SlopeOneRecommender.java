@@ -60,7 +60,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   
   /**
    * <p>
-   * Creates a default (weighted) {@link SlopeOneRecommender} based on the given {@link DataModel}.
+   * Creates a default (weighted)  based on the given {@link DataModel}.
    * </p>
    * 
    * @param dataModel
@@ -73,7 +73,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   
   /**
    * <p>
-   * Creates a {@link SlopeOneRecommender} based on the given {@link DataModel}.
+   * Creates a  based on the given {@link DataModel}.
    * </p>
    * 
    * <p>

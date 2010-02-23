@@ -26,7 +26,7 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 
 /**
  * 
- * {@link AggregatorReducer} groups all Frequent Patterns containing an item and outputs the top K patterns
+ *  groups all Frequent Patterns containing an item and outputs the top K patterns
  * containing that particular item
  * 
  */

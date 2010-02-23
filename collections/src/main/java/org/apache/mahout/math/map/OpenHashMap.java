@@ -202,7 +202,7 @@ public class OpenHashMap<K,V> extends AbstractSet implements Map<K,V> {
 
   /**
    * Returns the value associated with the specified key. It is often a good idea to first check with {@link
-   * #containsKey(double)} whether the given key has a value associated or not, i.e. whether there exists an association
+   * #containsKey(Object)} whether the given key has a value associated or not, i.e. whether there exists an association
    * for the given key or not.
    *
    * @param key the key to be searched for.

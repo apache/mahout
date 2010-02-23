@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.apache.mahout.math.map.OpenLongObjectHashMap;
 
-/** {@link FrequentPatternMaxHeap} keeps top K Attributes in a TreeSet */
+/**  keeps top K Attributes in a TreeSet */
 public final class FrequentPatternMaxHeap {
   
   private int count;

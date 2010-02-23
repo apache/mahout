@@ -20,7 +20,7 @@ package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 import java.util.Arrays;
 
 /**
- * A {@link Pattern} in FPGrowth is a list of items (here int) and the
+ * A  in FPGrowth is a list of items (here int) and the
  * support(the number of times the pattern is seen in the dataset)
  * 
  */

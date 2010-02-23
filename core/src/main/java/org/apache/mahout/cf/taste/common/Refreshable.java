@@ -38,13 +38,13 @@ public interface Refreshable {
   /**
    * <p>
    * Triggers "refresh" -- whatever that means -- of the implementation. The general contract is that any
-   * {@link Refreshable} should always leave itself in a consistent, operational state, and that the refresh
+   *  should always leave itself in a consistent, operational state, and that the refresh
    * atomically updates internal state from old to new.
    * </p>
    * 
    * @param alreadyRefreshed
-   *          {@link org.apache.mahout.cf.taste.common.Refreshable}s that are known to have already been
-   *          refreshed as a result of an initial call to a {@link #refresh(Collection)} method on some
+   *          s that are known to have already been
+   *          refreshed as a result of an initial call to a  method on some
    *          object. This ensure that objects in a refresh dependency graph aren't refreshed twice
    *          needlessly.
    */

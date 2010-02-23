@@ -66,7 +66,7 @@ public final class RefreshHelper implements Refreshable {
   }
   
   /**
-   * Typically this is called in {@link Refreshable#refresh(java.util.Collection)} and is the entire body of
+   * Typically this is called in  and is the entire body of
    * that method.
    */
   @Override

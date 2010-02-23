@@ -55,12 +55,12 @@ public final class GenericDataModel implements DataModel, Serializable {
   
   /**
    * <p>
-   * Creates a new {@link GenericDataModel} from the given users (and their preferences). This
+   * Creates a new  from the given users (and their preferences). This
    * {@link DataModel} retains all this information in memory and is effectively immutable.
    * </p>
    * 
    * @param userData
-   *          users to include in this {@link GenericDataModel} (see also
+   *          users to include in this  (see also
    *          {@link #toDataMap(FastByIDMap, boolean)})
    */
   public GenericDataModel(FastByIDMap<PreferenceArray> userData) {
@@ -112,7 +112,7 @@ public final class GenericDataModel implements DataModel, Serializable {
   
   /**
    * <p>
-   * Creates a new {@link GenericDataModel} containing an immutable copy of the data from another given
+   * Creates a new  containing an immutable copy of the data from another given
    * {@link DataModel}.
    * </p>
    * 

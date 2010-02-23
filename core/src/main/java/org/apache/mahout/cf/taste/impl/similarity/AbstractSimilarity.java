@@ -46,7 +46,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   
   /**
    * <p>
-   * Creates a normal (unweighted) {@link AbstractSimilarity}.
+   * Creates a normal (unweighted) .
    * </p>
    */
   AbstractSimilarity(DataModel dataModel) throws TasteException {
@@ -55,7 +55,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   
   /**
    * <p>
-   * Creates a possibly weighted {@link AbstractSimilarity}.
+   * Creates a possibly weighted .
    * </p>
    */
   AbstractSimilarity(final DataModel dataModel, Weighting weighting) throws TasteException {

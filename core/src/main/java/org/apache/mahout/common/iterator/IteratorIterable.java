@@ -31,11 +31,11 @@ public final class IteratorIterable<T> implements Iterable<T> {
   
   /**
    * <p>
-   * Constructs an {@link IteratorIterable} for an {@link Iterator}.
+   * Constructs an  for an {@link Iterator}.
    * </p>
    * 
    * @param iterator
-   *          {@link Iterator} on which to base this {@link IteratorIterable}
+   *          {@link Iterator} on which to base this
    */
   public IteratorIterable(Iterator<T> iterator) {
     if (iterator == null) {

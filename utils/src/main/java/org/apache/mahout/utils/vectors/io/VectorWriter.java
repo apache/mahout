@@ -27,7 +27,6 @@ public interface VectorWriter {
    * @return the number of docs written
    * @throws IOException if there was a problem writing
    *
-   * @see #write(Iterable
    */
   long write(Iterable<Vector> iterable) throws IOException;
   
