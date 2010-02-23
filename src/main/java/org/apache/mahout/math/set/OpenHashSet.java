@@ -39,13 +39,13 @@ public class OpenHashSet<T> extends AbstractSet implements Set<T>  {
   protected static final char NO_KEY_VALUE = 0;
 
   /** The hash table keys. */
-  protected Object[] table;
+  private Object[] table;
 
   /** The state of each hash table entry (FREE, FULL, REMOVED). */
-  protected byte[] state;
+  private byte[] state;
 
   /** The number of table entries in state==FREE. */
-  protected int freeEntries;
+  private int freeEntries;
 
 
   /** Constructs an empty map with default capacity and default load factors. */

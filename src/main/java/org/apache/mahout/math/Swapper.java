@@ -10,9 +10,6 @@ package org.apache.mahout.math;
 
 /**
  * Interface for an object that knows how to swap elements at two positions (a,b).
- *
- * @see org.apache.mahout.math.GenericSorting
- *
  */
 public interface Swapper {
 

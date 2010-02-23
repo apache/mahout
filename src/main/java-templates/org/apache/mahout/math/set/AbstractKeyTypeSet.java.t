@@ -89,7 +89,7 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
   /**
    * Returns a list filled with all keys contained in the receiver. The returned list has a size that equals
    * <tt>this.size()</tt>. Iteration order is guaranteed to be <i>identical</i> to the order used by method {@link
-   * #forEachKey(IntProcedure)}. <p> This method can be used to iterate over the keys of the receiver.
+   * #forEachKey(${keyTypeCap}Procedure)}. <p> This method can be used to iterate over the keys of the receiver.
    *
    * @return the keys.
    */
@@ -102,7 +102,8 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
   /**
    * Fills all keys contained in the receiver into the specified list. Fills the list, starting at index 0. After this
    * call returns the specified list has a new size that equals <tt>this.size()</tt>. Iteration order is guaranteed to
-   * be <i>identical</i> to the order used by method {@link #forEachKey(IntProcedure)}. <p> This method can be used to
+   * be <i>identical</i> to the order used by method {@link #forEachKey(${keyTypeCap}Procedure)}.
+   * <p> This method can be used to
    * iterate over the keys of the receiver.
    *
    * @param list the list to be filled, can have any size.
@@ -124,7 +125,6 @@ public abstract class Abstract${keyTypeCap}Set extends AbstractSet {
    * existing.
    *
    * @param key   the key the value shall be associated with.
-   * @param value the value to be associated.
    * @return <tt>true</tt> if the receiver did not already contain such a key; <tt>false</tt> if the receiver did
    *         already contain such a key - the new value has now replaced the formerly associated value.
    */
