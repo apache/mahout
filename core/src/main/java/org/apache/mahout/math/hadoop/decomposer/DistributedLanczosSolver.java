@@ -66,12 +66,6 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     matrix.configure(new JobConf(getConf()));
     solve(matrix, desiredRank, eigenVectors, eigenValues);
 
-    // TODO ack!
-    EigenVerificationJob evj = new EigenVerificationJob();
-    evj.setEigensToVerify(eigenVectors);
-    evj.setConf(getConf());
-    evj.run(new String[] {"--input", parsedArgs.get("--input"), "--output", parsedArgs.get("--output")});
-
     serializeOutput(eigenVectors, eigenValues, outputEigenVectorPath);  
     return 0;
   }
