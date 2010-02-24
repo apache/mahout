@@ -129,8 +129,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
       Option numRowsOpt = buildOption("numRows",
                                       "nr",
-                                      "Number of rows of the input matrix",
-                                      "0");
+                                      "Number of rows of the input matrix");
       Option numColsOpt = buildOption("numCols",
                                       "nc",
                                       "Number of columns of the input matrix");
