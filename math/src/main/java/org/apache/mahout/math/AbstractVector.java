@@ -168,7 +168,7 @@ public abstract class AbstractVector implements Vector {
       Iterator<Element> iter = iterateNonZero();
       while (iter.hasNext()) {
         Element e = iter.next();
-        result.setQuick(e.index(), result.getQuick(e.index()) - e.get());
+        result.setQuick(e.index(), e.get() - result.getQuick(e.index()));
       }
       return result;
     } else { // TODO: check the numNonDefault elements to further optimize 

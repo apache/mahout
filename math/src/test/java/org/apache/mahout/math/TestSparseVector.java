@@ -231,6 +231,18 @@ public class TestSparseVector extends TestCase {
     for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', 0.0, val.get(i));
     }
+    
+    Vector val1 = test.plus(1);
+    val = val1.minus(test);
+    for (int i = 0; i < test.size(); i++) {
+      assertEquals("get [" + i + ']', 1.0, val.get(i));
+    }
+
+    val1 = test.plus(-1);
+    val = val1.minus(test);
+    for (int i = 0; i < test.size(); i++) {
+      assertEquals("get [" + i + ']', -1.0, val.get(i));
+    }
   }
 
   public void testPlusDouble() throws Exception {
