@@ -50,8 +50,6 @@ import org.apache.mahout.utils.vectors.VectorHelper;
  */
 public class LDAPrintTopics {
   
-  private LDAPrintTopics() {}
-  
   private static class StringDoublePair implements Comparable<StringDoublePair> {
     private final double score;
     private final String word;
@@ -80,6 +78,116 @@ public class LDAPrintTopics {
       return (int) Double.doubleToLongBits(score) ^ word.hashCode();
     }
     
+  }
+  
+  // Expands the queue list to have a Queue for topic K
+  private static void ensureQueueSize(List<PriorityQueue<StringDoublePair>> queues, int k) {
+    for (int i = queues.size(); i <= k; ++i) {
+      queues.add(new PriorityQueue<StringDoublePair>());
+    }
+  }
+  
+  public static void main(String[] args) throws Exception {
+    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
+    ArgumentBuilder abuilder = new ArgumentBuilder();
+    GroupBuilder gbuilder = new GroupBuilder();
+    
+    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Path to an LDA output (a state)").withShortName("i").create();
+    
+    Option dictOpt = obuilder.withLongName("dict").withRequired(true).withArgument(
+      abuilder.withName("dict").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Dictionary to read in, in the same format as one created by "
+          + "org.apache.mahout.utils.vectors.lucene.Driver").withShortName("d").create();
+    
+    Option outOpt = obuilder.withLongName("output").withRequired(false).withArgument(
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Output directory to write top words").withShortName("o").create();
+    
+    Option wordOpt = obuilder.withLongName("words").withRequired(false).withArgument(
+      abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault("20").create()).withDescription(
+      "Number of words to print").withShortName("w").create();
+    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
+      abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The dictionary file type (text|sequencefile)").withShortName("dt").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        .create();
+    
+    Group group = gbuilder.withName("Options").withOption(dictOpt).withOption(outOpt).withOption(wordOpt)
+        .withOption(inputOpt).withOption(dictTypeOpt).create();
+    try {
+      Parser parser = new Parser();
+      parser.setGroup(group);
+      CommandLine cmdLine = parser.parse(args);
+      
+      if (cmdLine.hasOption(helpOpt)) {
+        CommandLineUtil.printHelp(group);
+        return;
+      }
+      
+      String input = cmdLine.getValue(inputOpt).toString();
+      String dictFile = cmdLine.getValue(dictOpt).toString();
+      int numWords = 20;
+      if (cmdLine.hasOption(wordOpt)) {
+        numWords = Integer.parseInt(cmdLine.getValue(wordOpt).toString());
+      }
+      Configuration config = new Configuration();
+      
+      String dictionaryType = "text";
+      if (cmdLine.hasOption(dictTypeOpt)) {
+        dictionaryType = cmdLine.getValue(dictTypeOpt).toString();
+      }
+      
+      List<String> wordList;
+      if (dictionaryType.equals("text")) {
+        wordList = Arrays.asList(VectorHelper.loadTermDictionary(new File(dictFile)));
+      } else if (dictionaryType.equals("sequencefile")) {
+        FileSystem fs = FileSystem.get(new Path(dictFile).toUri(), config);
+        wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, fs, dictFile));
+      } else {
+        throw new IllegalArgumentException("Invalid dictionary format");
+      }
+      
+      List<List<String>> topWords = topWordsForTopics(input, config, wordList, numWords);
+      
+      if (cmdLine.hasOption(outOpt)) {
+        File output = new File(cmdLine.getValue(outOpt).toString());
+        if (!output.exists()) {
+          if (!output.mkdirs()) {
+            throw new IOException("Could not create directory: " + output);
+          }
+        }
+        writeTopWords(topWords, output);
+      } else {
+        printTopWords(topWords);
+      }
+      
+    } catch (OptionException e) {
+      CommandLineUtil.printHelp(group);
+      throw e;
+    }
+  }
+  
+  // Adds the word if the queue is below capacity, or the score is high enough
+  private static void maybeEnqueue(Queue<StringDoublePair> q, String word, double score, int numWordsToPrint) {
+    if (q.size() >= numWordsToPrint && score > q.peek().score) {
+      q.poll();
+    }
+    if (q.size() < numWordsToPrint) {
+      q.add(new StringDoublePair(score, word));
+    }
+  }
+  
+  private static void printTopWords(List<List<String>> topWords) throws IOException {
+    for (int i = 0; i < topWords.size(); ++i) {
+      List<String> topK = topWords.get(i);
+      System.out.println("Topic " + i);
+      System.out.println("===========");
+      for (String word : topK) {
+        System.out.println(word);
+      }
+    }
   }
   
   public static List<List<String>> topWordsForTopics(String dir,
@@ -120,110 +228,19 @@ public class LDAPrintTopics {
     return result;
   }
   
-  // Expands the queue list to have a Queue for topic K
-  private static void ensureQueueSize(List<PriorityQueue<StringDoublePair>> queues, int k) {
-    for (int i = queues.size(); i <= k; ++i) {
-      queues.add(new PriorityQueue<StringDoublePair>());
+  private static void writeTopWords(List<List<String>> topWords, File output) throws IOException {
+    for (int i = 0; i < topWords.size(); ++i) {
+      List<String> topK = topWords.get(i);
+      File out = new File(output, "topic-" + i);
+      PrintWriter writer = new PrintWriter(new FileWriter(out));
+      writer.println("Topic " + i);
+      writer.println("===========");
+      for (String word : topK) {
+        writer.println(word);
+      }
+      writer.close();
     }
   }
   
-  // Adds the word if the queue is below capacity, or the score is high enough
-  private static void maybeEnqueue(Queue<StringDoublePair> q, String word, double score, int numWordsToPrint) {
-    if (q.size() >= numWordsToPrint && score > q.peek().score) {
-      q.poll();
-    }
-    if (q.size() < numWordsToPrint) {
-      q.add(new StringDoublePair(score, word));
-    }
-  }
-  
-  public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-    
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Path to an LDA output (a state)").withShortName("i").create();
-    
-    Option dictOpt = obuilder.withLongName("dict").withRequired(true).withArgument(
-      abuilder.withName("dict").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Dictionary to read in, in the same format as one created by "
-          + "org.apache.mahout.utils.vectors.lucene.Driver").withShortName("d").create();
-    
-    Option outOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Output directory to write top words").withShortName("o").create();
-    
-    Option wordOpt = obuilder.withLongName("words").withRequired(false).withArgument(
-      abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault("20").create()).withDescription(
-      "Number of words to print").withShortName("w").create();
-    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
-      abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The dictionary file type (text|sequencefile)").withShortName("dt").create();
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
-        .create();
-    
-    Group group = gbuilder.withName("Options").withOption(dictOpt).withOption(outOpt).withOption(wordOpt)
-        .withOption(inputOpt).withOption(dictTypeOpt).create();
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      CommandLine cmdLine = parser.parse(args);
-      
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-      
-      String input = cmdLine.getValue(inputOpt).toString();
-      File output = new File(cmdLine.getValue(outOpt).toString());
-      String dictFile = cmdLine.getValue(dictOpt).toString();
-      int numWords = 20;
-      if (cmdLine.hasOption(wordOpt)) {
-        numWords = Integer.parseInt(cmdLine.getValue(wordOpt).toString());
-      }
-      Configuration config = new Configuration();
-      
-      String dictionaryType = "text";
-      if (cmdLine.hasOption(dictTypeOpt)) {
-        dictionaryType = cmdLine.getValue(dictTypeOpt).toString();
-      }
-      
-      List<String> wordList;
-      if (dictionaryType.equals("text")) {
-        wordList = Arrays.asList(VectorHelper.loadTermDictionary(new File(dictFile)));
-      } else if (dictionaryType.equals("sequencefile")) {
-        FileSystem fs = FileSystem.get(new Path(dictFile).toUri(), config);
-        wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, fs, dictFile));
-      } else {
-        throw new IllegalArgumentException("Invalid dictionary format");
-      }
-      
-      List<List<String>> topWords = topWordsForTopics(input, config, wordList, numWords);
-      
-      if (!output.exists()) {
-        if (!output.mkdirs()) {
-          throw new IOException("Could not create directory: " + output);
-        }
-      }
-      
-      for (int i = 0; i < topWords.size(); ++i) {
-        List<String> topK = topWords.get(i);
-        File out = new File(output, "topic-" + i);
-        PrintWriter writer = new PrintWriter(new FileWriter(out));
-        writer.println("Topic " + i);
-        writer.println("===========");
-        for (String word : topK) {
-          writer.println(word);
-        }
-        writer.close();
-      }
-      
-    } catch (OptionException e) {
-      CommandLineUtil.printHelp(group);
-      throw e;
-    }
-  }
-  
+  private LDAPrintTopics() { }
 }
