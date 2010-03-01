@@ -52,16 +52,13 @@ import org.slf4j.LoggerFactory;
  */
 public final class LDADriver {
   
-  static final String STATE_IN_KEY = "org.apache.mahout.clustering.lda.stateIn";
-  
+  static final String STATE_IN_KEY = "org.apache.mahout.clustering.lda.stateIn";  
   static final String NUM_TOPICS_KEY = "org.apache.mahout.clustering.lda.numTopics";
-  static final String NUM_WORDS_KEY = "org.apache.mahout.clustering.lda.numWords";
-  
+  static final String NUM_WORDS_KEY = "org.apache.mahout.clustering.lda.numWords";  
   static final String TOPIC_SMOOTHING_KEY = "org.apache.mahout.clustering.lda.topicSmoothing";
   
   static final int LOG_LIKELIHOOD_KEY = -2;
   static final int TOPIC_SUM_KEY = -1;
-  
   static final double OVERALL_CONVERGENCE = 1.0E-5;
   
   private static final Logger log = LoggerFactory.getLogger(LDADriver.class);

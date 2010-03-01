@@ -17,9 +17,7 @@
 
 package org.apache.mahout.clustering.lda;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.commons.math.special.Gamma;
 import org.apache.mahout.math.DenseMatrix;
@@ -27,6 +25,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 /**
  * Class for performing infererence on a document, which involves computing (an approximation to)
@@ -50,14 +49,14 @@ public class LDAInference {
     private final Vector wordCounts;
     private final Vector gamma; // p(topic)
     private final Matrix mphi; // log p(columnMap(w)|t)
-    private final Map<Integer,Integer> columnMap; // maps words into the matrix's column map
+    private final OpenIntIntHashMap columnMap; // maps words into the matrix's column map
     public final double logLikelihood;
     
     public double phi(int k, int w) {
       return mphi.getQuick(k, columnMap.get(w));
     }
     
-    InferredDocument(Vector wordCounts, Vector gamma, Map<Integer,Integer> columnMap, Matrix phi, double ll) {
+    InferredDocument(Vector wordCounts, Vector gamma, OpenIntIntHashMap columnMap, Matrix phi, double ll) {
       this.wordCounts = wordCounts;
       this.gamma = gamma;
       this.mphi = phi;
@@ -94,7 +93,7 @@ public class LDAInference {
     double digammaSumGamma = digamma(gamma.zSum());
     digammaGamma = digammaGamma.plus(-digammaSumGamma);
     
-    Map<Integer,Integer> columnMap = new HashMap<Integer,Integer>();
+    OpenIntIntHashMap columnMap = new OpenIntIntHashMap();
     
     int iteration = 0;
     
@@ -145,7 +144,7 @@ public class LDAInference {
   private final LDAState state;
   
   private double computeLikelihood(Vector wordCounts,
-                                   Map<Integer,Integer> columnMap,
+                                   OpenIntIntHashMap columnMap,
                                    Matrix phi,
                                    Vector gamma,
                                    Vector digammaGamma) {
@@ -174,8 +173,8 @@ public class LDAInference {
       // now for each topic:
       for (int k = 0; k < state.numTopics; k++) {
         double llPart = 0.0;
-        llPart += Math.exp(phi.get(k, mapping))
-                  * (digammaGamma.get(k) - phi.get(k, mapping) + state.logProbWordGivenTopic(w, k));
+        llPart += Math.exp(phi.getQuick(k, mapping))
+                  * (digammaGamma.get(k) - phi.getQuick(k, mapping) + state.logProbWordGivenTopic(w, k));
         
         ll += llPart * n;
         
@@ -202,7 +201,10 @@ public class LDAInference {
       assert !Double.isInfinite(state.logProbWordGivenTopic(word, k));
       assert !Double.isNaN(digammaGamma.get(k));
     }
-    return phi.plus(-phiTotal); // log normalize
+    for (int i = 0; i < state.numTopics; i++) {
+      phi.setQuick(i, phi.getQuick(i) - phiTotal);// log normalize
+    }
+    return phi;
   }
   
   private static Vector digamma(Vector v) {
