@@ -60,6 +60,7 @@ if [ $# = 0 ]; then
   echo "  fpg                   run FPGrowth Driver for freq. pattern mining"
   echo "  kmeans                run kmeans clustering"
   echo "  lda                   run LDA clustering"
+  echo "  ldadump               dump the output state of LDA"
   echo "  lucenevector          generate vectors from a lucene index"
   echo "  trainclassifier       run Bayes/CBayes classifier training job"
   echo "  testclassifier        test Bayes/CBayes model using a pre-classified data"
@@ -186,6 +187,8 @@ elif [ "$COMMAND" = "fkmeans" ] ; then
   CLASS=org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver
 elif [ "$COMMAND" = "lda" ] ; then
   CLASS=org.apache.mahout.clustering.lda.LDADriver
+elif [ "$COMMAND" = "ldadump" ] ; then
+  CLASS=org.apache.mahout.clustering.lda.LDAPrintTopics
 elif [ "$COMMAND" = "fpg" ] ; then
   CLASS=org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver  
 elif [ "$COMMAND" = "dirichlet" ] ; then

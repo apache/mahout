@@ -50,7 +50,7 @@ import org.apache.mahout.utils.vectors.VectorHelper;
  */
 public class LDAPrintTopics {
   
-  private LDAPrintTopics() { }
+  private LDAPrintTopics() {}
   
   private static class StringDoublePair implements Comparable<StringDoublePair> {
     private final double score;
@@ -83,9 +83,9 @@ public class LDAPrintTopics {
   }
   
   public static List<List<String>> topWordsForTopics(String dir,
-    Configuration job,
-    List<String> wordList,
-    int numWordsToPrint) throws IOException {
+                                                     Configuration job,
+                                                     List<String> wordList,
+                                                     int numWordsToPrint) throws IOException {
     FileSystem fs = new Path(dir).getFileSystem(job);
     
     List<PriorityQueue<StringDoublePair>> queues = new ArrayList<PriorityQueue<StringDoublePair>>();
@@ -121,18 +121,14 @@ public class LDAPrintTopics {
   }
   
   // Expands the queue list to have a Queue for topic K
-  private static void ensureQueueSize(List<PriorityQueue<StringDoublePair>> queues,
-                                      int k) {
+  private static void ensureQueueSize(List<PriorityQueue<StringDoublePair>> queues, int k) {
     for (int i = queues.size(); i <= k; ++i) {
       queues.add(new PriorityQueue<StringDoublePair>());
     }
   }
   
   // Adds the word if the queue is below capacity, or the score is high enough
-  private static void maybeEnqueue(Queue<StringDoublePair> q,
-                                   String word,
-                                   double score,
-                                   int numWordsToPrint) {
+  private static void maybeEnqueue(Queue<StringDoublePair> q, String word, double score, int numWordsToPrint) {
     if (q.size() >= numWordsToPrint && score > q.peek().score) {
       q.poll();
     }
@@ -146,43 +142,30 @@ public class LDAPrintTopics {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option inputOpt = obuilder.withLongName("input").withRequired(true)
-    .withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-      .withDescription("Path to an LDA output (a state)").withShortName("i")
-      .create();
+    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
+      abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Path to an LDA output (a state)").withShortName("i").create();
     
-    Option dictOpt = obuilder.withLongName("dict").withRequired(true)
-    .withArgument(
-      abuilder.withName("dict").withMinimum(1).withMaximum(1).create())
-      .withDescription(
-        "Dictionary to read in, in the same format as one created by "
-        + "org.apache.mahout.utils.vectors.lucene.Driver").withShortName(
-        "d").create();
+    Option dictOpt = obuilder.withLongName("dict").withRequired(true).withArgument(
+      abuilder.withName("dict").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Dictionary to read in, in the same format as one created by "
+          + "org.apache.mahout.utils.vectors.lucene.Driver").withShortName("d").create();
     
-    Option outOpt = obuilder.withLongName("output").withRequired(true)
-    .withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create())
-      .withDescription("Output directory to write top words").withShortName(
-      "o").create();
+    Option outOpt = obuilder.withLongName("output").withRequired(true).withArgument(
+      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+      "Output directory to write top words").withShortName("o").create();
     
-    Option wordOpt = obuilder.withLongName("words").withRequired(false)
-    .withArgument(
-      abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault(
-      "20").create()).withDescription("Number of words to print")
-      .withShortName("w").create();
-    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(
-      false).withArgument(
-        abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1)
-        .create()).withDescription(
-        "The dictionary file type (text|sequencefile)").withShortName("dt")
+    Option wordOpt = obuilder.withLongName("words").withRequired(false).withArgument(
+      abuilder.withName("words").withMinimum(0).withMaximum(1).withDefault("20").create()).withDescription(
+      "Number of words to print").withShortName("w").create();
+    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
+      abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The dictionary file type (text|sequencefile)").withShortName("dt").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
-    Option helpOpt = obuilder.withLongName("help").withDescription(
-    "Print out help").withShortName("h").create();
     
-    Group group = gbuilder.withName("Options").withOption(dictOpt).withOption(
-      outOpt).withOption(wordOpt).withOption(inputOpt).withOption(dictTypeOpt)
-      .create();
+    Group group = gbuilder.withName("Options").withOption(dictOpt).withOption(outOpt).withOption(wordOpt)
+        .withOption(inputOpt).withOption(dictTypeOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -209,18 +192,15 @@ public class LDAPrintTopics {
       
       List<String> wordList;
       if (dictionaryType.equals("text")) {
-        wordList = Arrays.asList(VectorHelper.loadTermDictionary(new File(
-          dictFile)));
+        wordList = Arrays.asList(VectorHelper.loadTermDictionary(new File(dictFile)));
       } else if (dictionaryType.equals("sequencefile")) {
         FileSystem fs = FileSystem.get(new Path(dictFile).toUri(), config);
-        wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, fs,
-          dictFile));
+        wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, fs, dictFile));
       } else {
         throw new IllegalArgumentException("Invalid dictionary format");
       }
       
-      List<List<String>> topWords = topWordsForTopics(input, config, wordList,
-        numWords);
+      List<List<String>> topWords = topWordsForTopics(input, config, wordList, numWords);
       
       if (!output.exists()) {
         if (!output.mkdirs()) {
