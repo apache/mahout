@@ -43,6 +43,8 @@ public class Cluster extends ClusterBase {
   /** Has the centroid converged with the center? */
   private boolean converged;
   
+  private double std = 0.00000001;
+  
   /**
    * Format the cluster for output
    * 
@@ -134,8 +136,8 @@ public class Cluster extends ClusterBase {
     super();
     this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);
-    this.setPointTotal(center.like());
-    this.pointSquaredTotal = center.like();
+    this.setPointTotal(getCenter().like());
+    this.pointSquaredTotal = getCenter().like();
   }
   
   /** For (de)serialization as a Writable */
@@ -152,7 +154,7 @@ public class Cluster extends ClusterBase {
     this.setId(clusterId);
     this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);
-    this.setPointTotal(center.like());
+    this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();
   }
   
@@ -194,21 +196,24 @@ public class Cluster extends ClusterBase {
    */
   public void addPoints(int count, Vector delta) {
     centroid = null;
-    setNumPoints(getNumPoints() + count);
-    if (getPointTotal() == null) {
-      setPointTotal(delta.clone());
+    if (getNumPoints() == 0) {
+      setPointTotal(new RandomAccessSparseVector(delta.clone()));
       pointSquaredTotal = new RandomAccessSparseVector(delta.clone().assign(Functions.square));
     } else {
       delta.addTo(getPointTotal());
       delta.clone().assign(Functions.square).addTo(pointSquaredTotal);
     }
+    setNumPoints(getNumPoints() + count);
   }
   
   /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
+    std = getStd();
     setCenter(computeCentroid());
+    centroid = null;
     setNumPoints(0);
-    setPointTotal(getCenter().like());
+    this.setPointTotal(getCenter().like());
+    this.pointSquaredTotal = getCenter().like();
   }
   
   /**
@@ -236,6 +241,7 @@ public class Cluster extends ClusterBase {
   
   /** @return the std */
   public double getStd() {
+    if (getNumPoints() == 0) return std;
     Vector stds = pointSquaredTotal.times(getNumPoints()).minus(getPointTotal().times(getPointTotal()))
         .assign(new SquareRootFunction()).divide(getNumPoints());
     return stds.zSum() / stds.size();

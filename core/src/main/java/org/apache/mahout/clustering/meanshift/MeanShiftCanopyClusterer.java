@@ -1,6 +1,7 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
@@ -15,7 +16,7 @@ public class MeanShiftCanopyClusterer {
   
   private double convergenceDelta = 0;
   // the next canopyId to be allocated
-  //private int nextCanopyId = 0;
+  // private int nextCanopyId = 0;
   // the T1 distance threshold
   private double t1;
   // the T2 distance threshold
@@ -57,7 +58,7 @@ public class MeanShiftCanopyClusterer {
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
-    //nextCanopyId = 0; // never read?
+    // nextCanopyId = 0; // never read?
     t1 = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.T1_KEY));
     t2 = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.T2_KEY));
     convergenceDelta = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY));
@@ -70,7 +71,7 @@ public class MeanShiftCanopyClusterer {
    *          the convergence criteria
    */
   public void config(DistanceMeasure aMeasure, double aT1, double aT2, double aDelta) {
-    //nextCanopyId = 100; // so canopyIds will sort properly  // never read?
+    // nextCanopyId = 100; // so canopyIds will sort properly // never read?
     measure = aMeasure;
     t1 = aT1;
     t2 = aT2;
@@ -111,8 +112,7 @@ public class MeanShiftCanopyClusterer {
   }
   
   /** Emit the new canopy to the collector, keyed by the canopy's Id */
-  static void emitCanopy(MeanShiftCanopy canopy,
-                         OutputCollector<Text,WritableComparable<?>> collector) throws IOException {
+  static void emitCanopy(MeanShiftCanopy canopy, OutputCollector<Text,WritableComparable<?>> collector) throws IOException {
     String identifier = canopy.getIdentifier();
     collector.collect(new Text(identifier), new Text("new " + canopy.toString()));
   }
@@ -126,8 +126,7 @@ public class MeanShiftCanopyClusterer {
    */
   public boolean shiftToMean(MeanShiftCanopy canopy) {
     Vector centroid = canopy.computeCentroid();
-    canopy
-        .setConverged(new EuclideanDistanceMeasure().distance(centroid, canopy.getCenter()) < convergenceDelta);
+    canopy.setConverged(measure.distance(centroid, canopy.getCenter()) < convergenceDelta);
     canopy.setCenter(centroid);
     canopy.setNumPoints(1);
     canopy.setPointTotal(centroid.clone());
@@ -159,4 +158,82 @@ public class MeanShiftCanopyClusterer {
   public boolean closelyBound(MeanShiftCanopy canopy, Vector point) {
     return measure.distance(canopy.getCenter(), point) < t2;
   }
+  
+  /**
+   * Story: User can exercise the reference implementation to verify that the test datapoints are clustered in
+   * a reasonable manner.
+   */
+  public void testReferenceImplementation() {
+    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 4.0,
+        1.0, 0.5);
+    List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+    // add all points to the canopies
+    
+    boolean done = false;
+    int iter = 1;
+    while (!done) {// shift canopies to their centroids
+      done = true;
+      List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
+      for (MeanShiftCanopy canopy : canopies) {
+        done = clusterer.shiftToMean(canopy) && done;
+        clusterer.mergeCanopy(canopy, migratedCanopies);
+      }
+      canopies = migratedCanopies;
+      System.out.println(iter++);
+    }
+  }
+  
+  /**
+   * This is the reference mean-shift implementation. Given its inputs it iterates over the points and
+   * clusters until their centers converge or until the maximum number of iterations is exceeded.
+   * 
+   * @param points
+   *          the input List<Vector> of points
+   * @param measure
+   *          the DistanceMeasure to use
+   * @param maxIter
+   *          the maximum number of iterations
+   */
+  public static List<MeanShiftCanopy> clusterPoints(List<Vector> points,
+                                                    DistanceMeasure measure,
+                                                    double convergenceThreshold,
+                                                    double t1,
+                                                    double t2,
+                                                    int numIter) {
+    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure, t1, t2, convergenceThreshold);
+    
+    List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+    int nextCanopyId = 0;
+    for (Vector point : points) {
+      clusterer.mergeCanopy(new MeanShiftCanopy(point, nextCanopyId++), canopies);
+    }
+    
+    boolean converged = false;
+    for (int iter = 0; !converged && iter < numIter; iter++) {
+      converged = runMeanShiftCanopyIteration(canopies, clusterer);
+    }
+    return canopies;
+  }
+  
+  /**
+   * Perform a single iteration over the points and clusters, assigning points to clusters and returning if
+   * the iterations are completed.
+   * 
+   * @param clusterList
+   *          the List<MeanShiftCanopy> clusters
+   * @return
+   */
+  public static boolean runMeanShiftCanopyIteration(List<MeanShiftCanopy> canopies,
+                                                    MeanShiftCanopyClusterer clusterer) {
+    boolean converged = true;
+    List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
+    for (MeanShiftCanopy canopy : canopies) {
+      converged = clusterer.shiftToMean(canopy) && converged;
+      clusterer.mergeCanopy(canopy, migratedCanopies);
+    }
+    canopies = migratedCanopies;
+    return converged;
+    
+  }
+  
 }

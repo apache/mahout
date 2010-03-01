@@ -17,6 +17,7 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
@@ -95,4 +96,86 @@ public class KMeansClusterer {
     String key = (name != null) && (name.length() != 0) ? name : point.asFormatString();
     output.collect(new Text(key), new Text(String.valueOf(nearestCluster.getId())));
   }
+  
+  /**
+   * This is the reference k-means implementation. Given its inputs it iterates over the points and clusters
+   * until their centers converge or until the maximum number of iterations is exceeded.
+   * 
+   * @param points
+   *          the input List<Vector> of points
+   * @param clusters
+   *          the List<Cluster> of initial clusters
+   * @param measure
+   *          the DistanceMeasure to use
+   * @param maxIter
+   *          the maximum number of iterations
+   */
+  public static List<List<Cluster>> clusterPoints(List<Vector> points,
+                                                  List<Cluster> clusters,
+                                                  DistanceMeasure measure,
+                                                  int maxIter,
+                                                  double distanceThreshold) {
+    List<List<Cluster>> clustersList = new ArrayList<List<Cluster>>();
+    clustersList.add(clusters);
+    
+    boolean converged = false;
+    int iteration = 0;
+    while (!converged && iteration < maxIter) {
+      System.out.println("iteration: " + iteration);
+      List<Cluster> next = new ArrayList<Cluster>();
+      List<Cluster> cs = clustersList.get(iteration++);
+      for (Cluster c : cs) {
+        next.add(new Cluster(c.getCenter()));
+      }
+      clustersList.add(next);
+      converged = runKMeansIteration(points, next, measure, distanceThreshold);
+    }
+    return clustersList;
+  }
+  
+  /**
+   * Perform a single iteration over the points and clusters, assigning points to clusters and returning if
+   * the iterations are completed.
+   * 
+   * @param points
+   *          the List<Vector> having the input points
+   * @param clusters
+   *          the List<Cluster> clusters
+   * @param measure
+   *          a DistanceMeasure to use
+   * @return
+   */
+  public static boolean runKMeansIteration(List<Vector> points,
+                                           List<Cluster> clusters,
+                                           DistanceMeasure measure,
+                                           double distanceThreshold) {
+    // iterate through all points, assigning each to the nearest cluster
+    for (Vector point : points) {
+      Cluster closestCluster = null;
+      double closestDistance = Double.MAX_VALUE;
+      for (Cluster cluster : clusters) {
+        double distance = measure.distance(cluster.getCenter(), point);
+        if (closestCluster == null || closestDistance > distance) {
+          closestCluster = cluster;
+          closestDistance = distance;
+        }
+      }
+      closestCluster.addPoint(point);
+    }
+    // test for convergence
+    boolean converged = true;
+    for (Cluster cluster : clusters) {
+      if (!cluster.computeConvergence(measure, distanceThreshold)) {
+        converged = false;
+      }
+    }
+    // update the cluster centers
+    if (!converged) {
+      for (Cluster cluster : clusters) {
+        cluster.recomputeCenter();
+      }
+    }
+    return converged;
+  }
+  
 }

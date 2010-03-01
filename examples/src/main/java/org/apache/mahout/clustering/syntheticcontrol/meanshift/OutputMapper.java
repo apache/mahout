@@ -39,8 +39,8 @@ public class OutputMapper extends MapReduceBase implements Mapper<Text,MeanShift
   public void map(Text key, MeanShiftCanopy canopy, OutputCollector<Text,Text> output,
                   Reporter reporter) throws IOException {
     clusters++;
-    for (Vector point : canopy.getBoundPoints()) {
-      output.collect(key, new Text(point.asFormatString()));
+    for (int point : canopy.getBoundPoints().elements()) {
+      output.collect(key, new Text(String.valueOf(point)));
     }
   }
   

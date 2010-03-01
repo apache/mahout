@@ -30,6 +30,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public final class RandomSeedGenerator {
   
   public static final String K = "k";
   
-  private RandomSeedGenerator() { }
+  private RandomSeedGenerator() {}
   
   public static Path buildRandom(String input, String output, int k) throws IOException,
                                                                     IllegalAccessException,
@@ -116,5 +117,21 @@ public final class RandomSeedGenerator {
     }
     
     return outFile;
+  }
+  
+  public static List<Vector> chooseRandomPoints(List<Vector> vectors, int k) {
+    List<Vector> chosenPoints = new ArrayList<Vector>(k);
+    Random random = RandomUtils.getRandom();
+    for(Vector value : vectors){
+      int currentSize = chosenPoints.size();
+      if (currentSize < k) {
+        chosenPoints.add(value);
+      } else if (random.nextInt(currentSize + 1) == 0) { // with chance 1/(currentSize+1) pick new element
+        int indexToRemove = random.nextInt(currentSize); // evict one chosen randomly
+        chosenPoints.remove(indexToRemove);
+        chosenPoints.add(value);
+      }
+    }
+    return chosenPoints;
   }
 }

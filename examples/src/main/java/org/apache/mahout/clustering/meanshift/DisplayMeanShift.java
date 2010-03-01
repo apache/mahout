@@ -35,19 +35,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class DisplayMeanShift extends DisplayDirichlet {
-
-  private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);  
   
-  private static final MeanShiftCanopyClusterer clusterer =
-    new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
+  private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);
+  
+  private static final MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(
+      new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
   
   private DisplayMeanShift() {
     initialize();
     this.setTitle("Canopy Clusters (> 1.5% of population)");
   }
+  
   // TODO this is never queried?
-  //private static final List<List<Vector>> iterationCenters = new ArrayList<List<Vector>>();
+  // private static final List<List<Vector>> iterationCenters = new ArrayList<List<Vector>>();
   
   @Override
   public void paint(Graphics g) {
@@ -73,8 +74,8 @@ class DisplayMeanShift extends DisplayDirichlet {
     for (MeanShiftCanopy canopy : canopies) {
       if (canopy.getBoundPoints().size() > 0.015 * DisplayDirichlet.sampleData.size()) {
         g2.setColor(colors[Math.min(i++, DisplayDirichlet.colors.length - 1)]);
-        for (Vector v : canopy.getBoundPoints()) {
-          DisplayDirichlet.plotRectangle(g2, v, dv);
+        for (int v : canopy.getBoundPoints().elements()) {
+          DisplayDirichlet.plotRectangle(g2, sampleData.get(v).get(), dv);
         }
         DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv1);
         DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv2);
@@ -82,32 +83,14 @@ class DisplayMeanShift extends DisplayDirichlet {
     }
   }
   
-  private static void testReferenceImplementation() {
-    // add all points to the canopies
-    int nextCanopyId = 0;
-    for (VectorWritable aRaw : sampleData) {
-      DisplayMeanShift.clusterer.mergeCanopy(
-          new MeanShiftCanopy(aRaw.get(), nextCanopyId++), canopies);
-    }
-    boolean done = false;
-    while (!done) { // shift canopies to their centroids
-      done = true;
-      List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
-      //List<Vector> centers = new ArrayList<Vector>();
-      for (MeanShiftCanopy canopy : canopies) {
-        //centers.add(canopy.getCenter());
-        done = DisplayMeanShift.clusterer.shiftToMean(canopy) && done;
-        DisplayMeanShift.clusterer.mergeCanopy(canopy, migratedCanopies);
-      }
-      //iterationCenters.add(centers);
-      canopies = migratedCanopies;
-    }
-  }
-  
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    testReferenceImplementation();
+    List<Vector> points = new ArrayList<Vector>();
+    for (VectorWritable sample : sampleData)
+      points.add(sample.get());
+    canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.5, 1.0, 0.05,
+      10);
     for (MeanShiftCanopy canopy : canopies) {
       log.info(canopy.toString());
     }

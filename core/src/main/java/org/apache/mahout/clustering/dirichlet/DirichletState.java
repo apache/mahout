@@ -39,9 +39,7 @@ public class DirichletState<O> {
   
   public DirichletState(ModelDistribution<O> modelFactory,
                         int numClusters,
-                        double alpha_0,
-                        int thin,
-                        int burnin) {
+                        double alpha_0) {
     this.numClusters = numClusters;
     this.modelFactory = modelFactory;
     this.alpha_0 = alpha_0;

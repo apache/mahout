@@ -33,8 +33,7 @@ class Display2dASNDirichlet extends DisplayDirichlet {
   Display2dASNDirichlet() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>"
-      + (int) (significance * 100)
-      + "% of population)");
+                  + (int) (significance * 100) + "% of population)");
   }
   
   @Override
@@ -59,12 +58,14 @@ class Display2dASNDirichlet extends DisplayDirichlet {
   
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
+    k = 10;
     DisplayDirichlet.generate2dSamples();
     generateResults();
     new Display2dASNDirichlet();
   }
   
   private static void generateResults() {
-    DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution(new VectorWritable(new DenseVector(2))));
+    DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution(new VectorWritable(
+        new DenseVector(2))));
   }
 }

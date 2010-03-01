@@ -41,7 +41,7 @@ public final class DirichletJob {
   
   private static final Logger log = LoggerFactory.getLogger(DirichletJob.class);
   
-  private DirichletJob() { }
+  private DirichletJob() {}
   
   public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -58,13 +58,17 @@ public final class DirichletJob {
       abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
       "The alpha0 value for the DirichletDistribution.").create();
     
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(
-      abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The ModelDistribution class name.").create();
+    Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d")
+        .withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create())
+        .withDescription(
+          "The ModelDistribution class name."
+              + "Defaults to org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution").create();
     
-    Option prototypeOpt = obuilder.withLongName("modelPrototypeClass").withRequired(true).withShortName("p")
+    Option prototypeOpt = obuilder.withLongName("modelPrototypeClass").withRequired(false).withShortName("p")
         .withArgument(abuilder.withName("prototypeClass").withMinimum(1).withMaximum(1).create())
-        .withDescription("The ModelDistribution prototype Vector class name.").create();
+        .withDescription(
+          "The ModelDistribution prototype Vector class name."
+              + "Defaults to org.apache.mahout.math.RandomAccessSparseVector").create();
     
     Option sizeOpt = obuilder.withLongName("prototypeSize").withRequired(true).withShortName("s")
         .withArgument(abuilder.withName("prototypeSize").withMinimum(1).withMaximum(1).create())
@@ -85,14 +89,15 @@ public final class DirichletJob {
       
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
-      String modelFactory = cmdLine.getValue(modelOpt).toString();
-      String modelPrototype = cmdLine.getValue(prototypeOpt).toString();
+      String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
+      if (cmdLine.hasOption(modelOpt)) modelFactory = cmdLine.getValue(modelOpt).toString();
+      String modelPrototype = "org.apache.mahout.math.RandomAccessSparseVector";
+      if (cmdLine.hasOption(prototypeOpt)) modelPrototype = cmdLine.getValue(prototypeOpt).toString();
       int prototypeSize = Integer.parseInt(cmdLine.getValue(sizeOpt).toString());
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
-      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels,
-        maxIterations, alpha_0);
+      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels, maxIterations, alpha_0);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);

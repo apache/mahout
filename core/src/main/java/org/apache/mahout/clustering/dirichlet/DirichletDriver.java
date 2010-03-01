@@ -65,7 +65,7 @@ public class DirichletDriver {
   
   private static final Logger log = LoggerFactory.getLogger(DirichletDriver.class);
   
-  private DirichletDriver() { }
+  private DirichletDriver() {}
   
   public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -84,15 +84,18 @@ public class DirichletDriver {
     
     Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(
       abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The ModelDistribution class name.").create();
+      "The ModelDistribution class name. "
+          + "Defaults to org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution").create();
     
-    Option prototypeOpt = obuilder.withLongName("modelPrototypeClass").withRequired(true).withShortName("p")
+    Option prototypeOpt = obuilder.withLongName("modelPrototypeClass").withRequired(false).withShortName("p")
         .withArgument(abuilder.withName("prototypeClass").withMinimum(1).withMaximum(1).create())
-        .withDescription("The ModelDistribution prototype Vector class name.").create();
+        .withDescription(
+          "The ModelDistribution prototype Vector class name. "
+              + "Defaults to org.apache.mahout.math.RandomAccessSparseVector").create();
     
     Option sizeOpt = obuilder.withLongName("prototypeSize").withRequired(true).withShortName("s")
         .withArgument(abuilder.withName("prototypeSize").withMinimum(1).withMaximum(1).create())
-        .withDescription("The ModelDistribution prototype Vector size.").create();
+        .withDescription("The ModelDistribution prototype Vector size. ").create();
     
     Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").withArgument(
       abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -113,15 +116,17 @@ public class DirichletDriver {
       
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
-      String modelFactory = cmdLine.getValue(modelOpt).toString();
-      String modelPrototype = cmdLine.getValue(prototypeOpt).toString();
+      String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
+      if (cmdLine.hasOption(modelOpt)) modelFactory = cmdLine.getValue(modelOpt).toString();
+      String modelPrototype = "org.apache.mahout.math.RandomAccessSparseVector";
+      if (cmdLine.hasOption(prototypeOpt)) modelPrototype = cmdLine.getValue(prototypeOpt).toString();
       int prototypeSize = Integer.parseInt(cmdLine.getValue(sizeOpt).toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
       double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
-      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels,
-        maxIterations, alpha_0, numReducers);
+      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels, maxIterations, alpha_0,
+        numReducers);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -161,8 +166,8 @@ public class DirichletDriver {
                                             SecurityException,
                                             NoSuchMethodException,
                                             InvocationTargetException {
-    runJob(input, output, modelFactory, "org.apache.mahout.math.DenseVector", 2, numClusters,
-      maxIterations, alpha_0, numReducers);
+    runJob(input, output, modelFactory, "org.apache.mahout.math.DenseVector", 2, numClusters, maxIterations,
+      alpha_0, numReducers);
   }
   
   /**
@@ -200,15 +205,14 @@ public class DirichletDriver {
                                             InvocationTargetException {
     
     String stateIn = output + "/state-0";
-    writeInitialState(output, stateIn, modelFactory, modelPrototype, prototypeSize,
-      numClusters, alpha_0);
+    writeInitialState(output, stateIn, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0);
     
     for (int iteration = 0; iteration < maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       String stateOut = output + "/state-" + (iteration + 1);
-      runIteration(input, stateIn, stateOut, modelFactory, modelPrototype, prototypeSize,
-        numClusters, alpha_0, numReducers);
+      runIteration(input, stateIn, stateOut, modelFactory, modelPrototype, prototypeSize, numClusters,
+        alpha_0, numReducers);
       // now point the input to the old output directory
       stateIn = stateOut;
     }
@@ -228,8 +232,8 @@ public class DirichletDriver {
                                                        NoSuchMethodException,
                                                        InvocationTargetException {
     
-    DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype,
-      prototypeSize, numModels, alpha_0);
+    DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize,
+      numModels, alpha_0);
     JobConf job = new JobConf(KMeansDriver.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), job);
@@ -278,7 +282,7 @@ public class DirichletDriver {
     Class<? extends Vector> vcl = ccl.loadClass(modelPrototype).asSubclass(Vector.class);
     Constructor<? extends Vector> v = vcl.getConstructor(int.class);
     factory.setModelPrototype(new VectorWritable(v.newInstance(prototypeSize)));
-    return new DirichletState<VectorWritable>(factory, numModels, alpha_0, 1, 1);
+    return new DirichletState<VectorWritable>(factory, numModels, alpha_0);
   }
   
   /**

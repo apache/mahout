@@ -21,35 +21,30 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
 
-public class SoftCluster implements Writable {
-  
-  // this cluster's clusterId
-  private int clusterId;
-  
-  // the current center
-  private Vector center = new RandomAccessSparseVector(0);
-  
+public class SoftCluster extends ClusterBase{
+
   // the current centroid is lazy evaluated and may be null
-  private Vector centroid = null;
+  private Vector centroid;
   
   // The Probability of belongingness sum
-  private double pointProbSum = 0.0;
+  private double pointProbSum;
   
   // the total of all points added to the cluster
-  private Vector weightedPointTotal = null;
+  private Vector weightedPointTotal;
   
   // has the centroid converged with the center?
-  private boolean converged = false;
+  private boolean converged;
   
   // track membership parameters
-  private double s0 = 0;
+  private double s0;
   
   private Vector s1;
   
@@ -87,41 +82,7 @@ public class SoftCluster implements Writable {
     }
     return null;
   }
-  
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeInt(clusterId);
-    out.writeBoolean(converged);
-    Vector vector = computeCentroid();
-    VectorWritable.writeVector(out, vector);
-  }
-  
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    clusterId = in.readInt();
-    converged = in.readBoolean();
-    VectorWritable temp = new VectorWritable();
-    temp.readFields(in);
-    center = temp.get();
-    this.pointProbSum = 0;
-    this.weightedPointTotal = center.like();
-  }
-  
-  /**
-   * Compute the centroid
-   * 
-   * @return the new centroid
-   */
-  public Vector computeCentroid() {
-    if (pointProbSum == 0) {
-      return weightedPointTotal;
-    } else if (centroid == null) {
-      // lazy compute new centroid
-      centroid = weightedPointTotal.divide(pointProbSum);
-    }
-    return centroid;
-  }
-  
+
   // For Writable
   public SoftCluster() { }
   
@@ -132,10 +93,44 @@ public class SoftCluster implements Writable {
    *          the center point
    */
   public SoftCluster(Vector center) {
-    this.center = center;
+    setCenter(new RandomAccessSparseVector(center));
     this.pointProbSum = 0;
-    
-    this.weightedPointTotal = center.like();
+    this.weightedPointTotal = getCenter().like();
+  }
+  
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(this.getId());
+    out.writeBoolean(converged);
+    Vector vector = computeCentroid();
+    VectorWritable.writeVector(out, vector);
+  }
+  
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.setId(in.readInt());
+    converged = in.readBoolean();
+    VectorWritable temp = new VectorWritable();
+    temp.readFields(in);
+    this.setCenter(new RandomAccessSparseVector(temp.get()));
+    this.pointProbSum = 0;
+    this.weightedPointTotal = getCenter().like();
+  }
+  
+  /**
+   * Compute the centroid
+   * 
+   * @return the new centroid
+   */
+  @Override
+  public Vector computeCentroid() {
+    if (pointProbSum == 0) {
+      return weightedPointTotal;
+    } else if (centroid == null) {
+      // lazy compute new centroid
+      centroid = weightedPointTotal.divide(pointProbSum);
+    }
+    return centroid;
   }
   
   /**
@@ -145,8 +140,8 @@ public class SoftCluster implements Writable {
    *          the center point
    */
   public SoftCluster(Vector center, int clusterId) {
-    this.clusterId = clusterId;
-    this.center = center;
+    this.setId(clusterId);
+    this.setCenter(center);
     this.pointProbSum = 0;
     this.weightedPointTotal = center.like();
   }
@@ -154,7 +149,7 @@ public class SoftCluster implements Writable {
   /** Construct a new softcluster with the given clusterID */
   public SoftCluster(String clusterId) {
     
-    this.clusterId = Integer.parseInt(clusterId.substring(1));
+    this.setId(Integer.parseInt(clusterId.substring(1)));
     this.pointProbSum = 0;
     // this.weightedPointTotal = center.like();
     this.converged = clusterId.charAt(0) == 'V';
@@ -162,14 +157,15 @@ public class SoftCluster implements Writable {
   
   @Override
   public String toString() {
-    return getIdentifier() + " - " + center.asFormatString();
+    return getIdentifier() + " - " + getCenter().asFormatString();
   }
   
+  @Override
   public String getIdentifier() {
     if (converged) {
-      return "V" + clusterId;
+      return "V" + this.getId();
     } else {
-      return "C" + clusterId;
+      return "C" + this.getId();
     }
   }
   
@@ -212,9 +208,9 @@ public class SoftCluster implements Writable {
     centroid = null;
     pointProbSum += ptProb;
     if (weightedPointTotal == null) {
-      weightedPointTotal = point.clone().times(ptProb);
+      weightedPointTotal = point.clone().assign(Functions.mult, ptProb);
     } else {
-      weightedPointTotal = weightedPointTotal.plus(point.times(ptProb));
+      point.clone().assign(Functions.mult, ptProb).addTo(weightedPointTotal);
     }
   }
   
@@ -230,12 +226,8 @@ public class SoftCluster implements Writable {
     if (weightedPointTotal == null) {
       weightedPointTotal = delta.clone();
     } else {
-      weightedPointTotal = weightedPointTotal.plus(delta);
+      delta.addTo(weightedPointTotal);
     }
-  }
-  
-  public Vector getCenter() {
-    return center;
   }
   
   public double getPointProbSum() {
@@ -244,19 +236,15 @@ public class SoftCluster implements Writable {
   
   /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
-    center = computeCentroid();
+    this.setCenter(computeCentroid());
     pointProbSum = 0;
-    weightedPointTotal = center.like();
+    weightedPointTotal = getCenter().like();
   }
   
   public Vector getWeightedPointTotal() {
     return weightedPointTotal;
   }
-  
-  public void setWeightedPointTotal(Vector v) {
-    this.weightedPointTotal = v;
-  }
-  
+
   public boolean isConverged() {
     return converged;
   }
@@ -265,8 +253,9 @@ public class SoftCluster implements Writable {
     this.converged = converged;
   }
   
-  public int getClusterId() {
-    return clusterId;
+  @Override
+  public String asFormatString() {
+    return formatCluster(this);
   }
   
 }

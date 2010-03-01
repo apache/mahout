@@ -29,19 +29,11 @@ import org.apache.mahout.math.Vector;
 
 public class FuzzyKMeansClusterer {
   
-  private static final double MINIMAL_VALUE = 0.0000000001; // using it for
-  // adding
-  // exception
-  // this value to any
-  // zero valued
-  // variable to avoid
-  // divide by Zero
-  
-  // private int nextClusterId = 0;
+  private static final double MINIMAL_VALUE = 0.0000000001;
   
   private DistanceMeasure measure;
   
-  private double convergenceDelta = 0;
+  private double convergenceDelta;
   
   private double m = 2.0; // default value
   
@@ -62,20 +54,6 @@ public class FuzzyKMeansClusterer {
   
   public FuzzyKMeansClusterer(JobConf job) {
     this.configure(job);
-  }
-  
-  /**
-   * Configure the distance measure directly. Used by unit tests.
-   * 
-   * @param aMeasure
-   *          the DistanceMeasure
-   * @param aConvergenceDelta
-   *          the delta value used to define convergence
-   */
-  private void config(DistanceMeasure aMeasure, double aConvergenceDelta) {
-    measure = aMeasure;
-    convergenceDelta = aConvergenceDelta;
-    // nextClusterId = 0;
   }
   
   /**
@@ -123,10 +101,8 @@ public class FuzzyKMeansClusterer {
     
     for (int i = 0; i < clusters.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-      Text key = new Text(clusters.get(i).getIdentifier()); // just output the
-      // identifier,avoids
-      // too much data
-      // traffic
+      Text key = new Text(clusters.get(i).getIdentifier());
+      // just output the identifier,avoids too much data traffic
       /*
        * Text value = new Text(Double.toString(probWeight) + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR +
        * values.toString());
@@ -154,7 +130,7 @@ public class FuzzyKMeansClusterer {
     List<Double> clusterDistanceList = new ArrayList<Double>();
     
     for (SoftCluster cluster : clusters) {
-      clusterDistanceList.add(measure.distance(point, cluster.getCenter()));
+      clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
     }
     FuzzyKMeansOutput fOutput = new FuzzyKMeansOutput(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
@@ -175,9 +151,7 @@ public class FuzzyKMeansClusterer {
       if (eachCDist == 0.0) {
         eachCDist = MINIMAL_VALUE;
       }
-      
       denom += Math.pow(clusterDistance / eachCDist, 2.0 / (m - 1));
-      
     }
     return 1.0 / denom;
   }
@@ -199,5 +173,82 @@ public class FuzzyKMeansClusterer {
   
   public DistanceMeasure getMeasure() {
     return this.measure;
+  }
+  
+  /**
+   * This is the reference k-means implementation. Given its inputs it iterates over the points and clusters
+   * until their centers converge or until the maximum number of iterations is exceeded.
+   * 
+   * @param points
+   *          the input List<Vector> of points
+   * @param clusters
+   *          the initial List<SoftCluster> of clusters
+   * @param measure
+   *          the DistanceMeasure to use
+   * @param maxIter
+   *          the maximum number of iterations
+   */
+  public static List<List<SoftCluster>> clusterPoints(List<Vector> points,
+                                                      List<SoftCluster> clusters,
+                                                      DistanceMeasure measure,
+                                                      double threshold,
+                                                      double m,
+                                                      int numIter) {
+    List<List<SoftCluster>> clustersList = new ArrayList<List<SoftCluster>>();
+    clustersList.add(clusters);
+    FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, threshold, m);
+    boolean converged = false;
+    int iteration = 0;
+    for (int iter = 0; !converged && iter < numIter; iter++) {
+      List<SoftCluster> next = new ArrayList<SoftCluster>();
+      List<SoftCluster> cs = clustersList.get(iteration++);
+      for (SoftCluster c : cs) {
+        next.add(new SoftCluster(c.getCenter(), c.getId()));
+      }
+      clustersList.add(next);
+      converged = runFuzzyKMeansIteration(points, clustersList.get(iteration), clusterer);
+    }
+    return clustersList;
+  }
+  
+  /**
+   * Perform a single iteration over the points and clusters, assigning points to clusters and returning if
+   * the iterations are completed.
+   * 
+   * @param points
+   *          the List<Vector> having the input points
+   * @param clusterList
+   *          the List<Cluster> clusters
+   * @return
+   */
+  public static boolean runFuzzyKMeansIteration(List<Vector> points,
+                                                List<SoftCluster> clusterList,
+                                                FuzzyKMeansClusterer clusterer) {
+    // for each
+    for (Vector point : points) {
+      List<Double> clusterDistanceList = new ArrayList<Double>();
+      for (SoftCluster cluster : clusterList) {
+        clusterDistanceList.add(clusterer.getMeasure().distance(point, cluster.getCenter()));
+      }
+      
+      for (int i = 0; i < clusterList.size(); i++) {
+        double probWeight = clusterer.computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
+        clusterList.get(i).addPoint(point, Math.pow(probWeight, clusterer.getM()));
+      }
+    }
+    boolean converged = true;
+    for (SoftCluster cluster : clusterList) {
+      if (!clusterer.computeConvergence(cluster)) {
+        converged = false;
+      }
+    }
+    // update the cluster centers
+    if (!converged) {
+      for (SoftCluster cluster : clusterList) {
+        cluster.recomputeCenter();
+      }
+    }
+    return converged;
+    
   }
 }

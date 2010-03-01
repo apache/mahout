@@ -21,16 +21,15 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.JsonVectorAdapter;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.list.IntArrayList;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -44,7 +43,7 @@ import com.google.gson.reflect.TypeToken;
 public class MeanShiftCanopy extends ClusterBase {
   
   // TODO: this is problematic, but how else to encode membership?
-  private List<Vector> boundPoints = new ArrayList<Vector>();
+  private IntArrayList boundPoints = new IntArrayList();
   
   private boolean converged = false;
   
@@ -78,9 +77,9 @@ public class MeanShiftCanopy extends ClusterBase {
   public MeanShiftCanopy(Vector point, int id) {
     this.setId(id);
     this.setCenter(point);
-    this.setPointTotal(point.clone());
+    this.setPointTotal(new RandomAccessSparseVector(point.clone()));
     this.setNumPoints(1);
-    this.boundPoints.add(point);
+    this.boundPoints.add(id);
   }
   
   /**
@@ -91,14 +90,14 @@ public class MeanShiftCanopy extends ClusterBase {
    * @param id
    *          an int identifying the canopy local to this process only
    * @param boundPoints
-   *          a List<Vector> containing points bound to the canopy
+   *          a IntArrayList containing points ids bound to the canopy
    * @param converged
    *          true if the canopy has converged
    */
-  MeanShiftCanopy(Vector point, int id, List<Vector> boundPoints, boolean converged) {
+  MeanShiftCanopy(Vector point, int id, IntArrayList boundPoints, boolean converged) {
     this.setId(id);
     this.setCenter(point);
-    this.setPointTotal(point.clone());
+    this.setPointTotal(new RandomAccessSparseVector(point));
     this.setNumPoints(1);
     this.boundPoints = boundPoints;
     this.converged = converged;
@@ -117,21 +116,13 @@ public class MeanShiftCanopy extends ClusterBase {
   void addPoints(Vector point, int nPoints) {
     setNumPoints(getNumPoints() + nPoints);
     Vector subTotal = nPoints == 1 ? point.clone() : point.times(nPoints);
-    setPointTotal(getPointTotal() == null ? subTotal : getPointTotal().plus(subTotal));
+    if (getPointTotal() == null) {
+      setPointTotal(new RandomAccessSparseVector(subTotal));
+    } else {
+      subTotal.addTo(getPointTotal()); 
+    }
   }
   
-  /**
-   * Compute the bound centroid by averaging the bound points
-   * 
-   * @return a Vector which is the new bound centroid
-   */
-  public Vector computeBoundCentroid() {
-    Vector result = new DenseVector(getCenter().size());
-    for (Vector v : boundPoints) {
-      result.assign(v, Functions.plus);
-    }
-    return result.divide(boundPoints.size());
-  }
   
   /**
    * Compute the centroid by normalizing the pointTotal
@@ -147,7 +138,7 @@ public class MeanShiftCanopy extends ClusterBase {
     }
   }
   
-  public List<Vector> getBoundPoints() {
+  public IntArrayList getBoundPoints() {
     return boundPoints;
   }
   
@@ -164,7 +155,7 @@ public class MeanShiftCanopy extends ClusterBase {
     setId(canopy.getId());
     setCenter(canopy.getCenter());
     addPoints(getCenter(), 1);
-    boundPoints.addAll(canopy.getBoundPoints());
+    boundPoints.addAllOf(canopy.getBoundPoints());
   }
   
   public boolean isConverged() {
@@ -178,7 +169,7 @@ public class MeanShiftCanopy extends ClusterBase {
    *          an existing MeanShiftCanopy
    */
   void merge(MeanShiftCanopy canopy) {
-    boundPoints.addAll(canopy.boundPoints);
+    boundPoints.addAllOf(canopy.boundPoints);
   }
   
   @Override
@@ -204,20 +195,19 @@ public class MeanShiftCanopy extends ClusterBase {
     temp.readFields(in);
     this.setCenter(temp.get());
     int numpoints = in.readInt();
-    this.boundPoints = new ArrayList<Vector>();
+    this.boundPoints = new IntArrayList();
     for (int i = 0; i < numpoints; i++) {
-      temp.readFields(in);
-      this.boundPoints.add(temp.get());
+      this.boundPoints.add(in.readInt());
     }
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    VectorWritable.writeVector(out, computeCentroid());
+    VectorWritable.writeVector(out, new SequentialAccessSparseVector(computeCentroid()));
     out.writeInt(boundPoints.size());
-    for (Vector v : boundPoints) {
-      VectorWritable.writeVector(out, v);
+    for (int v : boundPoints.elements()) {
+      out.writeInt(v);
     }
   }
   
@@ -236,7 +226,7 @@ public class MeanShiftCanopy extends ClusterBase {
     return formatCanopy(this);
   }
   
-  public void setBoundPoints(List<Vector> boundPoints) {
+  public void setBoundPoints(IntArrayList boundPoints) {
     this.boundPoints = boundPoints;
   }
   

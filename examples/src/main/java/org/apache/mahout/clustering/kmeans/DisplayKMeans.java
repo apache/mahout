@@ -21,10 +21,8 @@ import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -57,151 +55,30 @@ class DisplayKMeans extends DisplayDirichlet {
       for (Cluster cluster : cls) {
         // if (true || cluster.getNumPoints() > sampleData.size() * 0.05) {
         dv.assign(cluster.getStd() * 3);
+        System.out.println(cluster.getCenter().asFormatString() + " " + dv.asFormatString());
         DisplayDirichlet.plotEllipse(g2, cluster.getCenter(), dv);
         // }
       }
     }
   }
   
-  /**
-   * This is the reference k-means implementation. Given its inputs it iterates over the points and clusters
-   * until their centers converge or until the maximum number of iterations is exceeded.
-   * 
-   * @param points
-   *          the input List<Vector> of points
-   * @param clusters
-   *          the initial List<Cluster> of clusters
-   * @param measure
-   *          the DistanceMeasure to use
-   * @param maxIter
-   *          the maximum number of iterations
-   */
-  private static void referenceKmeans(List<VectorWritable> points,
-                                      List<List<Cluster>> clusters,
-                                      DistanceMeasure measure,
-                                      int maxIter) {
-    boolean converged = false;
-    int iteration = 0;
-    while (!converged && iteration < maxIter) {
-      List<Cluster> next = new ArrayList<Cluster>();
-      List<Cluster> cs = clusters.get(iteration++);
-      for (Cluster c : cs) {
-        next.add(new Cluster(c.getCenter()));
-      }
-      clusters.add(next);
-      converged = iterateReference(points, clusters.get(iteration), measure);
-    }
-  }
-  
-  /**
-   * Perform a single iteration over the points and clusters, assigning points to clusters and returning if
-   * the iterations are completed.
-   * 
-   * @param points
-   *          the List<Vector> having the input points
-   * @param clusters
-   *          the List<Cluster> clusters
-   * @param measure
-   *          a DistanceMeasure to use
-   * @return
-   */
-  private static boolean iterateReference(List<VectorWritable> points,
-                                          List<Cluster> clusters,
-                                          DistanceMeasure measure) {
-    // iterate through all points, assigning each to the nearest cluster
-    for (VectorWritable point : points) {
-      Cluster closestCluster = null;
-      double closestDistance = Double.MAX_VALUE;
-      for (Cluster cluster : clusters) {
-        double distance = measure.distance(cluster.getCenter(), point.get());
-        if (closestCluster == null || closestDistance > distance) {
-          closestCluster = cluster;
-          closestDistance = distance;
-        }
-      }
-      closestCluster.addPoint(point.get());
-    }
-    // test for convergence
-    boolean converged = true;
-    for (Cluster cluster : clusters) {
-      if (!cluster.computeConvergence(measure, 0.001)) {
-        converged = false;
-      }
-    }
-    // update the cluster centers
-    if (!converged) {
-      for (Cluster cluster : clusters) {
-        cluster.recomputeCenter();
-      }
-    }
-    return converged;
-  }
-  
-  /**
-   * Iterate through the points, adding new canopies. Return the canopies.
-   * 
-   * @param measure
-   *          a DistanceMeasure to use
-   * @param points
-   *          a list<Vector> defining the points to be clustered
-   * @param t1
-   *          the T1 distance threshold
-   * @param t2
-   *          the T2 distance threshold
-   * @return the List<Canopy> created
-   */
-  static List<Canopy> populateCanopies(DistanceMeasure measure,
-                                       List<VectorWritable> points,
-                                       double t1,
-                                       double t2) {
-    List<Canopy> canopies = new ArrayList<Canopy>();
-    /**
-     * Reference Implementation: Given a distance metric, one can create canopies as follows: Start with a
-     * list of the data points in any order, and with two distance thresholds, T1 and T2, where T1 > T2.
-     * (These thresholds can be set by the user, or selected by cross-validation.) Pick a point on the list
-     * and measure its distance to all other points. Put all points that are within distance threshold T1 into
-     * a canopy. Remove from the list all points that are within distance threshold T2. Repeat until the list
-     * is empty.
-     */
-    int nextCanopyId = 0;
-    while (!points.isEmpty()) {
-      Iterator<VectorWritable> ptIter = points.iterator();
-      Vector p1 = ptIter.next().get();
-      ptIter.remove();
-      Canopy canopy = new Canopy(p1, nextCanopyId++);
-      canopies.add(canopy);
-      while (ptIter.hasNext()) {
-        Vector p2 = ptIter.next().get();
-        double dist = measure.distance(p1, p2);
-        // Put all points that are within distance threshold T1 into the canopy
-        if (dist < t1) {
-          canopy.addPoint(p2);
-        }
-        // Remove from the list all points that are within distance threshold T2
-        if (dist < t2) {
-          ptIter.remove();
-        }
-      }
-    }
-    return canopies;
-  }
-  
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    List<VectorWritable> points = new ArrayList<VectorWritable>();
-    points.addAll(sampleData);
-    List<Canopy> canopies = populateCanopies(new ManhattanDistanceMeasure(), points,
-      t1, t2);
+    List<Vector> points = new ArrayList<Vector>();
+    for (VectorWritable sample : sampleData)
+      points.add(sample.get());
     DistanceMeasure measure = new ManhattanDistanceMeasure();
-    clusters = new ArrayList<List<Cluster>>();
-    DisplayKMeans.clusters.add(new ArrayList<Cluster>());
-    for (Canopy canopy : canopies) {
-      if (canopy.getNumPoints() > 0.05 * DisplayDirichlet.sampleData.size()) {
-        DisplayKMeans.clusters.get(0).add(new Cluster(canopy.getCenter()));
-      }
+    List<Cluster> initialClusters = new ArrayList<Cluster>();
+    k = 3;
+    int i = 0;
+    for (Vector point : points) {
+      if (initialClusters.size() < Math.min(k, points.size())) {
+        initialClusters.add(new Cluster(point, i++));
+      } else break;
     }
-    referenceKmeans(sampleData, clusters, measure, 10);
+    clusters = KMeansClusterer.clusterPoints(points, initialClusters, measure, 10, 0.001);
+    System.out.println(clusters.size());
     new DisplayKMeans();
   }
 }

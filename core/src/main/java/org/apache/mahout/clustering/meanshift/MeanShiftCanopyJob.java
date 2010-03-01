@@ -127,10 +127,13 @@ public class MeanShiftCanopyJob {
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);
+    
+    MeanShiftCanopyDriver.createCanopyFromVectors(input, output+"/initial-canopies");
+    
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 0;
-    String clustersIn = input;
+    String clustersIn = output+"/initial-canopies";
     while (!converged && (iteration < maxIterations)) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration

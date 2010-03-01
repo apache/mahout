@@ -125,7 +125,7 @@ public class DirichletClusterer<O> {
     this.thin = thin;
     this.burnin = burnin;
     this.numClusters = numClusters;
-    state = new DirichletState<O>(modelFactory, numClusters, alpha_0, thin, burnin);
+    state = new DirichletState<O>(modelFactory, numClusters, alpha_0);
   }
   
   /**
@@ -198,4 +198,34 @@ public class DirichletClusterer<O> {
     return pi;
   }
   
+  /**
+   * Create a new instance on the sample data with the given additional parameters
+   * 
+   * @param points
+   *          the observed data to be clustered
+   * @param modelFactory
+   *          the ModelDistribution to use
+   * @param alpha_0
+   *          the double value for the beta distributions
+   * @param numClusters
+   *          the int number of clusters
+   * @param thin
+   *          the int thinning interval, used to report every n iterations
+   * @param burnin
+   *          the int burnin interval, used to suppress early iterations
+   * @param numIterations
+   *          number of iterations to be performed
+   */
+  public static List<Model<Vector>[]> clusterPoints(List<Vector> points,
+                                                    ModelDistribution<Vector> modelFactory,
+                                                    double alpha_0,
+                                                    int numClusters,
+                                                    int thin,
+                                                    int burnin,
+                                                    int numIterations) {
+    DirichletClusterer<Vector> clusterer = new DirichletClusterer<Vector>(points, modelFactory, alpha_0,
+        numClusters, thin, burnin);
+    return clusterer.cluster(numIterations);
+    
+  }
 }

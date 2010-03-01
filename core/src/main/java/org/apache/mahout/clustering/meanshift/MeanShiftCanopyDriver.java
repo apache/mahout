@@ -45,7 +45,7 @@ public final class MeanShiftCanopyDriver {
   
   private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyDriver.class);
   
-  private MeanShiftCanopyDriver() { }
+  private MeanShiftCanopyDriver() {}
   
   public static void main(String[] args) {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -88,7 +88,8 @@ public final class MeanShiftCanopyDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
-      runJob(input, output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
+      createCanopyFromVectors(input, output + "/intial-canopies");
+      runJob(output + "/intial-canopies", output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY,
         measureClassName, t1, t2, convergenceDelta);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
@@ -142,6 +143,49 @@ public final class MeanShiftCanopyDriver {
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, control);
+    
+    client.setConf(conf);
+    try {
+      JobClient.runJob(conf);
+    } catch (IOException e) {
+      log.warn(e.toString(), e);
+    }
+  }
+  
+  /**
+   * Run the job
+   * 
+   * @param input
+   *          the input pathname String
+   * @param output
+   *          the output pathname String
+   * @param control
+   *          the control path
+   * @param measureClassName
+   *          the DistanceMeasure class name
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
+   * @param convergenceDelta
+   *          the double convergence criteria
+   */
+  public static void createCanopyFromVectors(String input, String output) {
+    
+    Configurable client = new JobClient();
+    JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
+    
+    conf.setOutputKeyClass(Text.class);
+    conf.setOutputValueClass(MeanShiftCanopy.class);
+    
+    FileInputFormat.setInputPaths(conf, new Path(input));
+    Path outPath = new Path(output);
+    FileOutputFormat.setOutputPath(conf, outPath);
+    
+    conf.setMapperClass(MeanShiftCanopyCreatorMapper.class);
+    conf.setNumReduceTasks(0);
+    conf.setInputFormat(SequenceFileInputFormat.class);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     client.setConf(conf);
     try {

@@ -66,7 +66,8 @@ public class TestMapReduce extends MahoutTestCase {
    *          double y-standard deviation of the samples
    */
   private void generateSamples(int num, double mx, double my, double sdx, double sdy) {
-    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy + ']');
+    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy
+                       + ']');
     for (int i = 0; i < num; i++) {
       addSample(new double[] {UncommonDistributions.rNorm(mx, sdx), UncommonDistributions.rNorm(my, sdy)});
     }
@@ -115,7 +116,7 @@ public class TestMapReduce extends MahoutTestCase {
   public void testMapper() throws Exception {
     generateSamples(10, 0, 0, 1);
     DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new NormalModelDistribution(
-        new VectorWritable(new DenseVector(2))), 5, 1, 0, 0);
+        new VectorWritable(new DenseVector(2))), 5, 1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.configure(state);
     
@@ -135,7 +136,7 @@ public class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
     DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new SampledNormalDistribution(
-        new VectorWritable(new DenseVector(2))), 20, 1, 1, 0);
+        new VectorWritable(new DenseVector(2))), 20, 1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.configure(state);
     
@@ -180,7 +181,7 @@ public class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
     DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new SampledNormalDistribution(
-        new VectorWritable(new DenseVector(2))), 20, 1.0, 1, 0);
+        new VectorWritable(new DenseVector(2))), 20, 1.0);
     
     List<Model<VectorWritable>[]> models = new ArrayList<Model<VectorWritable>[]>();
     

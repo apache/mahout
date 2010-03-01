@@ -18,6 +18,8 @@
 package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
@@ -174,7 +176,7 @@ public class CanopyClusterer {
         isCovered = true;
         vw.set(point);
         collector.collect(new Text(canopy.getIdentifier()), vw);
-        reporter.setStatus("Emit Canopy ID:" +canopy.getIdentifier());
+        reporter.setStatus("Emit Canopy ID:" + canopy.getIdentifier());
       } else if (dist < minDist) {
         minDist = dist;
         closest = canopy;
@@ -199,4 +201,78 @@ public class CanopyClusterer {
   public boolean canopyCovers(Canopy canopy, Vector point) {
     return measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point) < t1;
   }
+  
+  /**
+   * Iterate through the points, adding new canopies. Return the canopies.
+   * 
+   * @param points
+   *          a list<Vector> defining the points to be clustered
+   * @param measure
+   *          a DistanceMeasure to use
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
+   * @return the List<Canopy> created
+   */
+  public static List<Canopy> createCanopies(List<Vector> points, DistanceMeasure measure, double t1, double t2) {
+    List<Canopy> canopies = new ArrayList<Canopy>();
+    /**
+     * Reference Implementation: Given a distance metric, one can create canopies as follows: Start with a
+     * list of the data points in any order, and with two distance thresholds, T1 and T2, where T1 > T2.
+     * (These thresholds can be set by the user, or selected by cross-validation.) Pick a point on the list
+     * and measure its distance to all other points. Put all points that are within distance threshold T1 into
+     * a canopy. Remove from the list all points that are within distance threshold T2. Repeat until the list
+     * is empty.
+     */
+    int nextCanopyId = 0;
+    while (!points.isEmpty()) {
+      Iterator<Vector> ptIter = points.iterator();
+      Vector p1 = ptIter.next();
+      ptIter.remove();
+      Canopy canopy = new Canopy(p1, nextCanopyId++);
+      canopies.add(canopy);
+      while (ptIter.hasNext()) {
+        Vector p2 = ptIter.next();
+        double dist = measure.distance(p1, p2);
+        // Put all points that are within distance threshold T1 into the canopy
+        if (dist < t1) {
+          canopy.addPoint(p2);
+        }
+        // Remove from the list all points that are within distance threshold T2
+        if (dist < t2) {
+          ptIter.remove();
+        }
+      }
+    }
+    return canopies;
+  }
+  
+  /**
+   * Iterate through the canopies, adding their centroids to a list
+   * 
+   * @param canopies
+   *          a List<Canopy>
+   * @return the List<Vector>
+   */
+  public static List<Vector> calculateCentroids(List<Canopy> canopies) {
+    List<Vector> result = new ArrayList<Vector>();
+    for (Canopy canopy : canopies) {
+      result.add(canopy.computeCentroid());
+    }
+    return result;
+  }
+  
+  /**
+   * Iterate through the canopies, resetting their center to their centroids
+   * 
+   * @param canopies
+   *          a List<Canopy>
+   */
+  public static void updateCentroids(List<Canopy> canopies) {
+    for (Canopy canopy : canopies) {
+      canopy.setCenter(canopy.computeCentroid());
+    }
+  }
+  
 }

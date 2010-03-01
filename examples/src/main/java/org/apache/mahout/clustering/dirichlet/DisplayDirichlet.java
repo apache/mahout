@@ -36,22 +36,21 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.TimesFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DisplayDirichlet extends Frame {
-
+  
   private static final Logger log = LoggerFactory.getLogger(DisplayDirichlet.class);
-
+  
   private static final List<Vector> sampleParams = new ArrayList<Vector>();
-   
+  
   protected static final int ds = 72; // default scale = 72 pixels per inch
   
   protected static final int size = 8; // screen size in inches
   
   protected static final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
- 
+  
   protected static final double significance = 0.05;
   
   protected static final Color[] colors = {Color.red, Color.orange, Color.yellow, Color.green, Color.blue,
@@ -60,6 +59,8 @@ public class DisplayDirichlet extends Frame {
   protected static List<Model<VectorWritable>[]> result;
   
   protected int res; // screen resolution
+  
+  protected static int k = 12;
   
   public DisplayDirichlet() {
     initialize();
@@ -97,7 +98,9 @@ public class DisplayDirichlet extends Frame {
     Vector v = new DenseVector(2);
     Vector dv = new DenseVector(2);
     g2.setColor(Color.RED);
+    int i = 0;
     for (Vector param : sampleParams) {
+      i++;
       v.set(0, param.get(0));
       v.set(1, param.get(1));
       dv.set(0, param.get(2) * 3);
@@ -137,14 +140,12 @@ public class DisplayDirichlet extends Frame {
    */
   public static void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = {1, -1};
-    Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
+    Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
     int h = size / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2.draw(new Rectangle2D.Double(x * ds, y * ds, dv.get(0)
-                                                                                     * ds,
-        dv.get(1) * ds));
+    g2.draw(new Rectangle2D.Double(x * ds, y * ds, dv.get(0) * ds, dv.get(1) * ds));
   }
   
   /**
@@ -159,7 +160,7 @@ public class DisplayDirichlet extends Frame {
    */
   public static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = {1, -1};
-    Vector v2 = v.clone().assign(new DenseVector(flip), new TimesFunction());
+    Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
     int h = size / 2;
     double x = v2.get(0) + h;
@@ -185,13 +186,13 @@ public class DisplayDirichlet extends Frame {
   }
   
   public static void generateSamples() {
-    generateSamples(400, 1, 1, 3);
+    generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
   }
   
   public static void generate2dSamples() {
-    generate2dSamples(400, 1, 1, 3, 1);
+    generate2dSamples(500, 1, 1, 3, 1);
     generate2dSamples(300, 1, 0, 0.5, 1);
     generate2dSamples(300, 0, 2, 0.1, 0.5);
   }
@@ -213,10 +214,8 @@ public class DisplayDirichlet extends Frame {
     sampleParams.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
     for (int i = 0; i < num; i++) {
-      sampleData.add(new VectorWritable(new DenseVector(new double[] {
-          UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd)}
-      )));
+      sampleData.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
+                                                                      UncommonDistributions.rNorm(my, sd)})));
     }
   }
   
@@ -246,8 +245,8 @@ public class DisplayDirichlet extends Frame {
   }
   
   public static void generateResults(ModelDistribution<VectorWritable> modelDist) {
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
-        sampleData, modelDist, 1.0, 10, 2, 2);
+    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData, modelDist,
+        1.0, k, 2, 2);
     result = dc.cluster(20);
     printModels(result, 5);
   }
