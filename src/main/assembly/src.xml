@@ -18,7 +18,7 @@
         <include>${project.basedir}/**/NOTICE*</include>
         <include>${project.basedir}/**/pom.xml</include>
         <include>${project.basedir}/**/src/**</include>
-        <include>${project.basedir}/bin/**</include>
+        <include>${project.basedir}/conf/**</include>
         <include>${project.basedir}/**/build.xml</include>
         <include>${project.basedir}/**/*.properties</include>
       </includes>
@@ -26,6 +26,15 @@
         <exclude>target/**</exclude>
         <exclude>**/target/**</exclude>
       </excludes>
+    </fileSet>
+    <fileSet>
+      <directory/>
+      <outputDirectory/>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <includes>
+        <include>${project.basedir}/bin/mahout</include>
+      </includes>
+      <fileMode>0755</fileMode>
     </fileSet>
   </fileSets>
 </assembly>

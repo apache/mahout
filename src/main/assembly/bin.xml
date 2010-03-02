@@ -1,6 +1,6 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
   <id>bin</id>
   <formats>
     <format>tar.gz</format>
@@ -8,53 +8,90 @@
     <format>zip</format>
   </formats>
 
-  <moduleSets>
-    <moduleSet>
-      <includes>
-        <include>org.apache.mahout:mahout-collections</include>
-        <include>org.apache.mahout:mahout-math</include>
-        <include>org.apache.mahout:mahout-core</include>
-        <include>org.apache.mahout:mahout-utils</include>
-        <include>org.apache.mahout:mahout-examples</include>
-        <include>org.apache.mahout:mahout-taste-webapp</include>
-      </includes>
-      <binaries>
-        <outputDirectory/>
-        <unpack>false</unpack>
-        <dependencySets>
-          <dependencySet>
-            <excludes>
-              <exclude>org.apache.mahout:*</exclude>
-            </excludes>
-            <outputDirectory>lib</outputDirectory>
-          </dependencySet>
-        </dependencySets>
-      </binaries>
-    </moduleSet>
-  </moduleSets>
-
   <fileSets>
+    <fileSet>
+      <directory>examples/target/dependency</directory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+      <excludes>
+        <exclude>mahout-*</exclude>
+      </excludes>
+      <outputDirectory>lib</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>collections/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+ 	<exclude>*sources.jar</exclude>
+ 	<exclude>*javadoc.jar</exclude>
+ 	<exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>math/target</directory>
+      <includes>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+ 	<exclude>*sources.jar</exclude>
+ 	<exclude>*javadoc.jar</exclude>
+ 	<exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
     <fileSet>
       <directory>core/target</directory>
       <includes>
-        <include>*.job</include>
+        <include>mahout-*.job</include>
+        <include>mahout-*.jar</include>
       </includes>
+      <excludes>
+ 	<exclude>*sources.jar</exclude>
+ 	<exclude>*javadoc.jar</exclude>
+ 	<exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>utils/target</directory>
+      <includes>
+        <include>mahout-*.job</include>
+        <include>mahout-*.jar</include>
+      </includes>
+      <excludes>
+ 	<exclude>*sources.jar</exclude>
+ 	<exclude>*javadoc.jar</exclude>
+ 	<exclude>*tests.jar</exclude>
+      </excludes>
       <outputDirectory/>
     </fileSet>
     <fileSet>
       <directory>examples/target</directory>
       <includes>
-        <include>*.job</include>
+        <include>mahout-*.jar</include>
+        <include>mahout-*.job</include>
+      </includes>
+      <excludes>
+ 	<exclude>*sources.jar</exclude>
+ 	<exclude>*javadoc.jar</exclude>
+ 	<exclude>*tests.jar</exclude>
+      </excludes>
+      <outputDirectory/>
+    </fileSet>
+    <fileSet>
+      <directory>taste-web/target</directory>
+      <includes>
+        <include>mahout-*.war</include>
       </includes>
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>math/target/apidocs</directory>
+      <directory>collections/target/apidocs</directory>
       <outputDirectory>docs/mahout-collections</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>bin</directory>
-      <outputDirectory>bin</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>conf</directory>
@@ -85,6 +122,7 @@
         <include>NOTICE*</include>
         <include>KEYS</include>
       </includes>
+      <fileMode>0644</fileMode>
     </fileSet>
     <fileSet>
       <directory>src/main/assembly</directory>
@@ -92,6 +130,20 @@
       <includes>
         <include>*-LICENSE.txt</include>
       </includes>
+      <fileMode>0644</fileMode>
+    </fileSet>
+    <fileSet>
+      <directory>bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>mahout</include>
+      </includes>
+      <fileMode>0755</fileMode>
+    </fileSet>
+    <fileSet>
+      <directory>conf</directory>
+      <outputDirectory>conf</outputDirectory>
+      <fileMode>0644</fileMode>
     </fileSet>
   </fileSets>
 </assembly>
