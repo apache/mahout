@@ -57,6 +57,10 @@
       <outputDirectory>bin</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>conf</directory>
+      <outputDirectory>conf</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>math/target/apidocs</directory>
       <outputDirectory>docs/mahout-math</outputDirectory>
     </fileSet>

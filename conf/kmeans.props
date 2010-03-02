@@ -1,0 +1,5 @@
+#i|input = /path/to/input
+#o|output = /path/to/output
+#c|clusters = /path/to/put/clusters
+#x|max = <numIterations>
+#k|k = <numClusters>

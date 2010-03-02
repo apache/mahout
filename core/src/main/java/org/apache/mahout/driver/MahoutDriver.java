@@ -1,0 +1,198 @@
+package org.apache.mahout.driver;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.hadoop.util.ProgramDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+ * General-purpose driver class for Mahout programs.  Utilizes org.apache.hadoop.util.ProgramDriver to run
+ * main methods of other classes, but first loads up default properties from a properties file.
+ *
+ * for local running:
+ *
+ * $MAHOUT_HOME/bin/mahout run shortJobName [over-ride ops]
+ *
+ * Works like this: by default, the file "driver.classes.props" is loaded from the classpath, which
+ * defines a mapping between short names like "vectordump" and fully qualified class names.
+ * The format of driver.classes.props is like so:
+ *
+ * fully.qualified.class.name = shortJobName : descriptive string
+ *
+ * The default properties to be applied to the program run is pulled out of, by default, "<shortJobName>.props"
+ * (also off of the classpath).
+ *
+ * The format of the default properties files is as follows:
+ *
+ * i|input = /path/to/my/input
+ * o|output = /path/to/my/output
+ * m|jarFile = /path/to/jarFile
+ * # etc - each line is shortArg|longArg = value
+ *
+ * The next argument to the Driver is supposed to be the short name of the class to be run (as defined in the
+ * driver.classes.props file).
+ *
+ * Then the class which will be run will have it's main called with
+ *
+ *   main(new String[] { "--input", "/path/to/my/input", "--output", "/path/to/my/output" });
+ *
+ * After all the "default" properties are loaded from the file, any further command-line arguments are taken in,
+ * and over-ride the defaults.
+ *
+ * So if your driver.classes.props looks like so:
+ *
+ * org.apache.mahout.utils.vectors.VectorDumper = vecDump : dump vectors from a sequence file
+ *
+ * and you have a file core/src/main/resources/vecDump.props which looks like
+ *
+ * o|output = /tmp/vectorOut
+ * s|seqFile = /my/vector/sequenceFile
+ *
+ * And you execute the command-line:
+ *
+ * $MAHOUT_HOME/bin/mahout run vecDump -s /my/otherVector/sequenceFile
+ *
+ * Then org.apache.mahout.utils.vectors.VectorDumper.main() will be called with arguments:
+ *   {"--output", "/tmp/vectorOut", "-s", "/my/otherVector/sequenceFile"}
+ */
+public class MahoutDriver {
+  private static final Logger log = LoggerFactory.getLogger(MahoutDriver.class);
+
+  public static void main(String[] args) throws Exception {
+    int exitCode = -1;
+    try {
+      ProgramDriver programDriver = new ProgramDriver();
+      Properties mainClasses = new Properties();
+      InputStream propsStream = Thread.currentThread()
+                                      .getContextClassLoader()
+                                      .getResourceAsStream("driver.classes.props");
+
+      mainClasses.load(propsStream);
+
+      String progName = args[0];
+
+      boolean foundShortName = false;
+      for(Object key :  mainClasses.keySet()) {
+        String keyString = (String) key;
+        if(shortName((String)mainClasses.get(keyString)).equals(progName)) {
+          foundShortName = true;
+        }
+        addClass(programDriver, keyString, (String)mainClasses.get(keyString));
+      }
+      if(args.length < 1 || args[0] == null || args[0].equals("-h") || args[0].equals("--help")) {
+        programDriver.driver(args);
+      }
+      if(!foundShortName) {
+        addClass(programDriver, progName, progName);
+      }
+      shift(args);
+
+      InputStream defaultsStream = Thread.currentThread()
+                                         .getContextClassLoader()
+                                         .getResourceAsStream(progName + ".props");
+
+      Properties mainProps = new Properties();
+      if (defaultsStream != null) { // can't find props file, use empty props.
+        mainProps.load(defaultsStream);
+      } else {
+        log.warn("No " + progName + ".props found on classpath, will use command-line arguments only");
+      }
+      Map<String,String[]> argMap = new HashMap<String,String[]>();
+      int i=0;
+      while(i<args.length && args[i] != null) {
+        List<String> argValues = new ArrayList<String>();
+        String arg = args[i];
+        i++;
+        if(arg.length() > 2 && arg.charAt(1) == 'D') { // '-Dkey=value' or '-Dkey=value1,value2,etc' case
+          String[] argSplit = arg.split("=");
+          arg = argSplit[0];
+          if(argSplit.length == 2) {
+            argValues.add(argSplit[1]);
+          }
+        } else {                                      // '-key [values]' or '--key [values]' case.
+          while(i<args.length && args[i] != null) {
+            if(args[i].length() > 0 && args[i].charAt(0) != '-') {
+              argValues.add(args[i]);
+              i++;
+            } else {
+              break;
+            }
+          }
+        }
+        argMap.put(arg, argValues.toArray(new String[argValues.size()]));
+      }
+      for(Object key : mainProps.keySet()) {
+        String[] argNamePair = ((String)key).split("\\|");
+        String shortArg = "-" + argNamePair[0].trim();
+        String longArg = argNamePair.length < 2 ? null : "--" + argNamePair[1].trim();
+        if(!argMap.containsKey(shortArg) && (longArg == null || !argMap.containsKey(longArg))) {
+          argMap.put(longArg, new String[] { ((String)mainProps.get(key)) } );
+        }
+      }
+      List<String> argsList = new ArrayList<String>();
+      argsList.add(progName);
+      for(String arg : argMap.keySet()) {
+        if(arg.startsWith("-D")) { // arg is -Dkey - if value for this !isEmpty(), then arg -> -Dkey + "=" + value
+          if(argMap.get(arg).length > 0 && !argMap.get(arg)[0].trim().isEmpty()) {
+            arg += "=" + argMap.get(arg)[0].trim();
+          }
+        }
+        argsList.add(arg);
+        if(!arg.startsWith("-D")) {
+          for(String argValue : argMap.get(arg)) {
+            argsList.add(argValue);
+          }
+        }
+      }
+      programDriver.driver(argsList.toArray(new String[argsList.size()]));
+      exitCode = 0;
+    } catch (Throwable e) {
+      e.printStackTrace();
+      log.error("MahoutDriver failed with args: " + Arrays.toString(args) + "\n" + e.getMessage());
+      exitCode = -1;
+    }
+    System.exit(exitCode);
+  }
+
+  private static String[] shift(String[] args) {
+    System.arraycopy(args, 1, args, 0, args.length - 1);
+    args[args.length - 1] = null;
+    return args;
+  }
+
+  private static String shortName(String valueString) {
+    if(valueString.indexOf(":") < 0) {
+      return valueString;
+    } else {
+      return valueString.substring(0, valueString.indexOf(":")).trim();
+    }
+  }
+
+  private static String desc(String valueString) {
+    if(valueString.indexOf(":") < 0) {
+      return valueString;
+    } else {
+      return valueString.substring(valueString.indexOf(":")).trim();
+    }
+  }
+
+  private static void addClass(ProgramDriver driver, String classString, String descString) {
+    try {
+      Class<?> clazz = Class.forName(classString);
+      driver.addClass(shortName(descString), clazz, desc(descString));
+    } catch (Throwable e) {
+      log.warn("Unable to add class: " + classString + "\n" + e.getMessage());
+    }
+  }
+
+}

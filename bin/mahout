@@ -9,9 +9,15 @@
 #   MAHOUT_HEAPSIZE    The maximum amount of heap to use, in MB. 
 #                      Default is 1000.
 #
-#   HADOOP_CONFIF_DIR  The location of a hadoop config directory 
+#   HADOOP_CONF_DIR  The location of a hadoop config directory 
 #
 #   MAHOUT_OPTS        Extra Java runtime options.
+#
+#   MAHOUT_CONF_DIR    The location of the program short-name to class name
+#                      mappings and the default properties files
+#                      defaults to "$MAHOUT_HOME/conf"
+#
+
 #
 #/**
 # * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -47,50 +53,12 @@ while [ -h "$THIS" ]; do
   fi
 done
 
-# if no args specified, show usage
-if [ $# = 0 ]; then
-  echo "NOTE: These parameters are subject to change in future releases"
-  echo "Usage: mahout [-core] COMMAND"
-  echo "where COMMAND is one of:"
-# Please keep alphabetized
-  echo "  canopy                run canopy clustering"
-  echo "  clusterdump           dump clusters from a sequence file"
-  echo "  dirchlet              run Dirchlet clustering"
-  echo "  fkmeans               run fuzzy kmeans clustering"
-  echo "  fpg                   run FPGrowth Driver for freq. pattern mining"
-  echo "  kmeans                run kmeans clustering"
-  echo "  lda                   run LDA clustering"
-  echo "  ldadump               dump the output state of LDA"
-  echo "  lucenevector          generate vectors from a lucene index"
-  echo "  trainclassifier       run Bayes/CBayes classifier training job"
-  echo "  testclassifier        test Bayes/CBayes model using a pre-classified data"
-  echo "  meanshift             run Mean Shift clustering"
-  echo "  seqdirectory          generate sequence files containing the documents beneathe a directory"
-  echo "  seqdump               dump a sequence files using the writable toString() method"
-  echo "  seqwiki               generate sequence files from a wikipedia dump file"
-  echo "  seq2sparse            generate sparse vectors from a sequence file"
-  echo "  vectordump            dump vectors from a sequence file"
-  echo " or"
-  echo "  CLASSNAME         run the class named CLASSNAME"
-  echo "Most commands print help when invoked w/o parameters."
-  echo ""
-  echo "Expert: -core option is for developers only. It avoids building the job jar, "
-  echo "        instead it simply includes classes compiled with mvn package. "
-  echo "        NOTE: this works only for jobs executed in 'local' mode"
-  echo " Most algorithms should support using --help to get the full list of inputs."
-  exit 1
-fi
-
 IS_CORE=0
 #check for -core option
 if [ "$1" == "-core" ] ; then
   IS_CORE=1
   shift
 fi
-
-# get arguments
-COMMAND=$1
-shift
 
 # some directories
 THIS_DIR=`dirname "$THIS"`
@@ -117,8 +85,13 @@ if [ "$MAHOUT_HEAPSIZE" != "" ]; then
   #echo $JAVA_HEAP_MAX
 fi
 
+if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
+  MAHOUT_CONF_DIR=$MAHOUT_HOME/conf
+fi
+
 # CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/conf
-CLASSPATH=${HADOOP_CONF_DIR:=$MAHOUT_HOME/conf}
+CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
+CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
 CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
 
 # so that filenames w/ spaces are handled correctly in loops below
@@ -126,12 +99,18 @@ IFS=
 
 if [ $IS_CORE == 0 ] 
 then
+  # add release dependencies to CLASSPATH
+  for f in $MAHOUT_HOME/mahout-*.jar; do
+    CLASSPATH=${CLASSPATH}:$f;
+  done
+
+  # add dev targets if they exist
   for f in $MAHOUT_HOME/*/target/mahout-*.job; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
-  # for releases, add Mahout job to CLASSPATH
-  for f in $MAHOUT_HOME/mahout-*.job; do
+  # add release dependencies to CLASSPATH
+  for f in $MAHOUT_HOME/lib/*.jar; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 else
@@ -139,12 +118,14 @@ else
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/utils/target/classes
   CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/examples/target/classes
+  #CLASSPATH=${CLASSPATH}:$MAHOUT_HOME/core/src/main/resources
 fi
 
-# add dependencies to CLASSPATH
+# add development dependencies to CLASSPATH
 for f in $MAHOUT_HOME/examples/target/dependency/*.jar; do
   CLASSPATH=${CLASSPATH}:$f;
 done
+
 
 # cygwin path translation
 if $cygwin; then
@@ -174,47 +155,28 @@ if [ "x$JAVA_LIBRARY_PATH" != "x" ]; then
   MAHOUT_OPTS="$MAHOUT_OPTS -Djava.library.path=$JAVA_LIBRARY_PATH"
 fi
 
-# figure out which class to run
-if [ "$COMMAND" = "vectordump" ] ; then
-  CLASS=org.apache.mahout.utils.vectors.VectorDumper
-elif [ "$COMMAND" = "clusterdump" ] ; then
-  CLASS=org.apache.mahout.utils.clustering.ClusterDumper
-elif [ "$COMMAND" = "seqdump" ] ; then
-  CLASS=org.apache.mahout.utils.SequenceFileDumper
-elif [ "$COMMAND" = "kmeans" ] ; then
-  CLASS=org.apache.mahout.clustering.kmeans.KMeansDriver
-elif [ "$COMMAND" = "fkmeans" ] ; then
-  CLASS=org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver
-elif [ "$COMMAND" = "lda" ] ; then
-  CLASS=org.apache.mahout.clustering.lda.LDADriver
-elif [ "$COMMAND" = "ldadump" ] ; then
-  CLASS=org.apache.mahout.clustering.lda.LDAPrintTopics
-elif [ "$COMMAND" = "fpg" ] ; then
-  CLASS=org.apache.mahout.fpm.pfpgrowth.FPGrowthDriver  
-elif [ "$COMMAND" = "dirichlet" ] ; then
-  CLASS=org.apache.mahout.clustering.dirichlet.DirichletDriver
-elif [ "$COMMAND" = "meanshift" ] ; then
-  CLASS=org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver  
-elif [ "$COMMAND" = "canopy" ] ; then
-  CLASS=org.apache.mahout.clustering.canopy.CanopyDriver
-elif [ "$COMMAND" = "lucenevector" ]; then
-  CLASS=org.apache.mahout.utils.vectors.lucene.Driver
-elif [ "$COMMAND" = "seqdirectory" ]; then
-  CLASS=org.apache.mahout.text.SequenceFilesFromDirectory
-elif [ "$COMMAND" = "seqwiki" ]; then
-  CLASS=org.apache.mahout.text.WikipediaToSequenceFile
-elif [ "$COMMAND" = "seq2sparse" ]; then
-  CLASS=org.apache.mahout.text.SparseVectorsFromSequenceFiles  
-elif [ "$COMMAND" = "trainclassifier" ]; then
-  CLASS=org.apache.mahout.classifier.bayes.TrainClassifier  
-elif [ "$COMMAND" = "testclassifier" ]; then
-  CLASS=org.apache.mahout.classifier.bayes.TestClassifier
-else
-  CLASS=$COMMAND
+CLASS=org.apache.mahout.driver.MahoutDriver
+
+for f in $MAHOUT_HOME/examples/target/mahout-examples-*.job; do
+  if [ -e "$f" ]; then
+    MAHOUT_JOB=$f
+  fi
+done
+
+if [ "$MAHOUT_JOB" = "" ]; then
+  for f in $MAHOUT_HOME/mahout-examples-*.job; do
+    MAHOUT_JOB=$f
+  done
 fi
 
-#echo $CLASSPATH
-
 # run it
-exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
+
+if [ "$HADOOP_CONF_DIR" = "" ] || [ "$HADOOP_HOME" = "" ]; then
+  echo "no HADOOP_CONF_DIR or HADOOP_HOME set, running locally"
+  exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
+else
+  echo "running on hadoop, using HADOOP_HOME=$HADOOP_HOME and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+  export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
+  exec "$HADOOP_HOME/bin/hadoop" jar $MAHOUT_JOB $CLASS "$@"
+fi
 
