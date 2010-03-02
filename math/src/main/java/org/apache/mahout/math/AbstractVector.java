@@ -42,7 +42,7 @@ public abstract class AbstractVector implements Vector {
 
   protected int size;
 
-  protected double lengthSquared = -1;
+  protected double lengthSquared = -1.0;
 
   protected AbstractVector() {
     this(null, 0);
@@ -58,16 +58,18 @@ public abstract class AbstractVector implements Vector {
   }
 
   public double aggregate(BinaryFunction aggregator, UnaryFunction map) {
-    double result = 0;
-    for(int i=0; i<size(); i++) {
+    double result = 0.0;
+    int size = size();
+    for(int i=0; i<size; i++) {
       result = aggregator.apply(result, map.apply(getQuick(i)) );
     }
     return result;
   }
 
   public double aggregate(Vector other, BinaryFunction aggregator, BinaryFunction combiner) {
-    double result = 0;
-    for(int i=0; i<size(); i++) {
+    double result = 0.0;
+    int size = size();
+    for(int i=0; i<size; i++) {
       result = aggregator.apply(result, combiner.apply(getQuick(i), other.getQuick(i)));
     }
     return result;
@@ -121,7 +123,9 @@ public abstract class AbstractVector implements Vector {
     if (size() != x.size()) {
       throw new CardinalityException(size(), x.size());
     }
-    if(this == x) return dotSelf();
+    if (this == x) {
+      return dotSelf();
+    }
     double result = 0.0;
     Iterator<Element> iter = iterateNonZero();
     while (iter.hasNext()) {
@@ -132,7 +136,7 @@ public abstract class AbstractVector implements Vector {
   }
   
   public double dotSelf() {
-    double result = 0;
+    double result = 0.0;
     if (this instanceof DenseVector) {
       for (int i = 0; i < size(); i++) {
         double value = this.getQuick(i);
@@ -142,8 +146,7 @@ public abstract class AbstractVector implements Vector {
     } else {
       Iterator<Element> iter = iterateNonZero();
       while (iter.hasNext()) {
-        Element element = iter.next();
-        double value = element.get();
+        double value = iter.next().get();
         result += value * value;
       }
       return result;
@@ -247,9 +250,8 @@ public abstract class AbstractVector implements Vector {
     }
     Vector randomlyAccessed;
     Iterator<Element> it;
-    Element e;
-    double d = 0;
-    if(lengthSquared >= 0 ) {
+    double d = 0.0;
+    if (lengthSquared >= 0.0) {
       it = v.iterateNonZero();
       randomlyAccessed = this;
       d += lengthSquared;
@@ -258,8 +260,10 @@ public abstract class AbstractVector implements Vector {
       randomlyAccessed = v;
       d += v.getLengthSquared();
     }
-    while(it.hasNext() && (e = it.next()) != null) {
-      d += e.get() * (e.get() - 2 * randomlyAccessed.getQuick(e.index()));
+    while(it.hasNext()) {
+      Element e = it.next();
+      double value = e.get();
+      d += value * (value - 2.0 * randomlyAccessed.getQuick(e.index()));
     }
     assert(d > -1.0e-9); // round-off errors should never be too far off!
     return Math.abs(d);
@@ -274,7 +278,9 @@ public abstract class AbstractVector implements Vector {
       Element element = iter.next();
       result = Math.max(result, element.get());
     }
-    if (nonZeroElements < size()) return Math.max(result, 0.0);
+    if (nonZeroElements < size()) {
+      return Math.max(result, 0.0);
+    }
     return result;
   }
   
@@ -299,7 +305,7 @@ public abstract class AbstractVector implements Vector {
       while (iter.hasNext()) {
         Element element = iter.next();
         double tmp = element.get();
-        if (tmp == 0d) {
+        if (tmp == 0.0) {
           return element.index();
         }
       }
@@ -309,7 +315,8 @@ public abstract class AbstractVector implements Vector {
 
   public Vector plus(double x) {
     Vector result = clone();
-    for (int i = 0; i < result.size(); i++) {
+    int size = result.size();
+    for (int i = 0; i < size; i++) {
       result.setQuick(i, getQuick(i) + x);
     }
     return result;
@@ -324,20 +331,18 @@ public abstract class AbstractVector implements Vector {
     Iterator<Element> iter = x.iterateNonZero();
     while (iter.hasNext()) {
       Element e = iter.next();
-      result.setQuick(e.index(), getQuick(e.index()) + e.get());
+      int index = e.index();
+      result.setQuick(index, getQuick(index) + e.get());
     }
-
-    /*for (int i = 0; i < result.size(); i++)
-      result.setQuick(i, getQuick(i) + x.getQuick(i));*/
     return result;
   }
 
   public void addTo(Vector v) {
     Iterator<Element> it = iterateNonZero();
-    Element e;
-    while(it.hasNext() && (e = it.next()) != null) {
-      int i = e.index();
-      v.setQuick(i, v.getQuick(i) + e.get());
+    while(it.hasNext() ) {
+      Element e = it.next();
+      int index = e.index();
+      v.setQuick(index, v.getQuick(index) + e.get());
     }
   }
 
@@ -368,26 +373,25 @@ public abstract class AbstractVector implements Vector {
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
-      int index = element.index();
-      element.set(element.get() * x.getQuick(index));
+      element.set(element.get() * x.getQuick(element.index()));
     }
 
     return result;
   }
 
   public double zSum() {
-    double result = 0;
+    double result = 0.0;
     Iterator<Element> iter = iterateNonZero();
     while (iter.hasNext()) {
-      Element element = iter.next();
-      result += element.get();
+      result += iter.next().get();
     }
 
     return result;
   }
 
   public Vector assign(double value) {
-    for (int i = 0; i < size(); i++) {
+    int size = size();
+    for (int i = 0; i < size; i++) {
       setQuick(i, value);
     }
     return this;
@@ -397,7 +401,8 @@ public abstract class AbstractVector implements Vector {
     if (values.length != size()) {
       throw new CardinalityException();
     }
-    for (int i = 0; i < size(); i++) {
+    int size = size();
+    for (int i = 0; i < size; i++) {
       setQuick(i, values[i]);
     }
     return this;
@@ -407,7 +412,8 @@ public abstract class AbstractVector implements Vector {
     if (other.size() != size()) {
       throw new CardinalityException();
     }
-    for (int i = 0; i < size(); i++) {
+    int size = size();
+    for (int i = 0; i < size; i++) {
       setQuick(i, other.getQuick(i));
     }
     return this;
@@ -420,8 +426,8 @@ public abstract class AbstractVector implements Vector {
     } else {
       it = iterateAll();
     }
-    Element e;
-    while(it.hasNext() && (e = it.next()) != null) {
+    while(it.hasNext()) {
+      Element e = it.next();
       e.set(f.apply(e.get(), y));
     }
     return this;
@@ -434,8 +440,8 @@ public abstract class AbstractVector implements Vector {
     } else {
       it = iterateAll();
     }
-    Element e;
-    while(it.hasNext() && (e = it.next()) != null) {
+    while(it.hasNext()) {
+      Element e = it.next();
       e.set(function.apply(e.get()));
     }
     return this;
