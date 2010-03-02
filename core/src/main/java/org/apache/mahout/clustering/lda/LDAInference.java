@@ -84,8 +84,7 @@ public class LDAInference {
     Vector gamma = new DenseVector(state.numTopics);
     gamma.assign(state.topicSmoothing + docTotal / state.numTopics);
     Vector nextGamma = new DenseVector(state.numTopics);
-    
-    DenseMatrix phi = new DenseMatrix(state.numTopics, docLength);
+    createPhiMatrix(docLength);
     
     // digamma is expensive, precompute
     Vector digammaGamma = digamma(gamma);
@@ -141,6 +140,19 @@ public class LDAInference {
     return new InferredDocument(wordCounts, gamma, columnMap, phi, oldLL);
   }
   
+  private void createPhiMatrix(int docLength) {
+    if (phi == null){
+      phi = new DenseMatrix(state.numTopics, docLength);
+    }
+    else if (phi.getRow(0).size() != docLength){
+      phi = new DenseMatrix(state.numTopics, docLength);
+    }
+    else {
+      phi.assign(0);
+    }
+  }
+  
+  private DenseMatrix phi;
   private final LDAState state;
   
   private double computeLikelihood(Vector wordCounts,
