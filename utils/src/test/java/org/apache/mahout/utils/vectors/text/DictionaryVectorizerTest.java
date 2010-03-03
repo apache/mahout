@@ -112,8 +112,8 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    rmr("output");
-    rmr("testdata");
+    rmr("target/output");
+    rmr("target/testdata");
     Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
   }
@@ -123,7 +123,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   ClassNotFoundException,
   URISyntaxException {
     Configuration conf = new Configuration();
-    String pathString = "testdata/documents/docs.file";
+    String pathString = "target/testdata/documents/docs.file";
     Path path = new Path(pathString);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
       Text.class, Text.class);
@@ -135,10 +135,10 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     writer.close();
     Class<? extends Analyzer> analyzer = StandardAnalyzer.class;
     DocumentProcessor.tokenizeDocuments(pathString, analyzer,
-    "output/tokenized-documents");
-    DictionaryVectorizer.createTermFrequencyVectors("output/tokenized-documents",
-      "output/wordcount", 2, 1, 0.0f, 1, 100, false);
-    TFIDFConverter.processTfIdf("output/wordcount/vectors", "output/tfidf/", 100, 1, 99, 1.0f, false);
+    "target/output/tokenized-documents");
+    DictionaryVectorizer.createTermFrequencyVectors("target/output/tokenized-documents",
+      "target/output/wordcount", 2, 1, 0.0f, 1, 100, false);
+    TFIDFConverter.processTfIdf("target/output/wordcount/vectors", "target/output/tfidf/", 100, 1, 99, 1.0f, false);
     
   }
 }
