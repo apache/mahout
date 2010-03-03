@@ -79,12 +79,10 @@ public class MahoutDriver {
 
       mainClasses.load(propsStream);
 
-      String progName = args[0];
-
       boolean foundShortName = false;
       for(Object key :  mainClasses.keySet()) {
         String keyString = (String) key;
-        if(shortName((String)mainClasses.get(keyString)).equals(progName)) {
+        if(args.length > 0 && shortName((String)mainClasses.get(keyString)).equals(args[0])) {
           foundShortName = true;
         }
         addClass(programDriver, keyString, (String)mainClasses.get(keyString));
@@ -92,6 +90,7 @@ public class MahoutDriver {
       if(args.length < 1 || args[0] == null || args[0].equals("-h") || args[0].equals("--help")) {
         programDriver.driver(args);
       }
+      String progName = args[0];
       if(!foundShortName) {
         addClass(programDriver, progName, progName);
       }
