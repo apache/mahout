@@ -315,6 +315,24 @@ public class DenseVector extends AbstractVector {
     }
   }
   
+  public void addAll(Vector v) {
+    if (v.size() != size()) {
+      throw new CardinalityException();
+    }
+    
+    Iterator<org.apache.mahout.math.Vector.Element> iter = v.iterateNonZero();
+    while (iter.hasNext()) {
+      org.apache.mahout.math.Vector.Element element = iter.next();
+      values[element.index()] += element.get();
+    }
+  }
+  
+  @Override
+  public Vector assign(double value) {
+    Arrays.fill(values, value);
+    return this;
+  }
+  
   @Override
   public double dot(Vector x) {
     if (size() != x.size()) {

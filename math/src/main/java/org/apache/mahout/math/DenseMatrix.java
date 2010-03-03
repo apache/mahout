@@ -17,28 +17,30 @@
 
 package org.apache.mahout.math;
 
+import java.util.Arrays;
 
 /** Matrix of doubles implemented using a 2-d array */
 public class DenseMatrix extends AbstractMatrix {
-
+  
   protected double[][] values;
-
+  
   public DenseMatrix() {
     super();
   }
-
+  
   protected int columnSize() {
     return values[0].length;
   }
-
+  
   protected int rowSize() {
     return values.length;
   }
-
+  
   /**
    * Construct a matrix from the given values
-   *
-   * @param values a double[][]
+   * 
+   * @param values
+   *          a double[][]
    */
   public DenseMatrix(double[][] values) {
     // clone the rows
@@ -48,19 +50,19 @@ public class DenseMatrix extends AbstractMatrix {
       this.values[i] = values[i].clone();
     }
   }
-
+  
   /** Construct an empty matrix of the given size */
   public DenseMatrix(int rows, int columns) {
     this.values = new double[rows][columns];
   }
-
+  
   public int[] size() {
     int[] result = new int[2];
     result[ROW] = rowSize();
     result[COL] = columnSize();
     return result;
   }
-
+  
   @Override
   public Matrix clone() {
     DenseMatrix clone = (DenseMatrix) super.clone();
@@ -70,38 +72,46 @@ public class DenseMatrix extends AbstractMatrix {
     }
     return clone;
   }
-
+  
   public double getQuick(int row, int column) {
     return values[row][column];
   }
-
+  
   public Matrix like() {
     return like(rowSize(), columnSize());
   }
-
+  
   public Matrix like(int rows, int columns) {
     return new DenseMatrix(rows, columns);
   }
-
+  
   public void setQuick(int row, int column, double value) {
     values[row][column] = value;
   }
-
+  
   public int[] getNumNondefaultElements() {
     return size();
   }
-
+  
   public Matrix viewPart(int[] offset, int[] size) {
     if (size[ROW] > rowSize() || size[COL] > columnSize()) {
       throw new CardinalityException();
     }
-    if (offset[ROW] < 0 || offset[ROW] + size[ROW] > rowSize()
-        || offset[COL] < 0 || offset[COL] + size[COL] > columnSize()) {
+    if (offset[ROW] < 0 || offset[ROW] + size[ROW] > rowSize() || offset[COL] < 0
+        || offset[COL] + size[COL] > columnSize()) {
       throw new IndexException();
     }
     return new MatrixView(this, offset, size);
   }
-
+  
+  @Override
+  public Matrix assign(double value) {
+    for (int row = 0; row < rowSize(); row++) {
+      Arrays.fill(values[row], value);
+    }
+    return this;
+  }
+  
   public Matrix assignColumn(int column, Vector other) {
     if (other.size() != rowSize() || column >= columnSize()) {
       throw new CardinalityException();
@@ -111,7 +121,7 @@ public class DenseMatrix extends AbstractMatrix {
     }
     return this;
   }
-
+  
   public Matrix assignRow(int row, Vector other) {
     if (row >= rowSize() || other.size() != columnSize()) {
       throw new CardinalityException();
@@ -121,14 +131,14 @@ public class DenseMatrix extends AbstractMatrix {
     }
     return this;
   }
-
+  
   public Vector getColumn(int column) {
     if (column < 0 || column >= columnSize()) {
       throw new IndexException();
     }
     return new TransposeViewVector(this, column);
   }
-
+  
   public Vector getRow(int row) {
     if (row < 0 || row >= rowSize()) {
       throw new IndexException();

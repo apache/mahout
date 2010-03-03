@@ -380,14 +380,14 @@ public class Functions {
       return a * b;
     }
   };
-
+  
   /** Function that returns <tt>a + b</tt>. */
-  public static final BinaryFunction plus = plusMult(1);
-  /*
-  new BinaryFunction() {
-    public final double apply(double a, double b) { return a + b; }
+  public static final BinaryFunction plus = new BinaryFunction() {
+    
+    public final double apply(double a, double b) {
+      return a + b;
+    }
   };
-  */
 
   /** Function that returns <tt>Math.abs(a) + Math.abs(b)</tt>. */
   public static final BinaryFunction plusAbs = new BinaryFunction() {

@@ -17,13 +17,14 @@
 
 package org.apache.mahout.math;
 
-import junit.framework.TestCase;
-
-import static org.apache.mahout.math.function.Functions.*;
+import static org.apache.mahout.math.function.Functions.mult;
+import static org.apache.mahout.math.function.Functions.plus;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import junit.framework.TestCase;
 
 public class TestDenseVector extends TestCase {
 

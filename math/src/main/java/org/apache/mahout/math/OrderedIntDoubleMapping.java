@@ -55,7 +55,7 @@ final class OrderedIntDoubleMapping implements Serializable, Cloneable {
   int getNumMappings() {
     return numMappings;
   }
-
+  
   private void growTo(int newCapacity) {
     if (newCapacity > indices.length) {
       int[] newIndices = new int[newCapacity];
