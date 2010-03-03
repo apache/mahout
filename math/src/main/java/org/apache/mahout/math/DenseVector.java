@@ -116,7 +116,14 @@ public class DenseVector extends AbstractVector {
     lengthSquared = -1.0;
     values[index] = value;
   }
-
+  
+  @Override
+  public Vector assign(double value) {
+    this.lengthSquared = -1;
+    Arrays.fill(values, value);
+    return this;
+  }
+  
   @Override
   public Vector assign(Vector other, BinaryFunction function) {
     if (other.size() != size()) {
@@ -326,12 +333,7 @@ public class DenseVector extends AbstractVector {
       values[element.index()] += element.get();
     }
   }
-  
-  @Override
-  public Vector assign(double value) {
-    Arrays.fill(values, value);
-    return this;
-  }
+
   
   @Override
   public double dot(Vector x) {
