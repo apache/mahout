@@ -16,24 +16,29 @@
  */
 package org.apache.mahout.clustering.lda;
 
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
+
 import java.io.File;
 import java.util.Iterator;
 import java.util.Random;
 
+import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.PoissonDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
-import org.apache.commons.math.MathException;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.common.RandomUtils;
-
-import static org.easymock.classextension.EasyMock.*;
 
 public class TestMapReduce extends MahoutTestCase {
 

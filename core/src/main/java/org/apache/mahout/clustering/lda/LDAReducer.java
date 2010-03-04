@@ -18,6 +18,7 @@ package org.apache.mahout.clustering.lda;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.common.IntPairWritable;
 
 /**
  * A very simple reducer which simply logSums the input doubles and outputs a new double for sufficient
@@ -31,12 +32,12 @@ public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWr
                      Context context) throws java.io.IOException, InterruptedException {
     
     // sum likelihoods
-    if (topicWord.getY() == LDADriver.LOG_LIKELIHOOD_KEY) {
+    if (topicWord.getSecond() == LDADriver.LOG_LIKELIHOOD_KEY) {
       double accum = 0.0;
       for (DoubleWritable vw : values) {
         double v = vw.get();
         if (Double.isNaN(v)) {
-          throw new IllegalArgumentException(topicWord.getX() + " " + topicWord.getY());
+          throw new IllegalArgumentException(topicWord.getFirst() + " " + topicWord.getSecond());
         }
         accum += v;
       }
@@ -46,11 +47,11 @@ public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWr
       for (DoubleWritable vw : values) {
         double v = vw.get();
         if (Double.isNaN(v)) {
-          throw new IllegalArgumentException(topicWord.getX() + " " + topicWord.getY());
+          throw new IllegalArgumentException(topicWord.getFirst() + " " + topicWord.getSecond());
         }
         accum = LDAUtil.logSum(accum, v);
         if (Double.isNaN(accum)) {
-          throw new IllegalArgumentException(topicWord.getX() + " " + topicWord.getY());
+          throw new IllegalArgumentException(topicWord.getFirst() + " " + topicWord.getSecond());
         }
       }
       context.write(topicWord, new DoubleWritable(accum));

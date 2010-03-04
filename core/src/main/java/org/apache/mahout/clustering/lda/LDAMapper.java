@@ -25,6 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -47,16 +48,15 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
     Arrays.fill(logTotals, Double.NEGATIVE_INFINITY);
     
     // Output sufficient statistics for each word. == pseudo-log counts.
-    IntPairWritable kw = new IntPairWritable();
     DoubleWritable v = new DoubleWritable();
     for (Iterator<Vector.Element> iter = wordCounts.iterateNonZero(); iter.hasNext();) {
       Vector.Element e = iter.next();
       int w = e.index();
-      kw.setY(w);
+      
       for (int k = 0; k < state.numTopics; ++k) {
         v.set(doc.phi(k, w) + Math.log(e.get()));
         
-        kw.setX(k);
+        IntPairWritable kw = new IntPairWritable(k, w);
         
         // ouput (topic, word)'s logProb contribution
         context.write(kw, v);
@@ -66,19 +66,16 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
     
     // Output the totals for the statistics. This is to make
     // normalizing a lot easier.
-    kw.setY(LDADriver.TOPIC_SUM_KEY);
     for (int k = 0; k < state.numTopics; ++k) {
-      kw.setX(k);
+      IntPairWritable kw = new IntPairWritable(k, LDADriver.TOPIC_SUM_KEY);
       v.set(logTotals[k]);
       assert !Double.isNaN(v.get());
       context.write(kw, v);
     }
-    
+    IntPairWritable llk = new IntPairWritable(LDADriver.LOG_LIKELIHOOD_KEY, LDADriver.LOG_LIKELIHOOD_KEY);
     // Output log-likelihoods.
-    kw.setX(LDADriver.LOG_LIKELIHOOD_KEY);
-    kw.setY(LDADriver.LOG_LIKELIHOOD_KEY);
     v.set(doc.logLikelihood);
-    context.write(kw, v);
+    context.write(llk, v);
   }
   
   public void configure(LDAState myState) {

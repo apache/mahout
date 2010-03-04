@@ -41,6 +41,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.slf4j.Logger;
@@ -52,9 +53,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class LDADriver {
   
-  static final String STATE_IN_KEY = "org.apache.mahout.clustering.lda.stateIn";  
+  static final String STATE_IN_KEY = "org.apache.mahout.clustering.lda.stateIn";
   static final String NUM_TOPICS_KEY = "org.apache.mahout.clustering.lda.numTopics";
-  static final String NUM_WORDS_KEY = "org.apache.mahout.clustering.lda.numWords";  
+  static final String NUM_WORDS_KEY = "org.apache.mahout.clustering.lda.numWords";
   static final String TOPIC_SMOOTHING_KEY = "org.apache.mahout.clustering.lda.topicSmoothing";
   
   static final int LOG_LIKELIHOOD_KEY = -2;
@@ -63,7 +64,7 @@ public final class LDADriver {
   
   private static final Logger log = LoggerFactory.getLogger(LDADriver.class);
   
-  private LDADriver() { }
+  private LDADriver() {}
   
   public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
     
@@ -196,8 +197,7 @@ public final class LDADriver {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       String stateOut = output + "/state-" + (iteration + 1);
-      double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing,
-        numReducers);
+      double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing, numReducers);
       double relChange = (oldLL - ll) / oldLL;
       
       // now point the input to the old output directory
@@ -216,7 +216,6 @@ public final class LDADriver {
     Configuration job = new Configuration();
     FileSystem fs = dir.getFileSystem(job);
     
-    IntPairWritable kw = new IntPairWritable();
     DoubleWritable v = new DoubleWritable();
     
     Random random = RandomUtils.getRandom();
@@ -226,20 +225,18 @@ public final class LDADriver {
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, IntPairWritable.class,
           DoubleWritable.class);
       
-      kw.setX(k);
       double total = 0.0; // total number of pseudo counts we made
       for (int w = 0; w < numWords; ++w) {
-        kw.setY(w);
+        IntPairWritable kw = new IntPairWritable(k, w);
         // A small amount of random noise, minimized by having a floor.
         double pseudocount = random.nextDouble() + 1.0E-8;
         total += pseudocount;
         v.set(Math.log(pseudocount));
         writer.append(kw, v);
       }
-      
-      kw.setY(TOPIC_SUM_KEY);
+      IntPairWritable kTsk = new IntPairWritable(k, TOPIC_SUM_KEY);
       v.set(Math.log(total));
-      writer.append(kw, v);
+      writer.append(kTsk, v);
       
       writer.close();
     }
@@ -257,7 +254,7 @@ public final class LDADriver {
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
-        if (key.getX() == LOG_LIKELIHOOD_KEY) {
+        if (key.getFirst() == LOG_LIKELIHOOD_KEY) {
           ll = value.get();
           break;
         }
@@ -336,8 +333,8 @@ public final class LDADriver {
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
-        int topic = key.getX();
-        int word = key.getY();
+        int topic = key.getFirst();
+        int word = key.getSecond();
         if (word == TOPIC_SUM_KEY) {
           logTotals[topic] = value.get();
           if (Double.isInfinite(value.get())) {

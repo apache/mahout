@@ -25,7 +25,6 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 /**
  * Class for performing infererence on a document, which involves computing (an approximation to)
@@ -49,14 +48,14 @@ public class LDAInference {
     private final Vector wordCounts;
     private final Vector gamma; // p(topic)
     private final Matrix mphi; // log p(columnMap(w)|t)
-    private final OpenIntIntHashMap columnMap; // maps words into the matrix's column map
+    private final int[] columnMap; // maps words into the matrix's column map
     public final double logLikelihood;
     
     public double phi(int k, int w) {
-      return mphi.getQuick(k, columnMap.get(w));
+      return mphi.getQuick(k, columnMap[w]);
     }
     
-    InferredDocument(Vector wordCounts, Vector gamma, OpenIntIntHashMap columnMap, Matrix phi, double ll) {
+    InferredDocument(Vector wordCounts, Vector gamma, int[] columnMap, Matrix phi, double ll) {
       this.wordCounts = wordCounts;
       this.gamma = gamma;
       this.mphi = phi;
@@ -78,7 +77,7 @@ public class LDAInference {
    */
   public InferredDocument infer(Vector wordCounts) {
     double docTotal = wordCounts.zSum();
-    int docLength = wordCounts.size();
+    int docLength = wordCounts.size(); // cardinality of document vectors
     
     // initialize variational approximation to p(z|doc)
     Vector gamma = new DenseVector(state.numTopics);
@@ -86,13 +85,9 @@ public class LDAInference {
     Vector nextGamma = new DenseVector(state.numTopics);
     createPhiMatrix(docLength);
     
-    // digamma is expensive, precompute
-    Vector digammaGamma = digamma(gamma);
-    // and log normalize:
-    double digammaSumGamma = digamma(gamma.zSum());
-    digammaGamma = digammaGamma.plus(-digammaSumGamma);
+    Vector digammaGamma = digammaGamma(gamma);
     
-    OpenIntIntHashMap columnMap = new OpenIntIntHashMap();
+    int[] map = new int[docLength];
     
     int iteration = 0;
     
@@ -108,12 +103,12 @@ public class LDAInference {
         Vector phiW = eStepForWord(word, digammaGamma);
         phi.assignColumn(mapping, phiW);
         if (iteration == 0) { // first iteration
-          columnMap.put(word, mapping);
+          map[word] = mapping;
         }
         
         for (int k = 0; k < nextGamma.size(); ++k) {
           double g = nextGamma.getQuick(k);
-          nextGamma.setQuick(k, g + e.get() * Math.exp(phiW.get(k)));
+          nextGamma.setQuick(k, g + e.get() * Math.exp(phiW.getQuick(k)));
         }
         
         mapping++;
@@ -123,31 +118,36 @@ public class LDAInference {
       gamma = nextGamma;
       nextGamma = tempG;
       
-      // digamma is expensive, precompute
-      digammaGamma = digamma(gamma);
-      // and log normalize:
-      digammaSumGamma = digamma(gamma.zSum());
-      digammaGamma = digammaGamma.plus(-digammaSumGamma);
+      digammaGamma = digammaGamma(gamma);
       
-      double ll = computeLikelihood(wordCounts, columnMap, phi, gamma, digammaGamma);
-      assert !Double.isNaN(ll);
+      double ll = computeLikelihood(wordCounts, map, phi, gamma, digammaGamma);
+      // isNotNaNAssertion(ll);
       converged = (oldLL < 0) && ((oldLL - ll) / oldLL < E_STEP_CONVERGENCE);
       
       oldLL = ll;
       iteration++;
     }
     
-    return new InferredDocument(wordCounts, gamma, columnMap, phi, oldLL);
+    return new InferredDocument(wordCounts, gamma, map, phi, oldLL);
+  }
+  
+  private Vector digammaGamma(Vector gamma) {
+    // digamma is expensive, precompute
+    Vector digammaGamma = digamma(gamma);
+    // and log normalize:
+    double digammaSumGamma = digamma(gamma.zSum());
+    for (int i = 0; i < state.numTopics; i++) {
+      digammaGamma.setQuick(i, digammaGamma.getQuick(i) - digammaSumGamma);
+    }
+    return digammaGamma;
   }
   
   private void createPhiMatrix(int docLength) {
-    if (phi == null){
+    if (phi == null) {
       phi = new DenseMatrix(state.numTopics, docLength);
-    }
-    else if (phi.getRow(0).size() != docLength){
+    } else if (phi.getRow(0).size() != docLength) {
       phi = new DenseMatrix(state.numTopics, docLength);
-    }
-    else {
+    } else {
       phi.assign(0);
     }
   }
@@ -155,46 +155,43 @@ public class LDAInference {
   private DenseMatrix phi;
   private final LDAState state;
   
-  private double computeLikelihood(Vector wordCounts,
-                                   OpenIntIntHashMap columnMap,
-                                   Matrix phi,
-                                   Vector gamma,
-                                   Vector digammaGamma) {
+  private double computeLikelihood(Vector wordCounts, int[] map, Matrix phi, Vector gamma, Vector digammaGamma) {
     double ll = 0.0;
     
     // log normalizer for q(gamma);
     ll += Gamma.logGamma(state.topicSmoothing * state.numTopics);
     ll -= state.numTopics * Gamma.logGamma(state.topicSmoothing);
-    assert !Double.isNaN(ll) : state.topicSmoothing + " " + state.numTopics;
+    // isNotNaNAssertion(ll);
     
     // now for the the rest of q(gamma);
     for (int k = 0; k < state.numTopics; ++k) {
-      ll += (state.topicSmoothing - gamma.get(k)) * digammaGamma.get(k);
-      ll += Gamma.logGamma(gamma.get(k));
+      double gammaK = gamma.get(k);
+      ll += (state.topicSmoothing - gammaK) * digammaGamma.getQuick(k);
+      ll += Gamma.logGamma(gammaK);
       
     }
     ll -= Gamma.logGamma(gamma.zSum());
-    assert !Double.isNaN(ll);
+    // isNotNaNAssertion(ll);
     
     // for each word
     for (Iterator<Vector.Element> iter = wordCounts.iterateNonZero(); iter.hasNext();) {
       Vector.Element e = iter.next();
       int w = e.index();
       double n = e.get();
-      int mapping = columnMap.get(w);
+      int mapping = map[w];
       // now for each topic:
       for (int k = 0; k < state.numTopics; k++) {
         double llPart = 0.0;
-        llPart += Math.exp(phi.getQuick(k, mapping))
-                  * (digammaGamma.get(k) - phi.getQuick(k, mapping) + state.logProbWordGivenTopic(w, k));
+        double phiKMapping = phi.getQuick(k, mapping);
+        llPart += Math.exp(phiKMapping)
+                  * (digammaGamma.getQuick(k) - phiKMapping + state.logProbWordGivenTopic(w, k));
         
         ll += llPart * n;
         
-        assert state.logProbWordGivenTopic(w, k) < 0;
-        assert !Double.isNaN(llPart);
+        // likelihoodAssertion(w, k, llPart);
       }
     }
-    assert ll <= 0;
+    // isLessThanOrEqualsZero(ll);
     return ll;
   }
   
@@ -205,13 +202,10 @@ public class LDAInference {
     Vector phi = new DenseVector(state.numTopics); // log q(k|w), for each w
     double phiTotal = Double.NEGATIVE_INFINITY; // log Normalizer
     for (int k = 0; k < state.numTopics; ++k) { // update q(k|w)'s param phi
-      phi.set(k, state.logProbWordGivenTopic(word, k) + digammaGamma.get(k));
-      phiTotal = LDAUtil.logSum(phiTotal, phi.get(k));
+      phi.setQuick(k, state.logProbWordGivenTopic(word, k) + digammaGamma.getQuick(k));
+      phiTotal = LDAUtil.logSum(phiTotal, phi.getQuick(k));
       
-      assert !Double.isNaN(phiTotal);
-      assert !Double.isNaN(state.logProbWordGivenTopic(word, k));
-      assert !Double.isInfinite(state.logProbWordGivenTopic(word, k));
-      assert !Double.isNaN(digammaGamma.get(k));
+      // assertions(word, digammaGamma, phiTotal, k);
     }
     for (int i = 0; i < state.numTopics; i++) {
       phi.setQuick(i, phi.getQuick(i) - phiTotal);// log normalize
@@ -229,7 +223,7 @@ public class LDAInference {
     });
     return digammaGamma;
   }
-  
+
   /**
    * Approximation to the digamma function, from Radford Neal.
    * 
@@ -260,4 +254,25 @@ public class LDAInference {
     return r + Math.log(x) - 0.5 / x + t;
   }
   
+  /*
+  private void assertions(int word, Vector digammaGamma, double phiTotal, int k) {
+    assert !Double.isNaN(phiTotal);
+    assert !Double.isNaN(state.logProbWordGivenTopic(word, k));
+    assert !Double.isInfinite(state.logProbWordGivenTopic(word, k));
+    assert !Double.isNaN(digammaGamma.getQuick(k));
+  }
+  
+  private void likelihoodAssertion(int w, int k, double llPart) {
+    assert state.logProbWordGivenTopic(w, k) < 0;
+    assert !Double.isNaN(llPart);
+  }
+
+  private void isLessThanOrEqualsZero(double ll) {
+    assert ll <= 0;
+  }
+
+  private void isNotNaNAssertion(double ll) {
+    assert !Double.isNaN(ll) : state.topicSmoothing + " " + state.numTopics;
+  }
+  */
 }
