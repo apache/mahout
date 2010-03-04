@@ -43,6 +43,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.utils.vectors.VectorHelper;
 
 /**
@@ -204,8 +205,8 @@ public class LDAPrintTopics {
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
-        int topic = key.getX();
-        int word = key.getY();
+        int topic = key.getFirst();
+        int word = key.getSecond();
         
         ensureQueueSize(queues, topic);
         if (word >= 0 && topic >= 0) {
