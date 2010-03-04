@@ -16,10 +16,8 @@
  */
 package org.apache.mahout.math.decomposer;
 
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
-import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 
 public class SimpleEigenVerifier implements SingularVectorVerifier {
 

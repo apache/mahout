@@ -193,7 +193,7 @@ public class OpenObject${valueTypeCap}HashMap<T> extends AbstractObject${valueTy
 
   /**
    * Returns the value associated with the specified key. It is often a good idea to first check with 
-   * {@link containsKey(Object)} whether the given key has a value associated or not,
+   * {@link #containsKey(Object)} whether the given key has a value associated or not,
    * i.e. whether there exists an association for the given key or not.
    *
    * @param key the key to be searched for.

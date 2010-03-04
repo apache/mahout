@@ -185,7 +185,7 @@ public class FuzzyKMeansClusterer {
    *          the initial List<SoftCluster> of clusters
    * @param measure
    *          the DistanceMeasure to use
-   * @param maxIter
+   * @param numIter
    *          the maximum number of iterations
    */
   public static List<List<SoftCluster>> clusterPoints(List<Vector> points,

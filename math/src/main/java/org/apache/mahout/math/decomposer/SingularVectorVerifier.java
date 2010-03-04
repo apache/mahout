@@ -17,10 +17,8 @@
 
 package org.apache.mahout.math.decomposer;
 
-import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
-import org.apache.mahout.math.decomposer.EigenStatus;
 
 public interface SingularVectorVerifier {
   EigenStatus verify(VectorIterable eigenMatrix, Vector vector);

@@ -159,16 +159,6 @@ public final class MeanShiftCanopyDriver {
    *          the input pathname String
    * @param output
    *          the output pathname String
-   * @param control
-   *          the control path
-   * @param measureClassName
-   *          the DistanceMeasure class name
-   * @param t1
-   *          the T1 distance threshold
-   * @param t2
-   *          the T2 distance threshold
-   * @param convergenceDelta
-   *          the double convergence criteria
    */
   public static void createCanopyFromVectors(String input, String output) {
     
