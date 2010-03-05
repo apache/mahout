@@ -66,10 +66,10 @@ public class VectorHelper {
         bldr.append(", ");
       }
       Vector.Element elt = iter.next();
-      bldr.append(elt.index()).append(':').append(dictionary[elt.index()]);
+      bldr.append(elt.index()).append(':').append(dictionary != null ? dictionary[elt.index()] : elt.get());
       
     }
-    return bldr.toString();
+    return bldr.append("}").toString();
   }
   
   /**

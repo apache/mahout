@@ -133,8 +133,7 @@ public final class VectorDumper {
           writer = new OutputStreamWriter(System.out);
         }
         boolean printKey = cmdLine.hasOption(printKeyOpt);
-        SeqFileIterator iterator = (SeqFileIterator) vectorIterable
-            .iterator();
+        SeqFileIterator iterator = (SeqFileIterator) vectorIterable.iterator();
         int i = 0;
         while (iterator.hasNext()) {
           Vector vector = iterator.next();
@@ -142,8 +141,7 @@ public final class VectorDumper {
             writer.write(iterator.key().toString());
             writer.write("\t");
           }
-          String fmtStr = useJSON ? vector.asFormatString() : dictionary != null ? VectorHelper
-              .vectorToString(vector, dictionary) : vector.asFormatString();
+          String fmtStr = useJSON ? vector.asFormatString() : VectorHelper.vectorToString(vector, dictionary);
           writer.write(fmtStr);
           writer.write('\n');
           i++;
