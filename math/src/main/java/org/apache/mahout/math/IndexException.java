@@ -19,5 +19,11 @@ package org.apache.mahout.math;
 
 /** Exception thrown when there is an index outside of [0, cardinality) */
 public class IndexException extends RuntimeException {
+  public IndexException() {
 
+  }
+
+  public IndexException(int index, int cardinality) {
+    super("index(" + index +") is out of bounds of (0, " + cardinality + ")");
+  }
 }
