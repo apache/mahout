@@ -350,7 +350,7 @@ public abstract class AbstractVector implements Vector {
     if (index >= 0 && index < size()) {
       setQuick(index, value);
     } else {
-      throw new IndexException();
+      throw new IndexException(index, size());
     }
   }
 

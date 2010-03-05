@@ -408,7 +408,7 @@ public abstract class AbstractMatrix implements Matrix {
     int[] c = size();
     int[] o = other.size();
     if (c[COL] != o[ROW]) {
-      throw new CardinalityException();
+      throw new CardinalityException(c[COL], o[ROW]);
     }
     Matrix result = like(c[ROW], o[COL]);
     for (int row = 0; row < c[ROW]; row++) {

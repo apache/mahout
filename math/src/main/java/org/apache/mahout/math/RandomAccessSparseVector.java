@@ -265,7 +265,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   @Override
   public void addTo(Vector v) {
     if (v.size() != size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(size(), v.size());
     }
     values.forEachPair(new AddToVector(v));
   }
