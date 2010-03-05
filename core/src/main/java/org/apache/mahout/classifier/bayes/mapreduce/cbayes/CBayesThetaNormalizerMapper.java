@@ -78,7 +78,7 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
           try {
             output.collect(normalizerTuple, new DoubleWritable(weight));
           } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
           } // output Sigma_j
           return true;
         }

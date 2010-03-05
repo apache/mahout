@@ -123,7 +123,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
           DoubleWritable f = new DoubleWritable(Math.log(1.0 + dKJ) / lengthNormalisation);
           output.collect(tuple, f);
         } catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         }
         return true;
       }
@@ -146,7 +146,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
           tokenCountTuple.add(token);
           output.collect(tokenCountTuple, ONE);
         } catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         }
         return true;
       }

@@ -78,7 +78,7 @@ public class SeqBlas implements Blas {
   }
 
   public double dnrm2(DoubleMatrix1D x) {
-    return Math.sqrt(Algebra.DEFAULT.norm2(x));
+    return Math.sqrt(Algebra.norm2(x));
   }
 
   public void drot(DoubleMatrix1D x, DoubleMatrix1D y, double c, double s) {
@@ -166,7 +166,7 @@ public class SeqBlas implements Blas {
     if (isUpperTriangular) {
       A = A.viewDice();
     }
-    Property.DEFAULT.checkSquare(A);
+    Property.checkSquare(A);
     int size = A.rows();
     if (size != x.size() && size != y.size()) {
       throw new IllegalArgumentException(A.toStringShort() + ", " + x.toStringShort() + ", " + y.toStringShort());
@@ -192,7 +192,7 @@ public class SeqBlas implements Blas {
       isUpperTriangular = !isUpperTriangular;
     }
 
-    Property.DEFAULT.checkSquare(A);
+    Property.checkSquare(A);
     int size = A.rows();
     if (size != x.size()) {
       throw new IllegalArgumentException(A.toStringShort() + ", " + x.toStringShort());

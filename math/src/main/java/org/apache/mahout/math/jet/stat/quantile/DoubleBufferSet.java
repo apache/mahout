@@ -190,7 +190,7 @@ class DoubleBufferSet extends BufferSet {
     }
 
     //do the main work: determine values at given positions in sorted sequence
-    double[] outputValues = this.getValuesAtPositions(buffers, triggerPositions);
+    double[] outputValues = getValuesAtPositions(buffers, triggerPositions);
 
     //mark all full buffers as empty, except the first, which will contain the output
     for (int b = 1; b < buffers.length; b++) {
@@ -392,7 +392,7 @@ class DoubleBufferSet extends BufferSet {
   /** Returns the number of elements in all buffers. */
   public long totalSize() {
     DoubleBuffer[] fullBuffers = _getFullOrPartialBuffers();
-    long totalSize = 0;
+    long totalSize = 0L;
     for (int i = fullBuffers.length; --i >= 0;) {
       totalSize += fullBuffers[i].size() * fullBuffers[i].weight();
     }

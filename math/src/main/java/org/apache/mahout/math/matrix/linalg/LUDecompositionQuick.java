@@ -381,7 +381,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     if (this.workDouble == null || this.workDouble.length < m) {
       this.workDouble = new double[m];
     }
-    algebra.permute(B, this.piv, this.workDouble);
+    Algebra.permute(B, this.piv, this.workDouble);
 
     if (m * n == 0) {
       return;
@@ -445,7 +445,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
       this.work1 = new int[m];
     }
     //if (this.work2 == null || this.work2.length < m) this.work2 = new int[m];
-    algebra.permuteRows(B, this.piv, this.work1);
+    Algebra.permuteRows(B, this.piv, this.work1);
 
     if (m * n == 0) {
       return;
@@ -558,7 +558,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
       this.work1 = new int[m];
     }
     //if (this.work2 == null || this.work2.length < m) this.work2 = new int[m];
-    algebra.permuteRows(B, this.piv, this.work1);
+    Algebra.permuteRows(B, this.piv, this.work1);
 
     // Solve L*Y = B(piv,:) --> Y (Y is modified B)
     for (int k = 0; k < n; k++) {

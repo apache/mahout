@@ -40,8 +40,8 @@ import org.junit.Test;
 @SuppressWarnings("deprecation")
 public class CollocMapperTest {
   
-  OutputCollector<Gram,Gram> collector;
-  Reporter reporter;
+  private OutputCollector<Gram,Gram> collector;
+  private Reporter reporter;
   
   @Before
   @SuppressWarnings("unchecked")
@@ -160,7 +160,7 @@ public class CollocMapperTest {
   
   /** A lucene 2.9 standard analyzer with no stopwords. */
   public static class TestAnalyzer extends Analyzer {
-    final Analyzer a;
+    private final Analyzer a;
     
     public TestAnalyzer() {
       a = new StandardAnalyzer(Version.LUCENE_29, Collections.emptySet());

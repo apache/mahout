@@ -74,7 +74,7 @@ public class TimesSquaredJob {
                                                   Class<? extends TimesSquaredMapper> mapClass,
                                                   Class<? extends VectorSummingReducer> redClass) throws IOException {
     JobConf conf = new JobConf(TimesSquaredJob.class);
-    conf.setJobName("TimesSquaredJob: " + matrixInputPath + " timesSquared(" + v.getName() + ")");
+    conf.setJobName("TimesSquaredJob: " + matrixInputPath + " timesSquared(" + v.getName() + ')');
     FileSystem fs = FileSystem.get(conf);
     matrixInputPath = fs.makeQualified(matrixInputPath);
     outputVectorPathBase = fs.makeQualified(outputVectorPathBase);
@@ -107,23 +107,18 @@ public class TimesSquaredJob {
     return conf;
   }
 
-  public static Vector retrieveTimesSquaredOutputVector(JobConf conf) {
-    try {
-      Path outputPath = FileOutputFormat.getOutputPath(conf);
-      FileSystem fs = FileSystem.get(conf);
-      Path outputFile = new Path(outputPath, "part-00000");
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, outputFile, conf);
-      NullWritable n = NullWritable.get();
-      VectorWritable v = new VectorWritable();
-      reader.next(n,v);
-      Vector vector = v.get();
-      reader.close();
-      fs.deleteOnExit(outputFile);
-      return vector;
-    } catch (IOException ioe) {
-      log.error("Unable to retrieve vector!");
-      throw new RuntimeException(ioe);
-    }
+  public static Vector retrieveTimesSquaredOutputVector(JobConf conf) throws IOException {
+    Path outputPath = FileOutputFormat.getOutputPath(conf);
+    FileSystem fs = FileSystem.get(conf);
+    Path outputFile = new Path(outputPath, "part-00000");
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, outputFile, conf);
+    NullWritable n = NullWritable.get();
+    VectorWritable v = new VectorWritable();
+    reader.next(n,v);
+    Vector vector = v.get();
+    reader.close();
+    fs.deleteOnExit(outputFile);
+    return vector;
   }
 
   public static class TimesSquaredMapper extends MapReduceBase
@@ -159,7 +154,7 @@ public class TimesSquaredJob {
                      ? new RandomAccessSparseVector(inputVector.size(), 10)
                      : new DenseVector(inputVector.size());
       } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
+        throw new IllegalStateException(ioe);
       }
     }
 

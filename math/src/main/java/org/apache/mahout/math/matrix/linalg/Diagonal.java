@@ -23,7 +23,7 @@ class Diagonal {
    * @throws IllegalArgumentException if <tt>x.size() != y.size()</tt>.
    */
   public static boolean inverse(DoubleMatrix2D A) {
-    Property.DEFAULT.checkSquare(A);
+    Property.checkSquare(A);
     boolean isNonSingular = true;
     for (int i = A.rows(); --i >= 0;) {
       double v = A.getQuick(i, i);

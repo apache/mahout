@@ -184,11 +184,11 @@ public class LanczosSolver {
 
   protected Vector getInitialVector(VectorIterable corpus) {
     Vector v = null;
-    Iterator<MatrixSlice> it = corpus.iterator();
-    while(it.hasNext()) {
-      MatrixSlice slice = it.next();
+    for (MatrixSlice slice : corpus) {
       Vector vector;
-      if(slice == null || (vector = slice.vector()) == null || vector.getLengthSquared() == 0) continue;
+      if (slice == null || (vector = slice.vector()) == null || vector.getLengthSquared() == 0) {
+        continue;
+      }
       scaleFactor += vector.getLengthSquared();
       if (v == null) {
         v = new DenseVector(vector.size()).plus(vector);

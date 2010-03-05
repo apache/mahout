@@ -250,7 +250,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   private static class AddToVector implements IntDoubleProcedure {
-    final Vector v;
+    private final Vector v;
 
     private AddToVector(Vector v) {
       this.v = v;

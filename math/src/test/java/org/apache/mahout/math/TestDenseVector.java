@@ -28,9 +28,9 @@ import junit.framework.TestCase;
 
 public class TestDenseVector extends TestCase {
 
-  final double[] values = {1.1, 2.2, 3.3};
+  private final double[] values = {1.1, 2.2, 3.3};
 
-  final Vector test = new DenseVector(values);
+  private final Vector test = new DenseVector(values);
 
   public TestDenseVector(String name) {
     super(name);
@@ -303,7 +303,7 @@ public class TestDenseVector extends TestCase {
     other.set(2, -9);
     double expected = test.minus(other).getLengthSquared();
     assertTrue("a.getDistanceSquared(b) != a.minus(b).getLengthSquared",
-        Math.abs(expected - test.getDistanceSquared(other)) < 1e-6);
+        Math.abs(expected - test.getDistanceSquared(other)) < 1.0e-6);
   }
   
   public void testAssignDouble() {

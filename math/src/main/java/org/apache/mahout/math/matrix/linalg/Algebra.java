@@ -136,7 +136,7 @@ public class Algebra extends PersistentObject {
    * @return a new independent matrix; inverse(matrix) if the matrix is square, pseudoinverse otherwise.
    */
   public DoubleMatrix2D inverse(DoubleMatrix2D A) {
-    if (property.isSquare(A) && property.isDiagonal(A)) {
+    if (Property.isSquare(A) && property.isDiagonal(A)) {
       DoubleMatrix2D inv = A.copy();
       boolean isNonSingular = Diagonal.inverse(inv);
       if (!isNonSingular) {
@@ -433,7 +433,7 @@ public class Algebra extends PersistentObject {
     // Was: for parallel matrix mult; if not initialized defaults to sequential blas
     Blas blas = SeqBlas.seqBlas;
    
-    Property.DEFAULT.checkSquare(A);
+    Property.checkSquare(A);
     if (p < 0) {
       A = inverse(A);
       p = -p;

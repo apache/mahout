@@ -69,7 +69,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
       rowPath= FileSystem.get(conf).makeQualified(new Path(inputPathString));
       outputTmpBasePath = FileSystem.get(conf).makeQualified(new Path(outputTmpPathString));
     } catch(IOException ioe) {
-      throw new RuntimeException(ioe);
+      throw new IllegalStateException(ioe);
     }
   }
 
@@ -98,7 +98,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, rowPath, conf);
       return new DistributedMatrixIterator(reader);
     } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
+      throw new IllegalStateException(ioe);
     }
   }
 
@@ -133,7 +133,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
       JobClient.runJob(conf);
       return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
     } catch(IOException ioe) {
-      throw new RuntimeException(ioe);
+      throw new IllegalStateException(ioe);
     }
   }
   
@@ -161,7 +161,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
           hasBuffered = true;
         }
       } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
+        throw new IllegalStateException(ioe);
       } finally {
         if(!hasNext) {
           try { reader.close(); } catch (IOException ioe) {}

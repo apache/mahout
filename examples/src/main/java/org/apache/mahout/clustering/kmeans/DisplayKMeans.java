@@ -32,9 +32,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayKMeans extends DisplayDirichlet {
-  private static final double t1 = 3.0;
-  
-  private static final double t2 = 1.5;
   
   private static List<List<Cluster>> clusters;
   
@@ -55,7 +52,7 @@ class DisplayKMeans extends DisplayDirichlet {
       for (Cluster cluster : cls) {
         // if (true || cluster.getNumPoints() > sampleData.size() * 0.05) {
         dv.assign(cluster.getStd() * 3);
-        System.out.println(cluster.getCenter().asFormatString() + " " + dv.asFormatString());
+        System.out.println(cluster.getCenter().asFormatString() + ' ' + dv.asFormatString());
         DisplayDirichlet.plotEllipse(g2, cluster.getCenter(), dv);
         // }
       }

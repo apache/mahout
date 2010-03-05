@@ -402,7 +402,7 @@ public class Functions {
   /** Function that returns <tt>a + b</tt>. */
   public static final BinaryFunction plus = new BinaryFunction() {
     
-    public final double apply(double a, double b) {
+    public double apply(double a, double b) {
       return a + b;
     }
   };

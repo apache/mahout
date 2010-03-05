@@ -37,8 +37,8 @@ import org.junit.Test;
  */
 public class CollocReducerTest {
   
-  OutputCollector<Gram,Gram> output;
-  Reporter reporter;
+  private OutputCollector<Gram,Gram> output;
+  private Reporter reporter;
   
   @Before
   @SuppressWarnings("unchecked")

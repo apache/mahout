@@ -132,7 +132,7 @@ public class TestKmeansClustering extends MahoutTestCase {
     for (Vector p : points) {
       c.addPoint(p);
       if (c.getNumPoints() > 1) {
-        assertEquals(c.getStd() > 0.0, true);
+        assertTrue(c.getStd() > 0.0);
       }
     }
   }

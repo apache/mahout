@@ -230,13 +230,7 @@ class Fun {
       double prod = 0.0;
       double diff = 8.0;
       double value = 1.0;
-      while (true) { //while (!NULL) {
-        if ((factorial(i) * Math.pow((8.0 * beta), i)) > 1.0e250) {
-          break;
-        }
-        if (i > 10) {
-          break;
-        }
+      while (factorial(i) * Math.pow(8.0 * beta, i) <= 1.0e250 && i <= 10) {
         if (i == 1) {
           prod = my - 1.0;
         } else {

@@ -158,43 +158,43 @@ public class SortingTest extends Assert {
     assertEquals(-4, x);
     
     int[] ints = {-5, -2, 0, 100, 103};
-    x = Sorting.binarySearchFromTo(ints, (int) -6, 0, 4);
+    x = Sorting.binarySearchFromTo(ints, -6, 0, 4);
     assertEquals(-1, x);
-    x = Sorting.binarySearchFromTo(ints, (int) 0, 0, 4);
+    x = Sorting.binarySearchFromTo(ints, 0, 0, 4);
     assertEquals(2, x);
-    x = Sorting.binarySearchFromTo(ints, (int) 5, 0, 4);
+    x = Sorting.binarySearchFromTo(ints, 5, 0, 4);
     assertEquals(-4, x);
-    x = Sorting.binarySearchFromTo(ints, (int) 0, 3, 4);
+    x = Sorting.binarySearchFromTo(ints, 0, 3, 4);
     assertEquals(-4, x);
     
     long[] longs = {-5, -2, 0, 100, 103};
-    x = Sorting.binarySearchFromTo(longs, (long) -6, 0, 4);
+    x = Sorting.binarySearchFromTo(longs, -6L, 0, 4);
     assertEquals(-1, x);
-    x = Sorting.binarySearchFromTo(longs, (long) 0, 0, 4);
+    x = Sorting.binarySearchFromTo(longs, 0L, 0, 4);
     assertEquals(2, x);
-    x = Sorting.binarySearchFromTo(longs, (long) 5, 0, 4);
+    x = Sorting.binarySearchFromTo(longs, 5L, 0, 4);
     assertEquals(-4, x);
-    x = Sorting.binarySearchFromTo(longs, (long) 0, 3, 4);
+    x = Sorting.binarySearchFromTo(longs, 0L, 3, 4);
     assertEquals(-4, x);
     
     float[] floats = {-5, -2, 0, 100, 103};
-    x = Sorting.binarySearchFromTo(floats, (float) -6, 0, 4);
+    x = Sorting.binarySearchFromTo(floats, -6.0f, 0, 4);
     assertEquals(-1, x);
-    x = Sorting.binarySearchFromTo(floats, (float) 0, 0, 4);
+    x = Sorting.binarySearchFromTo(floats, 0.0f, 0, 4);
     assertEquals(2, x);
-    x = Sorting.binarySearchFromTo(floats, (float) 5, 0, 4);
+    x = Sorting.binarySearchFromTo(floats, 5.0f, 0, 4);
     assertEquals(-4, x);
-    x = Sorting.binarySearchFromTo(floats, (float) 0, 3, 4);
+    x = Sorting.binarySearchFromTo(floats, 0.0f, 3, 4);
     assertEquals(-4, x);
     
     double[] doubles = {-5, -2, 0, 100, 103};
-    x = Sorting.binarySearchFromTo(doubles, (double) -6, 0, 4);
+    x = Sorting.binarySearchFromTo(doubles, -6.0, 0, 4);
     assertEquals(-1, x);
-    x = Sorting.binarySearchFromTo(doubles, (double) 0, 0, 4);
+    x = Sorting.binarySearchFromTo(doubles, 0.0, 0, 4);
     assertEquals(2, x);
-    x = Sorting.binarySearchFromTo(doubles, (double) 5, 0, 4);
+    x = Sorting.binarySearchFromTo(doubles, 5.0, 0, 4);
     assertEquals(-4, x);
-    x = Sorting.binarySearchFromTo(doubles, (double) 0, 3, 4);
+    x = Sorting.binarySearchFromTo(doubles, 0.0, 3, 4);
     assertEquals(-4, x);
   }
   

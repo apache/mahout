@@ -13,6 +13,8 @@ import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
+import static org.apache.mahout.math.matrix.linalg.Property.*;
+
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class EigenvalueDecomposition implements java.io.Serializable {
@@ -45,14 +47,14 @@ public class EigenvalueDecomposition implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A</tt> is not square.
    */
   public EigenvalueDecomposition(DoubleMatrix2D A) {
-    Property.DEFAULT.checkSquare(A);
+    checkSquare(A);
 
     n = A.columns();
     V = new double[n][n];
     d = new double[n];
     e = new double[n];
 
-    boolean issymmetric = Property.DEFAULT.isSymmetric(A);
+    boolean issymmetric = DEFAULT.isSymmetric(A);
 
     if (issymmetric) {
       for (int i = 0; i < n; i++) {

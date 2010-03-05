@@ -66,7 +66,7 @@ public abstract class SolverTest extends TestCase {
       Vector afterMultiply = corpus.timesSquared(e);
       double dot = afterMultiply.dot(e);
       double error = 1 - dot / (afterMultiply.norm(2) * e.norm(2));
-      assertTrue("Error margin: " + error + " too high! (for eigen " + i + ")", Math.abs(error) < errorMargin);
+      assertTrue("Error margin: " + error + " too high! (for eigen " + i + ')', Math.abs(error) < errorMargin);
     }
   }
 

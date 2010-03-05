@@ -42,9 +42,7 @@ import org.apache.mahout.math.VectorWritable;
 public class TestMeanShift extends MahoutTestCase {
   
   private Vector[] raw = null;
-  
-  private FileSystem fs;
-  
+
   private Configuration conf;
   
   // DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
@@ -109,7 +107,6 @@ public class TestMeanShift extends MahoutTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     conf = new Configuration();
-    fs = FileSystem.get(conf);
     rmr("output");
     rmr("testdata");
     raw = new Vector[100];

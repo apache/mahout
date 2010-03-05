@@ -29,7 +29,7 @@ package org.apache.mahout.math.list;
 import org.apache.mahout.math.function.ObjectProcedure;
 
 import java.util.Collection;
-import java.util.Date;
+
 /**
  Resizable list holding <code>${valueType}</code> elements; implemented with arrays.
 */

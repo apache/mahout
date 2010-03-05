@@ -81,10 +81,13 @@ import org.slf4j.LoggerFactory;
  *   {"--output", "/tmp/vectorOut", "-s", "/my/otherVector/sequenceFile"}
  */
 public class MahoutDriver {
+
   private static final Logger log = LoggerFactory.getLogger(MahoutDriver.class);
 
-  public static void main(String[] args) throws Exception {
-    int exitCode = -1;
+  private MahoutDriver() {
+  }
+
+  public static void main(String[] args) throws Throwable {
     try {
       ProgramDriver programDriver = new ProgramDriver();
       Properties mainClasses = new Properties();
@@ -97,10 +100,10 @@ public class MahoutDriver {
       boolean foundShortName = false;
       for(Object key :  mainClasses.keySet()) {
         String keyString = (String) key;
-        if(args.length > 0 && shortName((String)mainClasses.get(keyString)).equals(args[0])) {
+        if(args.length > 0 && shortName(mainClasses.getProperty(keyString)).equals(args[0])) {
           foundShortName = true;
         }
-        addClass(programDriver, keyString, (String)mainClasses.get(keyString));
+        addClass(programDriver, keyString, mainClasses.getProperty(keyString));
       }
       if(args.length < 1 || args[0] == null || args[0].equals("-h") || args[0].equals("--help")) {
         programDriver.driver(args);
@@ -145,12 +148,12 @@ public class MahoutDriver {
         }
         argMap.put(arg, argValues.toArray(new String[argValues.size()]));
       }
-      for(Object key : mainProps.keySet()) {
-        String[] argNamePair = ((String)key).split("\\|");
-        String shortArg = "-" + argNamePair[0].trim();
+      for (String key : mainProps.stringPropertyNames()) {
+        String[] argNamePair = key.split("\\|");
+        String shortArg = '-' + argNamePair[0].trim();
         String longArg = argNamePair.length < 2 ? null : "--" + argNamePair[1].trim();
         if(!argMap.containsKey(shortArg) && (longArg == null || !argMap.containsKey(longArg))) {
-          argMap.put(longArg, new String[] { ((String)mainProps.get(key)) } );
+          argMap.put(longArg, new String[] { mainProps.getProperty(key) } );
         }
       }
       List<String> argsList = new ArrayList<String>();
@@ -158,24 +161,19 @@ public class MahoutDriver {
       for(String arg : argMap.keySet()) {
         if(arg.startsWith("-D")) { // arg is -Dkey - if value for this !isEmpty(), then arg -> -Dkey + "=" + value
           if(argMap.get(arg).length > 0 && !argMap.get(arg)[0].trim().isEmpty()) {
-            arg += "=" + argMap.get(arg)[0].trim();
+            arg += '=' + argMap.get(arg)[0].trim();
           }
         }
         argsList.add(arg);
         if(!arg.startsWith("-D")) {
-          for(String argValue : argMap.get(arg)) {
-            argsList.add(argValue);
-          }
+          argsList.addAll(Arrays.asList(argMap.get(arg)));
         }
       }
       programDriver.driver(argsList.toArray(new String[argsList.size()]));
-      exitCode = 0;
     } catch (Throwable e) {
-      e.printStackTrace();
-      log.error("MahoutDriver failed with args: " + Arrays.toString(args) + "\n" + e.getMessage());
-      exitCode = -1;
+      log.error("MahoutDriver failed with args: " + Arrays.toString(args) + '\n' + e.getMessage());
+      throw e;
     }
-    System.exit(exitCode);
   }
 
   private static String[] shift(String[] args) {
@@ -185,18 +183,18 @@ public class MahoutDriver {
   }
 
   private static String shortName(String valueString) {
-    if(valueString.indexOf(":") < 0) {
-      return valueString;
+    if (valueString.contains(":")) {
+      return valueString.substring(0, valueString.indexOf(':')).trim();
     } else {
-      return valueString.substring(0, valueString.indexOf(":")).trim();
+      return valueString;
     }
   }
 
   private static String desc(String valueString) {
-    if(valueString.indexOf(":") < 0) {
-      return valueString;
+    if (valueString.contains(":")) {
+      return valueString.substring(valueString.indexOf(':')).trim();
     } else {
-      return valueString.substring(valueString.indexOf(":")).trim();
+      return valueString;
     }
   }
 
@@ -204,8 +202,10 @@ public class MahoutDriver {
     try {
       Class<?> clazz = Class.forName(classString);
       driver.addClass(shortName(descString), clazz, desc(descString));
-    } catch (Throwable e) {
-      log.warn("Unable to add class: " + classString + "\n" + e.getMessage());
+    } catch (ClassNotFoundException e) {
+      log.warn("Unable to add class: " + classString, e);
+    } catch (Throwable t) {
+      log.warn("Unable to add class: " + classString, t);
     }
   }
 

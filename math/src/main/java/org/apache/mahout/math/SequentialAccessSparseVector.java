@@ -232,8 +232,10 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   private static final class DenseElement extends AbstractElement {
-    int index;
-    SequentialAccessSparseVector v;
+
+    private int index;
+    private final SequentialAccessSparseVector v;
+
     DenseElement(int ind, SequentialAccessSparseVector v) {
       super(ind, v);
       this.v = v;
@@ -262,7 +264,8 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   private static final class SparseElement extends AbstractElement {
 
-    SequentialAccessSparseVector v;
+    private final SequentialAccessSparseVector v;
+
     SparseElement(int ind, SequentialAccessSparseVector v) {
       super(ind, v);
       this.v = v;

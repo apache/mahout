@@ -70,7 +70,7 @@ public final class RandomSeedGenerator {
       Path inputPathPattern;
       Path inputPath = new Path(input);
       
-      if (fs.getFileStatus(inputPath).isDir() == true) {
+      if (fs.getFileStatus(inputPath).isDir()) {
         inputPathPattern = new Path(inputPath.toString() + "/*");
       } else {
         inputPathPattern = inputPath;
@@ -84,7 +84,7 @@ public final class RandomSeedGenerator {
       int nextClusterId = 0;
       
       for (FileStatus fileStatus : inputFiles) {
-        if (fileStatus.isDir() == true) {
+        if (fileStatus.isDir()) {
           continue; // select only the top level files
         }
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, fileStatus.getPath(), conf);

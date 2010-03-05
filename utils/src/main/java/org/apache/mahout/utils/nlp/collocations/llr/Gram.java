@@ -42,7 +42,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     UNIGRAM('u'),
     NGRAM('n');
     
-    char x;
+    private final char x;
     Type(char c) {
       this.x = c;
     }
@@ -104,9 +104,8 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
       ByteBuffer bb = Text.encode(ngram + '\0', true);
       bytes = bb.array();
       length = bb.limit();
-    }
-    catch (CharacterCodingException e) {
-      throw new RuntimeException("Should not have happened ",e); 
+    } catch (CharacterCodingException e) {
+      throw new IllegalStateException("Should not have happened ",e);
     }
     
     encodeType(type, bytes, length-1);
@@ -138,7 +137,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     try {
       return Text.decode(bytes, 0, length-1);
     } catch (CharacterCodingException e) {
-      throw new RuntimeException("Should not have happened " + e.toString()); 
+      throw new IllegalStateException("Should not have happened " + e.toString()); 
     }
   }
 

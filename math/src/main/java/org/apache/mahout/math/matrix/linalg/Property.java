@@ -496,7 +496,7 @@ public class Property extends PersistentObject {
 
   /** A matrix <tt>A</tt> is <i>singular</i> if it has no inverse, that is, iff <tt>det(A)==0</tt>. */
   public boolean isSingular(DoubleMatrix2D A) {
-    return !(Math.abs(Algebra.DEFAULT.det(A)) >= tolerance());
+    return Math.abs(Algebra.det(A)) < tolerance();
   }
 
   /**

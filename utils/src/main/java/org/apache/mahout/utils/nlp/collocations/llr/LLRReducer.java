@@ -89,7 +89,7 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
     }
     
     if (ngramTotal == -1) {
-      throw new RuntimeException("No NGRAM_TOTAL available in job config");
+      throw new IllegalStateException("No NGRAM_TOTAL available in job config");
     }
   }
   

@@ -27,9 +27,9 @@ import java.util.Map;
 
 public class TestSparseVector extends TestCase {
 
-  final double[] values = {1.1, 2.2, 3.3};
-  final double[] gold = {0, 1.1, 2.2, 3.3, 0};
-  final Vector test = new RandomAccessSparseVector(values.length + 2);
+  private final double[] values = {1.1, 2.2, 3.3};
+  private final double[] gold = {0, 1.1, 2.2, 3.3, 0};
+  private final Vector test = new RandomAccessSparseVector(values.length + 2);
 
   public TestSparseVector(String name) {
     super(name);
@@ -339,7 +339,8 @@ public class TestSparseVector extends TestCase {
     other.set(3, -9);
     other.set(4, 1);
     double expected = test.minus(other).getLengthSquared();
-    assertEquals("a.getDistanceSquared(b) != a.minus(b).getLengthSquared", Math.abs(expected - test.getDistanceSquared(other)) < 10E-7, true);
+    assertTrue("a.getDistanceSquared(b) != a.minus(b).getLengthSquared",
+               Math.abs(expected - test.getDistanceSquared(other)) < 10.0E-7);
   }
 
   public void testAssignDouble() {

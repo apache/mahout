@@ -29,7 +29,6 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 
 public class VectorTest extends TestCase {
 
@@ -109,7 +108,7 @@ public class VectorTest extends TestCase {
     dense.setQuick(1, 2);
     dense.setQuick(2, 3);
     assertTrue("equivalent didn't work", AbstractVector.equivalent(dense, right));
-    assertTrue("equals didn't work", dense.equals(right));
+    assertEquals("equals didn't work", dense, right);
 
     RandomAccessSparseVector sparse = new RandomAccessSparseVector(3);
     randomAccessLeft = new RandomAccessSparseVector(3);
@@ -120,17 +119,17 @@ public class VectorTest extends TestCase {
     randomAccessLeft.setQuick(1, 2);
     randomAccessLeft.setQuick(2, 3);
     assertTrue("equivalent didn't work", AbstractVector.equivalent(sparse, randomAccessLeft));
-    assertTrue("equals didn't work", randomAccessLeft.equals(sparse));
+    assertEquals("equals didn't work", randomAccessLeft, sparse);
 
     VectorView v1 = new VectorView(randomAccessLeft, 0, 2);
     VectorView v2 = new VectorView(right, 0, 2);
     assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, v2));
-    assertTrue("equals didn't work", v1.equals(v2));
+    assertEquals("equals didn't work", v1, v2);
     sparse = new RandomAccessSparseVector(2);
     sparse.setQuick(0, 1);
     sparse.setQuick(1, 2);
     assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, sparse));
-    assertTrue("equals didn't work", v1.equals(sparse));
+    assertEquals("equals didn't work", v1, sparse);
 
   }
 
@@ -172,13 +171,13 @@ public class VectorTest extends TestCase {
     
   }
 
-  private void setUpV(Vector v) {
+  private static void setUpV(Vector v) {
     v.setQuick(1, 2);
     v.setQuick(2, -4);
     v.setQuick(3, -9);
   }
 
-  private void setUpW(Vector w) {
+  private static void setUpW(Vector w) {
     w.setQuick(0, -5);
     w.setQuick(1, -1);
     w.setQuick(2, 9);
@@ -189,7 +188,7 @@ public class VectorTest extends TestCase {
   public void doTestGetDistanceSquared(Vector v, Vector w) throws Exception {
     double expected = v.minus(w).getLengthSquared();
     assertTrue("a.getDistanceSquared(b) != a.minus(b).getLengthSquared",
-        Math.abs(expected - v.getDistanceSquared(w)) < 1e-6);
+        Math.abs(expected - v.getDistanceSquared(w)) < 1.0e-6);
   }
 
   public void testGetLengthSquared() throws Exception {
@@ -214,8 +213,7 @@ public class VectorTest extends TestCase {
 
   public void doTestGetLengthSquared(Vector v) throws Exception {
     double expected = lengthSquaredSlowly(v);
-    assertTrue("v.getLengthSquared() != sum_of_squared_elements(v)",
-        expected == v.getLengthSquared());
+    assertEquals("v.getLengthSquared() != sum_of_squared_elements(v)", expected, v.getLengthSquared(), 0.0);
 
     v.set(v.size()/2, v.get(v.size()/2) + 1.0);
     expected = lengthSquaredSlowly(v);
@@ -382,7 +380,7 @@ public class VectorTest extends TestCase {
     vec1.setQuick(2, -2);
 
     double max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + -1, -1, max, 0.0);
+    assertEquals(max + " does not equal: " + (-1.0), -1.0, max, 0.0);
 
     int idx = vec1.maxValueIndex();
     assertEquals(idx + " does not equal: " + 0, 0, idx);
@@ -393,7 +391,7 @@ public class VectorTest extends TestCase {
     vec1.setQuick(2, -2);
     
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0d, max, 0.0);
+    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
     assertEquals(idx + " does not equal: " + 1, 1, idx);
@@ -404,7 +402,7 @@ public class VectorTest extends TestCase {
     vec1.setQuick(2, -2);
     
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0d, max, 0.0);
+    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
     assertEquals(idx + " does not equal: " + 1, 1, idx);
@@ -415,22 +413,22 @@ public class VectorTest extends TestCase {
     vec1.setQuick(2, -2);
     
     max = vec1.maxValue();
-    assertEquals(max + " does not equal: " + 0, 0d, max, 0.0);
+    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
 
     idx = vec1.maxValueIndex();
     assertEquals(idx + " does not equal: " + 1, 1, idx);
     
     vec1 = new RandomAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0d, max);
+    assertEquals(max + " does not equal 0", 0.0, max);
 
     vec1 = new DenseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0d, max);
+    assertEquals(max + " does not equal 0", 0.0, max);
 
     vec1 = new SequentialAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0d, max);
+    assertEquals(max + " does not equal 0", 0.0, max);
 
     vec1 = new RandomAccessSparseVector(0);
     max = vec1.maxValue();
@@ -526,7 +524,7 @@ public class VectorTest extends TestCase {
     doTestAggregation(w, v);
   }
 
-  private void doTestAggregation(Vector v, Vector w) throws Exception {
+  private static void doTestAggregation(Vector v, Vector w) throws Exception {
     assertEquals("aggregate(plus, pow(2)) not equal to " + v.getLengthSquared(),
         v.getLengthSquared(),
         v.aggregate(plus, pow(2)));
@@ -545,75 +543,17 @@ public class VectorTest extends TestCase {
         v.aggregate(w, plus, chain(pow(2), minus)));
   }
 
-  private void setUpFirstVector(Vector v) {
+  private static void setUpFirstVector(Vector v) {
     v.setQuick(1, 2);
     v.setQuick(2, 0.5);
     v.setQuick(3, -5);
   }
 
-  private void setUpSecondVector(Vector v) {
+  private static void setUpSecondVector(Vector v) {
     v.setQuick(0, 3);
     v.setQuick(1, -1.5);
     v.setQuick(2, -5);
     v.setQuick(3, 2);
-  }
-
-  /*public void testSparseVectorTimesX() {
-    RandomUtils.useTestSeed();
-    Random rnd = RandomUtils.getRandom();
-    Vector v1 = randomSparseVector(rnd);
-    double x = rnd.nextDouble();
-    long t0 = System.currentTimeMillis();
-    RandomAccessSparseVector.optimizeTimes = false;
-    Vector rRef = null;
-    for (int i = 0; i < 10; i++)
-      rRef = v1.times(x);
-    long t1 = System.currentTimeMillis();
-    RandomAccessSparseVector.optimizeTimes = true;
-    Vector rOpt = null;
-    for (int i = 0; i < 10; i++)
-      rOpt = v1.times(x);
-    long t2 = System.currentTimeMillis();
-    long tOpt = t2 - t1;
-    long tRef = t1 - t0;
-    assertTrue(tOpt < tRef);
-    System.out.println("testSparseVectorTimesX tRef-tOpt=" + (tRef - tOpt)
-        + " ms for 10 iterations");
-    for (int i = 0; i < 50000; i++)
-      assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
-  }*/
-
-  /*public void testSparseVectorTimesV() {
-    RandomUtils.useTestSeed();
-    Random rnd = RandomUtils.getRandom();
-    Vector v1 = randomSparseVector(rnd);
-    Vector v2 = randomSparseVector(rnd);
-    long t0 = System.currentTimeMillis();
-    RandomAccessSparseVector.optimizeTimes = false;
-    Vector rRef = null;
-    for (int i = 0; i < 10; i++)
-      rRef = v1.times(v2);
-    long t1 = System.currentTimeMillis();
-    RandomAccessSparseVector.optimizeTimes = true;
-    Vector rOpt = null;
-    for (int i = 0; i < 10; i++)
-      rOpt = v1.times(v2);
-    long t2 = System.currentTimeMillis();
-    long tOpt = t2 - t1;
-    long tRef = t1 - t0;
-    assertTrue(tOpt < tRef);
-    System.out.println("testSparseVectorTimesV tRef-tOpt=" + (tRef - tOpt)
-        + " ms for 10 iterations");
-    for (int i = 0; i < 50000; i++)
-      assertEquals("i=" + i, rRef.getQuick(i), rOpt.getQuick(i));
-  }*/
-
-  private static Vector randomSparseVector(Random rnd) {
-    RandomAccessSparseVector v1 = new RandomAccessSparseVector(50000);
-    for (int i = 0; i < 1000; i++) {
-      v1.setQuick(rnd.nextInt(50000), rnd.nextDouble());
-    }
-    return v1;
   }
 
   public void testLabelSerializationDense() {

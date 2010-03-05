@@ -180,7 +180,7 @@ public class LDAPrintTopics {
     }
   }
   
-  private static void printTopWords(List<List<String>> topWords) throws IOException {
+  private static void printTopWords(List<List<String>> topWords) {
     for (int i = 0; i < topWords.size(); ++i) {
       List<String> topK = topWords.get(i);
       System.out.println("Topic " + i);

@@ -48,12 +48,13 @@ public class LLRReducerTest {
   private static final Logger log =
     LoggerFactory.getLogger(LLRReducerTest.class);
   
-  Reporter reporter;
-  LLCallback ll;
-  LLCallback cl;
+  private Reporter reporter;
+  private LLCallback ll;
+  private LLCallback cl;
+
   // not verifying the llr algo output here, just the input, but it is handy
   // to see the values emitted.
-  OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
+  private final OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
     @Override
     public void collect(Text key, DoubleWritable value) throws IOException {
       log.info(key.toString() + ' ' + value.toString());

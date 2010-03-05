@@ -297,7 +297,7 @@ public class Formatter extends AbstractFormatter {
   /** Converts a given cell to a String; no alignment considered. */
   @Override
   protected String form(AbstractMatrix1D matrix, int index, Former formatter) {
-    return this.form((DoubleMatrix1D) matrix, index, formatter);
+    return form((DoubleMatrix1D) matrix, index, formatter);
   }
 
   /** Returns a string representations of all cells; no alignment considered. */

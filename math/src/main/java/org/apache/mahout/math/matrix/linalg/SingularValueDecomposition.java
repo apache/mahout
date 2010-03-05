@@ -33,7 +33,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
   public SingularValueDecomposition(DoubleMatrix2D Arg) {
-    Property.DEFAULT.checkRectangular(Arg);
+    Property.checkRectangular(Arg);
 
     // Derived from LINPACK code.
     // Initialize.

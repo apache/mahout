@@ -157,7 +157,7 @@ public final class KMeansDriver {
       if (cmdLine.hasOption(numReduceTasksOpt)) {
         numReduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
       }
-      if (cmdLine.hasOption(overwriteOutput) == true) {
+      if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.overwriteOutput(output);
       }
       if (cmdLine.hasOption(kOpt)) {

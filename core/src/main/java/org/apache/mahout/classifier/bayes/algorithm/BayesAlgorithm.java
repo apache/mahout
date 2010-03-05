@@ -126,7 +126,7 @@ public class BayesAlgorithm implements Algorithm {
         try {
           result.add(frequency * featureWeight(datastore, label, word));
         } catch (InvalidDatastoreException e) {
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         }
         return true;
       }

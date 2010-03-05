@@ -227,7 +227,7 @@ abstract class DoubleQuantileEstimator extends PersistentObject
     //double[] quantileElements = new double[phis.size()];
 
     //do the main work: determine values at given positions in sorted sequence
-    return new DoubleArrayList(bufferSet.getValuesAtPositions(fullBuffers, triggerPositions));
+    return new DoubleArrayList(DoubleBufferSet.getValuesAtPositions(fullBuffers, triggerPositions));
   }
 
   /** Not yet commented. */

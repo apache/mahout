@@ -354,8 +354,8 @@ public final class ClusterDumper {
   }
 
   static class TermIndexWeight {
-    public int index = -1;
-    public double weight = 0;
+    int index = -1;
+    double weight = 0;
 
     TermIndexWeight(int index, double weight) {
       this.index = index;

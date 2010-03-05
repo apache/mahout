@@ -50,7 +50,7 @@ public class QRDecomposition implements java.io.Serializable {
    */
 
   public QRDecomposition(DoubleMatrix2D A) {
-    Property.DEFAULT.checkRectangular(A);
+    Property.checkRectangular(A);
 
     // Initialize.
     QR = A.copy();
@@ -126,7 +126,7 @@ public class QRDecomposition implements java.io.Serializable {
    * @return A lower trapezoidal matrix whose columns define the householder reflections.
    */
   public DoubleMatrix2D getH() {
-    return Algebra.DEFAULT.trapezoidalLower(QR.copy());
+    return Algebra.trapezoidalLower(QR.copy());
   }
 
   /**

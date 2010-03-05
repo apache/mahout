@@ -51,7 +51,7 @@ public class TestHebbianSolver extends SolverTest {
                                 double convergence,
                                 int maxNumPasses,
                                 int desiredRank,
-                                TrainingState state) throws Exception {
+                                TrainingState state) {
     HebbianUpdater updater = new HebbianUpdater();
     SingularVectorVerifier verifier = new AsyncEigenVerifier();
     HebbianSolver solver = new HebbianSolver(updater,
@@ -63,10 +63,10 @@ public class TestHebbianSolver extends SolverTest {
     assertNotNull(finalState);
     state.setCurrentEigens(finalState.getCurrentEigens());
     state.setCurrentEigenValues(finalState.getCurrentEigenValues());
-    long time = 0;
+    long time = 0L;
     time += System.nanoTime() - start;
     assertEquals(state.getCurrentEigens().numRows(), desiredRank);
-    return (long) (time / 1000000);
+    return (time / 1000000L);
   }
 
 

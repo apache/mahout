@@ -36,7 +36,7 @@ public class CholeskyDecomposition implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A</tt> is not square.
    */
   public CholeskyDecomposition(DoubleMatrix2D A) {
-    Property.DEFAULT.checkSquare(A);
+    Property.checkSquare(A);
     // Initialize.
     //double[][] A = Arg.getArray();
 
