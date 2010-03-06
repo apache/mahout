@@ -71,6 +71,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     String outputTmpPathString = parsedArgs.get("--tempDir");
     int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
+    boolean isSymmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
     int desiredRank = Integer.parseInt(parsedArgs.get("--rank"));
     Matrix eigenVectors = new DenseMatrix(desiredRank, numCols);
     List<Double> eigenValues = new ArrayList<Double>();
@@ -81,7 +82,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                                                            numRows,
                                                            numCols);
     matrix.configure(new JobConf(getConf()));
-    solve(matrix, desiredRank, eigenVectors, eigenValues);
+    solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
 
     serializeOutput(eigenVectors, eigenValues, outputEigenVectorPath);  
     return 0;
@@ -154,9 +155,20 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                                           "r",
                                           "Desired decomposition rank (note: only roughly 1/4 to 1/3 "
                                         + "of these will have the top portion of the spectrum)");
+      Option isSymmetricOpt = buildOption("symmetric",
+                                          "sym",
+                                          "Is the input matrix square and symmetric?");
 
-      DistributedLanczosSolver.this.parsedArgs = parseArguments(args, numRowsOpt, numColsOpt, desiredRankOpt);
-      return DistributedLanczosSolver.this.run(args);
+      DistributedLanczosSolver.this.parsedArgs = parseArguments(args,
+                                                                numRowsOpt,
+                                                                numColsOpt,
+                                                                desiredRankOpt,
+                                                                isSymmetricOpt);
+      if (DistributedLanczosSolver.this.parsedArgs == null) {
+        return -1;
+      } else {
+        return DistributedLanczosSolver.this.run(args);
+      }
     }
   }
 

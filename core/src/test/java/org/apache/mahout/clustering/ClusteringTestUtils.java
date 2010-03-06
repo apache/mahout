@@ -20,6 +20,7 @@ package org.apache.mahout.clustering;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.math.VectorWritable;
@@ -31,13 +32,27 @@ public class ClusteringTestUtils {
   private ClusteringTestUtils() {
   }
 
-  public static void writePointsToFile(Iterable<VectorWritable> points, String fileName, FileSystem fs, Configuration conf)
-      throws IOException {
+  public static void writePointsToFile(Iterable<VectorWritable> points,
+                                       String fileName,
+                                       FileSystem fs,
+                                       Configuration conf) throws IOException {
+    writePointsToFile(points, false, fileName, fs, conf);
+  }
+
+  public static void writePointsToFile(Iterable<VectorWritable> points,
+                                       boolean intWritable,
+                                       String fileName,
+                                       FileSystem fs,
+                                       Configuration conf) throws IOException {
     Path path = new Path(fileName);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
-    long recNum = 0;
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs,
+                                                         conf,
+                                                         path,
+                                                         intWritable ? IntWritable.class : LongWritable.class,
+                                                         VectorWritable.class);
+    int recNum = 0;
     for (VectorWritable point : points) {
-      writer.append(new LongWritable(recNum++), point);
+      writer.append(intWritable ? new IntWritable(recNum++) : new LongWritable(recNum++), point);
     }
     writer.close();
   }
