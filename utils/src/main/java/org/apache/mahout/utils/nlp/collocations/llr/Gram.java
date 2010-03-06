@@ -42,7 +42,8 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     UNIGRAM('u'),
     NGRAM('n');
     
-    private final char x;
+    final char x;
+    
     Type(char c) {
       this.x = c;
     }
@@ -101,14 +102,14 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     try {  
       // extra character is used for storing type which is part 
       // of the sort key.
-      ByteBuffer bb = Text.encode(ngram + '\0', true);
+      ByteBuffer bb = Text.encode('\0' + ngram, true);
       bytes = bb.array();
       length = bb.limit();
     } catch (CharacterCodingException e) {
       throw new IllegalStateException("Should not have happened ",e);
     }
     
-    encodeType(type, bytes, length-1);
+    encodeType(type, bytes, 0);
     this.frequency = frequency;
   }
   
@@ -127,7 +128,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
    * @return the gram is at the head of its text unit or tail or unigram.
    */
   public Type getType() {
-    return decodeType(bytes, length-1);
+    return decodeType(bytes, 0);
   }
 
   /**
@@ -135,7 +136,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
    */
   public String getString() {
     try {
-      return Text.decode(bytes, 0, length-1);
+      return Text.decode(bytes, 1, length-1);
     } catch (CharacterCodingException e) {
       throw new IllegalStateException("Should not have happened " + e.toString()); 
     }

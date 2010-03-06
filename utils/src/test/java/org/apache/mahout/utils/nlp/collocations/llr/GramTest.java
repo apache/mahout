@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import junit.framework.Assert;
@@ -153,7 +154,6 @@ public class GramTest {
     };
     
     for (int i = 0; i < input.length; i++) {
-      System.err.println(i);
       Assert.assertEquals(freq[i], input[i].getFrequency());
       Assert.assertEquals(memb[i], input[i] == map.get(input[i]));
     }
@@ -188,5 +188,35 @@ public class GramTest {
    Assert.assertEquals(3, one.getFrequency());
    Assert.assertEquals(Gram.Type.UNIGRAM, one.getType());
    
+ }
+ 
+ @Test
+ public void testSorting() throws IOException {
+   Gram[] input =
+   {
+    new Gram("foo", 2, Gram.Type.HEAD),
+    new Gram("foo", 3, Gram.Type.HEAD),
+    new Gram("foo", 4, Gram.Type.TAIL),
+    new Gram("foo", 5, Gram.Type.TAIL),
+    new Gram("bar", 6, Gram.Type.HEAD),
+    new Gram("bar", 7, Gram.Type.TAIL),
+    new Gram("bar", 8, Gram.Type.NGRAM),
+    new Gram("bar", Gram.Type.UNIGRAM)
+   };
+   
+   Gram[] sorted = new Gram[input.length];
+   
+   int[] expectations = {
+       4, 0, 1, 5, 2, 3, 7, 6
+   };
+   
+   
+   System.arraycopy(input, 0, sorted, 0, input.length);
+   
+   Arrays.sort(sorted);
+   
+   for (int i=0; i < sorted.length; i++) {
+     Assert.assertSame(input[expectations[i]], sorted[i]);
+   }
  }
 }

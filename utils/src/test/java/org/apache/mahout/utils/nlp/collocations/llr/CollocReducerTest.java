@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test the CollocReducer FIXME: add negative test cases.
+ * Test the CollocReducer
  */
 public class CollocReducerTest {
   
@@ -52,10 +52,11 @@ public class CollocReducerTest {
     // test input, input[*][0] is the key,
     // input[*][1..n] are the values passed in via
     // the iterator.
-    Gram[][] input = {{new Gram("the", UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM)},
-                                   {new Gram("the", HEAD), new Gram("the best", NGRAM), new Gram("the worst", NGRAM)},
-                                   {new Gram("of", HEAD), new Gram("of times", NGRAM), new Gram("of times", NGRAM)},
-                                   {new Gram("times", TAIL), new Gram("of times", NGRAM), new Gram("of times", NGRAM)}};
+    Gram[][] input = {
+        {new Gram("the", UNIGRAM), new Gram("the", UNIGRAM), new Gram("the", UNIGRAM)},
+        {new Gram("the", HEAD), new Gram("the best", NGRAM), new Gram("the worst", NGRAM)},
+        {new Gram("of", HEAD), new Gram("of times", NGRAM), new Gram("of times", NGRAM)},
+        {new Gram("times", TAIL), new Gram("of times", NGRAM), new Gram("of times", NGRAM)}};
     
     // expected results.
     Gram[][] values = {{new Gram("the", 2, UNIGRAM), new Gram("the", 2, UNIGRAM)},
@@ -63,6 +64,8 @@ public class CollocReducerTest {
                                     {new Gram("the worst", 1, NGRAM), new Gram("the", 2, HEAD)},
                                     {new Gram("of times", 2, NGRAM), new Gram("of", 2, HEAD)},
                                     {new Gram("of times", 2, NGRAM), new Gram("times", 2, TAIL)}};
+    
+    byte[] empty = new byte[0];
     
     // set up expectations
     for (Gram[] v : values) {
@@ -73,10 +76,14 @@ public class CollocReducerTest {
     // play back the input data.
     CollocReducer c = new CollocReducer();
     
+    GramKey key = new GramKey();
+    
     for (Gram[] ii : input) {
+      key.set(ii[0], empty);
+
       List<Gram> vv = new LinkedList<Gram>();
-      vv.addAll(Arrays.asList(ii).subList(1, ii.length));
-      c.reduce(ii[0], vv.iterator(), output, reporter);
+      vv.addAll(Arrays.asList(ii));
+      c.reduce(key, vv.iterator(), output, reporter);
     }
     
     EasyMock.verify(reporter, output);

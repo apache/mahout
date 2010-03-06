@@ -27,6 +27,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
@@ -38,6 +39,8 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.CommandLineUtil;
@@ -47,8 +50,8 @@ import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Driver for LLR collocation discovery mapreduce job */
-public class CollocDriver {
+/** Driver for LLR Collocation discovery mapreduce job */
+public class CollocDriver extends Configured implements Tool {
   public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
   public static final String SUBGRAM_OUTPUT_DIRECTORY = "subgrams";
   public static final String NGRAM_OUTPUT_DIRECTORY = "ngrams";
@@ -64,10 +67,13 @@ public class CollocDriver {
   private CollocDriver() {
   }
 
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new CollocDriver(), args);
+  }
   /**
    * @param args
    */
-  public static void main(String[] args) throws Exception {
+  public int run(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -131,7 +137,7 @@ public class CollocDriver {
       
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
-        return;
+        return 1;
       }
       
       String input = cmdLine.getValue(inputOpt).toString();
@@ -202,8 +208,10 @@ public class CollocDriver {
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
+      return 1;
     }
     
+    return 0;
   }
   
   /**
@@ -247,9 +255,12 @@ public class CollocDriver {
                                           int reduceTasks,
                                           int minSupport) throws IOException {
     JobConf conf = new JobConf(CollocDriver.class);
+    conf.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
     
-    conf.setMapOutputKeyClass(Gram.class);
+    conf.setMapOutputKeyClass(GramKey.class);
     conf.setMapOutputValueClass(Gram.class);
+    conf.setPartitionerClass(GramKeyPartitioner.class);
+    conf.setOutputValueGroupingComparator(GramKeyGroupComparator.class);
     
     conf.setOutputKeyClass(Gram.class);
     conf.setOutputValueClass(Gram.class);
@@ -284,6 +295,8 @@ public class CollocDriver {
                                              float minLLRValue,
                                              int reduceTasks) throws IOException {
     JobConf conf = new JobConf(CollocDriver.class);
+    conf.setJobName(CollocDriver.class.getSimpleName() + ".computeNGrams: " + output);
+    
     
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);

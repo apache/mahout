@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Reducer for Pass 1 of the collocation identification job. Generates counts for ngrams and subgrams.
  */
-public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gram,Gram> {
+public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram,Gram,Gram> {
 
   private static final Logger log = LoggerFactory.getLogger(CollocReducer.class);
 
@@ -40,7 +40,11 @@ public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gr
   public static final int DEFAULT_MIN_SUPPORT = 2;
   
   public enum Skipped {
-    LESS_THAN_MIN_SUPPORT
+    LESS_THAN_MIN_SUPPORT,
+    MALFORMED_KEY_TUPLE,
+    MALFORMED_TUPLE,
+    MALFORMED_TYPES,
+    MALFORMED_UNIGRAM
   }
 
   private int minSupport;
@@ -60,51 +64,140 @@ public class CollocReducer extends MapReduceBase implements Reducer<Gram,Gram,Gr
   
   /**
    * collocation finder: pass 1 reduce phase:
+   * <p/>
+   * given input from the mapper, 
    * 
-   * given input from the mapper, k:h_subgram v:ngram k:t_subgram v:ngram
-   * 
-   * count ngrams and subgrams.
-   * 
+   * <pre>
+   * k:head_subgram,ngram,  v:ngram:partial freq
+   * k:head_subgram         v:head_subgram:partial freq
+   * k:tail_subgram,ngram,  v:ngram:partial freq
+   * k:tail_subgram         v:tail_subgram:partial freq
+   * k:unigram              v:unigram:partial freq
+   * </pre>
+   * sum gram frequencies and output for llr calculation
+   * <p/>
    * output is:
-   * 
-   * k:ngram:ngramfreq v:h_subgram:h_subgramfreq k:ngram:ngramfreq v:t_subgram:t_subgramfreq
-   * 
-   * Each ngram's frequency is essentially counted twice, frequency should be the same for the head and tail.
-   * Fix this to count only for the head and move the count into the value?
+   * <pre>
+   * k:ngram:ngramfreq      v:head_subgram:head_subgramfreq
+   * k:ngram:ngramfreq      v:tail_subgram:tail_subgramfreq
+   * k:unigram:unigramfreq  v:unigram:unigramfreq
+   * </pre>
+   * Each ngram's frequency is essentially counted twice, once for head, once for tail. 
+   * frequency should be the same for the head and tail. Fix this to count only for the 
+   * head and move the count into the value?
    */
   @Override
-  public void reduce(Gram subgramKey,
-                     Iterator<Gram> ngramValues,
+  public void reduce(GramKey key,
+                     Iterator<Gram> values,
                      OutputCollector<Gram,Gram> output,
                      Reporter reporter) throws IOException {
     
-    HashMap<Gram,Gram> ngramSet = new HashMap<Gram,Gram>();
-    int subgramFrequency = 0;
+    Gram.Type keyType = key.getType();
+
+    if (keyType == Gram.Type.UNIGRAM) {
+      // sum frequencies for unigrams.
+      processUnigram(key, values, output, reporter);
+    }
+    else if (keyType == Gram.Type.HEAD || keyType == Gram.Type.TAIL) {
+      // sum frequencies for subgrams, ngram and collect for each ngram.
+      processSubgram(key, values, output, reporter);
+    }
+    else {
+      reporter.incrCounter(Skipped.MALFORMED_TYPES, 1);
+    }
+  }
+
+  /** Sum frequencies for unigrams and deliver to the collector 
+   * 
+   * @param keyFirst
+   * @param values
+   * @param output
+   * @param reporter
+   * @throws IOException
+   */
+  protected void processUnigram(GramKey key, Iterator<Gram> values,
+      OutputCollector<Gram, Gram> output, Reporter reporter) throws IOException {
+
+    int freq = 0;
+    Gram value = null;
     
-    while (ngramValues.hasNext()) {
-      Gram ngram = ngramValues.next();
-      subgramFrequency += ngram.getFrequency();
+    // accumulate frequencies from values.
+    while (values.hasNext()) {
+      value = values.next();
+      freq += value.getFrequency();
+    }
+
+    if (freq < minSupport) {
+      reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
+      return;
+    }
+
+    value.setFrequency(freq);
+    output.collect(value, value);
+
+  }
       
-      Gram ngramCanon = ngramSet.get(ngram);
-      if (ngramCanon == null) {
-        // t is potentially reused, so create a new object to populate the
-        // HashMap
-        Gram ngramEntry = new Gram(ngram);
-        ngramSet.put(ngramEntry, ngramEntry);
-      } else {
-        ngramCanon.incrementFrequency(ngram.getFrequency());
+  /** Sum frequencies for subgram, ngrams and deliver ngram, subgram pairs to the collector.
+   *  <p/>
+   *  Sort order guarantees that the subgram/subgram pairs will be seen first and then
+   *  subgram/ngram1 pairs, subgram/ngram2 pairs ... subgram/ngramN pairs, so frequencies for
+   *  ngrams can be calcualted here as well.
+   *  <p/>
+   *  We end up calculating frequencies for ngrams for each sugram (head, tail) here, which is
+   *  some extra work.
+   *  
+   * @param keyFirst
+   * @param values
+   * @param output
+   * @param reporter
+   * @throws IOException
+   */
+  protected void processSubgram(GramKey key, Iterator<Gram> values, 
+      OutputCollector<Gram,Gram> output, Reporter reporter) throws IOException {
+
+    Gram subgram      = null;
+    Gram currentNgram = null;
+        
+    while (values.hasNext()) {
+      Gram value = values.next();
+
+      if (value.getType() == Gram.Type.HEAD || value.getType() == Gram.Type.TAIL) { 
+        // collect frequency for subgrams.
+        if (subgram == null) {
+          subgram = new Gram(value);
+        }
+        else {
+          subgram.incrementFrequency(value.getFrequency());
+        }
+      }
+      else if (!value.equals(currentNgram)) {
+        // we've collected frequency for all subgrams and we've encountered a new ngram. 
+        // collect the old ngram if there was one and we have sufficient support and
+        // create the new ngram.
+        if (currentNgram != null) {
+          if (currentNgram.getFrequency() < minSupport) {
+            reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
+          }
+          else {
+            output.collect(currentNgram, subgram);
+          }
+        }
+
+        currentNgram = new Gram(value);
+      }
+      else {
+        currentNgram.incrementFrequency(value.getFrequency());
       }
     }
     
-    // emit ngram:ngramFreq, subgram:subgramFreq pairs.
-    subgramKey.setFrequency(subgramFrequency);
-    
-    for (Gram ngram : ngramSet.keySet()) {
-      if (ngram.getFrequency() < minSupport) {
+    // collect last ngram.
+    if (currentNgram != null) {
+      if (currentNgram.getFrequency() < minSupport) {
         reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
-        continue;
+        return;
       }
-      output.collect(ngram, subgramKey);
+      
+      output.collect(currentNgram, subgram);
     }
   }
 }

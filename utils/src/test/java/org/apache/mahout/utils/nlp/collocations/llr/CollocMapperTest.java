@@ -35,14 +35,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test for CollocMapper FIXME: Add negative test cases
+ * Test for CollocMapper 
  */
 @SuppressWarnings("deprecation")
 public class CollocMapperTest {
   
-  private OutputCollector<Gram,Gram> collector;
+  private OutputCollector<GramKey,Gram> collector;
   private Reporter reporter;
-  
+
   @Before
   @SuppressWarnings("unchecked")
   public void setUp() {
@@ -82,9 +82,14 @@ public class CollocMapperTest {
       if (v[1].equals("of times")) {
         frequency = 2;
       }
+      
       Gram subgram = new Gram(v[0].substring(2), frequency, p);
-      Gram ngram = new Gram(v[1], frequency, Type.NGRAM);
-      collector.collect(subgram, ngram);
+      Gram ngram = new Gram(v[1], frequency, Gram.Type.NGRAM);
+      
+      GramKey subgramKey = new GramKey(subgram, new byte[0]);
+      GramKey subgramNgramKey = new GramKey(subgram, ngram.getBytes());
+      collector.collect(subgramKey, subgram);
+      collector.collect(subgramNgramKey, ngram);
     }
     
     reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
@@ -129,6 +134,7 @@ public class CollocMapperTest {
                                          {"u_worst", "worst"}, {"u_of", "of"},
                                          {"u_the", "the"}, {"u_best", "best"},
                                          {"u_times", "times"},};
+
     // set up expectations for mocks. ngram max size = 2
     for (String[] v : values) {
       Type p = v[0].startsWith("h") ? Gram.Type.HEAD : Gram.Type.TAIL;
@@ -138,9 +144,23 @@ public class CollocMapperTest {
           || v[1].equals("the")) {
         frequency = 2;
       }
-      Gram subgram = new Gram(v[0].substring(2), frequency, p);
-      Gram ngram = new Gram(v[1], frequency, p == Gram.Type.UNIGRAM ? Gram.Type.UNIGRAM : Gram.Type.NGRAM);
-      collector.collect(subgram, ngram);
+      
+      
+     
+      if (p == Gram.Type.UNIGRAM) {
+        Gram unigram = new Gram(v[1], frequency, Gram.Type.UNIGRAM);
+        GramKey unigramKey = new GramKey(unigram, new byte[0]);
+        collector.collect(unigramKey, unigram);
+      }
+      else {
+        Gram subgram = new Gram(v[0].substring(2), frequency, p);
+        Gram ngram = new Gram(v[1], frequency, Gram.Type.NGRAM);
+        
+        GramKey subgramKey = new GramKey(subgram, new byte[0]);
+        GramKey subgramNgramKey = new GramKey(subgram, ngram.getBytes());
+        collector.collect(subgramKey, subgram);
+        collector.collect(subgramNgramKey, ngram);
+      }
     }
     
     reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
