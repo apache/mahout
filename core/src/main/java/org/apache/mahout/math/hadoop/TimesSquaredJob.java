@@ -20,6 +20,7 @@ package org.apache.mahout.math.hadoop;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.WritableComparable;
@@ -50,11 +51,11 @@ public class TimesSquaredJob {
 
   private static final Logger log = LoggerFactory.getLogger(TimesSquaredJob.class);
 
-  public static final String INPUT_VECTOR = "timesSquared.inputVector";
-  public static final String IS_SPARSE_OUTPUT = "timesSquared.outputVector.sparse";
-  public static final String OUTPUT_VECTOR_DIMENSION = "timesSquared.output.dimension";
+  public static final String INPUT_VECTOR = "DistributedMatrix.times.inputVector";
+  public static final String IS_SPARSE_OUTPUT = "DistributedMatrix.times.outputVector.sparse";
+  public static final String OUTPUT_VECTOR_DIMENSION = "DistributedMatrix.times.output.dimension";
 
-  public static final String OUTPUT_VECTOR_FILENAME = "timesSquaredOutputVector";
+  public static final String OUTPUT_VECTOR_FILENAME = "DistributedMatrix.times.outputVector";
 
   private TimesSquaredJob() {}
 
@@ -68,7 +69,29 @@ public class TimesSquaredJob {
                                      VectorSummingReducer.class);
   }
 
+  public static JobConf createTimesJobConf(Vector v,
+                                           int outDim,
+                                           Path matrixInputPath,
+                                           Path outputVectorPath) throws IOException {
+    return createTimesSquaredJobConf(v,
+                                     outDim,
+                                     matrixInputPath,
+                                     outputVectorPath,
+                                     TimesMapper.class,
+                                     VectorSummingReducer.class);
+  }
+
+
   public static JobConf createTimesSquaredJobConf(Vector v,
+                                                  Path matrixInputPath,
+                                                  Path outputVectorPathBase,
+                                                  Class<? extends TimesSquaredMapper> mapClass,
+                                                  Class<? extends VectorSummingReducer> redClass) throws IOException {
+    return createTimesSquaredJobConf(v, v.size(), matrixInputPath, outputVectorPathBase, mapClass, redClass);
+  }
+
+  public static JobConf createTimesSquaredJobConf(Vector v,
+                                                  int outputVectorDim,
                                                   Path matrixInputPath,
                                                   Path outputVectorPathBase,
                                                   Class<? extends TimesSquaredMapper> mapClass,
@@ -92,7 +115,7 @@ public class TimesSquaredJob {
 
     conf.set(INPUT_VECTOR, ivpURI.toString());
     conf.setBoolean(IS_SPARSE_OUTPUT, !(v instanceof DenseVector));
-    conf.setInt(OUTPUT_VECTOR_DIMENSION, v.size());
+    conf.setInt(OUTPUT_VECTOR_DIMENSION, outputVectorDim);
     FileInputFormat.addInputPath(conf, matrixInputPath);
     conf.setInputFormat(SequenceFileInputFormat.class);
     FileOutputFormat.setOutputPath(conf, new Path(outputVectorPathBase, OUTPUT_VECTOR_FILENAME));
@@ -121,12 +144,12 @@ public class TimesSquaredJob {
     return vector;
   }
 
-  public static class TimesSquaredMapper extends MapReduceBase
-      implements Mapper<WritableComparable<?>,VectorWritable, NullWritable,VectorWritable> {
+  public static class TimesSquaredMapper<T extends WritableComparable> extends MapReduceBase
+      implements Mapper<T,VectorWritable, NullWritable,VectorWritable> {
 
     private Vector inputVector;
-    private Vector outputVector;
-    private OutputCollector<NullWritable,VectorWritable> out;
+    protected Vector outputVector;
+    protected OutputCollector<NullWritable,VectorWritable> out;
 
     @Override
     public void configure(JobConf conf) {
@@ -150,16 +173,17 @@ public class TimesSquaredJob {
         if(!(inputVector instanceof SequentialAccessSparseVector || inputVector instanceof DenseVector)) {
           inputVector = new SequentialAccessSparseVector(inputVector);
         }
+        int outDim = conf.getInt(OUTPUT_VECTOR_DIMENSION, Integer.MAX_VALUE);
         outputVector = conf.getBoolean(IS_SPARSE_OUTPUT, false)
-                     ? new RandomAccessSparseVector(inputVector.size(), 10)
-                     : new DenseVector(inputVector.size());
+                     ? new RandomAccessSparseVector(outDim, 10)
+                     : new DenseVector(outDim);
       } catch (IOException ioe) {
         throw new IllegalStateException(ioe);
       }
     }
 
     @Override
-    public void map(WritableComparable<?> rowNum,
+    public void map(T rowNum,
                     VectorWritable v,
                     OutputCollector<NullWritable,VectorWritable> out,
                     Reporter rep) throws IOException {
@@ -181,6 +205,20 @@ public class TimesSquaredJob {
       out.collect(NullWritable.get(), new VectorWritable(outputVector));
     }
 
+  }
+
+  public static class TimesMapper extends TimesSquaredMapper<IntWritable> {
+    @Override
+    public void map(IntWritable rowNum,
+                    VectorWritable v,
+                    OutputCollector<NullWritable,VectorWritable> out,
+                    Reporter rep) {
+      this.out = out;
+      double d = scale(v);
+      if(d != 0.0) {
+        outputVector.setQuick(rowNum.get(), d);
+      }
+    }
   }
 
   public static class VectorSummingReducer extends MapReduceBase
