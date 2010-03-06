@@ -91,7 +91,7 @@ public class TestHebbianSolver extends SolverTest {
                                     rank,
                                     state);
     eigens = state.getCurrentEigens();
-    assertEigen(eigens, corpus, 0.05);
+    assertEigen(eigens, corpus, 0.05, false);
     assertOrthonormal(eigens, 1.0e-6);
     System.out.println("Avg solving (Hebbian) time in ms: " + optimizedTime);
   }

@@ -23,11 +23,15 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
 
 public abstract class SolverTest extends TestCase {
+
+  private static final Logger log = LoggerFactory.getLogger(SolverTest.class);
 
   protected SolverTest(String name) {
     super(name);
@@ -55,18 +59,24 @@ public abstract class SolverTest extends TestCase {
     }
   }
 
-  public static void assertEigen(Matrix eigens, VectorIterable corpus, double errorMargin) {
-    assertEigen(eigens, corpus, eigens.numRows(), errorMargin);  
+  public static void assertEigen(Matrix eigens, VectorIterable corpus, double errorMargin, boolean isSymmetric) {
+    assertEigen(eigens, corpus, eigens.numRows(), errorMargin, isSymmetric);
   }
 
-  public static void assertEigen(Matrix eigens, VectorIterable corpus,  int numEigensToCheck, double errorMargin) {
+  public static void assertEigen(Matrix eigens,
+                                 VectorIterable corpus,
+                                 int numEigensToCheck,
+                                 double errorMargin,
+                                 boolean isSymmetric) {
     for (int i = 0; i < numEigensToCheck; i++) {
       Vector e = eigens.getRow(i);
-      if (e.norm(2) == 0) continue;
-      Vector afterMultiply = corpus.timesSquared(e);
+      if (e.getLengthSquared() == 0) continue;
+      Vector afterMultiply = isSymmetric ? corpus.times(e) : corpus.timesSquared(e);
       double dot = afterMultiply.dot(e);
-      double error = 1 - dot / (afterMultiply.norm(2) * e.norm(2));
-      assertTrue("Error margin: " + error + " too high! (for eigen " + i + ')', Math.abs(error) < errorMargin);
+      double afterNorm = afterMultiply.getLengthSquared();
+      double error = 1 - dot / Math.sqrt(afterNorm * e.getLengthSquared());
+      log.info("Eigenvalue({}) = {}", i, Math.sqrt(afterNorm/e.getLengthSquared()));
+      assertTrue("Error margin: {" + error + " too high! (for eigen " + i + ")", Math.abs(error) < errorMargin);
     }
   }
 
@@ -81,10 +91,10 @@ public abstract class SolverTest extends TestCase {
    * @return
    */
   public static Matrix randomSequentialAccessSparseMatrix(int numRows,
-                                                           int nonNullRows,
-                                                           int numCols,
-                                                           int entriesPerRow,
-                                                           double entryMean) {
+                                                          int nonNullRows,
+                                                          int numCols,
+                                                          int entriesPerRow,
+                                                          double entryMean) {
     SparseRowMatrix m = new SparseRowMatrix(new int[]{numRows, numCols});
     double n = 0;
     Random r = new Random(1234L);
@@ -96,8 +106,8 @@ public abstract class SolverTest extends TestCase {
         v.set(col, val * entryMean);
       }
       int c = r.nextInt(numRows);
-      if (r.nextBoolean()) {
-        m.assignRow(c, v);
+      if (r.nextBoolean() || numRows == nonNullRows) {
+        m.assignRow(numRows == nonNullRows ? i : c, v);
       } else {
         Vector other = m.getRow(r.nextInt(numRows));
         if (other != null && other.getLengthSquared() > 0) {

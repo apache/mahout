@@ -96,6 +96,14 @@ public class LanczosSolver {
                     int desiredRank,
                     Matrix eigenVectors,
                     List<Double> eigenValues) {
+    solve(corpus, desiredRank, eigenVectors, eigenValues, false);
+  }
+
+  public void solve(VectorIterable corpus,
+                    int desiredRank,
+                    Matrix eigenVectors,
+                    List<Double> eigenValues,
+                    boolean isSymmetric) {
     log.info("Finding {} singular vectors of matrix with {} rows, via Lanczos", desiredRank, corpus.numRows());
     Vector currentVector = getInitialVector(corpus);
     Vector previousVector = new DenseVector(currentVector.size());
@@ -106,7 +114,7 @@ public class LanczosSolver {
     DoubleMatrix2D triDiag = new DenseDoubleMatrix2D(desiredRank, desiredRank);
     for (int i = 1; i < desiredRank; i++) {
       startTime(TimingSection.ITERATE);
-      Vector nextVector = corpus.timesSquared(currentVector);
+      Vector nextVector = isSymmetric ? corpus.times(currentVector) : corpus.timesSquared(currentVector);
       log.info("{} passes through the corpus so far...", i);
       calculateScaleFactor(nextVector);
       nextVector.assign(new Scale(1 / scaleFactor));

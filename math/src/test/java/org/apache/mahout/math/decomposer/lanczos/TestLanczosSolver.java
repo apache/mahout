@@ -35,18 +35,30 @@ public class TestLanczosSolver extends SolverTest {
     Matrix corpus = randomSequentialAccessSparseMatrix(1000, 900, numColumns, 30, 1.0);
     int rank = 50;
     Matrix eigens = new DenseMatrix(rank, numColumns);
-    long time = timeLanczos(corpus, eigens, rank);
+    long time = timeLanczos(corpus, eigens, rank, false);
     assertTrue("Lanczos taking too long!  Are you in the debugger? :)", time < 10000);
     assertOrthonormal(eigens);
-    assertEigen(eigens, corpus, 0.1);
+    assertEigen(eigens, corpus, 0.1, false);
   }
 
-  public static long timeLanczos(Matrix corpus, Matrix eigens, int rank) throws Exception {
+  public void testLanczosSolverSymmetric() throws Exception {
+    int numColumns = 400;
+    Matrix corpus = randomSequentialAccessSparseMatrix(500, 450, numColumns, 10, 1.0);
+    Matrix gramMatrix = corpus.times(corpus.transpose());
+    int rank = 30;
+    Matrix eigens = new DenseMatrix(rank, gramMatrix.numCols());
+    long time = timeLanczos(gramMatrix, eigens, rank, true);
+    assertTrue("Lanczos taking too long!  Are you in the debugger? :)", time < 10000);
+    assertOrthonormal(eigens);
+    assertEigen(eigens, gramMatrix, 0.1, true);
+  }
+
+  public static long timeLanczos(Matrix corpus, Matrix eigens, int rank, boolean symmetric) throws Exception {
     long start = System.currentTimeMillis();
 
     LanczosSolver solver = new LanczosSolver();
     List<Double> eVals = new ArrayList<Double>();
-    solver.solve(corpus, rank, eigens, eVals);
+    solver.solve(corpus, rank, eigens, eVals, symmetric);
     
     long end = System.currentTimeMillis();
     return end - start;
