@@ -44,15 +44,15 @@ public class FPGrowthTest extends MahoutTestCase {
 
     FPGrowth<String> fp = new FPGrowth<String>();
 
-    Collection<Pair<List<String>, Long>> transactions = new ArrayList<Pair<List<String>, Long>>();
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("E", "A", "D", "B"), 1L));
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("D", "A", "C", "E", "B"), 1L));
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("C", "A", "B", "E"), 1L));
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("B", "A", "D"), 1L));
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("D"), 1L));
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("D", "B"), 1L));
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("A", "D", "E"), 1L));
-    transactions.add(new Pair<List<String>, Long>(Arrays.asList("B", "C"), 1L));
+    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("E", "A", "D", "B"), 1L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("D", "A", "C", "E", "B"), 1L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("C", "A", "B", "E"), 1L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("B", "A", "D"), 1L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("D"), 1L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("D", "B"), 1L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("A", "D", "E"), 1L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("B", "C"), 1L));
 
     File tmpFile = File.createTempFile("fpgrowthTest", ".dat");
     tmpFile.deleteOnExit();
@@ -61,20 +61,27 @@ public class FPGrowthTest extends MahoutTestCase {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
 
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class,
-        TopKStringPatterns.class);
-    fp.generateTopKFrequentPatterns(transactions.iterator(), fp.generateFList(transactions.iterator(), 3),
-        3, 100, new HashSet<String>(), new StringOutputConverter(
-            new SequenceFileOutputCollector<Text, TopKStringPatterns>(writer)),
+
+    SequenceFile.Writer writer =
+        new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
+    fp.generateTopKFrequentPatterns(
+        transactions.iterator(),
+        fp.generateFList(transactions.iterator(), 3),
+        3,
+        100,
+        new HashSet<String>(),
+        new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
         new ContextStatusUpdater(null));
     writer.close();
 
     List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
     assertEquals(
-        "[(C,([B, C],3)), (E,([A, E],4), ([A, B, E],3), ([A, D, E],3)), (A,([A],5), ([A, B],4), ([A, E],4),"
-            + " ([A, D],4), ([A, D, E],3), ([A, B, E],3), ([A, B, D],3)), (D,([D],6), ([A, D],4), ([B, D],4),"
-            + " ([A, D, E],3), ([A, B, D],3)), (B,([B],6), ([A, B],4), ([B, D],4), ([A, B, E],3),"
-            + " ([A, B, D],3), ([B, C],3))]", frequentPatterns.toString());
+      "[(C,([B, C],3)), "
+          + "(E,([A, E],4), ([A, B, E],3), ([A, D, E],3)), "
+          + "(A,([A],5), ([A, D],4), ([A, E],4), ([A, B],4), ([A, B, E],3), ([A, D, E],3), ([A, B, D],3)), "
+          + "(D,([D],6), ([B, D],4), ([A, D],4), ([A, D, E],3), ([A, B, D],3)), "
+          + "(B,([B],6), ([A, B],4), ([B, D],4), ([A, B, D],3), ([A, B, E],3), ([B, C],3))]",
+      frequentPatterns.toString());
 
   }
 }

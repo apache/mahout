@@ -17,6 +17,8 @@
 
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
+import org.apache.mahout.common.RandomUtils;
+
 import java.util.Arrays;
 
 /**
@@ -56,57 +58,23 @@ public class Pattern implements Comparable<Pattern> {
   }
   
   public final void add(int id, long supportCount) {
+    dirty = true;
     if (length >= pattern.length) {
       resize();
     }
     this.pattern[length] = id;
     this.supportValues[length++] = supportCount;
     this.support = supportCount > this.support ? this.support : supportCount;
-    dirty = true;
   }
-  
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    Pattern other = (Pattern) obj;
-    if (length != other.length) {
-      return false;
-    }
-    if (support != other.support) {
-      return false;
-    }
-    return Arrays.equals(pattern, other.pattern);
-  }
-  
+
   public final int[] getPattern() {
     return this.pattern;
   }
-  
+
   public final Object[] getPatternWithSupport() {
     return new Object[] {this.pattern, this.supportValues};
   }
-  
-  @Override
-  public int hashCode() {
-    if (dirty == false) {
-      return hashCode;
-    }
-    int result = 1;
-    int prime = 31;
-    result = prime * result + Arrays.hashCode(pattern);
-    result = prime * result + Long.valueOf(support).hashCode();
-    hashCode = result;
-    return result;
-  }
-  
+
   public final boolean isSubPatternOf(Pattern frequentPattern) {
     int[] otherPattern = frequentPattern.getPattern();
     int otherLength = frequentPattern.length();
@@ -127,22 +95,15 @@ public class Pattern implements Comparable<Pattern> {
     }
     return otherI != otherLength || i == length;
   }
-  
+
   public final int length() {
     return this.length;
   }
-  
+
   public final long support() {
     return this.support;
   }
-  
-  @Override
-  public final String toString() {
-    int[] arr = new int[length];
-    System.arraycopy(pattern, 0, arr, 0, length);
-    return Arrays.toString(arr) + '-' + support;
-  }
-  
+
   private void resize() {
     int size = (int) (GROWTH_RATE * length);
     if (size < DEFAULT_INITIAL_SIZE) {
@@ -157,22 +118,53 @@ public class Pattern implements Comparable<Pattern> {
   }
   
   @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    Pattern other = (Pattern) obj;
+    return length == other.length && support == other.support && Arrays.equals(pattern, other.pattern);
+  }
+  
+  @Override
+  public int hashCode() {
+    if (dirty == false) {
+      return hashCode;
+    }
+    int result = Arrays.hashCode(pattern);
+    result = 31 * result + RandomUtils.hashLong(support);
+    result = 31 * result + length;
+    hashCode = result;
+    return result;
+  }
+  
+  @Override
+  public final String toString() {
+    int[] arr = new int[length];
+    System.arraycopy(pattern, 0, arr, 0, length);
+    return Arrays.toString(arr) + '-' + support;
+  }
+  
+  @Override
   public int compareTo(Pattern cr2) {
     long support2 = cr2.support();
     int length2 = cr2.length();
     if (support == support2) {
-      if (length == length2) {
-        // if they are of same length and support order randomly
+      if (length < length2) {
+        return -1;
+      } else if (length > length2) {
         return 1;
       } else {
-        return length - length2;
+        return 0;
       }
     } else {
-      if (support > support2) {
-        return 1;
-      } else {
-        return -1;
-      }
+      return support > support2 ? 1 : -1;
     }
   }
   
