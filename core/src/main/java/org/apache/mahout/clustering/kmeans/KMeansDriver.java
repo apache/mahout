@@ -306,7 +306,7 @@ public final class KMeansDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(VectorWritable.class);
+    conf.setMapOutputValueClass(Text.class);
     conf.setOutputKeyClass(Text.class);
     // the output is the cluster id
     conf.setOutputValueClass(Text.class);
