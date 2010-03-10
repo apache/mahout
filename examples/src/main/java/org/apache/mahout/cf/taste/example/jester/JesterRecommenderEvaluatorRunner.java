@@ -50,7 +50,7 @@ public final class JesterRecommenderEvaluatorRunner {
       null,
       model,
       0.9,
-      0.1);
+      0.3);
     log.info(String.valueOf(evaluation));
   }
   

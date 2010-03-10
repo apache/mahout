@@ -50,8 +50,8 @@ public final class BookCrossingRecommenderEvaluatorRunner {
     double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(),
       null,
       model,
-      0.95,
-      0.05);
+      0.9,
+      0.3);
     log.info(String.valueOf(evaluation));
   }
   

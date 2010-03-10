@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.similarity.CachingUserSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
@@ -42,8 +43,8 @@ public final class BookCrossingRecommender implements Recommender {
   private final Recommender recommender;
   
   public BookCrossingRecommender(DataModel bcModel) throws TasteException {
-    UserSimilarity similarity = new PearsonCorrelationSimilarity(bcModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, 0.0, similarity, bcModel, 0.1);
+    UserSimilarity similarity = new CachingUserSimilarity(new PearsonCorrelationSimilarity(bcModel), bcModel);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, 0.0, similarity, bcModel, 0.25);
     recommender = new CachingRecommender(new GenericUserBasedRecommender(bcModel, neighborhood, similarity));
   }
   
