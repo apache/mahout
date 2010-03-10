@@ -17,42 +17,47 @@
 
 package org.apache.mahout.cf.taste.example.bookcrossing;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.commons.cli2.OptionException;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
+import org.apache.mahout.cf.taste.eval.IRStatistics;
+import org.apache.mahout.cf.taste.eval.RecommenderIRStatsEvaluator;
 import org.apache.mahout.cf.taste.example.TasteOptionParser;
-import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
+import org.apache.mahout.cf.taste.impl.eval.GenericRecommenderIRStatsEvaluator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BookCrossingRecommenderEvaluatorRunner {
-  
-  private static final Logger log = LoggerFactory.getLogger(BookCrossingRecommenderEvaluatorRunner.class);
-  
-  private BookCrossingRecommenderEvaluatorRunner() {
+import java.io.File;
+import java.io.IOException;
+
+public final class BookCrossingBooleanRecommenderEvaluatorRunner {
+
+  private static final Logger log = LoggerFactory.getLogger(BookCrossingBooleanRecommenderEvaluatorRunner.class);
+
+  private BookCrossingBooleanRecommenderEvaluatorRunner() {
     // do nothing
   }
-  
+
   public static void main(String... args) throws IOException, TasteException, OptionException {
-    RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
+    RecommenderIRStatsEvaluator evaluator = new GenericRecommenderIRStatsEvaluator();
     DataModel model;
     File ratingsFile = TasteOptionParser.getRatings(args);
     if (ratingsFile != null) {
-      model = new BookCrossingDataModel(ratingsFile, false);
+      model = new BookCrossingDataModel(ratingsFile, true);
     } else {
-      model = new BookCrossingDataModel(false);
+      model = new BookCrossingDataModel(true);
     }
-    
-    double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(),
-      null,
-      model,
-      0.9,
-      0.3);
+
+    IRStatistics evaluation = evaluator.evaluate(
+        new BookCrossingBooleanRecommenderBuilder(),
+        new BookCrossingDataModelBuilder(),
+        model,
+        null,
+        3,
+        Double.NEGATIVE_INFINITY,
+        1.0);
+
     log.info(String.valueOf(evaluation));
   }
-  
+
 }

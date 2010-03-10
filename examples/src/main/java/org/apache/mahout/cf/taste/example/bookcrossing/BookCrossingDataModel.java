@@ -36,22 +36,24 @@ import org.apache.mahout.common.IOUtils;
  * data needed by this class. The BX-Book-Ratings.csv file is needed.
  */
 public final class BookCrossingDataModel extends FileDataModel {
+
   private static final Pattern NON_DIGIT_SEMICOLON_PATTERN = Pattern.compile("[^0-9;]");
-  
-  public BookCrossingDataModel() throws IOException {
+
+  public BookCrossingDataModel(boolean ignoreRatings) throws IOException {
     this(GroupLensDataModel.readResourceToTempFile(
-    "/org/apache/mahout/cf/taste/example/bookcrossing/BX-Book-Ratings.csv"));
+             "/org/apache/mahout/cf/taste/example/bookcrossing/BX-Book-Ratings.csv"),
+         ignoreRatings);
   }
   
   /**
    * @param ratingsFile BookCrossing ratings file in its native format
    * @throws IOException if an error occurs while reading or writing files
    */
-  public BookCrossingDataModel(File ratingsFile) throws IOException {
-    super(convertBCFile(ratingsFile));
+  public BookCrossingDataModel(File ratingsFile, boolean ignoreRatings) throws IOException {
+    super(convertBCFile(ratingsFile, ignoreRatings));
   }
   
-  private static File convertBCFile(File originalFile) throws IOException {
+  private static File convertBCFile(File originalFile, boolean ignoreRatings) throws IOException {
     if (!originalFile.exists()) {
       throw new FileNotFoundException(originalFile.toString());
     }
@@ -61,11 +63,19 @@ public final class BookCrossingDataModel extends FileDataModel {
     try {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, true)) {
+        // 0 ratings are basically "no rating", ignore them (thanks h.9000)
+        if (line.endsWith("\"0\"")) {
+          continue;
+        }
         // Delete replace anything that isn't numeric, or a semicolon delimiter. Make comma the delimiter.
         String convertedLine = BookCrossingDataModel.NON_DIGIT_SEMICOLON_PATTERN.matcher(line).replaceAll("").replace(';', ',');
         // If this means we deleted an entire ID -- few cases like that -- skip the line
         if (convertedLine.contains(",,")) {
           continue;
+        }
+        if (ignoreRatings) {
+          // drop rating
+          convertedLine = convertedLine.substring(0, convertedLine.lastIndexOf(','));
         }
         writer.println(convertedLine);
       }
