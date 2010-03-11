@@ -36,11 +36,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PFPGrowthTest extends MahoutTestCase {
-
+  
   private static final Logger log = LoggerFactory.getLogger(PFPGrowthTest.class);
-
+  
   private final Parameters params = new Parameters();
-
+  
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -81,26 +81,26 @@ public class PFPGrowthTest extends MahoutTestCase {
     } finally {
       writer.close();
     }
-
+    
   }
-
+  
   public void testStartParallelCounting() throws IOException, InterruptedException, ClassNotFoundException {
     log.info("Starting Parallel Counting Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startParallelCounting(params);
     log.info("Reading fList Test: {}", params.get("maxHeapSize"));
-    List<Pair<String, Long>> fList = PFPGrowth.readFList(params);
+    List<Pair<String,Long>> fList = PFPGrowth.readFList(params);
     log.info("{}", fList);
     assertEquals("[(B,6), (D,6), (A,5), (E,4), (C,3)]", fList.toString());
   }
-
+  
   public void testStartGroupingItems() throws IOException {
     log.info("Starting Grouping Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startGroupingItems(params);
-    Map<String, Long> gList = PFPGrowth.deserializeMap(params, "gList", new Configuration());
+    Map<String,Long> gList = PFPGrowth.deserializeMap(params, "gList", new Configuration());
     log.info("{}", gList);
     assertEquals("{D=0, E=1, A=0, B=0, C=1}", gList.toString());
   }
-
+  
   public void testStartParallelFPGrowth() throws IOException, InterruptedException, ClassNotFoundException {
     log.info("Starting Parallel FPGrowth Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startGroupingItems(params);
@@ -108,11 +108,13 @@ public class PFPGrowthTest extends MahoutTestCase {
     PFPGrowth.startParallelFPGrowth(params);
     log.info("Starting Pattern Aggregation Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startAggregating(params);
-    List<Pair<String, TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
-    assertEquals("[(A,([B, A],4), ([B, D, A],3), ([B, A, E],3)), (B,([B],6), ([B, D],4), " +
-        "([B, A],4), ([B],4)), (C,([B, C],3)), (D,([B, D],4), ([B, D, A],3)), " +
-        "(E,([B, A, E],3))]", frequentPatterns.toString());
-
+    List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
+    assertEquals("[(A,([A],5), ([D, A],4), ([B, A],4), ([A, E],4)), "
+                 + "(B,([B],6), ([B, D],4), ([B, A],4), ([B, D, A],3)), " 
+                 + "(C,([B, C],3)), "
+                 + "(D,([D],6), ([D, A],4), ([B, D],4), ([D, A, E],3)), "
+                 + "(E,([A, E],4), ([D, A, E],3), ([B, A, E],3))]", frequentPatterns.toString());
+    
   }
-
+  
 }

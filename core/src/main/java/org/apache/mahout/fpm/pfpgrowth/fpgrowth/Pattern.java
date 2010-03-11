@@ -129,7 +129,11 @@ public class Pattern implements Comparable<Pattern> {
       return false;
     }
     Pattern other = (Pattern) obj;
-    return length == other.length && support == other.support && Arrays.equals(pattern, other.pattern);
+    if (length == other.length && support == other.support) {
+      // expensive check done only if length and support matches
+      return Arrays.equals(pattern, other.pattern);     
+    }
+    return false;
   }
   
   @Override
