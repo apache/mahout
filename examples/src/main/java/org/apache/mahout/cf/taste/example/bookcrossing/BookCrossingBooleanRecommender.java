@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.example.bookcrossing;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
-import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.GenericBooleanPrefUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.CachingUserSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -43,8 +43,8 @@ public final class BookCrossingBooleanRecommender implements Recommender {
 
   public BookCrossingBooleanRecommender(DataModel bcModel) throws TasteException {
     UserSimilarity similarity = new CachingUserSimilarity(new LogLikelihoodSimilarity(bcModel), bcModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(5, Double.NEGATIVE_INFINITY, similarity, bcModel, 1.0);
-    recommender = new GenericUserBasedRecommender(bcModel, neighborhood, similarity);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, Double.NEGATIVE_INFINITY, similarity, bcModel, 1.0);
+    recommender = new GenericBooleanPrefUserBasedRecommender(bcModel, neighborhood, similarity);
   }
 
   @Override
