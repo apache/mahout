@@ -244,13 +244,11 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
       }
       
       InMemInputSplit split = (InMemInputSplit) obj;
-      
-      if ((seed == null) && (split.seed != null)) {
-        return false;
-      }
-      
-      return (firstId == split.firstId) && (nbTrees == split.nbTrees)
-             && ((seed == null) || seed.equals(split.seed));
+
+      return firstId == split.firstId &&
+          nbTrees == split.nbTrees &&
+          ((seed == null && split.seed == null) || seed.equals(split.seed));
+
     }
     
     @Override

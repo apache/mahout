@@ -51,13 +51,13 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTree,Text,TopKStringPatterns> {
   
-  private final List<Pair<Integer,Long>> fList = new ArrayList<Pair<Integer,Long>>();
+  //private final List<Pair<Integer,Long>> fList = new ArrayList<Pair<Integer,Long>>();
   
   private final List<String> featureReverseMap = new ArrayList<String>();
   
   private final OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
   
-  private final List<String> fRMap = new ArrayList<String>();
+  //private final List<String> fRMap = new ArrayList<String>();
   
   private final OpenLongObjectHashMap<IntArrayList> groupFeatures = new OpenLongObjectHashMap<IntArrayList>();
   
@@ -114,8 +114,8 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
     for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList", context.getConfiguration())) {
       featureReverseMap.add(e.getFirst());
       fMap.put(e.getFirst(), i);
-      fRMap.add(e.getFirst());
-      fList.add(new Pair<Integer,Long>(i++, e.getSecond()));
+      //fRMap.add(e.getFirst()); // TODO never read?
+      //fList.add(new Pair<Integer,Long>(i++, e.getSecond()));
       
     }
     

@@ -109,9 +109,9 @@ public class PFPGrowthTest extends MahoutTestCase {
     log.info("Starting Pattern Aggregation Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startAggregating(params);
     List<Pair<String, TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
-    assertEquals("[(A,([A],5), ([D, A],4), ([B, A],4), ([A, E],4)), (B,([B],6), ([B, D],4), ([B, A],4),"
-        + " ([B, D, A],3)), (C,([B, C],3)), (D,([D],6), ([D, A],4), ([B, D],4), ([D, A, E],3)),"
-        + " (E,([A, E],4), ([D, A, E],3), ([B, A, E],3))]", frequentPatterns.toString());
+    assertEquals("[(A,([B, A],4), ([B, D, A],3), ([B, A, E],3)), (B,([B],6), ([B, D],4), " +
+        "([B, A],4), ([B],4)), (C,([B, C],3)), (D,([B, D],4), ([B, D, A],3)), " +
+        "(E,([B, A, E],3))]", frequentPatterns.toString());
 
   }
 

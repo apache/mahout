@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -30,9 +31,10 @@ import org.apache.mahout.math.VectorWritable;
 
 public class MeanShiftCanopyCreatorMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>,VectorWritable,Text,MeanShiftCanopy> {
-  
+
+  private static final Pattern UNDERSCORE_PATTERN = Pattern.compile("_");  
   private static int nextCanopyId = -1;
-  
+
   @Override
   public void map(WritableComparable<?> key,
                   VectorWritable vector,
@@ -47,7 +49,7 @@ public class MeanShiftCanopyCreatorMapper extends MapReduceBase implements
     super.configure(job);
     if (nextCanopyId == -1) {
       String taskId = job.get("mapred.task.id");
-      String[] parts = taskId.split("_");
+      String[] parts = UNDERSCORE_PATTERN.split(taskId);
       if (parts.length != 6 || !parts[0].equals("attempt")
           || (!"m".equals(parts[3]) && !"r".equals(parts[3]))) {
         throw new IllegalArgumentException("TaskAttemptId string : " + taskId + " is not properly formed");

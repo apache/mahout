@@ -19,8 +19,6 @@ package org.apache.mahout.clustering;
 
 import java.lang.reflect.Type;
 
-import junit.framework.TestCase;
-
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
@@ -31,6 +29,7 @@ import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -40,7 +39,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class TestPrintableInterface extends TestCase {
+public class TestPrintableInterface extends MahoutTestCase {
 
   private static final Type modelType = new TypeToken<Model<Vector>>() {
   }.getType();

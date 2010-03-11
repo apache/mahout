@@ -70,9 +70,8 @@ public class CollocDriver extends Configured implements Tool {
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new CollocDriver(), args);
   }
-  /**
-   * @param args
-   */
+
+  @Override
   public int run(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();

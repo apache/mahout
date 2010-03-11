@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
  * <p/>
  */
 public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTuple,GramKey,Gram> {
+
+  private static final byte[] EMPTY = new byte[0];
   
   public static final String MAX_SHINGLE_SIZE = "maxShingleSize";
   public static final int DEFAULT_MAX_SHINGLE_SIZE = 2;
@@ -130,7 +132,6 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
     } while (sf.incrementToken());
     
     try {
-      final byte[] empty = new byte[0];
       final GramKey gramKey = new GramKey();
       
       ngrams.forEachPair(new ObjectIntProcedure<String>() {
@@ -145,13 +146,13 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
               Gram head  = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
               Gram tail  = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
               
-              gramKey.set(head, empty);
+              gramKey.set(head, EMPTY);
               collector.collect(gramKey, head);
               
               gramKey.set(head, ngram.getBytes());
               collector.collect(gramKey, ngram);
               
-              gramKey.set(tail, empty);
+              gramKey.set(tail, EMPTY);
               collector.collect(gramKey, tail);
               
               gramKey.set(tail, ngram.getBytes());
@@ -170,7 +171,7 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
         public boolean apply(String term, int frequency) {
           try {
             Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
-            gramKey.set(unigram, empty);
+            gramKey.set(unigram, EMPTY);
             collector.collect(gramKey, unigram);
           } catch (IOException e) {
             throw new IllegalStateException(e);

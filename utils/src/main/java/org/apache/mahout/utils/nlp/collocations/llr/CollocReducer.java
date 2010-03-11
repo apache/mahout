@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.nlp.collocations.llr;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import org.apache.hadoop.mapred.JobConf;
@@ -107,13 +106,8 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
     }
   }
 
-  /** Sum frequencies for unigrams and deliver to the collector 
-   * 
-   * @param keyFirst
-   * @param values
-   * @param output
-   * @param reporter
-   * @throws IOException
+  /**
+   * Sum frequencies for unigrams and deliver to the collector
    */
   protected void processUnigram(GramKey key, Iterator<Gram> values,
       OutputCollector<Gram, Gram> output, Reporter reporter) throws IOException {
@@ -145,12 +139,6 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
    *  <p/>
    *  We end up calculating frequencies for ngrams for each sugram (head, tail) here, which is
    *  some extra work.
-   *  
-   * @param keyFirst
-   * @param values
-   * @param output
-   * @param reporter
-   * @throws IOException
    */
   protected void processSubgram(GramKey key, Iterator<Gram> values, 
       OutputCollector<Gram,Gram> output, Reporter reporter) throws IOException {

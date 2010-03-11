@@ -64,7 +64,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   private static final Logger log = LoggerFactory.getLogger(DistributedRowMatrix.class);
 
   private final String inputPathString;
-  private String outputTmpPathString;
+  private final String outputTmpPathString;
   private JobConf conf;
   private Path rowPath;
   private Path outputTmpBasePath;
@@ -200,7 +200,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
 
   public static class DistributedMatrixIterator implements Iterator<MatrixSlice> {
     private SequenceFile.Reader reader;
-    private FileStatus[] statuses;
+    private final FileStatus[] statuses;
     private boolean hasBuffered = false;
     private boolean hasNext = false;
     private int statusIndex = 0;

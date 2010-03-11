@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop;
 
 import org.apache.commons.cli2.Option;
@@ -14,7 +31,6 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.join.CompositeInputFormat;
 import org.apache.hadoop.mapred.join.TupleWritable;
-import org.apache.hadoop.mapred.lib.MultipleInputs;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -30,13 +46,11 @@ public class MatrixMultiplicationJob extends AbstractJob {
 
   private static final String OUT_CARD = "output.vector.cardinality";
 
-  private Map<String,String> argMap;
-
   public static JobConf createMatrixMultiplyJobConf(Path aPath, Path bPath, Path outPath, int outCardinality) {
     JobConf conf = new JobConf(MatrixMultiplicationJob.class);
     conf.setInputFormat(CompositeInputFormat.class);
     conf.set("mapred.join.expr", CompositeInputFormat.compose(
-          "inner", SequenceFileInputFormat.class, new Path[] {aPath, bPath}));
+          "inner", SequenceFileInputFormat.class, aPath, bPath));
     conf.setInt(OUT_CARD, outCardinality);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     FileOutputFormat.setOutputPath(conf, outPath);
@@ -76,13 +90,13 @@ public class MatrixMultiplicationJob extends AbstractJob {
                                     "ib",
                                     "Path to the second input matrix");
 
-    argMap = parseArguments(strings,
-                            numRowsAOpt,
-                            numRowsBOpt,
-                            numColsAOpt,
-                            numColsBOpt,
-                            inputPathA,
-                            inputPathB);
+    Map<String, String> argMap = parseArguments(strings,
+                                                numRowsAOpt,
+                                                numRowsBOpt,
+                                                numColsAOpt,
+                                                numColsBOpt,
+                                                inputPathA,
+                                                inputPathB);
 
     DistributedRowMatrix a = new DistributedRowMatrix(argMap.get("--inputPathA"),
                                                       argMap.get("--tempDir"),
@@ -108,6 +122,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
     private final IntWritable row = new IntWritable();
     private final VectorWritable outVector = new VectorWritable();
 
+    @Override
     public void configure(JobConf conf) {
       outCardinality = conf.getInt(OUT_CARD, Integer.MAX_VALUE);
     }
@@ -140,14 +155,13 @@ public class MatrixMultiplicationJob extends AbstractJob {
                        OutputCollector<IntWritable,VectorWritable> out,
                        Reporter reporter) throws IOException {
       Vector accumulator;
-      Vector row;
       if(it.hasNext()) {
         accumulator = new RandomAccessSparseVector(it.next().get());
       } else {
         return;
       }
       while(it.hasNext()) {
-        row = it.next().get();
+        Vector row = it.next().get();
         row.addTo(accumulator);
       }
       out.collect(rowNum, new VectorWritable(new SequentialAccessSparseVector(accumulator)));

@@ -1,12 +1,29 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.hadoop;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.TestCanopyCreation;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -21,16 +38,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class TestDistributedRowMatrix extends TestCase {
+public class TestDistributedRowMatrix extends MahoutTestCase {
 
   private static final String TESTDATA = "testdata";
 
-  public TestDistributedRowMatrix() {
-    super();
-  }
-
   @Override
   public void setUp() throws Exception {
+    super.setUp();
     File testData = new File(TESTDATA);
     if (testData.exists()) {
       TestCanopyCreation.rmr(TESTDATA);
@@ -59,12 +73,15 @@ public class TestDistributedRowMatrix extends TestCase {
       MatrixSlice mtts = mttIt.next();
       mttMap.put(mtts.index(), mtts.vector());
     }
-    for(Integer i : mMap.keySet()) {
-      if(mMap.get(i) == null || mttMap.get(i) == null) {
-        assertTrue(mMap.get(i) == null || mMap.get(i).norm(2) == 0);
-        assertTrue(mttMap.get(i) == null || mttMap.get(i).norm(2) == 0);
+    for(Map.Entry<Integer, Vector> entry : mMap.entrySet()) {
+      Integer key = entry.getKey();
+      Vector value = entry.getValue();
+      if(value == null || mttMap.get(key) == null) {
+        assertTrue(value == null || value.norm(2) == 0);
+        assertTrue(mttMap.get(key) == null || mttMap.get(key).norm(2) == 0);
       } else {
-        assertTrue(mMap.get(i).getDistanceSquared(mttMap.get(i)) < errorTolerance);
+        assertTrue(
+            value.getDistanceSquared(mttMap.get(key)) < errorTolerance);
       }
     }
   }
@@ -74,7 +91,7 @@ public class TestDistributedRowMatrix extends TestCase {
     DistributedRowMatrix mt = m.transpose();
     mt.setOutputTempPathString(new Path(m.getOutputTempPath().getParent(), "/tmpOutTranspose").toString());
     DistributedRowMatrix mtt = mt.transpose();
-    assertEquals(m, mtt, 1e-9);
+    assertEquals(m, mtt, 1.0e-9);
   }
 
   public void testMatrixTimesVector() throws Exception {
@@ -85,7 +102,7 @@ public class TestDistributedRowMatrix extends TestCase {
 
     Vector expected = m.times(v);
     Vector actual = dm.times(v);
-    assertEquals(expected.getDistanceSquared(actual), 0.0, 1e-9);
+    assertEquals(0.0, expected.getDistanceSquared(actual), 1.0e-9);
   }
 
   public void testMatrixTimesSquaredVector() throws Exception {
@@ -96,7 +113,7 @@ public class TestDistributedRowMatrix extends TestCase {
 
     Vector expected = m.timesSquared(v);
     Vector actual = dm.timesSquared(v);
-    assertEquals(expected.getDistanceSquared(actual), 0.0, 1e-9);
+    assertEquals(0.0, expected.getDistanceSquared(actual), 1.0e-9);
   }
 
   public void testMatrixTimesMatrix() throws Exception {
@@ -108,7 +125,7 @@ public class TestDistributedRowMatrix extends TestCase {
     DistributedRowMatrix distB = randomDistributedMatrix(20, 13, 25, 10, 5.0, false, "/distB");
     DistributedRowMatrix product = distA.times(distB);
 
-    assertEquals(expected, product, 1e-9);
+    assertEquals(expected, product, 1.0e-9);
   }
 
   public static DistributedRowMatrix randomDistributedMatrix(int numRows,

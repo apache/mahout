@@ -18,9 +18,8 @@
 package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.apache.hadoop.io.DoubleWritable;
@@ -33,8 +32,10 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.iterator.ArrayIterator;
 import org.apache.mahout.math.function.ObjectIntProcedure;
 import org.apache.mahout.math.function.ObjectProcedure;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -42,16 +43,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads the input train set(preprocessed using the {@link org.apache.mahout.classifier.BayesFileFormatter}).
+ * Reads the input train set(preprocessed using the {@link BayesFileFormatter}).
  */
 public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Text,StringTuple,DoubleWritable> {
   
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureMapper.class);
   
   private static final DoubleWritable ONE = new DoubleWritable(1.0);
-  
+  private static final Pattern SPACE_PATTERN = Pattern.compile("[ ]+");
+
   private int gramSize = 1;
-  
+
   /**
    * We need to count the number of times we've seen a term with a given label and we need to output that. But
    * this Mapper does more than just outputing the count. It first does weight normalisation. Secondly, it
@@ -75,27 +77,27 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
                   Reporter reporter) throws IOException {
     // String line = value.toString();
     final String label = key.toString();
-    List<String> tokens = Arrays.asList(value.toString().split("[ ]+"));
-    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(tokens.size() * gramSize);
+    String[] tokens = SPACE_PATTERN.split(value.toString());
+    OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(tokens.length * gramSize);
     
     if (gramSize > 1) {
-      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(tokens.iterator()), gramSize);
+      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(new ArrayIterator<String>(tokens)), gramSize);
       do {
         String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
         if (term.length() > 0) {
-          if (wordList.containsKey(term) == false) {
-            wordList.put(term, 1);
-          } else {
+          if (wordList.containsKey(term)) {
             wordList.put(term, 1 + wordList.get(term));
+          } else {
+            wordList.put(term, 1);
           }
         }
       } while (sf.incrementToken());
     } else {
       for (String term : tokens) {
-        if (wordList.containsKey(term) == false) {
-          wordList.put(term, 1);
-        } else {
+        if (wordList.containsKey(term)) {
           wordList.put(term, 1 + wordList.get(term));
+        } else {
+          wordList.put(term, 1);
         }
       }
     }

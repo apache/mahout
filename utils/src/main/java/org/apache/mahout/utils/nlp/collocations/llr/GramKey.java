@@ -32,9 +32,9 @@ import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 public class GramKey extends BinaryComparable implements
     WritableComparable<BinaryComparable> {
 
-  int primaryLength;
-  int length;
-  byte[] bytes;
+  private int primaryLength;
+  private int length;
+  private byte[] bytes;
   
   public GramKey() {
     
@@ -123,11 +123,11 @@ public class GramKey extends BinaryComparable implements
     try {
       return Text.decode(bytes, 1, primaryLength-1);
     } catch (CharacterCodingException e) {
-      throw new RuntimeException("Should not have happened " + e.toString()); 
+      throw new IllegalStateException(e);
     }
   }
   
   public String toString() {
-    return '\'' + getPrimaryString() + "'[" + getType().x + "]";
+    return '\'' + getPrimaryString() + "'[" + getType().x + ']';
   }
 }

@@ -57,10 +57,7 @@ public final class FrequentPatternMaxHeap {
   }
   
   public boolean addable(long support) {
-    if (count < maxSize) {
-      return true;
-    }
-    return least.support() <= support;
+    return count < maxSize || least.support() <= support;
   }
   
   public PriorityQueue<Pattern> getHeap() {

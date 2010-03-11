@@ -48,8 +48,8 @@ public class ToolReducerTest extends MahoutTestCase {
 
     try {
       reducer.combineDescriptions(0, null);
-      fail("Should throw a RuntimeException");
-    } catch (RuntimeException e) {
+      fail("Should throw a IllegalArgumentException");
+    } catch (IllegalArgumentException e) {
 
     }
   }

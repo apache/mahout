@@ -33,7 +33,7 @@ public class GramKeyPartitioner implements Partitioner<GramKey, Gram> {
     conf.setInt(HASH_OFFSET_PROPERTY_NAME, left);
   }
   
-  int offset;
+  private int offset;
 
   @Override
   public int getPartition(GramKey key, Gram value, int numPartitions) {

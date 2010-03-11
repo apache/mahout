@@ -19,10 +19,15 @@ package org.apache.mahout.math.hadoop.decomposer;
 
 import org.apache.mahout.math.DenseVector;
 
+import java.util.regex.Pattern;
+
 /**
  * TODO this is a horrible hack.  Make a proper writable subclass also.
  */
 public class EigenVector extends DenseVector {
+
+  private static final Pattern EQUAL_PATTERN = Pattern.compile(" = ");
+  private static final Pattern PIPE_PATTERN = Pattern.compile("|");
 
   public EigenVector(DenseVector v, double eigenValue, double cosAngleError, int order) {
     super(v, false);
@@ -43,9 +48,9 @@ public class EigenVector extends DenseVector {
 
   protected double[] parseMetaData() {
     double[] m = new double[3];
-    String[] s = getName().split(" = ");
-    m[0] = Double.parseDouble(s[0].split("|")[1]);
-    m[1] = Double.parseDouble(s[1].split("|")[1]);
+    String[] s = EQUAL_PATTERN.split(getName());
+    m[0] = Double.parseDouble(PIPE_PATTERN.split(s[0])[1]);
+    m[1] = Double.parseDouble(PIPE_PATTERN.split(s[1])[1]);
     m[2] = Double.parseDouble(s[2].substring(1));
     return m;
   }

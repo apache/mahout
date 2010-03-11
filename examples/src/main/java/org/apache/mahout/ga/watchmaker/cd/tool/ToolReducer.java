@@ -82,7 +82,7 @@ public class ToolReducer extends MapReduceBase implements Reducer<LongWritable,T
    * @param values
    *          available descriptions
    * @return
-   * @throws RuntimeException
+   * @throws IllegalArgumentException
    *           if the attribute should be ignored.
    */
   String combineDescriptions(int index, Iterator<Text> values) {
