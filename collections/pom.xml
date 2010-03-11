@@ -93,6 +93,11 @@
 
   <dependencies>
     <dependency>
+        <groupId>org.apache.mahout</groupId>
+        <artifactId>mahout-collection-codegen-plugin</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.5.8</version>
