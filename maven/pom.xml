@@ -16,7 +16,7 @@
     <junit.version>4.7</junit.version>
     <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
     <lucene.version>2.9.1</lucene.version>
-    <hadoop.version>0.20.2-SNAPSHOT</hadoop.version>
+    <hadoop.version>0.20.2</hadoop.version>
     <maven.clover.multiproject>true</maven.clover.multiproject>
   </properties>
   <url>http://lucene.apache.org/mahout</url>
@@ -95,6 +95,16 @@
       </snapshots>
       <releases>
         <enabled>false</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>Apache Releases</id>
+      <url>https://repository.apache.org/content/repositories/releases</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
       </releases>
     </repository>
     <!-- Needed for mail -->
