@@ -17,20 +17,19 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-parent</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
     <relativePath>../maven</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-math</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   <name>Mahout Math</name>
   <description>High performance scientific and technical computing data structures and methods, mostly based on CERN's
     Colt Java API
@@ -121,9 +120,9 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/math</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/math</developerConnection>
-    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-math</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.3/math</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.3/math</developerConnection>
+    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-math/tags/mahout-0.3-math</url>
   </scm>
   <repositories>
     <repository>

@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-parent</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
     <relativePath>../maven</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-core</artifactId>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   <name>Mahout Core</name>
   <description>Scalable machine learning libraries</description>
 
@@ -294,8 +294,8 @@
   </repositories>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/core</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/core</developerConnection>
-    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-core</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.3/core</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-0.3/core</developerConnection>
+    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-core/tags/mahout-0.3-core</url>
   </scm>
 </project>
