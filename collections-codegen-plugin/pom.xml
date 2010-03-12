@@ -4,12 +4,12 @@
   <parent>
     <artifactId>mahout-parent</artifactId>
     <groupId>org.apache.mahout</groupId>
-    <version>0.3</version>
+    <version>0.4-SNAPSHOT</version>
     <relativePath>../maven</relativePath>
   </parent>
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-collection-codegen-plugin</artifactId>
-  <version>0.3</version>
+  <version>0.4-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   <name>Maven Mojo to generate code for collections</name>
   <url>http://lucene.apache.org/mahout/</url>
