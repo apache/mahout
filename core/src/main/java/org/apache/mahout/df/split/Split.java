@@ -40,4 +40,9 @@ public class Split {
   public Split(int attr, double ig) {
     this(attr, ig, Double.NaN);
   }
+
+  @Override
+  public String toString() {
+    return String.format("attr: %d, ig: %f, split: %f", attr, ig, split);
+  }
 }

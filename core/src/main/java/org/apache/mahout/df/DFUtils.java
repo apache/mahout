@@ -23,6 +23,9 @@ import java.io.IOException;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.df.node.Node;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 
@@ -162,5 +165,12 @@ public class DFUtils {
     
     return hours + "h " + minutes + "m " + seconds + "s " + milli;
   }
-  
+
+  public static void storeWritable(Configuration conf, Path path, Writable writable) throws IOException {
+    FileSystem fs = path.getFileSystem(conf);
+
+    FSDataOutputStream out = fs.create(path);
+    writable.write(out);
+    out.close();
+  }
 }

@@ -51,16 +51,17 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tool to builds a Random Forest using any given dataset (in UCI format). Can use either the in-mem mapred or
- * partial mapred implementations
+ * partial mapred implementations. Stores the forest in the given output directory
  */
 public class BuildForest extends Configured implements Tool {
   
   private static final Logger log = LoggerFactory.getLogger(BuildForest.class);
   
-  private Path dataPath; // Data path
+  private Path dataPath;
   
-  private Path datasetPath; // Dataset path
-  
+  private Path datasetPath;
+
+  private Path outputPath;
   private int m; // Number of variables to select at each tree-node
   
   private int nbTrees; // Number of trees to grow
@@ -70,7 +71,7 @@ public class BuildForest extends Configured implements Tool {
   private boolean isPartial; // use partial data implementation
   
   private boolean isOob; // estimate oob error;
-  
+
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
@@ -103,12 +104,16 @@ public class BuildForest extends Configured implements Tool {
       abuilder.withName("nbtrees").withMinimum(1).withMaximum(1).create()).withDescription(
       "Number of trees to grow").create();
     
+    Option outputOpt = obuilder.withLongName("output").withShortName("o").withRequired(true).withArgument(
+        abuilder.withName("path").withMinimum(1).withMaximum(1).create()).
+        withDescription("Output path, will contain the Decision Forest").create();
+
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     
     Group group = gbuilder.withName("Options").withOption(oobOpt).withOption(dataOpt).withOption(datasetOpt)
         .withOption(selectionOpt).withOption(seedOpt).withOption(partialOpt).withOption(nbtreesOpt)
-        .withOption(helpOpt).create();
+        .withOption(outputOpt).withOption(helpOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -124,6 +129,7 @@ public class BuildForest extends Configured implements Tool {
       isOob = cmdLine.hasOption(oobOpt);
       String dataName = cmdLine.getValue(dataOpt).toString();
       String datasetName = cmdLine.getValue(datasetOpt).toString();
+      String outputName = cmdLine.getValue(outputOpt).toString();
       m = Integer.parseInt(cmdLine.getValue(selectionOpt).toString());
       nbTrees = Integer.parseInt(cmdLine.getValue(nbtreesOpt).toString());
       
@@ -133,6 +139,7 @@ public class BuildForest extends Configured implements Tool {
       
       log.debug("data : {}", dataName);
       log.debug("dataset : {}", datasetName);
+      log.debug("output : {}", outputName);
       log.debug("m : {}", m);
       log.debug("seed : {}", seed);
       log.debug("nbtrees : {}", nbTrees);
@@ -141,6 +148,7 @@ public class BuildForest extends Configured implements Tool {
       
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
+      outputPath = new Path(outputName);
       
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -153,7 +161,14 @@ public class BuildForest extends Configured implements Tool {
     return 0;
   }
   
-  private DecisionForest buildForest() throws IOException, ClassNotFoundException, InterruptedException {
+  private void buildForest() throws IOException, ClassNotFoundException, InterruptedException {
+    // make sure the output path does not exist
+    FileSystem ofs = outputPath.getFileSystem(getConf());
+    if (ofs.exists(outputPath)) {
+      log.error("Output path already exists");
+      return;
+    }
+
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     treeBuilder.setM(m);
     
@@ -171,6 +186,9 @@ public class BuildForest extends Configured implements Tool {
       log.info("InMem Mapred implementation");
       forestBuilder = new InMemBuilder(treeBuilder, dataPath, datasetPath, seed, getConf());
     }
+
+    forestBuilder.setOutputDirName(outputPath.getName());
+    
     log.info("Building the forest...");
     long time = System.currentTimeMillis();
     
@@ -193,8 +211,12 @@ public class BuildForest extends Configured implements Tool {
       log.info("oob error estimate : "
                            + ErrorEstimate.errorRate(labels, callback.computePredictions(rng)));
     }
-    
-    return forest;
+
+    // store the decision forest in the output path
+    Path forestPath = new Path(outputPath, "forest.seq");
+    log.info("Storing the forest in: " + forestPath);
+    DFUtils.storeWritable(getConf(), forestPath, forest);
+
   }
   
   protected static Data loadData(Configuration conf, Path dataPath, Dataset dataset) throws IOException {

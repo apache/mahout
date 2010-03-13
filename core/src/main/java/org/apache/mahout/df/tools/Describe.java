@@ -30,15 +30,14 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.DescriptorException;
 import org.apache.mahout.df.data.DescriptorUtils;
+import org.apache.mahout.df.DFUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +93,7 @@ public class Describe {
       
       runTool(dataPath, descriptor, descPath);
     } catch (OptionException e) {
-      log.warn(e.toString(), e);
+      log.warn(e.toString());
       CommandLineUtil.printHelp(group);
     }
   }
@@ -110,7 +109,7 @@ public class Describe {
     Dataset dataset = generateDataset(descriptor, dataPath);
     
     log.info("storing the dataset description");
-    storeWritable(new Configuration(), fPath, dataset);
+    DFUtils.storeWritable(new Configuration(), fPath, dataset);
   }
   
   private static Dataset generateDataset(String descriptor, String dataPath) throws IOException,
@@ -138,12 +137,5 @@ public class Describe {
     }
     return list;
   }
-  
-  private static void storeWritable(Configuration conf, Path path, Writable dataset) throws IOException {
-    FileSystem fs = path.getFileSystem(conf);
-    
-    FSDataOutputStream out = fs.create(path);
-    dataset.write(out);
-    out.close();
-  }
+
 }

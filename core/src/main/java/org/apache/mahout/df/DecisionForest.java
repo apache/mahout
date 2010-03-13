@@ -20,17 +20,21 @@ package org.apache.mahout.df;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.DataInput;
 
 import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataUtils;
 import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.node.Node;
+import org.apache.hadoop.io.Writable;
 
 /**
  * Represents a forest of decision trees.
  */
-public class DecisionForest {
+public class DecisionForest implements Writable {
   
   private final List<Node> trees;
   
@@ -163,5 +167,31 @@ public class DecisionForest {
   public int hashCode() {
     return trees.hashCode();
   }
-  
+
+  public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeInt(trees.size());
+    for (Node tree:trees) {
+      tree.write(dataOutput);
+    }
+  }
+
+  /**
+   * Reads the trees from the input and adds them to the existing trees
+   * @param dataInput
+   * @throws IOException
+   */
+  public void readFields(DataInput dataInput) throws IOException {
+    int size = dataInput.readInt();
+    for (int i = 0; i < size; i++) {
+      trees.add(Node.read(dataInput));
+    }
+  }
+
+  public static DecisionForest read(DataInput dataInput) throws IOException {
+    DecisionForest forest = new DecisionForest();
+    forest.readFields(dataInput);
+    return forest;
+  }
+
+
 }
