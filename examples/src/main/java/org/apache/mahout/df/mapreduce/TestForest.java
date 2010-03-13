@@ -151,15 +151,21 @@ public class TestForest extends Configured implements Tool {
       }
     }
 
+    // make sure the decision forest exists
+    FileSystem mfs = modelPath.getFileSystem(getConf());
+    if (!mfs.exists(modelPath)) {
+      throw new IllegalArgumentException("The forest path does not exist");
+    }
+
+    // load the dataset
     Dataset dataset = Dataset.load(getConf(), datasetPath);
     DataConverter converter = new DataConverter(dataset);
 
     log.info("Loading the forest...");
-    FileSystem fs = modelPath.getFileSystem(getConf());
-    Path[] modelfiles = DFUtils.listOutputFiles(fs, modelPath);
+    Path[] modelfiles = DFUtils.listOutputFiles(mfs, modelPath);
     DecisionForest forest = null;
     for (Path path : modelfiles) {
-      FSDataInputStream dataInput = new FSDataInputStream(fs.open(path));
+      FSDataInputStream dataInput = new FSDataInputStream(mfs.open(path));
       if (forest == null) {
         forest = DecisionForest.read(dataInput);
       } else {
