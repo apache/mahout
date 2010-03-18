@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.model.file;
 
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -37,7 +38,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /** <p>Tests {@link FileDataModel}.</p> */
 public final class FileDataModelTest extends TasteTestCase {
@@ -169,13 +169,13 @@ public final class FileDataModelTest extends TasteTestCase {
   }
 
   public void testRefresh() throws Exception {
-    final AtomicBoolean initialized = new AtomicBoolean(false);
+    final MutableBoolean initialized = new MutableBoolean(false);
     Runnable initializer = new Runnable() {
       @Override
       public void run() {
         try {
           model.getNumUsers();
-          initialized.set(true);
+          initialized.setValue(true);
         } catch (TasteException te) {
           // oops
         }
@@ -184,7 +184,7 @@ public final class FileDataModelTest extends TasteTestCase {
     new Thread(initializer).start();
     Thread.sleep(1000L); // wait a second for thread to start and call getNumUsers()
     model.getNumUsers(); // should block
-    assertTrue(initialized.get());
+    assertTrue(initialized.booleanValue());
     assertEquals(4, model.getNumUsers());
   }
 

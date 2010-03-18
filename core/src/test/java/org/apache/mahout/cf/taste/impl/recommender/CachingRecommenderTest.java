@@ -17,61 +17,60 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /** <p>Tests {@link CachingRecommender}.</p> */
 public final class CachingRecommenderTest extends TasteTestCase {
 
   public void testRecommender() throws Exception {
-    AtomicInteger recommendCount = new AtomicInteger();
+    MutableInt recommendCount = new MutableInt();
     Recommender mockRecommender = new MockRecommender(recommendCount);
 
     Recommender cachingRecommender = new CachingRecommender(mockRecommender);
     cachingRecommender.recommend(1, 1);
-    assertEquals(1, recommendCount.get());
+    assertEquals(1, recommendCount.intValue());
     cachingRecommender.recommend(2, 1);
-    assertEquals(2, recommendCount.get());
+    assertEquals(2, recommendCount.intValue());
     cachingRecommender.recommend(1, 1);
-    assertEquals(2, recommendCount.get());
+    assertEquals(2, recommendCount.intValue());
     cachingRecommender.recommend(2, 1);
-    assertEquals(2, recommendCount.get());
+    assertEquals(2, recommendCount.intValue());
     cachingRecommender.refresh(null);
     cachingRecommender.recommend(1, 1);
-    assertEquals(3, recommendCount.get());
+    assertEquals(3, recommendCount.intValue());
     cachingRecommender.recommend(2, 1);
-    assertEquals(4, recommendCount.get());
+    assertEquals(4, recommendCount.intValue());
     cachingRecommender.recommend(3, 1);
-    assertEquals(5, recommendCount.get());
+    assertEquals(5, recommendCount.intValue());
 
     // Results from this recommend() method can be cached...
     IDRescorer rescorer = NullRescorer.getItemInstance();
     cachingRecommender.refresh(null);
     cachingRecommender.recommend(1, 1, rescorer);
-    assertEquals(6, recommendCount.get());
+    assertEquals(6, recommendCount.intValue());
     cachingRecommender.recommend(2, 1, rescorer);
-    assertEquals(7, recommendCount.get());
+    assertEquals(7, recommendCount.intValue());
     cachingRecommender.recommend(1, 1, rescorer);
-    assertEquals(7, recommendCount.get());
+    assertEquals(7, recommendCount.intValue());
     cachingRecommender.recommend(2, 1, rescorer);
-    assertEquals(7, recommendCount.get());
+    assertEquals(7, recommendCount.intValue());
 
     // until you switch Rescorers
     cachingRecommender.recommend(1, 1, null);
-    assertEquals(8, recommendCount.get());
+    assertEquals(8, recommendCount.intValue());
     cachingRecommender.recommend(2, 1, null);
-    assertEquals(9, recommendCount.get());
+    assertEquals(9, recommendCount.intValue());
 
     cachingRecommender.refresh(null);
     cachingRecommender.estimatePreference(1, 1);
-    assertEquals(10, recommendCount.get());
+    assertEquals(10, recommendCount.intValue());
     cachingRecommender.estimatePreference(1, 2);
-    assertEquals(11, recommendCount.get());
+    assertEquals(11, recommendCount.intValue());
     cachingRecommender.estimatePreference(1, 2);
-    assertEquals(11, recommendCount.get());
+    assertEquals(11, recommendCount.intValue());
   }
 
 }

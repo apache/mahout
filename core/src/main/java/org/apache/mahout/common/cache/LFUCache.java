@@ -25,15 +25,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.mahout.common.Pair;
 
 public class LFUCache<K,V> implements Cache<K,V> {
   
   private final SortedMap<Long,Set<K>> evictionMap;
   
-  private final Map<K,Pair<V,AtomicLong>> dataMap;
+  private final Map<K,Pair<V, MutableLong>> dataMap;
   
   private final int capacity;
   
@@ -43,7 +43,7 @@ public class LFUCache<K,V> implements Cache<K,V> {
     this.capacity = capacity;
     
     evictionMap = new TreeMap<Long,Set<K>>();
-    dataMap = new HashMap<K,Pair<V,AtomicLong>>(capacity); 
+    dataMap = new HashMap<K,Pair<V,MutableLong>>(capacity);
   }
   
   @Override
@@ -57,13 +57,14 @@ public class LFUCache<K,V> implements Cache<K,V> {
   
   @Override
   public V get(K key) {
-    Pair<V,AtomicLong> data = dataMap.get(key);
+    Pair<V,MutableLong> data = dataMap.get(key);
     if (data == null) {
       return null;
     } else {
       V value = data.getFirst();
-      AtomicLong count = data.getSecond();
-      long oldCount = count.getAndIncrement();
+      MutableLong count = data.getSecond();
+      long oldCount = count.longValue();
+      count.increment();
       incrementHit(key, oldCount);
       return value;
     }
@@ -71,7 +72,7 @@ public class LFUCache<K,V> implements Cache<K,V> {
   }
   
   public V quickGet(K key) {
-    Pair<V,AtomicLong> data = dataMap.get(key);
+    Pair<V,MutableLong> data = dataMap.get(key);
     if (data == null) {
       return null;
     } else {
@@ -108,8 +109,8 @@ public class LFUCache<K,V> implements Cache<K,V> {
     {
       removeLeastFrequent();
     }
-    AtomicLong count = new AtomicLong(1L);
-    Pair<V,AtomicLong> data = new Pair<V,AtomicLong>(value, count);
+    MutableLong count = new MutableLong(1L);
+    Pair<V,MutableLong> data = new Pair<V,MutableLong>(value, count);
     dataMap.put(key, data);
     
     Long countKey = 1L;

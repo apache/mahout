@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -27,20 +28,19 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 final class MockRecommender implements Recommender {
 
-  private final AtomicInteger recommendCount;
+  private final MutableInt recommendCount;
 
-  MockRecommender(AtomicInteger recommendCount) {
+  MockRecommender(MutableInt recommendCount) {
     this.recommendCount = recommendCount;
   }
 
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany) {
-    recommendCount.incrementAndGet();
+    recommendCount.increment();
     return Collections.<RecommendedItem>singletonList(
         new GenericRecommendedItem(1, 1.0f));
   }
@@ -52,7 +52,7 @@ final class MockRecommender implements Recommender {
 
   @Override
   public float estimatePreference(long userID, long itemID) {
-    recommendCount.incrementAndGet();
+    recommendCount.increment();
     return 0.0f;
   }
 

@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.transforms;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -55,7 +54,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
   private final DataModel dataModel;
   private final RefreshHelper refreshHelper;
   private final double logBase;
-  private final AtomicReference<FastByIDMap<Double>> iufFactors;
+  private FastByIDMap<Double> iufFactors;
   
   /**
    * <p>
@@ -78,7 +77,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     }
     this.dataModel = dataModel;
     this.logBase = logBase;
-    this.iufFactors = new AtomicReference<FastByIDMap<Double>>(new FastByIDMap<Double>());
+    this.iufFactors = new FastByIDMap<Double>();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
@@ -97,7 +96,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
   
   @Override
   public float getTransformedValue(Preference pref) {
-    Double factor = iufFactors.get().get(pref.getItemID());
+    Double factor = iufFactors.get(pref.getItemID());
     if (factor != null) {
       return (float) (pref.getValue() * factor);
     }
@@ -127,7 +126,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
       newIufFactors.put(entry.getKey(), Math.log((double) numUsers / (double) entry.getValue()[0])
                                         / logFactor);
     }
-    iufFactors.set(newIufFactors);
+    iufFactors = newIufFactors;
   }
   
   @Override

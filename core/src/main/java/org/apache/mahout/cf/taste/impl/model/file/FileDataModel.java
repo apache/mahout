@@ -26,9 +26,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -313,18 +313,17 @@ public class FileDataModel extends AbstractDataModel {
                              FastByIDMap<?> data,
                              boolean fromPriorData) {
     log.info("Reading file info...");
-    AtomicInteger count = new AtomicInteger();
+    int count = 0;
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
       if (line.length() > 0) {
         processLine(line, data, fromPriorData);
-        int currentCount = count.incrementAndGet();
-        if (currentCount % 1000000 == 0) {
-          log.info("Processed {} lines", currentCount);
+        if (++count % 1000000 == 0) {
+          log.info("Processed {} lines", count);
         }
       }
     }
-    log.info("Read lines: {}", count.get());
+    log.info("Read lines: {}", count);
   }
   
   /**
@@ -492,18 +491,17 @@ public class FileDataModel extends AbstractDataModel {
   
   protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator, FastByIDMap<FastIDSet> data) {
     log.info("Reading file info...");
-    AtomicInteger count = new AtomicInteger();
+    int count = 0;
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
       if (line.length() > 0) {
         processLineWithoutID(line, data);
-        int currentCount = count.incrementAndGet();
-        if (currentCount % 100000 == 0) {
-          log.info("Processed {} lines", currentCount);
+        if (++count % 100000 == 0) {
+          log.info("Processed {} lines", count);
         }
       }
     }
-    log.info("Read lines: {}", count.get());
+    log.info("Read lines: {}", count);
   }
   
   protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data) {
