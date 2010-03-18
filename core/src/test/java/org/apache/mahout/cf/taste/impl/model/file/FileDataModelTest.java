@@ -48,11 +48,16 @@ public final class FileDataModelTest extends TasteTestCase {
       "123,654,0.7",
       "234,123,0.5",
       "234,234,1.0",
+      "234,999,0.9",
       "345,789,0.6",
       "345,654,0.7",
       "345,123,1.0",
       "345,234,0.5",
-      "456,456,0.1"};
+      "345,999,0.5",
+      "456,456,0.1",
+      "456,789,0.5",
+      "456,654,0.0",
+      "456,999,0.2",};
 
   private DataModel model;
   private File testFile;
@@ -96,10 +101,10 @@ public final class FileDataModelTest extends TasteTestCase {
 
   public void testFile() throws Exception {
     UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(2, userSimilarity, model);
+    UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, model);
     Recommender recommender = new GenericUserBasedRecommender(model, neighborhood, userSimilarity);
-    assertEquals(2, recommender.recommend(123, 3).size());
-    assertEquals(2, recommender.recommend(234, 3).size());
+    assertEquals(1, recommender.recommend(123, 3).size());
+    assertEquals(0, recommender.recommend(234, 3).size());
     assertEquals(1, recommender.recommend(345, 3).size());
 
     // Make sure this doesn't throw an exception
@@ -129,6 +134,8 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(654, it.nextLong());
     assertTrue(it.hasNext());
     assertEquals(789, it.nextLong());
+    assertTrue(it.hasNext());
+    assertEquals(999, it.nextLong());
     assertFalse(it.hasNext());
     try {
       it.next();

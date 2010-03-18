@@ -170,6 +170,16 @@ public final class NetflixDataModel implements DataModel {
   public boolean hasPreferenceValues() {
     return delegate.hasPreferenceValues();
   }
+
+  @Override
+  public float getMaxPreference() {
+    return delegate.getMaxPreference();
+  }
+
+  @Override
+  public float getMinPreference() {
+    return delegate.getMinPreference();
+  }
   
   private class MovieFilenameFilter implements FilenameFilter {
     @Override

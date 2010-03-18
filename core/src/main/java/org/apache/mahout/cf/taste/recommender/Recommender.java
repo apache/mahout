@@ -91,7 +91,10 @@ public interface Recommender extends Refreshable {
    *           if an error occurs while accessing the {@link DataModel}
    */
   void removePreference(long userID, long itemID) throws TasteException;
-  
+
+  /**
+   * @return underlying {@link DataModel} used by this implementation
+   */
   DataModel getDataModel();
-  
+
 }

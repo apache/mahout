@@ -40,7 +40,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  * is mostly useful for small experiments and is not recommended for contexts where performance is important.
  * </p>
  */
-public final class GenericBooleanPrefDataModel implements DataModel, Serializable {
+public final class GenericBooleanPrefDataModel extends AbstractDataModel implements Serializable {
   
   private final long[] userIDs;
   private final FastByIDMap<FastIDSet> preferenceFromUsers;

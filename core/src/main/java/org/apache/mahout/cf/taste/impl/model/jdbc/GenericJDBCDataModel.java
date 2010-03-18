@@ -53,7 +53,9 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
   public static final String GET_PREFS_FOR_ITEM_SQL_KEY = "getPrefsForItemSQL";
   public static final String GET_NUM_PREFERENCE_FOR_ITEM_KEY = "getNumPreferenceForItemSQL";
   public static final String GET_NUM_PREFERENCE_FOR_ITEMS_KEY = "getNumPreferenceForItemsSQL";
-  
+  public static final String GET_MAX_PREFERENCE_KEY = "getMaxPreferenceSQL";
+  public static final String GET_MIN_PREFERENCE_KEY = "getMinPreferenceSQL";
+
   /**
    * <p>
    * Specifies all SQL queries in a {@link Properties} object. See the <code>*_KEY</code> constants in this
@@ -79,7 +81,9 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
         props.getProperty(GET_ITEMS_SQL_KEY),
         props.getProperty(GET_PREFS_FOR_ITEM_SQL_KEY),
         props.getProperty(GET_NUM_PREFERENCE_FOR_ITEM_KEY),
-        props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY));
+        props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY),
+        props.getProperty(GET_MAX_PREFERENCE_KEY),
+        props.getProperty(GET_MIN_PREFERENCE_KEY));
   }
   
   /**

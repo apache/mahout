@@ -34,6 +34,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.model.AbstractDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
@@ -101,7 +102,7 @@ import org.slf4j.LoggerFactory;
  * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap, boolean)} and
  * {@link #processLineWithoutID(String, FastByIDMap)}
  */
-public class FileDataModel implements DataModel {
+public class FileDataModel extends AbstractDataModel {
   
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
   

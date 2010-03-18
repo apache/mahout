@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * is mostly useful for small experiments and is not recommended for contexts where performance is important.
  * </p>
  */
-public final class GenericDataModel implements DataModel, Serializable {
+public final class GenericDataModel extends AbstractDataModel implements Serializable {
   
   private static final Logger log = LoggerFactory.getLogger(GenericDataModel.class);
   
@@ -72,6 +72,8 @@ public final class GenericDataModel implements DataModel, Serializable {
     FastByIDMap<Collection<Preference>> prefsForItems = new FastByIDMap<Collection<Preference>>();
     FastIDSet itemIDSet = new FastIDSet();
     int currentCount = 0;
+    float maxPrefValue = Float.NEGATIVE_INFINITY;
+    float minPrefValue = Float.POSITIVE_INFINITY;
     for (Map.Entry<Long,PreferenceArray> entry : preferenceFromUsers.entrySet()) {
       PreferenceArray prefs = entry.getValue();
       prefs.sortByItem();
@@ -84,12 +86,22 @@ public final class GenericDataModel implements DataModel, Serializable {
           prefsForItems.put(itemID, prefsForItem);
         }
         prefsForItem.add(preference);
+        float value = preference.getValue();
+        if (value > maxPrefValue) {
+          maxPrefValue = value;
+        }
+        if (value < minPrefValue) {
+          minPrefValue = value;
+        }
       }
       if (++currentCount % 10000 == 0) {
         log.info("Processed {} users", currentCount);
       }
     }
     log.info("Processed {} users", currentCount);
+
+    setMinPreference(minPrefValue);
+    setMaxPreference(maxPrefValue);
     
     this.itemIDs = itemIDSet.toArray();
     itemIDSet = null; // Might help GC -- this is big

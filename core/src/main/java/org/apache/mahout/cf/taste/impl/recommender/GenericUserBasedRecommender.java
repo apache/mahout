@@ -50,6 +50,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   private final UserNeighborhood neighborhood;
   private final UserSimilarity similarity;
   private final RefreshHelper refreshHelper;
+  private EstimatedPreferenceCapper capper;
   
   public GenericUserBasedRecommender(DataModel dataModel,
                                      UserNeighborhood neighborhood,
@@ -64,6 +65,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
     refreshHelper.addDependency(neighborhood);
+    capper = buildCapper();
   }
   
   public UserSimilarity getSimilarity() {
@@ -129,21 +131,34 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     DataModel dataModel = getDataModel();
     double preference = 0.0;
     double totalSimilarity = 0.0;
+    int count = 0;
     for (long userID : theNeighborhood) {
       if (userID != theUserID) {
         // See GenericItemBasedRecommender.doEstimatePreference() too
         Float pref = dataModel.getPreferenceValue(userID, itemID);
         if (pref != null) {
-          double theSimilarity = similarity.userSimilarity(theUserID, userID) + 1.0;
-          // Similarity should not be NaN or else the user should never have showed up
-          // in the neighborhood. Adding 1.0 puts this in the range [0,2] which is
-          // more appropriate for weights
-          preference += theSimilarity * pref;
-          totalSimilarity += theSimilarity;
+          double theSimilarity = similarity.userSimilarity(theUserID, userID);
+          if (!Double.isNaN(theSimilarity)) {
+            preference += theSimilarity * pref;
+            totalSimilarity += theSimilarity;
+            count++;
+          }
         }
       }
     }
-    return totalSimilarity == 0.0 ? Float.NaN : (float) (preference / totalSimilarity);
+    // Throw out the estimate if it was based on no data points, of course, but also if based on
+    // just one. This is a bit of a band-aid on the 'stock' item-based algorithm for the moment.
+    // The reason is that in this case the estimate is, simply, the user's rating for one item
+    // that happened to have a defined similarity. The similarity score doesn't matter, and that
+    // seems like a bad situation.
+    if (count <= 1) {
+      return Float.NaN;
+    }
+    float estimate = (float) (preference / totalSimilarity);
+    if (capper != null) {
+      estimate = capper.capEstimate(estimate);
+    }
+    return estimate;
   }
   
   protected FastIDSet getAllOtherItems(long[] theNeighborhood, long theUserID) throws TasteException {
@@ -159,11 +174,21 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
+    capper = buildCapper();
   }
   
   @Override
   public String toString() {
     return "GenericUserBasedRecommender[neighborhood:" + neighborhood + ']';
+  }
+
+  private EstimatedPreferenceCapper buildCapper() {
+    DataModel dataModel = getDataModel();
+    if (Float.isNaN(dataModel.getMinPreference()) && Float.isNaN(dataModel.getMaxPreference())) {
+      return null;
+    } else {
+      return new EstimatedPreferenceCapper(dataModel);
+    }
   }
   
   private static class MostSimilarEstimator implements TopItems.Estimator<Long> {

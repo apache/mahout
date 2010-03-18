@@ -94,9 +94,13 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   private final String getPrefsForItemSQL;
   private final String getNumPreferenceForItemSQL;
   private final String getNumPreferenceForItemsSQL;
+  private final String getMaxPreferenceSQL;
+  private final String getMinPreferenceSQL;
   private int cachedNumUsers;
   private int cachedNumItems;
   private final Cache<Long,Integer> itemPrefCounts;
+  private float maxPreference;
+  private float minPreference;
   
   protected AbstractJDBCDataModel(DataSource dataSource,
                                   String getPreferenceSQL,
@@ -110,12 +114,15 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String getItemsSQL,
                                   String getPrefsForItemSQL,
                                   String getNumPreferenceForItemSQL,
-                                  String getNumPreferenceForItemsSQL) {
+                                  String getNumPreferenceForItemsSQL,
+                                  String getMaxPreferenceSQL,
+                                  String getMinPreferenceSQL) {
     this(dataSource, DEFAULT_PREFERENCE_TABLE,
         DEFAULT_USER_ID_COLUMN, DEFAULT_ITEM_ID_COLUMN,
         DEFAULT_PREFERENCE_COLUMN, getPreferenceSQL, getUserSQL, getAllUsersSQL,
         getNumItemsSQL, getNumUsersSQL, setPreferenceSQL, removePreferenceSQL, getUsersSQL, getItemsSQL,
-        getPrefsForItemSQL, getNumPreferenceForItemSQL, getNumPreferenceForItemsSQL);
+        getPrefsForItemSQL, getNumPreferenceForItemSQL, getNumPreferenceForItemsSQL,
+        getMaxPreferenceSQL, getMinPreferenceSQL);
   }
   
   protected AbstractJDBCDataModel(DataSource dataSource,
@@ -134,7 +141,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
                                   String getItemsSQL,
                                   String getPrefsForItemSQL,
                                   String getNumPreferenceForItemSQL,
-                                  String getNumPreferenceForItemsSQL) {
+                                  String getNumPreferenceForItemsSQL,
+                                  String getMaxPreferenceSQL,
+                                  String getMinPreferenceSQL) {
     
     log.debug("Creating AbstractJDBCModel...");
     
@@ -156,7 +165,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     AbstractJDBCComponent.checkNotNullAndLog("getPrefsForItemSQL", getPrefsForItemSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getNumPreferenceForItemSQL", getNumPreferenceForItemSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getNumPreferenceForItemsSQL", getNumPreferenceForItemsSQL);
-    
+    AbstractJDBCComponent.checkNotNullAndLog("getMaxPreferenceSQL", getMaxPreferenceSQL);
+    AbstractJDBCComponent.checkNotNullAndLog("getMinPreferenceSQL", getMinPreferenceSQL);
+
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
       AbstractJDBCDataModel.log
           .warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
@@ -181,11 +192,15 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     this.getPrefsForItemSQL = getPrefsForItemSQL;
     this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
     this.getNumPreferenceForItemsSQL = getNumPreferenceForItemsSQL;
+    this.getMaxPreferenceSQL = getMaxPreferenceSQL;
+    this.getMinPreferenceSQL = getMinPreferenceSQL;
     
     this.cachedNumUsers = -1;
     this.cachedNumItems = -1;
     this.itemPrefCounts = new Cache<Long,Integer>(new ItemPrefCountRetriever(getNumPreferenceForItemSQL));
-    
+
+    this.maxPreference = Float.NaN;
+    this.minPreference = Float.NaN;
   }
   
   /** @return the {@link DataSource} that this instance is using */
@@ -584,12 +599,64 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     cachedNumUsers = -1;
     cachedNumItems = -1;
+    minPreference = Float.NaN;
+    maxPreference = Float.NaN;
     itemPrefCounts.clear();
   }
 
   @Override
   public boolean hasPreferenceValues() {
     return true;
+  }
+
+  @Override
+  public float getMaxPreference() {
+    if (Float.isNaN(maxPreference)) {
+      Connection conn = null;
+      PreparedStatement stmt = null;
+      ResultSet rs = null;
+      try {
+        conn = dataSource.getConnection();
+        stmt = conn.prepareStatement(getMaxPreferenceSQL);
+
+        log.debug("Executing SQL query: {}", getMaxPreferenceSQL);
+        rs = stmt.executeQuery();
+        rs.next();
+        maxPreference = rs.getFloat(1);
+
+      } catch (SQLException sqle) {
+        log.warn("Exception while removing preference", sqle);
+        // do nothing
+      } finally {
+        IOUtils.quietClose(rs, stmt, conn);
+      }
+    }
+    return maxPreference;
+  }
+
+  @Override
+  public float getMinPreference() {
+    if (Float.isNaN(minPreference)) {
+      Connection conn = null;
+      PreparedStatement stmt = null;
+      ResultSet rs = null;
+      try {
+        conn = dataSource.getConnection();
+        stmt = conn.prepareStatement(getMinPreferenceSQL);
+
+        log.debug("Executing SQL query: {}", getMinPreferenceSQL);
+        rs = stmt.executeQuery();
+        rs.next();
+        minPreference = rs.getFloat(1);
+
+      } catch (SQLException sqle) {
+        log.warn("Exception while removing preference", sqle);
+        // do nothing
+      } finally {
+        IOUtils.quietClose(rs, stmt, conn);
+      }
+    }
+    return minPreference;
   }
   
   // Some overrideable methods to customize the class behavior:

@@ -39,12 +39,12 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.18, firstRecommended.getValue(), EPSILON);
+    assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
     recommender.refresh(null);
     recommended = recommender.recommend(1, 1);
     firstRecommended = recommended.get(0);    
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.18, firstRecommended.getValue(), EPSILON);
+    assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
   }
 
   public void testHowMany() throws Exception {
@@ -113,7 +113,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
-    assertEquals(0.18, recommender.estimatePreference(1, 2), EPSILON);
+    assertEquals(0.1f, recommender.estimatePreference(1, 2), EPSILON);
   }
 
   /**
@@ -129,7 +129,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem firstRecommended = recommended.get(0);
     // item one should be recommended because it has a greater rating/score
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.18, firstRecommended.getValue(), EPSILON);
+    assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
   }
 
   public void testMostSimilar() throws Exception {
@@ -140,9 +140,9 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem first = similar.get(0);
     RecommendedItem second = similar.get(1);
     assertEquals(1, first.getItemID());
-    assertEquals(1.0, first.getValue(), EPSILON);
+    assertEquals(1.0f, first.getValue(), EPSILON);
     assertEquals(2, second.getItemID());
-    assertEquals(0.5, second.getValue(), EPSILON);
+    assertEquals(0.5f, second.getValue(), EPSILON);
   }
 
   public void testMostSimilarToMultiple() throws Exception {
@@ -153,9 +153,9 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem first = similar.get(0);
     RecommendedItem second = similar.get(1);
     assertEquals(2, first.getItemID());
-    assertEquals(0.85, first.getValue(), EPSILON);
+    assertEquals(0.85f, first.getValue(), EPSILON);
     assertEquals(3, second.getItemID());
-    assertEquals(-0.3, second.getValue(), EPSILON);
+    assertEquals(-0.3f, second.getValue(), EPSILON);
   }
 
   public void testRecommendedBecause() throws Exception {
@@ -167,11 +167,11 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     RecommendedItem second = recommendedBecause.get(1);
     RecommendedItem third = recommendedBecause.get(2);
     assertEquals(2, first.getItemID());
-    assertEquals(0.99, first.getValue(), EPSILON);
+    assertEquals(0.99f, first.getValue(), EPSILON);
     assertEquals(3, second.getItemID());
-    assertEquals(0.4, second.getValue(), EPSILON);
+    assertEquals(0.4f, second.getValue(), EPSILON);
     assertEquals(0, third.getItemID());
-    assertEquals(0.2, third.getValue(), EPSILON);
+    assertEquals(0.2f, third.getValue(), EPSILON);
   }
 
   private static ItemBasedRecommender buildRecommender() {

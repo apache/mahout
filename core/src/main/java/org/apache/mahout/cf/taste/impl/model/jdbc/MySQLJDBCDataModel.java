@@ -197,7 +197,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
                             String itemIDColumn,
                             String preferenceColumn) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn, preferenceColumn,
-    // getPreferenceSQL
+        // getPreferenceSQL
         "SELECT " + preferenceColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND "
             + itemIDColumn + "=?",
         // getUserSQL
@@ -226,7 +226,9 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",
         // getNumPreferenceForItemsSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " tp1 JOIN " + preferenceTable + " tp2 " + "USING ("
-            + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?");
+            + userIDColumn + ") WHERE tp1." + itemIDColumn + "=? and tp2." + itemIDColumn + "=?",
+        "SELECT MAX(" + preferenceColumn + ") FROM " + preferenceTable,
+        "SELECT MIN(" + preferenceColumn + ") FROM " + preferenceTable);
   }
   
   @Override

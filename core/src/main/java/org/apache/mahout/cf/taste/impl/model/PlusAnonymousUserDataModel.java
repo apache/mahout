@@ -208,5 +208,15 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public boolean hasPreferenceValues() {
     return delegate.hasPreferenceValues();
   }
-  
+
+  @Override
+  public float getMaxPreference() {
+    return delegate.getMaxPreference();
+  }
+
+  @Override
+  public float getMinPreference() {
+    return delegate.getMinPreference();
+  }
+
 }

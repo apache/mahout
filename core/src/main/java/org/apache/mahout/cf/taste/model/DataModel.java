@@ -163,6 +163,26 @@ public interface DataModel extends Refreshable {
    */
   void removePreference(long userID, long itemID) throws TasteException;
 
+  /**
+   * @return true iff this implementation actually stores and returns distinct preference values;
+   *  that is, if it is not a 'boolean' DataModel
+   */
   boolean hasPreferenceValues();
+
+  /**
+   * @return the maximum preference value that is possible in the current problem domain being evaluated. For
+   * example, if the domain is movie ratings on a scale of 1 to 5, this should be 5. While a
+   * {@link org.apache.mahout.cf.taste.recommender.Recommender} may estimate a preference value above 5.0, it
+   * isn't "fair" to consider that the system is actually suggesting an impossible rating of, say, 5.4 stars.
+   * In practice the application would cap this estimate to 5.0. Since evaluators evaluate
+   * the difference between estimated and actual value, this at least prevents this effect from unfairly
+   * penalizing a {@link org.apache.mahout.cf.taste.recommender.Recommender}
+   */
+  float getMaxPreference();
+
+  /**
+   * @see #getMaxPreference()
+   */
+  float getMinPreference();
   
 }

@@ -56,7 +56,8 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                              String getNumPreferenceForItemsSQL) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn, preferenceColumn, getPreferenceSQL,
         getUserSQL, getAllUsersSQL, getNumItemsSQL, getNumUsersSQL, setPreferenceSQL, removePreferenceSQL,
-        getUsersSQL, getItemsSQL, getPrefsForItemSQL, getNumPreferenceForItemSQL, getNumPreferenceForItemsSQL);
+        getUsersSQL, getItemsSQL, getPrefsForItemSQL, getNumPreferenceForItemSQL, getNumPreferenceForItemsSQL,
+        null, null);
     this.setPreferenceSQL = setPreferenceSQL;
   }
   
@@ -96,6 +97,16 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   @Override
   public boolean hasPreferenceValues() {
     return false;
+  }
+
+  @Override
+  public float getMaxPreference() {
+    return 1.0f;
+  }
+
+  @Override
+  public float getMinPreference() {
+    return 1.0f;
   }
   
 }

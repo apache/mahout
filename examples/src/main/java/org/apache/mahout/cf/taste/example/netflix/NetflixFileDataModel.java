@@ -139,6 +139,16 @@ public final class NetflixFileDataModel implements DataModel {
   public boolean hasPreferenceValues() {
     return true;
   }
+
+  @Override
+  public float getMaxPreference() {
+    return 0.0f; // TODO
+  }
+
+  @Override
+  public float getMinPreference() {
+    return 0.0f; // TODO
+  }
   
   @Override
   public String toString() {

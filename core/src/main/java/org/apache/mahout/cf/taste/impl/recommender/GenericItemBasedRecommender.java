@@ -67,7 +67,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   private final ItemSimilarity similarity;
   private final RefreshHelper refreshHelper;
-  
+  private EstimatedPreferenceCapper capper;
+
   public GenericItemBasedRecommender(DataModel dataModel, ItemSimilarity similarity) {
     super(dataModel);
     if (similarity == null) {
@@ -77,6 +78,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     this.refreshHelper = new RefreshHelper(null);
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
+    capper = buildCapper();
   }
   
   public ItemSimilarity getSimilarity() {
@@ -186,10 +188,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     for (int i = 0; i < size; i++) {
       double theSimilarity = similarity.itemSimilarity(itemID, prefs.getItemID(i));
       if (!Double.isNaN(theSimilarity)) {
-        // Why + 1.0? similarity ranges from -1.0 to 1.0, and we want to use it as a simple
-        // weight. To avoid negative values, we add 1.0 to put it in
-        // the [0.0,2.0] range which is reasonable for weights
-        theSimilarity += 1.0;
+        // Weights can be negative!
         preference += theSimilarity * prefs.getValue(i);
         totalSimilarity += theSimilarity;
         count++;
@@ -200,7 +199,14 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     // The reason is that in this case the estimate is, simply, the user's rating for one item
     // that happened to have a defined similarity. The similarity score doesn't matter, and that
     // seems like a bad situation.
-    return count <= 1 ? Float.NaN : (float) (preference / totalSimilarity);
+    if (count <= 1) {
+      return Float.NaN;
+    }
+    float estimate = (float) (preference / totalSimilarity);
+    if (capper != null) {
+      estimate = capper.capEstimate(estimate);
+    }
+    return estimate;
   }
   
   private int getNumPreferences(long userID) throws TasteException {
@@ -210,11 +216,21 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
+    capper = buildCapper();
   }
   
   @Override
   public String toString() {
     return "GenericItemBasedRecommender[similarity:" + similarity + ']';
+  }
+
+  private EstimatedPreferenceCapper buildCapper() {
+    DataModel dataModel = getDataModel();
+    if (Float.isNaN(dataModel.getMinPreference()) && Float.isNaN(dataModel.getMaxPreference())) {
+      return null;
+    } else {
+      return new EstimatedPreferenceCapper(dataModel);
+    }
   }
   
   public static class MostSimilarEstimator implements TopItems.Estimator<Long> {
