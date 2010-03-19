@@ -20,18 +20,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-parent</artifactId>
-    <version>0.4-SNAPSHOT</version>
-    <relativePath>../maven</relativePath>
-  </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-collections</artifactId>
   <version>0.4-SNAPSHOT</version>
   <name>Mahout Collections</name>
   <description>Primitive-type collections based on CERN's Colt Java API</description>
+
+  <parent>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout</artifactId>
+    <version>0.4-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
 
   <packaging>jar</packaging>
 

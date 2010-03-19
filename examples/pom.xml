@@ -22,9 +22,9 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-parent</artifactId>
+    <artifactId>mahout</artifactId>
     <version>0.4-SNAPSHOT</version>
-    <relativePath>../maven</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>

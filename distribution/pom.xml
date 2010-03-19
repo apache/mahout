@@ -22,9 +22,9 @@
 
   <parent>
     <groupId>org.apache.mahout</groupId>
-    <artifactId>mahout-parent</artifactId>
+    <artifactId>mahout</artifactId>
     <version>0.4-SNAPSHOT</version>
-    <relativePath>../maven</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
@@ -100,6 +100,11 @@
     <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-examples</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.mahout</groupId>
+      <artifactId>mahout-taste-webapp</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
