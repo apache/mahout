@@ -87,46 +87,16 @@
 
   <profiles>
     <profile>
+      <id>release</id>
+      <modules>
+        <module>distribution</module>
+      </modules>
+    </profile>
+    <profile>
 <!-- Since this executes the release packaging, we won't want it in release:prepare! -->
       <id>release_perform</id>
       <build>
         <plugins>
-            <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-	    <version>2.2-beta-5</version>
-            <executions>
-              <execution>
-                <id>bin-assembly</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>single</goal>
-                </goals>
-                <configuration>
-                  <descriptors>
-                    <descriptor>src/main/assembly/bin.xml</descriptor>
-                  </descriptors>
-                  <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                  <tarLongFileMode>gnu</tarLongFileMode>
-                  <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
-              </execution>
-	      <execution>
-                <id>src-assembly</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>single</goal>
-                </goals>
-                <configuration>
-                  <descriptors>
-                    <descriptor>src/main/assembly/src.xml</descriptor>
-                  </descriptors>
-                  <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-                  <tarLongFileMode>gnu</tarLongFileMode>
-                  <appendAssemblyId>true</appendAssemblyId>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
