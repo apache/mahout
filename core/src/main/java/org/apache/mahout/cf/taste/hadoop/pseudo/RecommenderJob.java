@@ -104,7 +104,7 @@ public final class RecommenderJob extends AbstractJob {
       "Name of recommender class to instantiate");
     Option numReccomendationsOpt = AbstractJob.buildOption("numRecommendations", "n",
       "Number of recommendations per user", "10");
-    Option usersFileOpt = AbstractJob.buildOption("usersFile", "n", "Number of recommendations per user",
+    Option usersFileOpt = AbstractJob.buildOption("usersFile", "u", "Number of recommendations per user",
       null);
     
     Map<String,String> parsedArgs = AbstractJob.parseArguments(args, recommendClassOpt,
