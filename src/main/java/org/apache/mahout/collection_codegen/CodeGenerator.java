@@ -19,6 +19,15 @@
 
 package org.apache.mahout.collection_codegen;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -29,16 +38,6 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.codehaus.plexus.util.SelectorUtils;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @description Generate java code with Velocity.
  * @goal generate
@@ -129,6 +128,7 @@ public class CodeGenerator extends AbstractMojo {
   private MavenProject project;
   private VelocityEngine testVelocityEngine;
   private final FileSetManager fileSetManager;
+  private VelocityEngine mainVelocityEngine;
   
   public CodeGenerator() {
     typeToObjectTypeMap = new HashMap<String,String>();
@@ -155,22 +155,7 @@ public class CodeGenerator extends AbstractMojo {
       testOutputDirectory.mkdirs();
     }
 
-    VelocityEngine mainVelocityEngine = new VelocityEngine();
-    mainVelocityEngine.setProperty("file.resource.loader.path", sourceTemplateRoot);
-    if (testTemplateRoot != null) {
-      testVelocityEngine = new VelocityEngine();
-      testVelocityEngine.setProperty("file.resource.loader.path", testTemplateRoot);
-    }
-
-    
-    try {
-      mainVelocityEngine.init();
-      if (testVelocityEngine != null) {
-        testVelocityEngine.init();
-      }
-    } catch (Exception e) {
-      throw new MojoExecutionException("Unable to initialize velocity", e);
-    }
+    initializeVelocity();
     
     if (sourceTemplateRoot != null) {
       runGeneration(
@@ -193,6 +178,25 @@ public class CodeGenerator extends AbstractMojo {
       project.addTestCompileSourceRoot(testOutputDirectory.getAbsolutePath());
     }
     
+  }
+
+  private void initializeVelocity() throws MojoExecutionException {
+    mainVelocityEngine = new VelocityEngine();
+    mainVelocityEngine.setProperty("file.resource.loader.path", sourceTemplateRoot);
+    if (testTemplateRoot != null) {
+      testVelocityEngine = new VelocityEngine();
+      testVelocityEngine.setProperty("file.resource.loader.path", testTemplateRoot);
+    }
+
+    
+    try {
+      mainVelocityEngine.init();
+      if (testVelocityEngine != null) {
+        testVelocityEngine.init();
+      }
+    } catch (Exception e) {
+      throw new MojoExecutionException("Unable to initialize velocity", e);
+    }
   }
   
   private void runGeneration(String thisSourceRoot, 
