@@ -101,6 +101,7 @@ public class OpenHashMapTest extends Assert {
   }
   
   @Test
+  @SuppressWarnings("PMD")
   public void testContainValue() {
     OpenHashMap<String, String> map = new OpenHashMap<String, String>();
     map.put("Eleven", "11");
