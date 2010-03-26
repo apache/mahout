@@ -45,7 +45,7 @@ public final class ItemIDIndexMapper extends MapReduceBase implements
   }
   
   static int idToIndex(long itemID) {
-    return (int) itemID ^ (int) (itemID >>> 32);
+    return 0x7FFFFFFF & (int) itemID ^ (int) (itemID >>> 32);
   }
   
 }
