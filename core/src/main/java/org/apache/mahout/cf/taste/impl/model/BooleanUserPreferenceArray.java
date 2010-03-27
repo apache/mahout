@@ -153,6 +153,22 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   public Iterator<Preference> iterator() {
     return new PreferenceArrayIterator();
   }
+
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder(10*IDs.length);
+    result.append("BooleanUserPreferenceArray[userID:");
+    result.append(id);
+    result.append(",{");
+    for (int i = 0; i < IDs.length; i++) {
+      if (i > 0) {
+        result.append(',');
+      }
+      result.append(IDs[i]);
+    }
+    result.append("}]");
+    return result.toString();
+  }
   
   private final class PreferenceArrayIterator implements Iterator<Preference> {
     private int i = 0;
