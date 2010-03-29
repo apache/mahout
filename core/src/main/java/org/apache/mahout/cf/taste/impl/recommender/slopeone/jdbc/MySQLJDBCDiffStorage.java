@@ -34,32 +34,36 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
  * <th>item_id_a</th>
  * <th>item_id_b</th>
  * <th>average_diff</th>
+ * <th>standard_deviation</th>
  * <th>count</th>
  * </tr>
  * <tr>
  * <td>123</td>
  * <td>234</td>
  * <td>0.5</td>
+ * <td>0.12</td>
  * <td>5</td>
  * </tr>
  * <tr>
  * <td>123</td>
  * <td>789</td>
  * <td>-1.33</td>
+ * <td>0.2</td>
  * <td>3</td>
  * </tr>
  * <tr>
  * <td>234</td>
  * <td>789</td>
  * <td>2.1</td>
+ * <td>1.03</td>
  * <td>1</td>
  * </tr>
  * </table>
  * 
  * <p>
  * <code>item_id_a</code> and <code>item_id_b</code> should have types compatible with the long primitive
- * type. <code>average_diff</code> must be compatible with <code>float</code> and <code>count</code> must be
- * compatible with <code>int</code>.
+ * type. <code>average_diff</code> and <code>standard_deviation</code> must be compatible with
+ * <code>float</code> and <code>count</code> must be compatible with <code>int</code>.
  * </p>
  * 
  * <p>
@@ -73,6 +77,7 @@ import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
  *   item_id_a BIGINT NOT NULL,
  *   item_id_b BIGINT NOT NULL,
  *   average_diff FLOAT NOT NULL,
+ *   standard_deviation FLOAT NOT NULL,
  *   count INT NOT NULL,
  *   PRIMARY KEY (item_id_a, item_id_b),
  *   INDEX (item_id_a),
@@ -87,8 +92,14 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
   private static final int DEFAULT_MIN_DIFF_COUNT = 2;
   
   public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel) throws TasteException {
-    this(dataModel, DEFAULT_DIFF_TABLE, DEFAULT_ITEM_A_COLUMN, DEFAULT_ITEM_B_COLUMN, DEFAULT_COUNT_COLUMN,
-        DEFAULT_AVERAGE_DIFF_COLUMN, DEFAULT_MIN_DIFF_COUNT);
+    this(dataModel,
+         DEFAULT_DIFF_TABLE,
+         DEFAULT_ITEM_A_COLUMN,
+         DEFAULT_ITEM_B_COLUMN,
+         DEFAULT_COUNT_COLUMN,
+         DEFAULT_AVERAGE_DIFF_COLUMN,
+         DEFAULT_STDEV_COLUMN,
+         DEFAULT_MIN_DIFF_COUNT);
   }
   
   public MySQLJDBCDiffStorage(AbstractJDBCDataModel dataModel,
@@ -97,14 +108,17 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
                               String itemIDBColumn,
                               String countColumn,
                               String avgColumn,
+                              String stdevColumn,
                               int minDiffCount) throws TasteException {
     super(dataModel,
-    // getDiffSQL
-        "SELECT " + countColumn + ", " + avgColumn + " FROM " + diffsTable + " WHERE " + itemIDAColumn
+        // getDiffSQL
+        "SELECT " + countColumn + ", " + avgColumn + ", " + stdevColumn + " FROM "
+            + diffsTable + " WHERE " + itemIDAColumn
             + "=? AND " + itemIDBColumn + "=? UNION " + "SELECT " + countColumn + ", " + avgColumn + " FROM "
             + diffsTable + " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=?",
         // getDiffsSQL
-        "SELECT " + countColumn + ", " + avgColumn + ", " + itemIDAColumn + " FROM " + diffsTable + ", "
+        "SELECT " + countColumn + ", " + avgColumn + ", " + stdevColumn + ", " + itemIDAColumn 
+            + " FROM " + diffsTable + ", "
             + dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + "=? AND " + itemIDAColumn + " = "
             + dataModel.getItemIDColumn() + " AND " + dataModel.getUserIDColumn() + "=? ORDER BY "
             + itemIDAColumn,
@@ -139,17 +153,20 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
         // deleteDiffsSQL
         "TRUNCATE " + diffsTable,
         // createDiffsSQL
-        "INSERT INTO " + diffsTable + " (" + itemIDAColumn + ", " + itemIDBColumn + ", " + avgColumn + ", "
-            + countColumn + ") SELECT prefsA." + dataModel.getItemIDColumn() + ", prefsB."
-            + dataModel.getItemIDColumn() + ',' + " AVG(prefsB." + dataModel.getPreferenceColumn()
-            + " - prefsA." + dataModel.getPreferenceColumn() + ")," + " COUNT(1) AS count FROM "
-            + dataModel.getPreferenceTable() + " prefsA, " + dataModel.getPreferenceTable()
-            + " prefsB WHERE prefsA." + dataModel.getUserIDColumn() + " = prefsB."
-            + dataModel.getUserIDColumn() + " AND prefsA." + dataModel.getItemIDColumn() + " < prefsB."
-            + dataModel.getItemIDColumn() + ' ' + " GROUP BY prefsA." + dataModel.getItemIDColumn()
-            + ", prefsB." + dataModel.getItemIDColumn() + " HAVING count >=?",
+        "INSERT INTO " + diffsTable + " (" + itemIDAColumn + ", " + itemIDBColumn + ", " + avgColumn
+            + ", " + stdevColumn + ", " + countColumn + ") SELECT prefsA." + dataModel.getItemIDColumn()
+            + ", prefsB." + dataModel.getItemIDColumn() + ", AVG(prefsB." + dataModel.getPreferenceColumn()
+            + " - prefsA." + dataModel.getPreferenceColumn() + "), STDDEV_POP(prefsB."
+            + dataModel.getPreferenceColumn() + " - prefsA." + dataModel.getPreferenceColumn()
+            + "), COUNT(1) AS count FROM " + dataModel.getPreferenceTable() + " prefsA, "
+            + dataModel.getPreferenceTable() + " prefsB WHERE prefsA." + dataModel.getUserIDColumn()
+            + " = prefsB." + dataModel.getUserIDColumn() + " AND prefsA." + dataModel.getItemIDColumn()
+            + " < prefsB." + dataModel.getItemIDColumn() + ' ' + " GROUP BY prefsA."
+            + dataModel.getItemIDColumn() + ", prefsB." + dataModel.getItemIDColumn()
+            + " HAVING count >= ?",
         // diffsExistSQL
-        "SELECT COUNT(1) FROM " + diffsTable, minDiffCount);
+        "SELECT COUNT(1) FROM " + diffsTable,
+        minDiffCount);
   }
   
   /**

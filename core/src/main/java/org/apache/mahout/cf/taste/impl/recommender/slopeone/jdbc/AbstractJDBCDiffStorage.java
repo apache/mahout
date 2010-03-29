@@ -30,6 +30,8 @@ import javax.sql.DataSource;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.common.FixedRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.FixedRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
@@ -45,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * A {@link DiffStorage} which stores diffs in a database. Database-specific implementations subclass this
  * abstract class. Note that this implementation has a fairly particular dependence on the
  * {@link org.apache.mahout.cf.taste.model.DataModel} used; it needs a {@link JDBCDataModel} attached to the
- * same database since its efficent operation depends on accessing preference data in the database directly.
+ * same database since its efficient operation depends on accessing preference data in the database directly.
  * </p>
  */
 public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent implements DiffStorage {
@@ -57,7 +59,8 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   public static final String DEFAULT_ITEM_B_COLUMN = "item_id_b";
   public static final String DEFAULT_COUNT_COLUMN = "count";
   public static final String DEFAULT_AVERAGE_DIFF_COLUMN = "average_diff";
-  
+  public static final String DEFAULT_STDEV_COLUMN = "standard_deviation";
+
   private final DataSource dataSource;
   private final String getDiffSQL;
   private final String getDiffsSQL;
@@ -140,7 +143,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setLong(4, itemID1);
       log.debug("Executing SQL query: {}", getDiffSQL);
       rs = stmt.executeQuery();
-      return rs.next() ? new FixedRunningAverage(rs.getInt(1), rs.getDouble(2)) : null;
+      return rs.next() ? new FixedRunningAverageAndStdDev(rs.getDouble(2), rs.getDouble(3), rs.getInt(1)) : null;
     } catch (SQLException sqle) {
       log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
@@ -175,7 +178,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
           i++;
           // result[i] is null for these values of i
         }
-        result[i] = new FixedRunningAverage(rs.getInt(1), rs.getDouble(2));
+        result[i] = new FixedRunningAverageAndStdDev(rs.getDouble(2), rs.getDouble(3), rs.getInt(1));
         i++;
       }
     } catch (SQLException sqle) {
@@ -204,7 +207,7 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       if (rs.next()) {
         int count = rs.getInt(1);
         if (count > 0) {
-          return new FixedRunningAverage(count, rs.getDouble(2));
+          return new FixedRunningAverage(rs.getDouble(2), count);
         }
       }
       return null;
@@ -215,7 +218,12 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       IOUtils.quietClose(rs, stmt, conn);
     }
   }
-  
+
+  /**
+   * Note that this implementation does <em>not</em> update standard deviations. This would
+   * be expensive relative to the value of slightly adjusting these values, which are merely
+   * used as weighted. Rebuilding the diffs table will update standard deviations.
+   */
   @Override
   public void updateItemPref(long itemID, float prefDelta, boolean remove) throws TasteException {
     Connection conn = null;
@@ -330,41 +338,4 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
   }
-  
-  private static class FixedRunningAverage implements RunningAverage {
-    
-    private final int count;
-    private final double average;
-    
-    private FixedRunningAverage(int count, double average) {
-      this.count = count;
-      this.average = average;
-    }
-    
-    @Override
-    public void addDatum(double datum) {
-      throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    public void removeDatum(double datum) {
-      throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    public void changeDatum(double delta) {
-      throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    public int getCount() {
-      return count;
-    }
-    
-    @Override
-    public double getAverage() {
-      return average;
-    }
-  }
-  
 }
