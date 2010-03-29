@@ -25,15 +25,15 @@ import org.junit.Test;
 public class GramKeyPartitionerTest {
   @Test
   public void testPartition() {
-    byte[] empty = new byte[0];
     byte[] foo = new byte[1];
     foo[0] = 1;
-    
-    byte[] bar = new byte[1];
+
     foo[0] = 2;
-    
+
+    byte[] empty = new byte[0];
     GramKey a = new GramKey(new Gram("foo", 1, Gram.Type.HEAD), empty);
     GramKey b = new GramKey(new Gram("foo", 1, Gram.Type.HEAD), foo);
+    byte[] bar = new byte[1];
     GramKey c = new GramKey(new Gram("foo", 2, Gram.Type.HEAD), bar);
     GramKey d = new GramKey(new Gram("foo", 1, Gram.Type.TAIL), empty);
     GramKey e = new GramKey(new Gram("foo", 2, Gram.Type.TAIL), foo);

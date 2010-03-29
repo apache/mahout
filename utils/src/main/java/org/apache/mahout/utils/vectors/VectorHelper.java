@@ -69,7 +69,7 @@ public class VectorHelper {
       bldr.append(elt.index()).append(':').append(dictionary != null ? dictionary[elt.index()] : elt.get());
       
     }
-    return bldr.append("}").toString();
+    return bldr.append('}').toString();
   }
   
   /**

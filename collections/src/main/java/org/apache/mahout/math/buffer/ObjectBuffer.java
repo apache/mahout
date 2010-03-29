@@ -56,7 +56,7 @@ public class ObjectBuffer extends PersistentObject implements ObjectBufferConsum
    * @param list the list of which all elements shall be added.
    */
   @Override
-  public void addAllOf(ObjectArrayList list) {
+  public void addAllOf(ObjectArrayList<Object> list) {
     int listSize = list.size();
     if (this.size + listSize >= this.capacity) {
       flush();

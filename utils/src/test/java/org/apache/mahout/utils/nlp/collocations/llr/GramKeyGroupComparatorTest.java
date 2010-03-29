@@ -21,14 +21,14 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-
 public class GramKeyGroupComparatorTest {
+
   @Test
   public void testComparator() {
-    byte[] empty = new byte[0];
     byte[] foo   = new byte[1];
     foo[0] = (byte) 1;
-    
+
+    byte[] empty = new byte[0];
     GramKey a = new GramKey(new Gram("foo", 1, Gram.Type.HEAD), empty); // base
     GramKey b = new GramKey(new Gram("foo", 1, Gram.Type.HEAD), foo);   // vary byte
     GramKey c = new GramKey(new Gram("foo", 2, Gram.Type.HEAD), empty); // vary freq
@@ -36,9 +36,9 @@ public class GramKeyGroupComparatorTest {
     GramKey e = new GramKey(new Gram("bar", 5, Gram.Type.HEAD), empty); // vary string
     
     GramKeyGroupComparator cmp = new GramKeyGroupComparator();
-    
-    Assert.assertTrue(0 == cmp.compare(a, b));
-    Assert.assertTrue(0 == cmp.compare(a, c));
+
+    Assert.assertEquals(0, cmp.compare(a, b));
+    Assert.assertEquals(0, cmp.compare(a, c));
     Assert.assertTrue(0 > cmp.compare(a, d));
     Assert.assertTrue(0 < cmp.compare(a, e));
     Assert.assertTrue(0 < cmp.compare(d, e));

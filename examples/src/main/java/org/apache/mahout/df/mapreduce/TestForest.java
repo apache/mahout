@@ -42,14 +42,11 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.DecisionForest;
-import org.apache.mahout.df.ErrorEstimate;
-import org.apache.mahout.df.builder.DefaultTreeBuilder;
-import org.apache.mahout.df.callback.ForestPredictions;
-import org.apache.mahout.df.data.*;
-import org.apache.mahout.df.mapreduce.inmem.InMemBuilder;
-import org.apache.mahout.df.mapreduce.partial.PartialBuilder;
 import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.classifier.ClassifierResult;
+import org.apache.mahout.df.data.DataConverter;
+import org.apache.mahout.df.data.Dataset;
+import org.apache.mahout.df.data.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

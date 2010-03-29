@@ -64,9 +64,7 @@ public class CollocReducerTest {
                                     {new Gram("the worst", 1, NGRAM), new Gram("the", 2, HEAD)},
                                     {new Gram("of times", 2, NGRAM), new Gram("of", 2, HEAD)},
                                     {new Gram("of times", 2, NGRAM), new Gram("times", 2, TAIL)}};
-    
-    byte[] empty = new byte[0];
-    
+
     // set up expectations
     for (Gram[] v : values) {
       output.collect(v[0], v[1]);
@@ -77,7 +75,8 @@ public class CollocReducerTest {
     CollocReducer c = new CollocReducer();
     
     GramKey key = new GramKey();
-    
+
+    byte[] empty = new byte[0];
     for (Gram[] ii : input) {
       key.set(ii[0], empty);
 

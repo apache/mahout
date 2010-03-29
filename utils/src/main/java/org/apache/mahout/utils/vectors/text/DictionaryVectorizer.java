@@ -197,7 +197,7 @@ public final class DictionaryVectorizer {
     FileStatus[] outputFiles = fs.globStatus(new Path(wordCountPath.toString()
                                                       + OUTPUT_FILES_PATTERN));
     
-    long chunkSizeLimit = chunkSizeInMegabytes * 1024 * 1024;
+    long chunkSizeLimit = chunkSizeInMegabytes * 1024L * 1024L;
     int chunkIndex = 0;
     Path chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE,
       chunkIndex);

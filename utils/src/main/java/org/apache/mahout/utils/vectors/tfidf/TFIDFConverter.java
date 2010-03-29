@@ -190,7 +190,7 @@ public final class TFIDFConverter {
     FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath.toString()
                                                       + OUTPUT_FILES_PATTERN));
     
-    long chunkSizeLimit = chunkSizeInMegabytes * 1024 * 1024;
+    long chunkSizeLimit = chunkSizeInMegabytes * 1024L * 1024L;
     int chunkIndex = 0;
     Path chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
     chunkPaths.add(chunkPath);

@@ -168,6 +168,7 @@ public class DecisionForest implements Writable {
     return trees.hashCode();
   }
 
+  @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeInt(trees.size());
     for (Node tree:trees) {
@@ -180,6 +181,7 @@ public class DecisionForest implements Writable {
    * @param dataInput
    * @throws IOException
    */
+  @Override
   public void readFields(DataInput dataInput) throws IOException {
     int size = dataInput.readInt();
     for (int i = 0; i < size; i++) {

@@ -24,6 +24,6 @@ public class IndexException extends RuntimeException {
   }
 
   public IndexException(int index, int cardinality) {
-    super("index(" + index +") is out of bounds of (0, " + cardinality + ")");
+    super("index(" + index +") is out of bounds of (0, " + cardinality + ')');
   }
 }

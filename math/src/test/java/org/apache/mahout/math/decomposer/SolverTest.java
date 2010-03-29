@@ -76,7 +76,7 @@ public abstract class SolverTest extends TestCase {
       double afterNorm = afterMultiply.getLengthSquared();
       double error = 1 - dot / Math.sqrt(afterNorm * e.getLengthSquared());
       log.info("Eigenvalue({}) = {}", i, Math.sqrt(afterNorm/e.getLengthSquared()));
-      assertTrue("Error margin: {" + error + " too high! (for eigen " + i + ")", Math.abs(error) < errorMargin);
+      assertTrue("Error margin: {" + error + " too high! (for eigen " + i + ')', Math.abs(error) < errorMargin);
     }
   }
 

@@ -25,20 +25,18 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import org.junit.Test;
-
 
 public class GramKeyTest {
   @Test
   public void testGramKeySort() {
-    byte[] empty = new byte[0];
-    byte[] foo = new byte[1]; foo[0] = 1;
-    byte[] bar = new byte[1]; bar[0] = 2;
+    byte[] foo = {1};
+    //byte[] bar = new byte[1]; bar[0] = 2;
     
     
     // byte argument in GramKey breaks tie between equal grams
+    byte[] empty = new byte[0];
     GramKey[] input =
     {
       new GramKey(new Gram("bar", 1, Gram.Type.UNIGRAM), empty),
@@ -65,15 +63,15 @@ public class GramKeyTest {
     Arrays.sort(sorted);
 
     for (int i=0; i < input.length; i++) {
-      TestCase.assertSame(input[expect[i]], sorted[i]);
+      Assert.assertSame(input[expect[i]], sorted[i]);
     }
   }
   
   @Test
   public void testWritable() throws IOException {
     byte[] foo = new byte[0];
-    byte[] bar = new byte[1]; bar[0] = 2;
-    
+    byte[] bar = {2};
+
     GramKey one = new GramKey(new Gram("foo", 2, Gram.Type.HEAD), foo);
     GramKey two = new GramKey(new Gram("foobar", 3, Gram.Type.UNIGRAM), bar);
 
@@ -86,6 +84,7 @@ public class GramKeyTest {
     DataOutputStream out = new DataOutputStream(bout);
     
     two.write(out);
+    out.close();
     
     byte[] b = bout.toByteArray();
     
@@ -93,6 +92,7 @@ public class GramKeyTest {
     DataInputStream din = new DataInputStream(bin);
     
     one.readFields(din);
+    din.close();
 
     Assert.assertTrue(Arrays.equals(two.getBytes(), one.getBytes()));
     Assert.assertEquals(Gram.Type.UNIGRAM, one.getType());
