@@ -107,7 +107,9 @@ public final class RecommenderJob extends AbstractJob {
     recommenderConf.set(RecommenderMapper.COOCCURRENCE_PATH, cooccurrencePath);
     recommenderConf.set(RecommenderMapper.ITEMID_INDEX_PATH, itemIDIndexPath);
     recommenderConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
-    recommenderConf.set(RecommenderMapper.USERS_FILE, usersFile);
+    if (usersFile != null) {
+      recommenderConf.set(RecommenderMapper.USERS_FILE, usersFile);
+    }
     recommenderConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
     JobClient.runJob(recommenderConf);
     return 0;
