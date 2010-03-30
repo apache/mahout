@@ -164,12 +164,16 @@ public final class RecommenderMapper extends MapReduceBase implements
     
     @Override
     public Vector get(IntWritable key) throws TasteException {
-      Vector value;
+      VectorWritable writable;
       try {
-        value = map.get(key, columnVector).get();
+        writable = map.get(key, columnVector);
       } catch (IOException ioe) {
         throw new TasteException(ioe);
       }
+      if (writable == null) {
+        return null;
+      }
+      Vector value = writable.get();
       if (value == null) {
         return null;
       }
