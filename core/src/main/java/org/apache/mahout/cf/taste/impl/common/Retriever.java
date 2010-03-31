@@ -29,7 +29,7 @@ public interface Retriever<K,V> {
   /**
    * @param key
    *          key for which a value should be retrieved
-   * @return value for key
+   * @return value for key. Implementations should not return null.
    * @throws TasteException
    *           if an error occurs while retrieving the value
    */

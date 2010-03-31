@@ -171,11 +171,11 @@ public final class RecommenderMapper extends MapReduceBase implements
         throw new TasteException(ioe);
       }
       if (writable == null) {
-        return null;
+        throw new TasteException("Could not load column vector from map files");
       }
       Vector value = writable.get();
       if (value == null) {
-        return null;
+        throw new TasteException("Vector in map file was empty?");
       }
       columnVector = new VectorWritable();
       columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));
