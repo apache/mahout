@@ -49,16 +49,15 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     
     String prefsFile = parsedArgs.get("--input");
     String outputPath = parsedArgs.get("--output");
-    String jarFile = parsedArgs.get("--jarFile");
     String averagesOutputPath = parsedArgs.get("--tempDir");
     
-    JobConf prefsToDiffsJobConf = AbstractJob.prepareJobConf(prefsFile, averagesOutputPath, jarFile,
+    JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile, averagesOutputPath,
       TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, ItemPrefWritable.class,
       SlopeOnePrefsToDiffsReducer.class, ItemItemWritable.class, FloatWritable.class,
       SequenceFileOutputFormat.class);
     JobClient.runJob(prefsToDiffsJobConf);
     
-    JobConf diffsToAveragesJobConf = AbstractJob.prepareJobConf(averagesOutputPath, outputPath, jarFile,
+    JobConf diffsToAveragesJobConf = prepareJobConf(averagesOutputPath, outputPath,
       SequenceFileInputFormat.class, IdentityMapper.class, ItemItemWritable.class, FloatWritable.class,
       SlopeOneDiffsToAveragesReducer.class, ItemItemWritable.class, FloatWritable.class,
       TextOutputFormat.class);

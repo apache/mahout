@@ -30,7 +30,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
@@ -46,22 +46,10 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractJob implements Tool {
+public abstract class AbstractJob extends Configured implements Tool {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractJob.class);
-  
-  private Configuration configuration;
-  
-  @Override
-  public Configuration getConf() {
-    return configuration;
-  }
-  
-  @Override
-  public void setConf(Configuration configuration) {
-    this.configuration = configuration;
-  }
-  
+
   protected static Option buildOption(String name, String shortName, String description) {
     return buildOption(name, shortName, description, true, null);
   }
@@ -90,10 +78,9 @@ public abstract class AbstractJob implements Tool {
     Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", "temp");
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    Option jarFileOpt = buildOption("jarFile", "m", "Implementation jar", false, null);
-    
+
     GroupBuilder gBuilder = new GroupBuilder().withName("Options").withOption(inputOpt)
-        .withOption(tempDirOpt).withOption(outputOpt).withOption(helpOpt).withOption(jarFileOpt);
+        .withOption(tempDirOpt).withOption(outputOpt).withOption(helpOpt);
     
     for (Option opt : extraOpts) {
       gBuilder = gBuilder.withOption(opt);
@@ -118,7 +105,7 @@ public abstract class AbstractJob implements Tool {
     }
     
     Map<String,String> result = new HashMap<String,String>();
-    maybePut(result, cmdLine, inputOpt, tempDirOpt, outputOpt, helpOpt, jarFileOpt);
+    maybePut(result, cmdLine, inputOpt, tempDirOpt, outputOpt, helpOpt);
     maybePut(result, cmdLine, extraOpts);
     
     return result;
@@ -133,28 +120,22 @@ public abstract class AbstractJob implements Tool {
     }
   }
   
-  protected static JobConf prepareJobConf(String inputPath,
-                                          String outputPath,
-                                          String jarFile,
-                                          Class<? extends InputFormat> inputFormat,
-                                          Class<? extends Mapper> mapper,
-                                          Class<? extends Writable> mapperKey,
-                                          Class<? extends Writable> mapperValue,
-                                          Class<? extends Reducer> reducer,
-                                          Class<? extends Writable> reducerKey,
-                                          Class<? extends Writable> reducerValue,
-                                          Class<? extends OutputFormat> outputFormat) throws IOException {
+  protected JobConf prepareJobConf(String inputPath,
+                                   String outputPath,
+                                   Class<? extends InputFormat> inputFormat,
+                                   Class<? extends Mapper> mapper,
+                                   Class<? extends Writable> mapperKey,
+                                   Class<? extends Writable> mapperValue,
+                                   Class<? extends Reducer> reducer,
+                                   Class<? extends Writable> reducerKey,
+                                   Class<? extends Writable> reducerValue,
+                                   Class<? extends OutputFormat> outputFormat) throws IOException {
     
-    JobConf jobConf = new JobConf();
+    JobConf jobConf = new JobConf(getConf(), mapper);
     FileSystem fs = FileSystem.get(jobConf);
     
     Path inputPathPath = new Path(inputPath).makeQualified(fs);
     Path outputPathPath = new Path(outputPath).makeQualified(fs);
-
-    if(jarFile != null) {
-      jobConf.set("mapred.jar", jarFile);
-      jobConf.setJar(jarFile);
-    }
     
     jobConf.setClass("mapred.input.format.class", inputFormat, InputFormat.class);
     jobConf.set("mapred.input.dir", StringUtils.escapeString(inputPathPath.toString()));

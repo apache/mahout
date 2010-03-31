@@ -41,7 +41,6 @@ public class TextParagraphSplittingJob extends AbstractJob {
     Map<String,String> args = parseArguments(strings);
     JobConf conf = prepareJobConf(args.get("--input"),
                                   args.get("--output"),
-                                  args.get("--jarFile"),
                                   SequenceFileInputFormat.class,
                                   SplitMap.class,
                                   Text.class,

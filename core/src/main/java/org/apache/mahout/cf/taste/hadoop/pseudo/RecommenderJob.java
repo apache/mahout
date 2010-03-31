@@ -114,7 +114,6 @@ public final class RecommenderJob extends AbstractJob {
     }
     String inputFile = parsedArgs.get("--input");
     String outputPath = parsedArgs.get("--output");
-    String jarFile = parsedArgs.get("--jarFile");
     String usersFile = parsedArgs.get("--usersFile");
     if (usersFile == null) {
       usersFile = inputFile;
@@ -123,7 +122,7 @@ public final class RecommenderJob extends AbstractJob {
     String recommendClassName = parsedArgs.get("--recommenderClassName");
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     
-    JobConf jobConf = AbstractJob.prepareJobConf(usersFile, outputPath, jarFile, TextInputFormat.class,
+    JobConf jobConf = prepareJobConf(usersFile, outputPath, TextInputFormat.class,
       UserIDsMapper.class, LongWritable.class, NullWritable.class, RecommenderReducer.class,
       LongWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
     

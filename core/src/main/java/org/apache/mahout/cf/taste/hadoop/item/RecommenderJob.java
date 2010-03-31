@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.cli2.Option;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
@@ -76,7 +77,6 @@ public final class RecommenderJob extends AbstractJob {
     String inputPath = parsedArgs.get("--input");
     String tempDirPath = parsedArgs.get("--tempDir");
     String outputPath = parsedArgs.get("--output");
-    String jarFile = parsedArgs.get("--jarFile");
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");
     
@@ -84,23 +84,23 @@ public final class RecommenderJob extends AbstractJob {
     String itemIDIndexPath = tempDirPath + "/itemIDIndex";
     String cooccurrencePath = tempDirPath + "/cooccurrence";
     
-    JobConf itemIDIndexConf = AbstractJob.prepareJobConf(inputPath, itemIDIndexPath, jarFile,
+    JobConf itemIDIndexConf = prepareJobConf(inputPath, itemIDIndexPath,
       TextInputFormat.class, ItemIDIndexMapper.class, IntWritable.class, LongWritable.class,
       ItemIDIndexReducer.class, IntWritable.class, LongWritable.class, MapFileOutputFormat.class);
     JobClient.runJob(itemIDIndexConf);
     
-    JobConf toUserVectorConf = AbstractJob.prepareJobConf(inputPath, userVectorPath, jarFile,
+    JobConf toUserVectorConf = prepareJobConf(inputPath, userVectorPath,
       TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, ItemPrefWritable.class,
       ToUserVectorReducer.class, LongWritable.class, VectorWritable.class, SequenceFileOutputFormat.class);
     JobClient.runJob(toUserVectorConf);
     
-    JobConf toCooccurrenceConf = AbstractJob.prepareJobConf(userVectorPath, cooccurrencePath, jarFile,
+    JobConf toCooccurrenceConf = prepareJobConf(userVectorPath, cooccurrencePath,
       SequenceFileInputFormat.class, UserVectorToCooccurrenceMapper.class, IntWritable.class,
       IntWritable.class, UserVectorToCooccurrenceReducer.class, IntWritable.class, VectorWritable.class,
       MapFileOutputFormat.class);
     JobClient.runJob(toCooccurrenceConf);
     
-    JobConf recommenderConf = AbstractJob.prepareJobConf(userVectorPath, outputPath, jarFile,
+    JobConf recommenderConf = prepareJobConf(userVectorPath, outputPath,
       SequenceFileInputFormat.class, RecommenderMapper.class, LongWritable.class,
       RecommendedItemsWritable.class, IdentityReducer.class, LongWritable.class,
       RecommendedItemsWritable.class, TextOutputFormat.class);
@@ -116,7 +116,7 @@ public final class RecommenderJob extends AbstractJob {
   }
   
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new RecommenderJob(), args);
+    ToolRunner.run(new Configuration(), new RecommenderJob(), args);
   }
   
 }
