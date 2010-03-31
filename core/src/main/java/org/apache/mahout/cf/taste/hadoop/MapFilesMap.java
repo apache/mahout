@@ -30,6 +30,8 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a series of {@link MapFile}s, from which one might want to look up values based on keys. It just
@@ -37,6 +39,8 @@ import org.apache.hadoop.io.WritableComparable;
  */
 @SuppressWarnings("unchecked")
 public final class MapFilesMap<K extends WritableComparable,V extends Writable> implements Closeable {
+
+  private static final Logger log = LoggerFactory.getLogger(MapFilesMap.class);
   
   private static final PathFilter PARTS_FILTER = new PathFilter() {
     @Override
@@ -48,10 +52,13 @@ public final class MapFilesMap<K extends WritableComparable,V extends Writable> 
   private final List<MapFile.Reader> readers;
   
   public MapFilesMap(FileSystem fs, Path parentDir, Configuration conf) throws IOException {
+    log.info("Creating MapFileMap from parent directory {}", parentDir);
     readers = new ArrayList<MapFile.Reader>();
     try {
       for (FileStatus status : fs.listStatus(parentDir, PARTS_FILTER)) {
-        readers.add(new MapFile.Reader(fs, status.getPath().toString(), conf));
+        String path = status.getPath().toString();
+        log.info("Adding MapFile.Reader at {}", path);
+        readers.add(new MapFile.Reader(fs, path, conf));
       }
     } catch (IOException ioe) {
       close();
@@ -71,6 +78,7 @@ public final class MapFilesMap<K extends WritableComparable,V extends Writable> 
         return value;
       }
     }
+    log.debug("No value for key {}", key);
     return null;
   }
   
