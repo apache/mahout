@@ -17,6 +17,7 @@
 
 package org.apache.mahout.text;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -31,16 +32,14 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.AbstractJob;
 
 import java.io.IOException;
-import java.util.Map;
-
 
 public class TextParagraphSplittingJob extends AbstractJob {
 
   @Override
   public int run(String[] strings) throws Exception {
-    Map<String,String> args = parseArguments(strings);
-    JobConf conf = prepareJobConf(args.get("--input"),
-                                  args.get("--output"),
+    Configuration originalConf = getConf();
+    JobConf conf = prepareJobConf(originalConf.get("mapred.input.dir"),
+                                  originalConf.get("mapred.output.dir"),
                                   SequenceFileInputFormat.class,
                                   SplitMap.class,
                                   Text.class,

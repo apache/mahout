@@ -67,7 +67,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
   @Override
   public int run(String[] strings) throws Exception {
-    String inputPathString = parsedArgs.get("--input");
+    Configuration originalConfig = getConf();
+    String inputPathString = originalConfig.get("mapred.input.dir");
     String outputTmpPathString = parsedArgs.get("--tempDir");
     int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
@@ -75,13 +76,13 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     int desiredRank = Integer.parseInt(parsedArgs.get("--rank"));
     Matrix eigenVectors = new DenseMatrix(desiredRank, numCols);
     List<Double> eigenValues = new ArrayList<Double>();
-    String outputEigenVectorPath =  parsedArgs.get("--output");
+    String outputEigenVectorPath =  originalConfig.get("mapred.output.dir");
     
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPathString,
                                                            outputTmpPathString,
                                                            numRows,
                                                            numCols);
-    matrix.configure(new JobConf(getConf()));
+    matrix.configure(new JobConf(originalConfig));
     solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
 
     serializeOutput(eigenVectors, eigenValues, outputEigenVectorPath);  
@@ -96,7 +97,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * @throws IOException
    */
   public void serializeOutput(Matrix eigenVectors, List<Double> eigenValues, String outputPath) throws IOException {
-    log.info("Persisting " + eigenVectors.numRows() + " eigenVectors and eigenValues to: " + outputPath);
+    log.info("Persisting {} eigenVectors and eigenValues to: {}", eigenVectors.numRows(), outputPath);
     Path path = new Path(outputPath);
     Configuration conf = getConf();
     FileSystem fs = FileSystem.get(conf);

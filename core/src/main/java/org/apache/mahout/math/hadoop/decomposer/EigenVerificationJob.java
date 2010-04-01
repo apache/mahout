@@ -102,7 +102,8 @@ public class EigenVerificationJob extends AbstractJob {
     } else if (argMap.isEmpty()) {
       return 0;
     }
-    outPath = argMap.get("--output");
+    Configuration originalConf = getConf();
+    outPath = originalConf.get("mapred.output.class");
     tmpOut = outPath + "/tmp";
 
     if(argMap.get("--eigenInput") != null && eigensToVerify == null) {

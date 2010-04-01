@@ -42,23 +42,19 @@ import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * Runs a completely distributed recommender job as a series of mapreduces.</p>
+ * <p>Runs a completely distributed recommender job as a series of mapreduces.</p>
  * 
- * <p>
- * Command line arguments are:
- * </p>
+ * <p>Command line arguments specific to this class are:</p>
  * 
  * <ol>
- * <li>numRecommendations: Number of recommendations to compute per user (optional; default 10)</li>
- * <li>input: Directory containing a text file containing user IDs for which recommendations should be
+ * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
+ * <li>-Dmapred.input.dir=(path): Directory containing a text file containing user IDs for which recommendations should be
  * computed, one per line</li>
- * <li>output: output path where recommender output should go</li>
- * <li>jarFile: JAR file containing implementation code</li>
- * <li>tempDir: directory in which to place intermediate data files (optional; default "temp")</li>
- * <li>usersFile: file containing user IDs to recommend for (optional)</li>
+ * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
+ * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * </ol>
- * 
- * @see org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob
+ *
+ * <p>General command line options are documented in {@link AbstractJob}.</p>
  */
 public final class RecommenderJob extends AbstractJob {
   
@@ -74,9 +70,10 @@ public final class RecommenderJob extends AbstractJob {
       return -1;
     }
     
-    String inputPath = parsedArgs.get("--input");
+    Configuration originalConf = getConf();
+    String inputPath = originalConf.get("mapred.input.dir");
+    String outputPath = originalConf.get("mapred.output.dir");
     String tempDirPath = parsedArgs.get("--tempDir");
-    String outputPath = parsedArgs.get("--output");
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");
     

@@ -46,6 +46,28 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>Superclass of many Mahout Hadoop "jobs". A job drives configuration and launch of one or
+ * more maps and reduces in order to accomplish some task.</p>
+ *
+ * <p>Command line arguments available to all subclasses are:</p>
+ *
+ * <ul>
+ *  <li>--tempDir (path): Specifies a directory where the job may place temp files
+ *   (default "temp")</li>
+ *  <li>--help: Show help message</li>
+ * </ul>
+ *
+ * <p>In addition, note some key command line parameters that are parsed by Hadoop, which jobs
+ * may need to set:</p>
+ *
+ * <ul>
+ *  <li>-Dmapred.job.name=(name): Sets the Hadoop task names. It will be suffixed by the Job class name</li>
+ *  <li>-Dmapred.output.compress={true,false}: Compress final output (default true)</li>
+ *  <li>-Dmapred.input.dir=(path): input file, or directory containing input files (required)</li>
+ *  <li>-Dmapred.output.dir=(path): path to write output files (required)</li>
+ * </ul>
+ */
 public abstract class AbstractJob extends Configured implements Tool {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractJob.class);
@@ -74,13 +96,12 @@ public abstract class AbstractJob extends Configured implements Tool {
   
   protected static Map<String,String> parseArguments(String[] args, Option... extraOpts) {
     
-    Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", "temp");
-    Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    GroupBuilder gBuilder = new GroupBuilder().withName("Options").withOption(inputOpt)
-        .withOption(tempDirOpt).withOption(outputOpt).withOption(helpOpt);
+    GroupBuilder gBuilder = new GroupBuilder().withName("Options")
+        .withOption(tempDirOpt)
+        .withOption(helpOpt);
     
     for (Option opt : extraOpts) {
       gBuilder = gBuilder.withOption(opt);
@@ -105,7 +126,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
     
     Map<String,String> result = new HashMap<String,String>();
-    maybePut(result, cmdLine, inputOpt, tempDirOpt, outputOpt, helpOpt);
+    maybePut(result, cmdLine, tempDirOpt, helpOpt);
     maybePut(result, cmdLine, extraOpts);
     
     return result;
@@ -131,13 +152,14 @@ public abstract class AbstractJob extends Configured implements Tool {
                                    Class<? extends Writable> reducerValue,
                                    Class<? extends OutputFormat> outputFormat) throws IOException {
     
-    JobConf jobConf = new JobConf(getConf(), mapper);
+    JobConf jobConf = new JobConf(getConf(), getClass());
     FileSystem fs = FileSystem.get(jobConf);
     
     Path inputPathPath = new Path(inputPath).makeQualified(fs);
     Path outputPathPath = new Path(outputPath).makeQualified(fs);
     
     jobConf.setClass("mapred.input.format.class", inputFormat, InputFormat.class);
+    // Override this:
     jobConf.set("mapred.input.dir", StringUtils.escapeString(inputPathPath.toString()));
     
     jobConf.setClass("mapred.mapper.class", mapper, Mapper.class);
@@ -147,9 +169,17 @@ public abstract class AbstractJob extends Configured implements Tool {
     jobConf.setClass("mapred.reducer.class", reducer, Reducer.class);
     jobConf.setClass("mapred.output.key.class", reducerKey, Writable.class);
     jobConf.setClass("mapred.output.value.class", reducerValue, Writable.class);
-    jobConf.setBoolean("mapred.output.compress", true);
-    
+    if (jobConf.get("mapred.output.compress") == null) {
+      jobConf.setBoolean("mapred.output.compress", true);
+      // otherwise leave it to its default value
+    }
+    String customJobName = jobConf.get("mapred.job.name");
+    if (customJobName != null) {
+      jobConf.set("mapred.job.name", customJobName + '-' + getClass().getSimpleName());
+    }
+
     jobConf.setClass("mapred.output.format.class", outputFormat, OutputFormat.class);
+    // Override this:    
     jobConf.set("mapred.output.dir", StringUtils.escapeString(outputPathPath.toString()));
     
     return jobConf;

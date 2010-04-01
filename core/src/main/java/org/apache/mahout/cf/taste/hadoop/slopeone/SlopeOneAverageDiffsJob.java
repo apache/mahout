@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.hadoop.slopeone;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
@@ -47,8 +48,9 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
       return -1;
     }
     
-    String prefsFile = parsedArgs.get("--input");
-    String outputPath = parsedArgs.get("--output");
+    Configuration originalConf = getConf();
+    String prefsFile = originalConf.get("mapred.input.dir");
+    String outputPath = originalConf.get("mapred.output.dir");
     String averagesOutputPath = parsedArgs.get("--tempDir");
     
     JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile, averagesOutputPath,

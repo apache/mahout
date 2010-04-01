@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.cli2.Option;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
@@ -40,25 +41,22 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
  * {@link Recommender} instances on Hadoop, where each instance is a normal non-distributed implementation.
  * </p>
  * 
- * <p>
- * This class configures and runs a {@link RecommenderReducer} using Hadoop.
- * </p>
+ * <p>This class configures and runs a {@link RecommenderReducer} using Hadoop.</p>
  * 
- * <p>
- * Command line arguments are:
- * </p>
+ * <p>Command line arguments specific to this class are:</p>
  * 
  * <ol>
- * <li>recommenderClassName: Fully-qualified class name of {@link Recommender} to use to make recommendations.
+ * <li>--recommenderClassName (string): Fully-qualified class name of {@link Recommender} to use to make recommendations.
  * Note that it must have a constructor which takes a {@link org.apache.mahout.cf.taste.model.DataModel}
  * argument.</li>
- * <li>numRecommendations: Number of recommendations to compute per user</li>
- * <li>input: Location of a data model file containing preference data, suitable for use with
+ * <li>--numRecommendations (integer): Number of recommendations to compute per user</li>
+ * <li>-Dmapred.input.dir=(path): Location of a data model file containing preference data, suitable for use with
  * {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
- * <li>output: output path where recommender output should go</li>
- * <li>jarFile: JAR file containing implementation code</li>
- * <li>usersFile: file containing user IDs to recommend for (optional)</li>
+ * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
+ * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * </ol>
+ *
+ * <p>General command line options are documented in {@link AbstractJob}.</p>
  * 
  * <p>
  * For example, to get started trying this out, set up Hadoop in a pseudo-distributed manner:
@@ -92,8 +90,8 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
  * </p>
  * 
  * {@code hadoop jar recommender.jar org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob \
- * --recommenderClassName your.project.Recommender \ --numRecommendations 10 --input input/users.csv \
- * --output output --jarFile recommender.jar * }
+ * --recommenderClassName your.project.Recommender \ --numRecommendations 10 -Dmapred.input.dir=input/users.csv \
+ * -Dmapred.output.dir=output * }
  */
 public final class RecommenderJob extends AbstractJob {
   
@@ -112,8 +110,10 @@ public final class RecommenderJob extends AbstractJob {
     if (parsedArgs == null) {
       return -1;
     }
-    String inputFile = parsedArgs.get("--input");
-    String outputPath = parsedArgs.get("--output");
+
+    Configuration originalConf = getConf();
+    String inputFile = originalConf.get("mapred.input.dir");
+    String outputPath = originalConf.get("mapred.output.dir");
     String usersFile = parsedArgs.get("--usersFile");
     if (usersFile == null) {
       usersFile = inputFile;
