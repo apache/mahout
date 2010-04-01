@@ -30,6 +30,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.fpm.pfpgrowth.convertors.ContextStatusUpdater;
@@ -83,5 +84,31 @@ public class FPGrowthTest extends MahoutTestCase {
           + "(B,([B],6), ([A, B],4), ([B, D],4), ([A, B, D],3), ([A, B, E],3), ([B, C],3))]",
       frequentPatterns.toString());
 
+  }
+
+  /**
+   * Trivial test for MAHOUT-355
+   */
+  public void testNoNullPointerExceptionWhenReturnableFeaturesIsNull() throws IOException {
+
+    FPGrowth<String> fp = new FPGrowth<String>();
+
+    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("E", "A", "D", "B"), 1L));
+
+    OutputCollector<String, List<Pair<List<String>, Long>>> noOutput = new OutputCollector<String,List<Pair<List<String>,Long>>>() {
+      @Override
+      public void collect(String arg0, List<Pair<List<String>, Long>> arg1) { 
+      }
+    };
+
+    fp.generateTopKFrequentPatterns(
+        transactions.iterator(),
+        fp.generateFList(transactions.iterator(), 3),
+        3,
+        100,
+        null,
+        noOutput,
+        new ContextStatusUpdater(null));
   }
 }
