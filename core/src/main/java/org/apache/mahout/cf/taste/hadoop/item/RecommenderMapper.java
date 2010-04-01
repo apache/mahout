@@ -116,7 +116,9 @@ public final class RecommenderMapper extends MapReduceBase implements
           throw new IOException(te.getCause());
         }
       }
-      columnVector.times(value).addTo(recommendationVector);
+      if (columnVector != null) {
+        columnVector.times(value).addTo(recommendationVector);
+      }
     }
     
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
@@ -171,11 +173,11 @@ public final class RecommenderMapper extends MapReduceBase implements
         throw new TasteException(ioe);
       }
       if (writable == null) {
-        throw new TasteException("Could not load column vector from map files");
+        return null;
       }
       Vector value = writable.get();
       if (value == null) {
-        throw new TasteException("Vector in map file was empty?");
+        throw new IllegalStateException("Vector in map file was empty?");
       }
       columnVector = new VectorWritable();
       columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));

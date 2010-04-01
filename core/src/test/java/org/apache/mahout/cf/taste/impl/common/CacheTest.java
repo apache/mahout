@@ -52,9 +52,6 @@ public final class CacheTest extends TasteTestCase {
   private static class IdentityRetriever implements Retriever<Object,Object> {
     @Override
     public Object get(Object key) throws TasteException {
-      if (key == null) {
-        throw new TasteException("key is null");
-      }
       return key;
     }
   }

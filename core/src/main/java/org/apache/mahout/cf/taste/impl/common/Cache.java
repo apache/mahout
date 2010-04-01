@@ -27,7 +27,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
  * </p>
  * 
  * <p>
- * The cache does not support <code>null</code> values or keys.
+ * The cache does not support <code>null</code> keys.
  * </p>
  * 
  * <p>
@@ -36,6 +36,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
  * </p>
  */
 public final class Cache<K,V> implements Retriever<K,V> {
+
+  private static final Object NULL = new Object();
   
   private final FastMap<K,V> cache;
   private final Retriever<? super K,? extends V> retriever;
@@ -93,7 +95,7 @@ public final class Cache<K,V> implements Retriever<K,V> {
     if (value == null) {
       return getAndCacheValue(key);
     }
-    return value;
+    return value == NULL ? null : value;
   }
   
   /**
@@ -124,7 +126,7 @@ public final class Cache<K,V> implements Retriever<K,V> {
   private V getAndCacheValue(K key) throws TasteException {
     V value = retriever.get(key);
     synchronized (cache) {
-      cache.put(key, value);
+      cache.put(key, value == null ? (V) NULL : value);
     }
     return value;
   }

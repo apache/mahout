@@ -27,11 +27,9 @@ import org.apache.mahout.cf.taste.common.TasteException;
 public interface Retriever<K,V> {
   
   /**
-   * @param key
-   *          key for which a value should be retrieved
-   * @return value for key. Implementations should not return null.
-   * @throws TasteException
-   *           if an error occurs while retrieving the value
+   * @param key key for which a value should be retrieved
+   * @return value for key
+   * @throws TasteException if an error occurs while retrieving the value
    */
   V get(K key) throws TasteException;
   
