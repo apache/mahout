@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.common;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -41,7 +41,6 @@ import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.Tool;
-import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,8 @@ import org.slf4j.LoggerFactory;
  * may need to set:</p>
  *
  * <ul>
- *  <li>-Dmapred.job.name=(name): Sets the Hadoop task names. It will be suffixed by the Job class name</li>
+ *  <li>-Dmapred.job.name=(name): Sets the Hadoop task names. It will be suffixed by
+ *    the mapper and reducer class names</li>
  *  <li>-Dmapred.output.compress={true,false}: Compress final output (default true)</li>
  *  <li>-Dmapred.input.dir=(path): input file, or directory containing input files (required)</li>
  *  <li>-Dmapred.output.dir=(path): path to write output files (required)</li>
@@ -175,7 +175,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
     String customJobName = jobConf.get("mapred.job.name");
     if (customJobName != null) {
-      jobConf.set("mapred.job.name", customJobName + '-' + getClass().getSimpleName());
+      jobConf.set("mapred.job.name", customJobName + '-' + mapper.getSimpleName() + '-' + reducer.getSimpleName());
     }
 
     jobConf.setClass("mapred.output.format.class", outputFormat, OutputFormat.class);
