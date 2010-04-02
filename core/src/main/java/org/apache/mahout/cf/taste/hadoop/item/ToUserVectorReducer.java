@@ -23,11 +23,13 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.ItemWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -56,26 +58,38 @@ import org.apache.mahout.math.VectorWritable;
  * 
  */
 public final class ToUserVectorReducer extends MapReduceBase implements
-    Reducer<LongWritable,ItemPrefWritable,LongWritable,VectorWritable> {
+    Reducer<LongWritable,ItemWritable,LongWritable,VectorWritable> {
   
   public static final int MAX_PREFS_CONSIDERED = 20;
   
   private final VectorWritable vectorWritable = new VectorWritable();
+  private boolean booleanData;
+
+  @Override
+  public void configure(JobConf jobConf) {
+    booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
+  }
   
   @Override
   public void reduce(LongWritable userID,
-                     Iterator<ItemPrefWritable> itemPrefs,
+                     Iterator<ItemWritable> itemPrefs,
                      OutputCollector<LongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (itemPrefs.hasNext()) {
       RandomAccessSparseVector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
       while (itemPrefs.hasNext()) {
-        ItemPrefWritable itemPref = itemPrefs.next();
+        ItemWritable itemPref = itemPrefs.next();
         int index = ItemIDIndexMapper.idToIndex(itemPref.getItemID());
-        userVector.set(index, itemPref.getPrefValue());
+        float value;
+        if (itemPref instanceof ItemPrefWritable) {
+          value = ((ItemPrefWritable) itemPref).getPrefValue();
+        } else {
+          value = 1.0f;
+        }
+        userVector.set(index, value);
       }
       
-      if (userVector.getNumNondefaultElements() > MAX_PREFS_CONSIDERED) {
+      if (!booleanData && userVector.getNumNondefaultElements() > MAX_PREFS_CONSIDERED) {
         double cutoff = findTopNPrefsCutoff(MAX_PREFS_CONSIDERED,
           userVector);
         RandomAccessSparseVector filteredVector = new RandomAccessSparseVector(Integer.MAX_VALUE,

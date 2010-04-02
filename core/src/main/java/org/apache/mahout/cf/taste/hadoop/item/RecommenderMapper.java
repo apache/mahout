@@ -62,6 +62,7 @@ public final class RecommenderMapper extends MapReduceBase implements
   private MapFilesMap<IntWritable,VectorWritable> cooccurrenceColumnMap;
   private Cache<IntWritable,Vector> cooccurrenceColumnCache;
   private FastIDSet usersToRecommendFor;
+  private boolean booleanData;
   
   @Override
   public void configure(JobConf jobConf) {
@@ -88,6 +89,7 @@ public final class RecommenderMapper extends MapReduceBase implements
       throw new IllegalStateException(ioe);
     }
     cooccurrenceColumnCache = new Cache<IntWritable,Vector>(new CooccurrenceCache(cooccurrenceColumnMap), 100);
+    booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
   }
   
   @Override
@@ -105,7 +107,6 @@ public final class RecommenderMapper extends MapReduceBase implements
     while (userVectorIterator.hasNext()) {
       Vector.Element element = userVectorIterator.next();
       int index = element.index();
-      double value = element.get();
       Vector columnVector;
       try {
         columnVector = cooccurrenceColumnCache.get(new IntWritable(index));
@@ -117,7 +118,12 @@ public final class RecommenderMapper extends MapReduceBase implements
         }
       }
       if (columnVector != null) {
-        columnVector.times(value).addTo(recommendationVector);
+        if (booleanData) { // because 'value' is 1.0
+          columnVector.addTo(recommendationVector);
+        } else {
+          double value = element.get();          
+          columnVector.times(value).addTo(recommendationVector);
+        }
       }
     }
     

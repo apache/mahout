@@ -22,10 +22,12 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.hadoop.item.RecommenderJob;
 
 /**
  * <h1>Input</h1>
@@ -48,20 +50,31 @@ import org.apache.hadoop.mapred.Reporter;
  * </p>
  */
 public final class ToItemPrefsMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,LongWritable,ItemPrefWritable> {
+    Mapper<LongWritable,Text,LongWritable,ItemWritable> {
   
   private static final Pattern COMMA = Pattern.compile(",");
+
+  private boolean booleanData;
+
+  @Override
+  public void configure(JobConf jobConf) {
+    booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
+  }
   
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<LongWritable,ItemPrefWritable> output,
+                  OutputCollector<LongWritable,ItemWritable> output,
                   Reporter reporter) throws IOException {
     String[] tokens = ToItemPrefsMapper.COMMA.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
-    float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
-    output.collect(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
+    if (booleanData) {
+      output.collect(new LongWritable(userID), new ItemWritable(itemID));      
+    } else {
+      float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
+      output.collect(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
+    }
   }
   
 }

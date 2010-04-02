@@ -35,6 +35,7 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.hadoop.ItemWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
@@ -52,6 +53,7 @@ import org.apache.mahout.math.VectorWritable;
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
+ * <li>--booleanData (boolean): Treat input data as having to pref values (false)</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
@@ -60,15 +62,21 @@ import org.apache.mahout.math.VectorWritable;
  * arguments.</p>
  */
 public final class RecommenderJob extends AbstractJob {
+
+  public static final String BOOLEAN_DATA = "booleanData";
   
   @Override
   public int run(String[] args) throws IOException {
     
     Option numReccomendationsOpt = AbstractJob.buildOption("numRecommendations", "n",
       "Number of recommendations per user", "10");
-    Option usersFileOpt = AbstractJob.buildOption("usersFile", "u", "File of users to recommend for", null);
-    
-    Map<String,String> parsedArgs = AbstractJob.parseArguments(args, numReccomendationsOpt, usersFileOpt);
+    Option usersFileOpt = AbstractJob.buildOption("usersFile", "u",
+      "File of users to recommend for", null);
+    Option booleanDataOpt = AbstractJob.buildOption("booleanData", "b",
+      "Treat input as without pref values", Boolean.FALSE.toString());
+
+    Map<String,String> parsedArgs = AbstractJob.parseArguments(
+        args, numReccomendationsOpt, usersFileOpt, booleanDataOpt);
     if (parsedArgs == null) {
       return -1;
     }
@@ -79,6 +87,7 @@ public final class RecommenderJob extends AbstractJob {
     String tempDirPath = parsedArgs.get("--tempDir");
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");
+    boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
     
     String userVectorPath = tempDirPath + "/userVectors";
     String itemIDIndexPath = tempDirPath + "/itemIDIndex";
@@ -90,8 +99,10 @@ public final class RecommenderJob extends AbstractJob {
     JobClient.runJob(itemIDIndexConf);
     
     JobConf toUserVectorConf = prepareJobConf(inputPath, userVectorPath,
-      TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, ItemPrefWritable.class,
+      TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class,
+      booleanData ? ItemWritable.class : ItemPrefWritable.class,
       ToUserVectorReducer.class, LongWritable.class, VectorWritable.class, SequenceFileOutputFormat.class);
+    toUserVectorConf.setBoolean(BOOLEAN_DATA, booleanData);
     JobClient.runJob(toUserVectorConf);
     
     JobConf toCooccurrenceConf = prepareJobConf(userVectorPath, cooccurrencePath,
@@ -104,6 +115,7 @@ public final class RecommenderJob extends AbstractJob {
       SequenceFileInputFormat.class, RecommenderMapper.class, LongWritable.class,
       RecommendedItemsWritable.class, IdentityReducer.class, LongWritable.class,
       RecommendedItemsWritable.class, TextOutputFormat.class);
+    recommenderConf.setBoolean(BOOLEAN_DATA, booleanData);    
     recommenderConf.set(RecommenderMapper.COOCCURRENCE_PATH, cooccurrencePath);
     recommenderConf.set(RecommenderMapper.ITEMID_INDEX_PATH, itemIDIndexPath);
     recommenderConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
