@@ -110,6 +110,9 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector divide(double x) {
+    if (x == 1.0) {
+      return clone();
+    }
     Vector result = clone();
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
@@ -314,6 +317,9 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector plus(double x) {
+    if (x == 0.0) {
+      return clone();
+    }
     Vector result = clone();
     int size = result.size();
     for (int i = 0; i < size; i++) {
@@ -355,6 +361,12 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector times(double x) {
+    if (x == 1.0) {
+      return clone();
+    }
+    if (x == 0.0) {
+      return like();
+    }
     Vector result = clone();
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
