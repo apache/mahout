@@ -67,6 +67,9 @@ import org.slf4j.LoggerFactory;
  *  <li>-Dmapred.input.dir=(path): input file, or directory containing input files (required)</li>
  *  <li>-Dmapred.output.dir=(path): path to write output files (required)</li>
  * </ul>
+ *
+ * <p>Note that because of how Hadoop parses arguments, all "-D" arguments must appear before all other
+ * arguments.</p>
  */
 public abstract class AbstractJob extends Configured implements Tool {
   

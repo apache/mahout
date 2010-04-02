@@ -47,14 +47,17 @@ import org.apache.mahout.math.VectorWritable;
  * <p>Command line arguments specific to this class are:</p>
  * 
  * <ol>
- * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
  * <li>-Dmapred.input.dir=(path): Directory containing a text file containing user IDs for which recommendations should be
  * computed, one per line</li>
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
+ * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
+ *
+ * <p>Note that because of how Hadoop parses arguments, all "-D" arguments must appear before all other
+ * arguments.</p>
  */
 public final class RecommenderJob extends AbstractJob {
   

@@ -46,17 +46,20 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
  * <p>Command line arguments specific to this class are:</p>
  * 
  * <ol>
+ * <li>-Dmapred.input.dir=(path): Location of a data model file containing preference data, suitable for use with
+ * {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
+ * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
  * <li>--recommenderClassName (string): Fully-qualified class name of {@link Recommender} to use to make recommendations.
  * Note that it must have a constructor which takes a {@link org.apache.mahout.cf.taste.model.DataModel}
  * argument.</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user</li>
- * <li>-Dmapred.input.dir=(path): Location of a data model file containing preference data, suitable for use with
- * {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
- * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
+ *
+ * <p>Note that because of how Hadoop parses arguments, all "-D" arguments must appear before all other
+ * arguments.</p>
  * 
  * <p>
  * For example, to get started trying this out, set up Hadoop in a pseudo-distributed manner:
@@ -70,7 +73,7 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
  * HDFS like so:
  * </p>
  * 
- * {@code hadoop fs -put input.csv input/input.csv hadoop fs -put users.txt input/users.txt * }
+ * {@code hadoop fs -put input.csv input/input.csv; hadoop fs -put users.txt input/users.txt * }
  * 
  * <p>
  * Build Mahout code with <code>mvn package</code> in the core/ directory. Locate
@@ -89,9 +92,13 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
  * And launch:
  * </p>
  * 
- * {@code hadoop jar recommender.jar org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob \
- * --recommenderClassName your.project.Recommender \ --numRecommendations 10 -Dmapred.input.dir=input/users.csv \
- * -Dmapred.output.dir=output * }
+ * {@code hadoop jar recommender.jar \
+ *   org.apache.mahout.cf.taste.hadoop.pseudo.RecommenderJob \
+ *   -Dmapred.input.dir=input/users.csv \
+ *   -Dmapred.output.dir=output \
+ *   --recommenderClassName your.project.Recommender \
+ *   --numRecommendations 10  *
+ * }
  */
 public final class RecommenderJob extends AbstractJob {
   
