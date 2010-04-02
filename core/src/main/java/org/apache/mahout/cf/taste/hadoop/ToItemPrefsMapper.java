@@ -36,7 +36,8 @@ import org.apache.hadoop.mapred.Reporter;
  * </p>
  * 
  * <p>
- * Each line is assumed to be of the form <code>userID,itemID,preference</code>.
+ * Each line is assumed to be of the form <code>userID,itemID,preference</code>, or
+ * <code>userID,itemID</code>.</p>
  * </p>
  * 
  * <h1>Output</h1>
@@ -59,7 +60,7 @@ public final class ToItemPrefsMapper extends MapReduceBase implements
     String[] tokens = ToItemPrefsMapper.COMMA.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
-    float prefValue = Float.parseFloat(tokens[2]);
+    float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
     output.collect(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
   }
   
