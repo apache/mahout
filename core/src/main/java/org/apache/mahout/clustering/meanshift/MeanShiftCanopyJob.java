@@ -37,40 +37,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MeanShiftCanopyJob {
-  
+
   protected static final String CONTROL_CONVERGED = "/control/converged";
-  
+
   private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyJob.class);
-  
-  private MeanShiftCanopyJob() { }
-  
+
+  private MeanShiftCanopyJob() {
+  }
+
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-    
+
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
     Option maxIterOpt = DefaultOptionCreator.maxIterOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    
-    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d")
-        .withArgument(abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create())
-        .withDescription("The distance measure class name.").create();
-    
-    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(true).withShortName("t1")
-        .withArgument(abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create())
-        .withDescription("The T1 distance threshold.").create();
-    
-    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(true).withShortName("t2")
-        .withArgument(abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create())
-        .withDescription("The T1 distance threshold.").create();
-    
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(modelOpt).withOption(helpOpt).withOption(convergenceDeltaOpt).withOption(threshold1Opt)
-        .withOption(maxIterOpt).withOption(threshold2Opt).create();
-    
+
+    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d").withArgument(
+        abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The distance measure class name.").create();
+
+    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(true).withShortName("t1").withArgument(
+        abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create()).withDescription("The T1 distance threshold.")
+        .create();
+
+    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(true).withShortName("t2").withArgument(
+        abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create()).withDescription("The T1 distance threshold.")
+        .create();
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(helpOpt)
+        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(maxIterOpt).withOption(threshold2Opt).create();
+
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -79,7 +79,7 @@ public class MeanShiftCanopyJob {
         CommandLineUtil.printHelp(group);
         return;
       }
-      
+
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
       String measureClassName = cmdLine.getValue(modelOpt).toString();
@@ -93,9 +93,9 @@ public class MeanShiftCanopyJob {
       CommandLineUtil.printHelp(group);
     }
   }
-  
+
   /**
-   * Run the job
+   * Run the job, first converting the input Vectors to Canopies
    * 
    * @param input
    *          the input pathname String
@@ -112,13 +112,33 @@ public class MeanShiftCanopyJob {
    * @param maxIterations
    *          an int number of iterations
    */
-  public static void runJob(String input,
-                            String output,
-                            String measureClassName,
-                            double t1,
-                            double t2,
-                            double convergenceDelta,
-                            int maxIterations) throws IOException {
+  public static void runJob(String input, String output, String measureClassName, double t1, double t2, double convergenceDelta,
+      int maxIterations) throws IOException {
+    runJob(input, output, measureClassName, t1,t2,convergenceDelta, maxIterations, false);
+  }
+
+  /**
+   * Run the job where the input format can be either Vectors or Canopies
+   * 
+   * @param input
+   *          the input pathname String
+   * @param output
+   *          the output pathname String
+   * @param measureClassName
+   *          the DistanceMeasure class name
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
+   * @param convergenceDelta
+   *          the double convergence criteria
+   * @param maxIterations
+   *          an int number of iterations
+   * @param inputIsCanopies 
+              true if the input path already contains MeanShiftCanopies and does not need to be converted from Vectors
+   */
+  public static void runJob(String input, String output, String measureClassName, double t1, double t2, double convergenceDelta,
+      int maxIterations, boolean inputIsCanopies) throws IOException {
     // delete the output directory
     Configuration conf = new JobConf(MeanShiftCanopyDriver.class);
     Path outPath = new Path(output);
@@ -127,25 +147,27 @@ public class MeanShiftCanopyJob {
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);
-    
-    MeanShiftCanopyDriver.createCanopyFromVectors(input, output+"/initial-canopies");
-    
+  
+    String clustersIn = output + "/initial-canopies";
+    if (inputIsCanopies)
+      clustersIn = input;
+    else
+      MeanShiftCanopyDriver.createCanopyFromVectors(input, clustersIn);
+  
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 0;
-    String clustersIn = output+"/initial-canopies";
     while (!converged && (iteration < maxIterations)) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       String clustersOut = output + "/canopies-" + iteration;
       String controlOut = output + CONTROL_CONVERGED;
-      MeanShiftCanopyDriver.runJob(clustersIn, clustersOut, controlOut, measureClassName, t1, t2,
-        convergenceDelta);
+      MeanShiftCanopyDriver.runJob(clustersIn, clustersOut, controlOut, measureClassName, t1, t2, convergenceDelta);
       converged = FileSystem.get(conf).exists(new Path(controlOut));
       // now point the input to the old output directory
       clustersIn = output + "/canopies-" + iteration;
       iteration++;
     }
   }
-  
+
 }

@@ -140,7 +140,7 @@ public final class Job {
     String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput);
     MeanShiftCanopyJob.runJob(directoryContainingConvertedInput, output + "/meanshift", measureClassName, t1,
-      t2, convergenceDelta, maxIterations);
+      t2, convergenceDelta, maxIterations, true);
     FileStatus[] status = dfs.listStatus(new Path(output + "/meanshift"));
     OutputDriver.runJob(status[status.length - 1].getPath().toString(), output
                                                                         + CLUSTERED_POINTS_OUTPUT_DIRECTORY);
