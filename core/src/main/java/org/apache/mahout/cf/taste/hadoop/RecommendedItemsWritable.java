@@ -21,6 +21,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,8 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
  * highest.
  */
 public final class RecommendedItemsWritable implements Writable {
+
+  private static final MathContext ROUNDING = new MathContext(5);
   
   private List<RecommendedItem> recommended;
   
@@ -96,14 +100,8 @@ public final class RecommendedItemsWritable implements Writable {
       }
       result.append(item.getItemID());
       result.append(':');
-      String valueString = String.valueOf(item.getValue());
-      // Is this rounding too crude?
-      if (valueString.indexOf('E') >= 0) {
-        valueString = "0.0";
-      } else if (valueString.length() > 6) {
-        valueString = valueString.substring(0, 6);
-      }
-      result.append(valueString);
+      BigDecimal bd = new BigDecimal(item.getValue()).round(ROUNDING);
+      result.append(bd.toPlainString());
     }
     result.append(']');
     return result.toString();
