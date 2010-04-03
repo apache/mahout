@@ -69,6 +69,8 @@ public class TestForest extends Configured implements Tool {
 
   private boolean analyze; // analyze the classification results ?
 
+  private boolean useMapreduce; // use the mapreduce classifier ?
+
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
@@ -93,11 +95,13 @@ public class TestForest extends Configured implements Tool {
 
     Option analyzeOpt = obuilder.withLongName("analyze").withShortName("a").withRequired(false).create();
 
+    Option mrOpt = obuilder.withLongName("mapreduce").withShortName("mr").withRequired(false).create();
+
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(datasetOpt)
-        .withOption(modelOpt).withOption(outputOpt).withOption(analyzeOpt).withOption(helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(datasetOpt).withOption(modelOpt)
+        .withOption(outputOpt).withOption(analyzeOpt).withOption(mrOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -114,12 +118,14 @@ public class TestForest extends Configured implements Tool {
       String modelName = cmdLine.getValue(modelOpt).toString();
       String outputName = (cmdLine.hasOption(outputOpt)) ? cmdLine.getValue(outputOpt).toString() : null;
       analyze = cmdLine.hasOption(analyzeOpt);
+      useMapreduce = cmdLine.hasOption(mrOpt);
 
-      log.debug("inout   : {}", dataName);
-      log.debug("dataset : {}", datasetName);
-      log.debug("model   : {}", modelName);
-      log.debug("output  : {}", outputName);
-      log.debug("analyze : {}", analyze);
+      log.debug("inout     : {}", dataName);
+      log.debug("dataset   : {}", datasetName);
+      log.debug("model     : {}", modelName);
+      log.debug("output    : {}", outputName);
+      log.debug("analyze   : {}", analyze);
+      log.debug("mapreduce : {}", useMapreduce);
 
       dataPath = new Path(dataName);
       datasetPath = new Path(datasetName);
@@ -160,28 +166,41 @@ public class TestForest extends Configured implements Tool {
       throw new IllegalArgumentException("The Test data path does not exist");
     }
 
-    // load the dataset
-    Dataset dataset = Dataset.load(getConf(), datasetPath);
-    DataConverter converter = new DataConverter(dataset);
+    if (useMapreduce) {
+      mapreduce();
+    } else {
+      sequential();
+    }
+
+  }
+
+  private void mapreduce() throws ClassNotFoundException, IOException, InterruptedException {
+    if (analyze) {
+      log.warn("IMPORTANT: The current mapreduce implementation of TestForest does not support result analysis");
+    }
+
+    if (outputPath == null) {
+      throw new IllegalArgumentException("You must specify the ouputPath when using the mapreduce implementation");
+    }
+    
+    Classifier classifier = new Classifier(modelPath, dataPath, datasetPath, outputPath, getConf());
+
+    classifier.run();
+  }
+
+  private void sequential() throws IOException {
 
     log.info("Loading the forest...");
-    Path[] modelfiles = DFUtils.listOutputFiles(mfs, modelPath);
-    DecisionForest forest = null;
-    for (Path path : modelfiles) {
-      FSDataInputStream dataInput = new FSDataInputStream(mfs.open(path));
-      if (forest == null) {
-        forest = DecisionForest.read(dataInput);
-      } else {
-        forest.readFields(dataInput);
-      }
-
-      dataInput.close();
-    }    
+    DecisionForest forest = DecisionForest.load(getConf(), modelPath);
 
     if (forest == null) {
       log.error("No Decision Forest found!");
       return;
     }
+
+    // load the dataset
+    Dataset dataset = Dataset.load(getConf(), datasetPath);
+    DataConverter converter = new DataConverter(dataset);
 
     log.info("Sequential classification...");
     long time = System.currentTimeMillis();

@@ -30,6 +30,10 @@ import org.apache.mahout.df.data.DataUtils;
 import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.node.Node;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * Represents a forest of decision trees.
@@ -195,5 +199,36 @@ public class DecisionForest implements Writable {
     return forest;
   }
 
+  /**
+   * Load the forest from a single file or a directrory of files
+   * @param conf
+   * @param forestPath
+   * @return
+   * @throws IOException
+   */
+  public static DecisionForest load(Configuration conf, Path forestPath) throws IOException {
+    FileSystem fs = forestPath.getFileSystem(conf);
+    Path[] files = null;
+
+    if (fs.getFileStatus(forestPath).isDir())
+      files = DFUtils.listOutputFiles(fs, forestPath);
+    else
+      files = new Path[] {forestPath};
+
+    DecisionForest forest = null;
+    for (Path path : files) {
+      FSDataInputStream dataInput = new FSDataInputStream(fs.open(path));
+      if (forest == null) {
+        forest = DecisionForest.read(dataInput);
+      } else {
+        forest.readFields(dataInput);
+      }
+
+      dataInput.close();
+    }
+
+    return forest;
+    
+  }
 
 }
