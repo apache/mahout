@@ -19,9 +19,6 @@
 
 package org.apache.mahout.math.map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 
 /**
@@ -39,8 +36,6 @@ import java.util.Arrays;
  *
  */
 public class PrimeFinder {
-
-  private static final Logger log = LoggerFactory.getLogger(PrimeFinder.class);
 
   /** The largest prime this class can generate; currently equal to <tt>Integer.MAX_VALUE</tt>. */
   public static final int largestPrime = Integer.MAX_VALUE; //yes, it is prime.
@@ -167,7 +162,6 @@ public class PrimeFinder {
 
       if (deviation > maxDeviation) {
         maxDeviation = deviation;
-        log.info("new maxdev @{}@dev={}", i, maxDeviation);
       }
 
       accDeviation += deviation;
@@ -175,8 +169,5 @@ public class PrimeFinder {
     long width = 1 + (long) to - (long) from;
 
     double meanDeviation = accDeviation / width;
-    log.info("Statistics for [{},{}] are as follows", from, to);
-    log.info("meanDeviation = {} %", (float) meanDeviation * 100);
-    log.info("maxDeviation = {} %", (float) maxDeviation * 100);
   }
 }
