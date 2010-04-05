@@ -25,7 +25,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link WritableComparable} encapsulating a user ID. */
-public final class UserWritable implements WritableComparable<UserWritable> {
+public class UserWritable implements WritableComparable<UserWritable> {
 
   private long userID;
 

@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.hadoop.similarity.item.writables;
 
 import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.Writable;
 
 /**
  * An {@link ArrayWritable} holding {@link ItemPrefWithLengthWritable}s
@@ -36,11 +35,6 @@ public final class ItemPrefWithLengthArrayWritable extends ArrayWritable {
   }
 
   public ItemPrefWithLengthWritable[] getItemPrefs() {
-    Writable[] writables = get();
-    ItemPrefWithLengthWritable[] itemPrefs = new ItemPrefWithLengthWritable[writables.length];
-    for (int n=0; n<writables.length; n++) {
-      itemPrefs[n] = (ItemPrefWithLengthWritable)writables[n];
-    }
-    return itemPrefs;
+    return (ItemPrefWithLengthWritable[]) toArray();
   }
 }
