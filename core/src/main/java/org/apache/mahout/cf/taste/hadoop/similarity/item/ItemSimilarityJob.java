@@ -36,14 +36,13 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserWritable;
 import org.apache.mahout.common.AbstractJob;
 
 /**
@@ -123,14 +122,14 @@ public final class ItemSimilarityJob extends AbstractJob {
     String userVectorsPath = tempDirPath + "/userVectors";
 
     Job itemVectors = createJob(originalConf, "itemVectors", inputPath, itemVectorsPath, UserPrefsPerItemMapper.class,
-        ItemWritable.class, UserPrefWritable.class, ToItemVectorReducer.class, ItemWritable.class,
+        EntityWritable.class, EntityPrefWritable.class, ToItemVectorReducer.class, EntityWritable.class,
         UserPrefArrayWritable.class, TextInputFormat.class, SequenceFileOutputFormat.class, true);
 
     itemVectors.waitForCompletion(true);
 
     Job userVectors = createJob(originalConf, "userVectors", itemVectorsPath, userVectorsPath,
-        PreferredItemsPerUserMapper.class, UserWritable.class, ItemPrefWithLengthWritable.class,
-        PreferredItemsPerUserReducer.class, UserWritable.class, ItemPrefWithLengthArrayWritable.class);
+        PreferredItemsPerUserMapper.class, EntityWritable.class, ItemPrefWithLengthWritable.class,
+        PreferredItemsPerUserReducer.class, EntityWritable.class, ItemPrefWithLengthArrayWritable.class);
 
     userVectors.waitForCompletion(true);
 

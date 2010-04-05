@@ -29,30 +29,30 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
 
 public final class SlopeOnePrefsToDiffsReducer extends MapReduceBase implements
-    Reducer<LongWritable,ItemPrefWritable,ItemItemWritable,FloatWritable> {
+    Reducer<LongWritable, EntityPrefWritable,ItemItemWritable,FloatWritable> {
   
   @Override
   public void reduce(LongWritable key,
-                     Iterator<ItemPrefWritable> values,
+                     Iterator<EntityPrefWritable> values,
                      OutputCollector<ItemItemWritable,FloatWritable> output,
                      Reporter reporter) throws IOException {
-    List<ItemPrefWritable> prefs = new ArrayList<ItemPrefWritable>();
+    List<EntityPrefWritable> prefs = new ArrayList<EntityPrefWritable>();
     while (values.hasNext()) {
-      prefs.add(new ItemPrefWritable(values.next()));
+      prefs.add(new EntityPrefWritable(values.next()));
     }
     Collections.sort(prefs, ByItemIDComparator.getInstance());
     int size = prefs.size();
     for (int i = 0; i < size; i++) {
-      ItemPrefWritable first = prefs.get(i);
-      long itemAID = first.getItemID();
+      EntityPrefWritable first = prefs.get(i);
+      long itemAID = first.getID();
       float itemAValue = first.getPrefValue();
       for (int j = i + 1; j < size; j++) {
-        ItemPrefWritable second = prefs.get(j);
-        long itemBID = second.getItemID();
+        EntityPrefWritable second = prefs.get(j);
+        long itemBID = second.getID();
         float itemBValue = second.getPrefValue();
         output.collect(new ItemItemWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
       }

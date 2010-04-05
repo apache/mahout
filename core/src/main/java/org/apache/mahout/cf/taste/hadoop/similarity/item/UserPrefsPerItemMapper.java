@@ -23,14 +23,14 @@ import java.util.regex.Pattern;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.cf.taste.hadoop.ItemWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 
 /**
  * Read an entry from the preferences file and map it out with the item as key and the user with her preference
  * as value
  */
-public final class UserPrefsPerItemMapper extends Mapper<LongWritable,Text,ItemWritable,UserPrefWritable> {
+public final class UserPrefsPerItemMapper extends Mapper<LongWritable,Text, EntityWritable, EntityPrefWritable> {
 
   private static final Pattern COMMA = Pattern.compile(",");
 
@@ -44,7 +44,7 @@ public final class UserPrefsPerItemMapper extends Mapper<LongWritable,Text,ItemW
     long itemID = Long.parseLong(tokens[1]);
     float pref = Float.parseFloat(tokens[2]);
 
-    context.write(new ItemWritable(itemID), new UserPrefWritable(userID,pref));
+    context.write(new EntityWritable(itemID), new EntityPrefWritable(userID,pref));
   }
 
 

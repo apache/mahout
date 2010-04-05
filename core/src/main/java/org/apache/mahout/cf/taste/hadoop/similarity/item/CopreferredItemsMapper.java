@@ -21,20 +21,20 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserWritable;
 
 /**
  * map out each pair of items that appears in the same user-vector together with the multiplied vector lengths
  * of the associated item vectors
  */
 public final  class CopreferredItemsMapper
-    extends Mapper<UserWritable,ItemPrefWithLengthArrayWritable,ItemPairWritable,FloatWritable> {
+    extends Mapper<EntityWritable,ItemPrefWithLengthArrayWritable,ItemPairWritable,FloatWritable> {
 
   @Override
-  protected void map(UserWritable user, ItemPrefWithLengthArrayWritable itemPrefsArray, Context context)
+  protected void map(EntityWritable user, ItemPrefWithLengthArrayWritable itemPrefsArray, Context context)
       throws IOException, InterruptedException {
 
     ItemPrefWithLengthWritable[] itemPrefs = itemPrefsArray.getItemPrefs();

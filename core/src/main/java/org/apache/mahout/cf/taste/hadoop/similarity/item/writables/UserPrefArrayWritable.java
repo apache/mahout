@@ -18,23 +18,24 @@
 package org.apache.mahout.cf.taste.hadoop.similarity.item.writables;
 
 import org.apache.hadoop.io.ArrayWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 
 /**
- * An {@link ArrayWritable} holding {@link UserPrefWritable}s
+ * An {@link ArrayWritable} holding {@link EntityPrefWritable}s
  *
  * Used to represent an item-vector
  */
 public final class UserPrefArrayWritable extends ArrayWritable {
 
   public UserPrefArrayWritable() {
-    super(UserPrefWritable.class);
+    super(EntityPrefWritable.class);
   }
 
-  public UserPrefArrayWritable(UserPrefWritable[] userPrefs) {
-    super(UserPrefWritable.class, userPrefs);
+  public UserPrefArrayWritable(EntityPrefWritable[] userPrefs) {
+    super(EntityPrefWritable.class, userPrefs);
   }
 
-  public UserPrefWritable[] getUserPrefs() {
-    return (UserPrefWritable[]) toArray();
+  public EntityPrefWritable[] getUserPrefs() {
+    return (EntityPrefWritable[]) toArray();
   }
 }

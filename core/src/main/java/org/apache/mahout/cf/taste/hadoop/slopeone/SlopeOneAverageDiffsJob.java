@@ -35,7 +35,7 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
@@ -54,7 +54,7 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     String averagesOutputPath = parsedArgs.get("--tempDir");
     
     JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile, averagesOutputPath,
-      TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, ItemPrefWritable.class,
+      TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, EntityPrefWritable.class,
       SlopeOnePrefsToDiffsReducer.class, ItemItemWritable.class, FloatWritable.class,
       SequenceFileOutputFormat.class);
     JobClient.runJob(prefsToDiffsJobConf);

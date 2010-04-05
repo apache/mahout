@@ -26,56 +26,61 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link Writable} encapsulating an item ID. */
-public class ItemWritable implements WritableComparable<ItemWritable> {
+public class EntityWritable implements WritableComparable<EntityWritable>, Cloneable {
 
-  private long itemID;
+  private long ID;
 
-  public ItemWritable() {
+  public EntityWritable() {
     // do nothing
   }
 
-  public ItemWritable(long itemID) {
-    this.itemID = itemID;
+  public EntityWritable(long ID) {
+    this.ID = ID;
   }
 
-  public ItemWritable(ItemWritable other) {
-    this(other.getItemID());
+  public EntityWritable(EntityWritable other) {
+    this(other.getID());
   }
 
-  public long getItemID() {
-    return itemID;
+  public long getID() {
+    return ID;
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeLong(itemID);
+    out.writeLong(ID);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemID = in.readLong();
+    ID = in.readLong();
   }
 
-  public static ItemWritable read(DataInput in) throws IOException {
-    ItemWritable writable = new ItemWritable();
+  public static EntityWritable read(DataInput in) throws IOException {
+    EntityWritable writable = new EntityWritable();
     writable.readFields(in);
     return writable;
   }
 
   @Override
-  public int compareTo(ItemWritable other) {
-    long otherItemID = other.getItemID();
-    return itemID < otherItemID ? -1 : itemID > otherItemID ? 1 : 0;
+  public int compareTo(EntityWritable other) {
+    long otherItemID = other.getID();
+    return ID < otherItemID ? -1 : ID > otherItemID ? 1 : 0;
   }
 
   @Override
   public int hashCode() {
-    return RandomUtils.hashLong(itemID);
+    return RandomUtils.hashLong(ID);
   }
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof ItemWritable && (itemID == ((ItemWritable) o).getItemID());
+    return o instanceof EntityWritable && (ID == ((EntityWritable) o).getID());
+  }
+
+  @Override
+  public EntityWritable clone() {
+    return new EntityWritable(ID);
   }
 
 }

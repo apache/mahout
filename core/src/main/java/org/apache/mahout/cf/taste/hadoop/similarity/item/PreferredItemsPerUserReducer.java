@@ -22,15 +22,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserWritable;
 
 public final class PreferredItemsPerUserReducer
-    extends Reducer<UserWritable,ItemPrefWithLengthWritable,UserWritable,ItemPrefWithLengthArrayWritable> {
+    extends Reducer<EntityWritable,ItemPrefWithLengthWritable, EntityWritable,ItemPrefWithLengthArrayWritable> {
 
   @Override
-  protected void reduce(UserWritable user, Iterable<ItemPrefWithLengthWritable> itemPrefs, Context context)
+  protected void reduce(EntityWritable user, Iterable<ItemPrefWithLengthWritable> itemPrefs, Context context)
       throws IOException, InterruptedException {
 
     Set<ItemPrefWithLengthWritable> itemPrefsWithLength = new HashSet<ItemPrefWithLengthWritable>();

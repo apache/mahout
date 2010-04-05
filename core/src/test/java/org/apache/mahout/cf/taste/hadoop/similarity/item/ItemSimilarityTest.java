@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -41,21 +41,13 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CopreferredItemsMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CosineSimilarityReducer;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.PreferredItemsPerUserMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.PreferredItemsPerUserReducer;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.ToItemVectorReducer;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.UserPrefsPerItemMapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserWritable;
 import org.apache.mahout.common.MahoutTestCase;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
@@ -65,13 +57,12 @@ import org.easymock.classextension.EasyMock;
  * Integration test with a mini-file at the end
  *
  */
-@SuppressWarnings("unchecked")
 public class ItemSimilarityTest extends MahoutTestCase {
 
 
   public void testUserPrefsPerItemMapper() throws Exception {
     Mapper.Context ctx = createMock(Mapper.Context.class);
-    ctx.write(new ItemWritable(34l), new UserPrefWritable(12l, 2.3f));
+    ctx.write(new EntityWritable(34L), new EntityPrefWritable(12L, 2.3f));
     replay(ctx);
 
     new UserPrefsPerItemMapper().map(new LongWritable(), new Text("12,34,2.3"), ctx);
@@ -81,35 +72,33 @@ public class ItemSimilarityTest extends MahoutTestCase {
 
   public void testToItemVectorReducer() throws Exception {
 
-    List<UserPrefWritable> userPrefs = Arrays.asList(new UserPrefWritable(34l, 1f), new UserPrefWritable(56l, 2f));
+    List<EntityPrefWritable> userPrefs = Arrays.asList(new EntityPrefWritable(34L, 1.0f), new EntityPrefWritable(56L, 2.0f));
 
     Reducer.Context ctx = createMock(Reducer.Context.class);
 
-    ctx.write(eq(new ItemWritable(12l)), equalToUserPrefs(userPrefs));
+    ctx.write(eq(new EntityWritable(12L)), equalToUserPrefs(userPrefs));
 
     replay(ctx);
 
-    new ToItemVectorReducer().reduce(new ItemWritable(12l), userPrefs, ctx);
+    new ToItemVectorReducer().reduce(new EntityWritable(12L), userPrefs, ctx);
 
     verify(ctx);
   }
 
-  static UserPrefArrayWritable equalToUserPrefs(final Collection<UserPrefWritable> prefsToCheck) {
+  static UserPrefArrayWritable equalToUserPrefs(final Collection<EntityPrefWritable> prefsToCheck) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof UserPrefArrayWritable) {
           UserPrefArrayWritable userPrefArray = (UserPrefArrayWritable) argument;
-          Set<UserPrefWritable> set = new HashSet<UserPrefWritable>();
-          for (UserPrefWritable userPref : userPrefArray.getUserPrefs()) {
-            set.add(userPref);
-          }
+          Set<EntityPrefWritable> set = new HashSet<EntityPrefWritable>();
+          set.addAll(Arrays.asList(userPrefArray.getUserPrefs()));
 
           if (set.size() != prefsToCheck.size()) {
             return false;
           }
 
-          for (UserPrefWritable prefToCheck : prefsToCheck) {
+          for (EntityPrefWritable prefToCheck : prefsToCheck) {
             if (!set.contains(prefToCheck)) {
               return false;
             }
@@ -131,16 +120,16 @@ public class ItemSimilarityTest extends MahoutTestCase {
     UserPrefArrayWritable userPrefs = createMock(UserPrefArrayWritable.class);
 
     expect(userPrefs.getUserPrefs())
-        .andReturn(new UserPrefWritable[] { new UserPrefWritable(12l, 2f), new UserPrefWritable(56l, 3f) });
+        .andReturn(new EntityPrefWritable[] { new EntityPrefWritable(12L, 2.0f), new EntityPrefWritable(56L, 3.0f) });
 
-    double length = Math.sqrt(Math.pow(2f, 2) + Math.pow(3f, 2));
+    double length = Math.sqrt(Math.pow(2.0f, 2) + Math.pow(3.0f, 2));
 
-    ctx.write(new UserWritable(12l), new ItemPrefWithLengthWritable(34l, length, 2f));
-    ctx.write(new UserWritable(56l), new ItemPrefWithLengthWritable(34l, length, 3f));
+    ctx.write(new EntityWritable(12L), new ItemPrefWithLengthWritable(34L, length, 2.0f));
+    ctx.write(new EntityWritable(56L), new ItemPrefWithLengthWritable(34L, length, 3.0f));
 
     replay(ctx, userPrefs);
 
-    new PreferredItemsPerUserMapper().map(new ItemWritable(34l), userPrefs, ctx);
+    new PreferredItemsPerUserMapper().map(new EntityWritable(34L), userPrefs, ctx);
 
     verify(ctx, userPrefs);
   }
@@ -148,15 +137,15 @@ public class ItemSimilarityTest extends MahoutTestCase {
   public void testPreferredItemsPerUserReducer() throws Exception {
 
     List<ItemPrefWithLengthWritable> itemPrefs =
-        Arrays.asList(new ItemPrefWithLengthWritable(34l, 5d, 1f), new ItemPrefWithLengthWritable(56l, 7d, 2f));
+        Arrays.asList(new ItemPrefWithLengthWritable(34L, 5.0, 1.0f), new ItemPrefWithLengthWritable(56L, 7.0, 2.0f));
 
     Reducer.Context ctx = createMock(Reducer.Context.class);
 
-    ctx.write(eq(new UserWritable(12l)), equalToItemPrefs(itemPrefs));
+    ctx.write(eq(new EntityWritable(12L)), equalToItemPrefs(itemPrefs));
 
     replay(ctx);
 
-    new PreferredItemsPerUserReducer().reduce(new UserWritable(12l), itemPrefs, ctx);
+    new PreferredItemsPerUserReducer().reduce(new EntityWritable(12L), itemPrefs, ctx);
 
     verify(ctx);
   }
@@ -198,16 +187,16 @@ public class ItemSimilarityTest extends MahoutTestCase {
     ItemPrefWithLengthArrayWritable itemPrefs = createMock(ItemPrefWithLengthArrayWritable.class);
 
     expect(itemPrefs.getItemPrefs()).andReturn(new ItemPrefWithLengthWritable[] {
-        new ItemPrefWithLengthWritable(34l, 2d, 1f), new ItemPrefWithLengthWritable(56l, 3d, 2f),
-        new ItemPrefWithLengthWritable(78l, 4d, 3f) });
+        new ItemPrefWithLengthWritable(34L, 2.0, 1.0f), new ItemPrefWithLengthWritable(56L, 3.0, 2.0f),
+        new ItemPrefWithLengthWritable(78L, 4.0, 3.0f) });
 
-    ctx.write(new ItemPairWritable(34l, 56l, 6d), new FloatWritable(2f));
-    ctx.write(new ItemPairWritable(34l, 78l, 8d), new FloatWritable(3f));
-    ctx.write(new ItemPairWritable(56l, 78l, 12d), new FloatWritable(6f));
+    ctx.write(new ItemPairWritable(34L, 56L, 6.0), new FloatWritable(2.0f));
+    ctx.write(new ItemPairWritable(34L, 78L, 8.0), new FloatWritable(3.0f));
+    ctx.write(new ItemPairWritable(56L, 78L, 12.0), new FloatWritable(6.0f));
 
     replay(ctx, itemPrefs);
 
-    new CopreferredItemsMapper().map(new UserWritable(), itemPrefs, ctx);
+    new CopreferredItemsMapper().map(new EntityWritable(), itemPrefs, ctx);
 
     verify(ctx, itemPrefs);
   }
@@ -215,19 +204,19 @@ public class ItemSimilarityTest extends MahoutTestCase {
   public void testCosineSimilarityReducer() throws Exception {
     Reducer.Context ctx = createMock(Reducer.Context.class);
 
-    ctx.write(new ItemItemWritable(12l, 34l), new DoubleWritable(0.5d));
+    ctx.write(new ItemItemWritable(12L, 34L), new DoubleWritable(0.5d));
 
     replay(ctx);
 
-    new CosineSimilarityReducer().reduce(new ItemPairWritable(12l, 34l, 20d),
-        Arrays.asList(new FloatWritable(5f), new FloatWritable(5f)), ctx);
+    new CosineSimilarityReducer().reduce(new ItemPairWritable(12L, 34L, 20.0),
+        Arrays.asList(new FloatWritable(5.0f), new FloatWritable(5.0f)), ctx);
 
     verify(ctx);
   }
 
   public void testCompleteJob() throws Exception {
 
-    String tmpDirPath = System.getProperty("java.io.tmpdir")+"/"+ItemSimilarityTest.class.getCanonicalName();
+    String tmpDirPath = System.getProperty("java.io.tmpdir")+ '/' +ItemSimilarityTest.class.getCanonicalName();
     File tmpDir = new File(tmpDirPath);
 
     try {
@@ -279,14 +268,14 @@ public class ItemSimilarityTest extends MahoutTestCase {
         double similarity = Double.parseDouble(tokens[2]);
 
         if (currentLine == 1) {
-          assertEquals(1l, itemAID);
-          assertEquals(3l, itemBID);
+          assertEquals(1L, itemAID);
+          assertEquals(3L, itemBID);
           assertEquals(0.45, similarity, 0.01);
         }
 
         if (currentLine == 2) {
-          assertEquals(2l, itemAID);
-          assertEquals(3l, itemBID);
+          assertEquals(2L, itemAID);
+          assertEquals(3L, itemBID);
           assertEquals(0.89, similarity, 0.01);
         }
 

@@ -28,8 +28,8 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.ItemPrefWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -39,7 +39,7 @@ import org.apache.mahout.math.VectorWritable;
  * 
  * <p>
  * Takes user IDs as {@link LongWritable} mapped to all associated item IDs and preference values, as
- * {@link ItemPrefWritable}s.
+ * {@link EntityPrefWritable}s.
  * </p>
  * 
  * <h1>Output</h1>
@@ -58,7 +58,7 @@ import org.apache.mahout.math.VectorWritable;
  * 
  */
 public final class ToUserVectorReducer extends MapReduceBase implements
-    Reducer<LongWritable,ItemWritable,LongWritable,VectorWritable> {
+    Reducer<LongWritable, EntityWritable,LongWritable,VectorWritable> {
   
   public static final int MAX_PREFS_CONSIDERED = 20;
   
@@ -72,17 +72,17 @@ public final class ToUserVectorReducer extends MapReduceBase implements
   
   @Override
   public void reduce(LongWritable userID,
-                     Iterator<ItemWritable> itemPrefs,
+                     Iterator<EntityWritable> itemPrefs,
                      OutputCollector<LongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (itemPrefs.hasNext()) {
       RandomAccessSparseVector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
       while (itemPrefs.hasNext()) {
-        ItemWritable itemPref = itemPrefs.next();
-        int index = ItemIDIndexMapper.idToIndex(itemPref.getItemID());
+        EntityWritable itemPref = itemPrefs.next();
+        int index = ItemIDIndexMapper.idToIndex(itemPref.getID());
         float value;
-        if (itemPref instanceof ItemPrefWritable) {
-          value = ((ItemPrefWritable) itemPref).getPrefValue();
+        if (itemPref instanceof EntityPrefWritable) {
+          value = ((EntityPrefWritable) itemPref).getPrefValue();
         } else {
           value = 1.0f;
         }

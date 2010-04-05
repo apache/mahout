@@ -46,11 +46,11 @@ import org.apache.mahout.cf.taste.hadoop.item.RecommenderJob;
  * 
  * <p>
  * Outputs the user ID as a {@link LongWritable} mapped to the item ID and preference as a
- * {@link ItemPrefWritable}.
+ * {@link EntityPrefWritable}.
  * </p>
  */
 public final class ToItemPrefsMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,LongWritable,ItemWritable> {
+    Mapper<LongWritable,Text,LongWritable, EntityWritable> {
   
   private static final Pattern COMMA = Pattern.compile(",");
 
@@ -64,16 +64,16 @@ public final class ToItemPrefsMapper extends MapReduceBase implements
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<LongWritable,ItemWritable> output,
+                  OutputCollector<LongWritable, EntityWritable> output,
                   Reporter reporter) throws IOException {
     String[] tokens = ToItemPrefsMapper.COMMA.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
     if (booleanData) {
-      output.collect(new LongWritable(userID), new ItemWritable(itemID));      
+      output.collect(new LongWritable(userID), new EntityWritable(itemID));
     } else {
       float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
-      output.collect(new LongWritable(userID), new ItemPrefWritable(itemID, prefValue));
+      output.collect(new LongWritable(userID), new EntityPrefWritable(itemID, prefValue));
     }
   }
   

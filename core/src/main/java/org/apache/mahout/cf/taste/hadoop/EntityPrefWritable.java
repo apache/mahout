@@ -22,25 +22,24 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link Writable} encapsulating an item ID and a preference value. */
-public final class ItemPrefWritable extends ItemWritable implements WritableComparable<ItemPrefWritable> {
+public final class EntityPrefWritable extends EntityWritable {
   
   private float prefValue;
   
-  public ItemPrefWritable() {
+  public EntityPrefWritable() {
     // do nothing
   }
   
-  public ItemPrefWritable(long itemID, float prefValue) {
+  public EntityPrefWritable(long itemID, float prefValue) {
     super(itemID);
     this.prefValue = prefValue;
   }
   
-  public ItemPrefWritable(ItemPrefWritable other) {
-    this(other.getItemID(), other.getPrefValue());
+  public EntityPrefWritable(EntityPrefWritable other) {
+    this(other.getID(), other.getPrefValue());
   }
 
   public float getPrefValue() {
@@ -59,8 +58,8 @@ public final class ItemPrefWritable extends ItemWritable implements WritableComp
     prefValue = in.readFloat();
   }
   
-  public static ItemPrefWritable read(DataInput in) throws IOException {
-    ItemPrefWritable writable = new ItemPrefWritable();
+  public static EntityPrefWritable read(DataInput in) throws IOException {
+    EntityPrefWritable writable = new EntityPrefWritable();
     writable.readFields(in);
     return writable;
   }
@@ -72,12 +71,16 @@ public final class ItemPrefWritable extends ItemWritable implements WritableComp
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof ItemPrefWritable)) {
+    if (!(o instanceof EntityPrefWritable)) {
       return false;
     }
-    ItemPrefWritable other = (ItemPrefWritable) o;
-    return getItemID() == other.getItemID() && prefValue == other.getPrefValue();
-    
+    EntityPrefWritable other = (EntityPrefWritable) o;
+    return getID() == other.getID() && prefValue == other.getPrefValue();
+  }
+
+  @Override
+  public EntityPrefWritable clone() {
+    return new EntityPrefWritable(getID(), prefValue);
   }
   
 }
