@@ -33,8 +33,8 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 
@@ -55,13 +55,13 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     
     JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile, averagesOutputPath,
       TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, EntityPrefWritable.class,
-      SlopeOnePrefsToDiffsReducer.class, ItemItemWritable.class, FloatWritable.class,
+      SlopeOnePrefsToDiffsReducer.class, EntityEntityWritable.class, FloatWritable.class,
       SequenceFileOutputFormat.class);
     JobClient.runJob(prefsToDiffsJobConf);
     
     JobConf diffsToAveragesJobConf = prepareJobConf(averagesOutputPath, outputPath,
-      SequenceFileInputFormat.class, IdentityMapper.class, ItemItemWritable.class, FloatWritable.class,
-      SlopeOneDiffsToAveragesReducer.class, ItemItemWritable.class, FloatWritable.class,
+      SequenceFileInputFormat.class, IdentityMapper.class, EntityEntityWritable.class, FloatWritable.class,
+      SlopeOneDiffsToAveragesReducer.class, EntityEntityWritable.class, FloatWritable.class,
       TextOutputFormat.class);
     diffsToAveragesJobConf.setClass("mapred.output.compression.codec", GzipCodec.class,
       CompressionCodec.class);

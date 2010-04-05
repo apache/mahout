@@ -37,12 +37,12 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefArrayWritable;
 import org.apache.mahout.common.AbstractJob;
 
 /**
@@ -123,7 +123,7 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     Job itemVectors = createJob(originalConf, "itemVectors", inputPath, itemVectorsPath, UserPrefsPerItemMapper.class,
         EntityWritable.class, EntityPrefWritable.class, ToItemVectorReducer.class, EntityWritable.class,
-        UserPrefArrayWritable.class, TextInputFormat.class, SequenceFileOutputFormat.class, true);
+        EntityPrefWritableArrayWritable.class, TextInputFormat.class, SequenceFileOutputFormat.class, true);
 
     itemVectors.waitForCompletion(true);
 
@@ -135,7 +135,7 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     Job similarity = createJob(originalConf, "similarity", userVectorsPath, outputPath,
         CopreferredItemsMapper.class, ItemPairWritable.class, FloatWritable.class, CosineSimilarityReducer.class,
-        ItemItemWritable.class, DoubleWritable.class, SequenceFileInputFormat.class, TextOutputFormat.class, false);
+        EntityEntityWritable.class, DoubleWritable.class, SequenceFileInputFormat.class, TextOutputFormat.class, false);
 
     similarity.waitForCompletion(true);
 

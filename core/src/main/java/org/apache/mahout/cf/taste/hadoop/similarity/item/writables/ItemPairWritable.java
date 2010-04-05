@@ -22,7 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 
 /**
  * A {@link WritableComparable} encapsulating two items together with their
@@ -30,26 +30,26 @@ import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
  */
 public final class ItemPairWritable implements WritableComparable<ItemPairWritable> {
 
-  private ItemItemWritable itemItemWritable;
+  private EntityEntityWritable itemItemWritable;
   private double multipliedLength;
 
   public ItemPairWritable() {
   }
 
   public ItemPairWritable(long itemAID, long itemBID, double multipliedLength) {
-    this.itemItemWritable = new ItemItemWritable(itemAID, itemBID);
+    this.itemItemWritable = new EntityEntityWritable(itemAID, itemBID);
     this.multipliedLength = multipliedLength;
   }
 
   public long getItemAID() {
-    return itemItemWritable.getItemAID();
+    return itemItemWritable.getAID();
   }
 
   public long getItemBID() {
-    return itemItemWritable.getItemBID();
+    return itemItemWritable.getBID();
   }
 
-  public ItemItemWritable getItemItemWritable() {
+  public EntityEntityWritable getItemItemWritable() {
     return itemItemWritable;
   }
 
@@ -59,7 +59,7 @@ public final class ItemPairWritable implements WritableComparable<ItemPairWritab
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemItemWritable = ItemItemWritable.read(in);
+    itemItemWritable = EntityEntityWritable.read(in);
     multipliedLength = in.readDouble();
   }
 

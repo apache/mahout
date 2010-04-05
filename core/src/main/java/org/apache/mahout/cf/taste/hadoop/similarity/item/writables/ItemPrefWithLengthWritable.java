@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.common.RandomUtils;
 
 /**
@@ -29,24 +30,22 @@ import org.apache.mahout.common.RandomUtils;
  * stored along with the length of the item-vector
  *
  */
-public final class ItemPrefWithLengthWritable implements Writable {
+public final class ItemPrefWithLengthWritable implements Writable, Cloneable {
 
-  private long itemID;
+  private EntityPrefWritable itemPref;
   private double length;
-  private float prefValue;
 
   public ItemPrefWithLengthWritable() {
   // do nothing
   }
 
   public ItemPrefWithLengthWritable(long itemID, double length, float prefValue) {
-    this.itemID = itemID;
+    this.itemPref = new EntityPrefWritable(itemID, prefValue);
     this.length = length;
-    this.prefValue = prefValue;
   }
 
   public long getItemID() {
-    return itemID;
+    return itemPref.getID();
   }
 
   public double getLength() {
@@ -54,39 +53,38 @@ public final class ItemPrefWithLengthWritable implements Writable {
   }
 
   public float getPrefValue() {
-    return prefValue;
-  }
-
-  public ItemPrefWithLengthWritable deepCopy() {
-    return new ItemPrefWithLengthWritable(itemID, length, prefValue);
+    return itemPref.getPrefValue();
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeLong(itemID);
+    itemPref.write(out);
     out.writeDouble(length);
-    out.writeFloat(prefValue);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemID = in.readLong();
+    itemPref = EntityPrefWritable.read(in);
     length = in.readDouble();
-    prefValue = in.readFloat();
   }
 
   @Override
   public int hashCode() {
-    return RandomUtils.hashLong(itemID) + 31 * RandomUtils.hashDouble(length) + 31 * RandomUtils.hashFloat(prefValue);
+    return itemPref.hashCode() + 31 * RandomUtils.hashDouble(length);
   }
 
   @Override
   public boolean equals(Object o) {
     if (o instanceof ItemPrefWithLengthWritable) {
       ItemPrefWithLengthWritable other = (ItemPrefWithLengthWritable) o;
-      return (itemID == other.getItemID() && length == other.getLength() && prefValue == other.getPrefValue());
+      return itemPref.equals(other.itemPref) && length == other.getLength();
     }
     return false;
+  }
+
+  @Override
+  public ItemPrefWithLengthWritable clone() {
+    return new ItemPrefWithLengthWritable(itemPref.getID(), length, itemPref.getPrefValue());
   }
 
 }

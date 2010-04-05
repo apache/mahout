@@ -29,16 +29,16 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
 
 public final class SlopeOnePrefsToDiffsReducer extends MapReduceBase implements
-    Reducer<LongWritable, EntityPrefWritable,ItemItemWritable,FloatWritable> {
+    Reducer<LongWritable, EntityPrefWritable, EntityEntityWritable,FloatWritable> {
   
   @Override
   public void reduce(LongWritable key,
                      Iterator<EntityPrefWritable> values,
-                     OutputCollector<ItemItemWritable,FloatWritable> output,
+                     OutputCollector<EntityEntityWritable,FloatWritable> output,
                      Reporter reporter) throws IOException {
     List<EntityPrefWritable> prefs = new ArrayList<EntityPrefWritable>();
     while (values.hasNext()) {
@@ -54,7 +54,7 @@ public final class SlopeOnePrefsToDiffsReducer extends MapReduceBase implements
         EntityPrefWritable second = prefs.get(j);
         long itemBID = second.getID();
         float itemBValue = second.getPrefValue();
-        output.collect(new ItemItemWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
+        output.collect(new EntityEntityWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
       }
     }
   }

@@ -25,50 +25,50 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link WritableComparable} encapsulating two items. */
-public final class ItemItemWritable implements WritableComparable<ItemItemWritable> {
+public final class EntityEntityWritable implements WritableComparable<EntityEntityWritable> {
   
-  private long itemAID;
-  private long itemBID;
+  private long aID;
+  private long bID;
   
-  public ItemItemWritable() {
+  public EntityEntityWritable() {
   // do nothing
   }
   
-  public ItemItemWritable(long itemAID, long itemBID) {
-    this.itemAID = itemAID;
-    this.itemBID = itemBID;
+  public EntityEntityWritable(long aID, long bID) {
+    this.aID = aID;
+    this.bID = bID;
   }
   
-  public long getItemAID() {
-    return itemAID;
+  public long getAID() {
+    return aID;
   }
   
-  public long getItemBID() {
-    return itemBID;
+  public long getBID() {
+    return bID;
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeLong(itemAID);
-    out.writeLong(itemBID);
+    out.writeLong(aID);
+    out.writeLong(bID);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemAID = in.readLong();
-    itemBID = in.readLong();
+    aID = in.readLong();
+    bID = in.readLong();
   }
   
-  public static ItemItemWritable read(DataInput in) throws IOException {
-    ItemItemWritable writable = new ItemItemWritable();
+  public static EntityEntityWritable read(DataInput in) throws IOException {
+    EntityEntityWritable writable = new EntityEntityWritable();
     writable.readFields(in);
     return writable;
   }
   
   @Override
-  public int compareTo(ItemItemWritable that) {
-    int aCompare = compare(itemAID, that.getItemAID());
-    return aCompare == 0 ? compare(itemBID, that.getItemBID()) : aCompare;
+  public int compareTo(EntityEntityWritable that) {
+    int aCompare = compare(aID, that.getAID());
+    return aCompare == 0 ? compare(bID, that.getBID()) : aCompare;
   }
   
   private static int compare(long a, long b) {
@@ -77,21 +77,21 @@ public final class ItemItemWritable implements WritableComparable<ItemItemWritab
   
   @Override
   public int hashCode() {
-    return RandomUtils.hashLong(itemAID) + 31 * RandomUtils.hashLong(itemBID);
+    return RandomUtils.hashLong(aID) + 31 * RandomUtils.hashLong(bID);
   }
   
   @Override
   public boolean equals(Object o) {
-    if (o instanceof ItemItemWritable) {
-      ItemItemWritable that = (ItemItemWritable) o;
-      return (itemAID == that.getItemAID()) && (itemBID == that.getItemBID());
+    if (o instanceof EntityEntityWritable) {
+      EntityEntityWritable that = (EntityEntityWritable) o;
+      return (aID == that.getAID()) && (bID == that.getBID());
     }
     return false;
   }
   
   @Override
   public String toString() {
-    return itemAID + "\t" + itemBID;
+    return aID + "\t" + bID;
   }
   
 }

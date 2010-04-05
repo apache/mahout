@@ -22,14 +22,14 @@ import java.io.IOException;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
 
 /**
  * Finally compute the cosine for each item-pair
  */
 public final class CosineSimilarityReducer
-    extends Reducer<ItemPairWritable,FloatWritable,ItemItemWritable,DoubleWritable> {
+    extends Reducer<ItemPairWritable,FloatWritable, EntityEntityWritable,DoubleWritable> {
 
   @Override
   protected void reduce(ItemPairWritable pair, Iterable<FloatWritable> numeratorSummands, Context context)

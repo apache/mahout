@@ -42,12 +42,12 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityWritable;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefArrayWritable;
 import org.apache.mahout.common.MahoutTestCase;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
@@ -85,14 +85,14 @@ public class ItemSimilarityTest extends MahoutTestCase {
     verify(ctx);
   }
 
-  static UserPrefArrayWritable equalToUserPrefs(final Collection<EntityPrefWritable> prefsToCheck) {
+  static EntityPrefWritableArrayWritable equalToUserPrefs(final Collection<EntityPrefWritable> prefsToCheck) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
-        if (argument instanceof UserPrefArrayWritable) {
-          UserPrefArrayWritable userPrefArray = (UserPrefArrayWritable) argument;
+        if (argument instanceof EntityPrefWritableArrayWritable) {
+          EntityPrefWritableArrayWritable userPrefArray = (EntityPrefWritableArrayWritable) argument;
           Set<EntityPrefWritable> set = new HashSet<EntityPrefWritable>();
-          set.addAll(Arrays.asList(userPrefArray.getUserPrefs()));
+          set.addAll(Arrays.asList(userPrefArray.getPrefs()));
 
           if (set.size() != prefsToCheck.size()) {
             return false;
@@ -117,9 +117,9 @@ public class ItemSimilarityTest extends MahoutTestCase {
 
   public void testPreferredItemsPerUserMapper() throws Exception {
     Mapper.Context ctx = createMock(Mapper.Context.class);
-    UserPrefArrayWritable userPrefs = createMock(UserPrefArrayWritable.class);
+    EntityPrefWritableArrayWritable userPrefs = createMock(EntityPrefWritableArrayWritable.class);
 
-    expect(userPrefs.getUserPrefs())
+    expect(userPrefs.getPrefs())
         .andReturn(new EntityPrefWritable[] { new EntityPrefWritable(12L, 2.0f), new EntityPrefWritable(56L, 3.0f) });
 
     double length = Math.sqrt(Math.pow(2.0f, 2) + Math.pow(3.0f, 2));
@@ -204,7 +204,7 @@ public class ItemSimilarityTest extends MahoutTestCase {
   public void testCosineSimilarityReducer() throws Exception {
     Reducer.Context ctx = createMock(Reducer.Context.class);
 
-    ctx.write(new ItemItemWritable(12L, 34L), new DoubleWritable(0.5d));
+    ctx.write(new EntityEntityWritable(12L, 34L), new DoubleWritable(0.5d));
 
     replay(ctx);
 

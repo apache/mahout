@@ -25,15 +25,15 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.ItemItemWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 
 public final class SlopeOneDiffsToAveragesReducer extends MapReduceBase implements
-    Reducer<ItemItemWritable,FloatWritable,ItemItemWritable,FloatWritable> {
+    Reducer<EntityEntityWritable,FloatWritable, EntityEntityWritable,FloatWritable> {
   
   @Override
-  public void reduce(ItemItemWritable key,
+  public void reduce(EntityEntityWritable key,
                      Iterator<FloatWritable> values,
-                     OutputCollector<ItemItemWritable,FloatWritable> output,
+                     OutputCollector<EntityEntityWritable,FloatWritable> output,
                      Reporter reporter) throws IOException {
     int count = 0;
     double total = 0.0;

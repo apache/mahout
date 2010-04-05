@@ -24,7 +24,7 @@ import org.apache.hadoop.io.ArrayWritable;
  *
  * Used as user-vector
  */
-public final class ItemPrefWithLengthArrayWritable extends ArrayWritable {
+public class ItemPrefWithLengthArrayWritable extends ArrayWritable {
 
   public ItemPrefWithLengthArrayWritable() {
     super(ItemPrefWithLengthWritable.class);
@@ -37,4 +37,5 @@ public final class ItemPrefWithLengthArrayWritable extends ArrayWritable {
   public ItemPrefWithLengthWritable[] getItemPrefs() {
     return (ItemPrefWithLengthWritable[]) toArray();
   }
+
 }

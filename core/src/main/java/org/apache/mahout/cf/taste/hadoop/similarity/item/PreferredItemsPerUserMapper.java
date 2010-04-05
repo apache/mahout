@@ -21,22 +21,22 @@ import java.io.IOException;
 
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefArrayWritable;
 
 /**
  * for each item-vector, we compute its length here and map out all entries with the user as key,
  * so we can create the user-vectors in the reducer
  */
 public final class PreferredItemsPerUserMapper
-    extends Mapper<EntityWritable,UserPrefArrayWritable,EntityWritable,ItemPrefWithLengthWritable> {
+    extends Mapper<EntityWritable, EntityPrefWritableArrayWritable,EntityWritable,ItemPrefWithLengthWritable> {
 
   @Override
-  protected void map(EntityWritable item, UserPrefArrayWritable userPrefsArray, Context context)
+  protected void map(EntityWritable item, EntityPrefWritableArrayWritable userPrefsArray, Context context)
       throws IOException, InterruptedException {
 
-    EntityPrefWritable[] userPrefs = userPrefsArray.getUserPrefs();
+    EntityPrefWritable[] userPrefs = userPrefsArray.getPrefs();
 
     double length = 0.0;
     for (EntityPrefWritable userPref : userPrefs) {

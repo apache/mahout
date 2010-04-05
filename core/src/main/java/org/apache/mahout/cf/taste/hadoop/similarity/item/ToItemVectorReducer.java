@@ -23,15 +23,15 @@ import java.util.Set;
 
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.UserPrefArrayWritable;
 
 /**
  * For each single item, collect all users with their preferences
  * (thereby building the item vectors of the user-item-matrix)
  */
 public final class ToItemVectorReducer
-    extends Reducer<EntityWritable, EntityPrefWritable, EntityWritable,UserPrefArrayWritable> {
+    extends Reducer<EntityWritable, EntityPrefWritable, EntityWritable, EntityPrefWritableArrayWritable> {
 
   @Override
   protected void reduce(EntityWritable item, Iterable<EntityPrefWritable> userPrefs, Context context)
@@ -43,7 +43,7 @@ public final class ToItemVectorReducer
       collectedUserPrefs.add(userPref.clone());
     }
 
-    context.write(item, new UserPrefArrayWritable(
+    context.write(item, new EntityPrefWritableArrayWritable(
         collectedUserPrefs.toArray(new EntityPrefWritable[collectedUserPrefs.size()])));
   }
 
