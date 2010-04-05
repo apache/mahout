@@ -15,8 +15,7 @@ import org.apache.mahout.math.matrix.impl.AbstractFormatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix1D;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 import org.apache.mahout.math.matrix.impl.Former;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  Flexible, well human readable matrix print formatting; By default decimal point aligned. Build on top of the C-like <i>sprintf</i> functionality
  provided by the Format class written by Cay Horstmann.
@@ -271,8 +270,6 @@ import org.slf4j.LoggerFactory;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Formatter extends AbstractFormatter {
-
-  private static final Logger log = LoggerFactory.getLogger(Formatter.class);
 
   /** Constructs and returns a matrix formatter with format <tt>"%G"</tt>. */
   public Formatter() {

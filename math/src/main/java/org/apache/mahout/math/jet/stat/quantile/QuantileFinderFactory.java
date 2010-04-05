@@ -13,8 +13,7 @@ package org.apache.mahout.math.jet.stat.quantile;
 import org.apache.mahout.math.jet.math.Arithmetic;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.list.DoubleArrayList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  * Factory constructing exact and approximate quantile finders for both known and unknown <tt>N</tt>.
  * Also see {@link hep.aida.bin.QuantileBin1D}, demonstrating how this package can be used.
@@ -94,8 +93,6 @@ import org.slf4j.LoggerFactory;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class QuantileFinderFactory {
-
-  private static final Logger log = LoggerFactory.getLogger(QuantileFinderFactory.class);
 
   /** Make this class non instantiable. Let still allow others to inherit. */
   private QuantileFinderFactory() {
@@ -587,23 +584,20 @@ public class QuantileFinderFactory {
           double alpha_two = (c + 2.0 * d - root) / (2.0 * d);
 
           // any alpha must satisfy 0<alpha<1 to yield valid solutions
-          boolean alpha_one_OK = false;
-          if (0.0 < alpha_one && alpha_one < 1.0) {
-            alpha_one_OK = true;
-          }
-          boolean alpha_two_OK = false;
-          if (0.0 < alpha_two && alpha_two < 1.0) {
-            alpha_two_OK = true;
-          }
+          boolean alpha_one_OK = 0.0 < alpha_one && alpha_one < 1.0;
+          boolean alpha_two_OK = 0.0 < alpha_two && alpha_two < 1.0;
           if (alpha_one_OK || alpha_two_OK) {
-            double alpha = alpha_one;
-            if (alpha_one_OK && alpha_two_OK) {
-              // take the alpha that minimizes d/alpha
-              alpha = Math.max(alpha_one, alpha_two);
-            } else if (alpha_two_OK) {
+            double alpha;
+            if (alpha_one_OK) {
+              if (alpha_two_OK) {
+                // take the alpha that minimizes d/alpha
+                alpha = Math.max(alpha_one, alpha_two);
+              } else {
+                alpha = alpha_one;
+              }
+            } else {
               alpha = alpha_two;
             }
-
             // now we have k=Ceiling(Max(d/alpha, (h+1)/(2*epsilon)))
             long k = (long) Math.ceil(Math.max(d / alpha, (h + 1) / (2.0 * epsilon)));
             if (k > 0) { // valid solution?
@@ -621,7 +615,6 @@ public class QuantileFinderFactory {
       } //end for b
 
       if (best_b == Long.MAX_VALUE) {
-        log.warn("Computing b and k looks like a lot of work!");
         // no solution found so far. very unlikely. Anyway, try again.
         max_b *= 2;
         max_h *= 2;

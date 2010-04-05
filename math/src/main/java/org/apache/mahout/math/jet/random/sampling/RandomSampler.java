@@ -10,8 +10,7 @@ package org.apache.mahout.math.jet.random.sampling;
 
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  * Space and time efficiently computes a sorted <i>Simple Random Sample Without Replacement (SRSWOR)</i>, that is, a sorted set of <tt>n</tt> random numbers from an interval of <tt>N</tt> numbers;
  * Example: Computing <tt>n=3</tt> random numbers from the interval <tt>[1,50]</tt> may yield the sorted random set <tt>(7,13,47)</tt>.
@@ -111,8 +110,6 @@ import org.slf4j.LoggerFactory;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class RandomSampler extends PersistentObject {
-
-  private static final Logger log = LoggerFactory.getLogger(RandomSampler.class);
 
   //public class RandomSampler extends Object implements java.io.Serializable {
   private long n;

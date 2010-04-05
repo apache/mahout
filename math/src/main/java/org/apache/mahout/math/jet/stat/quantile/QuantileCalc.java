@@ -8,13 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.stat.quantile;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /** Computes b and k vor various parameters. */
 class QuantileCalc {
-
-  private static final Logger log = LoggerFactory.getLogger(QuantileCalc.class);
 
   private QuantileCalc() {
   }
@@ -289,77 +284,6 @@ class QuantileCalc {
     return result;
   }
 
-  public static void main(String[] args) {
-    test_B_and_K_Calculation(args);
-  }
-
-  /** Computes b and k for different parameters. */
-  public static void test_B_and_K_Calculation(String[] args) {
-    boolean known_N;
-    if (args == null) {
-      known_N = false;
-    } else {
-      known_N = Boolean.valueOf(args[0]);
-    }
-
-    int[] quantiles = {1, 1000};
-
-    long[] sizes = {100000, 1000000, 10000000, 1000000000};
-
-    double[] deltas = {0.0, 0.001, 0.0001, 0.00001};
-
-    double[] epsilons = {0.0, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0000001};
-
-
-    if (!known_N) {
-      sizes = new long[]{0};
-    }
-    log.info("\n\n");
-    if (known_N) {
-      log.info("Computing b's and k's for KNOWN N");
-    } else {
-      log.info("Computing b's and k's for UNKNOWN N");
-    }
-    log.info("mem [elements/1024]");
-    log.info("***********************************");
-
-    for (int p : quantiles) {
-      log.info("------------------------------");
-      log.info("computing for p = {}", p);
-      for (long N : sizes) {
-        log.info("   ------------------------------");
-        log.info("   computing for N = {}", N);
-        for (double delta : deltas) {
-          log.info("      ------------------------------");
-          log.info("      computing for delta = {}", delta);
-          for (double epsilon : epsilons) {
-            double[] returnSamplingRate = new double[1];
-            long[] result;
-            if (known_N) {
-              result = known_N_compute_B_and_K(N, epsilon, delta, p, returnSamplingRate);
-            } else {
-              result = unknown_N_compute_B_and_K(epsilon, delta, p);
-            }
-
-            long b = result[0];
-            long k = result[1];
-            log.info("         (e,d,N,p)=({},{},{},{}) --> ", new Object[] {epsilon, delta, N, p});
-            log.info("(b,k,mem");
-            if (known_N) {
-              log.info(",sampling");
-            }
-            log.info(")=({},{},{}", new Object[] {b, k, (b * k / 1024)});
-            if (known_N) {
-              log.info(",{}", returnSamplingRate[0]);
-            }
-            log.info(")");
-          }
-        }
-      }
-    }
-
-  }
-
   /**
    * Computes the number of buffers and number of values per buffer such that quantiles can be determined with an
    * approximation error no more than epsilon with a certain probability.
@@ -468,7 +392,6 @@ class QuantileCalc {
       } //end for b
 
       if (best_b == Long.MAX_VALUE) {
-        log.info("Warning: Computing b and k looks like a lot of work!");
         // no solution found so far. very unlikely. Anyway, try again.
         max_b *= 2;
         max_h *= 2;

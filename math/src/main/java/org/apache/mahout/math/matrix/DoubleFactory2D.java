@@ -15,8 +15,7 @@ import org.apache.mahout.math.jet.random.sampling.RandomSamplingAssistant;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.RCDoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.SparseDoubleMatrix2D;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  Factory for convenient construction of 2-d matrices holding <tt>double</tt>
  cells. Also provides convenient methods to compose (concatenate) and decompose
@@ -84,8 +83,6 @@ sample} to construct random matrices. </td>
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class DoubleFactory2D extends PersistentObject {
-
-  private static final Logger log = LoggerFactory.getLogger(DoubleFactory2D.class);
 
   /** A factory producing dense matrices. */
   public static final DoubleFactory2D dense = new DoubleFactory2D();

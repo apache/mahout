@@ -8,9 +8,6 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A handy stopwatch for benchmarking.
  * Like a real stop watch used on ancient running tracks you can start the watch, stop it,
@@ -21,8 +18,6 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class Timer extends PersistentObject {
 
-  private static final Logger log = LoggerFactory.getLogger(Timer.class);
-
   private long baseTime;
   private long elapsedTime;
 
@@ -31,16 +26,6 @@ public class Timer extends PersistentObject {
   /** Constructs a new timer, initially not started. Use start() to start the timer. */
   public Timer() {
     this.reset();
-  }
-
-  /**
-   * Prints the elapsed time on System.out
-   *
-   * @return <tt>this</tt> (for convenience only).
-   */
-  public Timer display() {
-    log.info(this.toString());
-    return this;
   }
 
   /** Same as <tt>seconds()</tt>. */
@@ -125,44 +110,6 @@ public class Timer extends PersistentObject {
     }
     baseTime = 0;
     return this;
-  }
-
-  /** Shows how to use a timer in convenient ways. */
-  public static void test(int size) {
-    //benchmark this piece
-    Timer t = new Timer().start();
-    int j = 0;
-    for (int i = 0; i < size; i++) {
-      j++;
-    }
-    t.stop();
-    t.display();
-
-
-    //do something we do not want to benchmark
-    j = 0;
-    for (int i = 0; i < size; i++) {
-      j++;
-    }
-
-
-    //benchmark another piece and add to last benchmark
-    t.start();
-    j = 0;
-    for (int i = 0; i < size; i++) {
-      j++;
-    }
-    t.stop().display();
-
-
-    //benchmark yet another piece independently
-    t.reset(); //set timer to zero
-    t.start();
-    j = 0;
-    for (int i = 0; i < size; i++) {
-      j++;
-    }
-    t.stop().display();
   }
 
   /** Returns a String representation of the receiver. */

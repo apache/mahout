@@ -23,15 +23,11 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
 
 public abstract class SolverTest extends TestCase {
-
-  private static final Logger log = LoggerFactory.getLogger(SolverTest.class);
 
   protected SolverTest(String name) {
     super(name);
@@ -75,7 +71,6 @@ public abstract class SolverTest extends TestCase {
       double dot = afterMultiply.dot(e);
       double afterNorm = afterMultiply.getLengthSquared();
       double error = 1 - dot / Math.sqrt(afterNorm * e.getLengthSquared());
-      log.info("Eigenvalue({}) = {}", i, Math.sqrt(afterNorm/e.getLengthSquared()));
       assertTrue("Error margin: {" + error + " too high! (for eigen " + i + ')', Math.abs(error) < errorMargin);
     }
   }

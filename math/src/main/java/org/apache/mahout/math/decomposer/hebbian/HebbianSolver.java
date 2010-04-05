@@ -23,7 +23,6 @@ import java.util.Random;
 
 import java.util.ArrayList;
 
-import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -33,8 +32,6 @@ import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 import org.apache.mahout.math.function.TimesFunction;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.PlusMult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Hebbian solver is an iterative, sparse, singular value decomposition solver, based on the paper
@@ -44,16 +41,13 @@ import org.slf4j.LoggerFactory;
  */
 public class HebbianSolver {
 
-  private static final Logger log = LoggerFactory.getLogger(HebbianSolver.class);
-
   private final EigenUpdater updater;
   private final SingularVectorVerifier verifier;
   private final double convergenceTarget;
   private final int maxPassesPerEigen;
   private final Random rng = new Random();
 
-  private int numPasses = 0;
-  private static final boolean debug = false;
+  //private int numPasses = 0;
 
   /**
    * Creates a new HebbianSolver
@@ -163,7 +157,6 @@ public class HebbianSolver {
     int cols = corpus.numCols();
     Matrix eigens = new DenseMatrix(desiredRank, cols);
     List<Double> eigenValues = new ArrayList<Double>();
-    log.info("Finding " + desiredRank + " singular vectors of matrix with " + corpus.numRows() + " rows, via Hebbian");
     /**
      * The corpusProjections matrix is a running cache of the residual projection of each corpus vector against all
      * of the previously found singular vectors.  Without this, if multiple passes over the data is made (per
@@ -186,17 +179,6 @@ public class HebbianSolver {
             updater.update(currentEigen, corpus.getRow(corpusRow), state);
         }
         state.setFirstPass(false);
-        if (debug) {
-          if (previousEigen == null) {
-            previousEigen = currentEigen.clone();
-          } else {
-            double dot = currentEigen.dot(previousEigen);
-            if (dot > 0) {
-              dot /= (currentEigen.norm(2) * previousEigen.norm(2));
-            }
-           // log.info("Current pass * previous pass = {}", dot);
-          }
-        }
       }
       // converged!
       double eigenValue = state.getStatusProgress().get(state.getStatusProgress().size() - 1).getEigenValue();
@@ -206,7 +188,6 @@ public class HebbianSolver {
       eigens.assignRow(i, currentEigen);
       eigenValues.add(eigenValue);
       state.setCurrentEigenValues(eigenValues);
-      log.info("Found eigenvector {}, eigenvalue: {}", i, eigenValue);
 
       /**
        *  TODO: Persist intermediate output!
@@ -216,7 +197,7 @@ public class HebbianSolver {
       state.setActivationDenominatorSquared(0);
       state.setActivationNumerator(0);
       state.getStatusProgress().clear();
-      numPasses = 0;
+      //numPasses = 0;
     }
     return state;
   }
@@ -253,13 +234,11 @@ public class HebbianSolver {
   protected boolean hasNotConverged(Vector currentPseudoEigen,
                                     Matrix corpus,
                                     TrainingState state) {
-    numPasses++;
+    //numPasses++;
     if (state.isFirstPass()) {
-      log.info("First pass through the corpus, no need to check convergence...");
       return true;
     }
     Matrix previousEigens = state.getCurrentEigens();
-    log.info("Have made {} passes through the corpus, checking convergence...", numPasses);
     /*
      * Step 1: orthogonalize currentPseudoEigen by subtracting off eigen(i) * helper.get(i)
      * Step 2: zero-out the helper vector because it has already helped.
@@ -269,20 +248,11 @@ public class HebbianSolver {
       currentPseudoEigen.assign(previousEigen, new PlusMult(-state.getHelperVector().get(i)));
       state.getHelperVector().set(i, 0);
     }
-    if (debug && currentPseudoEigen.norm(2) > 0) {
-      for (int i = 0; i < state.getNumEigensProcessed(); i++) {
-        Vector previousEigen = previousEigens.getRow(i);
-        log.info("dot with previous: {}", (previousEigen.dot(currentPseudoEigen)) / currentPseudoEigen.norm(2));
-      }
-    }
     /*
      * Step 3: verify how eigen-like the prospective eigen is.  This is potentially asynchronous.
      */
     EigenStatus status = verify(corpus, currentPseudoEigen);
-    if (status.inProgress()) {
-      log.info("Verifier not finished, making another pass...");
-    } else {
-      log.info("Has 1 - cosAngle: {}, convergence target is: {}", (1 - status.getCosAngle()), convergenceTarget);
+    if (!status.inProgress()) {
       state.getStatusProgress().add(status);
     }
     return (state.getStatusProgress().size() <= maxPassesPerEigen && 1 - status.getCosAngle() > convergenceTarget);
@@ -300,7 +270,6 @@ public class HebbianSolver {
     String corpusDir = props.getProperty("solver.input.dir");
     String outputDir = props.getProperty("solver.output.dir");
     if (corpusDir == null || corpusDir.length() == 0 || outputDir == null || outputDir.length() == 0) {
-      log.error("{} must contain values for solver.input.dir and solver.output.dir", propertiesFile);
       return;
     }
     int inBufferSize = Integer.parseInt(props.getProperty("solver.input.bufferSize"));
@@ -321,11 +290,7 @@ public class HebbianSolver {
     } else {
       //  corpus = new ParallelMultiplyingDiskBufferedDoubleMatrix(new File(corpusDir), inBufferSize, numThreads);
     }
-    long now = System.currentTimeMillis();
     TrainingState finalState = solver.solve(corpus, rank);
-    long time = (System.currentTimeMillis() - now) / 1000;
-    log.info("Solved {} eigenVectors in {} seconds.  Persisted to {}",
-             new Object[] {finalState.getCurrentEigens().size()[AbstractMatrix.ROW], time, outputDir});
   }
 
 }

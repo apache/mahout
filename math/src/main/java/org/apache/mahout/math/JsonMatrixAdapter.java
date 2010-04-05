@@ -27,15 +27,12 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 
 public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     JsonDeserializer<Matrix> {
 
-  private static final Logger log = LoggerFactory.getLogger(JsonMatrixAdapter.class);
   public static final String CLASS = "class";
   public static final String MATRIX = "matrix";
 
@@ -73,7 +70,7 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
-      log.warn("Error while loading class", e);
+      throw new JsonParseException(e);
     }
     return (Matrix) gson.fromJson(matrix, cl);
   }

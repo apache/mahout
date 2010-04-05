@@ -26,15 +26,12 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 
 public class JsonVectorAdapter implements JsonSerializer<Vector>,
     JsonDeserializer<Vector> {
 
-  private static final Logger log = LoggerFactory.getLogger(JsonVectorAdapter.class);
   public static final String VECTOR = "vector";
 
   public JsonElement serialize(Vector src, Type typeOfSrc,
@@ -61,7 +58,7 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
-      log.warn("Error while loading class", e);
+      throw new JsonParseException(e);
     }
     return (Vector) gson.fromJson(vector, cl);
   }
