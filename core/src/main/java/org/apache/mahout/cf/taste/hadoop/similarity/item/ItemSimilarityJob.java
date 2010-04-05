@@ -17,32 +17,24 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.SequenceFileInputFormat;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.EntityWritable;
-import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
+import org.apache.mahout.cf.taste.hadoop.ToUserPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
 
 /**
@@ -108,7 +100,6 @@ public final class ItemSimilarityJob extends AbstractJob {
   public int run(String[] args) throws Exception {
 
     Map<String,String> parsedArgs = AbstractJob.parseArguments(args);
-
     if (parsedArgs == null) {
       return -1;
     }
@@ -121,84 +112,47 @@ public final class ItemSimilarityJob extends AbstractJob {
     String itemVectorsPath = tempDirPath + "/itemVectors";
     String userVectorsPath = tempDirPath + "/userVectors";
 
-    Job itemVectors = createJob(originalConf, "itemVectors", inputPath, itemVectorsPath, UserPrefsPerItemMapper.class,
-        EntityWritable.class, EntityPrefWritable.class, ToItemVectorReducer.class, EntityWritable.class,
-        EntityPrefWritableArrayWritable.class, TextInputFormat.class, SequenceFileOutputFormat.class, true);
+    JobConf itemVectors = prepareJobConf(inputPath,
+                                         itemVectorsPath,
+                                         TextInputFormat.class,
+                                         ToUserPrefsMapper.class,
+                                         LongWritable.class,
+                                         EntityPrefWritable.class,
+                                         ToItemVectorReducer.class,
+                                         LongWritable.class,
+                                         EntityPrefWritableArrayWritable.class,
+                                         SequenceFileOutputFormat.class);
+    JobClient.runJob(itemVectors);
 
-    itemVectors.waitForCompletion(true);
+    JobConf userVectors = prepareJobConf(itemVectorsPath,
+                                         userVectorsPath,
+                                         SequenceFileInputFormat.class,
+                                         PreferredItemsPerUserMapper.class,
+                                         LongWritable.class,
+                                         ItemPrefWithLengthWritable.class,
+                                         PreferredItemsPerUserReducer.class,
+                                         LongWritable.class,
+                                         ItemPrefWithLengthArrayWritable.class,
+                                         SequenceFileOutputFormat.class);
+    JobClient.runJob(userVectors);
 
-    Job userVectors = createJob(originalConf, "userVectors", itemVectorsPath, userVectorsPath,
-        PreferredItemsPerUserMapper.class, EntityWritable.class, ItemPrefWithLengthWritable.class,
-        PreferredItemsPerUserReducer.class, EntityWritable.class, ItemPrefWithLengthArrayWritable.class);
-
-    userVectors.waitForCompletion(true);
-
-    Job similarity = createJob(originalConf, "similarity", userVectorsPath, outputPath,
-        CopreferredItemsMapper.class, ItemPairWritable.class, FloatWritable.class, CosineSimilarityReducer.class,
-        EntityEntityWritable.class, DoubleWritable.class, SequenceFileInputFormat.class, TextOutputFormat.class, false);
-
-    similarity.waitForCompletion(true);
+    JobConf similarity = prepareJobConf(userVectorsPath,
+                                        outputPath,
+                                        SequenceFileInputFormat.class,
+                                        CopreferredItemsMapper.class,
+                                        ItemPairWritable.class,
+                                        FloatWritable.class,
+                                        CosineSimilarityReducer.class,
+                                        EntityEntityWritable.class,
+                                        DoubleWritable.class,
+                                        TextOutputFormat.class);
+    JobClient.runJob(similarity);
 
     return 0;
   }
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(), new ItemSimilarityJob(), args);
-  }
-
-  protected static Job createJob(Configuration conf,
-                                 String jobName,
-                                 String inputPath,
-                                 String outputPath,
-                                 Class<? extends Mapper> mapperClass,
-                                 Class<? extends Writable> mapKeyOutClass,
-                                 Class<? extends Writable> mapValueOutClass,
-                                 Class<? extends Reducer> reducerClass,
-                                 Class<? extends Writable> keyOutClass,
-                                 Class<? extends Writable> valueOutClass) throws IOException {
-    return createJob(conf, jobName, inputPath, outputPath, mapperClass, mapKeyOutClass,
-        mapValueOutClass, reducerClass, keyOutClass, valueOutClass, SequenceFileInputFormat.class,
-        SequenceFileOutputFormat.class, true);
-  }
-
-  protected static Job createJob(Configuration conf,
-                                 String jobName,
-                                 String inputPath,
-                                 String outputPath,
-                                 Class<? extends Mapper> mapperClass,
-                                 Class<? extends Writable> mapKeyOutClass,
-                                 Class<? extends Writable> mapValueOutClass,
-                                 Class<? extends Reducer> reducerClass,
-                                 Class<? extends Writable> keyOutClass,
-                                 Class<? extends Writable> valueOutClass,
-                                 Class<? extends FileInputFormat> fileInputFormatClass,
-                                 Class<? extends FileOutputFormat> fileOutputFormatClass,
-                                 boolean compress) throws IOException {
-
-    Job job = new Job(conf, jobName);
-
-    FileSystem fs = FileSystem.get(conf);
-
-    Path inputPathPath = new Path(inputPath).makeQualified(fs);
-    Path outputPathPath = new Path(outputPath).makeQualified(fs);
-
-    FileInputFormat.setInputPaths(job, inputPathPath);
-    job.setInputFormatClass(fileInputFormatClass);
-
-    job.setMapperClass(mapperClass);
-    job.setMapOutputKeyClass(mapKeyOutClass);
-    job.setMapOutputValueClass(mapValueOutClass);
-
-    job.setReducerClass(reducerClass);
-    job.setOutputKeyClass(keyOutClass);
-    job.setOutputValueClass(valueOutClass);
-
-
-    FileOutputFormat.setOutputPath(job, outputPathPath);
-    FileOutputFormat.setCompressOutput(job, compress);
-    job.setOutputFormatClass(fileOutputFormatClass);
-
-    return job;
+    ToolRunner.run(new ItemSimilarityJob(), args);
   }
 
 }

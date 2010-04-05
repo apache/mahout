@@ -21,11 +21,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link Writable} encapsulating an item ID and a preference value. */
-public final class EntityPrefWritable extends EntityWritable {
+public final class EntityPrefWritable extends LongWritable {
   
   private float prefValue;
   
@@ -39,7 +40,11 @@ public final class EntityPrefWritable extends EntityWritable {
   }
   
   public EntityPrefWritable(EntityPrefWritable other) {
-    this(other.getID(), other.getPrefValue());
+    this(other.get(), other.getPrefValue());
+  }
+
+  public long getID() {
+    return get();
   }
 
   public float getPrefValue() {
@@ -75,12 +80,12 @@ public final class EntityPrefWritable extends EntityWritable {
       return false;
     }
     EntityPrefWritable other = (EntityPrefWritable) o;
-    return getID() == other.getID() && prefValue == other.getPrefValue();
+    return get() == other.get() && prefValue == other.getPrefValue();
   }
 
   @Override
   public EntityPrefWritable clone() {
-    return new EntityPrefWritable(getID(), prefValue);
+    return new EntityPrefWritable(get(), prefValue);
   }
   
 }

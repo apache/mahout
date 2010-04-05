@@ -18,34 +18,36 @@
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
 
 /**
  * Finally compute the cosine for each item-pair
  */
-public final class CosineSimilarityReducer
-    extends Reducer<ItemPairWritable,FloatWritable, EntityEntityWritable,DoubleWritable> {
+public final class CosineSimilarityReducer extends MapReduceBase
+    implements Reducer<ItemPairWritable,FloatWritable,EntityEntityWritable,DoubleWritable> {
 
   @Override
-  protected void reduce(ItemPairWritable pair, Iterable<FloatWritable> numeratorSummands, Context context)
-      throws IOException, InterruptedException {
+  public void reduce(ItemPairWritable pair,
+                     Iterator<FloatWritable> numeratorSummands,
+                     OutputCollector<EntityEntityWritable,DoubleWritable> output,
+                     Reporter reporter)
+      throws IOException {
 
     double numerator = 0.0;
-
-    for (FloatWritable nummeratorSummand : numeratorSummands) {
-      numerator += nummeratorSummand.get();
+    while (numeratorSummands.hasNext()) {
+      numerator += numeratorSummands.next().get();
     }
-
     double denominator = pair.getMultipliedLength();
-
     double cosine = numerator / denominator;
-
-    context.write(pair.getItemItemWritable(), new DoubleWritable(cosine));
+    output.collect(pair.getItemItemWritable(), new DoubleWritable(cosine));
   }
 
 }

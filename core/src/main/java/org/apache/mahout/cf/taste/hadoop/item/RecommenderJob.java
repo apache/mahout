@@ -36,7 +36,6 @@ import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
-import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
@@ -100,7 +99,7 @@ public final class RecommenderJob extends AbstractJob {
     
     JobConf toUserVectorConf = prepareJobConf(inputPath, userVectorPath,
       TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class,
-      booleanData ? EntityWritable.class : EntityPrefWritable.class,
+      booleanData ? LongWritable.class : EntityPrefWritable.class,
       ToUserVectorReducer.class, LongWritable.class, VectorWritable.class, SequenceFileOutputFormat.class);
     toUserVectorConf.setBoolean(BOOLEAN_DATA, booleanData);
     JobClient.runJob(toUserVectorConf);

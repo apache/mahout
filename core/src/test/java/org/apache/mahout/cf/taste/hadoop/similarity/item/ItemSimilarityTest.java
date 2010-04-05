@@ -17,12 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.verify;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,18 +33,15 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.easymock.classextension.EasyMock;
+import org.easymock.IArgumentMatcher;
+
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
+import org.apache.mahout.cf.taste.hadoop.ToUserPrefsMapper;
 import org.apache.mahout.common.MahoutTestCase;
-import org.easymock.IArgumentMatcher;
-import org.easymock.classextension.EasyMock;
 
 /**
  * Unit tests for the mappers and reducers in org.apache.mahout.cf.taste.hadoop.similarity
@@ -61,36 +52,41 @@ public class ItemSimilarityTest extends MahoutTestCase {
 
 
   public void testUserPrefsPerItemMapper() throws Exception {
-    Mapper.Context ctx = createMock(Mapper.Context.class);
-    ctx.write(new EntityWritable(34L), new EntityPrefWritable(12L, 2.3f));
-    replay(ctx);
+    OutputCollector<LongWritable,LongWritable> output =
+        EasyMock.createMock(OutputCollector.class);
+    output.collect(new LongWritable(34L), new EntityPrefWritable(12L, 2.3f));
+    EasyMock.replay(output);
 
-    new UserPrefsPerItemMapper().map(new LongWritable(), new Text("12,34,2.3"), ctx);
+    new ToUserPrefsMapper().map(new LongWritable(), new Text("12,34,2.3"), output, null);
 
-    verify(ctx);
+    EasyMock.verify(output);
   }
 
   public void testToItemVectorReducer() throws Exception {
 
-    List<EntityPrefWritable> userPrefs = Arrays.asList(new EntityPrefWritable(34L, 1.0f), new EntityPrefWritable(56L, 2.0f));
+    List<EntityPrefWritable> userPrefs = Arrays.asList(
+        new EntityPrefWritable(34L, 1.0f), new EntityPrefWritable(56L, 2.0f));
 
-    Reducer.Context ctx = createMock(Reducer.Context.class);
+    OutputCollector<LongWritable,EntityPrefWritableArrayWritable> output =
+        EasyMock.createMock(OutputCollector.class);
 
-    ctx.write(eq(new EntityWritable(12L)), equalToUserPrefs(userPrefs));
+    output.collect(EasyMock.eq(new LongWritable(12L)), equalToUserPrefs(userPrefs));
 
-    replay(ctx);
+    EasyMock.replay(output);
 
-    new ToItemVectorReducer().reduce(new EntityWritable(12L), userPrefs, ctx);
+    new ToItemVectorReducer().reduce(new LongWritable(12L), userPrefs.iterator(), output, null);
 
-    verify(ctx);
+    EasyMock.verify(output);
   }
 
-  static EntityPrefWritableArrayWritable equalToUserPrefs(final Collection<EntityPrefWritable> prefsToCheck) {
+  static EntityPrefWritableArrayWritable equalToUserPrefs(
+      final Collection<EntityPrefWritable> prefsToCheck) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof EntityPrefWritableArrayWritable) {
-          EntityPrefWritableArrayWritable userPrefArray = (EntityPrefWritableArrayWritable) argument;
+          EntityPrefWritableArrayWritable userPrefArray =
+              (EntityPrefWritableArrayWritable) argument;
           Set<EntityPrefWritable> set = new HashSet<EntityPrefWritable>();
           set.addAll(Arrays.asList(userPrefArray.getPrefs()));
 
@@ -116,50 +112,56 @@ public class ItemSimilarityTest extends MahoutTestCase {
   }
 
   public void testPreferredItemsPerUserMapper() throws Exception {
-    Mapper.Context ctx = createMock(Mapper.Context.class);
-    EntityPrefWritableArrayWritable userPrefs = createMock(EntityPrefWritableArrayWritable.class);
+    OutputCollector<LongWritable,ItemPrefWithLengthWritable> output =
+        EasyMock.createMock(OutputCollector.class);
+    EntityPrefWritableArrayWritable userPrefs =
+        EasyMock.createMock(EntityPrefWritableArrayWritable.class);
 
-    expect(userPrefs.getPrefs())
-        .andReturn(new EntityPrefWritable[] { new EntityPrefWritable(12L, 2.0f), new EntityPrefWritable(56L, 3.0f) });
+    EasyMock.expect(userPrefs.getPrefs()).andReturn(
+        new EntityPrefWritable[] {
+            new EntityPrefWritable(12L, 2.0f),
+            new EntityPrefWritable(56L, 3.0f) });
 
     double length = Math.sqrt(Math.pow(2.0f, 2) + Math.pow(3.0f, 2));
 
-    ctx.write(new EntityWritable(12L), new ItemPrefWithLengthWritable(34L, length, 2.0f));
-    ctx.write(new EntityWritable(56L), new ItemPrefWithLengthWritable(34L, length, 3.0f));
+    output.collect(new LongWritable(12L), new ItemPrefWithLengthWritable(34L, length, 2.0f));
+    output.collect(new LongWritable(56L), new ItemPrefWithLengthWritable(34L, length, 3.0f));
 
-    replay(ctx, userPrefs);
+    EasyMock.replay(output, userPrefs);
 
-    new PreferredItemsPerUserMapper().map(new EntityWritable(34L), userPrefs, ctx);
+    new PreferredItemsPerUserMapper().map(new LongWritable(34L), userPrefs, output, null);
 
-    verify(ctx, userPrefs);
+    EasyMock.verify(output, userPrefs);
   }
 
   public void testPreferredItemsPerUserReducer() throws Exception {
 
     List<ItemPrefWithLengthWritable> itemPrefs =
-        Arrays.asList(new ItemPrefWithLengthWritable(34L, 5.0, 1.0f), new ItemPrefWithLengthWritable(56L, 7.0, 2.0f));
+        Arrays.asList(new ItemPrefWithLengthWritable(34L, 5.0, 1.0f),
+                      new ItemPrefWithLengthWritable(56L, 7.0, 2.0f));
 
-    Reducer.Context ctx = createMock(Reducer.Context.class);
+    OutputCollector<LongWritable,ItemPrefWithLengthArrayWritable> output =
+        EasyMock.createMock(OutputCollector.class);
 
-    ctx.write(eq(new EntityWritable(12L)), equalToItemPrefs(itemPrefs));
+    output.collect(EasyMock.eq(new LongWritable(12L)), equalToItemPrefs(itemPrefs));
 
-    replay(ctx);
+    EasyMock.replay(output);
 
-    new PreferredItemsPerUserReducer().reduce(new EntityWritable(12L), itemPrefs, ctx);
+    new PreferredItemsPerUserReducer().reduce(
+        new LongWritable(12L), itemPrefs.iterator(), output, null);
 
-    verify(ctx);
+    EasyMock.verify(output);
   }
 
-  static ItemPrefWithLengthArrayWritable equalToItemPrefs(final Collection<ItemPrefWithLengthWritable> prefsToCheck) {
+  static ItemPrefWithLengthArrayWritable equalToItemPrefs(
+      final Collection<ItemPrefWithLengthWritable> prefsToCheck) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof ItemPrefWithLengthArrayWritable) {
           ItemPrefWithLengthArrayWritable itemPrefArray = (ItemPrefWithLengthArrayWritable) argument;
-          Set<ItemPrefWithLengthWritable> set = new HashSet<ItemPrefWithLengthWritable>();
-          for (ItemPrefWithLengthWritable itemPref : itemPrefArray.getItemPrefs()) {
-            set.add(itemPref);
-          }
+          Collection<ItemPrefWithLengthWritable> set = new HashSet<ItemPrefWithLengthWritable>();
+          set.addAll(Arrays.asList(itemPrefArray.getItemPrefs()));
 
           if (set.size() != prefsToCheck.size()) {
             return false;
@@ -183,40 +185,45 @@ public class ItemSimilarityTest extends MahoutTestCase {
   }
 
   public void testCopreferredItemsMapper() throws Exception {
-    Mapper.Context ctx = createMock(Mapper.Context.class);
-    ItemPrefWithLengthArrayWritable itemPrefs = createMock(ItemPrefWithLengthArrayWritable.class);
+    OutputCollector<ItemPairWritable,FloatWritable> output =
+        EasyMock.createMock(OutputCollector.class);
+    ItemPrefWithLengthArrayWritable itemPrefs =
+        EasyMock.createMock(ItemPrefWithLengthArrayWritable.class);
 
-    expect(itemPrefs.getItemPrefs()).andReturn(new ItemPrefWithLengthWritable[] {
+    EasyMock.expect(itemPrefs.getItemPrefs()).andReturn(new ItemPrefWithLengthWritable[] {
         new ItemPrefWithLengthWritable(34L, 2.0, 1.0f), new ItemPrefWithLengthWritable(56L, 3.0, 2.0f),
         new ItemPrefWithLengthWritable(78L, 4.0, 3.0f) });
 
-    ctx.write(new ItemPairWritable(34L, 56L, 6.0), new FloatWritable(2.0f));
-    ctx.write(new ItemPairWritable(34L, 78L, 8.0), new FloatWritable(3.0f));
-    ctx.write(new ItemPairWritable(56L, 78L, 12.0), new FloatWritable(6.0f));
+    output.collect(new ItemPairWritable(34L, 56L, 6.0), new FloatWritable(2.0f));
+    output.collect(new ItemPairWritable(34L, 78L, 8.0), new FloatWritable(3.0f));
+    output.collect(new ItemPairWritable(56L, 78L, 12.0), new FloatWritable(6.0f));
 
-    replay(ctx, itemPrefs);
+    EasyMock.replay(output, itemPrefs);
 
-    new CopreferredItemsMapper().map(new EntityWritable(), itemPrefs, ctx);
+    new CopreferredItemsMapper().map(new LongWritable(), itemPrefs, output, null);
 
-    verify(ctx, itemPrefs);
+    EasyMock.verify(output, itemPrefs);
   }
 
   public void testCosineSimilarityReducer() throws Exception {
-    Reducer.Context ctx = createMock(Reducer.Context.class);
+    OutputCollector<EntityEntityWritable,DoubleWritable> output =
+        EasyMock.createMock(OutputCollector.class);
 
-    ctx.write(new EntityEntityWritable(12L, 34L), new DoubleWritable(0.5d));
+    output.collect(new EntityEntityWritable(12L, 34L), new DoubleWritable(0.5d));
 
-    replay(ctx);
+    EasyMock.replay(output);
 
     new CosineSimilarityReducer().reduce(new ItemPairWritable(12L, 34L, 20.0),
-        Arrays.asList(new FloatWritable(5.0f), new FloatWritable(5.0f)), ctx);
+        Arrays.asList(new FloatWritable(5.0f),
+                      new FloatWritable(5.0f)).iterator(), output, null);
 
-    verify(ctx);
+    EasyMock.verify(output);
   }
 
   public void testCompleteJob() throws Exception {
 
-    String tmpDirPath = System.getProperty("java.io.tmpdir")+ '/' +ItemSimilarityTest.class.getCanonicalName();
+    String tmpDirPath = System.getProperty("java.io.tmpdir") +
+          ItemSimilarityTest.class.getCanonicalName();
     File tmpDir = new File(tmpDirPath);
 
     try {
@@ -250,14 +257,16 @@ public class ItemSimilarityTest extends MahoutTestCase {
       Configuration conf = new Configuration();
       conf.set("mapred.input.dir", tmpDirPath+"/prefs.txt");
       conf.set("mapred.output.dir", tmpDirPath+"/output");
+      conf.set("mapred.output.compress", Boolean.FALSE.toString());
 
       similarityJob.setConf(conf);
 
       similarityJob.run(new String[] { "--tempDir", tmpDirPath+"/tmp"});
 
-      BufferedReader reader = new BufferedReader(new FileReader(tmpDirPath+"/output/part-r-00000"));
+      String filePath = tmpDirPath+"/output/part-00000";
+      BufferedReader reader = new BufferedReader(new FileReader(filePath));
 
-      String line = null;
+      String line;
       int currentLine = 1;
       while ( (line = reader.readLine()) != null) {
 

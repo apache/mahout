@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity.item.writables;
+package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.DataInput;
 import java.io.DataOutput;

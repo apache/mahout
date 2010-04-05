@@ -19,22 +19,26 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 
-import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.EntityWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
 
 /**
  * for each item-vector, we compute its length here and map out all entries with the user as key,
  * so we can create the user-vectors in the reducer
  */
-public final class PreferredItemsPerUserMapper
-    extends Mapper<EntityWritable, EntityPrefWritableArrayWritable,EntityWritable,ItemPrefWithLengthWritable> {
+public final class PreferredItemsPerUserMapper extends MapReduceBase
+    implements Mapper<LongWritable,EntityPrefWritableArrayWritable,LongWritable,ItemPrefWithLengthWritable> {
 
   @Override
-  protected void map(EntityWritable item, EntityPrefWritableArrayWritable userPrefsArray, Context context)
-      throws IOException, InterruptedException {
+  public void map(LongWritable item,
+                  EntityPrefWritableArrayWritable userPrefsArray,
+                  OutputCollector<LongWritable,ItemPrefWithLengthWritable> output,
+                  Reporter reporter) throws IOException {
 
     EntityPrefWritable[] userPrefs = userPrefsArray.getPrefs();
 
@@ -47,8 +51,8 @@ public final class PreferredItemsPerUserMapper
     length = Math.sqrt(length);
 
     for (EntityPrefWritable userPref : userPrefs) {
-      context.write(new EntityWritable(userPref.getID()),
-          new ItemPrefWithLengthWritable(item.getID(), length, userPref.getPrefValue()));
+      output.collect(new LongWritable(userPref.getID()),
+          new ItemPrefWithLengthWritable(item.get(), length, userPref.getPrefValue()));
     }
 
   }

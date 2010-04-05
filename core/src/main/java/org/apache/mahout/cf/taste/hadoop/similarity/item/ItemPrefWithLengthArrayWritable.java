@@ -15,35 +15,27 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.ArrayWritable;
 
 /**
- * <h1>Input</h1>
- * 
- * <p>
- * Intended for use with {@link org.apache.hadoop.mapred.TextInputFormat}; accepts line number / line pairs as
- * {@link LongWritable}/{@link Text} pairs.
- * </p>
- * 
- * <p>
- * Each line is assumed to be of the form <code>userID,itemID,preference</code>, or
- * <code>userID,itemID</code>.</p>
- * </p>
- * 
- * <h1>Output</h1>
- * 
- * <p>
- * Outputs the user ID as a {@link LongWritable} mapped to the item ID and preference as a
- * {@link EntityPrefWritable}.
- * </p>
+ * An {@link ArrayWritable} holding {@link ItemPrefWithLengthWritable}s
+ *
+ * Used as user-vector
  */
-public final class ToItemPrefsMapper extends ToEntityPrefsMapper {
+public class ItemPrefWithLengthArrayWritable extends ArrayWritable {
 
-  public ToItemPrefsMapper() {
-    super(false);
+  public ItemPrefWithLengthArrayWritable() {
+    super(ItemPrefWithLengthWritable.class);
   }
-  
+
+  public ItemPrefWithLengthArrayWritable(ItemPrefWithLengthWritable[] itemPrefs) {
+    super(ItemPrefWithLengthWritable.class, itemPrefs);
+  }
+
+  public ItemPrefWithLengthWritable[] getItemPrefs() {
+    return (ItemPrefWithLengthWritable[]) toArray();
+  }
+
 }

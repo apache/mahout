@@ -19,31 +19,39 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.EntityWritable;
 
 /**
  * For each single item, collect all users with their preferences
  * (thereby building the item vectors of the user-item-matrix)
  */
 public final class ToItemVectorReducer
-    extends Reducer<EntityWritable, EntityPrefWritable, EntityWritable, EntityPrefWritableArrayWritable> {
+    extends MapReduceBase implements
+    Reducer<LongWritable,EntityPrefWritable,LongWritable,EntityPrefWritableArrayWritable> {
 
   @Override
-  protected void reduce(EntityWritable item, Iterable<EntityPrefWritable> userPrefs, Context context)
-      throws IOException, InterruptedException {
+  public void reduce(LongWritable item,
+                     Iterator<EntityPrefWritable> userPrefs,
+                     OutputCollector<LongWritable,EntityPrefWritableArrayWritable> output,
+                     Reporter reporter)
+      throws IOException {
 
     Set<EntityPrefWritable> collectedUserPrefs = new HashSet<EntityPrefWritable>();
 
-    for (EntityPrefWritable userPref : userPrefs) {
-      collectedUserPrefs.add(userPref.clone());
+    while (userPrefs.hasNext()) {
+      collectedUserPrefs.add(userPrefs.next().clone());
     }
 
-    context.write(item, new EntityPrefWritableArrayWritable(
+    output.collect(item, new EntityPrefWritableArrayWritable(
         collectedUserPrefs.toArray(new EntityPrefWritable[collectedUserPrefs.size()])));
   }
 

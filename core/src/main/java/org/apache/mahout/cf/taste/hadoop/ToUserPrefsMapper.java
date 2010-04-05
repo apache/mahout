@@ -15,27 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity.item.writables;
-
-import org.apache.hadoop.io.ArrayWritable;
+package org.apache.mahout.cf.taste.hadoop;
 
 /**
- * An {@link ArrayWritable} holding {@link ItemPrefWithLengthWritable}s
- *
- * Used as user-vector
+ * The 'reverse' of {@link ToItemPrefsMapper}; outputs item IDs mapped to user-pref data.
  */
-public class ItemPrefWithLengthArrayWritable extends ArrayWritable {
+public final class ToUserPrefsMapper extends ToEntityPrefsMapper {
 
-  public ItemPrefWithLengthArrayWritable() {
-    super(ItemPrefWithLengthWritable.class);
-  }
-
-  public ItemPrefWithLengthArrayWritable(ItemPrefWithLengthWritable[] itemPrefs) {
-    super(ItemPrefWithLengthWritable.class, itemPrefs);
-  }
-
-  public ItemPrefWithLengthWritable[] getItemPrefs() {
-    return (ItemPrefWithLengthWritable[]) toArray();
+  public ToUserPrefsMapper() {
+    super(true);
   }
 
 }

@@ -20,22 +20,25 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 import java.io.IOException;
 
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.cf.taste.hadoop.EntityWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPairWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
 
 /**
  * map out each pair of items that appears in the same user-vector together with the multiplied vector lengths
  * of the associated item vectors
  */
-public final  class CopreferredItemsMapper
-    extends Mapper<EntityWritable,ItemPrefWithLengthArrayWritable,ItemPairWritable,FloatWritable> {
+public final class CopreferredItemsMapper extends MapReduceBase
+    implements Mapper<LongWritable,ItemPrefWithLengthArrayWritable,ItemPairWritable,FloatWritable> {
 
   @Override
-  protected void map(EntityWritable user, ItemPrefWithLengthArrayWritable itemPrefsArray, Context context)
-      throws IOException, InterruptedException {
+  public void map(LongWritable user,
+                  ItemPrefWithLengthArrayWritable itemPrefsArray,
+                  OutputCollector<ItemPairWritable,FloatWritable> output,
+                  Reporter reporter)
+      throws IOException {
 
     ItemPrefWithLengthWritable[] itemPrefs = itemPrefsArray.getItemPrefs();
 
@@ -49,7 +52,7 @@ public final  class CopreferredItemsMapper
         long itemAID = Math.min(itemNID, itemM.getItemID());
         long itemBID = Math.max(itemNID, itemM.getItemID());
         ItemPairWritable pair = new ItemPairWritable(itemAID, itemBID, itemNLength * itemM.getLength());
-        context.write(pair, new FloatWritable(itemNValue * itemM.getPrefValue()));
+        output.collect(pair, new FloatWritable(itemNValue * itemM.getPrefValue()));
       }
     }
 

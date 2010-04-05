@@ -19,27 +19,32 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.cf.taste.hadoop.EntityWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.writables.ItemPrefWithLengthWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
 
-public final class PreferredItemsPerUserReducer
-    extends Reducer<EntityWritable,ItemPrefWithLengthWritable, EntityWritable,ItemPrefWithLengthArrayWritable> {
+public final class PreferredItemsPerUserReducer extends MapReduceBase
+    implements Reducer<LongWritable,ItemPrefWithLengthWritable, LongWritable,ItemPrefWithLengthArrayWritable> {
 
   @Override
-  protected void reduce(EntityWritable user, Iterable<ItemPrefWithLengthWritable> itemPrefs, Context context)
-      throws IOException, InterruptedException {
+  public void reduce(LongWritable user,
+                     Iterator<ItemPrefWithLengthWritable> itemPrefs,
+                     OutputCollector<LongWritable,ItemPrefWithLengthArrayWritable> output,
+                     Reporter reporter)
+      throws IOException {
 
     Set<ItemPrefWithLengthWritable> itemPrefsWithLength = new HashSet<ItemPrefWithLengthWritable>();
 
-    for (ItemPrefWithLengthWritable itemPrefWithLength : itemPrefs) {
-      itemPrefsWithLength.add(itemPrefWithLength.deepCopy());
+    while (itemPrefs.hasNext()) {
+      itemPrefsWithLength.add(itemPrefs.next().clone());
     }
 
-    context.write(user, new ItemPrefWithLengthArrayWritable(
+    output.collect(user, new ItemPrefWithLengthArrayWritable(
         itemPrefsWithLength.toArray(new ItemPrefWithLengthWritable[itemPrefsWithLength.size()])));
   }
 
