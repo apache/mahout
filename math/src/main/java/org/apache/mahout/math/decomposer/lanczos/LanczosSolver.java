@@ -35,6 +35,8 @@ import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 import org.apache.mahout.math.matrix.linalg.EigenvalueDecomposition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Simple implementation of the <a href="http://en.wikipedia.org/wiki/Lanczos_algorithm">Lanczos algorithm</a> for
@@ -63,6 +65,8 @@ import org.apache.mahout.math.matrix.linalg.EigenvalueDecomposition;
  */
 public class LanczosSolver {
 
+  private static final Logger log = LoggerFactory.getLogger(LanczosSolver.class);
+
   public static final double SAFE_MAX = 1.0e150;
 
   private static final double NANOS_IN_MILLI = 1.0e6;
@@ -73,7 +77,7 @@ public class LanczosSolver {
 
   private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
   private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
-  protected double scaleFactor = 0.0;
+  protected double scaleFactor = 0;
 
   private static final class Scale implements UnaryFunction {
     private final double d;
@@ -99,6 +103,7 @@ public class LanczosSolver {
                     Matrix eigenVectors,
                     List<Double> eigenValues,
                     boolean isSymmetric) {
+    log.info("Finding {} singular vectors of matrix with {} rows, via Lanczos", desiredRank, corpus.numRows());
     Vector currentVector = getInitialVector(corpus);
     Vector previousVector = new DenseVector(currentVector.size());
     Matrix basis = new SparseRowMatrix(new int[]{desiredRank, corpus.numCols()});
@@ -109,6 +114,7 @@ public class LanczosSolver {
     for (int i = 1; i < desiredRank; i++) {
       startTime(TimingSection.ITERATE);
       Vector nextVector = isSymmetric ? corpus.times(currentVector) : corpus.timesSquared(currentVector);
+      log.info("{} passes through the corpus so far...", i);
       calculateScaleFactor(nextVector);
       nextVector.assign(new Scale(1 / scaleFactor));
       nextVector.assign(previousVector, new PlusMult(-beta));
@@ -122,6 +128,7 @@ public class LanczosSolver {
       // and normalize
       beta = nextVector.norm(2);
       if (outOfRange(beta) || outOfRange(alpha)) {
+        log.warn("Lanczos parameters out of range: alpha = {}, beta = {}.  Bailing out early!", alpha, beta);
         break;
       }
       final double b = beta;
@@ -138,6 +145,7 @@ public class LanczosSolver {
     }
     startTime(TimingSection.TRIDIAG_DECOMP);
 
+    log.info("Lanczos iteration complete - now to diagonalize the tri-diagonal auxiliary matrix.");
     // at this point, have tridiag all filled out, and basis is all filled out, and orthonormalized
     EigenvalueDecomposition decomp = new EigenvalueDecomposition(triDiag);
 
@@ -156,8 +164,10 @@ public class LanczosSolver {
       }
       realEigen = realEigen.normalize();
       eigenVectors.assignRow(i, realEigen);
+      log.info("Eigenvector {} found with eigenvalue {}", i, eigenVals.get(i));
       eigenValues.add(eigenVals.get(i));
     }
+    log.info("LanczosSolver finished.");
     endTime(TimingSection.FINAL_EIGEN_CREATE);
   }
 
