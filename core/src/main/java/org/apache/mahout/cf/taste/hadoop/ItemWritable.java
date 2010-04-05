@@ -17,14 +17,16 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.mahout.common.RandomUtils;
+
 /** A {@link Writable} encapsulating an item ID. */
-public class ItemWritable implements Writable {
+public class ItemWritable implements WritableComparable<ItemWritable> {
 
   private long itemID;
 
@@ -58,6 +60,22 @@ public class ItemWritable implements Writable {
     ItemWritable writable = new ItemWritable();
     writable.readFields(in);
     return writable;
+  }
+
+  @Override
+  public int compareTo(ItemWritable other) {
+    long otherItemID = other.getItemID();
+    return itemID < otherItemID ? -1 : itemID > otherItemID ? 1 : 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return RandomUtils.hashLong(itemID);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof ItemWritable && (itemID == ((ItemWritable) o).getItemID());
   }
 
 }

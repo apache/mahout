@@ -15,69 +15,62 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.similarity.item.writables;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.mahout.common.RandomUtils;
 
-/** A {@link Writable} encapsulating an item ID and a preference value. */
-public final class ItemPrefWritable extends ItemWritable implements WritableComparable<ItemPrefWritable> {
-  
+/**
+ * A {@link Writable} encapsulating an item ID together with a preference value.
+ *
+ * Used as entry in an item-vector
+ */
+public final class UserPrefWritable extends UserWritable {
+
   private float prefValue;
-  
-  public ItemPrefWritable() {
-    // do nothing
+
+  public UserPrefWritable() {
   }
-  
-  public ItemPrefWritable(long itemID, float prefValue) {
-    super(itemID);
+
+  public UserPrefWritable(long userID, float prefValue) {
+    super(userID);
     this.prefValue = prefValue;
-  }
-  
-  public ItemPrefWritable(ItemPrefWritable other) {
-    this(other.getItemID(), other.getPrefValue());
   }
 
   public float getPrefValue() {
     return prefValue;
   }
-  
-  @Override
-  public void write(DataOutput out) throws IOException {
-    super.write(out);
-    out.writeFloat(prefValue);
+
+  public UserPrefWritable deepCopy() {
+    return new UserPrefWritable(getUserID(), prefValue);
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    prefValue = in.readFloat();
+    prefValue =  in.readFloat();
   }
-  
-  public static ItemPrefWritable read(DataInput in) throws IOException {
-    ItemPrefWritable writable = new ItemPrefWritable();
-    writable.readFields(in);
-    return writable;
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+   super.write(out);
+   out.writeFloat(prefValue);
   }
 
   @Override
   public int hashCode() {
-    return super.hashCode() ^ RandomUtils.hashFloat(prefValue);
+    return super.hashCode();
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof ItemPrefWritable)) {
-      return false;
+    if (o instanceof UserPrefWritable) {
+      UserWritable other = (UserWritable) o;
+      return super.equals(other);
     }
-    ItemPrefWritable other = (ItemPrefWritable) o;
-    return getItemID() == other.getItemID() && prefValue == other.getPrefValue();
-    
+    return false;
   }
-  
 }

@@ -15,69 +15,68 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop;
+package org.apache.mahout.cf.taste.hadoop.similarity.item.writables;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.RandomUtils;
 
-/** A {@link Writable} encapsulating an item ID and a preference value. */
-public final class ItemPrefWritable extends ItemWritable implements WritableComparable<ItemPrefWritable> {
-  
-  private float prefValue;
-  
-  public ItemPrefWritable() {
+/** A {@link WritableComparable} encapsulating a user ID. */
+public final class UserWritable implements WritableComparable<UserWritable> {
+
+  private long userID;
+
+  public UserWritable() {
     // do nothing
   }
-  
-  public ItemPrefWritable(long itemID, float prefValue) {
-    super(itemID);
-    this.prefValue = prefValue;
-  }
-  
-  public ItemPrefWritable(ItemPrefWritable other) {
-    this(other.getItemID(), other.getPrefValue());
+
+  public UserWritable(long userID) {
+    this.userID = userID;
   }
 
-  public float getPrefValue() {
-    return prefValue;
+  public long getUserID() {
+    return userID;
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
-    super.write(out);
-    out.writeFloat(prefValue);
+    out.writeLong(userID);
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
-    super.readFields(in);
-    prefValue = in.readFloat();
+    userID = in.readLong();
   }
-  
-  public static ItemPrefWritable read(DataInput in) throws IOException {
-    ItemPrefWritable writable = new ItemPrefWritable();
-    writable.readFields(in);
-    return writable;
+
+  @Override
+  public int compareTo(UserWritable other) {
+    return compare(userID, other.getUserID());
+  }
+
+  private static int compare(long a, long b) {
+    return a < b ? -1 : a > b ? 1 : 0;
   }
 
   @Override
   public int hashCode() {
-    return super.hashCode() ^ RandomUtils.hashFloat(prefValue);
+    return RandomUtils.hashLong(userID);
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof ItemPrefWritable)) {
-      return false;
+    if (o instanceof UserWritable) {
+      return (userID == ((UserWritable) o).getUserID());
     }
-    ItemPrefWritable other = (ItemPrefWritable) o;
-    return getItemID() == other.getItemID() && prefValue == other.getPrefValue();
-    
+    return false;
   }
-  
+
+  public static UserWritable read(DataInput in) throws IOException {
+    UserWritable writable = new UserWritable();
+    writable.readFields(in);
+    return writable;
+  }
+
 }
