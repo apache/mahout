@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Iterator;
+import java.util.Locale;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.JsonVectorAdapter;
@@ -152,13 +153,13 @@ public abstract class ClusterBase implements Writable, Printable {
         } else {
           buf.append(i).append(':');
         }
-        buf.append(String.format("%.3f", elem)).append(", ");
+        buf.append(String.format(Locale.ENGLISH, "%.3f", elem)).append(", ");
       }
     } else {
       buf.append('[');
       for (int i = 0; i < v.size(); i++) {
         double elem = v.get(i);
-        buf.append(String.format("%.3f", elem)).append(", ");
+        buf.append(String.format(Locale.ENGLISH, "%.3f", elem)).append(", ");
       }
     }
     buf.setLength(buf.length() - 2);

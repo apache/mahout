@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
@@ -258,7 +259,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     
     @Override
     public String toString() {
-      return String.format("[firstId:%d, nbTrees:%d, seed:%d]", firstId, nbTrees, seed);
+      return String.format(Locale.ENGLISH, "[firstId:%d, nbTrees:%d, seed:%d]", firstId, nbTrees, seed);
     }
     
     @Override

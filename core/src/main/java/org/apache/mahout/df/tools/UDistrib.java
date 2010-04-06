@@ -19,6 +19,7 @@ package org.apache.mahout.df.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -138,7 +139,7 @@ public class UDistrib {
     Path[] partPaths = new Path[numPartitions];
     FSDataOutputStream[] files = new FSDataOutputStream[numPartitions];
     for (int p = 0; p < numPartitions; p++) {
-      partPaths[p] = new Path(partsPath, String.format("part.%03d", p));
+      partPaths[p] = new Path(partsPath, String.format(Locale.ENGLISH, "part.%03d", p));
       files[p] = pfs.create(partPaths[p]);
     }
     

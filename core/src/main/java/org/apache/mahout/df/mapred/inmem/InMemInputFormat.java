@@ -20,6 +20,7 @@ package org.apache.mahout.df.mapred.inmem;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
@@ -250,7 +251,7 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
     
     @Override
     public String toString() {
-      return String.format("[firstId:%d, nbTrees:%d, seed:%d]", firstId,
+      return String.format(Locale.ENGLISH, "[firstId:%d, nbTrees:%d, seed:%d]", firstId,
         nbTrees, seed);
     }
     

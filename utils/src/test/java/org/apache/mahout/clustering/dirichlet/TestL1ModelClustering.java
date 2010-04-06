@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import junit.framework.Assert;
 
@@ -164,7 +165,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
       if (i > nextIx) {
         buf.append("..{").append(i).append("}=");
       }
-      buf.append(String.format("%.2f", elem)).append(", ");
+      buf.append(String.format(Locale.ENGLISH, "%.2f", elem)).append(", ");
       nextIx = i + 1;
     }
     buf.append(']');

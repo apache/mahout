@@ -21,6 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
@@ -138,7 +139,7 @@ public class NormalModel implements Model<VectorWritable> {
     if (mean != null) {
       buf.append(ClusterBase.formatVector(mean, bindings));
     }
-    buf.append(" sd=").append(String.format("%.2f", stdDev)).append('}');
+    buf.append(" sd=").append(String.format(Locale.ENGLISH, "%.2f", stdDev)).append('}');
     return buf.toString();
   }
   

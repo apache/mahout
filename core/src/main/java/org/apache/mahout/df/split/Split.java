@@ -17,6 +17,8 @@
 
 package org.apache.mahout.df.split;
 
+import java.util.Locale;
+
 /**
  * Contains enough information to identify each split
  */
@@ -43,6 +45,6 @@ public class Split {
 
   @Override
   public String toString() {
-    return String.format("attr: %d, ig: %f, split: %f", attr, ig, split);
+    return String.format(Locale.ENGLISH, "attr: %d, ig: %f, split: %f", attr, ig, split);
   }
 }

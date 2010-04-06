@@ -20,6 +20,7 @@ package org.apache.mahout.df.mapreduce.partial;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
@@ -110,7 +111,7 @@ public class PartitionBugTest extends MahoutTestCase {
         return;
       }
 
-      assertEquals(String.format("treeId: %d, InstanceId: %d, Prediction: %d",
+      assertEquals(String.format(Locale.ENGLISH, "treeId: %d, InstanceId: %d, Prediction: %d",
           treeId, instanceId, prediction), data.get(instanceId).label, prediction);
     }
 
