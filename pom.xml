@@ -51,7 +51,8 @@
       <plugin>
         <groupId>org.apache.mahout</groupId>
         <artifactId>mahout-collection-codegen-plugin</artifactId>
-        <version>${project.version}</version>
+        <!-- for now, peg to last release -->
+        <version>0.3</version>
         <executions>
           <execution>
             <goals>
