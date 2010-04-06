@@ -232,9 +232,8 @@ public class ItemSimilarityTest extends MahoutTestCase {
     try {
       if (tmpDir.exists()) {
         recursiveDelete(tmpDir);
-      } else {
-        tmpDir.mkdirs();
       }
+      tmpDir.mkdirs();
 
       /* user-item-matrix
 
