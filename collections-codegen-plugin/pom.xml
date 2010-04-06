@@ -22,7 +22,7 @@
           <version>2.0-beta-9</version>
           <configuration>
             <useReleaseProfile>true</useReleaseProfile>
-            <releaseProfiles>release</releaseProfiles>
+            <releaseProfiles>release,mahout_release</releaseProfiles>
             <remoteTagging>true</remoteTagging>
             <preparationGoals>clean install</preparationGoals>
             <goals>deploy</goals>
