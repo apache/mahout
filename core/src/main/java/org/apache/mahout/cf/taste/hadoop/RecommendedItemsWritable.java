@@ -21,8 +21,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.EOFException;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,8 +35,6 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
  */
 public final class RecommendedItemsWritable implements Writable {
 
-  private static final MathContext ROUNDING = new MathContext(5);
-  
   private List<RecommendedItem> recommended;
   
   public RecommendedItemsWritable() {
@@ -100,8 +96,7 @@ public final class RecommendedItemsWritable implements Writable {
       }
       result.append(item.getItemID());
       result.append(':');
-      BigDecimal bd = new BigDecimal(item.getValue()).round(ROUNDING);
-      result.append(bd.toPlainString());
+      result.append(item.getValue());
     }
     result.append(']');
     return result.toString();
