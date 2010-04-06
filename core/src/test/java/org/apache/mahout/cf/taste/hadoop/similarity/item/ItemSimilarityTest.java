@@ -222,8 +222,11 @@ public class ItemSimilarityTest extends MahoutTestCase {
 
   public void testCompleteJob() throws Exception {
 
-    String tmpDirPath = System.getProperty("java.io.tmpdir") +
-          ItemSimilarityTest.class.getCanonicalName();
+    String tmpDirProp = System.getProperty("java.io.tmpdir");
+    if (!tmpDirProp.endsWith("/")) {
+      tmpDirProp += "/";
+    }
+    String tmpDirPath = tmpDirProp + ItemSimilarityTest.class.getCanonicalName();
     File tmpDir = new File(tmpDirPath);
 
     try {
