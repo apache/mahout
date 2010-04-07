@@ -151,11 +151,13 @@ public final class RecommenderMapper extends MapReduceBase implements
         }
       }
     }
-    
-    List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>(topItems.size());
-    recommendations.addAll(topItems);
-    Collections.sort(recommendations, ByValueRecommendedItemComparator.getInstance());
-    output.collect(userID, new RecommendedItemsWritable(recommendations));
+
+    if (!topItems.isEmpty()) {
+      List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>(topItems.size());
+      recommendations.addAll(topItems);
+      Collections.sort(recommendations, ByValueRecommendedItemComparator.getInstance());
+      output.collect(userID, new RecommendedItemsWritable(recommendations));
+    }
   }
   
   @Override
