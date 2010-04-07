@@ -73,15 +73,4 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
     return (itemID == other.getItemID()) && (value == other.getValue());
   }
   
-  /**
-   * Defines a natural ordering from most-preferred item (highest value) to least-preferred.
-   * 
-   * @return 1, -1, 0 as this value is less than, greater than or equal to the other's value
-   */
-  @Override
-  public int compareTo(RecommendedItem other) {
-    float otherValue = other.getValue();
-    return value > otherValue ? -1 : value < otherValue ? 1 : 0;
-  }
-  
 }

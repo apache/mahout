@@ -15,27 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.recommender;
+package org.apache.mahout.cf.taste.impl.recommender;
+
+import java.util.Comparator;
+
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
 /**
- * <p>
- * Implementations encapsulate items that are recommended, and include the item recommended and a value
- * expressing the strength of the preference.
- * </p>
+ * Defines a natural ordering from most-preferred item (highest value) to least-preferred.
  */
-public interface RecommendedItem {
-  
-  /** @return the recommended item ID */
-  long getItemID();
-  
-  /**
-   * <p>
-   * A value expressing the strength of the preference for the recommended item. The range of the values
-   * depends on the implementation. Implementations must use larger values to express stronger preference.
-   * </p>
-   * 
-   * @return strength of the preference
-   */
-  float getValue();
-  
+public final class ByValueRecommendedItemComparator implements Comparator<RecommendedItem> {
+
+  private static final Comparator<RecommendedItem> instance = new ByValueRecommendedItemComparator();
+
+  public static Comparator<RecommendedItem> getInstance() {
+    return instance;
+  }
+
+  @Override
+  public int compare(RecommendedItem o1, RecommendedItem o2) {
+    float value1 = o1.getValue();
+    float value2 = o2.getValue();
+    return value1 > value2 ? -1 : value1 < value2 ? 1 : 0;
+  }
+
 }

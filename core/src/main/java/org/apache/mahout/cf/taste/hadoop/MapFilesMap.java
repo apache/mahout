@@ -74,8 +74,9 @@ public final class MapFilesMap<K extends WritableComparable,V extends Writable> 
    */
   public V get(K key, V value) throws IOException {
     for (MapFile.Reader reader : readers) {
-      if (reader.get(key, value) != null) {
-        return value;
+      V theValue;
+      if ((theValue = (V) reader.get(key, value)) != null) {
+        return theValue;
       }
     }
     log.debug("No value for key {}", key);

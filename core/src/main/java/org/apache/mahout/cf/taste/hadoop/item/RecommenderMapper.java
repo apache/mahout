@@ -42,6 +42,7 @@ import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.impl.recommender.ByValueRecommendedItemComparator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.FileLineIterable;
@@ -128,7 +129,7 @@ public final class RecommenderMapper extends MapReduceBase implements
     }
     
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
-        Collections.reverseOrder());
+        Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
     
     Iterator<Vector.Element> recommendationVectorIterator = recommendationVector.iterateNonZero();
     LongWritable itemID = new LongWritable();
@@ -137,19 +138,23 @@ public final class RecommenderMapper extends MapReduceBase implements
       int index = element.index();
       if (userVector.get(index) == 0.0) {
         if (topItems.size() < recommendationsPerUser) {
-          indexItemIDMap.get(new IntWritable(index), itemID);
-          topItems.add(new GenericRecommendedItem(itemID.get(), (float) element.get()));
+          LongWritable theItemID = indexItemIDMap.get(new IntWritable(index), itemID);
+          if (theItemID != null) {
+            topItems.add(new GenericRecommendedItem(theItemID.get(), (float) element.get()));
+          } // else, huh?
         } else if (element.get() > topItems.peek().getValue()) {
-          indexItemIDMap.get(new IntWritable(index), itemID);
-          topItems.add(new GenericRecommendedItem(itemID.get(), (float) element.get()));
-          topItems.poll();
+          LongWritable theItemID = indexItemIDMap.get(new IntWritable(index), itemID);
+          if (theItemID != null) {
+            topItems.add(new GenericRecommendedItem(theItemID.get(), (float) element.get()));
+            topItems.poll();
+          } // else, huh?
         }
       }
     }
     
     List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>(topItems.size());
     recommendations.addAll(topItems);
-    Collections.sort(recommendations);
+    Collections.sort(recommendations, ByValueRecommendedItemComparator.getInstance());
     output.collect(userID, new RecommendedItemsWritable(recommendations));
   }
   
@@ -162,31 +167,26 @@ public final class RecommenderMapper extends MapReduceBase implements
   private static class CooccurrenceCache implements Retriever<IntWritable,Vector> {
     
     private final MapFilesMap<IntWritable,VectorWritable> map;
-    private VectorWritable columnVector;
-    
+
     private CooccurrenceCache(MapFilesMap<IntWritable,VectorWritable> map) {
       this.map = map;
-      columnVector = new VectorWritable();
-      columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));
     }
     
     @Override
     public Vector get(IntWritable key) throws TasteException {
-      VectorWritable writable;
+      VectorWritable columnVector = new VectorWritable();
       try {
-        writable = map.get(key, columnVector);
+        columnVector = map.get(key, columnVector);
       } catch (IOException ioe) {
         throw new TasteException(ioe);
       }
-      if (writable == null) {
+      if (columnVector == null) {
         return null;
       }
-      Vector value = writable.get();
+      Vector value = columnVector.get();
       if (value == null) {
         throw new IllegalStateException("Vector in map file was empty?");
       }
-      columnVector = new VectorWritable();
-      columnVector.set(new RandomAccessSparseVector(Integer.MAX_VALUE, 1000));
       return value;
     }
     

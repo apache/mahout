@@ -51,6 +51,7 @@ public final class RecommendedItemsWritable implements Writable {
   
   @Override
   public void write(DataOutput out) throws IOException {
+    out.writeInt(recommended.size());
     for (RecommendedItem item : recommended) {
       out.writeLong(item.getItemID());
       out.writeFloat(item.getValue());
@@ -60,20 +61,13 @@ public final class RecommendedItemsWritable implements Writable {
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    recommended = new ArrayList<RecommendedItem>();
-    try {
-      do {
-        long itemID = in.readLong();
-        float value = in.readFloat();
-        if (!Float.isNaN(value)) {
-          RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
-          recommended.add(recommendedItem);
-        }
-      } while (true);
-    } catch (EOFException eofe) {
-      // continue; done
-    } catch (ArrayIndexOutOfBoundsException aiooe) {
-      // bizarre ByteArrayInputStream bug? sometimes throws from read(); done
+    int size = in.readInt();
+    recommended = new ArrayList<RecommendedItem>(size);
+    for (int i = 0; i < size; i++) {
+      long itemID = in.readLong();
+      float value = in.readFloat();
+      RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
+      recommended.add(recommendedItem);
     }
   }
   
@@ -94,9 +88,9 @@ public final class RecommendedItemsWritable implements Writable {
       } else {
         result.append(',');
       }
-      result.append(item.getItemID());
+      result.append(String.valueOf(item.getItemID()));
       result.append(':');
-      result.append(item.getValue());
+      result.append(String.valueOf(item.getValue()));
     }
     result.append(']');
     return result.toString();
