@@ -45,21 +45,22 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   private final float[] values;
   
   public GenericItemPreferenceArray(int size) {
-    if (size < 1) {
-      throw new IllegalArgumentException("size is less than 1");
-    }
     this.IDs = new long[size];
     values = new float[size];
+    this.id = Long.MIN_VALUE; // as a sort of 'unspecified' value
   }
   
   public GenericItemPreferenceArray(List<Preference> prefs) {
     this(prefs.size());
-    for (int i = 0; i < prefs.size(); i++) {
+    int size = prefs.size();
+    for (int i = 0; i < size; i++) {
       Preference pref = prefs.get(i);
       IDs[i] = pref.getUserID();
       values[i] = pref.getValue();
     }
-    id = prefs.get(0).getItemID();
+    if (size > 0) {
+      id = prefs.get(0).getItemID();
+    }
   }
   
   /**

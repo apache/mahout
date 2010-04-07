@@ -41,19 +41,20 @@ public final class BooleanItemPreferenceArray implements PreferenceArray {
   private long id;
   
   public BooleanItemPreferenceArray(int size) {
-    if (size < 1) {
-      throw new IllegalArgumentException("size is less than 1");
-    }
     this.IDs = new long[size];
+    this.id = Long.MIN_VALUE; // as a sort of 'unspecified' value
   }
   
   public BooleanItemPreferenceArray(List<Preference> prefs, boolean forOneUser) {
     this(prefs.size());
-    for (int i = 0; i < prefs.size(); i++) {
+    int size = prefs.size();
+    for (int i = 0; i < size; i++) {
       Preference pref = prefs.get(i);
       IDs[i] = forOneUser ? pref.getItemID() : pref.getUserID();
     }
-    id = forOneUser ? prefs.get(0).getUserID() : prefs.get(0).getItemID();
+    if (size > 0) {
+      id = forOneUser ? prefs.get(0).getUserID() : prefs.get(0).getItemID();
+    }
   }
   
   /**
