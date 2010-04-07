@@ -50,8 +50,8 @@ public final class TopItems {
     if ((possibleItemIDs == null) || (estimator == null)) {
       throw new IllegalArgumentException("argument is null");
     }
-    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1, Collections
-        .reverseOrder());
+    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1,
+        Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (possibleItemIDs.hasNext()) {
