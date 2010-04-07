@@ -82,7 +82,7 @@ public final class TopItems {
     }
     List<RecommendedItem> result = new ArrayList<RecommendedItem>(size);
     result.addAll(topItems);
-    Collections.sort(result);
+    Collections.sort(result, ByValueRecommendedItemComparator.getInstance());
     return result;
   }
   
