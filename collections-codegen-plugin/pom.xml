@@ -8,14 +8,13 @@
     </parent>
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-collection-codegen-plugin</artifactId>
-  <version>1.0</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   <name>Maven Mojo to generate code for collections</name>
   <url>http://lucene.apache.org/mahout/</url>
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-collection-codegen-plugin-1.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-collection-codegen-plugin-1.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-collection-codegen-plugin-1.0</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/collections-codegen</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/collections-codegen</developerConnection>
   </scm>
 
   <build>
