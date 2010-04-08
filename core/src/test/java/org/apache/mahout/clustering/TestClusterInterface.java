@@ -39,7 +39,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class TestPrintableInterface extends MahoutTestCase {
+public class TestClusterInterface extends MahoutTestCase {
 
   private static final Type modelType = new TypeToken<Model<Vector>>() {
   }.getType();
