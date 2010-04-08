@@ -173,10 +173,13 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       // with nulls for Preferences that have no corresponding result row
       int i = 0;
       while (rs.next()) {
-        long nextResultItemID = rs.getLong(3);
-        while (prefs.getItemID(i) != nextResultItemID) {
+        long nextResultItemID = rs.getLong(4);
+        while (i < size && prefs.getItemID(i) != nextResultItemID) {
           i++;
           // result[i] is null for these values of i
+        }
+        if (i == size) {
+          break;
         }
         result[i] = new FixedRunningAverageAndStdDev(rs.getDouble(2), rs.getDouble(3), rs.getInt(1));
         i++;
