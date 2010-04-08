@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.Printable;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.Vector;
 
@@ -30,7 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class DirichletCluster<O> implements Writable, Printable {
+public class DirichletCluster<O> implements Writable, Cluster {
   
   @Override
   public void readFields(DataInput in) throws IOException {
@@ -113,6 +113,18 @@ public class DirichletCluster<O> implements Writable, Printable {
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
     return gson.toJson(this, clusterType);
+  }
+
+  public int getId() {
+    return model.getId();
+  }
+
+  public Vector getCenter() {
+    return model.getCenter();
+  }
+
+  public int getNumPoints() {
+    return model.getNumPoints();
   }
   
 }

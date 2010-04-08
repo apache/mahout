@@ -33,68 +33,73 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class L1Model implements Model<VectorWritable> {
-  
+
   private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
-  
+
+  private int id;
+
   public L1Model() {
     super();
   }
-  
+
   public L1Model(Vector v) {
     observed = v.like();
     coefficients = v;
   }
-  
+
   private Vector coefficients;
-  
+
   private int count = 0;
-  
+
   private Vector observed;
-  
-  private static final Type modelType = new TypeToken<Model<Vector>>() { }.getType();
-  
+
+  private static final Type modelType = new TypeToken<Model<Vector>>() {
+  }.getType();
+
   @Override
   public void computeParameters() {
     coefficients = observed.divide(count);
   }
-  
+
   @Override
   public int count() {
     return count;
   }
-  
+
   @Override
   public void observe(VectorWritable x) {
     count++;
     x.get().addTo(observed);
   }
-  
+
   @Override
   public double pdf(VectorWritable x) {
     return Math.exp(-L1Model.measure.distance(x.get(), coefficients));
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
+    count = in.readInt();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
     coefficients = temp.get();
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
+    out.writeInt(count);
     VectorWritable.writeVector(out, coefficients);
   }
-  
+
   public L1Model sample() {
     return new L1Model(coefficients.clone());
   }
-  
+
   @Override
   public String toString() {
     return asFormatString(null);
   }
-  
+
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
@@ -105,7 +110,7 @@ public class L1Model implements Model<VectorWritable> {
     buf.append('}');
     return buf.toString();
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -118,5 +123,20 @@ public class L1Model implements Model<VectorWritable> {
     Gson gson = builder.create();
     return gson.toJson(this, modelType);
   }
-  
+
+  @Override
+  public Vector getCenter() {
+    return coefficients;
+  }
+
+  @Override
+  public int getId() {
+    return id;
+  }
+
+  @Override
+  public int getNumPoints() {
+    return count;
+  }
+
 }

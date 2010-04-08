@@ -15,15 +15,37 @@
  */
 package org.apache.mahout.clustering;
 
+import org.apache.mahout.math.Vector;
+
 /**
- * Implementations of this interface have a printable representation. This representation may be enhanced by
- * an optional Vector label bindings dictionary.
+ * Implementations of this interface have a printable representation and certain
+ * attributes that are common across all clustering implementations
  * 
  */
-public interface Printable {
+public interface Cluster {
   
   /**
-   * Produce a custom, printable representation of the receiver.
+   * Get the id of the Cluster
+   * 
+   * @return a unique integer
+   */
+  public int getId();
+
+  /**
+   * Get the "center" of the Cluster as a Vector
+   * 
+   * @return a Vector
+   */
+  public Vector getCenter();
+
+  /**
+   * Get an integer denoting the number of points observed by this cluster
+   * @return an integer 
+   */
+  public int getNumPoints();
+
+  /**
+   * Produce a custom, human-friendly, printable representation of the Cluster.
    * 
    * @param bindings
    *          an optional String[] containing labels used to format the primary Vector/s of this
@@ -33,7 +55,7 @@ public interface Printable {
   String asFormatString(String[] bindings);
   
   /**
-   * Produce a printable representation of the receiver using Json. (Label bindings are transient and not part
+   * Produce a textual representation of the Cluster using Json format. (Label bindings are transient and not part
    * of the Json representation)
    * 
    * @return a Json String

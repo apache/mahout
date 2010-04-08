@@ -34,15 +34,20 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public abstract class ClusterBase implements Writable, Printable {
+/**
+ * ClusterBase is an abstract base class class for several clustering implementations
+ * that share common implementations of various atttributes
+ *
+ */
+public abstract class ClusterBase implements Writable, Cluster {
   // this cluster's clusterId
-  private int id;
+  int id;
   
   // the current cluster center
-  private Vector center = new RandomAccessSparseVector(0);
+  Vector center = new RandomAccessSparseVector(0);
   
   // the number of points in the cluster
-  private int numPoints;
+  int numPoints;
   
   // the Vector total of all points added to the cluster
   private Vector pointTotal;

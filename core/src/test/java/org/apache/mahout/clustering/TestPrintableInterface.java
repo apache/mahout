@@ -27,7 +27,7 @@ import org.apache.mahout.clustering.dirichlet.models.L1Model;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
-import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
@@ -50,7 +50,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testDirichletNormalModel() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable model = new NormalModel(m, 0.75);
+    Cluster model = new NormalModel(m, 0.75);
     String format = model.asFormatString(null);
     assertEquals("format", "nm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
     String json = model.asJsonString();
@@ -64,7 +64,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testDirichletSampledNormalModel() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable model = new SampledNormalModel(m, 0.75);
+    Cluster model = new SampledNormalModel(m, 0.75);
     String format = model.asFormatString(null);
     assertEquals("format", "snm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
     String json = model.asJsonString();
@@ -78,7 +78,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testDirichletASNormalModel() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable model = new AsymmetricSampledNormalModel(m, m);
+    Cluster model = new AsymmetricSampledNormalModel(m, m);
     String format = model.asFormatString(null);
     assertEquals("format", "asnm{n=0 m=[1.100, 2.200, 3.300] sd=[1.100, 2.200, 3.300]}", format);
     String json = model.asJsonString();
@@ -92,7 +92,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testDirichletL1Model() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable model = new L1Model(m);
+    Cluster model = new L1Model(m);
     String format = model.asFormatString(null);
     assertEquals("format", "l1m{n=0 c=[1.100, 2.200, 3.300]}", format);
     String json = model.asJsonString();
@@ -107,7 +107,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     NormalModel model = new NormalModel(m, 0.75);
-    Printable cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
     String format = cluster.asFormatString(null);
     assertEquals("format", "nm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
   }
@@ -116,7 +116,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     NormalModel model = new NormalModel(m, 0.75);
-    Printable cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
     String json = cluster.asJsonString();
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
@@ -130,7 +130,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     AsymmetricSampledNormalModel model = new AsymmetricSampledNormalModel(m, m);
-    Printable cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
     String format = cluster.asFormatString(null);
     assertEquals("format", "asnm{n=0 m=[1.100, 2.200, 3.300] sd=[1.100, 2.200, 3.300]}", format);
   }
@@ -139,7 +139,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     AsymmetricSampledNormalModel model = new AsymmetricSampledNormalModel(m, m);
-    Printable cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
     String json = cluster.asJsonString();
 
     GsonBuilder builder = new GsonBuilder();
@@ -154,7 +154,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     L1Model model = new L1Model(m);
-    Printable cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
     String format = cluster.asFormatString(null);
     assertEquals("format", "l1m{n=0 c=[1.100, 2.200, 3.300]}", format);
   }
@@ -163,7 +163,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     L1Model model = new L1Model(m);
-    Printable cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
     String json = cluster.asJsonString();
 
     GsonBuilder builder = new GsonBuilder();
@@ -177,7 +177,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testCanopyAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [1.100, 2.200, 3.300]", formatString);
@@ -187,7 +187,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Printable cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [0:1.100, 2:3.300]", formatString);
@@ -196,7 +196,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testCanopyAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123);
     String[] bindings = { "fee", null, null };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
@@ -207,7 +207,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Printable cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [0:1.100, 2:3.300]", formatString);
@@ -216,7 +216,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable cluster = new Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [1.100, 2.200, 3.300]", formatString);
@@ -226,7 +226,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Printable cluster = new Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [0:1.100, 2:3.300]", formatString);
@@ -235,7 +235,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testClusterAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable cluster = new Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
@@ -246,7 +246,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Printable cluster = new Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [0:1.100, 2:3.300]", formatString);
@@ -255,7 +255,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testMSCanopyAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [1.100, 2.200, 3.300]", formatString);
@@ -265,7 +265,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Printable cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C123: [0:1.100, 2:3.300]", formatString);
@@ -274,7 +274,7 @@ public class TestPrintableInterface extends MahoutTestCase {
   public void testMSCanopyAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Printable cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
@@ -285,7 +285,7 @@ public class TestPrintableInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Printable cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);

@@ -36,6 +36,8 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
   
+  private int id;
+  
   // the parameters
   private Vector mean;
   
@@ -147,7 +149,6 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     return asFormatString(null);
   }
   
-  @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
     buf.append("asnm{n=").append(s0).append(" m=");
@@ -185,11 +186,25 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     VectorWritable.writeVector(out, s2);
   }
   
-  @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
     return gson.toJson(this, modelType);
+  }
+
+  @Override
+  public Vector getCenter() {
+    return mean;
+  }
+
+  @Override
+  public int getId() {
+     return id;
+  }
+
+  @Override
+  public int getNumPoints() {
+    return s0;
   }
 }

@@ -37,6 +37,8 @@ public class NormalModel implements Model<VectorWritable> {
   
   private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
   
+  private int id;
+  
   // the parameters
   private Vector mean;
   
@@ -171,5 +173,20 @@ public class NormalModel implements Model<VectorWritable> {
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
     return gson.toJson(this, modelType);
+  }
+
+  @Override
+  public Vector getCenter() {
+    return mean;
+  }
+
+  @Override
+  public int getId() {
+    return id;
+  }
+
+  @Override
+  public int getNumPoints() {
+    return s0;
   }
 }

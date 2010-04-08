@@ -50,7 +50,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.Vector;
@@ -63,13 +63,21 @@ public final class ClusterDumper {
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
 
   private final String seqFileDir;
+
   private final String pointsDir;
+
   private String termDictionary;
+
   private String dictionaryFormat;
+
   private String outputFile;
+
   private int subString = Integer.MAX_VALUE;
+
   private int numTopFeatures = 10;
-  private Map<String,List<String>> clusterIdToPoints = null;
+
+  private Map<String, List<String>> clusterIdToPoints = null;
+
   private boolean useJSON = false;
 
   public ClusterDumper(String seqFileDir, String pointsDir) throws IOException {
@@ -127,25 +135,25 @@ public final class ClusterDumper {
       FileSystem fs = FileSystem.get(path.toUri(), conf);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       Writable key = (Writable) reader.getKeyClass().newInstance();
-      ClusterBase value = (ClusterBase) reader.getValueClass().newInstance();
+      Writable value = (Writable) reader.getValueClass().newInstance();
       while (reader.next(key, value)) {
-        Vector center = value.getCenter();
-        String fmtStr = useJSON ? center.asFormatString() : VectorHelper.vectorToString(center, dictionary);
-        writer.append("Id: ").append(String.valueOf(value.getId())).append(":");
-        writer.append("name:").append(center.getName());
-        if (subString > 0) {
+        Cluster cluster = (Cluster) value;
+        String fmtStr = useJSON ? cluster.asJsonString() : cluster.asFormatString(dictionary);
+        if (subString > 0 && fmtStr.length() > subString) {
           writer.append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length())));
-        }
+        } else
+          writer.append(fmtStr);
+
         writer.append('\n');
 
         if (dictionary != null) {
-          String topTerms = getTopFeatures(center, dictionary, numTopFeatures);
+          String topTerms = getTopFeatures(cluster.getCenter(), dictionary, numTopFeatures);
           writer.write("\tTop Terms: ");
           writer.write(topTerms);
           writer.write('\n');
         }
 
-        List<String> points = clusterIdToPoints.get(String.valueOf(value.getId()));
+        List<String> points = clusterIdToPoints.get(String.valueOf(cluster.getId()));
         if (points != null) {
           writer.write("\tPoints: ");
           for (Iterator<String> iterator = points.iterator(); iterator.hasNext();) {
@@ -183,7 +191,7 @@ public final class ClusterDumper {
     this.subString = subString;
   }
 
-  public Map<String,List<String>> getClusterIdToPoints() {
+  public Map<String, List<String>> getClusterIdToPoints() {
     return clusterIdToPoints;
   }
 
@@ -210,37 +218,36 @@ public final class ClusterDumper {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option seqOpt = obuilder.withLongName("seqFileDir").withRequired(false).withArgument(
-      abuilder.withName("seqFileDir").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The directory containing Sequence Files for the Clusters").withShortName("s").create();
+        abuilder.withName("seqFileDir").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The directory containing Sequence Files for the Clusters").withShortName("s").create();
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
-      abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The output file.  If not specified, dumps to the console").withShortName("o").create();
+        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The output file.  If not specified, dumps to the console").withShortName("o").create();
     Option substringOpt = obuilder.withLongName("substring").withRequired(false).withArgument(
-      abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The number of chars of the asFormatString() to print").withShortName("b").create();
+        abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The number of chars of the asFormatString() to print").withShortName("b").create();
     Option numWordsOpt = obuilder.withLongName("numWords").withRequired(false).withArgument(
-      abuilder.withName("numWords").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The number of top terms to print").withShortName("n").create();
+        abuilder.withName("numWords").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The number of top terms to print").withShortName("n").create();
     Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
-      "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries")
+        "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries")
         .withShortName("j").create();
     Option pointsOpt = obuilder.withLongName("pointsDir").withRequired(false).withArgument(
-      abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The directory containing points sequence files mapping input vectors to their cluster.  "
-          + "If specified, then the program will output the points associated with a cluster").withShortName(
-      "p").create();
-    Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
-      abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The dictionary file. ").withShortName("d").create();
-    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
-      abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The dictionary file type (text|sequencefile)").withShortName("dt").create();
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
+        abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The directory containing points sequence files mapping input vectors to their cluster.  "
+            + "If specified, then the program will output the points associated with a cluster").withShortName("p")
         .create();
+    Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
+        abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create())
+        .withDescription("The dictionary file. ").withShortName("d").create();
+    Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
+        abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The dictionary file type (text|sequencefile)").withShortName("dt").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(seqOpt).withOption(outputOpt)
-        .withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt)
-        .withOption(dictTypeOpt).withOption(numWordsOpt).create();
+    Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(seqOpt).withOption(outputOpt).withOption(
+        substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).withOption(dictTypeOpt)
+        .withOption(numWordsOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -310,8 +317,8 @@ public final class ClusterDumper {
     this.useJSON = json;
   }
 
-  private static Map<String,List<String>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
-    SortedMap<String,List<String>> result = new TreeMap<String,List<String>>();
+  private static Map<String, List<String>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
+    SortedMap<String, List<String>> result = new TreeMap<String, List<String>>();
 
     File[] children = new File(pointsPathDir).listFiles(new FilenameFilter() {
       @Override
@@ -355,6 +362,7 @@ public final class ClusterDumper {
 
   static class TermIndexWeight {
     int index = -1;
+
     double weight = 0;
 
     TermIndexWeight(int index, double weight) {
@@ -381,7 +389,7 @@ public final class ClusterDumper {
       }
     });
 
-    List<Pair<String,Double>> topTerms = new LinkedList<Pair<String,Double>>();
+    List<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
 
     for (int i = 0; (i < vectorTerms.size()) && (i < numTerms); i++) {
       int index = vectorTerms.get(i).index;
@@ -390,12 +398,12 @@ public final class ClusterDumper {
         log.error("Dictionary entry missing for {}", index);
         continue;
       }
-      topTerms.add(new Pair<String,Double>(dictTerm, vectorTerms.get(i).weight));
+      topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
     }
 
     StringBuilder sb = new StringBuilder();
 
-    for (Pair<String,Double> item : topTerms) {
+    for (Pair<String, Double> item : topTerms) {
       String term = item.getFirst();
       sb.append("\n\t\t");
       sb.append(StringUtils.rightPad(term, 40));
