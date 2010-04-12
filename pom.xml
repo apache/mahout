@@ -84,6 +84,7 @@
         <lucene.version>2.9.1</lucene.version>
         <hadoop.version>0.20.2</hadoop.version>
         <maven.clover.multiproject>true</maven.clover.multiproject>
+        <collections.version>1.0-SNAPSHOT</collections.version>
     </properties>
     <repositories>
         <repository>
@@ -132,6 +133,11 @@
     </issueManagement>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+              <groupId>org.apache.mahout</groupId>
+              <artifactId>mahout-collections</artifactId>
+              <version>${collections.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.lucene</groupId>
                 <artifactId>lucene-analyzers</artifactId>
@@ -428,7 +434,6 @@
     <modules>
         <module>buildtools</module>
         <module>eclipse</module>
-        <module>collections</module>
         <module>math</module>
         <module>core</module>
         <module>taste-web</module>
