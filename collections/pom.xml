@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-collections</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <name>Mahout Collections</name>
     <description>Primitive-type collections based on CERN's Colt Java API</description>
     <parent>
@@ -133,9 +133,9 @@
         </dependency>
     </dependencies>
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-collections-1.0</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-collections-1.0</developerConnection>
-        <url>http://svn.apache.org/repos/asf/lucene/mahout/tags/mahout-collections-1.0</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/lucene/mahout/trunk/collections</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/collections</developerConnection>
+        <url>http://svn.apache.org/repos/asf/lucene/mahout/trunk/collections</url>
     </scm>
     <repositories>
         <repository>
