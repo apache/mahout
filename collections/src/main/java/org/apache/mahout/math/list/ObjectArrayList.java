@@ -152,7 +152,6 @@ public class ObjectArrayList<T> extends AbstractObjectList<T> {
    * the [] operator, be sure you know what you're doing.
    *
    * @param elements the new elements to be stored.
-   * @return the receiver itself.
    */
   public void elements(T[] elements) {
     this.elements = elements;
