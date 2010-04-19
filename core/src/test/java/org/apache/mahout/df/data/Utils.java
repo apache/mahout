@@ -79,12 +79,13 @@ public final class Utils {
 
     for (int token = 0; token < nbTokens; token++) {
       double rand = rng.nextDouble();
-      if (rand < 0.1)
+      if (rand < 0.1) {
         result[token] = 'I'; // IGNORED
-      else if (rand < 0.5)
+      } else if (rand >= 0.5) {
+        result[token] = 'C';
+      } else {
         result[token] = 'N'; // NUMERICAL
-      else
-        result[token] = 'C'; // CATEGORICAL
+      } // CATEGORICAL
     }
 
     // choose the label
@@ -201,13 +202,14 @@ public final class Utils {
     double[] vector = new double[attrs.length];
 
     for (int attr = 0; attr < attrs.length; attr++) {
-      if (attrs[attr].isIgnored())
+      if (attrs[attr].isIgnored()) {
         vector[attr] = Double.NaN;
-      else if (attrs[attr].isNumerical())
+      } else if (attrs[attr].isNumerical()) {
         vector[attr] = rng.nextDouble();
-      else
+      } else {
         // CATEGORICAL or LABEL
         vector[attr] = rng.nextInt(CATEGORICAL_RANGE);
+      }
     }
 
     return vector;
@@ -298,8 +300,9 @@ public final class Utils {
   public static Path writeDataToTestFile(String[] sData) throws IOException {
     Path testData = new Path("testdata/Data");
     FileSystem fs = testData.getFileSystem(new Configuration());
-    if (!fs.exists(testData))
+    if (!fs.exists(testData)) {
       fs.mkdirs(testData);
+    }
   
     Path path = new Path(testData, "DataLoaderTest.data");
   
@@ -311,8 +314,9 @@ public final class Utils {
   public static Path writeDatasetToTestFile(Dataset dataset) throws IOException {
     Path testData = new Path("testdata/Dataset");
     FileSystem fs = testData.getFileSystem(new Configuration());
-    if (!fs.exists(testData))
+    if (!fs.exists(testData)) {
       fs.mkdirs(testData);
+    }
   
     Path datasetPath = new Path(testData, "dataset.info");
     FSDataOutputStream out = fs.create(datasetPath);

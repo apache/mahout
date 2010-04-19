@@ -185,8 +185,9 @@ public class CDInfosToolTest extends MahoutTestCase {
   private static int nbNonIgnored(Descriptors descriptors) {
     int nbattrs = 0;
     for (int index = 0; index < descriptors.size(); index++) {
-      if (!descriptors.isIgnored(index))
+      if (!descriptors.isIgnored(index)) {
         nbattrs++;
+      }
     }
     
     return nbattrs;

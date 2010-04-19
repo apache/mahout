@@ -128,6 +128,6 @@ public class GramKey extends BinaryComparable implements
   }
   
   public String toString() {
-    return '\'' + getPrimaryString() + "'[" + getType().x + ']';
+    return '\'' + getPrimaryString() + "'[" + getType() + ']';
   }
 }

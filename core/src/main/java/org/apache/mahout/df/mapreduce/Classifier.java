@@ -169,11 +169,6 @@ public class Classifier {
    * mapper.
    */
   public static class CTextInputFormat extends TextInputFormat {
-
-    public CTextInputFormat() {
-      super();
-    }
-    
     @Override
     protected boolean isSplitable(JobContext jobContext, Path path) {
       return false;
@@ -187,11 +182,11 @@ public class Classifier {
 
     private DecisionForest forest;
 
-    private Random rng = RandomUtils.getRandom();
+    private final Random rng = RandomUtils.getRandom();
 
     private boolean first = true;
 
-    private Text lvalue = new Text();
+    private final Text lvalue = new Text();
 
 
     @Override
@@ -228,12 +223,12 @@ public class Classifier {
       }
 
       String line = value.toString();
-      if (line.isEmpty()) return;
-
-      Instance instance = converter.convert(0, line);
-      int prediction = forest.classify(rng, instance);
-      lvalue.set(Integer.toString(prediction));
-      context.write(key, lvalue);
+      if (!line.isEmpty()) {
+        Instance instance = converter.convert(0, line);
+        int prediction = forest.classify(rng, instance);
+        lvalue.set(Integer.toString(prediction));
+        context.write(key, lvalue);
+      }
     }
   }
 }

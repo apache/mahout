@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -38,6 +39,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
 import org.codehaus.plexus.util.SelectorUtils;
+
 /**
  * @description Generate java code with Velocity.
  * @goal generate
@@ -47,7 +49,9 @@ import org.codehaus.plexus.util.SelectorUtils;
 public class CodeGenerator extends AbstractMojo {
   
   private static final String[] NO_STRINGS = {null};
-  private static final Charset UTF8 = Charset.forName("utf-8");
+  private static final Charset UTF8 = Charset.forName("UTF-8");
+  private static final Pattern COMMA_PATTERN = Pattern.compile(",");
+
   private final Map<String,String> typeToObjectTypeMap;
   
   /**
@@ -129,7 +133,7 @@ public class CodeGenerator extends AbstractMojo {
   private VelocityEngine testVelocityEngine;
   private final FileSetManager fileSetManager;
   private VelocityEngine mainVelocityEngine;
-  
+
   public CodeGenerator() {
     typeToObjectTypeMap = new HashMap<String,String>();
     typeToObjectTypeMap.put("boolean", "Boolean");
@@ -228,13 +232,13 @@ public class CodeGenerator extends AbstractMojo {
     boolean hasValue = template.contains("ValueType");
     String[] keys;
     if (hasKey) {
-      keys = keyTypes.split(",");
+      keys = COMMA_PATTERN.split(keyTypes);
     } else {
       keys = NO_STRINGS;
     }
     String[] values;
     if (hasValue) {
-      values = valueTypes.split(",");
+      values = COMMA_PATTERN.split(valueTypes);
     } else {
       values = NO_STRINGS;
     }

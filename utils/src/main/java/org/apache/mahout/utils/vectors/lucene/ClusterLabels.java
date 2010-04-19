@@ -67,10 +67,10 @@ import org.slf4j.LoggerFactory;
 public class ClusterLabels {
   
   class TermInfoClusterInOut implements Comparable<TermInfoClusterInOut> {
-    final String term;
-    final int inClusterDF;
-    final int outClusterDF;
-    double logLikelihoodRatio;
+    private final String term;
+    private final int inClusterDF;
+    private final int outClusterDF;
+    private double logLikelihoodRatio;
     
     TermInfoClusterInOut(String term, int inClusterDF, int outClusterDF) {
       this.term = term;

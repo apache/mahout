@@ -21,7 +21,6 @@ import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.NGRAM;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,8 +55,8 @@ public class LLRReducerTest {
   // to see the values emitted.
   private final OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
     @Override
-    public void collect(Text key, DoubleWritable value) throws IOException {
-      log.info(key.toString() + ' ' + value.toString());
+    public void collect(Text key, DoubleWritable value) {
+      log.info("{} {}", key, value);
     }
   };
   
@@ -69,16 +68,9 @@ public class LLRReducerTest {
     cl        = new LLCallback() {
       @Override
       public double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
-        log.info("k11:" + k11 + " k12:" + k12 + " k21:" + k21 + " k22:" + k22);
-        try {
-          return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-          return -1;
-        }
+        log.info("k11:{} k12:{} k21:{} k22:{}", new Object[] {k11, k12, k21, k22});
+        return LogLikelihood.logLikelihoodRatio(k11, k12, k21, k22);
       }
-      
     };
   }
   

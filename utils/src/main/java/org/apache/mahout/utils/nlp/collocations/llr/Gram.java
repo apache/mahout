@@ -42,10 +42,14 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
     UNIGRAM('u'),
     NGRAM('n');
     
-    final char x;
+    private final char x;
     
     Type(char c) {
       this.x = c;
+    }
+
+    public String toString() {
+      return String.valueOf(x);
     }
   }
 
@@ -201,7 +205,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
   }
 
   public String toString() {
-    return '\'' + getString() + "'[" + getType().x + "]:" + frequency;
+    return '\'' + getString() + "'[" + getType() + "]:" + frequency;
   }
   
   public static void encodeType(Type type, byte[] buf, int offset) {

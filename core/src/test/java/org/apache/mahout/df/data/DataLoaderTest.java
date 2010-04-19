@@ -142,8 +142,9 @@ public class DataLoaderTest extends MahoutTestCase {
     // make sure that the attributes are loaded correctly
     int lind = 0;
     for (int index = 0; index < data.length; index++) {
-      if (missings.contains(index))
-        continue; // this vector won't be loaded
+      if (missings.contains(index)) {
+        continue;
+      }// this vector won't be loaded
 
       double[] vector = data[index];
       Instance instance = loaded.get(lind);
@@ -153,8 +154,9 @@ public class DataLoaderTest extends MahoutTestCase {
 
       int aId = 0;
       for (int attr = 0; attr < nbAttributes; attr++) {
-        if (attrs[attr].isIgnored())
+        if (attrs[attr].isIgnored()) {
           continue;
+        }
 
         if (attrs[attr].isNumerical()) {
           assertEquals(vector[attr], instance.get(aId++));
@@ -193,8 +195,9 @@ public class DataLoaderTest extends MahoutTestCase {
 
       int aId = 0;
       for (int attr = 0; attr < nbAttributes; attr++) {
-        if (attrs[attr].isIgnored() || attrs[attr].isLabel())
+        if (attrs[attr].isIgnored() || attrs[attr].isLabel()) {
           continue;
+        }
 
         assertEquals(attrs[attr].isNumerical(), loaded.getDataset().isNumerical(aId));
         
@@ -273,8 +276,9 @@ public class DataLoaderTest extends MahoutTestCase {
     int lind = 0;
 
     for (int index = 0; index < source.length; index++) {
-      if (missings.contains(index))
+      if (missings.contains(index)) {
         continue;
+      }
 
       if (source[index][attr] == oValue) {
         assertEquals(nValue, loaded.get(lind).get(aId));
@@ -303,8 +307,9 @@ public class DataLoaderTest extends MahoutTestCase {
     int lind = 0;
 
     for (int index = 0; index < source.length; index++) {
-      if (missings.contains(index))
+      if (missings.contains(index)) {
         continue;
+      }
 
       if (source[index][labelInd] == value) {
         assertEquals(code, loaded.get(lind).label);

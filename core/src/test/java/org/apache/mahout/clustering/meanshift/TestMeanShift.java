@@ -303,8 +303,9 @@ public class TestMeanShift extends MahoutTestCase {
     }
     FileSystem fs = FileSystem.get(new Path("testdata").toUri(), conf);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    for (Vector v : raw)
+    for (Vector v : raw) {
       points.add(new VectorWritable(v));
+    }
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, conf);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
     // now run the Job

@@ -66,7 +66,9 @@ public abstract class SolverTest extends TestCase {
                                  boolean isSymmetric) {
     for (int i = 0; i < numEigensToCheck; i++) {
       Vector e = eigens.getRow(i);
-      if (e.getLengthSquared() == 0) continue;
+      if (e.getLengthSquared() == 0) {
+        continue;
+      }
       Vector afterMultiply = isSymmetric ? corpus.times(e) : corpus.timesSquared(e);
       double dot = afterMultiply.dot(e);
       double afterNorm = afterMultiply.getLengthSquared();

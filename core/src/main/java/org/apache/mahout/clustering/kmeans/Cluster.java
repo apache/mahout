@@ -241,7 +241,9 @@ public class Cluster extends ClusterBase {
   
   /** @return the std */
   public double getStd() {
-    if (getNumPoints() == 0) return std;
+    if (getNumPoints() == 0) {
+      return std;
+    }
     Vector stds = pointSquaredTotal.times(getNumPoints()).minus(getPointTotal().times(getPointTotal()))
         .assign(new SquareRootFunction()).divide(getNumPoints());
     return stds.zSum() / stds.size();

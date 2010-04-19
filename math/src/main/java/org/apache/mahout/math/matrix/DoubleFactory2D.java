@@ -603,7 +603,7 @@ public class DoubleFactory2D extends PersistentObject {
    * @throws IllegalArgumentException <tt>values.length</tt> must be a multiple of <tt>rows</tt>.
    */
   public DoubleMatrix2D make(double[] values, int rows) {
-    int columns = (rows != 0 ? values.length / rows : 0);
+    int columns = rows == 0 ? 0 : values.length / rows;
     if (rows * columns != values.length) {
       throw new IllegalArgumentException("Array length must be a multiple of m.");
     }

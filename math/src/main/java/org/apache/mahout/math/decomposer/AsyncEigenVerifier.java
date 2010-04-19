@@ -46,7 +46,9 @@ public class AsyncEigenVerifier extends SimpleEigenVerifier {
         threadPool.execute(new VerifierRunnable(corpus, vectorCopy));
         started = true;
       }
-      if (finished) finished = false;
+      if (finished) {
+        finished = false;
+      }
       return status;
     }
   }

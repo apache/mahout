@@ -210,16 +210,17 @@ public class DecisionForest implements Writable {
     FileSystem fs = forestPath.getFileSystem(conf);
     Path[] files = null;
 
-    if (fs.getFileStatus(forestPath).isDir())
+    if (fs.getFileStatus(forestPath).isDir()) {
       files = DFUtils.listOutputFiles(fs, forestPath);
-    else
-      files = new Path[] {forestPath};
+    } else {
+      files = new Path[]{forestPath};
+    }
 
     DecisionForest forest = null;
     for (Path path : files) {
       FSDataInputStream dataInput = new FSDataInputStream(fs.open(path));
       if (forest == null) {
-        forest = DecisionForest.read(dataInput);
+        forest = read(dataInput);
       } else {
         forest.readFields(dataInput);
       }

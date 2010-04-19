@@ -67,8 +67,9 @@ class DisplayCanopy extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : sampleData)
+    for (VectorWritable sample : sampleData) {
       points.add(sample.get());
+    }
     canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), t1, t2);
     CanopyClusterer.updateCentroids(canopies);
     new DisplayCanopy();

@@ -39,7 +39,7 @@ public class TestHebbianSolver extends SolverTest {
   public static long timeSolver(Matrix corpus,
                                 double convergence,
                                 int maxNumPasses,
-                                TrainingState state) throws Exception {
+                                TrainingState state) {
     return timeSolver(corpus,
                       convergence,
                       maxNumPasses,
@@ -71,15 +71,15 @@ public class TestHebbianSolver extends SolverTest {
 
 
 
-  public static long timeSolver(Matrix corpus, TrainingState state) throws Exception {
+  public static long timeSolver(Matrix corpus, TrainingState state) {
     return timeSolver(corpus, state, 10);
   }
 
-  public static long timeSolver(Matrix corpus, TrainingState state, int rank) throws Exception {
+  public static long timeSolver(Matrix corpus, TrainingState state, int rank) {
     return timeSolver(corpus, 0.01, 20, rank, state);
   }
 
-  public void testHebbianSolver() throws Exception {
+  public void testHebbianSolver() {
     int numColumns = 800;
     Matrix corpus = randomSequentialAccessSparseMatrix(1000, 900, numColumns, 30, 1.0);
     int rank = 50;

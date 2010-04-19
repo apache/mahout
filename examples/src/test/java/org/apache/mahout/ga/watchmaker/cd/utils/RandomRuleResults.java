@@ -31,10 +31,11 @@ public final class RandomRuleResults {
 
   public static synchronized void addResult(int ruleid, CDFitness fit) {
     CDFitness f = results.get(ruleid);
-    if (f == null)
+    if (f == null) {
       f = new CDFitness(fit);
-    else
+    } else {
       f.add(fit);
+    }
     
     results.put(ruleid, f);
   }

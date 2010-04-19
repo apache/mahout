@@ -149,6 +149,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     return asFormatString(null);
   }
   
+  @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
     buf.append("asnm{n=").append(s0).append(" m=");
@@ -186,6 +187,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     VectorWritable.writeVector(out, s2);
   }
   
+  @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());

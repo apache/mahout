@@ -183,8 +183,10 @@ public class LanczosSolver {
 
   private static void orthoganalizeAgainstAllButLast(Vector nextVector, Matrix basis) {
     for (int i = 0; i < basis.numRows() - 1; i++) {
-      double alpha = 0;
-      if(basis.getRow(i) == null || (alpha = nextVector.dot(basis.getRow(i))) == 0) continue;
+      double alpha;
+      if (basis.getRow(i) == null || (alpha = nextVector.dot(basis.getRow(i))) == 0.0) {
+        continue;
+      }
       nextVector.assign(basis.getRow(i), new PlusMult(-alpha));
     }
   }
@@ -212,7 +214,9 @@ public class LanczosSolver {
   }
 
   private void endTime(TimingSection section) {
-    if (!times.containsKey(section)) times.put(section, 0L);
+    if (!times.containsKey(section)) {
+      times.put(section, 0L);
+    }
     times.put(section, times.get(section) + (System.nanoTime() - startTimes.get(section)));
   }
 

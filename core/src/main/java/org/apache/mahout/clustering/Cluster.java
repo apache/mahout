@@ -29,20 +29,20 @@ public interface Cluster {
    * 
    * @return a unique integer
    */
-  public int getId();
+  int getId();
 
   /**
    * Get the "center" of the Cluster as a Vector
    * 
    * @return a Vector
    */
-  public Vector getCenter();
+  Vector getCenter();
 
   /**
    * Get an integer denoting the number of points observed by this cluster
    * @return an integer 
    */
-  public int getNumPoints();
+  int getNumPoints();
 
   /**
    * Produce a custom, human-friendly, printable representation of the Cluster.

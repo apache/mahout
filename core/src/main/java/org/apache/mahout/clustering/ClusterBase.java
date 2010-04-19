@@ -40,18 +40,20 @@ import com.google.gson.reflect.TypeToken;
  *
  */
 public abstract class ClusterBase implements Writable, Cluster {
+
   // this cluster's clusterId
-  int id;
+  private int id;
   
   // the current cluster center
-  Vector center = new RandomAccessSparseVector(0);
+  private Vector center = new RandomAccessSparseVector(0);
   
   // the number of points in the cluster
-  int numPoints;
+  private int numPoints;
   
   // the Vector total of all points added to the cluster
   private Vector pointTotal;
   
+  @Override
   public int getId() {
     return id;
   }
@@ -60,6 +62,7 @@ public abstract class ClusterBase implements Writable, Cluster {
     this.id = id;
   }
   
+  @Override
   public Vector getCenter() {
     return center;
   }
@@ -68,6 +71,7 @@ public abstract class ClusterBase implements Writable, Cluster {
     this.center = center;
   }
   
+  @Override
   public int getNumPoints() {
     return numPoints;
   }

@@ -100,10 +100,7 @@ public class CDRuleTest extends MahoutTestCase {
 
       // all coditions should return false unless w < threshold
       for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
-        if (rule.getW(condInd) < thr)
-          assertTrue(rule.condition(condInd, dl));
-        else
-          assertFalse(rule.condition(condInd, dl));
+        assertEquals(rule.getW(condInd) < thr, rule.condition(condInd, dl));
       }
 
       mock.verify();
@@ -136,10 +133,7 @@ public class CDRuleTest extends MahoutTestCase {
 
       // the condition is true if the operator is >=
       for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
-        if (rule.getO(condInd))
-          assertTrue(rule.condition(condInd, dl));
-        else
-          assertFalse(rule.condition(condInd, dl));
+        assertEquals(rule.getO(condInd), rule.condition(condInd, dl));
       }
 
       mock.verify();
@@ -175,11 +169,8 @@ public class CDRuleTest extends MahoutTestCase {
       // (value==1), or the operator is != and the values are no equal
       // (value==0)
       for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
-        if ((rule.getO(condInd) && rule.getV(condInd) == 1)
-            || (!rule.getO(condInd) && rule.getV(condInd) != 1))
-          assertTrue(rule.condition(condInd, dl));
-        else
-          assertFalse(rule.condition(condInd, dl));
+        assertEquals(!(rule.getO(condInd) ^ rule.getV(condInd) == 1.0),
+                     rule.condition(condInd, dl));
       }
 
       mock.verify();

@@ -79,10 +79,7 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     int[][] matrix = resultAnalyzer.getConfusionMatrix().getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j)
-          assertEquals(4, matrix[i][j]);
-        else
-          assertEquals(0, matrix[i][j]);
+        assertEquals(i == j ? 4 : 0, matrix[i][j]);
       }
     }
     params.set("testDirPath", "testdata/bayesinput");
@@ -93,10 +90,7 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j)
-          assertEquals(4, matrix[i][j]);
-        else
-          assertEquals(0, matrix[i][j]);
+        assertEquals(i == j ? 4 : 0, matrix[i][j]);
       }
     }
   }
@@ -133,10 +127,7 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     int[][] matrix = resultAnalyzer.getConfusionMatrix().getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j)
-          assertEquals(4, matrix[i][j]);
-        else
-          assertEquals(0, matrix[i][j]);
+        assertEquals(i == j ? 4 : 0, matrix[i][j]);
       }
     }
     params.set("testDirPath", "testdata/bayesinput");
@@ -147,10 +138,7 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (i == j)
-          assertEquals(4, matrix[i][j]);
-        else
-          assertEquals(0, matrix[i][j]);
+        assertEquals(i == j ? 4 : 0, matrix[i][j]);
       }
     }
   }

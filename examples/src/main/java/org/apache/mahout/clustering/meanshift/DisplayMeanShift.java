@@ -87,8 +87,9 @@ class DisplayMeanShift extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : sampleData)
+    for (VectorWritable sample : sampleData) {
       points.add(sample.get());
+    }
     canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.5, 1.0, 0.05,
       10);
     for (MeanShiftCanopy canopy : canopies) {

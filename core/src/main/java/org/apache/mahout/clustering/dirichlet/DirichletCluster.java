@@ -115,14 +115,17 @@ public class DirichletCluster<O> implements Writable, Cluster {
     return gson.toJson(this, clusterType);
   }
 
+  @Override
   public int getId() {
     return model.getId();
   }
 
+  @Override
   public Vector getCenter() {
     return model.getCenter();
   }
 
+  @Override
   public int getNumPoints() {
     return model.getNumPoints();
   }

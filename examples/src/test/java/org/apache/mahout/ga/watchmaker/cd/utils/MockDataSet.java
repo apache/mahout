@@ -73,10 +73,11 @@ public class MockDataSet {
       if (index == labelpos) {
         // two-classes
         prepareCategoricalAttribute(index, 2);
-      } else if (rng.nextDouble() < numRate)
+      } else if (rng.nextDouble() < numRate) {
         prepareNumericalAttribute(index);
-      else
+      } else {
         prepareCategoricalAttribute(index, rng.nextInt(100) + 1);
+      }
     }
 
     EasyMock.replay(dataset);

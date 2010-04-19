@@ -53,8 +53,9 @@ public class TestDirichletClustering extends MahoutTestCase {
         + "] sd=" + sd);
     for (int i = 0; i < num; i++) {
       DenseVector v = new DenseVector(card);
-      for (int j = 0; j < card; j++)
+      for (int j = 0; j < card; j++) {
         v.set(j, UncommonDistributions.rNorm(mx, sd));
+      }
       sampleData.add(new VectorWritable(v));
     }
   }

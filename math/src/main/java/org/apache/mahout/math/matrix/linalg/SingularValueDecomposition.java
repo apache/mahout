@@ -266,8 +266,8 @@ public class SingularValueDecomposition implements java.io.Serializable {
           if (ks == k) {
             break;
           }
-          double t = (ks != p ? Math.abs(e[ks]) : 0.0) +
-              (ks != k + 1 ? Math.abs(e[ks - 1]) : 0.0);
+          double t = (ks == p ? 0.0 : Math.abs(e[ks])) +
+                     (ks == k + 1 ? 0.0 : Math.abs(e[ks - 1]));
           if (Math.abs(s[ks]) <= eps * t) {
             s[ks] = 0.0;
             break;

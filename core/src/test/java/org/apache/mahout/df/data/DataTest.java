@@ -97,8 +97,9 @@ public class DataTest extends MahoutTestCase {
   private static int count(double[] values, double value) {
     int count = 0;
     for (double v : values) {
-      if (v == value)
+      if (v == value) {
         count++;
+      }
     }
     return count;
   }
@@ -302,10 +303,12 @@ public class DataTest extends MahoutTestCase {
     boolean found2 = false;
     for (int index = 0; index < 10 && (!found1 || !found2); index++) {
       int major = data.majorityLabel(rng);
-      if (major == code1)
+      if (major == code1) {
         found1 = true;
-      if (major == code2)
+      }
+      if (major == code2) {
         found2 = true;
+      }
     }
     assertTrue(found1 && found2);
   }

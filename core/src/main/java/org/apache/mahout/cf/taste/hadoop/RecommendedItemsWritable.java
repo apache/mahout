@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

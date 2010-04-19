@@ -141,8 +141,9 @@ public final class ClusterDumper {
         String fmtStr = useJSON ? cluster.asJsonString() : cluster.asFormatString(dictionary);
         if (subString > 0 && fmtStr.length() > subString) {
           writer.append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length())));
-        } else
+        } else {
           writer.append(fmtStr);
+        }
 
         writer.append('\n');
 
@@ -361,10 +362,8 @@ public final class ClusterDumper {
   }
 
   static class TermIndexWeight {
-    int index = -1;
-
-    double weight = 0;
-
+    private int index = -1;
+    private double weight = 0.0;
     TermIndexWeight(int index, double weight) {
       this.index = index;
       this.weight = weight;

@@ -117,9 +117,13 @@ public class DirichletDriver {
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
       String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
-      if (cmdLine.hasOption(modelOpt)) modelFactory = cmdLine.getValue(modelOpt).toString();
+      if (cmdLine.hasOption(modelOpt)) {
+        modelFactory = cmdLine.getValue(modelOpt).toString();
+      }
       String modelPrototype = "org.apache.mahout.math.RandomAccessSparseVector";
-      if (cmdLine.hasOption(prototypeOpt)) modelPrototype = cmdLine.getValue(prototypeOpt).toString();
+      if (cmdLine.hasOption(prototypeOpt)) {
+        modelPrototype = cmdLine.getValue(prototypeOpt).toString();
+      }
       int prototypeSize = Integer.parseInt(cmdLine.getValue(sizeOpt).toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());

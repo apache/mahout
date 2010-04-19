@@ -53,7 +53,7 @@ public class TestLanczosSolver extends SolverTest {
     assertEigen(eigens, gramMatrix, 0.1, true);
   }
 
-  public static long timeLanczos(Matrix corpus, Matrix eigens, int rank, boolean symmetric) throws Exception {
+  public static long timeLanczos(Matrix corpus, Matrix eigens, int rank, boolean symmetric) {
     long start = System.currentTimeMillis();
 
     LanczosSolver solver = new LanczosSolver();

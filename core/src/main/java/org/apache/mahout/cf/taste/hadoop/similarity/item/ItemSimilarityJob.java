@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.util.Map;
 
-import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;

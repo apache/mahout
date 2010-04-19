@@ -134,15 +134,15 @@ public class CDGA {
       
       String dataset = cmdLine.getValue(inputOpt).toString();
       int target = Integer.parseInt(cmdLine.getValue(labelOpt).toString());
-      double threshold = !cmdLine.hasOption(thresholdOpt) ? 0.5 : Double.parseDouble(cmdLine.getValue(
-        thresholdOpt).toString());
-      int crosspnts = !cmdLine.hasOption(crosspntsOpt) ? 1 : Integer.parseInt(cmdLine.getValue(crosspntsOpt)
-          .toString());
+      double threshold = cmdLine.hasOption(thresholdOpt) ?
+          Double.parseDouble(cmdLine.getValue(thresholdOpt).toString()) : 0.5;
+      int crosspnts = cmdLine.hasOption(crosspntsOpt) ?
+          Integer.parseInt(cmdLine.getValue(crosspntsOpt).toString()) : 1;
       double mutrate = Double.parseDouble(cmdLine.getValue(mutrateOpt).toString());
-      double mutrange = !cmdLine.hasOption(mutrangeOpt) ? 0.1 : Double.parseDouble(cmdLine.getValue(
-        mutrangeOpt).toString());
-      int mutprec = !cmdLine.hasOption(mutprecOpt) ? 2 : Integer.parseInt(cmdLine.getValue(mutprecOpt)
-          .toString());
+      double mutrange = cmdLine.hasOption(mutrangeOpt) ?
+          Double.parseDouble(cmdLine.getValue(mutrangeOpt).toString()) : 0.1;
+      int mutprec = cmdLine.hasOption(mutprecOpt) ?
+          Integer.parseInt(cmdLine.getValue(mutprecOpt).toString()) : 2;
       int popSize = Integer.parseInt(cmdLine.getValue(popsizeOpt).toString());
       int genCount = Integer.parseInt(cmdLine.getValue(gencntOpt).toString());
       

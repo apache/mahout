@@ -149,10 +149,11 @@ public class MeanShiftCanopyJob {
     fs.mkdirs(outPath);
   
     String clustersIn = output + "/initial-canopies";
-    if (inputIsCanopies)
+    if (inputIsCanopies) {
       clustersIn = input;
-    else
+    } else {
       MeanShiftCanopyDriver.createCanopyFromVectors(input, clustersIn);
+    }
   
     // iterate until the clusters converge
     boolean converged = false;

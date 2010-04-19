@@ -179,7 +179,7 @@ public class OpenHashMapTest extends Assert {
     
     pairs.clear();
     map.forEachPair(new ObjectObjectProcedure<String, String>() {
-      int count = 0;
+      private int count = 0;
       
       @Override
       public boolean apply(String first, String second) {

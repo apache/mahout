@@ -26,9 +26,6 @@ import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -38,14 +35,12 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.clustering.dirichlet.DirichletClusterer;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.clustering.ClusterDumper;
@@ -60,8 +55,6 @@ import org.apache.mahout.utils.vectors.lucene.VectorMapper;
 public class TestClusterDumper extends MahoutTestCase {
 
   private List<VectorWritable> sampleData;
-
-  private FileSystem fs;
 
   private static final String[] DOCS = { "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
@@ -80,7 +73,7 @@ public class TestClusterDumper extends MahoutTestCase {
     super.setUp();
     RandomUtils.useTestSeed();
     Configuration conf = new Configuration();
-    fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(conf);
     // Create testdata directory
     File f = new File("testdata");
     if (!f.exists()) {
@@ -99,11 +92,13 @@ public class TestClusterDumper extends MahoutTestCase {
     // Run ClusterDumper test
   }
 
-  private void rmDir(File f) {
+  private static void rmDir(File f) {
     if (f != null && f.exists()) {
-      if (f.isDirectory())
-        for (File g : f.listFiles())
+      if (f.isDirectory()) {
+        for (File g : f.listFiles()) {
           rmDir(g);
+        }
+      }
       f.delete();
     }
   }
@@ -158,7 +153,7 @@ public class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet() throws Exception {
     Vector prototype = sampleData.get(0).get();
     DirichletDriver.runJob("testdata/points", "output",
-        new L1ModelDistribution(sampleData.get(0)).getClass().getName(), prototype.getClass().getName(), prototype
+        L1ModelDistribution.class.getName(), prototype.getClass().getName(), prototype
             .size(), 15, 10, 1.0, 1);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/state-10", null);

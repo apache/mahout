@@ -182,8 +182,9 @@ public class HebbianSolver {
         updater.update(currentEigen, initialTrainingVector, state);
         for (int corpusRow = 0; corpusRow < corpus.numRows(); corpusRow++) {
           state.setTrainingIndex(corpusRow);
-          if (corpusRow != randomStartingIndex)
+          if (corpusRow != randomStartingIndex) {
             updater.update(currentEigen, corpus.getRow(corpusRow), state);
+          }
         }
         state.setFirstPass(false);
         if (debug) {
