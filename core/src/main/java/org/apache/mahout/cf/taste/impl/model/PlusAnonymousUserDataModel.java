@@ -51,7 +51,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  * </p>
  * 
  * <p>
- * But, continue to use <code>realModel</code> as input to other components. To recommend, first construct and
+ * But, you may continue to use <code>realModel</code> as input to other components. To recommend, first construct and
  * set the temporary user information on the model and then simply call the recommender. The
  * <code>synchronized</code> block exists to remind you that this is of course not thread-safe. Only one set
  * of temp data can be inserted into the model and used at one time.
@@ -66,6 +66,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  *   PreferenceArray tempPrefs = ...;
  *   plusModel.setTempPrefs(tempPrefs);
  *   recommender.recommend(PlusAnonymousUserDataModel.TEMP_USER_ID, 10);
+ *   plusModel.setTempPrefs(null);
  * }
  * </pre>
  * 
@@ -87,8 +88,10 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public void setTempPrefs(PreferenceArray prefs) {
     this.tempPrefs = prefs;
     this.prefItemIDs.clear();
-    for (int i = 0; i < prefs.length(); i++) {
-      this.prefItemIDs.add(prefs.getItemID(i));
+    if (prefs != null) {
+      for (int i = 0; i < prefs.length(); i++) {
+        this.prefItemIDs.add(prefs.getItemID(i));
+      }
     }
   }
   
