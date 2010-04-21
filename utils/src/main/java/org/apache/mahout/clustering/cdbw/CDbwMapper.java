@@ -1,0 +1,144 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.clustering.cdbw;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.OutputLogFilter;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.math.VectorWritable;
+
+public class CDbwMapper extends MapReduceBase implements Mapper<IntWritable, VectorWritable, IntWritable, CDbwDistantPointWritable> {
+
+  private Map<Integer, List<VectorWritable>> representativePoints;
+
+  private Map<Integer, CDbwDistantPointWritable> mostDistantPoints = new HashMap<Integer, CDbwDistantPointWritable>();
+
+  private DistanceMeasure measure = new EuclideanDistanceMeasure();
+
+  private OutputCollector<IntWritable, CDbwDistantPointWritable> output = null;
+
+  @Override
+  public void map(IntWritable clusterId, VectorWritable point, OutputCollector<IntWritable, CDbwDistantPointWritable> output,
+      Reporter reporter) throws IOException {
+
+      this.output = output;
+
+    int key = clusterId.get();
+    CDbwDistantPointWritable currentMDP = mostDistantPoints.get(key);
+
+    List<VectorWritable> refPoints = representativePoints.get(key);
+    double totalDistance = 0.0;
+    for (VectorWritable refPoint : refPoints) {
+      totalDistance += measure.distance(refPoint.get(), point.get());
+    }
+    if (currentMDP == null || currentMDP.getDistance() < totalDistance) {
+      mostDistantPoints.put(key, new CDbwDistantPointWritable(totalDistance, new VectorWritable(point.get().clone())));
+    }
+  }
+
+  public void configure(Map<Integer, List<VectorWritable>> referencePoints, DistanceMeasure measure) {
+    this.representativePoints = referencePoints;
+    this.measure = measure;
+  }
+
+  public static Map<Integer, List<VectorWritable>> getReferencePoints(JobConf job) throws SecurityException,
+      IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+    String statePath = job.get(CDbwDriver.STATE_IN_KEY);
+    Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
+    try {
+      Path path = new Path(statePath);
+      FileSystem fs = FileSystem.get(path.toUri(), job);
+      FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
+      for (FileStatus s : status) {
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
+        try {
+          IntWritable key = new IntWritable(0);
+          VectorWritable point = new VectorWritable();
+          while (reader.next(key, point)) {
+            List<VectorWritable> repPoints = representativePoints.get(key.get());
+            if (repPoints == null) {
+              repPoints = new ArrayList<VectorWritable>();
+              representativePoints.put(key.get(), repPoints);
+            }
+            repPoints.add(point);
+            point = new VectorWritable();          }
+        } finally {
+          reader.close();
+        }
+      }
+      return representativePoints;
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  @Override
+  public void configure(JobConf job) {
+    super.configure(job);
+    try {
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      Class<?> cl = ccl.loadClass(job.get(CDbwDriver.DISTANCE_MEASURE_KEY));
+      measure = (DistanceMeasure) cl.newInstance();
+      representativePoints = getReferencePoints(job);
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException(e);
+    } catch (SecurityException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalStateException(e);
+    } catch (NoSuchMethodException e) {
+      throw new IllegalStateException(e);
+    } catch (InvocationTargetException e) {
+      throw new IllegalStateException(e);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    } catch (InstantiationException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapred.MapReduceBase#close()
+   */
+  @Override
+  public void close() throws IOException {
+    for (Integer clusterId : mostDistantPoints.keySet()) {
+      output.collect(new IntWritable(clusterId), mostDistantPoints.get(clusterId));
+    }
+    super.close();
+  }
+}

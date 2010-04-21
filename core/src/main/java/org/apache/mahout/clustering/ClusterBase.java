@@ -43,78 +43,79 @@ public abstract class ClusterBase implements Writable, Cluster {
 
   // this cluster's clusterId
   private int id;
-  
+
   // the current cluster center
   private Vector center = new RandomAccessSparseVector(0);
-  
+
   // the number of points in the cluster
   private int numPoints;
-  
+
   // the Vector total of all points added to the cluster
   private Vector pointTotal;
-  
+
   @Override
   public int getId() {
     return id;
   }
-  
+
   public void setId(int id) {
     this.id = id;
   }
-  
+
   @Override
   public Vector getCenter() {
     return center;
   }
-  
+
   public void setCenter(Vector center) {
     this.center = center;
   }
-  
+
   @Override
   public int getNumPoints() {
     return numPoints;
   }
-  
+
   public void setNumPoints(int numPoints) {
     this.numPoints = numPoints;
   }
-  
+
   public Vector getPointTotal() {
     return pointTotal;
   }
-  
+
   public void setPointTotal(Vector pointTotal) {
     this.pointTotal = pointTotal;
   }
-  
+
   /**
    * @deprecated
    * @return
    */
   @Deprecated
   public abstract String asFormatString();
-  
+
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
     buf.append(getIdentifier()).append(": ").append(formatVector(computeCentroid(), bindings));
     return buf.toString();
   }
-  
+
   public abstract Vector computeCentroid();
-  
+
   public abstract Object getIdentifier();
-  
+
   @Override
   public String asJsonString() {
-    Type vectorType = new TypeToken<Vector>() { }.getType();
+    Type vectorType = new TypeToken<Vector>() {
+    }.getType();
     GsonBuilder gBuilder = new GsonBuilder();
     gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
     Gson gson = gBuilder.create();
     return gson.toJson(this, this.getClass());
   }
-  
+
   /**
    * Simply writes out the id, and that's it!
    * 
@@ -125,13 +126,13 @@ public abstract class ClusterBase implements Writable, Cluster {
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
   }
-  
+
   /** Reads in the id, nothing else */
   @Override
   public void readFields(DataInput in) throws IOException {
     id = in.readInt();
   }
-  
+
   /**
    * Return a human-readable formatted string representation of the vector, not intended to be complete nor
    * usable as an input/output representation such as Json
@@ -171,7 +172,9 @@ public abstract class ClusterBase implements Writable, Cluster {
         buf.append(String.format(Locale.ENGLISH, "%.3f", elem)).append(", ");
       }
     }
-    buf.setLength(buf.length() - 2);
+    if (buf.length() > 1) {
+      buf.setLength(buf.length() - 2);
+    }
     buf.append(']');
     return buf.toString();
   }

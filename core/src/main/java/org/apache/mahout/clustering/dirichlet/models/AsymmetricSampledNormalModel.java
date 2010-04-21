@@ -56,8 +56,9 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     super();
   }
   
-  public AsymmetricSampledNormalModel(Vector mean, Vector stdDev) {
+  public AsymmetricSampledNormalModel(int id, Vector mean, Vector stdDev) {
     super();
+    this.id = id;
     this.mean = mean;
     this.stdDev = stdDev;
     this.s0 = 0;
@@ -79,7 +80,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
    * @return an AsymmetricSampledNormalModel
    */
   AsymmetricSampledNormalModel sample() {
-    return new AsymmetricSampledNormalModel(mean, stdDev);
+    return new AsymmetricSampledNormalModel(id, mean, stdDev);
   }
   
   @Override
@@ -166,6 +167,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   
   @Override
   public void readFields(DataInput in) throws IOException {
+    this.id = in.readInt();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
     this.mean = temp.get();
@@ -180,6 +182,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   
   @Override
   public void write(DataOutput out) throws IOException {
+    out.writeInt(id);
     VectorWritable.writeVector(out, mean);
     VectorWritable.writeVector(out, stdDev);
     out.writeInt(s0);

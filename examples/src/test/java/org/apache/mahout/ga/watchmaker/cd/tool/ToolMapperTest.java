@@ -42,7 +42,7 @@ public class ToolMapperTest extends MahoutTestCase {
     mapper.map(key, value, output, null);
 
     for (int index = 0; index < 6; index++) {
-      List<Text> values = output.getValue(String.valueOf(index));
+      List<Text> values = output.getValue(new LongWritable(index));
       assertEquals("should extract one value per attribute", 1, values.size());
       assertEquals("Bad extracted value", "A" + (index + 1), values.get(0)
           .toString());
@@ -65,7 +65,7 @@ public class ToolMapperTest extends MahoutTestCase {
     mapper.map(key, value, output, null);
 
     for (int index = 0; index < 6; index++) {
-      List<Text> values = output.getValue(String.valueOf(index));
+      List<Text> values = output.getValue(new LongWritable(index));
       if (index == 1 || index == 3 || index == 4) {
         // this attribute should be ignored
         assertNull("Attribute (" + index + ") should be ignored", values);

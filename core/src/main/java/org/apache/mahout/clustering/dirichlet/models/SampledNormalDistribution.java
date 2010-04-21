@@ -47,7 +47,7 @@ public class SampledNormalDistribution extends NormalModelDistribution {
       }
       Vector mean = prototype.like();
       mean.assign(m);
-      result[i] = new SampledNormalModel(mean, 1);
+      result[i] = new SampledNormalModel(i, mean, 1);
     }
     return result;
   }

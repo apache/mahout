@@ -20,11 +20,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +83,7 @@ public class KMeansClusterer {
   
   public void outputPointWithClusterInfo(NamedVector point,
                                          List<Cluster> clusters,
-                                         OutputCollector<Text,Text> output) throws IOException {
+                                         OutputCollector<IntWritable,VectorWritable> output) throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -93,7 +95,7 @@ public class KMeansClusterer {
       }
     }
     
-    output.collect(new Text(point.getName()), new Text(String.valueOf(nearestCluster.getId())));
+    output.collect(new IntWritable(nearestCluster.getId()), new VectorWritable(point));
   }
   
   /**

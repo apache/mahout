@@ -19,6 +19,7 @@ package org.apache.mahout.classifier.bayes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
@@ -44,11 +45,11 @@ public class BayesFeatureMapperTest extends MahoutTestCase {
     DummyOutputCollector<StringTuple,DoubleWritable> output = new DummyOutputCollector<StringTuple,DoubleWritable>();
     mapper.map(new Text("foo"), new Text("big brown shoe"), output,
       Reporter.NULL);
-    Map<String,List<DoubleWritable>> outMap = output.getData();
+    Map<StringTuple, List<DoubleWritable>> outMap = output.getData();
     System.out.println("Map: " + outMap);
     assertNotNull("outMap is null and it shouldn't be", outMap);
     // TODO: How about not such a lame test here?
-    for (Map.Entry<String,List<DoubleWritable>> entry : outMap.entrySet()) {
+    for (Entry<StringTuple, List<DoubleWritable>> entry : outMap.entrySet()) {
       assertTrue("entry.getKey() Size: " + entry.getKey().length()
                  + " is not greater than: 0", entry.getKey().length() > 0);
       assertEquals("entry.getValue() Size: " + entry.getValue().size()

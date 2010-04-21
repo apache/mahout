@@ -42,7 +42,8 @@ public class L1Model implements Model<VectorWritable> {
     super();
   }
 
-  public L1Model(Vector v) {
+  public L1Model(int id, Vector v) {
+    this.id = id;
     observed = v.like();
     coefficients = v;
   }
@@ -79,20 +80,23 @@ public class L1Model implements Model<VectorWritable> {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    count = in.readInt();
+    this.id = in.readInt();
+    this.count = in.readInt();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    coefficients = temp.get();
+    this.coefficients = temp.get();
+    this.observed = coefficients.like();
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
+    out.writeInt(id);
     out.writeInt(count);
     VectorWritable.writeVector(out, coefficients);
   }
 
   public L1Model sample() {
-    return new L1Model(coefficients.clone());
+    return new L1Model(id, coefficients.clone());
   }
 
   @Override

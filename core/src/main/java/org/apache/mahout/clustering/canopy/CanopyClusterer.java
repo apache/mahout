@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -164,7 +165,7 @@ public class CanopyClusterer {
    */
   public void emitPointToExistingCanopies(Vector point,
                                           List<Canopy> canopies,
-                                          OutputCollector<Text,VectorWritable> collector,
+                                          OutputCollector<IntWritable,VectorWritable> collector,
                                           Reporter reporter) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
@@ -174,7 +175,7 @@ public class CanopyClusterer {
       if (dist < t1) {
         isCovered = true;
         VectorWritable vw = new VectorWritable(point);
-        collector.collect(new Text(canopy.getIdentifier()), vw);
+        collector.collect(new IntWritable(canopy.getId()), vw);
         reporter.setStatus("Emit Canopy ID:" + canopy.getIdentifier());
       } else if (dist < minDist) {
         minDist = dist;
@@ -184,8 +185,7 @@ public class CanopyClusterer {
     // if the point is not contained in any canopies (due to canopy centroid
     // clustering), emit the point to the closest covering canopy.
     if (!isCovered) {
-      VectorWritable vw = new VectorWritable(point);
-      collector.collect(new Text(closest.getIdentifier()), vw);
+      collector.collect(new IntWritable(closest.getId()), new VectorWritable(point));
       reporter.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
     }
   }

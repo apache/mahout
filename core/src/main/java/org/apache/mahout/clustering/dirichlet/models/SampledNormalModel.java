@@ -28,8 +28,8 @@ public class SampledNormalModel extends NormalModel {
     super();
   }
   
-  public SampledNormalModel(Vector mean, double sd) {
-    super(mean, sd);
+  public SampledNormalModel(int id, Vector mean, double sd) {
+    super(id, mean, sd);
   }
   
   @Override
@@ -44,7 +44,7 @@ public class SampledNormalModel extends NormalModel {
    */
   @Override
   public NormalModel sample() {
-    return new SampledNormalModel(getMean(), getStdDev());
+    return new SampledNormalModel(getId(), getMean(), getStdDev());
   }
   
   @Override

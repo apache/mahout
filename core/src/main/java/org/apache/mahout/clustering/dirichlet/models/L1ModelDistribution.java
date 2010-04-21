@@ -39,7 +39,7 @@ public class L1ModelDistribution extends VectorModelDistribution {
     Model<VectorWritable>[] result = new L1Model[howMany];
     for (int i = 0; i < howMany; i++) {
       Vector prototype = getModelPrototype().get();
-      result[i] = new L1Model(prototype.like());
+      result[i] = new L1Model(i, prototype.like());
     }
     return result;
   }

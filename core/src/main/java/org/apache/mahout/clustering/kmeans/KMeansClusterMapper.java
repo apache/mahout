@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -33,7 +33,7 @@ import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.VectorWritable;
 
 public class KMeansClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,Text,Text> {
+    Mapper<WritableComparable<?>,VectorWritable,IntWritable,VectorWritable> {
   
   private final List<Cluster> clusters = new ArrayList<Cluster>();
   private KMeansClusterer clusterer;
@@ -41,7 +41,7 @@ public class KMeansClusterMapper extends MapReduceBase implements
   @Override
   public void map(WritableComparable<?> key,
                   VectorWritable point,
-                  OutputCollector<Text,Text> output,
+                  OutputCollector<IntWritable,VectorWritable> output,
                   Reporter reporter) throws IOException {
     clusterer.outputPointWithClusterInfo((NamedVector) point.get(), clusters, output);
   }

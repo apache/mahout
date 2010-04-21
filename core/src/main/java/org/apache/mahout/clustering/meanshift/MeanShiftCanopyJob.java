@@ -114,7 +114,7 @@ public class MeanShiftCanopyJob {
    */
   public static void runJob(String input, String output, String measureClassName, double t1, double t2, double convergenceDelta,
       int maxIterations) throws IOException {
-    runJob(input, output, measureClassName, t1,t2,convergenceDelta, maxIterations, false);
+    runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations, false);
   }
 
   /**
@@ -147,14 +147,14 @@ public class MeanShiftCanopyJob {
       fs.delete(outPath, true);
     }
     fs.mkdirs(outPath);
-  
+
     String clustersIn = output + "/initial-canopies";
     if (inputIsCanopies) {
       clustersIn = input;
     } else {
       MeanShiftCanopyDriver.createCanopyFromVectors(input, clustersIn);
     }
-  
+
     // iterate until the clusters converge
     boolean converged = false;
     int iteration = 0;
@@ -169,6 +169,9 @@ public class MeanShiftCanopyJob {
       clustersIn = output + "/canopies-" + iteration;
       iteration++;
     }
+
+    // now cluster the points
+    MeanShiftCanopyDriver.runClustering((inputIsCanopies ? input : output + "/initial-canopies"), clustersIn, output + "/clusters");
   }
 
 }

@@ -38,7 +38,7 @@ public class NormalScModelDistribution extends NormalModelDistribution {
       for (int j = 0; j < 60; j++) {
         mean.set(j, UncommonDistributions.rNorm(30, 0.5));
       }
-      result[i] = new NormalModel(mean, 1);
+      result[i] = new NormalModel(i, mean, 1);
     }
     return result;
   }

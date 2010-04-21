@@ -39,7 +39,7 @@ public class NormalModelDistribution extends VectorModelDistribution {
     Model<VectorWritable>[] result = new NormalModel[howMany];
     for (int i = 0; i < howMany; i++) {
       Vector prototype = getModelPrototype().get();
-      result[i] = new NormalModel(prototype.like(), 1);
+      result[i] = new NormalModel(i, prototype.like(), 1);
     }
     return result;
   }

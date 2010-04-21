@@ -29,15 +29,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class FuzzyKMeansUtil {
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansUtil.class);
-  
-  private FuzzyKMeansUtil() { }
-  
+
+  private FuzzyKMeansUtil() {
+  }
+
   /** Configure the mapper with the cluster info */
   public static void configureWithClusterInfo(String clusterPathStr, List<SoftCluster> clusters) {
     // Get the path location where the cluster Info is stored
@@ -52,17 +54,16 @@ class FuzzyKMeansUtil {
         return path.getName().startsWith("part");
       }
     };
-    
+
     try {
       // get all filtered file names in result list
       FileSystem fs = clusterPath.getFileSystem(job);
-      FileStatus[] matches = fs.listStatus(
-        FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
-      
+      FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
+
       for (FileStatus match : matches) {
         result.add(fs.makeQualified(match.getPath()));
       }
-      
+
       // iterate thru the result path list
       for (Path path : result) {
         // RecordReader<Text, Text> recordReader = null;
@@ -96,16 +97,24 @@ class FuzzyKMeansUtil {
               clusters.add(value);
               value = new SoftCluster();
             }
+          } else if (valueClass.equals(Canopy.class)) {
+            Canopy value = new Canopy();
+            while (reader.next(key, value)) {
+              // get the cluster info
+              SoftCluster theCluster = new SoftCluster(value.getCenter(), value.getId());
+              clusters.add(theCluster);
+              value = new Canopy();
+            }
           }
         } finally {
           reader.close();
         }
       }
-      
+
     } catch (IOException e) {
       log.info("Exception occurred in loading clusters:", e);
       throw new IllegalStateException(e);
     }
   }
-  
+
 }

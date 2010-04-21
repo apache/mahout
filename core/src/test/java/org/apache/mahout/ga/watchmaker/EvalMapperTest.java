@@ -60,10 +60,10 @@ public class EvalMapperTest extends MahoutTestCase {
     }
 
     // check that the evaluations are correct
-    Set<String> keys = collector.getKeys();
+    Set<LongWritable> keys = collector.getKeys();
     assertEquals("Number of evaluations", populationSize, keys.size());
-    for (String key : keys) {
-      DummyCandidate candidate = population.get(Integer.parseInt(key));
+    for (LongWritable key : keys) {
+      DummyCandidate candidate = population.get((int) key.get());
       assertEquals("Values for key " + key, 1, collector.getValue(key).size());
       double fitness = collector.getValue(key).get(0).get();
       assertEquals("Evaluation of the candidate " + key, DummyEvaluator

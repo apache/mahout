@@ -49,7 +49,7 @@ public class AsymmetricSampledNormalDistribution extends VectorModelDistribution
       for (int j = 0; j < prototype.size(); j++) {
         sd.set(j, UncommonDistributions.rNorm(1, 1));
       }
-      result[i] = new AsymmetricSampledNormalModel(mean, sd);
+      result[i] = new AsymmetricSampledNormalModel(i, mean, sd);
     }
     return result;
   }

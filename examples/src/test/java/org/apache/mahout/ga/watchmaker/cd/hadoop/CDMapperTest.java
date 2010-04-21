@@ -84,12 +84,12 @@ public class CDMapperTest extends MahoutTestCase {
     mapper.map(new LongWritable(0), dl, collector);
 
     // check the evaluations
-    Set<String> keys = collector.getKeys();
+    Set<LongWritable> keys = collector.getKeys();
     assertEquals("Number of evaluations", rules.size(), keys.size());
 
     CDFitness[] expected = { TP, FP, TN, FN };
-    for (String key : keys) {
-      int index = Integer.parseInt(key);
+    for (LongWritable key : keys) {
+      int index = (int) key.get();
       assertEquals("Values for key " + key, 1, collector.getValue(key).size());
       CDFitness eval = collector.getValue(key).get(0);
 

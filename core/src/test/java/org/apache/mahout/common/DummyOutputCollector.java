@@ -29,30 +29,30 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class DummyOutputCollector<K extends WritableComparable, V extends Writable>
-    implements OutputCollector<K, V> {
+    implements OutputCollector<K,V> {
 
-  private final Map<String, List<V>> data = new TreeMap<String, List<V>>();
+  private final Map<K, List<V>> data = new TreeMap<K,List<V>>();
 
   @Override
-  public void collect(K key, V values)
+  public void collect(K key,V values)
       throws IOException {
-    List<V> points = data.get(key.toString());
+    List<V> points = data.get(key);
     if (points == null) {
       points = new ArrayList<V>();
-      data.put(key.toString(), points);
+      data.put(key, points);
     }
     points.add(values);
   }
 
-  public Map<String, List<V>> getData() {
+  public Map<K,List<V>> getData() {
     return data;
   }
 
-  public List<V> getValue(String key) {
+  public List<V> getValue(K key) {
     return data.get(key);
   }
 
-  public Set<String> getKeys() {
+  public Set<K> getKeys() {
     return data.keySet();
   }
 

@@ -151,7 +151,7 @@ public class TestMapReduce extends MahoutTestCase {
     DirichletReducer reducer = new DirichletReducer();
     reducer.configure(state);
     OutputCollector<Text,DirichletCluster<VectorWritable>> reduceCollector = new DummyOutputCollector<Text,DirichletCluster<VectorWritable>>();
-    for (String key : mapCollector.getKeys()) {
+    for (Text key : mapCollector.getKeys()) {
       reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(), reduceCollector, null);
     }
     
@@ -196,7 +196,7 @@ public class TestMapReduce extends MahoutTestCase {
       DirichletReducer reducer = new DirichletReducer();
       reducer.configure(state);
       OutputCollector<Text,DirichletCluster<VectorWritable>> reduceCollector = new DummyOutputCollector<Text,DirichletCluster<VectorWritable>>();
-      for (String key : mapCollector.getKeys()) {
+      for (Text key : mapCollector.getKeys()) {
         reducer.reduce(new Text(key), mapCollector.getValue(key).iterator(), reduceCollector, null);
       }
       
@@ -359,7 +359,7 @@ public class TestMapReduce extends MahoutTestCase {
   
   public void testNormalModelWritableSerialization() throws Exception {
     double[] m = {1.1, 2.2, 3.3};
-    Model<?> model = new NormalModel(new DenseVector(m), 3.3);
+    Model<?> model = new NormalModel(5, new DenseVector(m), 3.3);
     DataOutputBuffer out = new DataOutputBuffer();
     model.write(out);
     Model<?> model2 = new NormalModel();
@@ -367,11 +367,12 @@ public class TestMapReduce extends MahoutTestCase {
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
     assertEquals("models", model.toString(), model2.toString());
+    assertEquals("ids", 5, model.getId());
   }
   
   public void testSampledNormalModelWritableSerialization() throws Exception {
     double[] m = {1.1, 2.2, 3.3};
-    Model<?> model = new SampledNormalModel(new DenseVector(m), 3.3);
+    Model<?> model = new SampledNormalModel(5, new DenseVector(m), 3.3);
     DataOutputBuffer out = new DataOutputBuffer();
     model.write(out);
     Model<?> model2 = new SampledNormalModel();
@@ -379,12 +380,13 @@ public class TestMapReduce extends MahoutTestCase {
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
     assertEquals("models", model.toString(), model2.toString());
+    assertEquals("ids", 5, model.getId());
   }
   
   public void testAsymmetricSampledNormalModelWritableSerialization() throws Exception {
     double[] m = {1.1, 2.2, 3.3};
     double[] s = {3.3, 4.4, 5.5};
-    Model<?> model = new AsymmetricSampledNormalModel(new DenseVector(m), new DenseVector(s));
+    Model<?> model = new AsymmetricSampledNormalModel(5, new DenseVector(m), new DenseVector(s));
     DataOutputBuffer out = new DataOutputBuffer();
     model.write(out);
     Model<?> model2 = new AsymmetricSampledNormalModel();
@@ -392,11 +394,12 @@ public class TestMapReduce extends MahoutTestCase {
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
     assertEquals("models", model.toString(), model2.toString());
+    assertEquals("ids", 5, model.getId());
   }
   
   public void testClusterWritableSerialization() throws Exception {
     double[] m = {1.1, 2.2, 3.3};
-    DirichletCluster<?> cluster = new DirichletCluster(new NormalModel(new DenseVector(m), 4), 10);
+    DirichletCluster<?> cluster = new DirichletCluster(new NormalModel(5, new DenseVector(m), 4), 10);
     DataOutputBuffer out = new DataOutputBuffer();
     cluster.write(out);
     DirichletCluster<?> cluster2 = new DirichletCluster();
@@ -406,6 +409,7 @@ public class TestMapReduce extends MahoutTestCase {
     assertEquals("count", cluster.getTotalCount(), cluster2.getTotalCount());
     assertNotNull("model null", cluster2.getModel());
     assertEquals("model", cluster.getModel().toString(), cluster2.getModel().toString());
+    assertEquals("ids", 5, cluster.getId());
   }
   
 }

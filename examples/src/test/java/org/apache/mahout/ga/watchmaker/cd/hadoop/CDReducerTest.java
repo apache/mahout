@@ -67,12 +67,12 @@ public class CDReducerTest extends MahoutTestCase {
     reducer.reduce(zero, evaluations.iterator(), collector, null);
 
     // check if the expectations are met
-    Set<String> keys = collector.getKeys();
+    Set<LongWritable> keys = collector.getKeys();
     assertEquals("nb keys", 1, keys.size());
-    assertTrue("bad key", keys.contains(zero.toString()));
+    assertTrue("bad key", keys.contains(zero));
 
-    assertEquals("nb values", 1, collector.getValue(zero.toString()).size());
-    CDFitness fitness = collector.getValue(zero.toString()).get(0);
+    assertEquals("nb values", 1, collector.getValue(zero).size());
+    CDFitness fitness = collector.getValue(zero).get(0);
     assertEquals(expected, fitness);
 
   }

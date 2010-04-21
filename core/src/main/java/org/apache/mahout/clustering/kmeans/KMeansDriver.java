@@ -29,6 +29,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -305,11 +306,11 @@ public final class KMeansDriver {
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(Text.class);
-    conf.setOutputKeyClass(Text.class);
+    conf.setMapOutputKeyClass(IntWritable.class);
+    conf.setMapOutputValueClass(VectorWritable.class);
+    conf.setOutputKeyClass(IntWritable.class);
     // the output is the cluster id
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputValueClass(VectorWritable.class);
     
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);

@@ -30,7 +30,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -154,11 +154,7 @@ public final class ClusterDriver {
     conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies);
     
     conf.setInputFormat(SequenceFileInputFormat.class);
-    
-    /*
-     * conf.setMapOutputKeyClass(Text.class); conf.setMapOutputValueClass(RandomAccessSparseVector.class);
-     */
-    conf.setOutputKeyClass(Text.class);
+    conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(VectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
@@ -168,6 +164,7 @@ public final class ClusterDriver {
     
     conf.setMapperClass(ClusterMapper.class);
     conf.setReducerClass(IdentityReducer.class);
+    conf.setNumReduceTasks(0);
     
     client.setConf(conf);
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);

@@ -15,47 +15,46 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.dirichlet;
+package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.VectorWritable;
 
-public class DirichletReducer extends MapReduceBase implements
-    Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>> {
+public class CDbwReducer extends MapReduceBase implements
+    Reducer<IntWritable, CDbwDistantPointWritable, IntWritable, VectorWritable> {
 
-  private DirichletState<VectorWritable> state;
+  private Map<Integer, List<VectorWritable>> referencePoints;
 
-  private Model<VectorWritable>[] newModels;
-
-  private OutputCollector<Text, DirichletCluster<VectorWritable>> output;
-
-  public Model<VectorWritable>[] getNewModels() {
-    return newModels;
-  }
+  private OutputCollector<IntWritable, VectorWritable> output;
 
   @Override
-  public void reduce(Text key, Iterator<VectorWritable> values, OutputCollector<Text, DirichletCluster<VectorWritable>> output,
-      Reporter reporter) throws IOException {
+  public void reduce(IntWritable key, Iterator<CDbwDistantPointWritable> values,
+      OutputCollector<IntWritable, VectorWritable> output, Reporter reporter) throws IOException {
     this.output = output;
-    int k = Integer.parseInt(key.toString());
-    Model<VectorWritable> model = newModels[k];
+    // find the most distant point
+    CDbwDistantPointWritable mdp = null;
     while (values.hasNext()) {
-      VectorWritable v = values.next();
-      model.observe(v);
+      CDbwDistantPointWritable dpw = values.next();
+      if (mdp == null || mdp.getDistance() < dpw.getDistance()) {
+        mdp = new CDbwDistantPointWritable(dpw.getDistance(), dpw.getPoint());
+      }
     }
-    model.computeParameters();
-    DirichletCluster<VectorWritable> cluster = state.getClusters().get(k);
-    cluster.setModel(model);
+    output.collect(new IntWritable(key.get()), mdp.getPoint());
+  }
+
+  public void configure(Map<Integer, List<VectorWritable>> referencePoints) {
+    this.referencePoints = referencePoints;
   }
 
   /* (non-Javadoc)
@@ -63,23 +62,19 @@ public class DirichletReducer extends MapReduceBase implements
    */
   @Override
   public void close() throws IOException {
-    for (int i = 0; i < state.getNumClusters(); i++) {
-      DirichletCluster cluster = state.getClusters().get(i);
-      output.collect(new Text(String.valueOf(i)), cluster);
+    for (Integer clusterId : referencePoints.keySet()) {
+      for (VectorWritable vw : referencePoints.get(clusterId)) {
+        output.collect(new IntWritable(clusterId), vw);
+      }
     }
     super.close();
-  }
-
-  public void configure(DirichletState<VectorWritable> state) {
-    this.state = state;
-    this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     try {
-      state = DirichletMapper.getDirichletState(job);
+      referencePoints = CDbwMapper.getReferencePoints(job);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -91,7 +86,6 @@ public class DirichletReducer extends MapReduceBase implements
     } catch (InvocationTargetException e) {
       throw new IllegalStateException(e);
     }
-    this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 
 }

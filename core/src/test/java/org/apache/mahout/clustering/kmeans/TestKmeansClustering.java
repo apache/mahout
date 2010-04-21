@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
@@ -177,8 +178,8 @@ public class TestKmeansClustering extends MahoutTestCase {
       // now verify that all points are correctly allocated
       EuclideanDistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
       Map<String,Cluster> clusterMap = loadClusterMap(clusters);
-      for (String key : collector.getKeys()) {
-        Cluster cluster = clusterMap.get(key);
+      for (Text key : collector.getKeys()) {
+        Cluster cluster = clusterMap.get(key.toString());
         List<KMeansInfo> values = collector.getValue(key);
         for (KMeansInfo value : values) {
           double distance = euclideanDistanceMeasure.distance(cluster.getCenter(), value.getPointTotal());
@@ -224,7 +225,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       // now combine the data
       KMeansCombiner combiner = new KMeansCombiner();
       DummyOutputCollector<Text,KMeansInfo> collector2 = new DummyOutputCollector<Text,KMeansInfo>();
-      for (String key : collector.getKeys()) {
+      for (Text key : collector.getKeys()) {
         combiner.reduce(new Text(key), collector.getValue(key).iterator(), collector2, null);
       }
       
@@ -232,7 +233,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       // now verify that all points are accounted for
       int count = 0;
       Vector total = new DenseVector(2);
-      for (String key : collector2.getKeys()) {
+      for (Text key : collector2.getKeys()) {
         List<KMeansInfo> values = collector2.getValue(key);
         assertEquals("too many values", 1, values.size());
         // String value = values.get(0).toString();
@@ -281,7 +282,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       // now combine the data
       KMeansCombiner combiner = new KMeansCombiner();
       DummyOutputCollector<Text,KMeansInfo> collector2 = new DummyOutputCollector<Text,KMeansInfo>();
-      for (String key : collector.getKeys()) {
+      for (Text key : collector.getKeys()) {
         combiner.reduce(new Text(key), collector.getValue(key).iterator(), collector2, null);
       }
       
@@ -290,7 +291,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       reducer.configure(conf);
       reducer.config(clusters);
       DummyOutputCollector<Text,Cluster> collector3 = new DummyOutputCollector<Text,Cluster>();
-      for (String key : collector2.getKeys()) {
+      for (Text key : collector2.getKeys()) {
         reducer.reduce(new Text(key), collector2.getValue(key).iterator(), collector3, new DummyReporter());
       }
       
@@ -319,7 +320,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       for (int i = 0; i < reference.size(); i++) {
         Cluster ref = reference.get(i);
         String key = ref.getIdentifier();
-        List<Cluster> values = collector3.getValue(key);
+        List<Cluster> values = collector3.getValue(new Text(key));
         Cluster cluster = values.get(0);
         converged = converged && cluster.isConverged();
         // Since we aren't roundtripping through Writable, we need to compare the reference center with the
@@ -377,21 +378,15 @@ public class TestKmeansClustering extends MahoutTestCase {
       // assertEquals("output dir files?", 4, outFiles.length);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/points/part-00000"), conf);
       int[] expect = expectedNumPoints[k];
-      DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
-      // The key is the name of the vector, or the vector itself
-      Text key = new Text();
-      // The value is the cluster id
-      Text value = new Text();
-      while (reader.next(key, value)) {
-        /*
-         * String line = reader.readLine(); String[] lineParts = line.split("\t"); assertEquals("line parts",
-         * 2, lineParts.length);
-         */
-        // String cl = line.substring(0, line.indexOf(':'));
-        // collector.collect(new Text(lineParts[1]), new Text(lineParts[0]));
-        collector.collect(value, key);
-        key = new Text();
-        value = new Text();
+      DummyOutputCollector<IntWritable,VectorWritable> collector = new DummyOutputCollector<IntWritable,VectorWritable>();
+      // The key is the clusterId
+      IntWritable clusterId = new IntWritable(0);
+      // The value is the vector
+      VectorWritable value = new VectorWritable();
+      while (reader.next(clusterId, value)) {
+       collector.collect(clusterId, value);
+        clusterId = new IntWritable(0);
+        value = new VectorWritable();
         
       }
       reader.close();
@@ -433,22 +428,22 @@ public class TestKmeansClustering extends MahoutTestCase {
     assertTrue("output dir exists?", outDir.exists());
     String[] outFiles = outDir.list();
     assertEquals("output dir files?", 4, outFiles.length);
-    DummyOutputCollector<Text,Text> collector = new DummyOutputCollector<Text,Text>();
+    DummyOutputCollector<IntWritable,VectorWritable> collector = new DummyOutputCollector<IntWritable,VectorWritable>();
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/points/part-00000"), conf);
     
-    // The key is the name of the vector, or the vector itself
-    Text key = new Text();
-    // The value is the cluster id
-    Text value = new Text();
-    while (reader.next(key, value)) {
-      collector.collect(value, key);
-      key = new Text();
-      value = new Text();
+    // The key is the clusterId
+    IntWritable clusterId = new IntWritable(0);
+    // The value is the vector
+    VectorWritable value = new VectorWritable();
+    while (reader.next(clusterId, value)) {
+      collector.collect(clusterId, value);
+      clusterId = new IntWritable(0);
+      value = new VectorWritable();
       
     }
     reader.close();
     
-    assertEquals("num points[0]", 4, collector.getValue("0").size());
-    assertEquals("num points[1]", 5, collector.getValue("1").size());
+    assertEquals("num points[0]", 4, collector.getValue(new IntWritable(0)).size());
+    assertEquals("num points[1]", 5, collector.getValue(new IntWritable(1)).size());
   }
 }

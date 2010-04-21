@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -35,7 +36,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class ClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable> {
+    Mapper<WritableComparable<?>,VectorWritable,IntWritable,VectorWritable> {
   
   private CanopyClusterer canopyClusterer;
   private final List<Canopy> canopies = new ArrayList<Canopy>();
@@ -43,7 +44,7 @@ public class ClusterMapper extends MapReduceBase implements
   @Override
   public void map(WritableComparable<?> key,
                   VectorWritable point,
-                  OutputCollector<Text,VectorWritable> output,
+                  OutputCollector<IntWritable,VectorWritable> output,
                   Reporter reporter) throws IOException {
     canopyClusterer.emitPointToExistingCanopies(point.get(), canopies, output, reporter);
   }

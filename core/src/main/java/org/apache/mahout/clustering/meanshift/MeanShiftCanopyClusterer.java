@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -28,35 +29,39 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public class MeanShiftCanopyClusterer {
-  
+
   private double convergenceDelta = 0;
+
   // the next canopyId to be allocated
   // private int nextCanopyId = 0;
   // the T1 distance threshold
   private double t1;
+
   // the T2 distance threshold
   private double t2;
+
   // the distance measure
   private DistanceMeasure measure;
-  
+
   public MeanShiftCanopyClusterer(JobConf job) {
     configure(job);
   }
-  
+
   public MeanShiftCanopyClusterer(DistanceMeasure aMeasure, double aT1, double aT2, double aDelta) {
     config(aMeasure, aT1, aT2, aDelta);
   }
-  
+
   public double getT1() {
     return t1;
   }
-  
+
   public double getT2() {
     return t2;
   }
-  
+
   /**
    * Configure the Canopy and its distance measure
    * 
@@ -65,8 +70,8 @@ public class MeanShiftCanopyClusterer {
    */
   public void configure(JobConf job) {
     try {
-      measure = Class.forName(job.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY)).asSubclass(
-        DistanceMeasure.class).newInstance();
+      measure = Class.forName(job.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
+          .newInstance();
       measure.configure(job);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -80,7 +85,7 @@ public class MeanShiftCanopyClusterer {
     t2 = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.T2_KEY));
     convergenceDelta = Double.parseDouble(job.get(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY));
   }
-  
+
   /**
    * Configure the Canopy for unit tests
    * 
@@ -94,7 +99,7 @@ public class MeanShiftCanopyClusterer {
     t2 = aT2;
     convergenceDelta = aDelta;
   }
-  
+
   /**
    * Merge the given canopy into the canopies list. If it touches any existing canopy (norm<T1) then add the
    * center of each to the other. If it covers any other canopies (norm<T2), then merge the given canopy with
@@ -127,13 +132,13 @@ public class MeanShiftCanopyClusterer {
       closestCoveringCanopy.merge(aCanopy);
     }
   }
-  
+
   /** Emit the new canopy to the collector, keyed by the canopy's Id */
-  static void emitCanopy(MeanShiftCanopy canopy, OutputCollector<Text,WritableComparable<?>> collector) throws IOException {
+  static void emitCanopy(MeanShiftCanopy canopy, OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
     String identifier = canopy.getIdentifier();
     collector.collect(new Text(identifier), new Text("new " + canopy.toString()));
   }
-  
+
   /**
    * Shift the center to the new centroid of the cluster
    * 
@@ -149,7 +154,7 @@ public class MeanShiftCanopyClusterer {
     canopy.setPointTotal(centroid.clone());
     return canopy.isConverged();
   }
-  
+
   /**
    * Return if the point is covered by this canopy
    * 
@@ -162,7 +167,7 @@ public class MeanShiftCanopyClusterer {
   boolean covers(MeanShiftCanopy canopy, Vector point) {
     return measure.distance(canopy.getCenter(), point) < t1;
   }
-  
+
   /**
    * Return if the point is closely covered by the canopy
    * 
@@ -175,17 +180,16 @@ public class MeanShiftCanopyClusterer {
   public boolean closelyBound(MeanShiftCanopy canopy, Vector point) {
     return measure.distance(canopy.getCenter(), point) < t2;
   }
-  
+
   /**
    * Story: User can exercise the reference implementation to verify that the test datapoints are clustered in
    * a reasonable manner.
    */
   public void testReferenceImplementation() {
-    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 4.0,
-        1.0, 0.5);
+    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 4.0, 1.0, 0.5);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     // add all points to the canopies
-    
+
     boolean done = false;
     int iter = 1;
     while (!done) {// shift canopies to their centroids
@@ -199,7 +203,7 @@ public class MeanShiftCanopyClusterer {
       System.out.println(iter++);
     }
   }
-  
+
   /**
    * This is the reference mean-shift implementation. Given its inputs it iterates over the points and
    * clusters until their centers converge or until the maximum number of iterations is exceeded.
@@ -211,27 +215,23 @@ public class MeanShiftCanopyClusterer {
    * @param numIter
    *          the maximum number of iterations
    */
-  public static List<MeanShiftCanopy> clusterPoints(List<Vector> points,
-                                                    DistanceMeasure measure,
-                                                    double convergenceThreshold,
-                                                    double t1,
-                                                    double t2,
-                                                    int numIter) {
+  public static List<MeanShiftCanopy> clusterPoints(List<Vector> points, DistanceMeasure measure, double convergenceThreshold,
+      double t1, double t2, int numIter) {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure, t1, t2, convergenceThreshold);
-    
+
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     int nextCanopyId = 0;
     for (Vector point : points) {
       clusterer.mergeCanopy(new MeanShiftCanopy(point, nextCanopyId++), canopies);
     }
-    
+
     boolean converged = false;
     for (int iter = 0; !converged && iter < numIter; iter++) {
       converged = runMeanShiftCanopyIteration(canopies, clusterer);
     }
     return canopies;
   }
-  
+
   /**
    * Perform a single iteration over the points and clusters, assigning points to clusters and returning if
    * the iterations are completed.
@@ -239,8 +239,7 @@ public class MeanShiftCanopyClusterer {
    * @param canopies
    *          the List<MeanShiftCanopy> clusters
    */
-  public static boolean runMeanShiftCanopyIteration(List<MeanShiftCanopy> canopies,
-                                                    MeanShiftCanopyClusterer clusterer) {
+  public static boolean runMeanShiftCanopyIteration(List<MeanShiftCanopy> canopies, MeanShiftCanopyClusterer clusterer) {
     boolean converged = true;
     List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
     for (MeanShiftCanopy canopy : canopies) {
@@ -249,7 +248,7 @@ public class MeanShiftCanopyClusterer {
     }
     canopies = migratedCanopies;
     return converged;
-    
+
   }
-  
+
 }

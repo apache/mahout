@@ -55,7 +55,8 @@ public class NormalModel implements Model<VectorWritable> {
   
   public NormalModel() { }
   
-  public NormalModel(Vector mean, double stdDev) {
+  public NormalModel(int id, Vector mean, double stdDev) {
+    this.id = id;
     this.mean = mean;
     this.stdDev = stdDev;
     this.s0 = 0;
@@ -81,7 +82,7 @@ public class NormalModel implements Model<VectorWritable> {
    * @return an NormalModel
    */
   public NormalModel sample() {
-    return new NormalModel(mean, stdDev);
+    return new NormalModel(id, mean, stdDev);
   }
   
   @Override
@@ -147,6 +148,7 @@ public class NormalModel implements Model<VectorWritable> {
   
   @Override
   public void readFields(DataInput in) throws IOException {
+    this.id = in.readInt();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
     this.mean = temp.get();
@@ -160,6 +162,7 @@ public class NormalModel implements Model<VectorWritable> {
   
   @Override
   public void write(DataOutput out) throws IOException {
+    out.writeInt(id);
     VectorWritable.writeVector(out, mean);
     out.writeDouble(stdDev);
     out.writeInt(s0);

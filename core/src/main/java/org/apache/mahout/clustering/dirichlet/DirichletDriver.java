@@ -32,6 +32,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -41,7 +42,9 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.dirichlet.models.VectorModelDistribution;
+import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopyClusterMapper;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Vector;
@@ -183,6 +186,10 @@ public class DirichletDriver {
    *          the directory pathname for output points
    * @param modelFactory
    *          the String ModelDistribution class name to use
+   * @param modelPrototype
+   *          the String class name of the model prototype
+   * @param prototypeSize
+   *          the int size of the prototype to use
    * @param numClusters
    *          the number of models
    * @param maxIterations
@@ -220,6 +227,8 @@ public class DirichletDriver {
       // now point the input to the old output directory
       stateIn = stateOut;
     }
+    // now cluster the most likely points
+    runClustering(input, stateIn, output + "/clusters");
   }
   
   private static void writeInitialState(String output,
@@ -363,20 +372,25 @@ public class DirichletDriver {
    *          the directory pathname for output points
    */
   public static void runClustering(String input, String stateIn, String output) {
-    Configurable client = new JobClient();
     JobConf conf = new JobConf(DirichletDriver.class);
+    conf.setJobName("Dirichlet Clustering");
     
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
+    conf.setOutputKeyClass(IntWritable.class);
+    conf.setOutputValueClass(VectorWritable.class);
     
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
     
-    conf.setMapperClass(DirichletMapper.class);
-    conf.setNumReduceTasks(0);
+    conf.setMapperClass(DirichletClusterMapper.class);
     
-    client.setConf(conf);
+    conf.setInputFormat(SequenceFileInputFormat.class);
+    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    
+    // uncomment it to run locally
+    // conf.set("mapred.job.tracker", "local");
+    conf.setNumReduceTasks(0);
+    conf.set(STATE_IN_KEY, stateIn);
     try {
       JobClient.runJob(conf);
     } catch (IOException e) {
