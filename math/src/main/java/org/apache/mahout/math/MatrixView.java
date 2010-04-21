@@ -80,12 +80,17 @@ public class MatrixView extends AbstractMatrix {
   }
 
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[ROW] > cardinality[ROW] || size[COL] > cardinality[COL]) {
-      throw new CardinalityException();
+    if (offset[ROW] < ROW) {
+      throw new IndexException(offset[ROW], ROW);
     }
-    if ((offset[ROW] < ROW || offset[ROW] + size[ROW] > cardinality[ROW])
-        || (offset[COL] < ROW || offset[COL] + size[COL] > cardinality[COL])) {
-      throw new IndexException();
+    if (offset[ROW] + size[ROW] > cardinality[ROW]) {
+      throw new IndexException(offset[ROW] + size[ROW], cardinality[ROW]);
+    }
+    if (offset[COL] < ROW) {
+      throw new IndexException(offset[COL], ROW);
+    }
+    if (offset[COL] + size[COL] > cardinality[COL]) {
+      throw new IndexException(offset[COL] + size[COL], cardinality[COL]);
     }
     int[] origin = offset.clone();
     origin[ROW] += offset[ROW];
@@ -95,7 +100,7 @@ public class MatrixView extends AbstractMatrix {
 
   public Matrix assignColumn(int column, Vector other) {
     if (cardinality[ROW] != other.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(cardinality[ROW], other.size());
     }
     for (int row = 0; row < cardinality[ROW]; row++) {
       matrix.setQuick(row + offset[ROW], column + offset[COL], other
@@ -106,7 +111,7 @@ public class MatrixView extends AbstractMatrix {
 
   public Matrix assignRow(int row, Vector other) {
     if (cardinality[COL] != other.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(cardinality[COL], other.size());
     }
     for (int col = 0; col < cardinality[COL]; col++) {
       matrix
@@ -117,7 +122,7 @@ public class MatrixView extends AbstractMatrix {
 
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException();
+      throw new IndexException(column, cardinality[COL]);
     }
     return new VectorView(matrix.getColumn(column + offset[COL]), offset[ROW],
         cardinality[ROW]);
@@ -125,7 +130,7 @@ public class MatrixView extends AbstractMatrix {
 
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException();
+      throw new IndexException(row, cardinality[ROW]);
     }
     return new VectorView(matrix.getRow(row + offset[ROW]), offset[COL],
         cardinality[COL]);

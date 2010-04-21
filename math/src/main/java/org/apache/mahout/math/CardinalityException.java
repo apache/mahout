@@ -17,11 +17,14 @@
 
 package org.apache.mahout.math;
 
-/** Exception thrown when there is a cardinality mismatch in matrix operations */
-public class CardinalityException extends RuntimeException {
-  public CardinalityException(int myCard, int otherCard) {
-    super("My cardinality is: " + myCard + ", but the other is: " + otherCard);
+/**
+ * Exception thrown when there is a cardinality mismatch in matrix or vector operations.
+ * For example, vectors of differing cardinality cannot be added.
+ */
+public class CardinalityException extends IllegalArgumentException {
+
+  public CardinalityException(int expected, int cardinality) {
+    super("Required cardinality " + expected + " but got " + cardinality);
   }
- 
-  public CardinalityException() { }
+
 }

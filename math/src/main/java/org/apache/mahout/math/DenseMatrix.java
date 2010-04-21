@@ -94,12 +94,17 @@ public class DenseMatrix extends AbstractMatrix {
   }
   
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[ROW] > rowSize() || size[COL] > columnSize()) {
-      throw new CardinalityException();
+    if (offset[ROW] < 0) {
+      throw new IndexException(offset[ROW], rowSize());
     }
-    if (offset[ROW] < 0 || offset[ROW] + size[ROW] > rowSize() || offset[COL] < 0
-        || offset[COL] + size[COL] > columnSize()) {
-      throw new IndexException();
+    if (offset[ROW] + size[ROW] > rowSize()) {
+      throw new IndexException(offset[ROW] + size[ROW], rowSize());
+    }
+    if (offset[COL] < 0) {
+      throw new IndexException(offset[COL], columnSize());
+    }
+    if (offset[COL] + size[COL] > columnSize()) {
+      throw new IndexException(offset[COL] + size[COL], columnSize());
     }
     return new MatrixView(this, offset, size);
   }
@@ -113,8 +118,11 @@ public class DenseMatrix extends AbstractMatrix {
   }
   
   public Matrix assignColumn(int column, Vector other) {
-    if (other.size() != rowSize() || column >= columnSize()) {
-      throw new CardinalityException();
+    if (rowSize() != other.size()) {
+      throw new CardinalityException(rowSize(), other.size());
+    }
+    if (column < 0 || column >= columnSize()) {
+      throw new IndexException(column, columnSize());
     }
     for (int row = 0; row < rowSize(); row++) {
       values[row][column] = other.getQuick(row);
@@ -123,8 +131,11 @@ public class DenseMatrix extends AbstractMatrix {
   }
   
   public Matrix assignRow(int row, Vector other) {
-    if (row >= rowSize() || other.size() != columnSize()) {
-      throw new CardinalityException();
+    if (columnSize() != other.size()) {
+      throw new CardinalityException(columnSize(), other.size());
+    }
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
     for (int col = 0; col < columnSize(); col++) {
       values[row][col] = other.getQuick(col);
@@ -134,14 +145,14 @@ public class DenseMatrix extends AbstractMatrix {
   
   public Vector getColumn(int column) {
     if (column < 0 || column >= columnSize()) {
-      throw new IndexException();
+      throw new IndexException(column, columnSize());
     }
     return new TransposeViewVector(this, column);
   }
   
   public Vector getRow(int row) {
     if (row < 0 || row >= rowSize()) {
-      throw new IndexException();
+      throw new IndexException(row, rowSize());
     }
     return new DenseVector(values[row], true);
   }

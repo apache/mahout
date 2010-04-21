@@ -122,19 +122,27 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[ROW] > rows.length || size[COL] > rows[ROW].size()) {
-      throw new CardinalityException();
+    if (offset[ROW] < 0) {
+      throw new IndexException(offset[ROW], rows.length);
     }
-    if (offset[ROW] < 0 || offset[ROW] + size[ROW] > rows.length
-        || offset[COL] < 0 || offset[COL] + size[COL] > rows[ROW].size()) {
-      throw new IndexException();
+    if (offset[ROW] + size[ROW] > rows.length) {
+      throw new IndexException(offset[ROW] + size[ROW], rows.length);
+    }
+    if (offset[COL] < 0) {
+      throw new IndexException(offset[COL], rows[ROW].size());
+    }
+    if (offset[COL] + size[COL] > rows[ROW].size()) {
+      throw new IndexException(offset[COL] + size[COL], rows[ROW].size());
     }
     return new MatrixView(this, offset, size);
   }
 
   public Matrix assignColumn(int column, Vector other) {
-    if (other.size() != cardinality[ROW] || column >= cardinality[COL]) {
-      throw new CardinalityException();
+    if (cardinality[ROW] != other.size()) {
+      throw new CardinalityException(cardinality[ROW], other.size());
+    }
+    if (column < 0 || column >= cardinality[COL]) {
+      throw new IndexException(column, cardinality[COL]);
     }
     for (int row = 0; row < cardinality[ROW]; row++) {
       rows[row].setQuick(column, other.getQuick(row));
@@ -143,8 +151,11 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   public Matrix assignRow(int row, Vector other) {
-    if (row >= cardinality[ROW] || other.size() != cardinality[COL]) {
-      throw new CardinalityException();
+    if (cardinality[COL] != other.size()) {
+      throw new CardinalityException(cardinality[COL], other.size());
+    }
+    if (row < 0 || row >= cardinality[ROW]) {
+      throw new IndexException(row, cardinality[ROW]);
     }
     rows[row].assign(other);
     return this;
@@ -157,7 +168,7 @@ public class SparseRowMatrix extends AbstractMatrix {
    */
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException();
+      throw new IndexException(column, cardinality[COL]);
     }
     return new TransposeViewVector(this, column) {
       @Override
@@ -176,7 +187,7 @@ public class SparseRowMatrix extends AbstractMatrix {
    */
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException();
+      throw new IndexException(row, cardinality[ROW]);
     }
     return rows[row];
   }

@@ -127,27 +127,38 @@ public class SparseColumnMatrix extends AbstractMatrix {
   }
 
   public Matrix viewPart(int[] offset, int[] size) {
-    if (size[COL] > columns.length || size[ROW] > columns[COL].size()) {
-      throw new CardinalityException();
+    if (offset[ROW] < 0) {
+      throw new IndexException(offset[ROW], columns[COL].size());
     }
-    if (offset[COL] < 0 || offset[COL] + size[COL] > columns.length
-        || offset[ROW] < 0 || offset[ROW] + size[ROW] > columns[COL].size()) {
-      throw new IndexException();
+    if (offset[ROW] + size[ROW] > columns[COL].size()) {
+      throw new IndexException(offset[ROW] + size[ROW], columns[COL].size());
+    }
+    if (offset[COL] < 0) {
+      throw new IndexException(offset[COL], columns.length);
+    }
+    if (offset[COL] + size[COL] > columns.length) {
+      throw new IndexException(offset[COL] + size[COL], columns.length);
     }
     return new MatrixView(this, offset, size);
   }
 
   public Matrix assignColumn(int column, Vector other) {
-    if (other.size() != cardinality[ROW] || column >= cardinality[COL]) {
-      throw new CardinalityException();
+    if (cardinality[ROW] != other.size()) {
+      throw new CardinalityException(cardinality[ROW], other.size());
+    }
+    if (column < 0 || column >= cardinality[COL]) {
+      throw new IndexException(column, cardinality[COL]);
     }
     columns[column].assign(other);
     return this;
   }
 
   public Matrix assignRow(int row, Vector other) {
-    if (row >= cardinality[ROW] || other.size() != cardinality[COL]) {
-      throw new CardinalityException();
+    if (cardinality[COL] != other.size()) {
+      throw new CardinalityException(cardinality[COL], other.size());
+    }
+    if (row < 0 || row >= cardinality[ROW]) {
+      throw new IndexException(row, cardinality[ROW]);
     }
     for (int col = 0; col < cardinality[COL]; col++) {
       columns[col].setQuick(row, other.getQuick(col));
@@ -157,14 +168,14 @@ public class SparseColumnMatrix extends AbstractMatrix {
 
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException();
+      throw new IndexException(column, cardinality[COL]);
     }
     return columns[column];
   }
 
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException();
+      throw new IndexException(row, cardinality[ROW]);
     }
     return new TransposeViewVector(this, row, false);
   }

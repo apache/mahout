@@ -58,7 +58,7 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
   @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(v1.size(), v2.size());
     }
     double result = 0;
     Vector vector = v1.minus(v2);

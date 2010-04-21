@@ -68,7 +68,7 @@ public class CosineDistanceMeasure implements DistanceMeasure {
   @Override
   public double distance(Vector v1, Vector v2) {
     if (v1.size() != v2.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(v1.size(), v2.size());
     }
     double lengthSquaredv1 = v1.getLengthSquared();
     double lengthSquaredv2 = v2.getLengthSquared();

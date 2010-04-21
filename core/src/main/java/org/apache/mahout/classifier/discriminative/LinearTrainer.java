@@ -77,7 +77,7 @@ public abstract class LinearTrainer {
                                                     CardinalityException,
                                                     TrainingException {
     if (labelset.size() != dataset.size()[1]) {
-      throw new CardinalityException();
+      throw new CardinalityException(labelset.size(), dataset.size()[1]);
     }
     
     boolean converged = false;

@@ -132,10 +132,7 @@ public class TestMatrixView extends TestCase {
     try {
       test.viewPart(offset, size);
       fail("exception expected");
-    } catch (CardinalityException e) {
-      assertTrue(true);
     } catch (IndexException e) {
-      fail("cardinality exception expected");
     }
   }
 
@@ -145,10 +142,7 @@ public class TestMatrixView extends TestCase {
     try {
       test.viewPart(offset, size);
       fail("exception expected");
-    } catch (CardinalityException e) {
-      fail("index exception expected");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -158,10 +152,7 @@ public class TestMatrixView extends TestCase {
     try {
       test.viewPart(offset, size);
       fail("exception expected");
-    } catch (CardinalityException e) {
-      fail("index exception expected");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -193,7 +184,6 @@ public class TestMatrixView extends TestCase {
       test.assign(new double[c[ROW] + 1][c[COL]]);
       fail("exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -213,7 +203,6 @@ public class TestMatrixView extends TestCase {
       test.assign(test.transpose(), plus);
       fail("exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -234,7 +223,6 @@ public class TestMatrixView extends TestCase {
       test.assign(test.transpose());
       fail("exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -280,7 +268,6 @@ public class TestMatrixView extends TestCase {
       }
       fail("index exception expected");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -294,7 +281,6 @@ public class TestMatrixView extends TestCase {
       }
       fail("index exception expected");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -314,7 +300,6 @@ public class TestMatrixView extends TestCase {
       test.minus(test.transpose());
       fail("cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -345,7 +330,6 @@ public class TestMatrixView extends TestCase {
       test.plus(test.transpose());
       fail("cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -359,7 +343,6 @@ public class TestMatrixView extends TestCase {
       }
       fail("index exception expected");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -373,7 +356,6 @@ public class TestMatrixView extends TestCase {
       }
       fail("index exception expected");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -404,7 +386,6 @@ public class TestMatrixView extends TestCase {
       test.times(other);
       fail("cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -440,7 +421,6 @@ public class TestMatrixView extends TestCase {
       test.assignRow(1, new DenseVector(data));
       fail("expecting cardinality exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -458,7 +438,6 @@ public class TestMatrixView extends TestCase {
       test.assignColumn(1, new DenseVector(data));
       fail("expecting cardinality exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -472,7 +451,6 @@ public class TestMatrixView extends TestCase {
       test.getRow(-1);
       fail("expecting index exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -481,7 +459,6 @@ public class TestMatrixView extends TestCase {
       test.getRow(5);
       fail("expecting index exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -495,7 +472,6 @@ public class TestMatrixView extends TestCase {
       test.getColumn(-1);
       fail("expecting index exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -504,7 +480,6 @@ public class TestMatrixView extends TestCase {
       test.getColumn(5);
       fail("expecting index exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -540,10 +515,7 @@ public class TestMatrixView extends TestCase {
     try {
       test.get("Fie", "Foe");
       fail("Expected UnboundLabelException");
-    } catch (IndexException e) {
-      fail("Expected UnboundLabelException");
     } catch (UnboundLabelException e) {
-      assertTrue(true);
     }
   }
 

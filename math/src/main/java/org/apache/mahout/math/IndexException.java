@@ -17,13 +17,14 @@
 
 package org.apache.mahout.math;
 
-/** Exception thrown when there is an index outside of [0, cardinality) */
-public class IndexException extends RuntimeException {
-  public IndexException() {
-
-  }
+/**
+ * Exception thrown when a matrix or vector is accessed at an index, or dimension,
+ * which does not logically exist in the entity.
+ */
+public class IndexException extends IllegalArgumentException {
 
   public IndexException(int index, int cardinality) {
-    super("index(" + index +") is out of bounds of (0, " + cardinality + ')');
+    super("Index " + index + " is outside allowable range of [0," + cardinality + ']');
   }
+
 }
