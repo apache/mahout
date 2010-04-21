@@ -49,7 +49,6 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
     Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
   
   private final OpenIntLongHashMap dictionary = new OpenIntLongHashMap();
-  private final VectorWritable vectorWritable = new VectorWritable();
   private final TFIDF tfidf = new TFIDF();
   private int minDf = 1;
   private int maxDfPercent = 99;
@@ -67,8 +66,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
     }
     Vector value = values.next().get();
     Iterator<Element> it = value.iterateNonZero();
-    Vector vector = new RandomAccessSparseVector(key.toString(), (int) featureCount, value
-        .getNumNondefaultElements());
+    Vector vector = new RandomAccessSparseVector((int) featureCount, value.getNumNondefaultElements());
     while (it.hasNext()) {
       Element e = it.next();
       if (!dictionary.containsKey(e.index())) {
@@ -87,7 +85,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    vectorWritable.set(vector);
+    VectorWritable vectorWritable = new VectorWritable(vector);
     output.collect(key, vectorWritable);
   }
   

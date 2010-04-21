@@ -29,42 +29,39 @@ import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 public class RandomAccessSparseVector extends AbstractVector {
 
   private static final int INITIAL_SIZE = 11;
-  protected OpenIntDoubleHashMap values;
+
+  private OpenIntDoubleHashMap values;
 
   /** For serialization purposes only. */
   public RandomAccessSparseVector() {
+    super(0);
   }
 
   public RandomAccessSparseVector(int cardinality) {
-    this(null, cardinality, Math.min(cardinality, INITIAL_SIZE)); // arbitrary estimate of
-    // 'sparseness'
+    this(cardinality, Math.min(cardinality, INITIAL_SIZE)); // arbitrary estimate of 'sparseness'
   }
 
   public RandomAccessSparseVector(int cardinality, int size) {
-    this(null, cardinality, size);
-  }
-
-  public RandomAccessSparseVector(String name, int cardinality) {
-    this(name, cardinality, Math.min(cardinality, INITIAL_SIZE)); // arbitrary estimate of
-    // 'sparseness'
-  }
-
-  public RandomAccessSparseVector(String name, int cardinality, int size) {
-    super(name, cardinality);
+    super(cardinality);
     values = new OpenIntDoubleHashMap(size);
   }
 
   public RandomAccessSparseVector(Vector other) {
-    this(other.getName(), other.size(), other.getNumNondefaultElements());
-    Iterator<Vector.Element> it = other.iterateNonZero();
-    Vector.Element e;
+    this(other.size(), other.getNumNondefaultElements());
+    Iterator<Element> it = other.iterateNonZero();
+    Element e;
     while(it.hasNext() && (e = it.next()) != null) {
       values.put(e.index(), e.get());
     }
   }
 
+  RandomAccessSparseVector(int cardinality, OpenIntDoubleHashMap values) {
+    super(cardinality);
+    this.values = values;
+  }
+
   public RandomAccessSparseVector(RandomAccessSparseVector other, boolean shallowCopy) {
-    super(other.getName(), other.size());
+    super(other.size());
     values = shallowCopy ? other.values : (OpenIntDoubleHashMap)other.values.clone() ;
   }
 
@@ -83,12 +80,12 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   @Override
   public Vector assign(Vector other) {
-    if (other.size() != size()) {
-      throw new CardinalityException();
+    if (size() != other.size()) {
+      throw new CardinalityException(size(), other.size());
     }
     values.clear();
-    Iterator<Vector.Element> it = other.iterateNonZero();
-    Vector.Element e;
+    Iterator<Element> it = other.iterateNonZero();
+    Element e;
     while(it.hasNext() && (e = it.next()) != null) {
       setQuick(e.index(), e.get());
     }
@@ -128,138 +125,15 @@ public class RandomAccessSparseVector extends AbstractVector {
    * NOTE: this implementation reuses the Vector.Element instance for each call of next(). If you need to preserve the
    * instance, you need to make a copy of it
    *
-   * @return an {@link NonZeroIterator} over the Elements.
+   * @return an {@link Iterator} over the Elements.
    * @see #getElement(int)
    */
-  public java.util.Iterator<Vector.Element> iterateNonZero() {
-    return new NonZeroIterator(false);
+  public Iterator<Element> iterateNonZero() {
+    return new NonDefaultIterator();
   }
   
-  public Iterator<Vector.Element> iterateAll() {
+  public Iterator<Element> iterator() {
     return new AllIterator();
-  }
-
-  /**
-   * Indicate whether the two objects are the same or not. Two {@link org.apache.mahout.math.Vector}s can be equal
-   * even if the underlying implementation is not equal.
-   *
-   * @param o The object to compare
-   * @return true if the objects have the same cell values and same name, false otherwise. <p/> * @see
-   *         AbstractVector#strictEquivalence(Vector, Vector)
-   * @see AbstractVector#equivalent(Vector, Vector)
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof Vector)) {
-      return false;
-    }
-
-    Vector that = (Vector) o;
-    String thisName = getName();
-    String thatName = that.getName();
-    if (this.size() != that.size()) {
-      return false;
-    }
-    if (thisName != null && thatName != null && !thisName.equals(thatName)) {
-      return false;
-    } else if ((thisName != null && thatName == null)
-        || (thatName != null && thisName == null)) {
-      return false;
-    }
-
-    return equivalent(this, that);
-  }
-
-  private class AllIterator implements java.util.Iterator<Vector.Element> {
-    private int offset = 0;
-    private final Element element = new Element(0);
-
-    public boolean hasNext() {
-      return offset < size();
-    }
-
-    public Vector.Element next() {
-      if (offset >= size()) {
-        throw new NoSuchElementException();
-      }
-      element.ind = offset++;
-      return element;
-    }
-
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-
-  private class NonZeroIterator implements java.util.Iterator<Vector.Element> {
-    private int offset = 0;
-    private final Element element = new Element(0);
-
-    private final IntArrayList intArrList =  values.keys();
-    
-    private NonZeroIterator(boolean sorted) {
-      if (sorted) {
-        intArrList.sort();
-      }      
-    }
-
-    public boolean hasNext() {
-      return offset < intArrList.size();
-    }
-
-    public Element next() {
-      if (offset < intArrList.size()) {
-        element.ind = intArrList.get(offset++);
-        return element;
-      }
-      throw new NoSuchElementException();
-    }
-
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  public Vector.Element getElement(int index) {
-    return new Element(index);
-  }
-
-  public class Element implements Vector.Element {
-    private int ind;
-
-    public Element(int ind) {
-      this.ind = ind;
-    }
-
-    public double get() {
-      return values.get(ind);
-    }
-
-    public int index() {
-      return ind;
-    }
-
-    public void set(double value) {
-      lengthSquared = -1.0;
-      values.put(ind, value);
-    }
-  }
-
-  private static class AddToVector implements IntDoubleProcedure {
-    private final Vector v;
-
-    private AddToVector(Vector v) {
-      this.v = v;
-    }
-
-    public boolean apply(int key, double value) {
-      v.set(key, value + v.get(key));
-      return true;
-    }
   }
 
   @Override
@@ -269,28 +143,116 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
     values.forEachPair(new AddToVector(v));
   }
+
   @Override
   public double dot(Vector x) {
     if (size() != x.size()) {
       throw new CardinalityException(size(), x.size());
     }
-    if(this == x) return dotSelf();
+    if (this == x) {
+      return dotSelf();
+    }
     
     double result = 0;
     if (x instanceof SequentialAccessSparseVector) {
-      Iterator<org.apache.mahout.math.Vector.Element> iter = x.iterateNonZero();
+      Iterator<Element> iter = x.iterateNonZero();
       while (iter.hasNext()) {
-        org.apache.mahout.math.Vector.Element element = iter.next();
+        Element element = iter.next();
         result += element.get() * getQuick(element.index());
       }
       return result;
     } else { 
-      Iterator<org.apache.mahout.math.Vector.Element> iter = iterateNonZero();
+      Iterator<Element> iter = iterateNonZero();
       while (iter.hasNext()) {
-        org.apache.mahout.math.Vector.Element element = iter.next();
+        Element element = iter.next();
         result += element.get() * x.getQuick(element.index());
       }
       return result;
+    }
+  }
+
+
+  private static class AddToVector implements IntDoubleProcedure {
+    private final Vector v;
+    private AddToVector(Vector v) {
+      this.v = v;
+    }
+    public boolean apply(int key, double value) {
+      v.set(key, value + v.get(key));
+      return true;
+    }
+  }
+
+  private final class NonDefaultIterator implements Iterator<Element> {
+
+    private final RandomAccessElement element = new RandomAccessElement();
+    private final IntArrayList indices = new IntArrayList();
+    private int offset;
+
+    private NonDefaultIterator() {
+      values.keys(indices);
+    }
+
+    public boolean hasNext() {
+      return offset < indices.size();
+    }
+
+    public Element next() {
+      if (offset >= indices.size()) {
+        throw new NoSuchElementException();
+      } else {
+        element.index = indices.get(offset);
+        offset++;
+        return element;
+      }
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private final class AllIterator implements Iterator<Element> {
+
+    private final RandomAccessElement element = new RandomAccessElement();
+
+    private AllIterator() {
+      element.index = -1;
+    }
+
+    public boolean hasNext() {
+      return element.index+1 < size();
+    }
+
+    public Element next() {
+      if (element.index+1 >= size()) {
+        throw new NoSuchElementException();
+      } else {
+        element.index++;
+        return element;
+      }
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private final class RandomAccessElement implements Element {
+
+    int index;
+
+    public double get() {
+      return values.get(index);
+    }
+
+    public int index() {
+      return index;
+    }
+
+    public void set(double value) {
+      lengthSquared = -1;
+      values.put(index, value);
     }
   }
   

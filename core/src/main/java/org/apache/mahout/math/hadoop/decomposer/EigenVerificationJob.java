@@ -183,7 +183,6 @@ public class EigenVerificationJob extends AbstractJob {
     Configuration conf = getConf();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-    VectorWritable vw = new VectorWritable();
     IntWritable iw = new IntWritable();
     for(Map.Entry<MatrixSlice,EigenStatus> pruneSlice : prunedEigenMeta) {
       MatrixSlice s = pruneSlice.getKey();
@@ -192,8 +191,8 @@ public class EigenVerificationJob extends AbstractJob {
                                        meta.getEigenValue(),
                                        Math.abs(1-meta.getCosAngle()),
                                        s.index());
-      log.info("appending " + ev.getName() + " to " + path.toString());
-      vw.set(ev);
+      log.info("appending {} to {}", ev, path);
+      VectorWritable vw = new VectorWritable(ev);
       iw.set(s.index());
       seqWriter.append(iw, vw);
     }

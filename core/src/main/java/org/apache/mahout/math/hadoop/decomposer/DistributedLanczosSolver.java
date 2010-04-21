@@ -102,12 +102,10 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     Configuration conf = getConf();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-    VectorWritable vw = new VectorWritable();
     IntWritable iw = new IntWritable();
     for(int i=0; i<eigenVectors.numRows() - 1; i++) {
       Vector v = eigenVectors.getRow(i);
-      v.setName("eigenVector" + i + ", eigenvalue = " + eigenValues.get(i));
-      vw.set(v);
+      VectorWritable vw = new VectorWritable(v);
       iw.set(i);
       seqWriter.append(iw, vw);
     }

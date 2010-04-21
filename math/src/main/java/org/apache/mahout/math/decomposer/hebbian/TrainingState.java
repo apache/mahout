@@ -25,19 +25,7 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.decomposer.EigenStatus;
 
-
 public class TrainingState {
-  TrainingState(Matrix eigens, Matrix projections) {
-    setCurrentEigens(eigens);
-    setTrainingProjections(projections);
-    setTrainingIndex(0);
-    setHelperVector(new DenseVector("helper", eigens.numRows()));
-    setFirstPass(true);
-    setStatusProgress(new ArrayList<EigenStatus>());
-    setActivationNumerator(0);
-    setActivationDenominatorSquared(0);
-    setNumEigensProcessed(0);
-  }
 
   private Matrix currentEigens;
   private int numEigensProcessed;
@@ -50,14 +38,27 @@ public class TrainingState {
   private double activationNumerator;
   private double activationDenominatorSquared;
 
+  TrainingState(Matrix eigens, Matrix projections) {
+    currentEigens = eigens;
+    trainingProjections = projections;
+    trainingIndex = 0;
+    helperVector = new DenseVector(eigens.numRows());
+    firstPass = true;
+    statusProgress = new ArrayList<EigenStatus>();
+    activationNumerator = 0;
+    activationDenominatorSquared = 0;
+    numEigensProcessed = 0;
+  }
+
   public Vector mostRecentEigen() {
-    return getCurrentEigens().getRow(getNumEigensProcessed() - 1);
+    return currentEigens.getRow(numEigensProcessed - 1);
   }
 
   public Vector currentTrainingProjection() {
-    if (getTrainingProjections().getRow(getTrainingIndex()) == null)
-      getTrainingProjections().assignRow(getTrainingIndex(), new DenseVector(getCurrentEigens().numCols()));
-    return getTrainingProjections().getRow(getTrainingIndex());
+    if (trainingProjections.getRow(trainingIndex) == null) {
+      trainingProjections.assignRow(trainingIndex, new DenseVector(currentEigens.numCols()));
+    }
+    return trainingProjections.getRow(trainingIndex);
   }
 
   public Matrix getCurrentEigens() {

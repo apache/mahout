@@ -28,27 +28,20 @@ public class VectorView extends AbstractVector {
   // the offset into the Vector
   private int offset;
 
-  // the cardinality of the view
-  private int cardinality;
-
   /** For serialization purposes only */
   public VectorView() {
+    super(0);
   }
 
   public VectorView(Vector vector, int offset, int cardinality) {
+    super(cardinality);
     this.vector = vector;
     this.offset = offset;
-    this.cardinality = cardinality;
   }
 
   @Override
   protected Matrix matrixLike(int rows, int columns) {
     return ((AbstractVector) vector).matrixLike(rows, columns);
-  }
-
-  @Override
-  public int size() {
-    return cardinality;
   }
 
   @Override
@@ -75,41 +68,41 @@ public class VectorView extends AbstractVector {
   }
 
   public int getNumNondefaultElements() {
-    return cardinality;
+    return size();
   }
 
   @Override
   public Vector viewPart(int offset, int length) {
-    if (length > cardinality) {
-      throw new CardinalityException();
+    if (offset < 0) {
+      throw new IndexException(offset, size());
     }
-    if (offset < 0 || offset + length > cardinality) {
-      throw new IndexException();
+    if (offset + length > size()) {
+      throw new IndexException(offset + length, size());
     }
     return new VectorView(vector, offset + this.offset, length);
   }
 
   /** @return true if index is a valid index in the underlying Vector */
   private boolean isInView(int index) {
-    return index >= offset && index < offset + cardinality;
+    return index >= offset && index < offset + size();
   }
 
-  public Iterator<Vector.Element> iterateNonZero() {
+  public Iterator<Element> iterateNonZero() {
     return new NonZeroIterator();
   }
 
-  public Iterator<Vector.Element> iterateAll() {
+  public Iterator<Element> iterator() {
     return new AllIterator();
   }
 
-  public class NonZeroIterator implements Iterator<Vector.Element> {
+  public class NonZeroIterator implements Iterator<Element> {
 
-    private final Iterator<Vector.Element> it;
+    private final Iterator<Element> it;
 
-    private Vector.Element el;
+    private Element el;
 
     private NonZeroIterator() {
-      it = vector.iterateAll();
+      it = vector.iterator();
       buffer();
     }
 
@@ -117,8 +110,8 @@ public class VectorView extends AbstractVector {
       while (it.hasNext()) {
         el = it.next();
         if (isInView(el.index()) && el.get() != 0) {
-          final Vector.Element decorated = vector.getElement(el.index());
-          el = new Vector.Element() {
+          final Element decorated = vector.getElement(el.index());
+          el = new Element() {
             public double get() {
               return decorated.get();
             }
@@ -137,11 +130,11 @@ public class VectorView extends AbstractVector {
       el = null; // No element was found
     }
 
-    public Vector.Element next() {
+    public Element next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      Vector.Element buffer = el;
+      Element buffer = el;
       buffer();
       return buffer;
     }
@@ -156,14 +149,14 @@ public class VectorView extends AbstractVector {
     }
   }
 
-  public class AllIterator implements Iterator<Vector.Element> {
+  public class AllIterator implements Iterator<Element> {
 
-    private final Iterator<Vector.Element> it;
+    private final Iterator<Element> it;
 
-    private Vector.Element el;
+    private Element el;
 
     private AllIterator() {
-      it = vector.iterateAll();
+      it = vector.iterator();
       buffer();
     }
 
@@ -171,8 +164,8 @@ public class VectorView extends AbstractVector {
       while (it.hasNext()) {
         el = it.next();
         if (isInView(el.index())) {
-          final Vector.Element decorated = vector.getElement(el.index());
-          el = new Vector.Element() {
+          final Element decorated = vector.getElement(el.index());
+          el = new Element() {
             public double get() {
               return decorated.get();
             }
@@ -191,11 +184,11 @@ public class VectorView extends AbstractVector {
       el = null; // No element was found
     }
 
-    public Vector.Element next() {
+    public Element next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      Vector.Element buffer = el;
+      Element buffer = el;
       buffer();
       return buffer;
     }
@@ -214,7 +207,7 @@ public class VectorView extends AbstractVector {
   @Override
   public double dot(Vector x) {
     if (size() != x.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(size(), x.size());
     }
     double result = 0;
     for (int i = 0; i < size(); i++) {
@@ -223,49 +216,11 @@ public class VectorView extends AbstractVector {
     return result;
   }
 
-  public Vector.Element getElement(int index) {
-    return new Element(index);
-  }
-
-  public class Element implements Vector.Element {
-
-    private final int ind;
-
-    private Element(int ind) {
-      this.ind = ind;
-    }
-
-    public double get() {
-      return getQuick(ind);
-    }
-
-    public int index() {
-      return ind;
-    }
-
-    public void set(double value) {
-      setQuick(ind, value);
-    }
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    return this == o || (o instanceof Vector && equivalent(this, (Vector) o));
-
-  }
-
-  @Override
-  public int hashCode() {
-    int result = vector.hashCode();
-    result = 31 * result + offset;
-    result = 31 * result + cardinality;
-    return result;
-  }
-
   @Override
   public double getLengthSquared() {
     double result = 0.0;
-    for (int i = 0; i < cardinality; i++) {
+    int size = size();
+    for (int i = 0; i < size; i++) {
       double value = getQuick(i);
       result += value * value;
     }
@@ -275,7 +230,8 @@ public class VectorView extends AbstractVector {
   @Override
   public double getDistanceSquared(Vector v) {
     double result = 0.0;
-    for (int i = 0; i < cardinality; i++) {
+    int size = size();
+    for (int i = 0; i < size; i++) {
       double delta = getQuick(i) - v.getQuick(i);
       result += delta * delta;
     }
@@ -284,9 +240,9 @@ public class VectorView extends AbstractVector {
 
   @Override
   public void addTo(Vector v) {
-    Iterator<Vector.Element> iter = iterateNonZero();
+    Iterator<Element> iter = iterateNonZero();
     while (iter.hasNext()) {
-      Vector.Element elt = iter.next();
+      Element elt = iter.next();
       v.set(elt.index(), elt.get() + v.get(elt.index()));
     }
   }

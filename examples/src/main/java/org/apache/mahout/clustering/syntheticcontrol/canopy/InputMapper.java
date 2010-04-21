@@ -39,9 +39,7 @@ public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Te
   private static final Pattern SPACE = Pattern.compile(" ");
   
   private Constructor<?> constructor;
-  
-  private VectorWritable vectorWritable;
-  
+
   @Override
   public void map(LongWritable key,
                   Text values,
@@ -61,7 +59,7 @@ public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Te
       for (Double d : doubles) {
         result.set(index++, d);
       }
-      vectorWritable.set(result);
+      VectorWritable vectorWritable = new VectorWritable(result);
       output.collect(new Text(String.valueOf(index)), vectorWritable);
       
     } catch (InstantiationException e) {
@@ -75,7 +73,6 @@ public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Te
   
   @Override
   public void configure(JobConf job) {
-    vectorWritable = new VectorWritable();
     String vectorImplClassName = job.get("vector.implementation.class.name");
     try {
       Class<? extends Vector> outputClass = (Class<? extends Vector>) job.getClassByName(vectorImplClassName);

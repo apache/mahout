@@ -117,12 +117,6 @@ public class LuceneIterable implements Iterable<Vector> {
         if (result == null) {
           return null;
         }
-        if (idField != null) {
-          String id = indexReader.document(doc, idFieldSelector).get(idField);
-          result.setName(id);
-        } else {
-          result.setName(String.valueOf(doc));
-        }
         if (normPower != NO_NORMALIZING) {
           result = result.normalize(normPower);
         }

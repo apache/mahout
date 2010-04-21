@@ -38,8 +38,8 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
-import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -80,20 +80,20 @@ public class TestKmeansClustering extends MahoutTestCase {
   
   public static List<VectorWritable> getPointsWritable(double[][] raw) {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    int i = 0;
-    for (double[] fr : raw) {
-      Vector vec = new RandomAccessSparseVector(String.valueOf(i++), fr.length);
+    for (int i = 0; i < raw.length; i++) {
+      double[] fr = raw[i];
+      Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
-      points.add(new VectorWritable(vec));
+      points.add(new VectorWritable(new NamedVector(vec, String.valueOf(i))));
     }
     return points;
   }
   
-  public static List<Vector> getPoints(double[][] raw) {
-    List<Vector> points = new ArrayList<Vector>();
+  public static List<NamedVector> getPoints(double[][] raw) {
+    List<NamedVector> points = new ArrayList<NamedVector>();
     for (int i = 0; i < raw.length; i++) {
       double[] fr = raw[i];
-      Vector vec = new SequentialAccessSparseVector(String.valueOf(i), fr.length);
+      NamedVector vec = new NamedVector(new SequentialAccessSparseVector(fr.length), String.valueOf(i));
       vec.assign(fr);
       points.add(vec);
     }
@@ -102,7 +102,7 @@ public class TestKmeansClustering extends MahoutTestCase {
   
   /** Story: Test the reference implementation */
   public void testReferenceImplementation() throws Exception {
-    List<Vector> points = getPoints(reference);
+    List<NamedVector> points = getPoints(reference);
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // try all possible values of k
     for (int k = 0; k < points.size(); k++) {
@@ -127,7 +127,7 @@ public class TestKmeansClustering extends MahoutTestCase {
   }
   
   public void testStd() {
-    List<Vector> points = getPoints(reference);
+    List<NamedVector> points = getPoints(reference);
     Cluster c = new Cluster(points.get(0));
     for (Vector p : points) {
       c.addPoint(p);
@@ -302,9 +302,10 @@ public class TestKmeansClustering extends MahoutTestCase {
         Vector vec = points.get(i).get();
         reference.add(new Cluster(vec, i));
       }
-      List<Vector> pointsVectors = new ArrayList<Vector>();
-      for(VectorWritable point : points)
-        pointsVectors.add(point.get());
+      List<NamedVector> pointsVectors = new ArrayList<NamedVector>();
+      for (VectorWritable point : points) {
+        pointsVectors.add((NamedVector) point.get());
+      }
       boolean converged = KMeansClusterer.runKMeansIteration(pointsVectors, reference,
         euclideanDistanceMeasure, 0.001);
       if (k == 8) {
@@ -324,13 +325,7 @@ public class TestKmeansClustering extends MahoutTestCase {
         // Since we aren't roundtripping through Writable, we need to compare the reference center with the
         // cluster centroid
         cluster.recomputeCenter();
-        assertTrue(i + " reference center: " + ref.getCenter().asFormatString() + " and cluster center:  "
-                   + cluster.getCenter().asFormatString() + " are not equal", AbstractVector.equivalent(ref
-            .getCenter(), cluster.getCenter()));
-        
-        /*
-         * assertEquals(k + " center[" + key + "][1]", ref.getCenter().get(1), cluster.getCenter().get(1));
-         */
+        assertEquals(ref.getCenter(), cluster.getCenter());
       }
       if (k == 8) {
         assertTrue("not converged? " + k, converged);

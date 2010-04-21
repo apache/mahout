@@ -37,30 +37,16 @@ public abstract class AbstractVector implements Vector {
    * with each vector instance.
    */
   private transient Map<String, Integer> bindings;
-
-  private String name;
-
-  protected int size;
-
+  private int size;
   protected double lengthSquared = -1.0;
 
-  protected AbstractVector() {
-    this(null, 0);
-  }
-
-  protected AbstractVector(String name) {
-    this(name, 0);
-  }
-
-  protected AbstractVector(String name, int size) {
-    this.name = name;
+  protected AbstractVector(int size) {
     this.size = size;
   }
 
   public double aggregate(BinaryFunction aggregator, UnaryFunction map) {
     double result = 0.0;
-    int size = size();
-    for(int i=0; i<size; i++) {
+    for (int i=0; i < size; i++) {
       result = aggregator.apply(result, map.apply(getQuick(i)) );
     }
     return result;
@@ -68,8 +54,7 @@ public abstract class AbstractVector implements Vector {
 
   public double aggregate(Vector other, BinaryFunction aggregator, BinaryFunction combiner) {
     double result = 0.0;
-    int size = size();
-    for(int i=0; i<size; i++) {
+    for (int i=0; i < size; i++) {
       result = aggregator.apply(result, combiner.apply(getQuick(i), other.getQuick(i)));
     }
     return result;
@@ -85,11 +70,11 @@ public abstract class AbstractVector implements Vector {
   protected abstract Matrix matrixLike(int rows, int columns);
 
   public Vector viewPart(int offset, int length) {
-    if (length > size) {
-      throw new CardinalityException();
+    if (offset < 0) {
+      throw new IndexException(offset, size);
     }
-    if (offset < 0 || offset + length > size) {
-      throw new IndexException();
+    if (offset + length > size) {
+      throw new IndexException(offset + length, size);
     }
     return new VectorView(this, offset, length);
   }
@@ -123,8 +108,8 @@ public abstract class AbstractVector implements Vector {
   }
 
   public double dot(Vector x) {
-    if (size() != x.size()) {
-      throw new CardinalityException(size(), x.size());
+    if (size != x.size()) {
+      throw new CardinalityException(size, x.size());
     }
     if (this == x) {
       return dotSelf();
@@ -140,52 +125,48 @@ public abstract class AbstractVector implements Vector {
   
   public double dotSelf() {
     double result = 0.0;
-    if (this instanceof DenseVector) {
-      for (int i = 0; i < size(); i++) {
-        double value = this.getQuick(i);
-        result += value * value;
-      }
-      return result;
-    } else {
-      Iterator<Element> iter = iterateNonZero();
-      while (iter.hasNext()) {
-        double value = iter.next().get();
-        result += value * value;
-      }
-      return result;
+    Iterator<Element> iter = iterateNonZero();
+    while (iter.hasNext()) {
+      double value = iter.next().get();
+      result += value * value;
     }
+    return result;
   }
 
   public double get(int index) {
-    if (index >= 0 && index < size()) {
-      return getQuick(index);
-    } else {
-      throw new IndexException();
+    if (index < 0 || index >= size) {
+      throw new IndexException(index, size);
     }
+    return getQuick(index);
   }
 
-  public Vector minus(Vector x) {
-    if (size() != x.size()) {
-      throw new CardinalityException();
-    }
-    if (x instanceof RandomAccessSparseVector || x instanceof DenseVector) {
-      // TODO: if both are RandomAccess check the numNonDefault to determine which to iterate
-      Vector result = x.clone();
-      Iterator<Element> iter = iterateNonZero();
-      while (iter.hasNext()) {
-        Element e = iter.next();
-        result.setQuick(e.index(), e.get() - result.getQuick(e.index()));
+  public Element getElement(final int index) {
+    return new Element() {
+      public double get() {
+        return AbstractVector.this.get(index);
       }
-      return result;
-    } else { // TODO: check the numNonDefault elements to further optimize 
-      Vector result = clone();
-      Iterator<Element> iter = x.iterateNonZero();
-      while (iter.hasNext()) {
-        Element e = iter.next();
-        result.setQuick(e.index(), getQuick(e.index()) - e.get());
+      public int index() {
+        return index;
       }
-      return result;
+      public void set(double value) {
+        AbstractVector.this.set(index, value);
+      }
+    };
+  }
+
+  public Vector minus(Vector that) {
+    if (size != that.size()) {
+      throw new CardinalityException(size, that.size());
     }
+    // TODO: check the numNonDefault elements to further optimize
+    Vector result = this.clone();
+    Iterator<Element> iter = that.iterateNonZero();
+    while (iter.hasNext()) {
+      Element thatElement = iter.next();
+      int index = thatElement.index();
+      result.setQuick(index, this.getQuick(index) - thatElement.get());
+    }
+    return result;
   }
 
   public Vector normalize() {
@@ -244,8 +225,8 @@ public abstract class AbstractVector implements Vector {
   }
 
   public double getDistanceSquared(Vector v) {
-    if(v.size() != size()) {
-      throw new CardinalityException();
+    if (size != v.size()) {
+      throw new CardinalityException(size, v.size());
     }
     // if this and v has a cached lengthSquared, dot product is quickest way to compute this.
     if(lengthSquared >= 0 && v instanceof AbstractVector && ((AbstractVector)v).lengthSquared >= 0) {
@@ -281,7 +262,7 @@ public abstract class AbstractVector implements Vector {
       Element element = iter.next();
       result = Math.max(result, element.get());
     }
-    if (nonZeroElements < size()) {
+    if (nonZeroElements < size) {
       return Math.max(result, 0.0);
     }
     return result;
@@ -303,12 +284,9 @@ public abstract class AbstractVector implements Vector {
     }
     // if the maxElement is negative and the vector is sparse then any
     // unfilled element(0.0) could be the maxValue hence return -1;
-    if (nonZeroElements < size() && max < 0.0) {
-      iter = this.iterateAll();
-      while (iter.hasNext()) {
-        Element element = iter.next();
-        double tmp = element.get();
-        if (tmp == 0.0) {
+    if (nonZeroElements < size && max < 0.0) {
+      for (Element element : this) {
+        if (element.get() == 0.0) {
           return element.index();
         }
       }
@@ -329,8 +307,8 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector plus(Vector x) {
-    if (size() != x.size()) {
-      throw new CardinalityException();
+    if (size != x.size()) {
+      throw new CardinalityException(size, x.size());
     }
     //TODO: get smarter about this, if we are adding a dense to a sparse, then we should return a dense
     Vector result = clone();
@@ -353,11 +331,10 @@ public abstract class AbstractVector implements Vector {
   }
 
   public void set(int index, double value) {
-    if (index >= 0 && index < size()) {
-      setQuick(index, value);
-    } else {
-      throw new IndexException(index, size());
+    if (index < 0 || index >= size) {
+      throw new IndexException(index, size);
     }
+    setQuick(index, value);
   }
 
   public Vector times(double x) {
@@ -378,8 +355,8 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector times(Vector x) {
-    if (size() != x.size()) {
-      throw new CardinalityException();
+    if (size != x.size()) {
+      throw new CardinalityException(size, x.size());
     }
     Vector result = clone();
     Iterator<Element> iter = result.iterateNonZero();
@@ -402,7 +379,6 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector assign(double value) {
-    int size = size();
     for (int i = 0; i < size; i++) {
       setQuick(i, value);
     }
@@ -410,10 +386,9 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector assign(double[] values) {
-    if (values.length != size()) {
-      throw new CardinalityException();
+    if (size != values.length) {
+      throw new CardinalityException(size, values.length);
     }
-    int size = size();
     for (int i = 0; i < size; i++) {
       setQuick(i, values[i]);
     }
@@ -421,10 +396,9 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector assign(Vector other) {
-    if (other.size() != size()) {
-      throw new CardinalityException();
+    if (size != other.size()) {
+      throw new CardinalityException(size, other.size());
     }
-    int size = size();
     for (int i = 0; i < size; i++) {
       setQuick(i, other.getQuick(i));
     }
@@ -436,7 +410,7 @@ public abstract class AbstractVector implements Vector {
     if(f.apply(0, y) == 0) {
       it = iterateNonZero();
     } else {
-      it = iterateAll();
+      it = iterator();
     }
     while(it.hasNext()) {
       Element e = it.next();
@@ -450,7 +424,7 @@ public abstract class AbstractVector implements Vector {
     if(function.apply(0) == 0) {
       it = iterateNonZero();
     } else {
-      it = iterateAll();
+      it = iterator();
     }
     while(it.hasNext()) {
       Element e = it.next();
@@ -460,18 +434,18 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector assign(Vector other, BinaryFunction function) {
-    if (other.size() != size()) {
-      throw new CardinalityException();
+    if (size != other.size()) {
+      throw new CardinalityException(size, other.size());
     }
-    for (int i = 0; i < size(); i++) {
+    for (int i = 0; i < size; i++) {
       setQuick(i, function.apply(getQuick(i), other.getQuick(i)));
     }
     return this;
   }
 
   public Matrix cross(Vector other) {
-    Matrix result = matrixLike(size(), other.size());
-    for (int row = 0; row < size(); row++) {
+    Matrix result = matrixLike(size, other.size());
+    for (int row = 0; row < size; row++) {
       result.assignRow(row, other.times(getQuick(row)));
     }
     return result;
@@ -493,15 +467,7 @@ public abstract class AbstractVector implements Vector {
     return gson.fromJson(formattedString, vectorType);
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public int size() {
+  public final int size() {
     return size;  
   }
 
@@ -514,87 +480,61 @@ public abstract class AbstractVector implements Vector {
     return gson.toJson(this, vectorType);
   }
 
-  /**
-   * Compare whether two Vector implementations have the same elements, regardless of the implementation and name. Two
-   * Vectors are equivalent if they have the same cardinality and all of their values are the same. <p/> Does not
-   * compare {@link Vector#getName()}.
-   *
-   * @param left  The left hand Vector to compare
-   * @param right The right hand Vector
-   * @return true if the two Vectors have the same cardinality and the same values
-   * @see #strictEquivalence(Vector, Vector)
-   * @see Vector#equals(Object)
-   */
-  public static boolean equivalent(Vector left, Vector right) {
-    if (left == right) {
-      return true;
+  @Override
+  public int hashCode() {
+    int result = size;
+    Iterator<Element> iter = iterateNonZero();
+    while (iter.hasNext()) {
+      Element ele = iter.next();
+      long v = Double.doubleToLongBits(ele.get());
+      result += ele.index() * (int) (v ^ (v >>> 32));
     }
-    int leftCardinality = left.size();
-    if (leftCardinality == right.size()) {
-      for (int i = 0; i < leftCardinality; i++) {
-        if (left.getQuick(i) != right.getQuick(i)) {
-          return false;
-        }
-
-      }
-    } else {
-      return false;
-    }
-    return true;
-  }
+    return result;
+   }
 
   /**
-   * Compare whether two Vector implementations are the same, including the underlying implementation. Two Vectors are
-   * the same if they have the same cardinality, same name and all of their values are the same.
-   *
-   * @param left  The left hand Vector to compare
-   * @param right The right hand Vector
-   * @return true if the two Vectors have the same cardinality and the same values
+   * Determines whether this {@link Vector} represents the same logical vector as another
+   * object. Two {@link Vector}s are equal (regardless of implementation) if the value at
+   * each index is the same, and the cardinalities are the same.
    */
-  public static boolean strictEquivalence(Vector left, Vector right) {
-    if (left == right) {
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (!(left.getClass().equals(right.getClass()))) {
+    if (!(o instanceof Vector)) {
       return false;
     }
-    String leftName = left.getName();
-    String rightName = right.getName();
-    if (leftName != null && rightName != null && !leftName.equals(rightName)) {
-      return false;
-    } else if ((leftName != null && rightName == null)
-        || (rightName != null && leftName == null)) {
+    Vector that = (Vector) o;
+    if (size != that.size()) {
       return false;
     }
-
-    int leftCardinality = left.size();
-    if (leftCardinality == right.size()) {
-      for (int i = 0; i < leftCardinality; i++) {
-        if (left.getQuick(i) != right.getQuick(i)) {
-          return false;
-        }
-
+    for (int index = 0; index < size; index++) {
+      if (getQuick(index) != that.getQuick(index)) {
+        return false;
       }
-    } else {
-      return false;
     }
     return true;
   }
 
   @Override
-  public int hashCode() {
-    int prime = 31;
-    int result = prime + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + size();
-    Iterator<Element> iter = iterateNonZero();
-    while (iter.hasNext()) {
-      Element ele = iter.next();
-      long v = Double.doubleToLongBits(ele.get());
-      result += (ele.index() * (int)(v^(v>>32)));
+  public String toString() {
+    StringBuilder result = new StringBuilder();
+    result.append('{');
+    for (int index = 0; index < size; index++) {
+      double value = getQuick(index);
+      if (value != 0.0) {
+        result.append(index);
+        result.append(':');
+        result.append(value);
+        result.append(',');
+      }
     }
-    return result;
-   }
-
+    if (result.length() > 1) {
+      result.setCharAt(result.length() - 1, '}');
+    }
+    return result.toString();
+  }
 
   public double get(String label) throws IndexException, UnboundLabelException {
     if (bindings == null) {

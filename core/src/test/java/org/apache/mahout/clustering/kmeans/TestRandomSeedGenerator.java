@@ -42,11 +42,10 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
   
   private FileSystem fs;
   
-  private static List<VectorWritable> getPoints(double[][] raw) {
+  private static List<VectorWritable> getPoints() {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    int i = 0;
     for (double[] fr : raw) {
-      Vector vec = new RandomAccessSparseVector(String.valueOf(i++), fr.length);
+      Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
     }
@@ -76,7 +75,7 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
   
   /** Story: test random seed generation generates 4 clusters with proper ids and data */
   public void testRandomSeedGenerator() throws Exception {
-    List<VectorWritable> points = getPoints(raw);
+    List<VectorWritable> points = getPoints();
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();

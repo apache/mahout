@@ -99,7 +99,6 @@ public class TestMapReduce extends MahoutTestCase {
     LDAState state = generateRandomState(100,NUM_TOPICS);
     LDAMapper mapper = new LDAMapper();
     mapper.configure(state);
-    VectorWritable vw = new VectorWritable();
     for(int i = 0; i < NUM_TESTS; ++i) {
       RandomAccessSparseVector v = generateRandomDoc(100,0.3);
       int myNumWords = numNonZero(v);
@@ -108,7 +107,7 @@ public class TestMapReduce extends MahoutTestCase {
       mock.write(isA(IntPairWritable.class),isA(DoubleWritable.class));
       expectLastCall().times(myNumWords * NUM_TOPICS + NUM_TOPICS + 1);
       replay(mock);
-      vw.set(v);
+      VectorWritable vw = new VectorWritable(v);
       mapper.map(new Text("tstMapper"), vw, mock);
       verify(mock);
     }

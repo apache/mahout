@@ -91,8 +91,9 @@ public class CDCrossoverTest extends MahoutTestCase {
       int nbattributes = rng.nextInt(maxattributes) + 3;
       int crosspnts = rng.nextInt(maxcrosspnts) + 1;
       // in the case of this test crosspnts should be < nbattributes
-      if (crosspnts >= nbattributes)
+      if (crosspnts >= nbattributes) {
         crosspnts = nbattributes - 1;
+      }
 
       // prepare dataset mock
       EasyMock.reset(dataset);
@@ -125,16 +126,6 @@ public class CDCrossoverTest extends MahoutTestCase {
       EasyMock.verify(dataset);
     }
 
-  }
-
-  static String printRule(CDRule rule) {
-    StringBuilder buffer = new StringBuilder();
-
-    for (int index = 0; index < rule.getNbConditions(); index++) {
-      buffer.append(rule.getO(index) ? 1 : 0);
-    }
-
-    return buffer.toString();
   }
 
   static int countAreas(CDRule rule) {

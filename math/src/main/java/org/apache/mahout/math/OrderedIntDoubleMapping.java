@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 final class OrderedIntDoubleMapping implements Serializable, Cloneable {
 
-  private static final double DEFAULT_VALUE = 0.0;
+  static final double DEFAULT_VALUE = 0.0;
 
   private int[] indices;
   private double[] values;

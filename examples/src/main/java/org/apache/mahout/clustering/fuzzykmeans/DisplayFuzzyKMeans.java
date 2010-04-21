@@ -28,14 +28,12 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayFuzzyKMeans extends DisplayDirichlet {
-  private static final double t1 = 3.0;
-  
-  private static final double t2 = 1.5;
-  
+
   private static List<List<SoftCluster>> clusters;
   
   DisplayFuzzyKMeans() {
@@ -64,9 +62,10 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : sampleData)
-      points.add(sample.get());
+    List<NamedVector> points = new ArrayList<NamedVector>();
+    for (VectorWritable sample : sampleData) {
+      points.add((NamedVector) sample.get());
+    }
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     List<SoftCluster> initialClusters = new ArrayList<SoftCluster>();
     
@@ -75,7 +74,9 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     for (Vector point : points) {
       if (initialClusters.size() < Math.min(k, points.size())) {
         initialClusters.add(new SoftCluster(point, i++));
-      } else break;
+      } else {
+        break;
+      }
     }
     clusters = FuzzyKMeansClusterer.clusterPoints(points, initialClusters, measure, 0.001, 3, 10);
     new DisplayFuzzyKMeans();

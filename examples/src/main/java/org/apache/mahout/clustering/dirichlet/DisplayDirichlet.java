@@ -34,6 +34,7 @@ import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -214,8 +215,10 @@ public class DisplayDirichlet extends Frame {
     sampleParams.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
     for (int i = 0; i < num; i++) {
-      sampleData.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
-                                                                      UncommonDistributions.rNorm(my, sd)})));
+      sampleData.add(new VectorWritable(
+          new NamedVector(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
+                                                        UncommonDistributions.rNorm(my, sd)}),
+                          String.valueOf(i))));
     }
   }
   

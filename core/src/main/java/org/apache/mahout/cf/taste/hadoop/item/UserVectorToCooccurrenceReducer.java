@@ -31,9 +31,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public final class UserVectorToCooccurrenceReducer extends MapReduceBase implements
     Reducer<IntWritable,IntWritable,IntWritable,VectorWritable> {
-  
-  private final VectorWritable vectorWritable = new VectorWritable();
-  
+
   @Override
   public void reduce(IntWritable index1,
                      Iterator<IntWritable> index2s,
@@ -52,8 +50,8 @@ public final class UserVectorToCooccurrenceReducer extends MapReduceBase impleme
           element.set(0.0);
         }
       }
-      vectorWritable.set(cooccurrenceRow);
-      output.collect(index1, vectorWritable);
+      VectorWritable writable = new VectorWritable(cooccurrenceRow);
+      output.collect(index1, writable);
     }
   }
   

@@ -29,22 +29,7 @@ import java.util.Map;
  * constructor that takes an int for cardinality and a no-arg constructor that can be used for marshalling the Writable
  * instance <p/> NOTE: Implementations may choose to reuse the Vector.Element in the Iterable methods
  */
-public interface Vector extends Cloneable {
-
-  /**
-   * Vectors may have a name associated with them, which makes them easy to identify
-   *
-   * @return The name, or null if one has not been set
-   */
-  String getName();
-
-  /**
-   * Set a name for this vector.  Need not be unique in a set of Vectors, but probably is more useful if it is. In other
-   * words, Mahout does not check for uniqueness.
-   *
-   * @param name The name
-   */
-  void setName(String name);
+public interface Vector extends Cloneable, Iterable<Vector.Element> {
 
   /** @return a formatted String suitable for output */
   String asFormatString();
@@ -67,7 +52,7 @@ public interface Vector extends Cloneable {
   Vector assign(double[] values);
 
   /**
-   * Assign the other matrix values to the receiver
+   * Assign the other vector values to the receiver
    *
    * @param other a Vector
    * @return the modified receiver
@@ -122,7 +107,7 @@ public interface Vector extends Cloneable {
    *
    * @return An {@link Iterator} over all elements
    */
-  Iterator<Element> iterateAll();
+  Iterator<Element> iterator();
 
   /**
    * Iterates over all non-zero elements. <p/> NOTE: Implementations may choose to reuse the Element returned for
@@ -175,7 +160,7 @@ public interface Vector extends Cloneable {
   }
 
   /**
-   * Return a new matrix containing the values of the recipient divided by the argument
+   * Return a new vector containing the values of the recipient divided by the argument
    *
    * @param x a double value
    * @return a new Vector
@@ -209,14 +194,14 @@ public interface Vector extends Cloneable {
   double getQuick(int index);
 
   /**
-   * Return an empty matrix of the same underlying class as the receiver
+   * Return an empty vector of the same underlying class as the receiver
    *
    * @return a Vector
    */
   Vector like();
 
   /**
-   * Return an empty matrix of the same underlying class as the receiver and of the given cardinality
+   * Return an empty vector of the same underlying class as the receiver and of the given cardinality
    *
    * @param cardinality an int specifying the desired cardinality
    * @return a Vector
@@ -224,7 +209,7 @@ public interface Vector extends Cloneable {
   Vector like(int cardinality);
 
   /**
-   * Return a new matrix containing the element by element difference of the recipient and the argument
+   * Return a new vector containing the element by element difference of the recipient and the argument
    *
    * @param x a Vector
    * @return a new Vector
@@ -233,7 +218,7 @@ public interface Vector extends Cloneable {
   Vector minus(Vector x);
 
   /**
-   * Return a new matrix containing the normalized (L_2 norm) values of the recipient
+   * Return a new vector containing the normalized (L_2 norm) values of the recipient
    *
    * @return a new Vector
    */
@@ -269,7 +254,7 @@ public interface Vector extends Cloneable {
   int maxValueIndex();
 
   /**
-   * Return a new matrix containing the sum of each value of the recipient and the argument
+   * Return a new vector containing the sum of each value of the recipient and the argument
    *
    * @param x a double
    * @return a new Vector
@@ -277,7 +262,7 @@ public interface Vector extends Cloneable {
   Vector plus(double x);
 
   /**
-   * Return a new matrix containing the element by element sum of the recipient and the argument
+   * Return a new vector containing the element by element sum of the recipient and the argument
    *
    * @param x a Vector
    * @return a new Vector
@@ -335,7 +320,7 @@ public interface Vector extends Cloneable {
   int getNumNondefaultElements();
 
   /**
-   * Return a new matrix containing the product of each value of the recipient and the argument
+   * Return a new vector containing the product of each value of the recipient and the argument
    *
    * @param x a double argument
    * @return a new Vector
@@ -343,7 +328,7 @@ public interface Vector extends Cloneable {
   Vector times(double x);
 
   /**
-   * Return a new matrix containing the element-wise product of the recipient and the argument
+   * Return a new vector containing the element-wise product of the recipient and the argument
    *
    * @param x a Vector argument
    * @return a new Vector
@@ -352,7 +337,7 @@ public interface Vector extends Cloneable {
   Vector times(Vector x);
 
   /**
-   * Return a new matrix containing the subset of the recipient
+   * Return a new vector containing the subset of the recipient
    *
    * @param offset an int offset into the receiver
    * @param length the cardinality of the desired result

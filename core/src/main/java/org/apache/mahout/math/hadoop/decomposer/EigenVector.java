@@ -29,9 +29,11 @@ public class EigenVector extends DenseVector {
   private static final Pattern EQUAL_PATTERN = Pattern.compile(" = ");
   private static final Pattern PIPE_PATTERN = Pattern.compile("|");
 
+  private final String name;
+
   public EigenVector(DenseVector v, double eigenValue, double cosAngleError, int order) {
     super(v, false);
-    setName("e|" + order +"| = |"+eigenValue+"|, err = "+cosAngleError);
+    name = "e|" + order + "| = |" + eigenValue + "|, err = " + cosAngleError;
   }
 
   public double getEigenValue() {
@@ -48,7 +50,7 @@ public class EigenVector extends DenseVector {
 
   protected double[] parseMetaData() {
     double[] m = new double[3];
-    String[] s = EQUAL_PATTERN.split(getName());
+    String[] s = EQUAL_PATTERN.split(name);
     m[0] = Double.parseDouble(PIPE_PATTERN.split(s[0])[1]);
     m[1] = Double.parseDouble(PIPE_PATTERN.split(s[1])[1]);
     m[2] = Double.parseDouble(s[2].substring(1));

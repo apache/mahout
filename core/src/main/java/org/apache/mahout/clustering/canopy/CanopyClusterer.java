@@ -169,12 +169,11 @@ public class CanopyClusterer {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
-    VectorWritable vw = new VectorWritable();
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
         isCovered = true;
-        vw.set(point);
+        VectorWritable vw = new VectorWritable(point);
         collector.collect(new Text(canopy.getIdentifier()), vw);
         reporter.setStatus("Emit Canopy ID:" + canopy.getIdentifier());
       } else if (dist < minDist) {
@@ -184,8 +183,8 @@ public class CanopyClusterer {
     }
     // if the point is not contained in any canopies (due to canopy centroid
     // clustering), emit the point to the closest covering canopy.
-    vw.set(point);
     if (!isCovered) {
+      VectorWritable vw = new VectorWritable(point);
       collector.collect(new Text(closest.getIdentifier()), vw);
       reporter.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
     }

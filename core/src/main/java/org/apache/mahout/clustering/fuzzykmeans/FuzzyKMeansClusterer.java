@@ -25,6 +25,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 
 public class FuzzyKMeansClusterer {
@@ -123,7 +124,7 @@ public class FuzzyKMeansClusterer {
    *          the OutputCollector to emit into
    */
   public void outputPointWithClusterProbabilities(String key,
-                                                  Vector point,
+                                                  NamedVector point,
                                                   List<SoftCluster> clusters,
                                                   OutputCollector<Text,FuzzyKMeansOutput> output) throws IOException {
     
@@ -137,8 +138,7 @@ public class FuzzyKMeansClusterer {
       double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
       fOutput.add(i, clusters.get(i), probWeight);
     }
-    String name = point.getName();
-    output.collect(new Text((name != null) && (name.length() != 0) ? name : point.asFormatString()), fOutput);
+    output.collect(new Text(point.getName()), fOutput);
   }
   
   /** Computes the probability of a point belonging to a cluster */
@@ -188,7 +188,7 @@ public class FuzzyKMeansClusterer {
    * @param numIter
    *          the maximum number of iterations
    */
-  public static List<List<SoftCluster>> clusterPoints(List<Vector> points,
+  public static List<List<SoftCluster>> clusterPoints(List<NamedVector> points,
                                                       List<SoftCluster> clusters,
                                                       DistanceMeasure measure,
                                                       double threshold,
@@ -221,7 +221,7 @@ public class FuzzyKMeansClusterer {
    *          the List<Cluster> clusters
    * @return
    */
-  public static boolean runFuzzyKMeansIteration(List<Vector> points,
+  public static boolean runFuzzyKMeansIteration(List<NamedVector> points,
                                                 List<SoftCluster> clusterList,
                                                 FuzzyKMeansClusterer clusterer) {
     // for each

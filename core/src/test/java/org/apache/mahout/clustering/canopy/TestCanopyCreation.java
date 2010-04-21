@@ -62,22 +62,20 @@ public class TestCanopyCreation extends MahoutTestCase {
   
   private FileSystem fs;
   
-  private static List<VectorWritable> getPointsWritable(double[][] raw) {
+  private static List<VectorWritable> getPointsWritable() {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    int i = 0;
     for (double[] fr : raw) {
-      Vector vec = new RandomAccessSparseVector(String.valueOf(i++), fr.length);
+      Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
     }
     return points;
   }
   
-  private static List<Vector> getPoints(double[][] raw) {
+  private static List<Vector> getPoints() {
     List<Vector> points = new ArrayList<Vector>();
-    int i = 0;
     for (double[] fr : raw) {
-      Vector vec = new RandomAccessSparseVector(String.valueOf(i++), fr.length);
+      Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(vec);
     }
@@ -145,9 +143,9 @@ public class TestCanopyCreation extends MahoutTestCase {
     fs = FileSystem.get(conf);
     rmr("output");
     rmr("testdata");
-    referenceManhattan = CanopyClusterer.createCanopies(getPoints(raw), manhattanDistanceMeasure, 3.1, 2.1);
+    referenceManhattan = CanopyClusterer.createCanopies(getPoints(), manhattanDistanceMeasure, 3.1, 2.1);
     manhattanCentroids = CanopyClusterer.calculateCentroids(referenceManhattan);
-    referenceEuclidean = CanopyClusterer.createCanopies(getPoints(raw), euclideanDistanceMeasure, 3.1, 2.1);
+    referenceEuclidean = CanopyClusterer.createCanopies(getPoints(), euclideanDistanceMeasure, 3.1, 2.1);
     euclideanCentroids = CanopyClusterer.calculateCentroids(referenceEuclidean);
   }
   
@@ -193,7 +191,7 @@ public class TestCanopyCreation extends MahoutTestCase {
   
   /** Story: User can cluster points without instantiating them all in memory at once */
   public void testIterativeManhattan() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<Vector> points = getPoints();
     List<Canopy> canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), 3.1, 2.1);
     System.out.println("testIterativeManhattan");
     printCanopies(canopies);
@@ -202,7 +200,7 @@ public class TestCanopyCreation extends MahoutTestCase {
   
   /** Story: User can cluster points without instantiating them all in memory at once */
   public void testIterativeEuclidean() throws Exception {
-    List<Vector> points = getPoints(raw);
+    List<Vector> points = getPoints();
     List<Canopy> canopies = CanopyClusterer.createCanopies(points, new EuclideanDistanceMeasure(), 3.1, 2.1);
     
     System.out.println("testIterativeEuclidean");
@@ -224,7 +222,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     mapper.configure(conf);
     
     DummyOutputCollector<Text,VectorWritable> collector = new DummyOutputCollector<Text,VectorWritable>();
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
@@ -254,7 +252,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     mapper.configure(conf);
     
     DummyOutputCollector<Text,VectorWritable> collector = new DummyOutputCollector<Text,VectorWritable>();
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
@@ -284,7 +282,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     reducer.configure(conf);
     
     DummyOutputCollector<Text,Canopy> collector = new DummyOutputCollector<Text,Canopy>();
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points.iterator(), collector, new DummyReporter());
     reducer.close();
     Set<String> keys = collector.getKeys();
@@ -313,7 +311,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     reducer.configure(conf);
     
     DummyOutputCollector<Text,Canopy> collector = new DummyOutputCollector<Text,Canopy>();
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points.iterator(), collector, new DummyReporter());
     reducer.close();
     Set<String> keys = collector.getKeys();
@@ -333,7 +331,7 @@ public class TestCanopyCreation extends MahoutTestCase {
    * ManhattanDistanceMeasure.
    */
   public void testCanopyGenManhattanMR() throws Exception {
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -370,7 +368,7 @@ public class TestCanopyCreation extends MahoutTestCase {
    * EuclideanDistanceMeasure.
    */
   public void testCanopyGenEuclideanMR() throws Exception {
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -416,7 +414,7 @@ public class TestCanopyCreation extends MahoutTestCase {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
@@ -459,7 +457,7 @@ public class TestCanopyCreation extends MahoutTestCase {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
@@ -493,7 +491,7 @@ public class TestCanopyCreation extends MahoutTestCase {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
@@ -538,7 +536,7 @@ public class TestCanopyCreation extends MahoutTestCase {
       canopies.add(new Canopy(centroid, nextCanopyId++));
     }
     mapper.config(canopies);
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     // map the data
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
@@ -571,7 +569,7 @@ public class TestCanopyCreation extends MahoutTestCase {
    * ManhattanDistanceMeasure.
    */
   public void testClusteringManhattanMR() throws Exception {
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -605,7 +603,7 @@ public class TestCanopyCreation extends MahoutTestCase {
    * EuclideanDistanceMeasure.
    */
   public void testClusteringEuclideanMR() throws Exception {
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();
@@ -636,7 +634,7 @@ public class TestCanopyCreation extends MahoutTestCase {
   
   /** Story: Clustering algorithm must support arbitrary user defined distance measure */
   public void testUserDefinedDistanceMeasure() throws Exception {
-    List<VectorWritable> points = getPointsWritable(raw);
+    List<VectorWritable> points = getPointsWritable();
     File testData = new File("testdata");
     if (!testData.exists()) {
       testData.mkdir();

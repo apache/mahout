@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /** A few universal implementations of convenience functions */
 public abstract class AbstractMatrix implements Matrix {
@@ -42,7 +43,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   public Iterator<MatrixSlice> iterateAll() {
     return new Iterator<MatrixSlice>() {
-      int slice = 0;
+      private int slice = 0;
 
       public boolean hasNext() {
         return slice < numSlices();
@@ -203,11 +204,11 @@ public abstract class AbstractMatrix implements Matrix {
   public Matrix assign(double[][] values) {
     int[] c = size();
     if (c[ROW] != values.length) {
-      throw new CardinalityException();
+      throw new CardinalityException(c[ROW], values.length);
     }
     for (int row = 0; row < c[ROW]; row++) {
       if (c[COL] != values[row].length) {
-        throw new CardinalityException();
+        throw new CardinalityException(c[COL], values[row].length);
       } else {
         for (int col = 0; col < c[COL]; col++) {
           setQuick(row, col, values[row][col]);
@@ -220,8 +221,11 @@ public abstract class AbstractMatrix implements Matrix {
   public Matrix assign(Matrix other, BinaryFunction function) {
     int[] c = size();
     int[] o = other.size();
-    if (c[ROW] != o[ROW] || c[COL] != o[COL]) {
-      throw new CardinalityException();
+    if (c[ROW] != o[ROW]) {
+      throw new CardinalityException(c[ROW], o[ROW]);
+    }
+    if (c[COL] != o[COL]) {
+      throw new CardinalityException(c[COL], o[COL]);
     }
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
@@ -235,8 +239,11 @@ public abstract class AbstractMatrix implements Matrix {
   public Matrix assign(Matrix other) {
     int[] c = size();
     int[] o = other.size();
-    if (c[ROW] != o[ROW] || c[COL] != o[COL]) {
-      throw new CardinalityException();
+    if (c[ROW] != o[ROW]) {
+      throw new CardinalityException(c[ROW], o[ROW]);
+    }
+    if (c[COL] != o[COL]) {
+      throw new CardinalityException(c[COL], o[COL]);
     }
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
@@ -261,7 +268,7 @@ public abstract class AbstractMatrix implements Matrix {
     int rowSize = card[ROW];
     int columnSize = card[COL];
     if (rowSize != columnSize) {
-      throw new CardinalityException();
+      throw new CardinalityException(rowSize, columnSize);
     }
 
     if (rowSize == 2) {
@@ -322,8 +329,11 @@ public abstract class AbstractMatrix implements Matrix {
 
   public double get(int row, int column) {
     int[] c = size();
-    if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL]) {
-      throw new IndexException();
+    if (row < 0 || row >= c[ROW]) {
+      throw new IndexException(row, c[ROW]);
+    }
+    if (column < 0 || column >= c[COL]) {
+      throw new IndexException(column, c[COL]);
     }
     return getQuick(row, column);
   }
@@ -331,8 +341,11 @@ public abstract class AbstractMatrix implements Matrix {
   public Matrix minus(Matrix other) {
     int[] c = size();
     int[] o = other.size();
-    if (c[ROW] != o[ROW] || c[COL] != o[COL]) {
-      throw new CardinalityException();
+    if (c[ROW] != o[ROW]) {
+      throw new CardinalityException(c[ROW], o[ROW]);
+    }
+    if (c[COL] != o[COL]) {
+      throw new CardinalityException(c[COL], o[COL]);
     }
     Matrix result = clone();
     for (int row = 0; row < c[ROW]; row++) {
@@ -358,8 +371,11 @@ public abstract class AbstractMatrix implements Matrix {
   public Matrix plus(Matrix other) {
     int[] c = size();
     int[] o = other.size();
-    if (c[ROW] != o[ROW] || c[COL] != o[COL]) {
-      throw new CardinalityException();
+    if (c[ROW] != o[ROW]) {
+      throw new CardinalityException(c[ROW], o[ROW]);
+    }
+    if (c[COL] != o[COL]) {
+      throw new CardinalityException(c[COL], o[COL]);
     }
     Matrix result = clone();
     for (int row = 0; row < c[ROW]; row++) {
@@ -373,8 +389,11 @@ public abstract class AbstractMatrix implements Matrix {
 
   public void set(int row, int column, double value) {
     int[] c = size();
-    if (row < 0 || column < 0 || row >= c[ROW] || column >= c[COL]) {
-      throw new IndexException();
+    if (row < 0 || row >= c[ROW]) {
+      throw new IndexException(row, c[ROW]);
+    }
+    if (column < 0 || column >= c[COL]) {
+      throw new IndexException(column, c[COL]);
     }
     setQuick(row, column, value);
   }
@@ -382,10 +401,10 @@ public abstract class AbstractMatrix implements Matrix {
   public void set(int row, double[] data) {
     int[] c = size();
     if (c[COL] < data.length) {
-      throw new CardinalityException();
+      throw new CardinalityException(c[COL], data.length);
     }
-    if ((c[ROW] < row) || (row < 0)) {
-      throw new IndexException();
+    if (row < 0 || row >= c[ROW]) {
+      throw new IndexException(row, c[ROW]);
     }
 
     for (int i = 0; i < c[COL]; i++) {
@@ -426,7 +445,7 @@ public abstract class AbstractMatrix implements Matrix {
   public Vector times(Vector v) {
     int[] c = size();
     if (c[COL] != v.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(c[COL], v.size());
     }
     Vector w = new DenseVector(c[ROW]);
     for (int i = 0; i < c[ROW]; i++) {
@@ -438,14 +457,15 @@ public abstract class AbstractMatrix implements Matrix {
   public Vector timesSquared(Vector v) {
     int[] c = size();
     if (c[COL] != v.size()) {
-      throw new CardinalityException();
+      throw new CardinalityException(c[COL], v.size());
     }
     Vector w = new DenseVector(c[COL]);
     for (int i = 0; i < c[ROW]; i++) {
       Vector xi = getRow(i);
       double d = xi.dot(v);
-      if(d != 0)
+      if (d != 0.0) {
         w.assign(xi, new PlusMult(d));
+      }
 
     }
     return w;
@@ -485,16 +505,16 @@ public abstract class AbstractMatrix implements Matrix {
     }
 
     protected TransposeViewVector(Matrix m, int offset, boolean rowToColumn) {
+      super(rowToColumn ? m.numRows() : m.numCols());
       matrix = m;
       this.transposeOffset = offset;
       this.rowToColumn = rowToColumn;
       numCols = rowToColumn ? m.numCols() : m.numRows();
-      size = rowToColumn ? m.numRows() : m.numCols();
     }
 
     @Override
     public Vector clone() {
-      Vector v = new DenseVector(size);
+      Vector v = new DenseVector(size());
       addTo(v);
       return v;
     }
@@ -504,14 +524,17 @@ public abstract class AbstractMatrix implements Matrix {
       return matrix.like(rows, columns);
     }
 
-    public Iterator<Element> iterateAll() {
+    public Iterator<Element> iterator() {
       return new Iterator<Element>() {
-        int i = 0;
+        private int i = 0;
         public boolean hasNext() {
-          return i < size;
+          return i < size();
         }
 
         public Element next() {
+          if (i >= size()) {
+            throw new NoSuchElementException();
+          }
           return getElement(i++);
         }
 
@@ -522,12 +545,12 @@ public abstract class AbstractMatrix implements Matrix {
     }
 
     /**
-     * Currently delegates to iterateAll.  TODO: This could be optimized to at least skip empty rows if there are
-     * many of them.
+     * Currently delegates to {@link #iterator()}.
+     * TODO: This could be optimized to at least skip empty rows if there are many of them.
      * @return an iterator (currently dense).
      */
     public Iterator<Element> iterateNonZero() {
-      return iterateAll();
+      return iterator();
     }
 
     public Element getElement(final int i) {
@@ -566,7 +589,7 @@ public abstract class AbstractMatrix implements Matrix {
     }
 
     public Vector like() {
-      return new DenseVector(size);
+      return new DenseVector(size());
     }
 
     public Vector like(int cardinality) {
@@ -579,7 +602,7 @@ public abstract class AbstractMatrix implements Matrix {
      * @return the number of nonzero entries
      */
     public int getNumNondefaultElements() {
-      return size;
+      return size();
     }
   }
 

@@ -22,52 +22,39 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.Writable;
-
-public class SequentialAccessSparseVectorWritable extends SequentialAccessSparseVector implements Writable {
+public class SequentialAccessSparseVectorWritable extends VectorWritable {
 
   public SequentialAccessSparseVectorWritable(SequentialAccessSparseVector vector) {
     super(vector);
   }
 
   public SequentialAccessSparseVectorWritable() {
-    
   }
 
   @Override
-  public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(getClass().getName());
-    dataOutput.writeUTF(getName() == null ? "" : getName());
-    dataOutput.writeInt(size());
-    int nde = getNumNondefaultElements();
-    dataOutput.writeInt(nde);
-    Iterator<Element> iter = iterateNonZero();
-    int count = 0;
+  public void write(DataOutput out) throws IOException {
+    SequentialAccessSparseVector sequentialVector = (SequentialAccessSparseVector) get();
+    out.writeInt(sequentialVector.size());
+    out.writeInt(sequentialVector.getNumNondefaultElements());
+    Iterator<Vector.Element> iter = sequentialVector.iterateNonZero();
     while (iter.hasNext()) {
-      Element element = iter.next();
-      dataOutput.writeInt(element.index());
-      dataOutput.writeDouble(element.get());
-      count++;
+      Vector.Element element = iter.next();
+      out.writeInt(element.index());
+      out.writeDouble(element.get());
     }
-    assert (nde == count);
   }
 
   @Override
-  public void readFields(DataInput dataInput) throws IOException {
-    String className = dataInput.readUTF();
-    if(className.equals(getClass().getName())) {
-      setName(dataInput.readUTF());
-    } else {
-      setName(className); // we have already read the class name in VectorWritable
+  public void readFields(DataInput in) throws IOException {
+    int size = in.readInt();
+    int numNonDefaultElements = in.readInt();
+    OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(numNonDefaultElements);
+    for (int i = 0; i < numNonDefaultElements; i++) {
+      int index = in.readInt();
+      double value = in.readDouble();
+      values.set(index, value);
     }
-    size = dataInput.readInt();
-    int nde = dataInput.readInt();
-    OrderedIntDoubleMapping values = new OrderedIntDoubleMapping(nde);
-    for (int i = 0; i < nde; i++) {
-      values.set(dataInput.readInt(), dataInput.readDouble());
-    }
-    this.values = values;
+    set(new SequentialAccessSparseVector(size, values));
   }
-
 
 }

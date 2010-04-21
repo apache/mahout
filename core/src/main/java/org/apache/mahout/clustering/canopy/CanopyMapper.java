@@ -59,8 +59,7 @@ public class CanopyMapper extends MapReduceBase implements
   public void close() throws IOException {
     for (Canopy canopy : canopies) {
       Vector centroid = canopy.computeCentroid();
-      VectorWritable vw = new VectorWritable();
-      vw.set(centroid);
+      VectorWritable vw = new VectorWritable(centroid);
       outputCollector.collect(new Text("centroid"), vw);
     }
     super.close();

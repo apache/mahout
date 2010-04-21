@@ -52,10 +52,6 @@ public class VectorHelper {
    */
   public static String vectorToString(Vector vector, String[] dictionary) {
     StringBuilder bldr = new StringBuilder(2048);
-    String name = vector.getName();
-    if (name != null && name.length() > 0) {
-      bldr.append("Name: ").append(name).append(' ');
-    }
     bldr.append("elts: {");
     Iterator<Vector.Element> iter = vector.iterateNonZero();
     boolean first = true;

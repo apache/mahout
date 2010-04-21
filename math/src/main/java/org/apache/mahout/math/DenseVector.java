@@ -27,14 +27,11 @@ import org.apache.mahout.math.function.PlusMult;
 /** Implements vector as an array of doubles */
 public class DenseVector extends AbstractVector {
 
-  protected double[] values;
+  private double[] values;
 
   /** For serialization purposes only */
   public DenseVector() {
-  }
-
-  public DenseVector(String name) {
-    super(name);
+    super(0);
   }
 
   /** Construct a new instance using provided values */
@@ -43,6 +40,7 @@ public class DenseVector extends AbstractVector {
   }
 
   public DenseVector(double[] values, boolean shallowCopy) {
+    super(values.length);
     this.values = shallowCopy ? values : values.clone();
   }
 
@@ -50,18 +48,9 @@ public class DenseVector extends AbstractVector {
     this(values.values, shallowCopy);
   }
 
-  public DenseVector(String name, double[] values) {
-    super(name);
-    this.values = values.clone();
-  }
-
   /** Construct a new instance of the given cardinality */
   public DenseVector(int cardinality) {
-    this(null, cardinality);
-  }
-
-  public DenseVector(String name, int cardinality) {
-    super(name);
+    super(cardinality);
     this.values = new double[cardinality];
   }
 
@@ -70,11 +59,11 @@ public class DenseVector extends AbstractVector {
    * @param vector
    */
   public DenseVector(Vector vector) {
-    super(vector.getName());
+    super(vector.size());
     values = new double[vector.size()];
-    Iterator<Vector.Element> it = vector.iterateNonZero();
-    while(it.hasNext()) {
-      Vector.Element e = it.next();
+    Iterator<Element> it = vector.iterateNonZero();
+    while (it.hasNext()) {
+      Element e = it.next();
       values[e.index()] = e.get();
     }
   }
@@ -85,15 +74,21 @@ public class DenseVector extends AbstractVector {
   }
 
   @Override
-  public int size() {
-    return values.length;
-  }
-
-  @Override
   public DenseVector clone() {
     DenseVector clone = (DenseVector) super.clone();
     clone.values = values.clone();
     return clone;
+  }
+
+  @Override
+  public double dotSelf() {
+    double result = 0.0;
+    int max = size();
+    for (int i = 0; i < max; i++) {
+      double value = this.getQuick(i);
+      result += value * value;
+    }
+    return result;
   }
 
   public double getQuick(int index) {
@@ -126,13 +121,13 @@ public class DenseVector extends AbstractVector {
   
   @Override
   public Vector assign(Vector other, BinaryFunction function) {
-    if (other.size() != size()) {
-      throw new CardinalityException();
+    if (size() != other.size()) {
+      throw new CardinalityException(size(), other.size());
     }
     // is there some other way to know if function.apply(0, x) = x for all x?
     if(function instanceof PlusMult) {
-      Iterator<Vector.Element> it = other.iterateNonZero();
-      Vector.Element e;
+      Iterator<Element> it = other.iterateNonZero();
+      Element e;
       while(it.hasNext() && (e = it.next()) != null) {
         values[e.index()] = function.apply(values[e.index()], e.get());
       }
@@ -151,151 +146,34 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public Vector viewPart(int offset, int length) {
-    if (length > values.length) {
-      throw new CardinalityException();
+    if (offset < 0) {
+      throw new IndexException(offset, size());
     }
-    if (offset < 0 || offset + length > values.length) {
-      throw new IndexException();
+    if (offset + length > size()) {
+      throw new IndexException(offset + length, size());
     }
     return new VectorView(this, offset, length);
   }
 
   /**
    * Returns an iterator that traverses this Vector from 0 to cardinality-1, in that order.
-   *
-   * @see Iterable#iterator
    */
-  public Iterator<Vector.Element> iterateNonZero() {
-    return new NonZeroIterator();
+  public Iterator<Element> iterateNonZero() {
+    return new NonDefaultIterator();
   }
 
-  public Iterator<Vector.Element> iterateAll() {
+  public Iterator<Element> iterator() {
     return new AllIterator();
   }
 
-  private class NonZeroIterator implements Iterator<Vector.Element> {
-
-    private final Element element = new Element(0);
-    private int offset;
-
-    private NonZeroIterator() {
-      goToNext();
-    }
-
-    private void goToNext() {
-      while (offset < values.length && values[offset] == 0) {
-        offset++;
-      }
-    }
-
-    public boolean hasNext() {
-      return offset < values.length;
-    }
-
-    public Vector.Element next() {
-      if (offset >= values.length) {
-        throw new NoSuchElementException();
-      }
-      element.ind = offset;
-      offset++;
-      goToNext();
-      return element;
-    }
-
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  private class AllIterator implements Iterator<Vector.Element> {
-
-    private final Element element = new Element(-1);
-
-    public boolean hasNext() {
-      return element.ind + 1 < values.length;
-    }
-
-    public Vector.Element next() {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-      element.ind++;
-      return element;
-    }
-
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  public class Element implements Vector.Element {
-
-    private int ind;
-
-    public Element(int ind) {
-      this.ind = ind;
-    }
-
-    public double get() {
-      return values[ind];
-    }
-
-    public int index() {
-      return ind;
-    }
-
-    public void set(double value) {
-      lengthSquared = -1.0;
-      values[ind] = value;
-    }
-  }
-
-  public Vector.Element getElement(int index) {
-    return new Element(index);
-  }
-
-  /**
-   * Indicate whether the two objects are the same or not. Two {@link org.apache.mahout.math.Vector}s can be equal
-   * even if the underlying implementation is not equal.
-   *
-   * @param o The object to compare
-   * @return true if the objects have the same cell values and same name, false otherwise.
-   * @see AbstractVector#strictEquivalence(Vector, Vector)
-   * @see AbstractVector#equivalent(Vector, Vector)
-   */
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    if (o instanceof DenseVector) {
+      // Speedup for DenseVectors
+      return Arrays.equals(values, ((DenseVector) o).values);
     }
-    if (!(o instanceof Vector)) {
-      return false;
-    }
-
-    Vector that = (Vector) o;
-    String thisName = getName();
-    String thatName = that.getName();
-    if (this.size() != that.size()) {
-      return false;
-    }
-    if (thisName != null && thatName != null && !thisName.equals(thatName)) {
-      return false;
-    } else if ((thisName != null && thatName == null)
-        || (thatName != null && thisName == null)) {
-      return false;
-    }
-
-    if (that instanceof DenseVector) {
-      if (!Arrays.equals(values, ((DenseVector) that).values)) {
-        return false;
-      }
-    } else {
-      return equivalent(this, that);
-    }
-
-    return true;
+    return super.equals(o);
   }
-
 
   @Override
   public double getLengthSquared() {
@@ -314,8 +192,8 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public void addTo(Vector v) {
-    if (v.size() != size()) {
-      throw new CardinalityException();
+    if (size() != v.size()) {
+      throw new CardinalityException(size(), v.size());
     }
     for (int i = 0; i < values.length; i++) {
       v.setQuick(i, values[i] + v.getQuick(i));
@@ -323,13 +201,13 @@ public class DenseVector extends AbstractVector {
   }
   
   public void addAll(Vector v) {
-    if (v.size() != size()) {
-      throw new CardinalityException();
+    if (size() != v.size()) {
+      throw new CardinalityException(size(), v.size());
     }
     
-    Iterator<org.apache.mahout.math.Vector.Element> iter = v.iterateNonZero();
+    Iterator<Element> iter = v.iterateNonZero();
     while (iter.hasNext()) {
-      org.apache.mahout.math.Vector.Element element = iter.next();
+      Element element = iter.next();
       values[element.index()] += element.get();
     }
   }
@@ -340,7 +218,9 @@ public class DenseVector extends AbstractVector {
     if (size() != x.size()) {
       throw new CardinalityException(size(), x.size());
     }
-    if(this == x) return dotSelf();
+    if (this == x) {
+      return dotSelf();
+    }
     
     double result = 0;
     if (x instanceof DenseVector) {
@@ -350,12 +230,93 @@ public class DenseVector extends AbstractVector {
       return result;
     } else {
       // Try to get the speed boost associated fast/normal seq access on x and quick lookup on this
-      Iterator<org.apache.mahout.math.Vector.Element> iter = x.iterateNonZero();
+      Iterator<Element> iter = x.iterateNonZero();
       while (iter.hasNext()) {
-        org.apache.mahout.math.Vector.Element element = iter.next();
+        Element element = iter.next();
         result += element.get() * this.values[element.index()];
       }
       return result;
     }
   }
+
+
+  private final class NonDefaultIterator implements Iterator<Element> {
+
+    private final DenseElement element = new DenseElement();
+    private int index = 0;
+
+    private NonDefaultIterator() {
+      goToNext();
+    }
+
+    private void goToNext() {
+      while (index < size() && values[index] == 0.0) {
+        index++;
+      }
+    }
+
+    public boolean hasNext() {
+      return index < size();
+    }
+
+    public Element next() {
+      if (index >= size()) {
+        throw new NoSuchElementException();
+      } else {
+        element.index = index;
+        index++;
+        goToNext();
+        return element;
+      }
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private final class AllIterator implements Iterator<Element> {
+
+    private final DenseElement element = new DenseElement();
+
+    private AllIterator() {
+      element.index = -1;
+    }
+
+    public boolean hasNext() {
+      return element.index+1 < size();
+    }
+
+    public Element next() {
+      if (element.index+1 >= size()) {
+        throw new NoSuchElementException();
+      } else {
+        element.index++;
+        return element;
+      }
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private final class DenseElement implements Element {
+
+    int index;
+
+    public double get() {
+      return values[index];
+    }
+
+    public int index() {
+      return index;
+    }
+
+    public void set(double value) {
+      lengthSquared = -1;
+      values[index] = value;
+    }
+  }
+
 }

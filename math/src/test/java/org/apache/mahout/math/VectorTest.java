@@ -23,10 +23,10 @@ import com.google.gson.reflect.TypeToken;
 import junit.framework.TestCase;
 import org.apache.mahout.math.function.Functions;
 
-import static org.apache.mahout.math.function.Functions.*;
-
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -37,16 +37,16 @@ public class VectorTest extends TestCase {
   }
 
   public void testSparseVector() throws Exception {
-    RandomAccessSparseVector vec1 = new RandomAccessSparseVector(3);
-    RandomAccessSparseVector vec2 = new RandomAccessSparseVector(3);
+    Vector vec1 = new RandomAccessSparseVector(3);
+    Vector vec2 = new RandomAccessSparseVector(3);
     doTestVectors(vec1, vec2);
   }
 
   public void testEquivalent() throws Exception {
     //names are not used for equivalent
-    RandomAccessSparseVector randomAccessLeft = new RandomAccessSparseVector("foo", 3);
-    SequentialAccessSparseVector sequentialAccessLeft = new SequentialAccessSparseVector("foo", 3);
-    DenseVector right = new DenseVector("foo", 3);
+    RandomAccessSparseVector randomAccessLeft = new RandomAccessSparseVector(3);
+    Vector sequentialAccessLeft = new SequentialAccessSparseVector(3);
+    Vector right = new DenseVector(3);
     randomAccessLeft.setQuick(0, 1);
     randomAccessLeft.setQuick(1, 2);
     randomAccessLeft.setQuick(2, 3);
@@ -56,50 +56,38 @@ public class VectorTest extends TestCase {
     right.setQuick(0, 1);
     right.setQuick(1, 2);
     right.setQuick(2, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, right));
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(sequentialAccessLeft, right));
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(sequentialAccessLeft, randomAccessLeft));
-    assertEquals("equals didn't work", randomAccessLeft, right);
-    assertEquals("equals didn't work", sequentialAccessLeft, right);
-    assertEquals("equals didn't work", sequentialAccessLeft, randomAccessLeft);
-    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, right));
-    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, sequentialAccessLeft));
-    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(sequentialAccessLeft, right));
+    assertEquals(randomAccessLeft, right);
+    assertEquals(sequentialAccessLeft, right);
+    assertEquals(sequentialAccessLeft, randomAccessLeft);
 
-    DenseVector leftBar = new DenseVector("bar", 3);
+    Vector leftBar = new DenseVector(3);
     leftBar.setQuick(0, 1);
     leftBar.setQuick(1, 2);
     leftBar.setQuick(2, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(leftBar, right));
-    assertFalse("equals didn't work", leftBar.equals(right));
-    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, right));
-    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(sequentialAccessLeft, right));
+    assertEquals(leftBar, right);
+    assertEquals(randomAccessLeft, right);
+    assertEquals(sequentialAccessLeft, right);
 
-    RandomAccessSparseVector rightBar = new RandomAccessSparseVector("bar", 3);
+    Vector rightBar = new RandomAccessSparseVector(3);
     rightBar.setQuick(0, 1);
     rightBar.setQuick(1, 2);
     rightBar.setQuick(2, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, rightBar));
-    assertFalse("equals didn't work", randomAccessLeft.equals(rightBar));
-    assertFalse("equivalent didn't work", AbstractVector.strictEquivalence(randomAccessLeft, rightBar));
+    assertEquals(randomAccessLeft, rightBar);
 
     right.setQuick(2, 4);
-    assertFalse("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, right));
-    assertFalse("equals didn't work", randomAccessLeft.equals(right));
+    assertFalse(randomAccessLeft.equals(right));
     right = new DenseVector(4);
     right.setQuick(0, 1);
     right.setQuick(1, 2);
     right.setQuick(2, 3);
     right.setQuick(3, 3);
-    assertFalse("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, right));
-    assertFalse("equals didn't work", randomAccessLeft.equals(right));
+    assertFalse(randomAccessLeft.equals(right));
     randomAccessLeft = new RandomAccessSparseVector(2);
     randomAccessLeft.setQuick(0, 1);
     randomAccessLeft.setQuick(1, 2);
-    assertFalse("equivalent didn't work", AbstractVector.equivalent(randomAccessLeft, right));
-    assertFalse("equals didn't work", randomAccessLeft.equals(right));
+    assertFalse(randomAccessLeft.equals(right));
 
-    DenseVector dense = new DenseVector(3);
+    Vector dense = new DenseVector(3);
     right = new DenseVector(3);
     right.setQuick(0, 1);
     right.setQuick(1, 2);
@@ -107,8 +95,7 @@ public class VectorTest extends TestCase {
     dense.setQuick(0, 1);
     dense.setQuick(1, 2);
     dense.setQuick(2, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(dense, right));
-    assertEquals("equals didn't work", dense, right);
+    assertEquals(dense, right);
 
     RandomAccessSparseVector sparse = new RandomAccessSparseVector(3);
     randomAccessLeft = new RandomAccessSparseVector(3);
@@ -118,19 +105,15 @@ public class VectorTest extends TestCase {
     randomAccessLeft.setQuick(0, 1);
     randomAccessLeft.setQuick(1, 2);
     randomAccessLeft.setQuick(2, 3);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(sparse, randomAccessLeft));
-    assertEquals("equals didn't work", randomAccessLeft, sparse);
+    assertEquals(randomAccessLeft, sparse);
 
-    VectorView v1 = new VectorView(randomAccessLeft, 0, 2);
-    VectorView v2 = new VectorView(right, 0, 2);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, v2));
-    assertEquals("equals didn't work", v1, v2);
+    Vector v1 = new VectorView(randomAccessLeft, 0, 2);
+    Vector v2 = new VectorView(right, 0, 2);
+    assertEquals(v1, v2);
     sparse = new RandomAccessSparseVector(2);
     sparse.setQuick(0, 1);
     sparse.setQuick(1, 2);
-    assertTrue("equivalent didn't work", AbstractVector.equivalent(v1, sparse));
-    assertEquals("equals didn't work", v1, sparse);
-
+    assertEquals(v1, sparse);
   }
 
   private static void doTestVectors(Vector left, Vector right) {
@@ -141,13 +124,12 @@ public class VectorTest extends TestCase {
     right.setQuick(1, 5);
     right.setQuick(2, 6);
     double result = left.dot(right);
-    assertEquals(result + " does not equal: " + 32, 32.0, result);
+    assertEquals(32.0, result);
     String formattedString = left.asFormatString();
-    System.out.println("Vec: " + formattedString);
+    //System.out.println("Vec: " + formattedString);
     Vector vec = AbstractVector.decodeVector(formattedString);
-    assertNotNull("vec is null and it shouldn't be", vec);
-    assertTrue("Vector could not be decoded from the formatString",
-        AbstractVector.equivalent(vec, left));
+    assertNotNull(vec);
+    assertEquals(vec, left);
   }
 
   public void testGetDistanceSquared() throws Exception {
@@ -185,10 +167,9 @@ public class VectorTest extends TestCase {
     w.setQuick(4, 2.1);
   }
 
-  public void doTestGetDistanceSquared(Vector v, Vector w) throws Exception {
+  public void doTestGetDistanceSquared(Vector v, Vector w) {
     double expected = v.minus(w).getLengthSquared();
-    assertTrue("a.getDistanceSquared(b) != a.minus(b).getLengthSquared",
-        Math.abs(expected - v.getDistanceSquared(w)) < 1.0e-6);
+    assertEquals(expected, v.getDistanceSquared(w), 1.0e-6);
   }
 
   public void testGetLengthSquared() throws Exception {
@@ -204,14 +185,15 @@ public class VectorTest extends TestCase {
   }
 
   public static double lengthSquaredSlowly(Vector v) {
-    double d = 0;
-    for(int i=0; i<v.size(); i++) {
-      d += (v.get(i) * v.get(i));
+    double d = 0.0;
+    for (int i = 0; i < v.size(); i++) {
+      double value = v.get(i);
+      d += value * value;
     }
     return d;
   }
 
-  public void doTestGetLengthSquared(Vector v) throws Exception {
+  public void doTestGetLengthSquared(Vector v) {
     double expected = lengthSquaredSlowly(v);
     assertEquals("v.getLengthSquared() != sum_of_squared_elements(v)", expected, v.getLengthSquared(), 0.0);
 
@@ -223,7 +205,7 @@ public class VectorTest extends TestCase {
     expected = lengthSquaredSlowly(v);
     assertEquals("mutation via setQuick() fails to change lengthSquared", expected, v.getLengthSquared());
 
-    Iterator<Vector.Element> it = v.iterateAll();
+    Iterator<Vector.Element> it = v.iterator();
     while(it.hasNext()) {
       Vector.Element e = it.next();
       if(e.index() == v.size() - 2) {
@@ -234,11 +216,11 @@ public class VectorTest extends TestCase {
     assertEquals("mutation via dense iterator.set fails to change lengthSquared", expected, v.getLengthSquared());
 
     it = v.iterateNonZero();
-    int i=0;
-    while(it.hasNext()) {
+    int i = 0;
+    while (it.hasNext()) {
       i++;
       Vector.Element e = it.next();
-      if(i == v.getNumNondefaultElements() - 1) {
+      if (i == v.getNumNondefaultElements() - 1) {
         e.set(e.get() - 5.0);
       }
     }
@@ -287,8 +269,62 @@ public class VectorTest extends TestCase {
     assertEquals("mutation via assign(v,plus) fails to change lengthSquared", expected, v.getLengthSquared());
   }
 
+  public void testIterator() {
+
+    Collection<Integer> expectedIndices = new HashSet<Integer>();
+    int i = 1;
+    while (i <= 20) {
+      expectedIndices.add(i * (i + 1) / 2);
+      i++;
+    }
+
+    Vector denseVector = new DenseVector(i * i);
+    for (int index : expectedIndices) {
+      denseVector.set(index, (double) 2 * index);
+    }
+    doTestIterators(denseVector, expectedIndices);
+
+    Vector randomAccessVector = new RandomAccessSparseVector(i * i);
+    for (int index : expectedIndices) {
+      randomAccessVector.set(index, (double) 2 * index);
+    }
+    doTestIterators(randomAccessVector, expectedIndices);
+
+    Vector sequentialVector = new SequentialAccessSparseVector(i * i);
+    for (int index : expectedIndices) {
+      sequentialVector.set(index, (double) 2 * index);
+    }
+    doTestIterators(sequentialVector, expectedIndices);
+  }
+
+  private static void doTestIterators(Vector vector, Collection<Integer> expectedIndices) {
+    expectedIndices = new HashSet<Integer>(expectedIndices);
+    Iterator<Vector.Element> allIterator = vector.iterator();
+    int index = 0;
+    while (allIterator.hasNext()) {
+      Vector.Element element = allIterator.next();
+      assertEquals(index, element.index());
+      if (expectedIndices.contains(index)) {
+        assertEquals((double) index * 2, element.get());
+      } else {
+        assertEquals(0.0, element.get());
+      }
+      index++;
+    }
+
+    Iterator<Vector.Element> nonZeroIterator = vector.iterateNonZero();
+    while (nonZeroIterator.hasNext()) {
+      Vector.Element element = nonZeroIterator.next();
+      index = element.index();
+      assertTrue(expectedIndices.contains(index));
+      assertEquals((double) index * 2, element.get());
+      expectedIndices.remove(index);
+    }
+    assertTrue(expectedIndices.isEmpty());
+  }
+
   public void testNormalize() throws Exception {
-    RandomAccessSparseVector vec1 = new RandomAccessSparseVector(3);
+    Vector vec1 = new RandomAccessSparseVector(3);
 
     vec1.setQuick(0, 1);
     vec1.setQuick(1, 2);
@@ -296,7 +332,7 @@ public class VectorTest extends TestCase {
     Vector norm = vec1.normalize();
     assertNotNull("norm1 is null and it shouldn't be", norm);
 
-    SequentialAccessSparseVector vec2 = new SequentialAccessSparseVector(3);
+    Vector vec2 = new SequentialAccessSparseVector(3);
 
     vec2.setQuick(0, 1);
     vec2.setQuick(1, 2);
@@ -310,25 +346,23 @@ public class VectorTest extends TestCase {
     expected.setQuick(1, 0.5345224838248488);
     expected.setQuick(2, 0.8017837257372732);
 
-    assertEquals("norm is not equal to expected", norm, expected);
-    assertTrue("norm is not equivalent to expected", AbstractVector.equivalent(norm2, expected));
+    assertEquals(expected, norm);
 
     norm = vec1.normalize(2);
-    assertEquals("norm is not equal to expected", norm, expected);
+    assertEquals(expected, norm);
 
     norm2 = vec2.normalize(2);
-    assertTrue("norm is not equivalent to expected", AbstractVector.equivalent(norm2, expected));
+    assertEquals(expected, norm2);
 
     norm = vec1.normalize(1);
     norm2 = vec2.normalize(1);
     expected.setQuick(0, 1.0 / 6);
     expected.setQuick(1, 2.0 / 6);
     expected.setQuick(2, 3.0 / 6);
-    assertEquals("norm is not equal to expected", norm, expected);
-    assertTrue("norm is not equivalent to expected", AbstractVector.equivalent(norm2, expected));
+    assertEquals(expected, norm);
+    assertEquals(expected, norm2);
     norm = vec1.normalize(3);
-    // TODO this is not used
-    expected = vec1.times(vec1).times(vec1);
+    //expected = vec1.times(vec1).times(vec1);
 
     // double sum = expected.zSum();
     // cube = Math.pow(sum, 1.0/3);
@@ -445,10 +479,9 @@ public class VectorTest extends TestCase {
   }
 
   public void testDenseVector() throws Exception {
-    DenseVector vec1 = new DenseVector(3);
-    DenseVector vec2 = new DenseVector(3);
+    Vector vec1 = new DenseVector(3);
+    Vector vec2 = new DenseVector(3);
     doTestVectors(vec1, vec2);
-
   }
 
   public void testVectorView() throws Exception {
@@ -456,10 +489,10 @@ public class VectorTest extends TestCase {
     RandomAccessSparseVector vec2 = new RandomAccessSparseVector(6);
     SequentialAccessSparseVector vec3 = new SequentialAccessSparseVector(3);
     SequentialAccessSparseVector vec4 = new SequentialAccessSparseVector(6);
-    VectorView vecV1 = new VectorView(vec1, 0, 3);
-    VectorView vecV2 = new VectorView(vec2, 2, 3);
-    VectorView vecV3 = new VectorView(vec3, 0, 3);
-    VectorView vecV4 = new VectorView(vec4, 2, 3);
+    Vector vecV1 = new VectorView(vec1, 0, 3);
+    Vector vecV2 = new VectorView(vec2, 2, 3);
+    Vector vecV3 = new VectorView(vec3, 0, 3);
+    Vector vecV4 = new VectorView(vec4, 2, 3);
     doTestVectors(vecV1, vecV2);
     doTestVectors(vecV3, vecV4);
   }
@@ -524,23 +557,23 @@ public class VectorTest extends TestCase {
     doTestAggregation(w, v);
   }
 
-  private static void doTestAggregation(Vector v, Vector w) throws Exception {
+  private static void doTestAggregation(Vector v, Vector w) {
     assertEquals("aggregate(plus, pow(2)) not equal to " + v.getLengthSquared(),
         v.getLengthSquared(),
-        v.aggregate(plus, pow(2)));
+        v.aggregate(Functions.plus, Functions.pow(2)));
     assertEquals("aggregate(plus, abs) not equal to " + v.norm(1),
         v.norm(1),
-        v.aggregate(plus, abs));
+        v.aggregate(Functions.plus, Functions.abs));
     assertEquals("aggregate(max, abs) not equal to " + v.norm(Double.POSITIVE_INFINITY),
         v.norm(Double.POSITIVE_INFINITY),
-        v.aggregate(max, abs));
+        v.aggregate(Functions.max, Functions.abs));
 
     assertEquals("v.dot(w) != v.aggregate(w, plus, mult)",
         v.dot(w),
-        v.aggregate(w, plus, mult));
+        v.aggregate(w, Functions.plus, Functions.mult));
     assertEquals("|(v-w)|^2 != v.aggregate(w, plus, chain(pow(2), minus))",
         v.minus(w).dot(v.minus(w)),
-        v.aggregate(w, plus, chain(pow(2), minus)));
+        v.aggregate(w, Functions.plus, Functions.chain(Functions.pow(2), Functions.minus)));
   }
 
   private static void setUpFirstVector(Vector v) {
@@ -576,18 +609,14 @@ public class VectorTest extends TestCase {
     try {
       test1.get("Fee");
       fail();
-    } catch (IndexException e) {
-      fail();
     } catch (UnboundLabelException e) {
-      assertTrue(true);
     }
-
   }
 
 
   public void testNameSerialization() throws Exception {
     double[] values = {1.1, 2.2, 3.3};
-    Vector test = new DenseVector("foo", values);
+    Vector test = new DenseVector(values);
     String formatString = test.asFormatString();
 
     Vector decode = AbstractVector.decodeVector(formatString);
@@ -623,10 +652,7 @@ public class VectorTest extends TestCase {
     try {
       test1.get("Fee");
       fail();
-    } catch (IndexException e) {
-      fail();
     } catch (UnboundLabelException e) {
-      assertTrue(true);
     }
   }
 
@@ -674,11 +700,11 @@ public class VectorTest extends TestCase {
     assertEquals(sparseLeft, sparseRight);
     assertEquals(sparseLeft.hashCode(), sparseRight.hashCode());
 
-    DenseVector emptyLeft = new DenseVector("foo", 0);
-    Vector emptyRight = new SequentialAccessSparseVector("foo", 0);
+    DenseVector emptyLeft = new DenseVector(0);
+    Vector emptyRight = new SequentialAccessSparseVector(0);
     assertEquals(emptyLeft, emptyRight);
     assertEquals(emptyLeft.hashCode(), emptyRight.hashCode());
-    emptyRight = new RandomAccessSparseVector("foo", 0);
+    emptyRight = new RandomAccessSparseVector(0);
     assertEquals(emptyLeft, emptyRight);
     assertEquals(emptyLeft.hashCode(), emptyRight.hashCode());
   }

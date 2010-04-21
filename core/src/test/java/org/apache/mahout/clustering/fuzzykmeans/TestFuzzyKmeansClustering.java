@@ -36,6 +36,7 @@ import org.apache.mahout.common.DummyReporter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -85,12 +86,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     
   }
   
-  private static void computeCluster(List<Vector> points,
+  private static void computeCluster(List<NamedVector> points,
                                      List<SoftCluster> clusterList,
                                      FuzzyKMeansClusterer clusterer,
                                      Map<String,String> pointClusterInfo) {
     
-    for (Vector point : points) {
+    for (NamedVector point : points) {
       StringBuilder outputValue = new StringBuilder("[");
       List<Double> clusterDistanceList = new ArrayList<Double>();
       for (SoftCluster cluster : clusterList) {
@@ -100,14 +101,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         double probWeight = clusterer.computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
         outputValue.append(clusterList.get(i).getId()).append(':').append(probWeight).append(' ');
       }
-      String name = point.getName();
-      pointClusterInfo.put(name != null && name.length() != 0 ? name : point.asFormatString().trim(),
-        outputValue.toString().trim() + ']');
+      pointClusterInfo.put(point.getName(), outputValue.toString().trim() + ']');
     }
   }
   
   public void testReferenceImplementation() throws Exception {
-    List<Vector> points = TestKmeansClustering.getPoints(TestKmeansClustering.reference);
+    List<NamedVector> points = TestKmeansClustering.getPoints(TestKmeansClustering.reference);
     for (int k = 0; k < points.size(); k++) {
       System.out.println("test k= " + k);
       
@@ -413,9 +412,10 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         Vector vec = tweakValue(points.get(i).get());
         reference.add(new SoftCluster(vec, i));
       }
-      List<Vector> pointsVectors = new ArrayList<Vector>();
-      for(VectorWritable point : points)
-        pointsVectors.add(point.get());
+      List<NamedVector> pointsVectors = new ArrayList<NamedVector>();
+      for (VectorWritable point : points) {
+        pointsVectors.add((NamedVector) point.get());
+      }
       
       DistanceMeasure measure = new EuclideanDistanceMeasure();
       FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, 0.001, 2);
@@ -519,9 +519,10 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         reference.add(new SoftCluster(vec, i));
       }
       Map<String,String> pointClusterInfo = new HashMap<String,String>();
-      List<Vector> pointsVectors = new ArrayList<Vector>();
-      for(VectorWritable point : points)
-        pointsVectors.add(point.get());
+      List<NamedVector> pointsVectors = new ArrayList<NamedVector>();
+      for (VectorWritable point : points) {
+        pointsVectors.add((NamedVector) point.get());
+      }
       
       List<List<SoftCluster>> clusters = FuzzyKMeansClusterer.clusterPoints(pointsVectors, reference,
         new EuclideanDistanceMeasure(), 0.001, 2, 1);

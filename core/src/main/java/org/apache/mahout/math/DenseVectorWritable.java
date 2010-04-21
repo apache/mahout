@@ -17,52 +17,38 @@
 
 package org.apache.mahout.math;
 
-import org.apache.hadoop.io.Writable;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Iterator;
 
-public class DenseVectorWritable extends DenseVector implements Writable {
+public class DenseVectorWritable extends VectorWritable {
 
-  public DenseVectorWritable() {
-    
+  public DenseVectorWritable(DenseVector vector) {
+    super(vector);
   }
 
-  public DenseVectorWritable(DenseVector v) {
-    setName(v.getName());
-    values = v.values;
-    lengthSquared = v.lengthSquared;
+  public DenseVectorWritable() {
   }
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(getClass().getName());
-    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
-    dataOutput.writeInt(size());
-    dataOutput.writeDouble(lengthSquared);
-    Iterator<Vector.Element> iter = iterateAll();
-    while (iter.hasNext()) {
-      Vector.Element element = iter.next();
+    DenseVector denseVector = (DenseVector) get();
+    dataOutput.writeInt(denseVector.size());
+    dataOutput.writeDouble(denseVector.getLengthSquared());
+    for (Vector.Element element : denseVector) {
       dataOutput.writeDouble(element.get());
     }
   }
 
   @Override
-  public void readFields(DataInput dataInput) throws IOException {
-    String className = dataInput.readUTF();
-    if(className.equals(getClass().getName())) {
-      this.setName(dataInput.readUTF());
-    } else {
-      setName(className); // we have already read the class name in VectorWritable
-    }
-    double[] values = new double[dataInput.readInt()];
-    lengthSquared = dataInput.readDouble();
+  public void readFields(DataInput in) throws IOException {
+    int size = in.readInt();
+    double[] values = new double[size];
+    double lengthSquared = in.readDouble();
     for (int i = 0; i < values.length; i++) {
-      values[i] = dataInput.readDouble();
+      values[i] = in.readDouble();
     }
-    this.values = values;
+    set(new DenseVector(values));
   }
   
 }

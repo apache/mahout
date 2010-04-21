@@ -40,16 +40,12 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
 public class TimesSquaredJob {
-
-  private static final Logger log = LoggerFactory.getLogger(TimesSquaredJob.class);
 
   public static final String INPUT_VECTOR = "DistributedMatrix.times.inputVector";
   public static final String IS_SPARSE_OUTPUT = "DistributedMatrix.times.outputVector.sparse";
@@ -97,7 +93,7 @@ public class TimesSquaredJob {
                                                   Class<? extends TimesSquaredMapper> mapClass,
                                                   Class<? extends VectorSummingReducer> redClass) throws IOException {
     JobConf conf = new JobConf(TimesSquaredJob.class);
-    conf.setJobName("TimesSquaredJob: " + matrixInputPath + " timesSquared(" + v.getName() + ')');
+    conf.setJobName("TimesSquaredJob: " + matrixInputPath);
     FileSystem fs = FileSystem.get(conf);
     matrixInputPath = fs.makeQualified(matrixInputPath);
     outputVectorPathBase = fs.makeQualified(outputVectorPathBase);

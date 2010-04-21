@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,7 @@ public class KMeansClusterer {
     output.collect(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
   }
   
-  public void outputPointWithClusterInfo(Vector point,
+  public void outputPointWithClusterInfo(NamedVector point,
                                          List<Cluster> clusters,
                                          OutputCollector<Text,Text> output) throws IOException {
     Cluster nearestCluster = null;
@@ -92,9 +93,7 @@ public class KMeansClusterer {
       }
     }
     
-    String name = point.getName();
-    String key = (name != null) && (name.length() != 0) ? name : point.asFormatString();
-    output.collect(new Text(key), new Text(String.valueOf(nearestCluster.getId())));
+    output.collect(new Text(point.getName()), new Text(String.valueOf(nearestCluster.getId())));
   }
   
   /**
@@ -110,7 +109,7 @@ public class KMeansClusterer {
    * @param maxIter
    *          the maximum number of iterations
    */
-  public static List<List<Cluster>> clusterPoints(List<Vector> points,
+  public static List<List<Cluster>> clusterPoints(List<NamedVector> points,
                                                   List<Cluster> clusters,
                                                   DistanceMeasure measure,
                                                   int maxIter,
@@ -145,7 +144,7 @@ public class KMeansClusterer {
    *          a DistanceMeasure to use
    * @return
    */
-  public static boolean runKMeansIteration(List<Vector> points,
+  public static boolean runKMeansIteration(List<NamedVector> points,
                                            List<Cluster> clusters,
                                            DistanceMeasure measure,
                                            double distanceThreshold) {

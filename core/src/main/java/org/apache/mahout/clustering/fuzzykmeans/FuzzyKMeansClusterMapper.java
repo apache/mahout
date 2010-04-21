@@ -28,6 +28,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.VectorWritable;
 
 public class FuzzyKMeansClusterMapper extends MapReduceBase implements
@@ -41,7 +42,7 @@ public class FuzzyKMeansClusterMapper extends MapReduceBase implements
                   VectorWritable point,
                   OutputCollector<Text,FuzzyKMeansOutput> output,
                   Reporter reporter) throws IOException {
-    clusterer.outputPointWithClusterProbabilities(key.toString(), point.get(), clusters, output);
+    clusterer.outputPointWithClusterProbabilities(key.toString(), (NamedVector) point.get(), clusters, output);
   }
   
   /**

@@ -17,20 +17,15 @@
 
 package org.apache.mahout.math;
 
-public class TestDenseVector extends AbstractTestVector {
+public class TestRandomAccessSparseVector extends AbstractTestVector {
 
-  public TestDenseVector(String name) {
+  public TestRandomAccessSparseVector(String name) {
     super(name);
   }
 
   @Override
   Vector generateTestVector(int cardinality) {
-    return new DenseVector(cardinality);
-  }
-
-  @Override
-  public void testSize() throws Exception {
-    assertEquals("size", 7, getTestVector().getNumNondefaultElements());
+    return new RandomAccessSparseVector(cardinality);
   }
 
 }

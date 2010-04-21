@@ -29,6 +29,7 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.VectorWritable;
 
 public class KMeansClusterMapper extends MapReduceBase implements
@@ -42,18 +43,7 @@ public class KMeansClusterMapper extends MapReduceBase implements
                   VectorWritable point,
                   OutputCollector<Text,Text> output,
                   Reporter reporter) throws IOException {
-    this.clusterer.outputPointWithClusterInfo(point.get(), clusters, output);
-  }
-  
-  /**
-   * Configure the mapper by providing its clusters. Used by unit tests.
-   * 
-   * @param clusters
-   *          a List<Cluster>
-   */
-  void config(List<Cluster> clusters) {
-    this.clusters.clear();
-    this.clusters.addAll(clusters);
+    clusterer.outputPointWithClusterInfo((NamedVector) point.get(), clusters, output);
   }
   
   @Override

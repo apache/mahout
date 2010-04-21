@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 
 import java.io.DataInput;
@@ -25,57 +24,39 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
+public class RandomAccessSparseVectorWritable extends VectorWritable {
 
-public class RandomAccessSparseVectorWritable extends RandomAccessSparseVector implements Writable {
-
-  public RandomAccessSparseVectorWritable(Vector v) {
-    super(v);
+  public RandomAccessSparseVectorWritable(RandomAccessSparseVector vector) {
+    super(vector);
   }
 
   public RandomAccessSparseVectorWritable() {
-    
   }
 
   @Override
   public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeUTF(getClass().getName());
-    dataOutput.writeUTF(this.getName() == null ? "" : this.getName());
-    int nde = getNumNondefaultElements();
-    dataOutput.writeInt(size());
-    dataOutput.writeInt(nde);
-    Iterator<Vector.Element> iter = iterateNonZero();
-    int count = 0;
+    RandomAccessSparseVector randomVector = (RandomAccessSparseVector) get();
+    dataOutput.writeInt(randomVector.size());
+    dataOutput.writeInt(randomVector.getNumNondefaultElements());
+    Iterator<Vector.Element> iter = randomVector.iterateNonZero();
     while (iter.hasNext()) {
       Vector.Element element = iter.next();
       dataOutput.writeInt(element.index());
       dataOutput.writeDouble(element.get());
-      count++;
     }
-    assert (nde == count);
   }
 
   @Override
   public void readFields(DataInput dataInput) throws IOException {
-    String className = dataInput.readUTF();
-    if(className.equals(getClass().getName())) {
-      this.setName(dataInput.readUTF());
-    } else {
-      setName(className); // we have already read the class name in VectorWritable
-    }
-    size = dataInput.readInt();
-    int cardinality = dataInput.readInt();
-    OpenIntDoubleHashMap values = new OpenIntDoubleHashMap(cardinality);
-    int i = 0;
-    while (i < cardinality) {
+    int size = dataInput.readInt();
+    int numNonDefaultElements = dataInput.readInt();
+    OpenIntDoubleHashMap values = new OpenIntDoubleHashMap(numNonDefaultElements);
+    for (int i = 0; i < numNonDefaultElements; i++) {
       int index = dataInput.readInt();
       double value = dataInput.readDouble();
       values.put(index, value);
-      i++;
     }
-    assert (i == cardinality);
-    this.values = values;
+    set(new RandomAccessSparseVector(size, values));
   }
-
-  
 
 }

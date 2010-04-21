@@ -24,22 +24,30 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+abstract class AbstractTestVector extends TestCase {
 
-public class TestSparseVector extends TestCase {
+  private static final double[] values = {1.1, 2.2, 3.3};
+  private static final double[] gold = {0.0, 1.1, 0.0, 2.2, 0.0, 3.3, 0.0};
+  private static final double EPSILON = 0.0000000001;
 
-  private final double[] values = {1.1, 2.2, 3.3};
-  private final double[] gold = {0, 1.1, 2.2, 3.3, 0};
-  private final Vector test = new RandomAccessSparseVector(values.length + 2);
+  private Vector test;
 
-  public TestSparseVector(String name) {
+  AbstractTestVector(String name) {
     super(name);
+  }
+
+  abstract Vector generateTestVector(int cardinality);
+
+  Vector getTestVector() {
+    return test;
   }
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
+    test = generateTestVector(2 * values.length + 1);
     for (int i = 0; i < values.length; i++) {
-      test.set(i + 1, values[i]);
+      test.set(2*i + 1, values[i]);
     }
   }
 
@@ -50,14 +58,14 @@ public class TestSparseVector extends TestCase {
   }
 
   public void testCardinality() {
-    assertEquals("size", 5, test.size());
+    assertEquals("size", 7, test.size());
   }
 
   public void testIterator() throws Exception {
     Iterator<Vector.Element> iterator = test.iterateNonZero();
     checkIterator(iterator, gold);
 
-    iterator = test.iterateAll();
+    iterator = test.iterator();
     checkIterator(iterator, gold);
 
     double[] doubles = {0.0, 5.0, 0, 3.0};
@@ -67,7 +75,7 @@ public class TestSparseVector extends TestCase {
     }
     iterator = zeros.iterateNonZero();
     checkIterator(iterator, doubles);
-    iterator = zeros.iterateAll();
+    iterator = zeros.iterator();
     checkIterator(iterator, doubles);
 
     doubles = new double[]{0.0, 0.0, 0, 0.0};
@@ -77,7 +85,7 @@ public class TestSparseVector extends TestCase {
     }
     iterator = zeros.iterateNonZero();
     checkIterator(iterator, doubles);
-    iterator = zeros.iterateAll();
+    iterator = zeros.iterator();
     checkIterator(iterator, doubles);
 
   }
@@ -90,6 +98,31 @@ public class TestSparseVector extends TestCase {
     }
   }
 
+  public void testIteratorSet() {
+    Vector clone = test.clone();
+    Iterator<Vector.Element> it = clone.iterateNonZero();
+    while (it.hasNext()) {
+      Vector.Element e = it.next();
+      e.set(e.get() * 2.0);
+    }
+    it = clone.iterateNonZero();
+    while (it.hasNext()) {
+      Vector.Element e = it.next();
+      assertEquals(test.get(e.index()) * 2.0, e.get());
+    }
+    clone = test.clone();
+    it = clone.iterator();
+    while (it.hasNext()) {
+      Vector.Element e = it.next();
+      e.set(e.get() * 2.0);
+    }
+    it = clone.iterator();
+    while (it.hasNext()) {
+      Vector.Element e = it.next();
+      assertEquals(test.get(e.index()) * 2.0, e.get());
+    }
+  }
+
   public void testCopy() throws Exception {
     Vector copy = test.clone();
     for (int i = 0; i < test.size(); i++) {
@@ -99,10 +132,10 @@ public class TestSparseVector extends TestCase {
 
   public void testGet() throws Exception {
     for (int i = 0; i < test.size(); i++) {
-      if (i > 0 && i < 4) {
-        assertEquals("get [" + i + ']', values[i - 1], test.get(i));
-      } else {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
+      } else {
+        assertEquals("get [" + i + ']', values[i/2], test.get(i));
       }
     }
   }
@@ -112,7 +145,6 @@ public class TestSparseVector extends TestCase {
       test.get(test.size());
       fail("expected exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -121,19 +153,18 @@ public class TestSparseVector extends TestCase {
       test.get(-1);
       fail("expected exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
   public void testSet() throws Exception {
-    test.set(2, 4.5);
+    test.set(3, 4.5);
     for (int i = 0; i < test.size(); i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
-      } else if (i == 2) {
+      } else if (i == 3) {
         assertEquals("set [" + i + ']', 4.5, test.get(i));
       } else {
-        assertEquals("set [" + i + ']', values[i - 1], test.get(i));
+        assertEquals("set [" + i + ']', values[i/2], test.get(i));
       }
     }
   }
@@ -146,7 +177,7 @@ public class TestSparseVector extends TestCase {
     Vector part = test.viewPart(1, 2);
     assertEquals("part size", 2, part.getNumNondefaultElements());
     for (int i = 0; i < part.size(); i++) {
-      assertEquals("part[" + i + ']', values[i], part.get(i));
+      assertEquals("part[" + i + ']', test.get(i+1), part.get(i));
     }
   }
 
@@ -154,32 +185,23 @@ public class TestSparseVector extends TestCase {
     try {
       test.viewPart(-1, values.length);
       fail("no exception");
-    } catch (CardinalityException e) {
-      fail("wrong exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
   public void testViewPartOver() {
     try {
-      test.viewPart(2, 5);
+      test.viewPart(2, 7);
       fail("no exception");
-    } catch (CardinalityException e) {
-      fail("wrong exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
   public void testViewPartCardinality() {
     try {
-      test.viewPart(1, 6);
+      test.viewPart(1, 8);
       fail("no exception");
-    } catch (CardinalityException e) {
-      assertTrue(true);
     } catch (IndexException e) {
-      fail("wrong exception");
     }
   }
 
@@ -201,7 +223,7 @@ public class TestSparseVector extends TestCase {
   public void testDot() throws Exception {
     double res = test.dot(test);
     double expected = 3.3 * 3.3 + 2.2 * 2.2 + 1.1 * 1.1;
-    assertEquals("dot", expected, res);
+    assertEquals("dot", expected, res, EPSILON);
   }
 
   public void testDotCardinality() {
@@ -209,7 +231,6 @@ public class TestSparseVector extends TestCase {
       test.dot(new DenseVector(test.size() + 1));
       fail("expected exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -217,10 +238,10 @@ public class TestSparseVector extends TestCase {
     Vector val = test.normalize();
     double mag = Math.sqrt(1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3);
     for (int i = 0; i < test.size(); i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
       } else {
-        assertEquals("dot", values[i - 1] / mag, val.get(i));
+        assertEquals("dot", values[i/2] / mag, val.get(i));
       }
     }
   }
@@ -230,6 +251,12 @@ public class TestSparseVector extends TestCase {
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', 0.0, val.get(i));
+    }
+
+    val = test.minus(test).minus(test);
+    assertEquals("cardinality", test.size(), val.size());
+    for (int i = 0; i < test.size(); i++) {
+      assertEquals("get [" + i + ']', 0.0, val.get(i) + test.get(i));
     }
     
     Vector val1 = test.plus(1);
@@ -249,10 +276,10 @@ public class TestSparseVector extends TestCase {
     Vector val = test.plus(1);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 1.0, val.get(i));
       } else {
-        assertEquals("get [" + i + ']', values[i - 1] + 1, val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] + 1.0, val.get(i));
       }
     }
   }
@@ -261,10 +288,10 @@ public class TestSparseVector extends TestCase {
     Vector val = test.plus(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
       } else {
-        assertEquals("get [" + i + ']', values[i - 1] * 2, val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] * 2.0, val.get(i));
       }
     }
   }
@@ -274,7 +301,6 @@ public class TestSparseVector extends TestCase {
       test.plus(new DenseVector(test.size() + 1));
       fail("expected exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -282,10 +308,10 @@ public class TestSparseVector extends TestCase {
     Vector val = test.times(3);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
       } else {
-        assertEquals("get [" + i + ']', values[i - 1] * 3, val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] * 3.0, val.get(i));
       }
     }
   }
@@ -294,10 +320,10 @@ public class TestSparseVector extends TestCase {
     Vector val = test.divide(3);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
       } else {
-        assertEquals("get [" + i + ']', values[i - 1] / 3, val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] / 3.0, val.get(i), EPSILON);
       }
     }
   }
@@ -306,11 +332,10 @@ public class TestSparseVector extends TestCase {
     Vector val = test.times(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, val.get(i));
       } else {
-        assertEquals("get [" + i + ']', values[i - 1] * values[i - 1], val
-            .get(i));
+        assertEquals("get [" + i + ']', values[i/2] * values[i/2], val.get(i));
       }
     }
   }
@@ -320,7 +345,6 @@ public class TestSparseVector extends TestCase {
       test.times(new DenseVector(test.size() + 1));
       fail("expected exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -364,7 +388,6 @@ public class TestSparseVector extends TestCase {
       test.assign(array);
       fail("cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -382,21 +405,20 @@ public class TestSparseVector extends TestCase {
       test.assign(other);
       fail("cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
   public void testAssignUnaryFunction() {
     test.assign(negate);
-    for (int i = 0; i < values.length; i++) {
-      assertEquals("value[" + i + ']', -values[i], test.getQuick(i+1));
+    for (int i = 1; i < values.length; i += 2) {
+      assertEquals("value[" + i + ']', -values[i], test.getQuick(i+2));
     }
   }
 
   public void testAssignBinaryFunction() throws Exception {
     test.assign(test, plus);
     for (int i = 0; i < values.length; i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
       } else {
         assertEquals("value[" + i + ']', 2 * values[i - 1], test.getQuick(i));
@@ -407,7 +429,7 @@ public class TestSparseVector extends TestCase {
   public void testAssignBinaryFunction2() throws Exception {
     test.assign(plus(4));
     for (int i = 0; i < values.length; i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 4.0, test.get(i));
       } else {
         assertEquals("value[" + i + ']', values[i - 1] + 4, test.getQuick(i));
@@ -418,7 +440,7 @@ public class TestSparseVector extends TestCase {
   public void testAssignBinaryFunction3() throws Exception {
     test.assign(mult(4));
     for (int i = 0; i < values.length; i++) {
-      if (i == 0 || i == 4) {
+      if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));
       } else {
         assertEquals("value[" + i + ']', values[i - 1] * 4, test.getQuick(i));
@@ -431,19 +453,18 @@ public class TestSparseVector extends TestCase {
       test.assign(test.like(2), plus);
       fail("Cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
   public void testLike() {
     Vector other = test.like();
-    assertTrue("not like", other instanceof RandomAccessSparseVector);
+    assertTrue("not like", test.getClass().isAssignableFrom(other.getClass()));
     assertEquals("size", test.size(), other.size());
   }
 
   public void testLikeN() {
     Vector other = test.like(8);
-    assertTrue("not like", other instanceof RandomAccessSparseVector);
+    assertTrue("not like", test.getClass().isAssignableFrom(other.getClass()));
     assertEquals("size", 8, other.size());
   }
 

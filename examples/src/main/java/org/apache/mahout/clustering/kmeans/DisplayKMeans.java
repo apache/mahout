@@ -28,6 +28,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -62,9 +63,10 @@ class DisplayKMeans extends DisplayDirichlet {
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : sampleData)
-      points.add(sample.get());
+    List<NamedVector> points = new ArrayList<NamedVector>();
+    for (VectorWritable sample : sampleData) {
+      points.add((NamedVector) sample.get());
+    }
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     List<Cluster> initialClusters = new ArrayList<Cluster>();
     k = 3;
@@ -72,7 +74,9 @@ class DisplayKMeans extends DisplayDirichlet {
     for (Vector point : points) {
       if (initialClusters.size() < Math.min(k, points.size())) {
         initialClusters.add(new Cluster(point, i++));
-      } else break;
+      } else {
+        break;
+      }
     }
     clusters = KMeansClusterer.clusterPoints(points, initialClusters, measure, 10, 0.001);
     System.out.println(clusters.size());

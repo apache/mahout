@@ -133,7 +133,7 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
                                                              int numCols,
                                                              int entriesPerRow,
                                                              double entryMean,
-                                                             boolean isSymmetric) throws Exception {
+                                                             boolean isSymmetric) throws IOException {
     return randomDistributedMatrix(numRows, nonNullRows, numCols, entriesPerRow, entryMean, isSymmetric, "");
   }
 
@@ -157,15 +157,13 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
       @Override
       public Iterator<VectorWritable> iterator() {
         final Iterator<MatrixSlice> it = m.iterator();
-        final VectorWritable v = new VectorWritable();
         return new Iterator<VectorWritable>() {
           @Override
           public boolean hasNext() { return it.hasNext(); }
           @Override
           public VectorWritable next() {
             MatrixSlice slice = it.next();
-            v.set(slice.vector());
-            return v;
+            return new VectorWritable(slice.vector());
           }
           @Override
           public void remove() { it.remove(); }

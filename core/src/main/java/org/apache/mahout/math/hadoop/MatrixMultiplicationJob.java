@@ -120,7 +120,6 @@ public class MatrixMultiplicationJob extends AbstractJob {
 
     private int outCardinality;
     private final IntWritable row = new IntWritable();
-    private final VectorWritable outVector = new VectorWritable();
 
     @Override
     public void configure(JobConf conf) {
@@ -140,7 +139,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
       while(it.hasNext()) {
         Vector.Element e = it.next();
         row.set(e.index());
-        outVector.set(outFrag.times(e.get()));
+        VectorWritable outVector = new VectorWritable(outFrag.times(e.get()));
         out.collect(row, outVector);
       }
     }

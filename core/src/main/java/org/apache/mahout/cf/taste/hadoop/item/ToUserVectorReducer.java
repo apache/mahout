@@ -61,7 +61,6 @@ public final class ToUserVectorReducer extends MapReduceBase implements
   
   public static final int MAX_PREFS_CONSIDERED = 20;
   
-  private final VectorWritable vectorWritable = new VectorWritable();
   private boolean booleanData;
 
   @Override
@@ -102,9 +101,9 @@ public final class ToUserVectorReducer extends MapReduceBase implements
         }
         userVector = filteredVector;
       }
-      
-      vectorWritable.set(userVector);
-      output.collect(userID, vectorWritable);
+
+      VectorWritable writable = new VectorWritable(userVector);
+      output.collect(userID, writable);
     }
   }
   

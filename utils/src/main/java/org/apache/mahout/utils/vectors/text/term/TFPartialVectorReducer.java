@@ -49,10 +49,9 @@ import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
  */
 public class TFPartialVectorReducer extends MapReduceBase implements
     Reducer<Text,StringTuple,Text,VectorWritable> {
+
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
-  
-  private final VectorWritable vectorWritable = new VectorWritable();
-  
+
   private int dimension;
   private boolean sequentialAccess;
   
@@ -68,8 +67,7 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     }
     StringTuple value = values.next();
     
-    Vector vector = new RandomAccessSparseVector(key.toString(), dimension, value.length()); // guess at
-                                                                                             // initial size
+    Vector vector = new RandomAccessSparseVector(dimension, value.length()); // guess at initial size
     
     if (maxNGramSize >= 2) {
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()),
@@ -104,7 +102,7 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     }
     // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
     if(vector.getNumNondefaultElements() > 0) {
-      vectorWritable.set(vector);
+      VectorWritable vectorWritable = new VectorWritable(vector);
       output.collect(key, vectorWritable);
     } else {
       reporter.incrCounter("TFParticalVectorReducer", "emptyVectorCount", 1);

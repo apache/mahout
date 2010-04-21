@@ -67,7 +67,6 @@ public class TestVectorView extends TestCase {
       test.get(test.size());
       fail("expected exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -75,14 +74,14 @@ public class TestVectorView extends TestCase {
 
     VectorView view = new VectorView(new DenseVector(values), offset, cardinality);
     double[] gold = {1.1, 2.2, 3.3};
-    Iterator<Vector.Element> iter = view.iterateAll();
+    Iterator<Vector.Element> iter = view.iterator();
     checkIterator(iter, gold);
     iter = view.iterateNonZero();
     checkIterator(iter, gold);
 
     view = new VectorView(new DenseVector(values), 0, cardinality);
     gold = new double[]{0.0, 1.1, 2.2};
-    iter = view.iterateAll();
+    iter = view.iterator();
     checkIterator(iter, gold);
     gold = new double[]{1.1, 2.2};
     iter = view.iterateNonZero();
@@ -105,7 +104,6 @@ public class TestVectorView extends TestCase {
       test.get(-1);
       fail("expected exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -136,10 +134,7 @@ public class TestVectorView extends TestCase {
     try {
       test.viewPart(-1, cardinality);
       fail("no exception");
-    } catch (CardinalityException e) {
-      fail("expected index exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -147,10 +142,7 @@ public class TestVectorView extends TestCase {
     try {
       test.viewPart(2, cardinality);
       fail("no exception");
-    } catch (CardinalityException e) {
-      fail("expected index exception");
     } catch (IndexException e) {
-      assertTrue(true);
     }
   }
 
@@ -158,10 +150,7 @@ public class TestVectorView extends TestCase {
     try {
       test.viewPart(1, values.length + 1);
       fail("no exception");
-    } catch (CardinalityException e) {
-      assertTrue(true);
     } catch (IndexException e) {
-      fail("expected cardinality exception");
     }
   }
 
@@ -175,7 +164,6 @@ public class TestVectorView extends TestCase {
       test.dot(new DenseVector(test.size() + 1));
       fail("expected exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -216,7 +204,6 @@ public class TestVectorView extends TestCase {
       test.plus(new DenseVector(test.size() + 1));
       fail("expected exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -250,7 +237,6 @@ public class TestVectorView extends TestCase {
       test.times(new DenseVector(test.size() + 1));
       fail("expected exception");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -283,7 +269,6 @@ public class TestVectorView extends TestCase {
       test.assign(array);
       fail("cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -301,7 +286,6 @@ public class TestVectorView extends TestCase {
       test.assign(other);
       fail("cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 
@@ -338,7 +322,6 @@ public class TestVectorView extends TestCase {
       test.assign(test.like(2), plus);
       fail("Cardinality exception expected");
     } catch (CardinalityException e) {
-      assertTrue(true);
     }
   }
 

@@ -23,48 +23,60 @@ import org.apache.hadoop.io.Writable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 public class VectorWritable extends Configured implements Writable {
 
   private Vector vector;
 
+  public VectorWritable() {
+  }
+
+  public VectorWritable(Vector vector) {
+    this.vector = vector;
+  }
+
   public Vector get() {
     return vector;
   }
 
-  public void set(Vector vector) {
+  protected void set(Vector vector) {
     this.vector = vector;
-  }
-
-  public VectorWritable() {
-  }
-
-  public VectorWritable(Vector v) {
-    vector = v;
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    Writable w;
-    if (vector instanceof Writable) {
-      w = (Writable) vector;
-    } else if(vector instanceof RandomAccessSparseVector) {
-      w = new RandomAccessSparseVectorWritable(vector);
-    } else if(vector instanceof SequentialAccessSparseVector) {
-      w = new SequentialAccessSparseVectorWritable((SequentialAccessSparseVector)vector);
-    } else {
-      w = new DenseVectorWritable(new DenseVector(vector));
+    VectorWritable writable;
+    Class<? extends Vector> vectorClass = vector.getClass();
+    String writableClassName = vectorClass.getName() + "Writable";
+    try {
+      Class<? extends VectorWritable> vectorWritableClass =
+          Class.forName(writableClassName).asSubclass(VectorWritable.class);
+      writable = vectorWritableClass.getConstructor(vectorClass).newInstance(vector);
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException(cnfe);
+    } catch (NoSuchMethodException nsme) {
+      throw new IOException(nsme);
+    } catch (InvocationTargetException ite) {
+      throw new IOException(ite);
+    } catch (InstantiationException ie) {
+      throw new IOException(ie);
+    } catch (IllegalAccessException iae) {
+      throw new IOException(iae);
     }
-    w.write(out);
+    out.writeUTF(writableClassName);
+    writable.write(out);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
+    String writableClassName = in.readUTF();
     try {
-      String vectorClassName = in.readUTF();
-      Class<? extends Vector> vectorClass = Class.forName(vectorClassName).asSubclass(Vector.class);
-      vector = vectorClass.newInstance();
-      ((Writable)vector).readFields(in);
+      Class<? extends VectorWritable> writableClass =
+          Class.forName(writableClassName).asSubclass(VectorWritable.class);
+      VectorWritable writable = writableClass.getConstructor().newInstance();
+      writable.readFields(in);
+      vector = writable.get();
     } catch (ClassNotFoundException cnfe) {
       throw new IOException(cnfe);
     } catch (ClassCastException cce) {
@@ -73,6 +85,10 @@ public class VectorWritable extends Configured implements Writable {
       throw new IOException(ie);
     } catch (IllegalAccessException iae) {
       throw new IOException(iae);
+    } catch (NoSuchMethodException nsme) {
+      throw new IOException(nsme);
+    } catch (InvocationTargetException ite) {
+      throw new IOException(ite);
     }
   }
 

@@ -36,9 +36,7 @@ import org.apache.mahout.math.VectorWritable;
  */
 public class PartialVectorMergeReducer extends MapReduceBase implements
     Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
-  
-  private final VectorWritable vectorWritable = new VectorWritable();
-  
+
   private double normPower;
   private int dimension;
   private boolean sequentialAccess;
@@ -49,7 +47,7 @@ public class PartialVectorMergeReducer extends MapReduceBase implements
                      OutputCollector<WritableComparable<?>,VectorWritable> output,
                      Reporter reporter) throws IOException {
     
-    Vector vector = new RandomAccessSparseVector(key.toString(), dimension, 10);
+    Vector vector = new RandomAccessSparseVector(dimension, 10);
     while (values.hasNext()) {
       VectorWritable value = values.next();
       value.get().addTo(vector);
@@ -60,7 +58,7 @@ public class PartialVectorMergeReducer extends MapReduceBase implements
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    vectorWritable.set(vector);
+    VectorWritable vectorWritable = new VectorWritable(vector);
     output.collect(key, vectorWritable);
   }
   

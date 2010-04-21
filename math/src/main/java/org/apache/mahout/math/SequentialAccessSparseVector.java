@@ -20,7 +20,7 @@ package org.apache.mahout.math;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.function.Functions;
 
 /**
  * <p>
@@ -45,35 +45,24 @@ import org.apache.mahout.math.Vector.Element;
  */
 public class SequentialAccessSparseVector extends AbstractVector {
 
-  protected OrderedIntDoubleMapping values;
-
+  private OrderedIntDoubleMapping values;
 
   /** For serialization purposes only. */
   public SequentialAccessSparseVector() {
-    super(null, 0);
-  }
-
-  public SequentialAccessSparseVector(int cardinality, int size) {
-    this(null, cardinality, size);
-  }
-
-  public SequentialAccessSparseVector(String name, int cardinality, int size) {
-    super(name, cardinality);
-    values = new OrderedIntDoubleMapping(size);
-  }
-
-  public SequentialAccessSparseVector(String name, int cardinality) {
-    this(name, cardinality, cardinality / 8); // arbitrary estimate of
-    // 'sparseness'
+    super(0);
   }
 
   public SequentialAccessSparseVector(int cardinality) {
-    this(null, cardinality, cardinality / 8); // arbitrary estimate of
-    // 'sparseness'
+    this(cardinality, cardinality / 8); // arbitrary estimate of 'sparseness'
+  }
+
+  public SequentialAccessSparseVector(int cardinality, int size) {
+    super(cardinality);
+    values = new OrderedIntDoubleMapping(size);
   }
 
   public SequentialAccessSparseVector(Vector other) {
-    this(other.getName(), other.size(), other.getNumNondefaultElements());
+    this(other.size(), other.getNumNondefaultElements());
     Iterator<Element> it = other.iterateNonZero();
     Element e;
     while(it.hasNext() && (e = it.next()) != null) {
@@ -82,13 +71,18 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   public SequentialAccessSparseVector(SequentialAccessSparseVector other, boolean shallowCopy) {
-    super(other.getName(), other.size());
+    super(other.size());
     values = shallowCopy ? other.values : other.values.clone();
   }
 
   public SequentialAccessSparseVector(SequentialAccessSparseVector other) {
-    this(other.getName(), other.size(), other.getNumNondefaultElements());
+    this(other.size(), other.getNumNondefaultElements());
     values = other.values.clone();
+  }
+
+  SequentialAccessSparseVector(int cardinality, OrderedIntDoubleMapping values) {
+    super(cardinality);
+    this.values = values;
   }
 
   @Override
@@ -134,163 +128,21 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   public Iterator<Element> iterateNonZero() {
-    return new IntDoublePairIterator(this);
+    return new NonDefaultIterator();
   }
 
-  public Iterator<Element> iterateAll() {
-    return new IntDoublePairIterator(this, size());
+  public Iterator<Element> iterator() {
+    return new AllIterator();
   }
-
-  /**
-   * Indicate whether the two objects are the same or not. Two {@link org.apache.mahout.math.Vector}s can be equal
-   * even if the underlying implementation is not equal.
-   *
-   * @param o The object to compare
-   * @return true if the objects have the same cell values and same name, false otherwise. <p/> * @see
-   *         AbstractVector#strictEquivalence(Vector, Vector)
-   * @see AbstractVector#equivalent(Vector, Vector)
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof Vector)) {
-      return false;
-    }
-
-    Vector that = (Vector) o;
-    String thisName = getName();
-    String thatName = that.getName();
-    if (this.size() != that.size()) {
-      return false;
-    }
-    if (thisName != null && thatName != null && !thisName.equals(thatName)) {
-      return false;
-    } else if ((thisName != null && thatName == null)
-        || (thatName != null && thisName == null)) {
-      return false;
-    }
-
-    if (that instanceof SequentialAccessSparseVector) {
-      return (values == null ? ((SequentialAccessSparseVector) that).values == null : values
-          .equals(((SequentialAccessSparseVector) that).values));
-    } else {
-      return equivalent(this, that);
-    }
-
-  }
-
-  private static final class IntDoublePairIterator implements java.util.Iterator<Element> {
-    private int offset = 0;
-    private final AbstractElement element;
-    private final int maxOffset;
-
-    IntDoublePairIterator(SequentialAccessSparseVector v) {
-      element = new SparseElement(offset, v);
-      maxOffset = v.values.getNumMappings();
-    }
-    IntDoublePairIterator(SequentialAccessSparseVector v, int cardinality) {
-      element = new DenseElement(offset, v);
-      maxOffset = cardinality;
-    }
-
-    public boolean hasNext() {
-      return offset < maxOffset;
-    }
-
-    public Element next() {
-      if (offset >= maxOffset) {
-        throw new NoSuchElementException();
-      }
-      element.offset = offset++;
-      return element;
-    }
-
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  public Element getElement(int index) {
-    return new DenseElement(index, this);
-  }
-
-
-  private abstract static class AbstractElement implements Element {
-    int offset;
-    final OrderedIntDoubleMapping mapping;
-    int[] indices;
-    double[] values;
-
-    AbstractElement(int ind, SequentialAccessSparseVector v) {
-      offset = ind;
-      mapping = v.values;
-      values = mapping.getValues();
-      indices = mapping.getIndices();
-    }
-  }
-
-  private static final class DenseElement extends AbstractElement {
-
-    private int index;
-    private final SequentialAccessSparseVector v;
-
-    DenseElement(int ind, SequentialAccessSparseVector v) {
-      super(ind, v);
-      this.v = v;
-      index = ind;
-    }
-
-    public double get() {
-      if(index >= indices.length) return 0.0;
-      int cur = indices[index];
-      while(cur < offset && index < indices.length - 1) cur = indices[++index];
-      if(cur == offset) return values[index];
-      return 0.0;
-    }
-
-    public int index() {
-      return offset;
-    }
-
-    public void set(double value) {
-      v.set(offset, value);
-      // indices and values may have changed, must re-grab them.
-      indices = mapping.getIndices();
-      values = mapping.getValues();
-    }
-  }
-
-  private static final class SparseElement extends AbstractElement {
-
-    private final SequentialAccessSparseVector v;
-
-    SparseElement(int ind, SequentialAccessSparseVector v) {
-      super(ind, v);
-      this.v = v;
-    }
-
-    public double get() {
-      return values[offset];
-    }
-
-    public int index() {
-      return indices[offset];
-    }
-
-    public void set(double value) {
-      v.lengthSquared = -1;
-      values[offset] = value;
-    }
-  }
-  
+    
   @Override
   public double dot(Vector x) {
     if (size() != x.size()) {
       throw new CardinalityException(size(), x.size());
     }
-    if(this == x) return dotSelf();
+    if (this == x) {
+      return dotSelf();
+    }
     
     double result = 0;
     if (x instanceof SequentialAccessSparseVector) {
@@ -300,9 +152,13 @@ public class SequentialAccessSparseVector extends AbstractVector {
       Element myCurrent = null;
       Element otherCurrent = null;
       while (myIter.hasNext() && otherIter.hasNext()) {
-        if (myCurrent == null) myCurrent = myIter.next();
-        if (otherCurrent == null) otherCurrent = otherIter.next();
-        
+        if (myCurrent == null) {
+          myCurrent = myIter.next();
+        }
+        if (otherCurrent == null) {
+          otherCurrent = otherIter.next();
+        }
+
         int myIndex = myCurrent.index();
         int otherIndex = otherCurrent.index();
         
@@ -325,6 +181,132 @@ public class SequentialAccessSparseVector extends AbstractVector {
         result += element.get() * x.getQuick(element.index());
       }
       return result;
+    }
+  }
+
+  @Override
+  public Vector minus(Vector that) {
+    if (size() != that.size()) {
+      throw new CardinalityException(size(), that.size());
+    }
+    // Here we compute "that - this" since it's not fast to randomly access "this"
+    // and then invert at the end
+    Vector result = that.clone();
+    Iterator<Element> iter = this.iterateNonZero();
+    while (iter.hasNext()) {
+      Element thisElement = iter.next();
+      int index = thisElement.index();
+      result.setQuick(index, that.getQuick(index) - thisElement.get());
+    }
+    result.assign(Functions.negate);
+    return result;
+  }
+
+
+  private final class NonDefaultIterator implements Iterator<Element> {
+
+    private final NonDefaultElement element = new NonDefaultElement();
+
+    public boolean hasNext() {
+      return element.getNextOffset() < values.getNumMappings();
+    }
+
+    public Element next() {
+      if (element.getNextOffset() >= values.getNumMappings()) {
+        throw new NoSuchElementException();
+      } else {
+        element.advanceOffset();
+        return element;
+      }
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private final class AllIterator implements Iterator<Element> {
+
+    private final AllElement element = new AllElement();
+
+    public boolean hasNext() {
+      return element.getNextIndex() < values.getIndices()[values.getNumMappings()-1];
+    }
+
+    public Element next() {
+      if (element.getNextIndex() >= values.getIndices()[values.getNumMappings()-1]) {
+        throw new NoSuchElementException();
+      } else {
+        element.advanceIndex();
+        return element;
+      }
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private final class NonDefaultElement implements Element {
+
+    private int offset = -1;
+
+    void advanceOffset() {
+      offset++;
+    }
+
+    int getNextOffset() {
+      return offset + 1;
+    }
+
+    public double get() {
+      return values.getValues()[offset];
+    }
+
+    public int index() {
+      return values.getIndices()[offset];
+    }
+
+    public void set(double value) {
+      lengthSquared = -1;      
+      values.getValues()[offset] = value;
+    }
+  }
+
+  private final class AllElement implements Element {
+
+    private int index = -1;
+    private int nextOffset = 0;
+
+    void advanceIndex() {
+      index++;
+      if (index > values.getIndices()[nextOffset]) {
+        nextOffset++;
+      }
+    }
+
+    int getNextIndex() {
+      return index + 1;
+    }
+
+    public double get() {
+      if (index == values.getIndices()[nextOffset]) {
+        return values.getValues()[nextOffset];
+      }
+      return OrderedIntDoubleMapping.DEFAULT_VALUE;
+    }
+
+    public int index() {
+      return index;
+    }
+
+    public void set(double value) {
+      if (index == values.getIndices()[nextOffset]) {
+        values.getValues()[nextOffset] = value;
+      } else {
+        // Yes, this works; the offset into indices of the new value's index will still be nextOffset
+        values.set(index, value);
+      }
     }
   }
   

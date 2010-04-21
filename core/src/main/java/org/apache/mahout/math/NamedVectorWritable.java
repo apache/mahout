@@ -17,20 +17,34 @@
 
 package org.apache.mahout.math;
 
-public class TestDenseVector extends AbstractTestVector {
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-  public TestDenseVector(String name) {
-    super(name);
+public class NamedVectorWritable extends VectorWritable {
+
+  public NamedVectorWritable(NamedVector vector) {
+    super(vector);
+  }
+
+  public NamedVectorWritable() {
   }
 
   @Override
-  Vector generateTestVector(int cardinality) {
-    return new DenseVector(cardinality);
+  public void write(DataOutput out) throws IOException {
+    NamedVector namedVector = (NamedVector) get();
+    out.writeUTF(namedVector.getName());
+    VectorWritable writable = new VectorWritable(namedVector.getDelegate());
+    writable.write(out);
   }
 
   @Override
-  public void testSize() throws Exception {
-    assertEquals("size", 7, getTestVector().getNumNondefaultElements());
+  public void readFields(DataInput in) throws IOException {
+    String name = in.readUTF();
+    VectorWritable writable = new VectorWritable();
+    writable.readFields(in);
+    Vector delegate = writable.get();
+    set(new NamedVector(delegate, name));
   }
 
 }
