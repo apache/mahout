@@ -45,6 +45,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
@@ -225,26 +226,26 @@ public final class FuzzyKMeansDriver {
                             float m) {
     
     boolean converged = false;
-    int iteration = 0;
+    int iteration = 1;
     
     // iterate until the clusters converge
-    while (!converged && (iteration < maxIterations)) {
+    while (!converged && (iteration <= maxIterations)) {
       log.info("Iteration {}", iteration);
       
       // point the output to a new directory per iteration
-      String clustersOut = output + File.separator + "clusters-" + iteration;
+      String clustersOut = output + ClusterBase.CLUSTERS_DIR + iteration;
       converged = runIteration(input, clustersIn, clustersOut, measureClass,
         convergenceDelta, numMapTasks, numReduceTasks, iteration, m);
       
       // now point the input to the old output directory
-      clustersIn = output + File.separator + "clusters-" + iteration;
+      clustersIn = clustersOut;
       iteration++;
     }
     
     // now actually cluster the points
     log.info("Clustering ");
     
-    runClustering(input, clustersIn, output + File.separator + "points", measureClass,
+    runClustering(input, clustersIn, output + ClusterBase.CLUSTERED_POINTS_DIR, measureClass,
       convergenceDelta, numMapTasks, m);
   }
   

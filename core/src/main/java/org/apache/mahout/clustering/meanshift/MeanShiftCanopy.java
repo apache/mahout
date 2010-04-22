@@ -148,7 +148,7 @@ public class MeanShiftCanopy extends ClusterBase {
   
   @Override
   public String getIdentifier() {
-    return (converged ? "V" : "C") + getId();
+    return (converged ? "V-" : "C-") + getId();
   }
   
   void init(MeanShiftCanopy canopy) {

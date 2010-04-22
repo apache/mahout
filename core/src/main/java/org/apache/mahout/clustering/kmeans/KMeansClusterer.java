@@ -81,21 +81,21 @@ public class KMeansClusterer {
     output.collect(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
   }
   
-  public void outputPointWithClusterInfo(NamedVector point,
+  public void outputPointWithClusterInfo(Vector vector,
                                          List<Cluster> clusters,
                                          OutputCollector<IntWritable,VectorWritable> output) throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
       Vector clusterCenter = cluster.getCenter();
-      double distance = measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
+      double distance = measure.distance(clusterCenter.getLengthSquared(), clusterCenter, vector);
       if ((distance < nearestDistance) || (nearestCluster == null)) {
         nearestCluster = cluster;
         nearestDistance = distance;
       }
     }
     
-    output.collect(new IntWritable(nearestCluster.getId()), new VectorWritable(point));
+    output.collect(new IntWritable(nearestCluster.getId()), new VectorWritable(vector));
   }
   
   /**

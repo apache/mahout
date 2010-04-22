@@ -373,10 +373,10 @@ public class TestKmeansClustering extends MahoutTestCase {
       KMeansDriver.runJob("testdata/points", "testdata/clusters", "output", EuclideanDistanceMeasure.class
           .getName(), 0.001, 10, k + 1);
       // now compare the expected clusters with actual
-      File outDir = new File("output/points");
+      File outDir = new File("output/clusteredPoints");
       assertTrue("output dir exists?", outDir.exists());
       // assertEquals("output dir files?", 4, outFiles.length);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/points/part-00000"), conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
       int[] expect = expectedNumPoints[k];
       DummyOutputCollector<IntWritable,VectorWritable> collector = new DummyOutputCollector<IntWritable,VectorWritable>();
       // The key is the clusterId
@@ -424,12 +424,12 @@ public class TestKmeansClustering extends MahoutTestCase {
         .getName(), 0.001, 10, 1);
     
     // now compare the expected clusters with actual
-    File outDir = new File("output/points");
+    File outDir = new File("output/clusteredPoints");
     assertTrue("output dir exists?", outDir.exists());
     String[] outFiles = outDir.list();
     assertEquals("output dir files?", 4, outFiles.length);
     DummyOutputCollector<IntWritable,VectorWritable> collector = new DummyOutputCollector<IntWritable,VectorWritable>();
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/points/part-00000"), conf);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
     
     // The key is the clusterId
     IntWritable clusterId = new IntWritable(0);

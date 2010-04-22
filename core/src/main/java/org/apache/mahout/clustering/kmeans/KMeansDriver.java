@@ -39,6 +39,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
@@ -47,10 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class KMeansDriver {
-  
-  /** The name of the directory used to output final results. */
-  public static final String DEFAULT_OUTPUT_DIRECTORY = "/points";
-  
+    
   private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
   
   private KMeansDriver() {}
@@ -206,19 +204,19 @@ public final class KMeansDriver {
         new Object[] {convergenceDelta, maxIterations, numReduceTasks, VectorWritable.class.getName()});
     }
     boolean converged = false;
-    int iteration = 0;
-    while (!converged && (iteration < maxIterations)) {
+    int iteration = 1;
+    while (!converged && (iteration <= maxIterations)) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String clustersOut = output + "/clusters-" + iteration;
+      String clustersOut = output + ClusterBase.CLUSTERS_DIR + iteration;
       converged = runIteration(input, clustersIn, clustersOut, measureClass, delta, numReduceTasks, iteration);
       // now point the input to the old output directory
-      clustersIn = output + "/clusters-" + iteration;
+      clustersIn = clustersOut;
       iteration++;
     }
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, output + DEFAULT_OUTPUT_DIRECTORY, measureClass, delta);
+    runClustering(input, clustersIn, output + ClusterBase.CLUSTERED_POINTS_DIR, measureClass, delta);
   }
   
   /**
@@ -265,7 +263,6 @@ public final class KMeansDriver {
     conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
-    conf.set(KMeansConfigKeys.ITERATION_NUMBER, String.valueOf(iteration));
     
     try {
       JobClient.runJob(conf);

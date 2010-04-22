@@ -204,7 +204,7 @@ public class TestMeanShift extends MahoutTestCase {
     for (Map.Entry<String, MeanShiftCanopy> stringMeanShiftCanopyEntry : refCanopyMap.entrySet()) {
       MeanShiftCanopy ref = stringMeanShiftCanopyEntry.getValue();
 
-      MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "V" : "C") + ref.getCanopyId());
+      MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "V-" : "C-") + ref.getCanopyId());
       assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId());
       assertEquals("centers(" + ref.getIdentifier() + ')', ref.getCenter().asFormatString(), canopy.getCenter().asFormatString());
       assertEquals("bound points", ref.getBoundPoints().size(), canopy.getBoundPoints().size());
@@ -272,7 +272,7 @@ public class TestMeanShift extends MahoutTestCase {
     for (Map.Entry<String, MeanShiftCanopy> mapEntry : reducerReferenceMap.entrySet()) {
       MeanShiftCanopy refCanopy = mapEntry.getValue();
 
-      List<MeanShiftCanopy> values = reduceCollector.getValue(new Text((refCanopy.isConverged() ? "V" : "C")
+      List<MeanShiftCanopy> values = reduceCollector.getValue(new Text((refCanopy.isConverged() ? "V-" : "C-")
           + refCanopy.getCanopyId()));
       assertEquals("values", 1, values.size());
       MeanShiftCanopy reducerCanopy = values.get(0);
@@ -306,7 +306,7 @@ public class TestMeanShift extends MahoutTestCase {
     // now run the Job
     MeanShiftCanopyJob.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10);
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
-    Path outPart = new Path("output/canopies-2/part-00000");
+    Path outPart = new Path("output/clusters-3/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();
     MeanShiftCanopy value = new MeanShiftCanopy();

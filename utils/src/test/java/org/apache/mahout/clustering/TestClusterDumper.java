@@ -37,7 +37,9 @@ import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
+import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -135,16 +137,33 @@ public class TestClusterDumper extends MahoutTestCase {
   public void testCanopy() throws Exception { // now run the Job
     CanopyClusteringJob.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/canopies", null);
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-0", null);
     clusterDumper.printClusters();
   }
 
   public void testKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata/points", "testdata/canopies", EuclideanDistanceMeasure.class.getName(), 8, 4);
+    CanopyDriver.runJob("testdata/points", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 8, 4);
     // now run the KMeans job
-    KMeansDriver.runJob("testdata/points", "testdata/canopies", "output", EuclideanDistanceMeasure.class.getName(),
+    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(),
         0.001, 10, 1);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-2", null);
+    clusterDumper.printClusters();
+  }
+
+  public void testFuzzyKmeans() throws Exception {
+    // now run the Canopy job to prime kMeans canopies
+    CanopyDriver.runJob("testdata/points", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 8, 4);
+    // now run the KMeans job
+    FuzzyKMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 1, 2);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-3", null);
+    clusterDumper.printClusters();
+  }
+
+  public void testMeanShift() throws Exception {
+    MeanShiftCanopyJob.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 9, 1.0, 0.001, 10);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-1", null);
     clusterDumper.printClusters();
@@ -156,7 +175,7 @@ public class TestClusterDumper extends MahoutTestCase {
         L1ModelDistribution.class.getName(), prototype.getClass().getName(), prototype
             .size(), 15, 10, 1.0, 1);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/state-10", null);
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", null);
     clusterDumper.printClusters();
   }
 }

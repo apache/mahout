@@ -41,10 +41,9 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.dirichlet.models.VectorModelDistribution;
-import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopyClusterMapper;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Vector;
@@ -54,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 public class DirichletDriver {
   
+
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.dirichlet.stateIn";
   
   public static final String MODEL_FACTORY_KEY = "org.apache.mahout.clustering.dirichlet.modelFactory";
@@ -215,20 +215,20 @@ public class DirichletDriver {
                                             NoSuchMethodException,
                                             InvocationTargetException {
     
-    String stateIn = output + "/state-0";
-    writeInitialState(output, stateIn, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0);
+    String clustersIn = output + ClusterBase.INITIAL_CLUSTERS_DIR;
+    writeInitialState(output, clustersIn, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0);
     
-    for (int iteration = 0; iteration < maxIterations; iteration++) {
+    for (int iteration = 1; iteration <= maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String stateOut = output + "/state-" + (iteration + 1);
-      runIteration(input, stateIn, stateOut, modelFactory, modelPrototype, prototypeSize, numClusters,
+      String clustersOut = output + ClusterBase.CLUSTERS_DIR + iteration;
+      runIteration(input, clustersIn, clustersOut, modelFactory, modelPrototype, prototypeSize, numClusters,
         alpha_0, numReducers);
       // now point the input to the old output directory
-      stateIn = stateOut;
+      clustersIn = clustersOut;
     }
     // now cluster the most likely points
-    runClustering(input, stateIn, output + "/clusters");
+    runClustering(input, clustersIn, output + ClusterBase.CLUSTERED_POINTS_DIR);
   }
   
   private static void writeInitialState(String output,

@@ -168,12 +168,12 @@ public class Cluster extends ClusterBase {
   
   @Override
   public String toString() {
-    return getIdentifier() + " - " + getCenter().asFormatString();
+    return getIdentifier() + ": " + getCenter().asFormatString();
   }
   
   @Override
   public String getIdentifier() {
-    return (converged ? "V" : "C") + getId();
+    return (converged ? "V-" : "C-") + getId();
   }
   
   /**

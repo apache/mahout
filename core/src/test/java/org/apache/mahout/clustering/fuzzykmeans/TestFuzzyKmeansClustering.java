@@ -205,11 +205,11 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         EuclideanDistanceMeasure.class.getName(), 0.001, 2, 1, k + 1, 2);
       
       // now compare the expected clusters with actual
-      File outDir = new File("output/points");
+      File outDir = new File("output/clusteredPoints");
       assertTrue("output dir exists?", outDir.exists());
       outDir.list();
       // assertEquals("output dir files?", 4, outFiles.length);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/points/part-00000"), conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
       IntWritable key = new IntWritable();
       VectorWritable out = new VectorWritable();
       while (reader.next(key, out)) {

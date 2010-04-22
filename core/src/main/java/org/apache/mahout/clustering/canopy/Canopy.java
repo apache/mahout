@@ -122,12 +122,12 @@ public class Canopy extends ClusterBase {
   
   @Override
   public String toString() {
-    return getIdentifier() + " - " + getCenter().asFormatString();
+    return getIdentifier() + ": " + getCenter().asFormatString();
   }
   
   @Override
   public String getIdentifier() {
-    return "C" + getId();
+    return "C-" + getId();
   }
   
   /**

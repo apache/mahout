@@ -31,54 +31,55 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class DirichletCluster<O> implements Writable, Cluster {
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.totalCount = in.readDouble();
     this.model = readModel(in);
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(totalCount);
     writeModel(out, model);
   }
-  
+
   private Model<O> model; // the model for this iteration
-  
+
   private double totalCount; // total count of observations for the model
-  
+
   public DirichletCluster(Model<O> model, double totalCount) {
     super();
     this.model = model;
     this.totalCount = totalCount;
   }
-  
+
   public DirichletCluster(Model<O> model) {
     super();
     this.model = model;
     this.totalCount = 0.0;
   }
-  
+
   public DirichletCluster() {
     super();
   }
-  
+
   public Model<O> getModel() {
     return model;
   }
-  
+
   public void setModel(Model<O> model) {
     this.model = model;
     this.totalCount += model.count();
   }
-  
+
   public double getTotalCount() {
     return totalCount;
   }
-  
-  private static final Type clusterType = new TypeToken<DirichletCluster<Vector>>() { }.getType();
-  
+
+  private static final Type clusterType = new TypeToken<DirichletCluster<Vector>>() {
+  }.getType();
+
   /** Reads a typed Model instance from the input stream */
   public static <O> Model<O> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
@@ -95,18 +96,18 @@ public class DirichletCluster<O> implements Writable, Cluster {
     model.readFields(in);
     return model;
   }
-  
+
   /** Writes a typed Model instance to the output stream */
   public static void writeModel(DataOutput out, Model<?> model) throws IOException {
     out.writeUTF(model.getClass().getName());
     model.write(out);
   }
-  
+
   @Override
   public String asFormatString(String[] bindings) {
-    return model.toString();
+    return "C-" + model.getId() + ": " + model.toString();
   }
-  
+
   @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();
@@ -129,5 +130,5 @@ public class DirichletCluster<O> implements Writable, Cluster {
   public int getNumPoints() {
     return model.getNumPoints();
   }
-  
+
 }

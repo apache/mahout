@@ -43,7 +43,7 @@ public class KMeansClusterMapper extends MapReduceBase implements
                   VectorWritable point,
                   OutputCollector<IntWritable,VectorWritable> output,
                   Reporter reporter) throws IOException {
-    clusterer.outputPointWithClusterInfo((NamedVector) point.get(), clusters, output);
+    clusterer.outputPointWithClusterInfo(point.get(), clusters, output);
   }
   
   @Override

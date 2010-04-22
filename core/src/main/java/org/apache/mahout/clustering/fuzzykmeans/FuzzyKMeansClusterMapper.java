@@ -42,7 +42,7 @@ public class FuzzyKMeansClusterMapper extends MapReduceBase implements
   @Override
   public void map(WritableComparable<?> key, VectorWritable point, OutputCollector<IntWritable, VectorWritable> output,
       Reporter reporter) throws IOException {
-    clusterer.outputPointWithClusterProbabilities(key.toString(), (NamedVector) point.get(), clusters, output);
+    clusterer.outputPointWithClusterProbabilities(key.toString(), point.get(), clusters, output);
   }
 
   /**

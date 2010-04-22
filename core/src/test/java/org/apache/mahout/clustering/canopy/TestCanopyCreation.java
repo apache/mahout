@@ -352,12 +352,12 @@ public class TestCanopyCreation extends MahoutTestCase {
     Text key = new Text();
     Canopy canopy = new Canopy();
     assertTrue("more to come", reader.next(key, canopy));
-    assertEquals("1st key", "C0", key.toString());
+    assertEquals("1st key", "C-0", key.toString());
     // Canopy canopy = new Canopy(value); //Canopy.decodeCanopy(value.toString());
     assertEquals("1st x value", 1.5, canopy.getCenter().get(0));
     assertEquals("1st y value", 1.5, canopy.getCenter().get(1));
     assertTrue("more to come", reader.next(key, canopy));
-    assertEquals("2nd key", "C1", key.toString());
+    assertEquals("2nd key", "C-1", key.toString());
     // canopy = Canopy.decodeCanopy(canopy.toString());
     assertEquals("1st x value", 4.333333333333334, canopy.getCenter().get(0));
     assertEquals("1st y value", 4.333333333333334, canopy.getCenter().get(1));
@@ -388,11 +388,11 @@ public class TestCanopyCreation extends MahoutTestCase {
     Text key = new Text();
     Canopy value = new Canopy();
     assertTrue("more to come", reader.next(key, value));
-    assertEquals("1st key", "C0", key.toString());
+    assertEquals("1st key", "C-0", key.toString());
     assertEquals("1st x value", 1.8, value.getCenter().get(0));
     assertEquals("1st y value", 1.8, value.getCenter().get(1));
     assertTrue("more to come", reader.next(key, value));
-    assertEquals("2nd key", "C1", key.toString());
+    assertEquals("2nd key", "C-1", key.toString());
     assertEquals("1st x value", 4.433333333333334, value.getCenter().get(0));
     assertEquals("1st y value", 4.433333333333334, value.getCenter().get(1));
     assertFalse("more to come", reader.next(key, value));
@@ -493,7 +493,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output", ManhattanDistanceMeasure.class.getName(), 3.1, 2.1);
     // TODO: change
-    Path path = new Path("output/clusters/part-00000");
+    Path path = new Path("output/clusteredPoints/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;
     /*
@@ -525,7 +525,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
     // now run the Job
     CanopyClusteringJob.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
-    Path path = new Path("output/clusters/part-00000");
+    Path path = new Path("output/clusteredPoints/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;
     /*
@@ -566,12 +566,12 @@ public class TestCanopyCreation extends MahoutTestCase {
     Text key = new Text();
     Canopy value = new Canopy();
     assertTrue("more to come", reader.next(key, value));
-    assertEquals("1st key", "C0", key.toString());
+    assertEquals("1st key", "C-0", key.toString());
     
     assertEquals("1st x value", 1.5, value.getCenter().get(0));
     assertEquals("1st y value", 1.5, value.getCenter().get(1));
     assertTrue("more to come", reader.next(key, value));
-    assertEquals("2nd key", "C1", key.toString());
+    assertEquals("2nd key", "C-1", key.toString());
     
     assertEquals("1st x value", 4.333333333333334, value.getCenter().get(0));
     assertEquals("1st y value", 4.333333333333334, value.getCenter().get(1));

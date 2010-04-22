@@ -40,6 +40,16 @@ import com.google.gson.reflect.TypeToken;
  *
  */
 public abstract class ClusterBase implements Writable, Cluster {
+  
+  // default directory for all clustered points
+  public static final String CLUSTERED_POINTS_DIR = "/clusteredPoints";
+
+  // default directory for initial clusters to prime iterative clustering algorithms
+  public static final String INITIAL_CLUSTERS_DIR = "/clusters-0";
+
+  // default directory for output of clusters per iteration
+  public static final String CLUSTERS_DIR = "/clusters-";
+
 
   // this cluster's clusterId
   private int id;

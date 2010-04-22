@@ -27,6 +27,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
@@ -42,12 +43,7 @@ import org.slf4j.LoggerFactory;
 public final class CanopyClusteringJob {
   
   private static final Logger log = LoggerFactory.getLogger(CanopyClusteringJob.class);
-  
-  /** The default name of the canopies output sub-directory. */
-  public static final String DEFAULT_CANOPIES_OUTPUT_DIRECTORY = "/canopies";
-  /** The default name of the directory used to output clusters. */
-  public static final String DEFAULT_CLUSTER_OUTPUT_DIRECTORY = ClusterDriver.DEFAULT_CLUSTER_OUTPUT_DIRECTORY;
-  
+    
   private CanopyClusteringJob() { }
   
   /**
@@ -135,9 +131,10 @@ public final class CanopyClusteringJob {
    */
   public static void runJob(String input, String output,
                             String measureClassName, double t1, double t2) throws IOException {
-    CanopyDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY,
+    String canopyOutputDir = output + ClusterBase.CLUSTERS_DIR + "0";
+    CanopyDriver.runJob(input, canopyOutputDir,
       measureClassName, t1, t2);
-    ClusterDriver.runJob(input, output + DEFAULT_CANOPIES_OUTPUT_DIRECTORY, output,
+    ClusterDriver.runJob(input, canopyOutputDir, output,
       measureClassName, t1, t2);
   }
   

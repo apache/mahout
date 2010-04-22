@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 public final class ClusterDriver {
   
-  public static final String DEFAULT_CLUSTER_OUTPUT_DIRECTORY = "/clusters";
+  public static final String DEFAULT_CLUSTERED_POINTS_DIRECTORY = "/clusteredPoints";
   
   private static final Logger log = LoggerFactory.getLogger(ClusterDriver.class);
   
@@ -159,7 +159,7 @@ public final class ClusterDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     FileInputFormat.setInputPaths(conf, new Path(points));
-    Path outPath = new Path(output + DEFAULT_CLUSTER_OUTPUT_DIRECTORY);
+    Path outPath = new Path(output + DEFAULT_CLUSTERED_POINTS_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setMapperClass(ClusterMapper.class);

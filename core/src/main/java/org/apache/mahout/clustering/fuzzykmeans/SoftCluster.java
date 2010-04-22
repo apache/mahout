@@ -157,15 +157,15 @@ public class SoftCluster extends ClusterBase{
   
   @Override
   public String toString() {
-    return getIdentifier() + " - " + getCenter().asFormatString();
+    return getIdentifier() + ": " + getCenter().asFormatString();
   }
   
   @Override
   public String getIdentifier() {
     if (converged) {
-      return "V" + this.getId();
+      return "V-" + this.getId();
     } else {
-      return "C" + this.getId();
+      return "C-" + this.getId();
     }
   }
   

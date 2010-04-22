@@ -25,9 +25,7 @@ public interface KMeansConfigKeys {
   String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.kmeans.measure";
   /** Configuration key for convergence threshold. */
   String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.kmeans.convergence";
-  /** Configuration key for ?? */
+  /** Configuration key for iteration cluster path */
   String CLUSTER_PATH_KEY = "org.apache.mahout.clustering.kmeans.path";
-  /** The number of iterations that have taken place */
-  String ITERATION_NUMBER = "org.apache.mahout.clustering.kmeans.iteration";
   
 }
