@@ -84,7 +84,7 @@
         <lucene.version>2.9.1</lucene.version>
         <hadoop.version>0.20.2</hadoop.version>
         <maven.clover.multiproject>true</maven.clover.multiproject>
-        <collections.version>1.0-SNAPSHOT</collections.version>
+        <collections.version>1.0</collections.version>
     </properties>
     <repositories>
         <repository>
