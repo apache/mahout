@@ -25,7 +25,8 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link WritableComparable} encapsulating two items. */
-public final class EntityEntityWritable implements WritableComparable<EntityEntityWritable> {
+public final class EntityEntityWritable
+    implements WritableComparable<EntityEntityWritable>, Cloneable {
   
   private long aID;
   private long bID;
@@ -46,6 +47,11 @@ public final class EntityEntityWritable implements WritableComparable<EntityEnti
   public long getBID() {
     return bID;
   }
+
+  public void set(long aID, long bID) {
+    this.aID = aID;
+    this.bID = bID;
+  }
   
   @Override
   public void write(DataOutput out) throws IOException {
@@ -57,12 +63,6 @@ public final class EntityEntityWritable implements WritableComparable<EntityEnti
   public void readFields(DataInput in) throws IOException {
     aID = in.readLong();
     bID = in.readLong();
-  }
-  
-  public static EntityEntityWritable read(DataInput in) throws IOException {
-    EntityEntityWritable writable = new EntityEntityWritable();
-    writable.readFields(in);
-    return writable;
   }
   
   @Override
@@ -92,6 +92,11 @@ public final class EntityEntityWritable implements WritableComparable<EntityEnti
   @Override
   public String toString() {
     return aID + "\t" + bID;
+  }
+
+  @Override
+  public EntityEntityWritable clone() {
+    return new EntityEntityWritable(aID, bID);
   }
   
 }

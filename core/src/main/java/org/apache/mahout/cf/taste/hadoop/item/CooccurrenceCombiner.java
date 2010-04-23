@@ -26,19 +26,17 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
 import org.apache.mahout.math.function.IntIntProcedure;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
-public final class UserVectorToCooccurrenceReducer extends MapReduceBase implements
-    Reducer<IntWritable, EntityCountWritable,IntWritable, RandomAccessSparseVectorWritable> {
+public final class CooccurrenceCombiner extends MapReduceBase implements
+    Reducer<IntWritable,EntityCountWritable,IntWritable,EntityCountWritable> {
 
   @Override
-  public void reduce(IntWritable index1,
+  public void reduce(final IntWritable index1,
                      Iterator<EntityCountWritable> index2s,
-                     OutputCollector<IntWritable,RandomAccessSparseVectorWritable> output,
-                     Reporter reporter) throws IOException {
+                     final OutputCollector<IntWritable,EntityCountWritable> output,
+                     Reporter reporter) {
 
     OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
     while (index2s.hasNext()) {
@@ -48,16 +46,18 @@ public final class UserVectorToCooccurrenceReducer extends MapReduceBase impleme
       indexCounts.put(index, oldValue + writable.getCount());
     }
 
-    final RandomAccessSparseVector cooccurrenceRow =
-        new RandomAccessSparseVector(Integer.MAX_VALUE, 1000);
+    final EntityCountWritable entityCount = new EntityCountWritable();
     indexCounts.forEachPair(new IntIntProcedure() {
       @Override
       public boolean apply(int index, int count) {
-        cooccurrenceRow.set(index, count);
+        entityCount.set(index, count);
+        try {
+          output.collect(index1, entityCount);
+        } catch (IOException ioe) {
+          throw new IllegalStateException(ioe);
+        }
         return true;
       }
     });
-    output.collect(index1, new RandomAccessSparseVectorWritable(cooccurrenceRow));
   }
-  
 }

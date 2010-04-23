@@ -59,7 +59,8 @@ public final class ItemPairWritable implements WritableComparable<ItemPairWritab
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemItemWritable = EntityEntityWritable.read(in);
+    itemItemWritable = new EntityEntityWritable();
+    itemItemWritable.readFields(in);
     multipliedLength = in.readDouble();
   }
 

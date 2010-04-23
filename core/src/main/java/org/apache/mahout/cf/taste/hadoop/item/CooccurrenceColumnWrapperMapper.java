@@ -18,39 +18,24 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.RandomAccessSparseVectorWritable;
-import org.apache.mahout.math.Vector;
 
-public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
-    Mapper<LongWritable, RandomAccessSparseVectorWritable,IntWritable, EntityCountWritable> {
-  
+public final class CooccurrenceColumnWrapperMapper extends MapReduceBase implements
+    Mapper<IntWritable, RandomAccessSparseVectorWritable,IntWritable,VectorOrPrefWritable> {
+
   @Override
-  public void map(LongWritable userID,
-                  RandomAccessSparseVectorWritable userVector,
-                  OutputCollector<IntWritable,EntityCountWritable> output,
+  public void map(IntWritable key,
+                  RandomAccessSparseVectorWritable value,
+                  OutputCollector<IntWritable,VectorOrPrefWritable> output,
                   Reporter reporter) throws IOException {
-    Iterator<Vector.Element> it = userVector.get().iterateNonZero();
-    EntityCountWritable entityCount = new EntityCountWritable();
-    IntWritable writable1 = new IntWritable();
-    while (it.hasNext()) {
-      int index1 = it.next().index();
-      writable1.set(index1);
-      Iterator<Vector.Element> it2 = userVector.get().iterateNonZero();
-      while (it2.hasNext()) {
-        int index2 = it2.next().index();
-        entityCount.set(index2, 1);
-        output.collect(writable1, entityCount);
-      }
-    }
+    output.collect(key, new VectorOrPrefWritable((RandomAccessSparseVector) value.get()));
   }
-  
+
 }

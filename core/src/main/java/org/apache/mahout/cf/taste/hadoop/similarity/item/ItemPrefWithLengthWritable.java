@@ -64,7 +64,8 @@ public final class ItemPrefWithLengthWritable implements Writable, Cloneable {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemPref = EntityPrefWritable.read(in);
+    itemPref = new EntityPrefWritable();
+    itemPref.readFields(in);
     length = in.readDouble();
   }
 

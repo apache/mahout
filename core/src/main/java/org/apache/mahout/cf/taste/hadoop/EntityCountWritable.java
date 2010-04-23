@@ -23,73 +23,73 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.common.RandomUtils;
+import org.apache.hadoop.io.WritableUtils;
 
-/** A {@link Writable} encapsulating an item ID and a preference value. */
-public final class EntityPrefWritable extends LongWritable implements Cloneable {
-  
-  private float prefValue;
-  
-  public EntityPrefWritable() {
+/** A {@link Writable} encapsulating an item ID and a count . */
+public final class EntityCountWritable extends LongWritable implements Cloneable {
+
+  private int count;
+
+  public EntityCountWritable() {
     // do nothing
   }
-  
-  public EntityPrefWritable(long itemID, float prefValue) {
+
+  public EntityCountWritable(long itemID, int count) {
     super(itemID);
-    this.prefValue = prefValue;
+    this.count = count;
   }
-  
-  public EntityPrefWritable(EntityPrefWritable other) {
-    this(other.get(), other.getPrefValue());
+
+  public EntityCountWritable(EntityCountWritable other) {
+    this(other.get(), other.getCount());
   }
 
   public long getID() {
     return get();
   }
 
-  public float getPrefValue() {
-    return prefValue;
+  public int getCount() {
+    return count;
   }
 
-  public void set(long id, float prefValue) {
+  public void set(long id, int count) {
     super.set(id);
-    this.prefValue = prefValue;
+    this.count = count;
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    out.writeFloat(prefValue);
+    WritableUtils.writeVInt(out, count);
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    prefValue = in.readFloat();
+    count = WritableUtils.readVInt(in);
   }
 
   @Override
   public int hashCode() {
-    return super.hashCode() ^ RandomUtils.hashFloat(prefValue);
+    return super.hashCode() ^ count;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof EntityPrefWritable)) {
+    if (!(o instanceof EntityCountWritable)) {
       return false;
     }
-    EntityPrefWritable other = (EntityPrefWritable) o;
-    return get() == other.get() && prefValue == other.getPrefValue();
+    EntityCountWritable other = (EntityCountWritable) o;
+    return get() == other.get() && count == other.getCount();
   }
 
   @Override
   public String toString() {
-    return get() + "\t" + prefValue;
+    return get() + "\t" + count;
   }
 
   @Override
-  public EntityPrefWritable clone() {
-    return new EntityPrefWritable(get(), prefValue);
+  public EntityCountWritable clone() {
+    return new EntityCountWritable(get(), count);
   }
-  
+
 }

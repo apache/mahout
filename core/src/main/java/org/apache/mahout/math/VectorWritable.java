@@ -40,7 +40,7 @@ public class VectorWritable extends Configured implements Writable {
     return vector;
   }
 
-  protected void set(Vector vector) {
+  public void set(Vector vector) {
     this.vector = vector;
   }
 

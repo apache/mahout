@@ -20,44 +20,31 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.RandomAccessSparseVectorWritable;
-import org.apache.mahout.math.function.IntIntProcedure;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
+import org.apache.mahout.math.Vector;
 
-public final class UserVectorToCooccurrenceReducer extends MapReduceBase implements
-    Reducer<IntWritable, EntityCountWritable,IntWritable, RandomAccessSparseVectorWritable> {
+public final class AggregateCombiner extends MapReduceBase implements
+    Reducer<LongWritable,RandomAccessSparseVectorWritable,LongWritable,RandomAccessSparseVectorWritable> {
 
   @Override
-  public void reduce(IntWritable index1,
-                     Iterator<EntityCountWritable> index2s,
-                     OutputCollector<IntWritable,RandomAccessSparseVectorWritable> output,
+  public void reduce(LongWritable key,
+                     Iterator<RandomAccessSparseVectorWritable> values,
+                     OutputCollector<LongWritable, RandomAccessSparseVectorWritable> output,
                      Reporter reporter) throws IOException {
-
-    OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
-    while (index2s.hasNext()) {
-      EntityCountWritable writable = index2s.next();
-      int index = (int) writable.getID();
-      int oldValue = indexCounts.get(index);
-      indexCounts.put(index, oldValue + writable.getCount());
+    if (!values.hasNext()) {
+      return;
     }
-
-    final RandomAccessSparseVector cooccurrenceRow =
-        new RandomAccessSparseVector(Integer.MAX_VALUE, 1000);
-    indexCounts.forEachPair(new IntIntProcedure() {
-      @Override
-      public boolean apply(int index, int count) {
-        cooccurrenceRow.set(index, count);
-        return true;
-      }
-    });
-    output.collect(index1, new RandomAccessSparseVectorWritable(cooccurrenceRow));
+    Vector partial = values.next().get();
+    while (values.hasNext()) {
+      partial = partial.plus(values.next().get());
+    }
+    output.collect(key, new RandomAccessSparseVectorWritable((RandomAccessSparseVector) partial));
   }
-  
+
 }

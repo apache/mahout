@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
@@ -29,17 +31,20 @@ import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapFileOutputFormat;
+import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.mapred.lib.MultipleInputs;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
-import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
-import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.RandomAccessSparseVectorWritable;
 
 /**
  * <p>Runs a completely distributed recommender job as a series of mapreduces.</p>
@@ -91,38 +96,62 @@ public final class RecommenderJob extends AbstractJob {
     String userVectorPath = tempDirPath + "/userVectors";
     String itemIDIndexPath = tempDirPath + "/itemIDIndex";
     String cooccurrencePath = tempDirPath + "/cooccurrence";
-    
-    JobConf itemIDIndexConf = prepareJobConf(inputPath, itemIDIndexPath,
-      TextInputFormat.class, ItemIDIndexMapper.class, IntWritable.class, LongWritable.class,
-      ItemIDIndexReducer.class, IntWritable.class, LongWritable.class, MapFileOutputFormat.class);
+    String parialMultiplyPath = tempDirPath + "/partialMultiply";
+
+    JobConf itemIDIndexConf = prepareJobConf(
+      inputPath, itemIDIndexPath, TextInputFormat.class,
+      ItemIDIndexMapper.class, IntWritable.class, LongWritable.class,
+      ItemIDIndexReducer.class, IntWritable.class, LongWritable.class,
+      MapFileOutputFormat.class);
     JobClient.runJob(itemIDIndexConf);
     
-    JobConf toUserVectorConf = prepareJobConf(inputPath, userVectorPath,
-      TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class,
-      booleanData ? LongWritable.class : EntityPrefWritable.class,
-      ToUserVectorReducer.class, LongWritable.class, VectorWritable.class, SequenceFileOutputFormat.class);
+    JobConf toUserVectorConf = prepareJobConf(
+      inputPath, userVectorPath, TextInputFormat.class,
+      ToItemPrefsMapper.class, LongWritable.class, booleanData ? LongWritable.class : EntityPrefWritable.class,
+      ToUserVectorReducer.class, LongWritable.class, RandomAccessSparseVectorWritable.class,
+      SequenceFileOutputFormat.class);
     toUserVectorConf.setBoolean(BOOLEAN_DATA, booleanData);
     JobClient.runJob(toUserVectorConf);
-    
-    JobConf toCooccurrenceConf = prepareJobConf(userVectorPath, cooccurrencePath,
-      SequenceFileInputFormat.class, UserVectorToCooccurrenceMapper.class, IntWritable.class,
-      IntWritable.class, UserVectorToCooccurrenceReducer.class, IntWritable.class, VectorWritable.class,
-      MapFileOutputFormat.class);
+
+    JobConf toCooccurrenceConf = prepareJobConf(
+      userVectorPath, cooccurrencePath, SequenceFileInputFormat.class,
+      UserVectorToCooccurrenceMapper.class, IntWritable.class, EntityCountWritable.class,
+      UserVectorToCooccurrenceReducer.class, IntWritable.class, RandomAccessSparseVectorWritable.class,
+      SequenceFileOutputFormat.class);
+    toCooccurrenceConf.setInt("io.sort.mb", 600);
+    toCooccurrenceConf.setClass("mapred.combiner.class", CooccurrenceCombiner.class, Reducer.class);
     JobClient.runJob(toCooccurrenceConf);
-    
-    JobConf recommenderConf = prepareJobConf(userVectorPath, outputPath,
-      SequenceFileInputFormat.class, RecommenderMapper.class, LongWritable.class,
-      RecommendedItemsWritable.class, IdentityReducer.class, LongWritable.class,
-      RecommendedItemsWritable.class, TextOutputFormat.class);
-    recommenderConf.setBoolean(BOOLEAN_DATA, booleanData);    
-    recommenderConf.set(RecommenderMapper.COOCCURRENCE_PATH, cooccurrencePath);
-    recommenderConf.set(RecommenderMapper.ITEMID_INDEX_PATH, itemIDIndexPath);
-    recommenderConf.setInt(RecommenderMapper.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
+
+    JobConf partialMultiplyConf = prepareJobConf(
+      cooccurrencePath, parialMultiplyPath, SequenceFileInputFormat.class,
+      CooccurrenceColumnWrapperMapper.class, IntWritable.class, VectorOrPrefWritable.class,
+      PartialMultiplyReducer.class, LongWritable.class, RandomAccessSparseVectorWritable.class,
+      SequenceFileOutputFormat.class);
+    MultipleInputs.addInputPath(
+        partialMultiplyConf,
+        new Path(cooccurrencePath).makeQualified(FileSystem.get(partialMultiplyConf)),
+        SequenceFileInputFormat.class, CooccurrenceColumnWrapperMapper.class);
+    MultipleInputs.addInputPath(
+        partialMultiplyConf,
+        new Path(userVectorPath).makeQualified(FileSystem.get(partialMultiplyConf)),
+        SequenceFileInputFormat.class, UserVectorSplitterMapper.class);
     if (usersFile != null) {
-      recommenderConf.set(RecommenderMapper.USERS_FILE, usersFile);
+      partialMultiplyConf.set(UserVectorSplitterMapper.USERS_FILE, usersFile);
     }
-    recommenderConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
-    JobClient.runJob(recommenderConf);
+    JobClient.runJob(partialMultiplyConf);
+
+    JobConf aggregateAndRecommendConf = prepareJobConf(
+        parialMultiplyPath, outputPath, SequenceFileInputFormat.class,
+        IdentityMapper.class, LongWritable.class, RandomAccessSparseVectorWritable.class,
+        AggregateAndRecommendReducer.class, LongWritable.class, RecommendedItemsWritable.class,
+        TextOutputFormat.class);
+    aggregateAndRecommendConf.setInt("io.sort.mb", 600);
+    aggregateAndRecommendConf.setClass("mapred.combiner.class", AggregateCombiner.class, Reducer.class);
+    aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath);
+    aggregateAndRecommendConf.setInt(AggregateAndRecommendReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
+    aggregateAndRecommendConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
+    JobClient.runJob(aggregateAndRecommendConf);
+
     return 0;
   }
   

@@ -176,10 +176,13 @@ public abstract class AbstractJob extends Configured implements Tool {
       jobConf.setBoolean("mapred.output.compress", true);
       // otherwise leave it to its default value
     }
+    jobConf.setCompressMapOutput(true);
+
     String customJobName = jobConf.get("mapred.job.name");
-    if (customJobName != null) {
-      jobConf.set("mapred.job.name", customJobName + '-' + mapper.getSimpleName() + '-' + reducer.getSimpleName());
+    if (customJobName == null) {
+      customJobName = getClass().getSimpleName();
     }
+    jobConf.set("mapred.job.name", customJobName + '-' + mapper.getSimpleName() + '-' + reducer.getSimpleName());
 
     jobConf.setClass("mapred.output.format.class", outputFormat, OutputFormat.class);
     // Override this:    

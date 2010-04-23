@@ -47,6 +47,10 @@ public final class RecommendedItemsWritable implements Writable {
   public List<RecommendedItem> getRecommendedItems() {
     return recommended;
   }
+
+  public void set(List<RecommendedItem> recommended) {
+    this.recommended = recommended;
+  }
   
   @Override
   public void write(DataOutput out) throws IOException {
@@ -68,12 +72,6 @@ public final class RecommendedItemsWritable implements Writable {
       RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
       recommended.add(recommendedItem);
     }
-  }
-  
-  public static RecommendedItemsWritable read(DataInput in) throws IOException {
-    RecommendedItemsWritable writable = new RecommendedItemsWritable();
-    writable.readFields(in);
-    return writable;
   }
   
   @Override
