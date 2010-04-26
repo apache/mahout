@@ -55,7 +55,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {3.0, 3.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertTrue(Double.isNaN(correlation));
+    assertEquals(1.0, correlation);
   }
 
   public void testNoCorrelation1() throws Exception {
@@ -66,7 +66,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {-3.0, 2.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertCorrelationEquals(0.424465381883345, correlation);
+    assertCorrelationEquals(0.24357264905599915, correlation);
   }
 
   public void testNoCorrelation1Weighted() throws Exception {
@@ -77,7 +77,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {-3.0, 2.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
-    assertCorrelationEquals(0.8081551272944483, correlation);
+    assertCorrelationEquals(0.747857549685333, correlation);
   }
 
   public void testNoCorrelation2() throws Exception {
@@ -88,7 +88,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {null, null, 1.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertTrue(Double.isNaN(correlation));
+    assertEquals(0.0, correlation);
   }
 
   public void testNoCorrelation3() throws Exception {
@@ -99,7 +99,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {70.0, 80.0, 90.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertCorrelationEquals(0.3606507916004517, correlation);
+    assertCorrelationEquals(0.10244407226831752, correlation);
   }
 
   public void testSimple() throws Exception {
@@ -110,7 +110,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {2.0, 5.0, 6.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertCorrelationEquals(0.5896248568217328, correlation);
+    assertCorrelationEquals(0.5598164905901122, correlation);
   }
 
   public void testSimpleWeighted() throws Exception {
@@ -121,7 +121,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {2.0, 5.0, 6.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED).userSimilarity(1, 2);
-    assertCorrelationEquals(0.8974062142054332, correlation);
+    assertCorrelationEquals(0.889954122647528, correlation);
   }
 
   public void testFullItemCorrelation1() throws Exception {
@@ -145,8 +145,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    // Yeah, undefined in this case
-    assertTrue(Double.isNaN(correlation));
+    assertEquals(1.0, correlation);
   }
 
   public void testNoItemCorrelation1() throws Exception {
@@ -158,7 +157,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    assertCorrelationEquals(0.424465381883345, correlation);
+    assertCorrelationEquals(0.24357264905599915, correlation);
   }
 
   public void testNoItemCorrelation2() throws Exception {
@@ -168,9 +167,8 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {null, 1.0, null},
                     {null, null, 1.0},
             });
-    double correlation =
-        new EuclideanDistanceSimilarity(dataModel).itemSimilarity(1, 2);
-    assertTrue(Double.isNaN(correlation));
+    double correlation = new EuclideanDistanceSimilarity(dataModel).itemSimilarity(1, 2);
+    assertEquals(0.0, correlation);
   }
 
   public void testNoItemCorrelation3() throws Exception {
@@ -183,7 +181,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    assertCorrelationEquals(0.3606507916004517, correlation);
+    assertCorrelationEquals(0.10244407226831752, correlation);
   }
 
   public void testSimpleItem() throws Exception {
@@ -196,7 +194,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    assertCorrelationEquals(0.5896248568217328, correlation);
+    assertCorrelationEquals(0.5598164905901122, correlation);
   }
 
   public void testSimpleItemWeighted() throws Exception {
@@ -209,7 +207,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     ItemSimilarity itemSimilarity = new EuclideanDistanceSimilarity(dataModel, Weighting.WEIGHTED);
     double correlation = itemSimilarity.itemSimilarity(0, 1);
-    assertCorrelationEquals(0.8974062142054332, correlation);
+    assertCorrelationEquals(0.889954122647528, correlation);
   }
 
   public void testRefresh() throws TasteException {

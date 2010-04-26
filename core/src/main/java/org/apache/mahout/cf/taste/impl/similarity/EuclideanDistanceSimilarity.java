@@ -54,17 +54,8 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
   
   @Override
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
-    if (n == 0) {
-      return Double.NaN;
-    }
-    double denominator = Math.sqrt(sumX2) + Math.sqrt(sumY2);
-    if (denominator == 0.0) {
-      return Double.NaN;
-    }
-    // normalize a bit for magnitude
-    sumXYdiff2 /= denominator;
-    // divide by n below to not automatically give users with more overlap more similarity
-    return 1.0 / (1.0 + Math.sqrt(sumXYdiff2) / n);
+    // divide denominator by n below to not automatically give users with more overlap more similarity
+    return n / (1.0 + Math.sqrt(sumXYdiff2));
   }
   
 }
