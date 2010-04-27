@@ -24,7 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -36,12 +35,10 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
-import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.common.FileLineIterable;
 
 /**
  * <p>
@@ -58,12 +55,10 @@ public final class RecommenderReducer extends MapReduceBase implements
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
   static final String DATA_MODEL_FILE = "dataModelFile";
-  static final String USERS_FILE = "usersFile";
-  
+
   private Recommender recommender;
   private int recommendationsPerUser;
-  private FastIDSet usersToRecommendFor;
-  
+
   @Override
   public void configure(JobConf jobConf) {
     String dataModelFile = jobConf.get(DATA_MODEL_FILE);
@@ -76,17 +71,6 @@ public final class RecommenderReducer extends MapReduceBase implements
       tempDataFile.deleteOnExit();
       fs.copyToLocalFile(dataModelPath, new Path(tempDataFile.getAbsolutePath()));
       fileDataModel = new FileDataModel(tempDataFile);
-      String usersFilePathString = jobConf.get(USERS_FILE);
-      if (usersFilePathString == null) {
-        usersToRecommendFor = null;
-      } else {
-        usersToRecommendFor = new FastIDSet();
-        Path usersFilePath = new Path(usersFilePathString).makeQualified(fs);
-        FSDataInputStream in = fs.open(usersFilePath);
-        for (String line : new FileLineIterable(in)) {
-          usersToRecommendFor.add(Long.parseLong(line));
-        }
-      }
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -115,10 +99,6 @@ public final class RecommenderReducer extends MapReduceBase implements
                      OutputCollector<LongWritable,RecommendedItemsWritable> output,
                      Reporter reporter) throws IOException {
     long userID = key.get();
-    if ((usersToRecommendFor != null) && !usersToRecommendFor.contains(userID)) {
-      return;
-    }
-    
     List<RecommendedItem> recommendedItems;
     try {
       recommendedItems = recommender.recommend(userID, recommendationsPerUser);

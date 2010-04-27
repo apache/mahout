@@ -136,7 +136,6 @@ public final class RecommenderJob extends AbstractJob {
     jobConf.set(RecommenderReducer.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     jobConf.set(RecommenderReducer.DATA_MODEL_FILE, inputFile);
-    jobConf.set(RecommenderReducer.USERS_FILE, usersFile);
     jobConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
     
     JobClient.runJob(jobConf);
