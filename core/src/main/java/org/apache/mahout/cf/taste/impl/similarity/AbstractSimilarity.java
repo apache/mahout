@@ -40,30 +40,23 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   private PreferenceTransform prefTransform;
   private SimilarityTransform similarityTransform;
   private final boolean weighted;
+  private final boolean centerData;
   private int cachedNumItems;
   private int cachedNumUsers;
   private final RefreshHelper refreshHelper;
   
   /**
    * <p>
-   * Creates a normal (unweighted) .
+   * Creates a possibly weighted AbstractSimilarity.
    * </p>
    */
-  AbstractSimilarity(DataModel dataModel) throws TasteException {
-    this(dataModel, Weighting.UNWEIGHTED);
-  }
-  
-  /**
-   * <p>
-   * Creates a possibly weighted .
-   * </p>
-   */
-  AbstractSimilarity(final DataModel dataModel, Weighting weighting) throws TasteException {
+  AbstractSimilarity(final DataModel dataModel, Weighting weighting, boolean centerData) throws TasteException {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
     this.dataModel = dataModel;
     this.weighted = weighting == Weighting.WEIGHTED;
+    this.centerData = centerData;
     this.cachedNumItems = dataModel.getNumItems();
     this.cachedNumUsers = dataModel.getNumUsers();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
@@ -304,19 +297,23 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         yIndex = yPrefs.getUserID(yPrefIndex);
       }
     }
-    
-    // See comments above on these computations
-    double n = count;
-    double meanX = sumX / n;
-    double meanY = sumY / n;
-    // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
-    double centeredSumXY = sumXY - meanY * sumX;
-    // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
-    double centeredSumX2 = sumX2 - meanX * sumX;
-    // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
-    double centeredSumY2 = sumY2 - meanY * sumY;
-    
-    double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
+
+    double result;
+    if (centerData) {
+      // See comments above on these computations
+      double n = (double) count;
+      double meanX = sumX / n;
+      double meanY = sumY / n;
+      // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
+      double centeredSumXY = sumXY - meanY * sumX;
+      // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
+      double centeredSumX2 = sumX2 - meanX * sumX;
+      // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
+      double centeredSumY2 = sumY2 - meanY * sumY;
+      result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
+    } else {
+      result = computeResult(count, sumXY, sumX2, sumY2, sumXYdiff2);
+    }
     
     if (similarityTransform != null) {
       result = similarityTransform.transformSimilarity(itemID1, itemID2, result);

@@ -23,36 +23,47 @@ import org.apache.mahout.cf.taste.model.DataModel;
 
 /**
  * <p>
- * An implementation of a "similarity" based on the Euclidean "distance" between two users X and Y. Thinking
- * of items as dimensions and preferences as points along those dimensions, a distance is computed using all
- * items (dimensions) where both users have expressed a preference for that item. This is simply the square
- * root of the sum of the squares of differences in position (preference) along each dimension. The similarity
- * is then computed as 1 / (1 + distance), so the resulting values are in the range (0,1].
+ * An implementation of the cosine similarity. The result is the cosine of the angle formed between
+ * the two preference vectors.
+ * </p>
+ *
+ * <p>
+ * Note that this similarity does not "center" its data, shifts the user's preference values so that each of their
+ * means is 0. For this behavior, use {@link PearsonCorrelationSimilarity}, which actually is mathematically
+ * equivalent for centered data.
  * </p>
  */
-public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
+public final class UncenteredCosineSimilarity extends AbstractSimilarity {
 
   /**
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
-  public EuclideanDistanceSimilarity(DataModel dataModel) throws TasteException {
+  public UncenteredCosineSimilarity(DataModel dataModel) throws TasteException {
     this(dataModel, Weighting.WEIGHTED);
   }
 
   /**
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
-  public EuclideanDistanceSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
+  public UncenteredCosineSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting, false);
     if (!dataModel.hasPreferenceValues()) {
       throw new IllegalArgumentException("DataModel doesn't have preference values");
     }
   }
-  
+
   @Override
   double computeResult(int n, double sumXY, double sumX2, double sumY2, double sumXYdiff2) {
-    // divide denominator by n below to not automatically give users with more overlap more similarity
-    return n / (1.0 + Math.sqrt(sumXYdiff2));
+    if (n == 0) {
+      return Double.NaN;
+    }
+    double denominator = Math.sqrt(sumX2) * Math.sqrt(sumY2);
+    if (denominator == 0.0) {
+      // One or both parties has -all- the same ratings;
+      // can't really say much similarity under this measure
+      return Double.NaN;
+    }
+    return sumXY / denominator;
   }
-  
+
 }

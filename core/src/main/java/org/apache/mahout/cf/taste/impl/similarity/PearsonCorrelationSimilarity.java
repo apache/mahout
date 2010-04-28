@@ -46,10 +46,14 @@ import org.apache.mahout.cf.taste.model.DataModel;
  * </p>
  * 
  * <p>
- * This correlation implementation is equivalent to the cosine measure correlation since the data it receives
+ * This correlation implementation is equivalent to the cosine similarity since the data it receives
  * is assumed to be centered -- mean is 0. The correlation may be interpreted as the cosine of the angle
  * between the two vectors defined by the users' preference values.
  * </p>
+ *
+ * <p>
+ * For cosine similarity on uncentered data, see {@link UncenteredCosineSimilarity}.
+ * </p> 
  */
 public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
 
@@ -57,17 +61,14 @@ public final class PearsonCorrelationSimilarity extends AbstractSimilarity {
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
   public PearsonCorrelationSimilarity(DataModel dataModel) throws TasteException {
-    super(dataModel);
-    if (!dataModel.hasPreferenceValues()) {
-      throw new IllegalArgumentException("DataModel doesn't have preference values");
-    }
+    this(dataModel, Weighting.WEIGHTED);
   }
 
   /**
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
   public PearsonCorrelationSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
-    super(dataModel, weighting);
+    super(dataModel, weighting, true);
     if (!dataModel.hasPreferenceValues()) {
       throw new IllegalArgumentException("DataModel doesn't have preference values");
     }
