@@ -18,9 +18,7 @@
 package org.apache.mahout.math;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.UnaryFunction;
@@ -32,11 +30,6 @@ import com.google.gson.reflect.TypeToken;
 /** Implementations of generic capabilities like sum of elements and dot products */
 public abstract class AbstractVector implements Vector {
 
-  /**
-   * User-settable mapping between String labels and Integer indices. Marked transient so that it will not be serialized
-   * with each vector instance.
-   */
-  private transient Map<String, Integer> bindings;
   private int size;
   protected double lengthSquared = -1.0;
 
@@ -80,19 +73,7 @@ public abstract class AbstractVector implements Vector {
   }
 
   @Override
-  public Vector clone() {
-    AbstractVector clone;
-    try {
-      clone = (AbstractVector) super.clone();
-    } catch (CloneNotSupportedException cnse) {
-      throw new IllegalStateException(cnse); // Can't happen
-    }
-    if (bindings != null) {
-      clone.bindings = (Map<String, Integer>) ((HashMap<String, Integer>) bindings).clone();
-    }
-    // name is OK
-    return clone;
-  }
+  public abstract Vector clone();
 
   public Vector divide(double x) {
     if (x == 1.0) {
@@ -310,13 +291,23 @@ public abstract class AbstractVector implements Vector {
     if (size != x.size()) {
       throw new CardinalityException(size, x.size());
     }
+
+    Vector to = this;
+    Vector from = x;
+    // Clone and edit to the sparse one; if both are sparse, add from the more sparse one
+    if (isDense() || (!x.isDense() &&
+        getNumNondefaultElements() < x.getNumNondefaultElements())) {
+      to = x;
+      from = this;
+    }
+
     //TODO: get smarter about this, if we are adding a dense to a sparse, then we should return a dense
-    Vector result = clone();
-    Iterator<Element> iter = x.iterateNonZero();
+    Vector result = to.clone();
+    Iterator<Element> iter = from.iterateNonZero();
     while (iter.hasNext()) {
       Element e = iter.next();
       int index = e.index();
-      result.setQuick(index, getQuick(index) + e.get());
+      result.setQuick(index, result.getQuick(index) + e.get());
     }
     return result;
   }
@@ -358,11 +349,20 @@ public abstract class AbstractVector implements Vector {
     if (size != x.size()) {
       throw new CardinalityException(size, x.size());
     }
-    Vector result = clone();
+
+    Vector to = this;
+    Vector from = x;
+    // Clone and edit to the sparse one; if both are sparse, edit the more sparse one (more zeroes)
+    if (isDense() || (!x.isDense() && getNumNondefaultElements() > x.getNumNondefaultElements())) {
+      to = x;
+      from = this;
+    }
+
+    Vector result = to.clone();
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
-      element.set(element.get() * x.getQuick(element.index()));
+      element.set(element.get() * from.getQuick(element.index()));
     }
 
     return result;
@@ -536,42 +536,4 @@ public abstract class AbstractVector implements Vector {
     return result.toString();
   }
 
-  public double get(String label) throws IndexException, UnboundLabelException {
-    if (bindings == null) {
-      throw new UnboundLabelException();
-    }
-    Integer index = bindings.get(label);
-    if (index == null) {
-      throw new UnboundLabelException();
-    }
-    return get(index);
-  }
-
-  public Map<String, Integer> getLabelBindings() {
-    return bindings;
-  }
-
-  public void set(String label, double value) throws IndexException,
-      UnboundLabelException {
-    if (bindings == null) {
-      throw new UnboundLabelException();
-    }
-    Integer index = bindings.get(label);
-    if (index == null) {
-      throw new UnboundLabelException();
-    }
-    set(index, value);
-  }
-
-  public void setLabelBindings(Map<String, Integer> bindings) {
-    this.bindings = bindings;
-  }
-
-  public void set(String label, int index, double value) throws IndexException {
-    if (bindings == null) {
-      bindings = new HashMap<String, Integer>();
-    }
-    bindings.put(label, index);
-    set(index, value);
-  }
 }

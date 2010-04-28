@@ -589,31 +589,6 @@ public class VectorTest extends TestCase {
     v.setQuick(3, 2);
   }
 
-  public void testLabelSerializationDense() {
-    double[] values = {1.1, 2.2, 3.3};
-    Vector test = new DenseVector(values);
-    Map<String, Integer> bindings = new HashMap<String, Integer>();
-    bindings.put("Fee", 0);
-    bindings.put("Fie", 1);
-    bindings.put("Foe", 2);
-    test.setLabelBindings(bindings);
-
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
-
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    String json = gson.toJson(test, vectorType);
-    Vector test1 = gson.fromJson(json, vectorType);
-    try {
-      test1.get("Fee");
-      fail();
-    } catch (UnboundLabelException e) {
-    }
-  }
-
-
   public void testNameSerialization() throws Exception {
     double[] values = {1.1, 2.2, 3.3};
     Vector test = new DenseVector(values);
@@ -627,43 +602,6 @@ public class VectorTest extends TestCase {
 
     decode = AbstractVector.decodeVector(formatString);
     assertEquals("noName and decode are not equal", noName, decode);
-  }
-
-  public void testLabelSerializationSparse() {
-    double[] values = {1.1, 2.2, 3.3};
-    Vector test = new RandomAccessSparseVector(3);
-    for (int i = 0; i < values.length; i++) {
-      test.set(i, values[i]);
-    }
-    Map<String, Integer> bindings = new HashMap<String, Integer>();
-    bindings.put("Fee", 0);
-    bindings.put("Fie", 1);
-    bindings.put("Foe", 2);
-    test.setLabelBindings(bindings);
-
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
-
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    String json = gson.toJson(test, vectorType);
-    Vector test1 = gson.fromJson(json, vectorType);
-    try {
-      test1.get("Fee");
-      fail();
-    } catch (UnboundLabelException e) {
-    }
-  }
-
-  public void testLabelSet() {
-    Vector test = new DenseVector(3);
-    test.set("Fee", 0, 1.1);
-    test.set("Fie", 1, 2.2);
-    test.set("Foe", 2, 3.3);
-    assertEquals("Fee", 1.1, test.get("Fee"));
-    assertEquals("Fie", 2.2, test.get("Fie"));
-    assertEquals("Foe", 3.3, test.get("Foe"));
   }
 
   public void testHashCodeEquivalence() {

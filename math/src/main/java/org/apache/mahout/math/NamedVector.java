@@ -18,7 +18,6 @@
 package org.apache.mahout.math;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.UnaryFunction;
@@ -64,10 +63,9 @@ public class NamedVector implements Vector {
   }
 
   @Override
-  public Vector clone() {
+  public NamedVector clone() {
     return new NamedVector(delegate.clone(), name);
   }
-
 
   public String asFormatString() {
     return delegate.asFormatString();
@@ -101,20 +99,20 @@ public class NamedVector implements Vector {
     return delegate.size();
   }
 
+  public boolean isDense() {
+    return delegate.isDense();
+  }
+
+  public boolean isSequentialAccess() {
+    return delegate.isSequentialAccess();
+  }
+
   public Iterator<Element> iterator() {
     return delegate.iterator();
   }
 
   public Iterator<Element> iterateNonZero() {
     return delegate.iterateNonZero();
-  }
-
-  public double get(String label) throws IndexException, UnboundLabelException {
-    return delegate.get(label);
-  }
-
-  public Map<String, Integer> getLabelBindings() {
-    return delegate.getLabelBindings();
   }
 
   public Element getElement(int index) {
@@ -137,12 +135,8 @@ public class NamedVector implements Vector {
     return delegate.getQuick(index);
   }
 
-  public Vector like() {
-    return delegate.like();
-  }
-
-  public Vector like(int cardinality) {
-    return delegate.like(cardinality);
+  public NamedVector like() {
+    return new NamedVector(delegate.like(), name);
   }
 
   public Vector minus(Vector x) {
@@ -175,18 +169,6 @@ public class NamedVector implements Vector {
 
   public Vector plus(Vector x) {
     return delegate.plus(x);
-  }
-
-  public void set(String label, double value) throws IndexException, UnboundLabelException {
-    delegate.set(label, value);
-  }
-
-  public void set(String label, int index, double value) throws IndexException {
-    delegate.set(label, index, value);
-  }
-
-  public void setLabelBindings(Map<String, Integer> bindings) {
-    delegate.setLabelBindings(bindings);
   }
 
   public void set(int index, double value) {

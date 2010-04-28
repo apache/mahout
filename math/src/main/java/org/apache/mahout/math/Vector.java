@@ -22,7 +22,6 @@ import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.UnaryFunction;
 
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * The basic interface including numerous convenience functions <p/> NOTE: All implementing classes must have a
@@ -94,6 +93,10 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    */
   int size();
 
+  boolean isDense();
+
+  boolean isSequentialAccess();
+
   /**
    * Return a copy of the recipient
    *
@@ -116,23 +119,6 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    * @return An {@link Iterator} over all non-zero elements
    */
   Iterator<Element> iterateNonZero();
-
-  /**
-   * Return the value at the index defined by the label
-   *
-   * @param label a String label that maps to an index
-   * @return the double at the index
-   * @throws IndexException        if the index is out of bounds
-   * @throws UnboundLabelException if the label is unbound
-   */
-  double get(String label) throws IndexException, UnboundLabelException;
-
-  /**
-   * Return a map of the current label bindings of the receiver
-   *
-   * @return a Map<String, Integer>
-   */
-  Map<String, Integer> getLabelBindings();
 
   /**
    * Return an object of Vector.Element representing an element of this Vector. Useful when designing new iterator
@@ -201,14 +187,6 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   Vector like();
 
   /**
-   * Return an empty vector of the same underlying class as the receiver and of the given cardinality
-   *
-   * @param cardinality an int specifying the desired cardinality
-   * @return a Vector
-   */
-  Vector like(int cardinality);
-
-  /**
    * Return a new vector containing the element by element difference of the recipient and the argument
    *
    * @param x a Vector
@@ -269,31 +247,6 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    * @throws CardinalityException if the cardinalities differ
    */
   Vector plus(Vector x);
-
-  /**
-   * Set the value at the index that is mapped to the label
-   *
-   * @param label a String label that maps to an index
-   * @param value the double value at the index
-   */
-  void set(String label, double value) throws IndexException,
-      UnboundLabelException;
-
-  /**
-   * Set the value at the index and add the label to the bindings
-   *
-   * @param label a String label that maps to an index
-   * @param index an int index
-   * @param value a double value
-   */
-  void set(String label, int index, double value) throws IndexException;
-
-  /**
-   * Sets a map of label bindings in the receiver
-   *
-   * @param bindings a {@link Map<String, Integer>} of label bindings
-   */
-  void setLabelBindings(Map<String, Integer> bindings);
 
   /**
    * Set the value at the given index

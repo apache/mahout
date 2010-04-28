@@ -55,7 +55,7 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
   }
 
-  RandomAccessSparseVector(int cardinality, OpenIntDoubleHashMap values) {
+  private RandomAccessSparseVector(int cardinality, OpenIntDoubleHashMap values) {
     super(cardinality);
     this.values = values;
   }
@@ -73,9 +73,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   @Override
   public RandomAccessSparseVector clone() {
-    RandomAccessSparseVector clone = (RandomAccessSparseVector) super.clone();
-    clone.values = (OpenIntDoubleHashMap)values.clone();
-    return clone;
+    return new RandomAccessSparseVector(size(), (OpenIntDoubleHashMap) values.clone());
   }
 
   @Override
@@ -92,13 +90,25 @@ public class RandomAccessSparseVector extends AbstractVector {
     return this;
   }
 
+  public boolean isDense() {
+    return false;
+  }
+
+  public boolean isSequentialAccess() {
+    return false;
+  }
+
   public double getQuick(int index) {
     return values.get(index);
   }
 
   public void setQuick(int index, double value) {
     lengthSquared = -1.0;
-    values.put(index, value);
+    if (value == 0.0) {
+      values.removeKey(index);
+    } else {
+      values.put(index, value);
+    }
   }
 
   public int getNumNondefaultElements() {
@@ -106,19 +116,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
   public RandomAccessSparseVector like() {
-    int numValues = 256;
-    if (values != null) {
-      numValues = values.size();
-    }
-    return new RandomAccessSparseVector(size(), numValues);
-  }
-
-  public Vector like(int newCardinality) {
-    int numValues = 256;
-    if (values != null) {
-      numValues = values.size();
-    }
-    return new RandomAccessSparseVector(newCardinality, numValues);
+    return new RandomAccessSparseVector(size(), values.size());
   }
 
   /**
@@ -252,7 +250,11 @@ public class RandomAccessSparseVector extends AbstractVector {
 
     public void set(double value) {
       lengthSquared = -1;
-      values.put(index, value);
+      if (value == 0.0) {
+        values.removeKey(index);
+      } else {
+        values.put(index, value);
+      }
     }
   }
   

@@ -20,9 +20,7 @@ package org.apache.mahout.math;
 import junit.framework.TestCase;
 import static org.apache.mahout.math.function.Functions.*;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 abstract class AbstractTestVector extends TestCase {
 
@@ -448,24 +446,10 @@ abstract class AbstractTestVector extends TestCase {
     }
   }
 
-  public void testAssignBinaryFunctionCardinality() {
-    try {
-      test.assign(test.like(2), plus);
-      fail("Cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
-  }
-
   public void testLike() {
     Vector other = test.like();
     assertTrue("not like", test.getClass().isAssignableFrom(other.getClass()));
     assertEquals("size", test.size(), other.size());
-  }
-
-  public void testLikeN() {
-    Vector other = test.like(8);
-    assertTrue("not like", test.getClass().isAssignableFrom(other.getClass()));
-    assertEquals("size", 8, other.size());
   }
 
   public void testCrossProduct() {
@@ -480,16 +464,4 @@ abstract class AbstractTestVector extends TestCase {
     }
   }
 
-  public void testLabelIndexing() {
-    Map<String, Integer> bindings = new HashMap<String, Integer>();
-    bindings.put("Fee", 0);
-    bindings.put("Fie", 1);
-    bindings.put("Foe", 2);
-    test.setLabelBindings(bindings);
-    assertEquals("Fee", test.get(0), test.get("Fee"));
-    assertEquals("Fie", test.get(1), test.get("Fie"));
-    assertEquals("Foe", test.get(2), test.get("Foe"));
-    test.set("Fie", 15.3);
-    assertEquals("Fie", test.get(1), test.get("Fie"));
-  }
 }

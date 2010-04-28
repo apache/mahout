@@ -46,21 +46,23 @@ public class VectorView extends AbstractVector {
 
   @Override
   public Vector clone() {
-    VectorView clone = (VectorView) super.clone();
-    clone.vector = vector.clone();
-    return clone;
+    return new VectorView(vector.clone(), offset, size());
+  }
+
+  public boolean isDense() {
+    return vector.isDense();
+  }
+
+  public boolean isSequentialAccess() {
+    return vector.isSequentialAccess();
+  }
+
+  public VectorView like() {
+    return new VectorView(vector.like(), offset, size());
   }
 
   public double getQuick(int index) {
     return vector.getQuick(offset + index);
-  }
-
-  public Vector like() {
-    return vector.like();
-  }
-
-  public Vector like(int cardinality) {
-    return vector.like(cardinality);
   }
 
   public void setQuick(int index, double value) {

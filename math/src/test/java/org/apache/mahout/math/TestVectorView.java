@@ -317,22 +317,8 @@ public class TestVectorView extends TestCase {
     }
   }
 
-  public void testAssignBinaryFunctionCardinality() {
-    try {
-      test.assign(test.like(2), plus);
-      fail("Cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
-  }
-
   public void testLike() {
-    assertTrue("not like", test.like() instanceof DenseVector);
-  }
-
-  public void testLikeN() {
-    Vector other = test.like(5);
-    assertTrue("not like", other instanceof DenseVector);
-    assertEquals("size", 5, other.size());
+    assertTrue("not like", test.like() instanceof VectorView);
   }
 
   public void testCrossProduct() {

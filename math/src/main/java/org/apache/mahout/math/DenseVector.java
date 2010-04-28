@@ -75,9 +75,15 @@ public class DenseVector extends AbstractVector {
 
   @Override
   public DenseVector clone() {
-    DenseVector clone = (DenseVector) super.clone();
-    clone.values = values.clone();
-    return clone;
+    return new DenseVector(values.clone());
+  }
+
+  public boolean isDense() {
+    return true;
+  }
+
+  public boolean isSequentialAccess() {
+    return true;
   }
 
   @Override
@@ -96,15 +102,7 @@ public class DenseVector extends AbstractVector {
   }
 
   public DenseVector like() {
-    DenseVector denseVector = new DenseVector(size());
-    denseVector.setLabelBindings(getLabelBindings());
-    return denseVector;
-  }
-
-  public Vector like(int cardinality) {
-    Vector denseVector = new DenseVector(cardinality);
-    denseVector.setLabelBindings(getLabelBindings());
-    return denseVector;
+    return new DenseVector(size());
   }
 
   public void setQuick(int index, double value) {

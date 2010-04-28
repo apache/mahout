@@ -519,6 +519,14 @@ public abstract class AbstractMatrix implements Matrix {
       return v;
     }
 
+    public boolean isDense() {
+      return true;
+    }
+
+    public boolean isSequentialAccess() {
+      return true;
+    }
+
     @Override
     protected Matrix matrixLike(int rows, int columns) {
       return matrix.like(rows, columns);
@@ -583,8 +591,7 @@ public abstract class AbstractMatrix implements Matrix {
       v.setQuick(transposeOffset, value);
     }
 
-    protected Vector newVector(int cardinality)
-    {
+    protected Vector newVector(int cardinality) {
       return new DenseVector(cardinality);
     }
 

@@ -80,7 +80,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     values = other.values.clone();
   }
 
-  SequentialAccessSparseVector(int cardinality, OrderedIntDoubleMapping values) {
+  private SequentialAccessSparseVector(int cardinality, OrderedIntDoubleMapping values) {
     super(cardinality);
     this.values = values;
   }
@@ -93,9 +93,15 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
   @Override
   public SequentialAccessSparseVector clone() {
-    SequentialAccessSparseVector clone = (SequentialAccessSparseVector) super.clone();
-    clone.values = values.clone();
-    return clone;
+    return new SequentialAccessSparseVector(size(), values.clone());
+  }
+
+  public boolean isDense() {
+    return false;
+  }
+
+  public boolean isSequentialAccess() {
+    return true;
   }
 
   public double getQuick(int index) {
@@ -112,19 +118,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
   }
 
   public SequentialAccessSparseVector like() {
-    int numValues = 256;
-    if (values != null) {
-      numValues = values.getNumMappings();
-    }
-    return new SequentialAccessSparseVector(size(), numValues);
-  }
-
-  public Vector like(int newCardinality) {
-    int numValues = 256;
-    if (values != null) {
-      numValues = values.getNumMappings();
-    }
-    return new SequentialAccessSparseVector(newCardinality, numValues);
+    return new SequentialAccessSparseVector(size(), values.getNumMappings());
   }
 
   public Iterator<Element> iterateNonZero() {
