@@ -35,36 +35,37 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.clustering.WeightedPointWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwMapper extends MapReduceBase implements Mapper<IntWritable, VectorWritable, IntWritable, CDbwDistantPointWritable> {
+public class CDbwMapper extends MapReduceBase implements Mapper<IntWritable, VectorWritable, IntWritable, WeightedPointWritable> {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
-  private Map<Integer, CDbwDistantPointWritable> mostDistantPoints = new HashMap<Integer, CDbwDistantPointWritable>();
+  private Map<Integer, WeightedPointWritable> mostDistantPoints = new HashMap<Integer, WeightedPointWritable>();
 
   private DistanceMeasure measure = new EuclideanDistanceMeasure();
 
-  private OutputCollector<IntWritable, CDbwDistantPointWritable> output = null;
+  private OutputCollector<IntWritable, WeightedPointWritable> output = null;
 
   @Override
-  public void map(IntWritable clusterId, VectorWritable point, OutputCollector<IntWritable, CDbwDistantPointWritable> output,
+  public void map(IntWritable clusterId, VectorWritable point, OutputCollector<IntWritable, WeightedPointWritable> output,
       Reporter reporter) throws IOException {
 
-      this.output = output;
+    this.output = output;
 
     int key = clusterId.get();
-    CDbwDistantPointWritable currentMDP = mostDistantPoints.get(key);
+    WeightedPointWritable currentMDP = mostDistantPoints.get(key);
 
     List<VectorWritable> refPoints = representativePoints.get(key);
     double totalDistance = 0.0;
     for (VectorWritable refPoint : refPoints) {
       totalDistance += measure.distance(refPoint.get(), point.get());
     }
-    if (currentMDP == null || currentMDP.getDistance() < totalDistance) {
-      mostDistantPoints.put(key, new CDbwDistantPointWritable(totalDistance, new VectorWritable(point.get().clone())));
+    if (currentMDP == null || currentMDP.getWeight() < totalDistance) {
+      mostDistantPoints.put(key, new WeightedPointWritable(totalDistance, new VectorWritable(point.get().clone())));
     }
   }
 
@@ -73,7 +74,7 @@ public class CDbwMapper extends MapReduceBase implements Mapper<IntWritable, Vec
     this.measure = measure;
   }
 
-  public static Map<Integer, List<VectorWritable>> getReferencePoints(JobConf job) throws SecurityException,
+  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(JobConf job) throws SecurityException,
       IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     String statePath = job.get(CDbwDriver.STATE_IN_KEY);
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
@@ -93,7 +94,8 @@ public class CDbwMapper extends MapReduceBase implements Mapper<IntWritable, Vec
               representativePoints.put(key.get(), repPoints);
             }
             repPoints.add(point);
-            point = new VectorWritable();          }
+            point = new VectorWritable();
+          }
         } finally {
           reader.close();
         }
@@ -111,7 +113,7 @@ public class CDbwMapper extends MapReduceBase implements Mapper<IntWritable, Vec
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl.loadClass(job.get(CDbwDriver.DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
-      representativePoints = getReferencePoints(job);
+      representativePoints = getRepresentativePoints(job);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {

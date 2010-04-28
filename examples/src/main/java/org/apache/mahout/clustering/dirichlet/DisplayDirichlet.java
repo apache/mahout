@@ -215,10 +215,8 @@ public class DisplayDirichlet extends Frame {
     sampleParams.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
     for (int i = 0; i < num; i++) {
-      sampleData.add(new VectorWritable(
-          new NamedVector(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
-                                                        UncommonDistributions.rNorm(my, sd)}),
-                          String.valueOf(i))));
+      sampleData.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
+          UncommonDistributions.rNorm(my, sd)})));
     }
   }
   

@@ -111,7 +111,7 @@ public class KMeansClusterer {
    * @param maxIter
    *          the maximum number of iterations
    */
-  public static List<List<Cluster>> clusterPoints(List<NamedVector> points,
+  public static List<List<Cluster>> clusterPoints(List<Vector> points,
                                                   List<Cluster> clusters,
                                                   DistanceMeasure measure,
                                                   int maxIter,
@@ -146,7 +146,7 @@ public class KMeansClusterer {
    *          a DistanceMeasure to use
    * @return
    */
-  public static boolean runKMeansIteration(List<NamedVector> points,
+  public static boolean runKMeansIteration(List<Vector> points,
                                            List<Cluster> clusters,
                                            DistanceMeasure measure,
                                            double distanceThreshold) {

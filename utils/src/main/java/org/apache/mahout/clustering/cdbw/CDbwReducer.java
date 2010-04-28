@@ -29,25 +29,25 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.clustering.WeightedPointWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwReducer extends MapReduceBase implements
-    Reducer<IntWritable, CDbwDistantPointWritable, IntWritable, VectorWritable> {
+public class CDbwReducer extends MapReduceBase implements Reducer<IntWritable, WeightedPointWritable, IntWritable, VectorWritable> {
 
   private Map<Integer, List<VectorWritable>> referencePoints;
 
   private OutputCollector<IntWritable, VectorWritable> output;
 
   @Override
-  public void reduce(IntWritable key, Iterator<CDbwDistantPointWritable> values,
-      OutputCollector<IntWritable, VectorWritable> output, Reporter reporter) throws IOException {
+  public void reduce(IntWritable key, Iterator<WeightedPointWritable> values, OutputCollector<IntWritable, VectorWritable> output,
+      Reporter reporter) throws IOException {
     this.output = output;
     // find the most distant point
-    CDbwDistantPointWritable mdp = null;
+    WeightedPointWritable mdp = null;
     while (values.hasNext()) {
-      CDbwDistantPointWritable dpw = values.next();
-      if (mdp == null || mdp.getDistance() < dpw.getDistance()) {
-        mdp = new CDbwDistantPointWritable(dpw.getDistance(), dpw.getPoint());
+      WeightedPointWritable dpw = values.next();
+      if (mdp == null || mdp.getWeight() < dpw.getWeight()) {
+        mdp = new WeightedPointWritable(dpw.getWeight(), dpw.getPoint());
       }
     }
     output.collect(new IntWritable(key.get()), mdp.getPoint());
@@ -74,7 +74,7 @@ public class CDbwReducer extends MapReduceBase implements
   public void configure(JobConf job) {
     super.configure(job);
     try {
-      referencePoints = CDbwMapper.getReferencePoints(job);
+      referencePoints = CDbwMapper.getRepresentativePoints(job);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {

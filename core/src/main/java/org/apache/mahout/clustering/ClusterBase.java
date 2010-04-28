@@ -26,7 +26,6 @@ import java.util.Locale;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.JsonVectorAdapter;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 
@@ -55,7 +54,7 @@ public abstract class ClusterBase implements Writable, Cluster {
   private int id;
 
   // the current cluster center
-  private Vector center = new RandomAccessSparseVector(0);
+  private Vector center;
 
   // the number of points in the cluster
   private int numPoints;

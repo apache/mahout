@@ -15,23 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.cdbw;
+package org.apache.mahout.clustering;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwDistantPointWritable implements Writable {
+public class WeightedPointWritable implements Writable {
 
   /**
-   * @return the distance
+   * @return the weight
    */
-  public double getDistance() {
-    return distance;
+  public double getWeight() {
+    return weight;
   }
 
   /**
@@ -41,35 +40,35 @@ public class CDbwDistantPointWritable implements Writable {
     return point;
   }
 
-  public CDbwDistantPointWritable(double distance, VectorWritable point) {
+  public WeightedPointWritable(double weight, VectorWritable point) {
     super();
-    this.distance = distance;
+    this.weight = weight;
     this.point = point;
   }
 
-  public CDbwDistantPointWritable() {
+  public WeightedPointWritable() {
     super();
   }
 
-  private double distance;
+  private double weight;
 
   private VectorWritable point;
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    distance = in.readDouble();
+    weight = in.readDouble();
     point = new VectorWritable();
     point.readFields(in);
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeDouble(distance);
+    out.writeDouble(weight);
     point.write(out);
   }
 
   public String toString() {
-    return String.valueOf(distance) + ": " + (point == null ? "null" : ClusterBase.formatVector(point.get(), null));
+    return String.valueOf(weight) + ": " + (point == null ? "null" : ClusterBase.formatVector(point.get(), null));
   }
 
 }

@@ -62,9 +62,9 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    List<NamedVector> points = new ArrayList<NamedVector>();
+    List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : sampleData) {
-      points.add((NamedVector) sample.get());
+      points.add((Vector) sample.get());
     }
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     List<SoftCluster> initialClusters = new ArrayList<SoftCluster>();

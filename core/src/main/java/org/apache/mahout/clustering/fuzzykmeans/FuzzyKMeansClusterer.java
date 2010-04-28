@@ -201,10 +201,16 @@ public class FuzzyKMeansClusterer {
    *          the initial List<SoftCluster> of clusters
    * @param measure
    *          the DistanceMeasure to use
+   * @param threshold
+   *          the double convergence threshold
+   * @param m
+   *          the double "fuzzyness" argument (>1)
    * @param numIter
    *          the maximum number of iterations
+   * @return
+   *          a List<List<SoftCluster>> of clusters produced per iteration
    */
-  public static List<List<SoftCluster>> clusterPoints(List<NamedVector> points,
+  public static List<List<SoftCluster>> clusterPoints(List<Vector> points,
                                                       List<SoftCluster> clusters,
                                                       DistanceMeasure measure,
                                                       double threshold,
@@ -237,7 +243,7 @@ public class FuzzyKMeansClusterer {
    *          the List<Cluster> clusters
    * @return
    */
-  public static boolean runFuzzyKMeansIteration(List<NamedVector> points,
+  public static boolean runFuzzyKMeansIteration(List<Vector> points,
                                                 List<SoftCluster> clusterList,
                                                 FuzzyKMeansClusterer clusterer) {
     for (Vector point : points) {

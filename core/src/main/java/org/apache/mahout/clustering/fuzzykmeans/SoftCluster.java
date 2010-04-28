@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
@@ -93,7 +92,7 @@ public class SoftCluster extends ClusterBase{
    *          the center point
    */
   public SoftCluster(Vector center) {
-    setCenter(new RandomAccessSparseVector(center));
+    setCenter(center.clone());
     this.pointProbSum = 0;
     this.weightedPointTotal = getCenter().like();
   }
@@ -112,7 +111,7 @@ public class SoftCluster extends ClusterBase{
     converged = in.readBoolean();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    this.setCenter(new RandomAccessSparseVector(temp.get()));
+    this.setCenter(temp.get());
     this.pointProbSum = 0;
     this.weightedPointTotal = getCenter().like();
   }
@@ -124,6 +123,8 @@ public class SoftCluster extends ClusterBase{
    */
   @Override
   public Vector computeCentroid() {
+    if (centroid != null)
+      return centroid;
     if (pointProbSum == 0) {
       return weightedPointTotal;
     } else if (centroid == null) {
@@ -157,7 +158,7 @@ public class SoftCluster extends ClusterBase{
   
   @Override
   public String toString() {
-    return getIdentifier() + ": " + getCenter().asFormatString();
+    return asFormatString(null);
   }
   
   @Override

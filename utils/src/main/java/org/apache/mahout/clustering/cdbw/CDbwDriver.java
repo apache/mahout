@@ -34,7 +34,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
@@ -44,8 +43,8 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.WeightedPointWritable;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
-import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -142,6 +141,13 @@ public class CDbwDriver {
       // now point the input to the old output directory
       stateIn = stateOut;
     }
+
+    Configurable client = new JobClient();
+    JobConf conf = new JobConf(CDbwDriver.class);
+    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
+    CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
+    System.out.println("CDbw = " + evaluator.CDbw());
   }
 
   private static void writeInitialState(String output, String clustersIn) throws ClassNotFoundException, InstantiationException,
@@ -192,7 +198,7 @@ public class CDbwDriver {
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(VectorWritable.class);
     conf.setMapOutputKeyClass(IntWritable.class);
-    conf.setMapOutputValueClass(CDbwDistantPointWritable.class);
+    conf.setMapOutputValueClass(WeightedPointWritable.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(stateOut);
@@ -205,38 +211,6 @@ public class CDbwDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.set(STATE_IN_KEY, stateIn);
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
-
-    client.setConf(conf);
-    try {
-      JobClient.runJob(conf);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    }
-  }
-
-  /**
-   * Run the job using supplied arguments
-   * 
-   * @param input
-   *          the directory pathname for input points
-   * @param stateIn
-   *          the directory pathname for input state
-   * @param output
-   *          the directory pathname for output points
-   */
-  public static void runClustering(String input, String stateIn, String output) {
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(CDbwDriver.class);
-
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
-
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
-
-    conf.setMapperClass(DirichletMapper.class);
-    conf.setNumReduceTasks(0);
 
     client.setConf(conf);
     try {

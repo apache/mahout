@@ -33,14 +33,14 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayKMeans extends DisplayDirichlet {
-  
+
   private static List<List<Cluster>> clusters;
-  
+
   DisplayKMeans() {
     initialize();
     this.setTitle("K-Means Clusters (> 5% of population)");
   }
-  
+
   @Override
   public void paint(Graphics g) {
     super.plotSampleData(g);
@@ -59,13 +59,13 @@ class DisplayKMeans extends DisplayDirichlet {
       }
     }
   }
-  
+
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
-    List<NamedVector> points = new ArrayList<NamedVector>();
+    List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : sampleData) {
-      points.add((NamedVector) sample.get());
+      points.add(sample.get());
     }
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     List<Cluster> initialClusters = new ArrayList<Cluster>();
