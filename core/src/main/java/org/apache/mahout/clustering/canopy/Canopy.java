@@ -49,8 +49,8 @@ public class Canopy extends ClusterBase {
    */
   public Canopy(Vector point, int canopyId) {
     this.setId(canopyId);
-    this.setCenter(point.clone());
-    this.setPointTotal(point.clone());
+    this.setCenter(new RandomAccessSparseVector(point.clone()));
+    this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }
   
@@ -65,7 +65,7 @@ public class Canopy extends ClusterBase {
     super.readFields(in);
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    this.setCenter(temp.get());
+    this.setCenter(new RandomAccessSparseVector(temp.get()));
     this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }

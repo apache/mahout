@@ -104,7 +104,7 @@ public class Cluster extends ClusterBase {
     this.converged = in.readBoolean();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    this.setCenter(temp.get());
+    this.setCenter(new RandomAccessSparseVector(temp.get()));
     this.setNumPoints(0);
     this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();
@@ -134,7 +134,7 @@ public class Cluster extends ClusterBase {
    */
   public Cluster(Vector center) {
     super();
-    this.setCenter(center.clone());
+    this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);
     this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();
@@ -152,7 +152,7 @@ public class Cluster extends ClusterBase {
   public Cluster(Vector center, int clusterId) {
     super();
     this.setId(clusterId);
-    this.setCenter(center.clone());
+    this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);
     this.setPointTotal(getCenter().like());
     this.pointSquaredTotal = getCenter().like();
