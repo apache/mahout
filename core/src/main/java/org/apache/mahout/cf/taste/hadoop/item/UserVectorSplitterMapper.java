@@ -32,11 +32,11 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.common.FileLineIterable;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public final class UserVectorSplitterMapper extends MapReduceBase implements
-    Mapper<LongWritable,RandomAccessSparseVectorWritable,IntWritable,VectorOrPrefWritable> {
+    Mapper<LongWritable, VectorWritable,IntWritable,VectorOrPrefWritable> {
 
   static final String USERS_FILE = "usersFile";
   
@@ -64,7 +64,7 @@ public final class UserVectorSplitterMapper extends MapReduceBase implements
 
   @Override
   public void map(LongWritable key,
-                  RandomAccessSparseVectorWritable value,
+                  VectorWritable value,
                   OutputCollector<IntWritable,VectorOrPrefWritable> output,
                   Reporter reporter) throws IOException {
     long userID = key.get();

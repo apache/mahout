@@ -25,17 +25,16 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public final class AggregateCombiner extends MapReduceBase implements
-    Reducer<LongWritable,RandomAccessSparseVectorWritable,LongWritable,RandomAccessSparseVectorWritable> {
+    Reducer<LongWritable,VectorWritable,LongWritable,VectorWritable> {
 
   @Override
   public void reduce(LongWritable key,
-                     Iterator<RandomAccessSparseVectorWritable> values,
-                     OutputCollector<LongWritable, RandomAccessSparseVectorWritable> output,
+                     Iterator<VectorWritable> values,
+                     OutputCollector<LongWritable, VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (!values.hasNext()) {
       return;
@@ -44,7 +43,7 @@ public final class AggregateCombiner extends MapReduceBase implements
     while (values.hasNext()) {
       partial = partial.plus(values.next().get());
     }
-    output.collect(key, new RandomAccessSparseVectorWritable((RandomAccessSparseVector) partial));
+    output.collect(key, new VectorWritable(partial));
   }
 
 }

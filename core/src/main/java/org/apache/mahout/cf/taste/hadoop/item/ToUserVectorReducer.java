@@ -19,19 +19,16 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * <h1>Input</h1>
@@ -49,34 +46,19 @@ import org.apache.mahout.math.Vector;
  * {@link ItemIDIndexMapper#idToIndex(long)}. The mapping is remembered for later with a combination of
  * {@link ItemIDIndexMapper} and {@link ItemIDIndexReducer}.
  * </p>
- * 
- * <p>
- * The number of non-default elements actually retained in the user vector is capped at
- * {@link #MAX_PREFS_CONSIDERED}.
- * </p>
- * 
  */
 public final class ToUserVectorReducer extends MapReduceBase implements
-    Reducer<LongWritable,LongWritable,LongWritable, RandomAccessSparseVectorWritable> {
-  
-  public static final int MAX_PREFS_CONSIDERED = 20;
-  
-  private boolean booleanData;
-
-  @Override
-  public void configure(JobConf jobConf) {
-    booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
-  }
+    Reducer<LongWritable,LongWritable,LongWritable, VectorWritable> {
   
   @Override
   public void reduce(LongWritable userID,
                      Iterator<LongWritable> itemPrefs,
-                     OutputCollector<LongWritable,RandomAccessSparseVectorWritable> output,
+                     OutputCollector<LongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (!itemPrefs.hasNext()) {
       return;
     }
-    RandomAccessSparseVector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
+    Vector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     while (itemPrefs.hasNext()) {
       LongWritable itemPref = itemPrefs.next();
       int index = ItemIDIndexMapper.idToIndex(itemPref.get());
@@ -89,38 +71,7 @@ public final class ToUserVectorReducer extends MapReduceBase implements
       userVector.set(index, value);
     }
 
-    if (!booleanData && userVector.getNumNondefaultElements() > MAX_PREFS_CONSIDERED) {
-      double cutoff = findTopNPrefsCutoff(MAX_PREFS_CONSIDERED,
-        userVector);
-      RandomAccessSparseVector filteredVector = new RandomAccessSparseVector(Integer.MAX_VALUE,
-          MAX_PREFS_CONSIDERED);
-      Iterator<Vector.Element> it = userVector.iterateNonZero();
-      while (it.hasNext()) {
-        Vector.Element element = it.next();
-        if (element.get() >= cutoff) {
-          filteredVector.set(element.index(), element.get());
-        }
-      }
-      userVector = filteredVector;
-    }
-
-    RandomAccessSparseVectorWritable writable = new RandomAccessSparseVectorWritable(userVector);
-    output.collect(userID, writable);
-  }
-
-  private static double findTopNPrefsCutoff(int n, Vector userVector) {
-    Queue<Double> topPrefValues = new PriorityQueue<Double>(n + 1);
-    Iterator<Vector.Element> it = userVector.iterateNonZero();
-    while (it.hasNext()) {
-      double prefValue = it.next().get();
-      if (topPrefValues.size() < n) {
-        topPrefValues.add(prefValue);
-      } else if (prefValue > topPrefValues.peek()) {
-        topPrefValues.add(prefValue);
-        topPrefValues.poll();
-      }
-    }
-    return topPrefValues.peek();
+    output.collect(userID, new VectorWritable(userVector));
   }
   
 }

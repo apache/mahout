@@ -17,24 +17,19 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import java.io.IOException;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.Partitioner;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.math.VectorWritable;
-
-public final class CooccurrenceColumnWrapperMapper extends MapReduceBase implements
-    Mapper<IntWritable, VectorWritable,IntWritable,VectorOrPrefWritable> {
+public final class FirstIndexPartitioner<V> implements Partitioner<IndexIndexWritable,V> {
 
   @Override
-  public void map(IntWritable key,
-                  VectorWritable value,
-                  OutputCollector<IntWritable,VectorOrPrefWritable> output,
-                  Reporter reporter) throws IOException {
-    output.collect(key, new VectorOrPrefWritable(value.get()));
+  public void configure(JobConf job) {
+    // do nothing
+  }
+
+  @Override
+  public int getPartition(IndexIndexWritable key, V value, int numPartitions) {
+    return key.getAID() % numPartitions;
   }
 
 }

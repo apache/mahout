@@ -20,6 +20,7 @@ package org.apache.mahout.common;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli2.Argument;
 import org.apache.commons.cli2.CommandLine;
@@ -93,18 +94,25 @@ public abstract class AbstractJob extends Configured implements Tool {
       argBuilder = argBuilder.withDefault(defaultValue);
     }
     Argument arg = argBuilder.create();
-    return new DefaultOptionBuilder().withLongName(name).withRequired(required).withShortName(shortName)
-        .withArgument(arg).withDescription(description).create();
+    DefaultOptionBuilder optBuilder = new DefaultOptionBuilder().withLongName(name).withRequired(required)
+        .withArgument(arg).withDescription(description);
+    if (shortName != null) {
+      optBuilder = optBuilder.withShortName(shortName);
+    }
+    return optBuilder.create();
   }
   
   protected static Map<String,String> parseArguments(String[] args, Option... extraOpts) {
     
-    Option tempDirOpt = buildOption("tempDir", "t", "Intermediate output directory", "temp");
+    Option tempDirOpt = buildOption("tempDir", null, "Intermediate output directory", "temp");
     Option helpOpt = DefaultOptionCreator.helpOption();
+    Option startPhase = buildOption("startPhase", null, "First phase to run", "0");
+    Option endPhase = buildOption("endPhase", null, "Last phase to run", String.valueOf(Integer.MAX_VALUE));
 
     GroupBuilder gBuilder = new GroupBuilder().withName("Options")
         .withOption(tempDirOpt)
-        .withOption(helpOpt);
+        .withOption(helpOpt)
+        .withOption(startPhase).withOption(endPhase);
     
     for (Option opt : extraOpts) {
       gBuilder = gBuilder.withOption(opt);
@@ -143,6 +151,14 @@ public abstract class AbstractJob extends Configured implements Tool {
       }
     }
   }
+
+  protected static boolean shouldRunNextPhase(Map<String,String> args, AtomicInteger currentPhase) {
+    int phase = currentPhase.getAndIncrement();
+    String startPhase = args.get("--startPhase");
+    String endPhase = args.get("--endPhase");
+    return !((startPhase != null && phase < Integer.parseInt(startPhase)) ||
+             (endPhase != null && phase > Integer.parseInt(endPhase)));
+  }
   
   protected JobConf prepareJobConf(String inputPath,
                                    String outputPath,
@@ -172,11 +188,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     jobConf.setClass("mapred.reducer.class", reducer, Reducer.class);
     jobConf.setClass("mapred.output.key.class", reducerKey, Writable.class);
     jobConf.setClass("mapred.output.value.class", reducerValue, Writable.class);
-    if (jobConf.get("mapred.output.compress") == null) {
-      jobConf.setBoolean("mapred.output.compress", true);
-      // otherwise leave it to its default value
-    }
-    jobConf.setCompressMapOutput(true);
+    jobConf.setBoolean("mapred.compress.map.output", true);
 
     String customJobName = jobConf.get("mapred.job.name");
     if (customJobName == null) {

@@ -19,6 +19,9 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
@@ -26,11 +29,9 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapFileOutputFormat;
+import org.apache.hadoop.mapred.Partitioner;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
@@ -39,12 +40,11 @@ import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.mapred.lib.MultipleInputs;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * <p>Runs a completely distributed recommender job as a series of mapreduces.</p>
@@ -98,34 +98,44 @@ public final class RecommenderJob extends AbstractJob {
     String cooccurrencePath = tempDirPath + "/cooccurrence";
     String parialMultiplyPath = tempDirPath + "/partialMultiply";
 
+    AtomicInteger currentPhase = new AtomicInteger();
+
     JobConf itemIDIndexConf = prepareJobConf(
       inputPath, itemIDIndexPath, TextInputFormat.class,
       ItemIDIndexMapper.class, IntWritable.class, LongWritable.class,
       ItemIDIndexReducer.class, IntWritable.class, LongWritable.class,
-      MapFileOutputFormat.class);
-    JobClient.runJob(itemIDIndexConf);
+      SequenceFileOutputFormat.class);
+    itemIDIndexConf.setClass("mapred.combiner.class", ItemIDIndexReducer.class, Reducer.class);    
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      JobClient.runJob(itemIDIndexConf);
+    }
     
     JobConf toUserVectorConf = prepareJobConf(
       inputPath, userVectorPath, TextInputFormat.class,
       ToItemPrefsMapper.class, LongWritable.class, booleanData ? LongWritable.class : EntityPrefWritable.class,
-      ToUserVectorReducer.class, LongWritable.class, RandomAccessSparseVectorWritable.class,
+      ToUserVectorReducer.class, LongWritable.class, VectorWritable.class,
       SequenceFileOutputFormat.class);
     toUserVectorConf.setBoolean(BOOLEAN_DATA, booleanData);
-    JobClient.runJob(toUserVectorConf);
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      JobClient.runJob(toUserVectorConf);
+    }
 
     JobConf toCooccurrenceConf = prepareJobConf(
       userVectorPath, cooccurrencePath, SequenceFileInputFormat.class,
-      UserVectorToCooccurrenceMapper.class, IntWritable.class, EntityCountWritable.class,
-      UserVectorToCooccurrenceReducer.class, IntWritable.class, RandomAccessSparseVectorWritable.class,
+      UserVectorToCooccurrenceMapper.class, IndexIndexWritable.class, IntWritable.class,
+      UserVectorToCooccurrenceReducer.class, IntWritable.class, VectorWritable.class,
       SequenceFileOutputFormat.class);
-    toCooccurrenceConf.setInt("io.sort.mb", 600);
+    setIOSort(toCooccurrenceConf);
     toCooccurrenceConf.setClass("mapred.combiner.class", CooccurrenceCombiner.class, Reducer.class);
-    JobClient.runJob(toCooccurrenceConf);
+    toCooccurrenceConf.setClass("mapred.partitioner.class", FirstIndexPartitioner.class, Partitioner.class);
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      JobClient.runJob(toCooccurrenceConf);
+    }
 
     JobConf partialMultiplyConf = prepareJobConf(
       cooccurrencePath, parialMultiplyPath, SequenceFileInputFormat.class,
       CooccurrenceColumnWrapperMapper.class, IntWritable.class, VectorOrPrefWritable.class,
-      PartialMultiplyReducer.class, LongWritable.class, RandomAccessSparseVectorWritable.class,
+      PartialMultiplyReducer.class, LongWritable.class, VectorWritable.class,
       SequenceFileOutputFormat.class);
     MultipleInputs.addInputPath(
         partialMultiplyConf,
@@ -138,21 +148,37 @@ public final class RecommenderJob extends AbstractJob {
     if (usersFile != null) {
       partialMultiplyConf.set(UserVectorSplitterMapper.USERS_FILE, usersFile);
     }
-    JobClient.runJob(partialMultiplyConf);
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      JobClient.runJob(partialMultiplyConf);
+    }
 
     JobConf aggregateAndRecommendConf = prepareJobConf(
         parialMultiplyPath, outputPath, SequenceFileInputFormat.class,
-        IdentityMapper.class, LongWritable.class, RandomAccessSparseVectorWritable.class,
+        IdentityMapper.class, LongWritable.class, VectorWritable.class,
         AggregateAndRecommendReducer.class, LongWritable.class, RecommendedItemsWritable.class,
         TextOutputFormat.class);
-    aggregateAndRecommendConf.setInt("io.sort.mb", 600);
+    setIOSort(aggregateAndRecommendConf);
     aggregateAndRecommendConf.setClass("mapred.combiner.class", AggregateCombiner.class, Reducer.class);
     aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath);
     aggregateAndRecommendConf.setInt(AggregateAndRecommendReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
-    aggregateAndRecommendConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
-    JobClient.runJob(aggregateAndRecommendConf);
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      JobClient.runJob(aggregateAndRecommendConf);
+    }
 
     return 0;
+  }
+
+  private static void setIOSort(JobConf conf) {
+    conf.setInt("io.sort.factor", 100);
+    conf.setInt("io.sort.mb", 1000);
+    String javaOpts = conf.get("mapred.child.java.opts");
+    if (javaOpts != null) {
+      Matcher m = Pattern.compile("Xmx([0-9]+)m").matcher(javaOpts);
+      if (m.matches()) {
+        int heapMB = Integer.parseInt(m.group(1));
+        conf.setInt("io.sort.mb", heapMB / 2);
+      }
+    }
   }
   
   public static void main(String[] args) throws Exception {

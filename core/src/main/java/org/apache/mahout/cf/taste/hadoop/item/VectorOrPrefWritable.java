@@ -23,20 +23,19 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public final class VectorOrPrefWritable implements Writable {
 
-  private RandomAccessSparseVector vector;
+  private Vector vector;
   private long userID;
   private float value;
 
   public VectorOrPrefWritable() {
   }
 
-  public VectorOrPrefWritable(RandomAccessSparseVector vector) {
+  public VectorOrPrefWritable(Vector vector) {
     this.vector = vector;
   }
 
@@ -57,7 +56,7 @@ public final class VectorOrPrefWritable implements Writable {
     return value;
   }
 
-  public void set(RandomAccessSparseVector vector) {
+  public void set(Vector vector) {
     this.vector = vector;
     this.userID = Long.MIN_VALUE;
     this.value = Float.NaN;
@@ -77,7 +76,7 @@ public final class VectorOrPrefWritable implements Writable {
       out.writeFloat(value);
     } else {
       out.writeBoolean(true);
-      new RandomAccessSparseVectorWritable(vector).write(out);
+      new VectorWritable(vector).write(out);
     }
   }
 
@@ -85,9 +84,9 @@ public final class VectorOrPrefWritable implements Writable {
   public void readFields(DataInput in) throws IOException {
     boolean hasVector = in.readBoolean();
     if (hasVector) {
-      RandomAccessSparseVectorWritable writable = new RandomAccessSparseVectorWritable();
+      VectorWritable writable = new VectorWritable();
       writable.readFields(in);
-      set((RandomAccessSparseVector) writable.get());
+      set(writable.get());
     } else {
       long theUserID = in.readLong();
       float theValue = in.readFloat();

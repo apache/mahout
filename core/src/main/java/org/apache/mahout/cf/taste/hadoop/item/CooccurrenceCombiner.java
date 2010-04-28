@@ -25,39 +25,36 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
-import org.apache.mahout.math.function.IntIntProcedure;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public final class CooccurrenceCombiner extends MapReduceBase implements
-    Reducer<IntWritable,EntityCountWritable,IntWritable,EntityCountWritable> {
+    Reducer<IndexIndexWritable,IntWritable,IndexIndexWritable,IntWritable> {
+
+  private IndexIndexWritable lastEntityEntity =
+      new IndexIndexWritable(Integer.MIN_VALUE, Integer.MIN_VALUE);
+  private int count = 0;
 
   @Override
-  public void reduce(final IntWritable index1,
-                     Iterator<EntityCountWritable> index2s,
-                     final OutputCollector<IntWritable,EntityCountWritable> output,
-                     Reporter reporter) {
-
-    OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
-    while (index2s.hasNext()) {
-      EntityCountWritable writable = index2s.next();
-      int index = (int) writable.getID();
-      int oldValue = indexCounts.get(index);
-      indexCounts.put(index, oldValue + writable.getCount());
-    }
-
-    final EntityCountWritable entityCount = new EntityCountWritable();
-    indexCounts.forEachPair(new IntIntProcedure() {
-      @Override
-      public boolean apply(int index, int count) {
-        entityCount.set(index, count);
-        try {
-          output.collect(index1, entityCount);
-        } catch (IOException ioe) {
-          throw new IllegalStateException(ioe);
-        }
-        return true;
+  public void reduce(IndexIndexWritable entityEntity,
+                     Iterator<IntWritable> counts,
+                     OutputCollector<IndexIndexWritable,IntWritable> output,
+                     Reporter reporter) throws IOException {
+    if (entityEntity.equals(lastEntityEntity)) {
+      count += sum(counts);
+    } else {
+      if (count > 0) {
+        output.collect(lastEntityEntity, new IntWritable(count));
       }
-    });
+      count = sum(counts);     
+      lastEntityEntity = entityEntity.clone();
+    }
   }
+
+  static int sum(Iterator<IntWritable> it) {
+    int sum = 0;
+    while (it.hasNext()) {
+      sum += it.next().get();
+    }
+    return sum;
+  }
+
 }

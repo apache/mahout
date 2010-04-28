@@ -25,39 +25,53 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
-import org.apache.mahout.math.function.IntIntProcedure;
-import org.apache.mahout.math.map.OpenIntIntHashMap;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public final class UserVectorToCooccurrenceReducer extends MapReduceBase implements
-    Reducer<IntWritable, EntityCountWritable,IntWritable, RandomAccessSparseVectorWritable> {
+    Reducer<IndexIndexWritable,IntWritable,IntWritable,VectorWritable> {
+
+  private int lastItem1ID = Integer.MIN_VALUE;
+  private int lastItem2ID = Integer.MIN_VALUE;
+  private Vector cooccurrenceRow = null;
+  private int count = 0;
 
   @Override
-  public void reduce(IntWritable index1,
-                     Iterator<EntityCountWritable> index2s,
-                     OutputCollector<IntWritable,RandomAccessSparseVectorWritable> output,
+  public void reduce(IndexIndexWritable entityEntity,
+                     Iterator<IntWritable> counts,
+                     OutputCollector<IntWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
 
-    OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
-    while (index2s.hasNext()) {
-      EntityCountWritable writable = index2s.next();
-      int index = (int) writable.getID();
-      int oldValue = indexCounts.get(index);
-      indexCounts.put(index, oldValue + writable.getCount());
-    }
+    int item1ID = entityEntity.getAID();
+    int item2ID = entityEntity.getBID();
 
-    final RandomAccessSparseVector cooccurrenceRow =
-        new RandomAccessSparseVector(Integer.MAX_VALUE, 1000);
-    indexCounts.forEachPair(new IntIntProcedure() {
-      @Override
-      public boolean apply(int index, int count) {
-        cooccurrenceRow.set(index, count);
-        return true;
+    if (item1ID < lastItem1ID) {
+      throw new IllegalStateException();
+    }
+    if (item1ID == lastItem1ID) {
+      if (item2ID < lastItem2ID) {
+        throw new IllegalStateException();
       }
-    });
-    output.collect(index1, new RandomAccessSparseVectorWritable(cooccurrenceRow));
+      if (item2ID == lastItem2ID) {
+        count += CooccurrenceCombiner.sum(counts);
+      } else {
+        if (cooccurrenceRow == null) {
+          cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE);
+        }
+        cooccurrenceRow.set(item2ID, count);
+        lastItem2ID = item2ID;
+        count = CooccurrenceCombiner.sum(counts);
+      }
+    } else {
+      if (cooccurrenceRow != null) {
+        output.collect(new IntWritable(lastItem1ID), new VectorWritable(cooccurrenceRow));
+      }
+      lastItem1ID = item1ID;
+      lastItem2ID = item2ID;
+      cooccurrenceRow = null;
+      count = CooccurrenceCombiner.sum(counts);
+    }
   }
   
 }

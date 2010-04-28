@@ -26,30 +26,85 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.EntityCountWritable;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
-    Mapper<LongWritable, RandomAccessSparseVectorWritable,IntWritable, EntityCountWritable> {
-  
+    Mapper<LongWritable, VectorWritable,IndexIndexWritable,IntWritable> {
+
+  private static final int MAX_PREFS_CONSIDERED = 50;
+
+  private boolean outputGuardValue = true;
+  private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
+
   @Override
   public void map(LongWritable userID,
-                  RandomAccessSparseVectorWritable userVector,
-                  OutputCollector<IntWritable,EntityCountWritable> output,
+                  VectorWritable userVectorWritable,
+                  OutputCollector<IndexIndexWritable,IntWritable> output,
                   Reporter reporter) throws IOException {
-    Iterator<Vector.Element> it = userVector.get().iterateNonZero();
-    EntityCountWritable entityCount = new EntityCountWritable();
-    IntWritable writable1 = new IntWritable();
+    Vector userVector = maybePruneUserVector(userVectorWritable.get());
+    countSeen(userVector);
+    Iterator<Vector.Element> it = userVector.iterateNonZero();
+    IndexIndexWritable entityEntity = new IndexIndexWritable();
+    IntWritable one = new IntWritable(1);
     while (it.hasNext()) {
       int index1 = it.next().index();
-      writable1.set(index1);
-      Iterator<Vector.Element> it2 = userVector.get().iterateNonZero();
+      Iterator<Vector.Element> it2 = userVector.iterateNonZero();
       while (it2.hasNext()) {
         int index2 = it2.next().index();
-        entityCount.set(index2, 1);
-        output.collect(writable1, entityCount);
+        if (index1 != index2) {
+          entityEntity.set(index1, index2);
+          output.collect(entityEntity, one);
+        }
       }
+    }
+    // Guard value, output once, sorts after everything; will be dropped by combiner
+    if (outputGuardValue) {
+      output.collect(new IndexIndexWritable(Integer.MAX_VALUE, Integer.MAX_VALUE), one);
+      outputGuardValue = false;
+    }
+  }
+
+  private Vector maybePruneUserVector(Vector userVector) {
+    if (userVector.getNumNondefaultElements() <= MAX_PREFS_CONSIDERED) {
+      return userVector;
+    }
+
+    OpenIntIntHashMap countCounts = new OpenIntIntHashMap();
+    Iterator<Vector.Element> it = userVector.iterateNonZero();
+    while (it.hasNext()) {
+      int index = it.next().index();
+      int count = indexCounts.get(index);
+      countCounts.adjustOrPutValue(count, 1, 1);
+    }
+
+    int resultingSizeAtCutoff = 0;
+    int cutoff = 0;
+    while (resultingSizeAtCutoff <= MAX_PREFS_CONSIDERED) {
+      cutoff++;
+      int count = indexCounts.get(cutoff);
+      resultingSizeAtCutoff += count;
+    }
+
+    Iterator<Vector.Element> it2 = userVector.iterateNonZero();
+    while (it2.hasNext()) {
+      Vector.Element e = it2.next();
+      int index = e.index();
+      int count = indexCounts.get(index);
+      if (count > cutoff) {
+        e.set(0.0);
+      }
+    }
+
+    return userVector;
+  }
+
+  private void countSeen(Vector userVector) {
+    Iterator<Vector.Element> it = userVector.iterateNonZero();
+    while (it.hasNext()) {
+      int index = it.next().index();
+      indexCounts.adjustOrPutValue(index, 1, 1);
     }
   }
   

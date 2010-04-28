@@ -25,40 +25,60 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.cf.taste.hadoop.MapFilesMap;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.impl.recommender.ByValueRecommendedItemComparator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 public final class AggregateAndRecommendReducer extends MapReduceBase implements
-    Reducer<LongWritable,RandomAccessSparseVectorWritable,LongWritable,RecommendedItemsWritable> {
+    Reducer<LongWritable,VectorWritable,LongWritable,RecommendedItemsWritable> {
 
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
 
+  private static final PathFilter PARTS_FILTER = new PathFilter() {
+    @Override
+    public boolean accept(Path path) {
+      return path.getName().startsWith("part-");
+    }
+  };
+
   private int recommendationsPerUser;
-  private MapFilesMap<IntWritable,LongWritable> indexItemIDMap;
+  private OpenIntLongHashMap indexItemIDMap;
 
   @Override
   public void configure(JobConf jobConf) {
+    recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
     try {
       FileSystem fs = FileSystem.get(jobConf);
       Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
-      recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
-      indexItemIDMap = new MapFilesMap<IntWritable,LongWritable>(fs, itemIDIndexPath, new Configuration());
+      indexItemIDMap = new OpenIntLongHashMap();
+      IntWritable index = new IntWritable();
+      LongWritable id = new LongWritable();
+      for (FileStatus status : fs.listStatus(itemIDIndexPath, PARTS_FILTER)) {
+        String path = status.getPath().toString();
+        SequenceFile.Reader reader =
+            new SequenceFile.Reader(fs, new Path(path).makeQualified(fs), jobConf);
+        while (reader.next(index, id)) {
+          indexItemIDMap.put(index.get(), id.get());
+        }
+        reader.close();
+      }
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -66,7 +86,7 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
 
   @Override
   public void reduce(LongWritable key,
-                     Iterator<RandomAccessSparseVectorWritable> values,
+                     Iterator<VectorWritable> values,
                      OutputCollector<LongWritable, RecommendedItemsWritable> output,
                      Reporter reporter) throws IOException {
     if (!values.hasNext()) {
@@ -80,22 +100,18 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
     Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
 
-    Iterator<Vector.Element> recommendationVectorIterator = recommendationVector.iterateNonZero();
-    LongWritable itemID = new LongWritable();
+    Iterator<Vector.Element> recommendationVectorIterator =
+        recommendationVector.iterateNonZero();
     while (recommendationVectorIterator.hasNext()) {
       Vector.Element element = recommendationVectorIterator.next();
       int index = element.index();
       if (topItems.size() < recommendationsPerUser) {
-        LongWritable theItemID = indexItemIDMap.get(new IntWritable(index), itemID);
-        if (theItemID != null) {
-          topItems.add(new GenericRecommendedItem(theItemID.get(), (float) element.get()));
-        } // else, huh?
+        long theItemID = indexItemIDMap.get(index);
+        topItems.add(new GenericRecommendedItem(theItemID, (float) element.get()));
       } else if (element.get() > topItems.peek().getValue()) {
-        LongWritable theItemID = indexItemIDMap.get(new IntWritable(index), itemID);
-        if (theItemID != null) {
-          topItems.add(new GenericRecommendedItem(theItemID.get(), (float) element.get()));
-          topItems.poll();
-        } // else, huh?
+        long theItemID = indexItemIDMap.get(index);
+        topItems.add(new GenericRecommendedItem(theItemID, (float) element.get()));
+        topItems.poll();
       }
     }
 

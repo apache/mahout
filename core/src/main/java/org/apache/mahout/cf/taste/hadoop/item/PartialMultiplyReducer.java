@@ -26,30 +26,35 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.math.RandomAccessSparseVectorWritable;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.LongFloatProcedure;
 import org.apache.mahout.math.map.OpenLongFloatHashMap;
 
 public final class PartialMultiplyReducer extends MapReduceBase implements
-    Reducer<IntWritable,VectorOrPrefWritable,LongWritable, RandomAccessSparseVectorWritable> {
+    Reducer<IntWritable,VectorOrPrefWritable,LongWritable,VectorWritable> {
 
   @Override
   public void reduce(IntWritable key,
                      Iterator<VectorOrPrefWritable> values,
-                     final OutputCollector<LongWritable,RandomAccessSparseVectorWritable> output,
+                     final OutputCollector<LongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
+
     OpenLongFloatHashMap savedValues = new OpenLongFloatHashMap();
     Vector cooccurrenceColumn = null;
     final int itemIndex = key.get();
     final LongWritable userIDWritable = new LongWritable();
-    final RandomAccessSparseVectorWritable vectorWritable = new RandomAccessSparseVectorWritable();
+    final VectorWritable vectorWritable = new VectorWritable();
+
     while (values.hasNext()) {
+
       VectorOrPrefWritable value = values.next();
       if (value.getVector() == null) {
+
         // Then this is a user-pref value
         long userID = value.getUserID();
         float preferenceValue = value.getValue();
+        
         if (cooccurrenceColumn == null) {
           // Haven't seen the co-occurrencce column yet; save it
           savedValues.put(userID, preferenceValue);
@@ -62,8 +67,12 @@ public final class PartialMultiplyReducer extends MapReduceBase implements
           vectorWritable.set(partialProduct);
           output.collect(userIDWritable, vectorWritable);
         }
+
       } else {
+
+        // Then this is the column vector
         cooccurrenceColumn = value.getVector();
+
         final Vector theColumn = cooccurrenceColumn;
         savedValues.forEachPair(new LongFloatProcedure() {
           @Override
