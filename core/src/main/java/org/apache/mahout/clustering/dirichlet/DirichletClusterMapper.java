@@ -59,7 +59,7 @@ public class DirichletClusterMapper extends MapReduceBase implements
         clusterPdf = pdf;
       }
     }
-    System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
+    //System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
     output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, vector));
   }
 

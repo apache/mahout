@@ -131,7 +131,7 @@ public class MeanShiftCanopy extends ClusterBase {
    */
   @Override
   public Vector computeCentroid() {
-    if (getNumPoints() == 0) {
+    if (getNumPoints() <= 1) {
       return getCenter();
     } else {
       return getPointTotal().divide(getNumPoints());
@@ -204,7 +204,7 @@ public class MeanShiftCanopy extends ClusterBase {
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    VectorWritable.writeVector(out, new SequentialAccessSparseVector(computeCentroid()));
+    VectorWritable.writeVector(out, computeCentroid());
     out.writeInt(boundPoints.size());
     for (int v : boundPoints.elements()) {
       out.writeInt(v);

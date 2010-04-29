@@ -42,7 +42,9 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.clustering.ClusterDumper;
@@ -61,14 +63,11 @@ public class TestClusterDumper extends MahoutTestCase {
   private static final String[] DOCS = { "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
       "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
-      "Mary had a little goat whose fleece was white as snow.",
-      "Mary had a little lamb whose fleece was black as tar.",
+      "Mary had a little goat whose fleece was white as snow.", "Mary had a little lamb whose fleece was black as tar.",
       "Dick had a little goat whose fleece was white as snow.", "Moby Dick is a story of a whale and a man obsessed.",
       "Moby Bob is a story of a walrus and a man obsessed.", "Moby Dick is a story of a whale and a crazy man.",
-      "The robber wore a black fleece jacket and a baseball cap.",
-      "The robber wore a red fleece jacket and a baseball cap.",
-      "The robber wore a white fleece jacket and a baseball cap.",
-      "The English Springer Spaniel is the best of all dogs." };
+      "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
+      "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
 
   @Override
   protected void setUp() throws Exception {
@@ -129,15 +128,17 @@ public class TestClusterDumper extends MahoutTestCase {
     int i = 0;
     for (Vector vector : iterable) {
       Assert.assertNotNull(vector);
-      System.out.println("Vector[" + i++ + "]=" + ClusterBase.formatVector(vector, null));
-      sampleData.add(new VectorWritable(vector));
+      NamedVector vector2 = new NamedVector(vector, "P(" + i + ")");
+      System.out.println(ClusterBase.formatVector(vector2, null));
+      sampleData.add(new VectorWritable(vector2));
+      i++;
     }
   }
 
   public void testCanopy() throws Exception { // now run the Job
     CanopyClusteringJob.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-0", null);
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-0", "output/clusteredPoints");
     clusterDumper.printClusters();
   }
 
@@ -145,10 +146,9 @@ public class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.runJob("testdata/points", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 8, 4);
     // now run the KMeans job
-    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(),
-        0.001, 10, 1);
+    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-2", null);
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-2", "output/clusteredPoints");
     clusterDumper.printClusters();
   }
 
@@ -156,26 +156,26 @@ public class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.runJob("testdata/points", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 8, 4);
     // now run the KMeans job
-    FuzzyKMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 1, 2);
+    FuzzyKMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10,
+        1, 1, (float) 1.1);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-3", null);
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-3", "output/clusteredPoints");
     clusterDumper.printClusters();
   }
 
   public void testMeanShift() throws Exception {
-    MeanShiftCanopyJob.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 9, 1.0, 0.001, 10);
+    MeanShiftCanopyJob.runJob("testdata/points", "output", CosineDistanceMeasure.class.getName(), 0.5, 0.01, 0.05, 10);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-1", null);
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-1", "output/clusteredPoints");
     clusterDumper.printClusters();
   }
 
   public void testDirichlet() throws Exception {
-    Vector prototype = sampleData.get(0).get();
-    DirichletDriver.runJob("testdata/points", "output",
-        L1ModelDistribution.class.getName(), prototype.getClass().getName(), prototype
-            .size(), 15, 10, 1.0, 1);
+    NamedVector prototype = (NamedVector) sampleData.get(0).get();
+    DirichletDriver.runJob("testdata/points", "output", L1ModelDistribution.class.getName(), prototype.getDelegate().getClass().getName(),
+        prototype.size(), 15, 10, 1.0, 1);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", null);
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", "output/clusteredPoints");
     clusterDumper.printClusters();
   }
 }

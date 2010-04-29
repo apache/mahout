@@ -311,9 +311,9 @@ public class DirichletDriver {
    * @param modelFactory
    *          the class name of the model factory class
    * @param modelPrototype
-   *          TODO
+   *          the class name of the model prototype (a Vector implementation)
    * @param prototypeSize
-   *          TODO
+   *          the size of the model prototype vector
    * @param numClusters
    *          the number of clusters
    * @param alpha_0

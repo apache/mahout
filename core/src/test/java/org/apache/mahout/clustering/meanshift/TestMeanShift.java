@@ -57,7 +57,7 @@ public class TestMeanShift extends MahoutTestCase {
    */
   private static void printCanopies(List<MeanShiftCanopy> canopies) {
     for (MeanShiftCanopy canopy : canopies) {
-      System.out.println(canopy.toString());
+      System.out.println(canopy.asFormatString(null));
     }
   }
 
@@ -70,7 +70,7 @@ public class TestMeanShift extends MahoutTestCase {
       }
     }
     for (MeanShiftCanopy canopy : canopies) {
-      int ch = 'A' + canopy.getCanopyId() - 100;
+      int ch = 'A' + canopy.getCanopyId();
       for (int pid : canopy.getBoundPoints().elements()) {
         Vector pt = raw[pid];
         out[(int) pt.getQuick(0)][(int) pt.getQuick(1)] = (char) ch;

@@ -504,8 +504,7 @@ public class TestCanopyCreation extends MahoutTestCase {
       count++;
       System.out.println("Txt: " + clusterId + " Vec: " + vector.getVector().get().asFormatString());
     }
-    // the point [3.0,3.0] is covered by both canopies
-    assertEquals("number of points", 1 + points.size(), count);
+    assertEquals("number of points", points.size(), count);
     reader.close();
   }
   
@@ -527,19 +526,12 @@ public class TestCanopyCreation extends MahoutTestCase {
     Path path = new Path("output/clusteredPoints/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;
-    /*
-     * while (reader.ready()) { System.out.println(reader.readLine()); count++; }
-     */
     IntWritable canopyId = new IntWritable(0);
     WeightedVectorWritable can = new WeightedVectorWritable();
     while (reader.next(canopyId, can)) {
       count++;
     }
-    /*
-     * while (reader.ready()) { System.out.println(reader.readLine()); count++; }
-     */
-    // the point [3.0,3.0] is covered by both canopies
-    assertEquals("number of points", 1 + points.size(), count);
+    assertEquals("number of points", points.size(), count);
     reader.close();
   }
   

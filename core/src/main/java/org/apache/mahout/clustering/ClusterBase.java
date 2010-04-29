@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.JsonVectorAdapter;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 
@@ -39,7 +40,7 @@ import com.google.gson.reflect.TypeToken;
  *
  */
 public abstract class ClusterBase implements Writable, Cluster {
-  
+
   // default directory for all clustered points
   public static final String CLUSTERED_POINTS_DIR = "/clusteredPoints";
 
@@ -48,7 +49,6 @@ public abstract class ClusterBase implements Writable, Cluster {
 
   // default directory for output of clusters per iteration
   public static final String CLUSTERS_DIR = "/clusters-";
-
 
   // this cluster's clusterId
   private int id;
@@ -107,7 +107,7 @@ public abstract class ClusterBase implements Writable, Cluster {
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
-    buf.append(getIdentifier()).append(": ").append(formatVector(computeCentroid(), bindings));
+    buf.append(getIdentifier()).append(": ").append(formatVector(getCenter(), bindings));
     return buf.toString();
   }
 
@@ -152,6 +152,9 @@ public abstract class ClusterBase implements Writable, Cluster {
    */
   public static String formatVector(Vector v, String[] bindings) {
     StringBuilder buf = new StringBuilder();
+    if (v instanceof NamedVector) {
+      buf.append(((NamedVector) v).getName()).append(" = ");
+    }
     int nzero = 0;
     Iterator<Element> iterateNonZero = v.iterateNonZero();
     while (iterateNonZero.hasNext()) {

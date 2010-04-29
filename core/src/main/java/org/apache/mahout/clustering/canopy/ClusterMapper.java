@@ -37,19 +37,18 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class ClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
-  
+    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
+
   private CanopyClusterer canopyClusterer;
+
   private final List<Canopy> canopies = new ArrayList<Canopy>();
-  
+
   @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable point,
-                  OutputCollector<IntWritable,WeightedVectorWritable> output,
-                  Reporter reporter) throws IOException {
-    canopyClusterer.emitPointToExistingCanopies(point.get(), canopies, output, reporter);
+  public void map(WritableComparable<?> key, VectorWritable point, OutputCollector<IntWritable, WeightedVectorWritable> output,
+      Reporter reporter) throws IOException {
+    canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, output, reporter);
   }
-  
+
   /**
    * Configure the mapper by providing its canopies. Used by unit tests.
    * 
@@ -60,12 +59,12 @@ public class ClusterMapper extends MapReduceBase implements
     this.canopies.clear();
     this.canopies.addAll(canopies);
   }
-  
+
   @Override
   public void configure(JobConf job) {
     super.configure(job);
     canopyClusterer = new CanopyClusterer(job);
-    
+
     String canopyPath = job.get(CanopyConfigKeys.CANOPY_PATH_KEY);
     if ((canopyPath != null) && (canopyPath.length() > 0)) {
       try {
@@ -85,13 +84,13 @@ public class ClusterMapper extends MapReduceBase implements
       } catch (IOException e) {
         throw new IllegalStateException(e);
       }
-      
+
       if (canopies.isEmpty()) {
         throw new IllegalStateException("Canopies are empty!");
       }
     }
   }
-  
+
   public boolean canopyCovers(Canopy canopy, Vector point) {
     return canopyClusterer.canopyCovers(canopy, point);
   }

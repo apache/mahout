@@ -44,6 +44,7 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -51,6 +52,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.Vector;
@@ -76,7 +78,7 @@ public final class ClusterDumper {
 
   private int numTopFeatures = 10;
 
-  private Map<String, List<String>> clusterIdToPoints = null;
+  private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints = null;
 
   private boolean useJSON = false;
 
@@ -154,14 +156,14 @@ public final class ClusterDumper {
           writer.write('\n');
         }
 
-        List<String> points = clusterIdToPoints.get(String.valueOf(cluster.getId()));
+        List<WeightedVectorWritable> points = clusterIdToPoints.get(cluster.getId());
         if (points != null) {
-          writer.write("\tPoints: ");
-          for (Iterator<String> iterator = points.iterator(); iterator.hasNext();) {
-            String point = iterator.next();
-            writer.append(point);
+          writer.write("\tWeight:  Point:\n\t");
+          for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
+            WeightedVectorWritable point = iterator.next();
+            writer.append(point.toString());
             if (iterator.hasNext()) {
-              writer.append(", ");
+              writer.append("\n\t");
             }
           }
           writer.write('\n');
@@ -192,7 +194,7 @@ public final class ClusterDumper {
     this.subString = subString;
   }
 
-  public Map<String, List<String>> getClusterIdToPoints() {
+  public Map<Integer, List<WeightedVectorWritable>> getClusterIdToPoints() {
     return clusterIdToPoints;
   }
 
@@ -228,26 +230,24 @@ public final class ClusterDumper {
         abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).withDescription(
         "The number of chars of the asFormatString() to print").withShortName("b").create();
     Option numWordsOpt = obuilder.withLongName("numWords").withRequired(false).withArgument(
-        abuilder.withName("numWords").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The number of top terms to print").withShortName("n").create();
+        abuilder.withName("numWords").withMinimum(1).withMaximum(1).create()).withDescription("The number of top terms to print")
+        .withShortName("n").create();
     Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
-        "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries")
-        .withShortName("j").create();
+        "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries").withShortName("j").create();
     Option pointsOpt = obuilder.withLongName("pointsDir").withRequired(false).withArgument(
         abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).withDescription(
         "The directory containing points sequence files mapping input vectors to their cluster.  "
-            + "If specified, then the program will output the points associated with a cluster").withShortName("p")
-        .create();
+            + "If specified, then the program will output the points associated with a cluster").withShortName("p").create();
     Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
-        abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create())
-        .withDescription("The dictionary file. ").withShortName("d").create();
+        abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).withDescription("The dictionary file. ")
+        .withShortName("d").create();
     Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
         abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
         "The dictionary file type (text|sequencefile)").withShortName("dt").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(seqOpt).withOption(outputOpt).withOption(
-        substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).withOption(dictTypeOpt)
+    Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(seqOpt).withOption(outputOpt)
+        .withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).withOption(dictTypeOpt)
         .withOption(numWordsOpt).create();
 
     try {
@@ -318,8 +318,8 @@ public final class ClusterDumper {
     this.useJSON = json;
   }
 
-  private static Map<String, List<String>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
-    SortedMap<String, List<String>> result = new TreeMap<String, List<String>>();
+  private static Map<Integer, List<WeightedVectorWritable>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
+    Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
 
     File[] children = new File(pointsPathDir).listFiles(new FilenameFilter() {
       @Override
@@ -337,19 +337,20 @@ public final class ClusterDumper {
       FileSystem fs = FileSystem.get(path.toUri(), conf);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       try {
-        Text key = (Text) reader.getKeyClass().newInstance();
-        Text value = (Text) reader.getValueClass().newInstance();
+        IntWritable key = (IntWritable) reader.getKeyClass().newInstance();
+        WeightedVectorWritable value = (WeightedVectorWritable) reader.getValueClass().newInstance();
         while (reader.next(key, value)) {
           // value is the cluster id as an int, key is the name/id of the
           // vector, but that doesn't matter because we only care about printing
           // it
           String clusterId = value.toString();
-          List<String> pointList = result.get(clusterId);
+          List<WeightedVectorWritable> pointList = result.get(key.get());
           if (pointList == null) {
-            pointList = new ArrayList<String>();
-            result.put(clusterId, pointList);
+            pointList = new ArrayList<WeightedVectorWritable>();
+            result.put(key.get(), pointList);
           }
-          pointList.add(key.toString());
+          pointList.add(value);
+          value = (WeightedVectorWritable) reader.getValueClass().newInstance();
         }
       } catch (InstantiationException e) {
         log.error("Exception", e);
@@ -363,7 +364,9 @@ public final class ClusterDumper {
 
   static class TermIndexWeight {
     private int index = -1;
+
     private double weight = 0.0;
+
     TermIndexWeight(int index, double weight) {
       this.index = index;
       this.weight = weight;

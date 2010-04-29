@@ -150,9 +150,7 @@ public class CanopyClusterer {
   }
 
   /**
-   * This method is used by the CanopyMapper to perform canopy inclusion tests and to emit the point keyed by
-   * its covering canopies to the output. if the point is not covered by any canopies (due to canopy centroid
-   * clustering), emit the point to the closest covering canopy.
+   * Emit the point to the closest covering canopy. Used by the ClusterMapper.
    * 
    * @param point
    *          the point to be added
@@ -163,29 +161,21 @@ public class CanopyClusterer {
    * @param reporter
    *          to report status of the job
    */
-  public void emitPointToExistingCanopies(Vector point, List<Canopy> canopies,
+  public void emitPointToClosestCanopy(Vector point, List<Canopy> canopies,
       OutputCollector<IntWritable, WeightedVectorWritable> collector, Reporter reporter) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
-    boolean isCovered = false;
+    // find closest canopy
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
-      if (dist < t1) {
-        isCovered = true;
-        VectorWritable vw = new VectorWritable(point);
-        collector.collect(new IntWritable(canopy.getId()), new WeightedVectorWritable(1, vw));
-        reporter.setStatus("Emit Canopy ID:" + canopy.getIdentifier());
-      } else if (dist < minDist) {
+      if (dist < minDist) {
         minDist = dist;
         closest = canopy;
       }
     }
-    // if the point is not contained in any canopies (due to canopy centroid
-    // clustering), emit the point to the closest covering canopy.
-    if (!isCovered) {
-      collector.collect(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
-      reporter.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
-    }
+    // emit to closest canopy
+    collector.collect(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
+    reporter.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
   }
 
   /**
