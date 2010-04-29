@@ -20,29 +20,28 @@ package org.apache.mahout.math.stats;
 /**
  * Utility methods for working with log-likelihood
  */
-public class LogLikelihood {
+public final class LogLikelihood {
 
   private LogLikelihood() {
   }
 
   /**
    * Calculate the Shannon entropy.
-   * @param elements TODO FILL IN HERE
    * @return The entropy value for the elements
    */
   public static double entropy(int... elements) {
-    double sum = 0;
-    for (int element : elements) {
-      sum += element;
-    }
+    double sum = 0.0;
     double result = 0.0;
-    for (int x : elements) {
-      if (x < 0) {
-        throw new IllegalArgumentException("Should not have negative count for entropy computation: (" + x + ')');
+    for (int element : elements) {
+      if (element < 0) {
+        throw new IllegalArgumentException("Should not have negative count for entropy computation: (" + element + ')');
       }
-      int zeroFlag = (x == 0 ? 1 : 0);
-      result += x * Math.log((x + zeroFlag) / sum);
+      if (element > 0) {
+        result += element * Math.log(element);
+        sum += element;
+      }
     }
+    result -= sum * Math.log(sum);
     return -result;
   }
 
@@ -68,7 +67,11 @@ public class LogLikelihood {
     double rowEntropy = entropy(k11, k12) + entropy(k21, k22);
     double columnEntropy = entropy(k11, k21) + entropy(k12, k22);
     double matrixEntropy = entropy(k11, k12, k21, k22);
-    return 2 * (matrixEntropy - rowEntropy - columnEntropy);
+    if (rowEntropy + columnEntropy > matrixEntropy) {
+      // round off error
+      return 0.0;
+    }
+    return 2.0 * (matrixEntropy - rowEntropy - columnEntropy);
   }
   
   /** 
@@ -88,6 +91,10 @@ public class LogLikelihood {
    */
   public static double rootLogLikelihoodRatio(int k11, int k12, int k21, int k22) {
     double llr = logLikelihoodRatio(k11, k12, k21, k22);
-    return Math.signum(((double) k11 / (k11+k12)) - ((double) k21 / (k21+k22))) * Math.sqrt(llr);
+    double sqrt = Math.sqrt(llr);
+    if (((double) k11 / (k11+k12)) < ((double) k21 / (k21+k22))) {
+      sqrt = -sqrt;
+    }
+    return sqrt;
   }
 }

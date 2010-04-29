@@ -25,6 +25,7 @@ public class LogLikelihoodTest extends Assert {
   public void testEntropy() throws Exception {
 
     assertEquals(1.386294, LogLikelihood.entropy(1, 1), 0.0001);
+    assertEquals(0.0, LogLikelihood.entropy(1), 0.0);
     //TODO: more tests here
     try {
       LogLikelihood.entropy(-1, -1);//exception
@@ -37,9 +38,9 @@ public class LogLikelihoodTest extends Assert {
   @Test
   public void testLogLikelihood() throws Exception {
     //TODO: check the epsilons
-    assertEquals(2.772589, LogLikelihood.logLikelihoodRatio(1, 0, 0, 1), 0.0001);
-    assertEquals(27.72589, LogLikelihood.logLikelihoodRatio(10, 0, 0, 10), 0.0001);
-    assertEquals(39.33052, LogLikelihood.logLikelihoodRatio(5, 1995, 0, 100000), 0.0001);
+    assertEquals(2.772589, LogLikelihood.logLikelihoodRatio(1, 0, 0, 1), 0.000001);
+    assertEquals(27.72589, LogLikelihood.logLikelihoodRatio(10, 0, 0, 10), 0.00001);
+    assertEquals(39.33052, LogLikelihood.logLikelihoodRatio(5, 1995, 0, 100000), 0.00001);
     assertEquals(4730.737, LogLikelihood.logLikelihoodRatio(1000, 1995, 1000, 100000), 0.001);
     assertEquals(5734.343, LogLikelihood.logLikelihoodRatio(1000, 1000, 1000, 100000), 0.001);
     assertEquals(5714.932, LogLikelihood.logLikelihoodRatio(1000, 1000, 1000, 99000), 0.001);
@@ -52,5 +53,10 @@ public class LogLikelihoodTest extends Assert {
     
     // negative because k11 is lower than expected
     assertTrue(LogLikelihood.rootLogLikelihoodRatio(36, 21928, 60280, 623876) < 0.0);
+  }
+
+  @Test
+  public void testRootNegativeLLR() {
+    assertEquals(0.0, LogLikelihood.rootLogLikelihoodRatio(6, 7567, 1924, 2426487), 0.00000001);
   }
 }
