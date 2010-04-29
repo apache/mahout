@@ -31,6 +31,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.DummyReporter;
@@ -370,15 +371,15 @@ public class TestKmeansClustering extends MahoutTestCase {
       // assertEquals("output dir files?", 4, outFiles.length);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
       int[] expect = expectedNumPoints[k];
-      DummyOutputCollector<IntWritable, VectorWritable> collector = new DummyOutputCollector<IntWritable, VectorWritable>();
+      DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
       // The key is the clusterId
       IntWritable clusterId = new IntWritable(0);
-      // The value is the vector
-      VectorWritable value = new VectorWritable();
+      // The value is the weighted vector
+      WeightedVectorWritable value = new WeightedVectorWritable();
       while (reader.next(clusterId, value)) {
         collector.collect(clusterId, value);
         clusterId = new IntWritable(0);
-        value = new VectorWritable();
+        value = new WeightedVectorWritable();
 
       }
       reader.close();
@@ -418,17 +419,17 @@ public class TestKmeansClustering extends MahoutTestCase {
     assertTrue("output dir exists?", outDir.exists());
     String[] outFiles = outDir.list();
     assertEquals("output dir files?", 4, outFiles.length);
-    DummyOutputCollector<IntWritable, VectorWritable> collector = new DummyOutputCollector<IntWritable, VectorWritable>();
+    DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
 
     // The key is the clusterId
     IntWritable clusterId = new IntWritable(0);
     // The value is the vector
-    VectorWritable value = new VectorWritable();
+    WeightedVectorWritable value = new WeightedVectorWritable();
     while (reader.next(clusterId, value)) {
       collector.collect(clusterId, value);
       clusterId = new IntWritable(0);
-      value = new VectorWritable();
+      value = new WeightedVectorWritable();
 
     }
     reader.close();

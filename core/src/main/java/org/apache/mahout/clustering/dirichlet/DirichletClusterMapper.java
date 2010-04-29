@@ -36,10 +36,11 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
 public class DirichletClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, VectorWritable> {
+    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
   private OutputCollector<IntWritable, VectorWritable> output;
 
@@ -47,7 +48,7 @@ public class DirichletClusterMapper extends MapReduceBase implements
 
   @SuppressWarnings("unchecked")
   @Override
-  public void map(WritableComparable<?> key, VectorWritable vector, OutputCollector<IntWritable, VectorWritable> output,
+  public void map(WritableComparable<?> key, VectorWritable vector, OutputCollector<IntWritable, WeightedVectorWritable> output,
       Reporter reporter) throws IOException {
     int clusterId = -1;
     double clusterPdf = 0;
@@ -59,7 +60,7 @@ public class DirichletClusterMapper extends MapReduceBase implements
       }
     }
     System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
-    output.collect(new IntWritable(clusterId), vector);
+    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, vector));
   }
 
   @Override

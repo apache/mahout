@@ -32,11 +32,12 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class ClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,IntWritable,VectorWritable> {
+    Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
   
   private CanopyClusterer canopyClusterer;
   private final List<Canopy> canopies = new ArrayList<Canopy>();
@@ -44,7 +45,7 @@ public class ClusterMapper extends MapReduceBase implements
   @Override
   public void map(WritableComparable<?> key,
                   VectorWritable point,
-                  OutputCollector<IntWritable,VectorWritable> output,
+                  OutputCollector<IntWritable,WeightedVectorWritable> output,
                   Reporter reporter) throws IOException {
     canopyClusterer.emitPointToExistingCanopies(point.get(), canopies, output, reporter);
   }

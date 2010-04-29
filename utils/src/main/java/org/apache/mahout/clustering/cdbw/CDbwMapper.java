@@ -35,37 +35,38 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.clustering.WeightedPointWritable;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwMapper extends MapReduceBase implements Mapper<IntWritable, VectorWritable, IntWritable, WeightedPointWritable> {
+public class CDbwMapper extends MapReduceBase implements
+    Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
-  private Map<Integer, WeightedPointWritable> mostDistantPoints = new HashMap<Integer, WeightedPointWritable>();
+  private Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<Integer, WeightedVectorWritable>();
 
   private DistanceMeasure measure = new EuclideanDistanceMeasure();
 
-  private OutputCollector<IntWritable, WeightedPointWritable> output = null;
+  private OutputCollector<IntWritable, WeightedVectorWritable> output = null;
 
   @Override
-  public void map(IntWritable clusterId, VectorWritable point, OutputCollector<IntWritable, WeightedPointWritable> output,
+  public void map(IntWritable clusterId, WeightedVectorWritable point, OutputCollector<IntWritable, WeightedVectorWritable> output,
       Reporter reporter) throws IOException {
 
     this.output = output;
 
     int key = clusterId.get();
-    WeightedPointWritable currentMDP = mostDistantPoints.get(key);
+    WeightedVectorWritable currentMDP = mostDistantPoints.get(key);
 
     List<VectorWritable> refPoints = representativePoints.get(key);
     double totalDistance = 0.0;
     for (VectorWritable refPoint : refPoints) {
-      totalDistance += measure.distance(refPoint.get(), point.get());
+      totalDistance += measure.distance(refPoint.get(), point.getVector().get());
     }
     if (currentMDP == null || currentMDP.getWeight() < totalDistance) {
-      mostDistantPoints.put(key, new WeightedPointWritable(totalDistance, new VectorWritable(point.get().clone())));
+      mostDistantPoints.put(key, new WeightedVectorWritable(totalDistance, new VectorWritable(point.getVector().get().clone())));
     }
   }
 

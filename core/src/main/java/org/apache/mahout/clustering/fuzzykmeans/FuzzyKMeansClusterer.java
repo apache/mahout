@@ -25,9 +25,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -126,35 +125,32 @@ public class FuzzyKMeansClusterer {
    *          the OutputCollector to emit into
    */
   public void outputPointWithClusterProbabilities(String key, Vector point, List<SoftCluster> clusters,
-      OutputCollector<IntWritable, VectorWritable> output) throws IOException {
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
 
-    // TODO: remove this later
-    //    List<Double> clusterDistanceList = new ArrayList<Double>();
-    //    
-    //    for (SoftCluster cluster : clusters) {
-    //      clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
-    //    }
-    //    FuzzyKMeansOutput fOutput = new FuzzyKMeansOutput(clusters.size());
-    //    for (int i = 0; i < clusters.size(); i++) {
-    //      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-    //      fOutput.add(i, clusters.get(i), probWeight);
-    //    }
-    //    String name = point.getName();
-
-    // for now just emit the closest cluster
-    int clusterId = -1;
-    double distance = Double.MAX_VALUE;
+    // calculate point distances for all clusters    
+    List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
-      Vector center = cluster.getCenter();
-      // System.out.println("cluster-" + cluster.getId() + "@ " + ClusterBase.formatVector(center, null));
-      double d = measure.distance(center, point);
-      if (d < distance) {
-        clusterId = cluster.getId();
-        distance = d;
+      clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
+    }
+    // calculate point pdf for all clusters
+    List<Double> clusterPdfList = new ArrayList<Double>();
+    for (int i = 0; i < clusters.size(); i++) {
+      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
+      clusterPdfList.add(probWeight);
+    }
+    // for now just emit the most likely cluster
+    int clusterId = -1;
+    double clusterPdf = 0;
+    for (int i = 0; i < clusters.size(); i++) {
+      // System.out.println("cluster-" + clusters.get(i).getId() + "@ " + ClusterBase.formatVector(center, null));
+      double pdf = clusterPdfList.get(i);
+      if (pdf > clusterPdf) {
+        clusterId = clusters.get(i).getId();
+        clusterPdf = pdf;
       }
     }
     // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-    output.collect(new IntWritable(clusterId), new VectorWritable(point));
+    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
   }
 
   /** Computes the probability of a point belonging to a cluster */
@@ -210,12 +206,8 @@ public class FuzzyKMeansClusterer {
    * @return
    *          a List<List<SoftCluster>> of clusters produced per iteration
    */
-  public static List<List<SoftCluster>> clusterPoints(List<Vector> points,
-                                                      List<SoftCluster> clusters,
-                                                      DistanceMeasure measure,
-                                                      double threshold,
-                                                      double m,
-                                                      int numIter) {
+  public static List<List<SoftCluster>> clusterPoints(List<Vector> points, List<SoftCluster> clusters, DistanceMeasure measure,
+      double threshold, double m, int numIter) {
     List<List<SoftCluster>> clustersList = new ArrayList<List<SoftCluster>>();
     clustersList.add(clusters);
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, threshold, m);
@@ -243,9 +235,7 @@ public class FuzzyKMeansClusterer {
    *          the List<Cluster> clusters
    * @return
    */
-  public static boolean runFuzzyKMeansIteration(List<Vector> points,
-                                                List<SoftCluster> clusterList,
-                                                FuzzyKMeansClusterer clusterer) {
+  public static boolean runFuzzyKMeansIteration(List<Vector> points, List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer) {
     for (Vector point : points) {
       List<Double> clusterDistanceList = new ArrayList<Double>();
       for (SoftCluster cluster : clusterList) {

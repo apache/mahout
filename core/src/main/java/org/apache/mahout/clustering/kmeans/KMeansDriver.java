@@ -40,6 +40,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
@@ -303,11 +304,8 @@ public final class KMeansDriver {
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    conf.setMapOutputKeyClass(IntWritable.class);
-    conf.setMapOutputValueClass(VectorWritable.class);
     conf.setOutputKeyClass(IntWritable.class);
-    // the output is the cluster id
-    conf.setOutputValueClass(VectorWritable.class);
+    conf.setOutputValueClass(WeightedVectorWritable.class);
     
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);

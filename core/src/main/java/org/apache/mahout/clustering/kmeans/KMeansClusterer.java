@@ -23,8 +23,8 @@ import java.util.List;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -35,12 +35,12 @@ import org.slf4j.LoggerFactory;
  * representation. The class can be used as part of a clustering job to be started as map/reduce job.
  * */
 public class KMeansClusterer {
-  
+
   private static final Logger log = LoggerFactory.getLogger(KMeansClusterer.class);
-  
+
   /** Distance to use for point to cluster comparison. */
   private final DistanceMeasure measure;
-  
+
   /**
    * Init the k-means clusterer with the distance measure to use for comparison.
    * 
@@ -51,7 +51,7 @@ public class KMeansClusterer {
   public KMeansClusterer(DistanceMeasure measure) {
     this.measure = measure;
   }
-  
+
   /**
    * Iterates over all clusters and identifies the one closes to the given point. Distance measure used is
    * configured at creation time of .
@@ -61,9 +61,8 @@ public class KMeansClusterer {
    * @param clusters
    *          a List<Cluster> to test.
    */
-  public void emitPointToNearestCluster(Vector point,
-                                        List<Cluster> clusters,
-                                        OutputCollector<Text,KMeansInfo> output) throws IOException {
+  public void emitPointToNearestCluster(Vector point, List<Cluster> clusters, OutputCollector<Text, KMeansInfo> output)
+      throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -80,10 +79,9 @@ public class KMeansClusterer {
     // emit only clusterID
     output.collect(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
   }
-  
-  public void outputPointWithClusterInfo(Vector vector,
-                                         List<Cluster> clusters,
-                                         OutputCollector<IntWritable,VectorWritable> output) throws IOException {
+
+  public void outputPointWithClusterInfo(Vector vector, List<Cluster> clusters,
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -94,10 +92,10 @@ public class KMeansClusterer {
         nearestDistance = distance;
       }
     }
-    
-    output.collect(new IntWritable(nearestCluster.getId()), new VectorWritable(vector));
+
+    output.collect(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, new VectorWritable(vector)));
   }
-  
+
   /**
    * This is the reference k-means implementation. Given its inputs it iterates over the points and clusters
    * until their centers converge or until the maximum number of iterations is exceeded.
@@ -111,14 +109,11 @@ public class KMeansClusterer {
    * @param maxIter
    *          the maximum number of iterations
    */
-  public static List<List<Cluster>> clusterPoints(List<Vector> points,
-                                                  List<Cluster> clusters,
-                                                  DistanceMeasure measure,
-                                                  int maxIter,
-                                                  double distanceThreshold) {
+  public static List<List<Cluster>> clusterPoints(List<Vector> points, List<Cluster> clusters, DistanceMeasure measure,
+      int maxIter, double distanceThreshold) {
     List<List<Cluster>> clustersList = new ArrayList<List<Cluster>>();
     clustersList.add(clusters);
-    
+
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration < maxIter) {
@@ -133,7 +128,7 @@ public class KMeansClusterer {
     }
     return clustersList;
   }
-  
+
   /**
    * Perform a single iteration over the points and clusters, assigning points to clusters and returning if
    * the iterations are completed.
@@ -146,10 +141,8 @@ public class KMeansClusterer {
    *          a DistanceMeasure to use
    * @return
    */
-  public static boolean runKMeansIteration(List<Vector> points,
-                                           List<Cluster> clusters,
-                                           DistanceMeasure measure,
-                                           double distanceThreshold) {
+  public static boolean runKMeansIteration(List<Vector> points, List<Cluster> clusters, DistanceMeasure measure,
+      double distanceThreshold) {
     // iterate through all points, assigning each to the nearest cluster
     for (Vector point : points) {
       Cluster closestCluster = null;
@@ -178,5 +171,5 @@ public class KMeansClusterer {
     }
     return converged;
   }
-  
+
 }

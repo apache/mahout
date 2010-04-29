@@ -35,35 +35,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class DisplayMeanShift extends DisplayDirichlet {
-  
+
   private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);
-  
-  private static final MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(
-      new EuclideanDistanceMeasure(), 1.0, 0.05, 0.5);
+
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-  
+
+  private static double t1, t2;
+
   private DisplayMeanShift() {
     initialize();
     this.setTitle("Canopy Clusters (> 1.5% of population)");
   }
-  
-  // TODO this is never queried?
-  // private static final List<List<Vector>> iterationCenters = new ArrayList<List<Vector>>();
-  
+
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     double sx = (double) res / ds;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
-    
+
     // plot the axes
     g2.setColor(Color.BLACK);
     Vector dv = new DenseVector(2).assign(size / 2.0);
-    Vector dv1 = new DenseVector(2).assign(DisplayMeanShift.clusterer.getT1());
-    Vector dv2 = new DenseVector(2).assign(DisplayMeanShift.clusterer.getT2());
+    Vector dv1 = new DenseVector(2).assign(t1);
+    Vector dv2 = new DenseVector(2).assign(t2);
     DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(2), dv);
     DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(-2), dv);
-    
+
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
@@ -72,7 +69,7 @@ class DisplayMeanShift extends DisplayDirichlet {
     }
     int i = 0;
     for (MeanShiftCanopy canopy : canopies) {
-      if (canopy.getBoundPoints().size() > 0.015 * DisplayDirichlet.sampleData.size()) {
+      if (canopy.getBoundPoints().toList().size() > 0.015 * DisplayDirichlet.sampleData.size()) {
         g2.setColor(colors[Math.min(i++, DisplayDirichlet.colors.length - 1)]);
         for (int v : canopy.getBoundPoints().elements()) {
           DisplayDirichlet.plotRectangle(g2, sampleData.get(v).get(), dv);
@@ -82,7 +79,7 @@ class DisplayMeanShift extends DisplayDirichlet {
       }
     }
   }
-  
+
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
@@ -90,14 +87,15 @@ class DisplayMeanShift extends DisplayDirichlet {
     for (VectorWritable sample : sampleData) {
       points.add(sample.get());
     }
-    canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.5, 1.0, 0.05,
-      10);
+    t1 = 1.5;
+    t2 = 0.5;
+    canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.005, t1, t2, 20);
     for (MeanShiftCanopy canopy : canopies) {
       log.info(canopy.toString());
     }
     new DisplayMeanShift();
   }
-  
+
   static void generateResults() {
     DisplayDirichlet.generateResults(new NormalModelDistribution());
   }

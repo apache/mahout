@@ -38,9 +38,9 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
-import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +155,7 @@ public final class ClusterDriver {
     
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(VectorWritable.class);
+    conf.setOutputValueClass(WeightedVectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     FileInputFormat.setInputPaths(conf, new Path(points));

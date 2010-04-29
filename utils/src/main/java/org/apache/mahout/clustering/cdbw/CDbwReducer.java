@@ -29,28 +29,28 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.clustering.WeightedPointWritable;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwReducer extends MapReduceBase implements Reducer<IntWritable, WeightedPointWritable, IntWritable, VectorWritable> {
+public class CDbwReducer extends MapReduceBase implements Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
 
   private Map<Integer, List<VectorWritable>> referencePoints;
 
   private OutputCollector<IntWritable, VectorWritable> output;
 
   @Override
-  public void reduce(IntWritable key, Iterator<WeightedPointWritable> values, OutputCollector<IntWritable, VectorWritable> output,
+  public void reduce(IntWritable key, Iterator<WeightedVectorWritable> values, OutputCollector<IntWritable, VectorWritable> output,
       Reporter reporter) throws IOException {
     this.output = output;
     // find the most distant point
-    WeightedPointWritable mdp = null;
+    WeightedVectorWritable mdp = null;
     while (values.hasNext()) {
-      WeightedPointWritable dpw = values.next();
+      WeightedVectorWritable dpw = values.next();
       if (mdp == null || mdp.getWeight() < dpw.getWeight()) {
-        mdp = new WeightedPointWritable(dpw.getWeight(), dpw.getPoint());
+        mdp = new WeightedVectorWritable(dpw.getWeight(), dpw.getVector());
       }
     }
-    output.collect(new IntWritable(key.get()), mdp.getPoint());
+    output.collect(new IntWritable(key.get()), mdp.getVector());
   }
 
   public void configure(Map<Integer, List<VectorWritable>> referencePoints) {

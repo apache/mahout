@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +45,11 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
-import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -348,7 +347,7 @@ public final class FuzzyKMeansDriver {
     conf.setJobName("Fuzzy K Means Clustering");
     
     conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(VectorWritable.class);
+    conf.setOutputValueClass(WeightedVectorWritable.class);
     
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);

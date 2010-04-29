@@ -27,37 +27,38 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class CanopyClusterer {
-  
+
   private int nextCanopyId;
-  
+
   private int numVectors;
-  
+
   // the T1 distance threshold
   private double t1;
-  
+
   // the T2 distance threshold
   private double t2;
-  
+
   // the distance measure
   private DistanceMeasure measure;
-  
+
   // private int nextClusterId = 0;
-  
+
   public CanopyClusterer(DistanceMeasure measure, double t1, double t2) {
     this.t1 = t1;
     this.t2 = t2;
     this.measure = measure;
   }
-  
+
   public CanopyClusterer(JobConf job) {
     this.configure(job);
   }
-  
+
   /**
    * Configure the Canopy and its distance measure
    * 
@@ -81,14 +82,14 @@ public class CanopyClusterer {
     t2 = Double.parseDouble(job.get(CanopyConfigKeys.T2_KEY));
     nextCanopyId = 0;
   }
-  
+
   /** Configure the Canopy for unit tests */
   public void config(DistanceMeasure aMeasure, double aT1, double aT2) {
     measure = aMeasure;
     t1 = aT1;
     t2 = aT2;
   }
-  
+
   /**
    * This is the same algorithm as the reference but inverted to iterate over existing canopies instead of the
    * points. Because of this it does not need to actually store the points, instead storing a total points
@@ -118,7 +119,7 @@ public class CanopyClusterer {
     }
     numVectors++;
   }
-  
+
   /**
    * This method is used by the CanopyMapper to perform canopy inclusion tests and to emit the point and its
    * covering canopies to the output. The CanopyCombiner will then sum the canopy points and produce the
@@ -131,9 +132,8 @@ public class CanopyClusterer {
    * @param collector
    *          an OutputCollector in which to emit the point
    */
-  public void emitPointToNewCanopies(Vector point,
-                                     List<Canopy> canopies,
-                                     OutputCollector<Text,Vector> collector) throws IOException {
+  public void emitPointToNewCanopies(Vector point, List<Canopy> canopies, OutputCollector<Text, Vector> collector)
+      throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
@@ -148,7 +148,7 @@ public class CanopyClusterer {
       canopy.emitPoint(point, collector);
     }
   }
-  
+
   /**
    * This method is used by the CanopyMapper to perform canopy inclusion tests and to emit the point keyed by
    * its covering canopies to the output. if the point is not covered by any canopies (due to canopy centroid
@@ -163,10 +163,8 @@ public class CanopyClusterer {
    * @param reporter
    *          to report status of the job
    */
-  public void emitPointToExistingCanopies(Vector point,
-                                          List<Canopy> canopies,
-                                          OutputCollector<IntWritable,VectorWritable> collector,
-                                          Reporter reporter) throws IOException {
+  public void emitPointToExistingCanopies(Vector point, List<Canopy> canopies,
+      OutputCollector<IntWritable, WeightedVectorWritable> collector, Reporter reporter) throws IOException {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     boolean isCovered = false;
@@ -175,7 +173,7 @@ public class CanopyClusterer {
       if (dist < t1) {
         isCovered = true;
         VectorWritable vw = new VectorWritable(point);
-        collector.collect(new IntWritable(canopy.getId()), vw);
+        collector.collect(new IntWritable(canopy.getId()), new WeightedVectorWritable(1, vw));
         reporter.setStatus("Emit Canopy ID:" + canopy.getIdentifier());
       } else if (dist < minDist) {
         minDist = dist;
@@ -185,11 +183,11 @@ public class CanopyClusterer {
     // if the point is not contained in any canopies (due to canopy centroid
     // clustering), emit the point to the closest covering canopy.
     if (!isCovered) {
-      collector.collect(new IntWritable(closest.getId()), new VectorWritable(point));
+      collector.collect(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
       reporter.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
     }
   }
-  
+
   /**
    * Return if the point is covered by the canopy
    * 
@@ -200,7 +198,7 @@ public class CanopyClusterer {
   public boolean canopyCovers(Canopy canopy, Vector point) {
     return measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point) < t1;
   }
-  
+
   /**
    * Iterate through the points, adding new canopies. Return the canopies.
    * 
@@ -246,7 +244,7 @@ public class CanopyClusterer {
     }
     return canopies;
   }
-  
+
   /**
    * Iterate through the canopies, adding their centroids to a list
    * 
@@ -261,7 +259,7 @@ public class CanopyClusterer {
     }
     return result;
   }
-  
+
   /**
    * Iterate through the canopies, resetting their center to their centroids
    * 
@@ -273,5 +271,5 @@ public class CanopyClusterer {
       canopy.setCenter(canopy.computeCentroid());
     }
   }
-  
+
 }

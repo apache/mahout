@@ -42,6 +42,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.VectorModelDistribution;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
@@ -376,7 +377,7 @@ public class DirichletDriver {
     conf.setJobName("Dirichlet Clustering");
     
     conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(VectorWritable.class);
+    conf.setOutputValueClass(WeightedVectorWritable.class);
     
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);

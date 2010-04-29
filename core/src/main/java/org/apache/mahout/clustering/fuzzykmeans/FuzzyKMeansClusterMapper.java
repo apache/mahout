@@ -22,25 +22,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.math.NamedVector;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
 public class FuzzyKMeansClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, VectorWritable> {
+    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
   private final List<SoftCluster> clusters = new ArrayList<SoftCluster>();
 
   private FuzzyKMeansClusterer clusterer;
 
   @Override
-  public void map(WritableComparable<?> key, VectorWritable point, OutputCollector<IntWritable, VectorWritable> output,
+  public void map(WritableComparable<?> key, VectorWritable point, OutputCollector<IntWritable, WeightedVectorWritable> output,
       Reporter reporter) throws IOException {
     clusterer.outputPointWithClusterProbabilities(key.toString(), point.get(), clusters, output);
   }

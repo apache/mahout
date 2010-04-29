@@ -31,6 +31,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.DummyReporter;
@@ -87,26 +88,37 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
   }
 
   private static void computeCluster(List<Vector> points, List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer,
-      Map<Integer, List<Vector>> pointClusterInfo) {
+      Map<Integer, List<WeightedVectorWritable>> pointClusterInfo) {
 
     for (Vector point : points) {
+      // calculate point distances for all clusters    
       List<Double> clusterDistanceList = new ArrayList<Double>();
-      SoftCluster closestCluster = null;
-      double closestDistance = Double.MAX_VALUE;
       for (SoftCluster cluster : clusterList) {
-        double distance = clusterer.getMeasure().distance(point, cluster.getCenter());
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestCluster = cluster;
+        clusterDistanceList.add(clusterer.getMeasure().distance(cluster.getCenter(), point));
+      }
+      // calculate point pdf for all clusters
+      List<Double> clusterPdfList = new ArrayList<Double>();
+      for (int i = 0; i < clusterList.size(); i++) {
+        double probWeight = clusterer.computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
+        clusterPdfList.add(probWeight);
+      }
+      // for now just emit the most likely cluster
+      int clusterId = -1;
+      double clusterPdf = 0;
+      for (int i = 0; i < clusterList.size(); i++) {
+        // System.out.println("cluster-" + clusters.get(i).getId() + "@ " + ClusterBase.formatVector(center, null));
+        double pdf = clusterPdfList.get(i);
+        if (pdf > clusterPdf) {
+          clusterId = clusterList.get(i).getId();
+          clusterPdf = pdf;
         }
-        clusterDistanceList.add(distance);
       }
-      List<Vector> list = pointClusterInfo.get(closestCluster.getId());
+      List<WeightedVectorWritable> list = pointClusterInfo.get(clusterId);
       if (list == null) {
-        list = new ArrayList<Vector>();
-        pointClusterInfo.put(closestCluster.getId(), list);
+        list = new ArrayList<WeightedVectorWritable>();
+        pointClusterInfo.put(clusterId, list);
       }
-      list.add(point);
+      list.add(new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
       double totalProb = 0;
       for (int i = 0; i < clusterList.size(); i++) {
         SoftCluster cluster = clusterList.get(i);
@@ -118,9 +130,9 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
     for (SoftCluster cluster : clusterList) {
       System.out.println(cluster.asFormatString(null));
-      List<Vector> list = pointClusterInfo.get(cluster.getId());
+      List<WeightedVectorWritable> list = pointClusterInfo.get(cluster.getId());
       if (list != null)
-        for (Vector vector : list) {
+        for (WeightedVectorWritable vector : list) {
           System.out.println("\t" + vector);
         }
     }
@@ -140,7 +152,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         //cluster.addPoint(cluster.getCenter(), 1);
         clusterList.add(cluster);
       }
-      Map<Integer, List<Vector>> pointClusterInfo = new HashMap<Integer, List<Vector>>();
+      Map<Integer, List<WeightedVectorWritable>> pointClusterInfo = new HashMap<Integer, List<WeightedVectorWritable>>();
       // run reference FuzzyKmeans algorithm
       List<List<SoftCluster>> clusters = FuzzyKMeansClusterer.clusterPoints(points, clusterList, new EuclideanDistanceMeasure(),
           0.001, 2, 2);
@@ -150,7 +162,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       // iterate for each cluster
       int size = 0;
       for (int cId : pointClusterInfo.keySet()) {
-        List<Vector> pts = pointClusterInfo.get(cId);
+        List<WeightedVectorWritable> pts = pointClusterInfo.get(cId);
         size += pts.size();
       }
       assertEquals("total size", size, points.size());
@@ -222,7 +234,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       // assertEquals("output dir files?", 4, outFiles.length);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
       IntWritable key = new IntWritable();
-      VectorWritable out = new VectorWritable();
+      WeightedVectorWritable out = new WeightedVectorWritable();
       while (reader.next(key, out)) {
         // make sure we can read all the clusters
       }
@@ -493,7 +505,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         softCluster.recomputeCenter();
       }
 
-      DummyOutputCollector<IntWritable, VectorWritable> clusterMapperCollector = new DummyOutputCollector<IntWritable, VectorWritable>();
+      DummyOutputCollector<IntWritable, WeightedVectorWritable> clusterMapperCollector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
 
       FuzzyKMeansClusterMapper clusterMapper = new FuzzyKMeansClusterMapper();
       clusterMapper.config(reducerCluster);
@@ -511,7 +523,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         Vector vec = tweakValue(points.get(i).get());
         reference.add(new SoftCluster(vec, i));
       }
-      Map<Integer, List<Vector>> refClusters = new HashMap<Integer, List<Vector>>();
+      Map<Integer, List<WeightedVectorWritable>> refClusters = new HashMap<Integer, List<WeightedVectorWritable>>();
       List<Vector> pointsVectors = new ArrayList<Vector>();
       for (VectorWritable point : points) {
         pointsVectors.add((Vector) point.get());
@@ -532,7 +544,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       // make sure all points are allocated to a cluster
       int size = 0;
       for (int cId : refClusters.keySet()) {
-        List<Vector> pts = refClusters.get(cId);
+        List<WeightedVectorWritable> pts = refClusters.get(cId);
         size += pts.size();
       }
       assertEquals("total size", size, points.size());

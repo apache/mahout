@@ -43,7 +43,7 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.clustering.WeightedPointWritable;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
@@ -198,7 +198,7 @@ public class CDbwDriver {
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(VectorWritable.class);
     conf.setMapOutputKeyClass(IntWritable.class);
-    conf.setMapOutputValueClass(WeightedPointWritable.class);
+    conf.setMapOutputValueClass(WeightedVectorWritable.class);
 
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(stateOut);

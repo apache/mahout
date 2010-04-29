@@ -35,27 +35,27 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
 public class MeanShiftCanopyClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, VectorWritable> {
+    Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {
 
   private MeanShiftCanopyClusterer clusterer;
 
-  private OutputCollector<IntWritable, VectorWritable> output;
+  private OutputCollector<IntWritable, WeightedVectorWritable> output;
 
   private List<MeanShiftCanopy> canopies;
 
   @Override
-  public void map(WritableComparable<?> key, MeanShiftCanopy vector, OutputCollector<IntWritable, VectorWritable> output,
+  public void map(WritableComparable<?> key, MeanShiftCanopy vector, OutputCollector<IntWritable, WeightedVectorWritable> output,
       Reporter reporter) throws IOException {
     int vectorId = vector.getId();
     for (MeanShiftCanopy msc : canopies) {
       for (int containedId : msc.getBoundPoints().toList()) {
         if (vectorId == containedId) {
           // System.out.println(msc.getId() + ": v" + vectorId + "=" + ClusterBase.formatVector(vector.getCenter(), null));
-          output.collect(new IntWritable(msc.getId()), new VectorWritable(vector.getCenter()));
+          output.collect(new IntWritable(msc.getId()), new WeightedVectorWritable(1, new VectorWritable(vector.getCenter())));
         }
       }
     }

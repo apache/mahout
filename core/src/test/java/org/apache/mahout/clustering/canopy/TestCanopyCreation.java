@@ -31,9 +31,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.DummyReporter;
 import org.apache.mahout.common.MahoutTestCase;
@@ -410,7 +409,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     mapper.configure(conf);
     
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<IntWritable,VectorWritable> collector = new DummyOutputCollector<IntWritable,VectorWritable>();
+    DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
     int nextCanopyId = 0;
     for (Vector centroid : manhattanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++));
@@ -421,14 +420,14 @@ public class TestCanopyCreation extends MahoutTestCase {
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
     }
-    Map<IntWritable, List<VectorWritable>> data = collector.getData();
+    Map<IntWritable, List<WeightedVectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (Entry<IntWritable, List<VectorWritable>> stringListEntry : data.entrySet()) {
+    for (Entry<IntWritable, List<WeightedVectorWritable>> stringListEntry : data.entrySet()) {
       IntWritable key = stringListEntry.getKey();
       Canopy canopy = findCanopy(key.get(), canopies);
-      List<VectorWritable> pts = stringListEntry.getValue();
-      for (VectorWritable ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.get()));
+      List<WeightedVectorWritable> pts = stringListEntry.getValue();
+      for (WeightedVectorWritable ptDef : pts) {
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.getVector().get()));
       }
     }
   }
@@ -453,7 +452,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     mapper.configure(conf);
     
     List<Canopy> canopies = new ArrayList<Canopy>();
-    DummyOutputCollector<IntWritable,VectorWritable> collector = new DummyOutputCollector<IntWritable,VectorWritable>();
+    DummyOutputCollector<IntWritable,WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable,WeightedVectorWritable>();
     int nextCanopyId = 0;
     for (Vector centroid : euclideanCentroids) {
       canopies.add(new Canopy(centroid, nextCanopyId++));
@@ -464,14 +463,14 @@ public class TestCanopyCreation extends MahoutTestCase {
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, collector, new DummyReporter());
     }
-    Map<IntWritable,List<VectorWritable>> data = collector.getData();
+    Map<IntWritable, List<WeightedVectorWritable>> data = collector.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
-    for (Entry<IntWritable, List<VectorWritable>> stringListEntry : data.entrySet()) {
+    for (Entry<IntWritable, List<WeightedVectorWritable>> stringListEntry : data.entrySet()) {
       IntWritable key = stringListEntry.getKey();
       Canopy canopy = findCanopy(key.get(), canopies);
-      List<VectorWritable> pts = stringListEntry.getValue();
-      for (VectorWritable ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.get()));
+      List<WeightedVectorWritable> pts = stringListEntry.getValue();
+      for (WeightedVectorWritable ptDef : pts) {
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.getVector().get()));
       }
     }
   }
@@ -500,10 +499,10 @@ public class TestCanopyCreation extends MahoutTestCase {
      * while (reader.ready()) { System.out.println(reader.readLine()); count++; }
      */
     IntWritable clusterId = new IntWritable(0);
-    VectorWritable vector = new VectorWritable();
+    WeightedVectorWritable vector = new WeightedVectorWritable();
     while (reader.next(clusterId, vector)) {
       count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + vector.get().asFormatString());
+      System.out.println("Txt: " + clusterId + " Vec: " + vector.getVector().get().asFormatString());
     }
     // the point [3.0,3.0] is covered by both canopies
     assertEquals("number of points", 1 + points.size(), count);
@@ -532,7 +531,7 @@ public class TestCanopyCreation extends MahoutTestCase {
      * while (reader.ready()) { System.out.println(reader.readLine()); count++; }
      */
     IntWritable canopyId = new IntWritable(0);
-    VectorWritable can = new VectorWritable();
+    WeightedVectorWritable can = new WeightedVectorWritable();
     while (reader.next(canopyId, can)) {
       count++;
     }
