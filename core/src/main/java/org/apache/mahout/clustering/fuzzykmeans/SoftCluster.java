@@ -23,32 +23,33 @@ import java.io.IOException;
 
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.SquareRootFunction;
 
-public class SoftCluster extends ClusterBase{
+public class SoftCluster extends ClusterBase {
 
   // the current centroid is lazy evaluated and may be null
   private Vector centroid;
-  
+
   // The Probability of belongingness sum
   private double pointProbSum;
-  
+
   // the total of all points added to the cluster
   private Vector weightedPointTotal;
-  
+
   // has the centroid converged with the center?
   private boolean converged;
-  
+
   // track membership parameters
   private double s0;
-  
+
   private Vector s1;
-  
+
   private Vector s2;
-  
+
   /**
    * Format the SoftCluster for output
    * 
@@ -58,7 +59,7 @@ public class SoftCluster extends ClusterBase{
   public static String formatCluster(SoftCluster cluster) {
     return cluster.getIdentifier() + ": " + cluster.computeCentroid().asFormatString();
   }
-  
+
   /**
    * Decodes and returns a SoftCluster from the formattedString
    * 
@@ -74,7 +75,7 @@ public class SoftCluster extends ClusterBase{
     if ((firstChar == 'C') || startsWithV) {
       int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
       Vector clusterCenter = AbstractVector.decodeVector(center);
-      
+
       SoftCluster cluster = new SoftCluster(clusterCenter, clusterId);
       cluster.setConverged(startsWithV);
       return cluster;
@@ -83,8 +84,9 @@ public class SoftCluster extends ClusterBase{
   }
 
   // For Writable
-  public SoftCluster() { }
-  
+  public SoftCluster() {
+  }
+
   /**
    * Construct a new SoftCluster with the given point as its center
    * 
@@ -96,7 +98,7 @@ public class SoftCluster extends ClusterBase{
     this.pointProbSum = 0;
     this.weightedPointTotal = getCenter().like();
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(this.getId());
@@ -104,18 +106,18 @@ public class SoftCluster extends ClusterBase{
     Vector vector = computeCentroid();
     VectorWritable.writeVector(out, vector);
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.setId(in.readInt());
     converged = in.readBoolean();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
-    this.setCenter(temp.get());
+    this.setCenter(new RandomAccessSparseVector(temp.get()));
     this.pointProbSum = 0;
     this.weightedPointTotal = getCenter().like();
   }
-  
+
   /**
    * Compute the centroid
    * 
@@ -123,17 +125,16 @@ public class SoftCluster extends ClusterBase{
    */
   @Override
   public Vector computeCentroid() {
-    if (centroid != null)
-      return centroid;
-    if (pointProbSum == 0) {
-      return weightedPointTotal;
-    } else if (centroid == null) {
+    if (centroid == null) {
+      if (pointProbSum == 0) {
+        return weightedPointTotal;
+      }
       // lazy compute new centroid
       centroid = weightedPointTotal.divide(pointProbSum);
     }
     return centroid;
   }
-  
+
   /**
    * Construct a new SoftCluster with the given point as its center
    * 
@@ -142,25 +143,25 @@ public class SoftCluster extends ClusterBase{
    */
   public SoftCluster(Vector center, int clusterId) {
     this.setId(clusterId);
-    this.setCenter(center);
+    this.setCenter(new RandomAccessSparseVector(center));
     this.pointProbSum = 0;
     this.weightedPointTotal = center.like();
   }
-  
+
   /** Construct a new softcluster with the given clusterID */
   public SoftCluster(String clusterId) {
-    
+
     this.setId(Integer.parseInt(clusterId.substring(1)));
     this.pointProbSum = 0;
     // this.weightedPointTotal = center.like();
     this.converged = clusterId.charAt(0) == 'V';
   }
-  
+
   @Override
   public String toString() {
     return asFormatString(null);
   }
-  
+
   @Override
   public String getIdentifier() {
     if (converged) {
@@ -169,7 +170,7 @@ public class SoftCluster extends ClusterBase{
       return "C-" + this.getId();
     }
   }
-  
+
   /** Observe the point, accumulating weighted variables for std() calculation */
   private void observePoint(Vector point, double ptProb) {
     s0 += ptProb;
@@ -185,7 +186,7 @@ public class SoftCluster extends ClusterBase{
       s2 = s2.plus(wtPt.times(wtPt));
     }
   }
-  
+
   /** Compute a "standard deviation" value to use as the "radius" of the cluster for display purposes */
   public double std() {
     if (s0 > 0) {
@@ -197,7 +198,7 @@ public class SoftCluster extends ClusterBase{
       return 0;
     }
   }
-  
+
   /**
    * Add the point to the SoftCluster
    * 
@@ -214,7 +215,7 @@ public class SoftCluster extends ClusterBase{
       point.clone().assign(Functions.mult, ptProb).addTo(weightedPointTotal);
     }
   }
-  
+
   /**
    * Add the point to the cluster
    * 
@@ -230,18 +231,18 @@ public class SoftCluster extends ClusterBase{
       delta.addTo(weightedPointTotal);
     }
   }
-  
+
   public double getPointProbSum() {
     return pointProbSum;
   }
-  
+
   /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
     this.setCenter(computeCentroid());
     pointProbSum = 0;
     weightedPointTotal = getCenter().like();
   }
-  
+
   public Vector getWeightedPointTotal() {
     return weightedPointTotal;
   }
@@ -249,14 +250,14 @@ public class SoftCluster extends ClusterBase{
   public boolean isConverged() {
     return converged;
   }
-  
+
   public void setConverged(boolean converged) {
     this.converged = converged;
   }
-  
+
   @Override
   public String asFormatString() {
     return formatCluster(this);
   }
-  
+
 }
