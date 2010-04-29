@@ -39,7 +39,7 @@ public final class UncenteredCosineSimilarity extends AbstractSimilarity {
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
   public UncenteredCosineSimilarity(DataModel dataModel) throws TasteException {
-    this(dataModel, Weighting.WEIGHTED);
+    this(dataModel, Weighting.UNWEIGHTED);
   }
 
   /**

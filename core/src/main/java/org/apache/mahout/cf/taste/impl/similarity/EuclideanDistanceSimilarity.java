@@ -36,7 +36,7 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
    * @throws IllegalArgumentException if {@link DataModel} does not have preference values
    */
   public EuclideanDistanceSimilarity(DataModel dataModel) throws TasteException {
-    this(dataModel, Weighting.WEIGHTED);
+    this(dataModel, Weighting.UNWEIGHTED);
   }
 
   /**
