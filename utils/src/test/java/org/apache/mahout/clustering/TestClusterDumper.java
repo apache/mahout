@@ -20,6 +20,7 @@ package org.apache.mahout.clustering;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -33,7 +34,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
@@ -49,6 +49,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.apache.mahout.utils.vectors.TFIDF;
+import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
@@ -68,6 +69,8 @@ public class TestClusterDumper extends MahoutTestCase {
       "Moby Bob is a story of a walrus and a man obsessed.", "Moby Dick is a story of a whale and a crazy man.",
       "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
       "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
+
+  private String[] termDictionary = null;
 
   @Override
   protected void setUp() throws Exception {
@@ -122,60 +125,74 @@ public class TestClusterDumper extends MahoutTestCase {
     IndexReader reader = IndexReader.open(directory, true);
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
+
+    int numTerms = 0;
+    for (Iterator<TermEntry> it = termInfo.getAllEntries(); it.hasNext();) {
+      it.next();
+      numTerms++;
+    }
+    termDictionary = new String[numTerms];
+    int i = 0;
+    for (Iterator<TermEntry> it = termInfo.getAllEntries(); it.hasNext();) {
+      String term = it.next().term;
+      termDictionary[i] = term;
+      System.out.println(i + " " + term);
+      i++;
+    }
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
     LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
 
-    int i = 0;
+    i = 0;
     for (Vector vector : iterable) {
       Assert.assertNotNull(vector);
-      NamedVector vector2 = new NamedVector(vector, "P(" + i + ")");
-      System.out.println(ClusterBase.formatVector(vector2, null));
-      sampleData.add(new VectorWritable(vector2));
+      NamedVector namedVector = new NamedVector(vector, "P(" + i + ")");
+      System.out.println(ClusterBase.formatVector(namedVector, termDictionary));
+      sampleData.add(new VectorWritable(namedVector));
       i++;
     }
   }
 
   public void testCanopy() throws Exception { // now run the Job
-    CanopyClusteringJob.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4);
+    CanopyDriver.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-0", "output/clusteredPoints");
-    clusterDumper.printClusters();
+    clusterDumper.printClusters(termDictionary);
   }
 
   public void testKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata/points", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 8, 4);
+    CanopyDriver.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4, false);
     // now run the KMeans job
     KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-2", "output/clusteredPoints");
-    clusterDumper.printClusters();
+    clusterDumper.printClusters(termDictionary);
   }
 
   public void testFuzzyKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata/points", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 8, 4);
+    CanopyDriver.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4, false);
     // now run the KMeans job
     FuzzyKMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10,
-        1, 1, (float) 1.1);
+        1, 1, (float) 1.1, true, true, 0);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-3", "output/clusteredPoints");
-    clusterDumper.printClusters();
+    clusterDumper.printClusters(termDictionary);
   }
 
   public void testMeanShift() throws Exception {
     MeanShiftCanopyJob.runJob("testdata/points", "output", CosineDistanceMeasure.class.getName(), 0.5, 0.01, 0.05, 10);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-1", "output/clusteredPoints");
-    clusterDumper.printClusters();
+    clusterDumper.printClusters(termDictionary);
   }
 
   public void testDirichlet() throws Exception {
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    DirichletDriver.runJob("testdata/points", "output", L1ModelDistribution.class.getName(), prototype.getDelegate().getClass().getName(),
-        prototype.size(), 15, 10, 1.0, 1);
+    DirichletDriver.runJob("testdata/points", "output", L1ModelDistribution.class.getName(), prototype.getDelegate().getClass()
+        .getName(), prototype.size(), 15, 10, 1.0, 1, true, true, 0);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", "output/clusteredPoints");
-    clusterDumper.printClusters();
+    clusterDumper.printClusters(termDictionary);
   }
 }

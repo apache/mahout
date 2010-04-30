@@ -105,7 +105,7 @@ public class DirichletCluster<O> implements Writable, Cluster {
 
   @Override
   public String asFormatString(String[] bindings) {
-    return "C-" + model.getId() + ": " + model.toString();
+    return "C-" + model.getId() + ": " + model.asFormatString(bindings);
   }
 
   @Override

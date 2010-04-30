@@ -35,7 +35,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.clustering.dirichlet.DirichletJob;
 import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
@@ -153,7 +152,7 @@ public class Job {
                                                    NoSuchMethodException,
                                                    InvocationTargetException {
     // delete the output directory
-    JobConf conf = new JobConf(DirichletJob.class);
+    JobConf conf = new JobConf(DirichletDriver.class);
     Path outPath = new Path(output);
     FileSystem fs = FileSystem.get(outPath.toUri(), conf);
     if (fs.exists(outPath)) {
@@ -163,7 +162,7 @@ public class Job {
     String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
     DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
-      vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers);
+      vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers, true, true, 0);
     printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
   }
   

@@ -31,6 +31,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -149,7 +150,7 @@ public class MeanShiftCanopyJob {
     }
     fs.mkdirs(outPath);
 
-    String clustersIn = output + ClusterBase.INITIAL_CLUSTERS_DIR;
+    String clustersIn = output + Cluster.INITIAL_CLUSTERS_DIR;
     if (inputIsCanopies) {
       clustersIn = input;
     } else {
@@ -162,7 +163,7 @@ public class MeanShiftCanopyJob {
     while (!converged && (iteration <= maxIterations)) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String clustersOut = output + ClusterBase.CLUSTERS_DIR + iteration;
+      String clustersOut = output + Cluster.CLUSTERS_DIR + iteration;
       String controlOut = output + CONTROL_CONVERGED;
       MeanShiftCanopyDriver.runJob(clustersIn, clustersOut, controlOut, measureClassName, t1, t2, convergenceDelta);
       converged = FileSystem.get(conf).exists(new Path(controlOut));
@@ -172,8 +173,8 @@ public class MeanShiftCanopyJob {
     }
 
     // now cluster the points
-    MeanShiftCanopyDriver.runClustering((inputIsCanopies ? input : output + ClusterBase.INITIAL_CLUSTERS_DIR), clustersIn, output
-        + ClusterBase.CLUSTERED_POINTS_DIR);
+    MeanShiftCanopyDriver.runClustering((inputIsCanopies ? input : output + Cluster.INITIAL_CLUSTERS_DIR), clustersIn, output
+        + Cluster.CLUSTERED_POINTS_DIR);
   }
 
 }

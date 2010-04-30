@@ -31,7 +31,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
+import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
 import org.slf4j.Logger;
@@ -138,7 +138,7 @@ public final class Job {
     String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput,
       "org.apache.mahout.math.RandomAccessSparseVector");
-    CanopyClusteringJob.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2);
+    CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2, true);
   }
   
 }

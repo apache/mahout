@@ -18,10 +18,17 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 public interface FuzzyKMeansConfigKeys {
-  
+
   String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.kmeans.measure";
+
   String CLUSTER_PATH_KEY = "org.apache.mahout.clustering.kmeans.path";
+
   String CLUSTER_CONVERGENCE_KEY = "org.apache.mahout.clustering.kmeans.convergence";
+
   String M_KEY = "org.apache.mahout.clustering.fuzzykmeans.m";
-  
+
+  String EMIT_MOST_LIKELY_KEY = "org.apache.mahout.clustering.fuzzykmeans.emitMostLikely";
+
+  String THRESHOLD_KEY = "org.apache.mahout.clustering.fuzzykmeans.threshold";
+
 }

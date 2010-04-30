@@ -24,6 +24,15 @@ import org.apache.mahout.math.Vector;
  */
 public interface Cluster {
   
+  // default directory for all clustered points
+  String CLUSTERED_POINTS_DIR = "/clusteredPoints";
+
+  // default directory for initial clusters to prime iterative clustering algorithms
+  String INITIAL_CLUSTERS_DIR = "/clusters-0";
+
+  // default directory for output of clusters per iteration
+  String CLUSTERS_DIR = "/clusters-";
+
   /**
    * Get the id of the Cluster
    * 

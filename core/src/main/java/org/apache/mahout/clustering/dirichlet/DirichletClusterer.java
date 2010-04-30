@@ -17,13 +17,18 @@
 
 package org.apache.mahout.clustering.dirichlet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.TimesFunction;
 
 /**
@@ -80,24 +85,28 @@ import org.apache.mahout.math.function.TimesFunction;
  * </pre>
  */
 public class DirichletClusterer<O> {
-  
+
   // observed data
   private final List<O> sampleData;
-  
+
   // the ModelDistribution for the computation
   private final ModelDistribution<O> modelFactory;
-  
+
   // the state of the clustering process
   private final DirichletState<O> state;
-  
+
   private final int thin;
-  
+
   private final int burnin;
-  
+
   private final int numClusters;
-  
+
   private final List<Model<O>[]> clusterSamples = new ArrayList<Model<O>[]>();
-  
+
+  private boolean emitMostLikely;
+
+  private double threshold;
+
   /**
    * Create a new instance on the sample data with the given additional parameters
    * 
@@ -114,12 +123,8 @@ public class DirichletClusterer<O> {
    * @param burnin
    *          the int burnin interval, used to suppress early iterations
    */
-  public DirichletClusterer(List<O> sampleData,
-                            ModelDistribution<O> modelFactory,
-                            double alpha_0,
-                            int numClusters,
-                            int thin,
-                            int burnin) {
+  public DirichletClusterer(List<O> sampleData, ModelDistribution<O> modelFactory, double alpha_0, int numClusters, int thin,
+      int burnin) {
     this.sampleData = sampleData;
     this.modelFactory = modelFactory;
     this.thin = thin;
@@ -127,7 +132,24 @@ public class DirichletClusterer<O> {
     this.numClusters = numClusters;
     state = new DirichletState<O>(modelFactory, numClusters, alpha_0);
   }
-  
+
+  /**
+   * This constructor only used by DirichletClusterMapper for setting up clustering params
+   * @param emitMostLikely
+   * @param threshold
+   */
+  public DirichletClusterer(boolean emitMostLikely, double threshold) {
+    super();
+    this.sampleData = null;
+    this.modelFactory = null;
+    this.thin = 0;
+    this.burnin = 0;
+    this.numClusters = 0;
+    this.state = null;
+    this.emitMostLikely = emitMostLikely;
+    this.threshold = threshold;
+  }
+
   /**
    * Iterate over the sample data, obtaining cluster samples periodically and returning them.
    * 
@@ -141,7 +163,7 @@ public class DirichletClusterer<O> {
     }
     return clusterSamples;
   }
-  
+
   /**
    * Perform one iteration of the clustering process, iterating over the samples to build a new array of
    * models, then updating the state for the next iteration
@@ -150,10 +172,10 @@ public class DirichletClusterer<O> {
    *          the DirichletState<Observation> of this iteration
    */
   private void iterate(int iteration, DirichletState<O> state) {
-    
+
     // create new posterior models
     Model<O>[] newModels = modelFactory.sampleFromPosterior(state.getModels());
-    
+
     // iterate over the samples, assigning each to a model
     for (O x : sampleData) {
       // compute normalized vector of probabilities that x is described by each model
@@ -164,7 +186,7 @@ public class DirichletClusterer<O> {
       // ask the selected model to observe the datum
       newModels[k].observe(x);
     }
-    
+
     // periodically add models to the cluster samples after the burn-in period
     if ((iteration >= burnin) && (iteration % thin == 0)) {
       clusterSamples.add(newModels);
@@ -172,7 +194,7 @@ public class DirichletClusterer<O> {
     // update the state from the new models
     state.update(newModels);
   }
-  
+
   /**
    * Compute a normalized vector of probabilities that x is described by each model using the mixture and the
    * model pdfs
@@ -197,7 +219,54 @@ public class DirichletClusterer<O> {
     pi.assign(new TimesFunction(), 1.0 / max);
     return pi;
   }
-  
+
+  public void emitPointToClusters(VectorWritable point, List<DirichletCluster> clusters,
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+    Vector pi = new DenseVector(clusters.size());
+    for (int i = 0; i < clusters.size(); i++) {
+      pi.set(i, clusters.get(i).getModel().pdf(point));
+    }
+    pi = pi.divide(pi.zSum());
+    if (emitMostLikely) {
+      emitMostLikelyCluster(point, clusters, pi, output);
+    } else {
+      emitAllClusters(point, clusters, pi, output);
+    }
+  }
+
+  /**
+   * Emit the point to the most likely cluster
+   * @param point
+   * @param pi the normalized pdf Vector for the point
+   * @param output
+   * @throws IOException
+   */
+  void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster> clusters, Vector pi,
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+    int clusterId = -1;
+    double clusterPdf = 0;
+    for (int i = 0; i < clusters.size(); i++) {
+      double pdf = pi.get(i);
+      if (pdf > clusterPdf) {
+        clusterId = i;
+        clusterPdf = pdf;
+      }
+    }
+    //System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
+    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
+  }
+
+  void emitAllClusters(VectorWritable point, List<DirichletCluster> clusters, Vector pi,
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+    for (int i = 0; i < clusters.size(); i++) {
+      double pdf = pi.get(i);
+      if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
+        //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
+        output.collect(new IntWritable(i), new WeightedVectorWritable(pdf, point));
+      }
+    }
+  }
+
   /**
    * Create a new instance on the sample data with the given additional parameters
    * 
@@ -216,16 +285,10 @@ public class DirichletClusterer<O> {
    * @param numIterations
    *          number of iterations to be performed
    */
-  public static List<Model<Vector>[]> clusterPoints(List<Vector> points,
-                                                    ModelDistribution<Vector> modelFactory,
-                                                    double alpha_0,
-                                                    int numClusters,
-                                                    int thin,
-                                                    int burnin,
-                                                    int numIterations) {
-    DirichletClusterer<Vector> clusterer = new DirichletClusterer<Vector>(points, modelFactory, alpha_0,
-        numClusters, thin, burnin);
+  public static List<Model<Vector>[]> clusterPoints(List<Vector> points, ModelDistribution<Vector> modelFactory, double alpha_0,
+      int numClusters, int thin, int burnin, int numIterations) {
+    DirichletClusterer<Vector> clusterer = new DirichletClusterer<Vector>(points, modelFactory, alpha_0, numClusters, thin, burnin);
     return clusterer.cluster(numIterations);
-    
+
   }
 }

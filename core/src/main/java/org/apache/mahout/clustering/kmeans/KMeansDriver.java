@@ -209,7 +209,7 @@ public final class KMeansDriver {
     while (!converged && (iteration <= maxIterations)) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String clustersOut = output + ClusterBase.CLUSTERS_DIR + iteration;
+      String clustersOut = output + Cluster.CLUSTERS_DIR + iteration;
       converged = runIteration(input, clustersIn, clustersOut, measureClass, delta, numReduceTasks, iteration);
       // now point the input to the old output directory
       clustersIn = clustersOut;
@@ -217,7 +217,7 @@ public final class KMeansDriver {
     }
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, output + ClusterBase.CLUSTERED_POINTS_DIR, measureClass, delta);
+    runClustering(input, clustersIn, output + Cluster.CLUSTERED_POINTS_DIR, measureClass, delta);
   }
   
   /**

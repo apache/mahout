@@ -225,7 +225,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       fs.mkdirs(outPath);
       // now run the Job
       FuzzyKMeansDriver.runJob("testdata/points", "testdata/clusters", "output", EuclideanDistanceMeasure.class.getName(), 0.001,
-          2, 1, k + 1, 2);
+          2, 1, k + 1, 2, false, true, 0);
 
       // now compare the expected clusters with actual
       File outDir = new File("output/clusteredPoints");
@@ -268,6 +268,8 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
       conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
       conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
+      conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
       mapper.configure(conf);
 
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
@@ -329,6 +331,8 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
       conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
       conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
+      conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
       mapper.configure(conf);
 
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
@@ -381,6 +385,8 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
       conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
       conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
+      conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
       mapper.configure(conf);
 
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
@@ -463,6 +469,8 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
       conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.001");
       conf.set(FuzzyKMeansConfigKeys.M_KEY, "2");
+      conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
+      conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
       mapper.configure(conf);
 
       DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();

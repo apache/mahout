@@ -52,6 +52,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.Pair;
@@ -98,12 +99,11 @@ public final class ClusterDumper {
     }
   }
 
-  public void printClusters() throws IOException, InstantiationException, IllegalAccessException {
+  public void printClusters(String[] dictionary) throws IOException, InstantiationException, IllegalAccessException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
     client.setConf(conf);
 
-    String[] dictionary = null;
     if (this.termDictionary != null) {
       if (dictionaryFormat.equals("text")) {
         dictionary = VectorHelper.loadTermDictionary(new File(this.termDictionary));
@@ -161,7 +161,8 @@ public final class ClusterDumper {
           writer.write("\tWeight:  Point:\n\t");
           for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
             WeightedVectorWritable point = iterator.next();
-            writer.append(point.toString());
+            writer.append(Double.toString(point.getWeight())).append(": ");
+            writer.append(ClusterBase.formatVector(point.getVector().get(), dictionary));
             if (iterator.hasNext()) {
               writer.append("\n\t");
             }
@@ -307,7 +308,7 @@ public final class ClusterDumper {
       if (sub >= 0) {
         clusterDumper.setSubString(sub);
       }
-      clusterDumper.printClusters();
+      clusterDumper.printClusters(null);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);

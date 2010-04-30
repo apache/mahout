@@ -27,6 +27,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -40,15 +41,19 @@ public class FuzzyKMeansClusterer {
 
   private double m = 2.0; // default value
 
+  private boolean emitMostLikely = true;
+
+  private double threshold = 0;
+
   /**
-   * Init the fuzzy k-means clusterer with the distance measure to use for comparison.
-   * 
-   * @param measure
-   *          The distance measure to use for comparing clusters against points.
-   * @param convergenceDelta
-   *          When do we define a cluster to have converged?
-   * 
-   * */
+    * Init the fuzzy k-means clusterer with the distance measure to use for comparison.
+    * 
+    * @param measure
+    *          The distance measure to use for comparing clusters against points.
+    * @param convergenceDelta
+    *          When do we define a cluster to have converged?
+    * 
+    * */
   public FuzzyKMeansClusterer(DistanceMeasure measure, double convergenceDelta, double m) {
     this.measure = measure;
     this.convergenceDelta = convergenceDelta;
@@ -74,6 +79,9 @@ public class FuzzyKMeansClusterer {
       convergenceDelta = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
       // nextClusterId = 0;
       m = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.M_KEY));
+      emitMostLikely = Boolean.parseBoolean(job.get(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY));
+      threshold = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.THRESHOLD_KEY));
+
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -114,45 +122,6 @@ public class FuzzyKMeansClusterer {
     }
   }
 
-  /**
-   * Output point with cluster info (Cluster and probability)
-   * 
-   * @param point
-   *          a point
-   * @param clusters
-   *          a List<SoftCluster> to test
-   * @param output
-   *          the OutputCollector to emit into
-   */
-  public void outputPointWithClusterProbabilities(String key, Vector point, List<SoftCluster> clusters,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
-
-    // calculate point distances for all clusters    
-    List<Double> clusterDistanceList = new ArrayList<Double>();
-    for (SoftCluster cluster : clusters) {
-      clusterDistanceList.add(measure.distance(cluster.getCenter(), point));
-    }
-    // calculate point pdf for all clusters
-    List<Double> clusterPdfList = new ArrayList<Double>();
-    for (int i = 0; i < clusters.size(); i++) {
-      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-      clusterPdfList.add(probWeight);
-    }
-    // for now just emit the most likely cluster
-    int clusterId = -1;
-    double clusterPdf = 0;
-    for (int i = 0; i < clusters.size(); i++) {
-      // System.out.println("cluster-" + clusters.get(i).getId() + "@ " + ClusterBase.formatVector(center, null));
-      double pdf = clusterPdfList.get(i);
-      if (pdf > clusterPdf) {
-        clusterId = clusters.get(i).getId();
-        clusterPdf = pdf;
-      }
-    }
-    // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
-  }
-
   /** Computes the probability of a point belonging to a cluster */
   public double computeProbWeight(double clusterDistance, List<Double> clusterDistanceList) {
     if (clusterDistance == 0) {
@@ -185,6 +154,71 @@ public class FuzzyKMeansClusterer {
 
   public DistanceMeasure getMeasure() {
     return this.measure;
+  }
+
+  public void emitPointToClusters(VectorWritable point, List<SoftCluster> clusters,
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+    // calculate point distances for all clusters    
+    List<Double> clusterDistanceList = new ArrayList<Double>();
+    for (SoftCluster cluster : clusters) {
+      clusterDistanceList.add(getMeasure().distance(cluster.getCenter(), point.get()));
+    }
+    // calculate point pdf for all clusters
+    Vector pi = new DenseVector(clusters.size());
+    for (int i = 0; i < clusters.size(); i++) {
+      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
+      pi.set(i, probWeight);
+    }
+    if (emitMostLikely) {
+      emitMostLikelyCluster(point.get(), clusters, pi, output);
+    } else {
+      emitAllClusters(point.get(), clusters, pi, output);
+    }
+  }
+
+  /**
+   * Emit the point to the cluster with the highest pdf
+   * 
+   * @param point
+   * @param clusters
+   * @param clusterPdfList
+   * @param output
+   * @throws IOException
+   */
+  void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector clusterPdfList,
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+    int clusterId = -1;
+    double clusterPdf = 0;
+    for (int i = 0; i < clusters.size(); i++) {
+      // System.out.println("cluster-" + clusters.get(i).getId() + "@ " + ClusterBase.formatVector(center, null));
+      double pdf = clusterPdfList.get(i);
+      if (pdf > clusterPdf) {
+        clusterId = clusters.get(i).getId();
+        clusterPdf = pdf;
+      }
+    }
+    // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
+    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
+  }
+
+  /**
+   * Emit the point to all clusters
+   * 
+   * @param point
+   * @param clusters
+   * @param pi
+   * @param output
+   * @throws IOException
+   */
+  void emitAllClusters(Vector point, List<SoftCluster> clusters, Vector pi,
+      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+    for (int i = 0; i < clusters.size(); i++) {
+      double pdf = pi.get(i);
+      if (pdf > threshold) {
+        // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
+        output.collect(new IntWritable(i), new WeightedVectorWritable(pdf, new VectorWritable(point)));
+      }
+    }
   }
 
   /**

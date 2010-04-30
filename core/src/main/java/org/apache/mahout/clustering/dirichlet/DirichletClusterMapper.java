@@ -35,8 +35,8 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class DirichletClusterMapper extends MapReduceBase implements
@@ -46,21 +46,13 @@ public class DirichletClusterMapper extends MapReduceBase implements
 
   private List<DirichletCluster> clusters;
 
+  private DirichletClusterer clusterer;
+
   @SuppressWarnings("unchecked")
   @Override
   public void map(WritableComparable<?> key, VectorWritable vector, OutputCollector<IntWritable, WeightedVectorWritable> output,
       Reporter reporter) throws IOException {
-    int clusterId = -1;
-    double clusterPdf = 0;
-    for (int i = 0; i < clusters.size(); i++) {
-      double pdf = clusters.get(i).getModel().pdf(vector);
-      if (pdf > clusterPdf) {
-        clusterId = i;
-        clusterPdf = pdf;
-      }
-    }
-    //System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
-    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, vector));
+    clusterer.emitPointToClusters(vector, clusters, output);
   }
 
   @Override
@@ -68,6 +60,9 @@ public class DirichletClusterMapper extends MapReduceBase implements
     super.configure(job);
     try {
       clusters = getClusters(job);
+      String emitMostLikely = job.get(DirichletDriver.EMIT_MOST_LIKELY_KEY);
+      String threshold = job.get(DirichletDriver.THRESHOLD_KEY);
+      clusterer = new DirichletClusterer<Vector>(Boolean.parseBoolean(emitMostLikely), Double.parseDouble(threshold));
     } catch (SecurityException e) {
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {

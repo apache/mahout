@@ -31,8 +31,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
@@ -151,10 +150,10 @@ public final class Job {
       "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
     CanopyDriver.runJob(directoryContainingConvertedInput,
-      output + ClusterBase.INITIAL_CLUSTERS_DIR, measureClass, t1, t2);
+      output + Cluster.INITIAL_CLUSTERS_DIR, measureClass, t1, t2, false);
     log.info("Running KMeans");
     KMeansDriver.runJob(directoryContainingConvertedInput,
-      output + ClusterBase.INITIAL_CLUSTERS_DIR, output, measureClass, convergenceDelta,
+      output + Cluster.INITIAL_CLUSTERS_DIR, output, measureClass, convergenceDelta,
       maxIterations, 1);
   }
 }

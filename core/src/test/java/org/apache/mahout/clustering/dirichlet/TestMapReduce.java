@@ -220,7 +220,7 @@ public class TestMapReduce extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data.txt", fs, conf);
     // Now run the driver
     DirichletDriver.runJob("input", "output",
-      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 10, 1.0, 1);
+      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 5, 1.0, 1);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -262,7 +262,7 @@ public class TestMapReduce extends MahoutTestCase {
     generate4Datasets();
     // Now run the driver
     DirichletDriver.runJob("input", "output",
-      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 15, 1.0, 1);
+      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 3, 1.0, 1);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -302,7 +302,7 @@ public class TestMapReduce extends MahoutTestCase {
     generate4Datasets();
     // Now run the driver
     DirichletDriver.runJob("input", "output",
-      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 15, 1.0, 2);
+      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 3, 1.0, 2);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -338,7 +338,7 @@ public class TestMapReduce extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, "input/data4.txt", fs, conf);
     // Now run the driver
     DirichletDriver.runJob("input", "output",
-      "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution", 20, 15, 1.0, 2);
+      "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution", 20, 3, 1.0, 2);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);

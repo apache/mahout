@@ -33,7 +33,6 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.Canopy;
-import org.apache.mahout.clustering.canopy.CanopyClusteringJob;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
@@ -153,7 +152,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
   }
 
   public void testCanopy() throws Exception { // now run the Job
-    CanopyClusteringJob.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
+    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true);
     int numIterations = 2;
     CDbwDriver.runJob("output/clusters-0", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
         numIterations, 1);
@@ -162,7 +161,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
 
   public void testKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
+    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
     // now run the KMeans job
     KMeansDriver.runJob("testdata", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1);
     int numIterations = 2;
@@ -173,10 +172,10 @@ public class TestCDbwEvaluator extends MahoutTestCase {
 
   public void testFuzzyKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata", "output/clusters-0", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1);
+    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
     // now run the KMeans job
     FuzzyKMeansDriver.runJob("testdata", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 1,
-        2);
+        2, false, true, 0);
     int numIterations = 2;
     CDbwDriver.runJob("output/clusters-4", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
         numIterations, 1);
@@ -194,7 +193,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
   public void testDirichlet() throws Exception {
     Vector prototype = new DenseVector(2);
     DirichletDriver.runJob("testdata", "output", L1ModelDistribution.class.getName(), prototype.getClass().getName(), prototype
-        .size(), 15, 5, 1.0, 1);
+        .size(), 15, 5, 1.0, 1, true, true, 0);
     int numIterations = 2;
     CDbwDriver.runJob("output/clusters-5", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
         numIterations, 1);
