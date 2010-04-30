@@ -39,7 +39,7 @@ import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopyJob;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
@@ -163,7 +163,7 @@ public class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4, false);
     // now run the KMeans job
-    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1);
+    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-2", "output/clusteredPoints");
     clusterDumper.printClusters(termDictionary);
@@ -181,7 +181,7 @@ public class TestClusterDumper extends MahoutTestCase {
   }
 
   public void testMeanShift() throws Exception {
-    MeanShiftCanopyJob.runJob("testdata/points", "output", CosineDistanceMeasure.class.getName(), 0.5, 0.01, 0.05, 10);
+    MeanShiftCanopyDriver.runJob("testdata/points", "output", CosineDistanceMeasure.class.getName(), 0.5, 0.01, 0.05, 10, false, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-1", "output/clusteredPoints");
     clusterDumper.printClusters(termDictionary);

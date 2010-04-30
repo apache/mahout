@@ -43,6 +43,7 @@ import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,9 +162,12 @@ public class Job {
     fs.mkdirs(outPath);
     String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
-    DirichletDriver.runJob(directoryContainingConvertedInput, output + "/state", modelFactory,
+    DirichletDriver.runJob(directoryContainingConvertedInput, output, modelFactory,
       vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers, true, true, 0);
-    printResults(output + "/state", modelFactory, vectorClassName, 60, maxIterations, numModels, alpha_0);
+    
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-5", "output/clusteredPoints");
+    clusterDumper.printClusters(null);
+
   }
   
   /**

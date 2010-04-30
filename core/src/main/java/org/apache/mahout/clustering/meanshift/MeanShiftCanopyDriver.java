@@ -28,6 +28,8 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -37,6 +39,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
@@ -50,10 +53,12 @@ public final class MeanShiftCanopyDriver {
 
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.meanshift.stateInKey";
 
+  protected static final String CONTROL_CONVERGED = "/control/converged";
+
   private MeanShiftCanopyDriver() {
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -62,6 +67,10 @@ public final class MeanShiftCanopyDriver {
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
+    Option maxIterOpt = DefaultOptionCreator.maxIterOption().create();
+    Option inputIsCanopiesOpt = obuilder.withLongName("inputIsCanopies").withRequired(true).withShortName("i").withArgument(
+        abuilder.withName("inputIsCanopies").withMinimum(1).withMaximum(1).create()).withDescription(
+        "True if the input directory already contains MeanShiftCanopies").create();
 
     Option modelOpt = obuilder.withLongName("distanceClass").withRequired(true).withShortName("d").withArgument(
         abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -75,8 +84,12 @@ public final class MeanShiftCanopyDriver {
         abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create()).withDescription("The T1 distance threshold.")
         .create();
 
+    Option clusteringOpt = obuilder.withLongName("clustering").withRequired(false).withDescription(
+        "If true, run clustering after the iterations have taken place").withShortName("cl").create();
+
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(helpOpt)
-        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(threshold2Opt).create();
+        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(threshold2Opt).withOption(clusteringOpt).withOption(
+            maxIterOpt).withOption(inputIsCanopiesOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -86,6 +99,10 @@ public final class MeanShiftCanopyDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
+      boolean runClustering = true;
+      if (cmdLine.hasOption(clusteringOpt)) {
+        runClustering = Boolean.parseBoolean(cmdLine.getValue(clusteringOpt).toString());
+      }
 
       String input = cmdLine.getValue(inputOpt).toString();
       String output = cmdLine.getValue(outputOpt).toString();
@@ -93,9 +110,10 @@ public final class MeanShiftCanopyDriver {
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
+      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
+      boolean inputIsCanopies = Boolean.parseBoolean(cmdLine.getValue(inputIsCanopiesOpt).toString());
       createCanopyFromVectors(input, output + "/intial-canopies");
-      runJob(output + "/intial-canopies", output, output + MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, measureClassName, t1, t2,
-          convergenceDelta);
+      runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -103,7 +121,7 @@ public final class MeanShiftCanopyDriver {
   }
 
   /**
-   * Run the job
+   * Run an iteration
    * 
    * @param input
    *          the input pathname String
@@ -120,7 +138,7 @@ public final class MeanShiftCanopyDriver {
    * @param convergenceDelta
    *          the double convergence criteria
    */
-  public static void runJob(String input, String output, String control, String measureClassName, double t1, double t2,
+  static void runIteration(String input, String output, String control, String measureClassName, double t1, double t2,
       double convergenceDelta) {
 
     Configurable client = new JobClient();
@@ -160,7 +178,7 @@ public final class MeanShiftCanopyDriver {
    * @param output
    *          the output pathname String
    */
-  public static void createCanopyFromVectors(String input, String output) {
+  static void createCanopyFromVectors(String input, String output) {
 
     Configurable client = new JobClient();
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
@@ -195,25 +213,23 @@ public final class MeanShiftCanopyDriver {
    * @param output
    *          the directory pathname for output clustered points
    */
-  public static void runClustering(String input,
-                                    String clustersIn,
-                                    String output) {
-    
+  static void runClustering(String input, String clustersIn, String output) {
+
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Mean Shift Clustering");
-    
+
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(WeightedVectorWritable.class);
-    
+
     FileInputFormat.setInputPaths(conf, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(conf, outPath);
-    
+
     conf.setMapperClass(MeanShiftCanopyClusterMapper.class);
-    
+
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    
+
     // uncomment it to run locally
     // conf.set("mapred.job.tracker", "local");
     conf.setNumReduceTasks(0);
@@ -222,6 +238,62 @@ public final class MeanShiftCanopyDriver {
       JobClient.runJob(conf);
     } catch (IOException e) {
       log.warn(e.toString(), e);
+    }
+  }
+
+  /**
+   * Run the job where the input format can be either Vectors or Canopies
+   * 
+   * @param input
+   *          the input pathname String
+   * @param output
+   *          the output pathname String
+   * @param measureClassName
+   *          the DistanceMeasure class name
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
+   * @param convergenceDelta
+   *          the double convergence criteria
+   * @param maxIterations
+   *          an int number of iterations
+   * @param inputIsCanopies 
+              true if the input path already contains MeanShiftCanopies and does not need to be converted from Vectors
+   * @param runClustering 
+   *          true if the input points are to be clustered once the iterations complete
+   */
+  public static void runJob(String input, String output, String measureClassName, double t1, double t2, double convergenceDelta,
+      int maxIterations, boolean inputIsCanopies, boolean runClustering) throws IOException {
+    // delete the output directory
+    Configuration conf = new JobConf(MeanShiftCanopyDriver.class);
+
+    String clustersIn = output + Cluster.INITIAL_CLUSTERS_DIR;
+    if (inputIsCanopies) {
+      clustersIn = input;
+    } else {
+      createCanopyFromVectors(input, clustersIn);
+    }
+
+    // iterate until the clusters converge
+    boolean converged = false;
+    int iteration = 1;
+    while (!converged && (iteration <= maxIterations)) {
+      log.info("Iteration {}", iteration);
+      // point the output to a new directory per iteration
+      String clustersOut = output + Cluster.CLUSTERS_DIR + iteration;
+      String controlOut = output + CONTROL_CONVERGED;
+      runIteration(clustersIn, clustersOut, controlOut, measureClassName, t1, t2, convergenceDelta);
+      converged = FileSystem.get(conf).exists(new Path(controlOut));
+      // now point the input to the old output directory
+      clustersIn = clustersOut;
+      iteration++;
+    }
+
+    if (runClustering) {
+      // now cluster the points
+      MeanShiftCanopyDriver.runClustering((inputIsCanopies ? input : output + Cluster.INITIAL_CLUSTERS_DIR), clustersIn, output
+          + Cluster.CLUSTERED_POINTS_DIR);
     }
   }
 }

@@ -247,10 +247,8 @@ public class DirichletDriver {
       IllegalAccessException, IOException, SecurityException, NoSuchMethodException, InvocationTargetException {
 
     DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha_0);
-    JobConf job = new JobConf(KMeansDriver.class);
-    Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(outPath.toUri(), job);
-    fs.delete(outPath, true);
+    JobConf job = new JobConf(DirichletDriver.class);
+    FileSystem fs = FileSystem.get(new Path(output).toUri(), job);
     for (int i = 0; i < numModels; i++) {
       Path path = new Path(stateIn + "/part-" + i);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, Text.class, DirichletCluster.class);

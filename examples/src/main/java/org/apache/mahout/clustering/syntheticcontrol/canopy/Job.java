@@ -34,6 +34,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,9 +124,11 @@ public final class Job {
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
+   * @throws IllegalAccessException 
+   * @throws InstantiationException 
    */
   private static void runJob(String input, String output, String measureClassName,
-                             double t1, double t2) throws IOException {
+                             double t1, double t2) throws IOException, InstantiationException, IllegalAccessException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
     
@@ -139,6 +142,10 @@ public final class Job {
     InputDriver.runJob(input, directoryContainingConvertedInput,
       "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2, true);
+    
+    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-0", "output/clusteredPoints");
+    clusterDumper.printClusters(null);
+
   }
   
 }

@@ -304,7 +304,7 @@ public class TestMeanShift extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, conf);
     ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
     // now run the Job
-    MeanShiftCanopyJob.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10);
+    MeanShiftCanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
     Path outPart = new Path("output/clusters-3/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);

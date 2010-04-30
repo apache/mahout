@@ -364,7 +364,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       // now run the Job
       HadoopUtil.overwriteOutput("output");
       KMeansDriver.runJob("testdata/points", "testdata/clusters", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10,
-          k + 1);
+          k + 1, true);
       // now compare the expected clusters with actual
       File outDir = new File("output/clusteredPoints");
       assertTrue("output dir exists?", outDir.exists());
@@ -412,7 +412,7 @@ public class TestKmeansClustering extends MahoutTestCase {
     CanopyDriver.runJob("testdata/points", "output", ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, false);
 
     // now run the KMeans job
-    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1);
+    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
 
     // now compare the expected clusters with actual
     File outDir = new File("output/clusteredPoints");
