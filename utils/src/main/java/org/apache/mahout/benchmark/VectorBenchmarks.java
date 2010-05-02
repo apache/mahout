@@ -17,6 +17,7 @@
 
 package org.apache.mahout.benchmark;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -35,6 +36,11 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.Summarizable;
@@ -43,12 +49,14 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.TanimotoDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +75,7 @@ public class VectorBenchmarks implements Summarizable {
   private final int opsPerUnit;
   private final Map<String,Integer> implType = new HashMap<String,Integer>();
   private final Map<String,List<String[]>> statsMap = new HashMap<String,List<String[]>>();
+ 
   
   public VectorBenchmarks(int cardinality, int sparsity, int numVectors, int loop, int opsPerUnit) {
     Random r = RandomUtils.getRandom();
@@ -250,6 +259,105 @@ public class VectorBenchmarks implements Summarizable {
       }
     }
     printStats(stats, "Clone", "SeqSparseVector");
+    
+  }
+  
+  public void serializeBenchmark() throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf,
+      new Path("/tmp/dense-vector"), IntWritable.class, VectorWritable.class);
+
+    IntWritable one = new IntWritable(0);
+    VectorWritable vec = new VectorWritable();
+    
+    TimingStatistics stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        vec.set(vectors[0][i]);
+        writer.append(one, vec);
+        call.end();
+      }
+    }
+    writer.close();
+    printStats(stats, "Serialize", "DenseVector");
+    
+    writer = new SequenceFile.Writer(fs, conf,
+      new Path("/tmp/randsparse-vector"), IntWritable.class, VectorWritable.class);
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        vec.set(vectors[1][i]);
+        writer.append(one, vec);
+        call.end();
+      }
+    }
+    writer.close();
+    printStats(stats, "Serialize", "RandSparseVector");
+    
+    writer = new SequenceFile.Writer(fs, conf,
+      new Path("/tmp/seqsparse-vector"), IntWritable.class, VectorWritable.class);
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        vec.set(vectors[2][i]);
+        writer.append(one, vec);
+        call.end();
+      }
+    }
+    writer.close();
+    printStats(stats, "Serialize", "SeqSparseVector");
+    
+  }
+  
+  public void deserializeBenchmark() throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
+    
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs,
+      new Path("/tmp/dense-vector"), conf);
+
+    IntWritable one = new IntWritable(0);
+    VectorWritable vec = new VectorWritable();
+    TimingStatistics stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        reader.next(one, vec);
+        call.end();
+      }
+    }
+    reader.close();
+    printStats(stats, "Deserialize", "DenseVector");
+    
+    reader = new SequenceFile.Reader(fs,
+      new Path("/tmp/randsparse-vector"), conf);
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        reader.next(one, vec);
+        call.end();
+      }
+    }
+    reader.close();
+    printStats(stats, "Deserialize", "RandSparseVector");
+    
+    reader = new SequenceFile.Reader(fs,
+      new Path("/tmp/seqsparse-vector"), conf);
+    stats = new TimingStatistics();
+    for (int l = 0; l < loop; l++) {
+      for (int i = 0; i < numVectors; i++) {
+        TimingStatistics.Call call = stats.newCall();
+        reader.next(one, vec);
+        call.end();
+      }
+    }
+    reader.close();
+    printStats(stats, "Deserialize", "SeqSparseVector");
     
   }
   
@@ -528,7 +636,7 @@ public class VectorBenchmarks implements Summarizable {
     
   }
   
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
     
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -583,7 +691,7 @@ public class VectorBenchmarks implements Summarizable {
         numVectors = Integer.parseInt((String) cmdLine.getValue(numVectorsOpt));
         
       }
-      int loop = 600;
+      int loop = 200;
       if (cmdLine.hasOption(loopOpt)) {
         loop = Integer.parseInt((String) cmdLine.getValue(loopOpt));
         
@@ -598,10 +706,12 @@ public class VectorBenchmarks implements Summarizable {
       mark.incrementalCreateBenchmark();
       mark.cloneBenchmark();
       mark.dotBenchmark();
+      mark.serializeBenchmark();
+      mark.deserializeBenchmark();
       mark.distanceMeasureBenchmark(new CosineDistanceMeasure());
       mark.distanceMeasureBenchmark(new SquaredEuclideanDistanceMeasure());
       mark.distanceMeasureBenchmark(new EuclideanDistanceMeasure());
-      //mark.distanceMeasureBenchmark(new ManhattanDistanceMeasure());
+      mark.distanceMeasureBenchmark(new ManhattanDistanceMeasure());
       mark.distanceMeasureBenchmark(new TanimotoDistanceMeasure());
       
       log.info("\n{}", mark.summarize());
