@@ -121,35 +121,6 @@ public class CanopyClusterer {
   }
 
   /**
-   * This method is used by the CanopyMapper to perform canopy inclusion tests and to emit the point and its
-   * covering canopies to the output. The CanopyCombiner will then sum the canopy points and produce the
-   * centroids.
-   * 
-   * @param point
-   *          the point to be added
-   * @param canopies
-   *          the List<Canopy> to be appended
-   * @param collector
-   *          an OutputCollector in which to emit the point
-   */
-  public void emitPointToNewCanopies(Vector point, List<Canopy> canopies, OutputCollector<Text, Vector> collector)
-      throws IOException {
-    boolean pointStronglyBound = false;
-    for (Canopy canopy : canopies) {
-      double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
-      if (dist < t1) {
-        canopy.emitPoint(point, collector);
-      }
-      pointStronglyBound = pointStronglyBound || (dist < t2);
-    }
-    if (!pointStronglyBound) {
-      Canopy canopy = new Canopy(point, nextCanopyId++);
-      canopies.add(canopy);
-      canopy.emitPoint(point, collector);
-    }
-  }
-
-  /**
    * Emit the point to the closest covering canopy. Used by the ClusterMapper.
    * 
    * @param point
