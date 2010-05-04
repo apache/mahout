@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
@@ -28,6 +29,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
@@ -79,21 +81,31 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
       countCounts.adjustOrPutValue(count, 1, 1);
     }
 
+    IntArrayList countsList = new IntArrayList(countCounts.size());
+    countCounts.keys(countsList);
+    int[] counts = countsList.elements();
+    Arrays.sort(counts);
+
     int resultingSizeAtCutoff = 0;
-    int cutoff = 0;
-    while (resultingSizeAtCutoff <= MAX_PREFS_CONSIDERED) {
-      cutoff++;
-      int count = indexCounts.get(cutoff);
+    int cutoffIndex = 0;
+    while (cutoffIndex < counts.length && resultingSizeAtCutoff <= MAX_PREFS_CONSIDERED) {
+      int cutoff = counts[cutoffIndex];
+      cutoffIndex++;
+      int count = countCounts.get(cutoff);
       resultingSizeAtCutoff += count;
     }
+    cutoffIndex--;    
 
-    Iterator<Vector.Element> it2 = userVector.iterateNonZero();
-    while (it2.hasNext()) {
-      Vector.Element e = it2.next();
-      int index = e.index();
-      int count = indexCounts.get(index);
-      if (count > cutoff) {
-        e.set(0.0);
+    if (resultingSizeAtCutoff > MAX_PREFS_CONSIDERED) {
+      int cutoff = counts[cutoffIndex];
+      Iterator<Vector.Element> it2 = userVector.iterateNonZero();
+      while (it2.hasNext()) {
+        Vector.Element e = it2.next();
+        int index = e.index();
+        int count = indexCounts.get(index);
+        if (count >= cutoff) {
+          e.set(0.0);
+        }
       }
     }
 
