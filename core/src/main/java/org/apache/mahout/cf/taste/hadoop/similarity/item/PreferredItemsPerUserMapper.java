@@ -18,44 +18,79 @@
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
+import org.apache.mahout.cf.taste.hadoop.similarity.DistributedSimilarity;
 
 /**
- * for each item-vector, we compute its length here and map out all entries with the user as key,
+ * for each item-vector, we compute its weight here and map out all entries with the user as key,
  * so we can create the user-vectors in the reducer
  */
 public final class PreferredItemsPerUserMapper extends MapReduceBase
-    implements Mapper<LongWritable,EntityPrefWritableArrayWritable,LongWritable,ItemPrefWithLengthWritable> {
+    implements Mapper<LongWritable,EntityPrefWritableArrayWritable,LongWritable,ItemPrefWithItemVectorWeightWritable> {
+
+  private DistributedSimilarity distributedSimilarity;
+
+  @Override
+  public void configure(JobConf jobConf) {
+    super.configure(jobConf);
+    distributedSimilarity =
+      ItemSimilarityJob.instantiateSimilarity(jobConf.get(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME));
+  }
 
   @Override
   public void map(LongWritable item,
                   EntityPrefWritableArrayWritable userPrefsArray,
-                  OutputCollector<LongWritable,ItemPrefWithLengthWritable> output,
+                  OutputCollector<LongWritable,ItemPrefWithItemVectorWeightWritable> output,
                   Reporter reporter) throws IOException {
 
     EntityPrefWritable[] userPrefs = userPrefsArray.getPrefs();
 
-    double length = 0.0;
-    for (EntityPrefWritable userPref : userPrefs) {
-      double value = userPref.getPrefValue();
-      length += value * value;
-    }
-
-    length = Math.sqrt(length);
+    double weight = distributedSimilarity.weightOfItemVector(new UserPrefsIterator(userPrefs));
 
     for (EntityPrefWritable userPref : userPrefs) {
       output.collect(new LongWritable(userPref.getID()),
-          new ItemPrefWithLengthWritable(item.get(), length, userPref.getPrefValue()));
+          new ItemPrefWithItemVectorWeightWritable(item.get(), weight, userPref.getPrefValue()));
+    }
+  }
+
+  public static class UserPrefsIterator implements Iterator<Float> {
+
+    private int index;
+    private final EntityPrefWritable[] userPrefs;
+
+    public UserPrefsIterator(EntityPrefWritable[] userPrefs) {
+      this.userPrefs = userPrefs;
+      this.index = 0;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return (index < userPrefs.length);
+    }
+
+    @Override
+    public Float next() {
+      if (index >= userPrefs.length) {
+        throw new NoSuchElementException();
+      }
+      return userPrefs[index++].getPrefValue();
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
     }
 
   }
-
 
 }

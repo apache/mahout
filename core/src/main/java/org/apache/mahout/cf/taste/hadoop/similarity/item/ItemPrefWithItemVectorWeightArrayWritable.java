@@ -20,22 +20,22 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 import org.apache.hadoop.io.ArrayWritable;
 
 /**
- * An {@link ArrayWritable} holding {@link ItemPrefWithLengthWritable}s
+ * An {@link ArrayWritable} holding {@link ItemPrefWithItemVectorWeightWritable}s
  *
  * Used as user-vector
  */
-public class ItemPrefWithLengthArrayWritable extends ArrayWritable {
+public class ItemPrefWithItemVectorWeightArrayWritable extends ArrayWritable {
 
-  public ItemPrefWithLengthArrayWritable() {
-    super(ItemPrefWithLengthWritable.class);
+  public ItemPrefWithItemVectorWeightArrayWritable() {
+    super(ItemPrefWithItemVectorWeightWritable.class);
   }
 
-  public ItemPrefWithLengthArrayWritable(ItemPrefWithLengthWritable[] itemPrefs) {
-    super(ItemPrefWithLengthWritable.class, itemPrefs);
+  public ItemPrefWithItemVectorWeightArrayWritable(ItemPrefWithItemVectorWeightWritable[] itemPrefs) {
+    super(ItemPrefWithItemVectorWeightWritable.class, itemPrefs);
   }
 
-  public ItemPrefWithLengthWritable[] getItemPrefs() {
-    return (ItemPrefWithLengthWritable[]) toArray();
+  public ItemPrefWithItemVectorWeightWritable[] getItemPrefs() {
+    return (ItemPrefWithItemVectorWeightWritable[]) toArray();
   }
 
 }

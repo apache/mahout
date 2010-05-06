@@ -17,11 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -34,6 +35,8 @@ import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.ToUserPrefsMapper;
+import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
+import org.apache.mahout.cf.taste.hadoop.similarity.DistributedSimilarity;
 import org.apache.mahout.common.AbstractJob;
 
 /**
@@ -84,6 +87,8 @@ import org.apache.mahout.common.AbstractJob;
  * the form userID,itemID,preference
  * computed, one per line</li>
  * <li>-Dmapred.output.dir=(path): output path where the computations output should go</li>
+ * <li>--similarityClassname (classname): an implemenation of {@link DistributedSimilarity} used to compute the
+ * similarity</li>
  * </ol>
  *
  *
@@ -95,15 +100,24 @@ import org.apache.mahout.common.AbstractJob;
  */
 public final class ItemSimilarityJob extends AbstractJob {
 
-  @Override
-  public int run(String[] args) throws Exception {
+  public static final String DISTRIBUTED_SIMILARITY_CLASSNAME =
+    "org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob.distributedSimilarityClassname";
 
-    Map<String,String> parsedArgs = AbstractJob.parseArguments(args);
+  @Override
+  public int run(String[] args) throws IOException {
+
+    Option similarityClassOpt = AbstractJob.buildOption("similarityClassname", "s",
+    "Name of distributed similarity class to instantiate");
+
+    Map<String,String> parsedArgs = AbstractJob.parseArguments(args, similarityClassOpt);
     if (parsedArgs == null) {
       return -1;
     }
 
     Configuration originalConf = getConf();
+
+    String distributedSimilarityClassname = parsedArgs.get("--similarityClassname");
+
     String inputPath = originalConf.get("mapred.input.dir");
     String outputPath = originalConf.get("mapred.output.dir");
     String tempDirPath = parsedArgs.get("--tempDir");
@@ -128,11 +142,13 @@ public final class ItemSimilarityJob extends AbstractJob {
                                          SequenceFileInputFormat.class,
                                          PreferredItemsPerUserMapper.class,
                                          LongWritable.class,
-                                         ItemPrefWithLengthWritable.class,
+                                         ItemPrefWithItemVectorWeightWritable.class,
                                          PreferredItemsPerUserReducer.class,
                                          LongWritable.class,
-                                         ItemPrefWithLengthArrayWritable.class,
+                                         ItemPrefWithItemVectorWeightArrayWritable.class,
                                          SequenceFileOutputFormat.class);
+
+    userVectors.set(DISTRIBUTED_SIMILARITY_CLASSNAME, distributedSimilarityClassname);
     JobClient.runJob(userVectors);
 
     JobConf similarity = prepareJobConf(userVectorsPath,
@@ -140,11 +156,13 @@ public final class ItemSimilarityJob extends AbstractJob {
                                         SequenceFileInputFormat.class,
                                         CopreferredItemsMapper.class,
                                         ItemPairWritable.class,
-                                        FloatWritable.class,
-                                        CosineSimilarityReducer.class,
+                                        CoRating.class,
+                                        SimilarityReducer.class,
                                         EntityEntityWritable.class,
                                         DoubleWritable.class,
                                         TextOutputFormat.class);
+
+    similarity.set(DISTRIBUTED_SIMILARITY_CLASSNAME, distributedSimilarityClassname);
     JobClient.runJob(similarity);
 
     return 0;
@@ -152,6 +170,18 @@ public final class ItemSimilarityJob extends AbstractJob {
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new ItemSimilarityJob(), args);
+  }
+
+  static DistributedSimilarity instantiateSimilarity(String classname) {
+    try {
+      return (DistributedSimilarity) Class.forName(classname).newInstance();
+    } catch (ClassNotFoundException cnfe) {
+      throw new IllegalStateException(cnfe);
+    } catch (InstantiationException ie) {
+      throw new IllegalStateException(ie);
+    } catch (IllegalAccessException iae) {
+      throw new IllegalStateException(iae);
+    }
   }
 
 }

@@ -31,14 +31,16 @@ import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 public final class ItemPairWritable implements WritableComparable<ItemPairWritable> {
 
   private EntityEntityWritable itemItemWritable;
-  private double multipliedLength;
+  private double itemAWeight;
+  private double itemBWeight;
 
   public ItemPairWritable() {
   }
 
-  public ItemPairWritable(long itemAID, long itemBID, double multipliedLength) {
+  public ItemPairWritable(long itemAID, long itemBID, double itemAWeight, double itemBWeight) {
     this.itemItemWritable = new EntityEntityWritable(itemAID, itemBID);
-    this.multipliedLength = multipliedLength;
+    this.itemAWeight = itemAWeight;
+    this.itemBWeight = itemBWeight;
   }
 
   public long getItemAID() {
@@ -53,21 +55,27 @@ public final class ItemPairWritable implements WritableComparable<ItemPairWritab
     return itemItemWritable;
   }
 
-  public double getMultipliedLength() {
-    return multipliedLength;
+  public double getItemAWeight() {
+    return itemAWeight;
+  }
+
+  public double getItemBWeight() {
+    return itemBWeight;
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     itemItemWritable = new EntityEntityWritable();
     itemItemWritable.readFields(in);
-    multipliedLength = in.readDouble();
+    itemAWeight = in.readDouble();
+    itemBWeight = in.readDouble();
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
     itemItemWritable.write(out);
-    out.writeDouble(multipliedLength);
+    out.writeDouble(itemAWeight);
+    out.writeDouble(itemBWeight);
   }
 
   @Override

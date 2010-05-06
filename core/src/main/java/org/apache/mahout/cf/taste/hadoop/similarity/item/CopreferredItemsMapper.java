@@ -19,40 +19,40 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
 
 /**
  * map out each pair of items that appears in the same user-vector together with the multiplied vector lengths
  * of the associated item vectors
  */
 public final class CopreferredItemsMapper extends MapReduceBase
-    implements Mapper<LongWritable,ItemPrefWithLengthArrayWritable,ItemPairWritable,FloatWritable> {
+    implements Mapper<LongWritable,ItemPrefWithItemVectorWeightArrayWritable,ItemPairWritable,CoRating> {
 
   @Override
   public void map(LongWritable user,
-                  ItemPrefWithLengthArrayWritable itemPrefsArray,
-                  OutputCollector<ItemPairWritable,FloatWritable> output,
+                  ItemPrefWithItemVectorWeightArrayWritable itemPrefsArray,
+                  OutputCollector<ItemPairWritable, CoRating> output,
                   Reporter reporter)
       throws IOException {
 
-    ItemPrefWithLengthWritable[] itemPrefs = itemPrefsArray.getItemPrefs();
+    ItemPrefWithItemVectorWeightWritable[] itemPrefs = itemPrefsArray.getItemPrefs();
 
     for (int n = 0; n < itemPrefs.length; n++) {
-      ItemPrefWithLengthWritable itemN = itemPrefs[n];
+      ItemPrefWithItemVectorWeightWritable itemN = itemPrefs[n];
       long itemNID = itemN.getItemID();
-      double itemNLength = itemN.getLength();
+      double itemNWeight = itemN.getWeight();
       float itemNValue = itemN.getPrefValue();
       for (int m = n + 1; m < itemPrefs.length; m++) {
-        ItemPrefWithLengthWritable itemM = itemPrefs[m];
+        ItemPrefWithItemVectorWeightWritable itemM = itemPrefs[m];
         long itemAID = Math.min(itemNID, itemM.getItemID());
         long itemBID = Math.max(itemNID, itemM.getItemID());
-        ItemPairWritable pair = new ItemPairWritable(itemAID, itemBID, itemNLength * itemM.getLength());
-        output.collect(pair, new FloatWritable(itemNValue * itemM.getPrefValue()));
+        ItemPairWritable pair = new ItemPairWritable(itemAID, itemBID, itemNWeight, itemM.getWeight());
+        output.collect(pair, new CoRating(itemNValue, itemM.getPrefValue()));
       }
     }
 

@@ -21,33 +21,43 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
+import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
+import org.apache.mahout.cf.taste.hadoop.similarity.DistributedSimilarity;
 
 /**
- * Finally compute the cosine for each item-pair
+ * Finally compute the similarity for each item-pair, that has been corated at least once
  */
-public final class CosineSimilarityReducer extends MapReduceBase
-    implements Reducer<ItemPairWritable,FloatWritable,EntityEntityWritable,DoubleWritable> {
+public final class SimilarityReducer extends MapReduceBase
+    implements Reducer<ItemPairWritable,CoRating,EntityEntityWritable,DoubleWritable> {
+
+  private DistributedSimilarity distributedSimilarity;
+
+  @Override
+  public void configure(JobConf jobConf) {
+    super.configure(jobConf);
+    distributedSimilarity =
+      ItemSimilarityJob.instantiateSimilarity(jobConf.get(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME));
+  }
 
   @Override
   public void reduce(ItemPairWritable pair,
-                     Iterator<FloatWritable> numeratorSummands,
+                     Iterator<CoRating> coRatings,
                      OutputCollector<EntityEntityWritable,DoubleWritable> output,
                      Reporter reporter)
       throws IOException {
 
-    double numerator = 0.0;
-    while (numeratorSummands.hasNext()) {
-      numerator += numeratorSummands.next().get();
+    double similarity =
+      distributedSimilarity.similarity(coRatings, pair.getItemAWeight(), pair.getItemBWeight());
+
+    if (!Double.isNaN(similarity)) {
+      output.collect(pair.getItemItemWritable(), new DoubleWritable(similarity));
     }
-    double denominator = pair.getMultipliedLength();
-    double cosine = numerator / denominator;
-    output.collect(pair.getItemItemWritable(), new DoubleWritable(cosine));
   }
 
 }

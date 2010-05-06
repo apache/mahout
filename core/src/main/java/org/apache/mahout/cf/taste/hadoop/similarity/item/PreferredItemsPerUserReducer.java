@@ -29,23 +29,25 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
 public final class PreferredItemsPerUserReducer extends MapReduceBase
-    implements Reducer<LongWritable,ItemPrefWithLengthWritable, LongWritable,ItemPrefWithLengthArrayWritable> {
+    implements Reducer<LongWritable,ItemPrefWithItemVectorWeightWritable, LongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
 
   @Override
   public void reduce(LongWritable user,
-                     Iterator<ItemPrefWithLengthWritable> itemPrefs,
-                     OutputCollector<LongWritable,ItemPrefWithLengthArrayWritable> output,
+                     Iterator<ItemPrefWithItemVectorWeightWritable> itemPrefs,
+                     OutputCollector<LongWritable,ItemPrefWithItemVectorWeightArrayWritable> output,
                      Reporter reporter)
       throws IOException {
 
-    Set<ItemPrefWithLengthWritable> itemPrefsWithLength = new HashSet<ItemPrefWithLengthWritable>();
+    Set<ItemPrefWithItemVectorWeightWritable> itemPrefsWithItemVectorWeight
+        = new HashSet<ItemPrefWithItemVectorWeightWritable>();
 
     while (itemPrefs.hasNext()) {
-      itemPrefsWithLength.add(itemPrefs.next().clone());
+      itemPrefsWithItemVectorWeight.add(itemPrefs.next().clone());
     }
 
-    output.collect(user, new ItemPrefWithLengthArrayWritable(
-        itemPrefsWithLength.toArray(new ItemPrefWithLengthWritable[itemPrefsWithLength.size()])));
+    output.collect(user, new ItemPrefWithItemVectorWeightArrayWritable(
+        itemPrefsWithItemVectorWeight.toArray(
+        new ItemPrefWithItemVectorWeightWritable[itemPrefsWithItemVectorWeight.size()])));
   }
 
 

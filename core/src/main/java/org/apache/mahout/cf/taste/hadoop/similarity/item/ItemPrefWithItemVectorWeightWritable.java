@@ -30,26 +30,26 @@ import org.apache.mahout.common.RandomUtils;
  * stored along with the length of the item-vector
  *
  */
-public final class ItemPrefWithLengthWritable implements Writable, Cloneable {
+public final class ItemPrefWithItemVectorWeightWritable implements Writable, Cloneable {
 
   private EntityPrefWritable itemPref;
-  private double length;
+  private double weight;
 
-  public ItemPrefWithLengthWritable() {
+  public ItemPrefWithItemVectorWeightWritable() {
   // do nothing
   }
 
-  public ItemPrefWithLengthWritable(long itemID, double length, float prefValue) {
+  public ItemPrefWithItemVectorWeightWritable(long itemID, double weight, float prefValue) {
     this.itemPref = new EntityPrefWritable(itemID, prefValue);
-    this.length = length;
+    this.weight = weight;
   }
 
   public long getItemID() {
     return itemPref.getID();
   }
 
-  public double getLength() {
-    return length;
+  public double getWeight() {
+    return weight;
   }
 
   public float getPrefValue() {
@@ -59,33 +59,33 @@ public final class ItemPrefWithLengthWritable implements Writable, Cloneable {
   @Override
   public void write(DataOutput out) throws IOException {
     itemPref.write(out);
-    out.writeDouble(length);
+    out.writeDouble(weight);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     itemPref = new EntityPrefWritable();
     itemPref.readFields(in);
-    length = in.readDouble();
+    weight = in.readDouble();
   }
 
   @Override
   public int hashCode() {
-    return itemPref.hashCode() + 31 * RandomUtils.hashDouble(length);
+    return itemPref.hashCode() + 31 * RandomUtils.hashDouble(weight);
   }
 
   @Override
   public boolean equals(Object o) {
-    if (o instanceof ItemPrefWithLengthWritable) {
-      ItemPrefWithLengthWritable other = (ItemPrefWithLengthWritable) o;
-      return itemPref.equals(other.itemPref) && length == other.getLength();
+    if (o instanceof ItemPrefWithItemVectorWeightWritable) {
+      ItemPrefWithItemVectorWeightWritable other = (ItemPrefWithItemVectorWeightWritable) o;
+      return itemPref.equals(other.itemPref) && weight == other.getWeight();
     }
     return false;
   }
 
   @Override
-  public ItemPrefWithLengthWritable clone() {
-    return new ItemPrefWithLengthWritable(itemPref.getID(), length, itemPref.getPrefValue());
+  public ItemPrefWithItemVectorWeightWritable clone() {
+    return new ItemPrefWithItemVectorWeightWritable(itemPref.getID(), weight, itemPref.getPrefValue());
   }
 
 }
