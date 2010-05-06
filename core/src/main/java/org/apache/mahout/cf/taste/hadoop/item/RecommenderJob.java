@@ -170,12 +170,16 @@ public final class RecommenderJob extends AbstractJob {
 
   private static void setIOSort(JobConf conf) {
     conf.setInt("io.sort.factor", 100);
-    conf.setInt("io.sort.mb", 1000);
+    conf.setInt("io.sort.mb", 200);
     String javaOpts = conf.get("mapred.child.java.opts");
     if (javaOpts != null) {
-      Matcher m = Pattern.compile("Xmx([0-9]+)m").matcher(javaOpts);
-      if (m.matches()) {
+      Matcher m = Pattern.compile("-Xmx([0-9]+)([mMgG])").matcher(javaOpts);
+      if (m.find()) {
         int heapMB = Integer.parseInt(m.group(1));
+        String megabyteOrGigabyte = m.group(2);
+        if ("g".equalsIgnoreCase(megabyteOrGigabyte)) {
+          heapMB *= 1024;
+        }
         conf.setInt("io.sort.mb", heapMB / 2);
       }
     }
