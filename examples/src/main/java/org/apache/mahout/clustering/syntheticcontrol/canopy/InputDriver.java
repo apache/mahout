@@ -73,8 +73,8 @@ public final class InputDriver {
         return;
       }
       
-      String input = cmdLine.getValue(inputOpt, "testdata").toString();
-      String output = cmdLine.getValue(outputOpt, "output").toString();
+      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
+      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       String vectorClassName = cmdLine.getValue(vectorOpt,
          "org.apache.mahout.math.RandomAccessSparseVector").toString();
       runJob(input, output, vectorClassName);
@@ -84,7 +84,7 @@ public final class InputDriver {
     }
   }
   
-  public static void runJob(String input, String output, String vectorClassName) throws IOException {
+  public static void runJob(Path input, Path output, String vectorClassName) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(InputDriver.class);
     
@@ -92,8 +92,8 @@ public final class InputDriver {
     conf.setOutputValueClass(VectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.set("vector.implementation.class.name", vectorClassName);
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    FileOutputFormat.setOutputPath(conf, new Path(output));
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, output);
     
     conf.setMapperClass(InputMapper.class);
     

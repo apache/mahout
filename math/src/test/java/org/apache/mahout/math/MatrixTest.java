@@ -17,32 +17,26 @@
 
 package org.apache.mahout.math;
 
-import junit.framework.TestCase;
-
 import static org.apache.mahout.math.function.Functions.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public abstract class MatrixTest extends TestCase {
+public abstract class MatrixTest extends MahoutTestCase {
 
   protected static final int ROW = AbstractMatrix.ROW;
 
   protected static final int COL = AbstractMatrix.COL;
 
-  protected final double[][] values = {{1.1, 2.2}, {3.3, 4.4},
+  private final double[][] values = {{1.1, 2.2}, {3.3, 4.4},
       {5.5, 6.6}};
 
-  protected final double[] vectorAValues = {1.0 / 1.1, 2.0 / 1.1};
+  private final double[] vectorAValues = {1.0 / 1.1, 2.0 / 1.1};
 
   //protected final double[] vectorBValues = {5.0, 10.0, 100.0};
 
   protected Matrix test;
-
-  protected MatrixTest(String name) {
-    super(name);
-  }
 
   @Override
   protected void setUp() throws Exception {

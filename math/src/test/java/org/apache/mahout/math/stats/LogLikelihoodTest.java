@@ -16,10 +16,11 @@ package org.apache.mahout.math.stats;
  * limitations under the License.
  */
 
-import org.junit.Assert;
+import org.apache.mahout.math.MahoutTestCase;
+
 import org.junit.Test;
 
-public class LogLikelihoodTest extends Assert {
+public class LogLikelihoodTest extends MahoutTestCase {
 
   @Test
   public void testEntropy() throws Exception {

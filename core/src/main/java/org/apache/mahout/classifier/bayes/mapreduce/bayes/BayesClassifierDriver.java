@@ -35,6 +35,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.classifier.ConfusionMatrix;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
@@ -73,16 +74,14 @@ public final class BayesClassifierDriver {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+    HadoopUtil.overwriteOutput(outPath);
     conf.set("bayes.parameters", params.toString());
     
     client.setConf(conf);
     JobClient.runJob(conf);
     
-    Path outputFiles = new Path(outPath.toString() + "/part*");
+    Path outputFiles = new Path(outPath, "part*");
+    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);    
     ConfusionMatrix matrix = readResult(dfs, outputFiles, conf, params);
     log.info("{}", matrix.summarize());
   }

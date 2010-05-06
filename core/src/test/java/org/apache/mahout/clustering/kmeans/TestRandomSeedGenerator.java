@@ -76,23 +76,15 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
   /** Story: test random seed generation generates 4 clusters with proper ids and data */
   public void testRandomSeedGenerator() throws Exception {
     List<VectorWritable> points = getPoints();
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    
-    File randomOutput = new File("testdata/random-output");
-    if (!randomOutput.exists()) {
-      randomOutput.mkdir();
-    }
-    
     JobConf job = new JobConf(RandomSeedGenerator.class);
     job.setMapOutputValueClass(VectorWritable.class);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/random-input", fs, job);
+    Path input = getTestTempFilePath("random-input");
+    Path output = getTestTempDirPath("random-output");
+    ClusteringTestUtils.writePointsToFile(points, input, fs, job);
     
-    RandomSeedGenerator.buildRandom("testdata/random-input", "testdata/random-output", 4);
+    RandomSeedGenerator.buildRandom(input, output, 4);
     
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("testdata/random-output/part-randomSeed"), job);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "part-randomSeed"), job);
     Writable key = (Writable) reader.getKeyClass().newInstance();
     Cluster value = (Cluster) reader.getValueClass().newInstance();
     

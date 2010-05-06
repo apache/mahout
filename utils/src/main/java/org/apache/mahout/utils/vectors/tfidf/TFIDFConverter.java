@@ -157,15 +157,15 @@ public final class TFIDFConverter {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
     
-    String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
+    Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, normPower,
-        (int) (long) datasetFeatures.getFirst()[0], sequentialAccessOutput);
+        datasetFeatures.getFirst()[0].intValue(), sequentialAccessOutput);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
-      HadoopUtil.deletePath(outputDir, fs);
-      HadoopUtil.rename(singlePartialVectorOutputPath, new Path(outputDir), fs);
+      fs.delete(outputDir, true);
+      fs.rename(singlePartialVectorOutputPath, outputDir);
     }
   }
   
@@ -291,10 +291,8 @@ public final class TFIDFConverter {
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setReducerClass(TFIDFPartialVectorReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    FileSystem dfs = FileSystem.get(output.toUri(), conf);
-    if (dfs.exists(output)) {
-      dfs.delete(output, true);
-    }
+
+    HadoopUtil.overwriteOutput(output);
     
     client.setConf(conf);
     JobClient.runJob(conf);
@@ -326,10 +324,8 @@ public final class TFIDFConverter {
     conf.setReducerClass(TermDocumentCountReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    FileSystem dfs = FileSystem.get(output.toUri(), conf);
-    if (dfs.exists(output)) {
-      dfs.delete(output, true);
-    }
+    HadoopUtil.overwriteOutput(output);
+
     client.setConf(conf);
     JobClient.runJob(conf);
   }

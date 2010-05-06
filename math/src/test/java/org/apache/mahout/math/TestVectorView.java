@@ -17,14 +17,13 @@
 
 package org.apache.mahout.math;
 
-import junit.framework.TestCase;
 import org.apache.mahout.math.function.TimesFunction;
 
 import static org.apache.mahout.math.function.Functions.*;
 
 import java.util.Iterator;
 
-public class TestVectorView extends TestCase {
+public class TestVectorView extends MahoutTestCase {
 
   private static final int cardinality = 3;
 
@@ -34,10 +33,6 @@ public class TestVectorView extends TestCase {
 
   private final Vector test = new VectorView(new DenseVector(values), offset,
       cardinality);
-
-  public TestVectorView(String name) {
-    super(name);
-  }
 
   public void testAsFormatString() {
     String formatString = test.asFormatString();

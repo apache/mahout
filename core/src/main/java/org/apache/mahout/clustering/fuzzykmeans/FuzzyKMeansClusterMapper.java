@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,9 +30,6 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class FuzzyKMeansClusterMapper extends MapReduceBase implements
@@ -41,9 +39,9 @@ public class FuzzyKMeansClusterMapper extends MapReduceBase implements
 
   private FuzzyKMeansClusterer clusterer;
 
-  private boolean emitMostLikely = false;
+  //private boolean emitMostLikely = false;
 
-  private double threshold = 0;
+  //private double threshold = 0;
 
   @Override
   public void map(WritableComparable<?> key, VectorWritable point, OutputCollector<IntWritable, WeightedVectorWritable> output,
@@ -70,7 +68,7 @@ public class FuzzyKMeansClusterMapper extends MapReduceBase implements
 
     String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
     if ((clusterPath != null) && (clusterPath.length() > 0)) {
-      FuzzyKMeansUtil.configureWithClusterInfo(clusterPath, clusters);
+      FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
     }
 
     if (clusters.isEmpty()) {

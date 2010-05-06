@@ -55,13 +55,9 @@ public class FPGrowthTest extends MahoutTestCase {
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("A", "D", "E"), 1L));
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("B", "C"), 1L));
 
-    File tmpFile = File.createTempFile("fpgrowthTest", ".dat");
-    tmpFile.deleteOnExit();
-
-    Path path = new Path(tmpFile.getAbsolutePath());
+    Path path = getTestTempFilePath("fpgrowthTest.dat");
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-
 
     SequenceFile.Writer writer =
         new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);

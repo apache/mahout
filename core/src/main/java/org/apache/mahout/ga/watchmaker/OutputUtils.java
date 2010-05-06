@@ -38,23 +38,6 @@ public final class OutputUtils {
   }
   
   /**
-   * Removes the output directory if it already exists.
-   * 
-   * @param fs
-   *          <code>FileSystem</code> to use
-   * @return output <code>Path</code>
-   */
-  public static Path prepareOutput(FileSystem fs) throws IOException {
-    Path outpath = new Path(fs.getWorkingDirectory(), "output");
-    
-    if (fs.exists(outpath)) {
-      fs.delete(outpath, true);
-    }
-    
-    return outpath;
-  }
-  
-  /**
    * Lists all files in the output <code>Path</code>
    * 
    * @param fs

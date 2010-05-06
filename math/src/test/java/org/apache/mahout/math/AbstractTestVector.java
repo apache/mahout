@@ -17,22 +17,17 @@
 
 package org.apache.mahout.math;
 
-import junit.framework.TestCase;
 import static org.apache.mahout.math.function.Functions.*;
 
 import java.util.Iterator;
 
-abstract class AbstractTestVector extends TestCase {
+abstract class AbstractTestVector extends MahoutTestCase {
 
   private static final double[] values = {1.1, 2.2, 3.3};
   private static final double[] gold = {0.0, 1.1, 0.0, 2.2, 0.0, 3.3, 0.0};
   private static final double EPSILON = 0.0000000001;
 
   private Vector test;
-
-  AbstractTestVector(String name) {
-    super(name);
-  }
 
   abstract Vector generateTestVector(int cardinality);
 

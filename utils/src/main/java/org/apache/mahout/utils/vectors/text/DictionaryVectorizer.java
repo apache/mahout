@@ -114,8 +114,8 @@ public final class DictionaryVectorizer {
    *          partial vectors without thrashing the system due to increased swapping
    * @throws IOException
    */
-  public static void createTermFrequencyVectors(String input,
-                                                String output,
+  public static void createTermFrequencyVectors(Path input,
+                                                Path output,
                                                 int minSupport,
                                                 int maxNGramSize,
                                                 float minLLRValue,
@@ -131,17 +131,16 @@ public final class DictionaryVectorizer {
       minSupport = DEFAULT_MIN_SUPPORT;
     }
     
-    Path inputPath = new Path(input);
     Path dictionaryJobPath = new Path(output + DICTIONARY_JOB_FOLDER);
     
     int[] maxTermDimension = new int[1];
     List<Path> dictionaryChunks;
     if (maxNGramSize == 1) {
-      startWordCounting(inputPath, dictionaryJobPath, minSupport);
+      startWordCounting(input, dictionaryJobPath, minSupport);
       dictionaryChunks = createDictionaryChunks(minSupport, dictionaryJobPath, output,
         chunkSizeInMegabytes, new LongWritable(), maxTermDimension);
     } else {
-      CollocDriver.generateAllGrams(inputPath.toString(), dictionaryJobPath.toString(), maxNGramSize,
+      CollocDriver.generateAllGrams(input, dictionaryJobPath, maxNGramSize,
         minSupport, minLLRValue, numReducers);
       dictionaryChunks = createDictionaryChunks(minSupport, new Path(
           output + DICTIONARY_JOB_FOLDER, CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
@@ -151,8 +150,7 @@ public final class DictionaryVectorizer {
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
     for (Path dictionaryChunk : dictionaryChunks) {
-      Path partialVectorOutputPath = getPath(
-        output + VECTOR_OUTPUT_FOLDER, partialVectorIndex++);
+      Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
       makePartialVectors(input, maxNGramSize, dictionaryChunk, partialVectorOutputPath,
         maxTermDimension[0], sequentialAccess);
@@ -161,15 +159,15 @@ public final class DictionaryVectorizer {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
     
-    String outputDir = output + DOCUMENT_VECTOR_OUTPUT_FOLDER;
+    Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, -1, maxTermDimension[0],
         sequentialAccess);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
-      HadoopUtil.deletePath(outputDir, fs);
-      HadoopUtil.rename(singlePartialVectorOutputPath, new Path(outputDir), fs);
+      fs.delete(outputDir, true);
+      fs.rename(singlePartialVectorOutputPath, outputDir);
     }
   }
   
@@ -184,7 +182,7 @@ public final class DictionaryVectorizer {
    */
   private static List<Path> createDictionaryChunks(int minSupport,
                                                    Path wordCountPath,
-                                                   String dictionaryPathBase,
+                                                   Path dictionaryPathBase,
                                                    int chunkSizeInMegabytes,
                                                    Writable value,
                                                    int[] maxTermDimension) throws IOException {
@@ -199,8 +197,7 @@ public final class DictionaryVectorizer {
     
     long chunkSizeLimit = chunkSizeInMegabytes * 1024L * 1024L;
     int chunkIndex = 0;
-    Path chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE,
-      chunkIndex);
+    Path chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
     chunkPaths.add(chunkPath);
     
     SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class,
@@ -218,8 +215,7 @@ public final class DictionaryVectorizer {
           dictWriter.close();
           chunkIndex++;
           
-          chunkPath = getPath(dictionaryPathBase + DICTIONARY_FILE,
-            chunkIndex);
+          chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
           chunkPaths.add(chunkPath);
           
           dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
@@ -238,10 +234,6 @@ public final class DictionaryVectorizer {
     return chunkPaths;
   }
   
-  private static Path getPath(String basePath, int index) {
-    return new Path(basePath + index);
-  }
-  
   /**
    * Create a partial vector using a chunk of features from the input documents. The input documents has to be
    * in the {@link SequenceFile} format
@@ -256,7 +248,7 @@ public final class DictionaryVectorizer {
    *          output directory were the partial vectors have to be created
    * @throws IOException
    */
-  private static void makePartialVectors(String input,
+  private static void makePartialVectors(Path input,
                                          int maxNGramSize,
                                          Path dictionaryFilePath,
                                          Path output,
@@ -280,7 +272,7 @@ public final class DictionaryVectorizer {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
-    FileInputFormat.setInputPaths(conf, new Path(input));
+    FileInputFormat.setInputPaths(conf, input);
     
     FileOutputFormat.setOutputPath(conf, output);
     
@@ -288,10 +280,8 @@ public final class DictionaryVectorizer {
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setReducerClass(TFPartialVectorReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    FileSystem dfs = FileSystem.get(output.toUri(), conf);
-    if (dfs.exists(output)) {
-      dfs.delete(output, true);
-    }
+
+    HadoopUtil.overwriteOutput(output);
     
     client.setConf(conf);
     JobClient.runJob(conf);
@@ -325,10 +315,7 @@ public final class DictionaryVectorizer {
     conf.setReducerClass(TermCountReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    FileSystem dfs = FileSystem.get(output.toUri(), conf);
-    if (dfs.exists(output)) {
-      dfs.delete(output, true);
-    }
+    HadoopUtil.overwriteOutput(output);
     
     client.setConf(conf);
     JobClient.runJob(conf);

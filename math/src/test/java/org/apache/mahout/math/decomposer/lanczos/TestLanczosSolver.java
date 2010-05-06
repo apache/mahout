@@ -26,10 +26,6 @@ import java.util.List;
 
 public class TestLanczosSolver extends SolverTest {
 
-  public TestLanczosSolver(String name) {
-    super(name);
-  }
-
   public void testLanczosSolver() throws Exception {
     int numColumns = 800;
     Matrix corpus = randomSequentialAccessSparseMatrix(1000, 900, numColumns, 30, 1.0);

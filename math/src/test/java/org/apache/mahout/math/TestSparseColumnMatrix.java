@@ -19,10 +19,6 @@ package org.apache.mahout.math;
 
 public class TestSparseColumnMatrix extends MatrixTest {
 
-  public TestSparseColumnMatrix(String name) {
-    super(name);
-  }
-
   @Override
   public Matrix matrixFactory(double[][] values) {
     int[] cardinality = {values.length, values[0].length};

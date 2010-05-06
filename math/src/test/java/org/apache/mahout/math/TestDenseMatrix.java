@@ -19,10 +19,6 @@ package org.apache.mahout.math;
 
 public class TestDenseMatrix extends MatrixTest {
 
-  public TestDenseMatrix(String name) {
-    super(name);
-  }
-
   @Override
   public Matrix matrixFactory(double[][] values) {
     return new DenseMatrix(values);

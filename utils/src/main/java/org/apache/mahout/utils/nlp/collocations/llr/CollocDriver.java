@@ -139,8 +139,8 @@ public class CollocDriver extends Configured implements Tool {
         return 1;
       }
       
-      String input = cmdLine.getValue(inputOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       
       int maxNGramSize = DEFAULT_MAX_NGRAM_SIZE;
       
@@ -189,7 +189,7 @@ public class CollocDriver extends Configured implements Tool {
           analyzerClass.newInstance();
         }
         
-        String tokenizedPath = output + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
+        Path tokenizedPath = new Path(output, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
         
         DocumentProcessor.tokenizeDocuments(input, analyzerClass, tokenizedPath);
         input = tokenizedPath;
@@ -230,8 +230,8 @@ public class CollocDriver extends Configured implements Tool {
    *          number of reducers used
    * @throws IOException
    */
-  public static void generateAllGrams(String input,
-                                      String output,
+  public static void generateAllGrams(Path input,
+                                      Path output,
                                       int maxNGramSize,
                                       int minSupport,
                                       float minLLRValue,
@@ -247,8 +247,8 @@ public class CollocDriver extends Configured implements Tool {
   /**
    * pass1: generate collocations, ngrams
    */
-  public static long generateCollocations(String input,
-                                          String output,
+  public static long generateCollocations(Path input,
+                                          Path output,
                                           boolean emitUnigrams,
                                           int maxNGramSize,
                                           int reduceTasks,
@@ -268,7 +268,7 @@ public class CollocDriver extends Configured implements Tool {
     
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
     
-    FileInputFormat.setInputPaths(conf, new Path(input));
+    FileInputFormat.setInputPaths(conf, input);
     Path outPath = new Path(output, SUBGRAM_OUTPUT_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
@@ -289,7 +289,7 @@ public class CollocDriver extends Configured implements Tool {
    * pass2: perform the LLR calculation
    */
   public static void computeNGramsPruneByLLR(long nGramTotal,
-                                             String output,
+                                             Path output,
                                              boolean emitUnigrams,
                                              float minLLRValue,
                                              int reduceTasks) throws IOException {

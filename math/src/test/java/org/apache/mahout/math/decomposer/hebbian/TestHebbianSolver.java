@@ -32,10 +32,6 @@ import org.apache.mahout.math.decomposer.SolverTest;
  */
 public class TestHebbianSolver extends SolverTest {
 
-  public TestHebbianSolver(String name) {
-    super(name);
-  }
-
   public static long timeSolver(Matrix corpus,
                                 double convergence,
                                 int maxNumPasses,

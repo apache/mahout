@@ -130,8 +130,8 @@ public class DirichletDriver {
         return;
       }
 
-      String input = cmdLine.getValue(inputOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
       if (cmdLine.hasOption(modelOpt)) {
         modelFactory = cmdLine.getValue(modelOpt).toString();
@@ -185,7 +185,7 @@ public class DirichletDriver {
    * @deprecated since it presumes 2-d, dense vector model prototypes
    */
   @Deprecated
-  public static void runJob(String input, String output, String modelFactory, int numClusters, int maxIterations, double alpha_0,
+  public static void runJob(Path input, Path output, String modelFactory, int numClusters, int maxIterations, double alpha_0,
       int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
       SecurityException, NoSuchMethodException, InvocationTargetException {
     runJob(input, output, modelFactory, "org.apache.mahout.math.DenseVector", 2, numClusters, maxIterations, alpha_0, numReducers,
@@ -220,37 +220,37 @@ public class DirichletDriver {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    */
-  public static void runJob(String input, String output, String modelFactory, String modelPrototype, int prototypeSize,
+  public static void runJob(Path input, Path output, String modelFactory, String modelPrototype, int prototypeSize,
       int numClusters, int maxIterations, double alpha_0, int numReducers, boolean runClustering, boolean emitMostLikely,
       double threshold) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
       SecurityException, NoSuchMethodException, InvocationTargetException {
 
-    String clustersIn = output + Cluster.INITIAL_CLUSTERS_DIR;
+    Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     writeInitialState(output, clustersIn, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0);
 
     for (int iteration = 1; iteration <= maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String clustersOut = output + Cluster.CLUSTERS_DIR + iteration;
+      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
       runIteration(input, clustersIn, clustersOut, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0, numReducers);
       // now point the input to the old output directory
       clustersIn = clustersOut;
     }
     if (runClustering) {
       // now cluster the most likely points
-      runClustering(input, clustersIn, output + Cluster.CLUSTERED_POINTS_DIR, emitMostLikely, threshold);
+      runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), emitMostLikely, threshold);
     }
   }
 
-  private static void writeInitialState(String output, String stateIn, String modelFactory, String modelPrototype,
+  private static void writeInitialState(Path output, Path stateIn, String modelFactory, String modelPrototype,
       int prototypeSize, int numModels, double alpha_0) throws ClassNotFoundException, InstantiationException,
       IllegalAccessException, IOException, SecurityException, NoSuchMethodException, InvocationTargetException {
 
     DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha_0);
     JobConf job = new JobConf(DirichletDriver.class);
-    FileSystem fs = FileSystem.get(new Path(output).toUri(), job);
+    FileSystem fs = FileSystem.get(output.toUri(), job);
     for (int i = 0; i < numModels; i++) {
-      Path path = new Path(stateIn + "/part-" + i);
+      Path path = new Path(stateIn, "/part-" + i);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, Text.class, DirichletCluster.class);
       writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
       writer.close();
@@ -309,7 +309,7 @@ public class DirichletDriver {
    * @param numReducers
    *          the number of Reducers desired
    */
-  public static void runIteration(String input, String stateIn, String stateOut, String modelFactory, String modelPrototype,
+  public static void runIteration(Path input, Path stateIn, Path stateOut, String modelFactory, String modelPrototype,
       int prototypeSize, int numClusters, double alpha_0, int numReducers) {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DirichletDriver.class);
@@ -319,16 +319,15 @@ public class DirichletDriver {
     conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(VectorWritable.class);
 
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(stateOut);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, stateOut);
 
     conf.setMapperClass(DirichletMapper.class);
     conf.setReducerClass(DirichletReducer.class);
     conf.setNumReduceTasks(numReducers);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(MODEL_FACTORY_KEY, modelFactory);
     conf.set(MODEL_PROTOTYPE_KEY, modelPrototype);
     conf.set(PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
@@ -357,16 +356,15 @@ public class DirichletDriver {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    */
-  public static void runClustering(String input, String stateIn, String output, boolean emitMostLikely, double threshold) {
+  public static void runClustering(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold) {
     JobConf conf = new JobConf(DirichletDriver.class);
     conf.setJobName("Dirichlet Clustering");
 
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(WeightedVectorWritable.class);
 
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, output);
 
     conf.setMapperClass(DirichletClusterMapper.class);
 
@@ -376,7 +374,7 @@ public class DirichletDriver {
     // uncomment it to run locally
     // conf.set("mapred.job.tracker", "local");
     conf.setNumReduceTasks(0);
-    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
     conf.set(THRESHOLD_KEY, Double.toString(threshold));
     try {

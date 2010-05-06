@@ -24,6 +24,7 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesDriver;
 import org.apache.mahout.common.CommandLineUtil;
@@ -71,8 +72,8 @@ public final class JobExecutor {
         return;
       }
       
-      String input = cmdLine.getValue(inputOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       
       job.runJob(input, output, new BayesParameters(1));
     } catch (OptionException e) {

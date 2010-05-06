@@ -19,15 +19,13 @@ package org.apache.mahout.classifier.bayes.mapreduce.cbayes;
 
 import java.io.IOException;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureDriver;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesTfIdfDriver;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesWeightSummerDriver;
+import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,25 +33,10 @@ import org.slf4j.LoggerFactory;
 public class CBayesDriver implements BayesJob {
   
   private static final Logger log = LoggerFactory.getLogger(CBayesDriver.class);
-  
-  /**
-   * Run the job
-   * 
-   * @param input
-   *          the input pathname String
-   * @param output
-   *          the output pathname String
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
-   */
+
   @Override
-  public void runJob(String input, String output, BayesParameters params) throws IOException {
-    Configuration conf = new JobConf(CBayesDriver.class);
-    Path outPath = new Path(output);
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+  public void runJob(Path input, Path output, BayesParameters params) throws IOException {
+    HadoopUtil.overwriteOutput(output);
     
     log.info("Reading features...");
     // Read the features in each document normalized by length of each document
@@ -76,30 +59,24 @@ public class CBayesDriver implements BayesJob {
     CBayesThetaNormalizerDriver normalizer = new CBayesThetaNormalizerDriver();
     normalizer.runJob(input, output, params);
     
-    Path docCountOutPath = new Path(output + "/trainer-docCount");
-    if (dfs.exists(docCountOutPath)) {
-      dfs.delete(docCountOutPath, true);
-    }
-    Path termDocCountOutPath = new Path(output + "/trainer-termDocCount");
-    if (dfs.exists(termDocCountOutPath)) {
-      dfs.delete(termDocCountOutPath, true);
-    }
-    Path featureCountOutPath = new Path(output + "/trainer-featureCount");
-    if (dfs.exists(featureCountOutPath)) {
-      dfs.delete(featureCountOutPath, true);
-    }
-    Path wordFreqOutPath = new Path(output + "/trainer-wordFreq");
-    if (dfs.exists(wordFreqOutPath)) {
-      dfs.delete(wordFreqOutPath, true);
-    }
-    Path vocabCountPath = new Path(output + "/trainer-tfIdf/trainer-vocabCount");
-    if (dfs.exists(vocabCountPath)) {
-      dfs.delete(vocabCountPath, true);
-    }
-    Path vocabCountOutPath = new Path(output + "/trainer-vocabCount");
-    if (dfs.exists(vocabCountOutPath)) {
-      dfs.delete(vocabCountOutPath, true);
-    }
+    Path docCountOutPath = new Path(output, "trainer-docCount");
+    HadoopUtil.overwriteOutput(docCountOutPath);
+
+    Path termDocCountOutPath = new Path(output, "trainer-termDocCount");
+    HadoopUtil.overwriteOutput(termDocCountOutPath);
+
+    Path featureCountOutPath = new Path(output, "trainer-featureCount");
+    HadoopUtil.overwriteOutput(featureCountOutPath);
+
+    Path wordFreqOutPath = new Path(output, "trainer-wordFreq");
+    HadoopUtil.overwriteOutput(wordFreqOutPath);
+
+    Path vocabCountPath = new Path(output, "trainer-tfIdf/trainer-vocabCount");
+    HadoopUtil.overwriteOutput(vocabCountPath);
+
+    Path vocabCountOutPath = new Path(output, "trainer-vocabCount");
+    HadoopUtil.overwriteOutput(vocabCountOutPath);
+
     
   }
 }

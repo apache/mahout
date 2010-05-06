@@ -27,14 +27,13 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
@@ -43,8 +42,6 @@ import org.slf4j.LoggerFactory;
 public final class Job {
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
-
-  private static final String CLUSTERED_POINTS_OUTPUT_DIRECTORY = "/clusteredPoints";
 
   private Job() {
   }
@@ -84,8 +81,8 @@ public final class Job {
         return;
       }
 
-      String input = cmdLine.getValue(inputOpt, "testdata").toString();
-      String output = cmdLine.getValue(outputOpt, "output").toString();
+      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
+      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       String measureClassName = cmdLine.getValue(modelOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt, "47.6").toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt, "1").toString());
@@ -123,18 +120,15 @@ public final class Job {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    */
-  private static void runJob(String input, String output, String measureClassName, double t1, double t2, double convergenceDelta,
+  private static void runJob(Path input, Path output, String measureClassName, double t1, double t2, double convergenceDelta,
       int maxIterations) throws IOException, InstantiationException, IllegalAccessException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
-    Path outPath = new Path(output);
     client.setConf(conf);
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
-    String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    HadoopUtil.overwriteOutput(output);
+
+    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
     MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2,
         convergenceDelta, maxIterations, true, true);

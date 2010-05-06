@@ -19,10 +19,6 @@ package org.apache.mahout.math;
 
 public class TestSequentialAccessSparseVector extends AbstractTestVector {
 
-  public TestSequentialAccessSparseVector(String name) {
-    super(name);
-  }
-
   @Override
   Vector generateTestVector(int cardinality) {
     return new SequentialAccessSparseVector(cardinality);

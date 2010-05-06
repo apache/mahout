@@ -43,6 +43,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,11 +177,8 @@ public final class WikipediaDatasetCreatorDriver {
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters and make or break a piece of code
     
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
-    
+    HadoopUtil.overwriteOutput(outPath);
+
     Set<String> categories = new HashSet<String>();
     for (String line : new FileLineIterable(new File(catFile))) {
       categories.add(line.trim().toLowerCase());

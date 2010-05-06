@@ -46,7 +46,9 @@ import org.apache.mahout.math.VectorWritable;
 
 public class TestCanopyCreation extends MahoutTestCase {
 
-  private static final double[][] raw = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
+  private static final double[][] raw = {
+      { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, 
+      { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
 
   private List<Canopy> referenceManhattan;
 
@@ -321,19 +323,17 @@ public class TestCanopyCreation extends MahoutTestCase {
    */
   public void testCanopyGenManhattanMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
     JobConf job = new JobConf(CanopyDriver.class);
     job.setMapOutputValueClass(points.get(0).getClass());
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, job);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, job);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, job);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, job);
     // now run the Canopy Driver
-    CanopyDriver.runJob("testdata", "output", ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, false);
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
+                        ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, false);
 
     // verify output from sequence file
-    Path path = new Path("output/clusters-0/part-00000");
+    Path path = new Path(output, "clusters-0/part-00000");
     FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
     Text key = new Text();
@@ -358,18 +358,15 @@ public class TestCanopyCreation extends MahoutTestCase {
    */
   public void testCanopyGenEuclideanMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
     JobConf job = new JobConf(CanopyDriver.class);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, job);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, job);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, job);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, job);
     // now run the Canopy Driver
-    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
 
     // verify output from sequence file
-    Path path = new Path("output/clusters-0/part-00000");
+    Path path = new Path(output, "clusters-0/part-00000");
     FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
     Text key = new Text();
@@ -467,18 +464,14 @@ public class TestCanopyCreation extends MahoutTestCase {
    */
   public void testClusteringManhattanMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
     JobConf conf = new JobConf();
     conf.setMapOutputValueClass(points.get(0).getClass());
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job
-    CanopyDriver.runJob("testdata", "output", ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, true);
-    // TODO: change
-    Path path = new Path("output/clusteredPoints/part-00000");
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, true);
+    Path path = new Path(output, "clusteredPoints/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;
     /*
@@ -500,16 +493,13 @@ public class TestCanopyCreation extends MahoutTestCase {
    */
   public void testClusteringEuclideanMR() throws Exception {
     List<VectorWritable> points = getPointsWritable();
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job
-    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true);
-    Path path = new Path("output/clusteredPoints/part-00000");
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true);
+    Path path = new Path(output, "clusteredPoints/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;
     IntWritable canopyId = new IntWritable(0);
@@ -524,20 +514,17 @@ public class TestCanopyCreation extends MahoutTestCase {
   /** Story: Clustering algorithm must support arbitrary user defined distance measure */
   public void testUserDefinedDistanceMeasure() throws Exception {
     List<VectorWritable> points = getPointsWritable();
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Canopy Driver. User defined measure happens to be a Manhattan
     // subclass so results are same.
-    CanopyDriver.runJob("testdata", "output", UserDefinedDistanceMeasure.class.getName(), 3.1, 2.1, false);
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, UserDefinedDistanceMeasure.class.getName(), 3.1, 2.1, false);
 
     // verify output from sequence file
     JobConf job = new JobConf(CanopyDriver.class);
-    Path path = new Path("output/clusters-0/part-00000");
+    Path path = new Path(output, "clusters-0/part-00000");
     FileSystem fs = FileSystem.get(path.toUri(), job);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
     Text key = new Text();

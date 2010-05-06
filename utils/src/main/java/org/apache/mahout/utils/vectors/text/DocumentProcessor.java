@@ -32,6 +32,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.utils.vectors.text.document.SequenceFileTokenizerMapper;
 
@@ -69,8 +70,8 @@ public final class DocumentProcessor {
    *          The Lucene {@link Analyzer} for tokenizing the UTF-8 text
    * @throws IOException
    */
-  public static void tokenizeDocuments(String input, Class<? extends Analyzer> analyzerClass,
-                                       String output) throws IOException {
+  public static void tokenizeDocuments(Path input, Class<? extends Analyzer> analyzerClass,
+                                       Path output) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DocumentProcessor.class);
@@ -83,19 +84,15 @@ public final class DocumentProcessor {
     
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(StringTuple.class);
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, output);
     
     conf.setMapperClass(SequenceFileTokenizerMapper.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setNumReduceTasks(0);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
-    
+    HadoopUtil.overwriteOutput(output);
+
     client.setConf(conf);
     JobClient.runJob(conf);
   }

@@ -61,11 +61,8 @@ public class PartialBuilderTest extends MahoutTestCase {
     randomKeyValues(rng, keys, values, firstIds);
 
     // store the output in a sequence file
-    Path base = new Path("testdata");
+    Path base = getTestTempDirPath("testdata");
     FileSystem fs = base.getFileSystem(job);
-    if (fs.exists(base)) {
-      fs.delete(base, true);
-    }
 
     Path outputFile = new Path(base, "PartialBuilderTest.seq");
     Writer writer = SequenceFile.createWriter(fs, job, outputFile,

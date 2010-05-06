@@ -17,16 +17,6 @@
 
 package org.apache.mahout.classifier;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-
 /**
  * Class containing sample docs from ASF websites under mahout, lucene and spamassasin projects
  *
@@ -108,23 +98,5 @@ public final class ClassifierData {
 
 
   private ClassifierData() { }
-  
-  public static void writeDataToFile(String file, String[][] content) throws IOException {
-    BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-    for (String[] entry : content) {
-      writer.write(entry[0] + '\t' + entry[1] + '\n');
-    }
-    writer.close();
-  }
 
-  public static void writeDataToSequenceFile(String file,
-                                             String[][] content,
-                                             FileSystem fs,
-                                             Configuration conf) throws IOException {
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(file), Text.class, Text.class);
-    for (String[] entry : content) {
-      writer.append(new Text(entry[0]), new Text(entry[1]));
-    }
-    writer.close();
-  }
 }

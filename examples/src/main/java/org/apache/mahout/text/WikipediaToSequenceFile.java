@@ -44,6 +44,7 @@ import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.XmlInputFormat;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,10 +171,7 @@ public final class WikipediaToSequenceFile {
      * "BLOCK"); conf.set("mapred.output.compress", "true"); conf.set("mapred.output.compression.type",
      * "BLOCK"); conf.set("mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec");
      */
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+    HadoopUtil.overwriteOutput(outPath);    
     
     Set<String> categories = new HashSet<String>();
     if (catFile.length() > 0) {

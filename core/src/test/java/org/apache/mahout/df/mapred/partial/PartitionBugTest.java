@@ -26,6 +26,7 @@ import java.util.Random;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.builder.TreeBuilder;
@@ -89,9 +90,7 @@ public class PartitionBugTest extends MahoutTestCase {
     // remove the output path (its only used for testing)
     Path outputPath = builder.getOutputPath(jobConf);
     FileSystem fs = outputPath.getFileSystem(jobConf);
-    if (fs.exists(outputPath)) {
-      fs.delete(outputPath, true);
-    }
+    HadoopUtil.overwriteOutput(outputPath);
     
     builder.build(numTrees, new MockCallback(data));
   }

@@ -18,6 +18,7 @@ package org.apache.mahout.classifier.bayes.mapreduce.common;
 
 import java.io.IOException;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 
 /**
@@ -27,12 +28,7 @@ public interface BayesJob {
   
   /**
    * Execute a classification job on a cluster.
-   * 
-   * @param input
-   *          path to training documents.
-   * @param output
-   *          path to output directory.
-   * */
-  void runJob(String input, String output, BayesParameters params) throws IOException;
+   */
+  void runJob(Path input, Path output, BayesParameters params) throws IOException;
   
 }

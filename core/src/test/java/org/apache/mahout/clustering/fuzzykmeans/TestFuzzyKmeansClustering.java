@@ -171,37 +171,16 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
   public void testFuzzyKMeansMRJob() throws Exception {
     List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.reference);
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    testData = new File("testdata/points");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
+
+    Path pointsPath = getTestTempDirPath("points");
+    Path clustersPath = getTestTempDirPath("clusters");
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, "testdata/points/file1", fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
 
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
-      JobConf job = new JobConf(FuzzyKMeansDriver.class);
-      Path path = new Path("testdata/clusters");
-      FileSystem fs = FileSystem.get(path.toUri(), job);
-      if (fs.exists(path)) {
-        fs.delete(path, true);
-      }
-
-      testData = new File("testdata/clusters");
-      if (!testData.exists()) {
-        testData.mkdir();
-      }
-
-      /*
-       * BufferedWriter writer = new BufferedWriter(new OutputStreamWriter( new
-       * FileOutputStream("testdata/clusters/part-00000"), Charset .forName("UTF-8")));
-       */
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path("testdata/clusters/part-00000"), Text.class,
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(clustersPath, "part-00000"), Text.class,
           SoftCluster.class);
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
@@ -217,22 +196,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
       writer.close();
 
-      Path outPath = new Path("output");
-      fs = FileSystem.get(outPath.toUri(), conf);
-      if (fs.exists(outPath)) {
-        fs.delete(outPath, true);
-      }
-      fs.mkdirs(outPath);
       // now run the Job
-      FuzzyKMeansDriver.runJob("testdata/points", "testdata/clusters", "output", EuclideanDistanceMeasure.class.getName(), 0.001,
+      Path output = getTestTempDirPath("output");
+      FuzzyKMeansDriver.runJob(pointsPath, clustersPath, output, EuclideanDistanceMeasure.class.getName(), 0.001,
           2, 1, k + 1, 2, false, true, 0);
 
-      // now compare the expected clusters with actual
-      File outDir = new File("output/clusteredPoints");
-      assertTrue("output dir exists?", outDir.exists());
-      outDir.list();
-      // assertEquals("output dir files?", 4, outFiles.length);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-00000"), conf);
       IntWritable key = new IntWritable();
       WeightedVectorWritable out = new WeightedVectorWritable();
       while (reader.next(key, out)) {

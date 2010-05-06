@@ -17,9 +17,7 @@
 
 package org.apache.mahout.math;
 
-import junit.framework.TestCase;
-
-public class TestOrderedIntDoubleMapping extends TestCase {
+public class TestOrderedIntDoubleMapping extends MahoutTestCase {
 
   public void testGetSet() {
 

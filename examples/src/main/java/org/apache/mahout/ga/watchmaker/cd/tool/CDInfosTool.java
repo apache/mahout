@@ -85,7 +85,7 @@ public class CDInfosTool {
       throw new IllegalArgumentException("Input path not found or is not a directory");
     }
     
-    Path outpath = OutputUtils.prepareOutput(fs);
+    Path outpath = new Path("output");
     
     configureJob(conf, descriptors, inpath, outpath);
     JobClient.runJob(conf);

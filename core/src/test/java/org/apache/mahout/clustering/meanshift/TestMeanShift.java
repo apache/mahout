@@ -81,19 +81,6 @@ public class TestMeanShift extends MahoutTestCase {
     }
   }
 
-  private static void rmr(String path) throws Exception {
-    File f = new File(path);
-    if (f.exists()) {
-      if (f.isDirectory()) {
-        String[] contents = f.list();
-        for (String content : contents) {
-          rmr(f.toString() + File.separator + content);
-        }
-      }
-      f.delete();
-    }
-  }
-
   private List<MeanShiftCanopy> getInitialCanopies() {
     int nextCanopyId = 0;
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
@@ -107,8 +94,6 @@ public class TestMeanShift extends MahoutTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     conf = new Configuration();
-    rmr("output");
-    rmr("testdata");
     raw = new Vector[100];
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
@@ -292,21 +277,19 @@ public class TestMeanShift extends MahoutTestCase {
    * EuclideanDistanceMeasure.
    */
   public void testCanopyEuclideanMRJob() throws Exception {
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    FileSystem fs = FileSystem.get(new Path("testdata").toUri(), conf);
+    Path input = getTestTempDirPath("testdata");
+    FileSystem fs = FileSystem.get(input.toUri(), conf);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     for (Vector v : raw) {
       points.add(new VectorWritable(v));
     }
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file1", fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/file2", fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job
-    MeanShiftCanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
+    Path output = getTestTempDirPath("output");
+    MeanShiftCanopyDriver.runJob(input, output, EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
     JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
-    Path outPart = new Path("output/clusters-3/part-00000");
+    Path outPart = new Path(output, "clusters-3/part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();
     MeanShiftCanopy value = new MeanShiftCanopy();

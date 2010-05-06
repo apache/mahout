@@ -20,7 +20,6 @@ package org.apache.mahout.classifier.bayes.mapreduce.common;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -29,30 +28,22 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 
 /** Create and run the Bayes Feature Reader Step. */
 public class BayesFeatureDriver implements BayesJob {
-  
-  /**
-   * Run the job
-   * 
-   * @param input
-   *          the input pathname String
-   * @param output
-   *          the output pathname String
-   */
+
   @Override
-  public void runJob(String input, String output, BayesParameters params) throws IOException {
+  public void runJob(Path input, Path output, BayesParameters params) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(BayesFeatureDriver.class);
     conf.setJobName("Bayes Feature Driver running over input: " + input);
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
     
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, output);
     
     conf.setMapperClass(BayesFeatureMapper.class);
     
@@ -60,15 +51,11 @@ public class BayesFeatureDriver implements BayesJob {
     conf.setCombinerClass(BayesFeatureReducer.class);
     conf.setReducerClass(BayesFeatureReducer.class);
     conf.setOutputFormat(BayesFeatureOutputFormat.class);
-    conf
-        .set("io.serializations",
+    conf.set("io.serializations",
           "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
-    
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+
+    HadoopUtil.overwriteOutput(output);
     conf.set("bayes.parameters", params.toString());
     
     client.setConf(conf);

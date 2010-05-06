@@ -17,12 +17,21 @@
 
 package org.apache.mahout.classifier.bayes;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.apache.mahout.classifier.ClassifierData;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.ResultAnalyzer;
@@ -43,17 +52,31 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    ClassifierData.writeDataToFile("testdata/bayesinput", ClassifierData.DATA);
+
+    File tempInputFile = getTestTempFile("bayesinput");
+    BufferedWriter writer = new BufferedWriter(
+        new OutputStreamWriter(new FileOutputStream(tempInputFile), Charset.forName("UTF-8")));
+    for (String[] entry : ClassifierData.DATA) {
+      writer.write(entry[0] + '\t' + entry[1] + '\n');
+    }
+    writer.close();
+
+    Path input = getTestTempFilePath("bayesinput");
+    Configuration conf = new Configuration();
+    FileSystem fs = input.getFileSystem(conf);
+    fs.copyFromLocalFile(new Path(tempInputFile.getAbsolutePath()), input);
   }
   
   public void testSelfTestBayes() throws InvalidDatastoreException, IOException {
     BayesParameters params = new BayesParameters(1);
     params.set("alpha_i", "1.0");
     params.set("dataSource", "hdfs");
-    TrainClassifier.trainNaiveBayes("testdata/bayesinput", "testdata/bayesmodel", params);
+    Path bayesInputPath = getTestTempFilePath("bayesinput");
+    Path bayesModelPath = getTestTempDirPath("bayesmodel");
+    TrainClassifier.trainNaiveBayes(bayesInputPath, bayesModelPath, params);
     
     params.set("verbose", "true");
-    params.set("basePath", "testdata/bayesmodel");
+    params.set("basePath", bayesModelPath.toString());
     params.set("classifierType", "bayes");
     params.set("dataSource", "hdfs");
     params.set("defaultCat", "unknown");
@@ -82,10 +105,10 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
         assertEquals(i == j ? 4 : 0, matrix[i][j]);
       }
     }
-    params.set("testDirPath", "testdata/bayesinput");
+    params.set("testDirPath", bayesInputPath.toString());
     TestClassifier.classifyParallel(params);
     Configuration conf = new Configuration();
-    Path outputFiles = new Path("testdata/bayesinput-output/part*");
+    Path outputFiles = getTestTempFilePath("bayesinput-output/part*");
     FileSystem fs = FileSystem.get(outputFiles.toUri(), conf);
     matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
@@ -99,10 +122,12 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     BayesParameters params = new BayesParameters(1);
     params.set("alpha_i", "1.0");
     params.set("dataSource", "hdfs");
-    TrainClassifier.trainCNaiveBayes("testdata/bayesinput", "testdata/cbayesmodel", params);
+    Path bayesInputPath = getTestTempFilePath("bayesinput");
+    Path bayesModelPath = getTestTempDirPath("cbayesmodel");
+    TrainClassifier.trainCNaiveBayes(bayesInputPath, bayesModelPath, params);
     
     params.set("verbose", "true");
-    params.set("basePath", "testdata/cbayesmodel");
+    params.set("basePath", bayesModelPath.toString());
     params.set("classifierType", "cbayes");
     params.set("dataSource", "hdfs");
     params.set("defaultCat", "unknown");
@@ -130,10 +155,10 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
         assertEquals(i == j ? 4 : 0, matrix[i][j]);
       }
     }
-    params.set("testDirPath", "testdata/bayesinput");
+    params.set("testDirPath", bayesInputPath.toString());
     TestClassifier.classifyParallel(params);
     Configuration conf = new Configuration();
-    Path outputFiles = new Path("testdata/bayesinput-output/part*");
+    Path outputFiles = getTestTempFilePath("bayesinput-output/part*");
     FileSystem fs = FileSystem.get(outputFiles.toUri(), conf);
     matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {

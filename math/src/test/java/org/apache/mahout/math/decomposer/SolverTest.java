@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.decomposer;
 
-import junit.framework.TestCase;
+import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.SparseRowMatrix;
@@ -27,11 +27,7 @@ import org.apache.mahout.math.VectorIterable;
 import java.util.Random;
 
 
-public abstract class SolverTest extends TestCase {
-
-  protected SolverTest(String name) {
-    super(name);
-  }
+public abstract class SolverTest extends MahoutTestCase {
 
   public static void assertOrthonormal(Matrix eigens) {
     assertOrthonormal(eigens, 1.0e-6);

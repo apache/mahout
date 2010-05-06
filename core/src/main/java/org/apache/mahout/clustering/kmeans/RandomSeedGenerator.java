@@ -29,6 +29,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -49,31 +50,22 @@ public final class RandomSeedGenerator {
   
   private RandomSeedGenerator() {}
   
-  public static Path buildRandom(String input, String output, int k) throws IOException,
+  public static Path buildRandom(Path input, Path output, int k) throws IOException,
                                                                     IllegalAccessException,
                                                                     InstantiationException {
     // delete the output directory
     JobConf conf = new JobConf(RandomSeedGenerator.class);
-    Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(outPath.toUri(), conf);
-    if (fs.exists(outPath)) {
-      fs.delete(outPath, true);
-    }
-    fs.mkdirs(outPath);
-    Path outFile = new Path(outPath, "part-randomSeed");
-    if (fs.exists(outFile)) {
-      log.warn("Deleting {}", outFile);
-      fs.delete(outFile, false);
-    }
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    HadoopUtil.overwriteOutput(output);
+    Path outFile = new Path(output, "part-randomSeed");
     boolean newFile = fs.createNewFile(outFile);
     if (newFile) {
       Path inputPathPattern;
-      Path inputPath = new Path(input);
-      
-      if (fs.getFileStatus(inputPath).isDir()) {
-        inputPathPattern = new Path(inputPath.toString() + "/*");
+
+      if (fs.getFileStatus(input).isDir()) {
+        inputPathPattern = new Path(input, "*");
       } else {
-        inputPathPattern = inputPath;
+        inputPathPattern = input;
       }
       
       FileStatus[] inputFiles = fs.globStatus(inputPathPattern);

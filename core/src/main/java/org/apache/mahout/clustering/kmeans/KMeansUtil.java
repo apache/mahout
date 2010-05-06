@@ -41,11 +41,11 @@ final class KMeansUtil {
   private KMeansUtil() { }
   
   /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(String clusterPathStr, List<Cluster> clusters) {
+  public static void configureWithClusterInfo(Path clusterPathStr, List<Cluster> clusters) {
     
     // Get the path location where the cluster Info is stored
     JobConf job = new JobConf(KMeansUtil.class);
-    Path clusterPath = new Path(clusterPathStr + "/*");
+    Path clusterPath = new Path(clusterPathStr, "*");
     List<Path> result = new ArrayList<Path>();
     
     // filter out the files

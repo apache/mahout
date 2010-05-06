@@ -139,9 +139,9 @@ public final class FuzzyKMeansDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-      String input = cmdLine.getValue(inputOpt).toString();
-      String clusters = cmdLine.getValue(clustersOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path clusters = new Path(cmdLine.getValue(clustersOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       String measureClass = SquaredEuclideanDistanceMeasure.class.getName();
       if (cmdLine.hasOption(measureClassOpt)) {
         measureClass = cmdLine.getValue(measureClassOpt).toString();
@@ -176,7 +176,7 @@ public final class FuzzyKMeansDriver {
       }
 
       if (cmdLine.hasOption(kOpt)) {
-        clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString())).toString();
+        clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString()));
       }
 
       boolean emitMostLikely = true;
@@ -226,7 +226,7 @@ public final class FuzzyKMeansDriver {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    */
-  public static void runJob(String input, String clustersIn, String output, String measureClass, double convergenceDelta,
+  public static void runJob(Path input, Path clustersIn, Path output, String measureClass, double convergenceDelta,
       int maxIterations, int numMapTasks, int numReduceTasks, float m, boolean runClustering, boolean emitMostLikely,
       double threshold) {
 
@@ -238,7 +238,7 @@ public final class FuzzyKMeansDriver {
       log.info("Iteration {}", iteration);
 
       // point the output to a new directory per iteration
-      String clustersOut = output + Cluster.CLUSTERS_DIR + iteration;
+      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
       converged = runIteration(input, clustersIn, clustersOut, measureClass, convergenceDelta, numMapTasks, numReduceTasks,
           iteration, m);
 
@@ -249,7 +249,7 @@ public final class FuzzyKMeansDriver {
 
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, output + Cluster.CLUSTERED_POINTS_DIR, measureClass, convergenceDelta, numMapTasks, m,
+    runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), measureClass, convergenceDelta, numMapTasks, m,
         emitMostLikely, threshold);
   }
 
@@ -275,7 +275,7 @@ public final class FuzzyKMeansDriver {
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
    * @return true if the iteration successfully runs
    */
-  private static boolean runIteration(String input, String clustersIn, String clustersOut, String measureClass,
+  private static boolean runIteration(Path input, Path clustersIn, Path clustersOut, String measureClass,
       double convergenceDelta, int numMapTasks, int numReduceTasks, int iterationNumber, float m) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
@@ -286,9 +286,8 @@ public final class FuzzyKMeansDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(SoftCluster.class);
 
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(clustersOut);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, clustersOut);
 
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
@@ -299,7 +298,7 @@ public final class FuzzyKMeansDriver {
     conf.setNumMapTasks(numMapTasks);
     conf.setNumReduceTasks(numReduceTasks);
 
-    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
     conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
@@ -312,7 +311,7 @@ public final class FuzzyKMeansDriver {
 
     try {
       JobClient.runJob(conf);
-      FileSystem fs = FileSystem.get(outPath.toUri(), conf);
+      FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
       return isConverged(clustersOut, conf, fs);
     } catch (IOException e) {
       log.warn(e.toString(), e);
@@ -340,7 +339,7 @@ public final class FuzzyKMeansDriver {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    */
-  private static void runClustering(String input, String clustersIn, String output, String measureClass, double convergenceDelta,
+  private static void runClustering(Path input, Path clustersIn, Path output, String measureClass, double convergenceDelta,
       int numMapTasks, float m, boolean emitMostLikely, double threshold) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
@@ -349,9 +348,8 @@ public final class FuzzyKMeansDriver {
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(WeightedVectorWritable.class);
 
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, output);
 
     conf.setMapperClass(FuzzyKMeansClusterMapper.class);
 
@@ -362,7 +360,7 @@ public final class FuzzyKMeansDriver {
     // conf.set("mapred.job.tracker", "local");
     conf.setNumMapTasks(numMapTasks);
     conf.setNumReduceTasks(0);
-    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
     conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
@@ -388,9 +386,9 @@ public final class FuzzyKMeansDriver {
    * @throws IOException
    *           if there was an IO error
    */
-  private static boolean isConverged(String filePath, Configuration conf, FileSystem fs) throws IOException {
+  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
 
-    Path clusterPath = new Path(filePath + "/*");
+    Path clusterPath = new Path(filePath, "*");
     List<Path> result = new ArrayList<Path>();
 
     PathFilter clusterFileFilter = new PathFilter() {

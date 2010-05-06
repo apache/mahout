@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.fs.Path;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.CommandLineUtil;
@@ -127,8 +128,8 @@ public final class SparseVectorsFromSequenceFiles {
         return;
       }
       
-      String inputDir = (String) cmdLine.getValue(inputDirOpt);
-      String outputDir = (String) cmdLine.getValue(outputDirOpt);
+      Path inputDir = new Path((String) cmdLine.getValue(inputDirOpt));
+      Path outputDir = new Path((String) cmdLine.getValue(outputDirOpt));
       
       int chunkSize = 100;
       if (cmdLine.hasOption(chunkSizeOpt)) {
@@ -210,7 +211,7 @@ public final class SparseVectorsFromSequenceFiles {
         }
       }
       HadoopUtil.overwriteOutput(outputDir);
-      String tokenizedPath = outputDir + DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER;
+      Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
       DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath);
       
       boolean sequentialAccessOutput = false;

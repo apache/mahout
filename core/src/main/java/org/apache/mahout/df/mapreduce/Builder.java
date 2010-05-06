@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
@@ -337,10 +338,7 @@ public abstract class Builder {
     if (isOutput(conf)) {
       log.debug("Parsing the output...");
       DecisionForest forest = parseOutput(job, callback);
-      
-      // delete the output path
-      fs.delete(outputPath, true);
-      
+      HadoopUtil.overwriteOutput(outputPath);
       return forest;
     }
     

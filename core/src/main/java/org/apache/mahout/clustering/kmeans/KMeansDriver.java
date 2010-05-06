@@ -39,7 +39,6 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
@@ -125,9 +124,9 @@ public final class KMeansDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-      String input = cmdLine.getValue(inputOpt).toString();
-      String clusters = cmdLine.getValue(clustersOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path clusters = new Path(cmdLine.getValue(clustersOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       String measureClass = SquaredEuclideanDistanceMeasure.class.getName();
       if (cmdLine.hasOption(measureClassOpt)) {
         measureClass = cmdLine.getValue(measureClassOpt).toString();
@@ -153,7 +152,7 @@ public final class KMeansDriver {
         HadoopUtil.overwriteOutput(output);
       }
       if (cmdLine.hasOption(kOpt)) {
-        clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString())).toString();
+        clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString()));
       }
       boolean runClustering = true;
       if (cmdLine.hasOption(clusteringOpt)) {
@@ -186,8 +185,14 @@ public final class KMeansDriver {
    * @param runClustering 
    *          true if points are to be clustered after iterations are completed
    */
-  public static void runJob(String input, String clustersIn, String output, String measureClass, double convergenceDelta,
-      int maxIterations, int numReduceTasks, boolean runClustering) {
+  public static void runJob(Path input,
+                            Path clustersIn,
+                            Path output,
+                            String measureClass,
+                            double convergenceDelta,
+                            int maxIterations,
+                            int numReduceTasks,
+                            boolean runClustering) throws IOException {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
@@ -200,8 +205,8 @@ public final class KMeansDriver {
     while (!converged && (iteration <= maxIterations)) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String clustersOut = output + Cluster.CLUSTERS_DIR + iteration;
-      converged = runIteration(input, clustersIn, clustersOut, measureClass, delta, numReduceTasks, iteration);
+      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
+      converged = runIteration(input, clustersIn, clustersOut, measureClass, delta, numReduceTasks);
       // now point the input to the old output directory
       clustersIn = clustersOut;
       iteration++;
@@ -209,7 +214,7 @@ public final class KMeansDriver {
     if (runClustering) {
       // now actually cluster the points
       log.info("Clustering ");
-      runClustering(input, clustersIn, output + Cluster.CLUSTERED_POINTS_DIR, measureClass, delta);
+      runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), measureClass, delta);
     }
   }
 
@@ -228,34 +233,36 @@ public final class KMeansDriver {
    *          the convergence delta value
    * @param numReduceTasks
    *          the number of reducer tasks
-   * @param iteration
-   *          The iteration number
    * @return true if the iteration successfully runs
    */
-  private static boolean runIteration(String input, String clustersIn, String clustersOut, String measureClass,
-      String convergenceDelta, int numReduceTasks, int iteration) {
+  private static boolean runIteration(Path input,
+                                      Path clustersIn,
+                                      Path clustersOut,
+                                      String measureClass,
+                                      String convergenceDelta,
+                                      int numReduceTasks) throws IOException {
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(KMeansInfo.class);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Cluster.class);
 
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(clustersOut);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, clustersOut);
+    HadoopUtil.overwriteOutput(clustersOut);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setMapperClass(KMeansMapper.class);
     conf.setCombinerClass(KMeansCombiner.class);
     conf.setReducerClass(KMeansReducer.class);
     conf.setNumReduceTasks(numReduceTasks);
-    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
     try {
       JobClient.runJob(conf);
-      FileSystem fs = FileSystem.get(outPath.toUri(), conf);
+      FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
       return isConverged(clustersOut, conf, fs);
     } catch (IOException e) {
       log.warn(e.toString(), e);
@@ -277,7 +284,11 @@ public final class KMeansDriver {
    * @param convergenceDelta
    *          the convergence delta value
    */
-  private static void runClustering(String input, String clustersIn, String output, String measureClass, String convergenceDelta) {
+  private static void runClustering(Path input,
+                                    Path clustersIn,
+                                    Path output,
+                                    String measureClass,
+                                    String convergenceDelta) throws IOException {
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
       log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output, measureClass });
@@ -290,13 +301,13 @@ public final class KMeansDriver {
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(WeightedVectorWritable.class);
 
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    HadoopUtil.overwriteOutput(output);
+    FileOutputFormat.setOutputPath(conf, output);
 
     conf.setMapperClass(KMeansClusterMapper.class);
     conf.setNumReduceTasks(0);
-    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn);
+    conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
@@ -320,8 +331,8 @@ public final class KMeansDriver {
    * @throws IOException
    *           if there was an IO error
    */
-  private static boolean isConverged(String filePath, JobConf conf, FileSystem fs) throws IOException {
-    FileStatus[] parts = fs.listStatus(new Path(filePath));
+  private static boolean isConverged(Path filePath, JobConf conf, FileSystem fs) throws IOException {
+    FileStatus[] parts = fs.listStatus(filePath);
     for (FileStatus part : parts) {
       String name = part.getPath().getName();
       if (name.startsWith("part") && !name.endsWith(".crc")) {

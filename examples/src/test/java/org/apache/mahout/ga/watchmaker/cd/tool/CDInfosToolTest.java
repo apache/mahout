@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
@@ -208,11 +209,9 @@ public class CDInfosToolTest extends MahoutTestCase {
       Object[][] descriptions = randomDescriptions(descriptors);
 
       // random dataset
-      Path inpath = new Path("input");
+      Path inpath = getTestTempDirPath("input");
       FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
-      if (fs.exists(inpath)) {
-        fs.delete(inpath, true);
-      }
+      HadoopUtil.overwriteOutput(inpath);
 
       randomDataset(fs, inpath, descriptors, descriptions);
 

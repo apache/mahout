@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -73,7 +74,7 @@ public class KMeansReducer extends MapReduceBase implements Reducer<Text,KMeansI
       String path = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if (path.length() > 0) {
         List<Cluster> clusters = new ArrayList<Cluster>();
-        KMeansUtil.configureWithClusterInfo(path, clusters);
+        KMeansUtil.configureWithClusterInfo(new Path(path), clusters);
         setClusterMap(clusters);
         if (clusterMap.isEmpty()) {
           throw new IllegalStateException("Cluster is empty!");

@@ -33,37 +33,27 @@ public final class HadoopUtil {
   
   private HadoopUtil() { }
   
-  public static void overwriteOutput(String output) throws IOException {
+  public static void overwriteOutput(Path output) throws IOException {
     Configuration conf = new JobConf(KMeansDriver.class);
-    Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(outPath.toUri(), conf);
-    if (fs.exists(outPath)) {
-      log.warn("Deleting {}", outPath);
-      fs.delete(outPath, true);
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    //boolean wasFile = fs.isFile(output);
+    if (fs.exists(output)) {
+      log.info("Deleting {}", output);
+      fs.delete(output, true);
     }
-    log.warn("Creating dir {}", outPath);
-    fs.mkdirs(outPath);
-  }
-  
-  public static void deletePath(String output, FileSystem fs) throws IOException {
-    Path outPath = new Path(output);
-    if (fs.exists(outPath)) {
-      log.warn("Deleting {}", outPath);
-      fs.delete(outPath, true);
-    }
+    //if (!wasFile) {
+    //  log.info("Creating dir {}", output);
+    //  fs.mkdirs(output);
+    //}
   }
   
   public static void deletePaths(Iterable<Path> paths, FileSystem fs) throws IOException {
     for (Path path : paths) {
       if (fs.exists(path)) {
-        log.warn("Deleting {}", path);
+        log.info("Deleting {}", path);
         fs.delete(path, true);
       }
     }
   }
-  
-  public static void rename(Path from, Path to, FileSystem fs) throws IOException {
-    log.warn("Renaming " + from.toUri() + " to " + to.toUri());
-    fs.rename(from, to);
-  }
+
 }

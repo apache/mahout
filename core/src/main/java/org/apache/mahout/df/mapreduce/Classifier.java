@@ -17,6 +17,7 @@
 
 package org.apache.mahout.df.mapreduce;
 
+import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.mahout.df.DecisionForest;
@@ -122,8 +123,7 @@ public class Classifier {
 
     parseOutput(job);
 
-    // delete the output path
-    fs.delete(mappersOutputPath, true);
+    HadoopUtil.overwriteOutput(mappersOutputPath);
   }
 
   /**

@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -73,7 +74,7 @@ public class FuzzyKMeansReducer extends MapReduceBase implements
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
     String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
     if ((clusterPath != null) && (clusterPath.length() > 0)) {
-      FuzzyKMeansUtil.configureWithClusterInfo(clusterPath, clusters);
+      FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
       setClusterMap(clusters);
     }
     

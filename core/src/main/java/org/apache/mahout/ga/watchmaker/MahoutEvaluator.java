@@ -33,6 +33,7 @@ import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
@@ -59,7 +60,7 @@ public class MahoutEvaluator {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
     Path inpath = prepareInput(fs, population);
-    Path outpath = OutputUtils.prepareOutput(fs);
+    Path outpath = new Path("output");
     
     configureJob(conf, evaluator, inpath, outpath);
     JobClient.runJob(conf);
@@ -78,16 +79,8 @@ public class MahoutEvaluator {
    */
   private static Path prepareInput(FileSystem fs, List<?> population) throws IOException {
     Path inpath = new Path(fs.getWorkingDirectory(), "input");
-    
-    // Delete the input if it already exists
-    if (fs.exists(inpath)) {
-      fs.delete(inpath, true);
-    }
-    
-    fs.mkdirs(inpath);
-    
+    HadoopUtil.overwriteOutput(inpath);
     storePopulation(fs, new Path(inpath, "population"), population);
-    
     return inpath;
   }
   

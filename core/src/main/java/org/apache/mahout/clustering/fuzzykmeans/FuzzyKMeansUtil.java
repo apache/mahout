@@ -41,10 +41,10 @@ class FuzzyKMeansUtil {
   }
 
   /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(String clusterPathStr, List<SoftCluster> clusters) {
+  public static void configureWithClusterInfo(Path clusterPathStr, List<SoftCluster> clusters) {
     // Get the path location where the cluster Info is stored
     Configuration job = new Configuration();
-    Path clusterPath = new Path(clusterPathStr + "/*");
+    Path clusterPath = new Path(clusterPathStr, "*");
     List<Path> result = new ArrayList<Path>();
     //log.info("I am here");
     // filter out the files

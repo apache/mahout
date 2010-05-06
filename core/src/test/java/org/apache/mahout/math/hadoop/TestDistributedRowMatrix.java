@@ -22,7 +22,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.clustering.canopy.TestCanopyCreation;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
@@ -32,35 +31,12 @@ import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decomposer.SolverTest;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class TestDistributedRowMatrix extends MahoutTestCase {
-
-  private static final String TESTDATA = "testdata";
-
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    File testData = new File(TESTDATA);
-    if (testData.exists()) {
-      TestCanopyCreation.rmr(TESTDATA);
-    }
-    testData.mkdir();
-  }
-
-  @Override
-  public void tearDown() throws Exception {
-    TestCanopyCreation.rmr(TESTDATA);
-    super.tearDown();
-  }
-
-  public static void assertEquals(double d1, double d2, double errorTolerance) {
-    assertTrue(Math.abs(d1-d2) < errorTolerance);
-  }
 
   public static void assertEquals(VectorIterable m, VectorIterable mtt, double errorTolerance) {
     Iterator<MatrixSlice> mIt = m.iterateAll();
@@ -121,30 +97,30 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
     Matrix inputB = SolverTest.randomSequentialAccessSparseMatrix(20, 13, 25, 10, 5.0);
     Matrix expected = inputA.transpose().times(inputB);
 
-    DistributedRowMatrix distA = randomDistributedMatrix(20, 19, 15, 5, 10.0, false, "/distA");
-    DistributedRowMatrix distB = randomDistributedMatrix(20, 13, 25, 10, 5.0, false, "/distB");
+    DistributedRowMatrix distA = randomDistributedMatrix(20, 19, 15, 5, 10.0, false, "distA");
+    DistributedRowMatrix distB = randomDistributedMatrix(20, 13, 25, 10, 5.0, false, "distB");
     DistributedRowMatrix product = distA.times(distB);
 
     assertEquals(expected, product, 1.0e-9);
   }
 
-  public static DistributedRowMatrix randomDistributedMatrix(int numRows,
-                                                             int nonNullRows,
-                                                             int numCols,
-                                                             int entriesPerRow,
-                                                             double entryMean,
-                                                             boolean isSymmetric) throws IOException {
-    return randomDistributedMatrix(numRows, nonNullRows, numCols, entriesPerRow, entryMean, isSymmetric, "");
+  public DistributedRowMatrix randomDistributedMatrix(int numRows,
+                                                      int nonNullRows,
+                                                      int numCols,
+                                                      int entriesPerRow,
+                                                      double entryMean,
+                                                      boolean isSymmetric) throws IOException {
+    return randomDistributedMatrix(numRows, nonNullRows, numCols, entriesPerRow, entryMean, isSymmetric, "testdata");
   }
 
-  public static DistributedRowMatrix randomDistributedMatrix(int numRows,
-                                                             int nonNullRows,
-                                                             int numCols,
-                                                             int entriesPerRow,
-                                                             double entryMean,
-                                                             boolean isSymmetric,
-                                                             String baseTmpDir) throws IOException {
-    baseTmpDir = TESTDATA + baseTmpDir;
+  public DistributedRowMatrix randomDistributedMatrix(int numRows,
+                                                      int nonNullRows,
+                                                      int numCols,
+                                                      int entriesPerRow,
+                                                      double entryMean,
+                                                      boolean isSymmetric,
+                                                      String baseTmpDirSuffix) throws IOException {
+    Path baseTmpDirPath = getTestTempDirPath(baseTmpDirSuffix);
     Matrix c = SolverTest.randomSequentialAccessSparseMatrix(numRows, nonNullRows, numCols, entriesPerRow, entryMean);
     if(isSymmetric) {
       c = c.times(c.transpose());
@@ -169,10 +145,10 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
           public void remove() { it.remove(); }
         };
       }
-    }, true, baseTmpDir + "/distMatrix/part-00000", fs, conf);
+    }, true, new Path(baseTmpDirPath, "distMatrix/part-00000"), fs, conf);
 
-    DistributedRowMatrix distMatrix = new DistributedRowMatrix(baseTmpDir + "/distMatrix",
-                                                               baseTmpDir + "/tmpOut",
+    DistributedRowMatrix distMatrix = new DistributedRowMatrix(baseTmpDirPath + "/distMatrix",
+                                                               baseTmpDirPath + "/tmpOut",
                                                                m.numRows(),
                                                                m.numCols());
     distMatrix.configure(new JobConf(conf));

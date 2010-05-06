@@ -17,24 +17,13 @@
 
 package org.apache.mahout.math;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import junit.framework.TestCase;
 import org.apache.mahout.math.function.Functions;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 
-public class VectorTest extends TestCase {
-
-  public VectorTest(String s) {
-    super(s);
-  }
+public class VectorTest extends MahoutTestCase {
 
   public void testSparseVector() throws Exception {
     Vector vec1 = new RandomAccessSparseVector(3);

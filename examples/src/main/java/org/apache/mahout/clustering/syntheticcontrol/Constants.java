@@ -24,5 +24,5 @@ public interface Constants {
    * Directory used to store the input after it has been processed from it's
    * original form into one suitable for processing by the clustering examples.
    */
-  String DIRECTORY_CONTAINING_CONVERTED_INPUT = "/data";
+  String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
 }

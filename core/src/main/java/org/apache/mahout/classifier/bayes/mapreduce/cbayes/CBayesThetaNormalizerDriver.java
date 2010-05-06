@@ -35,6 +35,7 @@ import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesJob;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,26 +44,18 @@ import org.slf4j.LoggerFactory;
 public class CBayesThetaNormalizerDriver implements BayesJob {
   
   private static final Logger log = LoggerFactory.getLogger(CBayesThetaNormalizerDriver.class);
-  
-  /**
-   * Run the job
-   * 
-   * @param input
-   *          the input pathname String
-   * @param output
-   *          the output pathname String
-   */
+
   @Override
-  public void runJob(String input, String output, BayesParameters params) throws IOException {
+  public void runJob(Path input, Path output, BayesParameters params) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CBayesThetaNormalizerDriver.class);
     conf.setJobName("Complementary Bayes Theta Normalizer Driver running over input: " + input);
     
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-weights/Sigma_j"));
-    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-tfIdf/trainer-tfIdf"));
-    Path outPath = new Path(output + "/trainer-thetaNormalizer");
+    FileInputFormat.addInputPath(conf, new Path(output, "trainer-weights/Sigma_j"));
+    FileInputFormat.addInputPath(conf, new Path(output, "trainer-tfIdf/trainer-tfIdf"));
+    Path outPath = new Path(output, "trainer-thetaNormalizer");
     FileOutputFormat.setOutputPath(conf, outPath);
     // conf.setNumMapTasks(100);
     // conf.setNumReduceTasks(1);
@@ -78,11 +71,9 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     // parameters and make or break a piece of code
     
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+    HadoopUtil.overwriteOutput(outPath);
     
-    Path sigmaKFiles = new Path(output + "/trainer-weights/Sigma_k/*");
+    Path sigmaKFiles = new Path(output, "trainer-weights/Sigma_k/*");
     Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(dfs, sigmaKFiles, conf);
     DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(conf,
         GenericsUtil.getClass(labelWeightSum));
@@ -93,7 +84,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     log.info("{}", c);
     conf.set("cnaivebayes.sigma_k", labelWeightSumString);
     
-    Path sigmaKSigmaJFile = new Path(output + "/trainer-weights/Sigma_kSigma_j/*");
+    Path sigmaKSigmaJFile = new Path(output, "trainer-weights/Sigma_kSigma_j/*");
     double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(dfs, sigmaKSigmaJFile, conf);
     DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
     String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
@@ -103,7 +94,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     log.info("{}", retSigmaJSigmaK);
     conf.set("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
     
-    Path vocabCountFile = new Path(output + "/trainer-tfIdf/trainer-vocabCount/*");
+    Path vocabCountFile = new Path(output, "trainer-tfIdf/trainer-vocabCount/*");
     double vocabCount = SequenceFileModelReader.readVocabCount(dfs, vocabCountFile, conf);
     String vocabCountString = stringifier.toString(vocabCount);
     
@@ -112,7 +103,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     double retvocabCount = stringifier.fromString(vocabCountString);
     log.info("{}", retvocabCount);
     conf.set("bayes.parameters", params.toString());
-    conf.set("output.table", output);
+    conf.set("output.table", output.toString());
     client.setConf(conf);
     
     JobClient.runJob(conf);

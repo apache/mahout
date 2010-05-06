@@ -73,7 +73,7 @@ public class CDMahoutEvaluator {
       throw new IllegalArgumentException("Input path not found or is not a directory");
     }
     
-    Path outpath = OutputUtils.prepareOutput(fs);
+    Path outpath = new Path("output");
     
     configureJob(conf, rules, target, inpath, outpath, split);
     JobClient.runJob(conf);

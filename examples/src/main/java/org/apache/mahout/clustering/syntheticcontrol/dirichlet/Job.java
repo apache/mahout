@@ -41,6 +41,7 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.clustering.ClusterDumper;
@@ -94,8 +95,8 @@ public class Job {
         return;
       }
       
-      String input = cmdLine.getValue(inputOpt, "testdata").toString();
-      String output = cmdLine.getValue(outputOpt, "output").toString();
+      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
+      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       String modelFactory = cmdLine.getValue(modelOpt,
         "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt, "10").toString());
@@ -137,8 +138,8 @@ public class Job {
    * @throws IllegalArgumentException
    * @throws SecurityException
    */
-  public static void runJob(String input,
-                            String output,
+  public static void runJob(Path input,
+                            Path output,
                             String modelFactory,
                             int numModels,
                             int maxIterations,
@@ -152,15 +153,9 @@ public class Job {
                                                    IllegalArgumentException,
                                                    NoSuchMethodException,
                                                    InvocationTargetException {
-    // delete the output directory
-    JobConf conf = new JobConf(DirichletDriver.class);
-    Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(outPath.toUri(), conf);
-    if (fs.exists(outPath)) {
-      fs.delete(outPath, true);
-    }
-    fs.mkdirs(outPath);
-    String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    HadoopUtil.overwriteOutput(output);
+
+    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
     DirichletDriver.runJob(directoryContainingConvertedInput, output, modelFactory,
       vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers, true, true, 0);

@@ -33,18 +33,17 @@ public class ClusteringTestUtils {
   }
 
   public static void writePointsToFile(Iterable<VectorWritable> points,
-                                       String fileName,
+                                       Path path,
                                        FileSystem fs,
                                        Configuration conf) throws IOException {
-    writePointsToFile(points, false, fileName, fs, conf);
+    writePointsToFile(points, false, path, fs, conf);
   }
 
   public static void writePointsToFile(Iterable<VectorWritable> points,
                                        boolean intWritable,
-                                       String fileName,
+                                       Path path,
                                        FileSystem fs,
                                        Configuration conf) throws IOException {
-    Path path = new Path(fileName);
     SequenceFile.Writer writer = new SequenceFile.Writer(fs,
                                                          conf,
                                                          path,

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -69,7 +70,7 @@ public class FuzzyKMeansMapper extends MapReduceBase implements
     
     String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
     if ((clusterPath != null) && (clusterPath.length() > 0)) {
-      FuzzyKMeansUtil.configureWithClusterInfo(clusterPath, clusters);
+      FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
     }
     
     if (clusters.isEmpty()) {

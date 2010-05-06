@@ -33,6 +33,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.math.VectorWritable;
 
 /**
@@ -71,7 +72,7 @@ public final class PartialVectorMerger {
    * @throws IOException
    */
   public static void mergePartialVectors(List<Path> partialVectorPaths,
-                                         String output,
+                                         Path output,
                                          float normPower,
                                          int dimension,
                                          boolean sequentialAccess) throws IOException {
@@ -94,19 +95,15 @@ public final class PartialVectorMerger {
     
     FileInputFormat.setInputPaths(conf, getCommaSeparatedPaths(partialVectorPaths));
     
-    Path outputPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outputPath);
+    FileOutputFormat.setOutputPath(conf, output);
     
     conf.setMapperClass(IdentityMapper.class);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setReducerClass(PartialVectorMergeReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    FileSystem dfs = FileSystem.get(outputPath.toUri(), conf);
-    if (dfs.exists(outputPath)) {
-      dfs.delete(outputPath, true);
-    }
-    
+    HadoopUtil.overwriteOutput(output);
+
     client.setConf(conf);
     JobClient.runJob(conf);
   }

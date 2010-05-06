@@ -17,13 +17,12 @@
 
 package org.apache.mahout.math;
 
-import junit.framework.TestCase;
 import static org.apache.mahout.math.function.Functions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestMatrixView extends TestCase {
+public class TestMatrixView extends MahoutTestCase {
 
   private static final int ROW = AbstractMatrix.ROW;
 
@@ -33,10 +32,6 @@ public class TestMatrixView extends TestCase {
       {3.3, 4.4, 5.5}, {5.5, 6.6, 7.7}, {7.7, 8.8, 9.9}};
 
   private Matrix test;
-
-  public TestMatrixView(String name) {
-    super(name);
-  }
 
   @Override
   protected void setUp() throws Exception {

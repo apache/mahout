@@ -45,6 +45,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 
@@ -78,11 +79,8 @@ public class KeyBasedStringTupleGrouper {
     Path outPath = new Path(params.get("output"));
     FileOutputFormat.setOutputPath(job, outPath);
     
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
-    
+    HadoopUtil.overwriteOutput(outPath);
+
     job.setInputFormatClass(TextInputFormat.class);
     job.setMapperClass(KeyBasedStringTupleMapper.class);
     job.setCombinerClass(KeyBasedStringTupleCombiner.class);

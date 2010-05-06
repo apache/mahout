@@ -63,8 +63,8 @@ public class InputDriver {
         return;
       }
       
-      String input = cmdLine.getValue(inputOpt, "testdata").toString();
-      String output = cmdLine.getValue(outputOpt, "output").toString();
+      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
+      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       runJob(input, output);
     } catch (OptionException e) {
       InputDriver.LOG.error("Exception parsing command line: ", e);
@@ -72,15 +72,15 @@ public class InputDriver {
     }
   }
   
-  public static void runJob(String input, String output) throws IOException {
+  public static void runJob(Path input, Path output) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputDriver.class);
     
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(MeanShiftCanopy.class);
     
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    FileOutputFormat.setOutputPath(conf, new Path(output));
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, output);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     conf.setMapperClass(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputMapper.class);
     conf.setReducerClass(Reducer.class);

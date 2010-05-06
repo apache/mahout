@@ -38,6 +38,7 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,18 +47,9 @@ import org.slf4j.LoggerFactory;
 public class BayesTfIdfDriver implements BayesJob {
   
   private static final Logger log = LoggerFactory.getLogger(BayesTfIdfDriver.class);
-  
-  /**
-   * Run the job
-   * 
-   * @param input
-   *          the input pathname String
-   * @param output
-   *          the output pathname String
-   * @throws ClassNotFoundException
-   */
+
   @Override
-  public void runJob(String input, String output, BayesParameters params) throws IOException {
+  public void runJob(Path input, Path output, BayesParameters params) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(BayesWeightSummerDriver.class);
@@ -66,10 +58,10 @@ public class BayesTfIdfDriver implements BayesJob {
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
     
-    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-termDocCount"));
-    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-wordFreq"));
-    FileInputFormat.addInputPath(conf, new Path(output + "/trainer-featureCount"));
-    Path outPath = new Path(output + "/trainer-tfIdf/");
+    FileInputFormat.addInputPath(conf, new Path(output, "trainer-termDocCount"));
+    FileInputFormat.addInputPath(conf, new Path(output, "trainer-wordFreq"));
+    FileInputFormat.addInputPath(conf, new Path(output, "trainer-featureCount"));
+    Path outPath = new Path(output, "trainer-tfIdf");
     FileOutputFormat.setOutputPath(conf, outPath);
     
     // conf.setNumMapTasks(100);
@@ -91,11 +83,9 @@ public class BayesTfIdfDriver implements BayesJob {
     // parameters and make or break a piece of code
     
     FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+    HadoopUtil.overwriteOutput(outPath);
     
-    Path interimFile = new Path(output + "/trainer-docCount/part-*");
+    Path interimFile = new Path(output, "trainer-docCount/part-*");
     
     Map<String,Double> labelDocumentCounts = SequenceFileModelReader.readLabelDocumentCounts(dfs,
       interimFile, conf);
@@ -111,8 +101,9 @@ public class BayesTfIdfDriver implements BayesJob {
     conf.set("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
     log.info(params.print());
     if (params.get("dataSource").equals("hbase")) {
+      String tableName = output.toString();
       HBaseConfiguration hc = new HBaseConfiguration(new Configuration());
-      HTableDescriptor ht = new HTableDescriptor(output);
+      HTableDescriptor ht = new HTableDescriptor(tableName);
       HColumnDescriptor hcd = new HColumnDescriptor(BayesConstants.HBASE_COLUMN_FAMILY + ':');
       hcd.setBloomfilter(true);
       hcd.setInMemory(true);
@@ -124,13 +115,13 @@ public class BayesTfIdfDriver implements BayesJob {
       HBaseAdmin hba = new HBaseAdmin(hc);
       log.info("Creating Table {}", output);
       
-      if (hba.tableExists(output)) {
-        hba.disableTable(output);
-        hba.deleteTable(output);
+      if (hba.tableExists(tableName)) {
+        hba.disableTable(tableName);
+        hba.deleteTable(tableName);
         hba.majorCompact(".META.");
       }
       hba.createTable(ht);
-      conf.set("output.table", output);
+      conf.set("output.table", tableName);
     }
     conf.set("bayes.parameters", params.toString());
     

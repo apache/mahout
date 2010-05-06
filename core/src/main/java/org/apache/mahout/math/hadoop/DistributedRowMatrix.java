@@ -152,7 +152,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   }
 
   public DistributedRowMatrix transpose() {
-    Path outputPath = new Path(rowPath.getParent(), "transpose-" + (byte)System.nanoTime());
+    Path outputPath = new Path(rowPath.getParent(), "transpose-" + (System.nanoTime() & 0xFF));
     try {
       JobConf conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
       JobClient.runJob(conf);

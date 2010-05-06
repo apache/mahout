@@ -35,7 +35,6 @@ import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.DummyReporter;
-import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -48,11 +47,15 @@ import org.apache.mahout.math.VectorWritable;
 
 public class TestKmeansClustering extends MahoutTestCase {
 
-  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 },
-      { 5, 5 } };
+  public static final double[][] reference =
+      { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 },
+        { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
 
-  private static final int[][] expectedNumPoints = { { 9 }, { 4, 5 }, { 4, 4, 1 }, { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 },
-      { 1, 1, 1, 1, 1, 4 }, { 1, 1, 1, 1, 1, 2, 2 }, { 1, 1, 1, 1, 1, 1, 2, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+  private static final int[][] expectedNumPoints = {
+      { 9 }, { 4, 5 }, { 4, 4, 1 },
+      { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 },
+      { 1, 1, 1, 1, 1, 4 }, { 1, 1, 1, 1, 1, 2, 2 },
+      { 1, 1, 1, 1, 1, 1, 2, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
 
   private FileSystem fs;
 
@@ -332,23 +335,17 @@ public class TestKmeansClustering extends MahoutTestCase {
   /** Story: User wishes to run kmeans job on reference data */
   public void testKMeansMRJob() throws Exception {
     List<VectorWritable> points = getPointsWritable(reference);
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    testData = new File("testdata/points");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
 
+    Path pointsPath = getTestTempDirPath("points");
+    Path clustersPath = getTestTempDirPath("clusters");
     Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, "testdata/points/file1", fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/points/file2", fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
     for (int k = 1; k < points.size(); k++) {
       System.out.println("testKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
       JobConf job = new JobConf(KMeansDriver.class);
-      Path path = new Path("testdata/clusters/part-00000");
+      Path path = new Path(clustersPath, "part-00000");
       FileSystem fs = FileSystem.get(path.toUri(), job);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, Text.class, Cluster.class);
 
@@ -362,14 +359,13 @@ public class TestKmeansClustering extends MahoutTestCase {
       }
       writer.close();
       // now run the Job
-      HadoopUtil.overwriteOutput("output");
-      KMeansDriver.runJob("testdata/points", "testdata/clusters", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10,
+      Path outputPath = getTestTempDirPath("output");
+      KMeansDriver.runJob(pointsPath, clustersPath, outputPath, EuclideanDistanceMeasure.class.getName(), 0.001, 10,
           k + 1, true);
       // now compare the expected clusters with actual
-      File outDir = new File("output/clusteredPoints");
-      assertTrue("output dir exists?", outDir.exists());
+      Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       // assertEquals("output dir files?", 4, outFiles.length);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-00000"), conf);
       int[] expect = expectedNumPoints[k];
       DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
       // The key is the clusterId
@@ -380,12 +376,10 @@ public class TestKmeansClustering extends MahoutTestCase {
         collector.collect(clusterId, value);
         clusterId = new IntWritable(0);
         value = new WeightedVectorWritable();
-
       }
       reader.close();
-      if (k == 2)
+      if (k == 2) {
       // cluster 3 is empty so won't appear in output
-      {
         assertEquals("clusters[" + k + ']', expect.length - 1, collector.getKeys().size());
       } else {
         assertEquals("clusters[" + k + ']', expect.length, collector.getKeys().size());
@@ -396,31 +390,26 @@ public class TestKmeansClustering extends MahoutTestCase {
   /** Story: User wants to use canopy clustering to input the initial clusters for kmeans job. */
   public void testKMeansWithCanopyClusterInput() throws Exception {
     List<VectorWritable> points = getPointsWritable(reference);
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    testData = new File("testdata/points");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    Configuration conf = new Configuration();
-    ClusteringTestUtils.writePointsToFile(points, "testdata/points/file1", fs, conf);
-    ClusteringTestUtils.writePointsToFile(points, "testdata/points/file2", fs, conf);
 
+    Path pointsPath = getTestTempDirPath("points");
+    Configuration conf = new Configuration();
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
+
+    Path outputPath = getTestTempDirPath("output");
     // now run the Canopy job
-    CanopyDriver.runJob("testdata/points", "output", ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, false);
+    CanopyDriver.runJob(pointsPath, outputPath, ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, false);
 
     // now run the KMeans job
-    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
+    KMeansDriver.runJob(pointsPath, new Path(outputPath, "clusters-0"), outputPath,
+                        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
 
     // now compare the expected clusters with actual
-    File outDir = new File("output/clusteredPoints");
-    assertTrue("output dir exists?", outDir.exists());
-    String[] outFiles = outDir.list();
-    assertEquals("output dir files?", 4, outFiles.length);
+    Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
+    //String[] outFiles = outDir.list();
+    //assertEquals("output dir files?", 4, outFiles.length);
     DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("output/clusteredPoints/part-00000"), conf);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-00000"), conf);
 
     // The key is the clusterId
     IntWritable clusterId = new IntWritable(0);

@@ -17,14 +17,68 @@
 
 package org.apache.mahout.common;
 
-import junit.framework.TestCase;
+import java.io.IOException;
 
-public abstract class MahoutTestCase extends TestCase {
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
+public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
+
+  private Path testTempDirPath;
+  private FileSystem fs;
 
   @Override
   protected void setUp() throws Exception {
     super.setUp();
     RandomUtils.useTestSeed();
+    testTempDirPath = null;
+    fs = null;
   }
+
+  @Override
+  protected void tearDown() throws Exception {
+    if (testTempDirPath != null) {
+      fs.delete(testTempDirPath, true);
+      testTempDirPath = null;
+      fs = null;
+    }
+    super.tearDown();
+  }
+
+  protected final Path getTestTempDirPath() throws IOException {
+    if (testTempDirPath == null) {
+      fs = FileSystem.get(new Configuration());
+      long simpleRandomLong = (long) (Long.MAX_VALUE * Math.random());
+      testTempDirPath =
+          fs.makeQualified(new Path("/tmp/mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong));
+      if (!fs.mkdirs(testTempDirPath)) {
+        throw new IOException("Could not create " + testTempDirPath);
+      }
+      fs.deleteOnExit(testTempDirPath);
+    }
+    return testTempDirPath;
+  }
+
+  protected final Path getTestTempFilePath(String name) throws IOException {
+    return getTestTempFileOrDirPath(name, false);
+  }
+
+  protected final Path getTestTempDirPath(String name) throws IOException {
+    return getTestTempFileOrDirPath(name, true);
+  }
+
+  private Path getTestTempFileOrDirPath(String name, boolean dir) throws IOException {
+    Path testTempDirPath = getTestTempDirPath();
+    Path tempFileOrDir = fs.makeQualified(new Path(testTempDirPath, name));
+    fs.deleteOnExit(tempFileOrDir);
+    if (dir) {
+      if (!fs.mkdirs(tempFileOrDir)) {
+        throw new IOException("Could not create " + tempFileOrDir);
+      }
+    }
+    return tempFileOrDir;
+  }
+
 
 }

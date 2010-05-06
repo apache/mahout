@@ -42,6 +42,7 @@ import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ import org.slf4j.LoggerFactory;
 public final class CanopyDriver {
   
   private static final Logger log = LoggerFactory.getLogger(CanopyDriver.class);
-  public static final String DEFAULT_CLUSTERED_POINTS_DIRECTORY = "/clusteredPoints";
+  public static final String DEFAULT_CLUSTERED_POINTS_DIRECTORY = "clusteredPoints";
   
   private CanopyDriver() { }
   
@@ -99,8 +100,8 @@ public final class CanopyDriver {
         return;
       }
       
-      String input = cmdLine.getValue(inputOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       String measureClass = SquaredEuclideanDistanceMeasure.class.getName();
       if (cmdLine.hasOption(measureClassOpt)) {
         measureClass = cmdLine.getValue(measureClassOpt).toString();
@@ -136,7 +137,7 @@ public final class CanopyDriver {
    * @param runClustering 
    *          true if points are to be clustered after clusters are determined
    */
-  public static void runJob(String input, String output,
+  public static void runJob(Path input, Path output,
                             String measureClassName, double t1, double t2, boolean runClustering) throws IOException {
     log.info("Input: {} Out: {} " 
       + "Measure: {} t1: {} t2: {}", new Object[] {input, output, measureClassName, t1, t2});
@@ -153,11 +154,10 @@ public final class CanopyDriver {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(Canopy.class);
     
-    FileInputFormat.setInputPaths(conf, new Path(input));
+    FileInputFormat.setInputPaths(conf, input);
     
-    String canopyOutputDir = output + Cluster.CLUSTERS_DIR + "0";
-    Path outPath = new Path(canopyOutputDir);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + "0");
+    FileOutputFormat.setOutputPath(conf, canopyOutputDir);
     
     conf.setMapperClass(CanopyMapper.class);
     conf.setReducerClass(CanopyReducer.class);
@@ -165,10 +165,8 @@ public final class CanopyDriver {
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
     client.setConf(conf);
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+    HadoopUtil.overwriteOutput(output);
+
     JobClient.runJob(conf);
     
     if (runClustering){
@@ -192,27 +190,27 @@ public final class CanopyDriver {
    * @param t2
    *          the T2 distance threshold
    */
-  public static void runClustering(String points,
-                            String canopies,
-                            String output,
-                            String measureClassName,
-                            double t1,
-                            double t2) throws IOException {
+  public static void runClustering(Path points,
+                                   Path canopies,
+                                   Path output,
+                                   String measureClassName,
+                                   double t1,
+                                   double t2) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CanopyDriver.class);
     
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
-    conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies);
+    conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies.toString());
     
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputKeyClass(IntWritable.class);
     conf.setOutputValueClass(WeightedVectorWritable.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
     
-    FileInputFormat.setInputPaths(conf, new Path(points));
-    Path outPath = new Path(output + DEFAULT_CLUSTERED_POINTS_DIRECTORY);
+    FileInputFormat.setInputPaths(conf, points);
+    Path outPath = new Path(output, DEFAULT_CLUSTERED_POINTS_DIRECTORY);
     FileOutputFormat.setOutputPath(conf, outPath);
     
     conf.setMapperClass(ClusterMapper.class);
@@ -220,10 +218,7 @@ public final class CanopyDriver {
     conf.setNumReduceTasks(0);
     
     client.setConf(conf);
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
+    HadoopUtil.overwriteOutput(outPath);    
     JobClient.runJob(conf);
   }
   

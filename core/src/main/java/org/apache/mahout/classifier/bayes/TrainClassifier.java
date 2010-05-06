@@ -27,6 +27,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesDriver;
 import org.apache.mahout.classifier.bayes.mapreduce.cbayes.CBayesDriver;
@@ -46,12 +47,12 @@ public final class TrainClassifier {
   
   private TrainClassifier() { }
   
-  public static void trainNaiveBayes(String dir, String outputDir, BayesParameters params) throws IOException {
+  public static void trainNaiveBayes(Path dir, Path outputDir, BayesParameters params) throws IOException {
     BayesDriver driver = new BayesDriver();
     driver.runJob(dir, outputDir, params);
   }
   
-  public static void trainCNaiveBayes(String dir, String outputDir, BayesParameters params) throws IOException {
+  public static void trainCNaiveBayes(Path dir, Path outputDir, BayesParameters params) throws IOException {
     CBayesDriver driver = new CBayesDriver();
     driver.runJob(dir, outputDir, params);
   }
@@ -116,17 +117,17 @@ public final class TrainClassifier {
       } else {
         params.set("dataSource", "hdfs");
       }
-      
+
+      Path inputPath = new Path((String) cmdLine.getValue(inputDirOpt));
+      Path outputPath = new Path((String) cmdLine.getValue(outputOpt));
       if (classifierType.equalsIgnoreCase("bayes")) {
         log.info("Training Bayes Classifier");
-        trainNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine
-            .getValue(outputOpt), params);
+        trainNaiveBayes(inputPath, outputPath, params);
         
       } else if (classifierType.equalsIgnoreCase("cbayes")) {
         log.info("Training Complementary Bayes Classifier");
         // setup the HDFS and copy the files there, then run the trainer
-        trainCNaiveBayes((String) cmdLine.getValue(inputDirOpt), (String) cmdLine
-            .getValue(outputOpt), params);
+        trainCNaiveBayes(inputPath, outputPath, params);
       }
     } catch (OptionException e) {
       log.error("Error while parsing options", e);

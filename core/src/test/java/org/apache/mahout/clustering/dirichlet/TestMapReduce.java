@@ -209,17 +209,13 @@ public class TestMapReduce extends MahoutTestCase {
   
   /** Test the Mapper and Reducer using the Driver */
   public void testDriverMRIterations() throws Exception {
-    File f = new File("input");
-    for (File g : f.listFiles()) {
-      g.delete();
-    }
     generateSamples(100, 0, 0, 0.5);
     generateSamples(100, 2, 0, 0.2);
     generateSamples(100, 0, 2, 0.3);
     generateSamples(100, 2, 2, 1);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver
-    DirichletDriver.runJob("input", "output",
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
       "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 5, 1.0, 1);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
@@ -255,13 +251,9 @@ public class TestMapReduce extends MahoutTestCase {
   
   /** Test the Mapper and Reducer using the Driver */
   public void testDriverMnRIterations() throws Exception {
-    File f = new File("input");
-    for (File g : f.listFiles()) {
-      g.delete();
-    }
     generate4Datasets();
     // Now run the driver
-    DirichletDriver.runJob("input", "output",
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
       "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 3, 1.0, 1);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
@@ -281,27 +273,23 @@ public class TestMapReduce extends MahoutTestCase {
   
   private void generate4Datasets() throws IOException {
     generateSamples(500, 0, 0, 0.5);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data1.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data1.txt"), fs, conf);
     sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 0, 0.2);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data2.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data2.txt"), fs, conf);
     sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 0, 2, 0.3);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data3.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data3.txt"), fs, conf);
     sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 2, 1);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data4.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data4.txt"), fs, conf);
   }
   
   /** Test the Mapper and Reducer using the Driver */
   public void testDriverMnRnIterations() throws Exception {
-    File f = new File("input");
-    for (File g : f.listFiles()) {
-      g.delete();
-    }
     generate4Datasets();
     // Now run the driver
-    DirichletDriver.runJob("input", "output",
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
       "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 3, 1.0, 2);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
@@ -326,18 +314,18 @@ public class TestMapReduce extends MahoutTestCase {
       g.delete();
     }
     generateSamples(500, 0, 0, 0.5, 1.0);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data1.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data1.txt"), fs, conf);
     sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 0, 0.2);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data2.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data2.txt"), fs, conf);
     sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 0, 2, 0.3);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data3.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data3.txt"), fs, conf);
     sampleData = new ArrayList<VectorWritable>();
     generateSamples(500, 2, 2, 1);
-    ClusteringTestUtils.writePointsToFile(sampleData, "input/data4.txt", fs, conf);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data4.txt"), fs, conf);
     // Now run the driver
-    DirichletDriver.runJob("input", "output",
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
       "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution", 20, 3, 1.0, 2);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();

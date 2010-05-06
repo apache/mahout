@@ -68,7 +68,7 @@ public class ClusterMapper extends MapReduceBase implements
     String canopyPath = job.get(CanopyConfigKeys.CANOPY_PATH_KEY);
     if ((canopyPath != null) && (canopyPath.length() > 0)) {
       try {
-        Path path = new Path(canopyPath + "/part-00000");
+        Path path = new Path(canopyPath, "part-00000");
         FileSystem fs = FileSystem.get(path.toUri(), job);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
         try {

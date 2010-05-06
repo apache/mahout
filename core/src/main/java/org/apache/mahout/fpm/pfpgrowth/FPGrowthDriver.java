@@ -152,11 +152,11 @@ public final class FPGrowthDriver {
         encoding = (String) cmdLine.getValue(encodingOpt);
       }
       params.set("encoding", encoding);
-      String inputDir = (String) cmdLine.getValue(inputDirOpt);
-      String outputDir = (String) cmdLine.getValue(outputOpt);
+      Path inputDir = new Path(cmdLine.getValue(inputDirOpt).toString());
+      Path outputDir = new Path(cmdLine.getValue(outputOpt).toString());
       
-      params.set("input", inputDir);
-      params.set("output", outputDir);
+      params.set("input", inputDir.toString());
+      params.set("output", outputDir.toString());
       
       String classificationMethod = (String) cmdLine.getValue(methodOpt);
       if (classificationMethod.equalsIgnoreCase("sequential")) {

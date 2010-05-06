@@ -40,6 +40,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.data.DataConverter;
 import org.apache.mahout.df.data.Dataset;
@@ -115,9 +116,8 @@ public class FrequenciesJob {
     job.waitForCompletion(true);
     
     int[][] counts = parseOutput(job);
-    
-    // delete the output path
-    fs.delete(outputPath, true);
+
+    HadoopUtil.overwriteOutput(outputPath);
     
     return counts;
   }

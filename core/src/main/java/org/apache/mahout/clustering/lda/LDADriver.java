@@ -118,8 +118,8 @@ public final class LDADriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-      String input = cmdLine.getValue(inputOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       
       int maxIterations = -1;
       if (cmdLine.hasOption(maxIterOpt)) {
@@ -180,15 +180,15 @@ public final class LDADriver {
    *          the number of Reducers desired
    * @throws IOException
    */
-  public static void runJob(String input,
-                            String output,
+  public static void runJob(Path input,
+                            Path output,
                             int numTopics,
                             int numWords,
                             double topicSmoothing,
                             int maxIterations,
                             int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     
-    String stateIn = output + "/state-0";
+    Path stateIn = new Path(output, "state-0");
     writeInitialState(stateIn, numTopics, numWords);
     double oldLL = Double.NEGATIVE_INFINITY;
     boolean converged = false;
@@ -196,7 +196,7 @@ public final class LDADriver {
     for (int iteration = 0; ((maxIterations < 1) || (iteration < maxIterations)) && !converged; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String stateOut = output + "/state-" + (iteration + 1);
+      Path stateOut = new Path(output, "state-" + (iteration + 1));
       double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing, numReducers);
       double relChange = (oldLL - ll) / oldLL;
       
@@ -211,17 +211,16 @@ public final class LDADriver {
     }
   }
   
-  private static void writeInitialState(String statePath, int numTopics, int numWords) throws IOException {
-    Path dir = new Path(statePath);
+  private static void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {
     Configuration job = new Configuration();
-    FileSystem fs = dir.getFileSystem(job);
+    FileSystem fs = statePath.getFileSystem(job);
     
     DoubleWritable v = new DoubleWritable();
     
     Random random = RandomUtils.getRandom();
     
     for (int k = 0; k < numTopics; ++k) {
-      Path path = new Path(dir, "part-" + k);
+      Path path = new Path(statePath, "part-" + k);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, IntPairWritable.class,
           DoubleWritable.class);
       
@@ -242,15 +241,14 @@ public final class LDADriver {
     }
   }
   
-  private static double findLL(String statePath, Configuration job) throws IOException {
-    Path dir = new Path(statePath);
-    FileSystem fs = dir.getFileSystem(job);
+  private static double findLL(Path statePath, Configuration job) throws IOException {
+    FileSystem fs = statePath.getFileSystem(job);
     
     double ll = 0.0;
     
     IntPairWritable key = new IntPairWritable();
     DoubleWritable value = new DoubleWritable();
-    for (FileStatus status : fs.globStatus(new Path(dir, "part-*"))) {
+    for (FileStatus status : fs.globStatus(new Path(statePath, "part-*"))) {
       Path path = status.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
       while (reader.next(key, value)) {
@@ -279,9 +277,9 @@ public final class LDADriver {
    * @param numReducers
    *          the number of Reducers desired
    */
-  public static double runIteration(String input,
-                                    String stateIn,
-                                    String stateOut,
+  public static double runIteration(Path input,
+                                    Path stateIn,
+                                    Path stateOut,
                                     int numTopics,
                                     int numWords,
                                     double topicSmoothing,
@@ -289,7 +287,7 @@ public final class LDADriver {
                                                     InterruptedException,
                                                     ClassNotFoundException {
     Configuration conf = new Configuration();
-    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));
     conf.set(NUM_WORDS_KEY, Integer.toString(numWords));
     conf.set(TOPIC_SMOOTHING_KEY, Double.toString(topicSmoothing));
@@ -298,9 +296,8 @@ public final class LDADriver {
     
     job.setOutputKeyClass(IntPairWritable.class);
     job.setOutputValueClass(DoubleWritable.class);
-    FileInputFormat.addInputPaths(job, input);
-    Path outPath = new Path(stateOut);
-    FileOutputFormat.setOutputPath(job, outPath);
+    FileInputFormat.addInputPaths(job, input.toString());
+    FileOutputFormat.setOutputPath(job, stateOut);
     
     job.setMapperClass(LDAMapper.class);
     job.setReducerClass(LDAReducer.class);

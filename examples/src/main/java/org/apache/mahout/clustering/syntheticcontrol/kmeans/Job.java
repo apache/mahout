@@ -37,6 +37,7 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
@@ -87,8 +88,8 @@ public final class Job {
         CommandLineUtil.printHelp(group);
         return;
       }
-      String input = cmdLine.getValue(inputOpt, "testdata").toString();
-      String output = cmdLine.getValue(outputOpt, "output").toString();
+      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
+      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       String measureClass = cmdLine.getValue(measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure")
           .toString();
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
@@ -131,24 +132,21 @@ public final class Job {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    */
-  private static void runJob(String input, String output, String measureClass, double t1, double t2, double convergenceDelta,
+  private static void runJob(Path input, Path output, String measureClass, double t1, double t2, double convergenceDelta,
       int maxIterations) throws IOException, InstantiationException, IllegalAccessException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
-    Path outPath = new Path(output);
     client.setConf(conf);
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    if (dfs.exists(outPath)) {
-      dfs.delete(outPath, true);
-    }
-    String directoryContainingConvertedInput = output + Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT;
+    HadoopUtil.overwriteOutput(output);
+
+    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
     CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2, false);
     log.info("Running KMeans");
-    KMeansDriver.runJob(directoryContainingConvertedInput, output + Cluster.INITIAL_CLUSTERS_DIR, output, measureClass,
+    KMeansDriver.runJob(directoryContainingConvertedInput, new Path(output, Cluster.INITIAL_CLUSTERS_DIR), output, measureClass,
         convergenceDelta, maxIterations, 1, true);
 
     ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", "output/clusteredPoints");
