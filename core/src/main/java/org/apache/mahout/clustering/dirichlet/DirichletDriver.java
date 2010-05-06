@@ -44,7 +44,6 @@ import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.VectorModelDistribution;
-import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Vector;
@@ -250,7 +249,7 @@ public class DirichletDriver {
     JobConf job = new JobConf(DirichletDriver.class);
     FileSystem fs = FileSystem.get(output.toUri(), job);
     for (int i = 0; i < numModels; i++) {
-      Path path = new Path(stateIn, "/part-" + i);
+      Path path = new Path(stateIn, "part-" + i);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, Text.class, DirichletCluster.class);
       writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
       writer.close();
