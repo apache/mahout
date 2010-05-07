@@ -222,8 +222,9 @@ public final class SparseVectorsFromSequenceFiles {
       DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, minSupport, maxNGramSize,
         minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput);
       if (processIdf) {
-        TFIDFConverter.processTfIdf(outputDir + DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER,
-          outputDir + TFIDFConverter.TFIDF_OUTPUT_FOLDER, chunkSize, minDf, maxDFPercent, norm,
+        TFIDFConverter.processTfIdf(
+          new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
+          new Path(outputDir, TFIDFConverter.TFIDF_OUTPUT_FOLDER), chunkSize, minDf, maxDFPercent, norm,
           sequentialAccessOutput);
       }
     } catch (OptionException e) {

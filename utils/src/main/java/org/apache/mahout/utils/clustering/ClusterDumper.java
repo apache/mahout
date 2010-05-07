@@ -42,8 +42,10 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -65,9 +67,9 @@ public final class ClusterDumper {
 
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
 
-  private final String seqFileDir;
+  private final Path seqFileDir;
 
-  private final String pointsDir;
+  private final Path pointsDir;
 
   private String termDictionary;
 
@@ -83,7 +85,7 @@ public final class ClusterDumper {
 
   private boolean useJSON = false;
 
-  public ClusterDumper(String seqFileDir, String pointsDir) throws IOException {
+  public ClusterDumper(Path seqFileDir, Path pointsDir) throws IOException {
     this.seqFileDir = seqFileDir;
     this.pointsDir = pointsDir;
     init();
@@ -115,26 +117,18 @@ public final class ClusterDumper {
       }
     }
 
-    Writer writer = null;
-    if (this.outputFile != null) {
-      writer = new FileWriter(this.outputFile);
-    } else {
-      writer = new OutputStreamWriter(System.out);
-    }
+    Writer writer = this.outputFile == null ? new OutputStreamWriter(System.out) : new FileWriter(this.outputFile);
 
-    File[] seqFileList = new File(this.seqFileDir).listFiles(new FilenameFilter() {
+    FileSystem fs = seqFileDir.getFileSystem(conf);
+    FileStatus[] seqFileList = fs.listStatus(seqFileDir, new PathFilter() {
       @Override
-      public boolean accept(File file, String name) {
-        return name.endsWith(".crc") == false;
+      public boolean accept(Path path) {
+        return !path.getName().endsWith(".crc");
       }
     });
-    for (File seqFile : seqFileList) {
-      if (!seqFile.isFile()) {
-        continue;
-      }
-      Path path = new Path(seqFile.getAbsolutePath());
+    for (FileStatus seqFile : seqFileList) {
+      Path path = seqFile.getPath();
       System.out.println("Input Path: " + path);
-      FileSystem fs = FileSystem.get(path.toUri(), conf);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       Writable key = (Writable) reader.getKeyClass().newInstance();
       Writable value = (Writable) reader.getValueClass().newInstance();
@@ -262,15 +256,15 @@ public final class ClusterDumper {
       if (!cmdLine.hasOption(seqOpt)) {
         return;
       }
-      String seqFileDir = cmdLine.getValue(seqOpt).toString();
+      Path seqFileDir = new Path(cmdLine.getValue(seqOpt).toString());
       String termDictionary = null;
       if (cmdLine.hasOption(dictOpt)) {
         termDictionary = cmdLine.getValue(dictOpt).toString();
       }
 
-      String pointsDir = null;
+      Path pointsDir = null;
       if (cmdLine.hasOption(pointsOpt)) {
-        pointsDir = cmdLine.getValue(pointsOpt).toString();
+        pointsDir = new Path(cmdLine.getValue(pointsOpt).toString());
       }
       String outputFile = null;
       if (cmdLine.hasOption(outputOpt)) {
@@ -319,23 +313,20 @@ public final class ClusterDumper {
     this.useJSON = json;
   }
 
-  private static Map<Integer, List<WeightedVectorWritable>> readPoints(String pointsPathDir, JobConf conf) throws IOException {
+  private static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, JobConf conf)
+      throws IOException {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
 
-    File[] children = new File(pointsPathDir).listFiles(new FilenameFilter() {
+    FileSystem fs = pointsPathDir.getFileSystem(conf);
+    FileStatus[] children = fs.listStatus(pointsPathDir, new PathFilter() {
       @Override
-      public boolean accept(File file, String name) {
-        return name.endsWith(".crc") == false;
+      public boolean accept(Path path) {
+        return !path.getName().endsWith(".crc");
       }
     });
 
-    for (File file : children) {
-      if (!file.isFile()) {
-        continue;
-      }
-      String pointsPath = file.getAbsolutePath();
-      Path path = new Path(pointsPath);
-      FileSystem fs = FileSystem.get(path.toUri(), conf);
+    for (FileStatus file : children) {
+      Path path = file.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       try {
         IntWritable key = (IntWritable) reader.getKeyClass().newInstance();
@@ -344,7 +335,7 @@ public final class ClusterDumper {
           // value is the cluster id as an int, key is the name/id of the
           // vector, but that doesn't matter because we only care about printing
           // it
-          String clusterId = value.toString();
+          //String clusterId = value.toString();
           List<WeightedVectorWritable> pointList = result.get(key.get());
           if (pointList == null) {
             pointList = new ArrayList<WeightedVectorWritable>();

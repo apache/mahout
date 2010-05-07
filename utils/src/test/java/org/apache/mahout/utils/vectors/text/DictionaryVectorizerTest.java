@@ -17,7 +17,6 @@
 
 package org.apache.mahout.utils.vectors.text;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Random;
@@ -58,7 +57,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
   private FileSystem fs;
   
   private static char getRandomDelimiter() {
-    return DictionaryVectorizerTest.DELIM.charAt(DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.DELIM.length()));
+    return DELIM.charAt(random.nextInt(DictionaryVectorizerTest.DELIM.length()));
   }
   
   public static String getRandomDocument() {
@@ -96,35 +95,16 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     return sb.toString();
   }
   
-  private static void rmr(String path) throws Exception {
-    File f = new File(path);
-    if (f.exists()) {
-      if (f.isDirectory()) {
-        String[] contents = f.list();
-        for (String content : contents) {
-          rmr(f.toString() + File.separator + content);
-        }
-      }
-      f.delete();
-    }
-  }
-  
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    rmr("target/output");
-    rmr("target/testdata");
     Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
   }
   
-  public void testCreateTermFrequencyVectors() throws IOException,
-  InterruptedException,
-  ClassNotFoundException,
-  URISyntaxException {
+  public void testCreateTermFrequencyVectors() throws IOException {
     Configuration conf = new Configuration();
-    String pathString = "target/testdata/documents/docs.file";
-    Path path = new Path(pathString);
+    Path path = getTestTempFilePath("documents/docs.file");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path,
       Text.class, Text.class);
     
@@ -134,11 +114,12 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     }
     writer.close();
     Class<? extends Analyzer> analyzer = StandardAnalyzer.class;
-    DocumentProcessor.tokenizeDocuments(pathString, analyzer,
-    "target/output/tokenized-documents");
-    DictionaryVectorizer.createTermFrequencyVectors("target/output/tokenized-documents",
-      "target/output/wordcount", 2, 1, 0.0f, 1, 100, false);
-    TFIDFConverter.processTfIdf("target/output/wordcount/vectors", "target/output/tfidf/", 100, 1, 99, 1.0f, false);
+    DocumentProcessor.tokenizeDocuments(path, analyzer,
+    getTestTempDirPath("output/tokenized-documents"));
+    DictionaryVectorizer.createTermFrequencyVectors(getTestTempDirPath("output/tokenized-documents"),
+      getTestTempDirPath("output/wordcount"), 2, 1, 0.0f, 1, 100, false);
+    TFIDFConverter.processTfIdf(getTestTempDirPath("output/wordcount/vectors"),
+                                getTestTempDirPath("output/tfidf"), 100, 1, 99, 1.0f, false);
     
   }
 }

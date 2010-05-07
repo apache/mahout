@@ -39,6 +39,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.fs.Path;
 import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.CorruptIndexException;
@@ -105,9 +106,9 @@ public class ClusterLabels {
 
   public static final int DEFAULT_MAX_LABELS = 25;
 
-  private final String seqFileDir;
+  private final Path seqFileDir;
 
-  private final String pointsDir;
+  private final Path pointsDir;
 
   private final String indexDir;
 
@@ -123,7 +124,7 @@ public class ClusterLabels {
 
   private int maxLabels = DEFAULT_MAX_LABELS;
 
-  public ClusterLabels(String seqFileDir, String pointsDir, String indexDir, String contentField, int minNumIds, int maxLabels)
+  public ClusterLabels(Path seqFileDir, Path pointsDir, String indexDir, String contentField, int minNumIds, int maxLabels)
       throws IOException {
     this.seqFileDir = seqFileDir;
     this.pointsDir = pointsDir;
@@ -363,8 +364,8 @@ public class ClusterLabels {
         return;
       }
 
-      String seqFileDir = cmdLine.getValue(seqOpt).toString();
-      String pointsDir = cmdLine.getValue(pointsOpt).toString();
+      Path seqFileDir = new Path(cmdLine.getValue(seqOpt).toString());
+      Path pointsDir = new Path(cmdLine.getValue(pointsOpt).toString());
       String indexDir = cmdLine.getValue(indexOpt).toString();
       String contentField = cmdLine.getValue(fieldOpt).toString();
 

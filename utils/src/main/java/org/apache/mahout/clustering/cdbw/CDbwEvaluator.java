@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
@@ -83,7 +84,8 @@ public class CDbwEvaluator {
    * @throws IllegalAccessException
    * @throws IOException
    */
-  public CDbwEvaluator(JobConf job, String clustersIn) throws SecurityException, IllegalArgumentException, NoSuchMethodException,
+  public CDbwEvaluator(JobConf job, Path clustersIn)
+      throws SecurityException, IllegalArgumentException, NoSuchMethodException,
       InvocationTargetException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     super();
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
@@ -117,15 +119,13 @@ public class CDbwEvaluator {
    * @throws NoSuchMethodException
    * @throws InvocationTargetException
    */
-  private HashMap<Integer, Cluster> loadClusters(JobConf job, String clustersIn) throws ClassNotFoundException,
-      InstantiationException, IllegalAccessException, IOException, SecurityException, NoSuchMethodException,
-      InvocationTargetException {
+  private HashMap<Integer, Cluster> loadClusters(JobConf job, Path clustersIn)
+      throws InstantiationException, IllegalAccessException, IOException, SecurityException {
     HashMap<Integer, Cluster> clusters = new HashMap<Integer, Cluster>();
-    File f = new File(clustersIn);
-    for (File part : f.listFiles()) {
-      if (!part.getName().startsWith(".")) {
-        Path inPart = new Path(clustersIn + "/" + part.getName());
-        FileSystem fs = FileSystem.get(inPart.toUri(), job);
+    FileSystem fs = clustersIn.getFileSystem(job);
+    for (FileStatus part : fs.listStatus(clustersIn)) {
+      if (!part.getPath().getName().startsWith(".")) {
+        Path inPart = part.getPath();
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, job);
         Writable key = (Writable) reader.getKeyClass().newInstance();
         Writable value = (Writable) reader.getValueClass().newInstance();

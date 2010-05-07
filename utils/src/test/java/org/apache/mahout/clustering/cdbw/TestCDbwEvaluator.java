@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.cdbw;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -41,7 +41,6 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -49,10 +48,8 @@ import org.apache.mahout.math.VectorWritable;
 
 public class TestCDbwEvaluator extends MahoutTestCase {
 
-  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 },
-      { 5, 5 } };
-
-  private List<VectorWritable> sampleData;
+  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 },
+      { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
@@ -61,32 +58,21 @@ public class TestCDbwEvaluator extends MahoutTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    // Create testdata directory
-    ClusteringTestUtils.rmr("testdata");
-    File f = new File("testdata");
-    f.mkdir();
-    ClusteringTestUtils.rmr("output");
     // Create test data
-    sampleData = TestKmeansClustering.getPointsWritable(reference);
-    ClusteringTestUtils.writePointsToFile(sampleData, "testdata/file1", fs, conf);
+    List<VectorWritable> sampleData = TestKmeansClustering.getPointsWritable(reference);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
   }
 
   private void checkRefPoints(int numIterations) throws IOException {
-    File out = new File("output");
-    assertTrue("output is not Dir", out.isDirectory());
     for (int i = 0; i <= numIterations; i++) {
-      out = new File("output/representativePoints-" + i);
-      assertTrue("rep-i is not a Dir", out.isDirectory());
-      System.out.println(out.getName() + ":");
-      File[] files = out.listFiles();
+      Path out = new Path(getTestTempDirPath("output"), "representativePoints-" + i);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(conf);
-      for (File file : files) {
-        if (!file.getName().startsWith(".")) {
-          SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(file.getAbsolutePath()), conf);
+      for (FileStatus file : fs.listStatus(out)) {
+        if (!file.getPath().getName().startsWith(".")) {
+          SequenceFile.Reader reader = new SequenceFile.Reader(fs, file.getPath(), conf);
           try {
             IntWritable clusterId = new IntWritable(0);
             VectorWritable point = new VectorWritable();
@@ -152,51 +138,62 @@ public class TestCDbwEvaluator extends MahoutTestCase {
   }
 
   public void testCanopy() throws Exception { // now run the Job
-    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true);
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
+                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true);
     int numIterations = 2;
-    CDbwDriver.runJob("output/clusters-0", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
-        numIterations, 1);
+    Path output = getTestTempDirPath("output");
+    CDbwDriver.runJob(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"), output,
+                      EuclideanDistanceMeasure.class.getName(), numIterations, 1);
     checkRefPoints(numIterations);
   }
 
   public void testKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
+                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
     // now run the KMeans job
-    KMeansDriver.runJob("testdata", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
+    Path output = getTestTempDirPath("output");
+    KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
+                        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
     int numIterations = 2;
-    CDbwDriver.runJob("output/clusters-2", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
-        numIterations, 1);
+    CDbwDriver.runJob(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"), output,
+                      EuclideanDistanceMeasure.class.getName(), numIterations, 1);
     checkRefPoints(numIterations);
   }
 
   public void testFuzzyKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
+                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
     // now run the KMeans job
-    FuzzyKMeansDriver.runJob("testdata", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 1,
-        2, false, true, 0);
+    Path output = getTestTempDirPath("output");
+    FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
+                             EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 1, 2, false, true, 0);
     int numIterations = 2;
-    CDbwDriver.runJob("output/clusters-4", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
-        numIterations, 1);
+    CDbwDriver.runJob(new Path(output, "clusters-4"), new Path(output, "clusteredPoints"), output,
+                      EuclideanDistanceMeasure.class.getName(), numIterations, 1);
     checkRefPoints(numIterations);
   }
 
   public void testMeanShift() throws Exception {
-    MeanShiftCanopyDriver.runJob("testdata", "output", EuclideanDistanceMeasure.class.getName(), 2.1, 1.0, 0.001, 10, false, true);
+    MeanShiftCanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
+                                 EuclideanDistanceMeasure.class.getName(), 2.1, 1.0, 0.001, 10, false, true);
     int numIterations = 2;
-    CDbwDriver.runJob("output/clusters-2", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
-        numIterations, 1);
+    Path output = getTestTempDirPath("output");
+    CDbwDriver.runJob(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"), output,
+                      EuclideanDistanceMeasure.class.getName(), numIterations, 1);
     checkRefPoints(numIterations);
   }
 
   public void testDirichlet() throws Exception {
     Vector prototype = new DenseVector(2);
-    DirichletDriver.runJob("testdata", "output", L1ModelDistribution.class.getName(), prototype.getClass().getName(), prototype
-        .size(), 15, 5, 1.0, 1, true, true, 0);
+    DirichletDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
+                           L1ModelDistribution.class.getName(), prototype.getClass().getName(),
+                           prototype.size(), 15, 5, 1.0, 1, true, true, 0);
     int numIterations = 2;
-    CDbwDriver.runJob("output/clusters-5", "output/clusteredPoints", "output", EuclideanDistanceMeasure.class.getName(),
-        numIterations, 1);
+    Path output = getTestTempDirPath("output");
+    CDbwDriver.runJob(new Path(output, "clusters-5"), new Path(output, "clusteredPoints"), output,
+                      EuclideanDistanceMeasure.class.getName(), numIterations, 1);
     checkRefPoints(numIterations);
   }
 

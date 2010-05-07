@@ -73,7 +73,7 @@ public final class DictionaryVectorizer {
   
   private static final int MIN_CHUNKSIZE = 100;
   
-  private static final String OUTPUT_FILES_PATTERN = "/part-*";
+  private static final String OUTPUT_FILES_PATTERN = "part-*";
   
   // 4 byte overhead for each entry in the OpenObjectIntHashMap
   private static final int DICTIONARY_BYTE_OVERHEAD = 4;
@@ -192,8 +192,7 @@ public final class DictionaryVectorizer {
     Configuration conf = new Configuration();
     
     FileSystem fs = FileSystem.get(wordCountPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(wordCountPath.toString()
-                                                      + OUTPUT_FILES_PATTERN));
+    FileStatus[] outputFiles = fs.globStatus(new Path(wordCountPath, OUTPUT_FILES_PATTERN));
     
     long chunkSizeLimit = chunkSizeInMegabytes * 1024L * 1024L;
     int chunkIndex = 0;

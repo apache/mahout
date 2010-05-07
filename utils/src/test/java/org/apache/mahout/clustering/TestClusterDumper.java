@@ -27,6 +27,7 @@ import junit.framework.Assert;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -75,25 +76,11 @@ public class TestClusterDumper extends MahoutTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    RandomUtils.useTestSeed();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    // Create testdata directory
-    File f = new File("testdata");
-    if (!f.exists()) {
-      f.mkdir();
-    }
-    f = new File("testdata/points");
-    if (!f.exists()) {
-      f.mkdir();
-    }
-    f = new File("output");
-    rmDir(f);
     // Create test data
     getSampleData(DOCS);
-    ClusteringTestUtils.writePointsToFile(sampleData, "testdata/points/file1", fs, conf);
-    // Run clustering job
-    // Run ClusterDumper test
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
   }
 
   private static void rmDir(File f) {
@@ -145,7 +132,7 @@ public class TestClusterDumper extends MahoutTestCase {
     i = 0;
     for (Vector vector : iterable) {
       Assert.assertNotNull(vector);
-      NamedVector namedVector = new NamedVector(vector, "P(" + i + ")");
+      NamedVector namedVector = new NamedVector(vector, "P(" + i + ')');
       System.out.println(ClusterBase.formatVector(namedVector, termDictionary));
       sampleData.add(new VectorWritable(namedVector));
       i++;
@@ -153,46 +140,63 @@ public class TestClusterDumper extends MahoutTestCase {
   }
 
   public void testCanopy() throws Exception { // now run the Job
-    CanopyDriver.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4, true);
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
+                        EuclideanDistanceMeasure.class.getName(), 8, 4, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-0", "output/clusteredPoints");
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   public void testKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4, false);
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
+                        EuclideanDistanceMeasure.class.getName(), 8, 4, false);
     // now run the KMeans job
-    KMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
+    KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
+                        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-2", "output/clusteredPoints");
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-2"),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   public void testFuzzyKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
-    CanopyDriver.runJob("testdata/points", "output", EuclideanDistanceMeasure.class.getName(), 8, 4, false);
+    Path output = getTestTempDirPath("output");
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
+                        EuclideanDistanceMeasure.class.getName(), 8, 4, false);
     // now run the KMeans job
-    FuzzyKMeansDriver.runJob("testdata/points", "output/clusters-0", "output", EuclideanDistanceMeasure.class.getName(), 0.001, 10,
+    FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
+                             EuclideanDistanceMeasure.class.getName(), 0.001, 10,
         1, 1, (float) 1.1, true, true, 0);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-3", "output/clusteredPoints");
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   public void testMeanShift() throws Exception {
-    MeanShiftCanopyDriver.runJob("testdata/points", "output", CosineDistanceMeasure.class.getName(), 0.5, 0.01, 0.05, 10, false, true);
+    Path output = getTestTempDirPath("output");
+    MeanShiftCanopyDriver.runJob(getTestTempDirPath("testdata"), output,
+                                 CosineDistanceMeasure.class.getName(), 0.5, 0.01, 0.05, 10, false, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-1", "output/clusteredPoints");
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-1"),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   public void testDirichlet() throws Exception {
+    Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    DirichletDriver.runJob("testdata/points", "output", L1ModelDistribution.class.getName(), prototype.getDelegate().getClass()
-        .getName(), prototype.size(), 15, 10, 1.0, 1, true, true, 0);
+    DirichletDriver.runJob(getTestTempDirPath("testdata"), output,
+                           L1ModelDistribution.class.getName(), prototype.getDelegate().getClass().getName(),
+                           prototype.size(), 15, 10, 1.0, 1, true, true, 0);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", "output/clusteredPoints");
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 }

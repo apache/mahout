@@ -64,23 +64,23 @@ public final class TFIDFConverter {
   
   public static final String MAX_DF_PERCENTAGE = "max.df.percentage";
   
-  public static final String TFIDF_OUTPUT_FOLDER = "/tfidf";
+  public static final String TFIDF_OUTPUT_FOLDER = "tfidf";
   
-  private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "/vectors";
+  private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "vectors";
   
-  private static final String FREQUENCY_FILE = "/frequency.file-";
+  private static final String FREQUENCY_FILE = "frequency.file-";
   
   private static final int MAX_CHUNKSIZE = 10000;
   
   private static final int MIN_CHUNKSIZE = 100;
   
-  private static final String OUTPUT_FILES_PATTERN = "/part-*";
+  private static final String OUTPUT_FILES_PATTERN = "part-*";
   
   private static final int SEQUENCEFILE_BYTE_OVERHEAD = 45;
   
-  private static final String VECTOR_OUTPUT_FOLDER = "/partial-vectors-";
+  private static final String VECTOR_OUTPUT_FOLDER = "partial-vectors-";
   
-  private static final String WORDCOUNT_OUTPUT_FOLDER = "/df-count";
+  private static final String WORDCOUNT_OUTPUT_FOLDER = "df-count";
   
   /**
    * Cannot be initialized. Use the static functions
@@ -112,8 +112,8 @@ public final class TFIDFConverter {
    *          partial vectors without thrashing the system due to increased swapping
    * @throws IOException
    */
-  public static void processTfIdf(String input,
-                                  String output,
+  public static void processTfIdf(Path input,
+                                  Path output,
                                   int chunkSizeInMegabytes,
                                   int minDf,
                                   int maxDFPercent,
@@ -136,10 +136,9 @@ public final class TFIDFConverter {
       maxDFPercent = 99;
     }
     
-    Path inputPath = new Path(input);
-    Path wordCountPath = new Path(output + WORDCOUNT_OUTPUT_FOLDER);
+    Path wordCountPath = new Path(output, WORDCOUNT_OUTPUT_FOLDER);
     
-    startDFCounting(inputPath, wordCountPath);
+    startDFCounting(input, wordCountPath);
     Pair<Long[],List<Path>> datasetFeatures = createDictionaryChunks(wordCountPath, output,
       chunkSizeInMegabytes);
     
@@ -147,8 +146,7 @@ public final class TFIDFConverter {
     List<Path> partialVectorPaths = new ArrayList<Path>();
     List<Path> dictionaryChunks = datasetFeatures.getSecond();
     for (Path dictionaryChunk : dictionaryChunks) {
-      Path partialVectorOutputPath = getPath(output + VECTOR_OUTPUT_FOLDER,
-        partialVectorIndex++);
+      Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
       makePartialVectors(input, datasetFeatures.getFirst()[0], datasetFeatures.getFirst()[1],
         minDf, maxDFPercent, dictionaryChunk, partialVectorOutputPath, sequentialAccessOutput);
@@ -178,7 +176,7 @@ public final class TFIDFConverter {
    * @throws IOException
    */
   private static Pair<Long[],List<Path>> createDictionaryChunks(Path featureCountPath,
-                                                                String dictionaryPathBase,
+                                                                Path dictionaryPathBase,
                                                                 int chunkSizeInMegabytes) throws IOException {
     List<Path> chunkPaths = new ArrayList<Path>();
     
@@ -187,12 +185,11 @@ public final class TFIDFConverter {
     Configuration conf = new Configuration();
     
     FileSystem fs = FileSystem.get(featureCountPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath.toString()
-                                                      + OUTPUT_FILES_PATTERN));
+    FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath, OUTPUT_FILES_PATTERN));
     
     long chunkSizeLimit = chunkSizeInMegabytes * 1024L * 1024L;
     int chunkIndex = 0;
-    Path chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
+    Path chunkPath = new Path(dictionaryPathBase, FREQUENCY_FILE + chunkIndex);
     chunkPaths.add(chunkPath);
     SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class,
         LongWritable.class);
@@ -209,7 +206,7 @@ public final class TFIDFConverter {
           freqWriter.close();
           chunkIndex++;
           
-          chunkPath = getPath(dictionaryPathBase + FREQUENCY_FILE, chunkIndex);
+          chunkPath = new Path(dictionaryPathBase, FREQUENCY_FILE + chunkIndex);
           chunkPaths.add(chunkPath);
           
           freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
@@ -233,10 +230,6 @@ public final class TFIDFConverter {
     return new Pair<Long[],List<Path>>(counts, chunkPaths);
   }
   
-  public static Path getPath(String basePath, int index) {
-    return new Path(basePath + index);
-  }
-  
   /**
    * Create a partial tfidf vector using a chunk of features from the input vectors. The input vectors has to
    * be in the {@link SequenceFile} format
@@ -258,7 +251,7 @@ public final class TFIDFConverter {
    *          output directory were the partial vectors have to be created
    * @throws IOException
    */
-  private static void makePartialVectors(String input,
+  private static void makePartialVectors(Path input,
                                          Long featureCount,
                                          Long vectorCount,
                                          int minDf,
@@ -283,7 +276,7 @@ public final class TFIDFConverter {
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(VectorWritable.class);
     DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
-    FileInputFormat.setInputPaths(conf, new Path(input));
+    FileInputFormat.setInputPaths(conf, input);
     
     FileOutputFormat.setOutputPath(conf, output);
     

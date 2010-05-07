@@ -30,6 +30,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -95,8 +96,8 @@ public class CDbwDriver {
         return;
       }
 
-      String input = cmdLine.getValue(inputOpt).toString();
-      String output = cmdLine.getValue(outputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path output = new Path(cmdLine.getValue(outputOpt).toString());
       String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
       if (cmdLine.hasOption(modelOpt)) {
         modelFactory = cmdLine.getValue(modelOpt).toString();
@@ -126,17 +127,17 @@ public class CDbwDriver {
    * @param numReducers
    *          the number of Reducers desired
    */
-  public static void runJob(String clustersIn, String clusteredPointsIn, String output, String distanceMeasureClass,
+  public static void runJob(Path clustersIn, Path clusteredPointsIn, Path output, String distanceMeasureClass,
       int numIterations, int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
       IOException, SecurityException, NoSuchMethodException, InvocationTargetException {
 
-    String stateIn = output + "/representativePoints-0";
+    Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
 
     for (int iteration = 0; iteration < numIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      String stateOut = output + "/representativePoints-" + (iteration + 1);
+      Path stateOut = new Path(output, "representativePoints-" + (iteration + 1));
       runIteration(clusteredPointsIn, stateIn, stateOut, distanceMeasureClass, numReducers);
       // now point the input to the old output directory
       stateIn = stateOut;
@@ -144,26 +145,24 @@ public class CDbwDriver {
 
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CDbwDriver.class);
-    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
     System.out.println("CDbw = " + evaluator.CDbw());
   }
 
-  private static void writeInitialState(String output, String clustersIn) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException, SecurityException, NoSuchMethodException, InvocationTargetException {
+  private static void writeInitialState(Path output, Path clustersIn)
+      throws InstantiationException, IllegalAccessException, IOException, SecurityException {
 
     JobConf job = new JobConf(KMeansDriver.class);
-    Path outPath = new Path(output);
-    FileSystem fs = FileSystem.get(outPath.toUri(), job);
-    File f = new File(clustersIn);
-    for (File part : f.listFiles()) {
-      if (!part.getName().startsWith(".")) {
-        Path inPart = new Path(clustersIn + "/" + part.getName());
+    FileSystem fs = FileSystem.get(output.toUri(), job);
+    for (FileStatus part : fs.listStatus(clustersIn)) {
+      if (!part.getPath().getName().startsWith(".")) {
+        Path inPart = part.getPath();
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, job);
         Writable key = (Writable) reader.getKeyClass().newInstance();
         Writable value = (Writable) reader.getValueClass().newInstance();
-        Path path = new Path(output + "/" + part.getName());
+        Path path = new Path(output, inPart.getName());
         SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, IntWritable.class, VectorWritable.class);
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
@@ -191,7 +190,8 @@ public class CDbwDriver {
    * @param numReducers
    *          the number of Reducers desired
    */
-  public static void runIteration(String input, String stateIn, String stateOut, String distanceMeasureClass, int numReducers) {
+  public static void runIteration(Path input, Path stateIn, Path stateOut,
+                                  String distanceMeasureClass, int numReducers) {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CDbwDriver.class);
 
@@ -200,16 +200,15 @@ public class CDbwDriver {
     conf.setMapOutputKeyClass(IntWritable.class);
     conf.setMapOutputValueClass(WeightedVectorWritable.class);
 
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(stateOut);
-    FileOutputFormat.setOutputPath(conf, outPath);
+    FileInputFormat.setInputPaths(conf, input);
+    FileOutputFormat.setOutputPath(conf, stateOut);
 
     conf.setMapperClass(CDbwMapper.class);
     conf.setReducerClass(CDbwReducer.class);
     conf.setNumReduceTasks(numReducers);
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.set(STATE_IN_KEY, stateIn);
+    conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
 
     client.setConf(conf);
