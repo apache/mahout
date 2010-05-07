@@ -131,10 +131,11 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     for (SoftCluster cluster : clusterList) {
       System.out.println(cluster.asFormatString(null));
       List<WeightedVectorWritable> list = pointClusterInfo.get(cluster.getId());
-      if (list != null)
+      if (list != null) {
         for (WeightedVectorWritable vector : list) {
           System.out.println("\t" + vector);
         }
+      }
     }
   }
 

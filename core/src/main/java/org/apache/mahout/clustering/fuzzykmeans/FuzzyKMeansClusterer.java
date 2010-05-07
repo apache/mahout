@@ -185,7 +185,7 @@ public class FuzzyKMeansClusterer {
    * @param output
    * @throws IOException
    */
-  void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector clusterPdfList,
+  static void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector clusterPdfList,
       OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
     int clusterId = -1;
     double clusterPdf = 0;

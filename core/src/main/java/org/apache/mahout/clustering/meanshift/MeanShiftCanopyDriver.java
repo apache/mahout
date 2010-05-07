@@ -53,7 +53,7 @@ public final class MeanShiftCanopyDriver {
 
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.meanshift.stateInKey";
 
-  protected static final String CONTROL_CONVERGED = "control/converged";
+  private static final String CONTROL_CONVERGED = "control/converged";
 
   private MeanShiftCanopyDriver() {
   }

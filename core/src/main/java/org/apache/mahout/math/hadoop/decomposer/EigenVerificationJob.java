@@ -133,7 +133,7 @@ public class EigenVerificationJob extends AbstractJob {
     return 0;
   }
 
-  public Map<String,String> handleArgs(String[] args) {
+  public static Map<String,String> handleArgs(String[] args) {
     Option eigenInputOpt = buildOption("eigenInput", "ei",
         "The Path for purported eigenVector input files (SequenceFile<WritableComparable,VectorWritable>.", null);
     Option corpusInputOpt = buildOption("corpusInput", "ci",

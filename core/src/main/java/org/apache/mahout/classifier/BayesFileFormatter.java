@@ -258,10 +258,7 @@ public final class BayesFileFormatter {
    * @throws IOException
    *           if the files can't be dealt with properly
    */
-  public static void main(String[] args) throws ClassNotFoundException,
-                                        IllegalAccessException,
-                                        InstantiationException,
-                                        IOException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -29,7 +28,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 
 public class MeanShiftCanopyClusterer {
 
@@ -185,7 +183,7 @@ public class MeanShiftCanopyClusterer {
    * Story: User can exercise the reference implementation to verify that the test datapoints are clustered in
    * a reasonable manner.
    */
-  public void testReferenceImplementation() {
+  public static void testReferenceImplementation() {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(new EuclideanDistanceMeasure(), 4.0, 1.0, 0.5);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     // add all points to the canopies

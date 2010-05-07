@@ -26,7 +26,6 @@ import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.list.IntArrayList;

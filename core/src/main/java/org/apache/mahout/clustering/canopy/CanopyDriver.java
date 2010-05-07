@@ -28,7 +28,6 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -156,7 +155,7 @@ public final class CanopyDriver {
     
     FileInputFormat.setInputPaths(conf, input);
     
-    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + "0");
+    Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
     FileOutputFormat.setOutputPath(conf, canopyOutputDir);
     
     conf.setMapperClass(CanopyMapper.class);

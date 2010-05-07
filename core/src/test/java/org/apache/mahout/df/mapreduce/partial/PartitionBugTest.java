@@ -24,7 +24,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
@@ -133,7 +132,6 @@ public class PartitionBugTest extends MahoutTestCase {
 
     @Override
     public long maxDepth() {
-      // TODO Auto-generated method stub
       return 0;
     }
 
@@ -144,7 +142,6 @@ public class PartitionBugTest extends MahoutTestCase {
 
     @Override
     public long nbNodes() {
-      // TODO Auto-generated method stub
       return 0;
     }
 

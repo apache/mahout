@@ -83,8 +83,7 @@ public class TestKmeansClustering extends MahoutTestCase {
 
   public static List<VectorWritable> getPointsWritable(double[][] raw) {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    for (int i = 0; i < raw.length; i++) {
-      double[] fr = raw[i];
+    for (double[] fr : raw) {
       Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
@@ -94,8 +93,7 @@ public class TestKmeansClustering extends MahoutTestCase {
 
   public static List<Vector> getPoints(double[][] raw) {
     List<Vector> points = new ArrayList<Vector>();
-    for (int i = 0; i < raw.length; i++) {
-      double[] fr = raw[i];
+    for (double[] fr : raw) {
       Vector vec = new SequentialAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(vec);
@@ -313,8 +311,7 @@ public class TestKmeansClustering extends MahoutTestCase {
 
       // now verify that all clusters have correct centers
       converged = true;
-      for (int i = 0; i < reference.size(); i++) {
-        Cluster ref = reference.get(i);
+      for (Cluster ref : reference) {
         String key = ref.getIdentifier();
         List<Cluster> values = collector3.getValue(new Text(key));
         Cluster cluster = values.get(0);

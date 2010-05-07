@@ -241,7 +241,7 @@ public class DirichletClusterer<O> {
    * @param output
    * @throws IOException
    */
-  void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster> clusters, Vector pi,
+  static void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster> clusters, Vector pi,
       OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
     int clusterId = -1;
     double clusterPdf = 0;

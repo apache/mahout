@@ -60,10 +60,11 @@ public class InMemInputFormatTest extends MahoutTestCase {
 
         assertEquals(expectedId, split.getFirstId());
 
-        if (index < numSplits - 1)
+        if (index < numSplits - 1) {
           assertEquals(nbTreesPerSplit, split.getNbTrees());
-        else
+        } else {
           assertEquals(nbTrees - totalTrees, split.getNbTrees());
+        }
 
         totalTrees += split.getNbTrees();
         expectedId += split.getNbTrees();

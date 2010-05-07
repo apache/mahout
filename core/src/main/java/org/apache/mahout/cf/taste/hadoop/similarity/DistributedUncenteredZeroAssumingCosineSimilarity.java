@@ -42,7 +42,7 @@ public final class DistributedUncenteredZeroAssumingCosineSimilarity
     double length = 0.0;
     while (prefValues.hasNext()) {
       float prefValue = prefValues.next();
-      if (!((Float)prefValue).isNaN()) {
+      if (!Float.isNaN(prefValue)) {
         length += prefValue * prefValue;
       }
     }

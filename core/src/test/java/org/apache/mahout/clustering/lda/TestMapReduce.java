@@ -16,11 +16,7 @@
  */
 package org.apache.mahout.clustering.lda;
 
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.verify;
+import org.easymock.classextension.EasyMock;
 
 import java.io.File;
 import java.util.Iterator;
@@ -86,8 +82,6 @@ public class TestMapReduce extends MahoutTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     random = RandomUtils.getRandom();
-    File f = new File("input");
-    f.mkdir();
   }
 
   /**
@@ -102,14 +96,14 @@ public class TestMapReduce extends MahoutTestCase {
     for(int i = 0; i < NUM_TESTS; ++i) {
       RandomAccessSparseVector v = generateRandomDoc(100,0.3);
       int myNumWords = numNonZero(v);
-      LDAMapper.Context mock = createMock(LDAMapper.Context.class);
+      LDAMapper.Context mock = EasyMock.createMock(LDAMapper.Context.class);
 
-      mock.write(isA(IntPairWritable.class),isA(DoubleWritable.class));
-      expectLastCall().times(myNumWords * NUM_TOPICS + NUM_TOPICS + 1);
-      replay(mock);
+      mock.write(EasyMock.isA(IntPairWritable.class), EasyMock.isA(DoubleWritable.class));
+      EasyMock.expectLastCall().times(myNumWords * NUM_TOPICS + NUM_TOPICS + 1);
+      EasyMock.replay(mock);
       VectorWritable vw = new VectorWritable(v);
       mapper.map(new Text("tstMapper"), vw, mock);
-      verify(mock);
+      EasyMock.verify(mock);
     }
   }
 
