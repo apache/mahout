@@ -59,7 +59,7 @@ import org.apache.mahout.utils.vectors.text.term.TermCountReducer;
  */
 public final class DictionaryVectorizer {
   
-  public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "/vectors";
+  public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "vectors";
   
   public static final String MIN_SUPPORT = "min.support";
   
@@ -67,7 +67,7 @@ public final class DictionaryVectorizer {
   
   public static final int DEFAULT_MIN_SUPPORT = 2;
   
-  private static final String DICTIONARY_FILE = "/dictionary.file-";
+  private static final String DICTIONARY_FILE = "dictionary.file-";
   
   private static final int MAX_CHUNKSIZE = 10000;
   
@@ -78,9 +78,9 @@ public final class DictionaryVectorizer {
   // 4 byte overhead for each entry in the OpenObjectIntHashMap
   private static final int DICTIONARY_BYTE_OVERHEAD = 4;
   
-  private static final String VECTOR_OUTPUT_FOLDER = "/partial-vectors-";
+  private static final String VECTOR_OUTPUT_FOLDER = "partial-vectors-";
   
-  private static final String DICTIONARY_JOB_FOLDER = "/wordcount";
+  private static final String DICTIONARY_JOB_FOLDER = "wordcount";
   
   /**
    * Cannot be initialized. Use the static functions
@@ -131,7 +131,7 @@ public final class DictionaryVectorizer {
       minSupport = DEFAULT_MIN_SUPPORT;
     }
     
-    Path dictionaryJobPath = new Path(output + DICTIONARY_JOB_FOLDER);
+    Path dictionaryJobPath = new Path(output, DICTIONARY_JOB_FOLDER);
     
     int[] maxTermDimension = new int[1];
     List<Path> dictionaryChunks;
@@ -143,7 +143,7 @@ public final class DictionaryVectorizer {
       CollocDriver.generateAllGrams(input, dictionaryJobPath, maxNGramSize,
         minSupport, minLLRValue, numReducers);
       dictionaryChunks = createDictionaryChunks(minSupport, new Path(
-          output + DICTIONARY_JOB_FOLDER, CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
+          new Path(output, DICTIONARY_JOB_FOLDER), CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
         chunkSizeInMegabytes, new DoubleWritable(), maxTermDimension);
     }
     
