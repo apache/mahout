@@ -17,6 +17,8 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
@@ -43,12 +45,16 @@ public class CDMahoutEvaluatorTest extends MahoutTestCase {
     }
 
     // dataset
+    // This is sensitive to the working directory where the test is run:
     Path input = new Path("target/test-classes/wdbc");
     CDMahoutEvaluator.initializeDataSet(input);
 
     // evaluate the rules
     List<CDFitness> results = new ArrayList<CDFitness>();
-    CDMahoutEvaluator.evaluate(rules, target, input, results);
+    Path output = getTestTempDirPath("output");
+    FileSystem fs = output.getFileSystem(new Configuration());
+    fs.delete(output, true); // It's unhappy if this directory exists
+    CDMahoutEvaluator.evaluate(rules, target, input, output, results);
 
     // check the results
     for (int index = 0; index < nbrules; index++) {

@@ -63,7 +63,7 @@ public class CDMahoutEvaluator {
    * @throws IOException
    */
   public static void evaluate(List<? extends Rule> rules, int target,
-                              Path inpath, List<CDFitness> evaluations, DatasetSplit split)
+                              Path inpath, Path output, List<CDFitness> evaluations, DatasetSplit split)
   throws IOException {
     JobConf conf = new JobConf(CDMahoutEvaluator.class);
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
@@ -72,13 +72,11 @@ public class CDMahoutEvaluator {
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir()) {
       throw new IllegalArgumentException("Input path not found or is not a directory");
     }
-    
-    Path outpath = new Path("output");
-    
-    configureJob(conf, rules, target, inpath, outpath, split);
+
+    configureJob(conf, rules, target, inpath, output, split);
     JobClient.runJob(conf);
     
-    importEvaluations(fs, conf, outpath, evaluations);
+    importEvaluations(fs, conf, output, evaluations);
   }
   
   /**
@@ -105,11 +103,11 @@ public class CDMahoutEvaluator {
    * @return the evaluation
    * @throws IOException
    */
-  public static CDFitness evaluate(Rule rule, int target, Path inpath,
+  public static CDFitness evaluate(Rule rule, int target, Path inpath, Path output,
                                    DatasetSplit split) throws IOException {
     List<CDFitness> evals = new ArrayList<CDFitness>();
     
-    evaluate(Arrays.asList(rule), target, inpath, evals, split);
+    evaluate(Arrays.asList(rule), target, inpath, output, evals, split);
     
     return evals.get(0);
   }
@@ -126,8 +124,8 @@ public class CDMahoutEvaluator {
    * @throws IOException
    */
   public static void evaluate(List<? extends Rule> rules, int target,
-                              Path inpath, List<CDFitness> evaluations) throws IOException {
-    evaluate(rules, target, inpath, evaluations, new DatasetSplit(1));
+                              Path inpath, Path output, List<CDFitness> evaluations) throws IOException {
+    evaluate(rules, target, inpath, output, evaluations, new DatasetSplit(1));
   }
   
   /**

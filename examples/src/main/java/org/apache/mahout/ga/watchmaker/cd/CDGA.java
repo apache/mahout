@@ -200,13 +200,15 @@ public class CDGA {
     
     // evolve the rules over the training set
     Rule solution = engine.evolve(popSize, 1, new GenerationCount(genCount));
-    
+
+    Path output = new Path("output");
+
     // fitness over the training set
-    CDFitness bestTrainFit = CDMahoutEvaluator.evaluate(solution, target, inpath, split);
+    CDFitness bestTrainFit = CDMahoutEvaluator.evaluate(solution, target, inpath, output, split);
     
     // fitness over the testing set
     split.setTraining(false);
-    CDFitness bestTestFit = CDMahoutEvaluator.evaluate(solution, target, inpath, split);
+    CDFitness bestTestFit = CDMahoutEvaluator.evaluate(solution, target, inpath, output, split);
     
     // evaluate the solution over the testing set
     log.info("Best solution fitness (train set) : {}", bestTrainFit);

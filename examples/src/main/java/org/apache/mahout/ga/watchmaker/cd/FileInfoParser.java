@@ -117,10 +117,10 @@ public class FileInfoParser {
       throw new IllegalArgumentException("null inpath parameter");
     }
     if (!fs.exists(inpath)) {
-      throw new IllegalArgumentException("Input path does not exist");
+      throw new IllegalArgumentException("Input path does not exist: " + inpath);
     }
     if (!fs.getFileStatus(inpath).isDir()) {
-      throw new IllegalArgumentException("Input path should be a directory");
+      throw new IllegalArgumentException("Input path should be a directory: " + inpath);
     }
     
     // info file name

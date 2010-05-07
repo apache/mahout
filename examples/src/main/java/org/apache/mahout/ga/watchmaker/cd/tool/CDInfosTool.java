@@ -75,7 +75,7 @@ public class CDInfosTool {
    *        generated descriptions for each non ignored attribute
    * @throws IOException
    */
-  public static void gatherInfos(Descriptors descriptors, Path inpath,
+  public static void gatherInfos(Descriptors descriptors, Path inpath, Path output,
                                  List<String> descriptions) throws IOException {
     JobConf conf = new JobConf(CDInfosTool.class);
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
@@ -84,13 +84,11 @@ public class CDInfosTool {
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir()) {
       throw new IllegalArgumentException("Input path not found or is not a directory");
     }
-    
-    Path outpath = new Path("output");
-    
-    configureJob(conf, descriptors, inpath, outpath);
+
+    configureJob(conf, descriptors, inpath, output);
     JobClient.runJob(conf);
     
-    importDescriptions(fs, conf, outpath, descriptions);
+    importDescriptions(fs, conf, output, descriptions);
   }
   
   /**
@@ -240,20 +238,20 @@ public class CDInfosTool {
         return;
       }
       
-      String input = cmdLine.getValue(inputOpt).toString();
+      Path input = new Path(cmdLine.getValue(inputOpt).toString());
+      Path output = new Path("output"); // TODO surely this should be configurable?
       
-      Path inpath = new Path(input);
-      FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
+      FileSystem fs = FileSystem.get(input.toUri(), new Configuration());
       
       log.info("Loading Descriptors...");
-      Descriptors descriptors = loadDescriptors(fs, inpath);
+      Descriptors descriptors = loadDescriptors(fs, input);
       
       log.info("Gathering informations...");
       List<String> descriptions = new ArrayList<String>();
-      gatherInfos(descriptors, inpath, descriptions);
+      gatherInfos(descriptors, input, output, descriptions);
       
       log.info("Storing Descriptions...");
-      storeDescriptions(fs, inpath, descriptors, descriptions);
+      storeDescriptions(fs, input, descriptors, descriptions);
     } catch (OptionException e) {
       log.error("Error while parsing options", e);
       CommandLineUtil.printHelp(group);

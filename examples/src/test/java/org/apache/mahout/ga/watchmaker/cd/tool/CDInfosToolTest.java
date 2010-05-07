@@ -210,6 +210,7 @@ public class CDInfosToolTest extends MahoutTestCase {
 
       // random dataset
       Path inpath = getTestTempDirPath("input");
+      Path output = getTestTempDirPath("output");
       FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
       HadoopUtil.overwriteOutput(inpath);
 
@@ -217,7 +218,8 @@ public class CDInfosToolTest extends MahoutTestCase {
 
       // Start the tool
       List<String> result = new ArrayList<String>();
-      CDInfosTool.gatherInfos(descriptors, inpath, result);
+      fs.delete(output, true); // It's unhappy if this directory exists
+      CDInfosTool.gatherInfos(descriptors, inpath, output, result);
 
       // check the results
       Collection<String> target = new ArrayList<String>();

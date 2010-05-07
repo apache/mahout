@@ -27,7 +27,6 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -141,7 +140,8 @@ public final class Job {
       "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2, true);
     
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-0", "output/clusteredPoints");
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
 
   }

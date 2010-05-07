@@ -27,7 +27,6 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -149,7 +148,8 @@ public final class Job {
     KMeansDriver.runJob(directoryContainingConvertedInput, new Path(output, Cluster.INITIAL_CLUSTERS_DIR), output, measureClass,
         convergenceDelta, maxIterations, 1, true);
 
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", "output/clusteredPoints");
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 }

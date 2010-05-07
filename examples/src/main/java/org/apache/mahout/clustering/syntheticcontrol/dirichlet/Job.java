@@ -30,7 +30,6 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
@@ -130,13 +129,6 @@ public class Job {
    *          the alpha0 value for the DirichletDistribution
    * @param numReducers
    *          the desired number of reducers
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   * @throws ClassNotFoundException
-   * @throws InvocationTargetException
-   * @throws NoSuchMethodException
-   * @throws IllegalArgumentException
-   * @throws SecurityException
    */
   public static void runJob(Path input,
                             Path output,
@@ -159,8 +151,9 @@ public class Job {
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
     DirichletDriver.runJob(directoryContainingConvertedInput, output, modelFactory,
       vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers, true, true, 0);
-    
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-5", "output/clusteredPoints");
+
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-5"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
 
   }

@@ -133,7 +133,8 @@ public final class Job {
     MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2,
         convergenceDelta, maxIterations, true, true);
 
-    ClusterDumper clusterDumper = new ClusterDumper("output/clusters-10", "output/clusteredPoints");
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
 
   }

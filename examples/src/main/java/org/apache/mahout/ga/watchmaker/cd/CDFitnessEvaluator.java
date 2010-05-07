@@ -60,9 +60,10 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
   protected void evaluate(List<? extends Rule> population,
                           List<Double> evaluations) {
     evals.clear();
-    
+
+    Path output = new Path("output");
     try {
-      CDMahoutEvaluator.evaluate(population, target, dataset, evals, split);
+      CDMahoutEvaluator.evaluate(population, target, dataset, output, evals, split);
     } catch (IOException e) {
       throw new IllegalStateException("Exception while evaluating the population", e);
     }
