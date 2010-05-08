@@ -30,9 +30,11 @@ public class VectorWritable extends Configured implements Writable {
   public static final int FLAG_DENSE = 0x01;
   public static final int FLAG_SEQUENTIAL = 0x02;
   public static final int FLAG_NAMED = 0x04;
-  public static final int NUM_FLAGS = 3;
+  public static final int FLAG_LAX_PRECISION = 0x08;
+  public static final int NUM_FLAGS = 4;
 
   private Vector vector;
+  private boolean writesLaxPrecision = false;
 
   public VectorWritable() {
   }
@@ -41,12 +43,29 @@ public class VectorWritable extends Configured implements Writable {
     this.vector = vector;
   }
 
+  /**
+   * @return {@link Vector} that this {@link VectorWritable} is to write, or has
+   *  just read
+   */
   public Vector get() {
     return vector;
   }
 
   public void set(Vector vector) {
     this.vector = vector;
+  }
+
+  /**
+   * @return true if this {@link VectorWritable} is allowed to encode {@link Vector}
+   *  values using fewer bytes, possibly losing precision. In particular this means
+   *  that floating point values will be encoded as floats, not doubles.
+   */
+  public boolean isWritesLaxPrecision() {
+    return writesLaxPrecision;
+  }
+
+  public void setWritesLaxPrecision(boolean writesLaxPrecision) {
+    this.writesLaxPrecision = writesLaxPrecision;
   }
 
   @Override
@@ -56,13 +75,20 @@ public class VectorWritable extends Configured implements Writable {
     boolean sequential = vector.isSequentialAccess();
     boolean named = vector instanceof NamedVector;
 
-    int flags = (dense ? FLAG_DENSE : 0) | (sequential ? FLAG_SEQUENTIAL : 0) | (named ? FLAG_NAMED : 0);
-    out.writeByte(flags);
+    boolean writesLaxPrecision = this.writesLaxPrecision;
+    out.writeByte((dense ? FLAG_DENSE : 0) |
+                  (sequential ? FLAG_SEQUENTIAL : 0) |
+                  (named ? FLAG_NAMED : 0) |
+                  (writesLaxPrecision ? FLAG_LAX_PRECISION : 0));
 
     if (dense) {
       out.writeInt(vector.size());
       for (Vector.Element element : vector) {
-        out.writeDouble(element.get());
+        if (writesLaxPrecision) {
+          out.writeFloat((float) element.get());
+        } else {
+          out.writeDouble(element.get());
+        }
       }
     } else {
       out.writeInt(vector.size());
@@ -71,7 +97,11 @@ public class VectorWritable extends Configured implements Writable {
       while (iter.hasNext()) {
         Vector.Element element = iter.next();
         out.writeInt(element.index());
-        out.writeDouble(element.get());
+        if (writesLaxPrecision) {
+          out.writeFloat((float) element.get());
+        } else {
+          out.writeDouble(element.get());
+        }
       }
     }
     if (named) {
@@ -83,18 +113,19 @@ public class VectorWritable extends Configured implements Writable {
   public void readFields(DataInput in) throws IOException {
     int flags = in.readByte();
     if (flags >> NUM_FLAGS != 0) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("Unknown flags set: " + Integer.toString(flags, 2));
     }
     boolean dense = (flags & FLAG_DENSE) != 0;
     boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
     boolean named = (flags & FLAG_NAMED) != 0;
+    boolean laxPrecision = (flags & FLAG_LAX_PRECISION) != 0;
 
     Vector v;
     if (dense) {
       int size = in.readInt();
       double[] values = new double[size];
       for (int i = 0; i < size; i++) {
-        values[i] = in.readDouble();
+        values[i] = laxPrecision ? in.readFloat() : in.readDouble();
       }
       v = new DenseVector(values);
     } else {
@@ -107,7 +138,7 @@ public class VectorWritable extends Configured implements Writable {
       }
       for (int i = 0; i < numNonDefaultElements; i++) {
         int index = in.readInt();
-        double value = in.readDouble();
+        double value = laxPrecision ? in.readFloat() : in.readDouble();
         v.setQuick(index, value);
       }
     }
