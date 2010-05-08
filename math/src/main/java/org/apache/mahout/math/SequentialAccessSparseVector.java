@@ -96,10 +96,16 @@ public class SequentialAccessSparseVector extends AbstractVector {
     return new SequentialAccessSparseVector(size(), values.clone());
   }
 
+  /**
+   * @return false
+   */
   public boolean isDense() {
     return false;
   }
 
+  /**
+   * @return true
+   */
   public boolean isSequentialAccess() {
     return true;
   }

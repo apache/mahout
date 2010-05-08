@@ -90,10 +90,16 @@ public class RandomAccessSparseVector extends AbstractVector {
     return this;
   }
 
+  /**
+   * @return false
+   */
   public boolean isDense() {
     return false;
   }
 
+  /**
+   * @return false
+   */
   public boolean isSequentialAccess() {
     return false;
   }

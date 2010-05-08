@@ -78,10 +78,16 @@ public class DenseVector extends AbstractVector {
     return new DenseVector(values.clone());
   }
 
+  /**
+   * @return true
+   */
   public boolean isDense() {
     return true;
   }
 
+  /**
+   * @return true
+   */
   public boolean isSequentialAccess() {
     return true;
   }
