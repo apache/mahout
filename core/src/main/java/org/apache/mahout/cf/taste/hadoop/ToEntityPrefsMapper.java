@@ -32,9 +32,12 @@ import java.util.regex.Pattern;
 abstract class ToEntityPrefsMapper extends MapReduceBase implements
     Mapper<LongWritable,Text,LongWritable,LongWritable> {
 
-  private static final Pattern COMMA = Pattern.compile(",");
+  static final String TRANSPOSE_USER_ITEM = "transposeUserItem";
+
+  private static final Pattern DELIMITER = Pattern.compile("[\t,]");
 
   private boolean booleanData;
+  private boolean transpose;
   private final boolean itemKey;
 
   ToEntityPrefsMapper(boolean itemKey) {
@@ -44,6 +47,7 @@ abstract class ToEntityPrefsMapper extends MapReduceBase implements
   @Override
   public void configure(JobConf jobConf) {
     booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
+    transpose = jobConf.getBoolean(TRANSPOSE_USER_ITEM, false);
   }
 
   @Override
@@ -51,10 +55,13 @@ abstract class ToEntityPrefsMapper extends MapReduceBase implements
                   Text value,
                   OutputCollector<LongWritable,LongWritable> output,
                   Reporter reporter) throws IOException {
-    String[] tokens = ToEntityPrefsMapper.COMMA.split(value.toString());
+    String[] tokens = ToEntityPrefsMapper.DELIMITER.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
-    if (itemKey) {
+    if (itemKey ^ transpose) {
+      // If using items as keys, and not transposing items and users, then users are items!
+      // Or if not using items as keys (users are, as usual), but transposing items and users,
+      // then users are items! Confused?
       long temp = userID;
       userID = itemID;
       itemID = temp;
