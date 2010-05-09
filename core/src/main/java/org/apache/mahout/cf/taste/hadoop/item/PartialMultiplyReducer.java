@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -32,20 +32,21 @@ import org.apache.mahout.math.function.LongFloatProcedure;
 import org.apache.mahout.math.map.OpenLongFloatHashMap;
 
 public final class PartialMultiplyReducer extends MapReduceBase implements
-    Reducer<IntWritable,VectorOrPrefWritable,LongWritable,VectorWritable> {
+    Reducer<IntWritable,VectorOrPrefWritable,VLongWritable,VectorWritable> {
 
   @Override
   public void reduce(IntWritable key,
                      Iterator<VectorOrPrefWritable> values,
-                     final OutputCollector<LongWritable,VectorWritable> output,
+                     final OutputCollector<VLongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
 
     OpenLongFloatHashMap savedValues = new OpenLongFloatHashMap();
-    Vector cooccurrenceColumn = null;
     final int itemIndex = key.get();
-    final LongWritable userIDWritable = new LongWritable();
+    final VLongWritable userIDWritable = new VLongWritable();
     final VectorWritable vectorWritable = new VectorWritable();
+    vectorWritable.setWritesLaxPrecision(true);
 
+    Vector cooccurrenceColumn = null;
     while (values.hasNext()) {
 
       VectorOrPrefWritable value = values.next();
@@ -60,7 +61,8 @@ public final class PartialMultiplyReducer extends MapReduceBase implements
           savedValues.put(userID, preferenceValue);
         } else {
           // Have seen it
-          Vector partialProduct = cooccurrenceColumn.times(preferenceValue);
+          Vector partialProduct = preferenceValue == 1.0f ?
+              cooccurrenceColumn : cooccurrenceColumn.times(preferenceValue);
           // This makes sure this item isn't recommended for this user:
           partialProduct.set(itemIndex, Double.NEGATIVE_INFINITY);
           userIDWritable.set(userID);

@@ -22,19 +22,19 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
 public final class PreferredItemsPerUserReducer extends MapReduceBase
-    implements Reducer<LongWritable,ItemPrefWithItemVectorWeightWritable, LongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
+    implements Reducer<VLongWritable,ItemPrefWithItemVectorWeightWritable,VLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
 
   @Override
-  public void reduce(LongWritable user,
+  public void reduce(VLongWritable user,
                      Iterator<ItemPrefWithItemVectorWeightWritable> itemPrefs,
-                     OutputCollector<LongWritable,ItemPrefWithItemVectorWeightArrayWritable> output,
+                     OutputCollector<VLongWritable,ItemPrefWithItemVectorWeightArrayWritable> output,
                      Reporter reporter)
       throws IOException {
 

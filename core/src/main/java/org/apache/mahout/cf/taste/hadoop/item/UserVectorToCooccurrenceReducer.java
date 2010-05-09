@@ -65,7 +65,9 @@ public final class UserVectorToCooccurrenceReducer extends MapReduceBase impleme
       }
     } else {
       if (cooccurrenceRow != null) {
-        output.collect(new IntWritable(lastItem1ID), new VectorWritable(cooccurrenceRow));
+        VectorWritable vw = new VectorWritable(cooccurrenceRow);
+        vw.setWritesLaxPrecision(true);
+        output.collect(new IntWritable(lastItem1ID), vw);
       }
       lastItem1ID = item1ID;
       lastItem2ID = item2ID;

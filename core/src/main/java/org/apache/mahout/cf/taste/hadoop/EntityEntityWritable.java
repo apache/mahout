@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableUtils;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link WritableComparable} encapsulating two items. */
@@ -55,14 +56,14 @@ public final class EntityEntityWritable
   
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeLong(aID);
-    out.writeLong(bID);
+    WritableUtils.writeVLong(out, aID);
+    WritableUtils.writeVLong(out, bID);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    aID = in.readLong();
-    bID = in.readLong();
+    aID = WritableUtils.readVLong(in);
+    bID = WritableUtils.readVLong(in);
   }
   
   @Override

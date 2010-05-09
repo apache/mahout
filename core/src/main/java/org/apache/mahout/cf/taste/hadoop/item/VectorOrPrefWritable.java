@@ -23,6 +23,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -72,11 +73,13 @@ public final class VectorOrPrefWritable implements Writable {
   public void write(DataOutput out) throws IOException {
     if (vector == null) {
       out.writeBoolean(false);
-      out.writeLong(userID);
+      WritableUtils.writeVLong(out, userID);
       out.writeFloat(value);
     } else {
       out.writeBoolean(true);
-      new VectorWritable(vector).write(out);
+      VectorWritable vw = new VectorWritable(vector);
+      vw.setWritesLaxPrecision(true);
+      vw.write(out);
     }
   }
 
@@ -88,7 +91,7 @@ public final class VectorOrPrefWritable implements Writable {
       writable.readFields(in);
       set(writable.get());
     } else {
-      long theUserID = in.readLong();
+      long theUserID = WritableUtils.readVLong(in);
       float theValue = in.readFloat();
       set(theUserID, theValue);
     }

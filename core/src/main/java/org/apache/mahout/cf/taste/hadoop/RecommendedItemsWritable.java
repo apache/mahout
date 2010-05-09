@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableUtils;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
@@ -56,7 +57,7 @@ public final class RecommendedItemsWritable implements Writable {
   public void write(DataOutput out) throws IOException {
     out.writeInt(recommended.size());
     for (RecommendedItem item : recommended) {
-      out.writeLong(item.getItemID());
+      WritableUtils.writeVLong(out, item.getItemID());
       out.writeFloat(item.getValue());
     }
     
@@ -67,7 +68,7 @@ public final class RecommendedItemsWritable implements Writable {
     int size = in.readInt();
     recommended = new ArrayList<RecommendedItem>(size);
     for (int i = 0; i < size; i++) {
-      long itemID = in.readLong();
+      long itemID = WritableUtils.readVLong(in);
       float value = in.readFloat();
       RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
       recommended.add(recommendedItem);

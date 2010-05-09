@@ -21,12 +21,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 
 /** A {@link Writable} encapsulating an item ID and a count . */
-public final class EntityCountWritable extends LongWritable implements Cloneable {
+public final class EntityCountWritable extends VLongWritable implements Cloneable {
 
   private int count;
 

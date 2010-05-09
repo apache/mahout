@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -50,7 +50,7 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
  * @see RecommenderJob
  */
 public final class RecommenderReducer extends MapReduceBase implements
-    Reducer<LongWritable,NullWritable,LongWritable,RecommendedItemsWritable> {
+    Reducer<VLongWritable,NullWritable,VLongWritable,RecommendedItemsWritable> {
   
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -94,9 +94,9 @@ public final class RecommenderReducer extends MapReduceBase implements
   }
   
   @Override
-  public void reduce(LongWritable key,
+  public void reduce(VLongWritable key,
                      Iterator<NullWritable> values,
-                     OutputCollector<LongWritable,RecommendedItemsWritable> output,
+                     OutputCollector<VLongWritable,RecommendedItemsWritable> output,
                      Reporter reporter) throws IOException {
     long userID = key.get();
     List<RecommendedItem> recommendedItems;
@@ -112,7 +112,7 @@ public final class RecommenderReducer extends MapReduceBase implements
       }
     }
     RecommendedItemsWritable writable = new RecommendedItemsWritable(recommendedItems);
-    output.collect(new LongWritable(userID), writable);
+    output.collect(key, writable);
     reporter.getCounter(ReducerMetrics.USERS_PROCESSED).increment(1L);
     reporter.getCounter(ReducerMetrics.RECOMMENDATIONS_MADE).increment(recommendedItems.size());
   }

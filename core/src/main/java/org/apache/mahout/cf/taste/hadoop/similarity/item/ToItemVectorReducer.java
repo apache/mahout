@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -36,12 +36,12 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
  */
 public final class ToItemVectorReducer
     extends MapReduceBase implements
-    Reducer<LongWritable,EntityPrefWritable,LongWritable,EntityPrefWritableArrayWritable> {
+    Reducer<VLongWritable,EntityPrefWritable,VLongWritable,EntityPrefWritableArrayWritable> {
 
   @Override
-  public void reduce(LongWritable item,
+  public void reduce(VLongWritable item,
                      Iterator<EntityPrefWritable> userPrefs,
-                     OutputCollector<LongWritable,EntityPrefWritableArrayWritable> output,
+                     OutputCollector<VLongWritable,EntityPrefWritableArrayWritable> output,
                      Reporter reporter)
       throws IOException {
 

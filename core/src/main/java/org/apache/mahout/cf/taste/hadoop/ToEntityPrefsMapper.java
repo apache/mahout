@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -30,7 +31,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 abstract class ToEntityPrefsMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,LongWritable,LongWritable> {
+    Mapper<LongWritable,Text,VLongWritable,VLongWritable> {
 
   static final String TRANSPOSE_USER_ITEM = "transposeUserItem";
 
@@ -53,7 +54,7 @@ abstract class ToEntityPrefsMapper extends MapReduceBase implements
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<LongWritable,LongWritable> output,
+                  OutputCollector<VLongWritable,VLongWritable> output,
                   Reporter reporter) throws IOException {
     String[] tokens = ToEntityPrefsMapper.DELIMITER.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
@@ -67,10 +68,10 @@ abstract class ToEntityPrefsMapper extends MapReduceBase implements
       itemID = temp;
     }
     if (booleanData) {
-      output.collect(new LongWritable(userID), new LongWritable(itemID));
+      output.collect(new VLongWritable(userID), new VLongWritable(itemID));
     } else {
       float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
-      output.collect(new LongWritable(userID), new EntityPrefWritable(itemID, prefValue));
+      output.collect(new VLongWritable(userID), new EntityPrefWritable(itemID, prefValue));
     }
   }
 

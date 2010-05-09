@@ -21,12 +21,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.RandomUtils;
 
 /** A {@link Writable} encapsulating an item ID and a preference value. */
-public final class EntityPrefWritable extends LongWritable implements Cloneable {
+public final class EntityPrefWritable extends VLongWritable implements Cloneable {
   
   private float prefValue;
   

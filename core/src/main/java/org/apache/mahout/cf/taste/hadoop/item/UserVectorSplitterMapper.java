@@ -24,7 +24,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -36,7 +36,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public final class UserVectorSplitterMapper extends MapReduceBase implements
-    Mapper<LongWritable, VectorWritable,IntWritable,VectorOrPrefWritable> {
+    Mapper<VLongWritable,VectorWritable,IntWritable,VectorOrPrefWritable> {
 
   static final String USERS_FILE = "usersFile";
   
@@ -63,7 +63,7 @@ public final class UserVectorSplitterMapper extends MapReduceBase implements
   }
 
   @Override
-  public void map(LongWritable key,
+  public void map(VLongWritable key,
                   VectorWritable value,
                   OutputCollector<IntWritable,VectorOrPrefWritable> output,
                   Reporter reporter) throws IOException {

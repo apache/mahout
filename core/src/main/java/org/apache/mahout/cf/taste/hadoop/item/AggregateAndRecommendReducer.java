@@ -30,8 +30,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -46,7 +46,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 public final class AggregateAndRecommendReducer extends MapReduceBase implements
-    Reducer<LongWritable,VectorWritable,LongWritable,RecommendedItemsWritable> {
+    Reducer<VLongWritable,VectorWritable,VLongWritable,RecommendedItemsWritable> {
 
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -69,7 +69,7 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
       Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
       indexItemIDMap = new OpenIntLongHashMap();
       IntWritable index = new IntWritable();
-      LongWritable id = new LongWritable();
+      VLongWritable id = new VLongWritable();
       for (FileStatus status : fs.listStatus(itemIDIndexPath, PARTS_FILTER)) {
         String path = status.getPath().toString();
         SequenceFile.Reader reader =
@@ -85,9 +85,9 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
   }
 
   @Override
-  public void reduce(LongWritable key,
+  public void reduce(VLongWritable key,
                      Iterator<VectorWritable> values,
-                     OutputCollector<LongWritable, RecommendedItemsWritable> output,
+                     OutputCollector<VLongWritable,RecommendedItemsWritable> output,
                      Reporter reporter) throws IOException {
     if (!values.hasNext()) {
       return;

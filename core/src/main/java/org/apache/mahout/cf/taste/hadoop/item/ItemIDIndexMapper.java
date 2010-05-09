@@ -23,25 +23,26 @@ import java.util.regex.Pattern;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
 public final class ItemIDIndexMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,IntWritable,LongWritable> {
+    Mapper<LongWritable,Text,IntWritable,VLongWritable> {
   
   private static final Pattern COMMA = Pattern.compile(",");
   
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<IntWritable,LongWritable> output,
+                  OutputCollector<IntWritable,VLongWritable> output,
                   Reporter reporter) throws IOException {
     String[] tokens = ItemIDIndexMapper.COMMA.split(value.toString());
     long itemID = Long.parseLong(tokens[1]);
     int index = idToIndex(itemID);
-    output.collect(new IntWritable(index), new LongWritable(itemID));
+    output.collect(new IntWritable(index), new VLongWritable(itemID));
   }
   
   static int idToIndex(long itemID) {

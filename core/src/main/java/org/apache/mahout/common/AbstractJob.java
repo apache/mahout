@@ -18,8 +18,8 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli2.Argument;
@@ -136,10 +136,11 @@ public abstract class AbstractJob extends Configured implements Tool {
       return null;
     }
     
-    Map<String,String> result = new HashMap<String,String>();
-    maybePut(result, cmdLine, tempDirOpt, helpOpt);
+    Map<String,String> result = new TreeMap<String,String>();
+    maybePut(result, cmdLine, tempDirOpt, helpOpt, startPhase, endPhase);
     maybePut(result, cmdLine, extraOpts);
-    
+
+    log.info("Command line arguments: {}", result);
     return result;
   }
   
@@ -156,8 +157,13 @@ public abstract class AbstractJob extends Configured implements Tool {
     int phase = currentPhase.getAndIncrement();
     String startPhase = args.get("--startPhase");
     String endPhase = args.get("--endPhase");
-    return !((startPhase != null && phase < Integer.parseInt(startPhase)) ||
-             (endPhase != null && phase > Integer.parseInt(endPhase)));
+    boolean phaseSkipped =
+        (startPhase != null && phase < Integer.parseInt(startPhase)) ||
+        (endPhase != null && phase > Integer.parseInt(endPhase));
+    if (phaseSkipped) {
+      log.info("Skipping phase {}", phase);
+    }
+    return !phaseSkipped;
   }
   
   protected JobConf prepareJobConf(String inputPath,

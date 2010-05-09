@@ -23,7 +23,7 @@ import java.util.Map;
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
@@ -129,10 +129,10 @@ public final class ItemSimilarityJob extends AbstractJob {
                                          itemVectorsPath,
                                          TextInputFormat.class,
                                          ToUserPrefsMapper.class,
-                                         LongWritable.class,
+                                         VLongWritable.class,
                                          EntityPrefWritable.class,
                                          ToItemVectorReducer.class,
-                                         LongWritable.class,
+                                         VLongWritable.class,
                                          EntityPrefWritableArrayWritable.class,
                                          SequenceFileOutputFormat.class);
     JobClient.runJob(itemVectors);
@@ -141,10 +141,10 @@ public final class ItemSimilarityJob extends AbstractJob {
                                          userVectorsPath,
                                          SequenceFileInputFormat.class,
                                          PreferredItemsPerUserMapper.class,
-                                         LongWritable.class,
+                                         VLongWritable.class,
                                          ItemPrefWithItemVectorWeightWritable.class,
                                          PreferredItemsPerUserReducer.class,
-                                         LongWritable.class,
+                                         VLongWritable.class,
                                          ItemPrefWithItemVectorWeightArrayWritable.class,
                                          SequenceFileOutputFormat.class);
 

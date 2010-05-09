@@ -32,6 +32,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
@@ -52,9 +53,9 @@ import org.easymock.classextension.EasyMock;
 public final class ItemSimilarityTest extends MahoutTestCase {
 
   public void testUserPrefsPerItemMapper() throws Exception {
-    OutputCollector<LongWritable,LongWritable> output =
+    OutputCollector<VLongWritable,VLongWritable> output =
         EasyMock.createMock(OutputCollector.class);
-    output.collect(new LongWritable(34L), new EntityPrefWritable(12L, 2.3f));
+    output.collect(new VLongWritable(34L), new EntityPrefWritable(12L, 2.3f));
     EasyMock.replay(output);
 
     new ToUserPrefsMapper().map(new LongWritable(), new Text("12,34,2.3"), output, null);
@@ -67,14 +68,14 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     List<EntityPrefWritable> userPrefs = Arrays.asList(
         new EntityPrefWritable(34L, 1.0f), new EntityPrefWritable(56L, 2.0f));
 
-    OutputCollector<LongWritable,EntityPrefWritableArrayWritable> output =
+    OutputCollector<VLongWritable,EntityPrefWritableArrayWritable> output =
         EasyMock.createMock(OutputCollector.class);
 
-    output.collect(EasyMock.eq(new LongWritable(12L)), equalToUserPrefs(userPrefs));
+    output.collect(EasyMock.eq(new VLongWritable(12L)), equalToUserPrefs(userPrefs));
 
     EasyMock.replay(output);
 
-    new ToItemVectorReducer().reduce(new LongWritable(12L), userPrefs.iterator(), output, null);
+    new ToItemVectorReducer().reduce(new VLongWritable(12L), userPrefs.iterator(), output, null);
 
     EasyMock.verify(output);
   }
@@ -112,7 +113,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
   }
 
   public void testPreferredItemsPerUserMapper() throws Exception {
-    OutputCollector<LongWritable,ItemPrefWithItemVectorWeightWritable> output =
+    OutputCollector<VLongWritable,ItemPrefWithItemVectorWeightWritable> output =
         EasyMock.createMock(OutputCollector.class);
     EntityPrefWritableArrayWritable userPrefs = new EntityPrefWritableArrayWritable(
         new EntityPrefWritable[] {
@@ -122,8 +123,8 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     double weight =
       new DistributedUncenteredZeroAssumingCosineSimilarity().weightOfItemVector(Arrays.asList(2.0f, 3.0f).iterator());
 
-    output.collect(new LongWritable(12L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 2.0f));
-    output.collect(new LongWritable(56L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 3.0f));
+    output.collect(new VLongWritable(12L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 2.0f));
+    output.collect(new VLongWritable(56L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 3.0f));
 
     JobConf conf = new JobConf();
     conf.set(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME,
@@ -133,7 +134,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
     PreferredItemsPerUserMapper mapper = new PreferredItemsPerUserMapper();
     mapper.configure(conf);
-    mapper.map(new LongWritable(34L), userPrefs, output, null);
+    mapper.map(new VLongWritable(34L), userPrefs, output, null);
 
     EasyMock.verify(output);
   }
@@ -144,15 +145,15 @@ public final class ItemSimilarityTest extends MahoutTestCase {
         Arrays.asList(new ItemPrefWithItemVectorWeightWritable(34L, 5.0, 1.0f),
                       new ItemPrefWithItemVectorWeightWritable(56L, 7.0, 2.0f));
 
-    OutputCollector<LongWritable,ItemPrefWithItemVectorWeightArrayWritable> output =
+    OutputCollector<VLongWritable,ItemPrefWithItemVectorWeightArrayWritable> output =
         EasyMock.createMock(OutputCollector.class);
 
-    output.collect(EasyMock.eq(new LongWritable(12L)), equalToItemPrefs(itemPrefs));
+    output.collect(EasyMock.eq(new VLongWritable(12L)), equalToItemPrefs(itemPrefs));
 
     EasyMock.replay(output);
 
     new PreferredItemsPerUserReducer().reduce(
-        new LongWritable(12L), itemPrefs.iterator(), output, null);
+        new VLongWritable(12L), itemPrefs.iterator(), output, null);
 
     EasyMock.verify(output);
   }
@@ -204,7 +205,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
     EasyMock.replay(output, itemPrefs);
 
-    new CopreferredItemsMapper().map(new LongWritable(), itemPrefs, output, null);
+    new CopreferredItemsMapper().map(new VLongWritable(), itemPrefs, output, null);
 
     EasyMock.verify(output, itemPrefs);
   }

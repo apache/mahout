@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
@@ -54,7 +54,7 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     String averagesOutputPath = parsedArgs.get("--tempDir");
     
     JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile, averagesOutputPath,
-      TextInputFormat.class, ToItemPrefsMapper.class, LongWritable.class, EntityPrefWritable.class,
+      TextInputFormat.class, ToItemPrefsMapper.class, VLongWritable.class, EntityPrefWritable.class,
       SlopeOnePrefsToDiffsReducer.class, EntityEntityWritable.class, FloatWritable.class,
       SequenceFileOutputFormat.class);
     JobClient.runJob(prefsToDiffsJobConf);

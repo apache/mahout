@@ -19,7 +19,7 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -31,10 +31,10 @@ import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
  * of the associated item vectors
  */
 public final class CopreferredItemsMapper extends MapReduceBase
-    implements Mapper<LongWritable,ItemPrefWithItemVectorWeightArrayWritable,ItemPairWritable,CoRating> {
+    implements Mapper<VLongWritable,ItemPrefWithItemVectorWeightArrayWritable,ItemPairWritable,CoRating> {
 
   @Override
-  public void map(LongWritable user,
+  public void map(VLongWritable user,
                   ItemPrefWithItemVectorWeightArrayWritable itemPrefsArray,
                   OutputCollector<ItemPairWritable, CoRating> output,
                   Reporter reporter)

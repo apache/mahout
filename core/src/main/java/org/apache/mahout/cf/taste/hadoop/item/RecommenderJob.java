@@ -28,7 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
@@ -102,8 +102,8 @@ public final class RecommenderJob extends AbstractJob {
 
     JobConf itemIDIndexConf = prepareJobConf(
       inputPath, itemIDIndexPath, TextInputFormat.class,
-      ItemIDIndexMapper.class, IntWritable.class, LongWritable.class,
-      ItemIDIndexReducer.class, IntWritable.class, LongWritable.class,
+      ItemIDIndexMapper.class, IntWritable.class, VLongWritable.class,
+      ItemIDIndexReducer.class, IntWritable.class, VLongWritable.class,
       SequenceFileOutputFormat.class);
     itemIDIndexConf.setClass("mapred.combiner.class", ItemIDIndexReducer.class, Reducer.class);    
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -112,8 +112,8 @@ public final class RecommenderJob extends AbstractJob {
     
     JobConf toUserVectorConf = prepareJobConf(
       inputPath, userVectorPath, TextInputFormat.class,
-      ToItemPrefsMapper.class, LongWritable.class, booleanData ? LongWritable.class : EntityPrefWritable.class,
-      ToUserVectorReducer.class, LongWritable.class, VectorWritable.class,
+      ToItemPrefsMapper.class, VLongWritable.class, booleanData ? VLongWritable.class : EntityPrefWritable.class,
+      ToUserVectorReducer.class, VLongWritable.class, VectorWritable.class,
       SequenceFileOutputFormat.class);
     toUserVectorConf.setBoolean(BOOLEAN_DATA, booleanData);
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -135,7 +135,7 @@ public final class RecommenderJob extends AbstractJob {
     JobConf partialMultiplyConf = prepareJobConf(
       cooccurrencePath, parialMultiplyPath, SequenceFileInputFormat.class,
       CooccurrenceColumnWrapperMapper.class, IntWritable.class, VectorOrPrefWritable.class,
-      PartialMultiplyReducer.class, LongWritable.class, VectorWritable.class,
+      PartialMultiplyReducer.class, VLongWritable.class, VectorWritable.class,
       SequenceFileOutputFormat.class);
     MultipleInputs.addInputPath(
         partialMultiplyConf,
@@ -154,8 +154,8 @@ public final class RecommenderJob extends AbstractJob {
 
     JobConf aggregateAndRecommendConf = prepareJobConf(
         parialMultiplyPath, outputPath, SequenceFileInputFormat.class,
-        IdentityMapper.class, LongWritable.class, VectorWritable.class,
-        AggregateAndRecommendReducer.class, LongWritable.class, RecommendedItemsWritable.class,
+        IdentityMapper.class, VLongWritable.class, VectorWritable.class,
+        AggregateAndRecommendReducer.class, VLongWritable.class, RecommendedItemsWritable.class,
         TextOutputFormat.class);
     setIOSort(aggregateAndRecommendConf);
     aggregateAndRecommendConf.setClass("mapred.combiner.class", AggregateCombiner.class, Reducer.class);
@@ -170,19 +170,22 @@ public final class RecommenderJob extends AbstractJob {
 
   private static void setIOSort(JobConf conf) {
     conf.setInt("io.sort.factor", 100);
-    conf.setInt("io.sort.mb", 200);
+    int assumedHeapSize = 512;
     String javaOpts = conf.get("mapred.child.java.opts");
     if (javaOpts != null) {
       Matcher m = Pattern.compile("-Xmx([0-9]+)([mMgG])").matcher(javaOpts);
       if (m.find()) {
-        int heapMB = Integer.parseInt(m.group(1));
+        assumedHeapSize = Integer.parseInt(m.group(1));
         String megabyteOrGigabyte = m.group(2);
         if ("g".equalsIgnoreCase(megabyteOrGigabyte)) {
-          heapMB *= 1024;
+          assumedHeapSize *= 1024;
         }
-        conf.setInt("io.sort.mb", heapMB / 2);
       }
     }
+    conf.setInt("io.sort.mb", assumedHeapSize / 2);
+    // For some reason the Merger doesn't report status for a long time; increase
+    // timeout when running these jobs
+    conf.setInt("mapred.task.timeout", 60*60*1000);
   }
   
   public static void main(String[] args) throws Exception {

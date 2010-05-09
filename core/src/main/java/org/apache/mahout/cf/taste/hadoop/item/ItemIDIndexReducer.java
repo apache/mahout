@@ -21,19 +21,19 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
 public final class ItemIDIndexReducer extends MapReduceBase implements
-    Reducer<IntWritable,LongWritable,IntWritable,LongWritable> {
+    Reducer<IntWritable,VLongWritable,IntWritable,VLongWritable> {
   
   @Override
   public void reduce(IntWritable index,
-                     Iterator<LongWritable> possibleItemIDs,
-                     OutputCollector<IntWritable,LongWritable> output,
+                     Iterator<VLongWritable> possibleItemIDs,
+                     OutputCollector<IntWritable,VLongWritable> output,
                      Reporter reporter) throws IOException {
     if (possibleItemIDs.hasNext()) {
       long minimumItemID = Long.MAX_VALUE;
@@ -43,7 +43,7 @@ public final class ItemIDIndexReducer extends MapReduceBase implements
           minimumItemID = itemID;
         }
       }
-      output.collect(index, new LongWritable(minimumItemID));
+      output.collect(index, new VLongWritable(minimumItemID));
     }
   }
   

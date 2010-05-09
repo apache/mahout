@@ -20,7 +20,7 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -29,21 +29,22 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public final class AggregateCombiner extends MapReduceBase implements
-    Reducer<LongWritable,VectorWritable,LongWritable,VectorWritable> {
+    Reducer<VLongWritable,VectorWritable,VLongWritable,VectorWritable> {
 
   @Override
-  public void reduce(LongWritable key,
+  public void reduce(VLongWritable key,
                      Iterator<VectorWritable> values,
-                     OutputCollector<LongWritable, VectorWritable> output,
+                     OutputCollector<VLongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
-    if (!values.hasNext()) {
-      return;
+    if (values.hasNext()) {
+      Vector partial = values.next().get();
+      while (values.hasNext()) {
+        partial = partial.plus(values.next().get());
+      }
+      VectorWritable vw = new VectorWritable(partial);
+      vw.setWritesLaxPrecision(true);
+      output.collect(key, vw);
     }
-    Vector partial = values.next().get();
-    while (values.hasNext()) {
-      partial = partial.plus(values.next().get());
-    }
-    output.collect(key, new VectorWritable(partial));
   }
 
 }

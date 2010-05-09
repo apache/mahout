@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 
 /**
@@ -25,7 +24,7 @@ import org.apache.hadoop.io.Text;
  * 
  * <p>
  * Intended for use with {@link org.apache.hadoop.mapred.TextInputFormat}; accepts line number / line pairs as
- * {@link LongWritable}/{@link Text} pairs.
+ * {@link org.apache.hadoop.io.VLongWritable}/{@link Text} pairs.
  * </p>
  * 
  * <p>
@@ -36,7 +35,7 @@ import org.apache.hadoop.io.Text;
  * <h1>Output</h1>
  * 
  * <p>
- * Outputs the user ID as a {@link LongWritable} mapped to the item ID and preference as a
+ * Outputs the user ID as a {@link org.apache.hadoop.io.VLongWritable} mapped to the item ID and preference as a
  * {@link EntityPrefWritable}.
  * </p>
  */

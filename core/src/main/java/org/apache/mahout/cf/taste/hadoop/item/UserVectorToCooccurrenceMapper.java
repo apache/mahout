@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -33,7 +33,7 @@ import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
-    Mapper<LongWritable, VectorWritable,IndexIndexWritable,IntWritable> {
+    Mapper<VLongWritable,VectorWritable,IndexIndexWritable,IntWritable> {
 
   private static final int MAX_PREFS_CONSIDERED = 50;
 
@@ -41,7 +41,7 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
   private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
 
   @Override
-  public void map(LongWritable userID,
+  public void map(VLongWritable userID,
                   VectorWritable userVectorWritable,
                   OutputCollector<IndexIndexWritable,IntWritable> output,
                   Reporter reporter) throws IOException {

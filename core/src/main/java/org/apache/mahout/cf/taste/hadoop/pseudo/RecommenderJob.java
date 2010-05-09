@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
@@ -130,8 +130,8 @@ public final class RecommenderJob extends AbstractJob {
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     
     JobConf jobConf = prepareJobConf(usersFile, outputPath, TextInputFormat.class,
-      UserIDsMapper.class, LongWritable.class, NullWritable.class, RecommenderReducer.class,
-      LongWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
+      UserIDsMapper.class, VLongWritable.class, NullWritable.class, RecommenderReducer.class,
+      VLongWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
     
     jobConf.set(RecommenderReducer.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
