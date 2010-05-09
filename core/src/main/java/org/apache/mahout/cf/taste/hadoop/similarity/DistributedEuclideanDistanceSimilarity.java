@@ -19,41 +19,28 @@ package org.apache.mahout.cf.taste.hadoop.similarity;
 
 import java.util.Iterator;
 
+import org.apache.mahout.cf.taste.impl.similarity.EuclideanDistanceSimilarity;
+
 /**
- * distributed cosine similarity that assumes that all unknown preferences
- * are zeros and that does not center data
+ * distributed version of {@link EuclideanDistanceSimilarity}
  */
-public final class DistributedUncenteredZeroAssumingCosineSimilarity
-    extends AbstractDistributedItemSimilarity {
+public class DistributedEuclideanDistanceSimilarity extends AbstractDistributedItemSimilarity {
 
   @Override
-  protected double doComputeResult(Iterator<CoRating> coRatings,
+  protected double doComputeResult(Iterator<CoRating> coratings,
       double weightOfItemVectorX, double weightOfItemVectorY,
       int numberOfUsers) {
 
-    double sumXY = 0;
-    while (coRatings.hasNext()) {
-      CoRating coRating = coRatings.next();
-      sumXY += coRating.getPrefValueX() * coRating.getPrefValueY();
+    double n=0;
+    double sumXYdiff2 = 0;
+
+    while (coratings.hasNext()) {
+      CoRating coRating = coratings.next();
+      double diff = coRating.getPrefValueX() - coRating.getPrefValueY();
+      sumXYdiff2 += diff * diff;
+      n++;
     }
 
-    if (sumXY == 0) {
-      return Double.NaN;
-    }
-    return sumXY / (weightOfItemVectorX * weightOfItemVectorY);
+    return (n / (1.0 + Math.sqrt(sumXYdiff2)));
   }
-
-  @Override
-  public double weightOfItemVector(Iterator<Float> prefValues) {
-    double length = 0.0;
-    while (prefValues.hasNext()) {
-      float prefValue = prefValues.next();
-      if (!Float.isNaN(prefValue)) {
-        length += prefValue * prefValue;
-      }
-    }
-
-    return Math.sqrt(length);
-  }
-
 }

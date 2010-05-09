@@ -17,41 +17,48 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 
-public final class DistributedSimilarityTest extends TasteTestCase {
+/**
+ * base testcase for all tests for implementations of {@link DistributedItemSimilarity}
+ */
+public abstract class DistributedItemSimilarityTestCase extends TasteTestCase {
 
-  public void testUncenteredZeroAssumingCosine() throws Exception {
-
-    DistributedSimilarity similarity = new DistributedUncenteredZeroAssumingCosineSimilarity();
-
-    assertSimilar(similarity, new Float[] { Float.NaN, Float.NaN, Float.NaN, Float.NaN, 1.0f },
-        new Float[] { Float.NaN, 1.0f, 1.0f, 1.0f, 1.0f }, 0.5);
-
-    assertSimilar(similarity, new Float[] { Float.NaN, 1.0f }, new Float[] { 1.0f, Float.NaN }, Double.NaN);
-    assertSimilar(similarity, new Float[] { 1.0f, Float.NaN }, new Float[] { 1.0f, Float.NaN }, 1.0);
-  }
-
-  public void testPearsonCorrelation() throws Exception {
-
-    DistributedSimilarity similarity = new DistributedPearsonCorrelationSimilarity();
-
-    assertSimilar(similarity, new Float[] { 3.0f, -2.0f }, new Float[] { 3.0f, -2.0f }, 1.0);
-    assertSimilar(similarity, new Float[] { 3.0f, 3.0f }, new Float[] { 3.0f, 3.0f }, Double.NaN);
-    assertSimilar(similarity, new Float[] { Float.NaN, 3.0f }, new Float[] { 3.0f, Float.NaN }, Double.NaN);
-  }
-
-  private static void assertSimilar(DistributedSimilarity similarity,
+  /**
+   * emulates the way the similarity would be computed by {@link ItemSimilarityJob}
+   *
+   * @param similarity
+   * @param numberOfUsers
+   * @param prefsX
+   * @param prefsY
+   * @param expectedSimilarity
+   */
+  protected static void assertSimilar(DistributedItemSimilarity similarity,
+                                    int numberOfUsers,
                                     Float[] prefsX,
                                     Float[] prefsY,
                                     double expectedSimilarity) {
 
-    double weightX = similarity.weightOfItemVector(Arrays.asList(prefsX).iterator());
-    double weightY = similarity.weightOfItemVector(Arrays.asList(prefsY).iterator());
+    List<Float> nonNaNPrefsX = new LinkedList<Float>();
+    for (Float prefX : prefsX) {
+      if (!prefX.isNaN()) {
+        nonNaNPrefsX.add(prefX);
+      }
+    }
+
+    List<Float> nonNaNPrefsY = new LinkedList<Float>();
+    for (Float prefY : prefsY) {
+      if (!prefY.isNaN()) {
+        nonNaNPrefsY.add(prefY);
+      }
+    }
+
+    double weightX = similarity.weightOfItemVector(nonNaNPrefsX.iterator());
+    double weightY = similarity.weightOfItemVector(nonNaNPrefsY.iterator());
 
     List<CoRating> coRatings = new LinkedList<CoRating>();
 
@@ -64,7 +71,7 @@ public final class DistributedSimilarityTest extends TasteTestCase {
       }
     }
 
-    double result = similarity.similarity(coRatings.iterator(), weightX, weightY);
+    double result = similarity.similarity(coRatings.iterator(), weightX, weightY, numberOfUsers);
     assertEquals(expectedSimilarity, result, EPSILON);
   }
 

@@ -19,29 +19,39 @@ package org.apache.mahout.cf.taste.hadoop.similarity;
 
 import java.util.Iterator;
 
+import org.apache.mahout.cf.taste.impl.similarity.TanimotoCoefficientSimilarity;
+
 /**
- * Modelling the pairwise similarity computation in a distributed manner
+ * Distributed version of {@link TanimotoCoefficientSimilarity}
  */
-public interface DistributedSimilarity {
+public class DistributedTanimotoCoefficientSimilarity extends AbstractDistributedItemSimilarity {
 
-  /**
-   * compute the weight of an item vector (called in an early stage of the map-reduce steps)
-   *
-   * @param prefValues
-   * @return
-   */
-  double weightOfItemVector(Iterator<Float> prefValues);
+	@Override
+	protected double doComputeResult(Iterator<CoRating> coratings,
+			double weightOfItemVectorX, double weightOfItemVectorY,
+			int numberOfUsers) {
 
-  /**
-   * compute the similarity for a pair of item-vectors
-   *
-   * @param coratings all coratings for these items
-   * @param weightOfItemVectorX the weight computed for the first vector
-   * @param weightOfItemVectorY the weight computed for the second vector
-   * @return
-   */
-  double similarity(Iterator<CoRating> coratings,
-                    double weightOfItemVectorX,
-                    double weightOfItemVectorY);
+	  double preferringXAndY = 0;
+	  while (coratings.hasNext()) {
+	    coratings.next();
+	    preferringXAndY++;
+	  }
+
+	  if (preferringXAndY == 0) {
+	    return Double.NaN;
+	  }
+
+	  return (preferringXAndY / (weightOfItemVectorX + weightOfItemVectorY - preferringXAndY));
+	}
+
+	@Override
+	public double weightOfItemVector(Iterator<Float> prefValues) {
+		double nonZeroEntries = 0;
+		while (prefValues.hasNext()) {
+		  prefValues.next();
+		  nonZeroEntries++;
+		}
+		return nonZeroEntries;
+	}
 
 }

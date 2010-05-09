@@ -19,60 +19,44 @@ package org.apache.mahout.cf.taste.hadoop.similarity;
 
 import java.util.Iterator;
 
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
+import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 
 /**
- * Distributed version of {@link PearsonCorrelationSimilarity}
+ * Distributed version of {@link UncenteredCosineSimilarity}
  */
-public class DistributedPearsonCorrelationSimilarity extends AbstractDistributedItemSimilarity {
+public class DistributedUncenteredCosineSimilarity extends AbstractDistributedItemSimilarity {
 
   @Override
-  protected double doComputeResult(Iterator<CoRating> coRatings,
+  protected double doComputeResult(Iterator<CoRating> coratings,
       double weightOfItemVectorX, double weightOfItemVectorY,
       int numberOfUsers) {
 
-    int count = 0;
-    double sumX = 0.0;
-    double sumY = 0.0;
-    double sumXY = 0.0;
-    double sumX2 = 0.0;
-    double sumY2 = 0.0;
+    int n = 0;
+    double sumXY = 0;
+    double sumX2 = 0;
+    double sumY2 = 0;
 
-    while (coRatings.hasNext()) {
-      CoRating coRating = coRatings.next();
+    while (coratings.hasNext()) {
+      CoRating coRating = coratings.next();
       double x = coRating.getPrefValueX();
       double y = coRating.getPrefValueY();
 
       sumXY += x * y;
-      sumX += x;
       sumX2 += x * x;
-      sumY += y;
       sumY2 += y * y;
-      count++;
+      n++;
     }
 
-    if (sumXY == 0.0) {
+    if (n == 0) {
       return Double.NaN;
     }
-
-    // "Center" the data. If my math is correct, this'll do it.
-    double n = count;
-    double meanX = sumX / n;
-    double meanY = sumY / n;
-    // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
-    double centeredSumXY = sumXY - meanY * sumX;
-    // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
-    double centeredSumX2 = sumX2 - meanX * sumX;
-    // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
-    double centeredSumY2 = sumY2 - meanY * sumY;
-
-    double denominator = Math.sqrt(centeredSumX2) * Math.sqrt(centeredSumY2);
+    double denominator = Math.sqrt(sumX2) * Math.sqrt(sumY2);
     if (denominator == 0.0) {
       // One or both parties has -all- the same ratings;
       // can't really say much similarity under this measure
       return Double.NaN;
     }
+    return sumXY / denominator;
 
-    return centeredSumXY / denominator;
   }
 }

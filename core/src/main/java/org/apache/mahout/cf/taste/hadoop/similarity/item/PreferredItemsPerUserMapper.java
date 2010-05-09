@@ -29,7 +29,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.DistributedSimilarity;
+import org.apache.mahout.cf.taste.hadoop.similarity.DistributedItemSimilarity;
 
 /**
  * for each item-vector, we compute its weight here and map out all entries with the user as key,
@@ -38,7 +38,7 @@ import org.apache.mahout.cf.taste.hadoop.similarity.DistributedSimilarity;
 public final class PreferredItemsPerUserMapper extends MapReduceBase
     implements Mapper<VLongWritable,EntityPrefWritableArrayWritable,VLongWritable,ItemPrefWithItemVectorWeightWritable> {
 
-  private DistributedSimilarity distributedSimilarity;
+  private DistributedItemSimilarity distributedSimilarity;
 
   @Override
   public void configure(JobConf jobConf) {

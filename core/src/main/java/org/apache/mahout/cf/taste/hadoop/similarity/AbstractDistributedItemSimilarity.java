@@ -20,40 +20,37 @@ package org.apache.mahout.cf.taste.hadoop.similarity;
 import java.util.Iterator;
 
 /**
- * distributed cosine similarity that assumes that all unknown preferences
- * are zeros and that does not center data
+ * abstract base class for all implementations of {@link DistributedItemSimilarity} that does not give a
+ * weight to item vectors and only ensures that the result is within [-1,1]
  */
-public final class DistributedUncenteredZeroAssumingCosineSimilarity
-    extends AbstractDistributedItemSimilarity {
+public abstract class AbstractDistributedItemSimilarity
+    implements DistributedItemSimilarity {
 
   @Override
-  protected double doComputeResult(Iterator<CoRating> coRatings,
+  public final double similarity(Iterator<CoRating> coratings,
       double weightOfItemVectorX, double weightOfItemVectorY,
       int numberOfUsers) {
 
-    double sumXY = 0;
-    while (coRatings.hasNext()) {
-      CoRating coRating = coRatings.next();
-      sumXY += coRating.getPrefValueX() * coRating.getPrefValueY();
-    }
+    double result = doComputeResult(coratings, weightOfItemVectorX, weightOfItemVectorY, numberOfUsers);
 
-    if (sumXY == 0) {
-      return Double.NaN;
+    if (result < -1.0) {
+      result = -1.0;
+    } else if (result > 1.0) {
+      result = 1.0;
     }
-    return sumXY / (weightOfItemVectorX * weightOfItemVectorY);
+    return result;
   }
 
+  /**
+   * do not compute a weight by default, subclasses can override this
+   * when they need a weight
+   */
   @Override
   public double weightOfItemVector(Iterator<Float> prefValues) {
-    double length = 0.0;
-    while (prefValues.hasNext()) {
-      float prefValue = prefValues.next();
-      if (!Float.isNaN(prefValue)) {
-        length += prefValue * prefValue;
-      }
-    }
-
-    return Math.sqrt(length);
+    return Double.NaN;
   }
 
+  protected abstract double doComputeResult(Iterator<CoRating> coratings,
+      double weightOfItemVectorX, double weightOfItemVectorY,
+      int numberOfUsers);
 }

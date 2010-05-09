@@ -30,7 +30,9 @@ import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
@@ -63,6 +65,52 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     EasyMock.verify(output);
   }
 
+  public void testCountUsersMapper() throws Exception {
+    OutputCollector<CountUsersKeyWritable,VLongWritable> output = EasyMock.createMock(OutputCollector.class);
+    output.collect(keyForUserID(12L), EasyMock.eq(new VLongWritable(12L)));
+    output.collect(keyForUserID(35L), EasyMock.eq(new VLongWritable(35L)));
+    EasyMock.replay(output);
+
+    CountUsersMapper mapper = new CountUsersMapper();
+    mapper.map(null, new Text("12,100,1.3"), output, null);
+    mapper.map(null, new Text("35,100,3.0"), output, null);
+
+    EasyMock.verify(output);
+  }
+
+  static CountUsersKeyWritable keyForUserID(final long userID) {
+    EasyMock.reportMatcher(new IArgumentMatcher() {
+      @Override
+      public boolean matches(Object argument) {
+        if (argument instanceof CountUsersKeyWritable) {
+          CountUsersKeyWritable key = (CountUsersKeyWritable) argument;
+          return (userID == key.getUserID());
+        }
+        return false;
+      }
+
+      @Override
+      public void appendTo(StringBuffer buffer) {}
+    });
+
+    return null;
+  }
+
+  public void testCountUsersReducer() throws Exception {
+
+    OutputCollector<IntWritable,NullWritable> output = EasyMock.createMock(OutputCollector.class);
+    output.collect(new IntWritable(3), NullWritable.get());
+    EasyMock.replay(output);
+
+    List<VLongWritable> userIDs = Arrays.asList(new VLongWritable(1L), new VLongWritable(1L),
+                                                new VLongWritable(3L), new VLongWritable(5L),
+                                                new VLongWritable(5L), new VLongWritable(5L));
+
+    new CountUsersReducer().reduce(null, userIDs.iterator(), output, null);
+
+    EasyMock.verify(output);
+  }
+
   public void testToItemVectorReducer() throws Exception {
 
     List<EntityPrefWritable> userPrefs = Arrays.asList(
@@ -79,6 +127,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
     EasyMock.verify(output);
   }
+
 
   static EntityPrefWritableArrayWritable equalToUserPrefs(
       final Collection<EntityPrefWritable> prefsToCheck) {
@@ -217,6 +266,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     JobConf conf = new JobConf();
     conf.set(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME,
         "org.apache.mahout.cf.taste.hadoop.similarity.DistributedUncenteredZeroAssumingCosineSimilarity");
+    conf.setInt(ItemSimilarityJob.NUMBER_OF_USERS, 1);
 
     output.collect(new EntityEntityWritable(12L, 34L), new DoubleWritable(0.5));
 
@@ -255,11 +305,11 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
       BufferedWriter writer = new BufferedWriter(new FileWriter(tmpDirPath+"/prefs.txt"));
       try {
-        writer.write("1,2,1\n" +
+        writer.write("2,1,1\n" +
+                     "1,2,1\n" +
+                     "3,4,1\n" +
                      "1,3,2\n" +
-                     "2,1,1\n" +
-                     "2,3,1\n" +
-                     "3,4,1\n");
+                     "2,3,1\n");
       } finally {
         writer.close();
       }
@@ -275,6 +325,10 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
       similarityJob.run(new String[] { "--tempDir", tmpDirPath+"/tmp", "--similarityClassname",
           "org.apache.mahout.cf.taste.hadoop.similarity.DistributedUncenteredZeroAssumingCosineSimilarity"});
+
+      int numberOfUsers = ItemSimilarityJob.readNumberOfUsers(new JobConf(), tmpDirPath + "/tmp/countUsers/part-00000");
+
+      assertEquals(3, numberOfUsers);
 
       String filePath = tmpDirPath+"/output/part-00000";
       BufferedReader reader = new BufferedReader(new FileReader(filePath));
