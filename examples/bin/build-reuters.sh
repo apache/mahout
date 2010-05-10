@@ -16,10 +16,10 @@
 # */
 
 #
-# Runs the LDA examples using Reuters.
+# Downloads the Reuters dataset and prepares it for clustering
 #
-# To run:  change into the mahout/examples directory (the parent of the one containing this file) and type:
-#  bin/build-reuters.sh
+# To run:  change into the mahout directory and type:
+#  examples/bin/build-reuters.sh
 #!/bin/sh
 
 cd examples/bin/
@@ -40,4 +40,4 @@ cd ../..
 ./bin/mahout org.apache.lucene.benchmark.utils.ExtractReuters ./examples/bin/work/reuters-sgm/ ./examples/bin/work/reuters-out/
 ./bin/mahout seqdirectory -i ./examples/bin/work/reuters-out/ -o ./examples/bin/work/reuters-out-seqdir -c UTF-8
 ./bin/mahout seq2sparse -i ./examples/bin/work/reuters-out-seqdir/ -o ./examples/bin/work/reuters-out-seqdir-sparse
-./bin/mahout kmeans -i ./examples/bin/work/reuters-out-seqdir-sparse/tfidf/vectors/ -c ./examples/bin/work/clusters -o ./examples/bin/work/reuters-kmeans -k 20 -w
+#./bin/mahout kmeans -i ./examples/bin/work/reuters-out-seqdir-sparse/tfidf/vectors/ -c ./examples/bin/work/clusters -o ./examples/bin/work/reuters-kmeans -k 20 -w
