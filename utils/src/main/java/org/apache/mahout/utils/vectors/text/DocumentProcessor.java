@@ -46,7 +46,7 @@ import org.apache.mahout.utils.vectors.text.document.SequenceFileTokenizerMapper
  */
 public final class DocumentProcessor {
   
-  public static final String TOKENIZED_DOCUMENT_OUTPUT_FOLDER = "/tokenized-documents";
+  public static final String TOKENIZED_DOCUMENT_OUTPUT_FOLDER = "tokenized-documents";
   public static final String ANALYZER_CLASS = "analyzer.class";
   
   public static final Charset CHARSET = Charset.forName("UTF-8");
