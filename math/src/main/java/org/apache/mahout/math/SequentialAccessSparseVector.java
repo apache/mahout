@@ -96,6 +96,24 @@ public class SequentialAccessSparseVector extends AbstractVector {
     return new SequentialAccessSparseVector(size(), values.clone());
   }
 
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder();
+    result.append('{');
+    Iterator<Element> it = iterateNonZero();
+    while (it.hasNext()) {
+      Element e = it.next();
+      result.append(e.index());
+      result.append(':');
+      result.append(e.get());
+      result.append(',');
+    }
+    if (result.length() > 1) {
+      result.setCharAt(result.length() - 1, '}');
+    }
+    return result.toString();
+  }
+
   /**
    * @return false
    */

@@ -35,7 +35,7 @@ import org.apache.mahout.math.map.OpenIntIntHashMap;
 public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
     Mapper<VLongWritable,VectorWritable,IndexIndexWritable,IntWritable> {
 
-  private static final int MAX_PREFS_CONSIDERED = 50;
+  private static final int MAX_PREFS_CONSIDERED = 100;
 
   private boolean outputGuardValue = true;
   private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
@@ -45,8 +45,9 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
                   VectorWritable userVectorWritable,
                   OutputCollector<IndexIndexWritable,IntWritable> output,
                   Reporter reporter) throws IOException {
-    Vector userVector = maybePruneUserVector(userVectorWritable.get());
+    Vector userVector = userVectorWritable.get();
     countSeen(userVector);
+    userVector = maybePruneUserVector(userVector);    
     Iterator<Vector.Element> it = userVector.iterateNonZero();
     IndexIndexWritable entityEntity = new IndexIndexWritable();
     IntWritable one = new IntWritable(1);
@@ -55,10 +56,8 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
       Iterator<Vector.Element> it2 = userVector.iterateNonZero();
       while (it2.hasNext()) {
         int index2 = it2.next().index();
-        if (index1 != index2) {
-          entityEntity.set(index1, index2);
-          output.collect(entityEntity, one);
-        }
+        entityEntity.set(index1, index2);
+        output.collect(entityEntity, one);
       }
     }
     // Guard value, output once, sorts after everything; will be dropped by combiner

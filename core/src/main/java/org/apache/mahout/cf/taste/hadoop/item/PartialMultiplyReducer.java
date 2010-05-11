@@ -41,7 +41,7 @@ public final class PartialMultiplyReducer extends MapReduceBase implements
 
   private static final Logger log = LoggerFactory.getLogger(PartialMultiplyReducer.class);
 
-  private static final int MAX_PRODUCTS_PER_ITEM = 1000;
+  private static final int MAX_PRODUCTS_PER_ITEM = 100;
 
   private enum Counters {
     PRODUCTS_OUTPUT,
@@ -72,11 +72,6 @@ public final class PartialMultiplyReducer extends MapReduceBase implements
       }
     }
 
-    if (cooccurrenceColumn == null) {
-      log.info("Column vector missing for {}; continuing", itemIndex);
-      return;
-    }
-
     final VLongWritable userIDWritable = new VLongWritable();
 
     // These single-element vectors ensure that each user will not be recommended
@@ -97,6 +92,11 @@ public final class PartialMultiplyReducer extends MapReduceBase implements
         return true;
       }
     });
+
+    if (cooccurrenceColumn == null) {
+      log.info("Column vector missing for {}; continuing", itemIndex);
+      return;
+    }    
 
     final float smallestLargeValue = findSmallestLargeValue(savedValues);
 

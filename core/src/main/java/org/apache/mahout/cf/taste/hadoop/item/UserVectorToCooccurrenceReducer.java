@@ -45,6 +45,7 @@ public final class UserVectorToCooccurrenceReducer extends MapReduceBase impleme
 
     int item1ID = entityEntity.getAID();
     int item2ID = entityEntity.getBID();
+    int sum = CooccurrenceCombiner.sum(counts);
 
     if (item1ID < lastItem1ID) {
       throw new IllegalStateException();
@@ -54,17 +55,20 @@ public final class UserVectorToCooccurrenceReducer extends MapReduceBase impleme
         throw new IllegalStateException();
       }
       if (item2ID == lastItem2ID) {
-        count += CooccurrenceCombiner.sum(counts);
+        count += sum;
       } else {
         if (cooccurrenceRow == null) {
-          cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE);
+          cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
         }
-        cooccurrenceRow.set(item2ID, count);
+        cooccurrenceRow.set(lastItem2ID, count);
         lastItem2ID = item2ID;
-        count = CooccurrenceCombiner.sum(counts);
+        count = sum;
       }
     } else {
       if (cooccurrenceRow != null) {
+        if (count > 0) {
+          cooccurrenceRow.set(lastItem2ID, count);
+        }
         VectorWritable vw = new VectorWritable(cooccurrenceRow);
         vw.setWritesLaxPrecision(true);
         output.collect(new IntWritable(lastItem1ID), vw);
@@ -72,7 +76,7 @@ public final class UserVectorToCooccurrenceReducer extends MapReduceBase impleme
       lastItem1ID = item1ID;
       lastItem2ID = item2ID;
       cooccurrenceRow = null;
-      count = CooccurrenceCombiner.sum(counts);
+      count = sum;
     }
   }
   
