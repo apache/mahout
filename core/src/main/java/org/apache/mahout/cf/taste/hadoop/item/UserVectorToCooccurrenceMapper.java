@@ -18,8 +18,9 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.VLongWritable;
@@ -29,7 +30,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
@@ -73,37 +73,28 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
       return userVector;
     }
 
-    OpenIntIntHashMap countCounts = new OpenIntIntHashMap();
+    PriorityQueue<Integer> smallCounts =
+        new PriorityQueue<Integer>(MAX_PREFS_CONSIDERED + 1, Collections.reverseOrder());
+
     Iterator<Vector.Element> it = userVector.iterateNonZero();
     while (it.hasNext()) {
-      int index = it.next().index();
-      int count = indexCounts.get(index);
-      countCounts.adjustOrPutValue(count, 1, 1);
+      int count = indexCounts.get(it.next().index());
+      if (count > 0) {
+        if (smallCounts.size() < MAX_PREFS_CONSIDERED) {
+          smallCounts.add(count);
+        } else if (count < smallCounts.peek()) {
+          smallCounts.add(count);
+          smallCounts.poll();
+        }
+      }
     }
+    int greatestSmallCount = smallCounts.peek();
 
-    IntArrayList countsList = new IntArrayList(countCounts.size());
-    countCounts.keys(countsList);
-    int[] counts = countsList.elements();
-    Arrays.sort(counts);
-
-    int resultingSizeAtCutoff = 0;
-    int cutoffIndex = 0;
-    while (cutoffIndex < counts.length && resultingSizeAtCutoff <= MAX_PREFS_CONSIDERED) {
-      int cutoff = counts[cutoffIndex];
-      cutoffIndex++;
-      int count = countCounts.get(cutoff);
-      resultingSizeAtCutoff += count;
-    }
-    cutoffIndex--;    
-
-    if (resultingSizeAtCutoff > MAX_PREFS_CONSIDERED) {
-      int cutoff = counts[cutoffIndex];
+    if (greatestSmallCount > 0) {
       Iterator<Vector.Element> it2 = userVector.iterateNonZero();
       while (it2.hasNext()) {
         Vector.Element e = it2.next();
-        int index = e.index();
-        int count = indexCounts.get(index);
-        if (count >= cutoff) {
+        if (indexCounts.get(e.index()) > greatestSmallCount) {
           e.set(0.0);
         }
       }

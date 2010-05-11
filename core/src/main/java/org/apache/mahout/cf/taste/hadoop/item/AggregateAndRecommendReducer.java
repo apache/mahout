@@ -105,12 +105,11 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
     while (recommendationVectorIterator.hasNext()) {
       Vector.Element element = recommendationVectorIterator.next();
       int index = element.index();
-      if (topItems.size() < recommendationsPerUser) {
-        long theItemID = indexItemIDMap.get(index);
-        topItems.add(new GenericRecommendedItem(theItemID, (float) element.get()));
-      } else if (element.get() > topItems.peek().getValue()) {
-        long theItemID = indexItemIDMap.get(index);
-        topItems.add(new GenericRecommendedItem(theItemID, (float) element.get()));
+      float value = (float) element.get();
+      if (topItems.size() < recommendationsPerUser && !Float.isNaN(value)) {
+        topItems.add(new GenericRecommendedItem(indexItemIDMap.get(index), value));
+      } else if (value > topItems.peek().getValue()) {
+        topItems.add(new GenericRecommendedItem(indexItemIDMap.get(index), value));
         topItems.poll();
       }
     }
