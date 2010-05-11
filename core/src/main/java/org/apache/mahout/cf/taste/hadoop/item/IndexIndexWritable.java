@@ -22,7 +22,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.mahout.math.Varint;
 
 /** A {@link WritableComparable} encapsulating two item indices. */
 public final class IndexIndexWritable
@@ -55,14 +54,14 @@ public final class IndexIndexWritable
 
   @Override
   public void write(DataOutput out) throws IOException {
-    Varint.writeUnsignedVarInt(aID, out);
-    Varint.writeUnsignedVarInt(bID, out);
+    out.writeInt(aID);
+    out.writeInt(bID);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    aID = Varint.readUnsignedVarInt(in);
-    bID = Varint.readUnsignedVarInt(in);
+    aID = in.readInt();
+    bID = in.readInt();
   }
 
   @Override
