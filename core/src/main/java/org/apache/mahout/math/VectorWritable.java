@@ -81,8 +81,8 @@ public class VectorWritable extends Configured implements Writable {
                   (named ? FLAG_NAMED : 0) |
                   (writesLaxPrecision ? FLAG_LAX_PRECISION : 0));
 
+    Varint.writeUnsignedVarInt(vector.size(), out);
     if (dense) {
-      out.writeInt(vector.size());
       for (Vector.Element element : vector) {
         if (writesLaxPrecision) {
           out.writeFloat((float) element.get());
@@ -91,16 +91,31 @@ public class VectorWritable extends Configured implements Writable {
         }
       }
     } else {
-      out.writeInt(vector.size());
-      out.writeInt(vector.getNumNondefaultElements());
+      Varint.writeUnsignedVarInt(vector.getNumNondefaultElements(), out);
       Iterator<Vector.Element> iter = vector.iterateNonZero();
-      while (iter.hasNext()) {
-        Vector.Element element = iter.next();
-        out.writeInt(element.index());
-        if (writesLaxPrecision) {
-          out.writeFloat((float) element.get());
-        } else {
-          out.writeDouble(element.get());
+      if (sequential) {
+        int lastIndex = 0;
+        while (iter.hasNext()) {
+          Vector.Element element = iter.next();
+          int thisIndex = element.index();
+          // Delta-code indices:
+          Varint.writeUnsignedVarInt(thisIndex - lastIndex, out);
+          lastIndex = thisIndex;
+          if (writesLaxPrecision) {
+            out.writeFloat((float) element.get());
+          } else {
+            out.writeDouble(element.get());
+          }
+        }
+      } else {
+        while (iter.hasNext()) {
+          Vector.Element element = iter.next();
+          Varint.writeUnsignedVarInt(element.index(), out);
+          if (writesLaxPrecision) {
+            out.writeFloat((float) element.get());
+          } else {
+            out.writeDouble(element.get());
+          }
         }
       }
     }
@@ -120,26 +135,34 @@ public class VectorWritable extends Configured implements Writable {
     boolean named = (flags & FLAG_NAMED) != 0;
     boolean laxPrecision = (flags & FLAG_LAX_PRECISION) != 0;
 
+    int size = Varint.readUnsignedVarInt(in);
     Vector v;
     if (dense) {
-      int size = in.readInt();
       double[] values = new double[size];
       for (int i = 0; i < size; i++) {
         values[i] = laxPrecision ? in.readFloat() : in.readDouble();
       }
       v = new DenseVector(values);
     } else {
-      int size = in.readInt();
-      int numNonDefaultElements = in.readInt();
+      int numNonDefaultElements = Varint.readUnsignedVarInt(in);
+      v = sequential ?
+          new SequentialAccessSparseVector(size, numNonDefaultElements) :
+          new RandomAccessSparseVector(size, numNonDefaultElements);
       if (sequential) {
-        v = new SequentialAccessSparseVector(size, numNonDefaultElements);
+        int lastIndex = 0;
+        for (int i = 0; i < numNonDefaultElements; i++) {
+          int delta = Varint.readUnsignedVarInt(in);
+          int index = lastIndex + delta;
+          lastIndex = index;
+          double value = laxPrecision ? in.readFloat() : in.readDouble();
+          v.setQuick(index, value);
+        }
       } else {
-        v = new RandomAccessSparseVector(size, numNonDefaultElements);
-      }
-      for (int i = 0; i < numNonDefaultElements; i++) {
-        int index = in.readInt();
-        double value = laxPrecision ? in.readFloat() : in.readDouble();
-        v.setQuick(index, value);
+        for (int i = 0; i < numNonDefaultElements; i++) {
+          int index = Varint.readUnsignedVarInt(in);
+          double value = laxPrecision ? in.readFloat() : in.readDouble();
+          v.setQuick(index, value);
+        }
       }
     }
     if (named) {
