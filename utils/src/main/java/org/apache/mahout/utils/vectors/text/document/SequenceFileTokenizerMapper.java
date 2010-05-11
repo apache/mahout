@@ -28,9 +28,9 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.text.DefaultAnalyzer;
 import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 
 /**
@@ -60,7 +60,7 @@ public class SequenceFileTokenizerMapper extends MapReduceBase implements Mapper
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl
-          .loadClass(job.get(DocumentProcessor.ANALYZER_CLASS, StandardAnalyzer.class.getName()));
+          .loadClass(job.get(DocumentProcessor.ANALYZER_CLASS, DefaultAnalyzer.class.getName()));
       analyzer = (Analyzer) cl.newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);

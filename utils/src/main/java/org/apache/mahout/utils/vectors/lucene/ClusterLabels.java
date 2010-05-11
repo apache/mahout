@@ -271,7 +271,7 @@ public class ClusterLabels {
 
     OpenBitSet bitset = new OpenBitSet(numDocs);
 
-    FieldSelector idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
+    FieldSelector idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
 
     for (int i = 0; i < numDocs; i++) {
       String id = null;

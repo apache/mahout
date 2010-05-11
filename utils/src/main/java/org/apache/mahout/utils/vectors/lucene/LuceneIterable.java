@@ -70,7 +70,7 @@ public class LuceneIterable implements Iterable<Vector> {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
-    idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.emptySet());
+    idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
     this.indexReader = reader;
     this.idField = idField;
     this.field = field;

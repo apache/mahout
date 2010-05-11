@@ -27,7 +27,6 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.Path;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.utils.nlp.collocations.llr.LLRReducer;
@@ -168,7 +167,7 @@ public final class SparseVectorsFromSequenceFiles {
       }
       log.info("Pass1 reduce tasks: {}", reduceTasks);
       
-      Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
+      Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
       if (cmdLine.hasOption(analyzerNameOpt)) {
         String className = cmdLine.getValue(analyzerNameOpt).toString();
         analyzerClass = (Class<? extends Analyzer>) Class.forName(className);

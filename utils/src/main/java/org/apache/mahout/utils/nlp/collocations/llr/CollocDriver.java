@@ -42,9 +42,9 @@ import org.apache.hadoop.mapred.lib.IdentityMapper;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.text.DefaultAnalyzer;
 import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 import org.slf4j.Logger;
@@ -180,7 +180,7 @@ public class CollocDriver extends Configured implements Tool {
       if (cmdLine.hasOption(preprocessOpt)) {
         log.info("Input will be preprocessed");
         
-        Class<? extends Analyzer> analyzerClass = StandardAnalyzer.class;
+        Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
         if (cmdLine.hasOption(analyzerNameOpt)) {
           String className = cmdLine.getValue(analyzerNameOpt).toString();
           analyzerClass = Class.forName(className).asSubclass(Analyzer.class);

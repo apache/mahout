@@ -27,9 +27,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.text.DefaultAnalyzer;
 import org.apache.mahout.utils.vectors.tfidf.TFIDFConverter;
 
 /**
@@ -113,7 +113,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
         getRandomDocument()));
     }
     writer.close();
-    Class<? extends Analyzer> analyzer = StandardAnalyzer.class;
+    Class<? extends Analyzer> analyzer = DefaultAnalyzer.class;
     DocumentProcessor.tokenizeDocuments(path, analyzer,
     getTestTempDirPath("output/tokenized-documents"));
     DictionaryVectorizer.createTermFrequencyVectors(getTestTempDirPath("output/tokenized-documents"),

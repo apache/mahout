@@ -29,11 +29,11 @@ import org.apache.lucene.analysis.standard.StandardFilter;
 import org.apache.lucene.wikipedia.analysis.WikipediaTokenizer;
 
 public class WikipediaAnalyzer extends Analyzer {
-  
+ 
   private final CharArraySet stopSet;
   
   public WikipediaAnalyzer() {
-    stopSet = (CharArraySet) StopFilter.makeStopSet(StopAnalyzer.ENGLISH_STOP_WORDS);
+    stopSet = (CharArraySet) StopFilter.makeStopSet(StopAnalyzer.ENGLISH_STOP_WORDS_SET.toArray(new String[0]));
   }
   
   public WikipediaAnalyzer(CharArraySet stopSet) {
