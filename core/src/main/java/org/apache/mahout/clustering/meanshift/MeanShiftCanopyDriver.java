@@ -43,6 +43,7 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,9 @@ public final class MeanShiftCanopyDriver {
     Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
     Option maxIterOpt = DefaultOptionCreator.maxIterOption().create();
+    Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
+        "If set, overwrite the output directory").withShortName("w").create();
+
     Option inputIsCanopiesOpt = obuilder.withLongName("inputIsCanopies").withRequired(true).withShortName("i").withArgument(
         abuilder.withName("inputIsCanopies").withMinimum(1).withMaximum(1).create()).withDescription(
         "True if the input directory already contains MeanShiftCanopies").create();
@@ -87,9 +91,9 @@ public final class MeanShiftCanopyDriver {
     Option clusteringOpt = obuilder.withLongName("clustering").withRequired(false).withDescription(
         "If true, run clustering after the iterations have taken place").withShortName("cl").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(helpOpt)
-        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(threshold2Opt).withOption(clusteringOpt).withOption(
-            maxIterOpt).withOption(inputIsCanopiesOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput).withOption(
+        modelOpt).withOption(helpOpt).withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(threshold2Opt)
+        .withOption(clusteringOpt).withOption(maxIterOpt).withOption(inputIsCanopiesOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -107,6 +111,9 @@ public final class MeanShiftCanopyDriver {
       Path input = new Path(cmdLine.getValue(inputOpt).toString());
       Path output = new Path(cmdLine.getValue(outputOpt).toString());
       String measureClassName = cmdLine.getValue(modelOpt).toString();
+      if (cmdLine.hasOption(overwriteOutput)) {
+        HadoopUtil.overwriteOutput(output);
+      }
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
@@ -281,8 +288,8 @@ public final class MeanShiftCanopyDriver {
 
     if (runClustering) {
       // now cluster the points
-      MeanShiftCanopyDriver.runClustering((inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR)),
-                                          clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR));
+      MeanShiftCanopyDriver.runClustering((inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR)), clustersIn,
+          new Path(output, Cluster.CLUSTERED_POINTS_DIR));
     }
   }
 }

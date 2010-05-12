@@ -45,6 +45,7 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.VectorModelDistribution;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -85,6 +86,9 @@ public class DirichletDriver {
     Option topicsOpt = DefaultOptionCreator.kOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
+    Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
+        "If set, overwrite the output directory").withShortName("w").create();
+
     Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").withArgument(
         abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
         "The alpha0 value for the DirichletDistribution.").create();
@@ -116,9 +120,10 @@ public class DirichletDriver {
     Option thresholdOpt = obuilder.withLongName("threshold").withRequired(false).withShortName("t").withArgument(
         abuilder.withName("threshold").withMinimum(1).withMaximum(1).create()).withDescription("The pdf threshold").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(
-        prototypeOpt).withOption(sizeOpt).withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt).withOption(helpOpt)
-        .withOption(numRedOpt).withOption(clusteringOpt).withOption(emitMostLikelyOpt).withOption(thresholdOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput).withOption(
+        modelOpt).withOption(prototypeOpt).withOption(sizeOpt).withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt)
+        .withOption(helpOpt).withOption(numRedOpt).withOption(clusteringOpt).withOption(emitMostLikelyOpt).withOption(thresholdOpt)
+        .create();
 
     try {
       Parser parser = new Parser();
@@ -131,6 +136,9 @@ public class DirichletDriver {
 
       Path input = new Path(cmdLine.getValue(inputOpt).toString());
       Path output = new Path(cmdLine.getValue(outputOpt).toString());
+      if (cmdLine.hasOption(overwriteOutput)) {
+        HadoopUtil.overwriteOutput(output);
+      }
       String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
       if (cmdLine.hasOption(modelOpt)) {
         modelFactory = cmdLine.getValue(modelOpt).toString();
@@ -241,9 +249,9 @@ public class DirichletDriver {
     }
   }
 
-  private static void writeInitialState(Path output, Path stateIn, String modelFactory, String modelPrototype,
-      int prototypeSize, int numModels, double alpha_0) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException, SecurityException, NoSuchMethodException, InvocationTargetException {
+  private static void writeInitialState(Path output, Path stateIn, String modelFactory, String modelPrototype, int prototypeSize,
+      int numModels, double alpha_0) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
+      SecurityException, NoSuchMethodException, InvocationTargetException {
 
     DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha_0);
     JobConf job = new JobConf(DirichletDriver.class);

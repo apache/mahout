@@ -151,11 +151,6 @@ public class Job {
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
     DirichletDriver.runJob(directoryContainingConvertedInput, output, modelFactory,
       vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers, true, true, 0);
-
-    ClusterDumper clusterDumper =
-        new ClusterDumper(new Path(output, "clusters-5"), new Path(output, "clusteredPoints"));
-    clusterDumper.printClusters(null);
-
   }
   
   /**

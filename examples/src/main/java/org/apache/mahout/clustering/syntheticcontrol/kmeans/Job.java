@@ -147,9 +147,5 @@ public final class Job {
     log.info("Running KMeans");
     KMeansDriver.runJob(directoryContainingConvertedInput, new Path(output, Cluster.INITIAL_CLUSTERS_DIR), output, measureClass,
         convergenceDelta, maxIterations, 1, true);
-
-    ClusterDumper clusterDumper =
-        new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
-    clusterDumper.printClusters(null);
   }
 }
