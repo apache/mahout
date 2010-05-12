@@ -1,5 +1,0 @@
-====================================
-This is release 1.0 of Mahout Collections
-====================================
-
-This is the first release of Mahout Collections independent of the rest of Mahout.
