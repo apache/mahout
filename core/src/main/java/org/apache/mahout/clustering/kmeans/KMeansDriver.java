@@ -337,21 +337,22 @@ public final class KMeansDriver {
       String name = part.getPath().getName();
       if (name.startsWith("part") && !name.endsWith(".crc")) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, part.getPath(), conf);
-        Writable key;
         try {
-          key = (Writable) reader.getKeyClass().newInstance();
+          Writable key = (Writable) reader.getKeyClass().newInstance();
+          Cluster value = new Cluster();
+          while (reader.next(key, value)) {
+            if (value.isConverged() == false) {
+              return false;
+            }
+          }
         } catch (InstantiationException e) { // shouldn't happen
           log.error("Exception", e);
           throw new IllegalStateException(e);
         } catch (IllegalAccessException e) {
           log.error("Exception", e);
           throw new IllegalStateException(e);
-        }
-        Cluster value = new Cluster();
-        while (reader.next(key, value)) {
-          if (value.isConverged() == false) {
-            return false;
-          }
+        } finally {
+          reader.close();
         }
       }
     }
