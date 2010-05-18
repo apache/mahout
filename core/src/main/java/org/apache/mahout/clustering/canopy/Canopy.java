@@ -49,7 +49,7 @@ public class Canopy extends ClusterBase {
    */
   public Canopy(Vector point, int canopyId) {
     this.setId(canopyId);
-    this.setCenter(new RandomAccessSparseVector(point.clone()));
+    this.setCenter(new RandomAccessSparseVector(point));
     this.setPointTotal(getCenter().clone());
     this.setNumPoints(1);
   }

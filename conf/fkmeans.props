@@ -10,7 +10,7 @@
 #dm|distance = <distance measure class name. Default: SquaredEuclideanDistanceMeasure>
 #cd|convergenceDelta = <the convergence threshold. Default: 0.5>
 #u|numMap <the number of mapper tasks to launch. Default: 10>
-#r|numReduce = <the number of reduce tasks to launch. Default: 1>
+#r|numReduce = <the number of reduce tasks to launch. Default: 2>
 #cl|clustering = <cluster points if present>
 #e|emitMostLikely = <emit most likely cluster if clustering. Default: true>
 #t|threshold = <threshold if clustering and not emitMostLikely. Default: 0.0>
