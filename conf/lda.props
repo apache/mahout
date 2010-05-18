@@ -6,6 +6,6 @@
 
 # The following parameters all have default values if not specified
 #a|topicSmoothing = <topic smoothing. Default: 50/numTopics>
-#maxIter|maxIter = <maximum number of iterations. Default: -1 (until converged)>
-#numReducers|numReducers = <the number of reducers. Default: 2>
+#x|maxIter = <maximum number of iterations. Default: -1 (until converged)>
+#r|numReducers = <the number of reducers. Default: 2>
 
