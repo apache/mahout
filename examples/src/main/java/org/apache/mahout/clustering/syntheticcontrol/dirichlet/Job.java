@@ -61,7 +61,7 @@ public class Job {
     
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption().withRequired(false).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().withRequired(false).create();
     Option topicsOpt = DefaultOptionCreator.kOption().withRequired(false).create();
     
     Option redOpt = obuilder.withLongName("reducerNum").withRequired(false).withArgument(
@@ -150,7 +150,7 @@ public class Job {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
     DirichletDriver.runJob(directoryContainingConvertedInput, output, modelFactory,
-      vectorClassName, 60, numModels, maxIterations, alpha_0, numReducers, true, true, 0);
+      vectorClassName, numModels, maxIterations, alpha_0, numReducers, true, true, 0);
   }
   
   /**

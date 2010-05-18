@@ -215,8 +215,8 @@ public class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 5, 1.0, 1);
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"), "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", "org.apache.mahout.math.DenseVector", 20, 5, 1.0, 1,
+    false, true, 0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -253,8 +253,8 @@ public class TestMapReduce extends MahoutTestCase {
   public void testDriverMnRIterations() throws Exception {
     generate4Datasets();
     // Now run the driver
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 3, 1.0, 1);
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"), "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", "org.apache.mahout.math.DenseVector", 20, 3, 1.0, 1,
+    false, true, 0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -289,8 +289,8 @@ public class TestMapReduce extends MahoutTestCase {
   public void testDriverMnRnIterations() throws Exception {
     generate4Datasets();
     // Now run the driver
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-      "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", 20, 3, 1.0, 2);
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"), "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", "org.apache.mahout.math.DenseVector", 20, 3, 1.0, 2,
+    false, true, 0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
@@ -325,8 +325,8 @@ public class TestMapReduce extends MahoutTestCase {
     generateSamples(500, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data4.txt"), fs, conf);
     // Now run the driver
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-      "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution", 20, 3, 1.0, 2);
+    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"), "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution", "org.apache.mahout.math.DenseVector", 20, 3, 1.0, 2,
+    false, true, 0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);

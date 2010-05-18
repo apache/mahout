@@ -49,6 +49,7 @@ import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,80 +57,36 @@ import org.slf4j.LoggerFactory;
 public final class FuzzyKMeansDriver {
 
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansDriver.class);
-  
+
   private FuzzyKMeansDriver() {
   }
 
   public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
-
-    Option clustersOpt = obuilder.withLongName("clusters").withRequired(true).withArgument(
-        abuilder.withName("clusters").withMinimum(1).withMaximum(1).create()).withDescription(
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
+    Option measureClassOpt = DefaultOptionCreator.distanceMeasureOption().create();
+    Option clustersOpt = DefaultOptionCreator.clustersInOption().withDescription(
         "The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
             + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
-        .withShortName("c").create();
-
-    Option kOpt = obuilder.withLongName("k").withRequired(false).withArgument(
-        abuilder.withName("k").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
-            + " as the Centroid and written to the clusters output path.").withShortName("k").create();
-
-    Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The Path to put the output in")
-        .withShortName("o").create();
-
-    Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
-        abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Distance Measure to use.  Default is SquaredEuclidean").withShortName("dm").create();
-
-    Option convergenceDeltaOpt = obuilder.withLongName("convergence").withRequired(false).withArgument(
-        abuilder.withName("convergence").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The threshold below which the clusters are considered to be converged.  Default is 0.5").withShortName("d").create();
-
-    Option maxIterationsOpt = obuilder.withLongName("max").withRequired(false).withArgument(
-        abuilder.withName("max").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The maximum number of iterations to perform.  Default is 20").withShortName("x").create();
-
-    Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
-        abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
-
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
-
-    Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
-        "If set, overwrite the output directory").withShortName("w").create();
-
-    Option mOpt = obuilder.withLongName("m").withRequired(true).withArgument(
-        abuilder.withName("m").withMinimum(1).withMaximum(1).create()).withDescription(
-        "coefficient normalization factor, must be greater than 1").withShortName("m").create();
-
-    Option numReduceTasksOpt = obuilder.withLongName("numReduce").withRequired(false).withArgument(
-        abuilder.withName("numReduce").withMinimum(1).withMaximum(1).create()).withDescription("The number of reduce tasks")
-        .withShortName("r").create();
-
-    Option numMapTasksOpt = obuilder.withLongName("numMap").withRequired(false).withArgument(
-        abuilder.withName("numMap").withMinimum(1).withMaximum(1).create()).withDescription("The number of map tasks")
-        .withShortName("u").create();
-
-    Option clusteringOpt = obuilder.withLongName("clustering").withRequired(false).withDescription(
-        "If true, run clustering after the iterations have taken place").withShortName("cl").create();
-
-    Option emitMostLikelyOpt = obuilder.withLongName("emitMostLikely").withRequired(false).withShortName("e").withArgument(
-        abuilder.withName("emitMostLikely").withMinimum(1).withMaximum(1).create()).withDescription(
-        "True if clustering emits most likely point only, false for threshold clustering").create();
-
-    Option thresholdOpt = obuilder.withLongName("threshold").withRequired(false).withShortName("t").withArgument(
-        abuilder.withName("threshold").withMinimum(1).withMaximum(1).create()).withDescription("The pdf threshold").create();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(clustersOpt).withOption(outputOpt).withOption(
-        measureClassOpt).withOption(convergenceDeltaOpt).withOption(maxIterationsOpt).withOption(kOpt).withOption(mOpt).withOption(
-        vectorClassOpt).withOption(overwriteOutput).withOption(helpOpt).withOption(emitMostLikelyOpt).withOption(thresholdOpt)
         .create();
+    Option kOpt = DefaultOptionCreator.kOption().withDescription(
+        "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
+            + " as the Centroid and written to the clusters input path.").create();
+    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
+    Option maxIterationsOpt = DefaultOptionCreator.maxIterationsOption().create();
+    Option helpOpt = DefaultOptionCreator.helpOption();
+    Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
+    Option mOpt = DefaultOptionCreator.mOption().create();
+    Option numReduceTasksOpt = DefaultOptionCreator.numReducersOption().create();
+    Option numMapTasksOpt = DefaultOptionCreator.numMappersOption().create();
+    Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
+    Option emitMostLikelyOpt = DefaultOptionCreator.emitMostLikelyOption().create();
+    Option thresholdOpt = DefaultOptionCreator.thresholdOption().create();
+
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(clustersOpt).withOption(outputOpt)
+        .withOption(measureClassOpt).withOption(convergenceDeltaOpt).withOption(maxIterationsOpt).withOption(kOpt).withOption(mOpt)
+        .withOption(overwriteOutput).withOption(helpOpt).withOption(numMapTasksOpt).withOption(numReduceTasksOpt).withOption(
+            emitMostLikelyOpt).withOption(thresholdOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -146,46 +103,19 @@ public final class FuzzyKMeansDriver {
       if (cmdLine.hasOption(measureClassOpt)) {
         measureClass = cmdLine.getValue(measureClassOpt).toString();
       }
-      double convergenceDelta = 0.5;
-      if (cmdLine.hasOption(convergenceDeltaOpt)) {
-        convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
-      }
+      double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
       float m = Float.parseFloat(cmdLine.getValue(mOpt).toString());
 
-      // Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
-      // RandomAccessSparseVector.class
-      // : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
-
-      int numReduceTasks = 10;
-      if (cmdLine.hasOption(numReduceTasksOpt)) {
-        numReduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
-      }
-
-      int numMapTasks = 50;
-      if (cmdLine.hasOption(numMapTasksOpt)) {
-        numMapTasks = Integer.parseInt(cmdLine.getValue(numMapTasksOpt).toString());
-      }
-
-      int maxIterations = 20;
-      if (cmdLine.hasOption(maxIterationsOpt)) {
-        maxIterations = Integer.parseInt(cmdLine.getValue(maxIterationsOpt).toString());
-      }
-
+      int numReduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
+      int numMapTasks = Integer.parseInt(cmdLine.getValue(numMapTasksOpt).toString());
+      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterationsOpt).toString());
       if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.overwriteOutput(output);
       }
-
+      boolean emitMostLikely = Boolean.parseBoolean(cmdLine.getValue(emitMostLikelyOpt).toString());
+      double threshold = Double.parseDouble(cmdLine.getValue(thresholdOpt).toString());
       if (cmdLine.hasOption(kOpt)) {
         clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString()));
-      }
-
-      boolean emitMostLikely = true;
-      if (cmdLine.hasOption(emitMostLikelyOpt)) {
-        emitMostLikely = Boolean.parseBoolean(cmdLine.getValue(emitMostLikelyOpt).toString());
-      }
-      double threshold = 0;
-      if (cmdLine.hasOption(thresholdOpt)) {
-        threshold = Double.parseDouble(cmdLine.getValue(thresholdOpt).toString());
       }
       runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numMapTasks, numReduceTasks, m, cmdLine
           .hasOption(clusteringOpt), emitMostLikely, threshold);
@@ -249,8 +179,8 @@ public final class FuzzyKMeansDriver {
 
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), measureClass, convergenceDelta, numMapTasks, m,
-        emitMostLikely, threshold);
+    runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), measureClass, convergenceDelta, numMapTasks,
+        m, emitMostLikely, threshold);
   }
 
   /**
@@ -275,8 +205,8 @@ public final class FuzzyKMeansDriver {
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
    * @return true if the iteration successfully runs
    */
-  private static boolean runIteration(Path input, Path clustersIn, Path clustersOut, String measureClass,
-      double convergenceDelta, int numMapTasks, int numReduceTasks, int iterationNumber, float m) {
+  private static boolean runIteration(Path input, Path clustersIn, Path clustersOut, String measureClass, double convergenceDelta,
+      int numMapTasks, int numReduceTasks, int iterationNumber, float m) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Fuzzy K Means{" + iterationNumber + '}');

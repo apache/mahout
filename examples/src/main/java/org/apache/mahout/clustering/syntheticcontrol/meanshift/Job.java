@@ -54,7 +54,7 @@ public final class Job {
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().withRequired(false).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption().withRequired(false).create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().withRequired(false).create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
     Option modelOpt = obuilder.withLongName("distanceClass").withRequired(false).withShortName("d").withArgument(

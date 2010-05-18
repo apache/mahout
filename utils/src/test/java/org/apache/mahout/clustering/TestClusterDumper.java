@@ -193,7 +193,7 @@ public class TestClusterDumper extends MahoutTestCase {
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
     DirichletDriver.runJob(getTestTempDirPath("testdata"), output,
                            L1ModelDistribution.class.getName(), prototype.getDelegate().getClass().getName(),
-                           prototype.size(), 15, 10, 1.0, 1, true, true, 0);
+                           15, 10, 1.0, 1, true, true, 0);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"),
                                                     new Path(output, "clusteredPoints"));

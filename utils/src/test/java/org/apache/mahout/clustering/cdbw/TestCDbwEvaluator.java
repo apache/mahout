@@ -189,7 +189,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     Vector prototype = new DenseVector(2);
     DirichletDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
                            L1ModelDistribution.class.getName(), prototype.getClass().getName(),
-                           prototype.size(), 15, 5, 1.0, 1, true, true, 0);
+                           15, 5, 1.0, 1, true, true, 0);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
     CDbwDriver.runJob(new Path(output, "clusters-5"), new Path(output, "clusteredPoints"), output,

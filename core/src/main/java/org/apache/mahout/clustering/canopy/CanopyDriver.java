@@ -42,6 +42,7 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -57,37 +58,18 @@ public final class CanopyDriver {
   }
 
   public static void main(String[] args) throws IOException {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
+    Option helpOpt = DefaultOptionCreator.helpOption();
+    Option inputOpt = DefaultOptionCreator.inputOption().create();
+    Option outputOpt = DefaultOptionCreator.outputOption().create();
+    Option measureClassOpt = DefaultOptionCreator.distanceMeasureOption().create();
+    Option t1Opt = DefaultOptionCreator.t1Option().create();
+    Option t2Opt = DefaultOptionCreator.t2Option().create();
 
-    Option inputOpt = obuilder.withLongName("input").withRequired(true).withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
+    Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
+    Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
 
-    Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
-        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The Path to put the output in")
-        .withShortName("o").create();
-
-    Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
-        "If set, overwrite the output directory").withShortName("w").create();
-
-    Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
-        abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
-
-    Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
-        abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
-    Option t1Opt = obuilder.withLongName("t1").withRequired(true).withArgument(
-        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1").withShortName("t1").create();
-    Option t2Opt = obuilder.withLongName("t2").withRequired(true).withArgument(
-        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("t2").withShortName("t2").create();
-
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput).withOption(
-        measureClassOpt).withOption(vectorClassOpt).withOption(t1Opt).withOption(t2Opt).withOption(helpOpt).create();
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput).withOption(
+        measureClassOpt).withOption(t1Opt).withOption(t2Opt).withOption(clusteringOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -104,18 +86,11 @@ public final class CanopyDriver {
       if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.overwriteOutput(output);
       }
-      String measureClass = SquaredEuclideanDistanceMeasure.class.getName();
-      if (cmdLine.hasOption(measureClassOpt)) {
-        measureClass = cmdLine.getValue(measureClassOpt).toString();
-      }
-
-      // Class<? extends Vector> vectorClass = cmdLine.hasOption(vectorClassOpt) == false ?
-      // RandomAccessSparseVector.class
-      // : (Class<? extends Vector>) Class.forName(cmdLine.getValue(vectorClassOpt).toString());
+      String measureClass = cmdLine.getValue(measureClassOpt).toString();
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
 
-      runJob(input, output, measureClass, t1, t2, false);
+      runJob(input, output, measureClass, t1, t2, cmdLine.hasOption(clusteringOpt));
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);

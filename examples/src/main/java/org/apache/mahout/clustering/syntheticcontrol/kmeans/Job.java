@@ -57,7 +57,7 @@ public final class Job {
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().withRequired(false).create();
-    Option maxIterationsOpt = DefaultOptionCreator.maxIterOption().withRequired(false).create();
+    Option maxIterationsOpt = DefaultOptionCreator.maxIterationsOption().withRequired(false).create();
 
     Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
         abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -95,9 +95,6 @@ public final class Job {
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterationsOpt, 10).toString());
-      // String className = cmdLine.getValue(vectorClassOpt,
-      // "org.apache.mahout.math.RandomAccessSparseVector").toString();
-      // Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
 
       runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations);
     } catch (OptionException e) {

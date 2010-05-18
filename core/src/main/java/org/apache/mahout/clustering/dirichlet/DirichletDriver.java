@@ -30,15 +30,18 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
@@ -76,54 +79,23 @@ public class DirichletDriver {
   }
 
   public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-
+    Option helpOpt = DefaultOptionCreator.helpOption();
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option outputOpt = DefaultOptionCreator.outputOption().create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption().create();
-    Option topicsOpt = DefaultOptionCreator.kOption().create();
-    Option helpOpt = DefaultOptionCreator.helpOption();
+    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().create();
+    Option kOpt = DefaultOptionCreator.kOption().create();
+    Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
+    Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
+    Option alphaOpt = DefaultOptionCreator.alphaOption().create();
+    Option modelDistOpt = DefaultOptionCreator.modelDistributionOption().create();
+    Option prototypeOpt = DefaultOptionCreator.modelPrototypeOption().create();
+    Option numRedOpt = DefaultOptionCreator.numReducersOption().create();
+    Option emitMostLikelyOpt = DefaultOptionCreator.emitMostLikelyOption().create();
+    Option thresholdOpt = DefaultOptionCreator.thresholdOption().create();
 
-    Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
-        "If set, overwrite the output directory").withShortName("w").create();
-
-    Option mOpt = obuilder.withLongName("alpha").withRequired(true).withShortName("m").withArgument(
-        abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The alpha0 value for the DirichletDistribution.").create();
-
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(
-        abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The ModelDistribution class name. " + "Defaults to org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution")
-        .create();
-
-    Option prototypeOpt = obuilder.withLongName("modelPrototypeClass").withRequired(false).withShortName("p").withArgument(
-        abuilder.withName("prototypeClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The ModelDistribution prototype Vector class name. " + "Defaults to org.apache.mahout.math.RandomAccessSparseVector")
-        .create();
-
-    Option sizeOpt = obuilder.withLongName("prototypeSize").withRequired(true).withShortName("s").withArgument(
-        abuilder.withName("prototypeSize").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The ModelDistribution prototype Vector size. ").create();
-
-    Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").withArgument(
-        abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create()).withDescription("The number of reduce tasks.").create();
-
-    Option clusteringOpt = obuilder.withLongName("clustering").withRequired(false).withDescription(
-        "If true, run clustering after the iterations have taken place").withShortName("cl").create();
-
-    Option emitMostLikelyOpt = obuilder.withLongName("emitMostLikely").withRequired(false).withShortName("e").withArgument(
-        abuilder.withName("emitMostLikely").withMinimum(1).withMaximum(1).create()).withDescription(
-        "True if clustering emits most likely point only, false for threshold clustering").create();
-
-    Option thresholdOpt = obuilder.withLongName("threshold").withRequired(false).withShortName("t").withArgument(
-        abuilder.withName("threshold").withMinimum(1).withMaximum(1).create()).withDescription("The pdf threshold").create();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput).withOption(
-        modelOpt).withOption(prototypeOpt).withOption(sizeOpt).withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt)
-        .withOption(helpOpt).withOption(numRedOpt).withOption(clusteringOpt).withOption(emitMostLikelyOpt).withOption(thresholdOpt)
-        .create();
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput).withOption(
+        modelDistOpt).withOption(prototypeOpt).withOption(maxIterOpt).withOption(alphaOpt).withOption(kOpt).withOption(helpOpt)
+        .withOption(numRedOpt).withOption(clusteringOpt).withOption(emitMostLikelyOpt).withOption(thresholdOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -139,33 +111,17 @@ public class DirichletDriver {
       if (cmdLine.hasOption(overwriteOutput)) {
         HadoopUtil.overwriteOutput(output);
       }
-      String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
-      if (cmdLine.hasOption(modelOpt)) {
-        modelFactory = cmdLine.getValue(modelOpt).toString();
-      }
-      String modelPrototype = "org.apache.mahout.math.RandomAccessSparseVector";
-      if (cmdLine.hasOption(prototypeOpt)) {
-        modelPrototype = cmdLine.getValue(prototypeOpt).toString();
-      }
-      int prototypeSize = Integer.parseInt(cmdLine.getValue(sizeOpt).toString());
+      String modelFactory = cmdLine.getValue(modelDistOpt).toString();
+      String modelPrototype = cmdLine.getValue(prototypeOpt).toString();
+      int numModels = Integer.parseInt(cmdLine.getValue(kOpt).toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
-      int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
-      boolean runClustering = true;
-      if (cmdLine.hasOption(clusteringOpt)) {
-        runClustering = Boolean.parseBoolean(cmdLine.getValue(clusteringOpt).toString());
-      }
-      boolean emitMostLikely = true;
-      if (cmdLine.hasOption(emitMostLikelyOpt)) {
-        emitMostLikely = Boolean.parseBoolean(cmdLine.getValue(emitMostLikelyOpt).toString());
-      }
-      double threshold = 0;
-      if (cmdLine.hasOption(thresholdOpt)) {
-        threshold = Double.parseDouble(cmdLine.getValue(thresholdOpt).toString());
-      }
-      double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt).toString());
-      runJob(input, output, modelFactory, modelPrototype, prototypeSize, numModels, maxIterations, alpha_0, numReducers,
-          runClustering, emitMostLikely, threshold);
+      boolean emitMostLikely = Boolean.parseBoolean(cmdLine.getValue(emitMostLikelyOpt).toString());
+      double threshold = Double.parseDouble(cmdLine.getValue(thresholdOpt).toString());
+      double alpha_0 = Double.parseDouble(cmdLine.getValue(alphaOpt).toString());
+
+      runJob(input, output, modelFactory, modelPrototype, numModels, maxIterations, alpha_0, numReducers, cmdLine
+          .hasOption(clusteringOpt), emitMostLikely, threshold);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -181,37 +137,8 @@ public class DirichletDriver {
    *          the directory pathname for output points
    * @param modelFactory
    *          the String ModelDistribution class name to use
-   * @param numClusters
-   *          the number of models
-   * @param maxIterations
-   *          the maximum number of iterations
-   * @param alpha_0
-   *          the alpha_0 value for the DirichletDistribution
-   * @param numReducers
-   *          the number of Reducers desired
-   * @deprecated since it presumes 2-d, dense vector model prototypes
-   */
-  @Deprecated
-  public static void runJob(Path input, Path output, String modelFactory, int numClusters, int maxIterations, double alpha_0,
-      int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
-      SecurityException, NoSuchMethodException, InvocationTargetException {
-    runJob(input, output, modelFactory, "org.apache.mahout.math.DenseVector", 2, numClusters, maxIterations, alpha_0, numReducers,
-        false, true, 0);
-  }
-
-  /**
-   * Run the job using supplied arguments
-   * 
-   * @param input
-   *          the directory pathname for input points
-   * @param output
-   *          the directory pathname for output points
-   * @param modelFactory
-   *          the String ModelDistribution class name to use
    * @param modelPrototype
    *          the String class name of the model prototype
-   * @param prototypeSize
-   *          the int size of the prototype to use
    * @param numClusters
    *          the number of models
    * @param maxIterations
@@ -227,19 +154,22 @@ public class DirichletDriver {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    */
-  public static void runJob(Path input, Path output, String modelFactory, String modelPrototype, int prototypeSize,
-      int numClusters, int maxIterations, double alpha_0, int numReducers, boolean runClustering, boolean emitMostLikely,
-      double threshold) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
-      SecurityException, NoSuchMethodException, InvocationTargetException {
+  public static void runJob(Path input, Path output, String modelFactory, String modelPrototype, int numClusters,
+      int maxIterations, double alpha_0, int numReducers, boolean runClustering, boolean emitMostLikely, double threshold)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, SecurityException,
+      NoSuchMethodException, InvocationTargetException {
 
     Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
-    writeInitialState(output, clustersIn, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0);
+
+    int protoSize = readPrototypeSize(input);
+
+    writeInitialState(output, clustersIn, modelFactory, modelPrototype, protoSize, numClusters, alpha_0);
 
     for (int iteration = 1; iteration <= maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      runIteration(input, clustersIn, clustersOut, modelFactory, modelPrototype, prototypeSize, numClusters, alpha_0, numReducers);
+      runIteration(input, clustersIn, clustersOut, modelFactory, modelPrototype, protoSize, numClusters, alpha_0, numReducers);
       // now point the input to the old output directory
       clustersIn = clustersOut;
     }
@@ -247,6 +177,24 @@ public class DirichletDriver {
       // now cluster the most likely points
       runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), emitMostLikely, threshold);
     }
+  }
+
+  private static int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
+    JobConf job = new JobConf(DirichletDriver.class);
+    FileSystem fs = FileSystem.get(input.toUri(), job);
+    FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
+    int protoSize = 0;
+    for (FileStatus s : status) {
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
+      WritableComparable key = (WritableComparable) reader.getKeyClass().newInstance();
+      VectorWritable value = new VectorWritable();
+      if (reader.next(key, value)) {
+        protoSize = value.get().size();
+      }
+      reader.close();
+      break;
+    }
+    return protoSize;
   }
 
   private static void writeInitialState(Path output, Path stateIn, String modelFactory, String modelPrototype, int prototypeSize,

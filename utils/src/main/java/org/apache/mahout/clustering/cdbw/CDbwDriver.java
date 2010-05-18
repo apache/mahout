@@ -73,7 +73,7 @@ public class CDbwDriver {
 
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option outputOpt = DefaultOptionCreator.outputOption().create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterOption().create();
+    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
     Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(
