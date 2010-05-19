@@ -120,13 +120,7 @@ public final class ClusterDumper {
     Writer writer = this.outputFile == null ? new OutputStreamWriter(System.out) : new FileWriter(this.outputFile);
 
     FileSystem fs = seqFileDir.getFileSystem(conf);
-    FileStatus[] seqFileList = fs.listStatus(seqFileDir, new PathFilter() {
-      @Override
-      public boolean accept(Path path) {
-        return !path.getName().endsWith(".crc");
-      }
-    });
-    for (FileStatus seqFile : seqFileList) {
+    for (FileStatus seqFile : fs.globStatus(new Path(seqFileDir, "part-*"))) {
       Path path = seqFile.getPath();
       System.out.println("Input Path: " + path);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
