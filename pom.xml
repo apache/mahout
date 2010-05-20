@@ -27,8 +27,8 @@
     <artifactId>mahout</artifactId>
     <version>0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Apache Lucene Mahout</name>
-    <url>http://lucene.apache.org/mahout</url>
+    <name>Apache Mahout</name>
+    <url>http://mahout.apache.org</url>
     <inceptionYear>2008</inceptionYear>
     <description>Mahout's goal is to build scalable machine learning libraries. With scalable we mean: Scalable to reasonably large data sets. Our core algorithms for clustering, classfication and batch based collaborative filtering are implemented on top of Apache Hadoop using the map/reduce paradigm. However we do not restrict contributions to Hadoop based implementations: Contributions that run on a single node or on a non-Hadoop cluster are welcome as well. The core libraries are highly optimized to allow for good performance also for non-distributed algorithms. Scalable to support your business case. Mahout is distributed under a commercially friendly Apache Software license. Scalable community. The goal of Mahout is to build a vibrant, responsive, diverse community to facilitate discussions not only on the project itself but also on potential use cases. Come to the mailing lists to find out more. Currently Mahout supports mainly four use cases: Recommendation mining takes users' behavior and from that tries to find items users might like. Clustering takes e.g. text documents and groups them into groups of topically related documents. Classification learns from exisiting categorized documents what documents of a specific category look like and is able to assign unlabelled documents to the (hopefully) correct category. Frequent itemset mining takes a set of item groups (terms in a query session, shopping cart content) and identifies, which individual items usually appear together.
   </description>
@@ -46,41 +46,41 @@
     <mailingLists>
         <mailingList>
             <name>User list</name>
-            <subscribe>mahout-user-subscribe@lucene.apache.org</subscribe>
-            <unsubscribe>mahout-user-unsubscribe@lucene.apache.org</unsubscribe>
-            <post>mahout-user@lucene.apache.org</post>
-            <archive>http://mail-archives.apache.org/mod_mbox/lucene-mahout-user/</archive>
+            <subscribe>user-subscribe@mahout.apache.org</subscribe>
+            <unsubscribe>user-unsubscribe@mahout.apache.org</unsubscribe>
+            <post>user@mahout.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/mahout-user/</archive>
             <otherArchives>
-                <otherArchive>http://lucene.apache.org/mail/mahout-user/</otherArchive>
+                <otherArchive>http://mahout.apache.org/mail/user/</otherArchive>
                 <otherArchive>http://mahout.markmail.org/</otherArchive>
                 <otherArchive>http://www.nabble.com/Mahout-User-List-f32042.html</otherArchive>
             </otherArchives>
         </mailingList>
         <mailingList>
             <name>Developers List</name>
-            <subscribe>mahout-dev-subscribe@lucene.apache.org</subscribe>
-            <unsubscribe>mahout-dev-unsubscribe@lucene.apache.org</unsubscribe>
-            <post>mahout-dev@lucene.apache.org</post>
-            <archive>http://mail-archives.apache.org/mod_mbox/lucene-mahout-dev/</archive>
+            <subscribe>dev-subscribe@mahout.apache.org</subscribe>
+            <unsubscribe>dev-unsubscribe@mahout.apache.org</unsubscribe>
+            <post>mahout-dev@mahout.apache.org</post>
+            <archive>http://mail-archives.apache.org/mod_mbox/mahout-dev/</archive>
             <otherArchives>
-                <otherArchive>http://lucene.apache.org/mail/mahout-dev/</otherArchive>
+                <otherArchive>http://mahout.apache.org/mail/dev/</otherArchive>
                 <otherArchive>http://mahout.markmail.org/</otherArchive>
                 <otherArchive>http://www.nabble.com/Mahout-Developer-List-f32041.html</otherArchive>
             </otherArchives>
         </mailingList>
         <mailingList>
             <name>Commit notifications</name>
-            <subscribe>mahout-commits-subscribe@lucene.apache.org</subscribe>
-            <unsubscribe>mahout-commits-unsubscribe@lucene.apache.org</unsubscribe>
-            <archive>http://mail-archives.apache.org/mod_mbox/lucene-mahout-commits/</archive>
+            <subscribe>commits-subscribe@mahout.apache.org</subscribe>
+            <unsubscribe>commits-unsubscribe@mahout.apache.org</unsubscribe>
+            <archive>http://mail-archives.apache.org/mod_mbox/mahout-commits/</archive>
             <otherArchives>
-                <otherArchive>http://lucene.apache.org/mail/mahout-commits/</otherArchive>
+                <otherArchive>http://mahout.apache.org/mail/commits/</otherArchive>
             </otherArchives>
         </mailingList>
     </mailingLists>
     <properties>
         <junit.version>4.7</junit.version>
-        <tagBase>https://svn.apache.org/repos/asf/lucene/mahout</tagBase>
+        <tagBase>https://svn.apache.org/repos/asf/mahout/tags</tagBase>
         <lucene.version>3.0.1</lucene.version>
         <hadoop.version>0.20.2</hadoop.version>
         <maven.clover.multiproject>true</maven.clover.multiproject>
@@ -551,7 +551,6 @@
                 <eclipse.outputDirectory>${basedir}/eclipse-classes</eclipse.outputDirectory>
             </properties>
         </profile>
-
         <profile>
           <id>setup.eclipse</id>
             <build>
@@ -576,9 +575,9 @@
         </profile>
     </profiles>
     <scm>
-        <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk</developerConnection>
-        <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout</url>
+        <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk</developerConnection>
+        <url>https://svn.apache.org/repos/asf/mahout</url>
     </scm>
     <distributionManagement>
         <site>
