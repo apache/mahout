@@ -42,7 +42,15 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
   public void map(WritableComparable<?> key, VectorWritable wordCountsWritable, Context context) throws IOException,
                                                                                                 InterruptedException {
     Vector wordCounts = wordCountsWritable.get();
-    LDAInference.InferredDocument doc = infer.infer(wordCounts);
+    LDAInference.InferredDocument doc = null;
+    try {
+      doc = infer.infer(wordCounts);
+    } catch (ArrayIndexOutOfBoundsException e1) {
+     throw new IllegalStateException(
+         "This is probably because the --numWords argument is set too small.  \n"
+         + "\tIt needs to be >= than the number of words (terms actually) in the corpus and can be \n"
+         + "\tlarger if some storage inefficiency can be tolerated.", e1);
+    }
     
     double[] logTotals = new double[state.numTopics];
     Arrays.fill(logTotals, Double.NEGATIVE_INFINITY);
