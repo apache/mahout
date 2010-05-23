@@ -145,10 +145,10 @@ public final class LDADriver {
     double oldLL = Double.NEGATIVE_INFINITY;
     boolean converged = false;
 
-    for (int iteration = 0; ((maxIterations < 1) || (iteration < maxIterations)) && !converged; iteration++) {
+    for (int iteration = 1; ((maxIterations < 1) || (iteration <= maxIterations)) && !converged; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      Path stateOut = new Path(output, "state-" + (iteration + 1));
+      Path stateOut = new Path(output, "state-" + iteration);
       double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing, numReducers);
       double relChange = (oldLL - ll) / oldLL;
 
@@ -157,7 +157,7 @@ public final class LDADriver {
       log.info("(Old LL: {})", oldLL);
       log.info("(Rel Change: {})", relChange);
 
-      converged = (iteration > 2) && (relChange < OVERALL_CONVERGENCE);
+      converged = (iteration > 3) && (relChange < OVERALL_CONVERGENCE);
       stateIn = stateOut;
       oldLL = ll;
     }

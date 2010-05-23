@@ -59,7 +59,7 @@ import org.apache.mahout.utils.vectors.text.term.TermCountReducer;
  */
 public final class DictionaryVectorizer {
   
-  public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "vectors";
+  public static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tf-vectors";
   
   public static final String MIN_SUPPORT = "min.support";
   
@@ -153,7 +153,7 @@ public final class DictionaryVectorizer {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
       makePartialVectors(input, maxNGramSize, dictionaryChunk, partialVectorOutputPath,
-        maxTermDimension[0], sequentialAccess);
+        maxTermDimension[0], sequentialAccess, numReducers);
     }
     
     Configuration conf = new Configuration();
@@ -162,7 +162,7 @@ public final class DictionaryVectorizer {
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, -1, maxTermDimension[0],
-        sequentialAccess);
+        sequentialAccess, numReducers);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
@@ -245,6 +245,8 @@ public final class DictionaryVectorizer {
    *          location of the chunk of features and the id's
    * @param output
    *          output directory were the partial vectors have to be created
+   * @param numReducers 
+   *          the desired number of reducer tasks
    * @throws IOException
    */
   private static void makePartialVectors(Path input,
@@ -252,7 +254,8 @@ public final class DictionaryVectorizer {
                                          Path dictionaryFilePath,
                                          Path output,
                                          int dimension,
-                                         boolean sequentialAccess) throws IOException {
+                                         boolean sequentialAccess, 
+                                         int numReducers) throws IOException {
     
     Configurable client = new JobClient();
     JobConf conf = new JobConf(DictionaryVectorizer.class);
@@ -279,6 +282,7 @@ public final class DictionaryVectorizer {
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setReducerClass(TFPartialVectorReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
+    conf.setNumReduceTasks(numReducers);
 
     HadoopUtil.overwriteOutput(output);
     

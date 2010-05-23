@@ -66,7 +66,7 @@ public final class TFIDFConverter {
   
   public static final String TFIDF_OUTPUT_FOLDER = "tfidf";
   
-  private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "vectors";
+  private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tfidf-vectors";
   
   private static final String FREQUENCY_FILE = "frequency.file-";
   
@@ -99,17 +99,21 @@ public final class TFIDFConverter {
    * @param output
    *          output directory where {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the document
    *          are generated
-   * @param minDf
-   *          The minimum document frequency. Default 1
-   * @param maxDFPercent
-   *          The max percentage of vectors for the DF. Can be used to remove really high frequency features.
-   *          Expressed as an integer between 0 and 100. Default 99
    * @param chunkSizeInMegabytes
    *          the size in MB of the feature => id chunk to be kept in memory at each node during Map/Reduce
    *          stage. Its recommended you calculated this based on the number of cores and the free memory
    *          available to you per node. Say, you have 2 cores and around 1GB extra memory to spare we
    *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
    *          partial vectors without thrashing the system due to increased swapping
+   * @param minDf
+   *          The minimum document frequency. Default 1
+   * @param maxDFPercent
+   *          The max percentage of vectors for the DF. Can be used to remove really high frequency features.
+   *          Expressed as an integer between 0 and 100. Default 99
+   * @param numReducers 
+   *          The number of reducers to spawn. This also affects the possible parallelism since each reducer
+   *          will typically produce a single output file containing tf-idf vectors for a subset of the
+   *          documents in the corpus.
    * @throws IOException
    */
   public static void processTfIdf(Path input,
@@ -118,7 +122,8 @@ public final class TFIDFConverter {
                                   int minDf,
                                   int maxDFPercent,
                                   float normPower,
-                                  boolean sequentialAccessOutput) throws IOException {
+                                  boolean sequentialAccessOutput, 
+                                  int numReducers) throws IOException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
@@ -158,7 +163,7 @@ public final class TFIDFConverter {
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, normPower,
-        datasetFeatures.getFirst()[0].intValue(), sequentialAccessOutput);
+        datasetFeatures.getFirst()[0].intValue(), sequentialAccessOutput, numReducers);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);

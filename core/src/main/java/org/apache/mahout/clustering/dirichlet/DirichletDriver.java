@@ -83,7 +83,7 @@ public class DirichletDriver {
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().create();
-    Option kOpt = DefaultOptionCreator.kOption().create();
+    Option kOpt = DefaultOptionCreator.kOption().withRequired(true).create();
     Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
     Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
     Option alphaOpt = DefaultOptionCreator.alphaOption().create();

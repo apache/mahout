@@ -101,14 +101,14 @@ public final class SparseVectorsFromSequenceFiles {
       abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "(Optional) The maximum size of ngrams to create"
-              + " (2 = bigrams, 3 = trigrams, etc) Default Value:2").withShortName("ng").create();
+              + " (2 = bigrams, 3 = trigrams, etc) Default Value:1").withShortName("ng").create();
     Option sequentialAccessVectorOpt = obuilder.withLongName("sequentialAccessVector").withRequired(false)
         .withDescription(
-          "(Optional) Whether output vectors should be SequentialAccessVectors If set true else false")
+          "(Optional) Whether output vectors should be SequentialAccessVectors. If set true else false")
         .withShortName("seq").create();
     
     Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
-      "If set, overwrite the output directory").withShortName("w").create();
+      "If set, overwrite the output directory").withShortName("ow").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     
@@ -165,7 +165,7 @@ public final class SparseVectorsFromSequenceFiles {
       if (cmdLine.hasOption(numReduceTasksOpt)) {
         reduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
       }
-      log.info("Pass1 reduce tasks: {}", reduceTasks);
+      log.info("Number of reduce tasks: {}", reduceTasks);
       
       Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
       if (cmdLine.hasOption(analyzerNameOpt)) {
@@ -224,7 +224,7 @@ public final class SparseVectorsFromSequenceFiles {
         TFIDFConverter.processTfIdf(
           new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
           new Path(outputDir, TFIDFConverter.TFIDF_OUTPUT_FOLDER), chunkSize, minDf, maxDFPercent, norm,
-          sequentialAccessOutput);
+          sequentialAccessOutput, reduceTasks);
       }
     } catch (OptionException e) {
       log.error("Exception", e);

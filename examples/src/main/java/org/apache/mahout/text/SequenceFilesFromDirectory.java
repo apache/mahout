@@ -79,9 +79,7 @@ public final class SequenceFilesFromDirectory {
     private final FileSystem fs;
     
     public ChunkedWriter(int chunkSizeInMB, String outputDir) throws IOException {
-      if (chunkSizeInMB < 64) {
-        chunkSizeInMB = 64;
-      } else if (chunkSizeInMB > 1984) {
+      if (chunkSizeInMB > 1984) {
         chunkSizeInMB = 1984;
       }
       maxChunkSizeInBytes = chunkSizeInMB * 1024 * 1024;

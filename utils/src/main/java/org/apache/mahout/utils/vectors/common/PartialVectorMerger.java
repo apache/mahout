@@ -69,13 +69,16 @@ public final class PartialVectorMerger {
    *          output directory were the partial vectors have to be created
    * @param normPower
    *          The normalization value. Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
+   * @param numReducers 
+   *          The number of reducers to spawn
    * @throws IOException
    */
   public static void mergePartialVectors(List<Path> partialVectorPaths,
                                          Path output,
                                          float normPower,
                                          int dimension,
-                                         boolean sequentialAccess) throws IOException {
+                                         boolean sequentialAccess, 
+                                         int numReducers) throws IOException {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
@@ -101,6 +104,7 @@ public final class PartialVectorMerger {
     conf.setInputFormat(SequenceFileInputFormat.class);
     conf.setReducerClass(PartialVectorMergeReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
+    conf.setNumReduceTasks(numReducers);
     
     HadoopUtil.overwriteOutput(output);
 

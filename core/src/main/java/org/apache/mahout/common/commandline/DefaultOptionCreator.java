@@ -112,7 +112,7 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for specification of numbers of clusters to create. Used by Dirichlet, FuzzyKmeans, Kmeans
    */
   public static DefaultOptionBuilder kOption() {
-    return new DefaultOptionBuilder().withLongName("k").withRequired(true).withArgument(
+    return new DefaultOptionBuilder().withLongName("k").withRequired(false).withArgument(
         new ArgumentBuilder().withName("k").withMinimum(1).withMaximum(1).create()).withDescription(
         "The number of clusters to create").withShortName("k");
   }
