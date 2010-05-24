@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.math.Varint;
 
 /**
  * A {@link Writable} which encapsulates a list of {@link RecommendedItem}s. This is the mapper (and reducer)
@@ -57,7 +57,7 @@ public final class RecommendedItemsWritable implements Writable {
   public void write(DataOutput out) throws IOException {
     out.writeInt(recommended.size());
     for (RecommendedItem item : recommended) {
-      WritableUtils.writeVLong(out, item.getItemID());
+      Varint.writeSignedVarLong(item.getItemID(), out);
       out.writeFloat(item.getValue());
     }
     
@@ -68,7 +68,7 @@ public final class RecommendedItemsWritable implements Writable {
     int size = in.readInt();
     recommended = new ArrayList<RecommendedItem>(size);
     for (int i = 0; i < size; i++) {
-      long itemID = WritableUtils.readVLong(in);
+      long itemID = Varint.readSignedVarLong(in);
       float value = in.readFloat();
       RecommendedItem recommendedItem = new GenericRecommendedItem(itemID, value);
       recommended.add(recommendedItem);

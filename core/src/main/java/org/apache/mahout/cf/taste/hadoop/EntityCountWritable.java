@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -21,12 +21,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
+import org.apache.mahout.math.VarLongWritable;
+import org.apache.mahout.math.Varint;
 
 /** A {@link Writable} encapsulating an item ID and a count . */
-public final class EntityCountWritable extends VLongWritable implements Cloneable {
+public final class EntityCountWritable extends VarLongWritable implements Cloneable {
 
   private int count;
 
@@ -59,13 +59,13 @@ public final class EntityCountWritable extends VLongWritable implements Cloneabl
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    WritableUtils.writeVInt(out, count);
+    Varint.writeUnsignedVarInt(count, out);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
-    count = WritableUtils.readVInt(in);
+    count = Varint.readUnsignedVarInt(in);
   }
 
   @Override

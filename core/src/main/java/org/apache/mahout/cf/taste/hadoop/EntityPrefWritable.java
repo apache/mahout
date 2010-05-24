@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -21,12 +21,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VarLongWritable;
 
 /** A {@link Writable} encapsulating an item ID and a preference value. */
-public final class EntityPrefWritable extends VLongWritable implements Cloneable {
+public final class EntityPrefWritable extends VarLongWritable implements Cloneable {
   
   private float prefValue;
   

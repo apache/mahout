@@ -25,7 +25,7 @@ import java.nio.charset.CharacterCodingException;
 import org.apache.hadoop.io.BinaryComparable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableUtils;
+import org.apache.mahout.math.Varint;
 import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 
 /** A GramKey, based on the identity fields of Gram (type, string) plus a byte[] used for secondary ordering */
@@ -76,8 +76,8 @@ public class GramKey extends BinaryComparable implements
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    int newLength = WritableUtils.readVInt(in);
-    int newPrimaryLength = WritableUtils.readVInt(in);
+    int newLength = Varint.readUnsignedVarInt(in);
+    int newPrimaryLength = Varint.readUnsignedVarInt(in);
     setCapacity(newLength, false);
     in.readFully(bytes, 0, newLength);
     length = newLength;
@@ -87,8 +87,8 @@ public class GramKey extends BinaryComparable implements
   
   @Override
   public void write(DataOutput out) throws IOException {
-    WritableUtils.writeVInt(out, length);
-    WritableUtils.writeVInt(out, primaryLength);
+    Varint.writeUnsignedVarInt(length, out);
+    Varint.writeUnsignedVarInt(primaryLength, out);
     out.write(bytes, 0, length);
   }
   

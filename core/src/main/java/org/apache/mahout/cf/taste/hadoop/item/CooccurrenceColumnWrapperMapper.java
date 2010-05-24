@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,20 +19,20 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VectorWritable;
 
 public final class CooccurrenceColumnWrapperMapper extends MapReduceBase implements
-    Mapper<IntWritable, VectorWritable,IntWritable,VectorOrPrefWritable> {
+    Mapper<VarIntWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
 
   @Override
-  public void map(IntWritable key,
+  public void map(VarIntWritable key,
                   VectorWritable value,
-                  OutputCollector<IntWritable,VectorOrPrefWritable> output,
+                  OutputCollector<VarIntWritable,VectorOrPrefWritable> output,
                   Reporter reporter) throws IOException {
     output.collect(key, new VectorOrPrefWritable(value.get()));
   }

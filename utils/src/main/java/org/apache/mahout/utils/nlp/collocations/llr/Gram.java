@@ -26,7 +26,7 @@ import java.nio.charset.CharacterCodingException;
 import org.apache.hadoop.io.BinaryComparable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableUtils;
+import org.apache.mahout.math.Varint;
 
 /**
  * Writable for holding data generated from the collocation discovery jobs. Depending on the job configuration
@@ -168,19 +168,19 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    int newLength = WritableUtils.readVInt(in);
+    int newLength = Varint.readUnsignedVarInt(in);
     setCapacity(newLength, false);
     in.readFully(bytes, 0, newLength);
-    int newFrequency = WritableUtils.readVInt(in);
+    int newFrequency = Varint.readUnsignedVarInt(in);
     length = newLength;
     frequency = newFrequency;
   }
   
   @Override
   public void write(DataOutput out) throws IOException {
-    WritableUtils.writeVInt(out, length);
+    Varint.writeUnsignedVarInt(length, out);
     out.write(bytes, 0, length);
-    WritableUtils.writeVInt(out, frequency);
+    Varint.writeUnsignedVarInt(frequency, out);
   }
 
   /* Cribbed from o.a.hadoop.io.Text:

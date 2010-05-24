@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -21,15 +21,15 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.GenericWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.VIntWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 
 public final class TupleWritable extends ArrayWritable {
   
   public static class Field extends GenericWritable {
     
-    private static final Class<?>[] CLASSES = {VIntWritable.class, VLongWritable.class, DoubleWritable.class,
+    private static final Class<?>[] CLASSES = {VarIntWritable.class, VarLongWritable.class, DoubleWritable.class,
                                                Text.class};
     
     @Override
@@ -98,8 +98,8 @@ public final class TupleWritable extends ArrayWritable {
   public int getInt(int idx) {
     Field field = get(idx);
     Class<? extends Writable> wrappedClass = field.get().getClass();
-    if (wrappedClass.equals(VIntWritable.class)) {
-      return ((VIntWritable) field.get()).get();
+    if (wrappedClass.equals(VarIntWritable.class)) {
+      return ((VarIntWritable) field.get()).get();
     } else {
       throw new IllegalArgumentException("Not an integer: " + wrappedClass);
     }
@@ -108,8 +108,8 @@ public final class TupleWritable extends ArrayWritable {
   public long getLong(int idx) {
     Field field = get(idx);
     Class<? extends Writable> wrappedClass = field.get().getClass();
-    if (wrappedClass.equals(VLongWritable.class)) {
-      return ((VLongWritable) field.get()).get();
+    if (wrappedClass.equals(VarLongWritable.class)) {
+      return ((VarLongWritable) field.get()).get();
     } else {
       throw new IllegalArgumentException("Not a long: " + wrappedClass);
     }

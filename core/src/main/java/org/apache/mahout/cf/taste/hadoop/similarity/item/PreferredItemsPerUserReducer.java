@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,19 +22,19 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.VarLongWritable;
 
 public final class PreferredItemsPerUserReducer extends MapReduceBase
-    implements Reducer<VLongWritable,ItemPrefWithItemVectorWeightWritable,VLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
+    implements Reducer<VarLongWritable,ItemPrefWithItemVectorWeightWritable,VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
 
   @Override
-  public void reduce(VLongWritable user,
+  public void reduce(VarLongWritable user,
                      Iterator<ItemPrefWithItemVectorWeightWritable> itemPrefs,
-                     OutputCollector<VLongWritable,ItemPrefWithItemVectorWeightArrayWritable> output,
+                     OutputCollector<VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> output,
                      Reporter reporter)
       throws IOException {
 

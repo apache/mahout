@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,13 +22,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
+import org.apache.mahout.math.VarLongWritable;
 
 /**
  * For each single item, collect all users with their preferences
@@ -36,12 +36,12 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
  */
 public final class ToItemVectorReducer
     extends MapReduceBase implements
-    Reducer<VLongWritable,EntityPrefWritable,VLongWritable,EntityPrefWritableArrayWritable> {
+    Reducer<VarLongWritable,EntityPrefWritable,VarLongWritable,EntityPrefWritableArrayWritable> {
 
   @Override
-  public void reduce(VLongWritable item,
+  public void reduce(VarLongWritable item,
                      Iterator<EntityPrefWritable> userPrefs,
-                     OutputCollector<VLongWritable,EntityPrefWritableArrayWritable> output,
+                     OutputCollector<VarLongWritable,EntityPrefWritableArrayWritable> output,
                      Reporter reporter)
       throws IOException {
 

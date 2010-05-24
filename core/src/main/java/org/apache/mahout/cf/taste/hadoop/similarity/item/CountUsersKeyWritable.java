@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,13 +22,13 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.VarLongWritable;
+import org.apache.mahout.math.Varint;
 
 /**
  * a writable key that is used by {@link CountUsersMapper} and {@link CountUsersReducer} to
@@ -52,12 +52,12 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    userID = WritableUtils.readVLong(in);
+    userID = Varint.readSignedVarLong(in);
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    WritableUtils.writeVLong(out, userID);
+    Varint.writeSignedVarLong(userID, out);
   }
 
   @Override
@@ -81,10 +81,10 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
   /**
    * all userIDs go to the same partition
    */
-  public static class CountUsersPartitioner implements Partitioner<CountUsersKeyWritable,VLongWritable> {
+  public static class CountUsersPartitioner implements Partitioner<CountUsersKeyWritable,VarLongWritable> {
 
     @Override
-    public int getPartition(CountUsersKeyWritable key, VLongWritable value, int numPartitions) {
+    public int getPartition(CountUsersKeyWritable key, VarLongWritable value, int numPartitions) {
       return 0;
     }
 

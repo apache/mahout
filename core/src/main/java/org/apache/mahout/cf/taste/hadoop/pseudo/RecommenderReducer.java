@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -39,6 +38,7 @@ import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.math.VarLongWritable;
 
 /**
  * <p>
@@ -50,7 +50,7 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
  * @see RecommenderJob
  */
 public final class RecommenderReducer extends MapReduceBase implements
-    Reducer<VLongWritable,NullWritable,VLongWritable,RecommendedItemsWritable> {
+    Reducer<VarLongWritable,NullWritable,VarLongWritable,RecommendedItemsWritable> {
   
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -94,9 +94,9 @@ public final class RecommenderReducer extends MapReduceBase implements
   }
   
   @Override
-  public void reduce(VLongWritable key,
+  public void reduce(VarLongWritable key,
                      Iterator<NullWritable> values,
-                     OutputCollector<VLongWritable,RecommendedItemsWritable> output,
+                     OutputCollector<VarLongWritable,RecommendedItemsWritable> output,
                      Reporter reporter) throws IOException {
     long userID = key.get();
     List<RecommendedItem> recommendedItems;

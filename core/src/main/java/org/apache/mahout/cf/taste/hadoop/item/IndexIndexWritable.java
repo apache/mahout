@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.mahout.math.Varint;
 
 /** A {@link WritableComparable} encapsulating two item indices. */
 public final class IndexIndexWritable
@@ -54,14 +55,14 @@ public final class IndexIndexWritable
 
   @Override
   public void write(DataOutput out) throws IOException {
-    out.writeInt(aID);
-    out.writeInt(bID);
+    Varint.writeUnsignedVarInt(aID, out);
+    Varint.writeUnsignedVarInt(bID, out);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    aID = in.readInt();
-    bID = in.readInt();
+    aID = Varint.readUnsignedVarInt(in);
+    bID = Varint.readUnsignedVarInt(in);    
   }
 
   @Override

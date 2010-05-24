@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -29,9 +29,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -41,12 +39,14 @@ import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.impl.recommender.ByValueRecommendedItemComparator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 public final class AggregateAndRecommendReducer extends MapReduceBase implements
-    Reducer<VLongWritable,VectorWritable,VLongWritable,RecommendedItemsWritable> {
+    Reducer<VarLongWritable,VectorWritable,VarLongWritable,RecommendedItemsWritable> {
 
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
@@ -68,8 +68,8 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
       FileSystem fs = FileSystem.get(jobConf);
       Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
       indexItemIDMap = new OpenIntLongHashMap();
-      IntWritable index = new IntWritable();
-      VLongWritable id = new VLongWritable();
+      VarIntWritable index = new VarIntWritable();
+      VarLongWritable id = new VarLongWritable();
       for (FileStatus status : fs.listStatus(itemIDIndexPath, PARTS_FILTER)) {
         String path = status.getPath().toString();
         SequenceFile.Reader reader =
@@ -85,9 +85,9 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
   }
 
   @Override
-  public void reduce(VLongWritable key,
+  public void reduce(VarLongWritable key,
                      Iterator<VectorWritable> values,
-                     OutputCollector<VLongWritable,RecommendedItemsWritable> output,
+                     OutputCollector<VarLongWritable,RecommendedItemsWritable> output,
                      Reporter reporter) throws IOException {
     if (!values.hasNext()) {
       return;

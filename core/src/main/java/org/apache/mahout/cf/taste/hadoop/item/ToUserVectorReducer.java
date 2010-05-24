@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,13 +20,13 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -34,7 +34,7 @@ import org.apache.mahout.math.VectorWritable;
  * <h1>Input</h1>
  * 
  * <p>
- * Takes user IDs as {@link VLongWritable} mapped to all associated item IDs and preference values, as
+ * Takes user IDs as {@link VarLongWritable} mapped to all associated item IDs and preference values, as
  * {@link EntityPrefWritable}s.
  * </p>
  * 
@@ -48,19 +48,19 @@ import org.apache.mahout.math.VectorWritable;
  * </p>
  */
 public final class ToUserVectorReducer extends MapReduceBase implements
-    Reducer<VLongWritable,VLongWritable,VLongWritable,VectorWritable> {
+    Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable> {
   
   @Override
-  public void reduce(VLongWritable userID,
-                     Iterator<VLongWritable> itemPrefs,
-                     OutputCollector<VLongWritable,VectorWritable> output,
+  public void reduce(VarLongWritable userID,
+                     Iterator<VarLongWritable> itemPrefs,
+                     OutputCollector<VarLongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (!itemPrefs.hasNext()) {
       return;
     }
     Vector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     while (itemPrefs.hasNext()) {
-      VLongWritable itemPref = itemPrefs.next();
+      VarLongWritable itemPref = itemPrefs.next();
       int index = ItemIDIndexMapper.idToIndex(itemPref.get());
       float value;
       if (itemPref instanceof EntityPrefWritable) {

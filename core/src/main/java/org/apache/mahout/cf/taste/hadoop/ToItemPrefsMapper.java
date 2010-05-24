@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -24,7 +24,7 @@ import org.apache.hadoop.io.Text;
  * 
  * <p>
  * Intended for use with {@link org.apache.hadoop.mapred.TextInputFormat}; accepts line number / line pairs as
- * {@link org.apache.hadoop.io.VLongWritable}/{@link Text} pairs.
+ * {@link org.apache.mahout.math.VarLongWritable}/{@link Text} pairs.
  * </p>
  * 
  * <p>
@@ -35,7 +35,7 @@ import org.apache.hadoop.io.Text;
  * <h1>Output</h1>
  * 
  * <p>
- * Outputs the user ID as a {@link org.apache.hadoop.io.VLongWritable} mapped to the item ID and preference as a
+ * Outputs the user ID as a {@link org.apache.mahout.math.VarLongWritable} mapped to the item ID and preference as a
  * {@link EntityPrefWritable}.
  * </p>
  */

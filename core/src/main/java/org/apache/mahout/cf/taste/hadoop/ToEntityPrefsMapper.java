@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,21 +19,21 @@ package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.item.RecommenderJob;
+import org.apache.mahout.math.VarLongWritable;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-abstract class ToEntityPrefsMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,VLongWritable,VLongWritable> {
+public abstract class ToEntityPrefsMapper extends MapReduceBase implements
+    Mapper<LongWritable,Text, VarLongWritable,VarLongWritable> {
 
-  static final String TRANSPOSE_USER_ITEM = "transposeUserItem";
+  public static final String TRANSPOSE_USER_ITEM = "transposeUserItem";
 
   private static final Pattern DELIMITER = Pattern.compile("[\t,]");
 
@@ -54,7 +54,7 @@ abstract class ToEntityPrefsMapper extends MapReduceBase implements
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<VLongWritable,VLongWritable> output,
+                  OutputCollector<VarLongWritable,VarLongWritable> output,
                   Reporter reporter) throws IOException {
     String[] tokens = ToEntityPrefsMapper.DELIMITER.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
@@ -68,10 +68,10 @@ abstract class ToEntityPrefsMapper extends MapReduceBase implements
       itemID = temp;
     }
     if (booleanData) {
-      output.collect(new VLongWritable(userID), new VLongWritable(itemID));
+      output.collect(new VarLongWritable(userID), new VarLongWritable(itemID));
     } else {
       float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
-      output.collect(new VLongWritable(userID), new EntityPrefWritable(itemID, prefValue));
+      output.collect(new VarLongWritable(userID), new EntityPrefWritable(itemID, prefValue));
     }
   }
 

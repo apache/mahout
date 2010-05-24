@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -30,11 +30,9 @@ import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
@@ -44,6 +42,8 @@ import org.apache.mahout.cf.taste.hadoop.ToUserPrefsMapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
 import org.apache.mahout.cf.taste.hadoop.similarity.DistributedUncenteredZeroAssumingCosineSimilarity;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
 
@@ -55,9 +55,9 @@ import org.easymock.classextension.EasyMock;
 public final class ItemSimilarityTest extends MahoutTestCase {
 
   public void testUserPrefsPerItemMapper() throws Exception {
-    OutputCollector<VLongWritable,VLongWritable> output =
+    OutputCollector<VarLongWritable,VarLongWritable> output =
         EasyMock.createMock(OutputCollector.class);
-    output.collect(new VLongWritable(34L), new EntityPrefWritable(12L, 2.3f));
+    output.collect(new VarLongWritable(34L), new EntityPrefWritable(12L, 2.3f));
     EasyMock.replay(output);
 
     new ToUserPrefsMapper().map(new LongWritable(), new Text("12,34,2.3"), output, null);
@@ -66,9 +66,9 @@ public final class ItemSimilarityTest extends MahoutTestCase {
   }
 
   public void testCountUsersMapper() throws Exception {
-    OutputCollector<CountUsersKeyWritable,VLongWritable> output = EasyMock.createMock(OutputCollector.class);
-    output.collect(keyForUserID(12L), EasyMock.eq(new VLongWritable(12L)));
-    output.collect(keyForUserID(35L), EasyMock.eq(new VLongWritable(35L)));
+    OutputCollector<CountUsersKeyWritable,VarLongWritable> output = EasyMock.createMock(OutputCollector.class);
+    output.collect(keyForUserID(12L), EasyMock.eq(new VarLongWritable(12L)));
+    output.collect(keyForUserID(35L), EasyMock.eq(new VarLongWritable(35L)));
     EasyMock.replay(output);
 
     CountUsersMapper mapper = new CountUsersMapper();
@@ -98,13 +98,13 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
   public void testCountUsersReducer() throws Exception {
 
-    OutputCollector<IntWritable,NullWritable> output = EasyMock.createMock(OutputCollector.class);
-    output.collect(new IntWritable(3), NullWritable.get());
+    OutputCollector<VarIntWritable,NullWritable> output = EasyMock.createMock(OutputCollector.class);
+    output.collect(new VarIntWritable(3), NullWritable.get());
     EasyMock.replay(output);
 
-    List<VLongWritable> userIDs = Arrays.asList(new VLongWritable(1L), new VLongWritable(1L),
-                                                new VLongWritable(3L), new VLongWritable(5L),
-                                                new VLongWritable(5L), new VLongWritable(5L));
+    List<VarLongWritable> userIDs = Arrays.asList(new VarLongWritable(1L), new VarLongWritable(1L),
+                                                new VarLongWritable(3L), new VarLongWritable(5L),
+                                                new VarLongWritable(5L), new VarLongWritable(5L));
 
     new CountUsersReducer().reduce(null, userIDs.iterator(), output, null);
 
@@ -116,14 +116,14 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     List<EntityPrefWritable> userPrefs = Arrays.asList(
         new EntityPrefWritable(34L, 1.0f), new EntityPrefWritable(56L, 2.0f));
 
-    OutputCollector<VLongWritable,EntityPrefWritableArrayWritable> output =
+    OutputCollector<VarLongWritable,EntityPrefWritableArrayWritable> output =
         EasyMock.createMock(OutputCollector.class);
 
-    output.collect(EasyMock.eq(new VLongWritable(12L)), equalToUserPrefs(userPrefs));
+    output.collect(EasyMock.eq(new VarLongWritable(12L)), equalToUserPrefs(userPrefs));
 
     EasyMock.replay(output);
 
-    new ToItemVectorReducer().reduce(new VLongWritable(12L), userPrefs.iterator(), output, null);
+    new ToItemVectorReducer().reduce(new VarLongWritable(12L), userPrefs.iterator(), output, null);
 
     EasyMock.verify(output);
   }
@@ -162,7 +162,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
   }
 
   public void testPreferredItemsPerUserMapper() throws Exception {
-    OutputCollector<VLongWritable,ItemPrefWithItemVectorWeightWritable> output =
+    OutputCollector<VarLongWritable,ItemPrefWithItemVectorWeightWritable> output =
         EasyMock.createMock(OutputCollector.class);
     EntityPrefWritableArrayWritable userPrefs = new EntityPrefWritableArrayWritable(
         new EntityPrefWritable[] {
@@ -172,8 +172,8 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     double weight =
       new DistributedUncenteredZeroAssumingCosineSimilarity().weightOfItemVector(Arrays.asList(2.0f, 3.0f).iterator());
 
-    output.collect(new VLongWritable(12L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 2.0f));
-    output.collect(new VLongWritable(56L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 3.0f));
+    output.collect(new VarLongWritable(12L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 2.0f));
+    output.collect(new VarLongWritable(56L), new ItemPrefWithItemVectorWeightWritable(34L, weight, 3.0f));
 
     JobConf conf = new JobConf();
     conf.set(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME,
@@ -183,7 +183,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
     PreferredItemsPerUserMapper mapper = new PreferredItemsPerUserMapper();
     mapper.configure(conf);
-    mapper.map(new VLongWritable(34L), userPrefs, output, null);
+    mapper.map(new VarLongWritable(34L), userPrefs, output, null);
 
     EasyMock.verify(output);
   }
@@ -194,15 +194,15 @@ public final class ItemSimilarityTest extends MahoutTestCase {
         Arrays.asList(new ItemPrefWithItemVectorWeightWritable(34L, 5.0, 1.0f),
                       new ItemPrefWithItemVectorWeightWritable(56L, 7.0, 2.0f));
 
-    OutputCollector<VLongWritable,ItemPrefWithItemVectorWeightArrayWritable> output =
+    OutputCollector<VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> output =
         EasyMock.createMock(OutputCollector.class);
 
-    output.collect(EasyMock.eq(new VLongWritable(12L)), equalToItemPrefs(itemPrefs));
+    output.collect(EasyMock.eq(new VarLongWritable(12L)), equalToItemPrefs(itemPrefs));
 
     EasyMock.replay(output);
 
     new PreferredItemsPerUserReducer().reduce(
-        new VLongWritable(12L), itemPrefs.iterator(), output, null);
+        new VarLongWritable(12L), itemPrefs.iterator(), output, null);
 
     EasyMock.verify(output);
   }
@@ -254,7 +254,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
     EasyMock.replay(output, itemPrefs);
 
-    new CopreferredItemsMapper().map(new VLongWritable(), itemPrefs, output, null);
+    new CopreferredItemsMapper().map(new VarLongWritable(), itemPrefs, output, null);
 
     EasyMock.verify(output, itemPrefs);
   }
@@ -282,97 +282,78 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
   public void testCompleteJob() throws Exception {
 
-    String tmpDirProp = System.getProperty("java.io.tmpdir");
-    if (!tmpDirProp.endsWith("/")) {
-      tmpDirProp += "/";
-    }
-    String tmpDirPath = tmpDirProp + ItemSimilarityTest.class.getCanonicalName();
-    File tmpDir = new File(tmpDirPath);
+    File inputFile = getTestTempFile("prefs.txt");
+    File outputDir = getTestTempDir("output");
+    outputDir.delete();
+    File tmpDir = getTestTempDir("tmp");
 
+    /* user-item-matrix
+
+                 Game   Mouse   PC    Disk
+         Jane     -       1      2      -
+         Paul     1       -      1      -
+         Fred     -       -      -      1
+     */
+
+    BufferedWriter writer = new BufferedWriter(new FileWriter(inputFile));
     try {
-      if (tmpDir.exists()) {
-        recursiveDelete(tmpDir);
-      }
-      tmpDir.mkdirs();
-
-      /* user-item-matrix
-
-                   Game   Mouse   PC    Disk
-           Jane     -       1      2      -
-           Paul     1       -      1      -
-           Fred     -       -      -      1
-       */
-
-      BufferedWriter writer = new BufferedWriter(new FileWriter(tmpDirPath+"/prefs.txt"));
-      try {
-        writer.write("2,1,1\n" +
-                     "1,2,1\n" +
-                     "3,4,1\n" +
-                     "1,3,2\n" +
-                     "2,3,1\n");
-      } finally {
-        writer.close();
-      }
-
-      ItemSimilarityJob similarityJob = new ItemSimilarityJob();
-
-      Configuration conf = new Configuration();
-      conf.set("mapred.input.dir", tmpDirPath+"/prefs.txt");
-      conf.set("mapred.output.dir", tmpDirPath+"/output");
-      conf.set("mapred.output.compress", Boolean.FALSE.toString());
-
-      similarityJob.setConf(conf);
-
-      similarityJob.run(new String[] { "--tempDir", tmpDirPath+"/tmp", "--similarityClassname",
-          "org.apache.mahout.cf.taste.hadoop.similarity.DistributedUncenteredZeroAssumingCosineSimilarity"});
-
-      int numberOfUsers = ItemSimilarityJob.readNumberOfUsers(new JobConf(), tmpDirPath + "/tmp/countUsers/part-00000");
-
-      assertEquals(3, numberOfUsers);
-
-      String filePath = tmpDirPath+"/output/part-00000";
-      BufferedReader reader = new BufferedReader(new FileReader(filePath));
-
-      String line;
-      int currentLine = 1;
-      while ( (line = reader.readLine()) != null) {
-
-        String[] tokens = line.split("\t");
-
-        long itemAID = Long.parseLong(tokens[0]);
-        long itemBID = Long.parseLong(tokens[1]);
-        double similarity = Double.parseDouble(tokens[2]);
-
-        if (currentLine == 1) {
-          assertEquals(1L, itemAID);
-          assertEquals(3L, itemBID);
-          assertEquals(0.45, similarity, 0.01);
-        }
-
-        if (currentLine == 2) {
-          assertEquals(2L, itemAID);
-          assertEquals(3L, itemBID);
-          assertEquals(0.89, similarity, 0.01);
-        }
-
-        currentLine++;
-      }
-
-      int linesWritten = currentLine-1;
-      assertEquals(2, linesWritten);
-
+      writer.write("2,1,1\n" +
+                   "1,2,1\n" +
+                   "3,4,1\n" +
+                   "1,3,2\n" +
+                   "2,3,1\n");
     } finally {
-      recursiveDelete(tmpDir);
+      writer.close();
     }
-  }
 
-  static void recursiveDelete(File fileOrDir) {
-    if (fileOrDir.isDirectory()) {
-      for (File innerFile : fileOrDir.listFiles()) {
-        recursiveDelete(innerFile);
+    ItemSimilarityJob similarityJob = new ItemSimilarityJob();
+
+    Configuration conf = new Configuration();
+    conf.set("mapred.input.dir", inputFile.getAbsolutePath());
+    conf.set("mapred.output.dir", outputDir.getAbsolutePath());
+    conf.set("mapred.output.compress", Boolean.FALSE.toString());
+
+    similarityJob.setConf(conf);
+
+    similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+        "org.apache.mahout.cf.taste.hadoop.similarity.DistributedUncenteredZeroAssumingCosineSimilarity"});
+
+    File countUsersPart = new File(new File(tmpDir, "countUsers"), "part-00000");
+    int numberOfUsers = ItemSimilarityJob.readNumberOfUsers(new JobConf(), countUsersPart.getAbsolutePath());
+
+    assertEquals(3, numberOfUsers);
+
+    File outPart = new File(outputDir, "part-00000");
+    BufferedReader reader = new BufferedReader(new FileReader(outPart));
+
+    String line;
+    int currentLine = 1;
+    while ( (line = reader.readLine()) != null) {
+
+      String[] tokens = line.split("\t");
+
+      long itemAID = Long.parseLong(tokens[0]);
+      long itemBID = Long.parseLong(tokens[1]);
+      double similarity = Double.parseDouble(tokens[2]);
+
+      if (currentLine == 1) {
+        assertEquals(1L, itemAID);
+        assertEquals(3L, itemBID);
+        assertEquals(0.45, similarity, 0.01);
       }
+
+      if (currentLine == 2) {
+        assertEquals(2L, itemAID);
+        assertEquals(3L, itemBID);
+        assertEquals(0.89, similarity, 0.01);
+      }
+
+      currentLine++;
     }
-    fileOrDir.delete();
+
+    int linesWritten = currentLine-1;
+    assertEquals(2, linesWritten);
+
   }
 
 }

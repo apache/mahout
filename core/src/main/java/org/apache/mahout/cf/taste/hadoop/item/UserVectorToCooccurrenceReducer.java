@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,64 +20,31 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public final class UserVectorToCooccurrenceReducer extends MapReduceBase implements
-    Reducer<IndexIndexWritable,IntWritable,IntWritable,VectorWritable> {
-
-  private int lastItem1ID = Integer.MIN_VALUE;
-  private int lastItem2ID = Integer.MIN_VALUE;
-  private Vector cooccurrenceRow = null;
-  private int count = 0;
+    Reducer<VarIntWritable,VarIntWritable,VarIntWritable,VectorWritable> {
 
   @Override
-  public void reduce(IndexIndexWritable entityEntity,
-                     Iterator<IntWritable> counts,
-                     OutputCollector<IntWritable,VectorWritable> output,
+  public void reduce(VarIntWritable itemIndex1,
+                     Iterator<VarIntWritable> itemIndex2s,
+                     OutputCollector<VarIntWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
-
-    int item1ID = entityEntity.getAID();
-    int item2ID = entityEntity.getBID();
-    int sum = CooccurrenceCombiner.sum(counts);
-
-    if (item1ID < lastItem1ID) {
-      throw new IllegalStateException();
+    Vector cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
+    while (itemIndex2s.hasNext()) {
+      int itemIndex2 = itemIndex2s.next().get();
+      cooccurrenceRow.set(itemIndex2, cooccurrenceRow.get(itemIndex2) + 1.0);
     }
-    if (item1ID == lastItem1ID) {
-      if (item2ID < lastItem2ID) {
-        throw new IllegalStateException();
-      }
-      if (item2ID == lastItem2ID) {
-        count += sum;
-      } else {
-        if (cooccurrenceRow == null) {
-          cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-        }
-        cooccurrenceRow.set(lastItem2ID, count);
-        lastItem2ID = item2ID;
-        count = sum;
-      }
-    } else {
-      if (cooccurrenceRow != null) {
-        if (count > 0) {
-          cooccurrenceRow.set(lastItem2ID, count);
-        }
-        VectorWritable vw = new VectorWritable(cooccurrenceRow);
-        vw.setWritesLaxPrecision(true);
-        output.collect(new IntWritable(lastItem1ID), vw);
-      }
-      lastItem1ID = item1ID;
-      lastItem2ID = item2ID;
-      cooccurrenceRow = null;
-      count = sum;
-    }
+    VectorWritable vw = new VectorWritable(cooccurrenceRow);
+    vw.setWritesLaxPrecision(true);
+    output.collect(itemIndex1, vw);
   }
   
 }

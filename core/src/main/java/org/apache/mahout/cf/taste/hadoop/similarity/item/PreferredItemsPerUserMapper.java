@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -30,13 +29,14 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.DistributedItemSimilarity;
+import org.apache.mahout.math.VarLongWritable;
 
 /**
  * for each item-vector, we compute its weight here and map out all entries with the user as key,
  * so we can create the user-vectors in the reducer
  */
 public final class PreferredItemsPerUserMapper extends MapReduceBase
-    implements Mapper<VLongWritable,EntityPrefWritableArrayWritable,VLongWritable,ItemPrefWithItemVectorWeightWritable> {
+    implements Mapper<VarLongWritable,EntityPrefWritableArrayWritable,VarLongWritable,ItemPrefWithItemVectorWeightWritable> {
 
   private DistributedItemSimilarity distributedSimilarity;
 
@@ -48,9 +48,9 @@ public final class PreferredItemsPerUserMapper extends MapReduceBase
   }
 
   @Override
-  public void map(VLongWritable item,
+  public void map(VarLongWritable item,
                   EntityPrefWritableArrayWritable userPrefsArray,
-                  OutputCollector<VLongWritable,ItemPrefWithItemVectorWeightWritable> output,
+                  OutputCollector<VarLongWritable,ItemPrefWithItemVectorWeightWritable> output,
                   Reporter reporter) throws IOException {
 
     EntityPrefWritable[] userPrefs = userPrefsArray.getPrefs();
@@ -58,7 +58,7 @@ public final class PreferredItemsPerUserMapper extends MapReduceBase
     double weight = distributedSimilarity.weightOfItemVector(new UserPrefsIterator(userPrefs));
 
     for (EntityPrefWritable userPref : userPrefs) {
-      output.collect(new VLongWritable(userPref.getID()),
+      output.collect(new VarLongWritable(userPref.getID()),
           new ItemPrefWithItemVectorWeightWritable(item.get(), weight, userPref.getPrefValue()));
     }
   }

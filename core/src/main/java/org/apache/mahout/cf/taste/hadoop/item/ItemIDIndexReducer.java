@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,20 +20,20 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 
 public final class ItemIDIndexReducer extends MapReduceBase implements
-    Reducer<IntWritable,VLongWritable,IntWritable,VLongWritable> {
+    Reducer<VarIntWritable, VarLongWritable, VarIntWritable,VarLongWritable> {
   
   @Override
-  public void reduce(IntWritable index,
-                     Iterator<VLongWritable> possibleItemIDs,
-                     OutputCollector<IntWritable,VLongWritable> output,
+  public void reduce(VarIntWritable index,
+                     Iterator<VarLongWritable> possibleItemIDs,
+                     OutputCollector<VarIntWritable,VarLongWritable> output,
                      Reporter reporter) throws IOException {
     if (possibleItemIDs.hasNext()) {
       long minimumItemID = Long.MAX_VALUE;
@@ -43,7 +43,7 @@ public final class ItemIDIndexReducer extends MapReduceBase implements
           minimumItemID = itemID;
         }
       }
-      output.collect(index, new VLongWritable(minimumItemID));
+      output.collect(index, new VarLongWritable(minimumItemID));
     }
   }
   

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,29 +22,29 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.VarLongWritable;
 
 /**
  * maps out the userIDs in a way that we can use a secondary sort on them
  */
 public class CountUsersMapper extends MapReduceBase
-    implements Mapper<LongWritable,Text,CountUsersKeyWritable,VLongWritable> {
+    implements Mapper<LongWritable,Text,CountUsersKeyWritable, VarLongWritable> {
 
   private static final Pattern DELIMITER = Pattern.compile("[\t,]");
 
   @Override
   public void map(LongWritable arg0, Text value,
-      OutputCollector<CountUsersKeyWritable,VLongWritable> out, Reporter reporter)
+      OutputCollector<CountUsersKeyWritable,VarLongWritable> out, Reporter reporter)
       throws IOException {
 
     String[] tokens = DELIMITER.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
 
-    out.collect(new CountUsersKeyWritable(userID), new VLongWritable(userID));
+    out.collect(new CountUsersKeyWritable(userID), new VarLongWritable(userID));
   }
 
 }

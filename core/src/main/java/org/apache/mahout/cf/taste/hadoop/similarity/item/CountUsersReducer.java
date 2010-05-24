@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,24 +20,24 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 
 /**
  * counts all unique users, we ensure that we see userIDs sorted in ascending order via
  * secondary sort, so we don't have to buffer all of them
  */
 public class CountUsersReducer extends MapReduceBase
-    implements Reducer<CountUsersKeyWritable,VLongWritable,IntWritable,NullWritable> {
+    implements Reducer<CountUsersKeyWritable,VarLongWritable, VarIntWritable,NullWritable> {
 
   @Override
-  public void reduce(CountUsersKeyWritable key, Iterator<VLongWritable> userIDs,
-      OutputCollector<IntWritable,NullWritable> out, Reporter reporter)
+  public void reduce(CountUsersKeyWritable key, Iterator<VarLongWritable> userIDs,
+      OutputCollector<VarIntWritable,NullWritable> out, Reporter reporter)
       throws IOException {
 
     long lastSeenUserID = Long.MIN_VALUE;
@@ -50,7 +50,7 @@ public class CountUsersReducer extends MapReduceBase
         numberOfUsers++;
       }
     }
-    out.collect(new IntWritable(numberOfUsers), NullWritable.get());
+    out.collect(new VarIntWritable(numberOfUsers), NullWritable.get());
   }
 
 }

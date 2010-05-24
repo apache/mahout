@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,8 +22,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.Varint;
 
 /** A {@link WritableComparable} encapsulating two items. */
 public final class EntityEntityWritable
@@ -56,14 +56,14 @@ public final class EntityEntityWritable
   
   @Override
   public void write(DataOutput out) throws IOException {
-    WritableUtils.writeVLong(out, aID);
-    WritableUtils.writeVLong(out, bID);
+    Varint.writeSignedVarLong(aID, out);
+    Varint.writeSignedVarLong(bID, out);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
-    aID = WritableUtils.readVLong(in);
-    bID = WritableUtils.readVLong(in);
+    aID = Varint.readSignedVarLong(in);
+    bID = Varint.readSignedVarLong(in);
   }
   
   @Override

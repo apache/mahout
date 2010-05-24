@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -29,9 +29,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
@@ -46,6 +44,8 @@ import org.apache.mahout.cf.taste.hadoop.ToUserPrefsMapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
 import org.apache.mahout.cf.taste.hadoop.similarity.DistributedItemSimilarity;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 
 /**
  * <p>Runs a completely distributed computation of the cosine distance of the itemvectors of the user-item-matrix
@@ -143,9 +143,9 @@ public final class ItemSimilarityJob extends AbstractJob {
                                          TextInputFormat.class,
                                          CountUsersMapper.class,
                                          CountUsersKeyWritable.class,
-                                         VLongWritable.class,
+                                         VarLongWritable.class,
                                          CountUsersReducer.class,
-                                         IntWritable.class,
+                                         VarIntWritable.class,
                                          NullWritable.class,
                                          TextOutputFormat.class);
 
@@ -163,10 +163,10 @@ public final class ItemSimilarityJob extends AbstractJob {
                                          itemVectorsPath,
                                          TextInputFormat.class,
                                          ToUserPrefsMapper.class,
-                                         VLongWritable.class,
+                                         VarLongWritable.class,
                                          EntityPrefWritable.class,
                                          ToItemVectorReducer.class,
-                                         VLongWritable.class,
+                                         VarLongWritable.class,
                                          EntityPrefWritableArrayWritable.class,
                                          SequenceFileOutputFormat.class);
     JobClient.runJob(itemVectors);
@@ -175,10 +175,10 @@ public final class ItemSimilarityJob extends AbstractJob {
                                          userVectorsPath,
                                          SequenceFileInputFormat.class,
                                          PreferredItemsPerUserMapper.class,
-                                         VLongWritable.class,
+                                         VarLongWritable.class,
                                          ItemPrefWithItemVectorWeightWritable.class,
                                          PreferredItemsPerUserReducer.class,
-                                         VLongWritable.class,
+                                         VarLongWritable.class,
                                          ItemPrefWithItemVectorWeightArrayWritable.class,
                                          SequenceFileOutputFormat.class);
 

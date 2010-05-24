@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,48 +22,55 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
-    Mapper<VLongWritable,VectorWritable,IndexIndexWritable,IntWritable> {
+    Mapper<VarLongWritable,VectorWritable,VarIntWritable,VarIntWritable> {
 
   private static final int MAX_PREFS_CONSIDERED = 100;
 
-  private boolean outputGuardValue = true;
+  private enum Counters {
+    USER_PREFS_SKIPPED,
+  }
+
   private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
 
   @Override
-  public void map(VLongWritable userID,
+  public void map(VarLongWritable userID,
                   VectorWritable userVectorWritable,
-                  OutputCollector<IndexIndexWritable,IntWritable> output,
+                  OutputCollector<VarIntWritable,VarIntWritable> output,
                   Reporter reporter) throws IOException {
+
     Vector userVector = userVectorWritable.get();
     countSeen(userVector);
-    userVector = maybePruneUserVector(userVector);    
+
+    int originalSize = userVector.getNumNondefaultElements();
+    userVector = maybePruneUserVector(userVector);
+    int newSize = userVector.getNumNondefaultElements();
+    if (newSize < originalSize) {
+      reporter.incrCounter(Counters.USER_PREFS_SKIPPED, originalSize - newSize);
+    }
+
     Iterator<Vector.Element> it = userVector.iterateNonZero();
-    IndexIndexWritable entityEntity = new IndexIndexWritable();
-    IntWritable one = new IntWritable(1);
+    VarIntWritable itemIndex1 = new VarIntWritable();
+    VarIntWritable itemIndex2 = new VarIntWritable();
     while (it.hasNext()) {
       int index1 = it.next().index();
+      itemIndex1.set(index1);
       Iterator<Vector.Element> it2 = userVector.iterateNonZero();
       while (it2.hasNext()) {
         int index2 = it2.next().index();
-        entityEntity.set(index1, index2);
-        output.collect(entityEntity, one);
+        itemIndex2.set(index2);
+        output.collect(itemIndex1, itemIndex2);
       }
-    }
-    // Guard value, output once, sorts after everything; will be dropped by combiner
-    if (outputGuardValue) {
-      output.collect(new IndexIndexWritable(Integer.MAX_VALUE, Integer.MAX_VALUE), one);
-      outputGuardValue = false;
     }
   }
 

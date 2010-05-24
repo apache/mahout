@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,29 +20,38 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.VLongWritable;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.cf.taste.hadoop.ToEntityPrefsMapper;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 
 public final class ItemIDIndexMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,IntWritable,VLongWritable> {
+    Mapper<LongWritable,Text, VarIntWritable, VarLongWritable> {
   
   private static final Pattern COMMA = Pattern.compile(",");
+
+  private boolean transpose;
+
+  @Override
+  public void configure(JobConf jobConf) {
+    transpose = jobConf.getBoolean(ToEntityPrefsMapper.TRANSPOSE_USER_ITEM, false);
+  }
   
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<IntWritable,VLongWritable> output,
+                  OutputCollector<VarIntWritable,VarLongWritable> output,
                   Reporter reporter) throws IOException {
     String[] tokens = ItemIDIndexMapper.COMMA.split(value.toString());
-    long itemID = Long.parseLong(tokens[1]);
+    long itemID = Long.parseLong(tokens[transpose ? 0 : 1]);
     int index = idToIndex(itemID);
-    output.collect(new IntWritable(index), new VLongWritable(itemID));
+    output.collect(new VarIntWritable(index), new VarLongWritable(itemID));
   }
   
   static int idToIndex(long itemID) {

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
@@ -37,6 +36,7 @@ import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
+import org.apache.mahout.math.VarLongWritable;
 
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
   
@@ -54,7 +54,7 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     String averagesOutputPath = parsedArgs.get("--tempDir");
     
     JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile, averagesOutputPath,
-      TextInputFormat.class, ToItemPrefsMapper.class, VLongWritable.class, EntityPrefWritable.class,
+      TextInputFormat.class, ToItemPrefsMapper.class, VarLongWritable.class, EntityPrefWritable.class,
       SlopeOnePrefsToDiffsReducer.class, EntityEntityWritable.class, FloatWritable.class,
       SequenceFileOutputFormat.class);
     JobClient.runJob(prefsToDiffsJobConf);

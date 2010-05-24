@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,21 +20,21 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public final class AggregateCombiner extends MapReduceBase implements
-    Reducer<VLongWritable,VectorWritable,VLongWritable,VectorWritable> {
+    Reducer<VarLongWritable,VectorWritable,VarLongWritable,VectorWritable> {
 
   @Override
-  public void reduce(VLongWritable key,
+  public void reduce(VarLongWritable key,
                      Iterator<VectorWritable> values,
-                     OutputCollector<VLongWritable,VectorWritable> output,
+                     OutputCollector<VarLongWritable,VectorWritable> output,
                      Reporter reporter) throws IOException {
     if (values.hasNext()) {
       Vector partial = values.next().get();

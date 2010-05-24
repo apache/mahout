@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -24,19 +24,19 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.math.VarLongWritable;
 
 public final class SlopeOnePrefsToDiffsReducer extends MapReduceBase implements
-    Reducer<VLongWritable,EntityPrefWritable,EntityEntityWritable,FloatWritable> {
+    Reducer<VarLongWritable,EntityPrefWritable,EntityEntityWritable,FloatWritable> {
   
   @Override
-  public void reduce(VLongWritable key,
+  public void reduce(VarLongWritable key,
                      Iterator<EntityPrefWritable> values,
                      OutputCollector<EntityEntityWritable,FloatWritable> output,
                      Reporter reporter) throws IOException {

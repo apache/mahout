@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -19,12 +19,11 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
@@ -32,12 +31,15 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public final class UserVectorSplitterMapper extends MapReduceBase implements
-    Mapper<VLongWritable,VectorWritable,IntWritable,VectorOrPrefWritable> {
+    Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
 
+  private static final int MAX_PREFS_CONSIDERED = 10;  
   static final String USERS_FILE = "usersFile";
   
   private FastIDSet usersToRecommendFor;
@@ -63,26 +65,63 @@ public final class UserVectorSplitterMapper extends MapReduceBase implements
   }
 
   @Override
-  public void map(VLongWritable key,
+  public void map(VarLongWritable key,
                   VectorWritable value,
-                  OutputCollector<IntWritable,VectorOrPrefWritable> output,
+                  OutputCollector<VarIntWritable,VectorOrPrefWritable> output,
                   Reporter reporter) throws IOException {
     long userID = key.get();
     if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID)) {
       return;
     }
-    Vector userVector = value.get();
+    Vector userVector = maybePruneUserVector(value.get());
     Iterator<Vector.Element> it = userVector.iterateNonZero();
-    IntWritable itemIndexWritable = new IntWritable();
+    VarIntWritable itemIndexWritable = new VarIntWritable();
     VectorOrPrefWritable vectorOrPref = new VectorOrPrefWritable();
     while (it.hasNext()) {
       Vector.Element e = it.next();
-      int itemIndex = e.index();
-      double preferenceValue = e.get();
-      itemIndexWritable.set(itemIndex);
-      vectorOrPref.set(userID, (float) preferenceValue);
+      itemIndexWritable.set(e.index());
+      vectorOrPref.set(userID, (float) e.get());
       output.collect(itemIndexWritable, vectorOrPref);
     }
+  }
+
+  private static Vector maybePruneUserVector(Vector userVector) {
+    if (userVector.getNumNondefaultElements() <= MAX_PREFS_CONSIDERED) {
+      return userVector;
+    }
+
+    float smallestLargeValue = findSmallestLargeValue(userVector);
+
+    // "Blank out" small-sized prefs to reduce the amount of partial products
+    // generated later. They're not zeroed, but NaN-ed, so they come through
+    // and can be used to exclude these items from prefs.
+    Iterator<Vector.Element> it = userVector.iterateNonZero();
+    while (it.hasNext()) {
+      Vector.Element e = it.next();
+      float absValue = Math.abs((float) e.get());
+      if (absValue < smallestLargeValue) {
+        e.set(Float.NaN);
+      }
+    }
+
+    return userVector;
+  }
+
+  private static float findSmallestLargeValue(Vector userVector) {
+    PriorityQueue<Float> topPrefValues = new PriorityQueue<Float>(MAX_PREFS_CONSIDERED + 1);
+    Iterator<Vector.Element> it = userVector.iterateNonZero();
+    while (it.hasNext()) {
+      float absValue = Math.abs((float) it.next().get());
+      if (topPrefValues.size() < MAX_PREFS_CONSIDERED) {
+        topPrefValues.add(absValue);
+      } else {
+        if (absValue > topPrefValues.peek()) {
+          topPrefValues.add(absValue);
+          topPrefValues.poll();
+        }
+      }
+    }
+    return topPrefValues.peek();
   }
 
 }

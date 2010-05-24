@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -23,7 +23,6 @@ import java.util.Map;
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapred.JobClient;
@@ -34,6 +33,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.math.VarLongWritable;
 
 /**
  * <p>
@@ -130,8 +130,8 @@ public final class RecommenderJob extends AbstractJob {
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     
     JobConf jobConf = prepareJobConf(usersFile, outputPath, TextInputFormat.class,
-      UserIDsMapper.class, VLongWritable.class, NullWritable.class, RecommenderReducer.class,
-      VLongWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
+      UserIDsMapper.class, VarLongWritable.class, NullWritable.class, RecommenderReducer.class,
+      VarLongWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
     
     jobConf.set(RecommenderReducer.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
