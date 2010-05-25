@@ -371,7 +371,7 @@
                   <configuration>
                     <rulesets>
                       <!-- classpath -->
-                      <ruleset>/mahout-pmd-ruleset.xml</ruleset>
+                      <ruleset>maven/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <targetJdk>1.5</targetJdk>
