@@ -22,10 +22,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Partitioner;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Varint;
@@ -81,15 +81,13 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
   /**
    * all userIDs go to the same partition
    */
-  public static class CountUsersPartitioner implements Partitioner<CountUsersKeyWritable,VarLongWritable> {
+  public static class CountUsersPartitioner extends Partitioner<CountUsersKeyWritable,VarLongWritable> {
 
     @Override
     public int getPartition(CountUsersKeyWritable key, VarLongWritable value, int numPartitions) {
       return 0;
     }
 
-    @Override
-    public void configure(JobConf conf) {}
   }
 
   /**

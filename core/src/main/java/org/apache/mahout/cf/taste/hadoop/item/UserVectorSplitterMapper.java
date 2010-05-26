@@ -21,14 +21,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.math.VarIntWritable;
@@ -36,7 +33,7 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public final class UserVectorSplitterMapper extends MapReduceBase implements
+public final class UserVectorSplitterMapper extends
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
 
   private static final int MAX_PREFS_CONSIDERED = 10;  
@@ -45,7 +42,8 @@ public final class UserVectorSplitterMapper extends MapReduceBase implements
   private FastIDSet usersToRecommendFor;
 
   @Override
-  public void configure(JobConf jobConf) {
+  public void setup(Context context) {
+    Configuration jobConf = context.getConfiguration();
     try {
       FileSystem fs = FileSystem.get(jobConf);
       String usersFilePathString = jobConf.get(USERS_FILE);
@@ -67,8 +65,7 @@ public final class UserVectorSplitterMapper extends MapReduceBase implements
   @Override
   public void map(VarLongWritable key,
                   VectorWritable value,
-                  OutputCollector<VarIntWritable,VectorOrPrefWritable> output,
-                  Reporter reporter) throws IOException {
+                  Context context) throws IOException, InterruptedException {
     long userID = key.get();
     if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID)) {
       return;
@@ -81,7 +78,7 @@ public final class UserVectorSplitterMapper extends MapReduceBase implements
       Vector.Element e = it.next();
       itemIndexWritable.set(e.index());
       vectorOrPref.set(userID, (float) e.get());
-      output.collect(itemIndexWritable, vectorOrPref);
+      context.write(itemIndexWritable, vectorOrPref);
     }
   }
 

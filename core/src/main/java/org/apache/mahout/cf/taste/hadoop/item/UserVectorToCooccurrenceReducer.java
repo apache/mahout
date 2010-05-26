@@ -18,33 +18,28 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
-import java.util.Iterator;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public final class UserVectorToCooccurrenceReducer extends MapReduceBase implements
+public final class UserVectorToCooccurrenceReducer extends
     Reducer<VarIntWritable,VarIntWritable,VarIntWritable,VectorWritable> {
 
   @Override
   public void reduce(VarIntWritable itemIndex1,
-                     Iterator<VarIntWritable> itemIndex2s,
-                     OutputCollector<VarIntWritable,VectorWritable> output,
-                     Reporter reporter) throws IOException {
+                     Iterable<VarIntWritable> itemIndex2s,
+                     Context context) throws IOException, InterruptedException {
     Vector cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    while (itemIndex2s.hasNext()) {
-      int itemIndex2 = itemIndex2s.next().get();
+    for (VarIntWritable varIntWritable : itemIndex2s) {
+      int itemIndex2 = varIntWritable.get();
       cooccurrenceRow.set(itemIndex2, cooccurrenceRow.get(itemIndex2) + 1.0);
     }
     VectorWritable vw = new VectorWritable(cooccurrenceRow);
     vw.setWritesLaxPrecision(true);
-    output.collect(itemIndex1, vw);
+    context.write(itemIndex1, vw);
   }
   
 }

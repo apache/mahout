@@ -22,17 +22,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
-public final class UserVectorToCooccurrenceMapper extends MapReduceBase implements
+public final class UserVectorToCooccurrenceMapper extends
     Mapper<VarLongWritable,VectorWritable,VarIntWritable,VarIntWritable> {
 
   private static final int MAX_PREFS_CONSIDERED = 100;
@@ -46,8 +43,7 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
   @Override
   public void map(VarLongWritable userID,
                   VectorWritable userVectorWritable,
-                  OutputCollector<VarIntWritable,VarIntWritable> output,
-                  Reporter reporter) throws IOException {
+                  Context context) throws IOException, InterruptedException {
 
     Vector userVector = userVectorWritable.get();
     countSeen(userVector);
@@ -56,7 +52,7 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
     userVector = maybePruneUserVector(userVector);
     int newSize = userVector.getNumNondefaultElements();
     if (newSize < originalSize) {
-      reporter.incrCounter(Counters.USER_PREFS_SKIPPED, originalSize - newSize);
+      context.getCounter(Counters.USER_PREFS_SKIPPED).increment(originalSize - newSize);
     }
 
     Iterator<Vector.Element> it = userVector.iterateNonZero();
@@ -69,7 +65,7 @@ public final class UserVectorToCooccurrenceMapper extends MapReduceBase implemen
       while (it2.hasNext()) {
         int index2 = it2.next().index();
         itemIndex2.set(index2);
-        output.collect(itemIndex1, itemIndex2);
+        context.write(itemIndex1, itemIndex2);
       }
     }
   }

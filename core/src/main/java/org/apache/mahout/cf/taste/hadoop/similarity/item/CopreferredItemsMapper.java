@@ -19,10 +19,7 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
 import org.apache.mahout.math.VarLongWritable;
 
@@ -30,15 +27,14 @@ import org.apache.mahout.math.VarLongWritable;
  * map out each pair of items that appears in the same user-vector together with the multiplied vector lengths
  * of the associated item vectors
  */
-public final class CopreferredItemsMapper extends MapReduceBase
-    implements Mapper<VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable,ItemPairWritable,CoRating> {
+public final class CopreferredItemsMapper extends
+    Mapper<VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable,ItemPairWritable,CoRating> {
 
   @Override
   public void map(VarLongWritable user,
                   ItemPrefWithItemVectorWeightArrayWritable itemPrefsArray,
-                  OutputCollector<ItemPairWritable, CoRating> output,
-                  Reporter reporter)
-      throws IOException {
+                  Context context)
+      throws IOException, InterruptedException {
 
     ItemPrefWithItemVectorWeightWritable[] itemPrefs = itemPrefsArray.getItemPrefs();
 
@@ -52,7 +48,7 @@ public final class CopreferredItemsMapper extends MapReduceBase
         long itemAID = Math.min(itemNID, itemM.getItemID());
         long itemBID = Math.max(itemNID, itemM.getItemID());
         ItemPairWritable pair = new ItemPairWritable(itemAID, itemBID, itemNWeight, itemM.getWeight());
-        output.collect(pair, new CoRating(itemNValue, itemM.getPrefValue()));
+        context.write(pair, new CoRating(itemNValue, itemM.getPrefValue()));
       }
     }
 

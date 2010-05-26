@@ -20,29 +20,24 @@ package org.apache.mahout.cf.taste.hadoop.slopeone;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.math.VarLongWritable;
 
-public final class SlopeOnePrefsToDiffsReducer extends MapReduceBase implements
+public final class SlopeOnePrefsToDiffsReducer extends
     Reducer<VarLongWritable,EntityPrefWritable,EntityEntityWritable,FloatWritable> {
   
   @Override
   public void reduce(VarLongWritable key,
-                     Iterator<EntityPrefWritable> values,
-                     OutputCollector<EntityEntityWritable,FloatWritable> output,
-                     Reporter reporter) throws IOException {
+                     Iterable<EntityPrefWritable> values,
+                     Context context) throws IOException, InterruptedException {
     List<EntityPrefWritable> prefs = new ArrayList<EntityPrefWritable>();
-    while (values.hasNext()) {
-      prefs.add(new EntityPrefWritable(values.next()));
+    for (EntityPrefWritable writable : values) {
+      prefs.add(new EntityPrefWritable(writable));
     }
     Collections.sort(prefs, ByItemIDComparator.getInstance());
     int size = prefs.size();
@@ -54,7 +49,7 @@ public final class SlopeOnePrefsToDiffsReducer extends MapReduceBase implements
         EntityPrefWritable second = prefs.get(j);
         long itemBID = second.getID();
         float itemBValue = second.getPrefValue();
-        output.collect(new EntityEntityWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
+        context.write(new EntityEntityWritable(itemAID, itemBID), new FloatWritable(itemBValue - itemAValue));
       }
     }
   }

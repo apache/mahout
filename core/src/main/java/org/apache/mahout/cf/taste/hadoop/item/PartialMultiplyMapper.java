@@ -20,24 +20,20 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector;
 
-public final class PartialMultiplyMapper extends MapReduceBase implements
+public final class PartialMultiplyMapper extends
     Mapper<VarIntWritable,VectorAndPrefsWritable,VarLongWritable,VectorWritable> {
 
   @Override
   public void map(VarIntWritable key,
                   VectorAndPrefsWritable vectorAndPrefsWritable,
-                  OutputCollector<VarLongWritable, VectorWritable> output,
-                  Reporter reporter) throws IOException {
+                  Context context) throws IOException, InterruptedException {
 
     int itemIndex = key.get();
 
@@ -55,7 +51,7 @@ public final class PartialMultiplyMapper extends MapReduceBase implements
     excludeWritable.setWritesLaxPrecision(true);
     for (long userID : userIDs) {
       userIDWritable.set(userID);
-      output.collect(userIDWritable, excludeWritable);
+      context.write(userIDWritable, excludeWritable);
     }
 
     VectorWritable vectorWritable = new VectorWritable();
@@ -69,7 +65,7 @@ public final class PartialMultiplyMapper extends MapReduceBase implements
             cooccurrenceColumn.times(prefValue);
         userIDWritable.set(userID);
         vectorWritable.set(partialProduct);
-        output.collect(userIDWritable, vectorWritable);
+        context.write(userIDWritable, vectorWritable);
       }
     }
 

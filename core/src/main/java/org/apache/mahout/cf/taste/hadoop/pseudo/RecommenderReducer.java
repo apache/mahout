@@ -24,14 +24,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
@@ -49,7 +46,7 @@ import org.apache.mahout.math.VarLongWritable;
  * 
  * @see RecommenderJob
  */
-public final class RecommenderReducer extends MapReduceBase implements
+public final class RecommenderReducer extends
     Reducer<VarLongWritable,NullWritable,VarLongWritable,RecommendedItemsWritable> {
   
   static final String RECOMMENDER_CLASS_NAME = "recommenderClassName";
@@ -60,7 +57,8 @@ public final class RecommenderReducer extends MapReduceBase implements
   private int recommendationsPerUser;
 
   @Override
-  public void configure(JobConf jobConf) {
+  public void setup(Context context) {
+    Configuration jobConf = context.getConfiguration();
     String dataModelFile = jobConf.get(DATA_MODEL_FILE);
     String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
     FileDataModel fileDataModel;
@@ -95,9 +93,8 @@ public final class RecommenderReducer extends MapReduceBase implements
   
   @Override
   public void reduce(VarLongWritable key,
-                     Iterator<NullWritable> values,
-                     OutputCollector<VarLongWritable,RecommendedItemsWritable> output,
-                     Reporter reporter) throws IOException {
+                     Iterable<NullWritable> values,
+                     Context context) throws IOException, InterruptedException {
     long userID = key.get();
     List<RecommendedItem> recommendedItems;
     try {
@@ -112,8 +109,8 @@ public final class RecommenderReducer extends MapReduceBase implements
       }
     }
     RecommendedItemsWritable writable = new RecommendedItemsWritable(recommendedItems);
-    output.collect(key, writable);
-    reporter.getCounter(ReducerMetrics.USERS_PROCESSED).increment(1L);
-    reporter.getCounter(ReducerMetrics.RECOMMENDATIONS_MADE).increment(recommendedItems.size());
+    context.write(key, writable);
+    context.getCounter(ReducerMetrics.USERS_PROCESSED).increment(1L);
+    context.getCounter(ReducerMetrics.RECOMMENDATIONS_MADE).increment(recommendedItems.size());
   }
 }

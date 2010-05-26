@@ -19,22 +19,18 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public final class CooccurrenceColumnWrapperMapper extends MapReduceBase implements
-    Mapper<VarIntWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
+public final class CooccurrenceColumnWrapperMapper extends
+    Mapper<VarIntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable> {
 
   @Override
   public void map(VarIntWritable key,
                   VectorWritable value,
-                  OutputCollector<VarIntWritable,VectorOrPrefWritable> output,
-                  Reporter reporter) throws IOException {
-    output.collect(key, new VectorOrPrefWritable(value.get()));
+                  Context context) throws IOException, InterruptedException {
+    context.write(key, new VectorOrPrefWritable(value.get()));
   }
 
 }

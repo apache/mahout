@@ -18,13 +18,9 @@
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 
@@ -32,25 +28,26 @@ import org.apache.mahout.math.VarLongWritable;
  * counts all unique users, we ensure that we see userIDs sorted in ascending order via
  * secondary sort, so we don't have to buffer all of them
  */
-public class CountUsersReducer extends MapReduceBase
-    implements Reducer<CountUsersKeyWritable,VarLongWritable, VarIntWritable,NullWritable> {
+public class CountUsersReducer extends
+    Reducer<CountUsersKeyWritable,VarLongWritable, VarIntWritable,NullWritable> {
 
   @Override
-  public void reduce(CountUsersKeyWritable key, Iterator<VarLongWritable> userIDs,
-      OutputCollector<VarIntWritable,NullWritable> out, Reporter reporter)
-      throws IOException {
+  public void reduce(CountUsersKeyWritable key,
+                     Iterable<VarLongWritable> userIDs,
+                     Context context)
+      throws IOException, InterruptedException {
 
     long lastSeenUserID = Long.MIN_VALUE;
     int numberOfUsers = 0;
 
-    while (userIDs.hasNext()) {
-      long currentUserID = userIDs.next().get();
+    for (VarLongWritable writable : userIDs) {
+      long currentUserID = writable.get();
       if (currentUserID > lastSeenUserID) {
         lastSeenUserID = currentUserID;
         numberOfUsers++;
       }
     }
-    out.collect(new VarIntWritable(numberOfUsers), NullWritable.get());
+    context.write(new VarIntWritable(numberOfUsers), NullWritable.get());
   }
 
 }

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import java.util.Iterator;
-
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 
 /**
@@ -27,13 +25,13 @@ import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 public class DistributedLogLikelihoodSimilarity extends AbstractDistributedItemSimilarity {
 
   @Override
-  protected double doComputeResult(Iterator<CoRating> coratings,
-      double weightOfItemVectorX, double weightOfItemVectorY,
-      int numberOfUsers) {
+  protected double doComputeResult(Iterable<CoRating> coratings,
+                                   double weightOfItemVectorX,
+                                   double weightOfItemVectorY,
+                                   int numberOfUsers) {
 
     int preferringXandY = 0;
-    while (coratings.hasNext()) {
-      coratings.next();
+    for (CoRating corating : coratings) {
       preferringXandY++;
     }
 
@@ -53,10 +51,9 @@ public class DistributedLogLikelihoodSimilarity extends AbstractDistributedItemS
   }
 
   @Override
-  public double weightOfItemVector(Iterator<Float> prefValues) {
-    double nonZeroEntries = 0;
-    while (prefValues.hasNext()) {
-      prefValues.next();
+  public double weightOfItemVector(Iterable<Float> prefValues) {
+    int nonZeroEntries = 0;
+    for (Float prefValue : prefValues) {
       nonZeroEntries++;
     }
     return nonZeroEntries;

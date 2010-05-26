@@ -27,27 +27,26 @@ public final class DistributedUncenteredZeroAssumingCosineSimilarity
     extends AbstractDistributedItemSimilarity {
 
   @Override
-  protected double doComputeResult(Iterator<CoRating> coRatings,
-      double weightOfItemVectorX, double weightOfItemVectorY,
-      int numberOfUsers) {
+  protected double doComputeResult(Iterable<CoRating> coRatings,
+                                   double weightOfItemVectorX,
+                                   double weightOfItemVectorY,
+                                   int numberOfUsers) {
 
-    double sumXY = 0;
-    while (coRatings.hasNext()) {
-      CoRating coRating = coRatings.next();
+    double sumXY = 0.0;
+    for (CoRating coRating : coRatings) {
       sumXY += coRating.getPrefValueX() * coRating.getPrefValueY();
     }
 
-    if (sumXY == 0) {
+    if (sumXY == 0.0) {
       return Double.NaN;
     }
     return sumXY / (weightOfItemVectorX * weightOfItemVectorY);
   }
 
   @Override
-  public double weightOfItemVector(Iterator<Float> prefValues) {
+  public double weightOfItemVector(Iterable<Float> prefValues) {
     double length = 0.0;
-    while (prefValues.hasNext()) {
-      float prefValue = prefValues.next();
+    for (float prefValue : prefValues) {
       if (!Float.isNaN(prefValue)) {
         length += prefValue * prefValue;
       }

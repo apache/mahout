@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import java.util.Iterator;
-
 /**
  * abstract base class for all implementations of {@link DistributedItemSimilarity} that does not give a
  * weight to item vectors and only ensures that the result is within [-1,1]
@@ -27,9 +25,10 @@ public abstract class AbstractDistributedItemSimilarity
     implements DistributedItemSimilarity {
 
   @Override
-  public final double similarity(Iterator<CoRating> coratings,
-      double weightOfItemVectorX, double weightOfItemVectorY,
-      int numberOfUsers) {
+  public final double similarity(Iterable<CoRating> coratings,
+                                 double weightOfItemVectorX,
+                                 double weightOfItemVectorY,
+                                 int numberOfUsers) {
 
     double result = doComputeResult(coratings, weightOfItemVectorX, weightOfItemVectorY, numberOfUsers);
 
@@ -46,11 +45,11 @@ public abstract class AbstractDistributedItemSimilarity
    * when they need a weight
    */
   @Override
-  public double weightOfItemVector(Iterator<Float> prefValues) {
+  public double weightOfItemVector(Iterable<Float> prefValues) {
     return Double.NaN;
   }
 
-  protected abstract double doComputeResult(Iterator<CoRating> coratings,
+  protected abstract double doComputeResult(Iterable<CoRating> coratings,
       double weightOfItemVectorX, double weightOfItemVectorY,
       int numberOfUsers);
 }

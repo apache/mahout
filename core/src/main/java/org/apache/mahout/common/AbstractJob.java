@@ -31,16 +31,15 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputFormat;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -166,47 +165,54 @@ public abstract class AbstractJob extends Configured implements Tool {
     return !phaseSkipped;
   }
   
-  protected JobConf prepareJobConf(String inputPath,
-                                   String outputPath,
-                                   Class<? extends InputFormat> inputFormat,
-                                   Class<? extends Mapper> mapper,
-                                   Class<? extends Writable> mapperKey,
-                                   Class<? extends Writable> mapperValue,
-                                   Class<? extends Reducer> reducer,
-                                   Class<? extends Writable> reducerKey,
-                                   Class<? extends Writable> reducerValue,
-                                   Class<? extends OutputFormat> outputFormat) throws IOException {
+  protected Job prepareJob(Path inputPath,
+                           Path outputPath,
+                           Class<? extends InputFormat> inputFormat,
+                           Class<? extends Mapper> mapper,
+                           Class<? extends Writable> mapperKey,
+                           Class<? extends Writable> mapperValue,
+                           Class<? extends Reducer> reducer,
+                           Class<? extends Writable> reducerKey,
+                           Class<? extends Writable> reducerValue,
+                           Class<? extends OutputFormat> outputFormat) throws IOException {
     
-    JobConf jobConf = new JobConf(getConf(), getClass());
-    FileSystem fs = FileSystem.get(jobConf);
-    
-    Path inputPathPath = new Path(inputPath).makeQualified(fs);
-    Path outputPathPath = new Path(outputPath).makeQualified(fs);
-    
-    jobConf.setClass("mapred.input.format.class", inputFormat, InputFormat.class);
-    // Override this:
-    jobConf.set("mapred.input.dir", StringUtils.escapeString(inputPathPath.toString()));
-    
-    jobConf.setClass("mapred.mapper.class", mapper, Mapper.class);
-    jobConf.setClass("mapred.mapoutput.key.class", mapperKey, Writable.class);
-    jobConf.setClass("mapred.mapoutput.value.class", mapperValue, Writable.class);
-    
-    jobConf.setClass("mapred.reducer.class", reducer, Reducer.class);
-    jobConf.setClass("mapred.output.key.class", reducerKey, Writable.class);
-    jobConf.setClass("mapred.output.value.class", reducerValue, Writable.class);
+    Job job = new Job(new Configuration(getConf()));
+    Configuration jobConf = job.getConfiguration();
+
+    if (reducer.equals(Reducer.class)) {
+      if (mapper.equals(Mapper.class)) {
+        throw new IllegalStateException("Can't figure out the user class jar file from mapper/reducer");
+      }
+      job.setJarByClass(mapper);
+    } else {
+      job.setJarByClass(reducer);
+    }
+
+    job.setInputFormatClass(inputFormat);
+    jobConf.set("mapred.input.dir", inputPath.toString());
+
+    job.setMapperClass(mapper);
+    job.setMapOutputKeyClass(mapperKey);
+    job.setMapOutputValueClass(mapperValue);
+
     jobConf.setBoolean("mapred.compress.map.output", true);
 
-    String customJobName = jobConf.get("mapred.job.name");
-    if (customJobName == null) {
+    job.setReducerClass(reducer);
+    job.setOutputKeyClass(reducerKey);
+    job.setOutputValueClass(reducerValue);
+
+    String customJobName = job.getJobName();
+    if (customJobName == null || customJobName.trim().length() == 0) {
       customJobName = getClass().getSimpleName();
     }
-    jobConf.set("mapred.job.name", customJobName + '-' + mapper.getSimpleName() + '-' + reducer.getSimpleName());
+    customJobName += '-' + mapper.getSimpleName();
+    customJobName += '-' + reducer.getSimpleName();
+    job.setJobName(customJobName);
 
-    jobConf.setClass("mapred.output.format.class", outputFormat, OutputFormat.class);
-    // Override this:    
-    jobConf.set("mapred.output.dir", StringUtils.escapeString(outputPathPath.toString()));
+    job.setOutputFormatClass(outputFormat);
+    jobConf.set("mapred.output.dir", outputPath.toString());
     
-    return jobConf;
+    return job;
   }
   
 }

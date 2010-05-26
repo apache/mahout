@@ -19,33 +19,28 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.VarLongWritable;
 
-public final class PreferredItemsPerUserReducer extends MapReduceBase
-    implements Reducer<VarLongWritable,ItemPrefWithItemVectorWeightWritable,VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
+public final class PreferredItemsPerUserReducer extends
+    Reducer<VarLongWritable,ItemPrefWithItemVectorWeightWritable,VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
 
   @Override
   public void reduce(VarLongWritable user,
-                     Iterator<ItemPrefWithItemVectorWeightWritable> itemPrefs,
-                     OutputCollector<VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> output,
-                     Reporter reporter)
-      throws IOException {
+                     Iterable<ItemPrefWithItemVectorWeightWritable> itemPrefs,
+                     Context context)
+      throws IOException, InterruptedException {
 
     Set<ItemPrefWithItemVectorWeightWritable> itemPrefsWithItemVectorWeight
         = new HashSet<ItemPrefWithItemVectorWeightWritable>();
 
-    while (itemPrefs.hasNext()) {
-      itemPrefsWithItemVectorWeight.add(itemPrefs.next().clone());
+    for (ItemPrefWithItemVectorWeightWritable writable : itemPrefs) {
+      itemPrefsWithItemVectorWeight.add(writable.clone());
     }
 
-    output.collect(user, new ItemPrefWithItemVectorWeightArrayWritable(
+    context.write(user, new ItemPrefWithItemVectorWeightArrayWritable(
         itemPrefsWithItemVectorWeight.toArray(
         new ItemPrefWithItemVectorWeightWritable[itemPrefsWithItemVectorWeight.size()])));
   }

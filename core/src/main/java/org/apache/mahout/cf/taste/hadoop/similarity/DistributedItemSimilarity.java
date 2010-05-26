@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import java.util.Iterator;
-
 /**
  * Modelling the pairwise similarity computation of items in a distributed manner
  */
@@ -30,7 +28,7 @@ public interface DistributedItemSimilarity {
    * @param prefValues
    * @return
    */
-  double weightOfItemVector(Iterator<Float> prefValues);
+  double weightOfItemVector(Iterable<Float> prefValues);
 
   /**
    * compute the similarity for a pair of item-vectors
@@ -41,7 +39,7 @@ public interface DistributedItemSimilarity {
    * @param numberOfUsers the overall number of users
    * @return
    */
-  double similarity(Iterator<CoRating> coratings,
+  double similarity(Iterable<CoRating> coratings,
                     double weightOfItemVectorX,
                     double weightOfItemVectorY,
                     int numberOfUsers);

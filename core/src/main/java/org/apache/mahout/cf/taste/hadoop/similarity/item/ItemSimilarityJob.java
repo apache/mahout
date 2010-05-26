@@ -22,20 +22,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Partitioner;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
@@ -115,7 +118,7 @@ public final class ItemSimilarityJob extends AbstractJob {
     "org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob.numberOfUsers";
 
   @Override
-  public int run(String[] args) throws IOException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
     Option similarityClassOpt = AbstractJob.buildOption("similarityClassname", "s",
     "Name of distributed similarity class to instantiate");
@@ -129,77 +132,79 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     String distributedSimilarityClassname = parsedArgs.get("--similarityClassname");
 
-    String inputPath = originalConf.get("mapred.input.dir");
-    String outputPath = originalConf.get("mapred.output.dir");
-    String tempDirPath = parsedArgs.get("--tempDir");
+    Path inputPath = new Path(originalConf.get("mapred.input.dir"));
+    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
+    Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
 
-    String countUsersPath = tempDirPath + "/countUsers";
-    String itemVectorsPath = tempDirPath + "/itemVectors";
-    String userVectorsPath = tempDirPath + "/userVectors";
+    Path countUsersPath = new Path(tempDirPath, "countUsers");
+    Path itemVectorsPath = new Path(tempDirPath, "itemVectors");
+    Path userVectorsPath = new Path(tempDirPath, "userVectors");
 
-    /* count all unique users */
-    JobConf countUsers = prepareJobConf(inputPath,
-                                         countUsersPath,
-                                         TextInputFormat.class,
-                                         CountUsersMapper.class,
-                                         CountUsersKeyWritable.class,
-                                         VarLongWritable.class,
-                                         CountUsersReducer.class,
-                                         VarIntWritable.class,
-                                         NullWritable.class,
-                                         TextOutputFormat.class);
+    AtomicInteger currentPhase = new AtomicInteger();
 
-    countUsers.setPartitionerClass(
-        CountUsersKeyWritable.CountUsersPartitioner.class);
-    countUsers.setOutputValueGroupingComparator(
-        CountUsersKeyWritable.CountUsersGroupComparator.class);
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      /* count all unique users */
+      Job countUsers = prepareJob(inputPath,
+                                  countUsersPath,
+                                  TextInputFormat.class,
+                                  CountUsersMapper.class,
+                                  CountUsersKeyWritable.class,
+                                  VarLongWritable.class,
+                                  CountUsersReducer.class,
+                                  VarIntWritable.class,
+                                  NullWritable.class,
+                                  TextOutputFormat.class);
+      countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
+      countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
+      countUsers.waitForCompletion(true);
+    }
 
-    JobClient.runJob(countUsers);
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job itemVectors = prepareJob(inputPath,
+                                   itemVectorsPath,
+                                   TextInputFormat.class,
+                                   ToUserPrefsMapper.class,
+                                   VarLongWritable.class,
+                                   EntityPrefWritable.class,
+                                   ToItemVectorReducer.class,
+                                   VarLongWritable.class,
+                                   EntityPrefWritableArrayWritable.class,
+                                   SequenceFileOutputFormat.class);
+      itemVectors.waitForCompletion(true);
+    }
 
-    int numberOfUsers =
-        readNumberOfUsers(countUsers, (countUsersPath + "/part-00000"));
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job userVectors = prepareJob(itemVectorsPath,
+                                   userVectorsPath,
+                                   SequenceFileInputFormat.class,
+                                   PreferredItemsPerUserMapper.class,
+                                   VarLongWritable.class,
+                                   ItemPrefWithItemVectorWeightWritable.class,
+                                   PreferredItemsPerUserReducer.class,
+                                   VarLongWritable.class,
+                                   ItemPrefWithItemVectorWeightArrayWritable.class,
+                                   SequenceFileOutputFormat.class);
+      userVectors.getConfiguration().set(DISTRIBUTED_SIMILARITY_CLASSNAME, distributedSimilarityClassname);
+      userVectors.waitForCompletion(true);
+    }
 
-    JobConf itemVectors = prepareJobConf(inputPath,
-                                         itemVectorsPath,
-                                         TextInputFormat.class,
-                                         ToUserPrefsMapper.class,
-                                         VarLongWritable.class,
-                                         EntityPrefWritable.class,
-                                         ToItemVectorReducer.class,
-                                         VarLongWritable.class,
-                                         EntityPrefWritableArrayWritable.class,
-                                         SequenceFileOutputFormat.class);
-    JobClient.runJob(itemVectors);
-
-    JobConf userVectors = prepareJobConf(itemVectorsPath,
-                                         userVectorsPath,
-                                         SequenceFileInputFormat.class,
-                                         PreferredItemsPerUserMapper.class,
-                                         VarLongWritable.class,
-                                         ItemPrefWithItemVectorWeightWritable.class,
-                                         PreferredItemsPerUserReducer.class,
-                                         VarLongWritable.class,
-                                         ItemPrefWithItemVectorWeightArrayWritable.class,
-                                         SequenceFileOutputFormat.class);
-
-    userVectors.set(DISTRIBUTED_SIMILARITY_CLASSNAME, distributedSimilarityClassname);
-    JobClient.runJob(userVectors);
-
-    JobConf similarity = prepareJobConf(userVectorsPath,
-                                        outputPath,
-                                        SequenceFileInputFormat.class,
-                                        CopreferredItemsMapper.class,
-                                        ItemPairWritable.class,
-                                        CoRating.class,
-                                        SimilarityReducer.class,
-                                        EntityEntityWritable.class,
-                                        DoubleWritable.class,
-                                        TextOutputFormat.class);
-
-    similarity.set(DISTRIBUTED_SIMILARITY_CLASSNAME, distributedSimilarityClassname);
-    similarity.setInt(NUMBER_OF_USERS, numberOfUsers);
-
-    JobClient.runJob(similarity);
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job similarity = prepareJob(userVectorsPath,
+                                  outputPath,
+                                  SequenceFileInputFormat.class,
+                                  CopreferredItemsMapper.class,
+                                  ItemPairWritable.class,
+                                  CoRating.class,
+                                  SimilarityReducer.class,
+                                  EntityEntityWritable.class,
+                                  DoubleWritable.class,
+                                  TextOutputFormat.class);
+      Configuration conf = similarity.getConfiguration();
+      int numberOfUsers = readNumberOfUsers(conf, countUsersPath);
+      conf.set(DISTRIBUTED_SIMILARITY_CLASSNAME, distributedSimilarityClassname);
+      conf.setInt(NUMBER_OF_USERS, numberOfUsers);
+      similarity.waitForCompletion(true);
+    }
 
     return 0;
   }
@@ -208,11 +213,17 @@ public final class ItemSimilarityJob extends AbstractJob {
     ToolRunner.run(new ItemSimilarityJob(), args);
   }
 
-  static int readNumberOfUsers(JobConf conf, String outputFile) throws IOException {
+  static int readNumberOfUsers(Configuration conf, Path outputDir) throws IOException {
     FileSystem fs = FileSystem.get(conf);
+    Path outputFile = fs.listStatus(outputDir, new PathFilter() {
+      @Override
+      public boolean accept(Path path) {
+        return path.getName().startsWith("part-");
+      }
+    })[0].getPath();
     InputStream in = null;
     try  {
-      in = fs.open(new Path(outputFile));
+      in = fs.open(outputFile);
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       IOUtils.copyBytes(in, out, conf);
       return Integer.parseInt(new String(out.toByteArray(), Charset.forName("UTF-8")).trim());

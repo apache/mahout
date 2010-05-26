@@ -21,28 +21,26 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.DistributedItemSimilarity;
+import org.apache.mahout.common.iterator.IteratorIterable;
 import org.apache.mahout.math.VarLongWritable;
 
 /**
  * for each item-vector, we compute its weight here and map out all entries with the user as key,
  * so we can create the user-vectors in the reducer
  */
-public final class PreferredItemsPerUserMapper extends MapReduceBase
-    implements Mapper<VarLongWritable,EntityPrefWritableArrayWritable,VarLongWritable,ItemPrefWithItemVectorWeightWritable> {
+public final class PreferredItemsPerUserMapper extends
+    Mapper<VarLongWritable,EntityPrefWritableArrayWritable,VarLongWritable,ItemPrefWithItemVectorWeightWritable> {
 
   private DistributedItemSimilarity distributedSimilarity;
 
   @Override
-  public void configure(JobConf jobConf) {
-    super.configure(jobConf);
+  public void setup(Context context) {
+    Configuration jobConf = context.getConfiguration();
     distributedSimilarity =
       ItemSimilarityJob.instantiateSimilarity(jobConf.get(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME));
   }
@@ -50,15 +48,15 @@ public final class PreferredItemsPerUserMapper extends MapReduceBase
   @Override
   public void map(VarLongWritable item,
                   EntityPrefWritableArrayWritable userPrefsArray,
-                  OutputCollector<VarLongWritable,ItemPrefWithItemVectorWeightWritable> output,
-                  Reporter reporter) throws IOException {
+                  Context context) throws IOException, InterruptedException {
 
     EntityPrefWritable[] userPrefs = userPrefsArray.getPrefs();
 
-    double weight = distributedSimilarity.weightOfItemVector(new UserPrefsIterator(userPrefs));
+    double weight = distributedSimilarity.weightOfItemVector(
+        new IteratorIterable<Float>(new UserPrefsIterator(userPrefs)));
 
     for (EntityPrefWritable userPref : userPrefs) {
-      output.collect(new VarLongWritable(userPref.getID()),
+      context.write(new VarLongWritable(userPref.getID()),
           new ItemPrefWithItemVectorWeightWritable(item.get(), weight, userPref.getPrefValue()));
     }
   }

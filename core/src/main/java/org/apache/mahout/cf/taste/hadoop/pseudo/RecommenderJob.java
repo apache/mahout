@@ -22,13 +22,14 @@ import java.util.Map;
 
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
@@ -103,7 +104,7 @@ import org.apache.mahout.math.VarLongWritable;
 public final class RecommenderJob extends AbstractJob {
   
   @Override
-  public int run(String[] args) throws IOException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
     Option recommendClassOpt = AbstractJob.buildOption("recommenderClassName", "r",
       "Name of recommender class to instantiate");
@@ -119,26 +120,35 @@ public final class RecommenderJob extends AbstractJob {
     }
 
     Configuration originalConf = getConf();
-    String inputFile = originalConf.get("mapred.input.dir");
-    String outputPath = originalConf.get("mapred.output.dir");
-    String usersFile = parsedArgs.get("--usersFile");
-    if (usersFile == null) {
+    Path inputFile = new Path(originalConf.get("mapred.input.dir"));
+    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
+    Path usersFile;
+    if (parsedArgs.get("--usersFile") == null) {
       usersFile = inputFile;
+    } else {
+      usersFile = new Path(parsedArgs.get("--usersFile"));
     }
     
     String recommendClassName = parsedArgs.get("--recommenderClassName");
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     
-    JobConf jobConf = prepareJobConf(usersFile, outputPath, TextInputFormat.class,
-      UserIDsMapper.class, VarLongWritable.class, NullWritable.class, RecommenderReducer.class,
-      VarLongWritable.class, RecommendedItemsWritable.class, TextOutputFormat.class);
-    
+    Job job = prepareJob(usersFile,
+                         outputPath,
+                         TextInputFormat.class,
+                         UserIDsMapper.class,
+                         VarLongWritable.class,
+                         NullWritable.class,
+                         RecommenderReducer.class,
+                         VarLongWritable.class,
+                         RecommendedItemsWritable.class,
+                         TextOutputFormat.class);
+    FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
+    Configuration jobConf = job.getConfiguration();
     jobConf.set(RecommenderReducer.RECOMMENDER_CLASS_NAME, recommendClassName);
     jobConf.setInt(RecommenderReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
-    jobConf.set(RecommenderReducer.DATA_MODEL_FILE, inputFile);
-    jobConf.setClass("mapred.output.compression.codec", GzipCodec.class, CompressionCodec.class);
-    
-    JobClient.runJob(jobConf);
+    jobConf.set(RecommenderReducer.DATA_MODEL_FILE, inputFile.toString());
+
+    job.waitForCompletion(true);
     return 0;
   }
   

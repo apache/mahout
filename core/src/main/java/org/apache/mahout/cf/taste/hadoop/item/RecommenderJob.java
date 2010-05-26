@@ -25,16 +25,14 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.lib.MultipleInputs;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
@@ -68,7 +66,7 @@ public final class RecommenderJob extends AbstractJob {
   public static final String BOOLEAN_DATA = "booleanData";
   
   @Override
-  public int run(String[] args) throws IOException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
     Option numReccomendationsOpt = AbstractJob.buildOption("numRecommendations", "n",
       "Number of recommendations per user", "10");
@@ -84,87 +82,97 @@ public final class RecommenderJob extends AbstractJob {
     }
     
     Configuration originalConf = getConf();
-    String inputPath = originalConf.get("mapred.input.dir");
-    String outputPath = originalConf.get("mapred.output.dir");
-    String tempDirPath = parsedArgs.get("--tempDir");
+    Path inputPath = new Path(originalConf.get("mapred.input.dir"));
+    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
+    Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
     
-    String userVectorPath = tempDirPath + "/userVectors";
-    String itemIDIndexPath = tempDirPath + "/itemIDIndex";
-    String cooccurrencePath = tempDirPath + "/cooccurrence";
-    String partialMultiplyPath = tempDirPath + "/partialMultiply";
+    Path userVectorPath = new Path(tempDirPath, "userVectors");
+    Path itemIDIndexPath = new Path(tempDirPath, "itemIDIndex");
+    Path cooccurrencePath = new Path(tempDirPath, "cooccurrence");
+    Path prePartialMultiplyPath1 = new Path(tempDirPath, "prePartialMultiply1");
+    Path prePartialMultiplyPath2 = new Path(tempDirPath, "prePartialMultiply2");
+    Path partialMultiplyPath = new Path(tempDirPath, "partialMultiply");
 
     AtomicInteger currentPhase = new AtomicInteger();
 
-    JobConf itemIDIndexConf = prepareJobConf(
-      inputPath, itemIDIndexPath, TextInputFormat.class,
-      ItemIDIndexMapper.class, VarIntWritable.class, VarLongWritable.class,
-      ItemIDIndexReducer.class, VarIntWritable.class, VarLongWritable.class,
-      SequenceFileOutputFormat.class);
-    itemIDIndexConf.setClass("mapred.combiner.class", ItemIDIndexReducer.class, Reducer.class);
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      JobClient.runJob(itemIDIndexConf);
-    }
-    
-    JobConf toUserVectorConf = prepareJobConf(
-      inputPath, userVectorPath, TextInputFormat.class,
-      ToItemPrefsMapper.class, VarLongWritable.class, booleanData ? VarLongWritable.class : EntityPrefWritable.class,
-      ToUserVectorReducer.class, VarLongWritable.class, VectorWritable.class,
-      SequenceFileOutputFormat.class);
-    toUserVectorConf.setBoolean(BOOLEAN_DATA, booleanData);
-    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      JobClient.runJob(toUserVectorConf);
+      Job itemIDIndex = prepareJob(
+        inputPath, itemIDIndexPath, TextInputFormat.class,
+        ItemIDIndexMapper.class, VarIntWritable.class, VarLongWritable.class,
+        ItemIDIndexReducer.class, VarIntWritable.class, VarLongWritable.class,
+        SequenceFileOutputFormat.class);
+      itemIDIndex.setCombinerClass(ItemIDIndexReducer.class);
+      itemIDIndex.waitForCompletion(true);
     }
 
-    JobConf toCooccurrenceConf = prepareJobConf(
-      userVectorPath, cooccurrencePath, SequenceFileInputFormat.class,
-      UserVectorToCooccurrenceMapper.class, VarIntWritable.class, VarIntWritable.class,
-      UserVectorToCooccurrenceReducer.class, VarIntWritable.class, VectorWritable.class,
-      SequenceFileOutputFormat.class);
-    setIOSort(toCooccurrenceConf);
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      JobClient.runJob(toCooccurrenceConf);
+      Job toUserVector = prepareJob(
+        inputPath, userVectorPath, TextInputFormat.class,
+        ToItemPrefsMapper.class, VarLongWritable.class, booleanData ? VarLongWritable.class : EntityPrefWritable.class,
+        ToUserVectorReducer.class, VarLongWritable.class, VectorWritable.class,
+        SequenceFileOutputFormat.class);
+      toUserVector.getConfiguration().setBoolean(BOOLEAN_DATA, booleanData);
+      toUserVector.waitForCompletion(true);
     }
 
-    JobConf partialMultiplyConf = prepareJobConf(
-      cooccurrencePath, partialMultiplyPath, SequenceFileInputFormat.class,
-      CooccurrenceColumnWrapperMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
-      ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
-      SequenceFileOutputFormat.class);
-    MultipleInputs.addInputPath(
-        partialMultiplyConf,
-        new Path(cooccurrencePath).makeQualified(FileSystem.get(partialMultiplyConf)),
-        SequenceFileInputFormat.class, CooccurrenceColumnWrapperMapper.class);
-    MultipleInputs.addInputPath(
-        partialMultiplyConf,
-        new Path(userVectorPath).makeQualified(FileSystem.get(partialMultiplyConf)),
-        SequenceFileInputFormat.class, UserVectorSplitterMapper.class);
-    if (usersFile != null) {
-      partialMultiplyConf.set(UserVectorSplitterMapper.USERS_FILE, usersFile);
-    }
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      JobClient.runJob(partialMultiplyConf);
+      Job toCooccurrence = prepareJob(
+        userVectorPath, cooccurrencePath, SequenceFileInputFormat.class,
+        UserVectorToCooccurrenceMapper.class, VarIntWritable.class, VarIntWritable.class,
+        UserVectorToCooccurrenceReducer.class, VarIntWritable.class, VectorWritable.class,
+        SequenceFileOutputFormat.class);
+      setIOSort(toCooccurrence);
+      toCooccurrence.waitForCompletion(true);
     }
 
-    JobConf aggregateAndRecommendConf = prepareJobConf(
-        partialMultiplyPath, outputPath, SequenceFileInputFormat.class,
-        PartialMultiplyMapper.class, VarLongWritable.class, VectorWritable.class,
-        AggregateAndRecommendReducer.class, VarLongWritable.class, RecommendedItemsWritable.class,
-        TextOutputFormat.class);
-    setIOSort(aggregateAndRecommendConf);
-    aggregateAndRecommendConf.setClass("mapred.combiner.class", AggregateCombiner.class, Reducer.class);
-    aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath);
-    aggregateAndRecommendConf.setInt(AggregateAndRecommendReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      JobClient.runJob(aggregateAndRecommendConf);
+      Job prePartialMultiply1 = prepareJob(
+        cooccurrencePath, prePartialMultiplyPath1, SequenceFileInputFormat.class,
+        CooccurrenceColumnWrapperMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
+        Reducer.class, VarIntWritable.class, VectorOrPrefWritable.class,
+        SequenceFileOutputFormat.class);
+      prePartialMultiply1.waitForCompletion(true);
+
+      Job prePartialMultiply2 = prepareJob(
+        userVectorPath, prePartialMultiplyPath2, SequenceFileInputFormat.class,
+        UserVectorSplitterMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
+        Reducer.class, VarIntWritable.class, VectorOrPrefWritable.class,
+        SequenceFileOutputFormat.class);
+      if (usersFile != null) {
+        prePartialMultiply2.getConfiguration().set(UserVectorSplitterMapper.USERS_FILE, usersFile);
+      }
+      prePartialMultiply2.waitForCompletion(true);
+
+      Job partialMultiply = prepareJob(
+        new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath, SequenceFileInputFormat.class,
+        Mapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
+        ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
+        SequenceFileOutputFormat.class);
+      partialMultiply.waitForCompletion(true);
+    }
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job aggregateAndRecommend = prepareJob(
+          partialMultiplyPath, outputPath, SequenceFileInputFormat.class,
+          PartialMultiplyMapper.class, VarLongWritable.class, VectorWritable.class,
+          AggregateAndRecommendReducer.class, VarLongWritable.class, RecommendedItemsWritable.class,
+          TextOutputFormat.class);
+      Configuration jobConf = aggregateAndRecommend.getConfiguration();
+      setIOSort(aggregateAndRecommend);
+      aggregateAndRecommend.setCombinerClass(AggregateCombiner.class);
+      jobConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath.toString());
+      jobConf.setInt(AggregateAndRecommendReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
+      aggregateAndRecommend.waitForCompletion(true);
     }
 
     return 0;
   }
 
-  private static void setIOSort(JobConf conf) {
+  private static void setIOSort(Job job) {
+    Configuration conf = job.getConfiguration();
     conf.setInt("io.sort.factor", 100);
     int assumedHeapSize = 512;
     String javaOpts = conf.get("mapred.child.java.opts");

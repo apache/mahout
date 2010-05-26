@@ -25,16 +25,13 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.impl.recommender.ByValueRecommendedItemComparator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
@@ -45,7 +42,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
-public final class AggregateAndRecommendReducer extends MapReduceBase implements
+public final class AggregateAndRecommendReducer extends
     Reducer<VarLongWritable,VectorWritable,VarLongWritable,RecommendedItemsWritable> {
 
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
@@ -62,7 +59,8 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
   private OpenIntLongHashMap indexItemIDMap;
 
   @Override
-  public void configure(JobConf jobConf) {
+  public void setup(Context context) {
+    Configuration jobConf = context.getConfiguration();
     recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
     try {
       FileSystem fs = FileSystem.get(jobConf);
@@ -86,15 +84,17 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
 
   @Override
   public void reduce(VarLongWritable key,
-                     Iterator<VectorWritable> values,
-                     OutputCollector<VarLongWritable,RecommendedItemsWritable> output,
-                     Reporter reporter) throws IOException {
-    if (!values.hasNext()) {
-      return;
+                     Iterable<VectorWritable> values,
+                     Context context) throws IOException, InterruptedException {
+
+    Vector recommendationVector = null;
+    for (VectorWritable vectorWritable : values) {
+      recommendationVector = recommendationVector == null ?
+          vectorWritable.get() :
+          recommendationVector.plus(vectorWritable.get());
     }
-    Vector recommendationVector = values.next().get();
-    while (values.hasNext()) {
-      recommendationVector = recommendationVector.plus(values.next().get());
+    if (recommendationVector == null) {
+      return;
     }
 
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
@@ -120,7 +120,7 @@ public final class AggregateAndRecommendReducer extends MapReduceBase implements
       List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>(topItems.size());
       recommendations.addAll(topItems);
       Collections.sort(recommendations, ByValueRecommendedItemComparator.getInstance());
-      output.collect(key, new RecommendedItemsWritable(recommendations));
+      context.write(key, new RecommendedItemsWritable(recommendations));
     }
   }
 

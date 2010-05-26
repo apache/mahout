@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import java.util.Iterator;
-
 import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 
 /**
@@ -27,17 +25,17 @@ import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 public class DistributedUncenteredCosineSimilarity extends AbstractDistributedItemSimilarity {
 
   @Override
-  protected double doComputeResult(Iterator<CoRating> coratings,
-      double weightOfItemVectorX, double weightOfItemVectorY,
-      int numberOfUsers) {
+  protected double doComputeResult(Iterable<CoRating> coratings,
+                                   double weightOfItemVectorX,
+                                   double weightOfItemVectorY,
+                                   int numberOfUsers) {
 
     int n = 0;
-    double sumXY = 0;
-    double sumX2 = 0;
-    double sumY2 = 0;
+    double sumXY = 0.0;
+    double sumX2 = 0.0;
+    double sumY2 = 0.0;
 
-    while (coratings.hasNext()) {
-      CoRating coRating = coratings.next();
+    for (CoRating coRating : coratings) {
       double x = coRating.getPrefValueX();
       double y = coRating.getPrefValueY();
 

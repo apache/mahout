@@ -22,29 +22,25 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VarLongWritable;
 
 /**
- * maps out the userIDs in a way that we can use a secondary sort on them
+ * Maps out the userIDs in a way that we can use a secondary sort on them
  */
-public class CountUsersMapper extends MapReduceBase
-    implements Mapper<LongWritable,Text,CountUsersKeyWritable, VarLongWritable> {
+public class CountUsersMapper extends
+    Mapper<LongWritable,Text,CountUsersKeyWritable, VarLongWritable> {
 
   private static final Pattern DELIMITER = Pattern.compile("[\t,]");
 
   @Override
-  public void map(LongWritable arg0, Text value,
-      OutputCollector<CountUsersKeyWritable,VarLongWritable> out, Reporter reporter)
-      throws IOException {
+  public void map(LongWritable key, Text value, Context context)
+      throws IOException, InterruptedException {
 
     String[] tokens = DELIMITER.split(value.toString());
     long userID = Long.parseLong(tokens[0]);
 
-    out.collect(new CountUsersKeyWritable(userID), new VarLongWritable(userID));
+    context.write(new CountUsersKeyWritable(userID), new VarLongWritable(userID));
   }
 
 }

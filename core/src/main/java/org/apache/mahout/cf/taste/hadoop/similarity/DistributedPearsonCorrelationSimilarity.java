@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import java.util.Iterator;
-
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 
 /**
@@ -27,9 +25,10 @@ import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 public class DistributedPearsonCorrelationSimilarity extends AbstractDistributedItemSimilarity {
 
   @Override
-  protected double doComputeResult(Iterator<CoRating> coRatings,
-      double weightOfItemVectorX, double weightOfItemVectorY,
-      int numberOfUsers) {
+  protected double doComputeResult(Iterable<CoRating> coRatings,
+                                   double weightOfItemVectorX,
+                                   double weightOfItemVectorY,
+                                   int numberOfUsers) {
 
     int count = 0;
     double sumX = 0.0;
@@ -38,8 +37,7 @@ public class DistributedPearsonCorrelationSimilarity extends AbstractDistributed
     double sumX2 = 0.0;
     double sumY2 = 0.0;
 
-    while (coRatings.hasNext()) {
-      CoRating coRating = coRatings.next();
+    for (CoRating coRating : coRatings) {
       double x = coRating.getPrefValueX();
       double y = coRating.getPrefValueY();
 

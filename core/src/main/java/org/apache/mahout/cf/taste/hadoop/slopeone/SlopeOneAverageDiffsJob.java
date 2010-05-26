@@ -19,18 +19,19 @@ package org.apache.mahout.cf.taste.hadoop.slopeone;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.common.AbstractJob;
@@ -41,7 +42,7 @@ import org.apache.mahout.math.VarLongWritable;
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
   
   @Override
-  public int run(String[] args) throws IOException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
     Map<String,String> parsedArgs = AbstractJob.parseArguments(args);
     if (parsedArgs == null) {
@@ -49,23 +50,41 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     }
     
     Configuration originalConf = getConf();
-    String prefsFile = originalConf.get("mapred.input.dir");
-    String outputPath = originalConf.get("mapred.output.dir");
-    String averagesOutputPath = parsedArgs.get("--tempDir");
-    
-    JobConf prefsToDiffsJobConf = prepareJobConf(prefsFile, averagesOutputPath,
-      TextInputFormat.class, ToItemPrefsMapper.class, VarLongWritable.class, EntityPrefWritable.class,
-      SlopeOnePrefsToDiffsReducer.class, EntityEntityWritable.class, FloatWritable.class,
-      SequenceFileOutputFormat.class);
-    JobClient.runJob(prefsToDiffsJobConf);
-    
-    JobConf diffsToAveragesJobConf = prepareJobConf(averagesOutputPath, outputPath,
-      SequenceFileInputFormat.class, IdentityMapper.class, EntityEntityWritable.class, FloatWritable.class,
-      SlopeOneDiffsToAveragesReducer.class, EntityEntityWritable.class, FloatWritable.class,
-      TextOutputFormat.class);
-    diffsToAveragesJobConf.setClass("mapred.output.compression.codec", GzipCodec.class,
-      CompressionCodec.class);
-    JobClient.runJob(diffsToAveragesJobConf);
+    Path prefsFile = new Path(originalConf.get("mapred.input.dir"));
+    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
+    Path averagesOutputPath = new Path(parsedArgs.get("--tempDir"));
+
+    AtomicInteger currentPhase = new AtomicInteger();
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job prefsToDiffsJob = prepareJob(prefsFile,
+                                       averagesOutputPath,
+                                       TextInputFormat.class,
+                                       ToItemPrefsMapper.class,
+                                       VarLongWritable.class,
+                                       EntityPrefWritable.class,
+                                       SlopeOnePrefsToDiffsReducer.class,
+                                       EntityEntityWritable.class,
+                                       FloatWritable.class,
+                                       SequenceFileOutputFormat.class);
+      prefsToDiffsJob.waitForCompletion(true);
+    }
+
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job diffsToAveragesJob = prepareJob(averagesOutputPath,
+                                          outputPath,
+                                          SequenceFileInputFormat.class,
+                                          Mapper.class,
+                                          EntityEntityWritable.class,
+                                          FloatWritable.class,
+                                          SlopeOneDiffsToAveragesReducer.class,
+                                          EntityEntityWritable.class,
+                                          FloatWritable.class,
+                                          TextOutputFormat.class);
+      FileOutputFormat.setOutputCompressorClass(diffsToAveragesJob, GzipCodec.class);
+      diffsToAveragesJob.waitForCompletion(true);
+    }
     return 0;
   }
   

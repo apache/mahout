@@ -18,12 +18,8 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
-import java.util.Iterator;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
@@ -47,20 +43,15 @@ import org.apache.mahout.math.VectorWritable;
  * {@link ItemIDIndexMapper} and {@link ItemIDIndexReducer}.
  * </p>
  */
-public final class ToUserVectorReducer extends MapReduceBase implements
+public final class ToUserVectorReducer extends
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable> {
   
   @Override
   public void reduce(VarLongWritable userID,
-                     Iterator<VarLongWritable> itemPrefs,
-                     OutputCollector<VarLongWritable,VectorWritable> output,
-                     Reporter reporter) throws IOException {
-    if (!itemPrefs.hasNext()) {
-      return;
-    }
+                     Iterable<VarLongWritable> itemPrefs,
+                     Context context) throws IOException, InterruptedException {
     Vector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    while (itemPrefs.hasNext()) {
-      VarLongWritable itemPref = itemPrefs.next();
+    for (VarLongWritable itemPref : itemPrefs) {
       int index = ItemIDIndexMapper.idToIndex(itemPref.get());
       float value;
       if (itemPref instanceof EntityPrefWritable) {
@@ -73,7 +64,7 @@ public final class ToUserVectorReducer extends MapReduceBase implements
 
     VectorWritable vw = new VectorWritable(userVector);
     vw.setWritesLaxPrecision(true);
-    output.collect(userID, vw);
+    context.write(userID, vw);
   }
   
 }

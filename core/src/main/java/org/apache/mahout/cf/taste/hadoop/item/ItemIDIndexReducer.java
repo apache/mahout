@@ -18,32 +18,27 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
-import java.util.Iterator;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 
-public final class ItemIDIndexReducer extends MapReduceBase implements
+public final class ItemIDIndexReducer extends
     Reducer<VarIntWritable, VarLongWritable, VarIntWritable,VarLongWritable> {
   
   @Override
   public void reduce(VarIntWritable index,
-                     Iterator<VarLongWritable> possibleItemIDs,
-                     OutputCollector<VarIntWritable,VarLongWritable> output,
-                     Reporter reporter) throws IOException {
-    if (possibleItemIDs.hasNext()) {
-      long minimumItemID = Long.MAX_VALUE;
-      while (possibleItemIDs.hasNext()) {
-        long itemID = possibleItemIDs.next().get();
-        if (itemID < minimumItemID) {
-          minimumItemID = itemID;
-        }
+                     Iterable<VarLongWritable> possibleItemIDs,
+                     Context context) throws IOException, InterruptedException {
+    long minimumItemID = Long.MAX_VALUE;
+    for (VarLongWritable varLongWritable : possibleItemIDs) {
+      long itemID = varLongWritable.get();
+      if (itemID < minimumItemID) {
+        minimumItemID = itemID;
       }
-      output.collect(index, new VarLongWritable(minimumItemID));
+    }
+    if (minimumItemID != Long.MAX_VALUE) {
+      context.write(index, new VarLongWritable(minimumItemID));
     }
   }
   

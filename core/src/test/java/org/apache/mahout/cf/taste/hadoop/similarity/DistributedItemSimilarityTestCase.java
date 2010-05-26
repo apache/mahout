@@ -57,8 +57,8 @@ public abstract class DistributedItemSimilarityTestCase extends TasteTestCase {
       }
     }
 
-    double weightX = similarity.weightOfItemVector(nonNaNPrefsX.iterator());
-    double weightY = similarity.weightOfItemVector(nonNaNPrefsY.iterator());
+    double weightX = similarity.weightOfItemVector(nonNaNPrefsX);
+    double weightY = similarity.weightOfItemVector(nonNaNPrefsY);
 
     List<CoRating> coRatings = new LinkedList<CoRating>();
 
@@ -71,7 +71,7 @@ public abstract class DistributedItemSimilarityTestCase extends TasteTestCase {
       }
     }
 
-    double result = similarity.similarity(coRatings.iterator(), weightX, weightY, numberOfUsers);
+    double result = similarity.similarity(coRatings, weightX, weightY, numberOfUsers);
     assertEquals(expectedSimilarity, result, EPSILON);
   }
 

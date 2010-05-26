@@ -20,18 +20,15 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.ToEntityPrefsMapper;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 
-public final class ItemIDIndexMapper extends MapReduceBase implements
+public final class ItemIDIndexMapper extends
     Mapper<LongWritable,Text, VarIntWritable, VarLongWritable> {
   
   private static final Pattern COMMA = Pattern.compile(",");
@@ -39,19 +36,19 @@ public final class ItemIDIndexMapper extends MapReduceBase implements
   private boolean transpose;
 
   @Override
-  public void configure(JobConf jobConf) {
+  public void setup(Context context) {
+    Configuration jobConf = context.getConfiguration();
     transpose = jobConf.getBoolean(ToEntityPrefsMapper.TRANSPOSE_USER_ITEM, false);
   }
   
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<VarIntWritable,VarLongWritable> output,
-                  Reporter reporter) throws IOException {
+                  Context context) throws IOException, InterruptedException {
     String[] tokens = ItemIDIndexMapper.COMMA.split(value.toString());
     long itemID = Long.parseLong(tokens[transpose ? 0 : 1]);
     int index = idToIndex(itemID);
-    output.collect(new VarIntWritable(index), new VarLongWritable(itemID));
+    context.write(new VarIntWritable(index), new VarLongWritable(itemID));
   }
   
   static int idToIndex(long itemID) {

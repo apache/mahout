@@ -19,30 +19,24 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.Vector;
 
-public final class ToVectorAndPrefReducer extends MapReduceBase implements
+public final class ToVectorAndPrefReducer extends
     Reducer<VarIntWritable,VectorOrPrefWritable,VarIntWritable,VectorAndPrefsWritable> {
 
   @Override
   public void reduce(VarIntWritable key,
-                     Iterator<VectorOrPrefWritable> values,
-                     OutputCollector<VarIntWritable,VectorAndPrefsWritable> output,
-                     Reporter reporter) throws IOException {
+                     Iterable<VectorOrPrefWritable> values,
+                     Context context) throws IOException, InterruptedException {
 
     List<Long> userIDs = new ArrayList<Long>();
     List<Float> prefValues = new ArrayList<Float>();
     Vector cooccurrenceColumn = null;
-    while (values.hasNext()) {
-      VectorOrPrefWritable value = values.next();
+    for (VectorOrPrefWritable value : values) {
       if (value.getVector() == null) {
         // Then this is a user-pref value
         userIDs.add(value.getUserID());
@@ -61,7 +55,7 @@ public final class ToVectorAndPrefReducer extends MapReduceBase implements
     }
 
     VectorAndPrefsWritable vectorAndPrefs = new VectorAndPrefsWritable(cooccurrenceColumn, userIDs, prefValues);
-    output.collect(key, vectorAndPrefs);
+    context.write(key, vectorAndPrefs);
   }
 
 }
