@@ -30,14 +30,14 @@ import java.io.File;
 public class FileInfosDatasetTest extends MahoutTestCase {
 
   public void testRanges() throws IOException {
-    Path inpath = new Path("target/test-classes/wdbc");
+    Path inpath = new Path(this.getClass().getResource("/wdbc/").getPath());
     FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
 
     DataLine dl = new DataLine();
-    for (String line : new FileLineIterable(new File("target/test-classes/wdbc/wdbc.data"))) {
+    for (String line : new FileLineIterable(new File(this.getClass().getResource("/wdbc/wdbc.data").getPath()))) {
       dl.set(line);
       for (int index = 0; index < dataset.getNbAttributes(); index++) {
         if (dataset.isNumerical(index)) {

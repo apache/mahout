@@ -46,7 +46,7 @@ public class CDMahoutEvaluatorTest extends MahoutTestCase {
 
     // dataset
     // This is sensitive to the working directory where the test is run:
-    Path input = new Path("target/test-classes/wdbc");
+    Path input = new Path(this.getClass().getResource("/wdbc/").getPath());
     CDMahoutEvaluator.initializeDataSet(input);
 
     // evaluate the rules

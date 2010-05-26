@@ -299,23 +299,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clover-plugin</artifactId>
-                    <configuration>
-                        <licenseLocation>${maven.clover.license}</licenseLocation>
-                        <jdk>1.5</jdk>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <phase>pre-site</phase>
-                            <goals>
-                                <goal>instrument</goal>
-                                <goal>aggregate</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.0.2</version>
                     <configuration>
@@ -339,13 +322,13 @@
                     <configuration>
                         <encoding>UTF-8</encoding>
                     </configuration>
+		    <!--
                     <executions>
                         <execution>
                             <id>validate</id>
                             <phase>validate</phase>
                             <configuration>
-                              <!-- classpath -->
-                                <configLocation>${project.build.directory}/../maven/src/main/resources/mahout-checkstyle.xml</configLocation>
+                                <configLocation>../maven/src/main/resources/mahout-checkstyle.xml</configLocation>
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>false</failsOnError>
                                 <linkXRef>false</linkXRef>
@@ -356,6 +339,7 @@
                             </goals>
                         </execution>
                     </executions>
+		    -->
                 </plugin>
                 <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
@@ -371,7 +355,7 @@
                   <configuration>
                     <rulesets>
                       <!-- classpath -->
-                      <ruleset>maven/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+                      <ruleset>../maven/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <targetJdk>1.5</targetJdk>
@@ -379,6 +363,7 @@
                     <includeTests>true</includeTests>
                     <verbose>true</verbose>
                   </configuration>
+		  <!--
                   <executions>
                     <execution>
                       <id>validate</id>
@@ -388,6 +373,7 @@
                       </goals>
                     </execution>
                   </executions>
+		  -->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -592,22 +578,18 @@
     </distributionManagement>
     <reporting>
         <plugins>
+            <!-- surefire runs unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+            </plugin>
+	    <!-- checkstyle -->
             <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
                     <configLocation>${project.build.directory}/../../maven/src/main/resources/mahout-checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                 </configuration>
-            </plugin>
-            <!-- generate java doc -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <!-- surefire runs unit tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin</artifactId>
             </plugin>
 	    <!-- test coverage plugin -->
 	    <plugin>
@@ -623,20 +605,18 @@
 	    		<jdk>1.5</jdk>
 	    	</configuration>
 	    </plugin>
+            <!-- generate java doc -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clover-plugin</artifactId>
-                <configuration>
-                    <licenseLocation>${maven.clover.license}</licenseLocation>
-                    <jdk>1.5</jdk>
-                </configuration>
+                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
             <!-- code duplication - copy and paste detection -->
             <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <configuration>
                     <rulesets>
-                        <ruleset>/mahout-pmd-ruleset.xml</ruleset>
+                        <ruleset>../maven/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <targetJdk>1.5</targetJdk>
@@ -660,7 +640,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>2.0.1</version>
+                <version>2.2</version>
                 <configuration>
                     <xmlOutput>true</xmlOutput>
                     <xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
