@@ -10,10 +10,11 @@ package org.apache.mahout.math.jet.stat;
 
 import org.apache.mahout.math.jet.math.Constants;
 import org.apache.mahout.math.jet.math.Polynomial;
+import org.apache.mahout.math.jet.random.Normal;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
+/** Partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 public class Probability extends Constants {
+  private static final Normal unitNormal = new Normal(0, 1, null);
 
   /**
    * ********************************************** COEFFICIENTS FOR METHOD  normalInverse()   *
@@ -122,6 +123,7 @@ public class Probability extends Constants {
    *
    * This function is identical to the incomplete beta integral function <tt>Gamma.incompleteBeta(b, a, x)</tt>.
    */
+  @Deprecated
   public static double betaComplemented(double a, double b, double x) {
     return Gamma.incompleteBeta(b, a, x);
   }
@@ -142,6 +144,7 @@ public class Probability extends Constants {
    * @param n the number of trials.
    * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
    */
+  @Deprecated
   public static double binomial(int k, int n, double p) {
     if ((p < 0.0) || (p > 1.0)) {
       throw new IllegalArgumentException();
@@ -177,6 +180,7 @@ public class Probability extends Constants {
    * @param n the number of trials.
    * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
    */
+  @Deprecated
   public static double binomialComplemented(int k, int n, double p) {
     if ((p < 0.0) || (p > 1.0)) {
       throw new IllegalArgumentException();
@@ -213,6 +217,7 @@ public class Probability extends Constants {
    * @param v degrees of freedom.
    * @param x integration end point.
    */
+  @Deprecated
   public static double chiSquare(double v, double x) throws ArithmeticException {
     if (x < 0.0 || v < 1.0) {
       return 0.0;
@@ -243,6 +248,7 @@ public class Probability extends Constants {
    *
    * @param v degrees of freedom.
    */
+  @Deprecated
   public static double chiSquareComplemented(double v, double x) throws ArithmeticException {
     if (x < 0.0 || v < 1.0) {
       return 0.0;
@@ -268,6 +274,7 @@ public class Probability extends Constants {
    *
    * @param x the argument to the function.
    */
+  @Deprecated
   public static double errorFunction(double x) throws ArithmeticException {
     double[] T = {
         9.60497373987051638749E0,
@@ -313,6 +320,7 @@ public class Probability extends Constants {
    *
    * @param a the argument to the function.
    */
+  @Deprecated
   public static double errorFunctionComplemented(double a) throws ArithmeticException {
     double x;
 
@@ -425,6 +433,7 @@ public class Probability extends Constants {
    * @param b the paramater b (beta, lambda) of the gamma distribution.
    * @param x integration end point.
    */
+  @Deprecated
   public static double gamma(double a, double b, double x) {
     if (x < 0.0) {
       return 0.0;
@@ -450,6 +459,7 @@ public class Probability extends Constants {
    * @param b the paramater b (beta, lambda) of the gamma distribution.
    * @param x integration end point.
    */
+  @Deprecated
   public static double gammaComplemented(double a, double b, double x) {
     if (x < 0.0) {
       return 0.0;
@@ -477,6 +487,7 @@ public class Probability extends Constants {
    * @param n the number of trials.
    * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
    */
+  @Deprecated
   public static double negativeBinomial(int k, int n, double p) {
     if ((p < 0.0) || (p > 1.0)) {
       throw new IllegalArgumentException();
@@ -506,6 +517,7 @@ public class Probability extends Constants {
    * @param n the number of trials.
    * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
    */
+  @Deprecated
   public static double negativeBinomialComplemented(int k, int n, double p) {
     if ((p < 0.0) || (p > 1.0)) {
       throw new IllegalArgumentException();
@@ -528,29 +540,24 @@ public class Probability extends Constants {
    *               sqrt(2pi)  | |
    *                           -
    *                          -inf.
-   *
+   * <p/>
    *             =  ( 1 + erf(z) ) / 2
    *             =  erfc(z) / 2
    * </pre>
    * where <tt>z = x/sqrt(2)</tt>. Computation is via the functions <tt>errorFunction</tt> and
    * <tt>errorFunctionComplement</tt>.
+   * <p>
+   * Computed using method 26.2.17 from Abramovitz and Stegun (see http://www.math.sfu.ca/~cbm/aands/page_932.htm
+   * and http://en.wikipedia.org/wiki/Normal_distribution#Numerical_approximations_of_the_normal_cdf
    */
+
   public static double normal(double a) throws ArithmeticException {
-
-    double x = a * SQRTH;
-    double z = Math.abs(x);
-
-    double y;
-    if (z < SQRTH) {
-      y = 0.5 + 0.5 * errorFunction(x);
-    } else {
-      y = 0.5 * errorFunctionComplemented(z);
-      if (x > 0) {
-        y = 1.0 - y;
-      }
+    if (a < 0) {
+      return 1 - normal(-a);
     }
-
-    return y;
+    double b0 = 0.2316419, b1 = 0.319381530, b2 = -0.356563782, b3 = 1.781477937, b4 = -1.821255978, b5 = 1.330274429;
+    double t = 1 / (1 + b0 * a);
+    return 1 - unitNormal.pdf(a) * t * (b1 + t * (b2 + t * (b3 + t * (b4 + t * b5))));
   }
 
   /**
@@ -573,11 +580,7 @@ public class Probability extends Constants {
    * @param x        the integration limit.
    */
   public static double normal(double mean, double variance, double x) throws ArithmeticException {
-    if (x > 0) {
-      return 0.5 + 0.5 * errorFunction((x - mean) / Math.sqrt(2.0 * variance));
-    } else {
-      return 0.5 - 0.5 * errorFunction((-(x - mean)) / Math.sqrt(2.0 * variance));
-    }
+    return normal((x - mean) / Math.sqrt(variance));
   }
 
   /**
@@ -589,6 +592,7 @@ public class Probability extends Constants {
    * <tt>exp(-2)</tt>. For larger arguments, <tt>w = y - 0.5</tt>, and  <tt>x/sqrt(2pi) = w + w**3
    * R(w**2)/S(w**2))</tt>.
    */
+  @Deprecated
   public static double normalInverse(double y0) throws ArithmeticException {
 
     double s2pi = Math.sqrt(2.0 * Math.PI);
@@ -649,6 +653,7 @@ public class Probability extends Constants {
    * @param k    number of terms.
    * @param mean the mean of the poisson distribution.
    */
+  @Deprecated
   public static double poisson(int k, double mean) throws ArithmeticException {
     if (mean < 0) {
       throw new IllegalArgumentException();
@@ -676,6 +681,7 @@ public class Probability extends Constants {
    * @param k    start term.
    * @param mean the mean of the poisson distribution.
    */
+  @Deprecated
   public static double poissonComplemented(int k, double mean) throws ArithmeticException {
     if (mean < 0) {
       throw new IllegalArgumentException();
@@ -709,6 +715,7 @@ public class Probability extends Constants {
    * @param k degrees of freedom.
    * @param t integration end point.
    */
+  @Deprecated
   public static double studentT(double k, double t) throws ArithmeticException {
     if (k <= 0) {
       throw new IllegalArgumentException();
@@ -735,6 +742,7 @@ public class Probability extends Constants {
    * @param alpha probability
    * @param size  size of data set
    */
+  @Deprecated
   public static double studentTInverse(double alpha, int size) {
     double cumProb = 1 - alpha / 2; // Cumulative probability
 
