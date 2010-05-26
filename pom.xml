@@ -345,7 +345,7 @@
                             <phase>validate</phase>
                             <configuration>
                               <!-- classpath -->
-                                <configLocation>/mahout-checkstyle.xml</configLocation>
+                                <configLocation>${project.build.directory}/../../maven/src/main/resources/mahout-checkstyle.xml</configLocation>
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>false</failsOnError>
                                 <linkXRef>false</linkXRef>
