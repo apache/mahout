@@ -100,6 +100,7 @@ public class DirichletDriver {
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
+      parser.setHelpOption(helpOpt);
       CommandLine cmdLine = parser.parse(args);
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
