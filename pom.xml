@@ -602,7 +602,6 @@
 	    		<generatePdf>false</generatePdf>
 	    		<generateXml>true</generateXml>
 	    		<generateHtml>true</generateHtml>
-	    		<jdk>1.5</jdk>
 	    	</configuration>
 	    </plugin>
             <!-- generate java doc -->
