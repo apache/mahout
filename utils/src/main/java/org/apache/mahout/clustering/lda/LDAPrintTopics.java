@@ -49,7 +49,9 @@ import org.apache.mahout.utils.vectors.VectorHelper;
 /**
  * Class to print out the top K words for each topic.
  */
-public class LDAPrintTopics {
+public final class LDAPrintTopics {
+
+  private LDAPrintTopics() { }  
   
   private static class StringDoublePair implements Comparable<StringDoublePair> {
     private final double score;
@@ -243,5 +245,4 @@ public class LDAPrintTopics {
     }
   }
   
-  private LDAPrintTopics() { }
 }

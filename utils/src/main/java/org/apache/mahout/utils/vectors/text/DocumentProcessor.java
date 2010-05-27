@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
@@ -38,7 +36,8 @@ import org.apache.mahout.utils.vectors.text.document.SequenceFileTokenizerMapper
 
 /**
  * This class converts a set of input documents in the sequence file format of {@link StringTuple}s.The
- * {@link SequenceFile} input should have a {@link Text} key containing the unique document identifier and a
+ * {@link org.apache.hadoop.io.SequenceFile} input should have a {@link Text} key
+ * containing the unique document identifier and a
  * {@link Text} value containing the whole document. The document should be stored in UTF-8 encoding which is
  * recognizable by hadoop. It uses the given {@link Analyzer} to process the document into
  * {@link org.apache.lucene.analysis.Token}s.
@@ -60,10 +59,10 @@ public final class DocumentProcessor {
   
   /**
    * Convert the input documents into token array using the {@link StringTuple} The input documents has to be
-   * in the {@link SequenceFile} format
+   * in the {@link org.apache.hadoop.io.SequenceFile} format
    * 
    * @param input
-   *          input directory of the documents in {@link SequenceFile} format
+   *          input directory of the documents in {@link org.apache.hadoop.io.SequenceFile} format
    * @param output
    *          output directory were the {@link StringTuple} token array of each document has to be created
    * @param analyzerClass

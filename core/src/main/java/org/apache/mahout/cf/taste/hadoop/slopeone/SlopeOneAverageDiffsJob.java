@@ -34,9 +34,9 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
-import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarLongWritable;
 
 public final class SlopeOneAverageDiffsJob extends AbstractJob {

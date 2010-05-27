@@ -29,9 +29,9 @@ public final class UserVectorToCooccurrenceReducer extends
     Reducer<VarIntWritable,VarIntWritable,VarIntWritable,VectorWritable> {
 
   @Override
-  public void reduce(VarIntWritable itemIndex1,
-                     Iterable<VarIntWritable> itemIndex2s,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarIntWritable itemIndex1,
+                        Iterable<VarIntWritable> itemIndex2s,
+                        Context context) throws IOException, InterruptedException {
     Vector cooccurrenceRow = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     for (VarIntWritable varIntWritable : itemIndex2s) {
       int itemIndex2 = varIntWritable.get();

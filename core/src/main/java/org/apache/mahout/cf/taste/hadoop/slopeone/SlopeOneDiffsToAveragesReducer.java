@@ -27,9 +27,9 @@ public final class SlopeOneDiffsToAveragesReducer extends
     Reducer<EntityEntityWritable,FloatWritable, EntityEntityWritable,FloatWritable> {
   
   @Override
-  public void reduce(EntityEntityWritable key,
-                     Iterable<FloatWritable> values,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(EntityEntityWritable key,
+                        Iterable<FloatWritable> values,
+                        Context context) throws IOException, InterruptedException {
     int count = 0;
     double total = 0.0;
     for (FloatWritable value : values) {

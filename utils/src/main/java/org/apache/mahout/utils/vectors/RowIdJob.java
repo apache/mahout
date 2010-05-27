@@ -56,9 +56,9 @@ public class RowIdJob extends AbstractJob {
     VectorWritable v = new VectorWritable();
 
     int i = 0;
-    for(FileStatus status : fs.listStatus(inputPath)) {
+    for (FileStatus status : fs.listStatus(inputPath)) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, status.getPath(), conf);
-      while(reader.next(inputKey, v)) {
+      while (reader.next(inputKey, v)) {
         docId.set(i);
         indexWriter.append(docId, inputKey);
         matrixWriter.append(docId, v);

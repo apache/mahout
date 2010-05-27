@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Generates a file descriptor for a given dataset
  */
-public class Describe {
+public final class Describe {
   
   private static final Logger log = LoggerFactory.getLogger(Describe.class);
   

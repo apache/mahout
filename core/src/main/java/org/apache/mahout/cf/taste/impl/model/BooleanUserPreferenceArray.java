@@ -157,7 +157,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder(10*IDs.length);
+    StringBuilder result = new StringBuilder(10 * IDs.length);
     result.append("BooleanUserPreferenceArray[userID:");
     result.append(id);
     result.append(",{");

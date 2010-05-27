@@ -27,9 +27,9 @@ public final class ItemIDIndexReducer extends
     Reducer<VarIntWritable, VarLongWritable, VarIntWritable,VarLongWritable> {
   
   @Override
-  public void reduce(VarIntWritable index,
-                     Iterable<VarLongWritable> possibleItemIDs,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarIntWritable index,
+                        Iterable<VarLongWritable> possibleItemIDs,
+                        Context context) throws IOException, InterruptedException {
     long minimumItemID = Long.MAX_VALUE;
     for (VarLongWritable varLongWritable : possibleItemIDs) {
       long itemID = varLongWritable.get();

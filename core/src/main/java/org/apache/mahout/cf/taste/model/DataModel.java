@@ -17,10 +17,6 @@
 
 package org.apache.mahout.cf.taste.model;
 
-import java.util.List;
-
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -45,7 +41,7 @@ public interface DataModel extends Refreshable {
    * @param userID
    *          ID of user to get prefs for
    * @return user's preferences, ordered by item ID
-   * @throws NoSuchUserException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
@@ -56,7 +52,7 @@ public interface DataModel extends Refreshable {
    * @param userID
    *          ID of user to get prefs for
    * @return IDs of items user expresses a preference for
-   * @throws NoSuchUserException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
@@ -64,7 +60,7 @@ public interface DataModel extends Refreshable {
   FastIDSet getItemIDsFromUser(long userID) throws TasteException;
   
   /**
-   * @return a {@link List} of all item IDs in the model, in order
+   * @return a {@link LongPrimitiveIterator} of all item IDs in the model, in order
    * @throws TasteException
    *           if an error occurs while accessing the data
    */
@@ -74,7 +70,7 @@ public interface DataModel extends Refreshable {
    * @param itemID
    *          item ID
    * @return all existing {@link Preference}s expressed for that item, ordered by user ID, as an array
-   * @throws NoSuchItemException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
    *           if the item does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
@@ -89,7 +85,7 @@ public interface DataModel extends Refreshable {
    * @param itemID
    *          item ID to get pref value for
    * @return preference value from the given user for the given item or null if none exists
-   * @throws NoSuchUserException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
@@ -120,7 +116,7 @@ public interface DataModel extends Refreshable {
    * @throws IllegalArgumentException
    *           if itemIDs is null, empty, or larger than 2 elements since currently only queries of up to 2
    *           items are needed and supported
-   * @throws NoSuchItemException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
    *           if an item does not exist
    */
   int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException;
@@ -136,9 +132,9 @@ public interface DataModel extends Refreshable {
    *          item to set preference for
    * @param value
    *          preference value
-   * @throws NoSuchItemException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
    *           if the item does not exist
-   * @throws NoSuchUserException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data
@@ -154,9 +150,9 @@ public interface DataModel extends Refreshable {
    *          user from which to remove preference
    * @param itemID
    *          item to remove preference for
-   * @throws NoSuchItemException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
    *           if the item does not exist
-   * @throws NoSuchUserException
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
    *           if the user does not exist
    * @throws TasteException
    *           if an error occurs while accessing the data

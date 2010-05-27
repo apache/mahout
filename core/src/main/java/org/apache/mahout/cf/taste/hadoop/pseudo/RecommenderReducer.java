@@ -57,7 +57,7 @@ public final class RecommenderReducer extends
   private int recommendationsPerUser;
 
   @Override
-  public void setup(Context context) {
+  protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
     String dataModelFile = jobConf.get(DATA_MODEL_FILE);
     String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
@@ -92,9 +92,9 @@ public final class RecommenderReducer extends
   }
   
   @Override
-  public void reduce(VarLongWritable key,
-                     Iterable<NullWritable> values,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarLongWritable key,
+                        Iterable<NullWritable> values,
+                        Context context) throws IOException, InterruptedException {
     long userID = key.get();
     List<RecommendedItem> recommendedItems;
     try {

@@ -32,7 +32,7 @@ import org.apache.hadoop.io.WritableComparator;
  */
 public final class IntPairWritable
     extends BinaryComparable 
-    implements WritableComparable<BinaryComparable>, Serializable {
+    implements WritableComparable<BinaryComparable>, Serializable, Cloneable {
 
   static final int INT_BYTE_LENGTH = 4;
   static final int INT_PAIR_BYTE_LENGTH = 2 * INT_BYTE_LENGTH;
@@ -130,7 +130,7 @@ public final class IntPairWritable
   
   private static void putInt(int value, byte[] b, int offset) {
     for (int i = offset, j = 24; j >= 0; i++, j -= 8) {
-      b[i] = (byte) (value >>> j);
+      b[i] = (byte) (value >> j);
     }
   }
   

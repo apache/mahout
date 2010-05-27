@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -38,9 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * A {@link Recommender} which caches the results from another {@link Recommender} in memory. Results are held
- * by {@link SoftReference}s so that the JVM may reclaim memory from the recommendationCache in low-memory
- * situations.
+ * A {@link Recommender} which caches the results from another {@link Recommender} in memory.
  * </p>
  */
 public final class CachingRecommender implements Recommender {

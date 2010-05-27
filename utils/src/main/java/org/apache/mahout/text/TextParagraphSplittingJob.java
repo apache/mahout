@@ -53,13 +53,13 @@ public class TextParagraphSplittingJob extends AbstractJob {
   public static class SplitMap extends Mapper<Text,Text,Text,Text> {
 
     @Override
-    public void map(Text key, Text text, Context context) throws IOException, InterruptedException {
+    protected void map(Text key, Text text, Context context) throws IOException, InterruptedException {
       Text outText = new Text();
       int loc = 0;
-      while(loc >= 0 && loc < text.getLength()) {
-        int nextLoc = text.find("\n\n", loc+1);
+      while (loc >= 0 && loc < text.getLength()) {
+        int nextLoc = text.find("\n\n", loc + 1);
         if (nextLoc > 0) {
-          outText.set(text.getBytes(), loc, (nextLoc - loc));
+          outText.set(text.getBytes(), loc, nextLoc - loc);
           context.write(key, outText);
         }
         loc = nextLoc;

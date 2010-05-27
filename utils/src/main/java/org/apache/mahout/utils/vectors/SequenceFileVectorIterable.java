@@ -56,7 +56,7 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
     }
   }
   
-  public class SeqFileIterator implements Iterator<Vector> {
+  public final class SeqFileIterator implements Iterator<Vector> {
     private final Writable key;
     private final Writable value;
     

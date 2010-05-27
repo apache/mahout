@@ -87,7 +87,7 @@ public class CDMapperTest extends MahoutTestCase {
     Set<LongWritable> keys = collector.getKeys();
     assertEquals("Number of evaluations", rules.size(), keys.size());
 
-    CDFitness[] expected = { TP, FP, TN, FN };
+    CDFitness[] expected = {TP, FP, TN, FN};
     for (LongWritable key : keys) {
       int index = (int) key.get();
       assertEquals("Values for key " + key, 1, collector.getValue(key).size());

@@ -17,13 +17,15 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
+import java.io.Serializable;
+
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 
 /** Group GramKeys based on their Gram, ignoring the secondary sort key, so that all keys with the same Gram are sent
  *  to the same call of the reduce method, sorted in natural order (for GramKeys).
  */
-public class GramKeyGroupComparator extends WritableComparator {
+public class GramKeyGroupComparator extends WritableComparator implements Serializable {
 
   protected GramKeyGroupComparator() {
     super(GramKey.class, true);
@@ -35,7 +37,8 @@ public class GramKeyGroupComparator extends WritableComparator {
     GramKey gka = (GramKey) a;
     GramKey gkb = (GramKey) b;
 
-    return WritableComparator.compareBytes(gka.getBytes(), 0, gka.getPrimaryLength(), gkb.getBytes(), 0, gkb.getPrimaryLength());
+    return WritableComparator.compareBytes(gka.getBytes(), 0, gka.getPrimaryLength(),
+                                           gkb.getBytes(), 0, gkb.getPrimaryLength());
   }
 
 }

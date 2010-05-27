@@ -48,7 +48,7 @@ public interface Parametered extends JobConfigurable {
   void createParameters(String prefix, JobConf jobConf);
   
   /** "multiple inheritance" */
-  class ParameteredGeneralizations {
+  final class ParameteredGeneralizations {
     private ParameteredGeneralizations() { }
     
     public static void configureParameters(Parametered parametered, JobConf jobConf) {
@@ -99,7 +99,7 @@ public interface Parametered extends JobConfigurable {
       return new Conf(parametered).toString();
     }
     
-    private static class Help {
+    private static final class Help {
       private final StringBuilder sb;
       
       @Override
@@ -158,7 +158,7 @@ public interface Parametered extends JobConfigurable {
       }
     }
     
-    private static class Conf {
+    private static final class Conf {
       private final StringBuilder sb;
       
       @Override

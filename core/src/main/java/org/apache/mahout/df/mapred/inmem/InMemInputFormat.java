@@ -240,7 +240,8 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
 
       return firstId == split.firstId &&
           nbTrees == split.nbTrees && 
-          ((seed == null && split.seed == null) || seed.equals(split.seed));
+          ((seed == null && split.seed == null) ||
+           (seed != null && seed.equals(split.seed)));
 
     }
     

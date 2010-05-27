@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
@@ -327,7 +326,7 @@ public class FileDataModel extends AbstractDataModel {
   
   /**
    * <p>
-   * Reads one line from the input file and adds the data to a {@link Map} data structure which maps user IDs
+   * Reads one line from the input file and adds the data to a {@link FastByIDMap} data structure which maps user IDs
    * to preferences. This assumes that each line of the input file corresponds to one preference. After
    * reading a line and determining which user and item the preference pertains to, the method should look to
    * see if the data contains a mapping for the user ID already, and if not, add an empty {@link List} of

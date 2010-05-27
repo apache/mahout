@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -70,7 +70,7 @@ public final class TransposeToByUser {
       while (lineIterator.hasNext()) {
         line = lineIterator.next();
         int firstComma = line.indexOf(',');
-        String userIDString= line.substring(0, firstComma);
+        String userIDString = line.substring(0, firstComma);
         int secondComma = line.indexOf(',', firstComma + 1);
         String ratingString = line.substring(firstComma, secondComma); // keep comma
         List<String> cachedLines = byUserEntryCache.get(userIDString);
@@ -86,7 +86,8 @@ public final class TransposeToByUser {
     
   }
   
-  private static void maybeFlushCache(File byUserDirectory, Map<String, List<String>> byUserEntryCache) throws IOException {
+  private static void maybeFlushCache(File byUserDirectory, Map<String, List<String>> byUserEntryCache)
+      throws IOException {
     if (byUserEntryCache.size() >= 100000) {
       log.info("Flushing cache");
       for (Map.Entry<String, List<String>> entry : byUserEntryCache.entrySet()) {

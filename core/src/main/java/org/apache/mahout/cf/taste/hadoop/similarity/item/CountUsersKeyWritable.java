@@ -22,7 +22,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Partitioner;
@@ -62,7 +61,7 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
 
   @Override
   public int compareTo(CountUsersKeyWritable other) {
-    return (userID == other.userID ? 0 : userID < other.userID ? -1 : 1);
+    return userID == other.userID ? 0 : userID < other.userID ? -1 : 1;
   }
 
   @Override

@@ -34,7 +34,7 @@ public class CountUsersMapper extends
   private static final Pattern DELIMITER = Pattern.compile("[\t,]");
 
   @Override
-  public void map(LongWritable key, Text value, Context context)
+  protected void map(LongWritable key, Text value, Context context)
       throws IOException, InterruptedException {
 
     String[] tokens = DELIMITER.split(value.toString());

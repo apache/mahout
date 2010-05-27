@@ -17,10 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import org.apache.mahout.cf.taste.impl.similarity.EuclideanDistanceSimilarity;
-
 /**
- * distributed version of {@link EuclideanDistanceSimilarity}
+ * Distributed version of {@link org.apache.mahout.cf.taste.impl.similarity.EuclideanDistanceSimilarity}
  */
 public class DistributedEuclideanDistanceSimilarity extends AbstractDistributedItemSimilarity {
 
@@ -30,8 +28,8 @@ public class DistributedEuclideanDistanceSimilarity extends AbstractDistributedI
                                    double weightOfItemVectorY,
                                    int numberOfUsers) {
 
-    double n=0;
-    double sumXYdiff2 = 0;
+    double n = 0.0;
+    double sumXYdiff2 = 0.0;
 
     for (CoRating coRating : coratings) {
       double diff = coRating.getPrefValueX() - coRating.getPrefValueY();

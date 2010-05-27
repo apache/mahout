@@ -25,7 +25,6 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;

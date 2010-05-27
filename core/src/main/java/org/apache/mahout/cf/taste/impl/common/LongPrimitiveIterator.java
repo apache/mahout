@@ -17,12 +17,10 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
-import java.util.Iterator;
-
 /**
- * Adds notion of iterating over <code>long</code> primitives in the style of an {@link Iterator} -- as
+ * Adds notion of iterating over <code>long</code> primitives in the style of an {@link java.util.Iterator} -- as
  * opposed to iterating over {@link Long}. Implementations of this interface however also implement
- * {@link Iterator} and {@link Iterable} over {@link Long} for convenience.
+ * {@link java.util.Iterator} and {@link Iterable} over {@link Long} for convenience.
  */
 public interface LongPrimitiveIterator extends SkippingIterator<Long> {
   

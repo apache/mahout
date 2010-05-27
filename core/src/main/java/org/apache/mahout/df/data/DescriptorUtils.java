@@ -27,7 +27,7 @@ import org.apache.mahout.df.data.Dataset.Attribute;
 /**
  * Contains various methods that deal with descriptor strings
  */
-public class DescriptorUtils {
+public final class DescriptorUtils {
   private DescriptorUtils() { }
   
   /**

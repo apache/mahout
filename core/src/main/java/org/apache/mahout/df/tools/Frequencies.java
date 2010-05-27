@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Compute the frequency distribution of the "class label"
  */
-public class Frequencies extends Configured implements Tool {
+public final class Frequencies extends Configured implements Tool {
   
   private static final Logger log = LoggerFactory.getLogger(Frequencies.class);
   

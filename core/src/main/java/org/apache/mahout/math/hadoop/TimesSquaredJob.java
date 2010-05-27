@@ -45,7 +45,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
-public class TimesSquaredJob {
+public final class TimesSquaredJob {
 
   public static final String INPUT_VECTOR = "DistributedMatrix.times.inputVector";
   public static final String IS_SPARSE_OUTPUT = "DistributedMatrix.times.outputVector.sparse";

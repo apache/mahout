@@ -56,7 +56,7 @@ public class StableFixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
     return new DelegateIterator(buf);
   }
   
-  private static class Entry<T> implements Comparable<Entry<T>> {
+  private static final class Entry<T> implements Comparable<Entry<T>> {
     
     private final int originalIndex;
     private T value;
@@ -88,7 +88,7 @@ public class StableFixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
     }
   }
   
-  private static class DelegateIterator<T> implements Iterator<T> {
+  private static final class DelegateIterator<T> implements Iterator<T> {
     
     private final Iterator<Entry<T>> iterator;
     

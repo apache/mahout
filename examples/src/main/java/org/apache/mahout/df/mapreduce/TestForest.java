@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -134,7 +134,7 @@ public class TestForest extends Configured implements Tool {
         outputPath = new Path(outputName);
       }
     } catch (OptionException e) {
-      System.err.println("Exception : " + e);
+      System.out.println("Exception : " + e);
       CommandLineUtil.printHelp(group);
       return -1;
     }

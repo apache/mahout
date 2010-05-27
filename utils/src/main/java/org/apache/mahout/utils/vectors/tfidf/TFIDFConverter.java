@@ -32,7 +32,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -49,7 +48,8 @@ import org.apache.mahout.utils.vectors.text.term.TermDocumentCountReducer;
 
 /**
  * This class converts a set of input vectors with term frequencies to TfIdf vectors. The Sequence file input
- * should have a {@link WritableComparable} key containing and a {@link VectorWritable} value containing the
+ * should have a {@link org.apache.hadoop.io.WritableComparable} key containing and a
+ * {@link VectorWritable} value containing the
  * term frequency vector. This is conversion class uses multiple map/reduces to convert the vectors to TfIdf
  * format
  * 

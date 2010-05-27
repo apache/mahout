@@ -42,7 +42,7 @@ public final class UserVectorSplitterMapper extends
   private FastIDSet usersToRecommendFor;
 
   @Override
-  public void setup(Context context) {
+  protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
     try {
       FileSystem fs = FileSystem.get(jobConf);
@@ -63,9 +63,9 @@ public final class UserVectorSplitterMapper extends
   }
 
   @Override
-  public void map(VarLongWritable key,
-                  VectorWritable value,
-                  Context context) throws IOException, InterruptedException {
+  protected void map(VarLongWritable key,
+                     VectorWritable value,
+                     Context context) throws IOException, InterruptedException {
     long userID = key.get();
     if (usersToRecommendFor != null && !usersToRecommendFor.contains(userID)) {
       return;

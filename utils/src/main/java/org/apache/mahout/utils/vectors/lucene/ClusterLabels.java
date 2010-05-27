@@ -29,7 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -42,7 +41,6 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.Path;
 import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.SetBasedFieldSelector;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
@@ -116,7 +114,7 @@ public class ClusterLabels {
 
   private String idField;
 
-  private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints = null;
+  private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
 
   private String output;
 
@@ -124,8 +122,12 @@ public class ClusterLabels {
 
   private int maxLabels = DEFAULT_MAX_LABELS;
 
-  public ClusterLabels(Path seqFileDir, Path pointsDir, String indexDir, String contentField, int minNumIds, int maxLabels)
-      throws IOException {
+  public ClusterLabels(Path seqFileDir,
+                       Path pointsDir,
+                       String indexDir,
+                       String contentField,
+                       int minNumIds,
+                       int maxLabels) throws IOException {
     this.seqFileDir = seqFileDir;
     this.pointsDir = pointsDir;
     this.indexDir = indexDir;
@@ -149,7 +151,7 @@ public class ClusterLabels {
       writer = new OutputStreamWriter(System.out);
     }
 
-    for (Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
+    for (Map.Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
       List<WeightedVectorWritable> wvws = integerListEntry.getValue();
       List<TermInfoClusterInOut> termInfos = getClusterLabels(integerListEntry.getKey(), wvws);
       if (termInfos != null) {
@@ -173,14 +175,9 @@ public class ClusterLabels {
 
   /**
    * Get the list of labels, sorted by best score.
-   * 
-   * @param integer
-   * @param wvws
-   * @return
-   * @throws CorruptIndexException
-   * @throws IOException
    */
-  protected List<TermInfoClusterInOut> getClusterLabels(Integer integer, List<WeightedVectorWritable> wvws) throws IOException {
+  protected List<TermInfoClusterInOut> getClusterLabels(Integer integer, List<WeightedVectorWritable> wvws)
+      throws IOException {
 
     if (wvws.size() < minNumIds) {
       log.info("Skipping small cluster {} with size: {}", integer, wvws.size());
@@ -266,12 +263,14 @@ public class ClusterLabels {
     return clusteredTermInfo.subList(0, Math.min(clusteredTermInfo.size(), maxLabels));
   }
 
-  private static OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField) throws IOException {
+  private static OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField)
+      throws IOException {
     int numDocs = reader.numDocs();
 
     OpenBitSet bitset = new OpenBitSet(numDocs);
 
-    FieldSelector idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
+    FieldSelector idFieldSelector =
+        new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
 
     for (int i = 0; i < numDocs; i++) {
       String id = null;
@@ -319,16 +318,16 @@ public class ClusterLabels {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option indexOpt = obuilder.withLongName("dir").withRequired(true).withArgument(
-        abuilder.withName("dir").withMinimum(1).withMaximum(1).create()).withDescription("The Lucene index directory")
-        .withShortName("d").create();
+        abuilder.withName("dir").withMinimum(1).withMaximum(1).create())
+        .withDescription("The Lucene index directory").withShortName("d").create();
 
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
         abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
         "The output file. If not specified, the result is printed on console.").withShortName("o").create();
 
     Option fieldOpt = obuilder.withLongName("field").withRequired(true).withArgument(
-        abuilder.withName("field").withMinimum(1).withMaximum(1).create()).withDescription("The content field in the index")
-        .withShortName("f").create();
+        abuilder.withName("field").withMinimum(1).withMaximum(1).create())
+        .withDescription("The content field in the index").withShortName("f").create();
 
     Option idFieldOpt = obuilder.withLongName("idField").withRequired(false).withArgument(
         abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -341,7 +340,8 @@ public class ClusterLabels {
 
     Option pointsOpt = obuilder.withLongName("pointsDir").withRequired(true).withArgument(
         abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The directory containing points sequence files mapping input vectors to their cluster.  ").withShortName("p").create();
+        "The directory containing points sequence files mapping input vectors to their cluster.  ")
+        .withShortName("p").create();
     Option minClusterSizeOpt = obuilder.withLongName("minClusterSize").withRequired(false).withArgument(
         abuilder.withName("minClusterSize").withMinimum(1).withMaximum(1).create()).withDescription(
         "The minimum number of points required in a cluster to print the labels for").withShortName("m").create();
@@ -350,9 +350,9 @@ public class ClusterLabels {
         "The maximum number of labels to print per cluster").withShortName("x").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(indexOpt).withOption(idFieldOpt).withOption(outputOpt).withOption(
-        fieldOpt).withOption(seqOpt).withOption(pointsOpt).withOption(helpOpt).withOption(maxLabelsOpt).withOption(
-        minClusterSizeOpt).create();
+    Group group = gbuilder.withName("Options").withOption(indexOpt).withOption(idFieldOpt).withOption(outputOpt)
+        .withOption(fieldOpt).withOption(seqOpt).withOption(pointsOpt).withOption(helpOpt)
+        .withOption(maxLabelsOpt).withOption(minClusterSizeOpt).create();
 
     try {
       Parser parser = new Parser();

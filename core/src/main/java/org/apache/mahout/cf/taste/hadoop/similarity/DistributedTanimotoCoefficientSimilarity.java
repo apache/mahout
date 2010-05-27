@@ -17,38 +17,33 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import org.apache.mahout.cf.taste.impl.similarity.TanimotoCoefficientSimilarity;
-
 /**
- * Distributed version of {@link TanimotoCoefficientSimilarity}
+ * Distributed version of {@link org.apache.mahout.cf.taste.impl.similarity.TanimotoCoefficientSimilarity}
  */
 public class DistributedTanimotoCoefficientSimilarity extends AbstractDistributedItemSimilarity {
 
-	@Override
-	protected double doComputeResult(Iterable<CoRating> coratings,
-			                             double weightOfItemVectorX,
+  @Override
+  protected double doComputeResult(Iterable<CoRating> coratings,
+  		                             double weightOfItemVectorX,
                                    double weightOfItemVectorY,
-			                             int numberOfUsers) {
-
-	  int preferringXAndY = 0;
-	  for (CoRating coRating : coratings) {
-	    preferringXAndY++;
-	  }
-
-	  if (preferringXAndY == 0) {
-	    return Double.NaN;
-	  }
-
-	  return (preferringXAndY / (weightOfItemVectorX + weightOfItemVectorY - preferringXAndY));
+  		                             int numberOfUsers) {
+    int preferringXAndY = 0;
+    for (CoRating coRating : coratings) {
+      preferringXAndY++;
+    }
+    if (preferringXAndY == 0) {
+      return Double.NaN;
+    }
+    return (preferringXAndY / (weightOfItemVectorX + weightOfItemVectorY - preferringXAndY));
 	}
 
 	@Override
 	public double weightOfItemVector(Iterable<Float> prefValues) {
-		int nonZeroEntries = 0;
-		for (Float prefValue : prefValues) {
-		  nonZeroEntries++;
-		}
-		return nonZeroEntries;
-	}
+    int nonZeroEntries = 0;
+    for (Float prefValue : prefValues) {
+      nonZeroEntries++;
+    }
+    return nonZeroEntries;
+  }
 
 }

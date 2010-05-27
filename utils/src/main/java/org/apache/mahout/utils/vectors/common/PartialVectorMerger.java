@@ -21,11 +21,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -37,7 +34,8 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.math.VectorWritable;
 
 /**
- * This class groups a set of input vectors. The Sequence file input should have a {@link WritableComparable}
+ * This class groups a set of input vectors. The Sequence file input should have a
+ * {@link org.apache.hadoop.io.WritableComparable}
  * key containing document id and a {@link VectorWritable} value containing the term frequency vector. This
  * class also does normalization of the vector.
  * 
@@ -64,7 +62,7 @@ public final class PartialVectorMerger {
    * {@link org.apache.mahout.math.RandomAccessSparseVector}
    * 
    * @param partialVectorPaths
-   *          input directory of the vectors in {@link SequenceFile} format
+   *          input directory of the vectors in {@link org.apache.hadoop.io.SequenceFile} format
    * @param output
    *          output directory were the partial vectors have to be created
    * @param normPower

@@ -28,9 +28,9 @@ public final class PreferredItemsPerUserReducer extends
     Reducer<VarLongWritable,ItemPrefWithItemVectorWeightWritable,VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
 
   @Override
-  public void reduce(VarLongWritable user,
-                     Iterable<ItemPrefWithItemVectorWeightWritable> itemPrefs,
-                     Context context)
+  protected void reduce(VarLongWritable user,
+                        Iterable<ItemPrefWithItemVectorWeightWritable> itemPrefs,
+                        Context context)
       throws IOException, InterruptedException {
 
     Set<ItemPrefWithItemVectorWeightWritable> itemPrefsWithItemVectorWeight

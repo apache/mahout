@@ -178,22 +178,22 @@ public class VectorBenchmarks implements Summarizable {
     int[] indexes = randomVectorIndices.get(randomIndex);
     double[] values = randomVectorValues.get(randomIndex);
     List<Integer> randomOrder = new ArrayList<Integer>();
-    for(int i=0; i<indexes.length; i++) {
+    for (int i = 0; i < indexes.length; i++) {
       randomOrder.add(i);
     }
     Collections.shuffle(randomOrder);
     int[] permutation = new int[randomOrder.size()];
-    for(int i=0; i<randomOrder.size(); i++) {
+    for (int i = 0; i < randomOrder.size(); i++) {
       permutation[i] = randomOrder.get(i);
     }
 
     TimingStatistics.Call call = stats.newCall();
-    if(useSetQuick) {
-      for(int i : permutation) {
+    if (useSetQuick) {
+      for (int i : permutation) {
         v.setQuick(indexes[i], values[i]);
       }
     } else {
-      for(int i : permutation) {
+      for (int i : permutation) {
         v.set(indexes[i], values[i]);
       }
     }

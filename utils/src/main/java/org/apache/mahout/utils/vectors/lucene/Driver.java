@@ -54,7 +54,7 @@ import org.apache.mahout.utils.vectors.io.VectorWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Driver {
+public final class Driver {
   private static final Logger log = LoggerFactory.getLogger(Driver.class);
   
   private Driver() { }

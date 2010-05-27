@@ -83,7 +83,7 @@ import org.slf4j.LoggerFactory;
  * Then org.apache.mahout.utils.vectors.VectorDumper.main() will be called with arguments:
  *   <pre>{"--output", "/tmp/vectorOut", "-s", "/my/otherVector/sequenceFile"}</pre>
  */
-public class MahoutDriver {
+public final class MahoutDriver {
 
   private static final Logger log = LoggerFactory.getLogger(MahoutDriver.class);
 

@@ -41,7 +41,6 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
-import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.JDBCDataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -51,12 +50,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * An abstract superclass for JDBC-related {@link DataModel} implementations, providing most of the common
+ * An abstract superclass for {@link JDBCDataModel} implementations, providing most of the common
  * functionality that any such implementation would need.
  * </p>
  * 
  * <p>
- * Performance will be a concern with any JDBC-based {@link DataModel}. There are going to be lots of
+ * Performance will be a concern with any {@link JDBCDataModel}. There are going to be lots of
  * simultaneous reads and some writes to one table. Make sure the table is set up optimally -- for example,
  * you'll want to establish indexes.
  * </p>
@@ -815,7 +814,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     
   }
   
-  private class ItemPrefCountRetriever implements Retriever<Long,Integer> {
+  private final class ItemPrefCountRetriever implements Retriever<Long,Integer> {
     private final String getNumPreferenceForItemSQL;
     
     private ItemPrefCountRetriever(String getNumPreferenceForItemSQL) {

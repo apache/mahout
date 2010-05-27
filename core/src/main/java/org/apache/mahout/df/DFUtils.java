@@ -32,7 +32,7 @@ import org.apache.mahout.ga.watchmaker.OutputUtils;
 /**
  * Utility class that contains various helper methods
  */
-public class DFUtils {
+public final class DFUtils {
   private DFUtils() { }
   
   /**

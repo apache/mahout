@@ -34,10 +34,9 @@ public final class ToItemVectorReducer extends
     Reducer<VarLongWritable,EntityPrefWritable,VarLongWritable,EntityPrefWritableArrayWritable> {
 
   @Override
-  public void reduce(VarLongWritable item,
-                     Iterable<EntityPrefWritable> userPrefs,
-                     Context context)
-      throws IOException, InterruptedException {
+  protected void reduce(VarLongWritable item,
+                        Iterable<EntityPrefWritable> userPrefs,
+                        Context context) throws IOException, InterruptedException {
 
     Set<EntityPrefWritable> collectedUserPrefs = new HashSet<EntityPrefWritable>();
 

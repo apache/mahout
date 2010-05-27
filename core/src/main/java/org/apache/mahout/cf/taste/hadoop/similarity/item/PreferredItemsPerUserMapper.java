@@ -39,16 +39,16 @@ public final class PreferredItemsPerUserMapper extends
   private DistributedItemSimilarity distributedSimilarity;
 
   @Override
-  public void setup(Context context) {
+  protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
     distributedSimilarity =
       ItemSimilarityJob.instantiateSimilarity(jobConf.get(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME));
   }
 
   @Override
-  public void map(VarLongWritable item,
-                  EntityPrefWritableArrayWritable userPrefsArray,
-                  Context context) throws IOException, InterruptedException {
+  protected void map(VarLongWritable item,
+                     EntityPrefWritableArrayWritable userPrefsArray,
+                     Context context) throws IOException, InterruptedException {
 
     EntityPrefWritable[] userPrefs = userPrefsArray.getPrefs();
 

@@ -19,11 +19,11 @@ package org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.jdbc.AbstractJDBCDataModel;
-import org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel;
 
 /**
  * <p>
- * MySQL-specific implementation. Should be used in conjunction with a {@link MySQLJDBCDataModel}. This
+ * MySQL-specific implementation. Should be used in conjunction with a
+ * {@link org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel}. This
  * implementation stores item-item diffs in a MySQL database and encapsulates some other slope-one-specific
  * operations that are needed on the preference data in the database. It assumes the database has a schema
  * like:
@@ -170,7 +170,7 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
   }
   
   /**
-   * @see MySQLJDBCDataModel#getFetchSize()
+   * @see org.apache.mahout.cf.taste.impl.model.jdbc.MySQLJDBCDataModel#getFetchSize()
    */
   @Override
   protected int getFetchSize() {

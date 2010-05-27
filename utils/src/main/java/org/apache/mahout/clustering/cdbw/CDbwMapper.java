@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,8 +51,10 @@ public class CDbwMapper extends MapReduceBase implements
   private OutputCollector<IntWritable, WeightedVectorWritable> output = null;
 
   @Override
-  public void map(IntWritable clusterId, WeightedVectorWritable point, OutputCollector<IntWritable, WeightedVectorWritable> output,
-      Reporter reporter) throws IOException {
+  public void map(IntWritable clusterId,
+                  WeightedVectorWritable point,
+                  OutputCollector<IntWritable, WeightedVectorWritable> output,
+                  Reporter reporter) throws IOException {
 
     this.output = output;
 
@@ -66,7 +67,8 @@ public class CDbwMapper extends MapReduceBase implements
       totalDistance += measure.distance(refPoint.get(), point.getVector().get());
     }
     if (currentMDP == null || currentMDP.getWeight() < totalDistance) {
-      mostDistantPoints.put(key, new WeightedVectorWritable(totalDistance, new VectorWritable(point.getVector().get().clone())));
+      mostDistantPoints.put(key, new WeightedVectorWritable(totalDistance,
+                                                            new VectorWritable(point.getVector().get().clone())));
     }
   }
 
@@ -75,8 +77,8 @@ public class CDbwMapper extends MapReduceBase implements
     this.measure = measure;
   }
 
-  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(JobConf job) throws SecurityException,
-      IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(JobConf job)
+      throws SecurityException, IllegalArgumentException {
     String statePath = job.get(CDbwDriver.STATE_IN_KEY);
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
     try {
@@ -121,10 +123,6 @@ public class CDbwMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
       throw new IllegalStateException(e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
-      throw new IllegalStateException(e);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (InstantiationException e) {
@@ -134,9 +132,6 @@ public class CDbwMapper extends MapReduceBase implements
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapred.MapReduceBase#close()
-   */
   @Override
   public void close() throws IOException {
     for (Integer clusterId : mostDistantPoints.keySet()) {

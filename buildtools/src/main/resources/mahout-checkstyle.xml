@@ -47,7 +47,7 @@
 		<!-- See http://checkstyle.sf.net/config_javadoc.html -->
 		<!-- <module name="PackageHtml"/> -->
 		<!--module name="JavadocMethod"/-->
-		<module name="JavadocType"/>
+		<!--module name="JavadocType"/-->
 		<!--module name="JavadocVariable"/-->
 		<!--module name="JavadocStyle"/-->
 
@@ -155,10 +155,12 @@
 		<module name="EmptyStatement" />
 		<module name="EqualsHashCode" />
 		<!--<module name="FinalLocalVariable"/>-->
+		<!--
 		<module name="HiddenField">
 			<property name="ignoreConstructorParameter" value="true" />
 			<property name="ignoreSetter" value="true" />
 		</module>
+		-->
 		<module name="IllegalInstantiation" />
 		<!--<module name="IllegalToken"/>-->
 		<!--<module name="IllegalTokenText"/>-->

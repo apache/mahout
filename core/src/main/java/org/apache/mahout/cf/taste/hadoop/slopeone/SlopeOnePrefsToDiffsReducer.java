@@ -32,9 +32,9 @@ public final class SlopeOnePrefsToDiffsReducer extends
     Reducer<VarLongWritable,EntityPrefWritable,EntityEntityWritable,FloatWritable> {
   
   @Override
-  public void reduce(VarLongWritable key,
-                     Iterable<EntityPrefWritable> values,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarLongWritable key,
+                        Iterable<EntityPrefWritable> values,
+                        Context context) throws IOException, InterruptedException {
     List<EntityPrefWritable> prefs = new ArrayList<EntityPrefWritable>();
     for (EntityPrefWritable writable : values) {
       prefs.add(new EntityPrefWritable(writable));

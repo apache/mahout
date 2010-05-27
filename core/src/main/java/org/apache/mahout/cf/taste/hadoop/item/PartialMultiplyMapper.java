@@ -31,9 +31,9 @@ public final class PartialMultiplyMapper extends
     Mapper<VarIntWritable,VectorAndPrefsWritable,VarLongWritable,VectorWritable> {
 
   @Override
-  public void map(VarIntWritable key,
-                  VectorAndPrefsWritable vectorAndPrefsWritable,
-                  Context context) throws IOException, InterruptedException {
+  protected void map(VarIntWritable key,
+                     VectorAndPrefsWritable vectorAndPrefsWritable,
+                     Context context) throws IOException, InterruptedException {
 
     int itemIndex = key.get();
 

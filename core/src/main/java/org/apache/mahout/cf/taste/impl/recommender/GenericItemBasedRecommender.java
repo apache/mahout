@@ -270,7 +270,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     }
   }
   
-  private static class MultiMostSimilarEstimator implements TopItems.Estimator<Long> {
+  private static final class MultiMostSimilarEstimator implements TopItems.Estimator<Long> {
     
     private final long[] toItemIDs;
     private final ItemSimilarity similarity;
@@ -300,7 +300,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     }
   }
   
-  private class RecommendedBecauseEstimator implements TopItems.Estimator<Long> {
+  private final class RecommendedBecauseEstimator implements TopItems.Estimator<Long> {
     
     private final long userID;
     private final long recommendedItemID;

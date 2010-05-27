@@ -53,7 +53,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CDbwDriver {
+public final class CDbwDriver {
 
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.dirichlet.stateIn";
 
@@ -148,7 +148,7 @@ public class CDbwDriver {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    System.out.println("CDbw = " + evaluator.CDbw());
+    //System.out.println("CDbw = " + evaluator.CDbw());
   }
 
   private static void writeInitialState(Path output, Path clustersIn)
@@ -167,7 +167,7 @@ public class CDbwDriver {
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
           if (!(cluster instanceof DirichletCluster) || ((DirichletCluster) cluster).getTotalCount() > 0) {
-            System.out.println("C-" + cluster.getId() + ": " + ClusterBase.formatVector(cluster.getCenter(), null));
+            //System.out.println("C-" + cluster.getId() + ": " + ClusterBase.formatVector(cluster.getCenter(), null));
             writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
           }
         }

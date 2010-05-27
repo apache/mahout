@@ -41,9 +41,9 @@ public final class UserVectorToCooccurrenceMapper extends
   private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
 
   @Override
-  public void map(VarLongWritable userID,
-                  VectorWritable userVectorWritable,
-                  Context context) throws IOException, InterruptedException {
+  protected void map(VarLongWritable userID,
+                     VectorWritable userVectorWritable,
+                     Context context) throws IOException, InterruptedException {
 
     Vector userVector = userVectorWritable.get();
     countSeen(userVector);

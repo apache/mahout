@@ -39,8 +39,9 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
   private LDAInference infer;
   
   @Override
-  public void map(WritableComparable<?> key, VectorWritable wordCountsWritable, Context context) throws IOException,
-                                                                                                InterruptedException {
+  protected void map(WritableComparable<?> key,
+                     VectorWritable wordCountsWritable,
+                     Context context) throws IOException, InterruptedException {
     Vector wordCounts = wordCountsWritable.get();
     LDAInference.InferredDocument doc = null;
     try {

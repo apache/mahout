@@ -39,8 +39,8 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
    */
   @Override
   public double distance(Vector a, Vector b) {
-    double ab = 0;
-    double denominator = 0;
+    double ab;
+    double denominator;
     if (getWeights() != null) {
       ab = dot(b, a); // b is SequentialAccess
       denominator = dot(a, a) + dot(b, b) - ab;
@@ -54,9 +54,9 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     }
     if (denominator > 0) {
       // denom == 0 only when dot(a,a) == dot(b,b) == dot(a,b) == 0
-      return 1 - ab / denominator;
+      return 1.0 - ab / denominator;
     } else {
-      return 0;
+      return 0.0;
     }
   }
   
@@ -65,7 +65,7 @@ public class TanimotoDistanceMeasure extends WeightedDistanceMeasure {
     Iterator<Vector.Element> it = a.iterateNonZero();
     Vector.Element el;
     Vector weights = getWeights();
-    double dot = 0;
+    double dot = 0.0;
     while (it.hasNext() && (el = it.next()) != null) {
       double elementValue = el.get();
       double value = elementValue * (sameVector ? elementValue : b.getQuick(el.index()));

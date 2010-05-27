@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +31,18 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwReducer extends MapReduceBase implements Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
+public class CDbwReducer extends MapReduceBase
+    implements Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
 
   private Map<Integer, List<VectorWritable>> referencePoints;
 
   private OutputCollector<IntWritable, VectorWritable> output;
 
   @Override
-  public void reduce(IntWritable key, Iterator<WeightedVectorWritable> values, OutputCollector<IntWritable, VectorWritable> output,
-      Reporter reporter) throws IOException {
+  public void reduce(IntWritable key,
+                     Iterator<WeightedVectorWritable> values,
+                     OutputCollector<IntWritable, VectorWritable> output,
+                     Reporter reporter) throws IOException {
     this.output = output;
     // find the most distant point
     WeightedVectorWritable mdp = null;
@@ -80,10 +82,6 @@ public class CDbwReducer extends MapReduceBase implements Reducer<IntWritable, W
     } catch (SecurityException e) {
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
       throw new IllegalStateException(e);
     }
   }

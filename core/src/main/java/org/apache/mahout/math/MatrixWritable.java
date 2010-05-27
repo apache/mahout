@@ -64,7 +64,6 @@ public class MatrixWritable implements Writable {
     }
     int rowSize = in.readInt();
     if (rowSize > 0) {
-      rowLabelBindings = new HashMap<String, Integer>();
       for (int i = 0; i < rowSize; i++) {
         rowLabelBindings.put(in.readUTF(), in.readInt());
       }

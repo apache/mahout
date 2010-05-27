@@ -16,13 +16,15 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 public class SingularValueDecomposition implements java.io.Serializable {
 
   /** Arrays for internal storage of U and V. */
-  private final double[][] U, V;
+  private final double[][] U;
+  private final double[][] V;
 
   /** Array for internal storage of singular values. */
   private final double[] s;
 
   /** Row and column dimensions. */
-  private final int m, n;
+  private final int m;
+  private final int n;
 
   /**
    * Constructs and returns a new singular value decomposition object; The decomposed matrices can be retrieved via
@@ -538,48 +540,42 @@ public class SingularValueDecomposition implements java.io.Serializable {
     String unknown = "Illegal operation or error: ";
     try {
       buf.append(String.valueOf(this.cond()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\nrank = ");
     try {
       buf.append(String.valueOf(this.rank()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\nnorm2 = ");
     try {
       buf.append(String.valueOf(this.norm2()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nU = ");
     try {
       buf.append(String.valueOf(this.getU()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nS = ");
     try {
       buf.append(String.valueOf(this.getS()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nV = ");
     try {
       buf.append(String.valueOf(this.getV()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 

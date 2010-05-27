@@ -28,9 +28,9 @@ public final class AggregateCombiner extends
     Reducer<VarLongWritable,VectorWritable,VarLongWritable,VectorWritable> {
 
   @Override
-  public void reduce(VarLongWritable key,
-                     Iterable<VectorWritable> values,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarLongWritable key,
+                        Iterable<VectorWritable> values,
+                        Context context) throws IOException, InterruptedException {
 
     Vector partial = null;
     for (VectorWritable vectorWritable : values) {

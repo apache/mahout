@@ -36,15 +36,15 @@ public final class ItemIDIndexMapper extends
   private boolean transpose;
 
   @Override
-  public void setup(Context context) {
+  protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
     transpose = jobConf.getBoolean(ToEntityPrefsMapper.TRANSPOSE_USER_ITEM, false);
   }
   
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  Context context) throws IOException, InterruptedException {
+  protected void map(LongWritable key,
+                     Text value,
+                     Context context) throws IOException, InterruptedException {
     String[] tokens = ItemIDIndexMapper.COMMA.split(value.toString());
     long itemID = Long.parseLong(tokens[transpose ? 0 : 1]);
     int index = idToIndex(itemID);

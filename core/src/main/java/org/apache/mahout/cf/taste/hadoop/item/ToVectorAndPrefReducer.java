@@ -29,9 +29,9 @@ public final class ToVectorAndPrefReducer extends
     Reducer<VarIntWritable,VectorOrPrefWritable,VarIntWritable,VectorAndPrefsWritable> {
 
   @Override
-  public void reduce(VarIntWritable key,
-                     Iterable<VectorOrPrefWritable> values,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarIntWritable key,
+                        Iterable<VectorOrPrefWritable> values,
+                        Context context) throws IOException, InterruptedException {
 
     List<Long> userIDs = new ArrayList<Long>();
     List<Float> prefValues = new ArrayList<Float>();

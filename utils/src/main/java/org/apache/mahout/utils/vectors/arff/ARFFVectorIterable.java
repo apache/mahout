@@ -148,7 +148,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
     return new ARFFIterator();
   }
   
-  private class ARFFIterator implements Iterator<Vector> {
+  private final class ARFFIterator implements Iterator<Vector> {
     
     private String line;
     

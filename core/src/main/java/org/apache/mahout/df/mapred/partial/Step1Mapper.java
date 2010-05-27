@@ -146,7 +146,8 @@ public class Step1Mapper extends MapredMapper implements Mapper<LongWritable,Tex
   }
   
   @Override
-  public void map(LongWritable key, Text value, OutputCollector<TreeID,MapredOutput> output, Reporter reporter) throws IOException {
+  public void map(LongWritable key, Text value, OutputCollector<TreeID,MapredOutput> output, Reporter reporter)
+      throws IOException {
     if (this.output == null) {
       this.output = output;
     }

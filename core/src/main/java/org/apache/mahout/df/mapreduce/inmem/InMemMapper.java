@@ -81,12 +81,12 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
   }
   
   @Override
-  protected void map(IntWritable key, NullWritable value, Context context) throws IOException,
-                                                                          InterruptedException {
+  protected void map(IntWritable key, NullWritable value, Context context)
+      throws IOException, InterruptedException {
     map(key, context);
   }
   
-  public void map(IntWritable key, Context context) throws IOException, InterruptedException {
+  protected void map(IntWritable key, Context context) throws IOException, InterruptedException {
     
     SingleTreePredictions callback = null;
     int[] predictions = null;

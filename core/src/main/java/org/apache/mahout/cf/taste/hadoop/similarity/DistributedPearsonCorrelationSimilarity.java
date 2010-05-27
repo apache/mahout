@@ -17,10 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
-
 /**
- * Distributed version of {@link PearsonCorrelationSimilarity}
+ * Distributed version of {@link org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity}
  */
 public class DistributedPearsonCorrelationSimilarity extends AbstractDistributedItemSimilarity {
 

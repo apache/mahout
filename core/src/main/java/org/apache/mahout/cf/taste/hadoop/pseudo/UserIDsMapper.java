@@ -32,9 +32,9 @@ public final class UserIDsMapper extends
     Mapper<LongWritable,Text, VarLongWritable,NullWritable> {
   
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  Context context) throws IOException, InterruptedException {
+  protected void map(LongWritable key,
+                     Text value,
+                     Context context) throws IOException, InterruptedException {
     String line = value.toString();
     int comma = line.indexOf(',');
     long userID = comma >= 0 ? Long.parseLong(line.substring(0, comma)) : Long.parseLong(line);

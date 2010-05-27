@@ -40,15 +40,14 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * A {@link Recommender} which uses Single Value Decomposition to find the main features of the data set.
- * Thanks to Simon Funk for the hints in the implementation.
+ * A {@link org.apache.mahout.cf.taste.recommender.Recommender} which uses Single Value Decomposition
+ * to find the main features of the data set. Thanks to Simon Funk for the hints in the implementation.
  */
 public final class SVDRecommender extends AbstractRecommender {
   

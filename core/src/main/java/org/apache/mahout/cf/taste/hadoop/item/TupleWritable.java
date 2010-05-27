@@ -26,24 +26,7 @@ import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 
 public final class TupleWritable extends ArrayWritable {
-  
-  public static class Field extends GenericWritable {
-    
-    private static final Class<?>[] CLASSES = {VarIntWritable.class, VarLongWritable.class, DoubleWritable.class,
-                                               Text.class};
-    
-    @Override
-    protected Class<? extends Writable>[] getTypes() {
-      return (Class<? extends Writable>[]) CLASSES;
-    }
-    
-    public Field() { }
-    
-    public Field(Writable writable) {
-      super.set(writable);
-    }
-  }
-  
+
   public TupleWritable() {
     super(Field.class);
   }
@@ -134,5 +117,24 @@ public final class TupleWritable extends ArrayWritable {
       throw new IllegalArgumentException("Not an double: " + wrappedClass);
     }
   }
+
+
+  public static class Field extends GenericWritable {
+
+    private static final Class<?>[] CLASSES = {VarIntWritable.class, VarLongWritable.class, DoubleWritable.class,
+                                               Text.class};
+
+    @Override
+    protected Class<? extends Writable>[] getTypes() {
+      return (Class<? extends Writable>[]) CLASSES;
+    }
+
+    public Field() { }
+
+    public Field(Writable writable) {
+      super.set(writable);
+    }
+  }
+
   
 }

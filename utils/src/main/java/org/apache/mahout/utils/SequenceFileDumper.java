@@ -41,7 +41,7 @@ import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SequenceFileDumper {
+public final class SequenceFileDumper {
   
   private static final Logger log = LoggerFactory.getLogger(SequenceFileDumper.class);
   

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import java.util.Iterator;
-
 /**
  * distributed cosine similarity that assumes that all unknown preferences
  * are zeros and that does not center data

@@ -21,11 +21,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Varint;
 
-/** A {@link Writable} encapsulating an item ID and a count . */
+/** A {@link org.apache.hadoop.io.Writable} encapsulating an item ID and a count . */
 public final class EntityCountWritable extends VarLongWritable implements Cloneable {
 
   private int count;

@@ -35,9 +35,9 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
@@ -48,8 +48,8 @@ import org.apache.mahout.math.VectorWritable;
  * <p>Command line arguments specific to this class are:</p>
  * 
  * <ol>
- * <li>-Dmapred.input.dir=(path): Directory containing a text file containing user IDs for which recommendations should be
- * computed, one per line</li>
+ * <li>-Dmapred.input.dir=(path): Directory containing a text file containing user IDs
+ *  for which recommendations should be computed, one per line</li>
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
@@ -147,7 +147,8 @@ public final class RecommenderJob extends AbstractJob {
       prePartialMultiply2.waitForCompletion(true);
 
       Job partialMultiply = prepareJob(
-        new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath, SequenceFileInputFormat.class,
+        new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath,
+        SequenceFileInputFormat.class,
         Mapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
         ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
         SequenceFileOutputFormat.class);
@@ -189,7 +190,7 @@ public final class RecommenderJob extends AbstractJob {
     conf.setInt("io.sort.mb", assumedHeapSize / 2);
     // For some reason the Merger doesn't report status for a long time; increase
     // timeout when running these jobs
-    conf.setInt("mapred.task.timeout", 60*60*1000);
+    conf.setInt("mapred.task.timeout", 60 * 60 * 1000);
   }
   
   public static void main(String[] args) throws Exception {

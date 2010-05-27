@@ -191,7 +191,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     }
   }
   
-  private static class MostSimilarEstimator implements TopItems.Estimator<Long> {
+  private static final class MostSimilarEstimator implements TopItems.Estimator<Long> {
     
     private final long toUserID;
     private final UserSimilarity similarity;

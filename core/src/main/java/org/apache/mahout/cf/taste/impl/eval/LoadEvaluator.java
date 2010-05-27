@@ -48,7 +48,7 @@ public final class LoadEvaluator {
     AbstractDifferenceRecommenderEvaluator.execute(callables);
   }
   
-  private static class LoadCallable implements Callable<Void> {
+  private static final class LoadCallable implements Callable<Void> {
     
     private final Recommender recommender;
     private final long userID;

@@ -43,7 +43,7 @@ public abstract class ToEntityPrefsMapper extends
   }
 
   @Override
-  public void setup(Context context) {
+  protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
     booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
     transpose = jobConf.getBoolean(TRANSPOSE_USER_ITEM, false);

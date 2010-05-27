@@ -20,7 +20,7 @@ package org.apache.mahout.df;
 /**
  * various methods to compute from the output of a random forest
  */
-public class ErrorEstimate {
+public final class ErrorEstimate {
   private ErrorEstimate() {}
   
   public static double errorRate(int[] labels, int[] predictions) {

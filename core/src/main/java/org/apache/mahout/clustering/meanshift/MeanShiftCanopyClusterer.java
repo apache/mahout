@@ -198,7 +198,7 @@ public class MeanShiftCanopyClusterer {
         clusterer.mergeCanopy(canopy, migratedCanopies);
       }
       canopies = migratedCanopies;
-      System.out.println(iter++);
+      //System.out.println(iter++);
     }
   }
 

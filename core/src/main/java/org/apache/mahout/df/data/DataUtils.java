@@ -24,7 +24,7 @@ import java.util.Random;
 /**
  * Helper methods that deals with data lists and arrays of values
  */
-public class DataUtils {
+public final class DataUtils {
   private DataUtils() { }
   
   /**

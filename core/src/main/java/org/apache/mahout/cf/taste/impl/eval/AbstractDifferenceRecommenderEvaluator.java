@@ -174,7 +174,8 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     return estimate;
   }
   
-  private double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender) throws TasteException {
+  private double getEvaluation(FastByIDMap<PreferenceArray> testUserPrefs, Recommender recommender)
+      throws TasteException {
     reset();
     Collection<Callable<Void>> estimateCallables = new ArrayList<Callable<Void>>();
     for (Map.Entry<Long,PreferenceArray> entry : testUserPrefs.entrySet()) {
@@ -226,7 +227,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
   
   abstract double computeFinalEvaluation();
   
-  private class PreferenceEstimateCallable implements Callable<Void> {
+  private final class PreferenceEstimateCallable implements Callable<Void> {
     
     private final Recommender recommender;
     private final long testUserID;
@@ -263,7 +264,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     
   }
   
-  private static class StatsCallable implements Callable<Void> {
+  private static final class StatsCallable implements Callable<Void> {
     
     private final Callable<Void> delegate;
     private final boolean logStats;

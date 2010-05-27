@@ -44,7 +44,7 @@ public class SequenceFileTokenizerMapper extends MapReduceBase implements Mapper
   public void map(Text key, Text value,
                   OutputCollector<Text,StringTuple> output, Reporter reporter) throws IOException {
     TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
-    TermAttribute termAtt = (TermAttribute) stream.addAttribute(TermAttribute.class);
+    TermAttribute termAtt = stream.addAttribute(TermAttribute.class);
     StringTuple document = new StringTuple();
     while (stream.incrementToken()) {
       if (termAtt.termLength() > 0) {

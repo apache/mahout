@@ -31,10 +31,9 @@ public final class CopreferredItemsMapper extends
     Mapper<VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable,ItemPairWritable,CoRating> {
 
   @Override
-  public void map(VarLongWritable user,
-                  ItemPrefWithItemVectorWeightArrayWritable itemPrefsArray,
-                  Context context)
-      throws IOException, InterruptedException {
+  protected void map(VarLongWritable user,
+                     ItemPrefWithItemVectorWeightArrayWritable itemPrefsArray,
+                     Context context) throws IOException, InterruptedException {
 
     ItemPrefWithItemVectorWeightWritable[] itemPrefs = itemPrefsArray.getItemPrefs();
 

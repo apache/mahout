@@ -42,7 +42,7 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  * job evaluates the fitness of each individual of the population using the given evaluator. Takes care of
  * storing the population into an input file, and loading the fitness from job outputs.
  */
-public class MahoutEvaluator {
+public final class MahoutEvaluator {
   private MahoutEvaluator() { }
   
   /**
@@ -56,7 +56,8 @@ public class MahoutEvaluator {
    *          <code>List&lt;Double&gt;</code> that contains the evaluated fitness for each candidate from the
    *          input population, sorted in the same order as the candidates.
    */
-  public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations) throws IOException {
+  public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations) 
+      throws IOException {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
     Path inpath = prepareInput(fs, population);

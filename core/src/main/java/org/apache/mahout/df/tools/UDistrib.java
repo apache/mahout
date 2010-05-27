@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * This tool is used to uniformly distribute the class of all the tuples of the dataset over a given number of
  * partitions.
  */
-public class UDistrib {
+public final class UDistrib {
   
   private static final Logger log = LoggerFactory.getLogger(UDistrib.class);
   

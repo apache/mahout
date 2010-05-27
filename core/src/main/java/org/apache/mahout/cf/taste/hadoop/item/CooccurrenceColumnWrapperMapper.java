@@ -27,9 +27,9 @@ public final class CooccurrenceColumnWrapperMapper extends
     Mapper<VarIntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable> {
 
   @Override
-  public void map(VarIntWritable key,
-                  VectorWritable value,
-                  Context context) throws IOException, InterruptedException {
+  protected void map(VarIntWritable key,
+                     VectorWritable value,
+                     Context context) throws IOException, InterruptedException {
     context.write(key, new VectorOrPrefWritable(value.get()));
   }
 

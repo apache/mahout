@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -24,7 +25,7 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 /**
  * Defines a natural ordering from most-preferred item (highest value) to least-preferred.
  */
-public final class ByValueRecommendedItemComparator implements Comparator<RecommendedItem> {
+public final class ByValueRecommendedItemComparator implements Comparator<RecommendedItem>, Serializable {
 
   private static final Comparator<RecommendedItem> instance = new ByValueRecommendedItemComparator();
 

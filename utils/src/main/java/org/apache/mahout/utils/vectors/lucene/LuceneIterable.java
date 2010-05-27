@@ -32,17 +32,17 @@ import org.apache.mahout.math.Vector;
  * {@link Vector}. The Field used to create the Vector currently must have Term Vectors stored for it.
  */
 public class LuceneIterable implements Iterable<Vector> {
-  
+
+  public static final double NO_NORMALIZING = -1.0;
+
   private final IndexReader indexReader;
   private final String field;
-  private final String idField;
-  private final FieldSelector idFieldSelector;
+  //private final String idField;
+  //private final FieldSelector idFieldSelector;
   
   private final VectorMapper mapper;
   private double normPower = NO_NORMALIZING;
-  
-  public static final double NO_NORMALIZING = -1.0;
-  
+
   public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper) {
     this(reader, idField, field, mapper, NO_NORMALIZING);
   }
@@ -70,9 +70,9 @@ public class LuceneIterable implements Iterable<Vector> {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
-    idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
+    //idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
     this.indexReader = reader;
-    this.idField = idField;
+    //this.idField = idField;
     this.field = field;
     this.mapper = mapper;
     this.normPower = normPower;

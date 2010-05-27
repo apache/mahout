@@ -59,7 +59,7 @@ public final class AggregateAndRecommendReducer extends
   private OpenIntLongHashMap indexItemIDMap;
 
   @Override
-  public void setup(Context context) {
+  protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
     recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
     try {
@@ -83,9 +83,9 @@ public final class AggregateAndRecommendReducer extends
   }
 
   @Override
-  public void reduce(VarLongWritable key,
-                     Iterable<VectorWritable> values,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarLongWritable key,
+                        Iterable<VectorWritable> values,
+                        Context context) throws IOException, InterruptedException {
 
     Vector recommendationVector = null;
     for (VectorWritable vectorWritable : values) {

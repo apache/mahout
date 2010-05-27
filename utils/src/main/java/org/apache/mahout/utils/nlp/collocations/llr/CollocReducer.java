@@ -96,12 +96,10 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
     if (keyType == Gram.Type.UNIGRAM) {
       // sum frequencies for unigrams.
       processUnigram(key, values, output, reporter);
-    }
-    else if (keyType == Gram.Type.HEAD || keyType == Gram.Type.TAIL) {
+    } else if (keyType == Gram.Type.HEAD || keyType == Gram.Type.TAIL) {
       // sum frequencies for subgrams, ngram and collect for each ngram.
       processSubgram(key, values, output, reporter);
-    }
-    else {
+    } else {
       reporter.incrCounter(Skipped.MALFORMED_TYPES, 1);
     }
   }
@@ -153,27 +151,23 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
         // collect frequency for subgrams.
         if (subgram == null) {
           subgram = new Gram(value);
-        }
-        else {
+        } else {
           subgram.incrementFrequency(value.getFrequency());
         }
-      }
-      else if (!value.equals(currentNgram)) {
+      } else if (!value.equals(currentNgram)) {
         // we've collected frequency for all subgrams and we've encountered a new ngram. 
         // collect the old ngram if there was one and we have sufficient support and
         // create the new ngram.
         if (currentNgram != null) {
           if (currentNgram.getFrequency() < minSupport) {
             reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
-          }
-          else {
+          } else {
             output.collect(currentNgram, subgram);
           }
         }
 
         currentNgram = new Gram(value);
-      }
-      else {
+      } else {
         currentNgram.incrementFrequency(value.getFrequency());
       }
     }

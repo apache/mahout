@@ -88,7 +88,7 @@ public final class TimingStatistics implements Serializable {
     return new Call();
   }
   
-  public class Call {
+  public final class Call {
     private final long startTime = System.nanoTime();
     
     private Call() { }

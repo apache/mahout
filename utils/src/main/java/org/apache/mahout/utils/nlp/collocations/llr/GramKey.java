@@ -121,7 +121,7 @@ public class GramKey extends BinaryComparable implements
 
   public String getPrimaryString() {
     try {
-      return Text.decode(bytes, 1, primaryLength-1);
+      return Text.decode(bytes, 1, primaryLength - 1);
     } catch (CharacterCodingException e) {
       throw new IllegalStateException(e);
     }

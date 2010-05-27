@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.apache.mahout.clustering.ClusterBase;
-import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -109,7 +108,7 @@ public class MeanShiftCanopy extends ClusterBase {
    *          a Vector to add
    * @param nPoints
    *          the number of times to add the point
-   * @throws CardinalityException
+   * @throws org.apache.mahout.math.CardinalityException
    *           if the cardinalities disagree
    */
   void addPoints(Vector point, int nPoints) {

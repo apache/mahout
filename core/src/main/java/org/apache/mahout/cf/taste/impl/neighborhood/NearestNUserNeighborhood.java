@@ -116,7 +116,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
     return "NearestNUserNeighborhood";
   }
   
-  private static class Estimator implements TopItems.Estimator<Long> {
+  private static final class Estimator implements TopItems.Estimator<Long> {
     private final UserSimilarity userSimilarityImpl;
     private final long theUserID;
     private final double minSim;

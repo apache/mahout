@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.model;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
@@ -36,7 +35,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 /**
  * <p>
- * A simple {@link DataModel} which uses a given {@link List} of users as its data source. This implementation
+ * A simple {@link DataModel} which uses given user data as its data source. This implementation
  * is mostly useful for small experiments and is not recommended for contexts where performance is important.
  * </p>
  */

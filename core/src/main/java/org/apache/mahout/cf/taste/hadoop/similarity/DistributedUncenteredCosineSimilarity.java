@@ -17,10 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
-
 /**
- * Distributed version of {@link UncenteredCosineSimilarity}
+ * Distributed version of {@link org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity}
  */
 public class DistributedUncenteredCosineSimilarity extends AbstractDistributedItemSimilarity {
 

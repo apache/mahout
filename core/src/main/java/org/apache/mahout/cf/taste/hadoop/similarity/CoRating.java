@@ -57,7 +57,7 @@ public final class CoRating implements Writable {
   public boolean equals(Object obj) {
     if (obj instanceof CoRating) {
       CoRating other = (CoRating) obj;
-      return (prefValueX == other.prefValueX && prefValueY == other.prefValueY);
+      return prefValueX == other.prefValueX && prefValueY == other.prefValueY;
     }
     return false;
   }

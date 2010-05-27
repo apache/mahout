@@ -34,7 +34,7 @@ import org.apache.mahout.clustering.kmeans.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FuzzyKMeansUtil {
+final class FuzzyKMeansUtil {
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansUtil.class);
 
   private FuzzyKMeansUtil() {

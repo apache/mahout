@@ -140,7 +140,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
    */
   public String getString() {
     try {
-      return Text.decode(bytes, 1, length-1);
+      return Text.decode(bytes, 1, length - 1);
     } catch (CharacterCodingException e) {
       throw new IllegalStateException("Should not have happened " + e.toString()); 
     }
@@ -194,7 +194,7 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
    * @param keepData should the old data be kept
    */
   private void setCapacity(int len, boolean keepData) {
-    len+=1; // extra byte to hold type
+    len++; // extra byte to hold type
     if (bytes == null || bytes.length < len) {
       byte[] newBytes = new byte[len];
       if (bytes != null && keepData) {

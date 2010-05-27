@@ -17,10 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity;
 
-import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
-
 /**
- * Distributed version of {@link LogLikelihoodSimilarity}
+ * Distributed version of {@link org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity}
  */
 public class DistributedLogLikelihoodSimilarity extends AbstractDistributedItemSimilarity {
 

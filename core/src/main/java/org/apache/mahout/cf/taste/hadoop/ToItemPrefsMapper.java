@@ -17,15 +17,13 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
-import org.apache.hadoop.io.Text;
-
 /**
  * <h1>Input</h1>
  * 
  * <p>
  * Intended for use with {@link org.apache.hadoop.mapreduce.lib.input.TextInputFormat};
  * accepts line number / line pairs as
- * {@link org.apache.mahout.math.VarLongWritable}/{@link Text} pairs.
+ * {@link org.apache.mahout.math.VarLongWritable}/{@link org.apache.hadoop.io.Text} pairs.
  * </p>
  * 
  * <p>

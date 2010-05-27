@@ -218,7 +218,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder(20*IDs.length);
+    StringBuilder result = new StringBuilder(20 * IDs.length);
     result.append("GenericUserPreferenceArray[userID:");
     result.append(id);
     result.append(",{");
@@ -235,7 +235,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   }
   
   private final class PreferenceArrayIterator implements Iterator<Preference> {
-    private int i = 0;
+    private int i;
     
     @Override
     public boolean hasNext() {

@@ -28,7 +28,7 @@ import org.apache.mahout.df.node.Node;
  * Stores/Loads the intermediate results of step1 needed by step2.<br>
  * This class should not be needed outside of the partial package, so all its methods are protected.<br>
  */
-public class InterResults {
+public final class InterResults {
   private InterResults() { }
   
   /**

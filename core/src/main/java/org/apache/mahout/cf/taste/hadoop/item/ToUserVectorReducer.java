@@ -47,18 +47,15 @@ public final class ToUserVectorReducer extends
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable> {
   
   @Override
-  public void reduce(VarLongWritable userID,
-                     Iterable<VarLongWritable> itemPrefs,
-                     Context context) throws IOException, InterruptedException {
+  protected void reduce(VarLongWritable userID,
+                        Iterable<VarLongWritable> itemPrefs,
+                        Context context) throws IOException, InterruptedException {
     Vector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     for (VarLongWritable itemPref : itemPrefs) {
       int index = ItemIDIndexMapper.idToIndex(itemPref.get());
-      float value;
-      if (itemPref instanceof EntityPrefWritable) {
-        value = ((EntityPrefWritable) itemPref).getPrefValue();
-      } else {
-        value = 1.0f;
-      }
+      float value = itemPref instanceof EntityPrefWritable ?
+          ((EntityPrefWritable) itemPref).getPrefValue() :
+          1.0f;
       userVector.set(index, value);
     }
 

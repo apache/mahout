@@ -150,7 +150,7 @@ public final class VectorDumper {
         if (cmdLine.hasOption(outputOpt)) {
           writer.close();
         }
-        System.err.println("Dumped " + i + " Vectors");
+        System.out.println("Dumped " + i + " Vectors");
       }
       
     } catch (OptionException e) {

@@ -17,9 +17,7 @@
 
 package org.apache.mahout.clustering.cdbw;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +56,6 @@ public class CDbwEvaluator {
    */
   public CDbwEvaluator(Map<Integer, List<VectorWritable>> representativePoints, Map<Integer, Cluster> clusters,
       DistanceMeasure measure) {
-    super();
     this.representativePoints = representativePoints;
     this.clusters = clusters;
     this.measure = measure;
@@ -74,20 +71,10 @@ public class CDbwEvaluator {
    *            a JobConf with appropriate parameters
    * @param clustersIn
    *            a String path to the input clusters directory
-   *            
-   * @throws SecurityException
-   * @throws IllegalArgumentException
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
-   * @throws ClassNotFoundException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws IOException
    */
   public CDbwEvaluator(JobConf job, Path clustersIn)
-      throws SecurityException, IllegalArgumentException, NoSuchMethodException,
-      InvocationTargetException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
-    super();
+      throws SecurityException, IllegalArgumentException,
+      ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = ccl.loadClass(job.get(CDbwDriver.DISTANCE_MEASURE_KEY));
     measure = (DistanceMeasure) cl.newInstance();
@@ -99,9 +86,7 @@ public class CDbwEvaluator {
   }
 
   public double CDbw() {
-    double cdbw = intraClusterDensity() * separation();
-    System.out.println("CDbw=" + cdbw);
-    return cdbw;
+    return intraClusterDensity() * separation();
   }
 
   /**
@@ -110,18 +95,10 @@ public class CDbwEvaluator {
    * @param clustersIn 
    *            a String pathname to the directory containing input cluster files
    * @return a List<Cluster> of the clusters
-   * 
-   * @throws ClassNotFoundException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws IOException
-   * @throws SecurityException
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
    */
-  private HashMap<Integer, Cluster> loadClusters(JobConf job, Path clustersIn)
+  private Map<Integer, Cluster> loadClusters(JobConf job, Path clustersIn)
       throws InstantiationException, IllegalAccessException, IOException, SecurityException {
-    HashMap<Integer, Cluster> clusters = new HashMap<Integer, Cluster>();
+    Map<Integer, Cluster> clusters = new HashMap<Integer, Cluster>();
     FileSystem fs = clustersIn.getFileSystem(job);
     for (FileStatus part : fs.listStatus(clustersIn)) {
       if (!part.getPath().getName().startsWith(".")) {
@@ -151,10 +128,10 @@ public class CDbwEvaluator {
         List<VectorWritable> repJ = representativePoints.get(cJ);
         double minDistance = Double.MAX_VALUE;
         Vector uIJ = null;
-        for (int ptI = 0; ptI < repI.size(); ptI++) {
-          for (int ptJ = 0; ptJ < repJ.size(); ptJ++) {
-            Vector vI = repI.get(ptI).get();
-            Vector vJ = repJ.get(ptJ).get();
+        for (VectorWritable aRepI : repI) {
+          for (VectorWritable aRepJ : repJ) {
+            Vector vI = aRepI.get();
+            Vector vJ = aRepJ.get();
             double distance = measure.distance(vI, vJ);
             if (distance < minDistance) {
               minDistance = distance;
@@ -171,18 +148,19 @@ public class CDbwEvaluator {
           density = minDistance * interDensity / stdSum;
         }
 
-        if (false) {
-          System.out.println("minDistance[" + cI + "," + cJ + "]=" + minDistance);
-          System.out.println("stDev[" + cI + "]=" + stDevI);
-          System.out.println("stDev[" + cJ + "]=" + stDevJ);
-          System.out.println("interDensity[" + cI + "," + cJ + "]=" + interDensity);
-          System.out.println("density[" + cI + "," + cJ + "]=" + density);
-          System.out.println();
-        }
+        // Use a logger
+        //if (false) {
+        //  System.out.println("minDistance[" + cI + "," + cJ + "]=" + minDistance);
+        //  System.out.println("stDev[" + cI + "]=" + stDevI);
+        //  System.out.println("stDev[" + cJ + "]=" + stDevJ);
+        //  System.out.println("interDensity[" + cI + "," + cJ + "]=" + interDensity);
+        //  System.out.println("density[" + cI + "," + cJ + "]=" + density);
+        //  System.out.println();
+        //}
         sum += density;
       }
     }
-    System.out.println("interClusterDensity=" + sum);
+    //System.out.println("interClusterDensity=" + sum);
     return sum;
   }
 
@@ -206,10 +184,9 @@ public class CDbwEvaluator {
 
   private void setStDev(int cI) {
     List<VectorWritable> repPts = representativePoints.get(cI);
-    double d = 0;
-    if (repPts == null) {
-      System.out.println();
-    }
+    //if (repPts == null) {
+    //  System.out.println();
+    //}
     int s0 = 0;
     Vector s1 = null;
     Vector s2 = null;
@@ -228,8 +205,8 @@ public class CDbwEvaluator {
       }
     }
     Vector std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
-    d = std.zSum() / std.size();
-    System.out.println("stDev[" + cI + "]=" + d);
+    double d = std.zSum() / std.size();
+    //System.out.println("stDev[" + cI + "]=" + d);
     stDevs.put(cI, d);
   }
 
@@ -255,9 +232,9 @@ public class CDbwEvaluator {
         }
         List<VectorWritable> repI = representativePoints.get(cI);
         List<VectorWritable> repJ = representativePoints.get(cJ);
-        for (int ptI = 0; ptI < repI.size(); ptI++) {
-          for (int ptJ = 0; ptJ < repJ.size(); ptJ++) {
-            double distance = measure.distance(repI.get(ptI).get(), repJ.get(ptJ).get());
+        for (VectorWritable aRepI : repI) {
+          for (VectorWritable aRepJ : repJ) {
+            double distance = measure.distance(aRepI.get(), aRepJ.get());
             if (distance < minDistance) {
               minDistance = distance;
             }
@@ -266,7 +243,7 @@ public class CDbwEvaluator {
       }
     }
     double separation = minDistance / (1 + interClusterDensity());
-    System.out.println("separation=" + separation);
+    //System.out.println("separation=" + separation);
     return separation;
   }
 
@@ -275,7 +252,7 @@ public class CDbwEvaluator {
     for (Integer cId : representativePoints.keySet()) {
       avgStd += stDevs.get(cId);
     }
-    avgStd = avgStd / representativePoints.size();
+    avgStd /= representativePoints.size();
 
     double sum = 0;
     for (Integer cId : representativePoints.keySet()) {
@@ -291,7 +268,7 @@ public class CDbwEvaluator {
       sum += cSum / repI.size();
     }
     double intraClusterDensity = sum / representativePoints.size();
-    System.out.println("intraClusterDensity=" + intraClusterDensity);
+    //System.out.println("intraClusterDensity=" + intraClusterDensity);
     return intraClusterDensity;
   }
 

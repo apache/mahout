@@ -45,13 +45,12 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.text.DefaultAnalyzer;
-import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Driver for LLR Collocation discovery mapreduce job */
-public class CollocDriver extends Configured implements Tool {
+public final class CollocDriver extends Configured implements Tool {
   public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
   public static final String SUBGRAM_OUTPUT_DIRECTORY = "subgrams";
   public static final String NGRAM_OUTPUT_DIRECTORY = "ngrams";
@@ -214,7 +213,7 @@ public class CollocDriver extends Configured implements Tool {
   }
   
   /**
-   * Generate all ngrams for the {@link DictionaryVectorizer} job
+   * Generate all ngrams for the {@link org.apache.mahout.utils.vectors.text.DictionaryVectorizer} job
    * 
    * @param input
    *          input path containing tokenized documents

@@ -483,7 +483,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     return "TreeClusteringRecommender2[clusterSimilarity:" + clusterSimilarity + ']';
   }
   
-  private class Estimator implements TopItems.Estimator<Long> {
+  private final class Estimator implements TopItems.Estimator<Long> {
     
     private final FastIDSet cluster;
     

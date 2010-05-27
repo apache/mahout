@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * adds an IGNORED first attribute that will contain a unique id for each instance, which is the line number
  * of the instance in the input data
  */
-public class DataLoader {
+public final class DataLoader {
   
   private static final Logger log = LoggerFactory.getLogger(DataLoader.class);
   

@@ -37,7 +37,7 @@ public final class SimilarityReducer extends
   private int numberOfUsers;
 
   @Override
-  public void setup(Context context) {
+  protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
     distributedItemSimilarity =
       ItemSimilarityJob.instantiateSimilarity(jobConf.get(ItemSimilarityJob.DISTRIBUTED_SIMILARITY_CLASSNAME));
@@ -48,9 +48,9 @@ public final class SimilarityReducer extends
   }
 
   @Override
-  public void reduce(ItemPairWritable pair,
-                     Iterable<CoRating> coRatings,
-                     Context context)
+  protected void reduce(ItemPairWritable pair,
+                        Iterable<CoRating> coRatings,
+                        Context context)
       throws IOException, InterruptedException {
 
     double similarity =

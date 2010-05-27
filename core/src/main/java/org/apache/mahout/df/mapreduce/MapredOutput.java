@@ -107,8 +107,9 @@ public class MapredOutput implements Writable, Cloneable {
     
     MapredOutput mo = (MapredOutput) obj;
 
-    return ((tree == null && mo.getTree() == null) || tree.equals(mo.getTree())) &&
-        Arrays.equals(predictions, mo.getPredictions());
+    return ((tree == null && mo.getTree() == null) ||
+            (tree != null && tree.equals(mo.getTree()))) &&
+            Arrays.equals(predictions, mo.getPredictions());
   }
   
   @Override

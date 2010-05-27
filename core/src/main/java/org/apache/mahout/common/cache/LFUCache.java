@@ -105,8 +105,7 @@ public class LFUCache<K,V> implements Cache<K,V> {
     if (dataMap.containsKey(key)) {
       return;
     }
-    if (capacity == dataMap.size()) // Cache Full
-    {
+    if (capacity == dataMap.size()) { // Cache Full
       removeLeastFrequent();
     }
     MutableLong count = new MutableLong(1L);

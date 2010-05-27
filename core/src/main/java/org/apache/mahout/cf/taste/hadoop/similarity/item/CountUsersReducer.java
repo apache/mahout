@@ -32,9 +32,9 @@ public class CountUsersReducer extends
     Reducer<CountUsersKeyWritable,VarLongWritable, VarIntWritable,NullWritable> {
 
   @Override
-  public void reduce(CountUsersKeyWritable key,
-                     Iterable<VarLongWritable> userIDs,
-                     Context context)
+  protected void reduce(CountUsersKeyWritable key,
+                        Iterable<VarLongWritable> userIDs,
+                        Context context)
       throws IOException, InterruptedException {
 
     long lastSeenUserID = Long.MIN_VALUE;

@@ -108,8 +108,7 @@ public class LLRReducer extends MapReduceBase implements Reducer<Gram,Gram,Text,
                      OutputCollector<Text,DoubleWritable> output,
                      Reporter reporter) throws IOException {
     
-    int[] gramFreq = new int[2];
-    gramFreq[0] = gramFreq[1] = -1;
+    int[] gramFreq = {-1, -1};
     
     if (ngram.getType() == Gram.Type.UNIGRAM && emitUnigrams) {
       DoubleWritable dd = new DoubleWritable(ngram.getFrequency());

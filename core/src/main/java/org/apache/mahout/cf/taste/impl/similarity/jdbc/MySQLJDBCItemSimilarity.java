@@ -21,11 +21,11 @@ import javax.sql.DataSource;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 /**
  * <p>
- * An {@link ItemSimilarity} backed by a MySQL database and accessed via JDBC. It may work with other JDBC
+ * An {@link org.apache.mahout.cf.taste.similarity.ItemSimilarity} backed by a MySQL database
+ * and accessed via JDBC. It may work with other JDBC
  * databases. By default, this class assumes that there is a {@link DataSource} available under the JNDI name
  * "jdbc/taste", which gives access to a database with a "taste_item_similarity" table with the following
  * schema:

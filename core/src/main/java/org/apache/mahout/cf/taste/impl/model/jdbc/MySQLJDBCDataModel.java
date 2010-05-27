@@ -24,12 +24,12 @@ import javax.sql.DataSource;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
-import org.apache.mahout.cf.taste.model.DataModel;
 
 /**
  * <p>
- * A {@link DataModel} backed by a MySQL database and accessed via JDBC. It may work with other JDBC
- * databases. By default, this class assumes that there is a {@link DataSource} available under the JNDI name
+ * A {@link org.apache.mahout.cf.taste.model.JDBCDataModel} backed by a MySQL database and
+ * accessed via JDBC. It may work with other JDBC databases. By default, this class
+ * assumes that there is a {@link DataSource} available under the JNDI name
  * "jdbc/taste", which gives access to a database with a "taste_preferences" table with the following schema:
  * </p>
  * 

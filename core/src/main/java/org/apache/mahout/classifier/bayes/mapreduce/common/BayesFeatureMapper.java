@@ -32,7 +32,6 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
-import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.ArrayIterator;
@@ -43,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads the input train set(preprocessed using the {@link BayesFileFormatter}).
+ * Reads the input train set(preprocessed using the {@link org.apache.mahout.classifier.BayesFileFormatter}).
  */
 public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Text,StringTuple,DoubleWritable> {
   
@@ -101,7 +100,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
         }
       }
     }
-    final MutableDouble lengthNormalisationMut = new MutableDouble(0);
+    final MutableDouble lengthNormalisationMut = new MutableDouble(0.0);
     wordList.forEachPair(new ObjectIntProcedure<String>() {
       @Override
       public boolean apply(String word, int dKJ) {
@@ -181,7 +180,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
     
     public IteratorTokenStream(Iterator<String> iterator) {
       this.iterator = iterator;
-      this.termAtt = (TermAttribute) addAttribute(TermAttribute.class);
+      this.termAtt = addAttribute(TermAttribute.class);
     }
     
     @Override
