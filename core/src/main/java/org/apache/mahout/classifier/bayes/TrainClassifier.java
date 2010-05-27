@@ -39,7 +39,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Train the Naive Bayes classifier with improved weighting
  * <p/>
- * To run the twenty newsgroups example: refer http://cwiki.apache.org/MAHOUT/twentynewsgroups.html
+ * A properly formatted file for input is one which has one document per line with the first entry as the label and the rest as evidence.
+ *
+ * @see org.apache.mahout.classifier.BayesFileFormatter
  */
 public final class TrainClassifier {
   
@@ -66,11 +68,11 @@ public final class TrainClassifier {
     
     Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
       abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The Directory on HDFS containing the collapsed, properly formatted files").withShortName("i").create();
+      "The Directory on HDFS containing the collapsed, properly formatted files: One doc per line, first entry on the line is the label, rest is the evidence").withShortName("i").create();
     
     Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
       abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The location of the modelon the HDFS").withShortName("o").create();
+      "The location of the model on the HDFS").withShortName("o").create();
     
     Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
       abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription(
