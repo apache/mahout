@@ -33,52 +33,55 @@ import org.slf4j.LoggerFactory;
 /**
  * General-purpose driver class for Mahout programs.  Utilizes org.apache.hadoop.util.ProgramDriver to run
  * main methods of other classes, but first loads up default properties from a properties file.
+ * <p/>
+ * To run locally:
  *
- * for local running:
- *
- * $MAHOUT_HOME/bin/mahout run shortJobName [over-ride ops]
- *
+ * <pre>$MAHOUT_HOME/bin/mahout run shortJobName [over-ride ops]</pre>
+ * <p/>
  * Works like this: by default, the file "driver.classes.props" is loaded from the classpath, which
  * defines a mapping between short names like "vectordump" and fully qualified class names.
  * The format of driver.classes.props is like so:
+ * <p/>
  *
- * fully.qualified.class.name = shortJobName : descriptive string
- *
+ * <pre>fully.qualified.class.name = shortJobName : descriptive string</pre>
+ * <p/>
  * The default properties to be applied to the program run is pulled out of, by default, "<shortJobName>.props"
  * (also off of the classpath).
- *
+ * <p/>
  * The format of the default properties files is as follows:
- *
- * i|input = /path/to/my/input
- * o|output = /path/to/my/output
- * m|jarFile = /path/to/jarFile
- * # etc - each line is shortArg|longArg = value
+ * <pre>
+  i|input = /path/to/my/input
+  o|output = /path/to/my/output
+  m|jarFile = /path/to/jarFile
+  # etc - each line is shortArg|longArg = value
+ </pre>
  *
  * The next argument to the Driver is supposed to be the short name of the class to be run (as defined in the
  * driver.classes.props file).
- *
+ * <p/>
  * Then the class which will be run will have it's main called with
  *
- *   main(new String[] { "--input", "/path/to/my/input", "--output", "/path/to/my/output" });
+ *   <pre>main(new String[] { "--input", "/path/to/my/input", "--output", "/path/to/my/output" });</pre>
  *
  * After all the "default" properties are loaded from the file, any further command-line arguments are taken in,
  * and over-ride the defaults.
- *
+ * <p/>
  * So if your driver.classes.props looks like so:
  *
- * org.apache.mahout.utils.vectors.VectorDumper = vecDump : dump vectors from a sequence file
+ * <pre>org.apache.mahout.utils.vectors.VectorDumper = vecDump : dump vectors from a sequence file</pre>
  *
  * and you have a file core/src/main/resources/vecDump.props which looks like
- *
- * o|output = /tmp/vectorOut
- * s|seqFile = /my/vector/sequenceFile
+ * <pre>
+  o|output = /tmp/vectorOut
+  s|seqFile = /my/vector/sequenceFile
+  </pre>
  *
  * And you execute the command-line:
  *
- * $MAHOUT_HOME/bin/mahout run vecDump -s /my/otherVector/sequenceFile
+ * <pre>$MAHOUT_HOME/bin/mahout run vecDump -s /my/otherVector/sequenceFile</pre>
  *
  * Then org.apache.mahout.utils.vectors.VectorDumper.main() will be called with arguments:
- *   {"--output", "/tmp/vectorOut", "-s", "/my/otherVector/sequenceFile"}
+ *   <pre>{"--output", "/tmp/vectorOut", "-s", "/my/otherVector/sequenceFile"}</pre>
  */
 public class MahoutDriver {
 
