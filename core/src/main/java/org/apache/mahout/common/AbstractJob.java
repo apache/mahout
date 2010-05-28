@@ -82,8 +82,13 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected static Option buildOption(String name, String shortName, String description, String defaultValue) {
     return buildOption(name, shortName, description, false, defaultValue);
   }
+
+  protected static Option buildOption(String name, String shortName, String description,
+                                      boolean required) {
+    return buildOption(name, shortName, description, required, null);
+  }
   
-  private static Option buildOption(String name,
+  protected static Option buildOption(String name,
                                     String shortName,
                                     String description,
                                     boolean required,
