@@ -30,14 +30,12 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class FPTreeDepthCache {
-  
+
+  private static final Logger log = LoggerFactory.getLogger(FPTreeDepthCache.class);
+
   private static int firstLevelCacheSize = 5;
-  
-  private static final Logger log = LoggerFactory.getLogger(
-    FPTreeDepthCache.class);
-  
-  private final LeastKCache<Integer,FPTree> firstLevelCache
-  = new LeastKCache<Integer,FPTree>(firstLevelCacheSize);
+
+  private final LeastKCache<Integer,FPTree> firstLevelCache = new LeastKCache<Integer,FPTree>(firstLevelCacheSize);
   
   private int hits;
   

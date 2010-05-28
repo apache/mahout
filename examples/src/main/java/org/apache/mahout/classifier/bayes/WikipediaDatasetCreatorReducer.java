@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -31,7 +31,10 @@ import org.apache.hadoop.mapred.Reporter;
  */
 public class WikipediaDatasetCreatorReducer extends MapReduceBase implements Reducer<Text,Text,Text,Text> {
   @Override
-  public void reduce(Text key, Iterator<Text> values, OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<Text> values,
+                     OutputCollector<Text,Text> output,
+                     Reporter reporter) throws IOException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
     

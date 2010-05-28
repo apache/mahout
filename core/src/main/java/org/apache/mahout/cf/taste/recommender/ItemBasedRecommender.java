@@ -77,7 +77,9 @@ public interface ItemBasedRecommender extends Recommender {
    * @throws TasteException
    *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
    */
-  List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany, Rescorer<LongPair> rescorer) throws TasteException;
+  List<RecommendedItem> mostSimilarItems(long[] itemIDs,
+                                         int howMany,
+                                         Rescorer<LongPair> rescorer) throws TasteException;
   
   /**
    * <p>

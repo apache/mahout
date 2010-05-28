@@ -43,7 +43,8 @@ public final class BookCrossingBooleanRecommender implements Recommender {
 
   public BookCrossingBooleanRecommender(DataModel bcModel) throws TasteException {
     UserSimilarity similarity = new CachingUserSimilarity(new LogLikelihoodSimilarity(bcModel), bcModel);
-    UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, Double.NEGATIVE_INFINITY, similarity, bcModel, 1.0);
+    UserNeighborhood neighborhood =
+        new NearestNUserNeighborhood(10, Double.NEGATIVE_INFINITY, similarity, bcModel, 1.0);
     recommender = new GenericBooleanPrefUserBasedRecommender(bcModel, neighborhood, similarity);
   }
 
@@ -53,8 +54,7 @@ public final class BookCrossingBooleanRecommender implements Recommender {
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-  throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
 

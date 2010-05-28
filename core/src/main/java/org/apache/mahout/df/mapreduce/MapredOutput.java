@@ -35,6 +35,21 @@ public class MapredOutput implements Writable, Cloneable {
   private Node tree;
   
   private int[] predictions;
+
+  public MapredOutput() { }
+
+  public MapredOutput(Node tree, int[] predictions) {
+    this.tree = tree;
+    this.predictions = predictions;
+  }
+
+  public MapredOutput(Node tree) {
+    this(tree, null);
+  }
+
+  public MapredOutput(int[] predictions) {
+    this(null, predictions);
+  }
   
   public Node getTree() {
     return tree;
@@ -42,21 +57,6 @@ public class MapredOutput implements Writable, Cloneable {
   
   public int[] getPredictions() {
     return predictions;
-  }
-  
-  public MapredOutput() { }
-  
-  public MapredOutput(Node tree, int[] predictions) {
-    this.tree = tree;
-    this.predictions = predictions;
-  }
-  
-  public MapredOutput(Node tree) {
-    this(tree, null);
-  }
-  
-  public MapredOutput(int[] predictions) {
-    this(null, predictions);
   }
   
   public static MapredOutput read(DataInput in) throws IOException {
@@ -107,9 +107,9 @@ public class MapredOutput implements Writable, Cloneable {
     
     MapredOutput mo = (MapredOutput) obj;
 
-    return ((tree == null && mo.getTree() == null) ||
-            (tree != null && tree.equals(mo.getTree()))) &&
-            Arrays.equals(predictions, mo.getPredictions());
+    return ((tree == null && mo.getTree() == null)
+            || (tree != null && tree.equals(mo.getTree())))
+           && Arrays.equals(predictions, mo.getPredictions());
   }
   
   @Override

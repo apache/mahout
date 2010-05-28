@@ -63,7 +63,7 @@
 		<module name="MethodName" />
 		<module name="PackageName" />
 		<module name="ParameterName" />
-		<module name="StaticVariableName" />
+		<!--module name="StaticVariableName" /-->
 		<module name="TypeName" />
 
 		<!-- Header checks -->
@@ -80,7 +80,7 @@
 		<module name="IllegalImport" />    <!-- defaults to sun.* packages -->
 		<module name="RedundantImport" />
 		<module name="UnusedImports" />
-		<module name="ImportOrder"/>
+		<!--module name="ImportOrder"/-->
 
 		<!-- Checks for Size Violations.                    -->
 		<!-- See http://checkstyle.sf.net/config_sizes.html -->
@@ -101,7 +101,7 @@
 			<property name="countEmpty" value="false" />
 		</module>
 		<module name="ParameterNumber">
-			<property name="max" value="7" />
+			<property name="max" value="10" />
 		</module>
 
 		<!-- Checks for whitespace                               -->
@@ -177,7 +177,7 @@
 		<module name="NestedTryDepth">
 			<property name="max" value="3" />
 		</module>
-		<module name="SuperClone" />
+		<!--module name="SuperClone" /-->
 		<module name="SuperFinalize" />
 		<!--<module name="IllegalCatch"/>-->
 		<module name="IllegalThrows">
@@ -186,7 +186,7 @@
 		</module>
 		<!--<module name="RedundantThrows"/>-->
 		<module name="PackageDeclaration" />
-		<module name="JUnitTestCase" />
+		<!--module name="JUnitTestCase" /-->
 		<module name="ReturnCount">
 			<property name="max" value="6" />
 		</module>

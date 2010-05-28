@@ -48,7 +48,7 @@ public final class IteratorUtils {
     int size = 0;
     while (iterator.hasNext()) {
       if (size == result.length) {
-        long[] newResult = new long[(result.length << 1)];
+        long[] newResult = new long[result.length << 1];
         System.arraycopy(result, 0, newResult, 0, result.length);
         result = newResult;
       }

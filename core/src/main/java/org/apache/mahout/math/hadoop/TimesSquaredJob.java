@@ -53,7 +53,7 @@ public final class TimesSquaredJob {
 
   public static final String OUTPUT_VECTOR_FILENAME = "DistributedMatrix.times.outputVector";
 
-  private TimesSquaredJob() {}
+  private TimesSquaredJob() { }
 
   public static JobConf createTimesSquaredJobConf(Vector v, 
                                                   Path matrixInputPath, 
@@ -143,9 +143,9 @@ public final class TimesSquaredJob {
   public static class TimesSquaredMapper<T extends WritableComparable> extends MapReduceBase
       implements Mapper<T,VectorWritable, NullWritable,VectorWritable> {
 
-    private Vector inputVector;
     protected Vector outputVector;
     protected OutputCollector<NullWritable,VectorWritable> out;
+    private Vector inputVector;
 
     @Override
     public void configure(JobConf conf) {
@@ -166,7 +166,7 @@ public final class TimesSquaredJob {
         reader.next(nw, val);
         reader.close();
         inputVector = val.get();
-        if(!(inputVector instanceof SequentialAccessSparseVector || inputVector instanceof DenseVector)) {
+        if (!(inputVector instanceof SequentialAccessSparseVector || inputVector instanceof DenseVector)) {
           inputVector = new SequentialAccessSparseVector(inputVector);
         }
         int outDim = conf.getInt(OUTPUT_VECTOR_DIMENSION, Integer.MAX_VALUE);
@@ -211,7 +211,7 @@ public final class TimesSquaredJob {
                     Reporter rep) {
       this.out = out;
       double d = scale(v);
-      if(d != 0.0) {
+      if (d != 0.0) {
         outputVector.setQuick(rowNum.get(), d);
       }
     }
@@ -235,9 +235,9 @@ public final class TimesSquaredJob {
                        Iterator<VectorWritable> vectors,
                        OutputCollector<NullWritable,VectorWritable> out,
                        Reporter reporter) throws IOException {
-      while(vectors.hasNext()) {
+      while (vectors.hasNext()) {
         VectorWritable v = vectors.next();
-        if(v != null) {
+        if (v != null) {
           v.get().addTo(outputVector);
         }
       }

@@ -44,6 +44,46 @@ public class Cluster extends ClusterBase {
   private boolean converged;
   
   private double std = 0.00000001;
+
+  /**
+   * Construct a new cluster with the given point as its center
+   *
+   * @param center
+   *          the center point
+   */
+  public Cluster(Vector center) {
+    super();
+    this.setCenter(new RandomAccessSparseVector(center));
+    this.setNumPoints(0);
+    this.setPointTotal(getCenter().like());
+    this.pointSquaredTotal = getCenter().like();
+  }
+
+  /** For (de)serialization as a Writable */
+  public Cluster() { }
+
+  /**
+   * Construct a new cluster with the given point as its center
+   *
+   * @param center
+   *          the center point
+   */
+  public Cluster(Vector center, int clusterId) {
+    super();
+    this.setId(clusterId);
+    this.setCenter(new RandomAccessSparseVector(center));
+    this.setNumPoints(0);
+    this.setPointTotal(getCenter().like());
+    this.pointSquaredTotal = getCenter().like();
+  }
+
+  /** Construct a new clsuter with the given id as identifier */
+  public Cluster(String clusterId) {
+
+    this.setId(Integer.parseInt(clusterId.substring(1)));
+    this.setNumPoints(0);
+    this.converged = clusterId.startsWith("V");
+  }
   
   /**
    * Format the cluster for output
@@ -124,46 +164,6 @@ public class Cluster extends ClusterBase {
       centroid = getPointTotal().divide(getNumPoints());
     }
     return centroid;
-  }
-  
-  /**
-   * Construct a new cluster with the given point as its center
-   * 
-   * @param center
-   *          the center point
-   */
-  public Cluster(Vector center) {
-    super();
-    this.setCenter(new RandomAccessSparseVector(center));
-    this.setNumPoints(0);
-    this.setPointTotal(getCenter().like());
-    this.pointSquaredTotal = getCenter().like();
-  }
-  
-  /** For (de)serialization as a Writable */
-  public Cluster() { }
-  
-  /**
-   * Construct a new cluster with the given point as its center
-   * 
-   * @param center
-   *          the center point
-   */
-  public Cluster(Vector center, int clusterId) {
-    super();
-    this.setId(clusterId);
-    this.setCenter(new RandomAccessSparseVector(center));
-    this.setNumPoints(0);
-    this.setPointTotal(getCenter().like());
-    this.pointSquaredTotal = getCenter().like();
-  }
-  
-  /** Construct a new clsuter with the given id as identifier */
-  public Cluster(String clusterId) {
-    
-    this.setId(Integer.parseInt(clusterId.substring(1)));
-    this.setNumPoints(0);
-    this.converged = clusterId.startsWith("V");
   }
   
   @Override

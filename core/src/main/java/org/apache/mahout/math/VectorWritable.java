@@ -34,7 +34,7 @@ public class VectorWritable extends Configured implements Writable {
   public static final int NUM_FLAGS = 4;
 
   private Vector vector;
-  private boolean writesLaxPrecision = false;
+  private boolean writesLaxPrecision;
 
   public VectorWritable() {
   }
@@ -76,10 +76,10 @@ public class VectorWritable extends Configured implements Writable {
     boolean named = vector instanceof NamedVector;
 
     boolean writesLaxPrecision = this.writesLaxPrecision;
-    out.writeByte((dense ? FLAG_DENSE : 0) |
-                  (sequential ? FLAG_SEQUENTIAL : 0) |
-                  (named ? FLAG_NAMED : 0) |
-                  (writesLaxPrecision ? FLAG_LAX_PRECISION : 0));
+    out.writeByte((dense ? FLAG_DENSE : 0)
+        | (sequential ? FLAG_SEQUENTIAL : 0)
+        | (named ? FLAG_NAMED : 0)
+        | (writesLaxPrecision ? FLAG_LAX_PRECISION : 0));
 
     Varint.writeUnsignedVarInt(vector.size(), out);
     if (dense) {
@@ -145,9 +145,9 @@ public class VectorWritable extends Configured implements Writable {
       v = new DenseVector(values);
     } else {
       int numNonDefaultElements = Varint.readUnsignedVarInt(in);
-      v = sequential ?
-          new SequentialAccessSparseVector(size, numNonDefaultElements) :
-          new RandomAccessSparseVector(size, numNonDefaultElements);
+      v = sequential
+          ? new SequentialAccessSparseVector(size, numNonDefaultElements)
+          : new RandomAccessSparseVector(size, numNonDefaultElements);
       if (sequential) {
         int lastIndex = 0;
         for (int i = 0; i < numNonDefaultElements; i++) {

@@ -118,8 +118,8 @@ public final class ItemSimilarityJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
-    Option similarityClassOpt = AbstractJob.buildOption("similarityClassname", "s",
-    "Name of distributed similarity class to instantiate");
+    Option similarityClassOpt = AbstractJob.buildOption(
+        "similarityClassname", "s", "Name of distributed similarity class to instantiate");
 
     Map<String,String> parsedArgs = AbstractJob.parseArguments(args, similarityClassOpt);
     if (parsedArgs == null) {

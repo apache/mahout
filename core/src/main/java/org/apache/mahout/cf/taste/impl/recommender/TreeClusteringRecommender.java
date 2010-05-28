@@ -65,7 +65,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   
   private static final int NUM_CLUSTER_RECS = 100;
   private static final FastIDSet[] NO_CLUSTERS = new FastIDSet[0];
-  private static final Random r = RandomUtils.getRandom();
+  private static final Random RANDOM = RandomUtils.getRandom();
   
   private final ClusterSimilarity clusterSimilarity;
   private final int numClusters;
@@ -350,7 +350,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     for (int i = 0; i < size; i++) {
       FastIDSet cluster1 = clusters.get(i);
       for (int j = i + 1; j < size; j++) {
-        if ((samplingRate >= 1.0) || (r.nextDouble() < samplingRate)) {
+        if ((samplingRate >= 1.0) || (RANDOM.nextDouble() < samplingRate)) {
           FastIDSet cluster2 = clusters.get(j);
           double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
           if (!Double.isNaN(similarity) && (similarity > bestSimilarity)) {

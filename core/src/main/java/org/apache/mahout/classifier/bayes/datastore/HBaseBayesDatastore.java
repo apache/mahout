@@ -129,15 +129,11 @@ public class HBaseBayesDatastore implements Datastore {
     }
     for (String label : labels) {
       log.info("{} {} {} {}", new Object[] {
-                                                                label,
-                                                                getWeightFromHbase(
-                                                                  BayesConstants.LABEL_THETA_NORMALIZER,
-                                                                  label),
-                                                                thetaNormalizer,
-                                                                getWeightFromHbase(
-                                                                  BayesConstants.LABEL_THETA_NORMALIZER,
-                                                                  label)
-                                                                    / thetaNormalizer});
+        label,
+        getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, label),
+        thetaNormalizer,
+        getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, label) / thetaNormalizer
+      });
     }
   }
   

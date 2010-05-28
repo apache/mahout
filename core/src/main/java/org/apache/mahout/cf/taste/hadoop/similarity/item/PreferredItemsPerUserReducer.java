@@ -25,16 +25,16 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.VarLongWritable;
 
 public final class PreferredItemsPerUserReducer extends
-    Reducer<VarLongWritable,ItemPrefWithItemVectorWeightWritable,VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
+    Reducer<VarLongWritable,ItemPrefWithItemVectorWeightWritable,
+            VarLongWritable,ItemPrefWithItemVectorWeightArrayWritable> {
 
   @Override
   protected void reduce(VarLongWritable user,
                         Iterable<ItemPrefWithItemVectorWeightWritable> itemPrefs,
-                        Context context)
-      throws IOException, InterruptedException {
+                        Context context) throws IOException, InterruptedException {
 
-    Set<ItemPrefWithItemVectorWeightWritable> itemPrefsWithItemVectorWeight
-        = new HashSet<ItemPrefWithItemVectorWeightWritable>();
+    Set<ItemPrefWithItemVectorWeightWritable> itemPrefsWithItemVectorWeight =
+        new HashSet<ItemPrefWithItemVectorWeightWritable>();
 
     for (ItemPrefWithItemVectorWeightWritable writable : itemPrefs) {
       itemPrefsWithItemVectorWeight.add(writable.clone());

@@ -73,7 +73,7 @@ public final class PreferredItemsPerUserMapper extends
 
     @Override
     public boolean hasNext() {
-      return (index < userPrefs.length);
+      return index < userPrefs.length;
     }
 
     @Override

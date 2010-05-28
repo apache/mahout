@@ -77,19 +77,17 @@ public class DirichletMapper extends MapReduceBase implements
     }
   }
   
-  public static DirichletState<VectorWritable> getDirichletState(JobConf job) throws SecurityException,
-                                                                             IllegalArgumentException,
-                                                                             NoSuchMethodException,
-                                                                             InvocationTargetException {
+  public static DirichletState<VectorWritable> getDirichletState(JobConf job)
+    throws SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
     String modelPrototype = job.get(DirichletDriver.MODEL_PROTOTYPE_KEY);
     String prototypeSize = job.get(DirichletDriver.PROTOTYPE_SIZE_KEY);
     String numClusters = job.get(DirichletDriver.NUM_CLUSTERS_KEY);
-    String alpha_0 = job.get(DirichletDriver.ALPHA_0_KEY);
+    String alpha0 = job.get(DirichletDriver.ALPHA_0_KEY);
     
     try {
-      double alpha = Double.parseDouble(alpha_0);
+      double alpha = Double.parseDouble(alpha0);
       DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory, modelPrototype,
         Integer.parseInt(prototypeSize), Integer.parseInt(numClusters), alpha);
       Path path = new Path(statePath);

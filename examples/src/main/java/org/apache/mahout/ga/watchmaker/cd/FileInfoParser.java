@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -42,7 +42,7 @@ import org.apache.hadoop.fs.Path;
  * if the attribute is numerical, and its min and max values</li>
  * </ul>
  */
-public class FileInfoParser {
+public final class FileInfoParser {
   
   public static final String IGNORED_TOKEN = "IGNORED";
   

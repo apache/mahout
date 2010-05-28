@@ -82,13 +82,12 @@ public class InMemoryBayesDatastore implements Datastore {
       throw new InvalidDatastoreException(e.getMessage());
     }
     for (String label : getKeys("")) {
-      log.info("{} {} {} {}", new Object[] {label,
-                                                                   thetaNormalizerPerLabel
-                                                                       .get(getLabelID(label)),
-                                                                   thetaNormalizer,
-                                                                   thetaNormalizerPerLabel
-                                                                       .get(getLabelID(label))
-                                                                       / thetaNormalizer});
+      log.info("{} {} {} {}", new Object[] {
+       label,
+       thetaNormalizerPerLabel.get(getLabelID(label)),
+       thetaNormalizer,
+       thetaNormalizerPerLabel.get(getLabelID(label)) / thetaNormalizer
+      });
     }
   }
   

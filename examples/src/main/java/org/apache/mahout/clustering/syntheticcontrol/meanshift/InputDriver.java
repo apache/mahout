@@ -39,8 +39,8 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InputDriver {
-  /** Logger for this class. */
+public final class InputDriver {
+
   private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
   
   private InputDriver() { }

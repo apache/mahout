@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -34,7 +34,6 @@ import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -44,17 +43,17 @@ public class DisplayDirichlet extends Frame {
   
   private static final Logger log = LoggerFactory.getLogger(DisplayDirichlet.class);
   
-  private static final List<Vector> sampleParams = new ArrayList<Vector>();
+  private static final List<Vector> SAMPLE_PARAMS = new ArrayList<Vector>();
   
-  protected static final int ds = 72; // default scale = 72 pixels per inch
+  protected static final int DS = 72; // default scale = 72 pixels per inch
   
-  protected static final int size = 8; // screen size in inches
+  protected static final int SIZE = 8; // screen size in inches
   
-  protected static final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  protected static final List<VectorWritable> SAMPLE_DATA = new ArrayList<VectorWritable>();
   
-  protected static final double significance = 0.05;
+  protected static final double SIGNIFICANCE = 0.05;
   
-  protected static final Color[] colors = {Color.red, Color.orange, Color.yellow, Color.green, Color.blue,
+  protected static final Color[] COLORS = {Color.red, Color.orange, Color.yellow, Color.green, Color.blue,
                                            Color.magenta, Color.lightGray};
   
   protected static List<Model<VectorWritable>[]> result;
@@ -72,7 +71,7 @@ public class DisplayDirichlet extends Frame {
     res = Toolkit.getDefaultToolkit().getScreenResolution();
     
     // Set Frame size in inches
-    this.setSize(size * res, size * res);
+    this.setSize(SIZE * res, SIZE * res);
     this.setVisible(true);
     this.setTitle("Dirichlet Process Sample Data");
     
@@ -100,7 +99,7 @@ public class DisplayDirichlet extends Frame {
     Vector dv = new DenseVector(2);
     g2.setColor(Color.RED);
     int i = 0;
-    for (Vector param : sampleParams) {
+    for (Vector param : SAMPLE_PARAMS) {
       i++;
       v.set(0, param.get(0));
       v.set(1, param.get(1));
@@ -112,19 +111,19 @@ public class DisplayDirichlet extends Frame {
   
   public void plotSampleData(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    double sx = (double) res / ds;
+    double sx = (double) res / DS;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
     
     // plot the axes
     g2.setColor(Color.BLACK);
-    Vector dv = new DenseVector(2).assign(size / 2.0);
+    Vector dv = new DenseVector(2).assign(SIZE / 2.0);
     plotRectangle(g2, new DenseVector(2).assign(2), dv);
     plotRectangle(g2, new DenseVector(2).assign(-2), dv);
     
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
-    for (VectorWritable v : sampleData) {
+    for (VectorWritable v : SAMPLE_DATA) {
       plotRectangle(g2, v.get(), dv);
     }
   }
@@ -143,10 +142,10 @@ public class DisplayDirichlet extends Frame {
     double[] flip = {1, -1};
     Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
-    int h = size / 2;
+    int h = SIZE / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2.draw(new Rectangle2D.Double(x * ds, y * ds, dv.get(0) * ds, dv.get(1) * ds));
+    g2.draw(new Rectangle2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
   }
   
   /**
@@ -163,10 +162,10 @@ public class DisplayDirichlet extends Frame {
     double[] flip = {1, -1};
     Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
-    int h = size / 2;
+    int h = SIZE / 2;
     double x = v2.get(0) + h;
     double y = v2.get(1) + h;
-    g2.draw(new Ellipse2D.Double(x * ds, y * ds, dv.get(0) * ds, dv.get(1) * ds));
+    g2.draw(new Ellipse2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
   }
   
   private static void printModels(List<Model<VectorWritable>[]> results, int significant) {
@@ -212,10 +211,10 @@ public class DisplayDirichlet extends Frame {
    */
   private static void generateSamples(int num, double mx, double my, double sd) {
     double[] params = {mx, my, sd, sd};
-    sampleParams.add(new DenseVector(params));
+    SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
     for (int i = 0; i < num; i++) {
-      sampleData.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
+      SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sd),
           UncommonDistributions.rNorm(my, sd)})));
     }
   }
@@ -236,24 +235,24 @@ public class DisplayDirichlet extends Frame {
    */
   private static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
     double[] params = {mx, my, sdx, sdy};
-    sampleParams.add(new DenseVector(params));
+    SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] {num, mx, my, sdx, sdy});
     for (int i = 0; i < num; i++) {
-      sampleData
+      SAMPLE_DATA
           .add(new VectorWritable(new DenseVector(new double[] {UncommonDistributions.rNorm(mx, sdx),
                                                                 UncommonDistributions.rNorm(my, sdy)})));
     }
   }
   
   public static void generateResults(ModelDistribution<VectorWritable> modelDist) {
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(sampleData, modelDist,
+    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(SAMPLE_DATA, modelDist,
         1.0, k, 2, 2);
     result = dc.cluster(20);
     printModels(result, 5);
   }
   
   public static boolean isSignificant(Model<VectorWritable> model) {
-    return (double) model.count() / sampleData.size() > significance;
+    return (double) model.count() / SAMPLE_DATA.size() > SIGNIFICANCE;
   }
   
 }

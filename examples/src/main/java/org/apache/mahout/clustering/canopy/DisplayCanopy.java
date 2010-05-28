@@ -32,16 +32,15 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayCanopy extends DisplayDirichlet {
+
+  private static List<Canopy> canopies;
+  private static final double T1 = 3.0;
+  private static final double T2 = 1.6;
+
   DisplayCanopy() {
     initialize();
     this.setTitle("Canopy Clusters (> 5% of population)");
   }
-  
-  private static List<Canopy> canopies;
-  
-  private static final double t1 = 3.0;
-  
-  private static final double t2 = 1.6;
   
   @Override
   public void paint(Graphics g) {
@@ -49,15 +48,15 @@ class DisplayCanopy extends DisplayDirichlet {
     Graphics2D g2 = (Graphics2D) g;
     Vector dv = new DenseVector(2);
     for (Canopy canopy : canopies) {
-      if (canopy.getNumPoints() > DisplayDirichlet.sampleData.size() * 0.05) {
+      if (canopy.getNumPoints() > DisplayDirichlet.SAMPLE_DATA.size() * 0.05) {
         g2.setStroke(new BasicStroke(2));
-        g2.setColor(colors[1]);
-        dv.assign(t1);
+        g2.setColor(COLORS[1]);
+        dv.assign(T1);
         Vector center = canopy.computeCentroid();
         DisplayDirichlet.plotEllipse(g2, center, dv);
         g2.setStroke(new BasicStroke(3));
-        g2.setColor(colors[0]);
-        dv.assign(t2);
+        g2.setColor(COLORS[0]);
+        dv.assign(T2);
         DisplayDirichlet.plotEllipse(g2, center, dv);
       }
     }
@@ -67,10 +66,10 @@ class DisplayCanopy extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : sampleData) {
+    for (VectorWritable sample : SAMPLE_DATA) {
       points.add(sample.get());
     }
-    canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), t1, t2);
+    canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), T1, T2);
     CanopyClusterer.updateCentroids(canopies);
     new DisplayCanopy();
   }

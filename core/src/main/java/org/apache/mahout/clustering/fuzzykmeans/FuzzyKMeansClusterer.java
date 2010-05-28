@@ -43,7 +43,7 @@ public class FuzzyKMeansClusterer {
 
   private boolean emitMostLikely = true;
 
-  private double threshold = 0;
+  private double threshold;
 
   /**
     * Init the fuzzy k-means clusterer with the distance measure to use for comparison.
@@ -101,8 +101,9 @@ public class FuzzyKMeansClusterer {
    * @param output
    *          the OutputCollector to emit into
    */
-  public void emitPointProbToCluster(Vector point, List<SoftCluster> clusters, OutputCollector<Text, FuzzyKMeansInfo> output)
-      throws IOException {
+  public void emitPointProbToCluster(Vector point,
+                                     List<SoftCluster> clusters, 
+                                     OutputCollector<Text, FuzzyKMeansInfo> output) throws IOException {
 
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
@@ -240,8 +241,12 @@ public class FuzzyKMeansClusterer {
    * @return
    *          a List<List<SoftCluster>> of clusters produced per iteration
    */
-  public static List<List<SoftCluster>> clusterPoints(List<Vector> points, List<SoftCluster> clusters, DistanceMeasure measure,
-      double threshold, double m, int numIter) {
+  public static List<List<SoftCluster>> clusterPoints(List<Vector> points,
+                                                      List<SoftCluster> clusters,
+                                                      DistanceMeasure measure,
+                                                      double threshold,
+                                                      double m,
+                                                      int numIter) {
     List<List<SoftCluster>> clustersList = new ArrayList<List<SoftCluster>>();
     clustersList.add(clusters);
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, threshold, m);

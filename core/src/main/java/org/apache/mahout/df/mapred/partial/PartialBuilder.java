@@ -47,6 +47,18 @@ import org.slf4j.LoggerFactory;
 public class PartialBuilder extends Builder {
   
   private static final Logger log = LoggerFactory.getLogger(PartialBuilder.class);
+
+  public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
+    this(treeBuilder, dataPath, datasetPath, seed, new Configuration());
+  }
+
+  public PartialBuilder(TreeBuilder treeBuilder,
+                        Path dataPath,
+                        Path datasetPath,
+                        Long seed,
+                        Configuration conf) {
+    super(treeBuilder, dataPath, datasetPath, seed, conf);
+  }
   
   /**
    * Indicates if we should run the second step of the builder.<br>
@@ -69,18 +81,6 @@ public class PartialBuilder extends Builder {
    */
   protected static void setStep2(Configuration conf, boolean value) {
     conf.setBoolean("debug.mahout.rf.partial.step2", value);
-  }
-  
-  public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
-    this(treeBuilder, dataPath, datasetPath, seed, new Configuration());
-  }
-  
-  public PartialBuilder(TreeBuilder treeBuilder,
-                        Path dataPath,
-                        Path datasetPath,
-                        Long seed,
-                        Configuration conf) {
-    super(treeBuilder, dataPath, datasetPath, seed, conf);
   }
   
   @Override

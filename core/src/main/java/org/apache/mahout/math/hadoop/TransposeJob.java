@@ -112,7 +112,7 @@ public class TransposeJob extends AbstractJob {
       int row = r.get();
       entry.setCol(row);
       entry.setRow(-1);  // output "row" is captured in the key
-      while(it.hasNext()) {
+      while (it.hasNext()) {
         Vector.Element e = it.next();
         r.set(e.index());
         entry.setVal(e.get());
@@ -139,7 +139,7 @@ public class TransposeJob extends AbstractJob {
                        OutputCollector<IntWritable, VectorWritable> out,
                        Reporter reporter) throws IOException {
       RandomAccessSparseVector tmp = new RandomAccessSparseVector(newNumCols, 100);
-      while(it.hasNext()) {
+      while (it.hasNext()) {
         DistributedRowMatrix.MatrixEntryWritable e = it.next();
         tmp.setQuick(e.getCol(), e.getVal());
       }

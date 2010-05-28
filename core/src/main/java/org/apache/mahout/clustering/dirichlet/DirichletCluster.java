@@ -32,36 +32,23 @@ import com.google.gson.reflect.TypeToken;
 
 public class DirichletCluster<O> implements Writable, Cluster {
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    this.totalCount = in.readDouble();
-    this.model = readModel(in);
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    out.writeDouble(totalCount);
-    writeModel(out, model);
-  }
+  private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster<Vector>>() {}.getType();
 
   private Model<O> model; // the model for this iteration
 
   private double totalCount; // total count of observations for the model
 
   public DirichletCluster(Model<O> model, double totalCount) {
-    super();
     this.model = model;
     this.totalCount = totalCount;
   }
 
   public DirichletCluster(Model<O> model) {
-    super();
     this.model = model;
     this.totalCount = 0.0;
   }
 
   public DirichletCluster() {
-    super();
   }
 
   public Model<O> getModel() {
@@ -77,8 +64,17 @@ public class DirichletCluster<O> implements Writable, Cluster {
     return totalCount;
   }
 
-  private static final Type clusterType = new TypeToken<DirichletCluster<Vector>>() {
-  }.getType();
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    this.totalCount = in.readDouble();
+    this.model = readModel(in);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeDouble(totalCount);
+    writeModel(out, model);
+  }
 
   /** Reads a typed Model instance from the input stream */
   public static <O> Model<O> readModel(DataInput in) throws IOException {
@@ -113,7 +109,7 @@ public class DirichletCluster<O> implements Writable, Cluster {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, clusterType);
+    return gson.toJson(this, CLUSTER_TYPE);
   }
 
   @Override

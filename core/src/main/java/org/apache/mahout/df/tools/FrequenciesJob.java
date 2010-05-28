@@ -202,7 +202,7 @@ public class FrequenciesJob {
       
       Instance instance = converter.convert((int) key.get(), value.toString());
       
-      context.write(firstId, new IntWritable(instance.label));
+      context.write(firstId, new IntWritable(instance.getLabel()));
     }
     
   }

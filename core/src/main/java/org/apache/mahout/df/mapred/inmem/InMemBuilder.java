@@ -56,8 +56,7 @@ public class InMemBuilder extends Builder {
   }
   
   @Override
-  protected void configureJob(JobConf conf, int nbTrees, boolean oobEstimate)
-  throws IOException {
+  protected void configureJob(JobConf conf, int nbTrees, boolean oobEstimate) throws IOException {
     FileOutputFormat.setOutputPath(conf, getOutputPath(conf));
     
     // put the data in the DistributedCache
@@ -74,8 +73,7 @@ public class InMemBuilder extends Builder {
   }
   
   @Override
-  protected DecisionForest parseOutput(JobConf conf, PredictionCallback callback)
-  throws IOException {
+  protected DecisionForest parseOutput(JobConf conf, PredictionCallback callback) throws IOException {
     Map<Integer, MapredOutput> output = new HashMap<Integer, MapredOutput>();
     
     Path outputPath = getOutputPath(conf);

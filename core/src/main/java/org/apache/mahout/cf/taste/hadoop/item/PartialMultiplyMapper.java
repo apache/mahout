@@ -61,8 +61,7 @@ public final class PartialMultiplyMapper extends
       long userID = userIDs.get(i);
       float prefValue = prefValues.get(i);
       if (!Float.isNaN(prefValue)) {
-        Vector partialProduct = prefValue == 1.0f ? cooccurrenceColumn : 
-            cooccurrenceColumn.times(prefValue);
+        Vector partialProduct = prefValue == 1.0f ? cooccurrenceColumn : cooccurrenceColumn.times(prefValue);
         userIDWritable.set(userID);
         vectorWritable.set(partialProduct);
         context.write(userIDWritable, vectorWritable);

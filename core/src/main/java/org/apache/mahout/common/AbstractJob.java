@@ -149,7 +149,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   }
   
   protected static void maybePut(Map<String,String> args, CommandLine cmdLine, Option... opt) {
-    for(Option o : opt) {
+    for (Option o : opt) {
       Object value = cmdLine.getValue(o);
       if (value != null) {
         args.put(o.getPreferredName(), value.toString());
@@ -161,9 +161,8 @@ public abstract class AbstractJob extends Configured implements Tool {
     int phase = currentPhase.getAndIncrement();
     String startPhase = args.get("--startPhase");
     String endPhase = args.get("--endPhase");
-    boolean phaseSkipped =
-        (startPhase != null && phase < Integer.parseInt(startPhase)) ||
-        (endPhase != null && phase > Integer.parseInt(endPhase));
+    boolean phaseSkipped = (startPhase != null && phase < Integer.parseInt(startPhase)) 
+        || (endPhase != null && phase > Integer.parseInt(endPhase));
     if (phaseSkipped) {
       log.info("Skipping phase {}", phase);
     }

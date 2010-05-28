@@ -34,13 +34,14 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class DisplayMeanShift extends DisplayDirichlet {
+final class DisplayMeanShift extends DisplayDirichlet {
 
   private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);
 
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
-  private static double t1, t2;
+  private static double t1;
+  private static double t2;
 
   private DisplayMeanShift() {
     initialize();
@@ -50,12 +51,12 @@ class DisplayMeanShift extends DisplayDirichlet {
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    double sx = (double) res / ds;
+    double sx = (double) res / DS;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
 
     // plot the axes
     g2.setColor(Color.BLACK);
-    Vector dv = new DenseVector(2).assign(size / 2.0);
+    Vector dv = new DenseVector(2).assign(SIZE / 2.0);
     Vector dv1 = new DenseVector(2).assign(t1);
     Vector dv2 = new DenseVector(2).assign(t2);
     DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(2), dv);
@@ -64,15 +65,15 @@ class DisplayMeanShift extends DisplayDirichlet {
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
-    for (VectorWritable v : sampleData) {
+    for (VectorWritable v : SAMPLE_DATA) {
       DisplayDirichlet.plotRectangle(g2, v.get(), dv);
     }
     int i = 0;
     for (MeanShiftCanopy canopy : canopies) {
-      if (canopy.getBoundPoints().toList().size() > 0.015 * DisplayDirichlet.sampleData.size()) {
-        g2.setColor(colors[Math.min(i++, DisplayDirichlet.colors.length - 1)]);
+      if (canopy.getBoundPoints().toList().size() > 0.015 * DisplayDirichlet.SAMPLE_DATA.size()) {
+        g2.setColor(COLORS[Math.min(i++, DisplayDirichlet.COLORS.length - 1)]);
         for (int v : canopy.getBoundPoints().elements()) {
-          DisplayDirichlet.plotRectangle(g2, sampleData.get(v).get(), dv);
+          DisplayDirichlet.plotRectangle(g2, SAMPLE_DATA.get(v).get(), dv);
         }
         DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv1);
         DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv2);
@@ -84,7 +85,7 @@ class DisplayMeanShift extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : sampleData) {
+    for (VectorWritable sample : SAMPLE_DATA) {
       points.add(sample.get());
     }
     t1 = 1.5;

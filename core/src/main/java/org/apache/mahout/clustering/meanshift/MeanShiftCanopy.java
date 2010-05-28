@@ -43,10 +43,9 @@ public class MeanShiftCanopy extends ClusterBase {
   // TODO: this is problematic, but how else to encode membership?
   private IntArrayList boundPoints = new IntArrayList();
   
-  private boolean converged = false;
+  private boolean converged;
   
   public MeanShiftCanopy() {
-    super();
   }
   
   /** Create a new Canopy with the given canopyId */

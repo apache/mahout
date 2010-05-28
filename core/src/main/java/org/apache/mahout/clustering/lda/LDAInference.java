@@ -34,7 +34,10 @@ public class LDAInference {
   
   private static final double E_STEP_CONVERGENCE = 1.0E-6;
   private static final int MAX_ITER = 20;
-  
+
+  private DenseMatrix phi;
+  private final LDAState state;
+
   public LDAInference(LDAState state) {
     this.state = state;
   }
@@ -49,18 +52,18 @@ public class LDAInference {
     private final Vector gamma; // p(topic)
     private final Matrix mphi; // log p(columnMap(w)|t)
     private final int[] columnMap; // maps words into the matrix's column map
-    public final double logLikelihood;
-    
-    public double phi(int k, int w) {
-      return mphi.getQuick(k, columnMap[w]);
-    }
-    
+    private final double logLikelihood;
+
     InferredDocument(Vector wordCounts, Vector gamma, int[] columnMap, Matrix phi, double ll) {
       this.wordCounts = wordCounts;
       this.gamma = gamma;
       this.mphi = phi;
       this.columnMap = columnMap;
       this.logLikelihood = ll;
+    }
+
+    public double phi(int k, int w) {
+      return mphi.getQuick(k, columnMap[w]);
     }
     
     public Vector getWordCounts() {
@@ -69,6 +72,10 @@ public class LDAInference {
     
     public Vector getGamma() {
       return gamma;
+    }
+
+    public double getLogLikelihood() {
+      return logLikelihood;
     }
   }
   
@@ -80,9 +87,9 @@ public class LDAInference {
     int docLength = wordCounts.size(); // cardinality of document vectors
     
     // initialize variational approximation to p(z|doc)
-    Vector gamma = new DenseVector(state.numTopics);
-    gamma.assign(state.topicSmoothing + docTotal / state.numTopics);
-    Vector nextGamma = new DenseVector(state.numTopics);
+    Vector gamma = new DenseVector(state.getNumTopics());
+    gamma.assign(state.getTopicSmoothing() + docTotal / state.getNumTopics());
+    Vector nextGamma = new DenseVector(state.getNumTopics());
     createPhiMatrix(docLength);
     
     Vector digammaGamma = digammaGamma(gamma);
@@ -94,7 +101,7 @@ public class LDAInference {
     boolean converged = false;
     double oldLL = 1;
     while (!converged && (iteration < MAX_ITER)) {
-      nextGamma.assign(state.topicSmoothing); // nG := alpha, for all topics
+      nextGamma.assign(state.getTopicSmoothing()); // nG := alpha, for all topics
       
       int mapping = 0;
       for (Iterator<Vector.Element> iter = wordCounts.iterateNonZero(); iter.hasNext();) {
@@ -136,7 +143,7 @@ public class LDAInference {
     Vector digammaGamma = digamma(gamma);
     // and log normalize:
     double digammaSumGamma = digamma(gamma.zSum());
-    for (int i = 0; i < state.numTopics; i++) {
+    for (int i = 0; i < state.getNumTopics(); i++) {
       digammaGamma.setQuick(i, digammaGamma.getQuick(i) - digammaSumGamma);
     }
     return digammaGamma;
@@ -144,29 +151,26 @@ public class LDAInference {
   
   private void createPhiMatrix(int docLength) {
     if (phi == null) {
-      phi = new DenseMatrix(state.numTopics, docLength);
+      phi = new DenseMatrix(state.getNumTopics(), docLength);
     } else if (phi.getRow(0).size() != docLength) {
-      phi = new DenseMatrix(state.numTopics, docLength);
+      phi = new DenseMatrix(state.getNumTopics(), docLength);
     } else {
       phi.assign(0);
     }
   }
   
-  private DenseMatrix phi;
-  private final LDAState state;
-  
   private double computeLikelihood(Vector wordCounts, int[] map, Matrix phi, Vector gamma, Vector digammaGamma) {
     double ll = 0.0;
     
     // log normalizer for q(gamma);
-    ll += Gamma.logGamma(state.topicSmoothing * state.numTopics);
-    ll -= state.numTopics * Gamma.logGamma(state.topicSmoothing);
+    ll += Gamma.logGamma(state.getTopicSmoothing() * state.getNumTopics());
+    ll -= state.getNumTopics() * Gamma.logGamma(state.getTopicSmoothing());
     // isNotNaNAssertion(ll);
     
     // now for the the rest of q(gamma);
-    for (int k = 0; k < state.numTopics; ++k) {
+    for (int k = 0; k < state.getNumTopics(); ++k) {
       double gammaK = gamma.get(k);
-      ll += (state.topicSmoothing - gammaK) * digammaGamma.getQuick(k);
+      ll += (state.getTopicSmoothing() - gammaK) * digammaGamma.getQuick(k);
       ll += Gamma.logGamma(gammaK);
       
     }
@@ -180,7 +184,7 @@ public class LDAInference {
       double n = e.get();
       int mapping = map[w];
       // now for each topic:
-      for (int k = 0; k < state.numTopics; k++) {
+      for (int k = 0; k < state.getNumTopics(); k++) {
         double llPart = 0.0;
         double phiKMapping = phi.getQuick(k, mapping);
         llPart += Math.exp(phiKMapping)
@@ -199,16 +203,16 @@ public class LDAInference {
    * Compute log q(k|w,doc) for each topic k, for a given word.
    */
   private Vector eStepForWord(int word, Vector digammaGamma) {
-    Vector phi = new DenseVector(state.numTopics); // log q(k|w), for each w
+    Vector phi = new DenseVector(state.getNumTopics()); // log q(k|w), for each w
     double phiTotal = Double.NEGATIVE_INFINITY; // log Normalizer
-    for (int k = 0; k < state.numTopics; ++k) { // update q(k|w)'s param phi
+    for (int k = 0; k < state.getNumTopics(); ++k) { // update q(k|w)'s param phi
       phi.setQuick(k, state.logProbWordGivenTopic(word, k) + digammaGamma.getQuick(k));
       phiTotal = LDAUtil.logSum(phiTotal, phi.getQuick(k));
       
       // assertions(word, digammaGamma, phiTotal, k);
     }
-    for (int i = 0; i < state.numTopics; i++) {
-      phi.setQuick(i, phi.getQuick(i) - phiTotal);// log normalize
+    for (int i = 0; i < state.getNumTopics(); i++) {
+      phi.setQuick(i, phi.getQuick(i) - phiTotal); // log normalize
     }
     return phi;
   }
@@ -250,7 +254,8 @@ public class LDAInference {
     }
     
     double f = 1.0 / (x * x);
-    double t = f * (-1 / 12.0 + f * (1 / 120.0 + f * (-1 / 252.0 + f * (1 / 240.0 + f * (-1 / 132.0 + f * (691 / 32760.0 + f * (-1 / 12.0 + f * 3617.0 / 8160.0)))))));
+    double t = f * (-1.0 / 12.0 + f * (1.0 / 120.0 + f * (-1.0 / 252.0 + f * (1.0 / 240.0
+        + f * (-1.0 / 132.0 + f * (691.0 / 32760.0 + f * (-1.0 / 12.0 + f * 3617.0 / 8160.0)))))));
     return r + Math.log(x) - 0.5 / x + t;
   }
   

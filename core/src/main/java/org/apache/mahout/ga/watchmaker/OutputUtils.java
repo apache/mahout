@@ -69,7 +69,10 @@ public final class OutputUtils {
    * @param evaluations
    *          List of evaluations
    */
-  public static void importEvaluations(FileSystem fs, JobConf conf, Path outpath, List<Double> evaluations) throws IOException {
+  public static void importEvaluations(FileSystem fs,
+                                       JobConf conf,
+                                       Path outpath,
+                                       List<Double> evaluations) throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
     
     // merge and sort the outputs

@@ -24,10 +24,10 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 
 final class ByItemIDComparator implements Comparator<EntityPrefWritable>, Serializable {
   
-  private static final Comparator<EntityPrefWritable> instance = new ByItemIDComparator();
+  private static final Comparator<EntityPrefWritable> INSTANCE = new ByItemIDComparator();
   
   public static Comparator<EntityPrefWritable> getInstance() {
-    return instance;
+    return INSTANCE;
   }
   
   @Override

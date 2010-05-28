@@ -100,18 +100,18 @@ public final class MahoutDriver {
     mainClasses.load(propsStream);
 
     boolean foundShortName = false;
-    for(Object key :  mainClasses.keySet()) {
+    for (Object key :  mainClasses.keySet()) {
       String keyString = (String) key;
-      if(args.length > 0 && shortName(mainClasses.getProperty(keyString)).equals(args[0])) {
+      if (args.length > 0 && shortName(mainClasses.getProperty(keyString)).equals(args[0])) {
         foundShortName = true;
       }
       addClass(programDriver, keyString, mainClasses.getProperty(keyString));
     }
-    if(args.length < 1 || args[0] == null || args[0].equals("-h") || args[0].equals("--help")) {
+    if (args.length < 1 || args[0] == null || args[0].equals("-h") || args[0].equals("--help")) {
       programDriver.driver(args);
     }
     String progName = args[0];
-    if(!foundShortName) {
+    if (!foundShortName) {
       addClass(programDriver, progName, progName);
     }
     shift(args);
@@ -127,20 +127,20 @@ public final class MahoutDriver {
       log.warn("No " + progName + ".props found on classpath, will use command-line arguments only");
     }
     Map<String,String[]> argMap = new HashMap<String,String[]>();
-    int i=0;
-    while(i<args.length && args[i] != null) {
+    int i = 0;
+    while (i < args.length && args[i] != null) {
       List<String> argValues = new ArrayList<String>();
       String arg = args[i];
       i++;
-      if(arg.length() > 2 && arg.charAt(1) == 'D') { // '-Dkey=value' or '-Dkey=value1,value2,etc' case
+      if (arg.length() > 2 && arg.charAt(1) == 'D') { // '-Dkey=value' or '-Dkey=value1,value2,etc' case
         String[] argSplit = arg.split("=");
         arg = argSplit[0];
-        if(argSplit.length == 2) {
+        if (argSplit.length == 2) {
           argValues.add(argSplit[1]);
         }
       } else {                                      // '-key [values]' or '--key [values]' case.
-        while(i<args.length && args[i] != null) {
-          if(args[i].length() > 0 && args[i].charAt(0) != '-') {
+        while (i < args.length && args[i] != null) {
+          if (args[i].length() > 0 && args[i].charAt(0) != '-') {
             argValues.add(args[i]);
             i++;
           } else {
@@ -155,19 +155,19 @@ public final class MahoutDriver {
       String shortArg = '-' + argNamePair[0].trim();
       String longArg = argNamePair.length < 2 ? null : "--" + argNamePair[1].trim();
       if(!argMap.containsKey(shortArg) && (longArg == null || !argMap.containsKey(longArg))) {
-        argMap.put(longArg, new String[] { mainProps.getProperty(key) } );
+        argMap.put(longArg, new String[] {mainProps.getProperty(key)});
       }
     }
     List<String> argsList = new ArrayList<String>();
     argsList.add(progName);
-    for(String arg : argMap.keySet()) {
-      if(arg.startsWith("-D")) { // arg is -Dkey - if value for this !isEmpty(), then arg -> -Dkey + "=" + value
-        if(argMap.get(arg).length > 0 && !argMap.get(arg)[0].trim().isEmpty()) {
+    for (String arg : argMap.keySet()) {
+      if (arg.startsWith("-D")) { // arg is -Dkey - if value for this !isEmpty(), then arg -> -Dkey + "=" + value
+        if (argMap.get(arg).length > 0 && !argMap.get(arg)[0].trim().isEmpty()) {
           arg += '=' + argMap.get(arg)[0].trim();
         }
       }
       argsList.add(arg);
-      if(!arg.startsWith("-D")) {
+      if (!arg.startsWith("-D")) {
         argsList.addAll(Arrays.asList(argMap.get(arg)));
       }
     }

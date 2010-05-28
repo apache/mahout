@@ -28,30 +28,30 @@ import org.apache.mahout.common.LongPair;
  */
 public final class NullRescorer<T> implements Rescorer<T>, IDRescorer {
   
-  private static final IDRescorer userOrItemInstance = new NullRescorer<Long>();
-  private static final Rescorer<LongPair> itemItemPairInstance = new NullRescorer<LongPair>();
-  private static final Rescorer<LongPair> userUserPairInstance = new NullRescorer<LongPair>();
+  private static final IDRescorer USER_OR_ITEM_INSTANCE = new NullRescorer<Long>();
+  private static final Rescorer<LongPair> ITEM_ITEM_PAIR_INSTANCE = new NullRescorer<LongPair>();
+  private static final Rescorer<LongPair> USER_USER_PAIR_INSTANCE = new NullRescorer<LongPair>();
   
   public static IDRescorer getItemInstance() {
-    return userOrItemInstance;
+    return USER_OR_ITEM_INSTANCE;
   }
   
   public static IDRescorer getUserInstance() {
-    return userOrItemInstance;
+    return USER_OR_ITEM_INSTANCE;
   }
   
   public static Rescorer<LongPair> getItemItemPairInstance() {
-    return itemItemPairInstance;
+    return ITEM_ITEM_PAIR_INSTANCE;
   }
   
   public static Rescorer<LongPair> getUserUserPairInstance() {
-    return userUserPairInstance;
+    return USER_USER_PAIR_INSTANCE;
   }
-  
+
   private NullRescorer() {
   // do nothing
   }
-  
+
   /**
    * @param thing
    *          to rescore
@@ -70,12 +70,12 @@ public final class NullRescorer<T> implements Rescorer<T>, IDRescorer {
   }
   
   @Override
-  public double rescore(long ID, double originalScore) {
+  public double rescore(long id, double originalScore) {
     return originalScore;
   }
   
   @Override
-  public boolean isFiltered(long ID) {
+  public boolean isFiltered(long id) {
     return false;
   }
   

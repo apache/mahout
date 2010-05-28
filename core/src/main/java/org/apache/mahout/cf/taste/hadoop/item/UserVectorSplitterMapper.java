@@ -36,9 +36,9 @@ import org.apache.mahout.math.VectorWritable;
 public final class UserVectorSplitterMapper extends
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
 
-  private static final int MAX_PREFS_CONSIDERED = 10;  
   static final String USERS_FILE = "usersFile";
-  
+  private static final int MAX_PREFS_CONSIDERED = 10;  
+
   private FastIDSet usersToRecommendFor;
 
   @Override

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -38,8 +38,8 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OutputDriver {
-  /** Logger for this class. */
+public final class OutputDriver {
+
   private static final Logger LOG = LoggerFactory.getLogger(OutputDriver.class);
   
   private OutputDriver() { }

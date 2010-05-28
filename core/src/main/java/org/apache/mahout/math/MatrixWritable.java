@@ -22,25 +22,25 @@ import org.apache.hadoop.io.Writable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class MatrixWritable implements Writable {
 
   private Matrix matrix;
 
-  public Matrix get() { return matrix; }
-
-  public void set(Matrix matrix) {
-    this.matrix = matrix;
-  }
-
   public MatrixWritable() {
-
   }
 
   public MatrixWritable(Matrix m) {
     set(m);
+  }
+
+  public Matrix get() {
+    return matrix;
+  }
+
+  public void set(Matrix matrix) {
+    this.matrix = matrix;
   }
 
   @Override
@@ -112,8 +112,7 @@ public class MatrixWritable implements Writable {
   }
 
   /** Writes a typed Matrix instance to the output stream */
-  public static void writeMatrix(DataOutput out, Matrix matrix)
-      throws IOException {
+  public static void writeMatrix(DataOutput out, Matrix matrix) throws IOException {
     out.writeUTF(matrix.getClass().getName());
    // matrix.write(out);
   }

@@ -93,11 +93,16 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
     });
     
     FPGrowth<Integer> fpGrowth = new FPGrowth<Integer>();
-    fpGrowth.generateTopKFrequentPatterns(cTree.getIterator(), localFList, minSupport, maxHeapSize,
-      new HashSet<Integer>(groupFeatures.get(key.get()).toList()), new IntegerStringOutputConverter(
-          new ContextWriteOutputCollector<LongWritable,TransactionTree,Text,TopKStringPatterns>(context),
-          featureReverseMap), new ContextStatusUpdater<LongWritable,TransactionTree,Text,TopKStringPatterns>(
-          context));
+    fpGrowth.generateTopKFrequentPatterns(
+        cTree.getIterator(),
+        localFList,
+        minSupport,
+        maxHeapSize,
+        new HashSet<Integer>(groupFeatures.get(key.get()).toList()),
+        new IntegerStringOutputConverter(
+            new ContextWriteOutputCollector<LongWritable,TransactionTree,Text,TopKStringPatterns>(context),
+            featureReverseMap),
+        new ContextStatusUpdater<LongWritable,TransactionTree,Text,TopKStringPatterns>(context));
   }
   
   @Override

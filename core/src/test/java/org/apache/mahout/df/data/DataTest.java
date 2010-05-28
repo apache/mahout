@@ -239,7 +239,7 @@ public class DataTest extends MahoutTestCase {
       data.countLabels(counts);
       
       for (int index=0;index<data.size();index++) {
-        counts[data.get(index).label]--;
+        counts[data.get(index).getLabel()]--;
       }
       
       for (int label = 0; label < data.getDataset().nblabels(); label++) {

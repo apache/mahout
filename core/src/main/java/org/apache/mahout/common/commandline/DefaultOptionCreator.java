@@ -200,8 +200,8 @@ public final class DefaultOptionCreator {
     return new DefaultOptionBuilder().withLongName("emitMostLikely").withRequired(false).withShortName("e")
         .withArgument(new ArgumentBuilder().withName("emitMostLikely").withDefault("true")
             .withMinimum(1).withMaximum(1).create()).withDescription(
-            "True if clustering should emit the most likely point only, " +
-                "false for threshold clustering. Default is true");
+            "True if clustering should emit the most likely point only, "
+                + "false for threshold clustering. Default is true");
   }
 
   /**

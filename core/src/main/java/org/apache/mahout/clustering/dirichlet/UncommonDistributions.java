@@ -244,18 +244,18 @@ public final class UncommonDistributions {
    * 
    * @param totalCounts
    *          an unnormalized count Vector
-   * @param alpha_0
+   * @param alpha0
    *          a double
    * @return a Vector of probabilities
    */
-  public static Vector rDirichlet(Vector totalCounts, double alpha_0) {
+  public static Vector rDirichlet(Vector totalCounts, double alpha0) {
     Vector pi = totalCounts.like();
     double total = totalCounts.zSum();
     double remainder = 1.0;
     for (int k = 0; k < pi.size(); k++) {
       double countK = totalCounts.get(k);
       total -= countK;
-      double betaK = rBeta(1 + countK, Math.max(0, alpha_0 + total));
+      double betaK = rBeta(1.0 + countK, Math.max(0.0, alpha0 + total));
       double piK = betaK * remainder;
       pi.set(k, piK);
       remainder -= piK;

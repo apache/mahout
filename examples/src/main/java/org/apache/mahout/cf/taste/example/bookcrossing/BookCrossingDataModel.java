@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -68,7 +68,8 @@ public final class BookCrossingDataModel extends FileDataModel {
           continue;
         }
         // Delete replace anything that isn't numeric, or a semicolon delimiter. Make comma the delimiter.
-        String convertedLine = BookCrossingDataModel.NON_DIGIT_SEMICOLON_PATTERN.matcher(line).replaceAll("").replace(';', ',');
+        String convertedLine = BookCrossingDataModel.NON_DIGIT_SEMICOLON_PATTERN.matcher(line)
+            .replaceAll("").replace(';', ',');
         // If this means we deleted an entire ID -- few cases like that -- skip the line
         if (convertedLine.contains(",,")) {
           continue;

@@ -109,7 +109,7 @@ public class PartitionBugTest extends MahoutTestCase {
       }
 
       assertEquals(String.format(Locale.ENGLISH, "treeId: %d, InstanceId: %d, Prediction: %d",
-          treeId, instanceId, prediction), data.get(instanceId).label, prediction);
+          treeId, instanceId, prediction), data.get(instanceId).getLabel(), prediction);
     }
 
   }
@@ -122,7 +122,7 @@ public class PartitionBugTest extends MahoutTestCase {
 
     @Override
     public int classify(Instance instance) {
-      return instance.label;
+      return instance.getLabel();
     }
 
     @Override

@@ -35,21 +35,21 @@ public class DirichletState<O> {
   
   private Vector mixture; // the mixture vector
   
-  private double alpha_0; // alpha_0
+  private double alpha0; // alpha0
   
   public DirichletState(ModelDistribution<O> modelFactory,
                         int numClusters,
-                        double alpha_0) {
+                        double alpha0) {
     this.numClusters = numClusters;
     this.modelFactory = modelFactory;
-    this.alpha_0 = alpha_0;
+    this.alpha0 = alpha0;
     // sample initial prior models
     clusters = new ArrayList<DirichletCluster<O>>();
     for (Model<O> m : modelFactory.sampleFromPrior(numClusters)) {
       clusters.add(new DirichletCluster<O>(m));
     }
     // sample the mixture parameters from a Dirichlet distribution on the totalCounts
-    mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha_0);
+    mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha0);
   }
   
   public DirichletState() { }
@@ -107,7 +107,7 @@ public class DirichletState<O> {
       clusters.get(i).setModel(newModels[i]);
     }
     // update the mixture
-    mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha_0);
+    mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha0);
   }
   
   /**

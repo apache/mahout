@@ -48,7 +48,8 @@ public final class RandomSeedGenerator {
   
   public static final String K = "k";
   
-  private RandomSeedGenerator() {}
+  private RandomSeedGenerator() {
+  }
   
   public static Path buildRandom(Path input, Path output, int k) throws IOException,
                                                                     IllegalAccessException,
@@ -111,10 +112,10 @@ public final class RandomSeedGenerator {
     return outFile;
   }
   
-  public static List<Vector> chooseRandomPoints(List<Vector> vectors, int k) {
+  public static List<Vector> chooseRandomPoints(Iterable<Vector> vectors, int k) {
     List<Vector> chosenPoints = new ArrayList<Vector>(k);
     Random random = RandomUtils.getRandom();
-    for(Vector value : vectors){
+    for (Vector value : vectors) {
       int currentSize = chosenPoints.size();
       if (currentSize < k) {
         chosenPoints.add(value);

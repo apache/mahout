@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -55,7 +55,10 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
   private boolean all;
   
   @Override
-  public void map(LongWritable key, Text value, OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
+  public void map(LongWritable key,
+                  Text value,
+                  OutputCollector<Text,Text> output,
+                  Reporter reporter) throws IOException {
     
     String content = value.toString();
     if (content.contains(REDIRECT)) {

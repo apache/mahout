@@ -60,7 +60,7 @@ public class MeanTreeCollector implements PredictionCallback {
     
     nbPredictions[treeId]++;
     
-    if (data.get(instanceId).label != prediction) {
+    if (data.get(instanceId).getLabel() != prediction) {
       nbErrors[treeId]++;
     }
   }

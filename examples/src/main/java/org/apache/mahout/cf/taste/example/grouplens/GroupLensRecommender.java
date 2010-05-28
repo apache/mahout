@@ -58,8 +58,7 @@ public final class GroupLensRecommender implements Recommender {
   }
   
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-      throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     return recommender.recommend(userID, howMany, rescorer);
   }
   

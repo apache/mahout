@@ -48,29 +48,6 @@ public class PartialBuilder extends Builder {
   
   private static final Logger log = LoggerFactory.getLogger(PartialBuilder.class);
   
-  /**
-   * Indicates if we should run the second step of the builder.<br>
-   * This parameter is only meant for debuging, so we keep it protected.
-   * 
-   * @param conf
-   * @return
-   */
-  protected static boolean isStep2(Configuration conf) {
-    return conf.getBoolean("debug.mahout.rf.partial.step2", true);
-  }
-  
-  /**
-   * Should run the second step of the builder ?
-   * 
-   * @param conf
-   * @param value
-   *          true to indicate that the second step will be launched
-   * 
-   */
-  protected static void setStep2(Configuration conf, boolean value) {
-    conf.setBoolean("debug.mahout.rf.partial.step2", value);
-  }
-  
   public PartialBuilder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed) {
     this(treeBuilder, dataPath, datasetPath, seed, new Configuration());
   }
@@ -81,6 +58,29 @@ public class PartialBuilder extends Builder {
                         Long seed,
                         Configuration conf) {
     super(treeBuilder, dataPath, datasetPath, seed, conf);
+  }
+
+  /**
+   * Indicates if we should run the second step of the builder.<br>
+   * This parameter is only meant for debuging, so we keep it protected.
+   *
+   * @param conf
+   * @return
+   */
+  protected static boolean isStep2(Configuration conf) {
+    return conf.getBoolean("debug.mahout.rf.partial.step2", true);
+  }
+
+  /**
+   * Should run the second step of the builder ?
+   *
+   * @param conf
+   * @param value
+   *          true to indicate that the second step will be launched
+   *
+   */
+  protected static void setStep2(Configuration conf, boolean value) {
+    conf.setBoolean("debug.mahout.rf.partial.step2", value);
   }
   
   @Override

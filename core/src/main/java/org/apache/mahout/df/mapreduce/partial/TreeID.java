@@ -26,7 +26,7 @@ public class TreeID extends LongWritable implements Cloneable {
   
   public static final int MAX_TREEID = 100000;
   
-  public TreeID() {}
+  public TreeID() { }
   
   public TreeID(int partition, int treeId) {
     if (partition < 0) {

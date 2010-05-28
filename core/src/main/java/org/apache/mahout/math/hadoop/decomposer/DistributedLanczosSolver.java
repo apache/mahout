@@ -61,7 +61,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   @Override
   protected Vector getInitialVector(VectorIterable corpus) {
     Vector initialVector = new DenseVector(corpus.numCols());
-    initialVector.assign(1/Math.sqrt(corpus.numCols()));
+    initialVector.assign(1.0 / Math.sqrt(corpus.numCols()));
     return initialVector;
   }
 
@@ -103,7 +103,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
-    for(int i=0; i<eigenVectors.numRows() - 1; i++) {
+    for (int i = 0; i < eigenVectors.numRows() - 1; i++) {
       Vector v = eigenVectors.getRow(i);
       VectorWritable vw = new VectorWritable(v);
       iw.set(i);

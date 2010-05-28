@@ -24,18 +24,12 @@ import org.apache.mahout.math.Vector;
  */
 public class Instance {
   
-  /** instance unique id */
-  public final int id;
+  private final int id;
   
   /** attributes, except LABEL and IGNORED */
   private final Vector attrs;
   
-  /**
-   * instance label code.<br>
-   * use Dataset.labels to get the real label value
-   * 
-   */
-  public final int label;
+  private final int label;
   
   public Instance(int id, Vector attrs, int label) {
     this.id = id;
@@ -84,5 +78,18 @@ public class Instance {
   public int hashCode() {
     return id + label + attrs.hashCode();
   }
-  
+
+  /** instance unique id */
+  public int getId() {
+    return id;
+  }
+
+  /**
+   * instance label code.<br>
+   * use Dataset.labels to get the real label value
+   *
+   */
+  public int getLabel() {
+    return label;
+  }
 }

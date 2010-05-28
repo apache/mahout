@@ -34,7 +34,7 @@ public class DistributedTanimotoCoefficientSimilarity extends AbstractDistribute
     if (preferringXAndY == 0) {
       return Double.NaN;
     }
-    return (preferringXAndY / (weightOfItemVectorX + weightOfItemVectorY - preferringXAndY));
+    return preferringXAndY / (weightOfItemVectorX + weightOfItemVectorY - preferringXAndY);
 	}
 
 	@Override

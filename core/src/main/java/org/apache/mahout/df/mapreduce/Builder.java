@@ -65,6 +65,14 @@ public abstract class Builder {
   
   private String outputDirName = "output";
   
+  protected Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {
+    this.treeBuilder = treeBuilder;
+    this.dataPath = dataPath;
+    this.datasetPath = datasetPath;
+    this.seed = seed;
+    this.conf = new Configuration(conf);
+  }
+  
   protected TreeBuilder getTreeBuilder() {
     return treeBuilder;
   }
@@ -251,14 +259,6 @@ public abstract class Builder {
     Path datasetPath = getDistributedCacheFile(conf, 0);
     
     return Dataset.load(conf, datasetPath);
-  }
-  
-  protected Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {
-    this.treeBuilder = treeBuilder;
-    this.dataPath = dataPath;
-    this.datasetPath = datasetPath;
-    this.seed = seed;
-    this.conf = new Configuration(conf);
   }
   
   /**

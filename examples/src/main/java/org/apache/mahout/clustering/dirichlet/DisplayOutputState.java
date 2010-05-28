@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -42,7 +42,7 @@ class DisplayOutputState extends DisplayDirichlet {
   DisplayOutputState() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Map/Reduce Results (>"
-      + (int) (significance * 100) + "% of population)");
+      + (int) (SIGNIFICANCE * 100) + "% of population)");
   }
   
   @Override
@@ -54,7 +54,7 @@ class DisplayOutputState extends DisplayDirichlet {
     int i = DisplayDirichlet.result.size() - 1;
     for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(COLORS[Math.min(DisplayDirichlet.COLORS.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         NormalModel mm = (NormalModel) m;
         dv.assign(mm.getStdDev() * 3);
@@ -85,7 +85,7 @@ class DisplayOutputState extends DisplayDirichlet {
   private static void getSamples() throws IOException {
     File f = new File("input");
     for (File g : f.listFiles()) {
-      DisplayDirichlet.sampleData.addAll(readFile(g.getCanonicalPath()));
+      DisplayDirichlet.SAMPLE_DATA.addAll(readFile(g.getCanonicalPath()));
     }
   }
   

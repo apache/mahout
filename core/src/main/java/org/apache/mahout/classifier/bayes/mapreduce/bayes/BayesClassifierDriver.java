@@ -46,7 +46,7 @@ public final class BayesClassifierDriver {
   
   private static final Logger log = LoggerFactory.getLogger(BayesClassifierDriver.class);
   
-  private BayesClassifierDriver() {}
+  private BayesClassifierDriver() { } 
   
   /**
    * Run the job

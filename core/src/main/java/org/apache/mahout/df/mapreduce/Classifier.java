@@ -65,6 +65,15 @@ public class Classifier {
   private final Path outputPath; // path that will containt the final output of the classifier
   private final Path mappersOutputPath; // mappers will output here
 
+  public Classifier(Path forestPath, Path inputPath, Path datasetPath, Path outputPath, Configuration conf) {
+    this.forestPath = forestPath;
+    this.inputPath = inputPath;
+    this.datasetPath = datasetPath;
+    this.outputPath = outputPath;
+    this.conf = conf;
+    mappersOutputPath = new Path(outputPath, "mappers");
+  }
+
   private void configureJob(Job job) throws IOException {
     Configuration conf = job.getConfiguration();
 
@@ -82,16 +91,6 @@ public class Classifier {
     job.setInputFormatClass(CTextInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
-  }
-
-  public Classifier(Path forestPath, Path inputPath, Path datasetPath, Path outputPath, Configuration conf) {
-    this.forestPath = forestPath;
-    this.inputPath = inputPath;
-    this.datasetPath = datasetPath;
-    this.outputPath = outputPath;
-    this.conf = conf;
-
-    mappersOutputPath = new Path(outputPath, "mappers");
   }
 
   public void run() throws IOException, ClassNotFoundException, InterruptedException {

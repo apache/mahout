@@ -206,7 +206,7 @@ public class TestForest extends Configured implements Tool {
     long time = System.currentTimeMillis();
 
     Random rng = RandomUtils.getRandom();
-    ResultAnalyzer analyzer = (analyze) ? new ResultAnalyzer(Arrays.asList(dataset.labels()), "unknown") : null;
+    ResultAnalyzer analyzer = analyze ? new ResultAnalyzer(Arrays.asList(dataset.labels()), "unknown") : null;
 
     if (dataFS.getFileStatus(dataPath).isDir()) {
       //the input is a directory of files
@@ -230,7 +230,7 @@ public class TestForest extends Configured implements Tool {
 
     for (Path path : infiles) {
       log.info("Classifying : " + path);
-      Path outfile = (outPath != null) ? new Path(outPath, path.getName()).suffix(".out"): null;
+      Path outfile = (outPath != null) ? new Path(outPath, path.getName()).suffix(".out") : null;
       testFile(path, outfile, converter, forest, dataset, analyzer, rng);
     }
   }
@@ -262,7 +262,8 @@ public class TestForest extends Configured implements Tool {
       }
 
       if (analyze) {
-        analyzer.addInstance(dataset.getLabel(instance.label), new ClassifierResult(dataset.getLabel(prediction), 1.0));
+        analyzer.addInstance(dataset.getLabel(instance.getLabel()),
+                             new ClassifierResult(dataset.getLabel(prediction), 1.0));
       }
     }
 
@@ -270,10 +271,6 @@ public class TestForest extends Configured implements Tool {
     input.close();
   }
 
-  /**
-   * @param args
-   * @throws Exception
-   */
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new TestForest(), args);
   }

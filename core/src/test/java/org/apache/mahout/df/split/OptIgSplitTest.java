@@ -46,8 +46,8 @@ public class OptIgSplitTest extends MahoutTestCase {
       Split expected = ref.computeSplit(data, attr);
       Split actual = opt.computeSplit(data, attr);
 
-      assertEquals(expected.ig, actual.ig, 0.0000001);
-      assertEquals(expected.split, actual.split);
+      assertEquals(expected.getIg(), actual.getIg(), 0.0000001);
+      assertEquals(expected.getSplit(), actual.getSplit());
     }
   }
 

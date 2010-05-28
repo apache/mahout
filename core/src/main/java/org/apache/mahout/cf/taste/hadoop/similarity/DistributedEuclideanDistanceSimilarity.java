@@ -37,6 +37,6 @@ public class DistributedEuclideanDistanceSimilarity extends AbstractDistributedI
       n++;
     }
 
-    return (n / (1.0 + Math.sqrt(sumXYdiff2)));
+    return n / (1.0 + Math.sqrt(sumXYdiff2));
   }
 }

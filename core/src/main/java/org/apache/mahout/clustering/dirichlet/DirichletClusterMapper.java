@@ -42,16 +42,14 @@ import org.apache.mahout.math.VectorWritable;
 public class DirichletClusterMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
-  private OutputCollector<IntWritable, VectorWritable> output;
-
   private List<DirichletCluster> clusters;
-
   private DirichletClusterer clusterer;
 
-  @SuppressWarnings("unchecked")
   @Override
-  public void map(WritableComparable<?> key, VectorWritable vector, OutputCollector<IntWritable, WeightedVectorWritable> output,
-      Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key,
+                  VectorWritable vector,
+                  OutputCollector<IntWritable, WeightedVectorWritable> output,
+                  Reporter reporter) throws IOException {
     clusterer.emitPointToClusters(vector, clusters, output);
   }
 

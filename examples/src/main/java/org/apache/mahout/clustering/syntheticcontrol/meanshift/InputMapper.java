@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -35,7 +35,7 @@ import org.apache.mahout.math.Vector;
 public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Text,Text,MeanShiftCanopy> {
   
   private static final Pattern SPACE = Pattern.compile(" ");
-  private int nextCanopyId = 0;
+  private int nextCanopyId;
   
   @Override
   public void map(LongWritable key,

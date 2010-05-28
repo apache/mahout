@@ -100,20 +100,24 @@ public interface Parametered extends JobConfigurable {
     }
     
     private static final class Help {
+      static final int NAME_DESC_DISTANCE = 8;
+
       private final StringBuilder sb;
+      private int longestName;
+      private int numChars = 100; // a few extra just to be sure
+
+      private Help(Parametered parametered) {
+        recurseCount(parametered);
+        numChars += (longestName + NAME_DESC_DISTANCE) * parametered.getParameters().size();
+        sb = new StringBuilder(numChars);
+        recurseWrite(parametered);
+      }
       
       @Override
       public String toString() {
         return sb.toString();
       }
-      
-      private int longestName = 0;
-      private int numChars = 100; // a few extra just to be sure
-      
-      static final int distanceBetweenNameAndDescription = 8;
-      
-      // todo: hmmm in the end this is 5 letters less that it says.. not sure why
-      
+
       private void recurseCount(Parametered parametered) {
         for (Parameter<?> parameter : parametered.getParameters()) {
           int parameterNameLength = parameter.name().length();
@@ -125,24 +129,12 @@ public interface Parametered extends JobConfigurable {
         }
       }
       
-      private Help(Parametered parametered) {
-        
-        recurseCount(parametered);
-        
-        numChars += (longestName + distanceBetweenNameAndDescription)
-                    * parametered.getParameters().size();
-        sb = new StringBuilder(numChars);
-        
-        recurseWrite(parametered);
-        
-      }
-      
       private void recurseWrite(Parametered parametered) {
         for (Parameter<?> parameter : parametered.getParameters()) {
           sb.append(parameter.prefix());
           sb.append(parameter.name());
           int max = longestName - parameter.name().length() - parameter.prefix().length()
-                    + distanceBetweenNameAndDescription;
+                    + NAME_DESC_DISTANCE;
           for (int i = 0; i < max; i++) {
             sb.append(' ');
           }
@@ -160,17 +152,20 @@ public interface Parametered extends JobConfigurable {
     
     private static final class Conf {
       private final StringBuilder sb;
+      private int longestName;
+      private int numChars = 100; // a few extra just to be sure
+
+      private Conf(Parametered parametered) {
+        recurseCount(parametered);
+        sb = new StringBuilder(numChars);
+        recurseWrite(parametered);
+      }
       
       @Override
       public String toString() {
         return sb.toString();
       }
-      
-      private int longestName = 0;
-      private int numChars = 100; // a few extra just to be sure
-      
-      // int distanceBetweenNameAndDescription = 4;
-      
+
       private void recurseCount(Parametered parametered) {
         for (Parameter<?> parameter : parametered.getParameters()) {
           int parameterNameLength = parameter.prefix().length() + parameter.name().length();
@@ -187,16 +182,6 @@ public interface Parametered extends JobConfigurable {
           
           recurseCount(parameter);
         }
-      }
-      
-      private Conf(Parametered parametered) {
-        
-        recurseCount(parametered);
-        
-        sb = new StringBuilder(numChars);
-        
-        recurseWrite(parametered);
-        
       }
       
       private void recurseWrite(Parametered parametered) {

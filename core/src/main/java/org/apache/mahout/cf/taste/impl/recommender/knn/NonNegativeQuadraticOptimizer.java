@@ -33,14 +33,14 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
   /**
    * Non-negative Quadratic Optimization.
    * 
-   * @param A
+   * @param matrix
    *          matrix nxn positions
    * @param b
    *          vector b, n positions
    * @return vector of n weights
    */
   @Override
-  public double[] optimize(double[][] A, double[] b) {
+  public double[] optimize(double[][] matrix, double[] b) {
     int k = b.length;
     double[] r = new double[k];
     double[] x = new double[k];
@@ -51,9 +51,9 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
       double rdot = 0.0;
       for (int n = 0; n < k; n++) {
         double sumAw = 0.0;
-        double[] An = A[n];
+        double[] rowAn = matrix[n];
         for (int i = 0; i < k; i++) {
-          sumAw += An[i] * x[i];
+          sumAw += rowAn[i] * x[i];
         }
         // r = b - Ax; // the residual, or 'steepest gradient'
         double rn = b[n] - sumAw;
@@ -76,12 +76,12 @@ public final class NonNegativeQuadraticOptimizer implements Optimizer {
       // max step size denominator
       double rArdotSum = 0.0;
       for (int n = 0; n < k; n++) {
-        double SumAr = 0.0;
-        double[] An = A[n];
+        double sumAr = 0.0;
+        double[] rowAn = matrix[n];
         for (int i = 0; i < k; i++) {
-          SumAr += An[i] * r[i];
+          sumAr += rowAn[i] * r[i];
         }
-        rArdotSum += r[n] * SumAr;
+        rArdotSum += r[n] * sumAr;
       }
       
       // max step size

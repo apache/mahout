@@ -191,11 +191,16 @@ public final class FPGrowthDriver {
     FPGrowth<String> fp = new FPGrowth<String>();
     Set<String> features = new HashSet<String>();
     
-    fp.generateTopKFrequentPatterns(new StringRecordIterator(new FileLineIterable(new File(input), encoding,
-        false), pattern), fp.generateFList(new StringRecordIterator(new FileLineIterable(new File(input),
-        encoding, false), pattern), minSupport), minSupport, maxHeapSize, features,
-      new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
-      new ContextStatusUpdater(null));
+    fp.generateTopKFrequentPatterns(
+        new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+        fp.generateFList(
+            new StringRecordIterator(new FileLineIterable(new File(input), encoding, false), pattern),
+            minSupport),
+        minSupport,
+        maxHeapSize,
+        features,
+        new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
+        new ContextStatusUpdater(null));
     writer.close();
     
     List<Pair<String,TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);

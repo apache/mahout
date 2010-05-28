@@ -42,8 +42,7 @@ public class FuzzyKMeansCombiner extends MapReduceBase implements
       // String pointInfo = values.next().toString();
       FuzzyKMeansInfo info = values.next();
       
-      if (info.getCombinerPass() == 0) // first time thru combiner
-      {
+      if (info.getCombinerPass() == 0) { // first time thru combiner
         cluster.addPoint(info.getVector(), Math.pow(info.getProbability(), clusterer.getM()));
       } else {
         cluster.addPoints(info.getVector(), info.getProbability());

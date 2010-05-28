@@ -34,8 +34,9 @@ public class CountUsersMapper extends
   private static final Pattern DELIMITER = Pattern.compile("[\t,]");
 
   @Override
-  protected void map(LongWritable key, Text value, Context context)
-      throws IOException, InterruptedException {
+  protected void map(LongWritable key,
+                     Text value,
+                     Context context) throws IOException, InterruptedException {
 
     String[] tokens = DELIMITER.split(value.toString());
     long userID = Long.parseLong(tokens[0]);

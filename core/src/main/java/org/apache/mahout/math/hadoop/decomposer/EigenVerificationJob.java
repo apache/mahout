@@ -85,19 +85,17 @@ public class EigenVerificationJob extends AbstractJob {
   private double maxError;
   private double minEigenValue;
   private boolean loadEigensInMemory;
+  private String tmpOut;
+  private String outPath;
 
   public void setEigensToVerify(VectorIterable eigens) {
     eigensToVerify = eigens;
   }
 
-  private String tmpOut;
-  private String outPath;
-
-
   @Override
   public int run(String[] args) throws Exception {
     Map<String,String> argMap = handleArgs(args);
-    if(argMap == null) {
+    if (argMap == null) {
       return -1;
     } else if (argMap.isEmpty()) {
       return 0;
@@ -106,7 +104,7 @@ public class EigenVerificationJob extends AbstractJob {
     outPath = originalConf.get("mapred.output.class");
     tmpOut = outPath + "/tmp";
 
-    if(argMap.get("--eigenInput") != null && eigensToVerify == null) {
+    if (argMap.get("--eigenInput") != null && eigensToVerify == null) {
       prepareEigens(argMap.get("--eigenInput"), argMap.get("--inMemory") != null);
     }
 
@@ -184,12 +182,12 @@ public class EigenVerificationJob extends AbstractJob {
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
-    for(Map.Entry<MatrixSlice,EigenStatus> pruneSlice : prunedEigenMeta) {
+    for (Map.Entry<MatrixSlice,EigenStatus> pruneSlice : prunedEigenMeta) {
       MatrixSlice s = pruneSlice.getKey();
       EigenStatus meta = pruneSlice.getValue();
       EigenVector ev = new EigenVector((DenseVector)s.vector(),
                                        meta.getEigenValue(),
-                                       Math.abs(1-meta.getCosAngle()),
+                                       Math.abs(1 - meta.getCosAngle()),
                                        s.index());
       log.info("appending {} to {}", ev, path);
       VectorWritable vw = new VectorWritable(ev);
@@ -202,8 +200,8 @@ public class EigenVerificationJob extends AbstractJob {
   public List<Map.Entry<MatrixSlice,EigenStatus>> pruneEigens(Map<MatrixSlice,EigenStatus> eigenMetaData) {
     List<Map.Entry<MatrixSlice,EigenStatus>> prunedEigenMeta = new ArrayList<Map.Entry<MatrixSlice,EigenStatus>>();
 
-    for(Map.Entry<MatrixSlice,EigenStatus> entry : eigenMetaData.entrySet()) {
-      if(Math.abs(1-entry.getValue().getCosAngle()) < maxError && entry.getValue().getEigenValue() > minEigenValue) {
+    for (Map.Entry<MatrixSlice,EigenStatus> entry : eigenMetaData.entrySet()) {
+      if (Math.abs(1 - entry.getValue().getCosAngle()) < maxError && entry.getValue().getEigenValue() > minEigenValue) {
         prunedEigenMeta.add(entry);
       }
     }
@@ -220,7 +218,7 @@ public class EigenVerificationJob extends AbstractJob {
   public Map<MatrixSlice,EigenStatus> verifyEigens() {
     Map<MatrixSlice, EigenStatus> eigenMetaData = new HashMap<MatrixSlice, EigenStatus>();
 
-    for(MatrixSlice slice : eigensToVerify) {
+    for (MatrixSlice slice : eigensToVerify) {
       EigenStatus status = eigenVerifier.verify(corpus, slice.vector());
       eigenMetaData.put(slice, status);
     }
@@ -230,9 +228,9 @@ public class EigenVerificationJob extends AbstractJob {
   private void prepareEigens(String eigenInput, boolean inMemory) {
     DistributedRowMatrix eigens = new DistributedRowMatrix(eigenInput, tmpOut, 1, 1);
     eigens.configure(new JobConf(getConf()));
-    if(inMemory) {
+    if (inMemory) {
       List<Vector> eigenVectors = new ArrayList<Vector>();
-      for(MatrixSlice slice : eigens) {
+      for (MatrixSlice slice : eigens) {
         eigenVectors.add(slice.vector());
       }
       eigensToVerify = new SparseRowMatrix(new int[] {eigenVectors.size(), eigenVectors.get(0).size()},

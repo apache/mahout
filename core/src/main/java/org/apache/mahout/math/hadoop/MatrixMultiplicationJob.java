@@ -136,7 +136,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
       Vector multiplier = firstIsOutFrag ? ((VectorWritable)v.get(1)).get() : ((VectorWritable)v.get(0)).get();
 
       Iterator<Vector.Element> it = multiplier.iterateNonZero();
-      while(it.hasNext()) {
+      while (it.hasNext()) {
         Vector.Element e = it.next();
         row.set(e.index());
         VectorWritable outVector = new VectorWritable(outFrag.times(e.get()));
@@ -153,13 +153,11 @@ public class MatrixMultiplicationJob extends AbstractJob {
                        Iterator<VectorWritable> it,
                        OutputCollector<IntWritable,VectorWritable> out,
                        Reporter reporter) throws IOException {
-      Vector accumulator;
-      if(it.hasNext()) {
-        accumulator = new RandomAccessSparseVector(it.next().get());
-      } else {
+      if (!it.hasNext()) {
         return;
       }
-      while(it.hasNext()) {
+      Vector accumulator = new RandomAccessSparseVector(it.next().get());
+      while (it.hasNext()) {
         Vector row = it.next().get();
         row.addTo(accumulator);
       }

@@ -34,12 +34,18 @@ import com.google.gson.reflect.TypeToken;
 
 public class L1Model implements Model<VectorWritable> {
 
-  private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
+  private static final DistanceMeasure MEASURE = new ManhattanDistanceMeasure();
+  private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
 
   private int id;
 
+  private Vector coefficients;
+
+  private int count;
+
+  private Vector observed;
+
   public L1Model() {
-    super();
   }
 
   public L1Model(int id, Vector v) {
@@ -47,15 +53,6 @@ public class L1Model implements Model<VectorWritable> {
     observed = v.like();
     coefficients = v;
   }
-
-  private Vector coefficients;
-
-  private int count = 0;
-
-  private Vector observed;
-
-  private static final Type modelType = new TypeToken<Model<Vector>>() {
-  }.getType();
 
   @Override
   public void computeParameters() {
@@ -75,7 +72,7 @@ public class L1Model implements Model<VectorWritable> {
 
   @Override
   public double pdf(VectorWritable x) {
-    return Math.exp(-L1Model.measure.distance(x.get(), coefficients));
+    return Math.exp(-L1Model.MEASURE.distance(x.get(), coefficients));
   }
 
   @Override
@@ -125,7 +122,7 @@ public class L1Model implements Model<VectorWritable> {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, modelType);
+    return gson.toJson(this, MODEL_TYPE);
   }
 
   @Override

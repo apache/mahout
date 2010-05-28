@@ -27,7 +27,7 @@ import com.thoughtworks.xstream.XStream;
  */
 public final class StringUtils {
   
-  private static final XStream xstream = new XStream();
+  private static final XStream XSTREAM = new XStream();
   private static final Pattern NEWLINE_PATTERN = Pattern.compile("\n");
   
   private StringUtils() {
@@ -42,7 +42,7 @@ public final class StringUtils {
    * @return the string representation of the object
    */
   public static String toString(Object obj) {
-    return StringUtils.NEWLINE_PATTERN.matcher(StringUtils.xstream.toXML(obj)).replaceAll("");
+    return StringUtils.NEWLINE_PATTERN.matcher(StringUtils.XSTREAM.toXML(obj)).replaceAll("");
   }
   
   /**
@@ -53,6 +53,6 @@ public final class StringUtils {
    * @return restored object
    */
   public static <T> T fromString(String str) {
-    return (T) StringUtils.xstream.fromXML(str);
+    return (T) StringUtils.XSTREAM.fromXML(str);
   }
 }

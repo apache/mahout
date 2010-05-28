@@ -29,19 +29,20 @@ public class MultiLabelVectorWritable extends VectorWritable {
 
   private int[] labels;
 
+  public MultiLabelVectorWritable() {
+  }
+
+  public MultiLabelVectorWritable(Vector v, int[] labels) {
+    super(v);
+    setLabels(labels);
+  }
+
   public void setLabels(int[] labels) {
     this.labels = labels;
   }
 
   public int[] getLabels() {
     return labels;
-  }
-
-  public MultiLabelVectorWritable() {}
-
-  public MultiLabelVectorWritable(Vector v, int[] labels) {
-    super(v);
-    setLabels(labels);
   }
 
   @Override

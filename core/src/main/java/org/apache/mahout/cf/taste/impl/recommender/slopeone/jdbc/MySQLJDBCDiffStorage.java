@@ -127,20 +127,20 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
             + dataModel.getPreferenceTable() + " WHERE " + dataModel.getItemIDColumn() + "=?",
         // updateDiffSQLs
         new String[] {
-                      "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " - (? / "
-                          + countColumn + ") WHERE " + itemIDAColumn + "=?",
-                      "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " + (? / "
-                          + countColumn + ") WHERE " + itemIDBColumn + "=?"},
+          "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " - (? / "
+              + countColumn + ") WHERE " + itemIDAColumn + "=?",
+          "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " + (? / "
+              + countColumn + ") WHERE " + itemIDBColumn + "=?"},
         // removeDiffSQL
         new String[] {
-                      "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, "
-                          + avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST("
-                          + countColumn + " AS DECIMAL)) + ? / CAST(" + countColumn + " AS DECIMAL) WHERE "
-                          + itemIDAColumn + "=?",
-                      "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, "
-                          + avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST("
-                          + countColumn + " AS DECIMAL)) - ? / CAST(" + countColumn + " AS DECIMAL) WHERE "
-                          + itemIDBColumn + "=?"},
+          "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, "
+              + avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST("
+              + countColumn + " AS DECIMAL)) + ? / CAST(" + countColumn + " AS DECIMAL) WHERE "
+              + itemIDAColumn + "=?",
+          "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, "
+              + avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST("
+              + countColumn + " AS DECIMAL)) - ? / CAST(" + countColumn + " AS DECIMAL) WHERE "
+              + itemIDBColumn + "=?"},
         // getRecommendableItemsSQL
         "SELECT id FROM " + "(SELECT " + itemIDAColumn + " AS id FROM " + diffsTable + ", "
             + dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + " = "

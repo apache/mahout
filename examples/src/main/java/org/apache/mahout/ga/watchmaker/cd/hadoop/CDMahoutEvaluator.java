@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -62,9 +62,12 @@ public class CDMahoutEvaluator {
    * @param split DatasetSplit used to separate training and testing input
    * @throws IOException
    */
-  public static void evaluate(List<? extends Rule> rules, int target,
-                              Path inpath, Path output, List<CDFitness> evaluations, DatasetSplit split)
-  throws IOException {
+  public static void evaluate(List<? extends Rule> rules,
+                              int target,
+                              Path inpath,
+                              Path output,
+                              List<CDFitness> evaluations,
+                              DatasetSplit split) throws IOException {
     JobConf conf = new JobConf(CDMahoutEvaluator.class);
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
     

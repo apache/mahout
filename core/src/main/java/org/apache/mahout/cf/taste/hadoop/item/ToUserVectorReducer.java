@@ -53,9 +53,7 @@ public final class ToUserVectorReducer extends
     Vector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     for (VarLongWritable itemPref : itemPrefs) {
       int index = ItemIDIndexMapper.idToIndex(itemPref.get());
-      float value = itemPref instanceof EntityPrefWritable ?
-          ((EntityPrefWritable) itemPref).getPrefValue() :
-          1.0f;
+      float value = itemPref instanceof EntityPrefWritable ? ((EntityPrefWritable) itemPref).getPrefValue() : 1.0f;
       userVector.set(index, value);
     }
 

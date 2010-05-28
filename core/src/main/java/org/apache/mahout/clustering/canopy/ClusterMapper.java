@@ -44,8 +44,10 @@ public class ClusterMapper extends MapReduceBase implements
   private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   @Override
-  public void map(WritableComparable<?> key, VectorWritable point, OutputCollector<IntWritable, WeightedVectorWritable> output,
-      Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key,
+                  VectorWritable point,
+                  OutputCollector<IntWritable, WeightedVectorWritable> output,
+                  Reporter reporter) throws IOException {
     canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, output, reporter);
   }
 

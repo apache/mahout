@@ -65,7 +65,8 @@ public final class FuzzyKMeansDriver {
     Option measureClassOpt = DefaultOptionCreator.distanceMeasureOption().create();
     Option clustersOpt = DefaultOptionCreator.clustersInOption().withDescription(
         "The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected"
+            + " and written out to this path first")
         .create();
     Option kOpt = DefaultOptionCreator.kOption().withDescription(
         "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -81,10 +82,11 @@ public final class FuzzyKMeansDriver {
     Option emitMostLikelyOpt = DefaultOptionCreator.emitMostLikelyOption().create();
     Option thresholdOpt = DefaultOptionCreator.thresholdOption().create();
 
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(clustersOpt).withOption(outputOpt)
-        .withOption(measureClassOpt).withOption(convergenceDeltaOpt).withOption(maxIterationsOpt).withOption(kOpt).withOption(mOpt)
-        .withOption(overwriteOutput).withOption(helpOpt).withOption(numMapTasksOpt).withOption(numReduceTasksOpt).withOption(
-            emitMostLikelyOpt).withOption(thresholdOpt).create();
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(clustersOpt)
+        .withOption(outputOpt).withOption(measureClassOpt).withOption(convergenceDeltaOpt)
+        .withOption(maxIterationsOpt).withOption(kOpt).withOption(mOpt)
+        .withOption(overwriteOutput).withOption(helpOpt).withOption(numMapTasksOpt)
+        .withOption(numReduceTasksOpt).withOption(emitMostLikelyOpt).withOption(thresholdOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -114,10 +116,21 @@ public final class FuzzyKMeansDriver {
       boolean emitMostLikely = Boolean.parseBoolean(cmdLine.getValue(emitMostLikelyOpt).toString());
       double threshold = Double.parseDouble(cmdLine.getValue(thresholdOpt).toString());
       if (cmdLine.hasOption(kOpt)) {
-        clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString()));
+        clusters = RandomSeedGenerator.buildRandom(input, clusters,
+                                                   Integer.parseInt(cmdLine.getValue(kOpt).toString()));
       }
-      runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numMapTasks, numReduceTasks, m, cmdLine
-          .hasOption(clusteringOpt), emitMostLikely, threshold);
+      runJob(input,
+             clusters,
+             output,
+             measureClass,
+             convergenceDelta,
+             maxIterations,
+             numMapTasks,
+             numReduceTasks,
+             m,
+             cmdLine.hasOption(clusteringOpt),
+             emitMostLikely,
+             threshold);
 
     } catch (OptionException e) {
       log.error("Exception", e);
@@ -155,9 +168,18 @@ public final class FuzzyKMeansDriver {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    */
-  public static void runJob(Path input, Path clustersIn, Path output, String measureClass, double convergenceDelta,
-      int maxIterations, int numMapTasks, int numReduceTasks, float m, boolean runClustering, boolean emitMostLikely,
-      double threshold) {
+  public static void runJob(Path input,
+                            Path clustersIn,
+                            Path output,
+                            String measureClass,
+                            double convergenceDelta,
+                            int maxIterations,
+                            int numMapTasks,
+                            int numReduceTasks,
+                            float m,
+                            boolean runClustering,
+                            boolean emitMostLikely,
+                            double threshold) {
 
     boolean converged = false;
     int iteration = 1;
@@ -168,8 +190,15 @@ public final class FuzzyKMeansDriver {
 
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      converged = runIteration(input, clustersIn, clustersOut, measureClass, convergenceDelta, numMapTasks, numReduceTasks,
-          iteration, m);
+      converged = runIteration(input,
+                               clustersIn,
+                               clustersOut,
+                               measureClass,
+                               convergenceDelta,
+                               numMapTasks,
+                               numReduceTasks,
+                               iteration,
+                               m);
 
       // now point the input to the old output directory
       clustersIn = clustersOut;
@@ -178,8 +207,15 @@ public final class FuzzyKMeansDriver {
 
     // now actually cluster the points
     log.info("Clustering ");
-    runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), measureClass, convergenceDelta, numMapTasks,
-        m, emitMostLikely, threshold);
+    runClustering(input,
+                  clustersIn,
+                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
+                  measureClass,
+                  convergenceDelta,
+                  numMapTasks,
+                  m,
+                  emitMostLikely,
+                  threshold);
   }
 
   /**
@@ -204,8 +240,15 @@ public final class FuzzyKMeansDriver {
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
    * @return true if the iteration successfully runs
    */
-  private static boolean runIteration(Path input, Path clustersIn, Path clustersOut, String measureClass, double convergenceDelta,
-      int numMapTasks, int numReduceTasks, int iterationNumber, float m) {
+  private static boolean runIteration(Path input,
+                                      Path clustersIn,
+                                      Path clustersOut,
+                                      String measureClass,
+                                      double convergenceDelta,
+                                      int numMapTasks,
+                                      int numReduceTasks,
+                                      int iterationNumber,
+                                      float m) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Fuzzy K Means{" + iterationNumber + '}');
@@ -268,8 +311,15 @@ public final class FuzzyKMeansDriver {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    */
-  private static void runClustering(Path input, Path clustersIn, Path output, String measureClass, double convergenceDelta,
-      int numMapTasks, float m, boolean emitMostLikely, double threshold) {
+  private static void runClustering(Path input,
+                                    Path clustersIn,
+                                    Path output,
+                                    String measureClass,
+                                    double convergenceDelta,
+                                    int numMapTasks,
+                                    float m,
+                                    boolean emitMostLikely,
+                                    double threshold) {
 
     JobConf conf = new JobConf(FuzzyKMeansDriver.class);
     conf.setJobName("Fuzzy K Means Clustering");
@@ -327,7 +377,8 @@ public final class FuzzyKMeansDriver {
       }
     };
 
-    FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
+    FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(
+        fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
 
     for (FileStatus match : matches) {
       result.add(fs.makeQualified(match.getPath()));

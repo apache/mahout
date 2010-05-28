@@ -39,7 +39,7 @@ public class NumericalNode extends Node {
   /** child node when attribute's value >= split value */
   private Node hiChild;
   
-  public NumericalNode() {}
+  public NumericalNode() { } 
   
   public NumericalNode(int attr, double split, Node loChild, Node hiChild) {
     this.attr = attr;

@@ -82,9 +82,9 @@ public final class LDADriver {
     Option numReducOpt = DefaultOptionCreator.numReducersOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(topicsOpt)
-        .withOption(wordsOpt).withOption(topicSmOpt).withOption(maxIterOpt).withOption(numReducOpt).withOption(overwriteOutput)
-        .withOption(helpOpt).create();
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(topicsOpt).withOption(wordsOpt).withOption(topicSmOpt).withOption(maxIterOpt)
+        .withOption(numReducOpt).withOption(overwriteOutput).withOption(helpOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -136,8 +136,13 @@ public final class LDADriver {
    *          the number of Reducers desired
    * @throws IOException
    */
-  public static void runJob(Path input, Path output, int numTopics, int numWords, double topicSmoothing, int maxIterations,
-      int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+  public static void runJob(Path input,
+                            Path output,
+                            int numTopics,
+                            int numWords,
+                            double topicSmoothing,
+                            int maxIterations,
+                            int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
 
     Path stateIn = new Path(output, "state-0");
     writeInitialState(stateIn, numTopics, numWords);
@@ -227,8 +232,13 @@ public final class LDADriver {
    * @param numReducers
    *          the number of Reducers desired
    */
-  public static double runIteration(Path input, Path stateIn, Path stateOut, int numTopics, int numWords, double topicSmoothing,
-      int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+  public static double runIteration(Path input,
+                                    Path stateIn,
+                                    Path stateOut,
+                                    int numTopics,
+                                    int numWords,
+                                    double topicSmoothing,
+                                    int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));

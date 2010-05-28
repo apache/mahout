@@ -293,7 +293,8 @@ public class FPTree {
   }
   
   public void replaceChild(int parentNodeId, int replacableNode, int childnodeId) {
-    for (int i = 0, j = childCount[parentNodeId]; i < j; i++) {
+    int max = childCount[parentNodeId];
+    for (int i = 0; i < max; i++) {
       if (nodeChildren[parentNodeId][i] == replacableNode) {
         nodeChildren[parentNodeId][i] = childnodeId;
         parent[childnodeId] = parentNodeId;

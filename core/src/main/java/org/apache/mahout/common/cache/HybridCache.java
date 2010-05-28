@@ -44,12 +44,12 @@ public class HybridCache<K,V> implements Cache<K,V> {
   
   @Override
   public V get(K key) {
-    V LRUObject = LRUGet(key);
-    if (LRUObject != null) {
-      return LRUObject;
+    V lruObject = lruGet(key);
+    if (lruObject != null) {
+      return lruObject;
     }
     
-    V lFUObject = LFUGet(key);
+    V lFUObject = lfuGet(key);
     if (lFUObject != null) {
       return lFUObject;
     }
@@ -57,14 +57,14 @@ public class HybridCache<K,V> implements Cache<K,V> {
     return null;
   }
   
-  private V LFUGet(K key) {
+  private V lfuGet(K key) {
     if (lfuCache.getEvictionCount() >= lfuCapacity) {
       return lfuCache.quickGet(key);
     }
     return lfuCache.get(key);
   }
   
-  private V LRUGet(K key) {
+  private V lruGet(K key) {
     return lruCache.get(key);
   }
   

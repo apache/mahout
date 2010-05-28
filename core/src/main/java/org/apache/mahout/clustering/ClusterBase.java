@@ -108,8 +108,7 @@ public abstract class ClusterBase implements Writable, Cluster {
 
   @Override
   public String asJsonString() {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
+    Type vectorType = new TypeToken<Vector>() {}.getType();
     GsonBuilder gBuilder = new GsonBuilder();
     gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
     Gson gson = gBuilder.create();

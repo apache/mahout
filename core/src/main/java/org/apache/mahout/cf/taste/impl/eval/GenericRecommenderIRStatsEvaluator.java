@@ -113,8 +113,8 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         }
         
         // List some most-preferred items that would count as (most) "relevant" results
-        double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ?
-            computeThreshold(prefs) : relevanceThreshold;
+        double theRelevanceThreshold =
+            Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
         prefs.sortByValueReversed();
         for (int i = 0; (i < size) && (relevantItemIDs.size() < at); i++) {
           if (prefs.getValue(i) >= theRelevanceThreshold) {
@@ -159,8 +159,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           }
           
           long end = System.currentTimeMillis();
-          GenericRecommenderIRStatsEvaluator.log
-              .info("Evaluated with user {} in {}ms", userID, (end - start));
+          GenericRecommenderIRStatsEvaluator.log.info("Evaluated with user {} in {}ms", userID, end - start);
           log.info("Precision/recall/fall-out: {} / {} / {}",
             new Object[] {precision.getAverage(), recall.getAverage(), fallOut.getAverage()});
         }

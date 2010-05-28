@@ -89,9 +89,9 @@ public final class AggregateAndRecommendReducer extends
 
     Vector recommendationVector = null;
     for (VectorWritable vectorWritable : values) {
-      recommendationVector = recommendationVector == null ?
-          vectorWritable.get() :
-          recommendationVector.plus(vectorWritable.get());
+      recommendationVector = recommendationVector == null
+          ? vectorWritable.get()
+          : recommendationVector.plus(vectorWritable.get());
     }
     if (recommendationVector == null) {
       return;

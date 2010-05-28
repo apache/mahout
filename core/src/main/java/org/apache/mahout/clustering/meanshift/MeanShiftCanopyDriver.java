@@ -70,9 +70,10 @@ public final class MeanShiftCanopyDriver {
     Option threshold2Opt = DefaultOptionCreator.t2Option().create();
     Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
 
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput)
-        .withOption(measureClassOpt).withOption(helpOpt).withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(
-            threshold2Opt).withOption(clusteringOpt).withOption(maxIterOpt).withOption(inputIsCanopiesOpt).create();
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(overwriteOutput).withOption(measureClassOpt).withOption(helpOpt)
+        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(threshold2Opt)
+        .withOption(clusteringOpt).withOption(maxIterOpt).withOption(inputIsCanopiesOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -94,8 +95,15 @@ public final class MeanShiftCanopyDriver {
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
-      runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, cmdLine.hasOption(inputIsCanopiesOpt), cmdLine
-          .hasOption(clusteringOpt));
+      runJob(input,
+             output,
+             measureClass,
+             t1,
+             t2,
+             convergenceDelta,
+             maxIterations,
+             cmdLine.hasOption(inputIsCanopiesOpt),
+             cmdLine.hasOption(clusteringOpt));
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -234,8 +242,15 @@ public final class MeanShiftCanopyDriver {
    * @param runClustering 
    *          true if the input points are to be clustered once the iterations complete
    */
-  public static void runJob(Path input, Path output, String measureClassName, double t1, double t2, double convergenceDelta,
-      int maxIterations, boolean inputIsCanopies, boolean runClustering) throws IOException {
+  public static void runJob(Path input,
+                            Path output,
+                            String measureClassName,
+                            double t1,
+                            double t2,
+                            double convergenceDelta,
+                            int maxIterations,
+                            boolean inputIsCanopies,
+                            boolean runClustering) throws IOException {
     // delete the output directory
     Configuration conf = new JobConf(MeanShiftCanopyDriver.class);
 
@@ -263,7 +278,9 @@ public final class MeanShiftCanopyDriver {
 
     if (runClustering) {
       // now cluster the points
-      MeanShiftCanopyDriver.runClustering((inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR)), clustersIn,
+      runClustering(
+          inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
+          clustersIn,
           new Path(output, Cluster.CLUSTERED_POINTS_DIR));
     }
   }

@@ -47,13 +47,13 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
     try {
       doc = infer.infer(wordCounts);
     } catch (ArrayIndexOutOfBoundsException e1) {
-     throw new IllegalStateException(
+      throw new IllegalStateException(
          "This is probably because the --numWords argument is set too small.  \n"
          + "\tIt needs to be >= than the number of words (terms actually) in the corpus and can be \n"
          + "\tlarger if some storage inefficiency can be tolerated.", e1);
     }
     
-    double[] logTotals = new double[state.numTopics];
+    double[] logTotals = new double[state.getNumTopics()];
     Arrays.fill(logTotals, Double.NEGATIVE_INFINITY);
     
     // Output sufficient statistics for each word. == pseudo-log counts.
@@ -62,7 +62,7 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
       Vector.Element e = iter.next();
       int w = e.index();
       
-      for (int k = 0; k < state.numTopics; ++k) {
+      for (int k = 0; k < state.getNumTopics(); ++k) {
         v.set(doc.phi(k, w) + Math.log(e.get()));
         
         IntPairWritable kw = new IntPairWritable(k, w);
@@ -75,7 +75,7 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
     
     // Output the totals for the statistics. This is to make
     // normalizing a lot easier.
-    for (int k = 0; k < state.numTopics; ++k) {
+    for (int k = 0; k < state.getNumTopics(); ++k) {
       IntPairWritable kw = new IntPairWritable(k, LDADriver.TOPIC_SUM_KEY);
       v.set(logTotals[k]);
       assert !Double.isNaN(v.get());
@@ -83,7 +83,7 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
     }
     IntPairWritable llk = new IntPairWritable(LDADriver.LOG_LIKELIHOOD_KEY, LDADriver.LOG_LIKELIHOOD_KEY);
     // Output log-likelihoods.
-    v.set(doc.logLikelihood);
+    v.set(doc.getLogLikelihood());
     context.write(llk, v);
   }
   

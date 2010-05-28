@@ -61,7 +61,7 @@ public final class PFPGrowth {
   
   private static final Logger log = LoggerFactory.getLogger(PFPGrowth.class);
   
-  private PFPGrowth() {}
+  private PFPGrowth() { }
   
   /**
    * Generates the fList from the serialized string representation
@@ -72,7 +72,9 @@ public final class PFPGrowth {
    * @return Deserialized Feature Frequency List
    * @throws IOException
    */
-  public static List<Pair<String,Long>> deserializeList(Parameters params, String key, Configuration conf) throws IOException {
+  public static List<Pair<String,Long>> deserializeList(Parameters params,
+                                                        String key,
+                                                        Configuration conf) throws IOException {
     List<Pair<String,Long>> list = new ArrayList<Pair<String,Long>>();
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");

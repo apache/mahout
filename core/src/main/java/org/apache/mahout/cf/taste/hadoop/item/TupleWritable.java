@@ -121,18 +121,18 @@ public final class TupleWritable extends ArrayWritable {
 
   public static class Field extends GenericWritable {
 
-    private static final Class<?>[] CLASSES = {VarIntWritable.class, VarLongWritable.class, DoubleWritable.class,
-                                               Text.class};
-
-    @Override
-    protected Class<? extends Writable>[] getTypes() {
-      return (Class<? extends Writable>[]) CLASSES;
-    }
+    private static final Class<?>[] CLASSES =
+      {VarIntWritable.class, VarLongWritable.class, DoubleWritable.class, Text.class};
 
     public Field() { }
 
     public Field(Writable writable) {
       super.set(writable);
+    }
+
+    @Override
+    protected Class<? extends Writable>[] getTypes() {
+      return (Class<? extends Writable>[]) CLASSES;
     }
   }
 

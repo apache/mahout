@@ -31,6 +31,27 @@ public abstract class AbstractParameter<T> implements Parameter<T> {
   private final String description;
   private final Class<T> type;
   private final String defaultValue;
+
+  protected AbstractParameter(Class<T> type,
+                              String prefix,
+                              String name,
+                              Configuration jobConf,
+                              T defaultValue,
+                              String description) {
+    this.type = type;
+    this.name = name;
+    this.description = description;
+
+    this.value = defaultValue;
+    this.defaultValue = getStringValue();
+
+    this.prefix = prefix;
+    String jobConfValue = jobConf.get(prefix + name);
+    if (jobConfValue != null) {
+      setStringValue(jobConfValue);
+    }
+
+  }
   
   @Override
   public void configure(JobConf jobConf) {
@@ -51,27 +72,6 @@ public abstract class AbstractParameter<T> implements Parameter<T> {
   @Override
   public Collection<Parameter<?>> getParameters() {
     return Collections.emptyList();
-  }
-  
-  protected AbstractParameter(Class<T> type,
-                              String prefix,
-                              String name,
-                              Configuration jobConf,
-                              T defaultValue,
-                              String description) {
-    this.type = type;
-    this.name = name;
-    this.description = description;
-    
-    this.value = defaultValue;
-    this.defaultValue = getStringValue();
-    
-    this.prefix = prefix;
-    String jobConfValue = jobConf.get(prefix + name);
-    if (jobConfValue != null) {
-      setStringValue(jobConfValue);
-    }
-    
   }
   
   @Override

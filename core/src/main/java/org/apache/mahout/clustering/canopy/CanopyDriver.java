@@ -65,8 +65,9 @@ public final class CanopyDriver {
     Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
     Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
 
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput).withOption(
-        measureClassOpt).withOption(t1Opt).withOption(t2Opt).withOption(clusteringOpt).withOption(helpOpt).create();
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(overwriteOutput).withOption(measureClassOpt).withOption(t1Opt).withOption(t2Opt)
+        .withOption(clusteringOpt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -112,9 +113,14 @@ public final class CanopyDriver {
    * @param runClustering 
    *          true if points are to be clustered after clusters are determined
    */
-  public static void runJob(Path input, Path output, String measureClassName, double t1, double t2, boolean runClustering)
-      throws IOException {
-    log.info("Input: {} Out: {} " + "Measure: {} t1: {} t2: {}", new Object[] { input, output, measureClassName, t1, t2 });
+  public static void runJob(Path input,
+                            Path output,
+                            String measureClassName,
+                            double t1,
+                            double t2,
+                            boolean runClustering) throws IOException {
+    log.info("Input: {} Out: {} " + "Measure: {} t1: {} t2: {}",
+             new Object[] {input, output, measureClassName, t1, t2});
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CanopyDriver.class);
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
@@ -163,8 +169,12 @@ public final class CanopyDriver {
    * @param t2
    *          the T2 distance threshold
    */
-  public static void runClustering(Path points, Path canopies, Path output, String measureClassName, double t1, double t2)
-      throws IOException {
+  public static void runClustering(Path points,
+                                   Path canopies,
+                                   Path output,
+                                   String measureClassName,
+                                   double t1,
+                                   double t2) throws IOException {
     Configurable client = new JobClient();
     JobConf conf = new JobConf(CanopyDriver.class);
 

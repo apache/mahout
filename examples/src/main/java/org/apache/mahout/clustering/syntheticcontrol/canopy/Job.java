@@ -34,7 +34,6 @@ import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
-import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +53,8 @@ public final class Job {
         abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
         "The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
-        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The Path to put the output in")
-        .withShortName("o").create();
+        abuilder.withName("output").withMinimum(1).withMaximum(1).create())
+        .withDescription("The Path to put the output in").withShortName("o").create();
 
     Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
         abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -66,13 +65,16 @@ public final class Job {
     // .withShortName("v").create();
 
     Option t1Opt = obuilder.withLongName("t1").withRequired(false).withArgument(
-        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1").withShortName("t1").create();
+        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1")
+        .withShortName("t1").create();
     Option t2Opt = obuilder.withLongName("t2").withRequired(false).withArgument(
-        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("t2").withShortName("t2").create();
+        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("t2")
+        .withShortName("t2").create();
 
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(measureClassOpt)// .withOption(vectorClassOpt)
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(measureClassOpt)// .withOption(vectorClassOpt)
         .withOption(t1Opt).withOption(t2Opt).withOption(helpOpt).create();
 
     try {
@@ -87,8 +89,8 @@ public final class Job {
 
       Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
-      String measureClass = cmdLine.getValue(measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure")
-          .toString();
+      String measureClass = cmdLine.getValue(measureClassOpt,
+                                             "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
 
       // String className = cmdLine.getValue(vectorClassOpt,
       // "org.apache.mahout.math.RandomAccessSparseVector").toString();
@@ -121,11 +123,12 @@ public final class Job {
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
    */
-  private static void runJob(Path input, Path output, String measureClassName, double t1, double t2) throws IOException,
-      InstantiationException, IllegalAccessException {
+  private static void runJob(Path input,
+                             Path output,
+                             String measureClassName,
+                             double t1,
+                             double t2) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 

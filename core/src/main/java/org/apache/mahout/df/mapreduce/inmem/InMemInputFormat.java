@@ -172,7 +172,8 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     }
     
     @Override
-    public void close() throws IOException {}
+    public void close() throws IOException {
+    }
     
   }
   
@@ -246,9 +247,9 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
       
       InMemInputSplit split = (InMemInputSplit) obj;
 
-      return firstId == split.firstId &&
-          nbTrees == split.nbTrees &&
-          ((seed == null && split.seed == null) || seed.equals(split.seed));
+      return firstId == split.firstId
+          && nbTrees == split.nbTrees
+          && ((seed == null && split.seed == null) || seed.equals(split.seed));
 
     }
     

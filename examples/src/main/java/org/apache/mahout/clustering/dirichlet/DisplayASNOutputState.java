@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -43,7 +43,7 @@ class DisplayASNOutputState extends DisplayDirichlet {
   DisplayASNOutputState() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Map/Reduce Results (>"
-      + (int) (significance * 100) + "% of population)");
+      + (int) (SIGNIFICANCE * 100) + "% of population)");
   }
   
   @Override
@@ -55,7 +55,7 @@ class DisplayASNOutputState extends DisplayDirichlet {
     int i = DisplayDirichlet.result.size() - 1;
     for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(COLORS[Math.min(DisplayDirichlet.COLORS.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         AsymmetricSampledNormalModel mm = (AsymmetricSampledNormalModel) m;
         dv.set(0, mm.getStdDev().get(0) * 3);
@@ -87,16 +87,15 @@ class DisplayASNOutputState extends DisplayDirichlet {
   private static void getSamples() throws IOException {
     File f = new File("input");
     for (File g : f.listFiles()) {
-      DisplayDirichlet.sampleData.addAll(readFile(g.getCanonicalPath()));
+      DisplayDirichlet.SAMPLE_DATA.addAll(readFile(g.getCanonicalPath()));
     }
   }
   
   private static void getResults() throws IOException, InvocationTargetException, NoSuchMethodException {
     result = new ArrayList<Model<VectorWritable>[]>();
     JobConf conf = new JobConf(KMeansDriver.class);
-    conf
-    .set(DirichletDriver.MODEL_FACTORY_KEY,
-    "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution");
+    conf.set(DirichletDriver.MODEL_FACTORY_KEY,
+             "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution");
     conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, "org.apache.mahout.math.DenseVector");
     conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, "2");
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");

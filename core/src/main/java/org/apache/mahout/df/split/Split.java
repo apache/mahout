@@ -22,16 +22,11 @@ import java.util.Locale;
 /**
  * Contains enough information to identify each split
  */
-public class Split {
+public final class Split {
   
-  /** attribute to split for */
-  public final int attr;
-  
-  /** Information Gain of the split */
-  public final double ig;
-  
-  /** split value for NUMERICAL attributes */
-  public final double split;
+  private final int attr;
+  private final double ig;
+  private final double split;
   
   public Split(int attr, double ig, double split) {
     this.attr = attr;
@@ -43,8 +38,24 @@ public class Split {
     this(attr, ig, Double.NaN);
   }
 
+  /** attribute to split for */
+  public int getAttr() {
+    return attr;
+  }
+
+  /** Information Gain of the split */
+  public double getIg() {
+    return ig;
+  }
+
+  /** split value for NUMERICAL attributes */
+  public double getSplit() {
+    return split;
+  }
+
   @Override
   public String toString() {
     return String.format(Locale.ENGLISH, "attr: %d, ig: %f, split: %f", attr, ig, split);
   }
+
 }

@@ -35,8 +35,10 @@ import com.google.gson.reflect.TypeToken;
 
 public class NormalModel implements Model<VectorWritable> {
   
-  private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
-  
+  private static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
+
+  private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
+
   private int id;
   
   // the parameters
@@ -45,14 +47,12 @@ public class NormalModel implements Model<VectorWritable> {
   private double stdDev;
   
   // the observation statistics, initialized by the first observation
-  private int s0 = 0;
+  private int s0;
   
   private Vector s1;
   
   private Vector s2;
-  
-  private static final Type modelType = new TypeToken<Model<Vector>>() { }.getType();
-  
+
   public NormalModel() { }
   
   public NormalModel(int id, Vector mean, double stdDev) {
@@ -122,7 +122,7 @@ public class NormalModel implements Model<VectorWritable> {
     double sd2 = stdDev * stdDev;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (stdDev * sqrt2pi);
+    return ex / (stdDev * SQRT2PI);
   }
   
   @Override
@@ -175,7 +175,7 @@ public class NormalModel implements Model<VectorWritable> {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, modelType);
+    return gson.toJson(this, MODEL_TYPE);
   }
 
   @Override

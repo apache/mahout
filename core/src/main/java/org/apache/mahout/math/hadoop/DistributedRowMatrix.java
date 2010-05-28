@@ -71,17 +71,6 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   private final int numRows;
   private final int numCols;
 
-  @Override
-  public void configure(JobConf conf) {
-    this.conf = conf;
-    try {
-      rowPath= FileSystem.get(conf).makeQualified(new Path(inputPathString));
-      outputTmpBasePath = FileSystem.get(conf).makeQualified(new Path(outputTmpPathString));
-    } catch(IOException ioe) {
-      throw new IllegalStateException(ioe);
-    }
-  }
-
   public DistributedRowMatrix(String inputPathString,
                               String outputTmpPathString,
                               int numRows,
@@ -90,6 +79,17 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     this.outputTmpPathString = outputTmpPathString;
     this.numRows = numRows;
     this.numCols = numCols;
+  }
+
+  @Override
+  public void configure(JobConf conf) {
+    this.conf = conf;
+    try {
+      rowPath = FileSystem.get(conf).makeQualified(new Path(inputPathString));
+      outputTmpBasePath = FileSystem.get(conf).makeQualified(new Path(outputTmpPathString));
+    } catch (IOException ioe) {
+      throw new IllegalStateException(ioe);
+    }
   }
 
   public Path getRowPath() {
@@ -105,7 +105,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
       outputTmpBasePath = FileSystem.get(conf).makeQualified(new Path(outPathString));
     } catch (IOException ioe) {
       log.warn("Unable to set outputBasePath to {}, leaving as {}",
-          outPathString, outputTmpBasePath.toString());
+          outPathString, outputTmpBasePath);
     }
   }
 
@@ -135,7 +135,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   }
 
   public DistributedRowMatrix times(DistributedRowMatrix other) {
-    if(numRows != other.numRows()) {
+    if (numRows != other.numRows()) {
       throw new CardinalityException(numRows, other.numRows());
     }
     Path outPath = new Path(outputTmpBasePath.getParent(), "productWith");
@@ -174,7 +174,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
                                                                  new Path(Long.toString(System.nanoTime()))));
       JobClient.runJob(conf);
       return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
-    } catch(IOException ioe) {
+    } catch (IOException ioe) {
       throw new RuntimeException(ioe);
     }
   }
@@ -188,7 +188,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
                                                                         new Path(Long.toString(System.nanoTime()))));
       JobClient.runJob(conf);
       return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
-    } catch(IOException ioe) {
+    } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
   }
@@ -201,9 +201,9 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   public static class DistributedMatrixIterator implements Iterator<MatrixSlice> {
     private SequenceFile.Reader reader;
     private final FileStatus[] statuses;
-    private boolean hasBuffered = false;
-    private boolean hasNext = false;
-    private int statusIndex = 0;
+    private boolean hasBuffered;
+    private boolean hasNext;
+    private int statusIndex;
     private final FileSystem fs;
     private final JobConf conf;
     private final IntWritable i = new IntWritable();
@@ -219,9 +219,9 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     @Override
     public boolean hasNext() {
       try {
-        if(!hasBuffered) {
+        if (!hasBuffered) {
           hasNext = reader.next(i, v);
-          if(!hasNext && statusIndex < statuses.length - 1) {
+          if (!hasNext && statusIndex < statuses.length - 1) {
             statusIndex++;
             reader = new SequenceFile.Reader(fs, statuses[statusIndex].getPath(), conf);
             hasNext = reader.next(i, v);
@@ -231,8 +231,11 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
       } catch (IOException ioe) {
         throw new IllegalStateException(ioe);
       } finally {
-        if(!hasNext) {
-          try { reader.close(); } catch (IOException ioe) {}
+        if (!hasNext) {
+          try {
+            reader.close();
+          } catch (IOException ioe) {
+          }
         }
       }
       return hasNext;
@@ -241,7 +244,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
 
     @Override
     public MatrixSlice next() {
-      if(!hasBuffered && !hasNext()) {
+      if (!hasBuffered && !hasNext()) {
         throw new NoSuchElementException();
       }
       hasBuffered = false;
@@ -285,14 +288,14 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
 
     @Override
     public int compareTo(MatrixEntryWritable o) {
-      if(row > o.row) {
+      if (row > o.row) {
         return 1;
-      } else if(row < o.row) {
+      } else if (row < o.row) {
         return -1;
       } else {
-        if(col > o.col) {
+        if (col > o.col) {
           return 1;
-        } else if(col < o.col) {
+        } else if (col < o.col) {
           return -1;
         } else {
           return 0;

@@ -26,7 +26,7 @@ public class MockLeaf extends Leaf {
   
   @Override
   public int classify(Instance instance) {
-    return instance.label;
+    return instance.getLabel();
   }
   
   @Override

@@ -98,7 +98,7 @@ public class TestLDAInference extends MahoutTestCase {
           assertTrue(k + " " + w + " logProb " + logProb, logProb <= 0.0);
         }
       }
-      assertTrue("log likelihood", doc.logLikelihood <= 1.0E-10);
+      assertTrue("log likelihood", doc.getLogLikelihood() <= 1.0E-10);
     }
   }
   

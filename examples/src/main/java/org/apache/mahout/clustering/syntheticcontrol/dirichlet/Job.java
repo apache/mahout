@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -43,13 +43,11 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Job {
+public final class Job {
   
-  /** Logger for this class. */
   private static final Logger log = LoggerFactory.getLogger(Job.class);
   
   private Job() { }
@@ -100,11 +98,11 @@ public class Job {
         "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
       int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt, "10").toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "5").toString());
-      double alpha_0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
+      double alpha0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
       int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
       String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector")
           .toString();
-      runJob(input, output, modelFactory, numModels, maxIterations, alpha_0, numReducers,
+      runJob(input, output, modelFactory, numModels, maxIterations, alpha0, numReducers,
             vectorClassName);
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
@@ -125,7 +123,7 @@ public class Job {
    *          the number of Models
    * @param maxIterations
    *          the maximum number of iterations
-   * @param alpha_0
+   * @param alpha0
    *          the alpha0 value for the DirichletDistribution
    * @param numReducers
    *          the desired number of reducers
@@ -135,7 +133,7 @@ public class Job {
                             String modelFactory,
                             int numModels,
                             int maxIterations,
-                            double alpha_0,
+                            double alpha0,
                             int numReducers,
                             String vectorClassName) throws IOException,
                                                    ClassNotFoundException,
@@ -150,7 +148,7 @@ public class Job {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
     DirichletDriver.runJob(directoryContainingConvertedInput, output, modelFactory,
-      vectorClassName, numModels, maxIterations, alpha_0, numReducers, true, true, 0);
+      vectorClassName, numModels, maxIterations, alpha0, numReducers, true, true, 0);
   }
   
   /**
@@ -168,7 +166,7 @@ public class Job {
    *          the int number of Iterations
    * @param numModels
    *          the int number of models
-   * @param alpha_0
+   * @param alpha0
    *          the double alpha_0 value
    * @throws InvocationTargetException
    * @throws NoSuchMethodException
@@ -180,14 +178,14 @@ public class Job {
                                   int prototypeSize,
                                   int numIterations,
                                   int numModels,
-                                  double alpha_0) throws SecurityException,
+                                  double alpha0) throws SecurityException,
                                                  NoSuchMethodException,
                                                  InvocationTargetException {
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(numModels));
-    conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha_0));
+    conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha0));
     for (int i = 0; i < numIterations; i++) {
       conf.set(DirichletDriver.STATE_IN_KEY, output + "/state-" + i);
       conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, vectorClassName);

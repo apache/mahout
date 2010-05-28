@@ -21,9 +21,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -261,8 +262,9 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         return false;
       }
       ClusterClusterPair other = (ClusterClusterPair) o;
-      return cluster1.equals(other.getCluster1()) && cluster2.equals(other.getCluster2())
-             && (similarity == other.getSimilarity());
+      return cluster1.equals(other.getCluster1())
+          && cluster2.equals(other.getCluster2())
+          && similarity == other.getSimilarity();
     }
     
     @Override
@@ -292,7 +294,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         
       } else {
         
-        List<FastIDSet> clusters = new LinkedList<FastIDSet>();
+        List<FastIDSet> clusters = new ArrayList<FastIDSet>();
         // Begin with a cluster for each user:
         LongPrimitiveIterator it = model.getUserIDs();
         while (it.hasNext()) {
@@ -320,7 +322,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   
   private boolean mergeClosestClusters(int numUsers, List<FastIDSet> clusters, boolean done) throws TasteException {
     // We find a certain number of closest clusters...
-    LinkedList<ClusterClusterPair> queue = findClosestClusters(numUsers, clusters);
+    List<ClusterClusterPair> queue = findClosestClusters(numUsers, clusters);
     
     // The first one is definitely the closest pair in existence so we can cluster
     // the two together, put it back into the set of clusters, and start again. Instead
@@ -334,7 +336,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
         break;
       }
       
-      ClusterClusterPair top = queue.removeFirst();
+      ClusterClusterPair top = queue.remove(0);
       
       if (clusteringByThreshold && (top.getSimilarity() < clusteringThreshold)) {
         done = true;
@@ -381,7 +383,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       // catch that case here and put it back into our queue
       for (FastIDSet cluster : clusters) {
         double similarity = clusterSimilarity.getSimilarity(merged, cluster);
-        if (similarity > queue.getLast().getSimilarity()) {
+        if (similarity > queue.get(queue.size() - 1).getSimilarity()) {
           ListIterator<ClusterClusterPair> queueIterator = queue.listIterator();
           while (queueIterator.hasNext()) {
             if (similarity > queueIterator.next().getSimilarity()) {
@@ -400,39 +402,33 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
     return done;
   }
   
-  private LinkedList<ClusterClusterPair> findClosestClusters(int numUsers,
-                                                             List<FastIDSet> clusters) throws TasteException {
-    boolean full = false;
-    LinkedList<ClusterClusterPair> queue = new LinkedList<ClusterClusterPair>();
-    int i = 0;
-    for (FastIDSet cluster1 : clusters) {
-      i++;
-      ListIterator<FastIDSet> it2 = clusters.listIterator(i);
-      while (it2.hasNext()) {
-        FastIDSet cluster2 = it2.next();
+  private List<ClusterClusterPair> findClosestClusters(int numUsers,
+                                                       List<FastIDSet> clusters) throws TasteException {
+    Queue<ClusterClusterPair> queue =
+        new PriorityQueue<ClusterClusterPair>(numUsers + 1, Collections.<ClusterClusterPair>reverseOrder());
+    int size = clusters.size();
+    for (int i = 0; i < size; i++) {
+      FastIDSet cluster1 = clusters.get(i);
+      for (int j = i + 1; j < size; j++) {
+        FastIDSet cluster2 = clusters.get(j);
         double similarity = clusterSimilarity.getSimilarity(cluster1, cluster2);
-        if (!Double.isNaN(similarity) && (!full || (similarity > queue.getLast().getSimilarity()))) {
-          ListIterator<ClusterClusterPair> queueIterator = queue.listIterator(queue.size());
-          while (queueIterator.hasPrevious()) {
-            if (similarity <= queueIterator.previous().getSimilarity()) {
-              queueIterator.next();
-              break;
-            }
-          }
-          queueIterator.add(new ClusterClusterPair(cluster1, cluster2, similarity));
-          if (full) {
-            queue.removeLast();
-          } else if (queue.size() > numUsers) { // use numUsers as queue size limit
-            full = true;
-            queue.removeLast();
+        if (!Double.isNaN(similarity)) {
+          if (queue.size() < numUsers) {
+            queue.add(new ClusterClusterPair(cluster1, cluster2, similarity));
+          } else if (similarity > queue.poll().getSimilarity()) {
+            queue.add(new ClusterClusterPair(cluster1, cluster2, similarity));
+            queue.poll();
           }
         }
       }
     }
-    return queue;
+    List<ClusterClusterPair> result = new ArrayList<ClusterClusterPair>(queue);
+    Collections.sort(result);
+    return result;
   }
   
-  private FastByIDMap<List<RecommendedItem>> computeTopRecsPerUserID(Iterable<FastIDSet> clusters) throws TasteException {
+  private FastByIDMap<List<RecommendedItem>> computeTopRecsPerUserID(Iterable<FastIDSet> clusters)
+    throws TasteException {
     FastByIDMap<List<RecommendedItem>> recsPerUser = new FastByIDMap<List<RecommendedItem>>();
     for (FastIDSet cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);

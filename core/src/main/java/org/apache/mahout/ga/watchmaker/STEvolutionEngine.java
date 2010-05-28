@@ -53,11 +53,9 @@ public class STEvolutionEngine<T> extends AbstractEvolutionEngine<T> {
     }
     
     // Sort candidates in descending order according to fitness.
-    if (getFitnessEvaluator().isNatural()) // Descending values for natural fitness.
-    {
+    if (getFitnessEvaluator().isNatural()) { // Descending values for natural fitness.
       Collections.sort(evaluatedPopulation, Collections.reverseOrder());
-    } else // Ascending values for non-natural fitness.
-    {
+    } else { // Ascending values for non-natural fitness.
       Collections.sort(evaluatedPopulation);
     }
     

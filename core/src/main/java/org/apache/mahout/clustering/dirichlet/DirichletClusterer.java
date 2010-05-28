@@ -114,7 +114,7 @@ public class DirichletClusterer<O> {
    *          the observed data to be clustered
    * @param modelFactory
    *          the ModelDistribution to use
-   * @param alpha_0
+   * @param alpha0
    *          the double value for the beta distributions
    * @param numClusters
    *          the int number of clusters
@@ -123,14 +123,18 @@ public class DirichletClusterer<O> {
    * @param burnin
    *          the int burnin interval, used to suppress early iterations
    */
-  public DirichletClusterer(List<O> sampleData, ModelDistribution<O> modelFactory, double alpha_0, int numClusters, int thin,
-      int burnin) {
+  public DirichletClusterer(List<O> sampleData,
+                            ModelDistribution<O> modelFactory,
+                            double alpha0,
+                            int numClusters,
+                            int thin,
+                            int burnin) {
     this.sampleData = sampleData;
     this.modelFactory = modelFactory;
     this.thin = thin;
     this.burnin = burnin;
     this.numClusters = numClusters;
-    state = new DirichletState<O>(modelFactory, numClusters, alpha_0);
+    state = new DirichletState<O>(modelFactory, numClusters, alpha0);
   }
 
   /**
@@ -139,7 +143,6 @@ public class DirichletClusterer<O> {
    * @param threshold
    */
   public DirichletClusterer(boolean emitMostLikely, double threshold) {
-    super();
     this.sampleData = null;
     this.modelFactory = null;
     this.thin = 0;
@@ -274,7 +277,7 @@ public class DirichletClusterer<O> {
    *          the observed data to be clustered
    * @param modelFactory
    *          the ModelDistribution to use
-   * @param alpha_0
+   * @param alpha0
    *          the double value for the beta distributions
    * @param numClusters
    *          the int number of clusters
@@ -285,9 +288,15 @@ public class DirichletClusterer<O> {
    * @param numIterations
    *          number of iterations to be performed
    */
-  public static List<Model<Vector>[]> clusterPoints(List<Vector> points, ModelDistribution<Vector> modelFactory, double alpha_0,
-      int numClusters, int thin, int burnin, int numIterations) {
-    DirichletClusterer<Vector> clusterer = new DirichletClusterer<Vector>(points, modelFactory, alpha_0, numClusters, thin, burnin);
+  public static List<Model<Vector>[]> clusterPoints(List<Vector> points, 
+                                                    ModelDistribution<Vector> modelFactory,
+                                                    double alpha0,
+                                                    int numClusters,
+                                                    int thin,
+                                                    int burnin,
+                                                    int numIterations) {
+    DirichletClusterer<Vector> clusterer =
+        new DirichletClusterer<Vector>(points, modelFactory, alpha0, numClusters, thin, burnin);
     return clusterer.cluster(numIterations);
 
   }

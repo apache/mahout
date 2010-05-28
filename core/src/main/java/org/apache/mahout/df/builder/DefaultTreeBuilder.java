@@ -77,7 +77,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
       return new Leaf(data.majorityLabel(rng));
     }
     if (data.identicalLabel()) {
-      return new Leaf(data.get(0).label);
+      return new Leaf(data.get(0).getLabel());
     }
     
     int[] attributes = randomAttributes(rng, selected, m);
@@ -86,42 +86,42 @@ public class DefaultTreeBuilder implements TreeBuilder {
     Split best = null;
     for (int attr : attributes) {
       Split split = igSplit.computeSplit(data, attr);
-      if ((best == null) || (best.ig < split.ig)) {
+      if ((best == null) || (best.getIg() < split.getIg())) {
         best = split;
       }
     }
     
-    boolean alreadySelected = selected[best.attr];
+    boolean alreadySelected = selected[best.getAttr()];
     
     if (alreadySelected) {
       // attribute already selected
-      log.warn("attribute {} already selected in a parent node", best.attr);
+      log.warn("attribute {} already selected in a parent node", best.getAttr());
     }
     
     Node childNode;
-    if (data.getDataset().isNumerical(best.attr)) {
-      Data loSubset = data.subset(Condition.lesser(best.attr, best.split));
+    if (data.getDataset().isNumerical(best.getAttr())) {
+      Data loSubset = data.subset(Condition.lesser(best.getAttr(), best.getSplit()));
       Node loChild = build(rng, loSubset);
       
-      Data hiSubset = data.subset(Condition.greaterOrEquals(best.attr, best.split));
+      Data hiSubset = data.subset(Condition.greaterOrEquals(best.getAttr(), best.getSplit()));
       Node hiChild = build(rng, hiSubset);
       
-      childNode = new NumericalNode(best.attr, best.split, loChild, hiChild);
+      childNode = new NumericalNode(best.getAttr(), best.getSplit(), loChild, hiChild);
     } else { // CATEGORICAL attribute
-      selected[best.attr] = true;
+      selected[best.getAttr()] = true;
       
-      double[] values = data.values(best.attr);
+      double[] values = data.values(best.getAttr());
       Node[] childs = new Node[values.length];
       
       for (int index = 0; index < values.length; index++) {
-        Data subset = data.subset(Condition.equals(best.attr, values[index]));
+        Data subset = data.subset(Condition.equals(best.getAttr(), values[index]));
         childs[index] = build(rng, subset);
       }
       
-      childNode = new CategoricalNode(best.attr, values, childs);
+      childNode = new CategoricalNode(best.getAttr(), values, childs);
       
       if (!alreadySelected) {
-        selected[best.attr] = false;
+        selected[best.getAttr()] = false;
       }
     }
     

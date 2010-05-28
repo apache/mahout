@@ -59,8 +59,8 @@ public class OptIgSplit extends IgSplit {
     // compute frequencies
     for (int index = 0; index < data.size(); index++) {
       Instance instance = data.get(index);
-      counts[ArrayUtils.indexOf(values, instance.get(attr))][instance.label]++;
-      countAll[instance.label]++;
+      counts[ArrayUtils.indexOf(values, instance.get(attr))][instance.getLabel()]++;
+      countAll[instance.getLabel()]++;
     }
     
     int size = data.size();
@@ -106,8 +106,8 @@ public class OptIgSplit extends IgSplit {
   protected void computeFrequencies(Data data, int attr, double[] values) {
     for (int index = 0; index < data.size(); index++) {
       Instance instance = data.get(index);
-      counts[ArrayUtils.indexOf(values, instance.get(attr))][instance.label]++;
-      countAll[instance.label]++;
+      counts[ArrayUtils.indexOf(values, instance.get(attr))][instance.getLabel()]++;
+      countAll[instance.getLabel()]++;
     }
   }
   

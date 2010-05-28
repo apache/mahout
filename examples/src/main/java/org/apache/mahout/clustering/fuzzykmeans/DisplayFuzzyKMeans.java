@@ -28,7 +28,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -49,7 +48,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     int i = DisplayFuzzyKMeans.clusters.size() - 1;
     for (List<SoftCluster> cls : clusters) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(COLORS[Math.min(DisplayDirichlet.COLORS.length - 1, i--)]);
       for (SoftCluster cluster : cls) {
         // if (true || cluster.getWeightedPointTotal().zSum() > sampleData.size() * 0.05) {
         dv.assign(Math.max(cluster.std(), 0.3) * 3);
@@ -63,7 +62,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     RandomUtils.useTestSeed();
     DisplayDirichlet.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : sampleData) {
+    for (VectorWritable sample : SAMPLE_DATA) {
       points.add((Vector) sample.get());
     }
     DistanceMeasure measure = new ManhattanDistanceMeasure();

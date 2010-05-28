@@ -53,7 +53,8 @@ public final class UDistrib {
   
   private static final Logger log = LoggerFactory.getLogger(UDistrib.class);
   
-  private UDistrib() {}
+  private UDistrib() {
+  }
   
   /**
    * Launch the uniform distribution tool. Requires the following command line arguments:<br>
@@ -176,7 +177,7 @@ public final class UDistrib {
       
       // write the tuple in files[tuple.label]
       Instance instance = converter.convert(id++, line);
-      int label = instance.label;
+      int label = instance.getLabel();
       files[currents[label]].writeBytes(line);
       files[currents[label]].writeChar('\n');
       

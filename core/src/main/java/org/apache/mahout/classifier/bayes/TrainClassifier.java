@@ -37,9 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Train the Naive Bayes classifier with improved weighting
- * <p/>
- * A properly formatted file for input is one which has one document per line with the first entry as the label and the rest as evidence.
+ * Train the Naive Bayes classifier with improved weighting.
+ * A properly formatted file for input is one which has one document per line
+ * with the first entry as the label and the rest as evidence.
  *
  * @see org.apache.mahout.classifier.BayesFileFormatter
  */
@@ -68,7 +68,9 @@ public final class TrainClassifier {
     
     Option inputDirOpt = obuilder.withLongName("input").withRequired(true).withArgument(
       abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The Directory on HDFS containing the collapsed, properly formatted files: One doc per line, first entry on the line is the label, rest is the evidence").withShortName("i").create();
+      "The Directory on HDFS containing the collapsed, properly formatted files: "
+          + "One doc per line, first entry on the line is the label, rest is the evidence")
+        .withShortName("i").create();
     
     Option outputOpt = obuilder.withLongName("output").withRequired(true).withArgument(
       abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(

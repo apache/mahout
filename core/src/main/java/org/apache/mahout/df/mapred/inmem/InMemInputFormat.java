@@ -115,8 +115,7 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
     }
   }
   
-  public static class InMemRecordReader implements
-  RecordReader<IntWritable, NullWritable> {
+  public static class InMemRecordReader implements RecordReader<IntWritable, NullWritable> {
     
     private final InMemInputSplit split;
     
@@ -238,10 +237,10 @@ public class InMemInputFormat implements InputFormat<IntWritable, NullWritable> 
       
       InMemInputSplit split = (InMemInputSplit) obj;
 
-      return firstId == split.firstId &&
-          nbTrees == split.nbTrees && 
-          ((seed == null && split.seed == null) ||
-           (seed != null && seed.equals(split.seed)));
+      return firstId == split.firstId
+          && nbTrees == split.nbTrees
+          && ((seed == null && split.seed == null)
+              || (seed != null && seed.equals(split.seed)));
 
     }
     

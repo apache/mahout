@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -95,7 +95,7 @@ public final class TravellingSalesman extends JApplet {
   private SwingBackgroundTask<List<String>> createTask(final Collection<String> cities) {
     final TravellingSalesmanStrategy strategy = strategyPanel.getStrategy();
     return new SwingBackgroundTask<List<String>>() {
-      private long elapsedTime = 0;
+      private long elapsedTime ;
       
       @Override
       protected List<String> performTask() {

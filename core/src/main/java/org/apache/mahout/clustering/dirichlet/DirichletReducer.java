@@ -44,8 +44,10 @@ public class DirichletReducer extends MapReduceBase implements
   }
 
   @Override
-  public void reduce(Text key, Iterator<VectorWritable> values, OutputCollector<Text, DirichletCluster<VectorWritable>> output,
-      Reporter reporter) throws IOException {
+  public void reduce(Text key,
+                     Iterator<VectorWritable> values,
+                     OutputCollector<Text, DirichletCluster<VectorWritable>> output,
+                     Reporter reporter) throws IOException {
     this.output = output;
     int k = Integer.parseInt(key.toString());
     Model<VectorWritable> model = newModels[k];

@@ -36,8 +36,8 @@ public abstract class AbstractJDBCComponent {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractJDBCComponent.class);
   
-  protected static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   private static final int DEFAULT_FETCH_SIZE = 1000; // A max, "big" number of rows to buffer at once
+  protected static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   
   protected static void checkNotNullAndLog(String argName, Object value) {
     if ((value == null) || (value.toString().length() == 0)) {

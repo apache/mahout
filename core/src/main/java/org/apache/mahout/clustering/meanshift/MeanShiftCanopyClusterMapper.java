@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,15 +43,17 @@ public class MeanShiftCanopyClusterMapper extends MapReduceBase implements
   private List<MeanShiftCanopy> canopies;
 
   @Override
-  public void map(WritableComparable<?> key, MeanShiftCanopy canopy, OutputCollector<IntWritable, WeightedVectorWritable> output,
-      Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key,
+                  MeanShiftCanopy canopy,
+                  OutputCollector<IntWritable, WeightedVectorWritable> output,
+                  Reporter reporter) throws IOException {
     // canopies use canopyIds assigned when input vectors are processed as vectorIds too
     int vectorId = canopy.getId();
     for (MeanShiftCanopy msc : canopies) {
       for (int containedId : msc.getBoundPoints().toList()) {
         if (vectorId == containedId) {
-          // System.out.println(msc.getId() + ": v" + vectorId + "=" + ClusterBase.formatVector(vector.getCenter(), null));
-          output.collect(new IntWritable(msc.getId()), new WeightedVectorWritable(1, new VectorWritable(canopy.getCenter())));
+          output.collect(new IntWritable(msc.getId()),
+                         new WeightedVectorWritable(1, new VectorWritable(canopy.getCenter())));
         }
       }
     }
@@ -67,15 +68,10 @@ public class MeanShiftCanopyClusterMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
       throw new IllegalStateException(e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
-      throw new IllegalStateException(e);
     }
   }
 
-  public static List<MeanShiftCanopy> getCanopies(JobConf job) throws SecurityException, IllegalArgumentException,
-      NoSuchMethodException, InvocationTargetException {
+  public static List<MeanShiftCanopy> getCanopies(JobConf job) throws SecurityException, IllegalArgumentException {
     String statePath = job.get(MeanShiftCanopyDriver.STATE_IN_KEY);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     try {

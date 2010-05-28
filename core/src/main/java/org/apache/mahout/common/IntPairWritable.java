@@ -224,6 +224,11 @@ public final class IntPairWritable
     private final IntPairWritable pair;
     private final double frequency;
 
+    public Frequency(IntPairWritable bigram, double frequency) {
+      this.pair = new IntPairWritable(bigram);
+      this.frequency = frequency;
+    }
+
     public double getFrequency() {
       return frequency;
     }
@@ -232,11 +237,6 @@ public final class IntPairWritable
       return pair;
     }
 
-    public Frequency(IntPairWritable bigram, double frequency) {
-      this.pair = new IntPairWritable(bigram);
-      this.frequency = frequency;
-    }
-    
     @Override
     public int hashCode() {
       return pair.hashCode() + RandomUtils.hashDouble(frequency);

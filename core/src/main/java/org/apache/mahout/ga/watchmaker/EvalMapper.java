@@ -45,7 +45,7 @@ public class EvalMapper extends MapReduceBase implements
   /** Parameter used to store the "stringified" evaluator */
   public static final String MAHOUT_GA_EVALUATOR = "mahout.ga.evaluator";
   
-  private FitnessEvaluator<Object> evaluator = null;
+  private FitnessEvaluator<Object> evaluator;
   
   @Override
   public void configure(JobConf job) {

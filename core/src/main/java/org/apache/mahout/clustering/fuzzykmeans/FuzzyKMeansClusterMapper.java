@@ -44,8 +44,10 @@ public class FuzzyKMeansClusterMapper extends MapReduceBase implements
   //private double threshold = 0;
 
   @Override
-  public void map(WritableComparable<?> key, VectorWritable point, OutputCollector<IntWritable, WeightedVectorWritable> output,
-      Reporter reporter) throws IOException {
+  public void map(WritableComparable<?> key,
+                  VectorWritable point,
+                  OutputCollector<IntWritable, WeightedVectorWritable> output,
+                  Reporter reporter) throws IOException {
     clusterer.emitPointToClusters(point, clusters, output);
   }
 

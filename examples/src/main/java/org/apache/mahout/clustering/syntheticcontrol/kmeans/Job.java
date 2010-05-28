@@ -38,7 +38,6 @@ import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,19 +63,21 @@ public final class Job {
         "The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
 
     Option t1Opt = obuilder.withLongName("t1").withRequired(false).withArgument(
-        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("The t1 value to use.").withShortName("m")
-        .create();
+        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("The t1 value to use.")
+        .withShortName("m").create();
     Option t2Opt = obuilder.withLongName("t2").withRequired(false).withArgument(
-        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("The t2 value to use.").withShortName("m")
-        .create();
+        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("The t2 value to use.")
+        .withShortName("m").create();
     Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
         abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Vector implementation class name.  Default is RandomAccessSparseVector.class").withShortName("v").create();
+        "The Vector implementation class name.  Default is RandomAccessSparseVector.class")
+        .withShortName("v").create();
 
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(measureClassOpt).withOption(
-        convergenceDeltaOpt).withOption(maxIterationsOpt).withOption(vectorClassOpt).withOption(t1Opt).withOption(t2Opt)
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(measureClassOpt).withOption(convergenceDeltaOpt).withOption(maxIterationsOpt)
+        .withOption(vectorClassOpt).withOption(t1Opt).withOption(t2Opt)
         .withOption(helpOpt).create();
     try {
       Parser parser = new Parser();
@@ -89,8 +90,8 @@ public final class Job {
       }
       Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
-      String measureClass = cmdLine.getValue(measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure")
-          .toString();
+      String measureClass = cmdLine.getValue(measureClassOpt,
+                                             "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
@@ -128,8 +129,13 @@ public final class Job {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    */
-  private static void runJob(Path input, Path output, String measureClass, double t1, double t2, double convergenceDelta,
-      int maxIterations) throws IOException, InstantiationException, IllegalAccessException {
+  private static void runJob(Path input,
+                             Path output,
+                             String measureClass,
+                             double t1,
+                             double t2,
+                             double convergenceDelta,
+                             int maxIterations) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 
@@ -142,7 +148,13 @@ public final class Job {
     log.info("Running Canopy to get initial clusters");
     CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2, false);
     log.info("Running KMeans");
-    KMeansDriver.runJob(directoryContainingConvertedInput, new Path(output, Cluster.INITIAL_CLUSTERS_DIR), output, measureClass,
-        convergenceDelta, maxIterations, 1, true);
+    KMeansDriver.runJob(directoryContainingConvertedInput,
+                        new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
+                        output,
+                        measureClass,
+                        convergenceDelta,
+                        maxIterations,
+                        1,
+                        true);
   }
 }

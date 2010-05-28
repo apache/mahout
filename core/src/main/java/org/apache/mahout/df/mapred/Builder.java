@@ -65,6 +65,14 @@ public abstract class Builder {
   private final Configuration conf;
   
   private String outputDirName = "output";
+
+  protected Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {
+    this.treeBuilder = treeBuilder;
+    this.dataPath = dataPath;
+    this.datasetPath = datasetPath;
+    this.seed = seed;
+    this.conf = conf;
+  }
   
   protected TreeBuilder getTreeBuilder() {
     return treeBuilder;
@@ -190,14 +198,6 @@ public abstract class Builder {
     // file system
     FileSystem fs = FileSystem.get(conf);
     return new Path(fs.getWorkingDirectory(), outputDirName);
-  }
-  
-  protected Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {
-    this.treeBuilder = treeBuilder;
-    this.dataPath = dataPath;
-    this.datasetPath = datasetPath;
-    this.seed = seed;
-    this.conf = conf;
   }
   
   /**

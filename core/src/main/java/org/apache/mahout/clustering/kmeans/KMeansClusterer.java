@@ -61,8 +61,9 @@ public class KMeansClusterer {
    * @param clusters
    *          a List<Cluster> to test.
    */
-  public void emitPointToNearestCluster(Vector point, List<Cluster> clusters, OutputCollector<Text, KMeansInfo> output)
-      throws IOException {
+  public void emitPointToNearestCluster(Vector point,
+                                        Iterable<Cluster> clusters,
+                                        OutputCollector<Text, KMeansInfo> output) throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -80,7 +81,7 @@ public class KMeansClusterer {
     output.collect(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
   }
 
-  public void outputPointWithClusterInfo(Vector vector, List<Cluster> clusters,
+  public void outputPointWithClusterInfo(Vector vector, Iterable<Cluster> clusters,
       OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;

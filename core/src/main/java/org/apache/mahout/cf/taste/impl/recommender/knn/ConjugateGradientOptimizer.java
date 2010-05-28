@@ -52,14 +52,14 @@ public final class ConjugateGradientOptimizer implements Optimizer {
    * 
    * </p>
    * 
-   * @param A
+   * @param matrix
    *          matrix nxn positions
    * @param b
    *          vector b, n positions
    * @return vector of n weights
    */
   @Override
-  public double[] optimize(double[][] A, double[] b) {
+  public double[] optimize(double[][] matrix, double[] b) {
     
     int k = b.length;
     double[] x = new double[k];
@@ -72,7 +72,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
     // w = -r;
     for (int i = 0; i < k; i++) {
       double v = 0.0;
-      double[] Ai = A[i];
+      double[] Ai = matrix[i];
       for (int j = 0; j < k; j++) {
         v += Ai[j] * x[j];
       }
@@ -86,7 +86,7 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       // z = A*w;
       for (int i = 0; i < k; i++) {
         double v = 0.0;
-        double[] Ai = A[i];
+        double[] Ai = matrix[i];
         for (int j = 0; j < k; j++) {
           v += Ai[j] * w[j];
         }

@@ -150,7 +150,7 @@ public class DataLoaderTest extends MahoutTestCase {
       Instance instance = loaded.get(lind);
 
       // make sure the id is correct
-      assertEquals(lind, instance.id);
+      assertEquals(lind, instance.getId());
 
       int aId = 0;
       for (int attr = 0; attr < nbAttributes; attr++) {
@@ -312,9 +312,9 @@ public class DataLoaderTest extends MahoutTestCase {
       }
 
       if (source[index][labelInd] == value) {
-        assertEquals(code, loaded.get(lind).label);
+        assertEquals(code, loaded.get(lind).getLabel());
       } else {
-        assertFalse(code == loaded.get(lind).label);
+        assertFalse(code == loaded.get(lind).getLabel());
       }
 
       lind++;

@@ -24,13 +24,13 @@ import org.apache.mahout.common.RandomUtils;
 /** Calculates the SVD using an Expectation Maximization algorithm. */
 public final class ExpectationMaximizationSVD {
   
-  private static final Random random = RandomUtils.getRandom();
+  private static final Random RANDOM = RandomUtils.getRandom();
   
   private static final double LEARNING_RATE = 0.005;
   /** Parameter used to prevent overfitting. 0.02 is a good value. */
   private static final double K = 0.02;
   /** Random noise applied to starting values. */
-  private static final double r = 0.005;
+  private static final double R = 0.005;
   
   private final int m;
   private final int n;
@@ -53,7 +53,7 @@ public final class ExpectationMaximizationSVD {
    *          default starting values for the SVD vectors
    */
   public ExpectationMaximizationSVD(int m, int n, int k, double defaultValue) {
-    this(m, n, k, defaultValue, r);
+    this(m, n, k, defaultValue, R);
   }
   
   public ExpectationMaximizationSVD(int m, int n, int k, double defaultValue, double noise) {
@@ -66,10 +66,10 @@ public final class ExpectationMaximizationSVD {
     
     for (int i = 0; i < k; i++) {
       for (int j = 0; j < m; j++) {
-        leftVector[j][i] = defaultValue + (ExpectationMaximizationSVD.random.nextDouble() - 0.5) * noise;
+        leftVector[j][i] = defaultValue + (ExpectationMaximizationSVD.RANDOM.nextDouble() - 0.5) * noise;
       }
       for (int j = 0; j < n; j++) {
-        rightVector[j][i] = defaultValue + (ExpectationMaximizationSVD.random.nextDouble() - 0.5) * noise;
+        rightVector[j][i] = defaultValue + (ExpectationMaximizationSVD.RANDOM.nextDouble() - 0.5) * noise;
       }
     }
   }

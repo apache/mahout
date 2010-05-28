@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -66,7 +66,7 @@ public class BuildForest extends Configured implements Tool {
   
   private int nbTrees; // Number of trees to grow
   
-  private Long seed = null; // Random seed
+  private Long seed; // Random seed
   
   private boolean isPartial; // use partial data implementation
   

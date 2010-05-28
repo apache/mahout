@@ -40,19 +40,19 @@ public class NGrams {
     StringTokenizer tokenizer = new StringTokenizer(line);
     List<String> tokens = new ArrayList<String>();
     String labelName = tokenizer.nextToken();
-    List<String> previousN_1Grams = new ArrayList<String>();
+    List<String> previousN1Grams = new ArrayList<String>();
     while (tokenizer.hasMoreTokens()) {
       
-      String next_token = tokenizer.nextToken();
-      if (previousN_1Grams.size() == gramSize) {
-        previousN_1Grams.remove(0);
+      String nextToken = tokenizer.nextToken();
+      if (previousN1Grams.size() == gramSize) {
+        previousN1Grams.remove(0);
       }
       
-      previousN_1Grams.add(next_token);
+      previousN1Grams.add(nextToken);
       
       StringBuilder gramBuilder = new StringBuilder();
       
-      for (String gram : previousN_1Grams) {
+      for (String gram : previousN1Grams) {
         gramBuilder.append(gram);
         String token = gramBuilder.toString();
         tokens.add(token);
@@ -68,19 +68,19 @@ public class NGrams {
     StringTokenizer tokenizer = new StringTokenizer(line);
     List<String> tokens = new ArrayList<String>();
     
-    List<String> previousN_1Grams = new ArrayList<String>();
+    List<String> previousN1Grams = new ArrayList<String>();
     while (tokenizer.hasMoreTokens()) {
       
-      String next_token = tokenizer.nextToken();
-      if (previousN_1Grams.size() == gramSize) {
-        previousN_1Grams.remove(0);
+      String nextToken = tokenizer.nextToken();
+      if (previousN1Grams.size() == gramSize) {
+        previousN1Grams.remove(0);
       }
       
-      previousN_1Grams.add(next_token);
+      previousN1Grams.add(nextToken);
       
       StringBuilder gramBuilder = new StringBuilder();
       
-      for (String gram : previousN_1Grams) {
+      for (String gram : previousN1Grams) {
         gramBuilder.append(gram);
         String token = gramBuilder.toString();
         tokens.add(token);

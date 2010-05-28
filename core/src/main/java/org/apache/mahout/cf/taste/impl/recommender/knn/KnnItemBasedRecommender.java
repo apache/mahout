@@ -62,7 +62,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   private double[] getInterpolations(long itemID, long userID, long[] itemNeighborhood) throws TasteException {
     
     int k = itemNeighborhood.length;
-    double[][] A = new double[k][k];
+    double[][] aMatrix = new double[k][k];
     double[] b = new double[k];
     int i = 0;
     
@@ -85,7 +85,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
             value += iPrefs.getValue(pi) * pj;
           }
         }
-        A[i][j] = value / numUsers;
+        aMatrix[i][j] = value / numUsers;
         j++;
       }
       i++;
@@ -110,7 +110,7 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
       i++;
     }
     
-    return optimizer.optimize(A, b);
+    return optimizer.optimize(aMatrix, b);
   }
   
   @Override

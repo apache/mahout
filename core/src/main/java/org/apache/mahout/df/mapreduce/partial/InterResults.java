@@ -115,7 +115,11 @@ public final class InterResults {
    *          partitions' sizes in hadoop order
    * @throws IOException
    */
-  public static void store(FileSystem fs, Path forestPath, TreeID[] keys, Node[] trees, int[] sizes) throws IOException {
+  public static void store(FileSystem fs,
+                           Path forestPath,
+                           TreeID[] keys,
+                           Node[] trees,
+                           int[] sizes) throws IOException {
     if (keys.length != trees.length) {
       throw new IllegalArgumentException("keys.length != trees.length");
     }

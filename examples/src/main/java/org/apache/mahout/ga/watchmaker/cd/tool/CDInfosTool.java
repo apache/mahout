@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * Gathers additional information about a given dataset. Takes a descriptor
  * about the attributes, and generates a description for each one.
  */
-public class CDInfosTool {
+public final class CDInfosTool {
   
   private static final Logger log = LoggerFactory.getLogger(CDInfosTool.class);
   
@@ -152,11 +152,8 @@ public class CDInfosTool {
    * Load the dataset's attributes descriptors from an .info file
    * 
    * @param inpath dataset path
-   * @return
-   * @throws IOException
    */
-  private static Descriptors loadDescriptors(FileSystem fs, Path inpath)
-  throws IOException {
+  private static Descriptors loadDescriptors(FileSystem fs, Path inpath) throws IOException {
     // TODO should become part of FileInfoParser
     
     Path infpath = FileInfoParser.getInfoFile(fs, inpath);

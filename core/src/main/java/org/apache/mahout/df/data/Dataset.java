@@ -80,6 +80,62 @@ public class Dataset implements Writable {
   
   /** number of instances in the dataset */
   private int nbInstances;
+
+  private Dataset() { }
+
+  /**
+   * Should only be called by a DataLoader
+   *
+   * @param attrs
+   *          attributes description
+   * @param values
+   *          distinct values for all CATEGORICAL attributes
+   * @param nbInstances
+   */
+  protected Dataset(Attribute[] attrs, List<String>[] values, int nbInstances) {
+    validateValues(attrs, values);
+
+    int nbattrs = countAttributes(attrs);
+
+    // the label values are set apart
+    attributes = new Attribute[nbattrs];
+    this.values = new String[nbattrs][];
+    ignored = new int[attrs.length - (nbattrs + 1)]; // nbignored = total - (nbattrs + label)
+
+    labelId = -1;
+    int ignoredId = 0;
+    int ind = 0;
+    for (int attr = 0; attr < attrs.length; attr++) {
+      if (attrs[attr].isIgnored()) {
+        ignored[ignoredId++] = attr;
+        continue;
+      }
+
+      if (attrs[attr].isLabel()) {
+        if (labelId != -1) {
+          throw new IllegalStateException("Label found more than once");
+        }
+        labelId = attr;
+        continue;
+      }
+
+      if (attrs[attr].isCategorical()) {
+        this.values[ind] = new String[values[attr].size()];
+        values[attr].toArray(this.values[ind]);
+      }
+
+      attributes[ind++] = attrs[attr];
+    }
+
+    if (labelId == -1) {
+      throw new IllegalStateException("Label not found");
+    }
+
+    labels = new String[values[labelId].size()];
+    values[labelId].toArray(labels);
+
+    this.nbInstances = nbInstances;
+  }
   
   public String[] labels() {
     return Arrays.copyOf(labels, labels.length);
@@ -134,62 +190,7 @@ public class Dataset implements Writable {
   public int[] getIgnored() {
     return ignored;
   }
-  
-  private Dataset() { }
-  
-  /**
-   * Should only be called by a DataLoader
-   * 
-   * @param attrs
-   *          attributes description
-   * @param values
-   *          distinct values for all CATEGORICAL attributes
-   * @param nbInstances
-   */
-  protected Dataset(Attribute[] attrs, List<String>[] values, int nbInstances) {
-    validateValues(attrs, values);
-    
-    int nbattrs = countAttributes(attrs);
-    
-    // the label values are set apart
-    attributes = new Attribute[nbattrs];
-    this.values = new String[nbattrs][];
-    ignored = new int[attrs.length - (nbattrs + 1)]; // nbignored = total - (nbattrs + label)
-    
-    labelId = -1;
-    int ignoredId = 0;
-    int ind = 0;
-    for (int attr = 0; attr < attrs.length; attr++) {
-      if (attrs[attr].isIgnored()) {
-        ignored[ignoredId++] = attr;
-        continue;
-      }
-      
-      if (attrs[attr].isLabel()) {
-        if (labelId != -1) {
-          throw new IllegalStateException("Label found more than once");
-        }
-        labelId = attr;
-        continue;
-      }
-      
-      if (attrs[attr].isCategorical()) {
-        this.values[ind] = new String[values[attr].size()];
-        values[attr].toArray(this.values[ind]);
-      }
-      
-      attributes[ind++] = attrs[attr];
-    }
-    
-    if (labelId == -1) {
-      throw new IllegalStateException("Label not found");
-    }
-    
-    labels = new String[values[labelId].size()];
-    values[labelId].toArray(labels);
-    
-    this.nbInstances = nbInstances;
-  }
+
   
   /**
    * Counts the number of attributes, except IGNORED and LABEL

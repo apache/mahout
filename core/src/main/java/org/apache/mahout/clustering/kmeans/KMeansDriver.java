@@ -56,7 +56,8 @@ public final class KMeansDriver {
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option clustersOpt = DefaultOptionCreator.clustersInOption().withDescription(
         "The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected"
+            + " and written out to this path first")
         .create();
     Option kOpt = DefaultOptionCreator.kOption().withDescription(
         "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -70,8 +71,9 @@ public final class KMeansDriver {
     Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(clustersOpt).withOption(outputOpt)
-        .withOption(measureClassOpt).withOption(convergenceDeltaOpt).withOption(maxIterationsOpt).withOption(numReduceTasksOpt)
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(clustersOpt)
+        .withOption(outputOpt).withOption(measureClassOpt).withOption(convergenceDeltaOpt)
+        .withOption(maxIterationsOpt).withOption(numReduceTasksOpt)
         .withOption(kOpt).withOption(overwriteOutput).withOption(helpOpt).withOption(clusteringOpt).create();
     try {
       Parser parser = new Parser();
@@ -94,7 +96,8 @@ public final class KMeansDriver {
         HadoopUtil.overwriteOutput(output);
       }
       if (cmdLine.hasOption(kOpt)) {
-        clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(cmdLine.getValue(kOpt).toString()));
+        clusters = RandomSeedGenerator.buildRandom(input, clusters,
+                                                   Integer.parseInt(cmdLine.getValue(kOpt).toString()));
       }
       runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, cmdLine
           .hasOption(clusteringOpt));
@@ -129,9 +132,10 @@ public final class KMeansDriver {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output, measureClass });
-      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", new Object[] { convergenceDelta,
-          maxIterations, numReduceTasks, VectorWritable.class.getName() });
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}",
+               new Object[] {input, clustersIn, output, measureClass});
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
+               new Object[] {convergenceDelta, maxIterations, numReduceTasks, VectorWritable.class.getName()});
     }
     boolean converged = false;
     int iteration = 1;
@@ -168,8 +172,12 @@ public final class KMeansDriver {
    *          the number of reducer tasks
    * @return true if the iteration successfully runs
    */
-  private static boolean runIteration(Path input, Path clustersIn, Path clustersOut, String measureClass, String convergenceDelta,
-      int numReduceTasks) throws IOException {
+  private static boolean runIteration(Path input,
+                                      Path clustersIn,
+                                      Path clustersOut,
+                                      String measureClass,
+                                      String convergenceDelta,
+                                      int numReduceTasks) throws IOException {
     JobConf conf = new JobConf(KMeansDriver.class);
     conf.setMapOutputKeyClass(Text.class);
     conf.setMapOutputValueClass(KMeansInfo.class);
@@ -213,11 +221,15 @@ public final class KMeansDriver {
    * @param convergenceDelta
    *          the convergence delta value
    */
-  private static void runClustering(Path input, Path clustersIn, Path output, String measureClass, String convergenceDelta)
-      throws IOException {
+  private static void runClustering(Path input,
+                                    Path clustersIn,
+                                    Path output,
+                                    String measureClass,
+                                    String convergenceDelta) throws IOException {
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output, measureClass });
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}",
+               new Object[] {input, clustersIn, output, measureClass});
       log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class.getName());
     }
     JobConf conf = new JobConf(KMeansDriver.class);

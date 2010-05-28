@@ -175,7 +175,7 @@ public class DecisionForest implements Writable {
   @Override
   public void write(DataOutput dataOutput) throws IOException {
     dataOutput.writeInt(trees.size());
-    for (Node tree:trees) {
+    for (Node tree : trees) {
       tree.write(dataOutput);
     }
   }

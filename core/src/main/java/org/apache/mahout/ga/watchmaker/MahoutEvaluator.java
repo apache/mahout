@@ -57,7 +57,7 @@ public final class MahoutEvaluator {
    *          input population, sorted in the same order as the candidates.
    */
   public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations) 
-      throws IOException {
+    throws IOException {
     JobConf conf = new JobConf(MahoutEvaluator.class);
     FileSystem fs = FileSystem.get(conf);
     Path inpath = prepareInput(fs, population);

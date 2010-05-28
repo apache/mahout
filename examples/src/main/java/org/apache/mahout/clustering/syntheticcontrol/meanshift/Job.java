@@ -35,7 +35,6 @@ import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,15 +61,17 @@ public final class Job {
         "The distance measure class name.").create();
 
     Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(false).withShortName("t1").withArgument(
-        abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create()).withDescription("The T1 distance threshold.")
-        .create();
+        abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create())
+        .withDescription("The T1 distance threshold.").create();
 
     Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(false).withShortName("t2").withArgument(
-        abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create()).withDescription("The T1 distance threshold.")
-        .create();
+        abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create())
+        .withDescription("The T1 distance threshold.").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(helpOpt)
-        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(maxIterOpt).withOption(threshold2Opt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(modelOpt).withOption(helpOpt)
+        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(maxIterOpt)
+        .withOption(threshold2Opt).create();
 
     try {
       Parser parser = new Parser();
@@ -83,7 +84,8 @@ public final class Job {
 
       Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
-      String measureClassName = cmdLine.getValue(modelOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
+      String measureClassName =
+          cmdLine.getValue(modelOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
       double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt, "47.6").toString());
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt, "1").toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
@@ -120,8 +122,13 @@ public final class Job {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    */
-  private static void runJob(Path input, Path output, String measureClassName, double t1, double t2, double convergenceDelta,
-      int maxIterations) throws IOException, InstantiationException, IllegalAccessException {
+  private static void runJob(Path input,
+                             Path output,
+                             String measureClassName,
+                             double t1,
+                             double t2,
+                             double convergenceDelta,
+                             int maxIterations) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 

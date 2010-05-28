@@ -32,13 +32,13 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
-import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.math.VarLongWritable;
 
 /**
  * <p>
  * This job runs a "pseudo-distributed" recommendation process on Hadoop. It merely runs many
- * {@link Recommender} instances on Hadoop, where each instance is a normal non-distributed implementation.
+ * {@link org.apache.mahout.cf.taste.recommender.Recommender} instances on Hadoop,
+ * where each instance is a normal non-distributed implementation.
  * </p>
  * 
  * <p>This class configures and runs a {@link RecommenderReducer} using Hadoop.</p>
@@ -49,7 +49,8 @@ import org.apache.mahout.math.VarLongWritable;
  * <li>-Dmapred.input.dir=(path): Location of a data model file containing preference data, suitable for use with
  * {@link org.apache.mahout.cf.taste.impl.model.file.FileDataModel}</li>
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
- * <li>--recommenderClassName (string): Fully-qualified class name of {@link Recommender} to use to make recommendations.
+ * <li>--recommenderClassName (string): Fully-qualified class name of
+ * {@link org.apache.mahout.cf.taste.recommender.Recommender} to use to make recommendations.
  * Note that it must have a constructor which takes a {@link org.apache.mahout.cf.taste.model.DataModel}
  * argument.</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user</li>

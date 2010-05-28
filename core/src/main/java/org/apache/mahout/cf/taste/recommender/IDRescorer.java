@@ -27,21 +27,21 @@ package org.apache.mahout.cf.taste.recommender;
 public interface IDRescorer {
   
   /**
-   * @param ID
+   * @param id
    *          ID of thing (user, item, etc.) to rescore
    * @param originalScore
    *          original score
    * @return modified score, or {@link Double#NaN} to indicate that this should be excluded entirely
    */
-  double rescore(long ID, double originalScore);
+  double rescore(long id, double originalScore);
   
   /**
    * Returns <code>true</code> to exclude the given thing.
    * 
-   * @param ID
+   * @param id
    *          ID of thing (user, item, etc.) to rescore
    * @return <code>true</code> to exclude, <code>false</code> otherwise
    */
-  boolean isFiltered(long ID);
+  boolean isFiltered(long id);
   
 }

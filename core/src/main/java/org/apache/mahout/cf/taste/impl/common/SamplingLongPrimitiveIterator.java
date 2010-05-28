@@ -28,7 +28,7 @@ import org.apache.mahout.common.RandomUtils;
  */
 public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIterator {
   
-  private static final Random r = RandomUtils.getRandom();
+  private static final Random RANDOM = RandomUtils.getRandom();
   
   private final LongPrimitiveIterator delegate;
   private final double samplingRate;
@@ -67,7 +67,7 @@ public final class SamplingLongPrimitiveIterator extends AbstractLongPrimitiveIt
   
   private void doNext() {
     int toSkip = 0;
-    while (SamplingLongPrimitiveIterator.r.nextDouble() >= samplingRate) {
+    while (SamplingLongPrimitiveIterator.RANDOM.nextDouble() >= samplingRate) {
       toSkip++;
     }
     // Really, would be nicer to select value from geometric distribution, for small values of samplingRate

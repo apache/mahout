@@ -50,8 +50,7 @@ public final class SimilarityReducer extends
   @Override
   protected void reduce(ItemPairWritable pair,
                         Iterable<CoRating> coRatings,
-                        Context context)
-      throws IOException, InterruptedException {
+                        Context context) throws IOException, InterruptedException {
 
     double similarity =
       distributedItemSimilarity.similarity(coRatings, pair.getItemAWeight(), pair.getItemBWeight(), numberOfUsers);

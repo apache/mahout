@@ -30,7 +30,7 @@ import org.apache.mahout.common.RandomUtils;
  */
 public final class SamplingIterator<T> implements Iterator<T> {
   
-  private static final Random r = RandomUtils.getRandom();
+  private static final Random RANDOM = RandomUtils.getRandom();
   
   private final Iterator<? extends T> delegate;
   private final double samplingRate;
@@ -64,7 +64,7 @@ public final class SamplingIterator<T> implements Iterator<T> {
     if (delegate instanceof SkippingIterator<?>) {
       SkippingIterator<? extends T> skippingDelegate = (SkippingIterator<? extends T>) delegate;
       int toSkip = 0;
-      while (SamplingIterator.r.nextDouble() >= samplingRate) {
+      while (SamplingIterator.RANDOM.nextDouble() >= samplingRate) {
         toSkip++;
       }
       // Really, would be nicer to select value from geometric distribution, for small values of samplingRate
@@ -78,7 +78,7 @@ public final class SamplingIterator<T> implements Iterator<T> {
     } else {
       while (delegate.hasNext()) {
         T delegateNext = delegate.next();
-        if (SamplingIterator.r.nextDouble() < samplingRate) {
+        if (SamplingIterator.RANDOM.nextDouble() < samplingRate) {
           next = delegateNext;
           found = true;
           break;

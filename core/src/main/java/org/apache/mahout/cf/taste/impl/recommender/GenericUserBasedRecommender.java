@@ -29,7 +29,6 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
@@ -39,8 +38,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * A simple {@link Recommender} which uses a given {@link DataModel} and {@link UserNeighborhood} to produce
- * recommendations.
+ * A simple {@link org.apache.mahout.cf.taste.recommender.Recommender}
+ * which uses a given {@link DataModel} and {@link UserNeighborhood} to produce recommendations.
  * </p>
  */
 public class GenericUserBasedRecommender extends AbstractRecommender implements UserBasedRecommender {

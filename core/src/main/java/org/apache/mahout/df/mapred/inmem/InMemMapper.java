@@ -96,7 +96,9 @@ public class InMemMapper extends MapredMapper implements
     map(key, output, (InMemInputSplit) reporter.getInputSplit());
   }
   
-  public void map(IntWritable key, OutputCollector<IntWritable,MapredOutput> output, InMemInputSplit split) throws IOException {
+  public void map(IntWritable key,
+                  OutputCollector<IntWritable,MapredOutput> output,
+                  InMemInputSplit split) throws IOException {
     
     SingleTreePredictions callback = null;
     int[] predictions = null;

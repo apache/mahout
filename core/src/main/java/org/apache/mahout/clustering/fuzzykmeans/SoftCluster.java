@@ -50,9 +50,47 @@ public class SoftCluster extends ClusterBase {
 
   private Vector s2;
 
+  // For Writable
+  public SoftCluster() {
+  }
+
+  /**
+   * Construct a new SoftCluster with the given point as its center
+   * 
+   * @param center
+   *          the center point
+   */
+  public SoftCluster(Vector center) {
+    setCenter(center.clone());
+    this.pointProbSum = 0;
+    this.weightedPointTotal = getCenter().like();
+  }
+
+  /**
+   * Construct a new SoftCluster with the given point as its center
+   *
+   * @param center
+   *          the center point
+   */
+  public SoftCluster(Vector center, int clusterId) {
+    this.setId(clusterId);
+    this.setCenter(new RandomAccessSparseVector(center));
+    this.pointProbSum = 0;
+    this.weightedPointTotal = center.like();
+  }
+
+  /** Construct a new softcluster with the given clusterID */
+  public SoftCluster(String clusterId) {
+
+    this.setId(Integer.parseInt(clusterId.substring(1)));
+    this.pointProbSum = 0;
+    // this.weightedPointTotal = center.like();
+    this.converged = clusterId.charAt(0) == 'V';
+  }
+
   /**
    * Format the SoftCluster for output
-   * 
+   *
    * @param cluster
    *          the Cluster
    */
@@ -62,7 +100,7 @@ public class SoftCluster extends ClusterBase {
 
   /**
    * Decodes and returns a SoftCluster from the formattedString
-   * 
+   *
    * @param formattedString
    *          a String produced by formatCluster
    */
@@ -83,21 +121,6 @@ public class SoftCluster extends ClusterBase {
     return null;
   }
 
-  // For Writable
-  public SoftCluster() {
-  }
-
-  /**
-   * Construct a new SoftCluster with the given point as its center
-   * 
-   * @param center
-   *          the center point
-   */
-  public SoftCluster(Vector center) {
-    setCenter(center.clone());
-    this.pointProbSum = 0;
-    this.weightedPointTotal = getCenter().like();
-  }
 
   @Override
   public void write(DataOutput out) throws IOException {
@@ -133,28 +156,6 @@ public class SoftCluster extends ClusterBase {
       centroid = weightedPointTotal.divide(pointProbSum);
     }
     return centroid;
-  }
-
-  /**
-   * Construct a new SoftCluster with the given point as its center
-   * 
-   * @param center
-   *          the center point
-   */
-  public SoftCluster(Vector center, int clusterId) {
-    this.setId(clusterId);
-    this.setCenter(new RandomAccessSparseVector(center));
-    this.pointProbSum = 0;
-    this.weightedPointTotal = center.like();
-  }
-
-  /** Construct a new softcluster with the given clusterID */
-  public SoftCluster(String clusterId) {
-
-    this.setId(Integer.parseInt(clusterId.substring(1)));
-    this.pointProbSum = 0;
-    // this.weightedPointTotal = center.like();
-    this.converged = clusterId.charAt(0) == 'V';
   }
 
   @Override

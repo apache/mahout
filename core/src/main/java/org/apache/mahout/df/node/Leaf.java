@@ -30,7 +30,7 @@ import org.apache.mahout.df.data.Instance;
 public class Leaf extends Node {
   private int label;
   
-  protected Leaf() {}
+  protected Leaf() { } 
   
   public Leaf(int label) {
     this.label = label;

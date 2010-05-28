@@ -58,7 +58,8 @@ final class FuzzyKMeansUtil {
     try {
       // get all filtered file names in result list
       FileSystem fs = clusterPath.getFileSystem(job);
-      FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
+      FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(
+          fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
 
       for (FileStatus match : matches) {
         result.add(fs.makeQualified(match.getPath()));

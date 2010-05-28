@@ -30,6 +30,14 @@ public class WeightedVectorWritable implements Writable {
 
   private VectorWritable vector;
 
+  public WeightedVectorWritable() {
+  }
+
+  public WeightedVectorWritable(double weight, VectorWritable vector) {
+    this.weight = weight;
+    this.vector = vector;
+  }
+
   /**
    * @return the weight
    */
@@ -42,16 +50,6 @@ public class WeightedVectorWritable implements Writable {
    */
   public VectorWritable getVector() {
     return vector;
-  }
-
-  public WeightedVectorWritable(double weight, VectorWritable vector) {
-    super();
-    this.weight = weight;
-    this.vector = vector;
-  }
-
-  public WeightedVectorWritable() {
-    super();
   }
 
   @Override

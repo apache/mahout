@@ -34,8 +34,9 @@ import com.google.gson.reflect.TypeToken;
 
 public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   
-  private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
-  
+  private static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
+  private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() { }.getType();
+
   private int id;
   
   // the parameters
@@ -44,20 +45,16 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   private Vector stdDev;
   
   // the observation statistics, initialized by the first observation
-  private int s0 = 0;
+  private int s0;
   
   private Vector s1;
   
   private Vector s2;
-  
-  private static final Type modelType = new TypeToken<Model<Vector>>() { }.getType();
-  
+
   public AsymmetricSampledNormalModel() {
-    super();
   }
   
   public AsymmetricSampledNormalModel(int id, Vector mean, Vector stdDev) {
-    super();
     this.id = id;
     this.mean = mean;
     this.stdDev = stdDev;
@@ -125,7 +122,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     double sd2 = sd * sd;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (sd * sqrt2pi);
+    return ex / (sd * SQRT2PI);
   }
   
   @Override
@@ -195,7 +192,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, modelType);
+    return gson.toJson(this, MODEL_TYPE);
   }
 
   @Override
@@ -205,7 +202,7 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
 
   @Override
   public int getId() {
-     return id;
+    return id;
   }
 
   @Override

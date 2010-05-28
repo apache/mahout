@@ -37,11 +37,11 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  */
 public final class BooleanUserPreferenceArray implements PreferenceArray {
   
-  private final long[] IDs;
+  private final long[] ids;
   private long id;
   
   public BooleanUserPreferenceArray(int size) {
-    this.IDs = new long[size];
+    this.ids = new long[size];
     this.id = Long.MIN_VALUE; // as a sort of 'unspecified' value
   }
   
@@ -50,7 +50,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
     int size = prefs.size();
     for (int i = 0; i < size; i++) {
       Preference pref = prefs.get(i);
-      IDs[i] = pref.getItemID();
+      ids[i] = pref.getItemID();
     }
     if (size > 0) {
       id = prefs.get(0).getUserID();
@@ -60,14 +60,14 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   /**
    * This is a private copy constructor for clone().
    */
-  private BooleanUserPreferenceArray(long[] IDs, long id) {
-    this.IDs = IDs;
+  private BooleanUserPreferenceArray(long[] ids, long id) {
+    this.ids = ids;
     this.id = id;
   }
   
   @Override
   public int length() {
-    return IDs.length;
+    return ids.length;
   }
   
   @Override
@@ -78,7 +78,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   @Override
   public void set(int i, Preference pref) {
     id = pref.getUserID();
-    IDs[i] = pref.getItemID();
+    ids[i] = pref.getItemID();
   }
   
   @Override
@@ -98,12 +98,12 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   
   @Override
   public long getItemID(int i) {
-    return IDs[i];
+    return ids[i];
   }
   
   @Override
   public void setItemID(int i, long itemID) {
-    IDs[i] = itemID;
+    ids[i] = itemID;
   }
   
   @Override
@@ -121,7 +121,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   
   @Override
   public void sortByItem() {
-    Arrays.sort(IDs);
+    Arrays.sort(ids);
   }
   
   @Override
@@ -137,7 +137,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   
   @Override
   public boolean hasPrefWithItemID(long itemID) {
-    for (long id : IDs) {
+    for (long id : ids) {
       if (itemID == id) {
         return true;
       }
@@ -147,7 +147,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   
   @Override
   public BooleanUserPreferenceArray clone() {
-    return new BooleanUserPreferenceArray(IDs.clone(), id);
+    return new BooleanUserPreferenceArray(ids.clone(), id);
   }
   
   @Override
@@ -157,22 +157,22 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder(10 * IDs.length);
+    StringBuilder result = new StringBuilder(10 * ids.length);
     result.append("BooleanUserPreferenceArray[userID:");
     result.append(id);
     result.append(",{");
-    for (int i = 0; i < IDs.length; i++) {
+    for (int i = 0; i < ids.length; i++) {
       if (i > 0) {
         result.append(',');
       }
-      result.append(IDs[i]);
+      result.append(ids[i]);
     }
     result.append("}]");
     return result.toString();
   }
   
   private final class PreferenceArrayIterator implements Iterator<Preference> {
-    private int i = 0;
+    private int i;
     
     @Override
     public boolean hasNext() {

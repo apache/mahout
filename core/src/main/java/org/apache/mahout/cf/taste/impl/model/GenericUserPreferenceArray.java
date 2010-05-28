@@ -41,12 +41,12 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   private static final int VALUE = 2;
   private static final int VALUE_REVERSED = 3;
   
-  private final long[] IDs;
+  private final long[] ids;
   private long id;
   private final float[] values;
   
   public GenericUserPreferenceArray(int size) {
-    this.IDs = new long[size];
+    this.ids = new long[size];
     values = new float[size];
     this.id = Long.MIN_VALUE; // as a sort of 'unspecified' value
   }
@@ -56,7 +56,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     int size = prefs.size();
     for (int i = 0; i < size; i++) {
       Preference pref = prefs.get(i);
-      IDs[i] = pref.getItemID();
+      ids[i] = pref.getItemID();
       values[i] = pref.getValue();
     }
     if (size > 0) {
@@ -67,15 +67,15 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   /**
    * This is a private copy constructor for clone().
    */
-  private GenericUserPreferenceArray(long[] IDs, long id, float[] values) {
-    this.IDs = IDs;
+  private GenericUserPreferenceArray(long[] ids, long id, float[] values) {
+    this.ids = ids;
     this.id = id;
     this.values = values;
   }
   
   @Override
   public int length() {
-    return IDs.length;
+    return ids.length;
   }
   
   @Override
@@ -86,7 +86,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   @Override
   public void set(int i, Preference pref) {
     id = pref.getUserID();
-    IDs[i] = pref.getItemID();
+    ids[i] = pref.getItemID();
     values[i] = pref.getValue();
   }
   
@@ -107,12 +107,12 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   
   @Override
   public long getItemID(int i) {
-    return IDs[i];
+    return ids[i];
   }
   
   @Override
   public void setItemID(int i, long itemID) {
-    IDs[i] = itemID;
+    ids[i] = itemID;
   }
   
   @Override
@@ -150,7 +150,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   
   @Override
   public boolean hasPrefWithItemID(long itemID) {
-    for (long id : IDs) {
+    for (long id : ids) {
       if (itemID == id) {
         return true;
       }
@@ -187,7 +187,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   private boolean isLess(int i, int j, int type) {
     switch (type) {
       case ITEM:
-        return IDs[i] < IDs[j];
+        return ids[i] < ids[j];
       case VALUE:
         return values[i] < values[j];
       case VALUE_REVERSED:
@@ -198,17 +198,17 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   }
   
   private void swap(int i, int j) {
-    long temp1 = IDs[i];
+    long temp1 = ids[i];
     float temp2 = values[i];
-    IDs[i] = IDs[j];
+    ids[i] = ids[j];
     values[i] = values[j];
-    IDs[j] = temp1;
+    ids[j] = temp1;
     values[j] = temp2;
   }
   
   @Override
   public GenericUserPreferenceArray clone() {
-    return new GenericUserPreferenceArray(IDs.clone(), id, values.clone());
+    return new GenericUserPreferenceArray(ids.clone(), id, values.clone());
   }
   
   @Override
@@ -218,15 +218,15 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder(20 * IDs.length);
+    StringBuilder result = new StringBuilder(20 * ids.length);
     result.append("GenericUserPreferenceArray[userID:");
     result.append(id);
     result.append(",{");
-    for (int i = 0; i < IDs.length; i++) {
+    for (int i = 0; i < ids.length; i++) {
       if (i > 0) {
         result.append(',');
       }
-      result.append(IDs[i]);
+      result.append(ids[i]);
       result.append('=');
       result.append(values[i]);
     }

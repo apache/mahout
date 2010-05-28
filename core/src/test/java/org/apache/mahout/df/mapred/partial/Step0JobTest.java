@@ -166,7 +166,7 @@ public class Step0JobTest extends MahoutTestCase {
       while (reader.next(key, value)) {
         if (firstKey == null) {
           firstKey = key.get();
-          expectedIds[p] = converter.convert(0, value.toString()).label;
+          expectedIds[p] = converter.convert(0, value.toString()).getLabel();
         }
 
         size++;

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -156,10 +156,9 @@ public final class NetflixFileDataModel implements DataModel {
   }
   
   private static final class MovieIDIterator extends AbstractLongPrimitiveIterator {
-    
+    static final int COUNT = 17770;    
     private int next = 1;
-    static final int COUNT = 17770;
-    
+
     @Override
     public long nextLong() {
       if (next <= COUNT) {

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -33,7 +33,7 @@ class DisplaySNDirichlet extends DisplayDirichlet {
   DisplaySNDirichlet() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - Sampled Normal Distribution (>"
-      + (int) (significance * 100) + "% of population)");
+      + (int) (SIGNIFICANCE * 100) + "% of population)");
   }
   
   @Override
@@ -45,7 +45,7 @@ class DisplaySNDirichlet extends DisplayDirichlet {
     int i = DisplayDirichlet.result.size() - 1;
     for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(colors[Math.min(DisplayDirichlet.colors.length - 1, i--)]);
+      g2.setColor(COLORS[Math.min(DisplayDirichlet.COLORS.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         NormalModel mm = (NormalModel) m;
         dv.assign(mm.getStdDev() * 3);
