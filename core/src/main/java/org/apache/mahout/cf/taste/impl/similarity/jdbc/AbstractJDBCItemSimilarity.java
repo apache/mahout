@@ -25,7 +25,6 @@ import java.util.Collection;
 
 import javax.sql.DataSource;
 
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
@@ -73,9 +72,8 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
     AbstractJDBCComponent.checkNotNullAndLog("getItemItemSimilaritySQL", getItemItemSimilaritySQL);
     
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
-      log
-          .warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
-                + "to the database itself, or database performance will be severely reduced.");
+      log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
+               + "to the database itself, or database performance will be severely reduced.");
     }
     
     this.dataSource = dataSource;
@@ -130,12 +128,10 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       
       log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
       rs = stmt.executeQuery();
-      
-      if (rs.next()) {
-        return rs.getDouble(1);
-      } else {
-        throw new NoSuchItemException();
-      }
+
+      // If not found, perhaps the items exist but have no presence in the table,
+      // so NaN is appropriate
+      return rs.next() ? rs.getDouble(1) : Double.NaN;
       
     } catch (SQLException sqle) {
       log.warn("Exception while retrieving user", sqle);
