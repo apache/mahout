@@ -41,9 +41,9 @@ cd ../..
 ./bin/mahout seqdirectory -i ./examples/bin/work/reuters-out/ -o ./examples/bin/work/reuters-out-seqdir -c UTF-8 -chunk 5
 
 # to use k-Means clustering, uncomment the next three lines
-#./bin/mahout seq2sparse -i ./examples/bin/work/reuters-out-seqdir/ -o ./examples/bin/work/reuters-out-seqdir-sparse
-#./bin/mahout kmeans -i ./examples/bin/work/reuters-out-seqdir-sparse/tfidf/tfidf-vectors/ -c ./examples/bin/work/clusters -o ./examples/bin/work/reuters-kmeans -x 10 -k 20 -ow
-#./bin/mahout clusterdump -s examples/bin/work/reuters-kmeans/clusters-10 -d examples/bin/work/reuters-out-seqdir-sparse/dictionary.file-0 -dt sequencefile -b 100 -n 20
+./bin/mahout seq2sparse -i ./examples/bin/work/reuters-out-seqdir/ -o ./examples/bin/work/reuters-out-seqdir-sparse
+./bin/mahout kmeans -i ./examples/bin/work/reuters-out-seqdir-sparse/tfidf-vectors/ -c ./examples/bin/work/clusters -o ./examples/bin/work/reuters-kmeans -x 10 -k 20 -ow
+./bin/mahout clusterdump -s examples/bin/work/reuters-kmeans/clusters-10 -d examples/bin/work/reuters-out-seqdir-sparse/dictionary.file-0 -dt sequencefile -b 100 -n 20
 
 # to use LDA clustering, uncomment the next three lines
 #./bin/mahout seq2sparse -i ./examples/bin/work/reuters-out-seqdir/ -o ./examples/bin/work/reuters-out-seqdir-sparse -wt tf -seq -nr 3

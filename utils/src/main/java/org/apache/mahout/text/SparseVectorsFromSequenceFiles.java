@@ -223,7 +223,7 @@ public final class SparseVectorsFromSequenceFiles {
       if (processIdf) {
         TFIDFConverter.processTfIdf(
           new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
-          new Path(outputDir, TFIDFConverter.TFIDF_OUTPUT_FOLDER), chunkSize, minDf, maxDFPercent, norm,
+          outputDir, chunkSize, minDf, maxDFPercent, norm,
           sequentialAccessOutput, reduceTasks);
       }
     } catch (OptionException e) {
