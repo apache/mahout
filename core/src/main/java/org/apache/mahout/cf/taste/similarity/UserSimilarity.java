@@ -35,13 +35,12 @@ public interface UserSimilarity extends Refreshable {
    * Returns the degree of similarity, of two users, based on the their preferences.
    * </p>
    * 
-   * @param userID1
-   *          first user ID
-   * @param userID2
-   *          second user ID
-   * @return similarity between the two users, in [-1,1]
-   * @throws TasteException
-   *           if an error occurs while accessing the data
+   * @param userID1 first user ID
+   * @param userID2 second user ID
+   * @return similarity between the users, in [-1,1] or {@link Double#NaN} similarity is unknown
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException
+   *  if either user is known to be non-existent in the data
+   * @throws TasteException if an error occurs while accessing the data
    */
   double userSimilarity(long userID1, long userID2) throws TasteException;
   
@@ -50,8 +49,7 @@ public interface UserSimilarity extends Refreshable {
    * Attaches a {@link PreferenceInferrer} to the  implementation.
    * </p>
    * 
-   * @param inferrer
-   *          {@link PreferenceInferrer}
+   * @param inferrer {@link PreferenceInferrer}
    */
   void setPreferenceInferrer(PreferenceInferrer inferrer);
   
