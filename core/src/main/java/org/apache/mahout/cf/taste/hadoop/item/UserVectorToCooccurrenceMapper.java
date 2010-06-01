@@ -32,13 +32,22 @@ import org.apache.mahout.math.map.OpenIntIntHashMap;
 public final class UserVectorToCooccurrenceMapper extends
     Mapper<VarLongWritable,VectorWritable,VarIntWritable,VarIntWritable> {
 
-  private static final int MAX_PREFS_CONSIDERED = 100;
+  static final String MAX_COOCCURRENCES_PER_ITEM_CONSIDERED = "maxCooccurrencesPerItemConsidered";
+  static final int DEFAULT_MAX_COOCCURRENCES_PER_ITEM_CONSIDERED = 100;
 
   private enum Counters {
     USER_PREFS_SKIPPED,
   }
 
+  private int maxCooccurrencesPerItemConsidered;
   private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
+
+  @Override
+  protected void setup(Context context) {
+    maxCooccurrencesPerItemConsidered =
+        context.getConfiguration().getInt(MAX_COOCCURRENCES_PER_ITEM_CONSIDERED,
+                                          DEFAULT_MAX_COOCCURRENCES_PER_ITEM_CONSIDERED);
+  }
 
   @Override
   protected void map(VarLongWritable userID,
@@ -71,18 +80,18 @@ public final class UserVectorToCooccurrenceMapper extends
   }
 
   private Vector maybePruneUserVector(Vector userVector) {
-    if (userVector.getNumNondefaultElements() <= MAX_PREFS_CONSIDERED) {
+    if (userVector.getNumNondefaultElements() <= maxCooccurrencesPerItemConsidered) {
       return userVector;
     }
 
     PriorityQueue<Integer> smallCounts =
-        new PriorityQueue<Integer>(MAX_PREFS_CONSIDERED + 1, Collections.reverseOrder());
+        new PriorityQueue<Integer>(maxCooccurrencesPerItemConsidered + 1, Collections.reverseOrder());
 
     Iterator<Vector.Element> it = userVector.iterateNonZero();
     while (it.hasNext()) {
       int count = indexCounts.get(it.next().index());
       if (count > 0) {
-        if (smallCounts.size() < MAX_PREFS_CONSIDERED) {
+        if (smallCounts.size() < maxCooccurrencesPerItemConsidered) {
           smallCounts.add(count);
         } else if (count < smallCounts.peek()) {
           smallCounts.add(count);

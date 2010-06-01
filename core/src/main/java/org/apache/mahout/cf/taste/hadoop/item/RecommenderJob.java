@@ -27,6 +27,7 @@ import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -54,6 +55,10 @@ import org.apache.mahout.math.VectorWritable;
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
  * <li>--booleanData (boolean): Treat input data as having to pref values (false)</li>
+ * <li>--maxPrefsPerUserConsidered (integer): Maximum number of preferences considered per user in
+ *  final recommendation phase (10)</li>
+ * <li>--maxCooccurrencesPerItemConsidered: Maximum number of cooccurrences considered per item
+ *  in count phase (100)</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
@@ -69,14 +74,22 @@ public final class RecommenderJob extends AbstractJob {
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
     Option numReccomendationsOpt = AbstractJob.buildOption("numRecommendations", "n",
-      "Number of recommendations per user", "10");
+      "Number of recommendations per user",
+      String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
     Option usersFileOpt = AbstractJob.buildOption("usersFile", "u",
       "File of users to recommend for", null);
     Option booleanDataOpt = AbstractJob.buildOption("booleanData", "b",
       "Treat input as without pref values", Boolean.FALSE.toString());
+    Option maxPrefsPerUserConsideredOpt = AbstractJob.buildOption("maxPrefsPerUserConsidered", null,
+      "Maximum number of preferences considered per user in final recommendation phase",
+      String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
+    Option maxCooccurrencesPerItemConsideredOpt = AbstractJob.buildOption("maxCooccurrencesPerItemConsidered", null,
+      "Maximum number of cooccurrences considered per item in count phase",
+      String.valueOf(UserVectorToCooccurrenceMapper.DEFAULT_MAX_COOCCURRENCES_PER_ITEM_CONSIDERED));
 
     Map<String,String> parsedArgs = AbstractJob.parseArguments(
-        args, numReccomendationsOpt, usersFileOpt, booleanDataOpt);
+        args, numReccomendationsOpt, usersFileOpt, booleanDataOpt,
+        maxPrefsPerUserConsideredOpt, maxCooccurrencesPerItemConsideredOpt);
     if (parsedArgs == null) {
       return -1;
     }
@@ -85,10 +98,12 @@ public final class RecommenderJob extends AbstractJob {
     Path inputPath = new Path(originalConf.get("mapred.input.dir"));
     Path outputPath = new Path(originalConf.get("mapred.output.dir"));
     Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
-    int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));
+    int numRecommendations = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
-    
+    int maxPrefsPerUserConsidered = Integer.parseInt(parsedArgs.get("--maxPrefsPerUserConsidered"));
+    int maxCooccurrencesPerItemConsidered = Integer.parseInt(parsedArgs.get("--maxCooccurrencesPerItemConsidered"));
+
     Path userVectorPath = new Path(tempDirPath, "userVectors");
     Path itemIDIndexPath = new Path(tempDirPath, "itemIDIndex");
     Path cooccurrencePath = new Path(tempDirPath, "cooccurrence");
@@ -125,6 +140,8 @@ public final class RecommenderJob extends AbstractJob {
         UserVectorToCooccurrenceReducer.class, VarIntWritable.class, VectorWritable.class,
         SequenceFileOutputFormat.class);
       setIOSort(toCooccurrence);
+      toCooccurrence.getConfiguration().setInt(UserVectorToCooccurrenceMapper.MAX_COOCCURRENCES_PER_ITEM_CONSIDERED,
+                                               maxCooccurrencesPerItemConsidered);
       toCooccurrence.waitForCompletion(true);
     }
 
@@ -144,6 +161,8 @@ public final class RecommenderJob extends AbstractJob {
       if (usersFile != null) {
         prePartialMultiply2.getConfiguration().set(UserVectorSplitterMapper.USERS_FILE, usersFile);
       }
+      prePartialMultiply2.getConfiguration().setInt(UserVectorSplitterMapper.MAX_PREFS_PER_USER_CONSIDERED,
+                                                    maxPrefsPerUserConsidered);
       prePartialMultiply2.waitForCompletion(true);
 
       Job partialMultiply = prepareJob(
@@ -165,14 +184,14 @@ public final class RecommenderJob extends AbstractJob {
       setIOSort(aggregateAndRecommend);
       aggregateAndRecommend.setCombinerClass(AggregateCombiner.class);
       jobConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath.toString());
-      jobConf.setInt(AggregateAndRecommendReducer.RECOMMENDATIONS_PER_USER, recommendationsPerUser);
+      jobConf.setInt(AggregateAndRecommendReducer.NUM_RECOMMENDATIONS, numRecommendations);
       aggregateAndRecommend.waitForCompletion(true);
     }
 
     return 0;
   }
 
-  private static void setIOSort(Job job) {
+  private static void setIOSort(JobContext job) {
     Configuration conf = job.getConfiguration();
     conf.setInt("io.sort.factor", 100);
     int assumedHeapSize = 512;

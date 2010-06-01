@@ -37,13 +37,17 @@ public final class UserVectorSplitterMapper extends
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
 
   static final String USERS_FILE = "usersFile";
-  private static final int MAX_PREFS_CONSIDERED = 10;  
+  static final String MAX_PREFS_PER_USER_CONSIDERED = "maxPrefsPerUserConsidered";
+  static final int DEFAULT_MAX_PREFS_PER_USER_CONSIDERED = 10;
 
+  private int maxPrefsPerUserConsidered;
   private FastIDSet usersToRecommendFor;
 
   @Override
   protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
+    maxPrefsPerUserConsidered = jobConf.getInt(MAX_PREFS_PER_USER_CONSIDERED,
+                                               DEFAULT_MAX_PREFS_PER_USER_CONSIDERED);
     try {
       FileSystem fs = FileSystem.get(jobConf);
       String usersFilePathString = jobConf.get(USERS_FILE);
@@ -82,8 +86,8 @@ public final class UserVectorSplitterMapper extends
     }
   }
 
-  private static Vector maybePruneUserVector(Vector userVector) {
-    if (userVector.getNumNondefaultElements() <= MAX_PREFS_CONSIDERED) {
+  private Vector maybePruneUserVector(Vector userVector) {
+    if (userVector.getNumNondefaultElements() <= maxPrefsPerUserConsidered) {
       return userVector;
     }
 
@@ -104,12 +108,12 @@ public final class UserVectorSplitterMapper extends
     return userVector;
   }
 
-  private static float findSmallestLargeValue(Vector userVector) {
-    PriorityQueue<Float> topPrefValues = new PriorityQueue<Float>(MAX_PREFS_CONSIDERED + 1);
+  private float findSmallestLargeValue(Vector userVector) {
+    PriorityQueue<Float> topPrefValues = new PriorityQueue<Float>(maxPrefsPerUserConsidered + 1);
     Iterator<Vector.Element> it = userVector.iterateNonZero();
     while (it.hasNext()) {
       float absValue = Math.abs((float) it.next().get());
-      if (topPrefValues.size() < MAX_PREFS_CONSIDERED) {
+      if (topPrefValues.size() < maxPrefsPerUserConsidered) {
         topPrefValues.add(absValue);
       } else {
         if (absValue > topPrefValues.peek()) {

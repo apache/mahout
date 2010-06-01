@@ -46,7 +46,8 @@ public final class AggregateAndRecommendReducer extends
     Reducer<VarLongWritable,VectorWritable,VarLongWritable,RecommendedItemsWritable> {
 
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
-  static final String RECOMMENDATIONS_PER_USER = "recommendationsPerUser";
+  static final String NUM_RECOMMENDATIONS = "numRecommendations";
+  static final int DEFAULT_NUM_RECOMMENDATIONS = 10;
 
   private static final PathFilter PARTS_FILTER = new PathFilter() {
     @Override
@@ -61,7 +62,7 @@ public final class AggregateAndRecommendReducer extends
   @Override
   protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
-    recommendationsPerUser = jobConf.getInt(RECOMMENDATIONS_PER_USER, 10);
+    recommendationsPerUser = jobConf.getInt(NUM_RECOMMENDATIONS, DEFAULT_NUM_RECOMMENDATIONS);
     try {
       FileSystem fs = FileSystem.get(jobConf);
       Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
