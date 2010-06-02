@@ -272,9 +272,10 @@ public class FuzzyKMeansClusterer {
    *          the List<Vector> having the input points
    * @param clusterList
    *          the List<Cluster> clusters
-   * @return
    */
-  public static boolean runFuzzyKMeansIteration(List<Vector> points, List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer) {
+  public static boolean runFuzzyKMeansIteration(List<Vector> points,
+                                                List<SoftCluster> clusterList,
+                                                FuzzyKMeansClusterer clusterer) {
     for (Vector point : points) {
       List<Double> clusterDistanceList = new ArrayList<Double>();
       for (SoftCluster cluster : clusterList) {

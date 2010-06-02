@@ -19,6 +19,7 @@ package org.apache.mahout.utils.vectors.arff;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -123,13 +124,7 @@ public class MapBackedARFFModel implements ARFFModel {
     
     return result;
   }
-  
-  /**
-   * Process a String
-   * 
-   * @param data
-   * @return
-   */
+
   // Not sure how scalable this is going to be
   protected double processString(String data) {
     data = MapBackedARFFModel.QUOTE_PATTERN.matcher(data).replaceAll("");
@@ -149,14 +144,11 @@ public class MapBackedARFFModel implements ARFFModel {
   protected double processDate(String data, int idx) {
     DateFormat format = dateMap.get(idx);
     if (format == null) {
-      format = DEFAULT_DATE_FORMAT;
+      format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     }
     double result;
     try {
-      Date date;
-      synchronized (format) {
-        date = format.parse(data);
-      }
+      Date date = format.parse(data);
       result = date.getTime(); // hmmm, what kind of loss casting long to double?
     } catch (ParseException e) {
       throw new IllegalStateException(e);

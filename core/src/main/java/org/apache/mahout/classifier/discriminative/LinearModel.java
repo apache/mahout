@@ -16,8 +16,6 @@
  */
 package org.apache.mahout.classifier.discriminative;
 
-import org.apache.mahout.math.CardinalityException;
-import org.apache.mahout.math.IndexException;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +24,9 @@ import org.slf4j.LoggerFactory;
  * Classifies a data point using a hyperplane.
  */
 public class LinearModel {
-  /** Logger for this class. */
-  private static final Logger LOG = LoggerFactory.getLogger(LinearModel.class);
+
+  private static final Logger log = LoggerFactory.getLogger(LinearModel.class);
+
   /** Represents the direction of the hyperplane found during training.*/
   private Vector hyperplane;
   /** Displacement of hyperplane from origin.*/
@@ -37,7 +36,7 @@ public class LinearModel {
   
   /**
    * Init a linear model with a hyperplane, distance and displacement.
-   * */
+   */
   public LinearModel(Vector hyperplane, double displacement, double threshold) {
     this.hyperplane = hyperplane;
     this.bias = displacement;
@@ -46,7 +45,7 @@ public class LinearModel {
   
   /**
    * Init a linear model with zero displacement and a threshold of 0.5.
-   * */
+   */
   public LinearModel(Vector hyperplane) {
     this(hyperplane, 0, 0.5);
   }
@@ -55,12 +54,12 @@ public class LinearModel {
    * Classify a point to either belong to the class modeled by this linear model or not.
    * @param dataPoint the data point to classify.
    * @return returns true if data point should be classified as belonging to this model.
-   * */
-  public boolean classify(Vector dataPoint) throws CardinalityException, IndexException {
+   */
+  public boolean classify(Vector dataPoint) {
     double product = this.hyperplane.dot(dataPoint);
-    if (LinearModel.LOG.isDebugEnabled()) {
-      LinearModel.LOG.debug("model: " + this + " product: " + product + " Bias: " + this.bias
-                            + " threshold: " + this.threshold);
+    if (log.isDebugEnabled()) {
+      log.debug("model: {} product: {} Bias: {} threshold: {}",
+                new Object[] {this, product, bias, threshold});
     }
     return product + this.bias > this.threshold;
   }
@@ -68,7 +67,7 @@ public class LinearModel {
   /**
    * Update the hyperplane by adding delta.
    * @param delta the delta to add to the hyperplane vector.
-   * */
+   */
   public void addDelta(Vector delta) {
     this.hyperplane = this.hyperplane.plus(delta);
   }
@@ -86,7 +85,7 @@ public class LinearModel {
   /**
    * Shift the bias of the model.
    * @param factor factor to multiply the bias by.
-   * */
+   */
   public synchronized void shiftBias(double factor) {
     this.bias += factor;
   }
@@ -95,7 +94,7 @@ public class LinearModel {
    * Multiply the weight at index by delta.
    * @param index the index of the element to update.
    * @param delta the delta to multiply the element with.
-   * */
+   */
   public void timesDelta(int index, double delta) {
     double element = this.hyperplane.get(index);
     element *= delta;

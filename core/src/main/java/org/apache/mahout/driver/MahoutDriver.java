@@ -154,7 +154,7 @@ public final class MahoutDriver {
       String[] argNamePair = key.split("\\|");
       String shortArg = '-' + argNamePair[0].trim();
       String longArg = argNamePair.length < 2 ? null : "--" + argNamePair[1].trim();
-      if(!argMap.containsKey(shortArg) && (longArg == null || !argMap.containsKey(longArg))) {
+      if (!argMap.containsKey(shortArg) && (longArg == null || !argMap.containsKey(longArg))) {
         argMap.put(longArg, new String[] {mainProps.getProperty(key)});
       }
     }

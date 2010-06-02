@@ -34,7 +34,7 @@ import org.apache.mahout.math.VectorWritable;
  */
 public class SequenceFileVectorIterable implements Iterable<Vector> {
   private final SequenceFile.Reader reader;
-  private boolean transpose = false;
+  private boolean transpose;
   
   public SequenceFileVectorIterable(SequenceFile.Reader reader) {
     this.reader = reader;
@@ -82,15 +82,14 @@ public class SequenceFileVectorIterable implements Iterable<Vector> {
     
     @Override
     public Vector next() {
-      
-      return (transpose ? (VectorWritable)key : (VectorWritable)value).get();
+      return (transpose ? (VectorWritable) key : (VectorWritable) value).get();
     }
     
     /**
      * Only valid when {@link #next()} is also valid
      * @return The current Key
      */
-    public Writable key(){
+    public Writable key() {
       return transpose ? value : key;
     }
     

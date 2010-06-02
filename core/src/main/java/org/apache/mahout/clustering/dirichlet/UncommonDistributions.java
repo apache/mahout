@@ -26,11 +26,12 @@ import org.uncommons.maths.random.GaussianGenerator;
 
 public final class UncommonDistributions {
   
-  private static final double sqrt2pi = Math.sqrt(2.0 * Math.PI);
+  private static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
   
-  private static final Random random = RandomUtils.getRandom();
+  private static final Random RANDOM = RandomUtils.getRandom();
   
-  private UncommonDistributions() { }
+  private UncommonDistributions() {
+  }
   
   // =============== start of BSD licensed code. See LICENSE.txt
   /**
@@ -40,17 +41,17 @@ public final class UncommonDistributions {
    */
   public static double rGamma(double k, double lambda) {
     boolean accept = false;
-    if (k >= 1) {
+    if (k >= 1.0) {
       // Cheng's algorithm
-      double b = k - Math.log(4);
-      double c = k + Math.sqrt(2 * k - 1);
-      double lam = Math.sqrt(2 * k - 1);
-      double cheng = 1 + Math.log(4.5);
+      double b = k - Math.log(4.0);
+      double c = k + Math.sqrt(2.0 * k - 1.0);
+      double lam = Math.sqrt(2.0 * k - 1.0);
+      double cheng = 1.0 + Math.log(4.5);
       double x;
       do {
-        double u = UncommonDistributions.random.nextDouble();
-        double v = UncommonDistributions.random.nextDouble();
-        double y = 1 / lam * Math.log(v / (1 - v));
+        double u = UncommonDistributions.RANDOM.nextDouble();
+        double v = UncommonDistributions.RANDOM.nextDouble();
+        double y = 1.0 / lam * Math.log(v / (1.0 - v));
         x = k * Math.exp(y);
         double z = u * v * v;
         double r = b + c * y - x;
@@ -61,12 +62,12 @@ public final class UncommonDistributions {
       return x / lambda;
     } else {
       // Weibull algorithm
-      double c = 1 / k;
-      double d = (1 - k) * Math.pow(k, (k / (1 - k)));
+      double c = 1.0 / k;
+      double d = (1.0 - k) * Math.pow(k, k / (1.0 - k));
       double x;
       do {
-        double u = UncommonDistributions.random.nextDouble();
-        double v = UncommonDistributions.random.nextDouble();
+        double u = UncommonDistributions.RANDOM.nextDouble();
+        double v = UncommonDistributions.RANDOM.nextDouble();
         double z = -Math.log(u);
         double e = -Math.log(v);
         x = Math.pow(z, c);
@@ -90,8 +91,8 @@ public final class UncommonDistributions {
    * @return a Vector of samples
    */
   public static double rBeta(double shape1, double shape2) {
-    double gam1 = rGamma(shape1, 1);
-    double gam2 = rGamma(shape2, 1);
+    double gam1 = rGamma(shape1, 1.0);
+    double gam2 = rGamma(shape2, 1.0);
     return gam1 / (gam1 + gam2);
     
   }
@@ -126,7 +127,7 @@ public final class UncommonDistributions {
   public static double rChisq(double df) {
     double result = 0.0;
     for (int i = 0; i < df; i++) {
-      double sample = rNorm(0, 1);
+      double sample = rNorm(0.0, 1.0);
       result += sample * sample;
     }
     return result;
@@ -142,7 +143,7 @@ public final class UncommonDistributions {
    * @return a double sample
    */
   public static double rNorm(double mean, double sd) {
-    GaussianGenerator dist = new GaussianGenerator(mean, sd, random);
+    GaussianGenerator dist = new GaussianGenerator(mean, sd, RANDOM);
     return dist.nextValue();
   }
   
@@ -161,16 +162,16 @@ public final class UncommonDistributions {
    */
   public static double dNorm(double x, double m, double s) {
     double xms = (x - m) / s;
-    double ex = xms * xms / 2;
+    double ex = xms * xms / 2.0;
     double exp = Math.exp(-ex);
-    return exp / (sqrt2pi * s);
+    return exp / (SQRT2PI * s);
   }
   
   /** Returns one sample from a multinomial. */
   public static int rMultinom(Vector probabilities) {
     // our probability argument are not normalized.
     double total = probabilities.zSum();
-    double nextDouble = UncommonDistributions.random.nextDouble();
+    double nextDouble = UncommonDistributions.RANDOM.nextDouble();
     double p = nextDouble * total;
     for (int i = 0; i < probabilities.size(); i++) {
       double p_i = probabilities.get(i);
@@ -220,17 +221,17 @@ public final class UncommonDistributions {
    * time-waiting algorithm.
    */
   public static int rBinomial(int n, double p) {
-    if (p >= 1) {
+    if (p >= 1.0) {
       return n; // needed to avoid infinite loops and negative results
     }
-    double q = -Math.log(1 - p);
-    double sum = 0;
+    double q = -Math.log(1.0 - p);
+    double sum = 0.0;
     int x = 0;
     while (sum <= q) {
-      double u = UncommonDistributions.random.nextDouble();
+      double u = UncommonDistributions.RANDOM.nextDouble();
       double e = -Math.log(u);
       sum += e / (n - x);
-      x += 1;
+      x++;
     }
     if (x == 0) {
       return 0;

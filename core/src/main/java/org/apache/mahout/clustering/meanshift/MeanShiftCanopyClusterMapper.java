@@ -71,7 +71,7 @@ public class MeanShiftCanopyClusterMapper extends MapReduceBase implements
     }
   }
 
-  public static List<MeanShiftCanopy> getCanopies(JobConf job) throws SecurityException, IllegalArgumentException {
+  public static List<MeanShiftCanopy> getCanopies(JobConf job) {
     String statePath = job.get(MeanShiftCanopyDriver.STATE_IN_KEY);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     try {

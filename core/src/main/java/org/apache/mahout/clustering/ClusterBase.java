@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.Locale;
 
+import com.google.gson.reflect.TypeToken;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.NamedVector;
@@ -32,7 +33,6 @@ import org.apache.mahout.math.Vector.Element;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * ClusterBase is an abstract base class class for several clustering implementations
@@ -40,6 +40,8 @@ import com.google.gson.reflect.TypeToken;
  *
  */
 public abstract class ClusterBase implements Writable, Cluster {
+
+  private static final Type VECTOR_TYPE = new TypeToken<Vector>() {}.getType();
 
   // this cluster's clusterId
   private int id;
@@ -108,9 +110,8 @@ public abstract class ClusterBase implements Writable, Cluster {
 
   @Override
   public String asJsonString() {
-    Type vectorType = new TypeToken<Vector>() {}.getType();
     GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
     Gson gson = gBuilder.create();
     return gson.toJson(this, this.getClass());
   }

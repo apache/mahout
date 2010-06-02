@@ -139,8 +139,6 @@ public final class Job {
                                                    ClassNotFoundException,
                                                    InstantiationException,
                                                    IllegalAccessException,
-                                                   SecurityException,
-                                                   IllegalArgumentException,
                                                    NoSuchMethodException,
                                                    InvocationTargetException {
     HadoopUtil.overwriteOutput(output);
@@ -178,8 +176,7 @@ public final class Job {
                                   int prototypeSize,
                                   int numIterations,
                                   int numModels,
-                                  double alpha0) throws SecurityException,
-                                                 NoSuchMethodException,
+                                  double alpha0) throws NoSuchMethodException,
                                                  InvocationTargetException {
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     JobConf conf = new JobConf(KMeansDriver.class);

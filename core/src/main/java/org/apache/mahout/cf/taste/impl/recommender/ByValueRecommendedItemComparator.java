@@ -27,10 +27,10 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
  */
 public final class ByValueRecommendedItemComparator implements Comparator<RecommendedItem>, Serializable {
 
-  private static final Comparator<RecommendedItem> instance = new ByValueRecommendedItemComparator();
+  private static final Comparator<RecommendedItem> INSTANCE = new ByValueRecommendedItemComparator();
 
   public static Comparator<RecommendedItem> getInstance() {
-    return instance;
+    return INSTANCE;
   }
 
   @Override

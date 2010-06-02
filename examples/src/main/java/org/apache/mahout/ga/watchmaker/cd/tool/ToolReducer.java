@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -30,7 +30,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.StringUtils;
-import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
 
 /**
  * Combines attribute description strings into a String.<br>
@@ -100,9 +99,9 @@ public class ToolReducer extends MapReduceBase implements Reducer<LongWritable,T
     double max = Double.NEGATIVE_INFINITY;
     
     while (values.hasNext()) {
-      Range range = DescriptionUtils.extractNumericalRange(values.next().toString());
-      min = Math.min(min, range.min);
-      max = Math.max(max, range.max);
+      double[] range = DescriptionUtils.extractNumericalRange(values.next().toString());
+      min = Math.min(min, range[0]);
+      max = Math.max(max, range[1]);
     }
     
     return DescriptionUtils.createNumericalDescription(min, max);

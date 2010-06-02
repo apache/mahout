@@ -18,7 +18,6 @@ package org.apache.mahout.classifier.discriminative;
 
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.IndexException;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
@@ -34,8 +33,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class LinearTrainer {
   
-  /** Logger for this class. */
-  private static final Logger LOG = LoggerFactory.getLogger(LinearTrainer.class);
+  private static final Logger log = LoggerFactory.getLogger(LinearTrainer.class);
+
   /** The model to train. */
   private final LinearModel model;
   
@@ -52,9 +51,9 @@ public abstract class LinearTrainer {
    *          initial value of weight vector.
    * @param initBias
    *          initial classification bias.
-   * */
+   */
   protected LinearTrainer(int dimension, double threshold,
-                          double init, double initBias) throws CardinalityException {
+                          double init, double initBias) {
     DenseVector initialWeights = new DenseVector(dimension);
     initialWeights.assign(init);
     this.model = new LinearModel(initialWeights, initBias, threshold);
@@ -72,10 +71,8 @@ public abstract class LinearTrainer {
    *          the set of labels, one for each data point. If the cardinalities
    *          of data- and labelset do not match, a CardinalityException is
    *          thrown
-   * */
-  public void train(Vector labelset, Matrix dataset) throws IndexException,
-                                                    CardinalityException,
-                                                    TrainingException {
+   */
+  public void train(Vector labelset, Matrix dataset) throws TrainingException {
     if (labelset.size() != dataset.size()[1]) {
       throw new CardinalityException(labelset.size(), dataset.size()[1]);
     }
@@ -91,13 +88,13 @@ public abstract class LinearTrainer {
       int columnCount = dataset.size()[1];
       for (int i = 0; i < columnCount; i++) {
         Vector dataPoint = dataset.getColumn(i);
-        LinearTrainer.LOG.debug("Training point: " + dataPoint);
+        log.debug("Training point: " + dataPoint);
         
         synchronized (this.model) {
           boolean prediction = model.classify(dataPoint);
           double label = labelset.get(i);
           if (label <= 0 && prediction || label > 0 && !prediction) {
-            LinearTrainer.LOG.debug("updating");
+            log.debug("updating");
             converged = false;
             update(label, dataPoint, this.model);
           }
@@ -108,7 +105,7 @@ public abstract class LinearTrainer {
   
   /**
    * Retrieves the trained model if called after train, otherwise the raw model.
-   * */
+   */
   public LinearModel getModel() {
     return this.model;
   }
@@ -122,7 +119,7 @@ public abstract class LinearTrainer {
    *          the target label of the wrongly classified data point.
    * @param dataPoint
    *          the data point that was classified incorrectly.
-   * */
+   */
   protected abstract void update(double label, Vector dataPoint, LinearModel model);
   
 }

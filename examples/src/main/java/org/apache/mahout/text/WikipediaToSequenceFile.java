@@ -20,6 +20,7 @@ package org.apache.mahout.text;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.cli2.CommandLine;
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * Create and run the Wikipedia Dataset Creator.
  */
 public final class WikipediaToSequenceFile {
+
   private static final Logger log = LoggerFactory.getLogger(WikipediaToSequenceFile.class);
   
   private WikipediaToSequenceFile() { }
@@ -62,9 +64,6 @@ public final class WikipediaToSequenceFile {
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the classifier as a
    * {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
-   * 
-   * @param args
-   *          The args
    */
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -162,8 +161,9 @@ public final class WikipediaToSequenceFile {
     conf.setInputFormat(XmlInputFormat.class);
     conf.setReducerClass(IdentityReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
-                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,"
+             + "org.apache.hadoop.io.serializer.WritableSerialization");
     
     /*
      * conf.set("mapred.compress.map.output", "true"); conf.set("mapred.map.output.compression.type",
@@ -175,12 +175,12 @@ public final class WikipediaToSequenceFile {
     Set<String> categories = new HashSet<String>();
     if (catFile.length() > 0) {
       for (String line : new FileLineIterable(new File(catFile))) {
-        categories.add(line.trim().toLowerCase());
+        categories.add(line.trim().toLowerCase(Locale.ENGLISH));
       }
     }
     
-    DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
-        .getClass(categories));
+    DefaultStringifier<Set<String>> setStringifier =
+        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
     
     String categoriesStr = setStringifier.toString(categories);
     

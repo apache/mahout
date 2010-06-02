@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,14 +35,13 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class DirichletClusterMapper extends MapReduceBase implements
     Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
-  private List<DirichletCluster> clusters;
-  private DirichletClusterer clusterer;
+  private List<DirichletCluster<VectorWritable>> clusters;
+  private DirichletClusterer<VectorWritable> clusterer;
 
   @Override
   public void map(WritableComparable<?> key,
@@ -60,22 +58,18 @@ public class DirichletClusterMapper extends MapReduceBase implements
       clusters = getClusters(job);
       String emitMostLikely = job.get(DirichletDriver.EMIT_MOST_LIKELY_KEY);
       String threshold = job.get(DirichletDriver.THRESHOLD_KEY);
-      clusterer = new DirichletClusterer<Vector>(Boolean.parseBoolean(emitMostLikely), Double.parseDouble(threshold));
+      clusterer = new DirichletClusterer<VectorWritable>(Boolean.parseBoolean(emitMostLikely),
+                                                         Double.parseDouble(threshold));
     } catch (SecurityException e) {
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
       throw new IllegalStateException(e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
-      throw new IllegalStateException(e);
     }
   }
 
-  public static List<DirichletCluster> getClusters(JobConf job) throws SecurityException, IllegalArgumentException,
-      NoSuchMethodException, InvocationTargetException {
+  public static List<DirichletCluster<VectorWritable>> getClusters(JobConf job) {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
-    List<DirichletCluster> clusters = new ArrayList<DirichletCluster>();
+    List<DirichletCluster<VectorWritable>> clusters = new ArrayList<DirichletCluster<VectorWritable>>();
     try {
       Path path = new Path(statePath);
       FileSystem fs = FileSystem.get(path.toUri(), job);
@@ -84,10 +78,10 @@ public class DirichletClusterMapper extends MapReduceBase implements
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
         try {
           Text key = new Text();
-          DirichletCluster cluster = new DirichletCluster();
+          DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();
           while (reader.next(key, cluster)) {
             clusters.add(cluster);
-            cluster = new DirichletCluster();
+            cluster = new DirichletCluster<VectorWritable>();
           }
         } finally {
           reader.close();

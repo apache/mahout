@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 import org.apache.commons.cli2.CommandLine;
@@ -34,7 +35,6 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -165,7 +165,7 @@ public final class CDInfosTool {
     
     while (reader.hasNextLine()) {
       String c = reader.nextLine();
-      descriptors.add(c.toUpperCase().charAt(0));
+      descriptors.add(c.toUpperCase(Locale.ENGLISH).charAt(0));
     }
     
     if (descriptors.isEmpty()) {
@@ -186,28 +186,28 @@ public final class CDInfosTool {
     
     Path infpath = FileInfoParser.getInfoFile(fs, inpath);
     
-    FSDataOutputStream out = fs.create(infpath);
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-    
-    int aindex = 0;
-    for (int index = 0; index < descriptors.size(); index++) {
-      if (descriptors.isLabel(index)) {
-        writer.write(FileInfoParser.LABEL_TOKEN + ", ");
-        writer.write(descriptions.get(aindex++));
-      } else if (descriptors.isNumerical(index)) {
-        writer.write(FileInfoParser.NUMERICAL_TOKEN + ", ");
-        writer.write(descriptions.get(aindex++));
-      } else if (descriptors.isNominal(index)) {
-        writer.write(FileInfoParser.NOMINAL_TOKEN + ", ");
-        writer.write(descriptions.get(aindex++));
-      } else {
-        writer.write(FileInfoParser.IGNORED_TOKEN);
+    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(infpath)));
+    try {
+      int aindex = 0;
+      for (int index = 0; index < descriptors.size(); index++) {
+        if (descriptors.isLabel(index)) {
+          writer.write(FileInfoParser.LABEL_TOKEN + ", ");
+          writer.write(descriptions.get(aindex++));
+        } else if (descriptors.isNumerical(index)) {
+          writer.write(FileInfoParser.NUMERICAL_TOKEN + ", ");
+          writer.write(descriptions.get(aindex++));
+        } else if (descriptors.isNominal(index)) {
+          writer.write(FileInfoParser.NOMINAL_TOKEN + ", ");
+          writer.write(descriptions.get(aindex++));
+        } else {
+          writer.write(FileInfoParser.IGNORED_TOKEN);
+        }
+
+        writer.newLine();
       }
-      
-      writer.newLine();
+    } finally {
+      writer.close();
     }
-    
-    writer.close();
   }
   
   public static void main(String[] args) throws IOException {

@@ -45,7 +45,8 @@ import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.DatasetTextInputFo
  * input path and launch a Hadoop job to evaluate the fitness of each rule. At
  * the end loads the evaluations from the job output.
  */
-public class CDMahoutEvaluator {
+public final class CDMahoutEvaluator {
+
   private CDMahoutEvaluator() {
   }
   
@@ -176,8 +177,10 @@ public class CDMahoutEvaluator {
    *        sorted in the same order as the candidates.
    * @throws IOException
    */
-  private static void importEvaluations(FileSystem fs, JobConf conf,
-                                        Path outpath, List<CDFitness> evaluations) throws IOException {
+  private static void importEvaluations(FileSystem fs,
+                                        JobConf conf,
+                                        Path outpath,
+                                        List<CDFitness> evaluations) throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, CDFitness.class, conf);
     
     // merge and sort the outputs

@@ -95,7 +95,7 @@ public final class TravellingSalesman extends JApplet {
   private SwingBackgroundTask<List<String>> createTask(final Collection<String> cities) {
     final TravellingSalesmanStrategy strategy = strategyPanel.getStrategy();
     return new SwingBackgroundTask<List<String>>() {
-      private long elapsedTime ;
+      private long elapsedTime;
       
       @Override
       protected List<String> performTask() {
@@ -121,7 +121,7 @@ public final class TravellingSalesman extends JApplet {
                                            List<String> shortestRoute,
                                            double distance,
                                            long elapsedTime) {
-    StringBuilder buffer = new StringBuilder();
+    StringBuilder buffer = new StringBuilder(100);
     buffer.append('[');
     buffer.append(strategyDescription);
     buffer.append("]\n");

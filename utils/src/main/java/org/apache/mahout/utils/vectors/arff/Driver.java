@@ -24,6 +24,7 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
@@ -137,14 +139,19 @@ public final class Driver {
           writeFile(outWriter, outDir, input, maxDocs, model);
         }
         log.info("Dictionary Output file: {}", dictOut);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dictOut),
-            Charset.forName("UTF8")));
         Map<String,Integer> labels = model.getLabelBindings();
-        for (Map.Entry<String,Integer> entry : labels.entrySet()) {
-          writer.append(entry.getKey()).append(delimiter).append(String.valueOf(entry.getValue())).append(
-            '\n');
+        Writer writer = new BufferedWriter(
+            new OutputStreamWriter(new FileOutputStream(dictOut), Charset.forName("UTF8")));
+        try {
+          for (Map.Entry<String,Integer> entry : labels.entrySet()) {
+            writer.write(entry.getKey());
+            writer.write(delimiter);
+            writer.write(String.valueOf(entry.getValue()));
+            writer.write('\n');
+          }
+        } finally {
+          writer.close();
         }
-        writer.close();
       }
       
     } catch (OptionException e) {
@@ -158,24 +165,25 @@ public final class Driver {
     log.info("Converting File: {}", file);
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1, arffModel
         .getNominalMap());
-    ARFFVectorIterable iteratable = new ARFFVectorIterable(file, model);
+    Iterable<Vector> iteratable = new ARFFVectorIterable(file, model);
     String outFile = outDir + '/' + file.getName() + ".mvc";
     
     VectorWriter vectorWriter;
-    if (outWriter != null) {
-      if (outWriter.equals("file")) {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-        vectorWriter = new JWriterVectorWriter(writer);
+    if (outWriter == null) {
+      vectorWriter = getSeqFileWriter(outFile);
+    } else {
+      if ("file".equals(outWriter)) {
+        vectorWriter = new JWriterVectorWriter(new BufferedWriter(new FileWriter(outFile)));
       } else {
         vectorWriter = getSeqFileWriter(outFile);
       }
-    } else {
-      vectorWriter = getSeqFileWriter(outFile);
     }
-    
-    long numDocs = vectorWriter.write(iteratable, maxDocs);
-    vectorWriter.close();
-    log.info("Wrote: {} vectors", numDocs);
+    try {
+      long numDocs = vectorWriter.write(iteratable, maxDocs);
+      log.info("Wrote: {} vectors", numDocs);
+    } finally {
+      vectorWriter.close();
+    }
   }
   
   private static VectorWriter getSeqFileWriter(String outFile) throws IOException {

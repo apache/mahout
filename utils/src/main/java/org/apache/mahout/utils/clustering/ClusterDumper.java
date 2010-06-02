@@ -78,9 +78,9 @@ public final class ClusterDumper {
 
   private int numTopFeatures = 10;
 
-  private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints = null;
+  private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
 
-  private boolean useJSON = false;
+  private boolean useJSON;
 
   public ClusterDumper(Path seqFileDir, Path pointsDir) throws IOException {
     this.seqFileDir = seqFileDir;
@@ -115,51 +115,54 @@ public final class ClusterDumper {
     }
 
     Writer writer = this.outputFile == null ? new OutputStreamWriter(System.out) : new FileWriter(this.outputFile);
+    try {
+      FileSystem fs = seqFileDir.getFileSystem(conf);
+      for (FileStatus seqFile : fs.globStatus(new Path(seqFileDir, "part-*"))) {
+        Path path = seqFile.getPath();
+        //System.out.println("Input Path: " + path); doesn't this interfere with output?
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+        try {
+          Writable key = (Writable) reader.getKeyClass().newInstance();
+          Writable value = (Writable) reader.getValueClass().newInstance();
+          while (reader.next(key, value)) {
+            Cluster cluster = (Cluster) value;
+            String fmtStr = useJSON ? cluster.asJsonString() : cluster.asFormatString(dictionary);
+            if (subString > 0 && fmtStr.length() > subString) {
+              writer.write(':');
+              writer.write(fmtStr, 0, Math.min(subString, fmtStr.length()));
+            } else {
+              writer.write(fmtStr);
+            }
 
-    FileSystem fs = seqFileDir.getFileSystem(conf);
-    for (FileStatus seqFile : fs.globStatus(new Path(seqFileDir, "part-*"))) {
-      Path path = seqFile.getPath();
-      System.out.println("Input Path: " + path);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      Writable key = (Writable) reader.getKeyClass().newInstance();
-      Writable value = (Writable) reader.getValueClass().newInstance();
-      while (reader.next(key, value)) {
-        Cluster cluster = (Cluster) value;
-        String fmtStr = useJSON ? cluster.asJsonString() : cluster.asFormatString(dictionary);
-        if (subString > 0 && fmtStr.length() > subString) {
-          writer.append(":").append(fmtStr.substring(0, Math.min(subString, fmtStr.length())));
-        } else {
-          writer.append(fmtStr);
-        }
+            writer.write('\n');
 
-        writer.append('\n');
+            if (dictionary != null) {
+              String topTerms = getTopFeatures(cluster.getCenter(), dictionary, numTopFeatures);
+              writer.write("\tTop Terms: ");
+              writer.write(topTerms);
+              writer.write('\n');
+            }
 
-        if (dictionary != null) {
-          String topTerms = getTopFeatures(cluster.getCenter(), dictionary, numTopFeatures);
-          writer.write("\tTop Terms: ");
-          writer.write(topTerms);
-          writer.write('\n');
-        }
-
-        List<WeightedVectorWritable> points = clusterIdToPoints.get(cluster.getId());
-        if (points != null) {
-          writer.write("\tWeight:  Point:\n\t");
-          for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
-            WeightedVectorWritable point = iterator.next();
-            writer.append(Double.toString(point.getWeight())).append(": ");
-            writer.append(ClusterBase.formatVector(point.getVector().get(), dictionary));
-            if (iterator.hasNext()) {
-              writer.append("\n\t");
+            List<WeightedVectorWritable> points = clusterIdToPoints.get(cluster.getId());
+            if (points != null) {
+              writer.write("\tWeight:  Point:\n\t");
+              for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
+                WeightedVectorWritable point = iterator.next();
+                writer.write(String.valueOf(point.getWeight()));
+                writer.write(": ");
+                writer.write(ClusterBase.formatVector(point.getVector().get(), dictionary));
+                if (iterator.hasNext()) {
+                  writer.write("\n\t");
+                }
+              }
+              writer.write('\n');
             }
           }
-          writer.write('\n');
+        } finally {
+          reader.close();
         }
-        writer.flush();
       }
-      reader.close();
-    }
-    if (this.outputFile != null) {
-      writer.flush();
+    } finally {
       writer.close();
     }
   }
@@ -216,24 +219,27 @@ public final class ClusterDumper {
         abuilder.withName("substring").withMinimum(1).withMaximum(1).create()).withDescription(
         "The number of chars of the asFormatString() to print").withShortName("b").create();
     Option numWordsOpt = obuilder.withLongName("numWords").withRequired(false).withArgument(
-        abuilder.withName("numWords").withMinimum(1).withMaximum(1).create()).withDescription("The number of top terms to print")
-        .withShortName("n").create();
+        abuilder.withName("numWords").withMinimum(1).withMaximum(1).create())
+        .withDescription("The number of top terms to print").withShortName("n").create();
     Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
-        "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries").withShortName("j").create();
+        "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries")
+        .withShortName("j").create();
     Option pointsOpt = obuilder.withLongName("pointsDir").withRequired(false).withArgument(
         abuilder.withName("pointsDir").withMinimum(1).withMaximum(1).create()).withDescription(
         "The directory containing points sequence files mapping input vectors to their cluster.  "
-            + "If specified, then the program will output the points associated with a cluster").withShortName("p").create();
+            + "If specified, then the program will output the points associated with a cluster")
+        .withShortName("p").create();
     Option dictOpt = obuilder.withLongName("dictionary").withRequired(false).withArgument(
-        abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create()).withDescription("The dictionary file. ")
-        .withShortName("d").create();
+        abuilder.withName("dictionary").withMinimum(1).withMaximum(1).create())
+        .withDescription("The dictionary file. ").withShortName("d").create();
     Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
         abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
         "The dictionary file type (text|sequencefile)").withShortName("dt").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
     Group group = gbuilder.withName("Options").withOption(helpOpt).withOption(seqOpt).withOption(outputOpt)
-        .withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt).withOption(dictOpt).withOption(dictTypeOpt)
+        .withOption(substringOpt).withOption(pointsOpt).withOption(centroidJSonOpt)
+        .withOption(dictOpt).withOption(dictTypeOpt)
         .withOption(numWordsOpt).create();
 
     try {
@@ -348,7 +354,7 @@ public final class ClusterDumper {
   static class TermIndexWeight {
     private int index = -1;
 
-    private double weight = 0.0;
+    private double weight;
 
     TermIndexWeight(int index, double weight) {
       this.index = index;

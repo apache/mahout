@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -33,7 +33,8 @@ public class WikipediaAnalyzer extends Analyzer {
   private final CharArraySet stopSet;
   
   public WikipediaAnalyzer() {
-    stopSet = (CharArraySet) StopFilter.makeStopSet(StopAnalyzer.ENGLISH_STOP_WORDS_SET.toArray(new String[0]));
+    stopSet = (CharArraySet) StopFilter.makeStopSet(
+        StopAnalyzer.ENGLISH_STOP_WORDS_SET.toArray(new String[StopAnalyzer.ENGLISH_STOP_WORDS_SET.size()]));
   }
   
   public WikipediaAnalyzer(CharArraySet stopSet) {

@@ -748,9 +748,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       }
       
       try {
-        long ID = getLongColumn(resultSet, 1);
+        long id = getLongColumn(resultSet, 1);
         resultSet.next();
-        return ID;
+        return id;
       } catch (SQLException sqle) {
         // No good way to handle this since we can't throw an exception
         log.warn("Exception while iterating", sqle);

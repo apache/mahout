@@ -200,7 +200,7 @@ public class DecisionForest implements Writable {
   }
 
   /**
-   * Load the forest from a single file or a directrory of files
+   * Load the forest from a single file or a directory of files
    * @param conf
    * @param forestPath
    * @return
@@ -208,8 +208,7 @@ public class DecisionForest implements Writable {
    */
   public static DecisionForest load(Configuration conf, Path forestPath) throws IOException {
     FileSystem fs = forestPath.getFileSystem(conf);
-    Path[] files = null;
-
+    Path[] files;
     if (fs.getFileStatus(forestPath).isDir()) {
       files = DFUtils.listOutputFiles(fs, forestPath);
     } else {
@@ -219,13 +218,15 @@ public class DecisionForest implements Writable {
     DecisionForest forest = null;
     for (Path path : files) {
       FSDataInputStream dataInput = new FSDataInputStream(fs.open(path));
-      if (forest == null) {
-        forest = read(dataInput);
-      } else {
-        forest.readFields(dataInput);
+      try {
+        if (forest == null) {
+          forest = read(dataInput);
+        } else {
+          forest.readFields(dataInput);
+        }
+      } finally {
+        dataInput.close();
       }
-
-      dataInput.close();
     }
 
     return forest;

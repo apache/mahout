@@ -24,7 +24,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.BufferedWriter;
@@ -237,12 +236,10 @@ public class CDInfosToolTest extends MahoutTestCase {
           // numerical attribute
           double min = (Double) descriptions[index][0];
           double max = (Double) descriptions[index][1];
-          Range range = DescriptionUtils.extractNumericalRange(description);
+          double[] range = DescriptionUtils.extractNumericalRange(description);
 
-          assertTrue("bad min value for attribute (" + index + ')',
-                  min <= range.min);
-          assertTrue("bad max value for attribute (" + index + ')',
-                  max >= range.max);
+          assertTrue("bad min value for attribute (" + index + ')', min <= range[0]);
+          assertTrue("bad max value for attribute (" + index + ')', max >= range[1]);
         } else if (descriptors.isNominal(index)) {
           // categorical attribute
           Object[] values = descriptions[index];

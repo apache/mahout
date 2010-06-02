@@ -86,8 +86,8 @@ public final class TransposeToByUser {
     
   }
   
-  private static void maybeFlushCache(File byUserDirectory, Map<String, List<String>> byUserEntryCache)
-      throws IOException {
+  private static void maybeFlushCache(File byUserDirectory,
+                                      Map<String, List<String>> byUserEntryCache) throws IOException {
     if (byUserEntryCache.size() >= 100000) {
       log.info("Flushing cache");
       for (Map.Entry<String, List<String>> entry : byUserEntryCache.entrySet()) {

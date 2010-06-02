@@ -18,7 +18,6 @@
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.ga.watchmaker.cd.tool.DescriptionUtils.Range;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,11 +52,9 @@ public class DescriptionUtilsTest extends MahoutTestCase {
   
   public void testExtractNumericalRange() {
     String description = "-2.06,12.32";
-    
-    Range range = DescriptionUtils.extractNumericalRange(description);
-    
-    assertEquals(-2.06, range.min);
-    assertEquals(12.32, range.max);
+    double[] range = DescriptionUtils.extractNumericalRange(description);
+    assertEquals(-2.06, range[0]);
+    assertEquals(12.32, range[1]);
   }
 
 }

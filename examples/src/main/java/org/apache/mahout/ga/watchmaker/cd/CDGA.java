@@ -134,15 +134,19 @@ public final class CDGA {
       
       String dataset = cmdLine.getValue(inputOpt).toString();
       int target = Integer.parseInt(cmdLine.getValue(labelOpt).toString());
-      double threshold = cmdLine.hasOption(thresholdOpt) ?
-          Double.parseDouble(cmdLine.getValue(thresholdOpt).toString()) : 0.5;
-      int crosspnts = cmdLine.hasOption(crosspntsOpt) ?
-          Integer.parseInt(cmdLine.getValue(crosspntsOpt).toString()) : 1;
+      double threshold = cmdLine.hasOption(thresholdOpt)
+          ? Double.parseDouble(cmdLine.getValue(thresholdOpt).toString())
+          : 0.5;
+      int crosspnts = cmdLine.hasOption(crosspntsOpt)
+          ? Integer.parseInt(cmdLine.getValue(crosspntsOpt).toString())
+          : 1;
       double mutrate = Double.parseDouble(cmdLine.getValue(mutrateOpt).toString());
-      double mutrange = cmdLine.hasOption(mutrangeOpt) ?
-          Double.parseDouble(cmdLine.getValue(mutrangeOpt).toString()) : 0.1;
-      int mutprec = cmdLine.hasOption(mutprecOpt) ?
-          Integer.parseInt(cmdLine.getValue(mutprecOpt).toString()) : 2;
+      double mutrange = cmdLine.hasOption(mutrangeOpt)
+          ? Double.parseDouble(cmdLine.getValue(mutrangeOpt).toString())
+          : 0.1;
+      int mutprec = cmdLine.hasOption(mutprecOpt)
+          ? Integer.parseInt(cmdLine.getValue(mutprecOpt).toString())
+          : 2;
       int popSize = Integer.parseInt(cmdLine.getValue(popsizeOpt).toString());
       int genCount = Integer.parseInt(cmdLine.getValue(gencntOpt).toString());
       
@@ -225,7 +229,7 @@ public final class CDGA {
     long hours = minutes / 60;
     minutes %= 60;
     
-    log.info("Elapsed time (Hours:minutes:seconds:milli) : {}:{}:{}:{}", new Object[] {hours, minutes,
-                                                                                            seconds, milli});
+    log.info("Elapsed time (Hours:minutes:seconds:milli) : {}:{}:{}:{}",
+             new Object[] {hours, minutes, seconds, milli});
   }
 }

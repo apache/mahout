@@ -19,12 +19,10 @@ package org.apache.mahout.math;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.function.UnaryFunction;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -168,27 +166,19 @@ public abstract class AbstractMatrix implements Matrix {
   }
 
   public static Matrix decodeMatrix(String formatString) {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
-    Type matrixType = new TypeToken<Matrix>() {
-    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
-    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
+    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
     Gson gson = builder.create();
-    return gson.fromJson(formatString, matrixType);
+    return gson.fromJson(formatString, Matrix.class);
   }
 
   public String asFormatString() {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
-    Type matrixType = new TypeToken<Matrix>() {
-    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
-    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
+    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, matrixType);
+    return gson.toJson(this, Matrix.class);
   }
 
   public Matrix assign(double value) {

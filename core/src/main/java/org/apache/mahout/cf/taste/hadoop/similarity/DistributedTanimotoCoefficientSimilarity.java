@@ -35,10 +35,10 @@ public class DistributedTanimotoCoefficientSimilarity extends AbstractDistribute
       return Double.NaN;
     }
     return preferringXAndY / (weightOfItemVectorX + weightOfItemVectorY - preferringXAndY);
-	}
+  }
 
-	@Override
-	public double weightOfItemVector(Iterable<Float> prefValues) {
+  @Override
+  public double weightOfItemVector(Iterable<Float> prefValues) {
     int nonZeroEntries = 0;
     for (Float prefValue : prefValues) {
       nonZeroEntries++;

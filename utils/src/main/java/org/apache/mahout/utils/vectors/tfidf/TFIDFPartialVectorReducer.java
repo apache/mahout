@@ -53,7 +53,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
   private int minDf = 1;
   private int maxDfPercent = 99;
   private long vectorCount = 1;
-  private long featureCount = 0;
+  private long featureCount;
   private boolean sequentialAccess;
   
   @Override

@@ -93,8 +93,8 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public int getCount(String correctLabel, String classifiedLabel) {
-    if (labels.contains(correctLabel) && (labels.contains(classifiedLabel) == false)
-        && (defaultLabel.equals(classifiedLabel) == false)) {
+    if (labels.contains(correctLabel) &&
+        !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
       throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
     }
     int correctId = labelMap.get(correctLabel);
@@ -103,9 +103,9 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public void putCount(String correctLabel, String classifiedLabel, int count) {
-    if (labels.contains(correctLabel) && (labels.contains(classifiedLabel) == false)
-        && (defaultLabel.equals(classifiedLabel) == false)) {
-      throw new IllegalArgumentException("Label not found");
+    if (labels.contains(correctLabel) &&
+        !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
+      throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
     }
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
@@ -137,7 +137,7 @@ public class ConfusionMatrix implements Summarizable {
   
   @Override
   public String summarize() {
-    StringBuilder returnString = new StringBuilder();
+    StringBuilder returnString = new StringBuilder(200);
     returnString.append("=======================================================").append('\n');
     returnString.append("Confusion Matrix\n");
     returnString.append("-------------------------------------------------------").append('\n');

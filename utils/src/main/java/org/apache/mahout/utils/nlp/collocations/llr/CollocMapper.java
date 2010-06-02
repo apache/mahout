@@ -179,13 +179,11 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
           return true;
         }
       });
-    }
-    catch (IllegalStateException ise) {
+    } catch (IllegalStateException ise) {
       // catch an re-throw original exceptions from the procedures.
       if (ise.getCause() instanceof IOException) {
         throw (IOException) ise.getCause();
-      }
-      else {
+      } else {
         // wasn't what was expected, so re-throw
         throw ise;
       }

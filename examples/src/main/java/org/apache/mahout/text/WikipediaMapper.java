@@ -19,6 +19,7 @@ package org.apache.mahout.text;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,7 +77,7 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
     
     if (!all) {
       String catMatch = findMatchingCategory(document);
-      if (catMatch.equals("Unknown")) {
+      if ("Unknown".equals(catMatch)) {
         return;
       }
     }
@@ -95,11 +96,7 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
   
   private static String getTitle(String xml) {
     Matcher m = TITLE.matcher(xml);
-    String ret = "";
-    if (m.find()) {
-      ret = m.group(1);
-    }
-    return ret;
+    return m.find() ? m.group(1) : "";
   }
   
   private String findMatchingCategory(String document) {
@@ -111,8 +108,7 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
       if (endIndex >= document.length() || endIndex < 0) {
         break;
       }
-      String category = document.substring(categoryIndex, endIndex).toLowerCase().trim();
-      // categories.add(category.toLowerCase());
+      String category = document.substring(categoryIndex, endIndex).toLowerCase(Locale.ENGLISH).trim();
       if (exactMatchOnly && inputCategories.contains(category)) {
         return category;
       } else if (exactMatchOnly == false) {
@@ -133,8 +129,8 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
       if (inputCategories == null) {
         Set<String> newCategories = new HashSet<String>();
         
-        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(job,
-            GenericsUtil.getClass(newCategories));
+        DefaultStringifier<Set<String>> setStringifier =
+            new DefaultStringifier<Set<String>>(job, GenericsUtil.getClass(newCategories));
         
         String categoriesStr = setStringifier.toString(newCategories);
         categoriesStr = job.get("wikipedia.categories", categoriesStr);
@@ -146,7 +142,7 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
     } catch (IOException ex) {
       throw new IllegalStateException(ex);
     }
-    log.info("Configure: Input Categories size: " + inputCategories.size() + " All: " + all
-                             + " Exact Match: " + exactMatchOnly);
+    log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
+             new Object[] {inputCategories.size(), all, exactMatchOnly});
   }
 }

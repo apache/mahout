@@ -30,21 +30,16 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 
-public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
-    JsonDeserializer<Matrix> {
+public class JsonMatrixAdapter implements JsonSerializer<Matrix>, JsonDeserializer<Matrix> {
 
   public static final String CLASS = "class";
   public static final String MATRIX = "matrix";
 
   public JsonElement serialize(Matrix src, Type typeOfSrc,
                                JsonSerializationContext context) {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
-    Type matrixType = new TypeToken<Matrix>() {
-    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
-    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
+    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
     obj.add(CLASS, new JsonPrimitive(src.getClass().getName()));
@@ -54,19 +49,15 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>,
 
   public Matrix deserialize(JsonElement json, Type typeOfT,
                             JsonDeserializationContext context) throws JsonParseException {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
-    Type matrixType = new TypeToken<Matrix>() {
-    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
-    builder.registerTypeAdapter(matrixType, new JsonMatrixAdapter());
+    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
     String klass = obj.get(CLASS).getAsString();
     String matrix = obj.get(MATRIX).getAsString();
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl = null;
+    Class<?> cl;
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {

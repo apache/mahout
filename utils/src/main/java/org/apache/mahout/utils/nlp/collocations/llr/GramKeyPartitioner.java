@@ -22,8 +22,9 @@ import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
 
-/** Partition GramKeys based on their Gram, ignoring the secondary sort key so that all GramKeys with the same
- *  gram are sent to the same partition.
+/**
+ * Partition GramKeys based on their Gram, ignoring the secondary sort key so that all GramKeys with the same
+ * gram are sent to the same partition.
  */
 public class GramKeyPartitioner implements Partitioner<GramKey, Gram> {
 
@@ -38,9 +39,9 @@ public class GramKeyPartitioner implements Partitioner<GramKey, Gram> {
   @Override
   public int getPartition(GramKey key, Gram value, int numPartitions) {
     // see: http://svn.apache.org/viewvc/hadoop/mapreduce/trunk/src/java/org/apache/hadoop/mapreduce/lib/partition/BinaryPartitioner.java?revision=816664&view=markup
-    int length = key.getLength()-1;
-    int right   = (offset + length) % length;
-    int hash   = WritableComparator.hashBytes(key.getBytes(), right);
+    int length = key.getLength() - 1;
+    int right = (offset + length) % length;
+    int hash = WritableComparator.hashBytes(key.getBytes(), right);
     return (hash & Integer.MAX_VALUE) % numPartitions;
   }
 

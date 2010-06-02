@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.bayes;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.cli2.CommandLine;
@@ -30,7 +31,6 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
@@ -62,9 +62,6 @@ public final class WikipediaDatasetCreatorDriver {
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the classifier as a
    * {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
-   * 
-   * @param args
-   *          The args
    */
   public static void main(String[] args) throws IOException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -112,7 +109,7 @@ public final class WikipediaDatasetCreatorDriver {
       Class<? extends Analyzer> analyzerClass = WikipediaAnalyzer.class;
       if (cmdLine.hasOption(analyzerOpt)) {
         String className = cmdLine.getValue(analyzerOpt).toString();
-        analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
+        analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it
         analyzerClass.newInstance();
@@ -151,9 +148,8 @@ public final class WikipediaDatasetCreatorDriver {
                             Class<? extends Analyzer> analyzerClass) throws IOException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(WikipediaDatasetCreatorDriver.class);
-    if (WikipediaDatasetCreatorDriver.log.isInfoEnabled()) {
-      log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output,
-                                                                                               catFile});
+    if (log.isInfoEnabled()) {
+      log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output, catFile});
     }
     conf.set("key.value.separator.in.input.line", " ");
     conf.set("xmlinput.start", "<text xml:space=\"preserve\">");
@@ -171,9 +167,9 @@ public final class WikipediaDatasetCreatorDriver {
     // conf.setCombinerClass(WikipediaDatasetCreatorReducer.class);
     conf.setReducerClass(WikipediaDatasetCreatorReducer.class);
     conf.setOutputFormat(WikipediaDatasetCreatorOutputFormat.class);
-    conf
-        .set("io.serializations",
-          "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,"
+             + "org.apache.hadoop.io.serializer.WritableSerialization");
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters and make or break a piece of code
     
@@ -181,11 +177,11 @@ public final class WikipediaDatasetCreatorDriver {
 
     Set<String> categories = new HashSet<String>();
     for (String line : new FileLineIterable(new File(catFile))) {
-      categories.add(line.trim().toLowerCase());
+      categories.add(line.trim().toLowerCase(Locale.ENGLISH));
     }
     
-    DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
-        .getClass(categories));
+    DefaultStringifier<Set<String>> setStringifier =
+        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
     
     String categoriesStr = setStringifier.toString(categories);
     

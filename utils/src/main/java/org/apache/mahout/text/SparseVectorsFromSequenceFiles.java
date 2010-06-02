@@ -39,13 +39,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Converts a given set of sequence files into SparseVectors
- * 
  */
 public final class SparseVectorsFromSequenceFiles {
   
   private static final Logger log = LoggerFactory.getLogger(SparseVectorsFromSequenceFiles.class);
   
-  private SparseVectorsFromSequenceFiles() {}
+  private SparseVectorsFromSequenceFiles() {
+  }
   
   public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -170,7 +170,7 @@ public final class SparseVectorsFromSequenceFiles {
       Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
       if (cmdLine.hasOption(analyzerNameOpt)) {
         String className = cmdLine.getValue(analyzerNameOpt).toString();
-        analyzerClass = (Class<? extends Analyzer>) Class.forName(className);
+        analyzerClass = Class.forName(className).asSubclass(Analyzer.class);
         // try instantiating it, b/c there isn't any point in setting it if
         // you can't instantiate it
         analyzerClass.newInstance();
@@ -180,9 +180,9 @@ public final class SparseVectorsFromSequenceFiles {
       
       if (cmdLine.hasOption(weightOpt)) {
         String wString = cmdLine.getValue(weightOpt).toString();
-        if (wString.equalsIgnoreCase("tf")) {
+        if ("tf".equalsIgnoreCase(wString)) {
           processIdf = false;
-        } else if (wString.equalsIgnoreCase("tfidf")) {
+        } else if ("tfidf".equalsIgnoreCase(wString)) {
           processIdf = true;
         } else {
           throw new OptionException(weightOpt);
@@ -203,7 +203,7 @@ public final class SparseVectorsFromSequenceFiles {
       float norm = PartialVectorMerger.NO_NORMALIZING;
       if (cmdLine.hasOption(powerOpt)) {
         String power = cmdLine.getValue(powerOpt).toString();
-        if (power.equals("INF")) {
+        if ("INF".equals(power)) {
           norm = Float.POSITIVE_INFINITY;
         } else {
           norm = Float.parseFloat(power);

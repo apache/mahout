@@ -19,13 +19,16 @@ package org.apache.mahout.text;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
-/** A subclass of the Lucene StandardAnalyzer that provides a no-argument constructor. 
+/**
+ *  A subclass of the Lucene StandardAnalyzer that provides a no-argument constructor. 
  *  Used as the default analyzer in many cases where an analyzer is instantiated by
  *  class name by calling a no-arg constructor.
  */
 public class DefaultAnalyzer extends StandardAnalyzer {
-	@SuppressWarnings("deprecation")
-	public DefaultAnalyzer() {
-		super(Version.LUCENE_CURRENT);
-	}
+
+  @SuppressWarnings("deprecation")
+  public DefaultAnalyzer() {
+    super(Version.LUCENE_CURRENT);
+  }
+
 }

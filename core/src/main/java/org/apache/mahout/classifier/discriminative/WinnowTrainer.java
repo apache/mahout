@@ -18,7 +18,6 @@ package org.apache.mahout.classifier.discriminative;
 
 import java.util.Iterator;
 
-import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public class WinnowTrainer extends LinearTrainer {
     this.promotionStep = promotionStep;
   }
   
-  public WinnowTrainer(int dimension, double promotionStep) throws CardinalityException {
+  public WinnowTrainer(int dimension, double promotionStep) {
     this(dimension, promotionStep, 0.5, 1, 0);
   }
   
@@ -49,7 +48,7 @@ public class WinnowTrainer extends LinearTrainer {
    * 
    * @param dimension
    *          number of features.
-   * */
+   */
   public WinnowTrainer(int dimension) {
     this(dimension, 2);
   }
@@ -64,7 +63,7 @@ public class WinnowTrainer extends LinearTrainer {
    * In case the prediction was negative but should have been positive, all
    * entries in the weight vector that correspond to non null features in the
    * example are halfed.
-   * */
+   */
   @Override
   protected void update(double label, Vector dataPoint, LinearModel model) {
     if (label > 0) {

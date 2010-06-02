@@ -18,10 +18,12 @@
 package org.apache.mahout.df;
 
 /**
- * various methods to compute from the output of a random forest
+ * Various methods to compute from the output of a random forest
  */
 public final class ErrorEstimate {
-  private ErrorEstimate() {}
+
+  private ErrorEstimate() {
+  }
   
   public static double errorRate(int[] labels, int[] predictions) {
     if (labels.length != predictions.length) {

@@ -99,7 +99,7 @@ public final class VectorDumper {
       
       if (cmdLine.hasOption(seqOpt)) {
         Path path = new Path(cmdLine.getValue(seqOpt).toString());
-        System.out.println("Input Path: " + path);
+        //System.out.println("Input Path: " + path); interferes with output?
         JobClient client = new JobClient();
         JobConf conf = new JobConf(Job.class);
         client.setConf(conf);
@@ -113,9 +113,9 @@ public final class VectorDumper {
         
         String[] dictionary = null;
         if (cmdLine.hasOption(dictOpt)) {
-          if (dictionaryType.equals("text")) {
+          if ("text".equals(dictionaryType)) {
             dictionary = VectorHelper.loadTermDictionary(new File(cmdLine.getValue(dictOpt).toString()));
-          } else if (dictionaryType.equals("sequencefile")) {
+          } else if ("sequencefile".equals(dictionaryType)) {
             dictionary = VectorHelper.loadTermDictionary(conf, fs, cmdLine.getValue(dictOpt).toString());
           } else {
             throw new OptionException(dictTypeOpt);
@@ -124,33 +124,33 @@ public final class VectorDumper {
         boolean useJSON = cmdLine.hasOption(centroidJSonOpt);
         
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-        SequenceFileVectorIterable vectorIterable = new SequenceFileVectorIterable(reader, cmdLine
-            .hasOption(vectorAsKeyOpt));
-        Writer writer;
-        if (cmdLine.hasOption(outputOpt)) {
-          writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
-        } else {
-          writer = new OutputStreamWriter(System.out);
-        }
-        boolean printKey = cmdLine.hasOption(printKeyOpt);
-        SeqFileIterator iterator = (SeqFileIterator) vectorIterable.iterator();
-        int i = 0;
-        while (iterator.hasNext()) {
-          Vector vector = iterator.next();
-          if (printKey) {
-            writer.write(iterator.key().toString());
-            writer.write("\t");
+        try {
+          Iterable<Vector> vectorIterable = new SequenceFileVectorIterable(reader, cmdLine.hasOption(vectorAsKeyOpt));
+          Writer writer = cmdLine.hasOption(outputOpt)
+              ? new FileWriter(cmdLine.getValue(outputOpt).toString())
+              : new OutputStreamWriter(System.out);
+          try {
+            boolean printKey = cmdLine.hasOption(printKeyOpt);
+            SeqFileIterator iterator = (SeqFileIterator) vectorIterable.iterator();
+            //int i = 0;
+            while (iterator.hasNext()) {
+              Vector vector = iterator.next();
+              if (printKey) {
+                writer.write(iterator.key().toString());
+                writer.write("\t");
+              }
+              String fmtStr = useJSON ? vector.asFormatString() : VectorHelper.vectorToString(vector, dictionary);
+              writer.write(fmtStr);
+              writer.write('\n');
+              //i++;
+            }
+            //System.out.println("Dumped " + i + " Vectors");
+          } finally {
+            writer.close();
           }
-          String fmtStr = useJSON ? vector.asFormatString() : VectorHelper.vectorToString(vector, dictionary);
-          writer.write(fmtStr);
-          writer.write('\n');
-          i++;
+        } finally {
+          reader.close();
         }
-        writer.flush();
-        if (cmdLine.hasOption(outputOpt)) {
-          writer.close();
-        }
-        System.out.println("Dumped " + i + " Vectors");
       }
       
     } catch (OptionException e) {

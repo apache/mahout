@@ -76,11 +76,10 @@ public class TFPartialVectorReducer extends MapReduceBase implements
       do {
         String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
         if (term.length() > 0) { // ngram
-          if (dictionary.containsKey(term) == false) {
-            continue;
+          if (dictionary.containsKey(term)) {
+            int termId = dictionary.get(term);
+            vector.setQuick(termId, vector.getQuick(termId) + 1);
           }
-          int termId = dictionary.get(term);
-          vector.setQuick(termId, vector.getQuick(termId) + 1);
         }
       } while (sf.incrementToken());
       
@@ -89,11 +88,10 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     } else {
       for (String term : value.getEntries()) {
         if (term.length() > 0) { // unigram
-          if (dictionary.containsKey(term) == false) {
-            continue;
+          if (dictionary.containsKey(term)) {
+            int termId = dictionary.get(term);
+            vector.setQuick(termId, vector.getQuick(termId) + 1);
           }
-          int termId = dictionary.get(term);
-          vector.setQuick(termId, vector.getQuick(termId) + 1);
         }
       }
     }
@@ -101,7 +99,7 @@ public class TFPartialVectorReducer extends MapReduceBase implements
       vector = new SequentialAccessSparseVector(vector);
     }
     // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
-    if(vector.getNumNondefaultElements() > 0) {
+    if (vector.getNumNondefaultElements() > 0) {
       VectorWritable vectorWritable = new VectorWritable(vector);
       output.collect(key, vectorWritable);
     } else {

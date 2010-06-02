@@ -148,7 +148,6 @@ public class Gram extends BinaryComparable implements WritableComparable<BinaryC
 
   /**
    * @return gram frequency
-   * @return
    */
   public int getFrequency() {
     return frequency;

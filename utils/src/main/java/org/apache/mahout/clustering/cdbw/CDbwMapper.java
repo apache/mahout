@@ -48,7 +48,7 @@ public class CDbwMapper extends MapReduceBase implements
 
   private DistanceMeasure measure = new EuclideanDistanceMeasure();
 
-  private OutputCollector<IntWritable, WeightedVectorWritable> output = null;
+  private OutputCollector<IntWritable, WeightedVectorWritable> output;
 
   @Override
   public void map(IntWritable clusterId,
@@ -77,8 +77,7 @@ public class CDbwMapper extends MapReduceBase implements
     this.measure = measure;
   }
 
-  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(JobConf job)
-      throws SecurityException, IllegalArgumentException {
+  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(JobConf job) {
     String statePath = job.get(CDbwDriver.STATE_IN_KEY);
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
     try {

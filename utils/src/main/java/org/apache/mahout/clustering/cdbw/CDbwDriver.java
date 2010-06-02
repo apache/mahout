@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.cdbw;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
@@ -43,7 +42,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
@@ -78,14 +76,15 @@ public final class CDbwDriver {
 
     Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(
         abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The ModelDistribution class name. " + "Defaults to org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution")
-        .create();
+        "The ModelDistribution class name. "
+        + "Defaults to org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution").create();
 
     Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").withArgument(
-        abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create()).withDescription("The number of reduce tasks.").create();
+        abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create())
+        .withDescription("The number of reduce tasks.").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt).withOption(
-        maxIterOpt).withOption(helpOpt).withOption(numRedOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
+        .withOption(modelOpt).withOption(maxIterOpt).withOption(helpOpt).withOption(numRedOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -127,9 +126,15 @@ public final class CDbwDriver {
    * @param numReducers
    *          the number of Reducers desired
    */
-  public static void runJob(Path clustersIn, Path clusteredPointsIn, Path output, String distanceMeasureClass,
-      int numIterations, int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-      IOException, SecurityException, NoSuchMethodException, InvocationTargetException {
+  public static void runJob(Path clustersIn,
+                            Path clusteredPointsIn,
+                            Path output,
+                            String distanceMeasureClass,
+                            int numIterations,
+                            int numReducers) throws ClassNotFoundException,
+                                                    InstantiationException,
+                                                    IllegalAccessException,
+                                                    IOException {
 
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);

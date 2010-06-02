@@ -18,11 +18,8 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Iterator;
 
-import org.apache.lucene.document.FieldSelector;
-import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermDocs;
 import org.apache.mahout.math.Vector;
@@ -87,7 +84,7 @@ public class LuceneIterable implements Iterable<Vector> {
     }
   }
   
-  private class TDIterator implements Iterator<Vector> {
+  private final class TDIterator implements Iterator<Vector> {
     private final TermDocs termDocs;
     
     private TDIterator() throws IOException {

@@ -223,7 +223,7 @@ public class DirichletClusterer<O> {
     return pi;
   }
 
-  public void emitPointToClusters(VectorWritable point, List<DirichletCluster> clusters,
+  public void emitPointToClusters(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters,
       OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
     Vector pi = new DenseVector(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
@@ -244,7 +244,7 @@ public class DirichletClusterer<O> {
    * @param output
    * @throws IOException
    */
-  static void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster> clusters, Vector pi,
+  void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
       OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
     int clusterId = -1;
     double clusterPdf = 0;
@@ -259,7 +259,7 @@ public class DirichletClusterer<O> {
     output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
   }
 
-  void emitAllClusters(VectorWritable point, List<DirichletCluster> clusters, Vector pi,
+  void emitAllClusters(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
       OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);

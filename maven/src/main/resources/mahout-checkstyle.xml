@@ -164,11 +164,11 @@
 		<module name="IllegalInstantiation" />
 		<!--<module name="IllegalToken"/>-->
 		<!--<module name="IllegalTokenText"/>-->
-		<module name="InnerAssignment" />
+    <!--<module name="InnerAssignment"/>-->
 		<!--<module name="MagicNumber"/>-->
 		<module name="MissingSwitchDefault" />
 		<!--module name="ModifiedControlVariable"/-->
-		<!--<module name="SimplifyBooleanExpression" /> -->
+    <module name="SimplifyBooleanExpression" />
 		<module name="SimplifyBooleanReturn" />
 		<module name="StringLiteralEquality" />
 		<module name="NestedIfDepth">
@@ -184,7 +184,7 @@
 			<property name="illegalClassNames"
 				value="java.lang.Error,java.lang.RuntimeException" />
 		</module>
-		<!--<module name="RedundantThrows"/>-->
+		<module name="RedundantThrows"/>
 		<module name="PackageDeclaration" />
 		<!--module name="JUnitTestCase" /-->
 		<module name="ReturnCount">
@@ -196,7 +196,7 @@
 			<property name="illegalClassNames"
 				value="java.util.GregorianCalendar, java.util.Hashtable, java.util.HashSet, java.util.HashMap, java.util.ArrayList, java.util.LinkedList, java.util.LinkedHashMap, java.util.LinkedHashSet, java.util.TreeSet, java.util.TreeMap" />
 		</module>
-		<module name="DeclarationOrder" />
+    <!--module name="DeclarationOrder" /-->
 		<!--<module name="ParameterAssignment"/>-->
 		<module name="ExplicitInitialization" />
 		<module name="DefaultComesLast" />
@@ -215,7 +215,7 @@
 		<module name="FinalClass" />
 		<module name="HideUtilityClassConstructor" />
 		<module name="InterfaceIsType" />
-		<!--<module name="MutableException"/>-->
+		<module name="MutableException"/>
 		<module name="ThrowsCount">
 			<property name="max" value="5" />
 		</module>
@@ -246,8 +246,8 @@
 
 		<!-- Miscellaneous other checks.                   -->
 		<!-- See http://checkstyle.sf.net/config_misc.html -->
+    <module name="ArrayTypeStyle"/>
 		<!-- 
-			<module name="ArrayTypeStyle"/>
 			<module name="FinalParameters"/>
 		-->
 		<!--

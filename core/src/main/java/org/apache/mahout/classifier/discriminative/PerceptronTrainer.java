@@ -16,24 +16,22 @@
  */
 package org.apache.mahout.classifier.discriminative;
 
-import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implements training accoring to the perceptron update rule.
- * */
+ * Implements training according to the perceptron update rule.
+ */
 public class PerceptronTrainer extends LinearTrainer {
   
-  /** Logger for this class. */
-  private static final Logger LOG = LoggerFactory
-  .getLogger(PerceptronTrainer.class);
+  private static final Logger log = LoggerFactory.getLogger(PerceptronTrainer.class);
+
   /** Rate the model is to be updated with at each step. */
   private final double learningRate;
   
   public PerceptronTrainer(int dimension, double threshold,
-                           double learningRate, double init, double initBias) throws CardinalityException {
+                           double learningRate, double init, double initBias) {
     super(dimension, threshold, init, initBias);
     this.learningRate = learningRate;
   }
@@ -46,20 +44,19 @@ public class PerceptronTrainer extends LinearTrainer {
    * 
    * In case the prediction was negative but should have been positive, the example
    * vector (multiplied by the learning rate) is subtracted from the weight vector.
-   * */
+   */
   @Override
-  protected void update(double label, Vector dataPoint,
-                        LinearModel model) {
+  protected void update(double label, Vector dataPoint, LinearModel model) {
     double factor = 1.0;
     if (label == 0.0) {
       factor = -1.0;
     }
     
     Vector updateVector = dataPoint.times(factor).times(this.learningRate);
-    PerceptronTrainer.LOG.debug("Updatevec: " + updateVector);
+    log.debug("Updatevec: {}", updateVector);
     
     model.addDelta(updateVector);
     model.shiftBias(factor * this.learningRate);
-    PerceptronTrainer.LOG.debug(model.toString());
+    log.debug("{}", model);
   }
 }

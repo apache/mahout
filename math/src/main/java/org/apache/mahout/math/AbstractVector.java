@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math;
 
-import java.lang.reflect.Type;
 import java.util.Iterator;
 
 import org.apache.mahout.math.function.BinaryFunction;
@@ -25,7 +24,6 @@ import org.apache.mahout.math.function.UnaryFunction;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 /** Implementations of generic capabilities like sum of elements and dot products */
 public abstract class AbstractVector implements Vector {
@@ -459,12 +457,10 @@ public abstract class AbstractVector implements Vector {
    * @return the n-dimensional point
    */
   public static Vector decodeVector(String formattedString) {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
-    return gson.fromJson(formattedString, vectorType);
+    return gson.fromJson(formattedString, Vector.class);
   }
 
   public final int size() {
@@ -472,12 +468,10 @@ public abstract class AbstractVector implements Vector {
   }
 
   public String asFormatString() {
-    Type vectorType = new TypeToken<Vector>() {
-    }.getType();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, vectorType);
+    return gson.toJson(this, Vector.class);
   }
 
   @Override

@@ -24,19 +24,10 @@ import java.util.StringTokenizer;
  * Utility functions to handle Attribute's description strings.
  */
 public final class DescriptionUtils {
+
   private DescriptionUtils() {
   }
-  
-  public static class Range {
-    public final double min;
-    public final double max;
-    
-    public Range(double min, double max) {
-      this.max = max;
-      this.min = min;
-    }
-  }
-  
+
   /**
    * Create a numerical attribute description.
    * 
@@ -66,12 +57,11 @@ public final class DescriptionUtils {
     return buffer.toString();
   }
   
-  public static Range extractNumericalRange(String description) {
+  public static double[] extractNumericalRange(String description) {
     StringTokenizer tokenizer = new StringTokenizer(description, ",");
     double min = Double.parseDouble(tokenizer.nextToken());
     double max = Double.parseDouble(tokenizer.nextToken());
-    
-    return new Range(min, max);
+    return new double[] {min,max};
   }
   /**
    * Extract all available values from the description.

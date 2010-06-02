@@ -29,6 +29,7 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
@@ -85,7 +86,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
     //boolean inData = false; // TODO not used?
     while ((line = buff.readLine()) != null) {
       line = line.trim();
-      String lower = line.toLowerCase();
+      String lower = line.toLowerCase(Locale.ENGLISH);
       Integer labelNumInt = labelNumber;
       if (lower.startsWith(ARFFModel.ARFF_COMMENT)) {
         continue;
@@ -116,7 +117,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
           label = ARFFType.DATE.getLabel(lower);
           type = ARFFType.DATE;
           //TODO: DateFormatter map
-          DateFormat format = ARFFModel.DEFAULT_DATE_FORMAT;
+          DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
           int idx = lower.indexOf(ARFFType.DATE.getIndicator());
           String[] split = ARFFVectorIterable.SPACE_PATTERN.split(line);
           if (split.length >= 4) { //we have a date format

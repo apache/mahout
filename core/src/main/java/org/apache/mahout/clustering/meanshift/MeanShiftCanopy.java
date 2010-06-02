@@ -22,6 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import com.google.gson.reflect.TypeToken;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -31,7 +32,6 @@ import org.apache.mahout.math.list.IntArrayList;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * This class models a canopy as a center point, the number of points that are contained within it according
@@ -39,6 +39,8 @@ import com.google.gson.reflect.TypeToken;
  * used to compute the centroid when needed.
  */
 public class MeanShiftCanopy extends ClusterBase {
+
+  private static final Type VECTOR_TYPE = new TypeToken<Vector>() { }.getType();
   
   // TODO: this is problematic, but how else to encode membership?
   private IntArrayList boundPoints = new IntArrayList();
@@ -233,9 +235,8 @@ public class MeanShiftCanopy extends ClusterBase {
   
   /** Format the canopy for output */
   public static String formatCanopy(MeanShiftCanopy canopy) {
-    Type vectorType = new TypeToken<Vector>() { }.getType();
     GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
     Gson gson = gBuilder.create();
     return gson.toJson(canopy, MeanShiftCanopy.class);
   }
@@ -248,9 +249,8 @@ public class MeanShiftCanopy extends ClusterBase {
    * @return a new Canopy
    */
   public static MeanShiftCanopy decodeCanopy(String formattedString) {
-    Type vectorType = new TypeToken<Vector>() { }.getType();
     GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(vectorType, new JsonVectorAdapter());
+    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
     Gson gson = gBuilder.create();
     return gson.fromJson(formattedString, MeanShiftCanopy.class);
   }

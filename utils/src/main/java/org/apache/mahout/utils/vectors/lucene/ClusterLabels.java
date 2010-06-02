@@ -144,31 +144,34 @@ public class ClusterLabels {
 
   public void getLabels() throws IOException {
 
-    Writer writer;
-    if (this.output != null) {
-      writer = new FileWriter(this.output);
-    } else {
-      writer = new OutputStreamWriter(System.out);
-    }
-
-    for (Map.Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
-      List<WeightedVectorWritable> wvws = integerListEntry.getValue();
-      List<TermInfoClusterInOut> termInfos = getClusterLabels(integerListEntry.getKey(), wvws);
-      if (termInfos != null) {
-        writer.write('\n');
-        writer.write("Top labels for Cluster " + integerListEntry.getKey() + " containing " + wvws.size() + " vectors");
-        writer.write('\n');
-        writer.write("Term \t\t LLR \t\t In-ClusterDF \t\t Out-ClusterDF ");
-        writer.write('\n');
-        for (TermInfoClusterInOut termInfo : termInfos) {
-          writer.write(termInfo.term + "\t\t" + termInfo.logLikelihoodRatio + "\t\t" + termInfo.inClusterDF + "\t\t"
-              + termInfo.outClusterDF);
+    Writer writer = this.output == null ? new OutputStreamWriter(System.out) : new FileWriter(this.output);
+    try {
+      for (Map.Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
+        List<WeightedVectorWritable> wvws = integerListEntry.getValue();
+        List<TermInfoClusterInOut> termInfos = getClusterLabels(integerListEntry.getKey(), wvws);
+        if (termInfos != null) {
           writer.write('\n');
+          writer.write("Top labels for Cluster ");
+          writer.write(String.valueOf(integerListEntry.getKey()));
+          writer.write(" containing ");
+          writer.write(String.valueOf(wvws.size()));
+          writer.write(" vectors");
+          writer.write('\n');
+          writer.write("Term \t\t LLR \t\t In-ClusterDF \t\t Out-ClusterDF ");
+          writer.write('\n');
+          for (TermInfoClusterInOut termInfo : termInfos) {
+            writer.write(termInfo.term);
+            writer.write("\t\t");
+            writer.write(String.valueOf(termInfo.logLikelihoodRatio));
+            writer.write("\t\t");
+            writer.write(String.valueOf(termInfo.inClusterDF));
+            writer.write("\t\t");
+            writer.write(String.valueOf(termInfo.outClusterDF));
+            writer.write('\n');
+          }
         }
       }
-    }
-    writer.flush();
-    if (this.output != null) {
+    } finally {
       writer.close();
     }
   }
@@ -273,7 +276,7 @@ public class ClusterLabels {
         new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
 
     for (int i = 0; i < numDocs; i++) {
-      String id = null;
+      String id;
       // Use Lucene's internal ID if idField is not specified. Else, get it from the document.
       if (idField == null) {
         id = Integer.toString(i);
