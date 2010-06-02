@@ -44,5 +44,17 @@ public interface ItemSimilarity extends Refreshable {
    * @throws TasteException if an error occurs while accessing the data
    */
   double itemSimilarity(long itemID1, long itemID2) throws TasteException;
+
+  /**
+   * <p>A bulk-get version of {@link #itemSimilarity(long, long)}.</p>
+   *
+   * @param itemID1 first item ID
+   * @param itemID2s second item IDs to compute similarity with
+   * @return similarity between itemID1 and other items
+   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
+   *  if any item is known to be non-existent in the data
+   * @throws TasteException if an error occurs while accessing the data
+   */
+  double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException;
   
 }

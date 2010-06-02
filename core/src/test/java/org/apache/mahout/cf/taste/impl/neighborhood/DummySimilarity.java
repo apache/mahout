@@ -45,6 +45,16 @@ final class DummySimilarity implements UserSimilarity, ItemSimilarity {
     // Make up something wacky
     return 1.0 / (1.0 + Math.abs(itemID1 - itemID2));
   }
+
+  @Override
+  public double[] itemSimilarities(long itemID1, long[] itemID2s) {
+    int length = itemID2s.length;
+    double[] result = new double[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = itemSimilarity(itemID1, itemID2s[i]);
+    }
+    return result;
+  }
   
   @Override
   public void setPreferenceInferrer(PreferenceInferrer inferrer) {

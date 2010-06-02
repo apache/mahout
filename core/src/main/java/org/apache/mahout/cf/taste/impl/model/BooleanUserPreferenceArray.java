@@ -105,6 +105,14 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   public void setItemID(int i, long itemID) {
     ids[i] = itemID;
   }
+
+  /**
+   * @return all item IDs
+   */
+  @Override
+  public long[] getIDs() {
+    return ids;
+  }
   
   @Override
   public float getValue(int i) {

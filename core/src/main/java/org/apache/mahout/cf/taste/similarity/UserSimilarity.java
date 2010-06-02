@@ -43,6 +43,8 @@ public interface UserSimilarity extends Refreshable {
    * @throws TasteException if an error occurs while accessing the data
    */
   double userSimilarity(long userID1, long userID2) throws TasteException;
+
+  // Should we implement userSimilarities() like ItemSimilarity.itemSimilarities()?
   
   /**
    * <p>

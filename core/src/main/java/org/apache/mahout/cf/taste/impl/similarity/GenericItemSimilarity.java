@@ -206,6 +206,16 @@ public final class GenericItemSimilarity implements ItemSimilarity {
     Double similarity = nextMap.get(secondID);
     return similarity == null ? Double.NaN : similarity;
   }
+
+  @Override
+  public double[] itemSimilarities(long itemID1, long[] itemID2s) {
+    int length = itemID2s.length;
+    double[] result = new double[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = itemSimilarity(itemID1, itemID2s[i]);
+    }
+    return result;
+  }
   
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {

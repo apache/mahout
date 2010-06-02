@@ -86,8 +86,23 @@ public final class TanimotoCoefficientSimilarity implements UserSimilarity, Item
   
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
-    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    return doItemSimilarity(itemID1, itemID2, preferring1);
+  }
+
+  @Override
+  public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
+    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    int length = itemID2s.length;
+    double[] result = new double[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = doItemSimilarity(itemID1, itemID2s[i], preferring1);
+    }
+    return result;
+  }
+
+  private double doItemSimilarity(long itemID1, long itemID2, int preferring1) throws TasteException {
+    int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     return (double) preferring1and2 / (double) (preferring1 + preferring2 - preferring1and2);
   }

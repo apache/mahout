@@ -184,9 +184,9 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     double totalSimilarity = 0.0;
     int count = 0;
     PreferenceArray prefs = getDataModel().getPreferencesFromUser(userID);
-    int size = prefs.length();
-    for (int i = 0; i < size; i++) {
-      double theSimilarity = similarity.itemSimilarity(itemID, prefs.getItemID(i));
+    double[] similarities = similarity.itemSimilarities(itemID, prefs.getIDs());
+    for (int i = 0; i < similarities.length; i++) {
+      double theSimilarity = similarities[i];
       if (!Double.isNaN(theSimilarity)) {
         // Weights can be negative!
         preference += theSimilarity * prefs.getValue(i);
@@ -285,12 +285,14 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     @Override
     public double estimate(Long itemID) throws TasteException {
       RunningAverage average = new FullRunningAverage();
-      for (long toItemID : toItemIDs) {
+      double[] similarities = similarity.itemSimilarities(itemID, toItemIDs);
+      for (int i = 0; i < toItemIDs.length; i++) {
+        long toItemID = toItemIDs[i];
         LongPair pair = new LongPair(toItemID, itemID);
         if ((rescorer != null) && rescorer.isFiltered(pair)) {
           continue;
         }
-        double estimate = similarity.itemSimilarity(toItemID, itemID);
+        double estimate = similarities[i];
         if (rescorer != null) {
           estimate = rescorer.rescore(pair, estimate);
         }

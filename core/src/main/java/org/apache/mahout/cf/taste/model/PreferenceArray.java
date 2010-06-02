@@ -78,6 +78,11 @@ public interface PreferenceArray extends Cloneable, Serializable, Iterable<Prefe
    *          new item ID
    */
   void setItemID(int i, long itemID);
+
+  /**
+   * @return all user or item IDs
+   */
+  long[] getIDs();
   
   /**
    * @param i

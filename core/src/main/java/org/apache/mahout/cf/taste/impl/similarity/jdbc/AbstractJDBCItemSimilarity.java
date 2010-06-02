@@ -52,10 +52,15 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   private final String itemBIDColumn;
   private final String similarityColumn;
   private final String getItemItemSimilaritySQL;
-  
-  protected AbstractJDBCItemSimilarity(DataSource dataSource, String getItemItemSimilaritySQL) {
-    this(dataSource, DEFAULT_SIMILARITY_TABLE, DEFAULT_ITEM_A_ID_COLUMN, DEFAULT_ITEM_B_ID_COLUMN,
-        DEFAULT_SIMILARITY_COLUMN, getItemItemSimilaritySQL);
+
+  protected AbstractJDBCItemSimilarity(DataSource dataSource,
+                                       String getItemItemSimilaritySQL) {
+    this(dataSource,
+         DEFAULT_SIMILARITY_TABLE,
+         DEFAULT_ITEM_A_ID_COLUMN,
+         DEFAULT_ITEM_B_ID_COLUMN,
+         DEFAULT_SIMILARITY_COLUMN,
+         getItemItemSimilaritySQL);
   }
   
   protected AbstractJDBCItemSimilarity(DataSource dataSource,
@@ -70,7 +75,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
     AbstractJDBCComponent.checkNotNullAndLog("similarityColumn", similarityColumn);
     
     AbstractJDBCComponent.checkNotNullAndLog("getItemItemSimilaritySQL", getItemItemSimilaritySQL);
-    
+
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
       log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
                + "to the database itself, or database performance will be severely reduced.");
@@ -102,48 +107,71 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
-    
     if (itemID1 == itemID2) {
       return 1.0;
     }
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.prepareStatement(getItemItemSimilaritySQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+      return doItemSimilarity(stmt, itemID1, itemID2);
+    } catch (SQLException sqle) {
+      log.warn("Exception while retrieving user", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(null, stmt, conn);
+    }
+  }
+
+  @Override
+  public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
+    double[] result = new double[itemID2s.length];
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.prepareStatement(getItemItemSimilaritySQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+      for (int i = 0; i < itemID2s.length; i++) {
+        result[i] = doItemSimilarity(stmt, itemID1, itemID2s[i]);
+      }
+    } catch (SQLException sqle) {
+      log.warn("Exception while retrieving user", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(null, stmt, conn);
+    }
+    return result;
+  }
+  
+  @Override
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+  // do nothing
+  }
+
+  private double doItemSimilarity(PreparedStatement stmt, long itemID1, long itemID2) throws SQLException {
     // Order as smaller - larger
     if (itemID1 > itemID2) {
       long temp = itemID1;
       itemID1 = itemID2;
       itemID2 = temp;
     }
-    
-    Connection conn = null;
-    PreparedStatement stmt = null;
+    stmt.setLong(1, itemID1);
+    stmt.setLong(2, itemID2);
+    log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
     ResultSet rs = null;
-    
     try {
-      conn = dataSource.getConnection();
-      stmt = conn.prepareStatement(getItemItemSimilaritySQL, ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY);
-      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
-      stmt.setFetchSize(getFetchSize());
-      stmt.setLong(1, itemID1);
-      stmt.setLong(2, itemID2);
-      
-      log.debug("Executing SQL query: {}", getItemItemSimilaritySQL);
       rs = stmt.executeQuery();
-
       // If not found, perhaps the items exist but have no presence in the table,
       // so NaN is appropriate
       return rs.next() ? rs.getDouble(1) : Double.NaN;
-      
-    } catch (SQLException sqle) {
-      log.warn("Exception while retrieving user", sqle);
-      throw new TasteException(sqle);
     } finally {
-      IOUtils.quietClose(rs, stmt, conn);
+      IOUtils.quietClose(rs);
     }
-  }
-  
-  @Override
-  public void refresh(Collection<Refreshable> alreadyRefreshed) {
-  // do nothing
   }
   
 }

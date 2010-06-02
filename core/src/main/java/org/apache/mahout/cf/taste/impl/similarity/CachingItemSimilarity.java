@@ -48,6 +48,16 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     LongPair key = itemID1 < itemID2 ? new LongPair(itemID1, itemID2) : new LongPair(itemID2, itemID1);
     return similarityCache.get(key);
   }
+
+  @Override
+  public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
+    int length = itemID2s.length;
+    double[] result = new double[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = itemSimilarity(itemID1, itemID2s[i]);
+    }
+    return result;
+  }
   
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {

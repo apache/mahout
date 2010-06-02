@@ -324,6 +324,16 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     }
     return result;
   }
+
+  @Override
+  public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
+    int length = itemID2s.length;
+    double[] result = new double[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = itemSimilarity(itemID1, itemID2s[i]);
+    }
+    return result;
+  }
   
   final double normalizeWeightResult(double result, int count, int num) {
     if (weighted) {

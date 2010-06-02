@@ -113,6 +113,14 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   public void setItemID(int i, long itemID) {
     id = itemID;
   }
+
+  /**
+   * @return all user IDs
+   */
+  @Override
+  public long[] getIDs() {
+    return ids;
+  }
   
   @Override
   public float getValue(int i) {

@@ -68,16 +68,32 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
   
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
+    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    int numUsers = dataModel.getNumUsers();    
+    return doItemSimilarity(itemID1, itemID2, preferring1, numUsers);
+  }
+
+  @Override
+  public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
+    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
+    int numUsers = dataModel.getNumUsers();
+    int length = itemID2s.length;
+    double[] result = new double[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = doItemSimilarity(itemID1, itemID2s[i], preferring1, numUsers);
+    }
+    return result;
+  }
+
+  private double doItemSimilarity(long itemID1, long itemID2, int preferring1, int numUsers) throws TasteException {
     int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
     if (preferring1and2 == 0) {
       return Double.NaN;
     }
-    int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
-    int numUsers = dataModel.getNumUsers();
     double logLikelihood = twoLogLambda(preferring1and2,
                                         preferring1 - preferring1and2,
-                                        preferring2, 
+                                        preferring2,
                                         numUsers - preferring2);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }

@@ -68,7 +68,7 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
  * </p>
  * 
  * <p>
- * Note that for each row, item_id_a should be "less than" item_id_b. It is redundant to store it both ways,
+ * Note that for each row, item_id_a should be less than item_id_b. It is redundant to store it both ways,
  * so the pair is always stored as a pair with the lesser one first.
  * 
  * @see org.apache.mahout.cf.taste.impl.recommender.slopeone.jdbc.MySQLJDBCDiffStorage
@@ -85,10 +85,11 @@ public final class MySQLJDBCItemSimilarity extends AbstractJDBCItemSimilarity {
   }
   
   public MySQLJDBCItemSimilarity(DataSource dataSource) {
-    this(dataSource, DEFAULT_SIMILARITY_TABLE,
-        DEFAULT_ITEM_A_ID_COLUMN,
-        DEFAULT_ITEM_B_ID_COLUMN,
-        DEFAULT_SIMILARITY_COLUMN);
+    this(dataSource,
+         DEFAULT_SIMILARITY_TABLE,
+         DEFAULT_ITEM_A_ID_COLUMN,
+         DEFAULT_ITEM_B_ID_COLUMN,
+         DEFAULT_SIMILARITY_COLUMN);
   }
   
   public MySQLJDBCItemSimilarity(DataSource dataSource,
@@ -96,14 +97,12 @@ public final class MySQLJDBCItemSimilarity extends AbstractJDBCItemSimilarity {
                                  String itemAIDColumn,
                                  String itemBIDColumn,
                                  String similarityColumn) {
-    super(dataSource, similarityTable, itemAIDColumn, itemBIDColumn, similarityColumn, "SELECT "
-                                                                                       + similarityColumn
-                                                                                       + " FROM "
-                                                                                       + similarityTable
-                                                                                       + " WHERE "
-                                                                                       + itemAIDColumn
-                                                                                       + "=? AND "
-                                                                                       + itemBIDColumn + "=?");
+    super(dataSource,
+          similarityTable,
+          itemAIDColumn,
+          itemBIDColumn, similarityColumn,
+          "SELECT " + similarityColumn + " FROM " + similarityTable + " WHERE "
+              + itemAIDColumn + "=? AND " + itemBIDColumn + "=?");
   }
   
   @Override
