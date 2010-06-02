@@ -29,9 +29,6 @@ package org.apache.mahout.math.function;
 /**
  * Interface that represents a function object: a function that takes three arguments.
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public interface IntIntDoubleFunction {
 
   /**

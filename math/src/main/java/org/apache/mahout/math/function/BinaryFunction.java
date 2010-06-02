@@ -22,6 +22,4 @@ package org.apache.mahout.math.function;
  * implementations.
  */
 public interface BinaryFunction extends DoubleDoubleFunction {
-
-
 }

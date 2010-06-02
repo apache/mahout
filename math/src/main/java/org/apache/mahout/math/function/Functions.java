@@ -105,9 +105,9 @@ import java.util.Date;
  */
 public class Functions {
 
-  /*****************************
+  /*
    * <H3>Unary functions</H3>
-   *****************************/
+   */
   /** Function that returns <tt>Math.abs(a)</tt>. */
   public static final UnaryFunction abs = new UnaryFunction() {
     public double apply(double a) {
@@ -257,9 +257,9 @@ public class Functions {
   };
 
 
-  /*****************************
+  /*
    * <H3>Binary functions</H3>
-   *****************************/
+   */
 
   /** Function that returns <tt>Math.atan2(a,b)</tt>. */
   public static final BinaryFunction atan2 = new BinaryFunction() {
@@ -268,16 +268,6 @@ public class Functions {
       return Math.atan2(a, b);
     }
   };
-
-  /**
-   * Function that returns <tt>com.imsl.math.Sfun.logBeta(a,b)</tt>.
-   */
-  /*
-  public static final BinaryFunction logBeta = new BinaryFunction() {
-    public final double apply(double a, double b) { return Sfun.logBeta(a,b); }
-  };
-  */
-
 
   /** Function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. */
   public static final BinaryFunction compare = new BinaryFunction() {

@@ -29,11 +29,9 @@ package org.apache.mahout.math.function;
 /**
  * Interface that represents a function object: a function that takes 27 arguments and returns a single value.
  *
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
+@SuppressWarnings({"JavaDoc"})
 public interface Double27Function {
 
   /**

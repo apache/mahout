@@ -31,8 +31,6 @@ package org.apache.mahout.math.function;
  * three arguments and does not return a value.
  */
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public interface IntIntDoubleProcedure {
 
   /**

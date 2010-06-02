@@ -49,7 +49,6 @@ import org.apache.mahout.math.function.IntFunction;
  * Note that this implementation is <b>not synchronized</b>.
  *
  * @see MersenneTwister
- * @see MersenneTwister64
  * @see java.util.Random
  */
 public abstract class RandomEngine extends PersistentObject
@@ -72,7 +71,7 @@ public abstract class RandomEngine extends PersistentObject
   }
 
   /**
-   * Constructs and returns a new uniform random number engine seeded with the current time. Currently this is {@link
+   * @return a new uniform random number engine seeded with the current time. Currently this is {@link
    * org.apache.mahout.math.jet.random.engine.MersenneTwister}.
    */
   public static RandomEngine makeDefault() {
@@ -80,7 +79,7 @@ public abstract class RandomEngine extends PersistentObject
   }
 
   /**
-   * Returns a 64 bit uniformly distributed random number in the open unit interval <code>(0.0,1.0)</code> (excluding
+   * @return a 64 bit uniformly distributed random number in the open unit interval <code>(0.0,1.0)</code> (excluding
    * 0.0 and 1.0).
    */
   public double nextDouble() {
@@ -114,29 +113,29 @@ public abstract class RandomEngine extends PersistentObject
   }
 
   /**
-   * Returns a 32 bit uniformly distributed random number in the open unit interval <code>(0.0f,1.0f)</code> (excluding
+   * @return a 32 bit uniformly distributed random number in the open unit interval <code>(0.0f,1.0f)</code> (excluding
    * 0.0f and 1.0f).
    */
   public float nextFloat() {
-    // catch loss of precision of double --> float conversion
+    // catch loss of precision of double --> float conversion which could result in a value == 1.0F
     float nextFloat;
     do {
       nextFloat = (float) raw();
     }
     while (nextFloat >= 1.0f);
 
-    // --> in (0.0f,1.0f)
+    // --> in [0.0f,1.0f)
     return nextFloat;
   }
 
   /**
-   * Returns a 32 bit uniformly distributed random number in the closed interval <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt>
+   * @return a 32 bit uniformly distributed random number in the closed interval <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt>
    * (including <tt>Integer.MIN_VALUE</tt> and <tt>Integer.MAX_VALUE</tt>);
    */
   public abstract int nextInt();
 
   /**
-   * Returns a 64 bit uniformly distributed random number in the closed interval <tt>[Long.MIN_VALUE,Long.MAX_VALUE]</tt>
+   * @return a 64 bit uniformly distributed random number in the closed interval <tt>[Long.MIN_VALUE,Long.MAX_VALUE]</tt>
    * (including <tt>Long.MIN_VALUE</tt> and <tt>Long.MAX_VALUE</tt>).
    */
   public long nextLong() {
@@ -146,7 +145,7 @@ public abstract class RandomEngine extends PersistentObject
   }
 
   /**
-   * Returns a 32 bit uniformly distributed random number in the open unit interval <code>(0.0,1.0)</code> (excluding
+   * @return a 32 bit uniformly distributed random number in the open unit interval <code>(0.0,1.0)</code> (excluding
    * 0.0 and 1.0).
    */
   public double raw() {

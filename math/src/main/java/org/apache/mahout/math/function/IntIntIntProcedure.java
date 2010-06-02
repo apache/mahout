@@ -32,8 +32,6 @@ package org.apache.mahout.math.function;
  * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public interface IntIntIntProcedure {
 
   /**

@@ -127,10 +127,7 @@ import java.util.Date;
  @author wolfgang.hoschek@cern.ch
  @version 1.0, 09/24/99
  @see java.util.Random
- */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
+   */
 public class MersenneTwister extends RandomEngine {
 
   private int mti;
@@ -163,7 +160,9 @@ public class MersenneTwister extends RandomEngine {
     this(DEFAULT_SEED);
   }
 
-  /** Constructs and returns a random number generator with the given seed. */
+  /** Constructs and returns a random number generator with the given seed.
+   * @param seed A number that is used to initialize the internal state of the generator.
+   */
   public MersenneTwister(int seed) {
     setSeed(seed);
   }
@@ -190,37 +189,9 @@ public class MersenneTwister extends RandomEngine {
     return clone;
   }
 
-  /** Generates N words at one time. */
+  /** Generates N words at one time */
   protected void nextBlock() {
-    /*
-    // ******************** OPTIMIZED **********************
-    // only 5-10% faster ?
     int y;
-
-    int kk;
-    int[] cache = mt; // cached for speed
-    int kkM;
-    int limit = N-M;
-    for (kk=0,kkM=kk+M; kk<limit; kk++,kkM++) {
-      y = (cache[kk]&UPPER_MASK)|(cache[kk+1]&LOWER_MASK);
-      cache[kk] = cache[kkM] ^ (y >>> 1) ^ ((y & 0x1) == 0 ? mag0 : mag1);
-    }
-    limit = N-1;
-    for (kkM=kk+(M-N); kk<limit; kk++,kkM++) {
-      y = (cache[kk]&UPPER_MASK)|(cache[kk+1]&LOWER_MASK);
-      cache[kk] = cache[kkM] ^ (y >>> 1) ^ ((y & 0x1) == 0 ? mag0 : mag1);
-    }
-    y = (cache[N-1]&UPPER_MASK)|(cache[0]&LOWER_MASK);
-    cache[N-1] = cache[M-1] ^ (y >>> 1) ^ ((y & 0x1) == 0 ? mag0 : mag1);
-
-    this.mt = cache;
-    this.mti = 0;
-    */
-
-
-    // ******************** UNOPTIMIZED **********************
-    int y;
-
     int kk;
 
     for (kk = 0; kk < N - M; kk++) {
@@ -235,7 +206,6 @@ public class MersenneTwister extends RandomEngine {
     mt[N - 1] = mt[M - 1] ^ (y >>> 1) ^ ((y & 0x1) == 0 ? mag0 : mag1);
 
     this.mti = 0;
-
   }
 
   /**
@@ -259,7 +229,8 @@ public class MersenneTwister extends RandomEngine {
     return y;
   }
 
-  /** Sets the receiver's seed. This method resets the receiver's entire internal state. */
+  /** Sets the receiver's seed. This method resets the receiver's entire internal state.
+   * @param seed An integer that is used to reset the internal state of the generator */
   protected void setSeed(int seed) {
     mt[0] = seed;
     for (int i = 1; i < N; i++) {
@@ -273,9 +244,21 @@ public class MersenneTwister extends RandomEngine {
     }
     //log.info("init done");
     mti = N;
+  }
 
-    /*
-    old version was:
+  /**
+   * Sets the receiver's seed in a fashion compatible with the
+   * reference C implementation. See
+   * http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/VERSIONS/C-LANG/980409/mt19937int.c
+   *
+   * This method isn't as good as the default method due to poor distribution of the
+   * resulting states.
+   *
+   * @param seed An integer that is used to reset the internal state in the same way as
+   * done in the 1999 reference implementation.  Should only be used for testing, not
+   * actual coding.
+   */
+  protected void setReferenceSeed(int seed) {
     for (int i = 0; i < N; i++) {
       mt[i] = seed & 0xffff0000;
       seed = 69069 * seed + 1;
@@ -284,6 +267,5 @@ public class MersenneTwister extends RandomEngine {
      }
     //log.info("init done");
     mti = N;
-    */
   }
 }

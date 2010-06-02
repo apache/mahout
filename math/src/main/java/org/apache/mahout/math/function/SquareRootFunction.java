@@ -22,5 +22,4 @@ public class SquareRootFunction implements UnaryFunction {
   public double apply(double arg1) {
     return Math.sqrt(arg1);
   }
-
 }
