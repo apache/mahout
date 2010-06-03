@@ -99,6 +99,7 @@ public final class WikipediaToSequenceFile {
     
     Parser parser = new Parser();
     parser.setGroup(group);
+    parser.setHelpOption(helpOpt);
     try {
       CommandLine cmdLine = parser.parse(args);
       if (cmdLine.hasOption(helpOpt)) {

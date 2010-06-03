@@ -62,6 +62,10 @@ public class TransposeJob extends AbstractJob {
                                     "nc",
                                     "Number of columns of the input matrix");
     Map<String,String> parsedArgs = parseArguments(strings, numRowsOpt, numColsOpt);
+    if (parsedArgs == null) {
+      // FIXME
+      return 0;
+    }
 
     Configuration originalConf = getConf();
     String inputPathString = originalConf.get("mapred.input.dir");

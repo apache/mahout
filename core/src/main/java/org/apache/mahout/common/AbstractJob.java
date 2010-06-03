@@ -128,6 +128,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
+      parser.setHelpOption(helpOpt);
       cmdLine = parser.parse(args);
     } catch (OptionException e) {
       log.error(e.getMessage());
