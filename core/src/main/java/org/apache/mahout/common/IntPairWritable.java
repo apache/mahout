@@ -17,15 +17,15 @@
 
 package org.apache.mahout.common;
 
+import org.apache.hadoop.io.BinaryComparable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
-
-import org.apache.hadoop.io.BinaryComparable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableComparator;
 
 /**
  * A {@link WritableComparable} which encapsulates an ordered pair of signed integers.
@@ -146,7 +146,7 @@ public final class IntPairWritable
     WritableComparator.define(IntPairWritable.class, new Comparator());
   }
 
-  public static final class Comparator extends WritableComparator implements Serializable {
+  public static final class Comparator extends WritableComparator {
     public Comparator() {
       super(IntPairWritable.class);
     }
@@ -185,7 +185,7 @@ public final class IntPairWritable
   /**
    * Compare only the first part of the pair, so that reduce is called once for each value of the first part.
    */
-  public static class FirstGroupingComparator extends WritableComparator implements Serializable {
+  public static class FirstGroupingComparator extends WritableComparator {
     
     public FirstGroupingComparator() {
       super(IntPairWritable.class);

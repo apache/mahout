@@ -20,7 +20,7 @@ package org.apache.mahout.math.decomposer;
 public class EigenStatus {
   private final double eigenValue;
   private final double cosAngle;
-  private Boolean inProgress;
+  private volatile Boolean inProgress;
 
   public EigenStatus(double eigenValue, double cosAngle) {
     this(eigenValue, cosAngle, true);
@@ -41,14 +41,10 @@ public class EigenStatus {
   }
 
   public boolean inProgress() {
-    synchronized (inProgress) {
-      return inProgress;
-    }
+    return inProgress;
   }
 
   void setInProgress(boolean status) {
-    synchronized (inProgress) {
-      inProgress = status;
-    }
+    inProgress = status;
   }
 }

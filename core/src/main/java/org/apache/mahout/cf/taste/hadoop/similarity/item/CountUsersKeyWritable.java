@@ -17,17 +17,16 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.Serializable;
-
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Varint;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * a writable key that is used by {@link CountUsersMapper} and {@link CountUsersReducer} to
@@ -92,7 +91,7 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
   /**
    * all userIDs go to the same reducer
    */
-  public static class CountUsersGroupComparator extends WritableComparator implements Serializable {
+  public static class CountUsersGroupComparator extends WritableComparator {
 
     public CountUsersGroupComparator() {
       super(CountUsersKeyWritable.class, true);

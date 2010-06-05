@@ -68,7 +68,11 @@ public class Beta extends AbstractContinousDistribution {
       a_ = a - 1.0;
       b_ = b - 1.0;
       double c = (b * b_) / (a * a_);
-      t = (c == 1.0) ? 0.5 : (1.0 - Math.sqrt(c)) / (1.0 - c);  // t = t_opt
+      if (Math.abs(c - 1.0) < 1e-8) {
+        t = 0.5;
+      } else {
+        t = (1.0 - Math.sqrt(c)) / (1.0 - c);
+      }
       fa = Math.exp(a_ * Math.log(t));
       fb = Math.exp(b_ * Math.log(1.0 - t));              // f(t) = fa * fb
 
