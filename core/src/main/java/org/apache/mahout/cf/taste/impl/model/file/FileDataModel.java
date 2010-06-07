@@ -585,6 +585,7 @@ public class FileDataModel extends AbstractDataModel {
   
   @Override
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
+    checkLoaded();
     return delegate.getPreferenceValue(userID, itemID);
   }
   
@@ -636,6 +637,7 @@ public class FileDataModel extends AbstractDataModel {
 
   @Override
   public boolean hasPreferenceValues() {
+    checkLoaded();    
     return delegate.hasPreferenceValues();
   }
   
