@@ -58,6 +58,8 @@ public final class VarintTest extends MahoutTestCase {
       Varint.writeSignedVarLong(i, out);
     }
     Varint.writeSignedVarLong((1L << 62) - 1, out);
+    Varint.writeSignedVarLong((1L << 62), out);
+    Varint.writeSignedVarLong(Long.MAX_VALUE, out);
 
     DataInput in = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
     assertEquals(0L, Varint.readSignedVarLong(in));
@@ -66,6 +68,8 @@ public final class VarintTest extends MahoutTestCase {
       assertEquals(i, Varint.readSignedVarLong(in));
     }
     assertEquals((1L << 62) - 1, Varint.readSignedVarLong(in));
+    assertEquals((1L << 62), Varint.readSignedVarLong(in));
+    assertEquals(Long.MAX_VALUE, Varint.readSignedVarLong(in));
   }
 
   public void testSignedNegativeLong() throws IOException {
@@ -75,11 +79,15 @@ public final class VarintTest extends MahoutTestCase {
       Varint.writeSignedVarLong(i, out);
       Varint.writeSignedVarLong(i+1, out);
     }
+    Varint.writeSignedVarLong(Long.MIN_VALUE, out);
+    Varint.writeSignedVarLong(Long.MIN_VALUE+1, out);
     DataInput in = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
     for (long i = -1L; i >= -(1L << 62); i <<= 1) {
       assertEquals(i, Varint.readSignedVarLong(in));
       assertEquals(i+1, Varint.readSignedVarLong(in));
     }
+    assertEquals(Long.MIN_VALUE, Varint.readSignedVarLong(in));
+    assertEquals(Long.MIN_VALUE+1, Varint.readSignedVarLong(in));
   }
 
   public void testUnsignedInt() throws IOException {
@@ -110,6 +118,8 @@ public final class VarintTest extends MahoutTestCase {
       Varint.writeSignedVarLong(i, out);
     }
     Varint.writeSignedVarInt((1 << 30) - 1, out);
+    Varint.writeSignedVarInt((1 << 30), out);
+    Varint.writeSignedVarInt(Integer.MAX_VALUE, out);
 
     DataInput in = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
     assertEquals(0, Varint.readSignedVarInt(in));
@@ -118,6 +128,8 @@ public final class VarintTest extends MahoutTestCase {
       assertEquals(i, Varint.readSignedVarInt(in));
     }
     assertEquals((1 << 30) - 1, Varint.readSignedVarInt(in));
+    assertEquals((1 << 30), Varint.readSignedVarInt(in));    
+    assertEquals(Integer.MAX_VALUE, Varint.readSignedVarInt(in));
   }
 
   public void testSignedNegativeInt() throws IOException {
@@ -127,11 +139,15 @@ public final class VarintTest extends MahoutTestCase {
       Varint.writeSignedVarInt(i, out);
       Varint.writeSignedVarInt(i+1, out);
     }
+    Varint.writeSignedVarInt(Integer.MIN_VALUE, out);
+    Varint.writeSignedVarInt(Integer.MIN_VALUE+1, out);
     DataInput in = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
     for (int i = -1; i >= -(1 << 30); i <<= 1) {
       assertEquals(i, Varint.readSignedVarInt(in));
       assertEquals(i+1, Varint.readSignedVarInt(in));
     }
+    assertEquals(Integer.MIN_VALUE, Varint.readSignedVarInt(in));
+    assertEquals(Integer.MIN_VALUE+1, Varint.readSignedVarInt(in));
   }
 
   public void testUnsignedSize() throws IOException {
@@ -158,45 +174,6 @@ public final class VarintTest extends MahoutTestCase {
       Varint.writeSignedVarLong(-(1L << exponent)-1, out);
       expectedSize += 1 + ((exponent + 1) / 7);
       assertEquals(expectedSize, baos.size());
-    }
-  }
-
-  public void testExceptions() throws IOException {
-    try {
-      Varint.writeUnsignedVarLong(-1L, null);
-      fail();
-    } catch (IllegalArgumentException iae) {
-      // good
-    }
-    try {
-      Varint.writeSignedVarLong(Varint.MIN_SIGNED_VAR_LONG - 1, null);
-      fail();
-    } catch (IllegalArgumentException iae) {
-      // good
-    }
-    try {
-      Varint.writeSignedVarLong(Varint.MAX_SIGNED_VAR_LONG + 1, null);
-      fail();
-    } catch (IllegalArgumentException iae) {
-      // good
-    }
-    try {
-      Varint.writeUnsignedVarInt(-1, null);
-      fail();
-    } catch (IllegalArgumentException iae) {
-      // good
-    }
-    try {
-      Varint.writeSignedVarInt(Varint.MIN_SIGNED_VAR_INT - 1, null);
-      fail();
-    } catch (IllegalArgumentException iae) {
-      // good
-    }
-    try {
-      Varint.writeSignedVarInt(Varint.MAX_SIGNED_VAR_INT + 1, null);
-      fail();
-    } catch (IllegalArgumentException iae) {
-      // good
     }
   }
 

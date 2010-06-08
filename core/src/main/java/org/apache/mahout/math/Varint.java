@@ -33,11 +33,6 @@ import java.io.IOException;
  */
 public final class Varint {
 
-  public static final long MIN_SIGNED_VAR_LONG = -(1L << 62);
-  public static final long MAX_SIGNED_VAR_LONG = (1L << 62) - 1;
-  public static final int MIN_SIGNED_VAR_INT = -(1 << 30);
-  public static final int MAX_SIGNED_VAR_INT = (1 << 30) - 1;
-
   private Varint() {
   }
 
@@ -51,13 +46,8 @@ public final class Varint {
    * @param value value to encode
    * @param out to write bytes to
    * @throws IOException if {@link DataOutput} throws {@link IOException}
-   * @throws IllegalArgumentException if value is not between {@link #MIN_SIGNED_VAR_LONG}
-   *  and {@link #MAX_SIGNED_VAR_LONG} inclusive
    */
   public static void writeSignedVarLong(long value, DataOutput out) throws IOException {
-    if (value < MIN_SIGNED_VAR_LONG || value > MAX_SIGNED_VAR_LONG) {
-      throw new IllegalArgumentException("Can't encode value as signed: " + value);
-    }
     // Great trick from http://code.google.com/apis/protocolbuffers/docs/encoding.html#types
     writeUnsignedVarLong((value << 1) ^ (value >> 63), out);
   }
@@ -67,17 +57,13 @@ public final class Varint {
    * <a href="http://code.google.com/apis/protocolbuffers/docs/encoding.html">
    * Google Protocol Buffers</a>. Zig-zag is not used, so input must not be negative.
    * If values can be negative, use {@link #writeSignedVarLong(long, DataOutput)}
-   * instead.
+   * instead. This method treats negative input as like a large unsigned value.
    *
    * @param value value to encode
    * @param out to write bytes to
    * @throws IOException if {@link DataOutput} throws {@link IOException}
-   * @throws IllegalArgumentException if value is negative
    */
   public static void writeUnsignedVarLong(long value, DataOutput out) throws IOException {
-    if (value < 0L) {
-      throw new IllegalArgumentException("Can't encode negative value: " + value);
-    }
     while ((value & 0xFFFFFFFFFFFFFF80L) != 0L) {
       out.writeByte(((int) value & 0x7F) | 0x80);
       value >>>= 7;
@@ -89,9 +75,6 @@ public final class Varint {
    * See {@link #writeSignedVarLong(long, DataOutput)}
    */
   public static void writeSignedVarInt(int value, DataOutput out) throws IOException {
-    if (value < MIN_SIGNED_VAR_INT || value > MAX_SIGNED_VAR_INT) {
-      throw new IllegalArgumentException("Can't encode value as signed: " + value);
-    }
     // Great trick from http://code.google.com/apis/protocolbuffers/docs/encoding.html#types
     writeUnsignedVarInt((value << 1) ^ (value >> 31), out);
   }
@@ -100,9 +83,6 @@ public final class Varint {
    * See {@link #writeUnsignedVarLong(long, DataOutput)}
    */
   public static void writeUnsignedVarInt(int value, DataOutput out) throws IOException {
-    if (value < 0) {
-      throw new IllegalArgumentException("Can't encode negative value: " + value);
-    }
     while ((value & 0xFFFFFF80) != 0L) {
       out.writeByte((value & 0x7F) | 0x80);
       value >>>= 7;
@@ -117,12 +97,15 @@ public final class Varint {
    * @return decode value
    * @throws IOException if {@link DataInput} throws {@link IOException}
    * @throws IllegalArgumentException if variable-length value does not terminate
-   *  after 8 bytes have been read
+   *  after 9 bytes have been read
    */
   public static long readSignedVarLong(DataInput in) throws IOException {
     long raw = readUnsignedVarLong(in);
     // This undoes the trick in writeSignedVarLong()
-    return (((raw << 63) >> 63) ^ raw) >> 1;
+    long temp = (((raw << 63) >> 63) ^ raw) >> 1;
+    // This extra step lets us deal with the largest signed values by treating
+    // negative results from read unsigned methods as like unsigned values
+    return temp ^ ((raw >> 63) << 63);
   }
 
   /**
@@ -132,7 +115,7 @@ public final class Varint {
    * @return decode value
    * @throws IOException if {@link DataInput} throws {@link IOException}
    * @throws IllegalArgumentException if variable-length value does not terminate
-   *  after 8 bytes have been read
+   *  after 9 bytes have been read
    */
   public static long readUnsignedVarLong(DataInput in) throws IOException {
     long value = 0L;
@@ -141,7 +124,7 @@ public final class Varint {
     while (((b = in.readByte()) & 0x80L) != 0) {
       value |= (b & 0x7F) << i;
       i += 7;
-      if (i > 56) {
+      if (i > 63) {
         throw new IllegalArgumentException("Variable length quantity is too long");
       }
     }
@@ -150,15 +133,22 @@ public final class Varint {
 
   /**
    * See {@link #readSignedVarLong(DataInput)}
+   * @throws IllegalArgumentException if variable-length value does not terminate
+   *  after 5 bytes have been read
    */
   public static int readSignedVarInt(DataInput in) throws IOException {
     int raw = readUnsignedVarInt(in);
     // This undoes the trick in writeSignedVarInt()
-    return (((raw << 31) >> 31) ^ raw) >> 1;
+    int temp = (((raw << 31) >> 31) ^ raw) >> 1;
+    // This extra step lets us deal with the largest signed values by treating
+    // negative results from read unsigned methods as like unsigned values
+    return temp ^ ((raw >> 31) << 31);
   }
 
   /**
    * See {@link #readUnsignedVarLong(DataInput)}
+   * @throws IllegalArgumentException if variable-length value does not terminate
+   *  after 5 bytes have been read
    */
   public static int readUnsignedVarInt(DataInput in) throws IOException {
     int value = 0;
@@ -167,7 +157,7 @@ public final class Varint {
     while (((b = in.readByte()) & 0x80) != 0) {
       value |= (b & 0x7F) << i;
       i += 7;
-      if (i > 28) {
+      if (i > 35) {
         throw new IllegalArgumentException("Variable length quantity is too long");
       }
     }
