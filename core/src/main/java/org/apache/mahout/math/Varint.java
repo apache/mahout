@@ -72,7 +72,7 @@ public final class Varint {
   }
 
   /**
-   * See {@link #writeSignedVarLong(long, DataOutput)}
+   * @see #writeSignedVarLong(long, DataOutput)
    */
   public static void writeSignedVarInt(int value, DataOutput out) throws IOException {
     // Great trick from http://code.google.com/apis/protocolbuffers/docs/encoding.html#types
@@ -80,7 +80,7 @@ public final class Varint {
   }
 
   /**
-   * See {@link #writeUnsignedVarLong(long, DataOutput)}
+   * @see #writeUnsignedVarLong(long, DataOutput)
    */
   public static void writeUnsignedVarInt(int value, DataOutput out) throws IOException {
     while ((value & 0xFFFFFF80) != 0L) {
@@ -91,13 +91,12 @@ public final class Varint {
   }
 
   /**
-   * See {@link #writeSignedVarLong(long, DataOutput)}.
-   *
    * @param in to read bytes from
    * @return decode value
    * @throws IOException if {@link DataInput} throws {@link IOException}
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 9 bytes have been read
+   * @see #writeSignedVarLong(long, DataOutput)
    */
   public static long readSignedVarLong(DataInput in) throws IOException {
     long raw = readUnsignedVarLong(in);
@@ -105,17 +104,17 @@ public final class Varint {
     long temp = (((raw << 63) >> 63) ^ raw) >> 1;
     // This extra step lets us deal with the largest signed values by treating
     // negative results from read unsigned methods as like unsigned values
-    return temp ^ ((raw >> 63) << 63);
+    // Must re-flip the top bit if the original read value had it set.
+    return temp ^ (raw & (1L << 63));
   }
 
   /**
-   * See {@link #writeUnsignedVarLong(long, DataOutput)}.
-   *
    * @param in to read bytes from
    * @return decode value
    * @throws IOException if {@link DataInput} throws {@link IOException}
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 9 bytes have been read
+   * @see #writeUnsignedVarLong(long, DataOutput)
    */
   public static long readUnsignedVarLong(DataInput in) throws IOException {
     long value = 0L;
@@ -132,23 +131,26 @@ public final class Varint {
   }
 
   /**
-   * See {@link #readSignedVarLong(DataInput)}
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 5 bytes have been read
+   * @throws IOException if {@link DataInput} throws {@link IOException}
+   * @see #readSignedVarLong(DataInput)
    */
   public static int readSignedVarInt(DataInput in) throws IOException {
     int raw = readUnsignedVarInt(in);
     // This undoes the trick in writeSignedVarInt()
     int temp = (((raw << 31) >> 31) ^ raw) >> 1;
     // This extra step lets us deal with the largest signed values by treating
-    // negative results from read unsigned methods as like unsigned values
-    return temp ^ ((raw >> 31) << 31);
+    // negative results from read unsigned methods as like unsigned values.
+    // Must re-flip the top bit if the original read value had it set.
+    return temp ^ (raw & (1 << 31));
   }
 
   /**
-   * See {@link #readUnsignedVarLong(DataInput)}
    * @throws IllegalArgumentException if variable-length value does not terminate
    *  after 5 bytes have been read
+   * @throws IOException if {@link DataInput} throws {@link IOException}
+   * @see #readUnsignedVarLong(DataInput)
    */
   public static int readUnsignedVarInt(DataInput in) throws IOException {
     int value = 0;
