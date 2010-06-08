@@ -35,6 +35,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -100,7 +101,7 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     }
     // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
     if (vector.getNumNondefaultElements() > 0) {
-      VectorWritable vectorWritable = new VectorWritable(vector);
+      VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
       output.collect(key, vectorWritable);
     } else {
       reporter.incrCounter("TFParticalVectorReducer", "emptyVectorCount", 1);

@@ -19,7 +19,7 @@ package org.apache.mahout.common.parameters;
 
 import java.util.Collection;
 
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 
 /** A placeholder for some sort of class with more parameters. */
 public class CompositeParameter<T extends Parametered> extends AbstractParameter<T> {
@@ -27,14 +27,14 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
   public CompositeParameter(Class<T> type,
                             String prefix,
                             String name,
-                            JobConf jobConf,
+                            Configuration jobConf,
                             T defaultValue,
                             String description) {
     super(type, prefix, name, jobConf, defaultValue, description);
   }
   
   @Override
-  public void createParameters(String prefix, JobConf jobConf) {
+  public void createParameters(String prefix, Configuration jobConf) {
     get().createParameters(prefix, jobConf);
   }
   
@@ -44,7 +44,7 @@ public class CompositeParameter<T extends Parametered> extends AbstractParameter
   }
   
   @Override
-  public void configure(JobConf jobConf) {
+  public void configure(Configuration jobConf) {
     get().configure(jobConf);
   }
   

@@ -21,35 +21,30 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class ClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
+public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, Vector> {
 
   private CanopyClusterer canopyClusterer;
 
-  private final List<Canopy> canopies = new ArrayList<Canopy>();
-
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable point,
-                  OutputCollector<IntWritable, WeightedVectorWritable> output,
-                  Reporter reporter) throws IOException {
-    canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, output, reporter);
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+    canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, context);
   }
+
+  private final List<Canopy> canopies = new ArrayList<Canopy>();
 
   /**
    * Configure the mapper by providing its canopies. Used by unit tests.
@@ -62,26 +57,35 @@ public class ClusterMapper extends MapReduceBase implements
     this.canopies.addAll(canopies);
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    canopyClusterer = new CanopyClusterer(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
 
-    String canopyPath = job.get(CanopyConfigKeys.CANOPY_PATH_KEY);
+    canopyClusterer = new CanopyClusterer(context.getConfiguration());
+
+    Configuration configuration = context.getConfiguration();
+    String canopyPath = configuration.get(CanopyConfigKeys.CANOPY_PATH_KEY);
+
     if ((canopyPath != null) && (canopyPath.length() > 0)) {
       try {
-        Path path = new Path(canopyPath, "part-00000");
-        FileSystem fs = FileSystem.get(path.toUri(), job);
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-        try {
-          Text key = new Text();
-          Canopy value = new Canopy();
-          while (reader.next(key, value)) {
-            canopies.add(value);
-            value = new Canopy();
+        Path path = new Path(canopyPath);
+        FileSystem fs = FileSystem.get(path.toUri(), configuration);
+        FileStatus[] files = fs.listStatus(path);
+        for (FileStatus file : files) {
+          SequenceFile.Reader reader = new SequenceFile.Reader(fs, file.getPath(), configuration);
+          try {
+            Text key = new Text();
+            Canopy value = new Canopy();
+            while (reader.next(key, value)) {
+              canopies.add(value);
+              value = new Canopy();
+            }
+          } finally {
+            reader.close();
           }
-        } finally {
-          reader.close();
         }
       } catch (IOException e) {
         throw new IllegalStateException(e);
@@ -91,6 +95,7 @@ public class ClusterMapper extends MapReduceBase implements
         throw new IllegalStateException("Canopies are empty!");
       }
     }
+
   }
 
   public boolean canopyCovers(Canopy canopy, Vector point) {

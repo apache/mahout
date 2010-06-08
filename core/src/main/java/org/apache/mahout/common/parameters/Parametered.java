@@ -19,13 +19,12 @@ package org.apache.mahout.common.parameters;
 
 import java.util.Collection;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Meta information and accessors for configuring a job. */
-public interface Parametered extends JobConfigurable {
+public interface Parametered {
   
   Logger log = LoggerFactory.getLogger(Parametered.class);
   
@@ -40,29 +39,31 @@ public interface Parametered extends JobConfigurable {
    *          ends with a dot if not empty.
    * @param jobConf
    *          configuration used for retreiving values
-   * @see ParameteredGeneralizations#configureParameters(String,Parametered,org.apache.hadoop.mapred.JobConf)
+   * @see ParameteredGeneralizations#configureParameters(String,Parametered,org.apache.hadoop.conf.Configuration)
    *      invoking method
-   * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,org.apache.hadoop.mapred.JobConf)
+   * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,org.apache.hadoop.conf.Configuration)
    *      invoking method
    */
-  void createParameters(String prefix, JobConf jobConf);
+  void createParameters(String prefix, Configuration jobConf);
+  
+  public void configure(Configuration config);
   
   /** "multiple inheritance" */
   final class ParameteredGeneralizations {
     private ParameteredGeneralizations() { }
     
-    public static void configureParameters(Parametered parametered, JobConf jobConf) {
+    public static void configureParameters(Parametered parametered, Configuration jobConf) {
       configureParameters(parametered.getClass().getSimpleName() + '.',
         parametered, jobConf);
       
     }
-    
+
     /**
      * Calls
-     * {@link org.apache.mahout.common.parameters.Parametered#createParameters(String,org.apache.hadoop.mapred.JobConf)}
+     * {@link org.apache.mahout.common.parameters.Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
      * on parameter parmetered, and then recurse down its composite tree to invoke
-     * {@link org.apache.mahout.common.parameters.Parametered#createParameters(String,org.apache.hadoop.mapred.JobConf)}
-     * and {@link org.apache.hadoop.mapred.JobConfigurable#configure(org.apache.hadoop.mapred.JobConf)} on
+     * {@link org.apache.mahout.common.parameters.Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
+     * and {@link org.apache.hadoop.conf.Configurationigurable#configure(org.apache.hadoop.conf.Configuration)} on
      * each composite part.
      * 
      * @param prefix
@@ -72,12 +73,12 @@ public interface Parametered extends JobConfigurable {
      * @param jobConf
      *          configuration used for retreiving values
      */
-    public static void configureParameters(String prefix, Parametered parametered, JobConf jobConf) {
+    public static void configureParameters(String prefix, Parametered parametered, Configuration jobConf) {
       parametered.createParameters(prefix, jobConf);
       configureParametersRecusivly(parametered, prefix, jobConf);
     }
     
-    private static void configureParametersRecusivly(Parametered parametered, String prefix, JobConf jobConf) {
+    private static void configureParametersRecusivly(Parametered parametered, String prefix, Configuration jobConf) {
       for (Parameter<?> parameter : parametered.getParameters()) {
         if (log.isDebugEnabled()) {
           log.debug("Configuring {}{}", prefix, parameter.name());

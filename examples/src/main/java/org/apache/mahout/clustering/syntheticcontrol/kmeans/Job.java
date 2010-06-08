@@ -128,14 +128,11 @@ public final class Job {
    *          the int maximum number of iterations
    * @throws IllegalAccessException 
    * @throws InstantiationException 
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  private static void runJob(Path input,
-                             Path output,
-                             String measureClass,
-                             double t1,
-                             double t2,
-                             double convergenceDelta,
-                             int maxIterations) throws IOException {
+  private static void runJob(Path input, Path output, String measureClass, double t1, double t2, double convergenceDelta,
+      int maxIterations) throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 

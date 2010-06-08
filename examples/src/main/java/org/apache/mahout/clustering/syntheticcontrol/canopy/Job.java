@@ -123,12 +123,11 @@ public final class Job {
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  private static void runJob(Path input,
-                             Path output,
-                             String measureClassName,
-                             double t1,
-                             double t2) throws IOException {
+  private static void runJob(Path input, Path output, String measureClassName, double t1, double t2) throws IOException,
+      InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
     JobClient client = new JobClient();
     JobConf conf = new JobConf(Job.class);
 

@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.Vector;
@@ -41,7 +41,7 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
   }
   
   @Override
-  public void configure(JobConf job) {
+  public void configure(Configuration job) {
   // nothing to do
   }
   
@@ -51,7 +51,7 @@ public class ManhattanDistanceMeasure implements DistanceMeasure {
   }
   
   @Override
-  public void createParameters(String prefix, JobConf jobConf) {
+  public void createParameters(String prefix, Configuration jobConf) {
   // nothing to do
   }
   

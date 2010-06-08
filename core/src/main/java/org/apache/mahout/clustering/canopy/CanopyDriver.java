@@ -25,17 +25,15 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.CommandLineUtil;
@@ -91,9 +89,14 @@ public final class CanopyDriver {
 
       runJob(input, output, measureClass, t1, t2, cmdLine.hasOption(clusteringOpt));
     } catch (OptionException e) {
-      log.error("Exception", e);
+      log.error("OptionException", e);
       CommandLineUtil.printHelp(group);
-
+    } catch (InterruptedException e) {
+      log.error("InterruptedException", e);
+      CommandLineUtil.printHelp(group);
+    } catch (ClassNotFoundException e) {
+      log.error("ClassNotFoundException", e);
+      CommandLineUtil.printHelp(group);
     }
   }
 
@@ -112,41 +115,33 @@ public final class CanopyDriver {
    *          the T2 distance threshold
    * @param runClustering 
    *          true if points are to be clustered after clusters are determined
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static void runJob(Path input,
-                            Path output,
-                            String measureClassName,
-                            double t1,
-                            double t2,
-                            boolean runClustering) throws IOException {
-    log.info("Input: {} Out: {} " + "Measure: {} t1: {} t2: {}",
-             new Object[] {input, output, measureClassName, t1, t2});
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(CanopyDriver.class);
+  public static void runJob(Path input, Path output, String measureClassName, double t1, double t2, boolean runClustering)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    log.info("Input: {} Out: {} " + "Measure: {} t1: {} t2: {}", new Object[] { input, output, measureClassName, t1, t2 });
+    Configuration conf = new Configuration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
 
-    conf.setInputFormat(SequenceFileInputFormat.class);
+    Job job = new Job(conf);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setMapperClass(CanopyMapper.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(VectorWritable.class);
+    job.setReducerClass(CanopyReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(Canopy.class);
+    job.setNumReduceTasks(1);
+    job.setJarByClass(CanopyDriver.class);
 
-    conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(VectorWritable.class);
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Canopy.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-
+    FileInputFormat.addInputPath(job, input);
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
-    FileOutputFormat.setOutputPath(conf, canopyOutputDir);
-
-    conf.setMapperClass(CanopyMapper.class);
-    conf.setReducerClass(CanopyReducer.class);
-    conf.setNumReduceTasks(1);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-
-    client.setConf(conf);
-
-    JobClient.runJob(conf);
+    FileOutputFormat.setOutputPath(job, canopyOutputDir);
+    job.waitForCompletion(true);
 
     if (runClustering) {
       runClustering(input, canopyOutputDir, output, measureClassName, t1, t2);
@@ -168,37 +163,33 @@ public final class CanopyDriver {
    *          the T1 distance threshold
    * @param t2
    *          the T2 distance threshold
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static void runClustering(Path points,
-                                   Path canopies,
-                                   Path output,
-                                   String measureClassName,
-                                   double t1,
-                                   double t2) throws IOException {
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(CanopyDriver.class);
-
+  public static void runClustering(Path points, Path canopies, Path output, String measureClassName, double t1, double t2)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    
+    Configuration conf = new Configuration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies.toString());
 
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(WeightedVectorWritable.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    Job job = new Job(conf);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setMapperClass(ClusterMapper.class);
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(WeightedVectorWritable.class);
+    job.setNumReduceTasks(0);
+    job.setJarByClass(CanopyDriver.class);
 
-    FileInputFormat.setInputPaths(conf, points);
+    FileInputFormat.addInputPath(job, points);
     Path outPath = new Path(output, DEFAULT_CLUSTERED_POINTS_DIRECTORY);
-    FileOutputFormat.setOutputPath(conf, outPath);
-
-    conf.setMapperClass(ClusterMapper.class);
-    conf.setReducerClass(IdentityReducer.class);
-    conf.setNumReduceTasks(0);
-
-    client.setConf(conf);
+    FileOutputFormat.setOutputPath(job, outPath);
     HadoopUtil.overwriteOutput(outPath);
-    JobClient.runJob(conf);
+    
+    job.waitForCompletion(true);
   }
 
 }

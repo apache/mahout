@@ -22,10 +22,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -54,22 +53,22 @@ public class CanopyClusterer {
     this.measure = measure;
   }
 
-  public CanopyClusterer(JobConf job) {
-    this.configure(job);
+  public CanopyClusterer(Configuration config) {
+    this.configure(config);
   }
 
   /**
    * Configure the Canopy and its distance measure
    * 
-   * @param job
+   * @param configuration
    *          the JobConf for this job
    */
-  public void configure(JobConf job) {
+  public void configure(Configuration configuration) {
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job.get(CanopyConfigKeys.DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(configuration.get(CanopyConfigKeys.DISTANCE_MEASURE_KEY));
       measure = (DistanceMeasure) cl.newInstance();
-      measure.configure(job);
+      measure.configure(configuration);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -77,8 +76,8 @@ public class CanopyClusterer {
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
-    t1 = Double.parseDouble(job.get(CanopyConfigKeys.T1_KEY));
-    t2 = Double.parseDouble(job.get(CanopyConfigKeys.T2_KEY));
+    t1 = Double.parseDouble(configuration.get(CanopyConfigKeys.T1_KEY));
+    t2 = Double.parseDouble(configuration.get(CanopyConfigKeys.T2_KEY));
     nextCanopyId = 0;
   }
 
@@ -100,10 +99,11 @@ public class CanopyClusterer {
    *          the point to be added
    * @param canopies
    *          the List<Canopy> to be appended
-   * @param reporter
+   * @param context
    *          Object to report status to the MR interface
+   * @throws IOException 
    */
-  public void addPointToCanopies(Vector point, List<Canopy> canopies, Reporter reporter) {
+  public void addPointToCanopies(Vector point, List<Canopy> canopies, TaskAttemptContext context) throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
@@ -113,26 +113,16 @@ public class CanopyClusterer {
       pointStronglyBound = pointStronglyBound || (dist < t2);
     }
     if (!pointStronglyBound) {
-      reporter.setStatus("Created new Canopy:" + nextCanopyId + " numPoints:" + numVectors);
+      context.setStatus("Created new Canopy:" + nextCanopyId + " numPoints:" + numVectors);
       canopies.add(new Canopy(point, nextCanopyId++));
     }
     numVectors++;
   }
 
-  /**
-   * Emit the point to the closest covering canopy. Used by the ClusterMapper.
-   * 
-   * @param point
-   *          the point to be added
-   * @param canopies
-   *          the List<Canopy> to be appended
-   * @param collector
-   *          an OutputCollector in which to emit the point
-   * @param reporter
-   *          to report status of the job
-   */
-  public void emitPointToClosestCanopy(Vector point, List<Canopy> canopies,
-      OutputCollector<IntWritable, WeightedVectorWritable> collector, Reporter reporter) throws IOException {
+  @SuppressWarnings("unchecked")
+  public void emitPointToClosestCanopy(Vector point, List<Canopy> canopies, org.apache.hadoop.mapreduce.Mapper.Context context)
+      throws IOException, InterruptedException {
+
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     // find closest canopy
@@ -144,8 +134,8 @@ public class CanopyClusterer {
       }
     }
     // emit to closest canopy
-    collector.collect(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
-    reporter.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
+    context.write(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
+    context.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
   }
 
   /**

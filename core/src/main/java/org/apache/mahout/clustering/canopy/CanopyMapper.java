@@ -23,46 +23,43 @@ import java.util.List;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class CanopyMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable> {
-  
+class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
+
   private final List<Canopy> canopies = new ArrayList<Canopy>();
-  
-  private OutputCollector<Text,VectorWritable> outputCollector;
-  
+
   private CanopyClusterer canopyClusterer;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable point,
-                  OutputCollector<Text,VectorWritable> output,
-                  Reporter reporter) throws IOException {
-    outputCollector = output;
-    canopyClusterer.addPointToCanopies(point.get(), canopies, reporter);
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+    canopyClusterer.addPointToCanopies(point.get(), canopies, context);
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    canopyClusterer = new CanopyClusterer(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    canopyClusterer = new CanopyClusterer(context.getConfiguration());
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void close() throws IOException {
+  protected void cleanup(Context context) throws IOException, InterruptedException {
     for (Canopy canopy : canopies) {
       Vector centroid = canopy.computeCentroid();
       VectorWritable vw = new VectorWritable(centroid);
-      outputCollector.collect(new Text("centroid"), vw);
+      context.write(new Text("centroid"), vw);
     }
-    super.close();
+    super.cleanup(context);
   }
-  
 }

@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.JobConf;
 
 public abstract class AbstractParameter<T> implements Parameter<T> {
   
@@ -54,12 +53,12 @@ public abstract class AbstractParameter<T> implements Parameter<T> {
   }
   
   @Override
-  public void configure(JobConf jobConf) {
+  public void configure(Configuration jobConf) {
   // nothing to do
   }
   
   @Override
-  public void createParameters(String prefix, JobConf jobConf) { }
+  public void createParameters(String prefix, Configuration jobConf) { }
   
   @Override
   public String getStringValue() {

@@ -23,38 +23,38 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class CanopyReducer extends MapReduceBase implements Reducer<Text,VectorWritable,Text,Canopy> {
-  
-  private final List<Canopy> canopies = new ArrayList<Canopy>();
-  
-  private CanopyClusterer canopyClusterer;
-  
+public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<VectorWritable> values,
-                     OutputCollector<Text,Canopy> output,
-                     Reporter reporter) throws IOException {
-    while (values.hasNext()) {
-      Vector point = values.next().get();
-      canopyClusterer.addPointToCanopies(point, canopies, reporter);
+  protected void reduce(Text arg0, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
+    Iterator<VectorWritable> it = values.iterator();
+    while (it.hasNext()) {
+      Vector point = it.next().get();
+      canopyClusterer.addPointToCanopies(point, canopies, context);
     }
     for (Canopy canopy : canopies) {
-      output.collect(new Text(canopy.getIdentifier()), canopy);
+      context.write(new Text(canopy.getIdentifier()), canopy);
     }
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    canopyClusterer = new CanopyClusterer(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    canopyClusterer = new CanopyClusterer(context.getConfiguration());
   }
-  
+
+  private final List<Canopy> canopies = new ArrayList<Canopy>();
+
+  private CanopyClusterer canopyClusterer;
+
 }

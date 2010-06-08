@@ -33,11 +33,12 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
@@ -85,7 +86,7 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    VectorWritable vectorWritable = new VectorWritable(vector);
+    VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
     output.collect(key, vectorWritable);
   }
   

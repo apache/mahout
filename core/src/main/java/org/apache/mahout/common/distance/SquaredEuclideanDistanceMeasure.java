@@ -20,7 +20,7 @@ package org.apache.mahout.common.distance;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.Vector;
 
@@ -33,7 +33,7 @@ import org.apache.mahout.math.Vector;
 public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
   
   @Override
-  public void configure(JobConf job) {
+  public void configure(Configuration job) {
   // nothing to do
   }
   
@@ -43,7 +43,7 @@ public class SquaredEuclideanDistanceMeasure implements DistanceMeasure {
   }
   
   @Override
-  public void createParameters(String prefix, JobConf jobConf) {
+  public void createParameters(String prefix, Configuration jobConf) {
   // nothing to do
   }
   

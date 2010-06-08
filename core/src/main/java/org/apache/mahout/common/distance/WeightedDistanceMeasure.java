@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.common.parameters.ClassParameter;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.common.parameters.PathParameter;
@@ -43,7 +43,7 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
   private Vector weights;
   
   @Override
-  public void createParameters(String prefix, JobConf jobConf) {
+  public void createParameters(String prefix, Configuration jobConf) {
     parameters = new ArrayList<Parameter<?>>();
     weightsFile = new PathParameter(prefix, "weightsFile", jobConf, null,
         "Path on DFS to a file containing the weights.");
@@ -59,7 +59,7 @@ public abstract class WeightedDistanceMeasure implements DistanceMeasure {
   }
   
   @Override
-  public void configure(JobConf jobConf) {
+  public void configure(Configuration jobConf) {
     if (parameters == null) {
       ParameteredGeneralizations.configureParameters(this, jobConf);
     }
