@@ -39,6 +39,7 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
@@ -73,23 +74,18 @@ public final class RecommenderJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
-    Option numReccomendationsOpt = AbstractJob.buildOption("numRecommendations", "n",
-      "Number of recommendations per user",
+    addOption("numRecommendations", "n", "Number of recommendations per user",
       String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
-    Option usersFileOpt = AbstractJob.buildOption("usersFile", "u",
-      "File of users to recommend for", null);
-    Option booleanDataOpt = AbstractJob.buildOption("booleanData", "b",
-      "Treat input as without pref values", Boolean.FALSE.toString());
-    Option maxPrefsPerUserConsideredOpt = AbstractJob.buildOption("maxPrefsPerUserConsidered", null,
+    addOption("usersFile", "u", "File of users to recommend for", null);
+    addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
+    addOption("maxPrefsPerUserConsidered", null,
       "Maximum number of preferences considered per user in final recommendation phase",
       String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
-    Option maxCooccurrencesPerItemConsideredOpt = AbstractJob.buildOption("maxCooccurrencesPerItemConsidered", null,
+    addOption("maxCooccurrencesPerItemConsidered", null,
       "Maximum number of cooccurrences considered per item in count phase",
       String.valueOf(UserVectorToCooccurrenceMapper.DEFAULT_MAX_COOCCURRENCES_PER_ITEM_CONSIDERED));
 
-    Map<String,String> parsedArgs = AbstractJob.parseArguments(
-        args, numReccomendationsOpt, usersFileOpt, booleanDataOpt,
-        maxPrefsPerUserConsideredOpt, maxCooccurrencesPerItemConsideredOpt);
+    Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }

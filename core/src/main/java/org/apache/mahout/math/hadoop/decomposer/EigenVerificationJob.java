@@ -101,7 +101,7 @@ public class EigenVerificationJob extends AbstractJob {
       return 0;
     }
     Configuration originalConf = getConf();
-    outPath = originalConf.get("mapred.output.class");
+    outPath = originalConf.get("mapred.output.dir");
     tmpOut = outPath + "/tmp";
 
     if (argMap.get("--eigenInput") != null && eigensToVerify == null) {
@@ -131,45 +131,18 @@ public class EigenVerificationJob extends AbstractJob {
     return 0;
   }
 
-  public static Map<String,String> handleArgs(String[] args) {
-    Option eigenInputOpt = buildOption("eigenInput", "ei",
+  public Map<String,String> handleArgs(String[] args) {
+    addOption("eigenInput", "ei",
         "The Path for purported eigenVector input files (SequenceFile<WritableComparable,VectorWritable>.", null);
-    Option corpusInputOpt = buildOption("corpusInput", "ci",
+    addOption("corpusInput", "ci",
         "The Path for corpus input files (SequenceFile<WritableComparable,VectorWritable>.");
-    Option outOpt = DefaultOptionCreator.outputOption().create();
-    Option helpOpt = DefaultOptionCreator.helpOption();
-    Option inMemOpt = buildOption("inMemory", "mem", "Buffer eigen matrix into memory (if you have enough!)", "false");
-    Option errorOpt = buildOption("maxError", "err", "Maximum acceptable error", "0.05");
-    Option minEigenValOpt = buildOption("minEigenvalue", "mev", "Minimum eigenvalue to keep the vector for", "0.0");
+    addOption(DefaultOptionCreator.outputOption().create());
+    addOption(DefaultOptionCreator.helpOption());
+    addOption("inMemory", "mem", "Buffer eigen matrix into memory (if you have enough!)", "false");
+    addOption("maxError", "err", "Maximum acceptable error", "0.05");
+    addOption("minEigenvalue", "mev", "Minimum eigenvalue to keep the vector for", "0.0");
 
-    GroupBuilder gBuilder = new GroupBuilder().withName("Options")
-                                              .withOption(eigenInputOpt)
-                                              .withOption(corpusInputOpt)
-                                              .withOption(helpOpt)
-                                              .withOption(outOpt)
-                                              .withOption(inMemOpt)
-                                              .withOption(errorOpt)
-                                              .withOption(minEigenValOpt);
-    Group group = gBuilder.create();
-
-    Map<String,String> argMap = new HashMap<String,String>();
-
-    CommandLine cmdLine;
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      cmdLine = parser.parse(args);
-    } catch (OptionException e) {
-      log.error(e.getMessage());
-      CommandLineUtil.printHelp(group);
-      return null;
-    }
-    if (cmdLine.hasOption(helpOpt)) {
-      CommandLineUtil.printHelp(group);
-      return argMap;
-    }
-    maybePut(argMap, cmdLine, eigenInputOpt, corpusInputOpt, helpOpt, outOpt, inMemOpt, errorOpt, minEigenValOpt);
-    return argMap;
+    return parseArguments(args);
   }
 
   public VectorIterable computePairwiseInnerProducts() {

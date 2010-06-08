@@ -116,6 +116,7 @@ public final class DictionaryVectorizer {
    */
   public static void createTermFrequencyVectors(Path input,
                                                 Path output,
+                                                Configuration baseConf,
                                                 int minSupport,
                                                 int maxNGramSize,
                                                 float minLLRValue,
@@ -140,7 +141,7 @@ public final class DictionaryVectorizer {
       dictionaryChunks = createDictionaryChunks(minSupport, dictionaryJobPath, output,
         chunkSizeInMegabytes, new LongWritable(), maxTermDimension);
     } else {
-      CollocDriver.generateAllGrams(input, dictionaryJobPath, maxNGramSize,
+      CollocDriver.generateAllGrams(input, dictionaryJobPath, baseConf, maxNGramSize,
         minSupport, minLLRValue, numReducers);
       dictionaryChunks = createDictionaryChunks(minSupport, new Path(
           new Path(output, DICTIONARY_JOB_FOLDER), CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,

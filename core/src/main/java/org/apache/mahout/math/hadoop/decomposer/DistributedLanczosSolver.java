@@ -144,25 +144,13 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     @Override
     public int run(String[] args) throws Exception {
 
-      Option numRowsOpt = buildOption("numRows",
-                                      "nr",
-                                      "Number of rows of the input matrix");
-      Option numColsOpt = buildOption("numCols",
-                                      "nc",
-                                      "Number of columns of the input matrix");
-      Option desiredRankOpt = buildOption("rank",
-                                          "r",
-                                          "Desired decomposition rank (note: only roughly 1/4 to 1/3 "
-                                        + "of these will have the top portion of the spectrum)");
-      Option isSymmetricOpt = buildOption("symmetric",
-                                          "sym",
-                                          "Is the input matrix square and symmetric?");
+      addOption("numRows", "nr", "Number of rows of the input matrix");
+      addOption("numCols", "nc", "Number of columns of the input matrix");
+      addOption("rank", "r", "Desired decomposition rank (note: only roughly 1/4 to 1/3 "
+                           + "of these will have the top portion of the spectrum)");
+      addOption("symmetric", "sym", "Is the input matrix square and symmetric?");
 
-      DistributedLanczosSolver.this.parsedArgs = parseArguments(args,
-                                                                numRowsOpt,
-                                                                numColsOpt,
-                                                                desiredRankOpt,
-                                                                isSymmetricOpt);
+      DistributedLanczosSolver.this.parsedArgs = parseArguments(args);
       if (DistributedLanczosSolver.this.parsedArgs == null) {
         return -1;
       } else {

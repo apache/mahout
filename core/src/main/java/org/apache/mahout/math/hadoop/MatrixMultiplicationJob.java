@@ -70,33 +70,15 @@ public class MatrixMultiplicationJob extends AbstractJob {
 
   @Override
   public int run(String[] strings) throws Exception {
-    Option numRowsAOpt = buildOption("numRowsA",
-                                     "nra",
-                                     "Number of rows of the first input matrix");
-    Option numColsAOpt = buildOption("numColsA",
-                                     "nca",
-                                     "Number of columns of the first input matrix");
-    Option numRowsBOpt = buildOption("numRowsB",
-                                     "nrb",
-                                     "Number of rows of the second input matrix");
+    addOption("numRowsA", "nra", "Number of rows of the first input matrix");
+    addOption("numColsA", "nca", "Number of columns of the first input matrix");
+    addOption("numRowsB", "nrb", "Number of rows of the second input matrix");
 
-    Option numColsBOpt = buildOption("numColsB",
-                                     "ncb",
-                                     "Number of columns of the second input matrix");
-    Option inputPathA = buildOption("inputPathA",
-                                    "ia",
-                                    "Path to the first input matrix");
-    Option inputPathB = buildOption("inputPathB",
-                                    "ib",
-                                    "Path to the second input matrix");
+    addOption("numColsB", "ncb", "Number of columns of the second input matrix");
+    addOption("inputPathA", "ia", "Path to the first input matrix");
+    addOption("inputPathB", "ib", "Path to the second input matrix");
 
-    Map<String, String> argMap = parseArguments(strings,
-                                                numRowsAOpt,
-                                                numRowsBOpt,
-                                                numColsAOpt,
-                                                numColsBOpt,
-                                                inputPathA,
-                                                inputPathB);
+    Map<String, String> argMap = parseArguments(strings);
 
     DistributedRowMatrix a = new DistributedRowMatrix(argMap.get("--inputPathA"),
                                                       argMap.get("--tempDir"),

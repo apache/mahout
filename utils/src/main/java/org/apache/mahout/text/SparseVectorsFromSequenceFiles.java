@@ -25,6 +25,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.CommandLineUtil;
@@ -219,7 +220,8 @@ public final class SparseVectorsFromSequenceFiles {
         sequentialAccessOutput = true;
       }
       
-      DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, minSupport, maxNGramSize,
+      Configuration conf = new Configuration();
+      DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, conf, minSupport, maxNGramSize,
         minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput);
       if (processIdf) {
         TFIDFConverter.processTfIdf(

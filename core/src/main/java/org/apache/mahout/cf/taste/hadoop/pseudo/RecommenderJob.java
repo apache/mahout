@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.math.VarLongWritable;
 
@@ -106,15 +107,13 @@ public final class RecommenderJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
-    Option recommendClassOpt = AbstractJob.buildOption("recommenderClassName", "r",
-      "Name of recommender class to instantiate");
-    Option numReccomendationsOpt = AbstractJob.buildOption("numRecommendations", "n",
-      "Number of recommendations per user", "10");
-    Option usersFileOpt = AbstractJob.buildOption("usersFile", "u", "Number of recommendations per user",
-      null);
+    addOption(DefaultOptionCreator.inputOption().create());
+    addOption(DefaultOptionCreator.outputOption().create());
+    addOption("recommenderClassName", "r", "Name of recommender class to instantiate");
+    addOption("numRecommendations", "n", "Number of recommendations per user", "10");
+    addOption("usersFile", "u", "Number of recommendations per user", null);
     
-    Map<String,String> parsedArgs = AbstractJob.parseArguments(args, recommendClassOpt,
-      numReccomendationsOpt, usersFileOpt);
+    Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }

@@ -37,6 +37,7 @@ import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VarLongWritable;
 
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
@@ -44,7 +45,10 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     
-    Map<String,String> parsedArgs = AbstractJob.parseArguments(args);
+    addInputOption();
+    addOutputOption();
+    
+    Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }

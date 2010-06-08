@@ -18,6 +18,8 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -75,50 +77,199 @@ public abstract class AbstractJob extends Configured implements Tool {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
-  protected static Option buildOption(String name, String shortName, String description) {
-    return buildOption(name, shortName, description, true, null);
+  /** option used to specify the input path */
+  private Option inputOption;
+  
+  /** option used to specify the output path */
+  private Option outputOption;
+  
+  /** input path, populated by {@link #parseArguments(String[])} */
+  private Path   inputPath; 
+  
+  /** output path, populated by {@link #parseArguments(String[]) */
+  private Path   outputPath;
+  
+  /** internal list of options that have been added */
+  private final List<Option> options;
+  
+  public AbstractJob() {
+    options = new LinkedList<Option>();
   }
   
-  protected static Option buildOption(String name, String shortName, String description, String defaultValue) {
-    return buildOption(name, shortName, description, false, defaultValue);
+  /** Returns the input path established by a call to {@link #parseArguments(String[])}.
+   *  The source of the path may be an input option added using {@link #addInputOption()}
+   *  or it may be the value of the <code>mapred.input.dir</code> configuration
+   *  property. 
+   * @return
+   */
+  public Path getInputPath() {
+    return inputPath;
+  }
+  
+  /** Returns the output path established by a call to {@link #parseArguments(String[])}.
+   *  The source of the path may be an output option added using {@link #addOutputOption()}
+   *  or it may be the value of the <code>mapred.input.dir</code> configuration
+   *  property. 
+   * @return
+   */
+  public Path getOutputPath() {
+    return outputPath;
+  }
+  
+  /** Add an option with no argument whose presence can be checked for using
+   *  <code>containsKey<code> method on the map returned by 
+   *  {@link #parseArguments(String[])};
+   *  
+   * @param name
+   * @param shortName
+   * @param description
+   */
+  public void addFlag(String name, String shortName, String description) {
+    options.add(buildOption(name, shortName, description, true, false, null));
+  }
+  
+  /** Add an option to the the set of options this job will parse when
+   *  {@link #parseArguments(String[])} is called. This options has an argument
+   *  with null as its default value.
+   *  
+   * @param name
+   * @param shortName
+   * @param description
+   */
+  public void addOption(String name, String shortName, String description) {
+    options.add(buildOption(name, shortName, description, true, false, null));
+  }
+  
+  /** Add an option to the the set of options this job will parse when
+   *  {@link #parseArguments(String[])} is called.
+   * 
+   * @param name
+   * @param shortName
+   * @param description
+   * @param required if true the {@link #parseArguments(String[])} will throw
+   *    fail with an error and usage message if this option is not specified
+   *    on the command line.
+   */
+  public void addOption(String name, String shortName, String description, boolean required) {
+    options.add(buildOption(name, shortName, description, true, required, null));
+  }
+  
+  /** Add an option to the the set of options this job will parse when
+   *  {@link #parseArguments(String[])} is called. If this option is not 
+   *  specified on the command line the default value will be 
+   *  used.
+   *  
+   * @param name
+   * @param shortName
+   * @param description
+   * @param defaultValue the default argument value if this argument is not
+   *   found on the command-line. null is allowed.
+   */
+  public void addOption(String name, String shortName, String description, String defaultValue) {
+    options.add(buildOption(name, shortName, description, true, false, defaultValue));
   }
 
-  protected static Option buildOption(String name, String shortName, String description,
-                                      boolean required) {
-    return buildOption(name, shortName, description, required, null);
+  /** Add an arbitrary option to the set of options this job will parse when
+   *  {@link #parseArguments(String[])} is called. If this option has no
+   *  argument, use <code>containsKey</code> on the map returned by 
+   *  <code>parseArguments</code> to check for its presence. Otherwise, the
+   *  string value of the option will be placed in the map using a key
+   *  equal to this options long name preceded by '--'.
+   * @param option
+   * @return the option added.
+   */
+  public Option addOption(Option option) {
+    options.add(option);
+    return option;
   }
   
-  protected static Option buildOption(String name,
-                                    String shortName,
-                                    String description,
-                                    boolean required,
-                                    String defaultValue) {
-    ArgumentBuilder argBuilder = new ArgumentBuilder().withName(name).withMinimum(1).withMaximum(1);
-    if (defaultValue != null) {
-      argBuilder = argBuilder.withDefault(defaultValue);
-    }
-    Argument arg = argBuilder.create();
-    DefaultOptionBuilder optBuilder = new DefaultOptionBuilder().withLongName(name).withRequired(required)
-        .withArgument(arg).withDescription(description);
+  /** Add the default output directory option, '-o' which takes a directory
+   *  name as an argument. When {@link #parseArguments(String[])} is 
+   *  called, the outputPath will be set based upon the value for this option.
+   *  This this method is called, the output is required. 
+   */
+  public void addInputOption() {
+    this.inputOption = addOption(DefaultOptionCreator.inputOption().create());
+  }
+  
+  /** Add the default output directory option, '-o' which takes a directory
+   *  name as an argument. When {@link #parseArguments(String[])} is 
+   *  called, the outputPath will be set based upon the value for this option.
+   *  This this method is called, the output is required. 
+   */
+  public void addOutputOption() {
+    this.outputOption = addOption(DefaultOptionCreator.outputOption().create());
+  }
+
+  /** Build an option with the given parameters. Name and description are
+   *  required.
+   * 
+   * @param name the long name of the option prefixed with '--' on the command-line
+   * @param shortName the short name of the option, prefixed with '-' on the command-line
+   * @param description description of the option displayed in help method
+   * @param hasArg true if the option has an argument.
+   * @param required true if the option is required.
+   * @param defaultValue default argument value, can be null.
+   * @return the option.
+   */
+  private static Option buildOption(String name,
+                                      String shortName,
+                                      String description,
+                                      boolean hasArg,
+                                      boolean required,
+                                      String defaultValue) {
+
+    DefaultOptionBuilder optBuilder = new DefaultOptionBuilder()
+      .withLongName(name)
+      .withDescription(description)
+      .withRequired(required);
+      
     if (shortName != null) {
-      optBuilder = optBuilder.withShortName(shortName);
+      optBuilder.withShortName(shortName);
     }
+    
+    if (hasArg) {
+      ArgumentBuilder argBuilder = new ArgumentBuilder()
+        .withName(name)
+        .withMinimum(1)
+        .withMaximum(1);
+      
+      if (defaultValue != null) {
+        argBuilder = argBuilder.withDefault(defaultValue);
+      }
+      
+      optBuilder.withArgument(argBuilder.create());
+    }
+
     return optBuilder.create();
   }
   
-  protected static Map<String,String> parseArguments(String[] args, Option... extraOpts) {
+  /** Parse the arguments specified based on the options defined using the 
+   *  various <code>addOption</code> methods. If -h is specified or an 
+   *  exception is encountered pring help and return null. Has the 
+   *  side effect of setting inputPath and outputPath 
+   *  if <code>addInputOption</code> or <code>addOutputOption</code> 
+   *  or <code>mapred.input.dir</code> or <code>mapred.output.dir</code>
+   *  are present in the Configuration.
+   * 
+   * @param args
+   * @return a Map<String,Sting> containing options and their argument values.
+   *  The presence of a flag can be tested using <code>containsKey</code>, while
+   *  argument values can be retrieved using <code>get(optionName</code>. The
+   *  names used for keys are the option name parameter prefixed by '--'.
+   *  
+   * 
+   */
+  public Map<String,String> parseArguments(String[] args) {
     
-    Option tempDirOpt = buildOption("tempDir", null, "Intermediate output directory", "temp");
-    Option helpOpt = DefaultOptionCreator.helpOption();
-    Option startPhase = buildOption("startPhase", null, "First phase to run", "0");
-    Option endPhase = buildOption("endPhase", null, "Last phase to run", String.valueOf(Integer.MAX_VALUE));
+    Option helpOpt = addOption(DefaultOptionCreator.helpOption());
+    addOption("tempDir", null, "Intermediate output directory", "temp");
+    addOption("startPhase", null, "First phase to run", "0");
+    addOption("endPhase", null, "Last phase to run", String.valueOf(Integer.MAX_VALUE));
 
-    GroupBuilder gBuilder = new GroupBuilder().withName("Options")
-        .withOption(tempDirOpt)
-        .withOption(helpOpt)
-        .withOption(startPhase).withOption(endPhase);
+    GroupBuilder gBuilder = new GroupBuilder().withName("Job-Specific Options:");
     
-    for (Option opt : extraOpts) {
+    for (Option opt : options) {
       gBuilder = gBuilder.withOption(opt);
     }
     
@@ -132,28 +283,59 @@ public abstract class AbstractJob extends Configured implements Tool {
       cmdLine = parser.parse(args);
     } catch (OptionException e) {
       log.error(e.getMessage());
-      CommandLineUtil.printHelp(group);
+      CommandLineUtil.printHelpWithGenericOptions(group);
       return null;
     }
     
     if (cmdLine.hasOption(helpOpt)) {
-      CommandLineUtil.printHelp(group);
+      CommandLineUtil.printHelpWithGenericOptions(group);
       return null;
     }
     
     Map<String,String> result = new TreeMap<String,String>();
-    maybePut(result, cmdLine, tempDirOpt, helpOpt, startPhase, endPhase);
-    maybePut(result, cmdLine, extraOpts);
+    maybePut(result, cmdLine, this.options.toArray(new Option[0]));
 
+    parseDirectories(cmdLine);
+    
     log.info("Command line arguments: {}", result);
     return result;
   }
   
+  /** Extract the values of the <code>inputOption</code> and <code>outputOption</code>
+   *  if present, otherwise attempt to retrieve the values of <code>mapred.input.dir</code>
+   *  and <code>mapred.output.dir</code>. If none of these are set, 
+   *  {@link #getInputPath()} and {@link #getOutputPath()} will return null.
+   * @param cmdLine
+   */
+  protected void parseDirectories(CommandLine cmdLine) {
+    Configuration conf = getConf();
+    
+    if (inputOption != null) {
+      if (cmdLine.hasOption(inputOption)) {
+        this.inputPath = new Path(cmdLine.getValue(inputOption).toString());
+      }
+    }
+    else if (conf.get("mapred.input.dir") != null) {
+      this.inputPath = new Path(conf.get("mapred.input.dir"));
+    }
+    
+    if (outputOption != null) {
+      if (cmdLine.hasOption(outputOption)) {
+        this.outputPath = new Path(cmdLine.getValue(outputOption).toString());
+      }
+    }
+    else if (conf.get("mapred.output.dir") != null) {
+      this.outputPath = new Path(conf.get("mapred.output.dir"));
+    }
+  }
+  
   protected static void maybePut(Map<String,String> args, CommandLine cmdLine, Option... opt) {
     for (Option o : opt) {
-      Object value = cmdLine.getValue(o);
-      if (value != null) {
-        args.put(o.getPreferredName(), value.toString());
+      if (cmdLine.hasOption(o)) {
+        // nulls are ok, for cases where options are simple flags.
+        Object vo = cmdLine.getValue(o);
+        String value = (vo == null) ? null : vo.toString();
+        args.put(o.getPreferredName(), value);
       }
     }
   }
@@ -219,5 +401,4 @@ public abstract class AbstractJob extends Configured implements Tool {
     
     return job;
   }
-  
 }

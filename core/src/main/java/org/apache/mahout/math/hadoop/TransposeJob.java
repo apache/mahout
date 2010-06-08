@@ -55,13 +55,9 @@ public class TransposeJob extends AbstractJob {
 
   @Override
   public int run(String[] strings) throws Exception {
-    Option numRowsOpt = buildOption("numRows",
-                                    "nr",
-                                    "Number of rows of the input matrix");
-    Option numColsOpt = buildOption("numCols",
-                                    "nc",
-                                    "Number of columns of the input matrix");
-    Map<String,String> parsedArgs = parseArguments(strings, numRowsOpt, numColsOpt);
+    addOption("numRows", "nr", "Number of rows of the input matrix");
+    addOption("numCols", "nc", "Number of columns of the input matrix");
+    Map<String,String> parsedArgs = parseArguments(strings);
     if (parsedArgs == null) {
       // FIXME
       return 0;
