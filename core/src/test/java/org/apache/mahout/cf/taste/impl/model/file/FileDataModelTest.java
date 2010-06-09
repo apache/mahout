@@ -31,8 +31,11 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -91,7 +94,7 @@ public final class FileDataModelTest extends TasteTestCase {
 
 
   public void testTranspose() throws Exception {
-    FileDataModel tModel = new FileDataModel(testFile, true);
+    FileDataModel tModel = new FileDataModel(testFile, true, FileDataModel.DEFAULT_MIN_RELOAD_INTERVAL_MS);
     PreferenceArray userPrefs = tModel.getPreferencesFromUser(456);
     assertNotNull("user prefs are null and it shouldn't be", userPrefs);
     PreferenceArray pref = tModel.getPreferencesForItem(123);
@@ -166,8 +169,33 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(4, model.getNumUsers());
   }
 
+  public void testExplicitRefreshAfterCompleteFileUpdate() throws Exception {
+    File file = getTestTempFile("refresh");
+    write(file, "123,456,3.0");
+
+    /* create a FileDataModel that always reloads when the underlying file has changed */
+    FileDataModel dataModel = new FileDataModel(file, false, 0L);
+    assertEquals(3.0f, dataModel.getPreferenceValue(123L, 456L));
+
+    /* change the underlying file,
+     * we have to wait at least a second to see the change in the file's lastModified timestamp */
+    Thread.sleep(2000L);
+    write(file, "123,456,5.0");
+    dataModel.refresh(null);
+
+    assertEquals(5.0f, dataModel.getPreferenceValue(123L, 456L));
+  }
+
   public void testToString() {
     assertTrue(model.toString().length() > 0);
   }
 
+  private static void write(File file, String content) throws IOException {
+    BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+    try {
+      writer.write(content);
+    } finally {
+      writer.close();
+    }
+  }
 }
