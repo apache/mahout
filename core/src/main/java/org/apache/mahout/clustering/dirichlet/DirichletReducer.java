@@ -22,66 +22,28 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.VectorWritable;
 
-public class DirichletReducer extends MapReduceBase implements
-    Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>> {
+public class DirichletReducer extends Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>> {
 
   private DirichletState<VectorWritable> state;
 
   private Model<VectorWritable>[] newModels;
 
-  private OutputCollector<Text, DirichletCluster<VectorWritable>> output;
-
   public Model<VectorWritable>[] getNewModels() {
     return newModels;
   }
 
-  @Override
-  public void reduce(Text key,
-                     Iterator<VectorWritable> values,
-                     OutputCollector<Text, DirichletCluster<VectorWritable>> output,
-                     Reporter reporter) throws IOException {
-    this.output = output;
-    int k = Integer.parseInt(key.toString());
-    Model<VectorWritable> model = newModels[k];
-    while (values.hasNext()) {
-      VectorWritable v = values.next();
-      model.observe(v);
-    }
-    model.computeParameters();
-    DirichletCluster<VectorWritable> cluster = state.getClusters().get(k);
-    cluster.setModel(model);
-  }
-
   /* (non-Javadoc)
-   * @see org.apache.hadoop.mapred.MapReduceBase#close()
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
    */
   @Override
-  public void close() throws IOException {
-    for (int i = 0; i < state.getNumClusters(); i++) {
-      DirichletCluster cluster = state.getClusters().get(i);
-      output.collect(new Text(String.valueOf(i)), cluster);
-    }
-    super.close();
-  }
-
-  public void configure(DirichletState<VectorWritable> state) {
-    this.state = state;
-    this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
-  }
-
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
     try {
-      state = DirichletMapper.getDirichletState(job);
+      state = DirichletMapper.getDirichletState(context.getConfiguration());
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -93,6 +55,40 @@ public class DirichletReducer extends MapReduceBase implements
     } catch (InvocationTargetException e) {
       throw new IllegalStateException(e);
     }
+    this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
+  @Override
+  protected void reduce(Text key, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
+    int k = Integer.parseInt(key.toString());
+    Model<VectorWritable> model = newModels[k];
+    Iterator<VectorWritable> it = values.iterator();
+    while (it.hasNext()) {
+      VectorWritable v = it.next();
+      model.observe(v);
+    }
+    model.computeParameters();
+    DirichletCluster<VectorWritable> cluster = state.getClusters().get(k);
+    cluster.setModel(model);
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#cleanup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
+  @Override
+  protected void cleanup(Context context) throws IOException, InterruptedException {
+    for (int i = 0; i < state.getNumClusters(); i++) {
+      DirichletCluster<VectorWritable> cluster = state.getClusters().get(i);
+      context.write(new Text(String.valueOf(i)), cluster);
+    }
+    super.cleanup(context);
+  }
+
+  public void setup(DirichletState<VectorWritable> state) {
+    this.state = state;
     this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 

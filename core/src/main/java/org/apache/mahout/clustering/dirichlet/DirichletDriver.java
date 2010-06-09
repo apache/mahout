@@ -27,7 +27,7 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,13 +35,12 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputLogFilter;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.VectorModelDistribution;
@@ -154,6 +153,7 @@ public final class DirichletDriver {
    *          a boolean if true emit only most likely cluster for each point
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @throws InterruptedException 
    */
   public static void runJob(Path input,
                             Path output,
@@ -167,7 +167,7 @@ public final class DirichletDriver {
                             boolean emitMostLikely,
                             double threshold)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
-             SecurityException, NoSuchMethodException, InvocationTargetException {
+             SecurityException, NoSuchMethodException, InvocationTargetException, InterruptedException {
 
     Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
 
@@ -198,12 +198,12 @@ public final class DirichletDriver {
   }
 
   private static int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
-    JobConf job = new JobConf(DirichletDriver.class);
-    FileSystem fs = FileSystem.get(input.toUri(), job);
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(input.toUri(), conf);
     FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
     int protoSize = 0;
     for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       WritableComparable key = (WritableComparable) reader.getKeyClass().newInstance();
       VectorWritable value = new VectorWritable();
       if (reader.next(key, value)) {
@@ -226,11 +226,11 @@ public final class DirichletDriver {
              SecurityException, NoSuchMethodException, InvocationTargetException {
 
     DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha0);
-    JobConf job = new JobConf(DirichletDriver.class);
-    FileSystem fs = FileSystem.get(output.toUri(), job);
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (int i = 0; i < numModels; i++) {
       Path path = new Path(stateIn, "part-" + i);
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, Text.class, DirichletCluster.class);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, DirichletCluster.class);
       writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
       writer.close();
     }
@@ -291,6 +291,9 @@ public final class DirichletDriver {
    *          alpha_0
    * @param numReducers
    *          the number of Reducers desired
+   * @throws IOException 
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void runIteration(Path input,
                                   Path stateIn,
@@ -300,23 +303,8 @@ public final class DirichletDriver {
                                   int prototypeSize,
                                   int numClusters,
                                   double alpha0,
-                                  int numReducers) {
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(DirichletDriver.class);
-
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(DirichletCluster.class);
-    conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(VectorWritable.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, stateOut);
-
-    conf.setMapperClass(DirichletMapper.class);
-    conf.setReducerClass(DirichletReducer.class);
-    conf.setNumReduceTasks(numReducers);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+                                  int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(MODEL_FACTORY_KEY, modelFactory);
     conf.set(MODEL_PROTOTYPE_KEY, modelPrototype);
@@ -324,12 +312,22 @@ public final class DirichletDriver {
     conf.set(NUM_CLUSTERS_KEY, Integer.toString(numClusters));
     conf.set(ALPHA_0_KEY, Double.toString(alpha0));
 
-    client.setConf(conf);
-    try {
-      JobClient.runJob(conf);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    }
+    Job job = new Job(conf);
+    
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(DirichletCluster.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(VectorWritable.class);
+    job.setMapperClass(DirichletMapper.class);
+    job.setReducerClass(DirichletReducer.class);
+    job.setNumReduceTasks(numReducers);
+
+    FileInputFormat.addInputPath(job, input);
+    FileOutputFormat.setOutputPath(job, stateOut);
+
+    job.waitForCompletion(true);
   }
 
   /**
@@ -345,32 +343,27 @@ public final class DirichletDriver {
    *          a boolean if true emit only most likely cluster for each point
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
+   * @throws IOException 
    */
-  public static void runClustering(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold) {
-    JobConf conf = new JobConf(DirichletDriver.class);
-    conf.setJobName("Dirichlet Clustering");
-
-    conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(WeightedVectorWritable.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
-
-    conf.setMapperClass(DirichletClusterMapper.class);
-
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-
-    // uncomment it to run locally
-    // conf.set("mapred.job.tracker", "local");
-    conf.setNumReduceTasks(0);
+  public static void runClustering(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
     conf.set(THRESHOLD_KEY, Double.toString(threshold));
-    try {
-      JobClient.runJob(conf);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    }
+
+    Job job = new Job(conf);
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(WeightedVectorWritable.class);
+    job.setMapperClass(DirichletClusterMapper.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setNumReduceTasks(0);
+    
+    FileInputFormat.addInputPath(job, input);
+    FileOutputFormat.setOutputPath(job, output);
+
+    job.waitForCompletion(true);
   }
 }

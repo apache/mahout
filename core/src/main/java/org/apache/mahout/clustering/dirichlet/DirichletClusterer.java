@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
@@ -223,17 +224,17 @@ public class DirichletClusterer<O> {
     return pi;
   }
 
-  public void emitPointToClusters(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+  public void emitPointToClusters(VectorWritable vector, List<DirichletCluster<VectorWritable>> clusters, Context context)
+      throws IOException, InterruptedException {
     Vector pi = new DenseVector(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
-      pi.set(i, clusters.get(i).getModel().pdf(point));
+      pi.set(i, clusters.get(i).getModel().pdf(vector));
     }
     pi = pi.divide(pi.zSum());
     if (emitMostLikely) {
-      emitMostLikelyCluster(point, clusters, pi, output);
+      emitMostLikelyCluster(vector, clusters, pi, context);
     } else {
-      emitAllClusters(point, clusters, pi, output);
+      emitAllClusters(vector, clusters, pi, context);
     }
   }
 
@@ -243,9 +244,10 @@ public class DirichletClusterer<O> {
    * @param pi the normalized pdf Vector for the point
    * @param output
    * @throws IOException
+   * @throws InterruptedException 
    */
-  void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+  private void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
+      Context context) throws IOException, InterruptedException {
     int clusterId = -1;
     double clusterPdf = 0;
     for (int i = 0; i < clusters.size(); i++) {
@@ -256,16 +258,16 @@ public class DirichletClusterer<O> {
       }
     }
     //System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
-    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
+    context.write(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
   }
 
-  void emitAllClusters(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+  private void emitAllClusters(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
+      Context context) throws IOException, InterruptedException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
       if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
         //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-        output.collect(new IntWritable(i), new WeightedVectorWritable(pdf, point));
+        context.write(new IntWritable(i), new WeightedVectorWritable(pdf, point));
       }
     }
   }

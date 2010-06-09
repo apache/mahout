@@ -20,50 +20,45 @@ package org.apache.mahout.clustering.dirichlet;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.TimesFunction;
 
-public class DirichletMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable> {
+public class DirichletMapper extends Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable> {
   
   private DirichletState<VectorWritable> state;
   
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable v,
-                  OutputCollector<Text,VectorWritable> output,
-                  Reporter reporter) throws IOException {
+  protected void map(WritableComparable<?> key, VectorWritable v, Context context) throws IOException, InterruptedException {
     // compute a normalized vector of probabilities that v is described by each model
     Vector pi = normalizedProbabilities(state, v);
     // then pick one model by sampling a Multinomial distribution based upon them
     // see: http://en.wikipedia.org/wiki/Multinomial_distribution
     int k = UncommonDistributions.rMultinom(pi);
-    output.collect(new Text(String.valueOf(k)), v);
+    context.write(new Text(String.valueOf(k)), v);
   }
-  
-  public void configure(DirichletState<VectorWritable> state) {
-    this.state = state;
-  }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
     try {
-      state = getDirichletState(job);
+      state = getDirichletState(context.getConfiguration());
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -76,25 +71,29 @@ public class DirichletMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-  
-  public static DirichletState<VectorWritable> getDirichletState(JobConf job)
+
+  public void setup(DirichletState<VectorWritable> state) {
+    this.state = state;
+  }
+    
+  public static DirichletState<VectorWritable> getDirichletState(Configuration conf)
     throws NoSuchMethodException, InvocationTargetException {
-    String statePath = job.get(DirichletDriver.STATE_IN_KEY);
-    String modelFactory = job.get(DirichletDriver.MODEL_FACTORY_KEY);
-    String modelPrototype = job.get(DirichletDriver.MODEL_PROTOTYPE_KEY);
-    String prototypeSize = job.get(DirichletDriver.PROTOTYPE_SIZE_KEY);
-    String numClusters = job.get(DirichletDriver.NUM_CLUSTERS_KEY);
-    String alpha0 = job.get(DirichletDriver.ALPHA_0_KEY);
+    String statePath = conf.get(DirichletDriver.STATE_IN_KEY);
+    String modelFactory = conf.get(DirichletDriver.MODEL_FACTORY_KEY);
+    String modelPrototype = conf.get(DirichletDriver.MODEL_PROTOTYPE_KEY);
+    String prototypeSize = conf.get(DirichletDriver.PROTOTYPE_SIZE_KEY);
+    String numClusters = conf.get(DirichletDriver.NUM_CLUSTERS_KEY);
+    String alpha0 = conf.get(DirichletDriver.ALPHA_0_KEY);
     
     try {
       double alpha = Double.parseDouble(alpha0);
       DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory, modelPrototype,
         Integer.parseInt(prototypeSize), Integer.parseInt(numClusters), alpha);
       Path path = new Path(statePath);
-      FileSystem fs = FileSystem.get(path.toUri(), job);
+      FileSystem fs = FileSystem.get(path.toUri(), conf);
       FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
       for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           Text key = new Text();
           DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();

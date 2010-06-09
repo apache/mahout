@@ -30,13 +30,12 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.CommandLineUtil;
@@ -127,6 +126,8 @@ public final class Job {
    *          the alpha0 value for the DirichletDistribution
    * @param numReducers
    *          the desired number of reducers
+   * @throws InterruptedException 
+   * @throws SecurityException 
    */
   public static void runJob(Path input,
                             Path output,
@@ -140,7 +141,7 @@ public final class Job {
                                                    InstantiationException,
                                                    IllegalAccessException,
                                                    NoSuchMethodException,
-                                                   InvocationTargetException {
+                                                   InvocationTargetException, SecurityException, InterruptedException {
     HadoopUtil.overwriteOutput(output);
 
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
@@ -179,12 +180,12 @@ public final class Job {
                                   double alpha0) throws NoSuchMethodException,
                                                  InvocationTargetException {
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
-    JobConf conf = new JobConf(KMeansDriver.class);
+    Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(numModels));
     conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha0));
     for (int i = 0; i < numIterations; i++) {
-      conf.set(DirichletDriver.STATE_IN_KEY, output + "/state-" + i);
+      conf.set(DirichletDriver.STATE_IN_KEY, output + "/clusters-" + i);
       conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, vectorClassName);
       conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
       clusters.add(DirichletMapper.getDirichletState(conf).getClusters());

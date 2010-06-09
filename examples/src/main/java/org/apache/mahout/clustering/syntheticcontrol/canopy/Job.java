@@ -28,8 +28,6 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
@@ -53,33 +51,27 @@ public final class Job {
         abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
         "The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
     Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
-        abuilder.withName("output").withMinimum(1).withMaximum(1).create())
-        .withDescription("The Path to put the output in").withShortName("o").create();
+        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The Path to put the output in")
+        .withShortName("o").create();
 
     Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
         abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
         "The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
-    // Option vectorClassOpt = obuilder.withLongName("vectorClass").withRequired(false).withArgument(
-    // abuilder.withName("vectorClass").withMinimum(1).withMaximum(1).create()).
-    // withDescription("The Vector implementation class name.  Default is RandomAccessSparseVector.class")
-    // .withShortName("v").create();
 
     Option t1Opt = obuilder.withLongName("t1").withRequired(false).withArgument(
-        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1")
-        .withShortName("t1").create();
+        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1").withShortName("t1").create();
     Option t2Opt = obuilder.withLongName("t2").withRequired(false).withArgument(
-        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("t2")
-        .withShortName("t2").create();
+        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("t2").withShortName("t2").create();
 
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(measureClassOpt)// .withOption(vectorClassOpt)
-        .withOption(t1Opt).withOption(t2Opt).withOption(helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(measureClassOpt).withOption(
+        t1Opt).withOption(t2Opt).withOption(helpOpt).create();
 
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
+      parser.setHelpOption(helpOpt);
       CommandLine cmdLine = parser.parse(args);
 
       if (cmdLine.hasOption(helpOpt)) {
@@ -89,12 +81,9 @@ public final class Job {
 
       Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
-      String measureClass = cmdLine.getValue(measureClassOpt,
-                                             "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
+      String measureClass = cmdLine.getValue(measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure")
+          .toString();
 
-      // String className = cmdLine.getValue(vectorClassOpt,
-      // "org.apache.mahout.math.RandomAccessSparseVector").toString();
-      // Class<? extends Vector> vectorClass = Class.forName(className).asSubclass(Vector.class);
       double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
       double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
 
@@ -128,10 +117,6 @@ public final class Job {
    */
   private static void runJob(Path input, Path output, String measureClassName, double t1, double t2) throws IOException,
       InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
-    JobClient client = new JobClient();
-    JobConf conf = new JobConf(Job.class);
-
-    client.setConf(conf);
     HadoopUtil.overwriteOutput(output);
 
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);

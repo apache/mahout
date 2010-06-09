@@ -24,27 +24,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Text,Text,VectorWritable> {
-  
+public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable> {
+
   private static final Pattern SPACE = Pattern.compile(" ");
-  
+
   private Constructor<?> constructor;
 
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(LongWritable key,
-                  Text values,
-                  OutputCollector<Text,VectorWritable> output,
-                  Reporter reporter) throws IOException {
+  protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
+
     String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
@@ -60,8 +58,8 @@ public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Te
         result.set(index++, d);
       }
       VectorWritable vectorWritable = new VectorWritable(result);
-      output.collect(new Text(String.valueOf(index)), vectorWritable);
-      
+      context.write(new Text(String.valueOf(index)), vectorWritable);
+
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -70,18 +68,23 @@ public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Te
       throw new IllegalStateException(e);
     }
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    String vectorImplClassName = job.get("vector.implementation.class.name");
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
+    String vectorImplClassName = conf.get("vector.implementation.class.name");
     try {
-      Class<? extends Vector> outputClass = (Class<? extends Vector>) job.getClassByName(vectorImplClassName);
+      Class<? extends Vector> outputClass = (Class<? extends Vector>) conf.getClassByName(vectorImplClassName);
       constructor = outputClass.getConstructor(int.class);
     } catch (NoSuchMethodException e) {
       throw new IllegalStateException(e);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     }
-    
-  }
+
+    }
 }

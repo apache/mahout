@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -28,36 +29,35 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class DirichletClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
+public class DirichletClusterMapper extends Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
   private List<DirichletCluster<VectorWritable>> clusters;
   private DirichletClusterer<VectorWritable> clusterer;
 
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable vector,
-                  OutputCollector<IntWritable, WeightedVectorWritable> output,
-                  Reporter reporter) throws IOException {
-    clusterer.emitPointToClusters(vector, clusters, output);
+  protected void map(WritableComparable<?> key, VectorWritable vector, Context context) throws IOException, InterruptedException {
+    clusterer.emitPointToClusters(vector, clusters, context);
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
     try {
-      clusters = getClusters(job);
-      String emitMostLikely = job.get(DirichletDriver.EMIT_MOST_LIKELY_KEY);
-      String threshold = job.get(DirichletDriver.THRESHOLD_KEY);
+      clusters = getClusters(conf);
+      String emitMostLikely = conf.get(DirichletDriver.EMIT_MOST_LIKELY_KEY);
+      String threshold = conf.get(DirichletDriver.THRESHOLD_KEY);
       clusterer = new DirichletClusterer<VectorWritable>(Boolean.parseBoolean(emitMostLikely),
                                                          Double.parseDouble(threshold));
     } catch (SecurityException e) {
@@ -67,7 +67,7 @@ public class DirichletClusterMapper extends MapReduceBase implements
     }
   }
 
-  public static List<DirichletCluster<VectorWritable>> getClusters(JobConf job) {
+  public static List<DirichletCluster<VectorWritable>> getClusters(Configuration job) {
     String statePath = job.get(DirichletDriver.STATE_IN_KEY);
     List<DirichletCluster<VectorWritable>> clusters = new ArrayList<DirichletCluster<VectorWritable>>();
     try {
