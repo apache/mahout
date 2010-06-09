@@ -204,7 +204,7 @@ public final class DirichletDriver {
     int protoSize = 0;
     for (FileStatus s : status) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      WritableComparable key = (WritableComparable) reader.getKeyClass().newInstance();
+      WritableComparable<?> key = (WritableComparable<?>) reader.getKeyClass().newInstance();
       VectorWritable value = new VectorWritable();
       if (reader.next(key, value)) {
         protoSize = value.get().size();

@@ -21,50 +21,49 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-public class KMeansClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
+public class KMeansClusterMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
   
   private final List<Cluster> clusters = new ArrayList<Cluster>();
   private KMeansClusterer clusterer;
   
-  @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable point,
-                  OutputCollector<IntWritable,WeightedVectorWritable> output,
-                  Reporter reporter) throws IOException {
-    clusterer.outputPointWithClusterInfo(point.get(), clusters, output);
-  }
   
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+    clusterer.outputPointWithClusterInfo(point.get(), clusters, context);
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
       DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
-      measure.configure(job);
+      measure.configure(conf);
       
-      String clusterPath = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
+      String clusterPath = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if ((clusterPath != null) && (clusterPath.length() > 0)) {
         KMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
         if (clusters.isEmpty()) {
           throw new IllegalStateException("Cluster is empty!");
         }
-      }
-      
+      }  
       this.clusterer = new KMeansClusterer(measure);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -74,5 +73,4 @@ public class KMeansClusterMapper extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-  
 }

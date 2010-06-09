@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
@@ -124,12 +124,8 @@ public class DirichletClusterer<O> {
    * @param burnin
    *          the int burnin interval, used to suppress early iterations
    */
-  public DirichletClusterer(List<O> sampleData,
-                            ModelDistribution<O> modelFactory,
-                            double alpha0,
-                            int numClusters,
-                            int thin,
-                            int burnin) {
+  public DirichletClusterer(List<O> sampleData, ModelDistribution<O> modelFactory, double alpha0, int numClusters, int thin,
+      int burnin) {
     this.sampleData = sampleData;
     this.modelFactory = modelFactory;
     this.thin = thin;
@@ -224,8 +220,9 @@ public class DirichletClusterer<O> {
     return pi;
   }
 
-  public void emitPointToClusters(VectorWritable vector, List<DirichletCluster<VectorWritable>> clusters, Context context)
-      throws IOException, InterruptedException {
+  public void emitPointToClusters(VectorWritable vector, List<DirichletCluster<VectorWritable>> clusters,
+      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
+      InterruptedException {
     Vector pi = new DenseVector(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
       pi.set(i, clusters.get(i).getModel().pdf(vector));
@@ -247,7 +244,8 @@ public class DirichletClusterer<O> {
    * @throws InterruptedException 
    */
   private void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
-      Context context) throws IOException, InterruptedException {
+      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
+      InterruptedException {
     int clusterId = -1;
     double clusterPdf = 0;
     for (int i = 0; i < clusters.size(); i++) {
@@ -262,7 +260,8 @@ public class DirichletClusterer<O> {
   }
 
   private void emitAllClusters(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
-      Context context) throws IOException, InterruptedException {
+      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
+      InterruptedException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
       if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
@@ -290,15 +289,9 @@ public class DirichletClusterer<O> {
    * @param numIterations
    *          number of iterations to be performed
    */
-  public static List<Model<Vector>[]> clusterPoints(List<Vector> points, 
-                                                    ModelDistribution<Vector> modelFactory,
-                                                    double alpha0,
-                                                    int numClusters,
-                                                    int thin,
-                                                    int burnin,
-                                                    int numIterations) {
-    DirichletClusterer<Vector> clusterer =
-        new DirichletClusterer<Vector>(points, modelFactory, alpha0, numClusters, thin, burnin);
+  public static List<Model<Vector>[]> clusterPoints(List<Vector> points, ModelDistribution<Vector> modelFactory, double alpha0,
+      int numClusters, int thin, int burnin, int numIterations) {
+    DirichletClusterer<Vector> clusterer = new DirichletClusterer<Vector>(points, modelFactory, alpha0, numClusters, thin, burnin);
     return clusterer.cluster(numIterations);
 
   }

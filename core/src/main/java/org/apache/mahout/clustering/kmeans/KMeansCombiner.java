@@ -20,24 +20,23 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
-public class KMeansCombiner extends MapReduceBase implements Reducer<Text,KMeansInfo,Text,KMeansInfo> {
-  
+public class KMeansCombiner extends Reducer<Text, KMeansInfo, Text, KMeansInfo> {
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<KMeansInfo> values,
-                     OutputCollector<Text,KMeansInfo> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(Text key, Iterable<KMeansInfo> values, Context context) throws IOException, InterruptedException {
+
     Cluster cluster = new Cluster(key.toString());
-    while (values.hasNext()) {
-      KMeansInfo next = values.next();
+    Iterator<KMeansInfo> it = values.iterator();
+    while (it.hasNext()) {
+      KMeansInfo next = it.next();
       cluster.addPoints(next.getPoints(), next.getPointTotal());
     }
-    output.collect(key, new KMeansInfo(cluster.getNumPoints(), cluster.getPointTotal()));
+    context.write(key, new KMeansInfo(cluster.getNumPoints(), cluster.getPointTotal()));
   }
-  
+
 }

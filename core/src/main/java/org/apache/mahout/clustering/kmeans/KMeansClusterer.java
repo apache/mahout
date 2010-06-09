@@ -22,7 +22,8 @@ import java.util.List;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -60,10 +61,11 @@ public class KMeansClusterer {
    *          a point to find a cluster for.
    * @param clusters
    *          a List<Cluster> to test.
+   * @throws InterruptedException 
+   * @throws IOException 
    */
-  public void emitPointToNearestCluster(Vector point,
-                                        Iterable<Cluster> clusters,
-                                        OutputCollector<Text, KMeansInfo> output) throws IOException {
+  public void emitPointToNearestCluster(Vector point, List<Cluster> clusters,
+      Mapper<WritableComparable<?>, VectorWritable, Text, KMeansInfo>.Context context) throws IOException, InterruptedException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -77,12 +79,11 @@ public class KMeansClusterer {
         nearestDistance = distance;
       }
     }
-    // emit only clusterID
-    output.collect(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
+    context.write(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
   }
 
-  public void outputPointWithClusterInfo(Vector vector, Iterable<Cluster> clusters,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+  public void outputPointWithClusterInfo(Vector vector, List<Cluster> clusters,
+      Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable>.Context context) throws IOException, InterruptedException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -93,8 +94,7 @@ public class KMeansClusterer {
         nearestDistance = distance;
       }
     }
-
-    output.collect(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, new VectorWritable(vector)));
+    context.write(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, new VectorWritable(vector)));
   }
 
   /**

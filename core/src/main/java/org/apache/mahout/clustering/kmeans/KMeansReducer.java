@@ -23,55 +23,57 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
-public class KMeansReducer extends MapReduceBase implements Reducer<Text,KMeansInfo,Text,Cluster> {
-  
-  private Map<String,Cluster> clusterMap;
+public class KMeansReducer extends Reducer<Text, KMeansInfo, Text, Cluster> {
+
+  private Map<String, Cluster> clusterMap;
+
   private double convergenceDelta;
+
   private DistanceMeasure measure;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<KMeansInfo> values,
-                     OutputCollector<Text,Cluster> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(Text key, Iterable<KMeansInfo> values, Context context) throws IOException, InterruptedException {
     Cluster cluster = clusterMap.get(key.toString());
-    
-    while (values.hasNext()) {
-      KMeansInfo delta = values.next();
+    Iterator<KMeansInfo> it = values.iterator();
+    while (it.hasNext()) {
+      KMeansInfo delta = it.next();
       cluster.addPoints(delta.getPoints(), delta.getPointTotal());
     }
     // force convergence calculation
     boolean converged = cluster.computeConvergence(this.measure, this.convergenceDelta);
     if (converged) {
-      reporter.incrCounter("Clustering", "Converged Clusters", 1);
+      //context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
-    output.collect(new Text(cluster.getIdentifier()), cluster);
+    context.write(new Text(cluster.getIdentifier()), cluster);
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
+      Class<?> cl = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
       this.measure = (DistanceMeasure) cl.newInstance();
-      this.measure.configure(job);
-      
-      this.convergenceDelta = Double.parseDouble(job.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
-      
-      this.clusterMap = new HashMap<String,Cluster>();
-      
-      String path = job.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
+      this.measure.configure(conf);
+
+      this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
+
+      this.clusterMap = new HashMap<String, Cluster>();
+
+      String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if (path.length() > 0) {
         List<Cluster> clusters = new ArrayList<Cluster>();
         KMeansUtil.configureWithClusterInfo(new Path(path), clusters);
@@ -88,18 +90,18 @@ public class KMeansReducer extends MapReduceBase implements Reducer<Text,KMeansI
       throw new IllegalStateException(e);
     }
   }
-  
+
   private void setClusterMap(List<Cluster> clusters) {
-    clusterMap = new HashMap<String,Cluster>();
+    clusterMap = new HashMap<String, Cluster>();
     for (Cluster cluster : clusters) {
       clusterMap.put(cluster.getIdentifier(), cluster);
     }
     clusters.clear();
   }
-  
-  public void config(List<Cluster> clusters) {
+
+  public void setup(List<Cluster> clusters, DistanceMeasure measure) {
     setClusterMap(clusters);
-    
+    this.measure = measure;
   }
-  
+
 }
