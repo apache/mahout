@@ -22,36 +22,34 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.VectorWritable;
 
-public class MeanShiftCanopyCreatorMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,VectorWritable,Text,MeanShiftCanopy> {
+public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, MeanShiftCanopy> {
 
-  private static final Pattern UNDERSCORE_PATTERN = Pattern.compile("_");  
+  private static final Pattern UNDERSCORE_PATTERN = Pattern.compile("_");
+
   private static int nextCanopyId = -1;
 
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable vector,
-                  OutputCollector<Text,MeanShiftCanopy> output,
-                  Reporter reporter) throws IOException {
-    MeanShiftCanopy canopy = new MeanShiftCanopy(vector.get(), nextCanopyId++);
-    output.collect(new Text(key.toString()), canopy);
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+    MeanShiftCanopy canopy = new MeanShiftCanopy(point.get(), nextCanopyId++);
+    context.write(new Text(key.toString()), canopy);
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
     if (nextCanopyId == -1) {
-      String taskId = job.get("mapred.task.id");
+      String taskId = context.getConfiguration().get("mapred.task.id");
       String[] parts = UNDERSCORE_PATTERN.split(taskId);
-      if (parts.length != 6 || !parts[0].equals("attempt")
-          || (!"m".equals(parts[3]) && !"r".equals(parts[3]))) {
+      if (parts.length != 6 || !parts[0].equals("attempt") || (!"m".equals(parts[3]) && !"r".equals(parts[3]))) {
         throw new IllegalArgumentException("TaskAttemptId string : " + taskId + " is not properly formed");
       }
       nextCanopyId = ((1 << 31) / 50000) * (Integer.parseInt(parts[4]));

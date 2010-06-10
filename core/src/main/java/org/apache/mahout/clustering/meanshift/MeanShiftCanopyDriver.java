@@ -25,21 +25,18 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -57,7 +54,7 @@ public final class MeanShiftCanopyDriver {
   private MeanShiftCanopyDriver() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
     Option inputOpt = DefaultOptionCreator.inputOption().create();
     Option outputOpt = DefaultOptionCreator.outputOption().create();
     Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
@@ -70,10 +67,9 @@ public final class MeanShiftCanopyDriver {
     Option threshold2Opt = DefaultOptionCreator.t2Option().create();
     Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
 
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(overwriteOutput).withOption(measureClassOpt).withOption(helpOpt)
-        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(threshold2Opt)
-        .withOption(clusteringOpt).withOption(maxIterOpt).withOption(inputIsCanopiesOpt).create();
+    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(overwriteOutput)
+        .withOption(measureClassOpt).withOption(helpOpt).withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(
+            threshold2Opt).withOption(clusteringOpt).withOption(maxIterOpt).withOption(inputIsCanopiesOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -95,15 +91,8 @@ public final class MeanShiftCanopyDriver {
       double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt).toString());
       double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
       int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
-      runJob(input,
-             output,
-             measureClass,
-             t1,
-             t2,
-             convergenceDelta,
-             maxIterations,
-             cmdLine.hasOption(inputIsCanopiesOpt),
-             cmdLine.hasOption(clusteringOpt));
+      runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, cmdLine.hasOption(inputIsCanopiesOpt), cmdLine
+          .hasOption(clusteringOpt));
     } catch (OptionException e) {
       log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
@@ -127,60 +116,51 @@ public final class MeanShiftCanopyDriver {
    *          the T2 distance threshold
    * @param convergenceDelta
    *          the double convergence criteria
+   * @throws IOException 
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   static void runIteration(Path input, Path output, Path control, String measureClassName, double t1, double t2,
-      double convergenceDelta) {
+      double convergenceDelta) throws IOException, InterruptedException, ClassNotFoundException {
 
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
-
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(MeanShiftCanopy.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
-
-    conf.setMapperClass(MeanShiftCanopyMapper.class);
-    conf.setReducerClass(MeanShiftCanopyReducer.class);
-    conf.setNumReduceTasks(1);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    Configuration conf = new Configuration();
     conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, control.toString());
 
-    client.setConf(conf);
-    try {
-      JobClient.runJob(conf);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    }
+    Job job = new Job(conf);
+
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(MeanShiftCanopy.class);
+
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, output);
+
+    job.setMapperClass(MeanShiftCanopyMapper.class);
+    job.setReducerClass(MeanShiftCanopyReducer.class);
+    job.setNumReduceTasks(1);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+    job.waitForCompletion(true);
   }
 
-  static void createCanopyFromVectors(Path input, Path output) {
+  static void createCanopyFromVectors(Path input, Path output) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
+    Job job = new Job(conf);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(MeanShiftCanopy.class);
+    job.setMapperClass(MeanShiftCanopyCreatorMapper.class);
+    job.setNumReduceTasks(0);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, output);
 
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(MeanShiftCanopy.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
-
-    conf.setMapperClass(MeanShiftCanopyCreatorMapper.class);
-    conf.setNumReduceTasks(0);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-
-    client.setConf(conf);
-    try {
-      JobClient.runJob(conf);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    }
+    job.waitForCompletion(true);
   }
 
   /**
@@ -192,32 +172,29 @@ public final class MeanShiftCanopyDriver {
    *          the directory pathname for input clusters
    * @param output
    *          the directory pathname for output clustered points
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
+   * @throws IOException 
    */
-  static void runClustering(Path input, Path clustersIn, Path output) {
+  static void runClustering(Path input, Path clustersIn, Path output) throws IOException, InterruptedException,
+      ClassNotFoundException {
 
-    JobConf conf = new JobConf(FuzzyKMeansDriver.class);
-    conf.setJobName("Mean Shift Clustering");
-
-    conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(WeightedVectorWritable.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
-
-    conf.setMapperClass(MeanShiftCanopyClusterMapper.class);
-
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-
-    // uncomment it to run locally
-    // conf.set("mapred.job.tracker", "local");
-    conf.setNumReduceTasks(0);
+    Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, clustersIn.toString());
-    try {
-      JobClient.runJob(conf);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    }
+    Job job = new Job(conf);
+
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(WeightedVectorWritable.class);
+    job.setMapperClass(MeanShiftCanopyClusterMapper.class);
+
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setNumReduceTasks(0);
+
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, output);
+
+    job.waitForCompletion(true);
   }
 
   /**
@@ -241,19 +218,12 @@ public final class MeanShiftCanopyDriver {
               true if the input path already contains MeanShiftCanopies and does not need to be converted from Vectors
    * @param runClustering 
    *          true if the input points are to be clustered once the iterations complete
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static void runJob(Path input,
-                            Path output,
-                            String measureClassName,
-                            double t1,
-                            double t2,
-                            double convergenceDelta,
-                            int maxIterations,
-                            boolean inputIsCanopies,
-                            boolean runClustering) throws IOException {
-    // delete the output directory
-    Configuration conf = new JobConf(MeanShiftCanopyDriver.class);
-
+  public static void runJob(Path input, Path output, String measureClassName, double t1, double t2, double convergenceDelta,
+      int maxIterations, boolean inputIsCanopies, boolean runClustering) throws IOException, InterruptedException,
+      ClassNotFoundException {
     Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     if (inputIsCanopies) {
       clustersIn = input;
@@ -270,7 +240,7 @@ public final class MeanShiftCanopyDriver {
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
       Path controlOut = new Path(output, CONTROL_CONVERGED);
       runIteration(clustersIn, clustersOut, controlOut, measureClassName, t1, t2, convergenceDelta);
-      converged = FileSystem.get(conf).exists(controlOut);
+      converged = FileSystem.get(new Configuration()).exists(controlOut);
       // now point the input to the old output directory
       clustersIn = clustersOut;
       iteration++;
@@ -278,10 +248,8 @@ public final class MeanShiftCanopyDriver {
 
     if (runClustering) {
       // now cluster the points
-      runClustering(
-          inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
-          clustersIn,
-          new Path(output, Cluster.CLUSTERED_POINTS_DIR));
+      runClustering(inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR), clustersIn, new Path(output,
+          Cluster.CLUSTERED_POINTS_DIR));
     }
   }
 }

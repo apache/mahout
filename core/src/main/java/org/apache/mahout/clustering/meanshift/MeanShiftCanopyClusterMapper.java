@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -28,42 +29,41 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class MeanShiftCanopyClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {
+public class MeanShiftCanopyClusterMapper extends Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {
 
   private List<MeanShiftCanopy> canopies;
 
+  
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(WritableComparable<?> key,
-                  MeanShiftCanopy canopy,
-                  OutputCollector<IntWritable, WeightedVectorWritable> output,
-                  Reporter reporter) throws IOException {
+  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context) throws IOException, InterruptedException {
     // canopies use canopyIds assigned when input vectors are processed as vectorIds too
     int vectorId = canopy.getId();
     for (MeanShiftCanopy msc : canopies) {
       for (int containedId : msc.getBoundPoints().toList()) {
         if (vectorId == containedId) {
-          output.collect(new IntWritable(msc.getId()),
+          context.write(new IntWritable(msc.getId()),
                          new WeightedVectorWritable(1, new VectorWritable(canopy.getCenter())));
         }
       }
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
     try {
-      canopies = getCanopies(job);
+      canopies = getCanopies(context.getConfiguration());
     } catch (SecurityException e) {
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
@@ -71,15 +71,15 @@ public class MeanShiftCanopyClusterMapper extends MapReduceBase implements
     }
   }
 
-  public static List<MeanShiftCanopy> getCanopies(JobConf job) {
-    String statePath = job.get(MeanShiftCanopyDriver.STATE_IN_KEY);
+  public static List<MeanShiftCanopy> getCanopies(Configuration configuration) {
+    String statePath = configuration.get(MeanShiftCanopyDriver.STATE_IN_KEY);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     try {
       Path path = new Path(statePath);
-      FileSystem fs = FileSystem.get(path.toUri(), job);
+      FileSystem fs = FileSystem.get(path.toUri(), configuration);
       FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
       for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), configuration);
         try {
           Text key = new Text();
           MeanShiftCanopy canopy = new MeanShiftCanopy();

@@ -24,24 +24,22 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Text,Text,MeanShiftCanopy> {
+public class InputMapper extends Mapper<LongWritable,Text,Text,MeanShiftCanopy> {
   
   private static final Pattern SPACE = Pattern.compile(" ");
   private int nextCanopyId;
   
+  
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(LongWritable key,
-                  Text values,
-                  OutputCollector<Text,MeanShiftCanopy> output,
-                  Reporter reporter) throws IOException {
+  protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
     String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     List<Double> doubles = new ArrayList<Double>();
@@ -56,7 +54,6 @@ public class InputMapper extends MapReduceBase implements Mapper<LongWritable,Te
       point.set(index++, d);
     }
     MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++);
-    output.collect(new Text(), canopy);
+    context.write(new Text(), canopy);
   }
-  
 }

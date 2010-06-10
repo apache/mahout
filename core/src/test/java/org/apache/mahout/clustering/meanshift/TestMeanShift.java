@@ -27,10 +27,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.MockMapperContext;
+import org.apache.mahout.clustering.MockReducerContext;
 import org.apache.mahout.common.DummyOutputCollector;
-import org.apache.mahout.common.DummyReporter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -143,8 +143,6 @@ public class TestMeanShift extends MahoutTestCase {
    * CanopyMapper/Combiner which clusters input points to produce an output set of canopies.
    */
   public void testCanopyMapperEuclidean() throws Exception {
-    MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
-    DummyOutputCollector<Text, MeanShiftCanopy> collector = new DummyOutputCollector<Text, MeanShiftCanopy>();
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
@@ -155,22 +153,25 @@ public class TestMeanShift extends MahoutTestCase {
       clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), refCanopies);
     }
 
-    JobConf conf = new JobConf();
+    Configuration conf = new Configuration();
     conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, "1");
     conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.5");
-    mapper.configure(conf);
 
     // map the data
+    MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
+    DummyOutputCollector<Text, MeanShiftCanopy> mapCollector = new DummyOutputCollector<Text, MeanShiftCanopy>();
+    MockMapperContext<Text, MeanShiftCanopy> mapContext = new MockMapperContext<Text, MeanShiftCanopy>(mapper, conf, mapCollector);
+    mapper.setup(mapContext);
     for (MeanShiftCanopy canopy : canopies) {
-      mapper.map(new Text(), canopy, collector, null);
+      mapper.map(new Text(), canopy, mapContext);
     }
-    mapper.close();
+    mapper.cleanup(mapContext);
 
     // now verify the output
-    assertEquals("Number of map results", 1, collector.getData().size());
-    List<MeanShiftCanopy> data = collector.getValue(new Text("canopy"));
+    assertEquals("Number of map results", 1, mapCollector.getData().size());
+    List<MeanShiftCanopy> data = mapCollector.getValue(new Text("canopy"));
     assertEquals("Number of canopies", refCanopies.size(), data.size());
 
     // add all points to the reference canopies
@@ -200,9 +201,6 @@ public class TestMeanShift extends MahoutTestCase {
    * clusters input centroid points to produce an output set of final canopy centroid points.
    */
   public void testCanopyReducerEuclidean() throws Exception {
-    MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
-    MeanShiftCanopyReducer reducer = new MeanShiftCanopyReducer();
-    DummyOutputCollector<Text, MeanShiftCanopy> mapCollector = new DummyOutputCollector<Text, MeanShiftCanopy>();
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(euclideanDistanceMeasure, 4, 1, 0.5);
     // get the initial canopies
     List<MeanShiftCanopy> canopies = getInitialCanopies();
@@ -224,25 +222,32 @@ public class TestMeanShift extends MahoutTestCase {
       clusterer.shiftToMean(canopy);
     }
 
-    JobConf conf = new JobConf();
+    Configuration conf = new Configuration();
     conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, "1");
     conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.5");
-    mapper.configure(conf);
+
+    MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
+    DummyOutputCollector<Text, MeanShiftCanopy> mapCollector = new DummyOutputCollector<Text, MeanShiftCanopy>();
+    MockMapperContext<Text, MeanShiftCanopy> mapContext = new MockMapperContext<Text, MeanShiftCanopy>(mapper, conf, mapCollector);
+    mapper.setup(mapContext);
 
     // map the data
     for (MeanShiftCanopy canopy : canopies) {
-      mapper.map(new Text(), canopy, mapCollector, null);
+      mapper.map(new Text(), canopy, mapContext);
     }
-    mapper.close();
+    mapper.cleanup(mapContext);
 
     assertEquals("Number of map results", 1, mapCollector.getData().size());
     // now reduce the mapper output
+    MeanShiftCanopyReducer reducer = new MeanShiftCanopyReducer();
     DummyOutputCollector<Text, MeanShiftCanopy> reduceCollector = new DummyOutputCollector<Text, MeanShiftCanopy>();
-    reducer.configure(conf);
-    reducer.reduce(new Text("canopy"), mapCollector.getValue(new Text("canopy")).iterator(), reduceCollector, new DummyReporter());
-    reducer.close();
+    MockReducerContext<Text, MeanShiftCanopy> reduceContext = new MockReducerContext<Text, MeanShiftCanopy>(reducer, conf,
+        reduceCollector, Text.class, MeanShiftCanopy.class);
+    reducer.setup(reduceContext);
+    reducer.reduce(new Text("canopy"), mapCollector.getValue(new Text("canopy")), reduceContext);
+    reducer.cleanup(reduceContext);
 
     // now verify the output
     assertEquals("Number of canopies", reducerReference.size(), reduceCollector.getKeys().size());
@@ -287,8 +292,8 @@ public class TestMeanShift extends MahoutTestCase {
     // now run the Job
     Path output = getTestTempDirPath("output");
     MeanShiftCanopyDriver.runJob(input, output, EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
-    JobConf conf = new JobConf(MeanShiftCanopyDriver.class);
-    Path outPart = new Path(output, "clusters-3/part-00000");
+    Configuration conf = new Configuration();
+    Path outPart = new Path(output, "clusters-3/part-r-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();
     MeanShiftCanopy value = new MeanShiftCanopy();

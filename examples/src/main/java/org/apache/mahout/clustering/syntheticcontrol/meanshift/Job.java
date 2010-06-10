@@ -27,9 +27,9 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.CommandLineUtil;
@@ -119,6 +119,8 @@ public final class Job {
    *          the double convergence criteria for iterations
    * @param maxIterations
    *          the int maximum number of iterations
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    */
@@ -128,9 +130,9 @@ public final class Job {
                              double t1,
                              double t2,
                              double convergenceDelta,
-                             int maxIterations) throws IOException {
+                             int maxIterations) throws IOException, InterruptedException, ClassNotFoundException {
     JobClient client = new JobClient();
-    JobConf conf = new JobConf(Job.class);
+    Configuration conf = new Configuration();
 
     client.setConf(conf);
     HadoopUtil.overwriteOutput(output);

@@ -23,42 +23,40 @@ import java.util.List;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 
-public class MeanShiftCanopyMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>,MeanShiftCanopy,Text,MeanShiftCanopy> {
+public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,MeanShiftCanopy,Text,MeanShiftCanopy> {
   
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
   
   private MeanShiftCanopyClusterer clusterer;
-  private OutputCollector<Text,MeanShiftCanopy> output;
-  
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(WritableComparable<?> key,
-                  MeanShiftCanopy canopy,
-                  OutputCollector<Text,MeanShiftCanopy> output,
-                  Reporter reporter) throws IOException {
-    this.output = output;
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    clusterer = new MeanShiftCanopyClusterer(context.getConfiguration());
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context) throws IOException, InterruptedException {
     clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void close() throws IOException {
+  protected void cleanup(Context context) throws IOException, InterruptedException {
     for (MeanShiftCanopy canopy : canopies) {
       clusterer.shiftToMean(canopy);
-      output.collect(new Text("canopy"), canopy);
+      context.write(new Text("canopy"), canopy);
     }
-    super.close();
+    super.cleanup(context);
   }
-  
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    clusterer = new MeanShiftCanopyClusterer(job);
-  }
-  
+
 }

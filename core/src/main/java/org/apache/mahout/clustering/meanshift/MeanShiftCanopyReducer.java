@@ -22,60 +22,59 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
-public class MeanShiftCanopyReducer extends MapReduceBase implements
-    Reducer<Text,MeanShiftCanopy,Text,MeanShiftCanopy> {
+public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,MeanShiftCanopy> {
   
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
   private MeanShiftCanopyClusterer clusterer;
   private boolean allConverged = true;
   
-  private JobConf conf;
-  
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<MeanShiftCanopy> values,
-                     OutputCollector<Text,MeanShiftCanopy> output,
-                     Reporter reporter) throws IOException {
-    
-    while (values.hasNext()) {
-      MeanShiftCanopy canopy = values.next();
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    clusterer = new MeanShiftCanopyClusterer(context.getConfiguration());
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
+  @Override
+  protected void reduce(Text key, Iterable<MeanShiftCanopy> values, Context context) throws IOException, InterruptedException {
+    Iterator<MeanShiftCanopy> it = values.iterator();
+    while (it.hasNext()) {
+      MeanShiftCanopy canopy = it.next();
       clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
     }
     
     for (MeanShiftCanopy canopy : canopies) {
       boolean converged = clusterer.shiftToMean(canopy);
       if (converged) {
-        reporter.incrCounter("Clustering", "Converged Clusters", 1);
+      // TODO:  reporter.incrCounter("Clustering", "Converged Clusters", 1);
       }
       allConverged = converged && allConverged;
-      output.collect(new Text(canopy.getIdentifier()), canopy);
+      context.write(new Text(canopy.getIdentifier()), canopy);
     }
     
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#cleanup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    this.conf = job;
-    clusterer = new MeanShiftCanopyClusterer(job);
-  }
-  
-  @Override
-  public void close() throws IOException {
+  protected void cleanup(Context context) throws IOException, InterruptedException {
+    Configuration conf = context.getConfiguration();
     if (allConverged) {
       Path path = new Path(conf.get(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY));
       FileSystem.get(conf).createNewFile(path);
     }
-    super.close();
+    super.cleanup(context);
   }
-  
 }

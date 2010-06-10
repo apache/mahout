@@ -25,14 +25,14 @@ import org.apache.commons.cli2.Option;
 import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -42,18 +42,18 @@ import org.slf4j.LoggerFactory;
 public final class InputDriver {
 
   private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
-  
-  private InputDriver() { }
-  
-  public static void main(String[] args) throws IOException {
+
+  private InputDriver() {
+  }
+
+  public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
     GroupBuilder gbuilder = new GroupBuilder();
-    
+
     Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
     Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
     Option helpOpt = DefaultOptionCreator.helpOption();
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt)
-        .create();
-    
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(helpOpt).create();
+
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -62,7 +62,7 @@ public final class InputDriver {
         CommandLineUtil.printHelp(group);
         return;
       }
-      
+
       Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       runJob(input, output);
@@ -71,23 +71,21 @@ public final class InputDriver {
       CommandLineUtil.printHelp(group);
     }
   }
-  
-  public static void runJob(Path input, Path output) throws IOException {
-    JobClient client = new JobClient();
-    JobConf conf = new JobConf(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputDriver.class);
-    
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(MeanShiftCanopy.class);
-    
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.setMapperClass(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputMapper.class);
-    conf.setReducerClass(Reducer.class);
-    conf.setNumReduceTasks(0);
-    
-    client.setConf(conf);
-    JobClient.runJob(conf);
+
+  public static void runJob(Path input, Path output) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
+
+    Job job = new Job(conf);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(MeanShiftCanopy.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setMapperClass(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputMapper.class);
+    job.setReducerClass(Reducer.class);
+    job.setNumReduceTasks(0);
+
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, output);
+
+    job.waitForCompletion(true);
   }
-  
 }
