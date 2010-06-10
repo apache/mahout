@@ -21,10 +21,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -60,8 +61,8 @@ public class FuzzyKMeansClusterer {
     this.m = m;
   }
 
-  public FuzzyKMeansClusterer(JobConf job) {
-    this.configure(job);
+  public FuzzyKMeansClusterer(Configuration conf) {
+    this.configure(conf);
   }
 
   /**
@@ -70,7 +71,7 @@ public class FuzzyKMeansClusterer {
    * @param job
    *          the JobConf for the job
    */
-  private void configure(JobConf job) {
+  private void configure(Configuration job) {
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl.loadClass(job.get(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY));
@@ -98,12 +99,12 @@ public class FuzzyKMeansClusterer {
    *          a point
    * @param clusters
    *          a List<SoftCluster>
-   * @param output
-   *          the OutputCollector to emit into
+   * @param context
+   *          the Context to emit into
+   * @throws InterruptedException 
    */
-  public void emitPointProbToCluster(Vector point,
-                                     List<SoftCluster> clusters, 
-                                     OutputCollector<Text, FuzzyKMeansInfo> output) throws IOException {
+  public void emitPointProbToCluster(Vector point, List<SoftCluster> clusters,
+      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context context) throws IOException, InterruptedException {
 
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
@@ -113,13 +114,8 @@ public class FuzzyKMeansClusterer {
     for (int i = 0; i < clusters.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
       Text key = new Text(clusters.get(i).getIdentifier());
-      // just output the identifier,avoids too much data traffic
-      /*
-       * Text value = new Text(Double.toString(probWeight) + FuzzyKMeansDriver.MAPPER_VALUE_SEPARATOR +
-       * values.toString());
-       */
       FuzzyKMeansInfo value = new FuzzyKMeansInfo(probWeight, point);
-      output.collect(key, value);
+      context.write(key, value);
     }
   }
 
@@ -158,7 +154,8 @@ public class FuzzyKMeansClusterer {
   }
 
   public void emitPointToClusters(VectorWritable point, List<SoftCluster> clusters,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
+      InterruptedException {
     // calculate point distances for all clusters    
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
@@ -171,9 +168,9 @@ public class FuzzyKMeansClusterer {
       pi.set(i, probWeight);
     }
     if (emitMostLikely) {
-      emitMostLikelyCluster(point.get(), clusters, pi, output);
+      emitMostLikelyCluster(point.get(), clusters, pi, context);
     } else {
-      emitAllClusters(point.get(), clusters, pi, output);
+      emitAllClusters(point.get(), clusters, pi, context);
     }
   }
 
@@ -185,9 +182,11 @@ public class FuzzyKMeansClusterer {
    * @param clusterPdfList
    * @param output
    * @throws IOException
+   * @throws InterruptedException 
    */
   static void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector clusterPdfList,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
+      InterruptedException {
     int clusterId = -1;
     double clusterPdf = 0;
     for (int i = 0; i < clusters.size(); i++) {
@@ -199,7 +198,7 @@ public class FuzzyKMeansClusterer {
       }
     }
     // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-    output.collect(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
+    context.write(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
   }
 
   /**
@@ -210,14 +209,16 @@ public class FuzzyKMeansClusterer {
    * @param pi
    * @param output
    * @throws IOException
+   * @throws InterruptedException 
    */
   void emitAllClusters(Vector point, List<SoftCluster> clusters, Vector pi,
-      OutputCollector<IntWritable, WeightedVectorWritable> output) throws IOException {
+      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
+      InterruptedException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
       if (pdf > threshold) {
         // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-        output.collect(new IntWritable(i), new WeightedVectorWritable(pdf, new VectorWritable(point)));
+        context.write(new IntWritable(i), new WeightedVectorWritable(pdf, new VectorWritable(point)));
       }
     }
   }
@@ -241,12 +242,8 @@ public class FuzzyKMeansClusterer {
    * @return
    *          a List<List<SoftCluster>> of clusters produced per iteration
    */
-  public static List<List<SoftCluster>> clusterPoints(List<Vector> points,
-                                                      List<SoftCluster> clusters,
-                                                      DistanceMeasure measure,
-                                                      double threshold,
-                                                      double m,
-                                                      int numIter) {
+  public static List<List<SoftCluster>> clusterPoints(List<Vector> points, List<SoftCluster> clusters, DistanceMeasure measure,
+      double threshold, double m, int numIter) {
     List<List<SoftCluster>> clustersList = new ArrayList<List<SoftCluster>>();
     clustersList.add(clusters);
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, threshold, m);
@@ -273,9 +270,7 @@ public class FuzzyKMeansClusterer {
    * @param clusterList
    *          the List<Cluster> clusters
    */
-  public static boolean runFuzzyKMeansIteration(List<Vector> points,
-                                                List<SoftCluster> clusterList,
-                                                FuzzyKMeansClusterer clusterer) {
+  public static boolean runFuzzyKMeansIteration(List<Vector> points, List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer) {
     for (Vector point : points) {
       List<Double> clusterDistanceList = new ArrayList<Double>();
       for (SoftCluster cluster : clusterList) {

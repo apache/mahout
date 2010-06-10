@@ -21,27 +21,22 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
-public class FuzzyKMeansCombiner extends MapReduceBase implements
-    Reducer<Text,FuzzyKMeansInfo,Text,FuzzyKMeansInfo> {
+public class FuzzyKMeansCombiner extends Reducer<Text,FuzzyKMeansInfo,Text,FuzzyKMeansInfo> {
   
   private FuzzyKMeansClusterer clusterer;
   
+  
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<FuzzyKMeansInfo> values,
-                     OutputCollector<Text,FuzzyKMeansInfo> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(Text key, Iterable<FuzzyKMeansInfo> values, Context context) throws IOException, InterruptedException {
     SoftCluster cluster = new SoftCluster(key.toString().trim());
-    while (values.hasNext()) {
-      // String pointInfo = values.next().toString();
-      FuzzyKMeansInfo info = values.next();
-      
+    Iterator<FuzzyKMeansInfo> it = values.iterator();
+    while (it.hasNext()) {
+      FuzzyKMeansInfo info = it.next();   
       if (info.getCombinerPass() == 0) { // first time thru combiner
         cluster.addPoint(info.getVector(), Math.pow(info.getProbability(), clusterer.getM()));
       } else {
@@ -50,13 +45,15 @@ public class FuzzyKMeansCombiner extends MapReduceBase implements
       info.setCombinerPass(info.getCombinerPass() + 1);
     }
     // TODO: how do we pass along the combinerPass? Or do we not need to?
-    output.collect(key, new FuzzyKMeansInfo(cluster.getPointProbSum(), cluster.getWeightedPointTotal(), 1));
-  }
-  
+    context.write(key, new FuzzyKMeansInfo(cluster.getPointProbSum(), cluster.getWeightedPointTotal(), 1));
+    }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    clusterer = new FuzzyKMeansClusterer(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    clusterer = new FuzzyKMeansClusterer(context.getConfiguration());
   }
-  
 }

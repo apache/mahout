@@ -36,12 +36,11 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
@@ -167,6 +166,7 @@ public final class FuzzyKMeansDriver {
    *          a boolean if true emit only most likely cluster for each point
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @throws IOException 
    */
   public static void runJob(Path input,
                             Path clustersIn,
@@ -179,7 +179,7 @@ public final class FuzzyKMeansDriver {
                             float m,
                             boolean runClustering,
                             boolean emitMostLikely,
-                            double threshold) {
+                            double threshold) throws IOException {
 
     boolean converged = false;
     int iteration = 1;
@@ -239,6 +239,7 @@ public final class FuzzyKMeansDriver {
    *          the fuzzification factor - see
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
    * @return true if the iteration successfully runs
+   * @throws IOException 
    */
   private static boolean runIteration(Path input,
                                       Path clustersIn,
@@ -248,28 +249,9 @@ public final class FuzzyKMeansDriver {
                                       int numMapTasks,
                                       int numReduceTasks,
                                       int iterationNumber,
-                                      float m) {
+                                      float m) throws IOException {
 
-    JobConf conf = new JobConf(FuzzyKMeansDriver.class);
-    conf.setJobName("Fuzzy K Means{" + iterationNumber + '}');
-
-    conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(FuzzyKMeansInfo.class);
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(SoftCluster.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, clustersOut);
-
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-
-    conf.setMapperClass(FuzzyKMeansMapper.class);
-    conf.setCombinerClass(FuzzyKMeansCombiner.class);
-    conf.setReducerClass(FuzzyKMeansReducer.class);
-    conf.setNumMapTasks(numMapTasks);
-    conf.setNumReduceTasks(numReduceTasks);
-
+    Configuration conf = new Configuration();
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
@@ -277,15 +259,38 @@ public final class FuzzyKMeansDriver {
     // these values don't matter during iterations as only used for clustering if requested
     conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, Boolean.toString(true));
     conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, Double.toString(0));
+    
+    Job job = new Job(conf);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(FuzzyKMeansInfo.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(SoftCluster.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+    job.setMapperClass(FuzzyKMeansMapper.class);
+    job.setCombinerClass(FuzzyKMeansCombiner.class);
+    job.setReducerClass(FuzzyKMeansReducer.class);
+    //TODO: job.setNumMapTasks(numMapTasks);
+    job.setNumReduceTasks(numReduceTasks);
+
+    FileInputFormat.addInputPath(job, input);
+    FileOutputFormat.setOutputPath(job, clustersOut);
 
     // uncomment it to run locally
     // conf.set("mapred.job.tracker", "local");
 
     try {
-      JobClient.runJob(conf);
+      job.waitForCompletion(true);
       FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
       return isConverged(clustersOut, conf, fs);
     } catch (IOException e) {
+      log.warn(e.toString(), e);
+      return true;
+    } catch (InterruptedException e) {
+      log.warn(e.toString(), e);
+      return true;
+    } catch (ClassNotFoundException e) {
       log.warn(e.toString(), e);
       return true;
     }
@@ -310,6 +315,7 @@ public final class FuzzyKMeansDriver {
    *          a boolean if true emit only most likely cluster for each point
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @throws IOException 
    */
   private static void runClustering(Path input,
                                     Path clustersIn,
@@ -319,36 +325,39 @@ public final class FuzzyKMeansDriver {
                                     int numMapTasks,
                                     float m,
                                     boolean emitMostLikely,
-                                    double threshold) {
+                                    double threshold) throws IOException {
 
-    JobConf conf = new JobConf(FuzzyKMeansDriver.class);
-    conf.setJobName("Fuzzy K Means Clustering");
-
-    conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(WeightedVectorWritable.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
-
-    conf.setMapperClass(FuzzyKMeansClusterMapper.class);
-
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-
-    // uncomment it to run locally
-    // conf.set("mapred.job.tracker", "local");
-    conf.setNumMapTasks(numMapTasks);
-    conf.setNumReduceTasks(0);
+    Configuration conf = new Configuration();
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
     conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
     conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
     conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, Double.toString(threshold));
+    
+    Job job = new Job(conf);
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(WeightedVectorWritable.class);
+
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, output);
+
+    job.setMapperClass(FuzzyKMeansClusterMapper.class);
+
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    //TODO: job.setNumMapTasks(numMapTasks);
+    job.setNumReduceTasks(0);
     try {
-      JobClient.runJob(conf);
+      job.waitForCompletion(true);
     } catch (IOException e) {
       log.warn(e.toString(), e);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ClassNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 

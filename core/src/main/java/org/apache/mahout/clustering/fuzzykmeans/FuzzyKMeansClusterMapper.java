@@ -21,54 +21,38 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class FuzzyKMeansClusterMapper extends MapReduceBase implements
-    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
+public class FuzzyKMeansClusterMapper extends Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
   private final List<SoftCluster> clusters = new ArrayList<SoftCluster>();
 
   private FuzzyKMeansClusterer clusterer;
 
-  //private boolean emitMostLikely = false;
-
-  //private double threshold = 0;
-
-  @Override
-  public void map(WritableComparable<?> key,
-                  VectorWritable point,
-                  OutputCollector<IntWritable, WeightedVectorWritable> output,
-                  Reporter reporter) throws IOException {
-    clusterer.emitPointToClusters(point, clusters, output);
-  }
-
-  /**
-   * Configure the mapper by providing its clusters. Used by unit tests.
-   * 
-   * @param clusters
-   *          a List<Cluster>
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
    */
-  void config(List<SoftCluster> clusters) {
-    this.clusters.clear();
-    this.clusters.addAll(clusters);
-  }
-
   @Override
-  public void configure(JobConf job) {
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+    clusterer.emitPointToClusters(point, clusters, context);
+    }
 
-    super.configure(job);
-    clusterer = new FuzzyKMeansClusterer(job);
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+     super.setup(context);
+     Configuration conf = context.getConfiguration();
+    clusterer = new FuzzyKMeansClusterer(conf);
 
-    String clusterPath = job.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
+    String clusterPath = conf.get(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY);
     if ((clusterPath != null) && (clusterPath.length() > 0)) {
       FuzzyKMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
     }
@@ -78,4 +62,15 @@ public class FuzzyKMeansClusterMapper extends MapReduceBase implements
     }
   }
 
+  /**
+   * Configure the mapper by providing its clusters. Used by unit tests.
+   * 
+   * @param clusters
+   *          a List<Cluster>
+   */
+  void setup(List<SoftCluster> clusters, Configuration conf) {
+    this.clusters.clear();
+    this.clusters.addAll(clusters);
+    this.clusterer = new FuzzyKMeansClusterer(conf);
+  }
 }
