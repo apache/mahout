@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
-import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -74,10 +73,20 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
     boolean isSymmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
     int desiredRank = Integer.parseInt(parsedArgs.get("--rank"));
+    return run(inputPathString, outputTmpPathString, numRows, numCols, isSymmetric, desiredRank);
+  }
+
+  public int run(String inputPathString,
+                 String outputTmpPathString,
+                 int numRows,
+                 int numCols,
+                 boolean isSymmetric,
+                 int desiredRank) throws Exception {
+    Configuration originalConfig = getConf();
     Matrix eigenVectors = new DenseMatrix(desiredRank, numCols);
     List<Double> eigenValues = new ArrayList<Double>();
     String outputEigenVectorPath =  originalConfig.get("mapred.output.dir");
-    
+
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPathString,
                                                            outputTmpPathString,
                                                            numRows,
@@ -85,7 +94,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     matrix.configure(new JobConf(originalConfig));
     solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
 
-    serializeOutput(eigenVectors, eigenValues, outputEigenVectorPath);  
+    serializeOutput(eigenVectors, eigenValues, outputEigenVectorPath);
     return 0;
   }
 

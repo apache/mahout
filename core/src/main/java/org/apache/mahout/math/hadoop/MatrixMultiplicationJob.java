@@ -79,6 +79,9 @@ public class MatrixMultiplicationJob extends AbstractJob {
     addOption("inputPathB", "ib", "Path to the second input matrix");
 
     Map<String, String> argMap = parseArguments(strings);
+    if(argMap == null) {
+      return -1;
+    }
 
     DistributedRowMatrix a = new DistributedRowMatrix(argMap.get("--inputPathA"),
                                                       argMap.get("--tempDir"),
