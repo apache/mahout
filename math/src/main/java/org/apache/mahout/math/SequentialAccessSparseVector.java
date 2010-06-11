@@ -152,7 +152,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
   public Iterator<Element> iterator() {
     return new AllIterator();
   }
-    
+
   @Override
   public double dot(Vector x) {
     if (size() != x.size()) {
@@ -162,37 +162,38 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return dotSelf();
     }
     
-    double result = 0;
     if (x instanceof SequentialAccessSparseVector) {
       // For sparse SeqAccVectors. do dot product without lookup in a linear fashion
       Iterator<Element> myIter = iterateNonZero();
       Iterator<Element> otherIter = x.iterateNonZero();
-      Element myCurrent = null;
-      Element otherCurrent = null;
-      while (myIter.hasNext() && otherIter.hasNext()) {
-        if (myCurrent == null) {
-          myCurrent = myIter.next();
-        }
-        if (otherCurrent == null) {
-          otherCurrent = otherIter.next();
-        }
-
+      if (!myIter.hasNext() || !otherIter.hasNext()) {
+        return 0.0;
+      }
+      Element myCurrent = myIter.next();
+      Element otherCurrent = otherIter.next();
+      double result = 0.0;
+      while (true) {
         int myIndex = myCurrent.index();
         int otherIndex = otherCurrent.index();
-        
-        if (myIndex < otherIndex) {
-          // due to the sparseness skipping occurs more hence checked before equality
-          myCurrent = null;
-        } else if (myIndex > otherIndex){
-          otherCurrent = null;
-        } else { // both are equal 
+        if (myIndex == otherIndex) {
           result += myCurrent.get() * otherCurrent.get();
-          myCurrent = null;
-          otherCurrent = null;
-        } 
+        }
+        if (myIndex <= otherIndex) {
+          if (!myIter.hasNext()) {
+            break;
+          }
+          myCurrent = myIter.next();
+        }
+        if (myIndex >= otherIndex) {
+          if (!otherIter.hasNext()) {
+            break;
+          }
+          otherCurrent = otherIter.next();
+        }
       }
       return result;
     } else { // seq.rand. seq.dense
+      double result = 0.0;      
       Iterator<Element> iter = iterateNonZero();
       while (iter.hasNext()) {
         Element element = iter.next();

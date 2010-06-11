@@ -219,6 +219,13 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     assertEquals("dot", expected, res, EPSILON);
   }
 
+  public void testDot2() {
+    Vector test2 = test.clone();
+    test2.set(1, 0.0);
+    test2.set(3, 0.0);
+    assertEquals(3.3 * 3.3, test2.dot(test), EPSILON);
+  }
+
   public void testDotCardinality() {
     try {
       test.dot(new DenseVector(test.size() + 1));
