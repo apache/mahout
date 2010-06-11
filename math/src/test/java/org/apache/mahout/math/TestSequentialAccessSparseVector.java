@@ -24,4 +24,17 @@ public class TestSequentialAccessSparseVector extends AbstractTestVector {
     return new SequentialAccessSparseVector(cardinality);
   }
 
+  public void testDot2() {
+    Vector w = new SequentialAccessSparseVector(Integer.MAX_VALUE, 12);
+    w.set(1, 0.4);
+    w.set(2, 0.4);
+    w.set(3, -0.666666667);
+
+    Vector v = new SequentialAccessSparseVector(Integer.MAX_VALUE, 12);
+    v.set(3, 1);
+
+    assertEquals("dot2", -0.666666667, v.dot(w));
+  }
+
+
 }
