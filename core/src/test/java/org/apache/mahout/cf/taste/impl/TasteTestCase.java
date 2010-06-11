@@ -26,6 +26,12 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,4 +76,14 @@ public abstract class TasteTestCase extends MahoutTestCase {
     return false;
   }
 
+  protected static void writeLines(File file, String... lines) throws FileNotFoundException {
+    PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8")));
+    try {
+      for (String line : lines) {
+        writer.println(line);
+      }
+    } finally {
+      writer.close();
+    }
+  }
 }

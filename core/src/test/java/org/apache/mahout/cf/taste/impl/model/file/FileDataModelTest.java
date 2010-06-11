@@ -31,14 +31,7 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 
 /** <p>Tests {@link FileDataModel}.</p> */
@@ -68,15 +61,7 @@ public final class FileDataModelTest extends TasteTestCase {
   public void setUp() throws Exception {
     super.setUp();
     testFile = getTestTempFile("test.txt");
-    PrintWriter writer =
-        new PrintWriter(new OutputStreamWriter(new FileOutputStream(testFile), Charset.forName("UTF-8")));
-    try {
-      for (String data : DATA) {
-        writer.println(data);
-      }
-    } finally {
-      writer.close();
-    }
+    writeLines(testFile, DATA);
     model = new FileDataModel(testFile);
   }
 
@@ -171,7 +156,7 @@ public final class FileDataModelTest extends TasteTestCase {
 
   public void testExplicitRefreshAfterCompleteFileUpdate() throws Exception {
     File file = getTestTempFile("refresh");
-    write(file, "123,456,3.0");
+    writeLines(file, "123,456,3.0");
 
     /* create a FileDataModel that always reloads when the underlying file has changed */
     FileDataModel dataModel = new FileDataModel(file, false, 0L);
@@ -180,7 +165,7 @@ public final class FileDataModelTest extends TasteTestCase {
     /* change the underlying file,
      * we have to wait at least a second to see the change in the file's lastModified timestamp */
     Thread.sleep(2000L);
-    write(file, "123,456,5.0");
+    writeLines(file, "123,456,5.0");
     dataModel.refresh(null);
 
     assertEquals(5.0f, dataModel.getPreferenceValue(123L, 456L));
@@ -190,12 +175,4 @@ public final class FileDataModelTest extends TasteTestCase {
     assertTrue(model.toString().length() > 0);
   }
 
-  private static void write(File file, String content) throws IOException {
-    BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-    try {
-      writer.write(content);
-    } finally {
-      writer.close();
-    }
-  }
 }
