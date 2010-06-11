@@ -63,20 +63,20 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
 
   private static final Logger log = LoggerFactory.getLogger(DistributedRowMatrix.class);
 
-  private final String inputPathString;
-  private final String outputTmpPathString;
+  private final Path inputPath;
+  private final Path outputTmpPath;
   private JobConf conf;
   private Path rowPath;
   private Path outputTmpBasePath;
   private final int numRows;
   private final int numCols;
 
-  public DistributedRowMatrix(String inputPathString,
-                              String outputTmpPathString,
+  public DistributedRowMatrix(Path inputPathString,
+                              Path outputTmpPathString,
                               int numRows,
                               int numCols) {
-    this.inputPathString = inputPathString;
-    this.outputTmpPathString = outputTmpPathString;
+    this.inputPath = inputPathString;
+    this.outputTmpPath = outputTmpPathString;
     this.numRows = numRows;
     this.numCols = numCols;
   }
@@ -85,8 +85,8 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   public void configure(JobConf conf) {
     this.conf = conf;
     try {
-      rowPath = FileSystem.get(conf).makeQualified(new Path(inputPathString));
-      outputTmpBasePath = FileSystem.get(conf).makeQualified(new Path(outputTmpPathString));
+      rowPath = FileSystem.get(conf).makeQualified(inputPath);
+      outputTmpBasePath = FileSystem.get(conf).makeQualified(outputTmpPath);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
@@ -142,8 +142,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     JobConf conf = MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
     try {
       JobClient.runJob(conf);
-      DistributedRowMatrix out = new DistributedRowMatrix(outPath.toString(),
-          outputTmpPathString, numRows, other.numCols());
+      DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numRows, other.numCols());
       out.configure(conf);
       return out;
     } catch (IOException ioe) {
@@ -156,7 +155,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     try {
       JobConf conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
       JobClient.runJob(conf);
-      DistributedRowMatrix m = new DistributedRowMatrix(outputPath.toString(), outputTmpPathString, numCols, numRows);
+      DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
       m.configure(this.conf);
       return m;
     } catch (IOException ioe) {
@@ -170,8 +169,8 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
       JobConf conf = TimesSquaredJob.createTimesJobConf(v,
                                                         numRows,
                                                         rowPath,
-                                                        new Path(outputTmpPathString,
-                                                                 new Path(Long.toString(System.nanoTime()))));
+                                                        new Path(outputTmpPath,
+                                                                 Long.toString(System.nanoTime())));
       JobClient.runJob(conf);
       return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
     } catch (IOException ioe) {

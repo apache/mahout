@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -39,7 +38,6 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
@@ -73,7 +71,9 @@ public final class RecommenderJob extends AbstractJob {
   
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-    
+
+    addInputOption();
+    addOutputOption();
     addOption("numRecommendations", "n", "Number of recommendations per user",
       String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
     addOption("usersFile", "u", "File of users to recommend for", null);
@@ -90,9 +90,8 @@ public final class RecommenderJob extends AbstractJob {
       return -1;
     }
     
-    Configuration originalConf = getConf();
-    Path inputPath = new Path(originalConf.get("mapred.input.dir"));
-    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
+    Path inputPath = getInputPath();
+    Path outputPath = getOutputPath();
     Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
     int numRecommendations = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");

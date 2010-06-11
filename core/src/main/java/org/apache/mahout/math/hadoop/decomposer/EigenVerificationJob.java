@@ -17,12 +17,6 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -31,7 +25,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MatrixSlice;
@@ -85,8 +78,8 @@ public class EigenVerificationJob extends AbstractJob {
   private double maxError;
   private double minEigenValue;
   private boolean loadEigensInMemory;
-  private String tmpOut;
-  private String outPath;
+  private Path tmpOut;
+  private Path outPath;
 
   public void setEigensToVerify(VectorIterable eigens) {
     eigensToVerify = eigens;
@@ -100,18 +93,17 @@ public class EigenVerificationJob extends AbstractJob {
     } else if (argMap.isEmpty()) {
       return 0;
     }
-    Configuration originalConf = getConf();
-    outPath = originalConf.get("mapred.output.dir");
-    tmpOut = outPath + "/tmp";
+    outPath = getOutputPath();
+    tmpOut = new Path(outPath, "tmp");
 
     if (argMap.get("--eigenInput") != null && eigensToVerify == null) {
-      prepareEigens(argMap.get("--eigenInput"), argMap.get("--inMemory") != null);
+      prepareEigens(new Path(argMap.get("--eigenInput")), argMap.get("--inMemory") != null);
     }
 
     maxError = Double.parseDouble(argMap.get("--maxError"));
     minEigenValue = Double.parseDouble(argMap.get("--minEigenvalue"));
 
-    DistributedRowMatrix c = new DistributedRowMatrix(argMap.get("--corpusInput"), tmpOut, 1, 1);
+    DistributedRowMatrix c = new DistributedRowMatrix(new Path(argMap.get("--corpusInput")), tmpOut, 1, 1);
     c.configure(new JobConf(getConf()));
     corpus = c;
 
@@ -132,6 +124,7 @@ public class EigenVerificationJob extends AbstractJob {
   }
 
   public Map<String,String> handleArgs(String[] args) {
+    addOutputOption();
     addOption("eigenInput", "ei",
         "The Path for purported eigenVector input files (SequenceFile<WritableComparable,VectorWritable>.", null);
     addOption("corpusInput", "ci",
@@ -198,7 +191,7 @@ public class EigenVerificationJob extends AbstractJob {
     return eigenMetaData;
   }
 
-  private void prepareEigens(String eigenInput, boolean inMemory) {
+  private void prepareEigens(Path eigenInput, boolean inMemory) {
     DistributedRowMatrix eigens = new DistributedRowMatrix(eigenInput, tmpOut, 1, 1);
     eigens.configure(new JobConf(getConf()));
     if (inMemory) {

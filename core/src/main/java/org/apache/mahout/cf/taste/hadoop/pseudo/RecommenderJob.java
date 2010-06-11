@@ -106,9 +106,9 @@ public final class RecommenderJob extends AbstractJob {
   
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-    
-    addOption(DefaultOptionCreator.inputOption().create());
-    addOption(DefaultOptionCreator.outputOption().create());
+
+    addInputOption();
+    addOutputOption();
     addOption("recommenderClassName", "r", "Name of recommender class to instantiate");
     addOption("numRecommendations", "n", "Number of recommendations per user", "10");
     addOption("usersFile", "u", "Number of recommendations per user", null);
@@ -118,15 +118,9 @@ public final class RecommenderJob extends AbstractJob {
       return -1;
     }
 
-    Configuration originalConf = getConf();
-    Path inputFile = new Path(originalConf.get("mapred.input.dir"));
-    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
-    Path usersFile;
-    if (parsedArgs.get("--usersFile") == null) {
-      usersFile = inputFile;
-    } else {
-      usersFile = new Path(parsedArgs.get("--usersFile"));
-    }
+    Path inputFile = getInputPath();
+    Path outputPath = getOutputPath();
+    Path usersFile = parsedArgs.get("--usersFile") == null ? inputFile : new Path(parsedArgs.get("--usersFile"));
     
     String recommendClassName = parsedArgs.get("--recommenderClassName");
     int recommendationsPerUser = Integer.parseInt(parsedArgs.get("--numRecommendations"));

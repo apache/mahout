@@ -24,7 +24,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -118,6 +117,8 @@ public final class ItemSimilarityJob extends AbstractJob {
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
+    addInputOption();
+    addOutputOption();
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
 
     Map<String,String> parsedArgs = parseArguments(args);
@@ -125,12 +126,10 @@ public final class ItemSimilarityJob extends AbstractJob {
       return -1;
     }
 
-    Configuration originalConf = getConf();
-
     String distributedSimilarityClassname = parsedArgs.get("--similarityClassname");
 
-    Path inputPath = new Path(originalConf.get("mapred.input.dir"));
-    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
+    Path inputPath = getInputPath();
+    Path outputPath = getOutputPath();
     Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
 
     Path countUsersPath = new Path(tempDirPath, "countUsers");

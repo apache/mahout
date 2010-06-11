@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.cli2.Argument;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -92,7 +91,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   /** internal list of options that have been added */
   private final List<Option> options;
   
-  public AbstractJob() {
+  protected AbstractJob() {
     options = new LinkedList<Option>();
   }
   
@@ -102,7 +101,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  property. 
    * @return
    */
-  public Path getInputPath() {
+  protected Path getInputPath() {
     return inputPath;
   }
   
@@ -112,7 +111,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  property. 
    * @return
    */
-  public Path getOutputPath() {
+  protected Path getOutputPath() {
     return outputPath;
   }
   
@@ -124,7 +123,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param shortName
    * @param description
    */
-  public void addFlag(String name, String shortName, String description) {
+  protected void addFlag(String name, String shortName, String description) {
     options.add(buildOption(name, shortName, description, true, false, null));
   }
   
@@ -136,7 +135,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param shortName
    * @param description
    */
-  public void addOption(String name, String shortName, String description) {
+  protected void addOption(String name, String shortName, String description) {
     options.add(buildOption(name, shortName, description, true, false, null));
   }
   
@@ -150,7 +149,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *    fail with an error and usage message if this option is not specified
    *    on the command line.
    */
-  public void addOption(String name, String shortName, String description, boolean required) {
+  protected void addOption(String name, String shortName, String description, boolean required) {
     options.add(buildOption(name, shortName, description, true, required, null));
   }
   
@@ -165,7 +164,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param defaultValue the default argument value if this argument is not
    *   found on the command-line. null is allowed.
    */
-  public void addOption(String name, String shortName, String description, String defaultValue) {
+  protected void addOption(String name, String shortName, String description, String defaultValue) {
     options.add(buildOption(name, shortName, description, true, false, defaultValue));
   }
 
@@ -178,7 +177,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param option
    * @return the option added.
    */
-  public Option addOption(Option option) {
+  protected Option addOption(Option option) {
     options.add(option);
     return option;
   }
@@ -188,7 +187,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  called, the outputPath will be set based upon the value for this option.
    *  This this method is called, the output is required. 
    */
-  public void addInputOption() {
+  protected void addInputOption() {
     this.inputOption = addOption(DefaultOptionCreator.inputOption().create());
   }
   
@@ -197,7 +196,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  called, the outputPath will be set based upon the value for this option.
    *  This this method is called, the output is required. 
    */
-  public void addOutputOption() {
+  protected void addOutputOption() {
     this.outputOption = addOption(DefaultOptionCreator.outputOption().create());
   }
 
@@ -293,7 +292,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
     
     Map<String,String> result = new TreeMap<String,String>();
-    maybePut(result, cmdLine, this.options.toArray(new Option[0]));
+    maybePut(result, cmdLine, this.options.toArray(new Option[this.options.size()]));
 
     parseDirectories(cmdLine);
     
@@ -310,21 +309,17 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected void parseDirectories(CommandLine cmdLine) {
     Configuration conf = getConf();
     
-    if (inputOption != null) {
-      if (cmdLine.hasOption(inputOption)) {
-        this.inputPath = new Path(cmdLine.getValue(inputOption).toString());
-      }
+    if (inputOption != null && cmdLine.hasOption(inputOption)) {
+      this.inputPath = new Path(cmdLine.getValue(inputOption).toString());
     }
-    else if (conf.get("mapred.input.dir") != null) {
+    if (inputPath == null && conf.get("mapred.input.dir") != null) {
       this.inputPath = new Path(conf.get("mapred.input.dir"));
     }
     
-    if (outputOption != null) {
-      if (cmdLine.hasOption(outputOption)) {
-        this.outputPath = new Path(cmdLine.getValue(outputOption).toString());
-      }
+    if (outputOption != null && cmdLine.hasOption(outputOption)) {
+      this.outputPath = new Path(cmdLine.getValue(outputOption).toString());
     }
-    else if (conf.get("mapred.output.dir") != null) {
+    if (outputPath == null && conf.get("mapred.output.dir") != null) {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
     }
   }

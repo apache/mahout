@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.hadoop;
 
-import org.apache.commons.cli2.Option;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.FileOutputFormat;
@@ -83,12 +82,12 @@ public class MatrixMultiplicationJob extends AbstractJob {
       return -1;
     }
 
-    DistributedRowMatrix a = new DistributedRowMatrix(argMap.get("--inputPathA"),
-                                                      argMap.get("--tempDir"),
+    DistributedRowMatrix a = new DistributedRowMatrix(new Path(argMap.get("--inputPathA")),
+                                                      new Path(argMap.get("--tempDir")),
                                                       Integer.parseInt(argMap.get("--numRowsA")),
                                                       Integer.parseInt(argMap.get("--numColsA")));
-    DistributedRowMatrix b = new DistributedRowMatrix(argMap.get("--inputPathB"),
-                                                      argMap.get("--tempDir"),
+    DistributedRowMatrix b = new DistributedRowMatrix(new Path(argMap.get("--inputPathB")),
+                                                      new Path(argMap.get("--tempDir")),
                                                       Integer.parseInt(argMap.get("--numRowsB")),
                                                       Integer.parseInt(argMap.get("--numColsB")));
 

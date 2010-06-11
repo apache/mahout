@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.compress.GzipCodec;
@@ -37,7 +36,6 @@ import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VarLongWritable;
 
 public final class SlopeOneAverageDiffsJob extends AbstractJob {
@@ -47,15 +45,14 @@ public final class SlopeOneAverageDiffsJob extends AbstractJob {
     
     addInputOption();
     addOutputOption();
-    
+
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
     
-    Configuration originalConf = getConf();
-    Path prefsFile = new Path(originalConf.get("mapred.input.dir"));
-    Path outputPath = new Path(originalConf.get("mapred.output.dir"));
+    Path prefsFile = getInputPath();
+    Path outputPath = getOutputPath();
     Path averagesOutputPath = new Path(parsedArgs.get("--tempDir"));
 
     AtomicInteger currentPhase = new AtomicInteger();

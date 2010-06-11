@@ -41,7 +41,7 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for input directory specification. Used by all clustering jobs plus others
    */
   public static DefaultOptionBuilder inputOption() {
-    return new DefaultOptionBuilder().withLongName("input").withRequired(true).withShortName("i").withArgument(
+    return new DefaultOptionBuilder().withLongName("input").withRequired(false).withShortName("i").withArgument(
         new ArgumentBuilder().withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
         "Path to job input directory. Must be a SequenceFile of VectorWritable");
   }
@@ -60,7 +60,7 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for output directory specification. Used by all clustering jobs plus others
    */
   public static DefaultOptionBuilder outputOption() {
-    return new DefaultOptionBuilder().withLongName("output").withRequired(true).withShortName("o").withArgument(
+    return new DefaultOptionBuilder().withLongName("output").withRequired(false).withShortName("o").withArgument(
         new ArgumentBuilder().withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
         "The directory pathname for output.");
   }

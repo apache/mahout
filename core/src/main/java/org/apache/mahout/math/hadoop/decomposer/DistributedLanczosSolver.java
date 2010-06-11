@@ -67,17 +67,17 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   @Override
   public int run(String[] strings) throws Exception {
     Configuration originalConfig = getConf();
-    String inputPathString = originalConfig.get("mapred.input.dir");
-    String outputTmpPathString = parsedArgs.get("--tempDir");
+    Path inputPath = new Path(originalConfig.get("mapred.input.dir"));
+    Path outputTmpPath = new Path(parsedArgs.get("--tempDir"));
     int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
     boolean isSymmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
     int desiredRank = Integer.parseInt(parsedArgs.get("--rank"));
-    return run(inputPathString, outputTmpPathString, numRows, numCols, isSymmetric, desiredRank);
+    return run(inputPath, outputTmpPath, numRows, numCols, isSymmetric, desiredRank);
   }
 
-  public int run(String inputPathString,
-                 String outputTmpPathString,
+  public int run(Path inputPath,
+                 Path outputTmpPath,
                  int numRows,
                  int numCols,
                  boolean isSymmetric,
@@ -87,8 +87,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     List<Double> eigenValues = new ArrayList<Double>();
     String outputEigenVectorPath =  originalConfig.get("mapred.output.dir");
 
-    DistributedRowMatrix matrix = new DistributedRowMatrix(inputPathString,
-                                                           outputTmpPathString,
+    DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath,
+                                                           outputTmpPath,
                                                            numRows,
                                                            numCols);
     matrix.configure(new JobConf(originalConfig));

@@ -147,8 +147,8 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
       }
     }, true, new Path(baseTmpDirPath, "distMatrix/part-00000"), fs, conf);
 
-    DistributedRowMatrix distMatrix = new DistributedRowMatrix(baseTmpDirPath + "/distMatrix",
-                                                               baseTmpDirPath + "/tmpOut",
+    DistributedRowMatrix distMatrix = new DistributedRowMatrix(new Path(baseTmpDirPath, "distMatrix"),
+                                                               new Path(baseTmpDirPath, "tmpOut"),
                                                                m.numRows(),
                                                                m.numCols());
     distMatrix.configure(new JobConf(conf));

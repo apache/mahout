@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math.hadoop;
 
-import org.apache.commons.cli2.Option;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -55,6 +53,7 @@ public class TransposeJob extends AbstractJob {
 
   @Override
   public int run(String[] strings) throws Exception {
+    addInputOption();
     addOption("numRows", "nr", "Number of rows of the input matrix");
     addOption("numCols", "nc", "Number of columns of the input matrix");
     Map<String,String> parsedArgs = parseArguments(strings);
@@ -63,13 +62,12 @@ public class TransposeJob extends AbstractJob {
       return 0;
     }
 
-    Configuration originalConf = getConf();
-    String inputPathString = originalConf.get("mapred.input.dir");
-    String outputTmpPathString = parsedArgs.get("--tempDir");
+    Path inputPath = getInputPath();
+    Path outputTmpPath = new Path(parsedArgs.get("--tempDir"));
     int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
 
-    DistributedRowMatrix matrix = new DistributedRowMatrix(inputPathString, outputTmpPathString, numRows, numCols);
+    DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
     matrix.configure(new JobConf(getConf()));
     matrix.transpose();
 
