@@ -28,9 +28,8 @@ import javax.sql.DataSource;
  * 
  * <pre>
  * CREATE TABLE taste_id_migration (
- *   long_id BIGINT NOT NULL,
- *   string_id VARCHAR(255) NOT NULL,
- *   PRIMARY KEY (long_id)
+ *   long_id BIGINT NOT NULL PRIMARY KEY,
+ *   string_id VARCHAR(255) NOT NULL UNIQUE
  * )
  * </pre>
  * 
@@ -60,8 +59,9 @@ public final class MySQLJDBCIDMigrator extends AbstractJDBCIDMigrator {
                              String mappingTable,
                              String longIDColumn,
                              String stringIDColumn) {
-    super(dataSource, "SELECT " + stringIDColumn + " FROM " + mappingTable + " WHERE " + longIDColumn + "=?",
-        "REPLACE INTO " + mappingTable + " (" + longIDColumn + ',' + stringIDColumn + ") VALUES (?,?)");
+    super(dataSource,
+          "SELECT " + stringIDColumn + " FROM " + mappingTable + " WHERE " + longIDColumn + "=?",
+          "INSERT IGNORE INTO " + mappingTable + " (" + longIDColumn + ',' + stringIDColumn + ") VALUES (?,?)");
   }
   
 }
