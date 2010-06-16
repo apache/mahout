@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 
@@ -65,6 +66,17 @@ public final class DummyRecordWriter<K,V> extends RecordWriter<K,V> {
                                                                 RecordWriter<K2,V2> output)
       throws IOException, InterruptedException {
     return mapper.new Context(configuration, new TaskAttemptID(), null, output, null, null, null);
+  }
+
+  public static <K1,V1,K2,V2> Reducer<K1,V1,K2,V2>.Context build(Reducer<K1,V1,K2,V2> reducer,
+                                                                 Configuration configuration,
+                                                                 RecordWriter<K2,V2> output)
+      throws IOException, InterruptedException {
+    return reducer.new Context(configuration,
+                               new TaskAttemptID(),
+                               null, null, null,
+                               output,
+                               null, null, null, null, null);
   }
 
 }
