@@ -1,4 +1,4 @@
-package org.apache.mahout.clustering;
+package org.apache.mahout.common;
 
 import java.io.IOException;
 

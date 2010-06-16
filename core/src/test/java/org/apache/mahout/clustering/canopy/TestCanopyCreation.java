@@ -30,12 +30,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.clustering.MockMapperContext;
-import org.apache.mahout.clustering.MockReducerContext;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -216,8 +216,10 @@ public class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
-    MockMapperContext<Text, VectorWritable> context = new MockMapperContext<Text, VectorWritable>(mapper, conf, collector);
+    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter.build(mapper,
+                                                                                                                  conf,
+                                                                                                                  writer);
     mapper.setup(context);
 
     List<VectorWritable> points = getPointsWritable();
@@ -226,9 +228,9 @@ public class TestCanopyCreation extends MahoutTestCase {
       mapper.map(new Text(), point, context);
     }
     mapper.cleanup(context);
-    assertEquals("Number of map results", 1, collector.getData().size());
+    assertEquals("Number of map results", 1, writer.getData().size());
     // now verify the output
-    List<VectorWritable> data = collector.getValue(new Text("centroid"));
+    List<VectorWritable> data = writer.getValue(new Text("centroid"));
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++) {
       assertEquals("Centroid error", manhattanCentroids.get(i).asFormatString(), data.get(i).get().asFormatString());
@@ -245,8 +247,10 @@ public class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
-    MockMapperContext<Text, VectorWritable> context = new MockMapperContext<Text, VectorWritable>(mapper, conf, collector);
+    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter.build(mapper,
+                                                                                                                  conf,
+                                                                                                                  writer);
     mapper.setup(context);
 
     List<VectorWritable> points = getPointsWritable();
@@ -255,9 +259,9 @@ public class TestCanopyCreation extends MahoutTestCase {
       mapper.map(new Text(), point, context);
     }
     mapper.cleanup(context);
-    assertEquals("Number of map results", 1, collector.getData().size());
+    assertEquals("Number of map results", 1, writer.getData().size());
     // now verify the output
-    List<VectorWritable> data = collector.getValue(new Text("centroid"));
+    List<VectorWritable> data = writer.getValue(new Text("centroid"));
     assertEquals("Number of centroids", 3, data.size());
     for (int i = 0; i < data.size(); i++) {
       assertEquals("Centroid error", euclideanCentroids.get(i).asFormatString(), data.get(i).get().asFormatString());
@@ -274,18 +278,21 @@ public class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
-    MockReducerContext<Text, Canopy> context = new MockReducerContext<Text, Canopy>(reducer, conf, collector, Text.class,
-        Canopy.class);
+    DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
+    Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter.build(reducer,
+                                                                                          conf,
+                                                                                          writer,
+                                                                                          Text.class,
+                                                                                          VectorWritable.class);
     reducer.setup(context);
 
     List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points, context);
-    Set<Text> keys = collector.getKeys();
+    Set<Text> keys = writer.getKeys();
     assertEquals("Number of centroids", 3, keys.size());
     int i = 0;
     for (Text key : keys) {
-      List<Canopy> data = collector.getValue(key);
+      List<Canopy> data = writer.getValue(key);
       assertEquals(manhattanCentroids.get(i).asFormatString() + " is not equal to "
           + data.get(0).computeCentroid().asFormatString(), manhattanCentroids.get(i), data.get(0).computeCentroid());
       i++;
@@ -302,18 +309,21 @@ public class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyOutputCollector<Text, Canopy> collector = new DummyOutputCollector<Text, Canopy>();
-    MockReducerContext<Text, Canopy> context = new MockReducerContext<Text, Canopy>(reducer, conf, collector, Text.class,
-        Canopy.class);
+    DummyRecordWriter<Text, Canopy> writer = new DummyRecordWriter<Text, Canopy>();
+    Reducer<Text, VectorWritable, Text, Canopy>.Context context = DummyRecordWriter.build(reducer,
+                                                                                          conf,
+                                                                                          writer,
+                                                                                          Text.class,
+                                                                                          VectorWritable.class);
     reducer.setup(context);
 
     List<VectorWritable> points = getPointsWritable();
     reducer.reduce(new Text("centroid"), points, context);
-    Set<Text> keys = collector.getKeys();
+    Set<Text> keys = writer.getKeys();
     assertEquals("Number of centroids", 3, keys.size());
     int i = 0;
     for (Text key : keys) {
-      List<Canopy> data = collector.getValue(key);
+      List<Canopy> data = writer.getValue(key);
       assertEquals(euclideanCentroids.get(i).asFormatString() + " is not equal to "
           + data.get(0).computeCentroid().asFormatString(), euclideanCentroids.get(i), data.get(0).computeCentroid());
       i++;
@@ -391,9 +401,9 @@ public class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.ManhattanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
-    MockMapperContext<IntWritable, WeightedVectorWritable> context = new MockMapperContext<IntWritable, WeightedVectorWritable>(
-        mapper, conf, collector);
+    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context = DummyRecordWriter
+        .build(mapper, conf, writer);
     mapper.setup(context);
 
     List<Canopy> canopies = new ArrayList<Canopy>();
@@ -407,7 +417,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, context);
     }
-    Map<IntWritable, List<WeightedVectorWritable>> data = collector.getData();
+    Map<IntWritable, List<WeightedVectorWritable>> data = writer.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
     for (Entry<IntWritable, List<WeightedVectorWritable>> stringListEntry : data.entrySet()) {
       IntWritable key = stringListEntry.getKey();
@@ -435,9 +445,9 @@ public class TestCanopyCreation extends MahoutTestCase {
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, "org.apache.mahout.common.distance.EuclideanDistanceMeasure");
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(3.1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(2.1));
-    DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
-    MockMapperContext<IntWritable, WeightedVectorWritable> context = new MockMapperContext<IntWritable, WeightedVectorWritable>(
-        mapper, conf, collector);
+    DummyRecordWriter<IntWritable, WeightedVectorWritable> writer = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context = DummyRecordWriter
+        .build(mapper, conf, writer);
     mapper.setup(context);
 
     List<Canopy> canopies = new ArrayList<Canopy>();
@@ -451,7 +461,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     for (VectorWritable point : points) {
       mapper.map(new Text(), point, context);
     }
-    Map<IntWritable, List<WeightedVectorWritable>> data = collector.getData();
+    Map<IntWritable, List<WeightedVectorWritable>> data = writer.getData();
     assertEquals("Number of map results", canopies.size(), data.size());
     for (Entry<IntWritable, List<WeightedVectorWritable>> stringListEntry : data.entrySet()) {
       IntWritable key = stringListEntry.getKey();

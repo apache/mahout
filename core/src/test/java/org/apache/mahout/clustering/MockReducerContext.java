@@ -5,10 +5,11 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.TaskAttemptID;
+import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.MockIterator;
 
 public class MockReducerContext<K extends WritableComparable, V extends Writable> extends Context {
 

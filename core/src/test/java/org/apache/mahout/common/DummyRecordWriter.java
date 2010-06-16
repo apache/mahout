@@ -31,9 +31,9 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 
-public final class DummyRecordWriter<K,V> extends RecordWriter<K,V> {
+public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
 
-  private final Map<K, List<V>> data = new TreeMap<K,List<V>>();
+  private final Map<K, List<V>> data = new TreeMap<K, List<V>>();
 
   @Override
   public void write(K key, V value) {
@@ -49,7 +49,7 @@ public final class DummyRecordWriter<K,V> extends RecordWriter<K,V> {
   public void close(TaskAttemptContext context) {
   }
 
-  public Map<K,List<V>> getData() {
+  public Map<K, List<V>> getData() {
     return data;
   }
 
@@ -61,22 +61,30 @@ public final class DummyRecordWriter<K,V> extends RecordWriter<K,V> {
     return data.keySet();
   }
 
-  public static <K1,V1,K2,V2> Mapper<K1,V1,K2,V2>.Context build(Mapper<K1,V1,K2,V2> mapper,
-                                                                Configuration configuration,
-                                                                RecordWriter<K2,V2> output)
-      throws IOException, InterruptedException {
-    return mapper.new Context(configuration, new TaskAttemptID(), null, output, null, null, null);
+  public static <K1, V1, K2, V2> Mapper<K1, V1, K2, V2>.Context build(Mapper<K1, V1, K2, V2> mapper,
+                                                                      Configuration configuration,
+                                                                      RecordWriter<K2, V2> output) throws IOException,
+      InterruptedException {
+    return mapper.new Context(configuration, new TaskAttemptID(), null, output, null, new DummyStatusReporter(), null);
   }
 
-  public static <K1,V1,K2,V2> Reducer<K1,V1,K2,V2>.Context build(Reducer<K1,V1,K2,V2> reducer,
-                                                                 Configuration configuration,
-                                                                 RecordWriter<K2,V2> output)
-      throws IOException, InterruptedException {
+  public static <K1, V1, K2, V2> Reducer<K1, V1, K2, V2>.Context build(Reducer<K1, V1, K2, V2> reducer,
+                                                                       Configuration configuration,
+                                                                       RecordWriter<K2, V2> output,
+                                                                       Class<K1> keyClass,
+                                                                       Class<V1> valueClass) throws IOException,
+      InterruptedException {
     return reducer.new Context(configuration,
                                new TaskAttemptID(),
-                               null, null, null,
+                               new MockIterator(),
+                               null,
+                               null,
                                output,
-                               null, null, null, null, null);
+                               null,
+                               new DummyStatusReporter(),
+                               null,
+                               keyClass,
+                               valueClass);
   }
 
 }
