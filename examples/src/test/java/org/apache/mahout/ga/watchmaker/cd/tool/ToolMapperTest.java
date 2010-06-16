@@ -17,21 +17,24 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
+import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.mahout.clustering.MockMapperContext;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
-
-import java.util.List;
 
 public class ToolMapperTest extends MahoutTestCase {
 
   public void testExtractAttributes() throws Exception {
     LongWritable key = new LongWritable();
     Text value = new Text();
-    DummyOutputCollector<LongWritable, Text> output = new DummyOutputCollector<LongWritable, Text>();
-
+    Configuration conf = new Configuration();
     ToolMapper mapper = new ToolMapper();
+    DummyOutputCollector<LongWritable, Text> output = new DummyOutputCollector<LongWritable, Text>();
+    MockMapperContext<LongWritable, Text> context = new MockMapperContext<LongWritable, Text>(mapper, conf, output);
 
     // no attribute is ignored
     char[] descriptors = { 'N', 'N', 'C', 'C', 'N', 'N' };
@@ -39,22 +42,22 @@ public class ToolMapperTest extends MahoutTestCase {
     mapper.configure(descriptors);
     String dataline = "A1, A2, A3, A4, A5, A6";
     value.set(dataline);
-    mapper.map(key, value, output, null);
+    mapper.map(key, value, context);
 
     for (int index = 0; index < 6; index++) {
       List<Text> values = output.getValue(new LongWritable(index));
       assertEquals("should extract one value per attribute", 1, values.size());
-      assertEquals("Bad extracted value", "A" + (index + 1), values.get(0)
-          .toString());
+      assertEquals("Bad extracted value", "A" + (index + 1), values.get(0).toString());
     }
   }
 
   public void testExtractIgnoredAttributes() throws Exception {
     LongWritable key = new LongWritable();
     Text value = new Text();
-    DummyOutputCollector<LongWritable, Text> output = new DummyOutputCollector<LongWritable, Text>();
-
     ToolMapper mapper = new ToolMapper();
+    Configuration conf = new Configuration();
+    DummyOutputCollector<LongWritable, Text> output = new DummyOutputCollector<LongWritable, Text>();
+    MockMapperContext<LongWritable, Text> context = new MockMapperContext<LongWritable, Text>(mapper, conf, output);
 
     // no attribute is ignored
     char[] descriptors = { 'N', 'I', 'C', 'I', 'I', 'N' };
@@ -62,7 +65,7 @@ public class ToolMapperTest extends MahoutTestCase {
     mapper.configure(descriptors);
     String dataline = "A1, I, A3, I, I, A6";
     value.set(dataline);
-    mapper.map(key, value, output, null);
+    mapper.map(key, value, context);
 
     for (int index = 0; index < 6; index++) {
       List<Text> values = output.getValue(new LongWritable(index));
@@ -71,8 +74,7 @@ public class ToolMapperTest extends MahoutTestCase {
         assertNull("Attribute (" + index + ") should be ignored", values);
       } else {
         assertEquals("should extract one value per attribute", 1, values.size());
-        assertEquals("Bad extracted value", "A" + (index + 1), values.get(0)
-            .toString());
+        assertEquals("Bad extracted value", "A" + (index + 1), values.get(0).toString());
       }
     }
   }

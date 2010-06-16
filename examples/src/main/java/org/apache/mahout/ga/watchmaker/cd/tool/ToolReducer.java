@@ -24,11 +24,7 @@ import java.util.Set;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.StringUtils;
 
 /**
@@ -40,39 +36,41 @@ import org.apache.mahout.common.StringUtils;
  * 
  * See Descriptors, for more informations about the job parameter
  */
-public class ToolReducer extends MapReduceBase implements Reducer<LongWritable,Text,LongWritable,Text> {
-  
+public class ToolReducer extends Reducer<LongWritable, Text, LongWritable, Text> {
+
   private Descriptors descriptors;
-  
+
   private final Set<String> distinct = new HashSet<String>();
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    
-    String descriptors = job.get(ToolMapper.ATTRIBUTES);
-    
+  protected void reduce(LongWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+    context.write(key, new Text(combineDescriptions((int) key.get(), values.iterator())));
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    String descriptors = context.getConfiguration().get(ToolMapper.ATTRIBUTES);
+
     if (descriptors != null) {
       configure(StringUtils.<char[]> fromString(descriptors));
     }
   }
-  
+
   void configure(char[] descriptors) {
     if (descriptors == null || descriptors.length == 0) {
       throw new IllegalArgumentException("Descriptors's array not found or is empty");
     }
-    
+
     this.descriptors = new Descriptors(descriptors);
   }
-  
-  @Override
-  public void reduce(LongWritable key,
-                     Iterator<Text> values,
-                     OutputCollector<LongWritable,Text> output,
-                     Reporter reporter) throws IOException {
-    output.collect(key, new Text(combineDescriptions((int) key.get(), values)));
-  }
-  
+
   /**
    * Combines a given attribute descriptions into a single descriptor.
    * 
@@ -93,28 +91,28 @@ public class ToolReducer extends MapReduceBase implements Reducer<LongWritable,T
       throw new IllegalArgumentException();
     }
   }
-  
+
   static String numericDescription(Iterator<Text> values) {
     double min = Double.POSITIVE_INFINITY;
     double max = Double.NEGATIVE_INFINITY;
-    
+
     while (values.hasNext()) {
       double[] range = DescriptionUtils.extractNumericalRange(values.next().toString());
       min = Math.min(min, range[0]);
       max = Math.max(max, range[1]);
     }
-    
+
     return DescriptionUtils.createNumericalDescription(min, max);
   }
-  
+
   String nominalDescription(Iterator<Text> values) {
     distinct.clear();
-    
+
     // extract all distinct values
     while (values.hasNext()) {
       DescriptionUtils.extractNominalValues(values.next().toString(), distinct);
     }
-    
+
     // create a new description
     return DescriptionUtils.createNominalDescription(distinct);
   }

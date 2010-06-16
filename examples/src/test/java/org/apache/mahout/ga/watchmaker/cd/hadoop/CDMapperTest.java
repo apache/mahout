@@ -81,7 +81,10 @@ public class CDMapperTest extends MahoutTestCase {
 
     // test the mapper
     DummyOutputCollector<LongWritable, CDFitness> collector = new DummyOutputCollector<LongWritable, CDFitness>();
-    mapper.map(new LongWritable(0), dl, collector);
+    for (int index1 = 0; index1 < mapper.rules.size(); index1++) {
+      CDFitness eval1 = CDMapper.evaluate(mapper.target, mapper.rules.get(index1).classify(dl), dl.getLabel());
+      collector.collect(new LongWritable(index1), eval1);
+    }
 
     // check the evaluations
     Set<LongWritable> keys = collector.getKeys();

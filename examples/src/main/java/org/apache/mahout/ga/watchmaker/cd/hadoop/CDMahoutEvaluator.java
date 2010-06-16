@@ -22,16 +22,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
@@ -49,7 +49,7 @@ public final class CDMahoutEvaluator {
 
   private CDMahoutEvaluator() {
   }
-  
+
   /**
    * Uses Mahout to evaluate the classification rules using the given evaluator.
    * The input path contains the dataset
@@ -62,27 +62,27 @@ public final class CDMahoutEvaluator {
    *        sorted in the same order as the candidates.
    * @param split DatasetSplit used to separate training and testing input
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static void evaluate(List<? extends Rule> rules,
-                              int target,
-                              Path inpath,
-                              Path output,
-                              List<CDFitness> evaluations,
-                              DatasetSplit split) throws IOException {
-    JobConf conf = new JobConf(CDMahoutEvaluator.class);
+  public static void evaluate(List<? extends Rule> rules, int target, Path inpath, Path output, List<CDFitness> evaluations,
+      DatasetSplit split) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
+
+    Job job = new Job(conf);
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
-    
+
     // check the input
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir()) {
       throw new IllegalArgumentException("Input path not found or is not a directory");
     }
 
-    configureJob(conf, rules, target, inpath, output, split);
-    JobClient.runJob(conf);
-    
+    configureJob(job, rules, target, inpath, output, split);
+    job.waitForCompletion(true);
+
     importEvaluations(fs, conf, output, evaluations);
   }
-  
+
   /**
    * Initializes the dataset
    * 
@@ -90,13 +90,13 @@ public final class CDMahoutEvaluator {
    * @throws IOException
    */
   public static void initializeDataSet(Path inpath) throws IOException {
-    JobConf conf = new JobConf(CDMahoutEvaluator.class);
+    Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
-    
+
     // Initialize the dataset
     DataSet.initialize(FileInfoParser.parseFile(fs, inpath));
   }
-  
+
   /**
    * Evaluate a single rule.
    * 
@@ -106,16 +106,17 @@ public final class CDMahoutEvaluator {
    * @param split DatasetSplit used to separate training and testing input
    * @return the evaluation
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static CDFitness evaluate(Rule rule, int target, Path inpath, Path output,
-                                   DatasetSplit split) throws IOException {
+  public static CDFitness evaluate(Rule rule, int target, Path inpath, Path output, DatasetSplit split) throws IOException, InterruptedException, ClassNotFoundException {
     List<CDFitness> evals = new ArrayList<CDFitness>();
-    
+
     evaluate(Arrays.asList(rule), target, inpath, output, evals, split);
-    
+
     return evals.get(0);
   }
-  
+
   /**
    * Use all the dataset for training.
    * 
@@ -126,46 +127,48 @@ public final class CDMahoutEvaluator {
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static void evaluate(List<? extends Rule> rules, int target,
-                              Path inpath, Path output, List<CDFitness> evaluations) throws IOException {
+  public static void evaluate(List<? extends Rule> rules, int target, Path inpath, Path output, List<CDFitness> evaluations)
+      throws IOException, InterruptedException, ClassNotFoundException {
     evaluate(rules, target, inpath, output, evaluations, new DatasetSplit(1));
   }
-  
+
   /**
    * Configure the job
    * 
-   * @param conf Job to configure
+   * @param job Job to configure
    * @param rules classification rules to evaluate
    * @param target label value to evaluate the rules for
    * @param inpath input path (the dataset)
    * @param outpath output <code>Path</code>
    * @param split DatasetSplit used to separate training and testing input
+   * @throws IOException 
    */
-  private static void configureJob(JobConf conf, List<? extends Rule> rules,
-                                   int target, Path inpath, Path outpath, DatasetSplit split) {
-    split.storeJobParameters(conf);
-    
-    FileInputFormat.setInputPaths(conf, inpath);
-    FileOutputFormat.setOutputPath(conf, outpath);
-    
-    conf.setOutputKeyClass(LongWritable.class);
-    conf.setOutputValueClass(CDFitness.class);
-    
-    conf.setMapperClass(CDMapper.class);
-    conf.setCombinerClass(CDReducer.class);
-    conf.setReducerClass(CDReducer.class);
-    
-    conf.setInputFormat(DatasetTextInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    
+  private static void configureJob(Job job, List<? extends Rule> rules, int target, Path inpath, Path outpath, DatasetSplit split) throws IOException {
+    split.storeJobParameters(job.getConfiguration());
+
+    FileInputFormat.setInputPaths(job, inpath);
+    FileOutputFormat.setOutputPath(job, outpath);
+
+    job.setOutputKeyClass(LongWritable.class);
+    job.setOutputValueClass(CDFitness.class);
+
+    job.setMapperClass(CDMapper.class);
+    job.setCombinerClass(CDReducer.class);
+    job.setReducerClass(CDReducer.class);
+
+    job.setInputFormatClass(DatasetTextInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
     // store the parameters
+    Configuration conf = job.getConfiguration();
     conf.set(CDMapper.CLASSDISCOVERY_RULES, StringUtils.toString(rules));
-    conf.set(CDMapper.CLASSDISCOVERY_DATASET, StringUtils.toString(DataSet
-      .getDataSet()));
+    conf.set(CDMapper.CLASSDISCOVERY_DATASET, StringUtils.toString(DataSet.getDataSet()));
     conf.setInt(CDMapper.CLASSDISCOVERY_TARGET_LABEL, target);
   }
-  
+
   /**
    * Reads back the evaluations.
    * 
@@ -177,27 +180,24 @@ public final class CDMahoutEvaluator {
    *        sorted in the same order as the candidates.
    * @throws IOException
    */
-  private static void importEvaluations(FileSystem fs,
-                                        JobConf conf,
-                                        Path outpath,
-                                        List<CDFitness> evaluations) throws IOException {
+  private static void importEvaluations(FileSystem fs, Configuration conf, Path outpath, List<CDFitness> evaluations) throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, CDFitness.class, conf);
-    
+
     // merge and sort the outputs
     Path[] outfiles = OutputUtils.listOutputFiles(fs, outpath);
     Path output = new Path(outpath, "output.sorted");
     sorter.merge(outfiles, output);
-    
+
     // import the evaluations
     LongWritable key = new LongWritable();
     CDFitness value = new CDFitness();
     Reader reader = new Reader(fs, output, conf);
-    
+
     while (reader.next(key, value)) {
       evaluations.add(new CDFitness(value));
     }
-    
+
     reader.close();
   }
-  
+
 }

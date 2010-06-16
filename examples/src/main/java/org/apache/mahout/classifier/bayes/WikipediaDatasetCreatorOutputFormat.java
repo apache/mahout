@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.bayes;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 
 /**
  * This class extends the MultipleOutputFormat, allowing to write the output data to different output files in

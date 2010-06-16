@@ -31,15 +31,15 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.classifier.bayes.XmlInputFormat;
 import org.apache.mahout.common.CommandLineUtil;
@@ -123,6 +123,12 @@ public final class WikipediaToSequenceFile {
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
+    } catch (InterruptedException e) {
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
+    } catch (ClassNotFoundException e) {
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
     }
   }
   
@@ -140,31 +146,34 @@ public final class WikipediaToSequenceFile {
    *          category string
    * @param all
    *          if true select all categories
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void runJob(String input, String output, String catFile,
-                            boolean exactMatchOnly, boolean all) throws IOException {
-    JobClient client = new JobClient();
-    JobConf conf = new JobConf(WikipediaToSequenceFile.class);
+                            boolean exactMatchOnly, boolean all) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
+    conf.set("xmlinput.start", "<page>");
+    conf.set("xmlinput.end", "</page>");
+    conf.setBoolean("exact.match.only", exactMatchOnly);
+    conf.setBoolean("all.files", all);
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,"
+             + "org.apache.hadoop.io.serializer.WritableSerialization");
+    
+    Job job = new Job(conf);
     if (WikipediaToSequenceFile.log.isInfoEnabled()) {
       log.info("Input: " + input + " Out: " + output + " Categories: " + catFile
                                        + " All Files: " + all);
     }
-    conf.set("xmlinput.start", "<page>");
-    conf.set("xmlinput.end", "</page>");
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
-    conf.setBoolean("exact.match.only", exactMatchOnly);
-    conf.setBoolean("all.files", all);
-    FileInputFormat.setInputPaths(conf, new Path(input));
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(Text.class);
+    FileInputFormat.setInputPaths(job, new Path(input));
     Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
-    conf.setMapperClass(WikipediaMapper.class);
-    conf.setInputFormat(XmlInputFormat.class);
-    conf.setReducerClass(IdentityReducer.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.set("io.serializations",
-             "org.apache.hadoop.io.serializer.JavaSerialization,"
-             + "org.apache.hadoop.io.serializer.WritableSerialization");
+    FileOutputFormat.setOutputPath(job, outPath);
+    job.setMapperClass(WikipediaMapper.class);
+    job.setInputFormatClass(XmlInputFormat.class);
+    job.setReducerClass(Reducer.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
     /*
      * conf.set("mapred.compress.map.output", "true"); conf.set("mapred.map.output.compression.type",
@@ -187,7 +196,6 @@ public final class WikipediaToSequenceFile {
     
     conf.set("wikipedia.categories", categoriesStr);
     
-    client.setConf(conf);
-    JobClient.runJob(conf);
+    job.waitForCompletion(true);
   }
 }

@@ -31,13 +31,13 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
@@ -62,8 +62,9 @@ public final class WikipediaDatasetCreatorDriver {
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the classifier as a
    * {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
+   * @throws InterruptedException 
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -120,12 +121,15 @@ public final class WikipediaDatasetCreatorDriver {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
     } catch (ClassNotFoundException e) {
-      log.error("Exception: Analyzer class not found", e);
-    } catch (IllegalAccessException e) {
-      log.error("Exception: Couldn't instantiate the class", e);
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
     } catch (InstantiationException e) {
-      log.error("Exception: Couldn't instantiate the class", e);
-    }
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
+    } catch (IllegalAccessException e) {
+      log.error("Exception", e);
+      CommandLineUtil.printHelp(group);
+    } 
   }
   
   /**
@@ -140,39 +144,41 @@ public final class WikipediaDatasetCreatorDriver {
    * @param exactMatchOnly
    *          if true, then the Wikipedia category must match exactly instead of simply containing the
    *          category string
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void runJob(String input,
                             String output,
                             String catFile,
                             boolean exactMatchOnly,
-                            Class<? extends Analyzer> analyzerClass) throws IOException {
-    JobClient client = new JobClient();
-    JobConf conf = new JobConf(WikipediaDatasetCreatorDriver.class);
-    if (log.isInfoEnabled()) {
-      log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output, catFile});
-    }
+                            Class<? extends Analyzer> analyzerClass) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
     conf.set("key.value.separator.in.input.line", " ");
     conf.set("xmlinput.start", "<text xml:space=\"preserve\">");
     conf.set("xmlinput.end", "</text>");
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(Text.class);
     conf.setBoolean("exact.match.only", exactMatchOnly);
     conf.set("analyzer.class", analyzerClass.getName());
-    FileInputFormat.setInputPaths(conf, new Path(input));
-    Path outPath = new Path(output);
-    FileOutputFormat.setOutputPath(conf, outPath);
-    conf.setMapperClass(WikipediaDatasetCreatorMapper.class);
-    conf.setNumMapTasks(100);
-    conf.setInputFormat(XmlInputFormat.class);
-    // conf.setCombinerClass(WikipediaDatasetCreatorReducer.class);
-    conf.setReducerClass(WikipediaDatasetCreatorReducer.class);
-    conf.setOutputFormat(WikipediaDatasetCreatorOutputFormat.class);
     conf.set("io.serializations",
              "org.apache.hadoop.io.serializer.JavaSerialization,"
              + "org.apache.hadoop.io.serializer.WritableSerialization");
     // Dont ever forget this. People should keep track of how hadoop conf
-    // parameters and make or break a piece of code
+    // parameters can make or break a piece of code
     
+    Job job = new Job(conf);
+    if (log.isInfoEnabled()) {
+      log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output, catFile});
+    }
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(Text.class);
+    job.setMapperClass(WikipediaDatasetCreatorMapper.class);
+    //TODO: job.setNumMapTasks(100);
+    job.setInputFormatClass(XmlInputFormat.class);
+    job.setReducerClass(WikipediaDatasetCreatorReducer.class);
+    job.setOutputFormatClass(WikipediaDatasetCreatorOutputFormat.class);
+    
+    FileInputFormat.setInputPaths(job, new Path(input));
+    Path outPath = new Path(output);
+    FileOutputFormat.setOutputPath(job, outPath);
     HadoopUtil.overwriteOutput(outPath);
 
     Set<String> categories = new HashSet<String>();
@@ -187,7 +193,6 @@ public final class WikipediaDatasetCreatorDriver {
     
     conf.set("wikipedia.categories", categoriesStr);
     
-    client.setConf(conf);
-    JobClient.runJob(conf);
+    job.waitForCompletion(true);
   }
 }

@@ -17,17 +17,19 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import org.apache.hadoop.io.LongWritable;
-import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.ga.watchmaker.cd.CDFitness;
-import org.apache.mahout.common.DummyOutputCollector;
-import org.apache.mahout.common.RandomUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.mahout.clustering.MockReducerContext;
+import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 
 public class CDReducerTest extends MahoutTestCase {
 
@@ -48,8 +50,7 @@ public class CDReducerTest extends MahoutTestCase {
     int tn = 0;
     int fn = 0;
     for (int index = 0; index < nbevals; index++) {
-      CDFitness fitness = new CDFitness(rng.nextInt(100), rng.nextInt(100), rng
-          .nextInt(100), rng.nextInt(100));
+      CDFitness fitness = new CDFitness(rng.nextInt(100), rng.nextInt(100), rng.nextInt(100), rng.nextInt(100));
       tp += fitness.getTp();
       fp += fitness.getFp();
       tn += fitness.getTn();
@@ -60,11 +61,14 @@ public class CDReducerTest extends MahoutTestCase {
     expected = new CDFitness(tp, fp, tn, fn);
   }
 
-  public void testReduce() throws IOException {
+  public void testReduce() throws IOException, InterruptedException {
     CDReducer reducer = new CDReducer();
+    Configuration conf = new Configuration();
     DummyOutputCollector<LongWritable, CDFitness> collector = new DummyOutputCollector<LongWritable, CDFitness>();
+    MockReducerContext<LongWritable, CDFitness> context = new MockReducerContext<LongWritable, CDFitness>(reducer, conf, collector,
+        LongWritable.class, CDFitness.class);
     LongWritable zero = new LongWritable(0);
-    reducer.reduce(zero, evaluations.iterator(), collector, null);
+    reducer.reduce(zero, evaluations, context);
 
     // check if the expectations are met
     Set<LongWritable> keys = collector.getKeys();

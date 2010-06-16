@@ -24,11 +24,7 @@ import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.StringUtils;
 
 /**
@@ -47,52 +43,55 @@ import org.apache.mahout.common.StringUtils;
  * 
  * See Descriptors, for more informations about the job parameter
  */
-public class ToolMapper extends MapReduceBase implements Mapper<LongWritable,Text,LongWritable,Text> {
-  
+public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
+
   public static final String ATTRIBUTES = "cdtool.attributes";
-  
+
   private final List<String> attributes = new ArrayList<String>();
-  
+
   private Descriptors descriptors;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    
-    String descrs = job.get(ATTRIBUTES);
-    
-    if (descrs != null) {
-      configure(StringUtils.<char[]> fromString(descrs));
-    }
-  }
-  
-  void configure(char[] descriptors) {
-    if (descriptors == null || descriptors.length == 0) {
-      throw new IllegalArgumentException("Descriptors's array not found or is empty");
-    }
-    
-    this.descriptors = new Descriptors(descriptors);
-  }
-  
-  @Override
-  public void map(LongWritable key, Text value, OutputCollector<LongWritable,Text> output,
-                  Reporter reporter) throws IOException {
+  protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     extractAttributes(value, attributes);
     if (attributes.size() != descriptors.size()) {
-      throw new IllegalArgumentException(
-          "Attributes number should be equal to the descriptors's array length");
+      throw new IllegalArgumentException("Attributes number should be equal to the descriptors's array length");
     }
-    
+
     // output non ignored attributes
     for (int index = 0; index < attributes.size(); index++) {
       if (descriptors.isIgnored(index)) {
         continue;
       }
-      
-      output.collect(new LongWritable(index), new Text(attributes.get(index)));
+
+      context.write(new LongWritable(index), new Text(attributes.get(index)));
     }
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    String descrs = context.getConfiguration().get(ATTRIBUTES);
+
+    if (descrs != null) {
+      configure(StringUtils.<char[]> fromString(descrs));
+    }
+  }
+
+  void configure(char[] descriptors) {
+    if (descriptors == null || descriptors.length == 0) {
+      throw new IllegalArgumentException("Descriptors's array not found or is empty");
+    }
+
+    this.descriptors = new Descriptors(descriptors);
+  }
+
   /**
    * Extract attribute values from the input Text. The attributes are separated by a colon ','. Skips ignored
    * attributes.
@@ -102,7 +101,7 @@ public class ToolMapper extends MapReduceBase implements Mapper<LongWritable,Tex
    */
   static void extractAttributes(Text value, List<String> attributes) {
     StringTokenizer tokenizer = new StringTokenizer(value.toString(), ",");
-    
+
     attributes.clear();
     while (tokenizer.hasMoreTokens()) {
       attributes.add(tokenizer.nextToken().trim());

@@ -38,15 +38,14 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -60,12 +59,12 @@ import org.slf4j.LoggerFactory;
  * about the attributes, and generates a description for each one.
  */
 public final class CDInfosTool {
-  
+
   private static final Logger log = LoggerFactory.getLogger(CDInfosTool.class);
-  
+
   private CDInfosTool() {
   }
-  
+
   /**
    * Uses Mahout to gather the information about a dataset.
    * 
@@ -74,50 +73,53 @@ public final class CDInfosTool {
    * @param descriptions <code>List&lt;String&gt;</code> that contains the
    *        generated descriptions for each non ignored attribute
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static void gatherInfos(Descriptors descriptors, Path inpath, Path output,
-                                 List<String> descriptions) throws IOException {
-    JobConf conf = new JobConf(CDInfosTool.class);
+  public static void gatherInfos(Descriptors descriptors, Path inpath, Path output, List<String> descriptions) throws IOException,
+      InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
+    Job job = new Job(conf);
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
-    
+
     // check the input
     if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir()) {
       throw new IllegalArgumentException("Input path not found or is not a directory");
     }
 
-    configureJob(conf, descriptors, inpath, output);
-    JobClient.runJob(conf);
-    
+    configureJob(job, descriptors, inpath, output);
+    job.waitForCompletion(true);
+
     importDescriptions(fs, conf, output, descriptions);
   }
-  
+
   /**
    * Configure the job
    * 
-   * @param conf
+   * @param job
    * @param descriptors attributes's descriptors
    * @param inpath input <code>Path</code>
    * @param outpath output <code>Path</code>
+   * @throws IOException 
    */
-  private static void configureJob(JobConf conf, Descriptors descriptors,
-                                   Path inpath, Path outpath) {
-    FileInputFormat.setInputPaths(conf, inpath);
-    FileOutputFormat.setOutputPath(conf, outpath);
-    
-    conf.setOutputKeyClass(LongWritable.class);
-    conf.setOutputValueClass(Text.class);
-    
-    conf.setMapperClass(ToolMapper.class);
-    conf.setCombinerClass(ToolCombiner.class);
-    conf.setReducerClass(ToolReducer.class);
-    
-    conf.setInputFormat(TextInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    
+  private static void configureJob(Job job, Descriptors descriptors, Path inpath, Path outpath) throws IOException {
+    FileInputFormat.setInputPaths(job, inpath);
+    FileOutputFormat.setOutputPath(job, outpath);
+
+    job.setOutputKeyClass(LongWritable.class);
+    job.setOutputValueClass(Text.class);
+
+    job.setMapperClass(ToolMapper.class);
+    job.setCombinerClass(ToolCombiner.class);
+    job.setReducerClass(ToolReducer.class);
+
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
     // store the stringified descriptors
-    conf.set(ToolMapper.ATTRIBUTES, StringUtils.toString(descriptors.getChars()));
+    job.getConfiguration().set(ToolMapper.ATTRIBUTES, StringUtils.toString(descriptors.getChars()));
   }
-  
+
   /**
    * Reads back the descriptions.
    * 
@@ -127,27 +129,27 @@ public final class CDInfosTool {
    * @param descriptions List of attribute's descriptions
    * @throws IOException
    */
-  private static void importDescriptions(FileSystem fs, JobConf conf,
-                                         Path outpath, List<String> descriptions) throws IOException {
+  private static void importDescriptions(FileSystem fs, Configuration conf, Path outpath, List<String> descriptions)
+      throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, Text.class, conf);
-    
+
     // merge and sort the outputs
     Path[] outfiles = OutputUtils.listOutputFiles(fs, outpath);
     Path output = new Path(outpath, "output.sorted");
     sorter.merge(outfiles, output);
-    
+
     // import the descriptions
     LongWritable key = new LongWritable();
     Text value = new Text();
     Reader reader = new Reader(fs, output, conf);
-    
+
     while (reader.next(key, value)) {
       descriptions.add(value.toString());
     }
-    
+
     reader.close();
   }
-  
+
   /**
    * Load the dataset's attributes descriptors from an .info file
    * 
@@ -155,37 +157,37 @@ public final class CDInfosTool {
    */
   private static Descriptors loadDescriptors(FileSystem fs, Path inpath) throws IOException {
     // TODO should become part of FileInfoParser
-    
+
     Path infpath = FileInfoParser.getInfoFile(fs, inpath);
-    
+
     FSDataInputStream input = fs.open(infpath);
     Scanner reader = new Scanner(input);
-    
+
     List<Character> descriptors = new ArrayList<Character>();
-    
+
     while (reader.hasNextLine()) {
       String c = reader.nextLine();
       descriptors.add(c.toUpperCase(Locale.ENGLISH).charAt(0));
     }
-    
+
     if (descriptors.isEmpty()) {
       throw new IllegalArgumentException("Infos file is empty");
     }
-    
+
     char[] desc = new char[descriptors.size()];
     for (int index = 0; index < descriptors.size(); index++) {
       desc[index] = descriptors.get(index);
     }
-    
+
     return new Descriptors(desc);
   }
-  
-  private static void storeDescriptions(FileSystem fs, Path inpath,
-                                        Descriptors descriptors, List<String> descriptions) throws IOException {
+
+  private static void storeDescriptions(FileSystem fs, Path inpath, Descriptors descriptors, List<String> descriptions)
+      throws IOException {
     // TODO should become part of FileInfoParser
-    
+
     Path infpath = FileInfoParser.getInfoFile(fs, inpath);
-    
+
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fs.create(infpath)));
     try {
       int aindex = 0;
@@ -209,44 +211,42 @@ public final class CDInfosTool {
       writer.close();
     }
   }
-  
-  public static void main(String[] args) throws IOException {
+
+  public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
-    
-    Option inputOpt = obuilder.withLongName("input").withRequired(true)
-    .withShortName("i").withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-      .withDescription("The Path for input data directory.").create();
-    
+
+    Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").withArgument(
+        abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription("The Path for input data directory.")
+        .create();
+
     Option helpOpt = DefaultOptionCreator.helpOption();
-    
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
-      helpOpt).create();
-    
+
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(helpOpt).create();
+
     Parser parser = new Parser();
     parser.setGroup(group);
     try {
       CommandLine cmdLine = parser.parse(args);
-      
+
       if (cmdLine.hasOption(helpOpt)) {
         CommandLineUtil.printHelp(group);
         return;
       }
-      
+
       Path input = new Path(cmdLine.getValue(inputOpt).toString());
       Path output = new Path("output"); // TODO surely this should be configurable?
-      
+
       FileSystem fs = FileSystem.get(input.toUri(), new Configuration());
-      
+
       log.info("Loading Descriptors...");
       Descriptors descriptors = loadDescriptors(fs, input);
-      
+
       log.info("Gathering informations...");
       List<String> descriptions = new ArrayList<String>();
       gatherInfos(descriptors, input, output, descriptions);
-      
+
       log.info("Storing Descriptions...");
       storeDescriptions(fs, input, descriptors, descriptions);
     } catch (OptionException e) {

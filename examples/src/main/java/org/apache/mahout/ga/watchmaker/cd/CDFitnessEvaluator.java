@@ -66,6 +66,10 @@ public class CDFitnessEvaluator extends STFitnessEvaluator<Rule> {
       CDMahoutEvaluator.evaluate(population, target, dataset, output, evals, split);
     } catch (IOException e) {
       throw new IllegalStateException("Exception while evaluating the population", e);
+    } catch (InterruptedException e) {
+      throw new IllegalStateException("Exception while evaluating the population", e);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("Exception while evaluating the population", e);
     }
     
     for (CDFitness fitness : evals) {

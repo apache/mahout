@@ -25,14 +25,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.GenericsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,25 +39,32 @@ import org.slf4j.LoggerFactory;
  * file
  * 
  */
-public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritable,Text,Text,Text> {
-  
+public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
+
   private static final Logger log = LoggerFactory.getLogger(WikipediaMapper.class);
+
   private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern.compile("[\\s]");
+
   private static final String START_DOC = "<text xml:space=\"preserve\">";
+
   private static final String END_DOC = "</text>";
+
   private static final Pattern TITLE = Pattern.compile("<title>(.*)<\\/title>");
-  
+
   private static final String REDIRECT = "<redirect />";
+
   private Set<String> inputCategories;
+
   private boolean exactMatchOnly;
+
   private boolean all;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(LongWritable key,
-                  Text value,
-                  OutputCollector<Text,Text> output,
-                  Reporter reporter) throws IOException {
-    
+  protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+
     String content = value.toString();
     if (content.contains(REDIRECT)) {
       return;
@@ -71,10 +75,10 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
       document = getDocument(content);
       title = getTitle(content);
     } catch (RuntimeException e) {
-      reporter.getCounter("Wikipedia", "Parse errors").increment(1);
+      // TODO: reporter.getCounter("Wikipedia", "Parse errors").increment(1);
       return;
     }
-    
+
     if (!all) {
       String catMatch = findMatchingCategory(document);
       if ("Unknown".equals(catMatch)) {
@@ -82,23 +86,47 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
       }
     }
     document = StringEscapeUtils.unescapeHtml(document);
-    
-    output.collect(new Text(SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")),
-      new Text(document));
-    
+    context.write(new Text(SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")), new Text(document));
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
+    try {
+      if (inputCategories == null) {
+        Set<String> newCategories = new HashSet<String>();
+
+        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
+            .getClass(newCategories));
+
+        String categoriesStr = setStringifier.toString(newCategories);
+        categoriesStr = conf.get("wikipedia.categories", categoriesStr);
+        inputCategories = setStringifier.fromString(categoriesStr);
+      }
+      exactMatchOnly = conf.getBoolean("exact.match.only", false);
+      all = conf.getBoolean("all.files", true);
+    } catch (IOException ex) {
+      throw new IllegalStateException(ex);
+    }
+    log.info("Configure: Input Categories size: {} All: {} Exact Match: {}", new Object[] { inputCategories.size(), all,
+        exactMatchOnly });
+  }
+
   private static String getDocument(String xml) {
     int start = xml.indexOf(START_DOC) + START_DOC.length();
     int end = xml.indexOf(END_DOC, start);
     return xml.substring(start, end);
   }
-  
+
   private static String getTitle(String xml) {
     Matcher m = TITLE.matcher(xml);
     return m.find() ? m.group(1) : "";
   }
-  
+
   private String findMatchingCategory(String document) {
     int startIndex = 0;
     int categoryIndex;
@@ -121,28 +149,5 @@ public class WikipediaMapper extends MapReduceBase implements Mapper<LongWritabl
       startIndex = endIndex;
     }
     return "Unknown";
-  }
-  
-  @Override
-  public void configure(JobConf job) {
-    try {
-      if (inputCategories == null) {
-        Set<String> newCategories = new HashSet<String>();
-        
-        DefaultStringifier<Set<String>> setStringifier =
-            new DefaultStringifier<Set<String>>(job, GenericsUtil.getClass(newCategories));
-        
-        String categoriesStr = setStringifier.toString(newCategories);
-        categoriesStr = job.get("wikipedia.categories", categoriesStr);
-        inputCategories = setStringifier.fromString(categoriesStr);
-        
-      }
-      exactMatchOnly = job.getBoolean("exact.match.only", false);
-      all = job.getBoolean("all.files", true);
-    } catch (IOException ex) {
-      throw new IllegalStateException(ex);
-    }
-    log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
-             new Object[] {inputCategories.size(), all, exactMatchOnly});
   }
 }

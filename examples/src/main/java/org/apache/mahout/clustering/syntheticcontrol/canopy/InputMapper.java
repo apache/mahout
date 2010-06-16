@@ -72,6 +72,7 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
   /* (non-Javadoc)
    * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
    */
+  @SuppressWarnings("unchecked")
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

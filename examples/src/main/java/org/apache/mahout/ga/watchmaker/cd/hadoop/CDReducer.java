@@ -21,37 +21,32 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 
 /**
  * Hadoop Reducer, combines many evaluations (CDFitness) into a single one.
  */
-public class CDReducer extends MapReduceBase implements
-    Reducer<LongWritable,CDFitness,LongWritable,CDFitness> {
-  
+public class CDReducer extends Reducer<LongWritable, CDFitness, LongWritable, CDFitness> {
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(LongWritable key,
-                     Iterator<CDFitness> values,
-                     OutputCollector<LongWritable,CDFitness> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(LongWritable key, Iterable<CDFitness> values, Context context) throws IOException, InterruptedException {
     int tp = 0;
     int fp = 0;
     int tn = 0;
     int fn = 0;
-    
-    while (values.hasNext()) {
-      CDFitness v = values.next();
+    Iterator<CDFitness> it = values.iterator();
+    while (it.hasNext()) {
+      CDFitness v = it.next();
       tp += v.getTp();
       fp += v.getFp();
       tn += v.getTn();
       fn += v.getFn();
     }
-    
-    output.collect(key, new CDFitness(tp, fp, tn, fn));
+
+    context.write(key, new CDFitness(tp, fp, tn, fn));
   }
-  
 }

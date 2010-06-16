@@ -21,26 +21,23 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 /**
  * Can also be used as a local Combiner
  */
-public class WikipediaDatasetCreatorReducer extends MapReduceBase implements Reducer<Text,Text,Text,Text> {
+public class WikipediaDatasetCreatorReducer extends Reducer<Text, Text, Text, Text> {
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<Text> values,
-                     OutputCollector<Text,Text> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
-    
-    while (values.hasNext()) {
-      output.collect(key, values.next());
+    Iterator<Text> it = values.iterator();
+    while (it.hasNext()) {
+      context.write(key, it.next());
     }
-    
   }
 }

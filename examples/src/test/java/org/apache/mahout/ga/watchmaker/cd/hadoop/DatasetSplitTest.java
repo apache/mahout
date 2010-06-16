@@ -17,29 +17,35 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomWrapper;
-import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.RndLineRecordReader;
-import org.apache.mahout.common.RandomUtils;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.RandomWrapper;
+import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.RndLineRecordReader;
 
 public class DatasetSplitTest extends MahoutTestCase {
 
   /**
    * Mock RecordReader that returns a sequence of keys in the range [0, size[
    */
-  private static class MockReader implements RecordReader<LongWritable, Text> {
+  private static class MockReader extends RecordReader<LongWritable, Text> {
 
     private long current;
 
     private final long size;
+
+    private LongWritable currentKey = new LongWritable();
+
+    private Text currentValue = new Text();
 
     MockReader(long size) {
       if (size <= 0) {
@@ -53,64 +59,61 @@ public class DatasetSplitTest extends MahoutTestCase {
     }
 
     @Override
-    public LongWritable createKey() {
-      return null;
-    }
-
-    @Override
-    public Text createValue() {
-      return null;
-    }
-
-    @Override
-    public long getPos() throws IOException {
-      return 0;
-    }
-
-    @Override
     public float getProgress() throws IOException {
       return 0;
     }
 
     @Override
-    public boolean next(LongWritable key, Text value) throws IOException {
+    public LongWritable getCurrentKey() throws IOException, InterruptedException {
+      return currentKey;
+    }
+
+    @Override
+    public Text getCurrentValue() throws IOException, InterruptedException {
+      return currentValue;
+    }
+
+    @Override
+    public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException, InterruptedException {
       if (current == size) {
         return false;
       } else {
-        key.set(current++);
+        currentKey.set(current++);
         return true;
       }
     }
   }
 
-  public void testTrainingTestingSets() throws IOException {
+  public void testTrainingTestingSets() throws IOException, InterruptedException {
     int n = 20;
 
     for (int nloop = 0; nloop < n; nloop++) {
       RandomWrapper rng = (RandomWrapper) RandomUtils.getRandom();
       double threshold = rng.nextDouble();
 
-      JobConf conf = new JobConf();
+      Configuration conf = new Configuration();
       Set<Long> dataset = new HashSet<Long>();
-      LongWritable key = new LongWritable();
-      Text value = new Text();
-      
+
       DatasetSplit split = new DatasetSplit(rng.getSeed(), threshold);
 
       // read the training set
       split.storeJobParameters(conf);
       long datasetSize = 100;
       RndLineRecordReader rndReader = new RndLineRecordReader(new MockReader(datasetSize), conf);
-      while (rndReader.next(key, value)) {
-        assertTrue("duplicate line index", dataset.add(key.get()));
+      while (rndReader.nextKeyValue()) {
+        assertTrue("duplicate line index", dataset.add(rndReader.getCurrentKey().get()));
       }
 
       // read the testing set
       split.setTraining(false);
       split.storeJobParameters(conf);
       rndReader = new RndLineRecordReader(new MockReader(datasetSize), conf);
-      while (rndReader.next(key, value)) {
-        assertTrue("duplicate line index", dataset.add(key.get()));
+      while (rndReader.nextKeyValue()) {
+        assertTrue("duplicate line index", dataset.add(rndReader.getCurrentKey().get()));
       }
 
       assertEquals("missing datas", datasetSize, dataset.size());
@@ -130,7 +133,7 @@ public class DatasetSplitTest extends MahoutTestCase {
       DatasetSplit split = new DatasetSplit(seed, threshold);
       split.setTraining(training);
 
-      JobConf conf = new JobConf();
+      Configuration conf = new Configuration();
       split.storeJobParameters(conf);
 
       assertEquals("bad seed", seed, DatasetSplit.getSeed(conf));

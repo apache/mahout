@@ -24,14 +24,11 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -45,40 +42,83 @@ import org.slf4j.LoggerFactory;
  * file
  * 
  */
-public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,Text,Text> {
-  
+public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Text, Text> {
+
   private static final Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorMapper.class);
+
   private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern.compile("[\\s\\W]");
+
   private static final Pattern OPEN_TEXT_TAG_PATTERN = Pattern.compile("<text xml:space=\"preserve\">");
+
   private static final Pattern CLOSE_TEXT_TAG_PATTERN = Pattern.compile("</text>");
-  
+
   private Set<String> inputCategories;
+
   private boolean exactMatchOnly;
+
   private Analyzer analyzer;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(LongWritable key, Text value,
-                  OutputCollector<Text,Text> output, Reporter reporter) throws IOException {
-    
+  protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     StringBuilder contents = new StringBuilder();
     String document = value.toString();
     String catMatch = findMatchingCategory(document);
-    
+
     if (!catMatch.equals("Unknown")) {
       document = StringEscapeUtils.unescapeHtml(WikipediaDatasetCreatorMapper.CLOSE_TEXT_TAG_PATTERN.matcher(
-        WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst(""))
-          .replaceAll(""));
+          WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
       TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
       TermAttribute termAtt = (TermAttribute) stream.addAttribute(TermAttribute.class);
       while (stream.incrementToken()) {
         contents.append(termAtt.termBuffer(), 0, termAtt.termLength()).append(' ');
       }
-      output.collect(new Text(WikipediaDatasetCreatorMapper.SPACE_NON_ALPHA_PATTERN.matcher(catMatch)
-          .replaceAll("_")), new Text(contents.toString()));
+      context.write(new Text(WikipediaDatasetCreatorMapper.SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")), new Text(
+          contents.toString()));
     }
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
+    try {
+      if (inputCategories == null) {
+        Set<String> newCategories = new HashSet<String>();
+
+        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
+            .getClass(newCategories));
+
+        String categoriesStr = setStringifier.toString(newCategories);
+        categoriesStr = conf.get("wikipedia.categories", categoriesStr);
+        inputCategories = setStringifier.fromString(categoriesStr);
+
+      }
+      exactMatchOnly = conf.getBoolean("exact.match.only", false);
+      if (analyzer == null) {
+        String analyzerStr = conf.get("analyzer.class", WikipediaAnalyzer.class.getName());
+        Class<? extends Analyzer> analyzerClass = (Class<? extends Analyzer>) Class.forName(analyzerStr);
+        analyzer = analyzerClass.newInstance();
+      }
+    } catch (IOException ex) {
+      throw new IllegalStateException(ex);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(e);
+    } catch (InstantiationException e) {
+      throw new IllegalStateException(e);
+    }
+    log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}", new Object[] { inputCategories.size(),
+        exactMatchOnly, analyzer.getClass().getName() });
+  }
+
   private String findMatchingCategory(String document) {
     int startIndex = 0;
     int categoryIndex;
@@ -102,41 +142,5 @@ public class WikipediaDatasetCreatorMapper extends MapReduceBase implements
       startIndex = endIndex;
     }
     return "Unknown";
-  }
-  
-  @Override
-  public void configure(JobConf job) {
-    try {
-      if (inputCategories == null) {
-        Set<String> newCategories = new HashSet<String>();
-        
-        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(job,
-            GenericsUtil.getClass(newCategories));
-        
-        String categoriesStr = setStringifier.toString(newCategories);
-        categoriesStr = job.get("wikipedia.categories", categoriesStr);
-        inputCategories = setStringifier.fromString(categoriesStr);
-        
-      }
-      exactMatchOnly = job.getBoolean("exact.match.only", false);
-      if (analyzer == null) {
-        String analyzerStr = job.get("analyzer.class", WikipediaAnalyzer.class.getName());
-        Class<? extends Analyzer> analyzerClass = (Class<? extends Analyzer>) Class.forName(analyzerStr);
-        analyzer = analyzerClass.newInstance();
-      }
-    } catch (IOException ex) {
-      throw new IllegalStateException(ex);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    }
-    log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}", new Object[] {
-      inputCategories.size(),
-      exactMatchOnly,
-      analyzer.getClass().getName()
-    });
   }
 }

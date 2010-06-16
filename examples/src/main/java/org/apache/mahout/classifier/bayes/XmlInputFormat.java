@@ -19,62 +19,79 @@ package org.apache.mahout.classifier.bayes;
 
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileSplit;
-import org.apache.hadoop.mapred.InputSplit;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordReader;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 
 /**
  * Reads records that are delimited by a specifc begin/end tag.
  */
 public class XmlInputFormat extends TextInputFormat {
-  
+
   public static final String START_TAG_KEY = "xmlinput.start";
+
   public static final String END_TAG_KEY = "xmlinput.end";
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.lib.input.TextInputFormat#createRecordReader(org.apache.hadoop.mapreduce.InputSplit, org.apache.hadoop.mapreduce.TaskAttemptContext)
+   */
   @Override
-  public RecordReader<LongWritable,Text> getRecordReader(InputSplit inputSplit,
-                                                         JobConf jobConf,
-                                                         Reporter reporter) throws IOException {
-    return new XmlRecordReader((FileSplit) inputSplit, jobConf);
+  public RecordReader<LongWritable, Text> createRecordReader(InputSplit split,
+      TaskAttemptContext context) {
+    try {
+      return new XmlRecordReader((FileSplit) split, context.getConfiguration());
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }
   }
-  
+
   /**
    * XMLRecordReader class to read through a given xml document to output xml blocks as records as specified
    * by the start tag and end tag
    * 
    */
-  public static class XmlRecordReader implements RecordReader<LongWritable,Text> {
+  public static class XmlRecordReader extends RecordReader<LongWritable, Text> {
     private final byte[] startTag;
+
     private final byte[] endTag;
+
     private final long start;
+
     private final long end;
+
     private final FSDataInputStream fsin;
+
     private final DataOutputBuffer buffer = new DataOutputBuffer();
     
-    public XmlRecordReader(FileSplit split, JobConf jobConf) throws IOException {
-      startTag = jobConf.get(START_TAG_KEY).getBytes("utf-8");
-      endTag = jobConf.get(END_TAG_KEY).getBytes("utf-8");
-      
+    private LongWritable currentKey;
+    
+    private Text currentValue;
+
+    public XmlRecordReader(FileSplit split, Configuration conf) throws IOException {
+      startTag = conf.get(START_TAG_KEY).getBytes("utf-8");
+      endTag = conf.get(END_TAG_KEY).getBytes("utf-8");
+
       // open the file and seek to the start of the split
       start = split.getStart();
       end = start + split.getLength();
       Path file = split.getPath();
-      FileSystem fs = file.getFileSystem(jobConf);
+      FileSystem fs = file.getFileSystem(conf);
       fsin = fs.open(split.getPath());
       fsin.seek(start);
     }
-    
-    @Override
-    public boolean next(LongWritable key, Text value) throws IOException {
+
+    private boolean next(LongWritable key, Text value) throws IOException {
       if (fsin.getPos() < end) {
         if (readUntilMatch(startTag, false)) {
           try {
@@ -91,32 +108,17 @@ public class XmlInputFormat extends TextInputFormat {
       }
       return false;
     }
-    
-    @Override
-    public LongWritable createKey() {
-      return new LongWritable();
-    }
-    
-    @Override
-    public Text createValue() {
-      return new Text();
-    }
-    
-    @Override
-    public long getPos() throws IOException {
-      return fsin.getPos();
-    }
-    
+
     @Override
     public void close() throws IOException {
       fsin.close();
     }
-    
+
     @Override
     public float getProgress() throws IOException {
       return (fsin.getPos() - start) / (float) (end - start);
     }
-    
+
     private boolean readUntilMatch(byte[] match, boolean withinBlock) throws IOException {
       int i = 0;
       while (true) {
@@ -129,7 +131,7 @@ public class XmlInputFormat extends TextInputFormat {
         if (withinBlock) {
           buffer.write(b);
         }
-        
+
         // check if we're matching:
         if (b == match[i]) {
           i++;
@@ -144,6 +146,27 @@ public class XmlInputFormat extends TextInputFormat {
           return false;
         }
       }
+    }
+
+    @Override
+    public LongWritable getCurrentKey() throws IOException, InterruptedException {
+      return currentKey;
+    }
+
+    @Override
+    public Text getCurrentValue() throws IOException, InterruptedException {
+      return currentValue;
+    }
+
+    @Override
+    public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
+    }
+
+    @Override
+    public boolean nextKeyValue() throws IOException, InterruptedException {
+      currentKey = new LongWritable();
+      currentValue = new Text();
+      return next(currentKey, currentValue);
     }
   }
 }
