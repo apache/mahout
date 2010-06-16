@@ -29,9 +29,9 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.math.VectorWritable;
 
 public class MeanShiftCanopyClusterMapper extends Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {

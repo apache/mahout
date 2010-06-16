@@ -44,8 +44,9 @@ import org.apache.mahout.df.callback.ForestPredictions;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
-import org.apache.mahout.df.mapred.inmem.InMemBuilder;
-import org.apache.mahout.df.mapred.partial.PartialBuilder;
+import org.apache.mahout.df.mapreduce.Builder;
+import org.apache.mahout.df.mapreduce.inmem.InMemBuilder;
+import org.apache.mahout.df.mapreduce.partial.PartialBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,7 @@ public class BuildForest extends Configured implements Tool {
   private boolean isOob; // estimate oob error;
   
   @Override
-  public int run(String[] args) throws IOException {
+  public int run(String[] args) throws Exception {
     
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -153,7 +154,7 @@ public class BuildForest extends Configured implements Tool {
     return 0;
   }
   
-  private DecisionForest buildForest() throws IOException {
+  private DecisionForest buildForest() throws IOException, ClassNotFoundException, InterruptedException {
     DefaultTreeBuilder treeBuilder = new DefaultTreeBuilder();
     treeBuilder.setM(m);
     

@@ -17,14 +17,15 @@
 
 package org.apache.mahout.ga.watchmaker;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
-import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
@@ -45,27 +46,26 @@ public class EvalMapperTest extends MahoutTestCase {
 
     // Mapper
     EvalMapper mapper = new EvalMapper();
-    DummyOutputCollector<LongWritable, DoubleWritable> collector = new DummyOutputCollector<LongWritable, DoubleWritable>();
-
-    // prepare configuration
-    JobConf conf = new JobConf();
+    Configuration conf = new Configuration();
     conf.set(EvalMapper.MAHOUT_GA_EVALUATOR, StringUtils.toString(evaluator));
-    mapper.configure(conf);
+    DummyRecordWriter<LongWritable,DoubleWritable> output = new DummyRecordWriter<LongWritable,DoubleWritable>();
+    Mapper<LongWritable,Text,LongWritable,DoubleWritable>.Context context = DummyRecordWriter.build(mapper, conf, output);
+
+    mapper.setup(context);
 
     // evaluate the population using the mapper
     for (int index = 0; index < population.size(); index++) {
       DummyCandidate candidate = population.get(index);
-      mapper.map(new LongWritable(index), new Text(StringUtils
-          .toString(candidate)), collector, null);
+      mapper.map(new LongWritable(index), new Text(StringUtils.toString(candidate)), context);
     }
 
     // check that the evaluations are correct
-    Set<LongWritable> keys = collector.getKeys();
+    Set<LongWritable> keys = output.getKeys();
     assertEquals("Number of evaluations", populationSize, keys.size());
     for (LongWritable key : keys) {
       DummyCandidate candidate = population.get((int) key.get());
-      assertEquals("Values for key " + key, 1, collector.getValue(key).size());
-      double fitness = collector.getValue(key).get(0).get();
+      assertEquals("Values for key " + key, 1, output.getValue(key).size());
+      double fitness = output.getValue(key).get(0).get();
       assertEquals("Evaluation of the candidate " + key, DummyEvaluator
           .getFitness(candidate.getIndex()), fitness);
     }

@@ -21,8 +21,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.math.AbstractVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -108,16 +106,6 @@ public class Canopy extends ClusterBase {
   public void addPoint(Vector point) {
     setNumPoints(getNumPoints() + 1);
     point.addTo(getPointTotal());
-  }
-  
-  /**
-   * Emit the point to the collector, keyed by the canopy's formatted representation
-   * 
-   * @param point
-   *          a point to emit.
-   */
-  public void emitPoint(Vector point, OutputCollector<Text,Vector> collector) throws IOException {
-    collector.collect(new Text(this.getIdentifier()), point);
   }
   
   @Override

@@ -28,7 +28,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -76,15 +76,16 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
   /** Story: test random seed generation generates 4 clusters with proper ids and data */
   public void testRandomSeedGenerator() throws Exception {
     List<VectorWritable> points = getPoints();
-    JobConf job = new JobConf(RandomSeedGenerator.class);
+    Job job = new Job();
+    Configuration conf = job.getConfiguration();
     job.setMapOutputValueClass(VectorWritable.class);
     Path input = getTestTempFilePath("random-input");
     Path output = getTestTempDirPath("random-output");
-    ClusteringTestUtils.writePointsToFile(points, input, fs, job);
+    ClusteringTestUtils.writePointsToFile(points, input, fs, conf);
     
     RandomSeedGenerator.buildRandom(input, output, 4);
     
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "part-randomSeed"), job);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "part-randomSeed"), conf);
     Writable key = (Writable) reader.getKeyClass().newInstance();
     Cluster value = (Cluster) reader.getValueClass().newInstance();
     

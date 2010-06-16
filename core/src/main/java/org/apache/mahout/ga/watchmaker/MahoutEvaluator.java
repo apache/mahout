@@ -22,17 +22,15 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
@@ -56,15 +54,16 @@ public final class MahoutEvaluator {
    *          <code>List&lt;Double&gt;</code> that contains the evaluated fitness for each candidate from the
    *          input population, sorted in the same order as the candidates.
    */
-  public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations) 
-    throws IOException {
-    JobConf conf = new JobConf(MahoutEvaluator.class);
+  public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations)
+      throws IOException, ClassNotFoundException, InterruptedException {
+    Job job = new Job();
+    Configuration conf = job.getConfiguration();
     FileSystem fs = FileSystem.get(conf);
     Path inpath = prepareInput(fs, population);
     Path outpath = new Path("output");
     
-    configureJob(conf, evaluator, inpath, outpath);
-    JobClient.runJob(conf);
+    configureJob(job, conf, evaluator, inpath, outpath);
+    job.waitForCompletion(true);
     
     OutputUtils.importEvaluations(fs, conf, outpath, evaluations);
   }
@@ -95,20 +94,18 @@ public final class MahoutEvaluator {
    * @param outpath
    *          output <code>Path</code>
    */
-  private static void configureJob(JobConf conf, FitnessEvaluator<?> evaluator, Path inpath, Path outpath) {
-    FileInputFormat.setInputPaths(conf, inpath);
-    FileOutputFormat.setOutputPath(conf, outpath);
+  private static void configureJob(Job job, Configuration conf, FitnessEvaluator<?> evaluator, Path inpath, Path outpath) {
+
+    conf.set("mapred.input.dir", inpath.toString());
+    conf.set("mapred.output.dir", outpath.toString());
+
+    job.setOutputKeyClass(LongWritable.class);
+    job.setOutputValueClass(DoubleWritable.class);
     
-    conf.setOutputKeyClass(LongWritable.class);
-    conf.setOutputValueClass(DoubleWritable.class);
+    job.setMapperClass(EvalMapper.class);
     
-    conf.setMapperClass(EvalMapper.class);
-    // no combiner
-    // identity reducer
-    // TODO do we really need a reducer at all ?
-    
-    conf.setInputFormat(TextInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
     // store the stringified evaluator
     conf.set(EvalMapper.MAHOUT_GA_EVALUATOR, StringUtils.toString(evaluator));

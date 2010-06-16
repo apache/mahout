@@ -17,14 +17,10 @@
 
 package org.apache.mahout.clustering.meanshift;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -129,12 +125,6 @@ public class MeanShiftCanopyClusterer {
     } else {
       closestCoveringCanopy.merge(aCanopy);
     }
-  }
-
-  /** Emit the new canopy to the collector, keyed by the canopy's Id */
-  static void emitCanopy(MeanShiftCanopy canopy, OutputCollector<Text, WritableComparable<?>> collector) throws IOException {
-    String identifier = canopy.getIdentifier();
-    collector.collect(new Text(identifier), new Text("new " + canopy.toString()));
   }
 
   /**

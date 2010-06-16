@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector;
@@ -55,7 +55,7 @@ public final class RandomSeedGenerator {
                                                                     IllegalAccessException,
                                                                     InstantiationException {
     // delete the output directory
-    JobConf conf = new JobConf(RandomSeedGenerator.class);
+    Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     HadoopUtil.overwriteOutput(output);
     Path outFile = new Path(output, "part-randomSeed");

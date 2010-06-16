@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
@@ -28,7 +29,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ final class KMeansUtil {
   public static void configureWithClusterInfo(Path clusterPathStr, List<Cluster> clusters) {
     
     // Get the path location where the cluster Info is stored
-    JobConf job = new JobConf(KMeansUtil.class);
+    Configuration conf = new Configuration();
     Path clusterPath = new Path(clusterPathStr, "*");
     List<Path> result = new ArrayList<Path>();
     
@@ -58,7 +58,7 @@ final class KMeansUtil {
     
     try {
       // get all filtered file names in result list
-      FileSystem fs = clusterPath.getFileSystem(job);
+      FileSystem fs = clusterPath.getFileSystem(conf);
       FileStatus[] matches = fs.listStatus(
         FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
       
@@ -70,7 +70,7 @@ final class KMeansUtil {
       for (Path path : result) {
         SequenceFile.Reader reader = null;
         try {
-          reader = new SequenceFile.Reader(fs, path, job);
+          reader = new SequenceFile.Reader(fs, path, conf);
           Class<?> valueClass = reader.getValueClass();
           Writable key;
           try {

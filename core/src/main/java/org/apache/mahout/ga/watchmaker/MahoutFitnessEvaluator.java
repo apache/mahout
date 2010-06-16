@@ -37,6 +37,10 @@ public class MahoutFitnessEvaluator<T> extends STFitnessEvaluator<T> {
       MahoutEvaluator.evaluate(evaluator, population, evaluations);
     } catch (IOException e) {
       throw new IllegalStateException("Exception while evaluating the population", e);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("Exception while evaluating the population", e);
+    } catch (InterruptedException e) {
+      throw new IllegalStateException("Exception while evaluating the population", e);
     }
   }
   

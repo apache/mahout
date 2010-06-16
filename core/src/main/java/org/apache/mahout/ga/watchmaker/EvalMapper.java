@@ -19,14 +19,11 @@ package org.apache.mahout.ga.watchmaker;
 
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
@@ -39,8 +36,7 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  * candidate: candidate solution to evaluate. <br>
  * fitness: evaluated fitness for the given candidate.
  */
-public class EvalMapper extends MapReduceBase implements
-    Mapper<LongWritable,Text,LongWritable,DoubleWritable> {
+public class EvalMapper extends Mapper<LongWritable,Text,LongWritable,DoubleWritable> {
   
   /** Parameter used to store the "stringified" evaluator */
   public static final String MAHOUT_GA_EVALUATOR = "mahout.ga.evaluator";
@@ -48,27 +44,27 @@ public class EvalMapper extends MapReduceBase implements
   private FitnessEvaluator<Object> evaluator;
   
   @Override
-  public void configure(JobConf job) {
-    String evlstr = job.get(MAHOUT_GA_EVALUATOR);
+  public void setup(Context context) throws IOException, InterruptedException {
+    Configuration conf = context.getConfiguration();
+    String evlstr = conf.get(MAHOUT_GA_EVALUATOR);
     if (evlstr == null) {
       throw new IllegalArgumentException("'MAHOUT_GA_EVALUATOR' job parameter non found");
     }
     
     evaluator = StringUtils.fromString(evlstr);
     
-    super.configure(job);
+    super.setup(context);
   }
   
   @Override
   public void map(LongWritable key,
                   Text value,
-                  OutputCollector<LongWritable,DoubleWritable> output,
-                  Reporter reporter) throws IOException {
+                  Context context) throws IOException, InterruptedException {
     Object candidate = StringUtils.fromString(value.toString());
     
     double fitness = evaluator.getFitness(candidate, null);
     
-    output.collect(key, new DoubleWritable(fitness));
+    context.write(key, new DoubleWritable(fitness));
   }
   
 }

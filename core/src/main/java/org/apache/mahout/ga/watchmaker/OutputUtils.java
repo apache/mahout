@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -28,7 +29,6 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
-import org.apache.hadoop.mapred.JobConf;
 
 /** Utility Class that deals with the output. */
 public final class OutputUtils {
@@ -70,7 +70,7 @@ public final class OutputUtils {
    *          List of evaluations
    */
   public static void importEvaluations(FileSystem fs,
-                                       JobConf conf,
+                                       Configuration conf,
                                        Path outpath,
                                        List<Double> evaluations) throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
