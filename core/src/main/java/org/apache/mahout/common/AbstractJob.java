@@ -326,12 +326,10 @@ public abstract class AbstractJob extends Configured implements Tool {
   
   protected static void maybePut(Map<String,String> args, CommandLine cmdLine, Option... opt) {
     for (Option o : opt) {
-      if (cmdLine.hasOption(o)) {
-        // nulls are ok, for cases where options are simple flags.
-        Object vo = cmdLine.getValue(o);
-        String value = (vo == null) ? null : vo.toString();
-        args.put(o.getPreferredName(), value);
-      }
+      // nulls are ok, for cases where options are simple flags.
+      Object vo = cmdLine.getValue(o);
+      String value = (vo == null) ? null : vo.toString();
+      args.put(o.getPreferredName(), value);
     }
   }
 
