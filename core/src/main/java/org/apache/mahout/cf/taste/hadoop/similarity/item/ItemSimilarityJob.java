@@ -32,6 +32,7 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
@@ -48,14 +49,14 @@ import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 
 /**
- * <p>Runs a completely distributed computation of the cosine distance of the itemvectors of the user-item-matrix
+ * <p>Runs a completely distributed computation of the similarity of the itemvectors of the user-item-matrix
  *  as a series of mapreduces.</p>
  *
  * <p>Algorithm used is a slight modification from the algorithm described in
  * http://www.umiacs.umd.edu/~jimmylin/publications/Elsayed_etal_ACL2008_short.pdf</p>
  *
  * <pre>
- * Example:
+ * Example using cosine distance:
  *
  * user-item-matrix:
  *
@@ -97,6 +98,8 @@ import org.apache.mahout.math.VarLongWritable;
  * <li>-Dmapred.output.dir=(path): output path where the computations output should go</li>
  * <li>--similarityClassname (classname): an implemenation of {@link DistributedItemSimilarity} used to compute the
  * similarity</li>
+ * <li>--maxSimilaritiesPerItem (integer): try to cap the number of similar items per item to this number
+ * (default: 100)</li>
  * </ol>
  *
  *
@@ -109,10 +112,15 @@ import org.apache.mahout.math.VarLongWritable;
 public final class ItemSimilarityJob extends AbstractJob {
 
   public static final String DISTRIBUTED_SIMILARITY_CLASSNAME =
-    "org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob.distributedSimilarityClassname";
+      "org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob.distributedSimilarityClassname";
 
   public static final String NUMBER_OF_USERS =
-    "org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob.numberOfUsers";
+      "org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob.numberOfUsers";
+
+  public static final String MAX_SIMILARITIES_PER_ITEM =
+      "org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob.maxSimilaritiesPerItem";
+
+  private static final Integer DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM = 100;
 
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
@@ -120,6 +128,8 @@ public final class ItemSimilarityJob extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
+    addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number " +
+    		"(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ")", String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -127,6 +137,7 @@ public final class ItemSimilarityJob extends AbstractJob {
     }
 
     String distributedSimilarityClassname = parsedArgs.get("--similarityClassname");
+    int maxSimilaritiesPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
 
     Path inputPath = getInputPath();
     Path outputPath = getOutputPath();
@@ -135,6 +146,8 @@ public final class ItemSimilarityJob extends AbstractJob {
     Path countUsersPath = new Path(tempDirPath, "countUsers");
     Path itemVectorsPath = new Path(tempDirPath, "itemVectors");
     Path userVectorsPath = new Path(tempDirPath, "userVectors");
+    Path similaritiesPath = new Path(tempDirPath, "similarities");
+    Path cappedSimilaritiesPath = new Path(tempDirPath, "cappedSimilarities");
 
     AtomicInteger currentPhase = new AtomicInteger();
 
@@ -186,7 +199,7 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job similarity = prepareJob(userVectorsPath,
-                                  outputPath,
+                                  similaritiesPath,
                                   SequenceFileInputFormat.class,
                                   CopreferredItemsMapper.class,
                                   ItemPairWritable.class,
@@ -194,12 +207,46 @@ public final class ItemSimilarityJob extends AbstractJob {
                                   SimilarityReducer.class,
                                   EntityEntityWritable.class,
                                   DoubleWritable.class,
-                                  TextOutputFormat.class);
+                                  SequenceFileOutputFormat.class);
       Configuration conf = similarity.getConfiguration();
       int numberOfUsers = readNumberOfUsers(conf, countUsersPath);
       conf.set(DISTRIBUTED_SIMILARITY_CLASSNAME, distributedSimilarityClassname);
       conf.setInt(NUMBER_OF_USERS, numberOfUsers);
       similarity.waitForCompletion(true);
+    }
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job capSimilaritiesPerItem = prepareJob(similaritiesPath,
+                                              cappedSimilaritiesPath,
+                                              SequenceFileInputFormat.class,
+                                              CapSimilaritiesPerItemMapper.class,
+                                              CapSimilaritiesPerItemKeyWritable.class,
+                                              SimilarItemWritable.class,
+                                              CapSimilaritiesPerItemReducer.class,
+                                              EntityEntityWritable.class,
+                                              DoubleWritable.class,
+                                              SequenceFileOutputFormat.class);
+
+      capSimilaritiesPerItem.getConfiguration().setInt(MAX_SIMILARITIES_PER_ITEM, maxSimilaritiesPerItem);
+      capSimilaritiesPerItem.setPartitionerClass(
+          CapSimilaritiesPerItemKeyWritable.CapSimilaritiesPerItemKeyPartitioner.class);
+      capSimilaritiesPerItem.setGroupingComparatorClass(
+          CapSimilaritiesPerItemKeyWritable.CapSimilaritiesPerItemKeyGroupingComparator.class);
+      capSimilaritiesPerItem.waitForCompletion(true);
+    }
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job removeDuplicates = prepareJob(cappedSimilaritiesPath,
+                                        outputPath,
+                                        SequenceFileInputFormat.class,
+                                        Mapper.class,
+                                        EntityEntityWritable.class,
+                                        DoubleWritable.class,
+                                        RemoveDuplicatesReducer.class,
+                                        EntityEntityWritable.class,
+                                        DoubleWritable.class,
+                                        TextOutputFormat.class);
+      removeDuplicates.waitForCompletion(true);
     }
 
     return 0;

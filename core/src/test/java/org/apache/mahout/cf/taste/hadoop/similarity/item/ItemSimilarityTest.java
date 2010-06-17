@@ -42,6 +42,7 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritableArrayWritable;
 import org.apache.mahout.cf.taste.hadoop.ToUserPrefsMapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.CoRating;
+import org.apache.mahout.cf.taste.hadoop.similarity.DistributedTanimotoCoefficientSimilarity;
 import org.apache.mahout.cf.taste.hadoop.similarity.DistributedUncenteredZeroAssumingCosineSimilarity;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.VarIntWritable;
@@ -280,7 +281,63 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     SimilarityReducer reducer = new SimilarityReducer();
     reducer.setup(context);
     reducer.reduce(new ItemPairWritable(12L, 34L, 2.0, 10.0),
-                   Arrays.asList(new CoRating(2.5f, 2.0f),new CoRating(2.0f, 2.5f)), context);
+                   Arrays.asList(new CoRating(2.5f, 2.0f), new CoRating(2.0f, 2.5f)), context);
+
+    EasyMock.verify(context);
+  }
+
+  public void testCapSimilaritiesPerItemMapper() throws Exception {
+    Mapper<EntityEntityWritable,DoubleWritable,CapSimilaritiesPerItemKeyWritable,SimilarItemWritable>.Context context =
+      EasyMock.createMock(Mapper.Context.class);
+
+    context.write(new CapSimilaritiesPerItemKeyWritable(1L, 0.89d), new SimilarItemWritable(5L, 0.89d));
+    context.write(new CapSimilaritiesPerItemKeyWritable(5L, 0.89d), new SimilarItemWritable(1L, 0.89d));
+
+    EasyMock.replay(context);
+
+    CapSimilaritiesPerItemMapper mapper = new CapSimilaritiesPerItemMapper();
+    EntityEntityWritable itemPair = new EntityEntityWritable(1L, 5L);
+    mapper.map(itemPair, new DoubleWritable(0.89d), context);
+
+    EasyMock.verify(context);
+  }
+
+  public void testCapSimilaritiesPerItemReducer() throws Exception {
+    Reducer<CapSimilaritiesPerItemKeyWritable,SimilarItemWritable,EntityEntityWritable,DoubleWritable>.Context context =
+      EasyMock.createMock(Reducer.Context.class);
+
+    Configuration conf = new Configuration();
+    EasyMock.expect(context.getConfiguration()).andStubReturn(conf);
+    conf.setInt(ItemSimilarityJob.MAX_SIMILARITIES_PER_ITEM, 2);
+
+    context.write(new EntityEntityWritable(1L, 3L), new DoubleWritable(0.9d));
+    context.write(new EntityEntityWritable(1L, 6L), new DoubleWritable(0.7d));
+
+    EasyMock.replay(context);
+
+    CapSimilaritiesPerItemReducer reducer = new CapSimilaritiesPerItemReducer();
+
+    List<SimilarItemWritable> similarItems = Arrays.asList(new SimilarItemWritable(3L, 0.9d),
+        new SimilarItemWritable(6L, 0.7d), new SimilarItemWritable(123l, 0.2d));
+
+    reducer.setup(context);
+    reducer.reduce(new CapSimilaritiesPerItemKeyWritable(1L, 1d), similarItems, context);
+
+    EasyMock.verify(context);
+  }
+
+  public void testRemoveDuplicatesReducer() throws Exception {
+    Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable>.Context context =
+      EasyMock.createMock(Reducer.Context.class);
+
+    context.write(new EntityEntityWritable(1L, 2L), new DoubleWritable(0.5d));
+
+    EasyMock.replay(context);
+
+    List<DoubleWritable> values = Arrays.asList(new DoubleWritable(0.5d), new DoubleWritable(0.5d));
+
+    RemoveDuplicatesReducer reducer = new RemoveDuplicatesReducer();
+    reducer.reduce(new EntityEntityWritable(1L, 2L), values, context);
 
     EasyMock.verify(context);
   }
@@ -321,7 +378,7 @@ public final class ItemSimilarityTest extends MahoutTestCase {
     similarityJob.setConf(conf);
 
     similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-        "org.apache.mahout.cf.taste.hadoop.similarity.DistributedUncenteredZeroAssumingCosineSimilarity"});
+       DistributedUncenteredZeroAssumingCosineSimilarity.class.getName()});
 
     File countUsersPart = new File(tmpDir, "countUsers");
     int numberOfUsers = ItemSimilarityJob.readNumberOfUsers(new Configuration(),
@@ -364,7 +421,102 @@ public final class ItemSimilarityTest extends MahoutTestCase {
 
     int linesWritten = currentLine-1;
     assertEquals(2, linesWritten);
+  }
 
+  public void testMaxSimilaritiesPerItem() throws Exception {
+
+    File inputFile = getTestTempFile("prefsForMaxSimilarities.txt");
+    File outputDir = getTestTempDir("output");
+    outputDir.delete();
+    File tmpDir = getTestTempDir("tmp");
+
+    /* user-item-matrix
+
+            i1  i2  i3
+        u1   1   0   1
+        u2   0   1   1
+        u3   1   1   0
+        u4   1   1   1
+        u5   0   1   0
+        u6   1   1   0
+
+        tanimoto(i1,i2) = 0.5
+        tanimoto(i2,i3) = 0.333
+        tanimoto(i3,i1) = 0.4
+
+        When we set maxSimilaritiesPerItem to 1 the following pairs should be found:
+
+        i1 --> i2
+        i2 --> i1
+        i3 --> i1
+
+     */
+
+    BufferedWriter writer = new BufferedWriter(new FileWriter(inputFile));
+    try {
+      writer.write("1,1,1\n" +
+                   "1,3,1\n" +
+                   "2,2,1\n" +
+                   "2,3,1\n" +
+                   "3,1,1\n" +
+                   "3,2,1\n" +
+                   "4,1,1\n" +
+                   "4,2,1\n" +
+                   "4,3,1\n" +
+                   "5,2,1\n" +
+                   "6,1,1\n" +
+                   "6,2,1\n");
+    } finally {
+      writer.close();
+    }
+
+    ItemSimilarityJob similarityJob = new ItemSimilarityJob();
+
+    Configuration conf = new Configuration();
+    conf.set("mapred.input.dir", inputFile.getAbsolutePath());
+    conf.set("mapred.output.dir", outputDir.getAbsolutePath());
+    conf.setBoolean("mapred.output.compress", false);
+
+    similarityJob.setConf(conf);
+
+    similarityJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+        DistributedTanimotoCoefficientSimilarity.class.getName(), "--maxSimilaritiesPerItem", "1"});
+
+    File outPart = outputDir.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.startsWith("part-");
+      }
+    })[0];
+    BufferedReader reader = new BufferedReader(new FileReader(outPart));
+
+    String line;
+    int currentLine = 1;
+    while ( (line = reader.readLine()) != null) {
+
+      String[] tokens = line.split("\t");
+
+      long itemAID = Long.parseLong(tokens[0]);
+      long itemBID = Long.parseLong(tokens[1]);
+      double similarity = Double.parseDouble(tokens[2]);
+
+      if (currentLine == 1) {
+        assertEquals(1L, itemAID);
+        assertEquals(2L, itemBID);
+        assertEquals(0.5d, similarity, 0.0001d);
+      }
+
+      if (currentLine == 2) {
+        assertEquals(1L, itemAID);
+        assertEquals(3L, itemBID);
+        assertEquals(0.4, similarity, 0.0001d);
+      }
+
+      currentLine++;
+    }
+
+    int linesWritten = currentLine-1;
+    assertEquals(2, linesWritten);
   }
 
 }
