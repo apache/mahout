@@ -221,17 +221,21 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     }
     
     // "Center" the data. If my math is correct, this'll do it.
-    double n = count;
-    double meanX = sumX / n;
-    double meanY = sumY / n;
-    // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
-    double centeredSumXY = sumXY - meanY * sumX;
-    // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
-    double centeredSumX2 = sumX2 - meanX * sumX;
-    // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
-    double centeredSumY2 = sumY2 - meanY * sumY;
-    
-    double result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
+    double result;
+    if (centerData) {
+      double n = count;
+      double meanX = sumX / n;
+      double meanY = sumY / n;
+      // double centeredSumXY = sumXY - meanY * sumX - meanX * sumY + n * meanX * meanY;
+      double centeredSumXY = sumXY - meanY * sumX;
+      // double centeredSumX2 = sumX2 - 2.0 * meanX * sumX + n * meanX * meanX;
+      double centeredSumX2 = sumX2 - meanX * sumX;
+      // double centeredSumY2 = sumY2 - 2.0 * meanY * sumY + n * meanY * meanY;
+      double centeredSumY2 = sumY2 - meanY * sumY;
+      result = computeResult(count, centeredSumXY, centeredSumX2, centeredSumY2, sumXYdiff2);
+    } else {
+      result = computeResult(count, sumXY, sumX2, sumY2, sumXYdiff2);
+    }
     
     if (similarityTransform != null) {
       result = similarityTransform.transformSimilarity(userID1, userID2, result);
