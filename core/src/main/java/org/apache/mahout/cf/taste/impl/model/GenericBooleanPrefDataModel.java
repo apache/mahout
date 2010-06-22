@@ -217,26 +217,42 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   }
   
   @Override
-  public int getNumUsersWithPreferenceFor(long... itemIDs) throws NoSuchItemException {
-    if (itemIDs.length == 0) {
+  public int getNumUsersWithPreferenceFor(long... itemIDs) {
+    if (itemIDs == null || itemIDs.length == 0) {
+      throw new IllegalArgumentException("itemIDs is null or empty");
+    }
+    FastIDSet userIDs1 = preferenceForItems.get(itemIDs[0]);
+    if (userIDs1 == null) {
       return 0;
     }
-    FastIDSet userIDs = preferenceForItems.get(itemIDs[0]);
-    if (userIDs == null) {
-      throw new NoSuchItemException();
+
+    if (itemIDs.length == 1) {
+      return userIDs1.size();
     }
-    FastIDSet intersection = new FastIDSet(userIDs.size());
-    intersection.addAll(userIDs);
+    
+    if (itemIDs.length == 2) {
+      FastIDSet userIDs2 = preferenceForItems.get(itemIDs[1]);
+      if (userIDs2 == null) {
+        return 0;
+      }
+      return userIDs1.intersectionSize(userIDs2);
+    }
+
+    /*
+    FastIDSet intersection = new FastIDSet(userIDs1.size());
+    intersection.addAll(userIDs1);
     int i = 1;
     while (!intersection.isEmpty() && (i < itemIDs.length)) {
-      userIDs = preferenceForItems.get(itemIDs[i]);
-      if (userIDs == null) {
-        throw new NoSuchItemException();
+      userIDs1 = preferenceForItems.get(itemIDs[i]);
+      if (userIDs1 == null) {
+        return 0;
       }
-      intersection.retainAll(userIDs);
+      intersection.retainAll(userIDs1);
       i++;
     }
     return intersection.size();
+     */
+    throw new IllegalArgumentException("Illegal number of item IDs: " + itemIDs.length);
   }
   
   @Override

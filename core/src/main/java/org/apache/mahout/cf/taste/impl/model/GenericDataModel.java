@@ -235,20 +235,21 @@ public final class GenericDataModel extends AbstractDataModel {
   
   @Override
   public int getNumUsersWithPreferenceFor(long... itemIDs) {
-    if (itemIDs == null) {
-      throw new IllegalArgumentException("itemIDs is null");
+    if (itemIDs == null || itemIDs.length == 0) {
+      throw new IllegalArgumentException("itemIDs is null or empty");
     }
-    int length = itemIDs.length;
-    if ((length == 0) || (length > 2)) {
-      throw new IllegalArgumentException("Illegal number of item IDs: " + length);
+    PreferenceArray prefs1 = preferenceForItems.get(itemIDs[0]);
+    if (prefs1 == null) {
+      return 0;
     }
-    if (length == 1) {
-      PreferenceArray prefs = preferenceForItems.get(itemIDs[0]);
-      return prefs == null ? 0 : prefs.length();
-    } else {
-      PreferenceArray prefs1 = preferenceForItems.get(itemIDs[0]);
+
+    if (itemIDs.length == 1) {
+      return prefs1.length();
+    }
+
+    if (itemIDs.length == 2) {
       PreferenceArray prefs2 = preferenceForItems.get(itemIDs[1]);
-      if ((prefs1 == null) || (prefs2 == null)) {
+      if (prefs2 == null) {
         return 0;
       }
       FastIDSet users1 = new FastIDSet(prefs1.length());
@@ -264,6 +265,8 @@ public final class GenericDataModel extends AbstractDataModel {
       users1.retainAll(users2);
       return users1.size();
     }
+
+    throw new IllegalArgumentException("Illegal number of item IDs: " + itemIDs.length);
   }
   
   @Override

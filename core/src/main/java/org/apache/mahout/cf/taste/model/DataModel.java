@@ -110,16 +110,12 @@ public interface DataModel extends Refreshable, Serializable {
   int getNumUsers() throws TasteException;
   
   /**
-   * @param itemIDs
-   *          item IDs to check for
+   * @param itemIDs item IDs to check for
    * @return the number of users who have expressed a preference for all of the items
-   * @throws TasteException
-   *           if an error occurs while accessing the data
+   * @throws TasteException if an error occurs while accessing the data
    * @throws IllegalArgumentException
-   *           if itemIDs is null, empty, or larger than 2 elements since currently only queries of up to 2
-   *           items are needed and supported
-   * @throws org.apache.mahout.cf.taste.common.NoSuchItemException
-   *           if an item does not exist
+   *  if itemIDs is null or empty. Arguments larger than 2 elements are not necessarily supported
+   *  and may result in this exception
    */
   int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException;
   
