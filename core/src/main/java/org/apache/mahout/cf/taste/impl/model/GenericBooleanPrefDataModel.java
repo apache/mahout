@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -39,7 +38,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  * is mostly useful for small experiments and is not recommended for contexts where performance is important.
  * </p>
  */
-public final class GenericBooleanPrefDataModel extends AbstractDataModel implements Serializable {
+public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   
   private final long[] userIDs;
   private final FastByIDMap<FastIDSet> preferenceFromUsers;

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.model;
 
+import java.io.Serializable;
+
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -28,7 +30,7 @@ import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
  * for items.
  * </p>
  */
-public interface DataModel extends Refreshable {
+public interface DataModel extends Refreshable, Serializable {
   
   /**
    * @return all user IDs in the model, in order

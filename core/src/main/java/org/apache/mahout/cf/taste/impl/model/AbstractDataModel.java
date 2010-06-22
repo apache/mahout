@@ -17,14 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import java.io.Serializable;
-
 import org.apache.mahout.cf.taste.model.DataModel;
 
 /**
  * Contains some features common to all implementations.
  */
-public abstract class AbstractDataModel implements DataModel, Serializable {
+public abstract class AbstractDataModel implements DataModel {
 
   private float maxPreference;
   private float minPreference;

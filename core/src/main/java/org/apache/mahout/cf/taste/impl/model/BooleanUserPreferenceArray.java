@@ -157,6 +157,20 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
   public BooleanUserPreferenceArray clone() {
     return new BooleanUserPreferenceArray(ids.clone(), id);
   }
+
+  @Override
+  public int hashCode() {
+    return (int) (id >> 32) ^ (int) id ^ Arrays.hashCode(ids);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof BooleanUserPreferenceArray)) {
+      return false;
+    }
+    BooleanUserPreferenceArray otherArray = (BooleanUserPreferenceArray) other;
+    return id == otherArray.id && Arrays.equals(ids, otherArray.ids);
+  }
   
   @Override
   public Iterator<Preference> iterator() {

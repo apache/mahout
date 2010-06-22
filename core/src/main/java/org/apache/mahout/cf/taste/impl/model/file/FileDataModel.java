@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.impl.model.file;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -101,7 +100,7 @@ import org.slf4j.LoggerFactory;
  * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap, boolean)} and
  * {@link #processLineWithoutID(String, FastByIDMap)}
  */
-public class FileDataModel extends AbstractDataModel implements Serializable {
+public class FileDataModel extends AbstractDataModel {
 
   private static final Logger log = LoggerFactory.getLogger(FileDataModel.class);
 

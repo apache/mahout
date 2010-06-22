@@ -337,6 +337,65 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
     clone.recentlyAccessed = countingAccesses ? new BitSet(keys.length) : null;
     return clone;
   }
+
+  @Override
+  public int hashCode() {
+    int hash = 0;
+    K[] keys = this.keys;
+    int max = keys.length;
+    for (int i = 0; i < max; i++) {
+      K key = keys[i];
+      if (key != null && key != REMOVED) {
+        hash = 31 * hash + key.hashCode();
+        hash = 31 * hash + values[i].hashCode();
+      }
+    }
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof FastMap)) {
+      return false;
+    }
+    FastMap<K,V> otherMap = (FastMap<K,V>) other;
+    K[] otherKeys = otherMap.keys;
+    V[] otherValues = otherMap.values;
+    int length = keys.length;
+    int otherLength = otherKeys.length;
+    int max = Math.min(length, otherLength);
+
+    int i = 0;
+    while (i < max) {
+      K key = keys[i];
+      K otherKey = otherKeys[i];
+      if (key == null || key == REMOVED) {
+        if (otherKey != null && otherKey != REMOVED) {
+          return false;
+        }
+      } else {
+        if (key != otherKey || !values[i].equals(otherValues[i])) {
+          return false;
+        }
+      }
+      i++;
+    }
+    while (i < length) {
+      K key = keys[i];
+      if (key != null && key != REMOVED) {
+        return false;
+      }
+      i++;
+    }
+    while (i < otherLength) {
+      K key = otherKeys[i];
+      if (key != null && key != REMOVED) {
+        return false;
+      }
+      i++;
+    }
+    return true;
+  }
   
   @Override
   public String toString() {

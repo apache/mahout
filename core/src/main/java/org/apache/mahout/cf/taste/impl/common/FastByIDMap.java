@@ -340,6 +340,65 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
     result.setCharAt(result.length() - 1, '}');
     return result.toString();
   }
+
+  @Override
+  public int hashCode() {
+    int hash = 0;
+    long[] keys = this.keys;
+    int max = keys.length;
+    for (int i = 0; i < max; i++) {
+      long key = keys[i];
+      if (key != NULL && key != REMOVED) {
+        hash = 31 * hash + ((int) (key >> 32) ^ (int) key);
+        hash = 31 * hash + values[i].hashCode();
+      }
+    }
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof FastByIDMap)) {
+      return false;
+    }
+    FastByIDMap<V> otherMap = (FastByIDMap<V>) other;
+    long[] otherKeys = otherMap.keys;
+    V[] otherValues = otherMap.values;
+    int length = keys.length;
+    int otherLength = otherKeys.length;
+    int max = Math.min(length, otherLength);
+
+    int i = 0;
+    while (i < max) {
+      long key = keys[i];
+      long otherKey = otherKeys[i];
+      if (key == NULL || key == REMOVED) {
+        if (otherKey != NULL && otherKey != REMOVED) {
+          return false;
+        }
+      } else {
+        if (key != otherKey || !values[i].equals(otherValues[i])) {
+          return false;
+        }
+      }
+      i++;
+    }
+    while (i < length) {
+      long key = keys[i];
+      if (key != NULL && key != REMOVED) {
+        return false;
+      }
+      i++;
+    }
+    while (i < otherLength) {
+      long key = otherKeys[i];
+      if (key != NULL && key != REMOVED) {
+        return false;
+      }
+      i++;
+    }
+    return true;
+  }
   
   private final class KeyIterator extends AbstractLongPrimitiveIterator {
     

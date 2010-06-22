@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -216,6 +217,22 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   @Override
   public GenericItemPreferenceArray clone() {
     return new GenericItemPreferenceArray(ids.clone(), id, values.clone());
+  }
+
+  @Override
+  public int hashCode() {
+    return (int) (id >> 32) ^ (int) id ^ Arrays.hashCode(ids) ^ Arrays.hashCode(values);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof GenericItemPreferenceArray)) {
+      return false;
+    }
+    GenericItemPreferenceArray otherArray = (GenericItemPreferenceArray) other;
+    return id == otherArray.id &&
+        Arrays.equals(ids, otherArray.ids) &&
+        Arrays.equals(values, otherArray.values);
   }
   
   @Override

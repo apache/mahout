@@ -17,7 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * is mostly useful for small experiments and is not recommended for contexts where performance is important.
  * </p>
  */
-public final class GenericDataModel extends AbstractDataModel implements Serializable {
+public final class GenericDataModel extends AbstractDataModel {
   
   private static final Logger log = LoggerFactory.getLogger(GenericDataModel.class);
   

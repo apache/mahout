@@ -157,6 +157,20 @@ public final class BooleanItemPreferenceArray implements PreferenceArray {
   public BooleanItemPreferenceArray clone() {
     return new BooleanItemPreferenceArray(ids.clone(), id);
   }
+
+  @Override
+  public int hashCode() {
+    return (int) (id >> 32) ^ (int) id ^ Arrays.hashCode(ids);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof BooleanItemPreferenceArray)) {
+      return false;
+    }
+    BooleanItemPreferenceArray otherArray = (BooleanItemPreferenceArray) other;
+    return id == otherArray.id && Arrays.equals(ids, otherArray.ids);
+  }
   
   @Override
   public Iterator<Preference> iterator() {
