@@ -438,16 +438,17 @@ public class FileDataModel extends AbstractDataModel {
         if (!exists) {
           if (prefs == null) {
             prefs = new GenericUserPreferenceArray(1);
-            ((FastByIDMap<PreferenceArray>) data).put(userID, prefs);
           } else {
             PreferenceArray newPrefs = new GenericUserPreferenceArray(prefs.length() + 1);
             for (int i = 0, j = 1; i < prefs.length(); i++, j++) {
               newPrefs.set(j, prefs.get(i));
             }
+            prefs = newPrefs;
           }
           prefs.setUserID(0, userID);
           prefs.setItemID(0, itemID);
           prefs.setValue(0, preferenceValue);
+          ((FastByIDMap<PreferenceArray>) data).put(userID, prefs);          
         }
       }
 
