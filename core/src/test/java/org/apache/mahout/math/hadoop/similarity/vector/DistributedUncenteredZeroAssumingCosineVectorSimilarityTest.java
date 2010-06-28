@@ -15,26 +15,25 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.math.hadoop.similarity.vector;
 
 /**
- * test for {@link DistributedUncenteredZeroAssumingCosineSimilarity}
+ * tests {@link DistributedUncenteredZeroAssumingCosineVectorSimilarity}
  */
-public class DistributedUncenteredZeroAssumingCosineSimilarityTest extends
-    DistributedItemSimilarityTestCase {
+public class DistributedUncenteredZeroAssumingCosineVectorSimilarityTest
+    extends DistributedVectorSimilarityTestCase {
 
   public void testUncenteredZeroAssumingCosine() throws Exception {
+    assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
+        asVector(0, 0, 0, 0, 1),
+        asVector(0, 1, 1, 1, 1), 5, 0.5d);
 
-    assertSimilar(new DistributedUncenteredZeroAssumingCosineSimilarity(), 2,
-        new Float[] { Float.NaN, Float.NaN, Float.NaN, Float.NaN, 1.0f },
-        new Float[] { Float.NaN, 1.0f, 1.0f, 1.0f, 1.0f }, 0.5);
+    assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
+        asVector(0, 1),
+        asVector(1, 0), 2, Double.NaN);
 
-    assertSimilar(new DistributedUncenteredZeroAssumingCosineSimilarity(), 2,
-        new Float[] { Float.NaN, 1.0f },
-        new Float[] { 1.0f, Float.NaN }, Double.NaN);
-
-    assertSimilar(new DistributedUncenteredZeroAssumingCosineSimilarity(), 2,
-        new Float[] { 1.0f, Float.NaN },
-        new Float[] { 1.0f, Float.NaN }, 1.0);
+    assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
+        asVector(1, 0),
+        asVector(1, 0), 2, 1d);
   }
 }

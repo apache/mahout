@@ -15,26 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.math.hadoop.similarity.vector;
+
+import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 
 /**
- * test for {@link DistributedTanimotoCoefficientSimilarity}
+ * distributed implementation of euclidean distance as vector similarity measure
  */
-public class DistributedTanimotoCoefficientSimilarityTestCase
-    extends DistributedItemSimilarityTestCase {
+public class DistributedEuclideanDistanceVectorSimilarity extends AbstractDistributedVectorSimilarity {
 
-  public void testTanimoto() throws Exception {
+  @Override
+  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
+      double weightOfVectorB, int numberOfColumns) {
 
-    assertSimilar(new DistributedTanimotoCoefficientSimilarity(), 2,
-        new Float[] { Float.NaN, Float.NaN, Float.NaN, Float.NaN, 1.0f },
-        new Float[] { Float.NaN, 1.0f, 1.0f, 1.0f, 1.0f }, 0.25);
+    double n = 0.0;
+    double sumXYdiff2 = 0.0;
 
-    assertSimilar(new DistributedTanimotoCoefficientSimilarity(), 2,
-        new Float[] { Float.NaN, 1.0f },
-        new Float[] { 1.0f, Float.NaN }, Double.NaN);
+    for (Cooccurrence cooccurrence : cooccurrences) {
+      double diff = cooccurrence.getValueA() - cooccurrence.getValueB();
+      sumXYdiff2 += diff * diff;
+      n++;
+    }
 
-    assertSimilar(new DistributedTanimotoCoefficientSimilarity(), 2,
-        new Float[] { 1.0f, Float.NaN },
-        new Float[] { 1.0f, Float.NaN }, 1.0);
+    return n / (1.0 + Math.sqrt(sumXYdiff2));
   }
+
 }

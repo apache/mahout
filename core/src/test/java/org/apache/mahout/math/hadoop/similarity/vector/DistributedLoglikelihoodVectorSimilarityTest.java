@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,24 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity.item;
-
-import java.io.IOException;
-
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
+package org.apache.mahout.math.hadoop.similarity.vector;
 
 /**
- * makes sure that every pair of similar items is written only once
+ * tests {@link DistributedLoglikelihoodVectorSimilarity}
  */
-public class RemoveDuplicatesReducer
-    extends Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable> {
+public class DistributedLoglikelihoodVectorSimilarityTest
+    extends DistributedVectorSimilarityTestCase {
 
-  @Override
-  protected void reduce(EntityEntityWritable itemPair, Iterable<DoubleWritable> values, Context ctx)
-      throws IOException, InterruptedException {
-    DoubleWritable value = values.iterator().next();
-    ctx.write(itemPair, value);
+  public void testLoglikelihood() throws Exception {
+    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
+        asVector(1, 1, 0, 1, 0),
+        asVector(1, 0, 0, 1, 1), 5, 0.12160727029227925);
+
+    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
+        asVector(1, 0, 0, 1, 1),
+        asVector(1, 1, 0, 1, 0), 5, 0.12160727029227925);
+
+    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
+        asVector(1, 0, 0, 1, 1),
+        asVector(0, 1, 1, 1, 1), 5, 0.5423213660693733);
   }
+
 }

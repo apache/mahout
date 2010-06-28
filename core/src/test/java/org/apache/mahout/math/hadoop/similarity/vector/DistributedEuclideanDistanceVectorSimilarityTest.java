@@ -15,30 +15,30 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.math.hadoop.similarity.vector;
 
 /**
- * test for {@link DistributedEuclideanDistanceSimilarity}
+ * tests {@link DistributedEuclideanDistanceVectorSimilarity}
  */
-public class DistributedEuclideanDistanceSimilarityTest extends
-    DistributedItemSimilarityTestCase {
+public class DistributedEuclideanDistanceVectorSimilarityTest extends
+    DistributedVectorSimilarityTestCase {
 
   public void testEuclideanDistance() throws Exception {
 
-    assertSimilar(new DistributedEuclideanDistanceSimilarity(), 2,
-        new Float[] { 3.0f, -2.0f },
-        new Float[] { 3.0f, -2.0f }, 1.0);
+    assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
+        asVector(3, -2),
+        asVector(3, -2), 2, 1d);
 
-    assertSimilar(new DistributedEuclideanDistanceSimilarity(), 2,
-        new Float[] { 3.0f, 3.0f },
-        new Float[] { 3.0f, 3.0f }, 1.0);
+    assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
+        asVector(3, 3),
+        asVector(3, 3), 2, 1d);
 
-    assertSimilar(new DistributedEuclideanDistanceSimilarity(), 2,
-        new Float[] { 1.0f, 2.0f, 3.0f },
-        new Float[] { 2.0f, 5.0f, 6.0f }, 0.5598164905901122);
+    assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
+        asVector(1, 2, 3),
+        asVector(2, 5, 6), 3, 0.5598164905901122);
 
-    assertSimilar(new DistributedEuclideanDistanceSimilarity(), 2,
-        new Float[] { 1.0f, Float.NaN },
-        new Float[] { Float.NaN, 1.0f }, 0.0);
+    assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
+        asVector(1, 0),
+        asVector(0, 1), 2, 0d);
   }
 }

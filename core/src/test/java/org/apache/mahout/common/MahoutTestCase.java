@@ -18,6 +18,7 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -80,5 +81,9 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     return tempFileOrDir;
   }
 
-
+  protected final void setField(Object target, String fieldname, Object value) throws Exception {
+    Field field = target.getClass().getDeclaredField(fieldname);
+    field.setAccessible(true);
+    field.set(target, value);
+  }
 }

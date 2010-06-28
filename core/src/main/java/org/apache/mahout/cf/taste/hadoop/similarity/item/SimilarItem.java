@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,29 +17,33 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import java.io.IOException;
+import java.util.Comparator;
 
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
-import org.apache.mahout.math.VarLongWritable;
+class SimilarItem {
 
-/**
- * Maps out the userIDs in a way that we can use a secondary sort on them
- */
-public class CountUsersMapper extends
-    Mapper<LongWritable,Text,CountUsersKeyWritable, VarLongWritable> {
+  static final Comparator<SimilarItem> COMPARE_BY_SIMILARITY = new BySimilaritySimilarItemComparator();
 
-  @Override
-  protected void map(LongWritable key,
-                     Text value,
-                     Context context) throws IOException, InterruptedException {
+  private long itemID;
+  private double similarity;
 
-    String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
-    long userID = Long.parseLong(tokens[0]);
-
-    context.write(new CountUsersKeyWritable(userID), new VarLongWritable(userID));
+  public SimilarItem(long itemID, double similarity) {
+    super();
+    this.itemID = itemID;
+    this.similarity = similarity;
   }
 
+  public long getItemID() {
+    return itemID;
+  }
+
+  public double getSimilarity() {
+    return similarity;
+  }
+
+  static class BySimilaritySimilarItemComparator implements Comparator<SimilarItem> {
+    @Override
+    public int compare(SimilarItem s1, SimilarItem s2) {
+      return (s1.similarity == s2.similarity) ? 0 : (s1.similarity < s2.similarity) ? -1 : 1;
+    }
+  }
 }

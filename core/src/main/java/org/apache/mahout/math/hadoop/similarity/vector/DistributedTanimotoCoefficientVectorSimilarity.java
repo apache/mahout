@@ -15,28 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.math.hadoop.similarity.vector;
+
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 
 /**
- * Distributed version of {@link org.apache.mahout.cf.taste.impl.similarity.EuclideanDistanceSimilarity}
+ * distributed implementation of the tanimoto coefficient
  */
-public class DistributedEuclideanDistanceSimilarity extends AbstractDistributedItemSimilarity {
+public class DistributedTanimotoCoefficientVectorSimilarity extends AbstractDistributedVectorSimilarity {
 
   @Override
-  protected double doComputeResult(Iterable<CoRating> coratings,
-                                   double weightOfItemVectorX,
-                                   double weightOfItemVectorY,
-                                   int numberOfUsers) {
-
-    double n = 0.0;
-    double sumXYdiff2 = 0.0;
-
-    for (CoRating coRating : coratings) {
-      double diff = coRating.getPrefValueX() - coRating.getPrefValueY();
-      sumXYdiff2 += diff * diff;
-      n++;
+  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
+      double weightOfVectorB, int numberOfColumns) {
+    double cooccurrenceCount = countElements(cooccurrences);
+    if (cooccurrenceCount == 0) {
+      return Double.NaN;
     }
+    return cooccurrenceCount / (weightOfVectorA + weightOfVectorB - cooccurrenceCount);
+  }
 
-    return n / (1.0 + Math.sqrt(sumXYdiff2));
+  @Override
+  public double weight(Vector v) {
+    return (double) countElements(v.iterateNonZero());
   }
 }

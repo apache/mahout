@@ -15,27 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity.item;
-
-import org.apache.hadoop.io.ArrayWritable;
+package org.apache.mahout.math.hadoop.similarity.vector;
 
 /**
- * An {@link ArrayWritable} holding {@link ItemPrefWithItemVectorWeightWritable}s
- *
- * Used as user-vector
+ * tests {@link DistributedTanimotoCoefficientVectorSimilarity}
  */
-public class ItemPrefWithItemVectorWeightArrayWritable extends ArrayWritable {
+public class DistributedTanimotoCoefficientVectorSimilarityTest extends
+    DistributedVectorSimilarityTestCase {
 
-  public ItemPrefWithItemVectorWeightArrayWritable() {
-    super(ItemPrefWithItemVectorWeightWritable.class);
+  public void testTanimoto() throws Exception {
+
+    assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),
+        asVector(0, 0, 0, 0, 1),
+        asVector(0, 1, 1, 1, 1), 5, 0.25);
+
+    assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),
+        asVector(0, 1),
+        asVector(1, 0), 2, Double.NaN);
+
+    assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),
+        asVector(0, 1),
+        asVector(0, 1), 2, 1d);
   }
-
-  public ItemPrefWithItemVectorWeightArrayWritable(ItemPrefWithItemVectorWeightWritable[] itemPrefs) {
-    super(ItemPrefWithItemVectorWeightWritable.class, itemPrefs);
-  }
-
-  public ItemPrefWithItemVectorWeightWritable[] getItemPrefs() {
-    return (ItemPrefWithItemVectorWeightWritable[]) toArray();
-  }
-
 }

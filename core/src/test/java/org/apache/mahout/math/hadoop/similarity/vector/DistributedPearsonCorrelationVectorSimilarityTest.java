@@ -15,25 +15,26 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.math.hadoop.similarity.vector;
 
 /**
- * test for {@link DistributedPearsonCorrelationSimilarity}
+ * tests {@link DistributedPearsonCorrelationVectorSimilarity}
  */
-public class DistributedPearsonCorrelationSimilarityTest extends DistributedItemSimilarityTestCase {
+public class DistributedPearsonCorrelationVectorSimilarityTest
+    extends DistributedVectorSimilarityTestCase {
 
   public void testPearsonCorrelation() throws Exception {
+    assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
+        asVector(3, -2),
+        asVector(3, -2), 2, 1d);
 
-    assertSimilar(new DistributedPearsonCorrelationSimilarity(), 2,
-        new Float[] { 3.0f, -2.0f },
-        new Float[] { 3.0f, -2.0f }, 1.0);
+    assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
+        asVector(3, 3),
+        asVector(3, 3), 2, Double.NaN);
 
-    assertSimilar(new DistributedPearsonCorrelationSimilarity(), 2,
-        new Float[] { 3.0f, 3.0f },
-        new Float[] { 3.0f, 3.0f }, Double.NaN);
-
-    assertSimilar(new DistributedPearsonCorrelationSimilarity(), 2,
-        new Float[] { Float.NaN, 3.0f },
-        new Float[] { 3.0f, Float.NaN }, Double.NaN);
+    assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
+        asVector(0, 3),
+        asVector(3, 0), 2, Double.NaN);
   }
+
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -23,23 +23,33 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
-import org.apache.mahout.math.VarLongWritable;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 
 /**
- * Maps out the userIDs in a way that we can use a secondary sort on them
+ * creates an item-user-matrix entry from a preference, replacing userID and itemID with int indices
  */
-public class CountUsersMapper extends
-    Mapper<LongWritable,Text,CountUsersKeyWritable, VarLongWritable> {
+public class PrefsToItemUserMatrixMapper
+    extends Mapper<LongWritable,Text,VarIntWritable,DistributedRowMatrix.MatrixEntryWritable> {
 
   @Override
-  protected void map(LongWritable key,
-                     Text value,
-                     Context context) throws IOException, InterruptedException {
+  protected void map(LongWritable key, Text value, Context ctx)
+      throws IOException, InterruptedException {
 
     String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
     long userID = Long.parseLong(tokens[0]);
+    long itemID = Long.parseLong(tokens[1]);
+    float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
 
-    context.write(new CountUsersKeyWritable(userID), new VarLongWritable(userID));
+    int row = TasteHadoopUtils.idToIndex(itemID);
+    int column = TasteHadoopUtils.idToIndex(userID);
+
+    DistributedRowMatrix.MatrixEntryWritable entry = new DistributedRowMatrix.MatrixEntryWritable();
+    entry.setRow(row);
+    entry.setCol(column);
+    entry.setVal(prefValue);
+
+    ctx.write(new VarIntWritable(row), entry);
   }
 
 }

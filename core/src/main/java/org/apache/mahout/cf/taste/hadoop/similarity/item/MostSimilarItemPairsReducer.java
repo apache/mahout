@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,26 +20,15 @@ package org.apache.mahout.cf.taste.hadoop.similarity.item;
 import java.io.IOException;
 
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 
-/**
- * maps out all pairs of similar items so that all similar items for an item can be collected in
- * the {@link CapSimilaritiesPerItemReducer}
- *
- */
-public class CapSimilaritiesPerItemMapper
-    extends Mapper<EntityEntityWritable,DoubleWritable,CapSimilaritiesPerItemKeyWritable,SimilarItemWritable> {
+public class MostSimilarItemPairsReducer
+    extends Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable> {
 
   @Override
-  protected void map(EntityEntityWritable itemPair, DoubleWritable similarity, Context ctx)
+  protected void reduce(EntityEntityWritable itemIDPair, Iterable<DoubleWritable> values, Context ctx)
       throws IOException, InterruptedException {
-
-    long itemIDA = itemPair.getAID();
-    long itemIDB = itemPair.getBID();
-    double value = similarity.get();
-
-    ctx.write(new CapSimilaritiesPerItemKeyWritable(itemIDA, value), new SimilarItemWritable(itemIDB, value));
-    ctx.write(new CapSimilaritiesPerItemKeyWritable(itemIDB, value), new SimilarItemWritable(itemIDA, value));
+    ctx.write(itemIDPair, values.iterator().next());
   }
 }

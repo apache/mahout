@@ -15,46 +15,40 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.math.hadoop.similarity.vector;
+
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 
 /**
- * Distributed version of {@link org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity}
+ * distributed implementation of loglikelihood as vector similarity measure
  */
-public class DistributedLogLikelihoodSimilarity extends AbstractDistributedItemSimilarity {
+public class DistributedLoglikelihoodVectorSimilarity extends
+    AbstractDistributedVectorSimilarity {
 
   @Override
-  protected double doComputeResult(Iterable<CoRating> coratings,
-                                   double weightOfItemVectorX,
-                                   double weightOfItemVectorY,
-                                   int numberOfUsers) {
+  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
+      double weightOfVectorB, int numberOfColumns) {
 
-    int preferringXandY = 0;
-    for (CoRating corating : coratings) {
-      preferringXandY++;
-    }
-
-    if (preferringXandY == 0) {
+    int cooccurrenceCount = countElements(cooccurrences);
+    if (cooccurrenceCount == 0) {
       return Double.NaN;
     }
 
-    int preferringX = (int) weightOfItemVectorX;
-    int preferringY = (int) weightOfItemVectorY;
+    int occurrencesA = (int) weightOfVectorA;
+    int occurrencesB = (int) weightOfVectorB;
 
-    double logLikelihood = twoLogLambda(preferringXandY,
-                                        preferringX - preferringXandY,
-                                        preferringY,
-                                        numberOfUsers - preferringY);
+    double logLikelihood = twoLogLambda(cooccurrenceCount,
+                                        occurrencesA - cooccurrenceCount,
+                                        occurrencesB,
+                                        numberOfColumns - occurrencesB);
 
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
 
   @Override
-  public double weightOfItemVector(Iterable<Float> prefValues) {
-    int nonZeroEntries = 0;
-    for (Float prefValue : prefValues) {
-      nonZeroEntries++;
-    }
-    return nonZeroEntries;
+  public double weight(Vector v) {
+    return (double) countElements(v.iterateNonZero());
   }
 
   private static double twoLogLambda(double k1, double k2, double n1, double n2) {
@@ -72,5 +66,4 @@ public class DistributedLogLikelihoodSimilarity extends AbstractDistributedItemS
   private static double safeLog(double d) {
     return d <= 0.0 ? 0.0 : Math.log(d);
   }
-
 }

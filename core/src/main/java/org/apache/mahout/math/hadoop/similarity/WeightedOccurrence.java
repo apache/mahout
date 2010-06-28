@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,60 +15,75 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity.item;
+package org.apache.mahout.math.hadoop.similarity;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Varint;
 
-public class SimilarItemWritable implements Writable {
+/**
+ * an entry in a row vector stored together with a precomputed weight of the row
+ */
+class WeightedOccurrence implements Writable, Cloneable {
 
-  private long itemID;
+  private int row;
   private double value;
+  private double weight;
 
-  public SimilarItemWritable() {
+  public WeightedOccurrence() {
     super();
   }
 
-  public SimilarItemWritable(long itemID, double value) {
+  public WeightedOccurrence(int row, double value, double weight) {
     super();
-    this.itemID = itemID;
+    this.row = row;
     this.value = value;
+    this.weight = weight;
   }
 
-  public long getItemID() {
-    return itemID;
+  public int getRow() {
+    return row;
   }
 
   public double getValue() {
     return value;
   }
 
+  public double getWeight() {
+    return weight;
+  }
+
+  @Override
+  public WeightedOccurrence clone() {
+    return new WeightedOccurrence(row, value, weight);
+  }
+
   @Override
   public void readFields(DataInput in) throws IOException {
-    itemID = Varint.readSignedVarLong(in);
+    row = Varint.readSignedVarInt(in);
     value = in.readDouble();
+    weight = in.readDouble();
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    Varint.writeSignedVarLong(itemID, out);
+    Varint.writeSignedVarInt(row, out);
     out.writeDouble(value);
+    out.writeDouble(weight);
   }
 
   @Override
   public int hashCode() {
-    return RandomUtils.hashLong(itemID);
+    return row;
   }
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof SimilarItemWritable) {
-      return (itemID == ((SimilarItemWritable)other).itemID);
+    if (other instanceof WeightedOccurrence) {
+      return row == ((WeightedOccurrence)other).row;
     }
     return false;
   }

@@ -15,41 +15,42 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.similarity;
+package org.apache.mahout.math.hadoop.similarity.vector;
+
+import java.util.Iterator;
+
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 
 /**
- * distributed cosine similarity that assumes that all unknown preferences
- * are zeros and that does not center data
+ * distributed implementation of the cosine similarity of two vectors
  */
-public final class DistributedUncenteredZeroAssumingCosineSimilarity
-    extends AbstractDistributedItemSimilarity {
+public class DistributedUncenteredZeroAssumingCosineVectorSimilarity extends AbstractDistributedVectorSimilarity {
 
   @Override
-  protected double doComputeResult(Iterable<CoRating> coRatings,
-                                   double weightOfItemVectorX,
-                                   double weightOfItemVectorY,
-                                   int numberOfUsers) {
+  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
+      double weightOfVectorB, int numberOfColumns) {
 
     double sumXY = 0.0;
-    for (CoRating coRating : coRatings) {
-      sumXY += coRating.getPrefValueX() * coRating.getPrefValueY();
+    for (Cooccurrence cooccurrence : cooccurrences) {
+      sumXY += cooccurrence.getValueA() * cooccurrence.getValueB();
     }
 
     if (sumXY == 0.0) {
       return Double.NaN;
     }
-    return sumXY / (weightOfItemVectorX * weightOfItemVectorY);
+    return sumXY / (weightOfVectorA * weightOfVectorB);
   }
 
   @Override
-  public double weightOfItemVector(Iterable<Float> prefValues) {
+  public double weight(Vector v) {
     double length = 0.0;
-    for (float prefValue : prefValues) {
-      if (!Float.isNaN(prefValue)) {
-        length += prefValue * prefValue;
-      }
+    Iterator<Element> elemIterator = v.iterateNonZero();
+    while (elemIterator.hasNext()) {
+      double value = elemIterator.next().get();
+      length += value * value;
     }
-
     return Math.sqrt(length);
   }
 
