@@ -17,9 +17,14 @@
 
 package org.apache.mahout.cf.taste.impl.similarity;
 
+import java.util.Collection;
+
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 /** <p>Tests {@link PearsonCorrelationSimilarity}.</p> */
 public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
@@ -215,6 +220,27 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
   public void testRefresh() throws Exception {
     // Make sure this doesn't throw an exception
     new PearsonCorrelationSimilarity(getDataModel()).refresh(null);
+  }
+
+  public void testInferrer() throws Exception {
+    DataModel dataModel = getDataModel(
+      new long[] {1, 2},
+      new Double[][] {
+              {null, 1.0, 2.0,  null, null, 6.0},
+              {1.0, 8.0, null, 3.0,  4.0,  null},
+      });
+    UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+    similarity.setPreferenceInferrer(new PreferenceInferrer() {
+      @Override
+      public float inferPreference(long userID, long itemID) {
+        return 1.0f;
+      }
+      @Override
+      public void refresh(Collection<Refreshable> alreadyRefreshed) {
+      }
+    });
+
+    assertEquals(-0.435285750066007, similarity.userSimilarity(1L, 2L));
   }
 
 }

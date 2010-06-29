@@ -169,7 +169,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
     
     while (true) {
       int compare = xIndex < yIndex ? -1 : xIndex > yIndex ? 1 : 0;
-      if (hasInferrer || (compare == 0)) {
+      if (hasInferrer || compare == 0) {
         double x;
         double y;
         if (xIndex == yIndex) {
@@ -186,15 +186,17 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
           // as if the other user expressed that preference
           if (compare < 0) {
             // X has a value; infer Y's
-            x = hasPrefTransform ? prefTransform.getTransformedValue(xPrefs.get(xPrefIndex)) : xPrefs
-                .getValue(xPrefIndex);
+            x = hasPrefTransform
+                ? prefTransform.getTransformedValue(xPrefs.get(xPrefIndex))
+                : xPrefs.getValue(xPrefIndex);
             y = inferrer.inferPreference(userID2, xIndex);
           } else {
             // compare > 0
             // Y has a value; infer X's
             x = inferrer.inferPreference(userID1, yIndex);
-            y = hasPrefTransform ? prefTransform.getTransformedValue(yPrefs.get(yPrefIndex)) : yPrefs
-                .getValue(yPrefIndex);
+            y = hasPrefTransform
+                ? prefTransform.getTransformedValue(yPrefs.get(yPrefIndex))
+                : yPrefs.getValue(yPrefIndex);
           }
         }
         sumXY += x * y;
@@ -208,15 +210,35 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
       }
       if (compare <= 0) {
         if (++xPrefIndex >= xLength) {
-          break;
+          if (hasInferrer) {
+            // Must count other Ys; pretend next X is far away
+            if (yIndex == Long.MAX_VALUE) {
+              // ... but stop if both are done!
+              break;
+            }
+            xIndex = Long.MAX_VALUE;
+          } else {
+            break;
+          }
+        } else {
+          xIndex = xPrefs.getItemID(xPrefIndex);
         }
-        xIndex = xPrefs.getItemID(xPrefIndex);
       }
       if (compare >= 0) {
         if (++yPrefIndex >= yLength) {
-          break;
+          if (hasInferrer) {
+            // Must count other Xs; pretend next Y is far away            
+            if (xIndex == Long.MAX_VALUE) {
+              // ... but stop if both are done!
+              break;
+            }
+            yIndex = Long.MAX_VALUE;
+          } else {
+            break;
+          }
+        } else {
+          yIndex = yPrefs.getItemID(yPrefIndex);
         }
-        yIndex = yPrefs.getItemID(yPrefIndex);
       }
     }
     
