@@ -18,10 +18,14 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 
+import org.apache.lucene.document.FieldSelector;
+import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.TermDocs;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 
 /**
@@ -34,8 +38,8 @@ public class LuceneIterable implements Iterable<Vector> {
 
   private final IndexReader indexReader;
   private final String field;
-  //private final String idField;
-  //private final FieldSelector idFieldSelector;
+  private final String idField;
+  private final FieldSelector idFieldSelector;
   
   private final VectorMapper mapper;
   private double normPower = NO_NORMALIZING;
@@ -67,9 +71,9 @@ public class LuceneIterable implements Iterable<Vector> {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
-    //idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
+    idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
     this.indexReader = reader;
-    //this.idField = idField;
+    this.idField = idField;
     this.field = field;
     this.mapper = mapper;
     this.normPower = normPower;
@@ -114,6 +118,13 @@ public class LuceneIterable implements Iterable<Vector> {
         if (result == null) {
           return null;
         }
+        String name;
+        if (idField != null) {
+          name = indexReader.document(doc, idFieldSelector).get(idField);
+        } else {
+          name = String.valueOf(doc);
+        }
+        result = new NamedVector(result, name);
         if (normPower != NO_NORMALIZING) {
           result = result.normalize(normPower);
         }

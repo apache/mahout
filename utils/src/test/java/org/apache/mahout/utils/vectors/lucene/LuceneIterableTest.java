@@ -27,6 +27,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.TFIDF;
@@ -72,8 +73,9 @@ public class LuceneIterableTest extends MahoutTestCase {
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
       Assert.assertNotNull(vector);
-      Assert.assertTrue("vector is not an instanceof " + RandomAccessSparseVector.class, vector instanceof RandomAccessSparseVector);
+      Assert.assertTrue("vector is not an instanceof " + NamedVector.class, vector instanceof NamedVector);
       Assert.assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
+      assertTrue(((NamedVector)vector).getName().startsWith("doc_"));
     }
   }
   
