@@ -37,10 +37,7 @@ import org.apache.mahout.math.function.TimesFunction;
 public class DirichletMapper extends Mapper<WritableComparable<?>,VectorWritable,Text,VectorWritable> {
   
   private DirichletState<VectorWritable> state;
-  
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
+
   @Override
   protected void map(WritableComparable<?> key, VectorWritable v, Context context) throws IOException, InterruptedException {
     // compute a normalized vector of probabilities that v is described by each model
@@ -51,9 +48,6 @@ public class DirichletMapper extends Mapper<WritableComparable<?>,VectorWritable
     context.write(new Text(String.valueOf(k)), v);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

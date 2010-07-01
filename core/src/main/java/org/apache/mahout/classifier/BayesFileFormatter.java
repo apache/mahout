@@ -209,7 +209,7 @@ public final class BayesFileFormatter {
       writer.write(label);
       writer.write('\t'); // edit: Inorder to match Hadoop standard
       // TextInputFormat
-      TermAttribute termAtt = (TermAttribute) ts.addAttribute(TermAttribute.class);
+      TermAttribute termAtt = ts.addAttribute(TermAttribute.class);
       while (ts.incrementToken()) {
         char[] termBuffer = termAtt.termBuffer();
         int termLen = termAtt.termLength();

@@ -269,7 +269,7 @@ public final class DataLoader {
    * @throws RuntimeException
    *           if no LABEL is found in the attributes description
    */
-  protected static Data constructData(Attribute[] attrs, List<Instance> vectors, List<String>[] values) {
+  private static Data constructData(Attribute[] attrs, List<Instance> vectors, List<String>[] values) {
     Dataset dataset = new Dataset(attrs, values, vectors.size());
     
     return new Data(dataset, vectors);

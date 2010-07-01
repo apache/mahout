@@ -231,9 +231,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
       return false;
     }
     GenericUserPreferenceArray otherArray = (GenericUserPreferenceArray) other;
-    return id == otherArray.id &&
-        Arrays.equals(ids, otherArray.ids) &&
-        Arrays.equals(values, otherArray.values);
+    return id == otherArray.id && Arrays.equals(ids, otherArray.ids) && Arrays.equals(values, otherArray.values);
   }
   
   @Override

@@ -254,7 +254,7 @@ public final class TransactionTree implements Writable {
       items += p.getFirst().size();
       count++;
       for (Integer i : p.getFirst()) {
-        if (frequencyList.containsKey(i) == false) {
+        if (!frequencyList.containsKey(i)) {
           frequencyList.put(i, new MutableLong(0));
         }
         frequencyList.get(i).add(p.getSecond());

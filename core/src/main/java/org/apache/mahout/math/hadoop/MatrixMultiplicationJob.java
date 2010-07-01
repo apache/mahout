@@ -78,7 +78,7 @@ public class MatrixMultiplicationJob extends AbstractJob {
     addOption("inputPathB", "ib", "Path to the second input matrix");
 
     Map<String, String> argMap = parseArguments(strings);
-    if(argMap == null) {
+    if (argMap == null) {
       return -1;
     }
 
@@ -94,8 +94,8 @@ public class MatrixMultiplicationJob extends AbstractJob {
     a.configure(new JobConf(getConf()));
     b.configure(new JobConf(getConf()));
 
-    DistributedRowMatrix c = a.times(b);
-
+    //DistributedRowMatrix c = a.times(b);
+    a.times(b);
     return 0;
   }
 

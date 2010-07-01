@@ -36,9 +36,6 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
     return newModels;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -58,26 +55,18 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
     this.newModels = state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(Text key, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
     int k = Integer.parseInt(key.toString());
     Model<VectorWritable> model = newModels[k];
-    Iterator<VectorWritable> it = values.iterator();
-    while (it.hasNext()) {
-      VectorWritable v = it.next();
-      model.observe(v);
+    for (VectorWritable value : values) {
+      model.observe(value);
     }
     model.computeParameters();
     DirichletCluster<VectorWritable> cluster = state.getClusters().get(k);
     cluster.setModel(model);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#cleanup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     for (int i = 0; i < state.getNumClusters(); i++) {

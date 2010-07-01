@@ -34,11 +34,9 @@ public class Cooccurrence implements Writable {
   private double valueB;
 
   public Cooccurrence() {
-    super();
   }
 
   public Cooccurrence(int column, double valueA, double valueB) {
-    super();
     this.column = column;
     this.valueA = valueA;
     this.valueB = valueB;

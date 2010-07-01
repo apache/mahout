@@ -38,9 +38,6 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
 
   private CanopyClusterer canopyClusterer;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
     canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, context);
@@ -59,9 +56,6 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
     this.canopies.addAll(canopies);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

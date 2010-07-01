@@ -19,7 +19,6 @@ package org.apache.mahout.clustering.meanshift;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -33,25 +32,18 @@ public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,Me
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
   private MeanShiftCanopyClusterer clusterer;
   private boolean allConverged = true;
-  
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
+
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     clusterer = new MeanShiftCanopyClusterer(context.getConfiguration());
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
-  protected void reduce(Text key, Iterable<MeanShiftCanopy> values, Context context) throws IOException, InterruptedException {
-    Iterator<MeanShiftCanopy> it = values.iterator();
-    while (it.hasNext()) {
-      MeanShiftCanopy canopy = it.next();
-      clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
+  protected void reduce(Text key, Iterable<MeanShiftCanopy> values, Context context)
+    throws IOException, InterruptedException {
+    for (MeanShiftCanopy value : values) {
+      clusterer.mergeCanopy(value.shallowCopy(), canopies);
     }
     
     for (MeanShiftCanopy canopy : canopies) {
@@ -65,9 +57,6 @@ public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,Me
     
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#cleanup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();

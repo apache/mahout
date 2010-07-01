@@ -347,7 +347,8 @@ public final class DirichletDriver {
    * @throws InterruptedException 
    * @throws IOException 
    */
-  public static void runClustering(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold) throws IOException, InterruptedException, ClassNotFoundException {
+  public static void runClustering(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));

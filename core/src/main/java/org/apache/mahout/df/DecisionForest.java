@@ -60,9 +60,6 @@ public class DecisionForest implements Writable {
   
   /**
    * Classifies the data and calls callback for each classification
-   * 
-   * @param data
-   * @param callback
    */
   public void classify(Data data, PredictionCallback callback) {
     if (callback == null) {
@@ -110,8 +107,6 @@ public class DecisionForest implements Writable {
   
   /**
    * Mean number of nodes per tree
-   * 
-   * @return
    */
   public long meanNbNodes() {
     long sum = 0;
@@ -125,8 +120,6 @@ public class DecisionForest implements Writable {
   
   /**
    * Total number of nodes in all the trees
-   * 
-   * @return
    */
   public long nbNodes() {
     long sum = 0;
@@ -140,8 +133,6 @@ public class DecisionForest implements Writable {
   
   /**
    * Mean maximum depth per tree
-   * 
-   * @return
    */
   public long meanMaxDepth() {
     long sum = 0;
@@ -182,8 +173,6 @@ public class DecisionForest implements Writable {
 
   /**
    * Reads the trees from the input and adds them to the existing trees
-   * @param dataInput
-   * @throws IOException
    */
   @Override
   public void readFields(DataInput dataInput) throws IOException {
@@ -201,10 +190,6 @@ public class DecisionForest implements Writable {
 
   /**
    * Load the forest from a single file or a directory of files
-   * @param conf
-   * @param forestPath
-   * @return
-   * @throws IOException
    */
   public static DecisionForest load(Configuration conf, Path forestPath) throws IOException {
     FileSystem fs = forestPath.getFileSystem(conf);

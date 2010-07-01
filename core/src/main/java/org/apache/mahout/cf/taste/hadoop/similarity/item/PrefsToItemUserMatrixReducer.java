@@ -32,10 +32,10 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
  * creates matrix rows ({@link VectorWritable}s) from the {@link MatrixEntryWritable}s
  */
 public class PrefsToItemUserMatrixReducer
-    extends Reducer<VarIntWritable,DistributedRowMatrix.MatrixEntryWritable,IntWritable,VectorWritable> {
+    extends Reducer<VarIntWritable, MatrixEntryWritable,IntWritable,VectorWritable> {
 
   @Override
-  protected void reduce(VarIntWritable rowIndex, Iterable<DistributedRowMatrix.MatrixEntryWritable> entries,
+  protected void reduce(VarIntWritable rowIndex, Iterable<MatrixEntryWritable> entries,
       Context ctx) throws IOException, InterruptedException {
     Vector row = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     for (MatrixEntryWritable entry : entries) {

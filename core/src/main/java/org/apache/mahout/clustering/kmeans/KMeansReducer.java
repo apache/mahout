@@ -19,7 +19,6 @@ package org.apache.mahout.clustering.kmeans;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,15 +36,11 @@ public class KMeansReducer extends Reducer<Text, KMeansInfo, Text, Cluster> {
 
   private DistanceMeasure measure;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
-  protected void reduce(Text key, Iterable<KMeansInfo> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<KMeansInfo> values, Context context)
+    throws IOException, InterruptedException {
     Cluster cluster = clusterMap.get(key.toString());
-    Iterator<KMeansInfo> it = values.iterator();
-    while (it.hasNext()) {
-      KMeansInfo delta = it.next();
+    for (KMeansInfo delta : values) {
       cluster.addPoints(delta.getPoints(), delta.getPointTotal());
     }
     // force convergence calculation
@@ -56,9 +51,6 @@ public class KMeansReducer extends Reducer<Text, KMeansInfo, Text, Cluster> {
     context.write(new Text(cluster.getIdentifier()), cluster);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

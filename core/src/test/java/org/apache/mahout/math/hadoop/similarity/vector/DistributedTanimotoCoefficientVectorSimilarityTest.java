@@ -35,6 +35,6 @@ public class DistributedTanimotoCoefficientVectorSimilarityTest extends
 
     assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),
         asVector(0, 1),
-        asVector(0, 1), 2, 1d);
+        asVector(0, 1), 2, 1.0d);
   }
 }

@@ -66,7 +66,7 @@ public final class ItemSimilarityJob extends AbstractJob {
     addOutputOption();
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
     addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number " +
-        "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ")", String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
+        "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {

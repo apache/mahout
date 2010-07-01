@@ -179,7 +179,7 @@ public final class FuzzyKMeansDriver {
                             float m,
                             boolean runClustering,
                             boolean emitMostLikely,
-                            double threshold) throws IOException {
+                            double threshold) throws IOException, ClassNotFoundException, InterruptedException {
 
     boolean converged = false;
     int iteration = 1;
@@ -325,7 +325,7 @@ public final class FuzzyKMeansDriver {
                                     int numMapTasks,
                                     float m,
                                     boolean emitMostLikely,
-                                    double threshold) throws IOException {
+                                    double threshold) throws IOException, ClassNotFoundException, InterruptedException {
 
     Configuration conf = new Configuration();
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
@@ -334,6 +334,9 @@ public final class FuzzyKMeansDriver {
     conf.set(FuzzyKMeansConfigKeys.M_KEY, String.valueOf(m));
     conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
     conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, Double.toString(threshold));
+
+    // Clear output
+    output.getFileSystem(conf).delete(output, true);
     
     Job job = new Job(conf);
     job.setOutputKeyClass(IntWritable.class);
@@ -348,17 +351,7 @@ public final class FuzzyKMeansDriver {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     //TODO: job.setNumMapTasks(numMapTasks);
     job.setNumReduceTasks(0);
-    try {
-      job.waitForCompletion(true);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    job.waitForCompletion(true);
   }
 
   /**

@@ -189,7 +189,7 @@ public final class TestClassifier {
     File[] subdirs = dir.listFiles(new FilenameFilter() {
       @Override
       public boolean accept(File file, String s) {
-        return s.startsWith(".") == false;
+        return !s.startsWith(".");
       }
     });
     

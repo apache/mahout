@@ -34,16 +34,14 @@ import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.math.VectorWritable;
 
-public class MeanShiftCanopyClusterMapper extends Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {
+public class MeanShiftCanopyClusterMapper
+  extends Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {
 
   private List<MeanShiftCanopy> canopies;
 
-  
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
-  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context)
+    throws IOException, InterruptedException {
     // canopies use canopyIds assigned when input vectors are processed as vectorIds too
     int vectorId = canopy.getId();
     for (MeanShiftCanopy msc : canopies) {
@@ -56,9 +54,6 @@ public class MeanShiftCanopyClusterMapper extends Mapper<WritableComparable<?>, 
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

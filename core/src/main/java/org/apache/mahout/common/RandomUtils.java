@@ -37,15 +37,15 @@ public final class RandomUtils {
   /** The largest prime less than 2<sup>31</sup>-1 that is the smaller of a twin prime pair. */
   public static final int MAX_INT_SMALLER_TWIN_PRIME = 2147482949;
 
-  private static final Map<RandomWrapper,Boolean> instances =
+  private static final Map<RandomWrapper,Boolean> INSTANCES =
       Collections.synchronizedMap(new WeakHashMap<RandomWrapper,Boolean>());
   
   private RandomUtils() { }
   
   public static void useTestSeed() {
     RandomWrapper.useTestSeed();
-    synchronized (instances) {
-      for (RandomWrapper rng : instances.keySet()) {
+    synchronized (INSTANCES) {
+      for (RandomWrapper rng : INSTANCES.keySet()) {
         rng.reset();
       }
     }
@@ -53,13 +53,13 @@ public final class RandomUtils {
   
   public static Random getRandom() {
     RandomWrapper random = new RandomWrapper();
-    instances.put(random, Boolean.TRUE);
+    INSTANCES.put(random, Boolean.TRUE);
     return random;
   }
   
   public static Random getRandom(long seed) {
     RandomWrapper random = new RandomWrapper(seed);
-    instances.put(random, Boolean.TRUE);
+    INSTANCES.put(random, Boolean.TRUE);
     return random;
   }
   

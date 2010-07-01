@@ -46,7 +46,7 @@ public final class FrequentPatternMaxHeap {
     for (Pattern p : queue) {
       Long index = p.support();
       Set<Pattern> patternList;
-      if (patternIndex.containsKey(index) == false) {
+      if (!patternIndex.containsKey(index)) {
         patternList = new HashSet<Pattern>();
         patternIndex.put(index, patternList);
       }
@@ -133,10 +133,7 @@ public final class FrequentPatternMaxHeap {
   }
   
   private boolean addPattern(Pattern frequentPattern) {
-    if (subPatternCheck == false) {
-      queue.add(frequentPattern);
-      return true;
-    } else {
+    if (subPatternCheck) {
       Long index = frequentPattern.support();
       if (patternIndex.containsKey(index)) {
         Set<Pattern> indexSet = patternIndex.get(index);
@@ -153,9 +150,7 @@ public final class FrequentPatternMaxHeap {
         }
         if (replace) {
           indexSet.remove(replacablePattern);
-          if (indexSet.contains(frequentPattern) == false
-              && queue.add(frequentPattern)) {
-            
+          if (!indexSet.contains(frequentPattern) && queue.add(frequentPattern)) {
             indexSet.add(frequentPattern);
           }
           return false;
@@ -166,15 +161,18 @@ public final class FrequentPatternMaxHeap {
       } else {
         queue.add(frequentPattern);
         Set<Pattern> patternList;
-        if (patternIndex.containsKey(index) == false) {
+        if (!patternIndex.containsKey(index)) {
           patternList = new HashSet<Pattern>();
           patternIndex.put(index, patternList);
         }
         patternList = patternIndex.get(index);
         patternList.add(frequentPattern);
-        
+
         return true;
       }
+    } else {
+      queue.add(frequentPattern);
+      return true;
     }
   }
 }

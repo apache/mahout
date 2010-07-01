@@ -27,11 +27,11 @@ public class DistributedEuclideanDistanceVectorSimilarityTest extends
 
     assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
         asVector(3, -2),
-        asVector(3, -2), 2, 1d);
+        asVector(3, -2), 2, 1.0d);
 
     assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
         asVector(3, 3),
-        asVector(3, 3), 2, 1d);
+        asVector(3, 3), 2, 1.0d);
 
     assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
         asVector(1, 2, 3),
@@ -39,6 +39,6 @@ public class DistributedEuclideanDistanceVectorSimilarityTest extends
 
     assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),
         asVector(1, 0),
-        asVector(0, 1), 2, 0d);
+        asVector(0, 1), 2, 0.0d);
   }
 }

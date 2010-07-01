@@ -64,8 +64,8 @@ public class MeanShiftCanopyClusterer {
    */
   public void configure(Configuration configuration) {
     try {
-      measure = Class.forName(configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
-          .newInstance();
+      measure = Class.forName(configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(configuration);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -203,8 +203,10 @@ public class MeanShiftCanopyClusterer {
    * @param numIter
    *          the maximum number of iterations
    */
-  public static List<MeanShiftCanopy> clusterPoints(List<Vector> points, DistanceMeasure measure, double convergenceThreshold,
-      double t1, double t2, int numIter) {
+  public static List<MeanShiftCanopy> clusterPoints(List<Vector> points,
+                                                    DistanceMeasure measure,
+                                                    double convergenceThreshold,
+                                                    double t1, double t2, int numIter) {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure, t1, t2, convergenceThreshold);
 
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
@@ -227,14 +229,15 @@ public class MeanShiftCanopyClusterer {
    * @param canopies
    *          the List<MeanShiftCanopy> clusters
    */
-  public static boolean runMeanShiftCanopyIteration(List<MeanShiftCanopy> canopies, MeanShiftCanopyClusterer clusterer) {
+  public static boolean runMeanShiftCanopyIteration(List<MeanShiftCanopy> canopies,
+                                                    MeanShiftCanopyClusterer clusterer) {
     boolean converged = true;
     List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
     for (MeanShiftCanopy canopy : canopies) {
       converged = clusterer.shiftToMean(canopy) && converged;
       clusterer.mergeCanopy(canopy, migratedCanopies);
     }
-    canopies = migratedCanopies;
+    //canopies = migratedCanopies;
     return converged;
 
   }

@@ -24,11 +24,11 @@ import org.apache.hadoop.io.ArrayWritable;
  */
 class WeightedOccurrenceArray extends ArrayWritable {
 
-  public WeightedOccurrenceArray() {
+  WeightedOccurrenceArray() {
     super(WeightedOccurrence.class);
   }
 
-  public WeightedOccurrenceArray(WeightedOccurrence[] weightedOccurrences) {
+  WeightedOccurrenceArray(WeightedOccurrence[] weightedOccurrences) {
     super(WeightedOccurrence.class);
     set(weightedOccurrences);
   }

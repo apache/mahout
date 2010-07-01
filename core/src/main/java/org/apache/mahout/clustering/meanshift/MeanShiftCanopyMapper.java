@@ -30,26 +30,19 @@ public class MeanShiftCanopyMapper extends Mapper<WritableComparable<?>,MeanShif
   private final List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
   
   private MeanShiftCanopyClusterer clusterer;
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
+
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     clusterer = new MeanShiftCanopyClusterer(context.getConfiguration());
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
-  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, MeanShiftCanopy canopy, Context context)
+    throws IOException, InterruptedException {
     clusterer.mergeCanopy(canopy.shallowCopy(), canopies);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     for (MeanShiftCanopy canopy : canopies) {

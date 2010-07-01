@@ -31,7 +31,6 @@ public class L1ModelDistribution extends VectorModelDistribution {
   }
   
   public L1ModelDistribution() {
-    super();
   }
   
   @Override

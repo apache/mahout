@@ -73,11 +73,7 @@ public class LFUCache<K,V> implements Cache<K,V> {
   
   public V quickGet(K key) {
     Pair<V,MutableLong> data = dataMap.get(key);
-    if (data == null) {
-      return null;
-    } else {
-      return data.getFirst();
-    }
+    return data == null ? null : data.getFirst();
   }
   
   private void incrementHit(K key, long count) {
@@ -85,7 +81,7 @@ public class LFUCache<K,V> implements Cache<K,V> {
     if (keys == null) {
       throw new ConcurrentModificationException();
     }
-    if (keys.remove(key) == false) {
+    if (!keys.remove(key)) {
       throw new ConcurrentModificationException();
     }
     if (keys.isEmpty()) {

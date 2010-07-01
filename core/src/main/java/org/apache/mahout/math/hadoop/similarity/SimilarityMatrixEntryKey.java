@@ -44,11 +44,9 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
   }
 
   public SimilarityMatrixEntryKey() {
-    super();
   }
 
   public SimilarityMatrixEntryKey(int row, double value) {
-    super();
     this.row = row;
     this.value = value;
   }

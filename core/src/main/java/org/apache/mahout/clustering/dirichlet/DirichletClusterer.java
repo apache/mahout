@@ -237,11 +237,7 @@ public class DirichletClusterer<O> {
 
   /**
    * Emit the point to the most likely cluster
-   * @param point
    * @param pi the normalized pdf Vector for the point
-   * @param output
-   * @throws IOException
-   * @throws InterruptedException 
    */
   private void emitMostLikelyCluster(VectorWritable point, List<DirichletCluster<VectorWritable>> clusters, Vector pi,
       Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,

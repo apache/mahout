@@ -33,8 +33,6 @@ public interface DistributedVectorSimilarity {
 
   /**
    * compute the weight (e.g. length) of a vector
-   * @param v
-   * @return
    */
   double weight(Vector v);
 
@@ -46,9 +44,11 @@ public interface DistributedVectorSimilarity {
    * @param cooccurrences     all column entries where both vectors have a nonZero entry
    * @param weightOfVectorA   the result of {@link DistributedVectorSimilarity#weight(Vector)} for the first row vector
    * @param weightOfVectorB   the result of {@link DistributedVectorSimilarity#weight(Vector)} for the first row vector
-   * @param numberOfCols      the overall number of columns
-   * @return
    */
-  double similarity(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, int numberOfColumns);
+  double similarity(int rowA,
+                    int rowB,
+                    Iterable<Cooccurrence> cooccurrences,
+                    double weightOfVectorA,
+                    double weightOfVectorB,
+                    int numberOfColumns);
 }

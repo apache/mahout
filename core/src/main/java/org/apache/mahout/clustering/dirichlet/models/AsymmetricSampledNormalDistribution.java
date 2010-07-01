@@ -29,7 +29,6 @@ import org.apache.mahout.math.VectorWritable;
 public class AsymmetricSampledNormalDistribution extends VectorModelDistribution {
   
   public AsymmetricSampledNormalDistribution() {
-    super();
   }
   
   public AsymmetricSampledNormalDistribution(VectorWritable modelPrototype) {

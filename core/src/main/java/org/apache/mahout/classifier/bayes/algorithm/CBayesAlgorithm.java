@@ -79,7 +79,7 @@ public class CBayesAlgorithm implements Algorithm {
       return new ClassifierResult[] {new ClassifierResult(defaultCategory, 0.0)};
     } else {
       List<ClassifierResult> result = new ArrayList<ClassifierResult>(pq.size());
-      while (pq.isEmpty() == false) {
+      while (!pq.isEmpty()) {
         result.add(pq.remove());
       }
       Collections.reverse(result);

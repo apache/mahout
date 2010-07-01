@@ -38,7 +38,7 @@ import org.apache.mahout.fpm.pfpgrowth.fpgrowth.Pattern;
 public final class TopKPatternsOutputConverter<A extends Comparable<? super A>> implements
     OutputCollector<Integer,FrequentPatternMaxHeap> {
   
-  private OutputCollector<A,List<Pair<List<A>,Long>>> collector;
+  private final OutputCollector<A,List<Pair<List<A>,Long>>> collector;
   
   private final Map<Integer,A> reverseMapping;
   

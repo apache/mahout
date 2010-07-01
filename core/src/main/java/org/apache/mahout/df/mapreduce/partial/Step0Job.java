@@ -196,7 +196,7 @@ public class Step0Job {
    * Outputs the first key and the size of the partition
    * 
    */
-  protected static class Step0Mapper extends Mapper<LongWritable,Text,IntWritable,Step0Output> {
+  static class Step0Mapper extends Mapper<LongWritable,Text,IntWritable,Step0Output> {
     
     private int partition;
     

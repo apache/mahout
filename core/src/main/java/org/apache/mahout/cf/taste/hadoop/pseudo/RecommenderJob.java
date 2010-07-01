@@ -20,7 +20,6 @@ package org.apache.mahout.cf.taste.hadoop.pseudo;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.cli2.Option;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -31,7 +30,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.math.VarLongWritable;
 

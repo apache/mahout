@@ -123,7 +123,7 @@ public final class ItemSimilarityTest extends TasteTestCase {
    * @throws Exception
    */
   public void testPrefsToItemUserMatrixMapper() throws Exception {
-    Mapper<LongWritable,Text,VarIntWritable,DistributedRowMatrix.MatrixEntryWritable>.Context context =
+    Mapper<LongWritable,Text,VarIntWritable, MatrixEntryWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
     context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(100L))),
         MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(100L),
@@ -145,15 +145,15 @@ public final class ItemSimilarityTest extends TasteTestCase {
    * @throws Exception
    */
   public void testPrefsToItemUserMatrixReducer() throws Exception {
-    Reducer<VarIntWritable,DistributedRowMatrix.MatrixEntryWritable,IntWritable,VectorWritable>.Context context =
+    Reducer<VarIntWritable, MatrixEntryWritable,IntWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
     context.write(EasyMock.eq(new IntWritable(123)), MathHelper.vectorMatches(MathHelper.elem(1, 0.5d),
-        MathHelper.elem(7, 2d)));
+        MathHelper.elem(7, 2.0d)));
     EasyMock.replay(context);
 
     List<MatrixEntryWritable> entries = Arrays.asList(MathHelper.matrixEntry(123, 1, 0.5d),
-        MathHelper.matrixEntry(123, 7, 2d));
+        MathHelper.matrixEntry(123, 7, 2.0d));
 
     new PrefsToItemUserMatrixReducer().reduce(new VarIntWritable(123), entries, context);
 
@@ -181,7 +181,7 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
     Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE);
     vector.set(12, 0.2d);
-    vector.set(34, 1d);
+    vector.set(34, 1.0d);
     vector.set(56, 0.9d);
 
     MostSimilarItemPairsMapper mapper = new MostSimilarItemPairsMapper();

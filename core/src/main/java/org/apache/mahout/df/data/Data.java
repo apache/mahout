@@ -47,40 +47,32 @@ public class Data implements Cloneable {
   }
   
   /**
-   * Returns the number of elements
-   * 
-   * @return
+   * @return the number of elements
    */
   public int size() {
     return instances.size();
   }
   
   /**
-   * Returns true is this data contains no element
-   * 
-   * @return
+   * @return true if this data contains no element
    */
   public boolean isEmpty() {
     return instances.isEmpty();
   }
   
   /**
-   * Returns true is this data contains the specified element.
-   * 
    * @param v
    *          element whose presence in this list if to be searched
-   * @return
+   * @return true is this data contains the specified element.
    */
   public boolean contains(Instance v) {
     return instances.contains(v);
   }
   
   /**
-   * Returns the index of the first occurrence of the element in this data
-   * 
    * @param v
    *          element to search for
-   * @return -1 if the element is not found
+   * @return the index of the first occurrence of the element in this data or -1 if the element is not found
    */
   public int indexof(Instance v) {
     return instances.indexOf(v);
@@ -100,10 +92,7 @@ public class Data implements Cloneable {
   }
   
   /**
-   * Returns the subset from this data that matches the given condition
-   * 
-   * @param condition
-   * @return
+   * @return the subset from this data that matches the given condition
    */
   public Data subset(Condition condition) {
     List<Instance> subset = new ArrayList<Instance>();
@@ -118,13 +107,11 @@ public class Data implements Cloneable {
   }
   
   /**
-   * Returns a random subset without modifying the current data
-   * 
    * @param rng
    *          Random number generator
    * @param ratio
    *          [0,1]
-   * @return
+   * @return a random subset without modifying the current data
    */
   public Data rsubset(Random rng, double ratio) {
     List<Instance> subset = new ArrayList<Instance>();
@@ -142,7 +129,6 @@ public class Data implements Cloneable {
    * if data has N cases, sample N cases at random -but with replacement.
    * 
    * @param rng
-   * @return
    */
   public Data bagging(Random rng) {
     int datasize = size();
@@ -181,7 +167,6 @@ public class Data implements Cloneable {
    * Splits the data in two, returns one part, and this gets the rest of the data. <b>VERY SLOW!</b>
    * 
    * @param rng
-   * @return
    */
   public Data rsplit(Random rng, int subsize) {
     List<Instance> subset = new ArrayList<Instance>(subsize);
@@ -218,8 +203,6 @@ public class Data implements Cloneable {
   
   /**
    * checks if all the vectors have identical label values
-   * 
-   * @return
    */
   public boolean identicalLabel() {
     if (isEmpty()) {
@@ -240,7 +223,6 @@ public class Data implements Cloneable {
    * finds all distinct values of a given attribute
    * 
    * @param attr
-   * @return
    */
   public double[] values(int attr) {
     Set<Double> result = new HashSet<Double>();
@@ -285,8 +267,6 @@ public class Data implements Cloneable {
   
   /**
    * extract the labels of all instances
-   * 
-   * @return
    */
   public int[] extractLabels() {
     int[] labels = new int[size()];
@@ -306,7 +286,6 @@ public class Data implements Cloneable {
    *          file system
    * @param path
    *          data path
-   * @return
    */
   public static int[] extractLabels(Dataset dataset, FileSystem fs, Path path) throws IOException {
     FSDataInputStream input = fs.open(path);

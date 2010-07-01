@@ -52,7 +52,6 @@ public class Cluster extends ClusterBase {
    *          the center point
    */
   public Cluster(Vector center) {
-    super();
     this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);
     this.setPointTotal(getCenter().like());
@@ -69,7 +68,6 @@ public class Cluster extends ClusterBase {
    *          the center point
    */
   public Cluster(Vector center, int clusterId) {
-    super();
     this.setId(clusterId);
     this.setCenter(new RandomAccessSparseVector(center));
     this.setNumPoints(0);

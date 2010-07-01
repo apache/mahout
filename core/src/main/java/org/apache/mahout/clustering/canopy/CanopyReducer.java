@@ -19,7 +19,6 @@ package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
@@ -29,14 +28,10 @@ import org.apache.mahout.math.VectorWritable;
 
 public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(Text arg0, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
-    Iterator<VectorWritable> it = values.iterator();
-    while (it.hasNext()) {
-      Vector point = it.next().get();
+    for (VectorWritable value : values) {
+      Vector point = value.get();
       canopyClusterer.addPointToCanopies(point, canopies, context);
     }
     for (Canopy canopy : canopies) {
@@ -44,9 +39,6 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

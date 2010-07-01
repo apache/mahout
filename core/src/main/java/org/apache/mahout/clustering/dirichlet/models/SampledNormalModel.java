@@ -25,7 +25,6 @@ import org.apache.mahout.math.Vector;
 public class SampledNormalModel extends NormalModel {
   
   public SampledNormalModel() {
-    super();
   }
   
   public SampledNormalModel(int id, Vector mean, double sd) {

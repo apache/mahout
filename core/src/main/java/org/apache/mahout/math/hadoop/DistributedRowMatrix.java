@@ -26,6 +26,7 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.Vector;
@@ -134,33 +135,25 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     return numCols;
   }
 
-  public DistributedRowMatrix times(DistributedRowMatrix other) {
+  public DistributedRowMatrix times(DistributedRowMatrix other) throws IOException {
     if (numRows != other.numRows()) {
       throw new CardinalityException(numRows, other.numRows());
     }
     Path outPath = new Path(outputTmpBasePath.getParent(), "productWith");
     JobConf conf = MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
-    try {
-      JobClient.runJob(conf);
-      DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numRows, other.numCols());
-      out.configure(conf);
-      return out;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
+    JobClient.runJob(conf);
+    DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numRows, other.numCols());
+    out.configure(conf);
+    return out;
   }
 
-  public DistributedRowMatrix transpose() {
+  public DistributedRowMatrix transpose() throws IOException {
     Path outputPath = new Path(rowPath.getParent(), "transpose-" + (System.nanoTime() & 0xFF));
-    try {
-      JobConf conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
-      JobClient.runJob(conf);
-      DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
-      m.configure(this.conf);
-      return m;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    }
+    JobConf conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
+    JobClient.runJob(conf);
+    DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
+    m.configure(this.conf);
+    return m;
   }
 
   @Override
@@ -174,7 +167,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
       JobClient.runJob(conf);
       return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
     } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
+      throw new IllegalStateException(ioe);
     }
   }
 
@@ -231,10 +224,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
         throw new IllegalStateException(ioe);
       } finally {
         if (!hasNext) {
-          try {
-            reader.close();
-          } catch (IOException ioe) {
-          }
+          IOUtils.quietClose(reader);
         }
       }
       return hasNext;
@@ -300,6 +290,20 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
           return 0;
         }
       }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof MatrixEntryWritable)) {
+        return false;
+      }
+      MatrixEntryWritable other = (MatrixEntryWritable) o;
+      return row == other.row && col == other.col;
+    }
+
+    @Override
+    public int hashCode() {
+      return row + 31 * col;
     }
 
     @Override

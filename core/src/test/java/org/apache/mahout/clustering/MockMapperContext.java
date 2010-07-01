@@ -12,7 +12,7 @@ import org.apache.mahout.common.DummyOutputCollector;
 
 public class MockMapperContext<K extends WritableComparable, V extends Writable> extends Context {
 
-  private DummyOutputCollector<K, V> collector;
+  private final DummyOutputCollector<K, V> collector;
 
   public MockMapperContext(Mapper<?,?,?,?> mapper, Configuration arg0,
       DummyOutputCollector<K,V> collector) throws IOException, InterruptedException {

@@ -13,7 +13,7 @@ import org.apache.mahout.common.MockIterator;
 
 public class MockReducerContext<K extends WritableComparable, V extends Writable> extends Context {
 
-  private DummyOutputCollector<K, V> collector;
+  private final DummyOutputCollector<K, V> collector;
 
   public MockReducerContext(Reducer<?,?,?,?> reducer, Configuration conf, DummyOutputCollector<K, V> collector, Class keyIn,
       Class<?> valueIn) throws IOException, InterruptedException {
@@ -21,17 +21,11 @@ public class MockReducerContext<K extends WritableComparable, V extends Writable
     this.collector = collector;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.TaskInputOutputContext#setStatus(java.lang.String)
-   */
   @Override
   public void setStatus(String status) {
     // TODO Auto-generated method stub
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.TaskInputOutputContext#write(java.lang.Object, java.lang.Object)
-   */
   @Override
   public void write(Object key, Object value) throws IOException, InterruptedException {
     collector.collect((K) key, (V) value);

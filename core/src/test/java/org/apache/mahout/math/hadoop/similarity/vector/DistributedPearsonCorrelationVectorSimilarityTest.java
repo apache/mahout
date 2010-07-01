@@ -26,7 +26,7 @@ public class DistributedPearsonCorrelationVectorSimilarityTest
   public void testPearsonCorrelation() throws Exception {
     assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
         asVector(3, -2),
-        asVector(3, -2), 2, 1d);
+        asVector(3, -2), 2, 1.0d);
 
     assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
         asVector(3, 3),

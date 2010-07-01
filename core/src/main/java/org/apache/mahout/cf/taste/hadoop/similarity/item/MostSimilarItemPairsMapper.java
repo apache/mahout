@@ -89,7 +89,7 @@ public class MostSimilarItemPairsMapper
     Iterator<Element> similarityVectorIterator = similarityVector.get().iterateNonZero();
 
     while (similarityVectorIterator.hasNext()) {
-      Vector.Element element = similarityVectorIterator.next();
+      Element element = similarityVectorIterator.next();
       int index = element.index();
       double value = element.get();
       /* ignore self similarities */

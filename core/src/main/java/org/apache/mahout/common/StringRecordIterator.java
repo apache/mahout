@@ -27,7 +27,7 @@ public class StringRecordIterator implements Iterator<Pair<List<String>,Long>> {
   private static final Long ONE = 1L;
   
   private final Iterator<String> lineIterator;
-  private Pattern splitter;
+  private final Pattern splitter;
   
   public StringRecordIterator(FileLineIterable iterable, String pattern) {
     this.lineIterator = iterable.iterator();

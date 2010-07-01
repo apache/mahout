@@ -25,7 +25,6 @@ import org.apache.mahout.common.Parameters;
 public class BayesParameters extends Parameters {
   
   public BayesParameters(int gramSize) {
-    super();
     set("gramSize", Integer.toString(gramSize));
   }
   

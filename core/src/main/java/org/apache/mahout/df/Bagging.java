@@ -69,7 +69,7 @@ public class Bagging {
     if (callback != null) {
       log.debug("Oob error estimation");
       for (int index = 0; index < data.size(); index++) {
-        if (sampled[index] == false) {
+        if (!sampled[index]) {
           int prediction = tree.classify(data.get(index));
           callback.prediction(treeId, index, prediction);
         }

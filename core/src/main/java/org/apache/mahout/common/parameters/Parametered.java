@@ -39,14 +39,14 @@ public interface Parametered {
    *          ends with a dot if not empty.
    * @param jobConf
    *          configuration used for retreiving values
-   * @see ParameteredGeneralizations#configureParameters(String,Parametered,org.apache.hadoop.conf.Configuration)
+   * @see ParameteredGeneralizations#configureParameters(String,Parametered,Configuration)
    *      invoking method
-   * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,org.apache.hadoop.conf.Configuration)
+   * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,Configuration)
    *      invoking method
    */
   void createParameters(String prefix, Configuration jobConf);
   
-  public void configure(Configuration config);
+  void configure(Configuration config);
   
   /** "multiple inheritance" */
   final class ParameteredGeneralizations {
@@ -60,10 +60,10 @@ public interface Parametered {
 
     /**
      * Calls
-     * {@link org.apache.mahout.common.parameters.Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
+     * {@link Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
      * on parameter parmetered, and then recurse down its composite tree to invoke
-     * {@link org.apache.mahout.common.parameters.Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
-     * and {@link org.apache.hadoop.conf.Configurationigurable#configure(org.apache.hadoop.conf.Configuration)} on
+     * {@link Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
+     * and {@link Parametered#configure(org.apache.hadoop.conf.Configuration)} on
      * each composite part.
      * 
      * @param prefix

@@ -23,11 +23,10 @@ class SimilarItem {
 
   static final Comparator<SimilarItem> COMPARE_BY_SIMILARITY = new BySimilaritySimilarItemComparator();
 
-  private long itemID;
-  private double similarity;
+  private final long itemID;
+  private final double similarity;
 
-  public SimilarItem(long itemID, double similarity) {
-    super();
+  SimilarItem(long itemID, double similarity) {
     this.itemID = itemID;
     this.similarity = similarity;
   }

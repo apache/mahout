@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -119,8 +120,9 @@ public class CanopyClusterer {
     numVectors++;
   }
 
-  @SuppressWarnings("unchecked")
-  public void emitPointToClosestCanopy(Vector point, List<Canopy> canopies, org.apache.hadoop.mapreduce.Mapper.Context context)
+  public void emitPointToClosestCanopy(Vector point,
+                                       List<Canopy> canopies,
+                                       Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
       throws IOException, InterruptedException {
 
     double minDist = Double.MAX_VALUE;

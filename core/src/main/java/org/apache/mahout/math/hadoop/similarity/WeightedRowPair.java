@@ -36,11 +36,9 @@ public class WeightedRowPair implements WritableComparable<WeightedRowPair> {
   private double weightB;
 
   public WeightedRowPair() {
-    super();
   }
 
   public WeightedRowPair(int rowA, int rowB, double weightA, double weightB) {
-    super();
     this.rowA = rowA;
     this.rowB = rowB;
     this.weightA = weightA;
@@ -99,7 +97,7 @@ public class WeightedRowPair implements WritableComparable<WeightedRowPair> {
   public boolean equals(Object other) {
     if (other instanceof WeightedRowPair) {
       WeightedRowPair otherPair = (WeightedRowPair) other;
-      return (rowA == otherPair.rowA && rowB == otherPair.rowB);
+      return rowA == otherPair.rowA && rowB == otherPair.rowB;
     }
     return false;
   }

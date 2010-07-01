@@ -43,7 +43,7 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
                      VectorWritable wordCountsWritable,
                      Context context) throws IOException, InterruptedException {
     Vector wordCounts = wordCountsWritable.get();
-    LDAInference.InferredDocument doc = null;
+    LDAInference.InferredDocument doc;
     try {
       doc = infer.infer(wordCounts);
     } catch (ArrayIndexOutOfBoundsException e1) {

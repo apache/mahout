@@ -230,9 +230,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
       return false;
     }
     GenericItemPreferenceArray otherArray = (GenericItemPreferenceArray) other;
-    return id == otherArray.id &&
-        Arrays.equals(ids, otherArray.ids) &&
-        Arrays.equals(values, otherArray.values);
+    return id == otherArray.id && Arrays.equals(ids, otherArray.ids) && Arrays.equals(values, otherArray.values);
   }
   
   @Override

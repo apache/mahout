@@ -18,7 +18,6 @@ package org.apache.mahout.clustering.lda;
 
 import org.easymock.classextension.EasyMock;
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.Random;
 

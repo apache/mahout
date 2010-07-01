@@ -35,10 +35,6 @@ public abstract class Condition {
   
   /**
    * Condition that checks if the given attribute has a value "equal" to the given value
-   * 
-   * @param attr
-   * @param value
-   * @return
    */
   public static Condition equals(int attr, double value) {
     return new Equals(attr, value);
@@ -46,10 +42,6 @@ public abstract class Condition {
   
   /**
    * Condition that checks if the given attribute has a value "lesser" than the given value
-   * 
-   * @param attr
-   * @param value
-   * @return
    */
   public static Condition lesser(int attr, double value) {
     return new Lesser(attr, value);
@@ -57,10 +49,6 @@ public abstract class Condition {
   
   /**
    * Condition that checks if the given attribute has a value "greater or equal" than the given value
-   * 
-   * @param attr
-   * @param value
-   * @return
    */
   public static Condition greaterOrEquals(int attr, double value) {
     return new GreaterOrEquals(attr, value);

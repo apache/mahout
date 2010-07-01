@@ -33,12 +33,10 @@ class WeightedOccurrence implements Writable, Cloneable {
   private double value;
   private double weight;
 
-  public WeightedOccurrence() {
-    super();
+  WeightedOccurrence() {
   }
 
-  public WeightedOccurrence(int row, double value, double weight) {
-    super();
+  WeightedOccurrence(int row, double value, double weight) {
     this.row = row;
     this.value = value;
     this.weight = weight;

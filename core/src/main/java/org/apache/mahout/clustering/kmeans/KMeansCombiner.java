@@ -17,24 +17,18 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 public class KMeansCombiner extends Reducer<Text, KMeansInfo, Text, KMeansInfo> {
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(Text key, Iterable<KMeansInfo> values, Context context) throws IOException, InterruptedException {
 
     Cluster cluster = new Cluster(key.toString());
-    Iterator<KMeansInfo> it = values.iterator();
-    while (it.hasNext()) {
-      KMeansInfo next = it.next();
-      cluster.addPoints(next.getPoints(), next.getPointTotal());
+    for (KMeansInfo value : values) {
+      cluster.addPoints(value.getPoints(), value.getPointTotal());
     }
     context.write(key, new KMeansInfo(cluster.getNumPoints(), cluster.getPointTotal()));
   }

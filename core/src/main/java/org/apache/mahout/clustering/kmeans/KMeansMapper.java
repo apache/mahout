@@ -34,17 +34,12 @@ public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, 
 
   private final List<Cluster> clusters = new ArrayList<Cluster>();
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context)
+    throws IOException, InterruptedException {
     this.clusterer.emitPointToNearestCluster(point.get(), this.clusters, context);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

@@ -82,7 +82,7 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
     if (gramSize > 1) {
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(new ArrayIterator<String>(tokens)), gramSize);
       do {
-        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
+        String term = (sf.getAttribute(TermAttribute.class)).term();
         if (term.length() > 0) {
           if (wordList.containsKey(term)) {
             wordList.put(term, 1 + wordList.get(term));

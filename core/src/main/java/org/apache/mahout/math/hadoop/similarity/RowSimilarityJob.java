@@ -92,8 +92,8 @@ public class RowSimilarityJob extends AbstractJob {
     addOutputOption();
     addOption("numberOfColumns", "r", "Number of columns in the input matrix");
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
-    addOption("maxSimilaritiesPerRow", "m", "Number of maximum similarities per row (default: " +
-        DEFAULT_MAX_SIMILARITIES_PER_ROW + ")", String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ROW));
+    addOption("maxSimilaritiesPerRow", "m", "Number of maximum similarities per row (default: "
+              + DEFAULT_MAX_SIMILARITIES_PER_ROW + ')', String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ROW));
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
@@ -138,7 +138,7 @@ public class RowSimilarityJob extends AbstractJob {
                                Cooccurrence.class,
                                SimilarityReducer.class,
                                SimilarityMatrixEntryKey.class,
-                               DistributedRowMatrix.MatrixEntryWritable.class,
+                               MatrixEntryWritable.class,
                                SequenceFileOutputFormat.class);
 
       Configuration pairwiseConf = pairwiseSimilarity.getConfiguration();
@@ -153,7 +153,7 @@ public class RowSimilarityJob extends AbstractJob {
                                SequenceFileInputFormat.class,
                                Mapper.class,
                                SimilarityMatrixEntryKey.class,
-                               DistributedRowMatrix.MatrixEntryWritable.class,
+                               MatrixEntryWritable.class,
                                EntriesToVectorsReducer.class,
                                IntWritable.class,
                                VectorWritable.class,
@@ -189,7 +189,7 @@ public class RowSimilarityJob extends AbstractJob {
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
       super.setup(ctx);
-      similarity = RowSimilarityJob.instantiateSimilarity(ctx.getConfiguration().get(DISTRIBUTED_SIMILARITY_CLASSNAME));
+      similarity = instantiateSimilarity(ctx.getConfiguration().get(DISTRIBUTED_SIMILARITY_CLASSNAME));
     }
 
     @Override
@@ -264,7 +264,7 @@ public class RowSimilarityJob extends AbstractJob {
    * computes the pairwise similarities
    */
   public static class SimilarityReducer
-      extends Reducer<WeightedRowPair,Cooccurrence,SimilarityMatrixEntryKey,DistributedRowMatrix.MatrixEntryWritable> {
+      extends Reducer<WeightedRowPair,Cooccurrence,SimilarityMatrixEntryKey, MatrixEntryWritable> {
 
     private DistributedVectorSimilarity similarity;
     private int numberOfColumns;
@@ -272,7 +272,7 @@ public class RowSimilarityJob extends AbstractJob {
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {
       super.setup(ctx);
-      similarity = RowSimilarityJob.instantiateSimilarity(ctx.getConfiguration().get(DISTRIBUTED_SIMILARITY_CLASSNAME));
+      similarity = instantiateSimilarity(ctx.getConfiguration().get(DISTRIBUTED_SIMILARITY_CLASSNAME));
       numberOfColumns = ctx.getConfiguration().getInt(NUMBER_OF_COLUMNS, -1);
       if (numberOfColumns < 1) {
         throw new IllegalStateException("Number of columns was not correctly set!");
@@ -290,7 +290,7 @@ public class RowSimilarityJob extends AbstractJob {
 
       if (!Double.isNaN(similarityValue)) {
         SimilarityMatrixEntryKey key = new SimilarityMatrixEntryKey();
-        DistributedRowMatrix.MatrixEntryWritable entry = new DistributedRowMatrix.MatrixEntryWritable();
+        MatrixEntryWritable entry = new MatrixEntryWritable();
         entry.setVal(similarityValue);
 
         entry.setRow(rowA);
@@ -312,7 +312,7 @@ public class RowSimilarityJob extends AbstractJob {
    * collects all {@link MatrixEntryWritable} for each column and creates a {@link VectorWritable}
    */
   public static class EntriesToVectorsReducer
-      extends Reducer<SimilarityMatrixEntryKey,DistributedRowMatrix.MatrixEntryWritable,IntWritable,VectorWritable> {
+      extends Reducer<SimilarityMatrixEntryKey, MatrixEntryWritable,IntWritable,VectorWritable> {
 
     private int maxSimilaritiesPerRow;
 

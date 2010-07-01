@@ -143,8 +143,8 @@ public final class TimesSquaredJob {
   public static class TimesSquaredMapper<T extends WritableComparable> extends MapReduceBase
       implements Mapper<T,VectorWritable, NullWritable,VectorWritable> {
 
-    protected Vector outputVector;
-    protected OutputCollector<NullWritable,VectorWritable> out;
+    Vector outputVector;
+    OutputCollector<NullWritable,VectorWritable> out;
     private Vector inputVector;
 
     @Override

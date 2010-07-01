@@ -34,6 +34,6 @@ public class DistributedUncenteredZeroAssumingCosineVectorSimilarityTest
 
     assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
         asVector(1, 0),
-        asVector(1, 0), 2, 1d);
+        asVector(1, 0), 2, 1.0d);
   }
 }

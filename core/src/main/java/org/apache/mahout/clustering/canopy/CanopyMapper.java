@@ -33,26 +33,17 @@ class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, V
 
   private CanopyClusterer canopyClusterer;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
     canopyClusterer.addPointToCanopies(point.get(), canopies, context);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     for (Canopy canopy : canopies) {

@@ -93,8 +93,7 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public int getCount(String correctLabel, String classifiedLabel) {
-    if (labels.contains(correctLabel) &&
-        !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
+    if (labels.contains(correctLabel) && !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
       throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
     }
     int correctId = labelMap.get(correctLabel);
@@ -103,8 +102,7 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public void putCount(String correctLabel, String classifiedLabel, int count) {
-    if (labels.contains(correctLabel) &&
-        !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
+    if (labels.contains(correctLabel) && !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
       throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
     }
     int correctId = labelMap.get(correctLabel);

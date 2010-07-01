@@ -27,7 +27,7 @@ public class DistributedUncenteredCosineVectorSimilarityTest
 
     assertSimilar(new DistributedUncenteredCosineVectorSimilarity(),
         asVector(0, 0, 0, 0, 1),
-        asVector(0, 1, 1, 1, 1), 5, 1d);
+        asVector(0, 1, 1, 1, 1), 5, 1.0d);
 
     assertSimilar(new DistributedUncenteredCosineVectorSimilarity(),
         asVector(0, 1),
@@ -35,7 +35,7 @@ public class DistributedUncenteredCosineVectorSimilarityTest
 
     assertSimilar(new DistributedUncenteredCosineVectorSimilarity(),
         asVector(1, 0),
-        asVector(1, 0), 2, 1d);
+        asVector(1, 0), 2, 1.0d);
 
     assertSimilar(new DistributedUncenteredCosineVectorSimilarity(),
         asVector(1, 1, 2),

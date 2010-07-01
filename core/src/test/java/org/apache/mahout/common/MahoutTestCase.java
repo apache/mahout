@@ -81,7 +81,8 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     return tempFileOrDir;
   }
 
-  protected final void setField(Object target, String fieldname, Object value) throws Exception {
+  protected static void setField(Object target, String fieldname, Object value)
+      throws NoSuchFieldException, IllegalAccessException {
     Field field = target.getClass().getDeclaredField(fieldname);
     field.setAccessible(true);
     field.set(target, value);

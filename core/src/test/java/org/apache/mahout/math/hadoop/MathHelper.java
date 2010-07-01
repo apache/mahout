@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -42,6 +43,9 @@ public class MathHelper {
 
   /** the "close enough" value for floating point computations */
   public static final double EPSILON = 0.00001d;
+
+  private MathHelper() {
+  }
 
   /**
    * applies an {@link IArgumentMatcher} to {@link MatrixEntryWritable}s
@@ -85,25 +89,24 @@ public class MathHelper {
   }
 
   /**
-   * convenience method to create a {@link Vector.Element}
+   * convenience method to create a {@link Element}
    *
    * @param index
    * @param value
    * @return
    */
-  public static Vector.Element elem(int index, double value) {
+  public static Element elem(int index, double value) {
     return new ElementToCheck(index, value);
   }
 
   /**
-   * a simple implementation of {@link Vector.Element}
+   * a simple implementation of {@link Element}
    */
-  static class ElementToCheck implements Vector.Element {
-    private int index;
+  static class ElementToCheck implements Element {
+    private final int index;
     private double value;
 
-    public ElementToCheck(int index, double value) {
-      super();
+    ElementToCheck(int index, double value) {
       this.index = index;
       this.value = value;
     }
@@ -127,13 +130,13 @@ public class MathHelper {
    * @param elements
    * @return
    */
-  public static VectorWritable vectorMatches(final Vector.Element... elements) {
+  public static VectorWritable vectorMatches(final Element... elements) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
         if (argument instanceof VectorWritable) {
           Vector v = ((VectorWritable) argument).get();
-          for (Vector.Element element : elements) {
+          for (Element element : elements) {
             boolean matches = Math.abs(element.get() - v.get(element.index())) <= EPSILON;
             if (!matches) {
               return false;
@@ -179,7 +182,7 @@ public class MathHelper {
         }
       }
     } finally {
-      reader.close();
+      IOUtils.quietClose(reader);
     }
     return matrix;
   }
@@ -206,7 +209,7 @@ public class MathHelper {
         writer.append(new IntWritable(n), new VectorWritable(v));
       }
     } finally {
-      writer.close();
+      IOUtils.quietClose(writer);
     }
   }
 }

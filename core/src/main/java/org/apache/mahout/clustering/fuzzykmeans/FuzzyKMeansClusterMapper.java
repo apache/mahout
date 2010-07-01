@@ -35,17 +35,11 @@ public class FuzzyKMeansClusterMapper extends Mapper<WritableComparable<?>, Vect
 
   private FuzzyKMeansClusterer clusterer;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
     clusterer.emitPointToClusters(point, clusters, context);
-    }
+  }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
      super.setup(context);

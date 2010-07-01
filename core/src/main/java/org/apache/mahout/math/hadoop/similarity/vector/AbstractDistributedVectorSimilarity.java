@@ -46,9 +46,6 @@ public abstract class AbstractDistributedVectorSimilarity implements Distributed
 
   /**
    * computes the number of elements in the {@link Iterable}
-   *
-   * @param iterable
-   * @return
    */
   protected int countElements(Iterable<?> iterable) {
     return countElements(iterable.iterator());
@@ -56,9 +53,6 @@ public abstract class AbstractDistributedVectorSimilarity implements Distributed
 
   /**
    * computes the number of elements in the {@link Iterator}
-   *
-   * @param iterator
-   * @return
    */
   protected int countElements(Iterator<?> iterator) {
     int count = 0;
@@ -73,17 +67,13 @@ public abstract class AbstractDistributedVectorSimilarity implements Distributed
    * do the actual similarity computation
    *
    * @see DistributedVectorSimilarity#similarity(int, int, Iterable, double, double, int)
-   *
-   * @param rowA
-   * @param rowB
-   * @param cooccurrences
-   * @param weightOfVectorA
-   * @param weightOfVectorB
-   * @param numberOfColumns
-   * @return
    */
-  protected abstract double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences,
-      double weightOfVectorA, double weightOfVectorB, int numberOfColumns);
+  protected abstract double doComputeResult(int rowA,
+                                            int rowB,
+                                            Iterable<Cooccurrence> cooccurrences,
+                                            double weightOfVectorA,
+                                            double weightOfVectorB,
+                                            int numberOfColumns);
 
   /**
    * vectors have no weight (NaN) by default, subclasses may override this

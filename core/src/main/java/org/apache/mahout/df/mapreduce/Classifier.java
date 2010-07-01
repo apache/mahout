@@ -75,7 +75,6 @@ public class Classifier {
   }
 
   private void configureJob(Job job) throws IOException {
-    Configuration conf = job.getConfiguration();
 
     job.setJarByClass(Classifier.class);
 

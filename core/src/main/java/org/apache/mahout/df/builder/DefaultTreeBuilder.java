@@ -198,10 +198,10 @@ public class DefaultTreeBuilder implements TreeBuilder {
         } while (selected[rind]);
         
         result[index] = rind;
-        selected[rind] = true; // temporarely set the choosen attribute to be selected
+        selected[rind] = true; // temporarily set the chosen attribute to be selected
       }
       
-      // the choosen attributes are not yet selected
+      // the chosen attributes are not yet selected
       for (int attr : result) {
         selected[attr] = false;
       }

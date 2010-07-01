@@ -58,7 +58,7 @@ public class LeastKCache<K extends Comparable<? super K>,V> implements Cache<K,V
   
   @Override
   public final void set(K key, V value) {
-    if (contains(key) == false) {
+    if (!contains(key)) {
       queue.add(key);
     }
     cache.put(key, value);

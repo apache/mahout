@@ -31,7 +31,6 @@ public class NormalModelDistribution extends VectorModelDistribution {
   }
   
   public NormalModelDistribution() {
-    super();
   }
   
   @Override

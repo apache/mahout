@@ -28,7 +28,6 @@ import org.apache.mahout.math.VectorWritable;
 public class SampledNormalDistribution extends NormalModelDistribution {
   
   public SampledNormalDistribution() {
-    super();
   }
   
   public SampledNormalDistribution(VectorWritable modelPrototype) {

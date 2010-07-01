@@ -176,13 +176,6 @@ public class FuzzyKMeansClusterer {
 
   /**
    * Emit the point to the cluster with the highest pdf
-   * 
-   * @param point
-   * @param clusters
-   * @param clusterPdfList
-   * @param output
-   * @throws IOException
-   * @throws InterruptedException 
    */
   static void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector clusterPdfList,
       Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
@@ -203,13 +196,6 @@ public class FuzzyKMeansClusterer {
 
   /**
    * Emit the point to all clusters
-   * 
-   * @param point
-   * @param clusters
-   * @param pi
-   * @param output
-   * @throws IOException
-   * @throws InterruptedException 
    */
   void emitAllClusters(Vector point, List<SoftCluster> clusters, Vector pi,
       Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context) throws IOException,

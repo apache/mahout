@@ -112,11 +112,6 @@ public class L1Model implements Model<VectorWritable> {
     return buf.toString();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.mahout.clustering.Printable#asJsonString()
-   */
   @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();

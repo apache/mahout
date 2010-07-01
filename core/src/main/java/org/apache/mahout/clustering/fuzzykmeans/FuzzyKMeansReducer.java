@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.fuzzykmeans;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +27,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.common.distance.DistanceMeasure;
 
 public class FuzzyKMeansReducer extends Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
 
@@ -36,16 +34,10 @@ public class FuzzyKMeansReducer extends Reducer<Text, FuzzyKMeansInfo, Text, Sof
 
   private FuzzyKMeansClusterer clusterer;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(Text key, Iterable<FuzzyKMeansInfo> values, Context context) throws IOException, InterruptedException {
     SoftCluster cluster = clusterMap.get(key.toString());
-    Iterator<FuzzyKMeansInfo> it = values.iterator();
-    while (it.hasNext()) {
-      FuzzyKMeansInfo value = it.next();
-
+    for (FuzzyKMeansInfo value : values) {
       if (value.getCombinerPass() == 0) { // escaped from combiner
         cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), clusterer.getM()));
       } else {
@@ -61,9 +53,6 @@ public class FuzzyKMeansReducer extends Reducer<Text, FuzzyKMeansInfo, Text, Sof
     context.write(new Text(cluster.getIdentifier()), cluster);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

@@ -121,7 +121,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       list.add(new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
       double totalProb = 0;
       for (int i = 0; i < clusterList.size(); i++) {
-        SoftCluster cluster = clusterList.get(i);
+        //SoftCluster cluster = clusterList.get(i);
         double probWeight = clusterer.computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
         totalProb += probWeight;
       }
@@ -162,8 +162,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // iterate for each cluster
       int size = 0;
-      for (int cId : pointClusterInfo.keySet()) {
-        List<WeightedVectorWritable> pts = pointClusterInfo.get(cId);
+      for (List<WeightedVectorWritable> pts : pointClusterInfo.values()) {
         size += pts.size();
       }
       assertEquals("total size", size, points.size());
@@ -398,7 +397,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
       List<Vector> pointsVectors = new ArrayList<Vector>();
       for (VectorWritable point : points) {
-        pointsVectors.add((Vector) point.get());
+        pointsVectors.add(point.get());
       }
 
       FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, 0.001, 2);
@@ -517,16 +516,18 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // Now compare the clustermapper results with reference implementation
       assertEquals("mapper and reference sizes", refClusters.size(), clusterMapperCollector.getKeys().size());
-      for (int pcId : refClusters.keySet()) {
-        System.out.println("refClusters=" + refClusters.get(pcId) + " mapClusters="
-            + clusterMapperCollector.getValue(new IntWritable(pcId)));
-        assertEquals("cluster " + pcId + " sizes", refClusters.get(pcId).size(), clusterMapperCollector.getValue(
-            new IntWritable(pcId)).size());
+      for (Map.Entry<Integer, List<WeightedVectorWritable>> entry : refClusters.entrySet()) {
+        int key = entry.getKey();
+        List<WeightedVectorWritable> value = entry.getValue();
+        System.out.println("refClusters=" + value + " mapClusters="
+            + clusterMapperCollector.getValue(new IntWritable(key)));
+        assertEquals("cluster " + key + " sizes",
+                     value.size(),
+                     clusterMapperCollector.getValue(new IntWritable(key)).size());
       }
       // make sure all points are allocated to a cluster
       int size = 0;
-      for (int cId : refClusters.keySet()) {
-        List<WeightedVectorWritable> pts = refClusters.get(cId);
+      for (List<WeightedVectorWritable> pts: refClusters.values()) {
         size += pts.size();
       }
       assertEquals("total size", size, points.size());

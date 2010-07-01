@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -26,31 +25,22 @@ import org.apache.hadoop.mapreduce.Reducer;
 public class FuzzyKMeansCombiner extends Reducer<Text,FuzzyKMeansInfo,Text,FuzzyKMeansInfo> {
   
   private FuzzyKMeansClusterer clusterer;
-  
-  
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
+
   @Override
   protected void reduce(Text key, Iterable<FuzzyKMeansInfo> values, Context context) throws IOException, InterruptedException {
     SoftCluster cluster = new SoftCluster(key.toString().trim());
-    Iterator<FuzzyKMeansInfo> it = values.iterator();
-    while (it.hasNext()) {
-      FuzzyKMeansInfo info = it.next();   
-      if (info.getCombinerPass() == 0) { // first time thru combiner
-        cluster.addPoint(info.getVector(), Math.pow(info.getProbability(), clusterer.getM()));
+    for (FuzzyKMeansInfo value : values) {
+      if (value.getCombinerPass() == 0) { // first time thru combiner
+        cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), clusterer.getM()));
       } else {
-        cluster.addPoints(info.getVector(), info.getProbability());
+        cluster.addPoints(value.getVector(), value.getProbability());
       }
-      info.setCombinerPass(info.getCombinerPass() + 1);
+      value.setCombinerPass(value.getCombinerPass() + 1);
     }
     // TODO: how do we pass along the combinerPass? Or do we not need to?
     context.write(key, new FuzzyKMeansInfo(cluster.getPointProbSum(), cluster.getWeightedPointTotal(), 1));
-    }
+  }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

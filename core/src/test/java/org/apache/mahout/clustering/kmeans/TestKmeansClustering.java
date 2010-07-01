@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.MockMapperContext;
 import org.apache.mahout.clustering.MockReducerContext;
@@ -304,7 +303,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       }
       List<Vector> pointsVectors = new ArrayList<Vector>();
       for (VectorWritable point : points) {
-        pointsVectors.add((Vector) point.get());
+        pointsVectors.add(point.get());
       }
       boolean converged = KMeansClusterer.runKMeansIteration(pointsVectors, reference, measure, 0.001);
       if (k == 8) {
