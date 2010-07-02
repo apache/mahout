@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -58,7 +59,7 @@ public class PartialVectorMergeReducer extends MapReduceBase implements
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    VectorWritable vectorWritable = new VectorWritable(vector);
+    VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
     output.collect(key, vectorWritable);
   }
   
