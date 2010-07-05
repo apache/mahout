@@ -77,7 +77,7 @@ public final class VectorDumper {
       abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
       "The dictionary file type (text|sequencefile)").withShortName("dt").create();
     Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
-      "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries")
+      "Output the centroid as JSON.  Otherwise it substitutes in the terms for vector cell entries")
         .withShortName("j").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
