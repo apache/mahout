@@ -171,7 +171,12 @@ public final class MahoutDriver {
         argsList.addAll(Arrays.asList(argMap.get(arg)));
       }
     }
+    long start = System.currentTimeMillis();
     programDriver.driver(argsList.toArray(new String[argsList.size()]));
+    long finish = System.currentTimeMillis();
+    if (log.isInfoEnabled()) {
+      log.info("Program took " + (finish - start) + " ms");
+    }
   }
 
   private static String[] shift(String[] args) {
