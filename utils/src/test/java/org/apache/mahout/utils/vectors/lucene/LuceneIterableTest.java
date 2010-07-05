@@ -68,8 +68,9 @@ public class LuceneIterableTest extends MahoutTestCase {
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
-    
+    LuceneIterable iterable;
+    iterable = new LuceneIterable(reader, "id", "content", mapper);
+
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
       Assert.assertNotNull(vector);
@@ -77,6 +78,17 @@ public class LuceneIterableTest extends MahoutTestCase {
       Assert.assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
       assertTrue(((NamedVector)vector).getName().startsWith("doc_"));
     }
+
+    iterable = new LuceneIterable(reader, "id", "content", mapper, 3);
+
+    //TODO: do something more meaningful here
+    for (Vector vector : iterable) {
+      Assert.assertNotNull(vector);
+      Assert.assertTrue("vector is not an instanceof " + NamedVector.class, vector instanceof NamedVector);
+      Assert.assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
+      assertTrue(((NamedVector)vector).getName().startsWith("doc_"));
+    }
+
   }
   
   

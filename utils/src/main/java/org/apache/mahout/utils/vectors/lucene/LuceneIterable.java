@@ -124,9 +124,10 @@ public class LuceneIterable implements Iterable<Vector> {
         } else {
           name = String.valueOf(doc);
         }
-        result = new NamedVector(result, name);
         if (normPower != NO_NORMALIZING) {
-          result = result.normalize(normPower);
+          result = new NamedVector(result.normalize(normPower), name);
+        } else {
+          result = new NamedVector(result, name);
         }
       } catch (IOException e) {
         // Log?
