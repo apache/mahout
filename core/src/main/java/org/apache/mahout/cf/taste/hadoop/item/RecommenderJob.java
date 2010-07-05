@@ -52,6 +52,7 @@ import org.apache.mahout.math.VectorWritable;
  *  for which recommendations should be computed, one per line</li>
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
+ * <li>--itemsFile (path): file containing item IDs to recommend for (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
  * <li>--booleanData (boolean): Treat input data as having to pref values (false)</li>
  * <li>--maxPrefsPerUserConsidered (integer): Maximum number of preferences considered per user in
@@ -77,6 +78,7 @@ public final class RecommenderJob extends AbstractJob {
     addOption("numRecommendations", "n", "Number of recommendations per user",
       String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
     addOption("usersFile", "u", "File of users to recommend for", null);
+    addOption("itemsFile", "u", "File of items to recommend for", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("maxPrefsPerUserConsidered", null,
       "Maximum number of preferences considered per user in final recommendation phase",
@@ -95,6 +97,7 @@ public final class RecommenderJob extends AbstractJob {
     Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
     int numRecommendations = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");
+    String itemsFile = parsedArgs.get("--itemsFile");
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
     int maxPrefsPerUserConsidered = Integer.parseInt(parsedArgs.get("--maxPrefsPerUserConsidered"));
     int maxCooccurrencesPerItemConsidered = Integer.parseInt(parsedArgs.get("--maxCooccurrencesPerItemConsidered"));
@@ -170,12 +173,16 @@ public final class RecommenderJob extends AbstractJob {
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+    
       Job aggregateAndRecommend = prepareJob(
           partialMultiplyPath, outputPath, SequenceFileInputFormat.class,
           PartialMultiplyMapper.class, VarLongWritable.class, VectorWritable.class,
           AggregateAndRecommendReducer.class, VarLongWritable.class, RecommendedItemsWritable.class,
           TextOutputFormat.class);
       Configuration jobConf = aggregateAndRecommend.getConfiguration();
+      if (itemsFile != null) {
+    	  jobConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
+    }
       setIOSort(aggregateAndRecommend);
       aggregateAndRecommend.setCombinerClass(AggregateCombiner.class);
       jobConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath.toString());

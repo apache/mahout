@@ -26,6 +26,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,9 +34,11 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.recommender.ByValueRecommendedItemComparator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
@@ -48,7 +51,10 @@ public final class AggregateAndRecommendReducer extends
   static final String ITEMID_INDEX_PATH = "itemIDIndexPath";
   static final String NUM_RECOMMENDATIONS = "numRecommendations";
   static final int DEFAULT_NUM_RECOMMENDATIONS = 10;
-
+  static final String ITEMS_FILE="itemsFile";
+  
+  private FastIDSet itemsToRecommendFor;
+  
   private static final PathFilter PARTS_FILTER = new PathFilter() {
     @Override
     public boolean accept(Path path) {
@@ -81,6 +87,23 @@ public final class AggregateAndRecommendReducer extends
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
     }
+    
+    try {
+        FileSystem fs = FileSystem.get(jobConf);
+        String usersFilePathString = jobConf.get(ITEMS_FILE);
+        if (usersFilePathString == null) {
+        	itemsToRecommendFor = null;
+        } else {
+        	itemsToRecommendFor = new FastIDSet();
+          Path usersFilePath = new Path(usersFilePathString).makeQualified(fs);
+          FSDataInputStream in = fs.open(usersFilePath);
+          for (String line : new FileLineIterable(in)) {
+        	  itemsToRecommendFor.add(Long.parseLong(line));
+          }
+        }
+      } catch (IOException ioe) {
+        throw new IllegalStateException(ioe);
+      }
   }
 
   @Override
@@ -106,13 +129,17 @@ public final class AggregateAndRecommendReducer extends
     while (recommendationVectorIterator.hasNext()) {
       Vector.Element element = recommendationVectorIterator.next();
       int index = element.index();
-      float value = (float) element.get();
-      if (!Float.isNaN(value)) {
-        if (topItems.size() < recommendationsPerUser) {
-          topItems.add(new GenericRecommendedItem(indexItemIDMap.get(index), value));
-        } else if (value > topItems.peek().getValue()) {
-          topItems.add(new GenericRecommendedItem(indexItemIDMap.get(index), value));
-          topItems.poll();
+  
+      long itemId = indexItemIDMap.get(index);
+      if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemId)) {
+        float value = (float) element.get();
+        if (!Float.isNaN(value)) {
+          if (topItems.size() < recommendationsPerUser) {
+            topItems.add(new GenericRecommendedItem(itemId, value));
+          } else if (value > topItems.peek().getValue()) {
+            topItems.add(new GenericRecommendedItem(itemId, value));
+            topItems.poll();
+          }
         }
       }
     }
