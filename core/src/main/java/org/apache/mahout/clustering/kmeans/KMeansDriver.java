@@ -206,6 +206,7 @@ public final class KMeansDriver {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, clustersOut);
 
+    job.setJarByClass(KMeansDriver.class);
     HadoopUtil.overwriteOutput(clustersOut);
     job.waitForCompletion(true);
     FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
