@@ -20,16 +20,15 @@ package org.apache.mahout.utils.vectors.common;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.math.VectorWritable;
 
@@ -41,22 +40,22 @@ import org.apache.mahout.math.VectorWritable;
  * 
  */
 public final class PartialVectorMerger {
-  
+
   public static final float NO_NORMALIZING = -1.0f;
-  
+
   public static final String NORMALIZATION_POWER = "normalization.power";
-  
+
   public static final String DIMENSION = "vector.dimension";
-  
+
   public static final String SEQUENTIAL_ACCESS = "vector.sequentialAccess";
-  
+
   /**
    * Cannot be initialized. Use the static functions
    */
   private PartialVectorMerger() {
 
   }
-  
+
   /**
    * Merge all the partial {@link org.apache.mahout.math.RandomAccessSparseVector}s into the complete Document
    * {@link org.apache.mahout.math.RandomAccessSparseVector}
@@ -70,46 +69,48 @@ public final class PartialVectorMerger {
    * @param numReducers 
    *          The number of reducers to spawn
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void mergePartialVectors(List<Path> partialVectorPaths,
                                          Path output,
                                          float normPower,
                                          int dimension,
-                                         boolean sequentialAccess, 
-                                         int numReducers) throws IOException {
+                                         boolean sequentialAccess,
+                                         int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }
-    
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(PartialVectorMerger.class);
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
-                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
+
+    Configuration conf = new Configuration();
     // this conf parameter needs to be set enable serialisation of conf values
-    conf.setJobName("PartialVectorMerger::MergePartialVectors");
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+        + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setBoolean(SEQUENTIAL_ACCESS, sequentialAccess);
     conf.setInt(DIMENSION, dimension);
     conf.setFloat(NORMALIZATION_POWER, normPower);
-    
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(VectorWritable.class);
-    
-    FileInputFormat.setInputPaths(conf, getCommaSeparatedPaths(partialVectorPaths));
-    
-    FileOutputFormat.setOutputPath(conf, output);
-    
-    conf.setMapperClass(IdentityMapper.class);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setReducerClass(PartialVectorMergeReducer.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.setNumReduceTasks(numReducers);
-    
+
+    Job job = new Job(conf);
+    job.setJobName("PartialVectorMerger::MergePartialVectors");
+
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(VectorWritable.class);
+
+    FileInputFormat.setInputPaths(job, getCommaSeparatedPaths(partialVectorPaths));
+
+    FileOutputFormat.setOutputPath(job, output);
+
+    job.setMapperClass(Mapper.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setReducerClass(PartialVectorMergeReducer.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setNumReduceTasks(numReducers);
+
     HadoopUtil.overwriteOutput(output);
 
-    client.setConf(conf);
-    JobClient.runJob(conf);
+    job.waitForCompletion(true);
   }
-  
+
   private static String getCommaSeparatedPaths(List<Path> paths) {
     StringBuilder commaSeparatedPaths = new StringBuilder();
     String sep = "";

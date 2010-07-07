@@ -17,39 +17,32 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.Reader;
 import java.util.Collections;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
-import org.easymock.EasyMock;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test for CollocMapper 
  */
-@SuppressWarnings("deprecation")
 public class CollocMapperTest {
   
   private OutputCollector<GramKey,Gram> collector;
-  private Reporter reporter;
-
-  @Before
-  @SuppressWarnings("unchecked")
-  public void setUp() {
-    collector = EasyMock.createMock(OutputCollector.class);
-    reporter = EasyMock.createMock(Reporter.class);
-  }
-  
   @Test
   public void testCollectNgrams() throws Exception {
     
@@ -88,22 +81,23 @@ public class CollocMapperTest {
       
       GramKey subgramKey = new GramKey(subgram, new byte[0]);
       GramKey subgramNgramKey = new GramKey(subgram, ngram.getBytes());
+      collector = new DummyOutputCollector<GramKey, Gram>();
       collector.collect(subgramKey, subgram);
       collector.collect(subgramNgramKey, ngram);
     }
     
-    reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
-    EasyMock.replay(reporter, collector);
-    
-    JobConf conf = new JobConf();
+    Configuration conf = new Configuration();
     conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
     
-    CollocMapper c = new CollocMapper();
-    c.configure(conf);
+    CollocMapper mapper = new CollocMapper();
+    DummyRecordWriter<GramKey, Gram> writer = new DummyRecordWriter<GramKey, Gram>();
+    Mapper<Text, StringTuple, GramKey, Gram>.Context context =  DummyRecordWriter.build(mapper, conf, writer);
+    mapper.setup(context);
     
-    c.map(key, inputTuple, collector, reporter);
+    mapper.map(key, inputTuple, context);
     
-    EasyMock.verify(reporter, collector);
+    Counter counter = (Counter) context.getCounter(CollocMapper.Count.NGRAM_TOTAL);
+    assertEquals("counter", 7, counter.getValue());
   }
   
   @Test
@@ -145,7 +139,7 @@ public class CollocMapperTest {
         frequency = 2;
       }
       
-      
+      collector = new DummyOutputCollector<GramKey, Gram>();
      
       if (p == Gram.Type.UNIGRAM) {
         Gram unigram = new Gram(v[1], frequency, Gram.Type.UNIGRAM);
@@ -163,19 +157,19 @@ public class CollocMapperTest {
       }
     }
     
-    reporter.incrCounter(CollocMapper.Count.NGRAM_TOTAL, 7);
-    EasyMock.replay(reporter, collector);
-    
-    JobConf conf = new JobConf();
+    Configuration conf = new Configuration();
     conf.set(CollocMapper.MAX_SHINGLE_SIZE, "2");
     conf.setBoolean(CollocDriver.EMIT_UNIGRAMS, true);
     
-    CollocMapper c = new CollocMapper();
-    c.configure(conf);
+    CollocMapper mapper = new CollocMapper();
+    DummyRecordWriter<GramKey, Gram> writer = new DummyRecordWriter<GramKey, Gram>();
+    Mapper<Text, StringTuple, GramKey, Gram>.Context context = DummyRecordWriter.build(mapper, conf, writer);
+    mapper.setup(context);
     
-    c.map(key, inputTuple, collector, reporter);
+    mapper.map(key, inputTuple, context);
     
-    EasyMock.verify(reporter, collector);
+    Counter counter = (Counter) context.getCounter(CollocMapper.Count.NGRAM_TOTAL);
+    assertEquals("counter", 7, counter.getValue());
   }
   
   /** A lucene 2.9 standard analyzer with no stopwords. */

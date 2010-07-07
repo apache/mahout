@@ -20,12 +20,9 @@ package org.apache.mahout.utils.vectors.common;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -35,22 +32,26 @@ import org.apache.mahout.math.VectorWritable;
 /**
  * Merges partial vectors in to a full sparse vector
  */
-public class PartialVectorMergeReducer extends MapReduceBase implements
-    Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
+public class PartialVectorMergeReducer extends
+    Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
   private double normPower;
+
   private int dimension;
+
   private boolean sequentialAccess;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(WritableComparable<?> key,
-                     Iterator<VectorWritable> values,
-                     OutputCollector<WritableComparable<?>,VectorWritable> output,
-                     Reporter reporter) throws IOException {
-    
+  protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context) throws IOException,
+      InterruptedException {
+
     Vector vector = new RandomAccessSparseVector(dimension, 10);
-    while (values.hasNext()) {
-      VectorWritable value = values.next();
+    Iterator<VectorWritable> it = values.iterator();
+    while (it.hasNext()) {
+      VectorWritable value = it.next();
       value.get().addTo(vector);
     }
     if (normPower != PartialVectorMerger.NO_NORMALIZING) {
@@ -60,14 +61,19 @@ public class PartialVectorMergeReducer extends MapReduceBase implements
       vector = new SequentialAccessSparseVector(vector);
     }
     VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
-    output.collect(key, vectorWritable);
+    context.write(key, vectorWritable);
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    normPower = job.getFloat(PartialVectorMerger.NORMALIZATION_POWER, PartialVectorMerger.NO_NORMALIZING);
-    dimension = job.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
-    sequentialAccess = job.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
+    normPower = conf.getFloat(PartialVectorMerger.NORMALIZATION_POWER, PartialVectorMerger.NO_NORMALIZING);
+    dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
+    sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
   }
+
 }

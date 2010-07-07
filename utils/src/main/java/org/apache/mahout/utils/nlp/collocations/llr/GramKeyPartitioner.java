@@ -19,14 +19,13 @@ package org.apache.mahout.utils.nlp.collocations.llr;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.WritableComparator;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Partitioner;
+import org.apache.hadoop.mapreduce.Partitioner;
 
 /**
  * Partition GramKeys based on their Gram, ignoring the secondary sort key so that all GramKeys with the same
  * gram are sent to the same partition.
  */
-public class GramKeyPartitioner implements Partitioner<GramKey, Gram> {
+public class GramKeyPartitioner extends Partitioner<GramKey, Gram> {
 
   private static final String HASH_OFFSET_PROPERTY_NAME = "grampartitioner.hash.offset";
     
@@ -45,8 +44,7 @@ public class GramKeyPartitioner implements Partitioner<GramKey, Gram> {
     return (hash & Integer.MAX_VALUE) % numPartitions;
   }
 
-  @Override
-  public void configure(JobConf conf) {
+  public void configure(Configuration conf) {
     offset = conf.getInt(HASH_OFFSET_PROPERTY_NAME, -1);
   }
 }

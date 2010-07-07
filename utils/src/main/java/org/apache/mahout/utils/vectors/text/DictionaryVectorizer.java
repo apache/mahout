@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
@@ -34,13 +33,12 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.math.VectorWritable;
@@ -113,6 +111,8 @@ public final class DictionaryVectorizer {
    *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
    *          partial vectors without thrashing the system due to increased swapping
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void createTermFrequencyVectors(Path input,
                                                 Path output,
@@ -122,7 +122,7 @@ public final class DictionaryVectorizer {
                                                 float minLLRValue,
                                                 int numReducers,
                                                 int chunkSizeInMegabytes,
-                                                boolean sequentialAccess) throws IOException {
+                                                boolean sequentialAccess) throws IOException, InterruptedException, ClassNotFoundException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
@@ -249,6 +249,8 @@ public final class DictionaryVectorizer {
    * @param numReducers 
    *          the desired number of reducer tasks
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   private static void makePartialVectors(Path input,
                                          int maxNGramSize,
@@ -256,72 +258,73 @@ public final class DictionaryVectorizer {
                                          Path output,
                                          int dimension,
                                          boolean sequentialAccess, 
-                                         int numReducers) throws IOException {
+                                         int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(DictionaryVectorizer.class);
+    Configuration conf = new Configuration();
+    // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
-    // this conf parameter needs to be set enable serialisation of conf values
-    
-    conf.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: " + input
-                    + ", dictionary-file: " + dictionaryFilePath.toString());
     conf.setInt(PartialVectorMerger.DIMENSION, dimension);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
-    conf.setInt(MAX_NGRAMS, maxNGramSize);
-    
-    conf.setMapOutputKeyClass(Text.class);
-    conf.setMapOutputValueClass(StringTuple.class);
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(VectorWritable.class);
+    conf.setInt(MAX_NGRAMS, maxNGramSize);   
     DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
-    FileInputFormat.setInputPaths(conf, input);
     
-    FileOutputFormat.setOutputPath(conf, output);
+    Job job = new Job(conf);
+    job.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: " + input
+                    + ", dictionary-file: " + dictionaryFilePath.toString());
     
-    conf.setMapperClass(IdentityMapper.class);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setReducerClass(TFPartialVectorReducer.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.setNumReduceTasks(numReducers);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(StringTuple.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(VectorWritable.class);
+    FileInputFormat.setInputPaths(job, input);
+    
+    FileOutputFormat.setOutputPath(job, output);
+    
+    job.setMapperClass(Mapper.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setReducerClass(TFPartialVectorReducer.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setNumReduceTasks(numReducers);
 
     HadoopUtil.overwriteOutput(output);
     
-    client.setConf(conf);
-    JobClient.runJob(conf);
+    job.waitForCompletion(true);
   }
   
   /**
    * Count the frequencies of words in parallel using Map/Reduce. The input documents have to be in
    * {@link SequenceFile} format
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  private static void startWordCounting(Path input, Path output, int minSupport) throws IOException {
+  private static void startWordCounting(Path input, Path output, int minSupport) throws IOException, InterruptedException, ClassNotFoundException {
     
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(DictionaryVectorizer.class);
+    Configuration conf = new Configuration();
+    // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
-    // this conf parameter needs to be set enable serialisation of conf values
-    
-    conf.setJobName("DictionaryVectorizer::WordCount: input-folder: " + input.toString());
     conf.setInt(MIN_SUPPORT, minSupport);
     
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(LongWritable.class);
+    Job job = new Job(conf);
     
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
+    job.setJobName("DictionaryVectorizer::WordCount: input-folder: " + input.toString());
     
-    conf.setMapperClass(TermCountMapper.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(LongWritable.class);
     
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setCombinerClass(TermCountReducer.class);
-    conf.setReducerClass(TermCountReducer.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, output);
+    
+    job.setMapperClass(TermCountMapper.class);
+    
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setCombinerClass(TermCountReducer.class);
+    job.setReducerClass(TermCountReducer.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
     HadoopUtil.overwriteOutput(output);
     
-    client.setConf(conf);
-    JobClient.runJob(conf);
+    job.waitForCompletion(true);
   }
 }

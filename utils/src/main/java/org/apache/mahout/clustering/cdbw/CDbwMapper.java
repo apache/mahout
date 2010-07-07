@@ -23,24 +23,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputLogFilter;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwMapper extends MapReduceBase implements
-    Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
+public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
@@ -48,16 +44,22 @@ public class CDbwMapper extends MapReduceBase implements
 
   private DistanceMeasure measure = new EuclideanDistanceMeasure();
 
-  private OutputCollector<IntWritable, WeightedVectorWritable> output;
-
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(IntWritable clusterId,
-                  WeightedVectorWritable point,
-                  OutputCollector<IntWritable, WeightedVectorWritable> output,
-                  Reporter reporter) throws IOException {
+  protected void cleanup(Context context) throws IOException, InterruptedException {
+    for (Integer clusterId : mostDistantPoints.keySet()) {
+      context.write(new IntWritable(clusterId), mostDistantPoints.get(clusterId));
+    }
+    super.cleanup(context);
+  }
 
-    this.output = output;
-
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context) throws IOException, InterruptedException {
     int key = clusterId.get();
     WeightedVectorWritable currentMDP = mostDistantPoints.get(key);
 
@@ -67,8 +69,34 @@ public class CDbwMapper extends MapReduceBase implements
       totalDistance += measure.distance(refPoint.get(), point.getVector().get());
     }
     if (currentMDP == null || currentMDP.getWeight() < totalDistance) {
-      mostDistantPoints.put(key, new WeightedVectorWritable(totalDistance,
-                                                            new VectorWritable(point.getVector().get().clone())));
+      mostDistantPoints.put(key, new WeightedVectorWritable(totalDistance, new VectorWritable(point.getVector().get().clone())));
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
+    try {
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      Class<?> cl = ccl.loadClass(conf.get(CDbwDriver.DISTANCE_MEASURE_KEY));
+      measure = (DistanceMeasure) cl.newInstance();
+      representativePoints = getRepresentativePoints(conf);
+    } catch (NumberFormatException e) {
+      throw new IllegalStateException(e);
+    } catch (SecurityException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalStateException(e);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    } catch (InstantiationException e) {
+      throw new IllegalStateException(e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException(e);
     }
   }
 
@@ -77,15 +105,15 @@ public class CDbwMapper extends MapReduceBase implements
     this.measure = measure;
   }
 
-  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(JobConf job) {
-    String statePath = job.get(CDbwDriver.STATE_IN_KEY);
+  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf) {
+    String statePath = conf.get(CDbwDriver.STATE_IN_KEY);
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
     try {
       Path path = new Path(statePath);
-      FileSystem fs = FileSystem.get(path.toUri(), job);
+      FileSystem fs = FileSystem.get(path.toUri(), conf);
       FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
       for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           IntWritable key = new IntWritable(0);
           VectorWritable point = new VectorWritable();
@@ -106,36 +134,5 @@ public class CDbwMapper extends MapReduceBase implements
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
-  }
-
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job.get(CDbwDriver.DISTANCE_MEASURE_KEY));
-      measure = (DistanceMeasure) cl.newInstance();
-      representativePoints = getRepresentativePoints(job);
-    } catch (NumberFormatException e) {
-      throw new IllegalStateException(e);
-    } catch (SecurityException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    }
-  }
-
-  @Override
-  public void close() throws IOException {
-    for (Integer clusterId : mostDistantPoints.keySet()) {
-      output.collect(new IntWritable(clusterId), mostDistantPoints.get(clusterId));
-    }
-    super.close();
   }
 }

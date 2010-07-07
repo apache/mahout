@@ -22,38 +22,38 @@ import java.util.Iterator;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 
 /**
  * Can also be used as a local Combiner. This accumulates all the words and the weights and sums them up.
  */
-public class TermCountReducer extends MapReduceBase implements Reducer<Text,LongWritable,Text,LongWritable> {
-  
+public class TermCountReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
+
   private int minSupport;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<LongWritable> values,
-                     OutputCollector<Text,LongWritable> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
     long sum = 0;
-    while (values.hasNext()) {
-      sum += values.next().get();
+    Iterator<LongWritable> it = values.iterator();
+    while (it.hasNext()) {
+      sum += it.next().get();
     }
     if (sum >= minSupport) {
-      output.collect(key, new LongWritable(sum));
+      context.write(key, new LongWritable(sum));
     }
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    minSupport = job.getInt(DictionaryVectorizer.MIN_SUPPORT,
-      DictionaryVectorizer.DEFAULT_MIN_SUPPORT);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    minSupport = context.getConfiguration().getInt(DictionaryVectorizer.MIN_SUPPORT, DictionaryVectorizer.DEFAULT_MIN_SUPPORT);
   }
+
 }

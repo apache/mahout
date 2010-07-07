@@ -26,12 +26,10 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.SequenceFileVectorIterable.SeqFileIterator;
@@ -104,9 +102,7 @@ public final class VectorDumper {
       if (cmdLine.hasOption(seqOpt)) {
         Path path = new Path(cmdLine.getValue(seqOpt).toString());
         //System.out.println("Input Path: " + path); interferes with output?
-        JobClient client = new JobClient();
-        JobConf conf = new JobConf(Job.class);
-        client.setConf(conf);
+        Configuration conf = new Configuration();
 
         FileSystem fs = FileSystem.get(path.toUri(), conf);
 

@@ -20,32 +20,30 @@ package org.apache.mahout.utils.nlp.collocations.llr;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 /** Combiner for pass1 of the CollocationDriver. Combines frequencies for values for the same key */
-public class CollocCombiner extends MapReduceBase implements Reducer<GramKey,Gram,GramKey,Gram> {
-  
+public class CollocCombiner extends Reducer<GramKey, Gram, GramKey, Gram> {
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(GramKey key,
-                     Iterator<Gram> values,
-                     OutputCollector<GramKey,Gram> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(GramKey key, Iterable<Gram> values, Context context) throws IOException, InterruptedException {
 
     int freq = 0;
     Gram value = null;
-    
+
     // accumulate frequencies from values.
-    while (values.hasNext()) {
-      value = values.next();
+    Iterator<Gram> it = values.iterator();
+    while (it.hasNext()) {
+      value = it.next();
       freq += value.getFrequency();
     }
 
     value.setFrequency(freq);
-    
-    output.collect(key, value);
+
+    context.write(key, value);
   }
-  
+
 }

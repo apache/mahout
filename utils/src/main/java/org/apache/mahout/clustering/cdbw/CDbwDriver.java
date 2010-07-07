@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -28,23 +27,21 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
-import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
@@ -74,17 +71,15 @@ public final class CDbwDriver {
     Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().create();
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(
-        abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The ModelDistribution class name. "
+    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(abuilder
+        .withName("modelClass").withMinimum(1).withMaximum(1).create()).withDescription("The ModelDistribution class name. "
         + "Defaults to org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution").create();
 
-    Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").withArgument(
-        abuilder.withName("maxRed").withMinimum(1).withMaximum(1).create())
-        .withDescription("The number of reduce tasks.").create();
+    Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").withArgument(abuilder
+        .withName("maxRed").withMinimum(1).withMaximum(1).create()).withDescription("The number of reduce tasks.").create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(modelOpt).withOption(maxIterOpt).withOption(helpOpt).withOption(numRedOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt)
+        .withOption(maxIterOpt).withOption(helpOpt).withOption(numRedOpt).create();
 
     try {
       Parser parser = new Parser();
@@ -125,16 +120,15 @@ public final class CDbwDriver {
    *          the number of iterations
    * @param numReducers
    *          the number of Reducers desired
+   * @throws InterruptedException 
    */
   public static void runJob(Path clustersIn,
                             Path clusteredPointsIn,
                             Path output,
                             String distanceMeasureClass,
                             int numIterations,
-                            int numReducers) throws ClassNotFoundException,
-                                                    InstantiationException,
-                                                    IllegalAccessException,
-                                                    IOException {
+                            int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+      IOException, InterruptedException {
 
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
@@ -148,30 +142,29 @@ public final class CDbwDriver {
       stateIn = stateOut;
     }
 
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(CDbwDriver.class);
+    Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    //System.out.println("CDbw = " + evaluator.CDbw());
+    // now print out the CDbw
+    System.out.println("CDbw = " + evaluator.CDbw());
   }
 
-  private static void writeInitialState(Path output, Path clustersIn)
-      throws InstantiationException, IllegalAccessException, IOException, SecurityException {
-
-    JobConf job = new JobConf(KMeansDriver.class);
-    FileSystem fs = FileSystem.get(output.toUri(), job);
+  private static void writeInitialState(Path output, Path clustersIn) throws InstantiationException, IllegalAccessException,
+      IOException, SecurityException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {
       if (!part.getPath().getName().startsWith(".")) {
         Path inPart = part.getPath();
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, conf);
         Writable key = (Writable) reader.getKeyClass().newInstance();
         Writable value = (Writable) reader.getValueClass().newInstance();
         Path path = new Path(output, inPart.getName());
-        SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, IntWritable.class, VectorWritable.class);
+        SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
-          if (!(cluster instanceof DirichletCluster) || ((DirichletCluster) cluster).getTotalCount() > 0) {
+          if (!(cluster instanceof DirichletCluster<?>) || ((DirichletCluster<?>) cluster).getTotalCount() > 0) {
             //System.out.println("C-" + cluster.getId() + ": " + ClusterBase.formatVector(cluster.getCenter(), null));
             writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
           }
@@ -194,33 +187,29 @@ public final class CDbwDriver {
    *          the class name of the DistanceMeasure class
    * @param numReducers
    *          the number of Reducers desired
+   * @throws IOException 
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
-  public static void runIteration(Path input, Path stateIn, Path stateOut,
-                                  String distanceMeasureClass, int numReducers) {
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(CDbwDriver.class);
-
-    conf.setOutputKeyClass(IntWritable.class);
-    conf.setOutputValueClass(VectorWritable.class);
-    conf.setMapOutputKeyClass(IntWritable.class);
-    conf.setMapOutputValueClass(WeightedVectorWritable.class);
-
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, stateOut);
-
-    conf.setMapperClass(CDbwMapper.class);
-    conf.setReducerClass(CDbwReducer.class);
-    conf.setNumReduceTasks(numReducers);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+  public static void runIteration(Path input, Path stateIn, Path stateOut, String distanceMeasureClass, int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
+    Job job = new Job(conf);
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(VectorWritable.class);
+    job.setMapOutputKeyClass(IntWritable.class);
+    job.setMapOutputValueClass(WeightedVectorWritable.class);
 
-    client.setConf(conf);
-    try {
-      JobClient.runJob(conf);
-    } catch (IOException e) {
-      log.warn(e.toString(), e);
-    }
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, stateOut);
+
+    job.setMapperClass(CDbwMapper.class);
+    job.setReducerClass(CDbwReducer.class);
+    job.setNumReduceTasks(numReducers);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+    job.waitForCompletion(true);
   }
 }

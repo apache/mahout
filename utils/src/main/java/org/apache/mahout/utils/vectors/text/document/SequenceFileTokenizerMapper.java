@@ -21,11 +21,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
@@ -36,13 +32,15 @@ import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 /**
  * Tokenizes a text document and outputs tokens in a StringTuple
  */
-public class SequenceFileTokenizerMapper extends MapReduceBase implements Mapper<Text,Text,Text,StringTuple> {
-  
+public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, StringTuple> {
+
   private Analyzer analyzer;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(Text key, Text value,
-                  OutputCollector<Text,StringTuple> output, Reporter reporter) throws IOException {
+  protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
     TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
     TermAttribute termAtt = stream.addAttribute(TermAttribute.class);
     StringTuple document = new StringTuple();
@@ -51,16 +49,19 @@ public class SequenceFileTokenizerMapper extends MapReduceBase implements Mapper
         document.add(new String(termAtt.termBuffer(), 0, termAtt.termLength()));
       }
     }
-    output.collect(key, document);
+    context.write(key, document);
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
       Class<?> cl = ccl
-          .loadClass(job.get(DocumentProcessor.ANALYZER_CLASS, DefaultAnalyzer.class.getName()));
+          .loadClass(context.getConfiguration().get(DocumentProcessor.ANALYZER_CLASS, DefaultAnalyzer.class.getName()));
       analyzer = (Analyzer) cl.newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -70,5 +71,4 @@ public class SequenceFileTokenizerMapper extends MapReduceBase implements Mapper
       throw new IllegalStateException(e);
     }
   }
-  
 }

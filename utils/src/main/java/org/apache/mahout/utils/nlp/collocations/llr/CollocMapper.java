@@ -20,12 +20,9 @@ package org.apache.mahout.utils.nlp.collocations.llr;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
@@ -41,36 +38,24 @@ import org.slf4j.LoggerFactory;
  * Input is a SequeceFile<Text,StringTuple>, where the key is a document id and the value is the tokenized documents.
  * <p/>
  */
-public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTuple,GramKey,Gram> {
+public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
 
   private static final byte[] EMPTY = new byte[0];
-  
+
   public static final String MAX_SHINGLE_SIZE = "maxShingleSize";
+
   public static final int DEFAULT_MAX_SHINGLE_SIZE = 2;
-  
+
   public enum Count {
     NGRAM_TOTAL
   }
-  
+
   private static final Logger log = LoggerFactory.getLogger(CollocMapper.class);
-  
+
   private int maxShingleSize;
+
   private boolean emitUnigrams;
-  
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    
-    this.maxShingleSize = job.getInt(MAX_SHINGLE_SIZE, DEFAULT_MAX_SHINGLE_SIZE);
-    
-    this.emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
-    
-    if (log.isInfoEnabled()) {
-      log.info("Max Ngram size is {}", this.maxShingleSize);
-      log.info("Emit Unitgrams is {}", emitUnigrams);
-    }
-  }
-  
+
   /**
    * Collocation finder: pass 1 map phase.
    * <p/>
@@ -110,16 +95,14 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
    *           if there's a problem with the ShingleFilter reading data or the collector collecting output.
    */
   @Override
-  public void map(Text key, StringTuple value,
-                  final OutputCollector<GramKey,Gram> collector, Reporter reporter) throws IOException {
-    
+  protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
+
     ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize);
     int count = 0; // ngram count
-    
-    OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(value.getEntries().size()
-                                                                           * (maxShingleSize - 1));
+
+    OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
     OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
-    
+
     do {
       String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
       String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class)).type();
@@ -130,50 +113,54 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
         unigrams.adjustOrPutValue(term, 1, 1);
       }
     } while (sf.incrementToken());
-    
+
     try {
       final GramKey gramKey = new GramKey();
-      
+
       ngrams.forEachPair(new ObjectIntProcedure<String>() {
         @Override
         public boolean apply(String term, int frequency) {
           // obtain components, the leading (n-1)gram and the trailing unigram.
           int i = term.lastIndexOf(' '); // TODO: fix for non-whitespace delimited languages.
           if (i != -1) { // bigram, trigram etc
-            
+
             try {
               Gram ngram = new Gram(term, frequency, Gram.Type.NGRAM);
-              Gram head  = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
-              Gram tail  = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
-              
+              Gram head = new Gram(term.substring(0, i), frequency, Gram.Type.HEAD);
+              Gram tail = new Gram(term.substring(i + 1), frequency, Gram.Type.TAIL);
+
               gramKey.set(head, EMPTY);
-              collector.collect(gramKey, head);
-              
+              context.write(gramKey, head);
+
               gramKey.set(head, ngram.getBytes());
-              collector.collect(gramKey, ngram);
-              
+              context.write(gramKey, ngram);
+
               gramKey.set(tail, EMPTY);
-              collector.collect(gramKey, tail);
-              
+              context.write(gramKey, tail);
+
               gramKey.set(tail, ngram.getBytes());
-              collector.collect(gramKey, ngram);
-              
+              context.write(gramKey, ngram);
+
             } catch (IOException e) {
+              throw new IllegalStateException(e);
+            } catch (InterruptedException e) {
               throw new IllegalStateException(e);
             }
           }
           return true;
         }
       });
-  
+
       unigrams.forEachPair(new ObjectIntProcedure<String>() {
         @Override
         public boolean apply(String term, int frequency) {
           try {
             Gram unigram = new Gram(term, frequency, Gram.Type.UNIGRAM);
             gramKey.set(unigram, EMPTY);
-            collector.collect(gramKey, unigram);
+            context.write(gramKey, unigram);
           } catch (IOException e) {
+            throw new IllegalStateException(e);
+          } catch (InterruptedException e) {
             throw new IllegalStateException(e);
           }
           return true;
@@ -188,23 +175,41 @@ public class CollocMapper extends MapReduceBase implements Mapper<Text,StringTup
         throw ise;
       }
     }
-    
-    reporter.incrCounter(Count.NGRAM_TOTAL, count);
-    
+
+    context.getCounter(Count.NGRAM_TOTAL).increment(count);
+
     sf.end();
     sf.close();
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
+    this.maxShingleSize = conf.getInt(MAX_SHINGLE_SIZE, DEFAULT_MAX_SHINGLE_SIZE);
+
+    this.emitUnigrams = conf.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
+
+    if (log.isInfoEnabled()) {
+      log.info("Max Ngram size is {}", this.maxShingleSize);
+      log.info("Emit Unitgrams is {}", emitUnigrams);
+    }
+  }
+
   /** Used to emit tokens from an input string array in the style of TokenStream */
   public static class IteratorTokenStream extends TokenStream {
     private final TermAttribute termAtt;
+
     private final Iterator<String> iterator;
-    
+
     public IteratorTokenStream(Iterator<String> iterator) {
       this.iterator = iterator;
       this.termAtt = (TermAttribute) addAttribute(TermAttribute.class);
     }
-    
+
     @Override
     public boolean incrementToken() throws IOException {
       if (iterator.hasNext()) {

@@ -21,10 +21,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.math.function.ObjectLongProcedure;
 import org.apache.mahout.math.map.OpenObjectLongHashMap;
@@ -32,12 +29,13 @@ import org.apache.mahout.math.map.OpenObjectLongHashMap;
 /**
  * TextVectorizer Term Count Mapper. Tokenizes a text document and outputs the count of the words
  */
-public class TermCountMapper extends MapReduceBase implements Mapper<Text,StringTuple,Text,LongWritable> {
+public class TermCountMapper extends Mapper<Text, StringTuple, Text, LongWritable> {
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
+   */
   @Override
-  public void map(Text key,
-                  StringTuple value,
-                  final OutputCollector<Text,LongWritable> output,
-                  final Reporter reporter) throws IOException {
+  protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
     OpenObjectLongHashMap<String> wordCount = new OpenObjectLongHashMap<String>();
     for (String word : value.getEntries()) {
       if (wordCount.containsKey(word)) {
@@ -50,10 +48,12 @@ public class TermCountMapper extends MapReduceBase implements Mapper<Text,String
       @Override
       public boolean apply(String first, long second) {
         try {
-          output.collect(new Text(first), new LongWritable(second));
+          context.write(new Text(first), new LongWritable(second));
         } catch (IOException e) {
-          reporter.incrCounter("Exception", "Output IO Exception", 1);
-        }
+          context.getCounter("Exception", "Output IO Exception").increment(1);
+        } catch (InterruptedException e) {
+          context.getCounter("Exception", "Interrupted Exception").increment(1);
+       }
         return true;
       }
     });

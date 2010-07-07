@@ -20,15 +20,14 @@ package org.apache.mahout.utils.vectors.text;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.StringTuple;
@@ -68,31 +67,31 @@ public final class DocumentProcessor {
    * @param analyzerClass
    *          The Lucene {@link Analyzer} for tokenizing the UTF-8 text
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void tokenizeDocuments(Path input, Class<? extends Analyzer> analyzerClass,
-                                       Path output) throws IOException {
-    
-    Configurable client = new JobClient();
-    JobConf conf = new JobConf(DocumentProcessor.class);
-    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
-                                  + "org.apache.hadoop.io.serializer.WritableSerialization");
+                                       Path output) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
     // this conf parameter needs to be set enable serialisation of conf values
-    
+    conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
+                                  + "org.apache.hadoop.io.serializer.WritableSerialization"); 
     conf.set(ANALYZER_CLASS, analyzerClass.getName());
-    conf.setJobName("DocumentProcessor::DocumentTokenizer: input-folder: " + input);
     
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(StringTuple.class);
-    FileInputFormat.setInputPaths(conf, input);
-    FileOutputFormat.setOutputPath(conf, output);
+    Job job = new Job(conf);
+    job.setJobName("DocumentProcessor::DocumentTokenizer: input-folder: " + input);
     
-    conf.setMapperClass(SequenceFileTokenizerMapper.class);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setNumReduceTasks(0);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(StringTuple.class);
+    FileInputFormat.setInputPaths(job, input);
+    FileOutputFormat.setOutputPath(job, output);
+    
+    job.setMapperClass(SequenceFileTokenizerMapper.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setNumReduceTasks(0);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
     HadoopUtil.overwriteOutput(output);
 
-    client.setConf(conf);
-    JobClient.runJob(conf);
+    job.waitForCompletion(true);
   }
 }

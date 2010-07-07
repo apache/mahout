@@ -21,17 +21,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.mahout.common.StringTuple;
@@ -48,32 +45,32 @@ import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
 /**
  * Converts a document in to a sparse vector
  */
-public class TFPartialVectorReducer extends MapReduceBase implements
-    Reducer<Text,StringTuple,Text,VectorWritable> {
+public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, VectorWritable> {
 
   private final OpenObjectIntHashMap<String> dictionary = new OpenObjectIntHashMap<String>();
 
   private int dimension;
+
   private boolean sequentialAccess;
-  
+
   private int maxNGramSize = 1;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(Text key,
-                     Iterator<StringTuple> values,
-                     OutputCollector<Text,VectorWritable> output,
-                     Reporter reporter) throws IOException {
-    if (values.hasNext() == false) {
+  protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException, InterruptedException {
+    Iterator<StringTuple> it = values.iterator();
+    if (it.hasNext() == false) {
       return;
     }
-    StringTuple value = values.next();
-    
+    StringTuple value = it.next();
+
     Vector vector = new RandomAccessSparseVector(dimension, value.length()); // guess at initial size
-    
+
     if (maxNGramSize >= 2) {
-      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()),
-          maxNGramSize);
-      
+      ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxNGramSize);
+
       do {
         String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
         if (term.length() > 0) { // ngram
@@ -83,7 +80,7 @@ public class TFPartialVectorReducer extends MapReduceBase implements
           }
         }
       } while (sf.incrementToken());
-      
+
       sf.end();
       sf.close();
     } else {
@@ -102,29 +99,33 @@ public class TFPartialVectorReducer extends MapReduceBase implements
     // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
     if (vector.getNumNondefaultElements() > 0) {
       VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
-      output.collect(key, vectorWritable);
+      context.write(key, vectorWritable);
     } else {
-      reporter.incrCounter("TFParticalVectorReducer", "emptyVectorCount", 1);
+      context.getCounter("TFParticalVectorReducer", "emptyVectorCount").increment(1);
     }
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
     try {
-      dimension = job.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
-      sequentialAccess = job.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
-      maxNGramSize = job.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
-      URI[] localFiles = DistributedCache.getCacheFiles(job);
+      dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
+      sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+      maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
+      URI[] localFiles = DistributedCache.getCacheFiles(conf);
       if (localFiles == null || localFiles.length < 1) {
         throw new IllegalArgumentException("missing paths from the DistributedCache");
       }
       Path dictionaryFile = new Path(localFiles[0].getPath());
-      FileSystem fs = dictionaryFile.getFileSystem(job);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, job);
+      FileSystem fs = dictionaryFile.getFileSystem(conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
       Text key = new Text();
       IntWritable value = new IntWritable();
-      
+
       // key is word value is id
       while (reader.next(key, value)) {
         dictionary.put(key.toString(), value.get());
@@ -133,5 +134,5 @@ public class TFPartialVectorReducer extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
-  
+
 }

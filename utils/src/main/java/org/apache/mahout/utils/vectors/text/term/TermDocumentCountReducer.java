@@ -22,26 +22,24 @@ import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 /**
  * Can also be used as a local Combiner. This accumulates all the features and the weights and sums them up.
  */
-public class TermDocumentCountReducer extends MapReduceBase implements
-    Reducer<IntWritable,LongWritable,IntWritable,LongWritable> {
-  
+public class TermDocumentCountReducer extends Reducer<IntWritable, LongWritable, IntWritable, LongWritable> {
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(IntWritable key,
-                     Iterator<LongWritable> values,
-                     OutputCollector<IntWritable,LongWritable> output,
-                     Reporter reporter) throws IOException {
+  protected void reduce(IntWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
     long sum = 0;
-    while (values.hasNext()) {
-      sum += values.next().get();
+    Iterator<LongWritable> it = values.iterator();
+    while (it.hasNext()) {
+      sum += it.next().get();
     }
-    output.collect(key, new LongWritable(sum));
+    context.write(key, new LongWritable(sum));
   }
+
 }

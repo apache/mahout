@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.arff;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 
 

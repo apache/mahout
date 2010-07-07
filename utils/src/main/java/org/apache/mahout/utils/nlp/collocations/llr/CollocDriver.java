@@ -24,14 +24,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.SequenceFileInputFormat;
-import org.apache.hadoop.mapred.SequenceFileOutputFormat;
-import org.apache.hadoop.mapred.lib.IdentityMapper;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.AbstractJob;
@@ -45,15 +43,19 @@ import org.slf4j.LoggerFactory;
 /** Driver for LLR Collocation discovery mapreduce job */
 public final class CollocDriver extends AbstractJob {
   public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
+
   public static final String SUBGRAM_OUTPUT_DIRECTORY = "subgrams";
+
   public static final String NGRAM_OUTPUT_DIRECTORY = "ngrams";
-  
+
   public static final String EMIT_UNIGRAMS = "emit-unigrams";
+
   public static final boolean DEFAULT_EMIT_UNIGRAMS = false;
-  
+
   public static final int DEFAULT_MAX_NGRAM_SIZE = 2;
+
   public static final int DEFAULT_PASS1_NUM_REDUCE_TASKS = 1;
-  
+
   private static final Logger log = LoggerFactory.getLogger(CollocDriver.class);
 
   private CollocDriver() {
@@ -68,36 +70,31 @@ public final class CollocDriver extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.numReducersOption().create());
-    
-    addOption("maxNGramSize", "ng", 
-        "(Optional) The max size of ngrams to create (2 = bigrams, 3 = trigrams, etc) default: 2",
-        String.valueOf(DEFAULT_MAX_NGRAM_SIZE));
-    addOption("minSupport", "s", 
-        "(Optional) Minimum Support. Default Value: " + CollocReducer.DEFAULT_MIN_SUPPORT, 
-        String.valueOf(CollocReducer.DEFAULT_MIN_SUPPORT));
-    addOption("minLLR", "ml",
-        "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR,
-        String.valueOf(LLRReducer.DEFAULT_MIN_LLR));
+
+    addOption("maxNGramSize",
+              "ng",
+              "(Optional) The max size of ngrams to create (2 = bigrams, 3 = trigrams, etc) default: 2",
+              String.valueOf(DEFAULT_MAX_NGRAM_SIZE));
+    addOption("minSupport", "s", "(Optional) Minimum Support. Default Value: " + CollocReducer.DEFAULT_MIN_SUPPORT, String
+        .valueOf(CollocReducer.DEFAULT_MIN_SUPPORT));
+    addOption("minLLR", "ml", "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR, String
+        .valueOf(LLRReducer.DEFAULT_MIN_LLR));
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption("analyzerName", "a",
-        "The class name of the analyzer to use for preprocessing", null);
-    
-    addFlag("preprocess", "p",
-        "If set, input is SequenceFile<Text,Text> where the value is the document, "
+    addOption("analyzerName", "a", "The class name of the analyzer to use for preprocessing", null);
+
+    addFlag("preprocess", "p", "If set, input is SequenceFile<Text,Text> where the value is the document, "
         + " which will be tokenized using the specified analyzer.");
-    addFlag("unigram", "u", 
-        "If set, unigrams will be emitted in the final output alongside collocations");
-    
+    addFlag("unigram", "u", "If set, unigrams will be emitted in the final output alongside collocations");
+
     Map<String, String> argMap = parseArguments(args);
-    
+
     if (argMap == null) {
       return -1;
     }
-    
+
     Path input = getInputPath();
     Path output = getOutputPath();
-    
-    
+
     int maxNGramSize = DEFAULT_MAX_NGRAM_SIZE;
     if (argMap.get("--maxNGramSize") != null) {
       try {
@@ -107,39 +104,34 @@ public final class CollocDriver extends AbstractJob {
       }
     }
     log.info("Maximum n-gram size is: {}", maxNGramSize);
-    
-    
+
     if (argMap.containsKey("--overwrite")) {
       HadoopUtil.overwriteOutput(output);
     }
-    
-    
+
     int minSupport = CollocReducer.DEFAULT_MIN_SUPPORT;
     if (argMap.get("--minsupport") != null) {
       minSupport = Integer.parseInt(argMap.get("--minsupport"));
     }
     log.info("Minimum Support value: {}", minSupport);
-    
-    
+
     float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
     if (argMap.get("--minLLR") != null) {
       minLLRValue = Float.parseFloat(argMap.get("--minLLR"));
     }
     log.info("Minimum LLR value: {}", minLLRValue);
-    
-    
+
     int reduceTasks = DEFAULT_PASS1_NUM_REDUCE_TASKS;
     if (argMap.get("--maxRed") != null) {
       reduceTasks = Integer.parseInt(argMap.get("--maxRed"));
     }
     log.info("Number of pass1 reduce tasks: {}", reduceTasks);
-    
-    
+
     boolean emitUnigrams = argMap.containsKey("--emitUnigrams");
 
     if (argMap.containsKey("--preprocess")) {
       log.info("Input will be preprocessed");
-      
+
       Class<? extends Analyzer> analyzerClass = DefaultAnalyzer.class;
       if (argMap.get("--analyzerName") != null) {
         String className = argMap.get("--analyzerName");
@@ -148,25 +140,24 @@ public final class CollocDriver extends AbstractJob {
         // you can't instantiate it
         analyzerClass.newInstance();
       }
-      
+
       Path tokenizedPath = new Path(output, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
-      
+
       DocumentProcessor.tokenizeDocuments(input, analyzerClass, tokenizedPath);
       input = tokenizedPath;
     } else {
       log.info("Input will NOT be preprocessed");
     }
-    
+
     // parse input and extract collocations
-    long ngramCount = generateCollocations(input, output, getConf(), emitUnigrams, maxNGramSize,
-      reduceTasks, minSupport);
-    
+    long ngramCount = generateCollocations(input, output, getConf(), emitUnigrams, maxNGramSize, reduceTasks, minSupport);
+
     // tally collocations and perform LLR calculation
     computeNGramsPruneByLLR(output, getConf(), ngramCount, emitUnigrams, minLLRValue, reduceTasks);
 
     return 0;
   }
-  
+
   /**
    * Generate all ngrams for the {@link org.apache.mahout.utils.vectors.text.DictionaryVectorizer} job
    * 
@@ -183,6 +174,8 @@ public final class CollocDriver extends AbstractJob {
    * @param reduceTasks
    *          number of reducers used
    * @throws IOException
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void generateAllGrams(Path input,
                                       Path output,
@@ -190,15 +183,14 @@ public final class CollocDriver extends AbstractJob {
                                       int maxNGramSize,
                                       int minSupport,
                                       float minLLRValue,
-                                      int reduceTasks) throws IOException {
+                                      int reduceTasks) throws IOException, InterruptedException, ClassNotFoundException {
     // parse input and extract collocations
-    long ngramCount = generateCollocations(input, output, baseConf, true, maxNGramSize, reduceTasks,
-      minSupport);
-    
+    long ngramCount = generateCollocations(input, output, baseConf, true, maxNGramSize, reduceTasks, minSupport);
+
     // tally collocations and perform LLR calculation
     computeNGramsPruneByLLR(output, baseConf, ngramCount, true, minLLRValue, reduceTasks);
   }
-  
+
   /**
    * pass1: generate collocations, ngrams
    */
@@ -209,73 +201,74 @@ public final class CollocDriver extends AbstractJob {
                                           int maxNGramSize,
                                           int reduceTasks,
                                           int minSupport) throws IOException {
-    
-    JobConf conf = new JobConf(baseConf, CollocDriver.class);
-    conf.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
-    
-    conf.setMapOutputKeyClass(GramKey.class);
-    conf.setMapOutputValueClass(Gram.class);
-    conf.setPartitionerClass(GramKeyPartitioner.class);
-    conf.setOutputValueGroupingComparator(GramKeyGroupComparator.class);
-    
-    conf.setOutputKeyClass(Gram.class);
-    conf.setOutputValueClass(Gram.class);
-    
-    conf.setCombinerClass(CollocCombiner.class);
-    
-    conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
-    
-    FileInputFormat.setInputPaths(conf, input);
-    
+
+    Configuration con = new Configuration();
+    con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
+    con.setInt(CollocMapper.MAX_SHINGLE_SIZE, maxNGramSize);
+    con.setInt(CollocReducer.MIN_SUPPORT, minSupport);
+    Job job = new Job(con);
+    job.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
+
+    job.setMapOutputKeyClass(GramKey.class);
+    job.setMapOutputValueClass(Gram.class);
+    job.setPartitionerClass(GramKeyPartitioner.class);
+    job.setGroupingComparatorClass(GramKeyGroupComparator.class);
+
+    job.setOutputKeyClass(Gram.class);
+    job.setOutputValueClass(Gram.class);
+
+    job.setCombinerClass(CollocCombiner.class);
+
+    FileInputFormat.setInputPaths(job, input);
+
     Path outputPath = new Path(output, SUBGRAM_OUTPUT_DIRECTORY);
-    FileOutputFormat.setOutputPath(conf, outputPath);
-    
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setMapperClass(CollocMapper.class);
-    
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.setReducerClass(CollocReducer.class);
-    conf.setInt(CollocMapper.MAX_SHINGLE_SIZE, maxNGramSize);
-    conf.setInt(CollocReducer.MIN_SUPPORT, minSupport);
-    conf.setNumReduceTasks(reduceTasks);
-    
-    RunningJob job = JobClient.runJob(conf);
+    FileOutputFormat.setOutputPath(job, outputPath);
+
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setMapperClass(CollocMapper.class);
+
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setReducerClass(CollocReducer.class);
+    job.setNumReduceTasks(reduceTasks);
+
     return job.getCounters().findCounter(CollocMapper.Count.NGRAM_TOTAL).getValue();
   }
-  
+
   /**
    * pass2: perform the LLR calculation
+   * @throws ClassNotFoundException 
+   * @throws InterruptedException 
    */
   public static void computeNGramsPruneByLLR(Path output,
-                                                Configuration baseConf,
-                                                long nGramTotal,
-                                                boolean emitUnigrams,
-                                                float minLLRValue,
-                                                int reduceTasks) throws IOException {
-    JobConf conf = new JobConf(baseConf, CollocDriver.class);
-    conf.setJobName(CollocDriver.class.getSimpleName() + ".computeNGrams: " + output);
-    
-    
+                                             Configuration baseConf,
+                                             long nGramTotal,
+                                             boolean emitUnigrams,
+                                             float minLLRValue,
+                                             int reduceTasks) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
-    
-    conf.setMapOutputKeyClass(Gram.class);
-    conf.setMapOutputValueClass(Gram.class);
-    
-    conf.setOutputKeyClass(Text.class);
-    conf.setOutputValueClass(DoubleWritable.class);
-    
-    FileInputFormat.setInputPaths(conf, new Path(output, SUBGRAM_OUTPUT_DIRECTORY));
+ 
+    Job job = new Job(conf);
+    job.setJobName(CollocDriver.class.getSimpleName() + ".computeNGrams: " + output);
+
+    job.setMapOutputKeyClass(Gram.class);
+    job.setMapOutputValueClass(Gram.class);
+
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(DoubleWritable.class);
+
+    FileInputFormat.setInputPaths(job, new Path(output, SUBGRAM_OUTPUT_DIRECTORY));
     Path outPath = new Path(output, NGRAM_OUTPUT_DIRECTORY);
-    FileOutputFormat.setOutputPath(conf, outPath);
-    
-    conf.setMapperClass(IdentityMapper.class);
-    conf.setInputFormat(SequenceFileInputFormat.class);
-    conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf.setReducerClass(LLRReducer.class);
-    conf.setNumReduceTasks(reduceTasks);
-    
+    FileOutputFormat.setOutputPath(job, outPath);
+
+    job.setMapperClass(Mapper.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setReducerClass(LLRReducer.class);
+    job.setNumReduceTasks(reduceTasks);
+
     conf.setFloat(LLRReducer.MIN_LLR, minLLRValue);
-    JobClient.runJob(conf);
+    job.waitForCompletion(true);
   }
 }

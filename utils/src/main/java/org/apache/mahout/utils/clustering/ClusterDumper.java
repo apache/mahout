@@ -40,6 +40,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,9 +48,6 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
@@ -90,7 +88,7 @@ public final class ClusterDumper {
 
   private void init() throws IOException {
     if (this.pointsDir != null) {
-      JobConf conf = new JobConf(Job.class);
+      Configuration conf = new Configuration();
       // read in the points
       clusterIdToPoints = readPoints(this.pointsDir, conf);
     } else {
@@ -99,9 +97,7 @@ public final class ClusterDumper {
   }
 
   public void printClusters(String[] dictionary) throws IOException, InstantiationException, IllegalAccessException {
-    JobClient client = new JobClient();
-    JobConf conf = new JobConf(Job.class);
-    client.setConf(conf);
+    Configuration conf = new Configuration();
 
     if (this.termDictionary != null) {
       if (dictionaryFormat.equals("text")) {
@@ -310,7 +306,7 @@ public final class ClusterDumper {
     this.useJSON = json;
   }
 
-  private static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, JobConf conf)
+  private static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, Configuration conf)
       throws IOException {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
 

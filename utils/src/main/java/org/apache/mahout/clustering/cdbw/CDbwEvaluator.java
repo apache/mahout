@@ -22,12 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -68,18 +68,18 @@ public class CDbwEvaluator {
   /**
    * Initialize a new instance from job information
    * 
-   * @param job
+   * @param conf
    *            a JobConf with appropriate parameters
    * @param clustersIn
    *            a String path to the input clusters directory
    */
-  public CDbwEvaluator(JobConf job, Path clustersIn)
+  public CDbwEvaluator(Configuration conf, Path clustersIn)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl = ccl.loadClass(job.get(CDbwDriver.DISTANCE_MEASURE_KEY));
+    Class<?> cl = ccl.loadClass(conf.get(CDbwDriver.DISTANCE_MEASURE_KEY));
     measure = (DistanceMeasure) cl.newInstance();
-    representativePoints = CDbwMapper.getRepresentativePoints(job);
-    clusters = loadClusters(job, clustersIn);
+    representativePoints = CDbwMapper.getRepresentativePoints(conf);
+    clusters = loadClusters(conf, clustersIn);
     for (Integer cId : representativePoints.keySet()) {
       setStDev(cId);
     }
@@ -96,14 +96,14 @@ public class CDbwEvaluator {
    *            a String pathname to the directory containing input cluster files
    * @return a List<Cluster> of the clusters
    */
-  private static Map<Integer, Cluster> loadClusters(JobConf job, Path clustersIn)
+  private static Map<Integer, Cluster> loadClusters(Configuration conf, Path clustersIn)
       throws InstantiationException, IllegalAccessException, IOException {
     Map<Integer, Cluster> clusters = new HashMap<Integer, Cluster>();
-    FileSystem fs = clustersIn.getFileSystem(job);
+    FileSystem fs = clustersIn.getFileSystem(conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {
       if (!part.getPath().getName().startsWith(".")) {
         Path inPart = part.getPath();
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, conf);
         Writable key = (Writable) reader.getKeyClass().newInstance();
         Writable value = (Writable) reader.getValueClass().newInstance();
         while (reader.next(key, value)) {

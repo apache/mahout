@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -28,11 +29,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -46,30 +43,38 @@ import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
 /**
  * Converts a document in to a sparse vector
  */
-public class TFIDFPartialVectorReducer extends MapReduceBase implements
-    Reducer<WritableComparable<?>,VectorWritable,WritableComparable<?>,VectorWritable> {
-  
+public class TFIDFPartialVectorReducer extends
+    Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
+
   private final OpenIntLongHashMap dictionary = new OpenIntLongHashMap();
+
   private final TFIDF tfidf = new TFIDF();
+
   private int minDf = 1;
+
   private int maxDfPercent = 99;
+
   private long vectorCount = 1;
+
   private long featureCount;
+
   private boolean sequentialAccess;
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(WritableComparable<?> key,
-                     Iterator<VectorWritable> values,
-                     OutputCollector<WritableComparable<?>,VectorWritable> output,
-                     Reporter reporter) throws IOException {
-    if (!values.hasNext()) {
+  protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context) throws IOException,
+      InterruptedException {
+    Iterator<VectorWritable> it = values.iterator();
+    if (!it.hasNext()) {
       return;
     }
-    Vector value = values.next().get();
-    Iterator<Element> it = value.iterateNonZero();
+    Vector value = it.next().get();
+    Iterator<Element> it1 = value.iterateNonZero();
     Vector vector = new RandomAccessSparseVector((int) featureCount, value.getNumNondefaultElements());
-    while (it.hasNext()) {
-      Element e = it.next();
+    while (it1.hasNext()) {
+      Element e = it1.next();
       if (!dictionary.containsKey(e.index())) {
         continue;
       }
@@ -80,38 +85,40 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
       if (df < minDf) {
         df = minDf;
       }
-      vector.setQuick(e.index(), tfidf.calculate((int) e.get(), (int) df, (int) featureCount,
-        (int) vectorCount));
+      vector.setQuick(e.index(), tfidf.calculate((int) e.get(), (int) df, (int) featureCount, (int) vectorCount));
     }
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
     VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
-    output.collect(key, vectorWritable);
+    context.write(key, vectorWritable);
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
     try {
-      
-      URI[] localFiles = DistributedCache.getCacheFiles(job);
+      Configuration conf = context.getConfiguration();
+      URI[] localFiles = DistributedCache.getCacheFiles(conf);
       if (localFiles == null || localFiles.length < 1) {
         throw new IllegalArgumentException("missing paths from the DistributedCache");
       }
-      
-      vectorCount = job.getLong(TFIDFConverter.VECTOR_COUNT, 1);
-      featureCount = job.getLong(TFIDFConverter.FEATURE_COUNT, 1);
-      minDf = job.getInt(TFIDFConverter.MIN_DF, 1);
-      maxDfPercent = job.getInt(TFIDFConverter.MAX_DF_PERCENTAGE, 99);
-      sequentialAccess = job.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
-      
+
+      vectorCount = conf.getLong(TFIDFConverter.VECTOR_COUNT, 1);
+      featureCount = conf.getLong(TFIDFConverter.FEATURE_COUNT, 1);
+      minDf = conf.getInt(TFIDFConverter.MIN_DF, 1);
+      maxDfPercent = conf.getInt(TFIDFConverter.MAX_DF_PERCENTAGE, 99);
+      sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+
       Path dictionaryFile = new Path(localFiles[0].getPath());
-      FileSystem fs = dictionaryFile.getFileSystem(job);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, job);
+      FileSystem fs = dictionaryFile.getFileSystem(conf);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
       IntWritable key = new IntWritable();
       LongWritable value = new LongWritable();
-      
+
       // key is feature, value is the document frequency
       while (reader.next(key, value)) {
         dictionary.put(key.get(), value.get());
@@ -120,4 +127,5 @@ public class TFIDFPartialVectorReducer extends MapReduceBase implements
       throw new IllegalStateException(e);
     }
   }
+
 }

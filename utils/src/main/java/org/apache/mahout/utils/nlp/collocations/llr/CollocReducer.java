@@ -20,47 +20,28 @@ package org.apache.mahout.utils.nlp.collocations.llr;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Reducer for Pass 1 of the collocation identification job. Generates counts for ngrams and subgrams.
  */
-public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram,Gram,Gram> {
+public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
 
   private static final Logger log = LoggerFactory.getLogger(CollocReducer.class);
 
   public static final String MIN_SUPPORT = "minSupport";
+
   public static final int DEFAULT_MIN_SUPPORT = 2;
-  
+
   public enum Skipped {
-    LESS_THAN_MIN_SUPPORT,
-    MALFORMED_KEY_TUPLE,
-    MALFORMED_TUPLE,
-    MALFORMED_TYPES,
-    MALFORMED_UNIGRAM
+    LESS_THAN_MIN_SUPPORT, MALFORMED_KEY_TUPLE, MALFORMED_TUPLE, MALFORMED_TYPES, MALFORMED_UNIGRAM
   }
 
   private int minSupport;
 
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
-    
-    this.minSupport = job.getInt(MIN_SUPPORT, DEFAULT_MIN_SUPPORT);
-
-    boolean emitUnigrams = job.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
-    
-    log.info("Min support is {}", minSupport);
-    log.info("Emit Unitgrams is {}", emitUnigrams);
-
-  }
-  
   /**
    * collocation finder: pass 1 reduce phase:
    * <p/>
@@ -86,33 +67,45 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
    * head and move the count into the value?
    */
   @Override
-  public void reduce(GramKey key,
-                     Iterator<Gram> values,
-                     OutputCollector<Gram,Gram> output,
-                     Reporter reporter) throws IOException {
-    
+  protected void reduce(GramKey key, Iterable<Gram> values, Context context) throws IOException, InterruptedException {
+
     Gram.Type keyType = key.getType();
 
     if (keyType == Gram.Type.UNIGRAM) {
       // sum frequencies for unigrams.
-      processUnigram(key, values, output, reporter);
+      processUnigram(key, values.iterator(), context);
     } else if (keyType == Gram.Type.HEAD || keyType == Gram.Type.TAIL) {
       // sum frequencies for subgrams, ngram and collect for each ngram.
-      processSubgram(key, values, output, reporter);
+      processSubgram(key, values.iterator(), context);
     } else {
-      reporter.incrCounter(Skipped.MALFORMED_TYPES, 1);
+      context.getCounter(Skipped.MALFORMED_TYPES).increment(1);
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
+  @Override
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
+    this.minSupport = conf.getInt(MIN_SUPPORT, DEFAULT_MIN_SUPPORT);
+
+    boolean emitUnigrams = conf.getBoolean(CollocDriver.EMIT_UNIGRAMS, CollocDriver.DEFAULT_EMIT_UNIGRAMS);
+
+    log.info("Min support is {}", minSupport);
+    log.info("Emit Unitgrams is {}", emitUnigrams);
   }
 
   /**
    * Sum frequencies for unigrams and deliver to the collector
+   * @throws InterruptedException 
    */
-  protected void processUnigram(GramKey key, Iterator<Gram> values,
-      OutputCollector<Gram, Gram> output, Reporter reporter) throws IOException {
+  protected void processUnigram(GramKey key, Iterator<Gram> values, Context context) throws IOException, InterruptedException {
 
     int freq = 0;
     Gram value = null;
-    
+
     // accumulate frequencies from values.
     while (values.hasNext()) {
       value = values.next();
@@ -120,15 +113,15 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
     }
 
     if (freq < minSupport) {
-      reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
+      context.getCounter(Skipped.LESS_THAN_MIN_SUPPORT).increment(1);
       return;
     }
 
     value.setFrequency(freq);
-    output.collect(value, value);
+    context.write(value, value);
 
   }
-      
+
   /** Sum frequencies for subgram, ngrams and deliver ngram, subgram pairs to the collector.
    *  <p/>
    *  Sort order guarantees that the subgram/subgram pairs will be seen first and then
@@ -137,17 +130,17 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
    *  <p/>
    *  We end up calculating frequencies for ngrams for each sugram (head, tail) here, which is
    *  some extra work.
+   * @throws InterruptedException 
    */
-  protected void processSubgram(GramKey key, Iterator<Gram> values, 
-      OutputCollector<Gram,Gram> output, Reporter reporter) throws IOException {
+  protected void processSubgram(GramKey key, Iterator<Gram> values, Context context) throws IOException, InterruptedException {
 
-    Gram subgram      = null;
+    Gram subgram = null;
     Gram currentNgram = null;
-        
+
     while (values.hasNext()) {
       Gram value = values.next();
 
-      if (value.getType() == Gram.Type.HEAD || value.getType() == Gram.Type.TAIL) { 
+      if (value.getType() == Gram.Type.HEAD || value.getType() == Gram.Type.TAIL) {
         // collect frequency for subgrams.
         if (subgram == null) {
           subgram = new Gram(value);
@@ -160,9 +153,9 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
         // create the new ngram.
         if (currentNgram != null) {
           if (currentNgram.getFrequency() < minSupport) {
-            reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
+            context.getCounter(Skipped.LESS_THAN_MIN_SUPPORT).increment(1);
           } else {
-            output.collect(currentNgram, subgram);
+            context.write(currentNgram, subgram);
           }
         }
 
@@ -171,15 +164,15 @@ public class CollocReducer extends MapReduceBase implements Reducer<GramKey,Gram
         currentNgram.incrementFrequency(value.getFrequency());
       }
     }
-    
+
     // collect last ngram.
     if (currentNgram != null) {
       if (currentNgram.getFrequency() < minSupport) {
-        reporter.incrCounter(Skipped.LESS_THAN_MIN_SUPPORT, 1);
+        context.getCounter(Skipped.LESS_THAN_MIN_SUPPORT).increment(1);
         return;
       }
-      
-      output.collect(currentNgram, subgram);
+
+      context.write(currentNgram, subgram);
     }
   }
 }

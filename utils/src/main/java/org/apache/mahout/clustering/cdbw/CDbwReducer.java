@@ -22,61 +22,56 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwReducer extends MapReduceBase
-    implements Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
+public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
 
   private Map<Integer, List<VectorWritable>> referencePoints;
 
-  private OutputCollector<IntWritable, VectorWritable> output;
-
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#cleanup(org.apache.hadoop.mapreduce.Reducer.Context)
+   */
   @Override
-  public void reduce(IntWritable key,
-                     Iterator<WeightedVectorWritable> values,
-                     OutputCollector<IntWritable, VectorWritable> output,
-                     Reporter reporter) throws IOException {
-    this.output = output;
+  protected void cleanup(Context context) throws IOException, InterruptedException {
+    for (Integer clusterId : referencePoints.keySet()) {
+      for (VectorWritable vw : referencePoints.get(clusterId)) {
+        context.write(new IntWritable(clusterId), vw);
+      }
+    }
+    super.cleanup(context);
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+   */
+  @Override
+  protected void reduce(IntWritable key, Iterable<WeightedVectorWritable> values, Context context) throws IOException,
+      InterruptedException {
     // find the most distant point
     WeightedVectorWritable mdp = null;
-    while (values.hasNext()) {
-      WeightedVectorWritable dpw = values.next();
+    Iterator<WeightedVectorWritable> it = values.iterator();
+    while (it.hasNext()) {
+      WeightedVectorWritable dpw = it.next();
       if (mdp == null || mdp.getWeight() < dpw.getWeight()) {
         mdp = new WeightedVectorWritable(dpw.getWeight(), dpw.getVector());
       }
     }
-    output.collect(new IntWritable(key.get()), mdp.getVector());
-  }
-
-  public void configure(Map<Integer, List<VectorWritable>> referencePoints) {
-    this.referencePoints = referencePoints;
+    context.write(new IntWritable(key.get()), mdp.getVector());
   }
 
   /* (non-Javadoc)
-   * @see org.apache.hadoop.mapred.MapReduceBase#close()
+   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
    */
   @Override
-  public void close() throws IOException {
-    for (Integer clusterId : referencePoints.keySet()) {
-      for (VectorWritable vw : referencePoints.get(clusterId)) {
-        output.collect(new IntWritable(clusterId), vw);
-      }
-    }
-    super.close();
-  }
-
-  @Override
-  public void configure(JobConf job) {
-    super.configure(job);
+  protected void setup(Context context) throws IOException, InterruptedException {
+    super.setup(context);
+    Configuration conf = context.getConfiguration();
     try {
-      referencePoints = CDbwMapper.getRepresentativePoints(job);
+      referencePoints = CDbwMapper.getRepresentativePoints(conf);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -84,6 +79,10 @@ public class CDbwReducer extends MapReduceBase
     } catch (IllegalArgumentException e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  public void configure(Map<Integer, List<VectorWritable>> referencePoints) {
+    this.referencePoints = referencePoints;
   }
 
 }

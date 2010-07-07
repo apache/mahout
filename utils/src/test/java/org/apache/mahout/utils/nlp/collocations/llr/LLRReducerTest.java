@@ -18,18 +18,18 @@
 package org.apache.mahout.utils.nlp.collocations.llr;
 
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.HEAD;
-import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.NGRAM;
+import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.math.stats.LogLikelihood;
 import org.apache.mahout.utils.nlp.collocations.llr.LLRReducer.LLCallback;
 import org.easymock.EasyMock;
@@ -41,29 +41,16 @@ import org.slf4j.LoggerFactory;
 /** Test the LLRReducer
  *  FIXME: Add negative test cases.
  */
-@SuppressWarnings("deprecation")
 public class LLRReducerTest {
   
   private static final Logger log =
     LoggerFactory.getLogger(LLRReducerTest.class);
   
-  private Reporter reporter;
   private LLCallback ll;
   private LLCallback cl;
 
-  // not verifying the llr algo output here, just the input, but it is handy
-  // to see the values emitted.
-  private final OutputCollector<Text,DoubleWritable> collector = new OutputCollector<Text,DoubleWritable>() {
-    @Override
-    public void collect(Text key, DoubleWritable value) {
-      log.info("{} {}", key, value);
-    }
-  };
-  
-  
   @Before
   public void setUp() {
-    reporter  = EasyMock.createMock(Reporter.class);
     ll        = EasyMock.createMock(LLCallback.class);
     cl        = new LLCallback() {
       @Override
@@ -76,7 +63,6 @@ public class LLRReducerTest {
   
   @Test
   public void testReduce() throws Exception {
-    LLRReducer reducer = new LLRReducer(ll);
     
     // test input, input[*][0] is the key,
     // input[*][1..n] are the values passed in via
@@ -108,14 +94,21 @@ public class LLRReducerTest {
     
     EasyMock.replay(ll);
     
-    JobConf config = new JobConf(CollocDriver.class);
-    config.set(LLRReducer.NGRAM_TOTAL, "7");
-    reducer.configure(config);
+    Configuration conf = new Configuration();
+    conf.set(LLRReducer.NGRAM_TOTAL, "7");
+    LLRReducer reducer = new LLRReducer(ll);
+    DummyRecordWriter<Text, DoubleWritable> writer = new DummyRecordWriter<Text, DoubleWritable>();
+    Reducer<Gram, Gram, Text, DoubleWritable>.Context context = DummyRecordWriter.build(reducer,
+                                                                                          conf,
+                                                                                          writer,
+                                                                                          Gram.class,
+                                                                                          Gram.class);
+    reducer.setup(context);
     
     for (Gram[] ii: input) {
       List<Gram> vv = new LinkedList<Gram>();
       vv.addAll(Arrays.asList(ii).subList(1, ii.length));
-      reducer.reduce(ii[0], vv.iterator(), collector, reporter);
+      reducer.reduce(ii[0], vv, context);
     }
     
     EasyMock.verify(ll);
