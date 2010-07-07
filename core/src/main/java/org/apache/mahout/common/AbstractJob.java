@@ -124,7 +124,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param description
    */
   protected void addFlag(String name, String shortName, String description) {
-    options.add(buildOption(name, shortName, description, true, false, null));
+    options.add(buildOption(name, shortName, description, false, false, null));
   }
   
   /** Add an option to the the set of options this job will parse when
@@ -280,6 +280,8 @@ public abstract class AbstractJob extends Configured implements Tool {
       parser.setGroup(group);
       parser.setHelpOption(helpOpt);
       cmdLine = parser.parse(args);
+      
+      
     } catch (OptionException e) {
       log.error(e.getMessage());
       CommandLineUtil.printHelpWithGenericOptions(group);
@@ -291,22 +293,39 @@ public abstract class AbstractJob extends Configured implements Tool {
       return null;
     }
     
+    try {
+      parseDirectories(cmdLine);
+    } catch (IllegalArgumentException e) {
+      log.error(e.getMessage());
+      CommandLineUtil.printHelpWithGenericOptions(group);
+      return null;
+    }
+    
+    
     Map<String,String> result = new TreeMap<String,String>();
     maybePut(result, cmdLine, this.options.toArray(new Option[this.options.size()]));
 
-    parseDirectories(cmdLine);
-    
     log.info("Command line arguments: {}", result);
     return result;
   }
   
-  /** Extract the values of the <code>inputOption</code> and <code>outputOption</code>
-   *  if present, otherwise attempt to retrieve the values of <code>mapred.input.dir</code>
-   *  and <code>mapred.output.dir</code>. If none of these are set, 
-   *  {@link #getInputPath()} and {@link #getOutputPath()} will return null.
+  /** Obtain input and output directories from command-line options or hadoop
+   *  properties. If <code>addInputOption</code> or <code>addOutputOption</code>
+   *  has been called, this method will throw an <code>OptionException</code> if
+   *  no source (command-line or property) for that value is present. 
+   *  Otherwise, <code>inputPath</code> or <code>outputPath<code> will be 
+   *  non-null only if specified as a hadoop property. Command-line options
+   *  take precedence over hadoop properties.
+   * 
    * @param cmdLine
+   * @throws IllegalArgumentException if either inputOption is present,
+   *   and neither <code>--input</code> nor <code>-Dmapred.input dir</code> are 
+   *   specified or outputOption is present and neither <code>--output</code> 
+   *   nor <code>-Dmapred.output.dir</code> are specified.
    */
-  protected void parseDirectories(CommandLine cmdLine) {
+  protected void parseDirectories(CommandLine cmdLine) 
+    throws IllegalArgumentException {
+    
     Configuration conf = getConf();
     
     if (inputOption != null && cmdLine.hasOption(inputOption)) {
@@ -322,14 +341,32 @@ public abstract class AbstractJob extends Configured implements Tool {
     if (outputPath == null && conf.get("mapred.output.dir") != null) {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
     }
+    
+    if (inputOption != null && inputPath == null) {
+      throw new IllegalArgumentException("No input specified: " +
+          inputOption.getPreferredName() + " or -Dmapred.input.dir " +
+          "must be provided to specify input directory");
+    }
+    
+    if (outputOption != null && outputPath == null) {
+      throw new IllegalArgumentException("No output specified: " +
+          outputOption.getPreferredName() + " or -Dmapred.output.dir " +
+          "must be provided to specify output directory");
+    }
   }
   
   protected static void maybePut(Map<String,String> args, CommandLine cmdLine, Option... opt) {
     for (Option o : opt) {
-      // nulls are ok, for cases where options are simple flags.
-      Object vo = cmdLine.getValue(o);
-      String value = (vo == null) ? null : vo.toString();
-      args.put(o.getPreferredName(), value);
+      
+      // the option appeared on the command-line, or it has a value
+      // (which is likely a default value). 
+      if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null) {
+        
+        // nulls are ok, for cases where options are simple flags.
+        Object vo = cmdLine.getValue(o);
+        String value = (vo == null) ? null : vo.toString();
+        args.put(o.getPreferredName(), value);
+      }
     }
   }
 
