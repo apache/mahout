@@ -28,11 +28,12 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.common.DummyRecordWriter;
+import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.mahout.math.stats.LogLikelihood;
 import org.apache.mahout.utils.nlp.collocations.llr.LLRReducer.LLCallback;
-import org.easymock.EasyMock;
+import org.easymock.classextension.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -46,11 +47,14 @@ public class LLRReducerTest {
   private static final Logger log =
     LoggerFactory.getLogger(LLRReducerTest.class);
   
+  private Reducer<Gram, Gram, Text, DoubleWritable>.Context context;
   private LLCallback ll;
   private LLCallback cl;
-
+  
   @Before
+  @SuppressWarnings("unchecked")
   public void setUp() {
+    context   = EasyMock.createMock(Reducer.Context.class);
     ll        = EasyMock.createMock(LLCallback.class);
     cl        = new LLCallback() {
       @Override
@@ -63,6 +67,7 @@ public class LLRReducerTest {
   
   @Test
   public void testReduce() throws Exception {
+    LLRReducer reducer = new LLRReducer(ll);
     
     // test input, input[*][0] is the key,
     // input[*][1..n] are the values passed in via
@@ -88,21 +93,19 @@ public class LLRReducerTest {
                             {1, 0, 1, 5}  // worst of
     };
     
-    for (int[] ee: expectations) {
+    Configuration config = new Configuration();
+    config.set(LLRReducer.NGRAM_TOTAL, "7");
+    EasyMock.expect(context.getConfiguration()).andReturn(config);
+    
+    for (int i=0; i < expectations.length; i++) {
+      int[] ee = expectations[i];
+      context.write(EasyMock.eq(new Text(input[i][0].getString())), (DoubleWritable) EasyMock.anyObject());
       EasyMock.expect(ll.logLikelihoodRatio(ee[0], ee[1], ee[2], ee[3])).andDelegateTo(cl);
+      
     }
+
+    EasyMock.replay(context, ll);
     
-    EasyMock.replay(ll);
-    
-    Configuration conf = new Configuration();
-    conf.set(LLRReducer.NGRAM_TOTAL, "7");
-    LLRReducer reducer = new LLRReducer(ll);
-    DummyRecordWriter<Text, DoubleWritable> writer = new DummyRecordWriter<Text, DoubleWritable>();
-    Reducer<Gram, Gram, Text, DoubleWritable>.Context context = DummyRecordWriter.build(reducer,
-                                                                                          conf,
-                                                                                          writer,
-                                                                                          Gram.class,
-                                                                                          Gram.class);
     reducer.setup(context);
     
     for (Gram[] ii: input) {

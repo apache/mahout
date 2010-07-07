@@ -202,7 +202,7 @@ public final class CollocDriver extends AbstractJob {
                                           int reduceTasks,
                                           int minSupport) throws IOException {
 
-    Configuration con = new Configuration();
+    Configuration con = new Configuration(baseConf);
     con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
     con.setInt(CollocMapper.MAX_SHINGLE_SIZE, maxNGramSize);
     con.setInt(CollocReducer.MIN_SUPPORT, minSupport);
@@ -245,7 +245,7 @@ public final class CollocDriver extends AbstractJob {
                                              boolean emitUnigrams,
                                              float minLLRValue,
                                              int reduceTasks) throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
+    Configuration conf = new Configuration(baseConf);
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
  

@@ -29,7 +29,6 @@ public class GramKeyGroupComparator extends WritableComparator {
     super(GramKey.class, true);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public int compare(WritableComparable a, WritableComparable b) {
     GramKey gka = (GramKey) a;
