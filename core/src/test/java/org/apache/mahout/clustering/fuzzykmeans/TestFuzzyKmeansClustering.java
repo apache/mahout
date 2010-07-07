@@ -29,12 +29,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.clustering.MockMapperContext;
-import org.apache.mahout.clustering.MockReducerContext;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
-import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -87,8 +88,10 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
   }
 
-  private static void computeCluster(List<Vector> points, List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer,
-      Map<Integer, List<WeightedVectorWritable>> pointClusterInfo) {
+  private static void computeCluster(List<Vector> points,
+                                     List<SoftCluster> clusterList,
+                                     FuzzyKMeansClusterer clusterer,
+                                     Map<Integer, List<WeightedVectorWritable>> pointClusterInfo) {
 
     for (Vector point : points) {
       // calculate point distances for all clusters    
@@ -155,10 +158,16 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
       Map<Integer, List<WeightedVectorWritable>> pointClusterInfo = new HashMap<Integer, List<WeightedVectorWritable>>();
       // run reference FuzzyKmeans algorithm
-      List<List<SoftCluster>> clusters = FuzzyKMeansClusterer.clusterPoints(points, clusterList, new EuclideanDistanceMeasure(),
-          0.001, 2, 2);
-      computeCluster(points, clusters.get(clusters.size() - 1), new FuzzyKMeansClusterer(new EuclideanDistanceMeasure(), 0.001, 2),
-          pointClusterInfo);
+      List<List<SoftCluster>> clusters = FuzzyKMeansClusterer.clusterPoints(points,
+                                                                            clusterList,
+                                                                            new EuclideanDistanceMeasure(),
+                                                                            0.001,
+                                                                            2,
+                                                                            2);
+      computeCluster(points,
+                     clusters.get(clusters.size() - 1),
+                     new FuzzyKMeansClusterer(new EuclideanDistanceMeasure(), 0.001, 2),
+                     pointClusterInfo);
 
       // iterate for each cluster
       int size = 0;
@@ -180,8 +189,11 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, new Path(clustersPath, "part-00000"), Text.class,
-          SoftCluster.class);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs,
+                                                           conf,
+                                                           new Path(clustersPath, "part-00000"),
+                                                           Text.class,
+                                                           SoftCluster.class);
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
 
@@ -198,8 +210,18 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // now run the Job
       Path output = getTestTempDirPath("output");
-      FuzzyKMeansDriver.runJob(pointsPath, clustersPath, output, EuclideanDistanceMeasure.class.getName(), 0.001, 2, 1, k + 1, 2,
-          false, true, 0);
+      FuzzyKMeansDriver.runJob(pointsPath,
+                               clustersPath,
+                               output,
+                               EuclideanDistanceMeasure.class.getName(),
+                               0.001,
+                               2,
+                               1,
+                               k + 1,
+                               2,
+                               false,
+                               true,
+                               0);
 
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-00000"), conf);
       IntWritable key = new IntWritable();
@@ -240,21 +262,23 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
-      MockMapperContext<Text, FuzzyKMeansInfo> mapContext = new MockMapperContext<Text, FuzzyKMeansInfo>(mapper, conf, mapCollector);
+      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                        conf,
+                                                                                                                        mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
       }
 
       // now verify mapper output
-      assertEquals("Mapper Keys", k + 1, mapCollector.getData().size());
+      assertEquals("Mapper Keys", k + 1, mapWriter.getData().size());
 
       Map<Vector, Double> pointTotalProbMap = new HashMap<Vector, Double>();
 
-      for (Text key : mapCollector.getKeys()) {
+      for (Text key : mapWriter.getKeys()) {
         // SoftCluster cluster = SoftCluster.decodeCluster(key);
-        List<FuzzyKMeansInfo> values = mapCollector.getValue(key);
+        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
 
         for (FuzzyKMeansInfo value : values) {
           Double val = pointTotalProbMap.get(value.getVector());
@@ -301,8 +325,10 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
-      MockMapperContext<Text, FuzzyKMeansInfo> mapContext = new MockMapperContext<Text, FuzzyKMeansInfo>(mapper, conf, mapCollector);
+      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                        conf,
+                                                                                                                        mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
@@ -310,20 +336,20 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run combiner
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-      DummyOutputCollector<Text, FuzzyKMeansInfo> combinerCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
-      MockReducerContext<Text, FuzzyKMeansInfo> combinerContext = new MockReducerContext<Text, FuzzyKMeansInfo>(combiner, conf,
-          combinerCollector, Text.class, FuzzyKMeansInfo.class);
+      DummyRecordWriter<Text, FuzzyKMeansInfo> combinerWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
+      Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, FuzzyKMeansInfo.class);
       combiner.setup(combinerContext);
-      for (Text key : mapCollector.getKeys()) {
-        List<FuzzyKMeansInfo> values = mapCollector.getValue(key);
+      for (Text key : mapWriter.getKeys()) {
+        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
         combiner.reduce(new Text(key), values, combinerContext);
       }
 
       // now verify the combiner output
-      assertEquals("Combiner Output", k + 1, combinerCollector.getData().size());
+      assertEquals("Combiner Output", k + 1, combinerWriter.getData().size());
 
-      for (Text key : combinerCollector.getKeys()) {
-        List<FuzzyKMeansInfo> values = combinerCollector.getValue(key);
+      for (Text key : combinerWriter.getKeys()) {
+        List<FuzzyKMeansInfo> values = combinerWriter.getValue(key);
         assertEquals("too many values", 1, values.size());
       }
     }
@@ -356,8 +382,10 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
-      MockMapperContext<Text, FuzzyKMeansInfo> mapContext = new MockMapperContext<Text, FuzzyKMeansInfo>(mapper, conf, mapCollector);
+      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                        conf,
+                                                                                                                        mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
@@ -365,29 +393,32 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run combiner
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-      DummyOutputCollector<Text, FuzzyKMeansInfo> combinerCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
-      MockReducerContext<Text, FuzzyKMeansInfo> combinerContext = new MockReducerContext<Text, FuzzyKMeansInfo>(combiner, conf,
-          combinerCollector, Text.class, FuzzyKMeansInfo.class);
+      DummyRecordWriter<Text, FuzzyKMeansInfo> combinerWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
+      Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, FuzzyKMeansInfo.class);
       combiner.setup(combinerContext);
-      for (Text key : mapCollector.getKeys()) {
-        List<FuzzyKMeansInfo> values = mapCollector.getValue(key);
+      for (Text key : mapWriter.getKeys()) {
+        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
         combiner.reduce(new Text(key), values, combinerContext);
       }
 
       // run reducer
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
-      DummyOutputCollector<Text, SoftCluster> reducerCollector = new DummyOutputCollector<Text, SoftCluster>();
-      MockReducerContext<Text, SoftCluster> reducerContext = new MockReducerContext<Text, SoftCluster>(reducer, conf,
-          reducerCollector, Text.class, SoftCluster.class);
+      DummyRecordWriter<Text, SoftCluster> reducerWriter = new DummyRecordWriter<Text, SoftCluster>();
+      Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster>.Context reducerContext = DummyRecordWriter.build(reducer,
+                                                                                                         conf,
+                                                                                                         reducerWriter,
+                                                                                                         Text.class,
+                                                                                                         FuzzyKMeansInfo.class);
       reducer.setup(clusterList, conf);
 
-      for (Text key : combinerCollector.getKeys()) {
-        List<FuzzyKMeansInfo> values = combinerCollector.getValue(key);
+      for (Text key : combinerWriter.getKeys()) {
+        List<FuzzyKMeansInfo> values = combinerWriter.getValue(key);
         reducer.reduce(new Text(key), values, reducerContext);
       }
 
       // now verify the reducer output
-      assertEquals("Reducer Output", k + 1, combinerCollector.getData().size());
+      assertEquals("Reducer Output", k + 1, combinerWriter.getData().size());
 
       // compute the reference result after one iteration and compare
       List<SoftCluster> reference = new ArrayList<SoftCluster>();
@@ -405,7 +436,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       for (SoftCluster key : reference) {
         String clusterId = key.getIdentifier();
-        List<SoftCluster> values = reducerCollector.getValue(new Text(clusterId));
+        List<SoftCluster> values = reducerWriter.getValue(new Text(clusterId));
         SoftCluster cluster = values.get(0);
         System.out.println("ref= " + key.toString() + " cluster= " + cluster.toString());
         cluster.recomputeCenter();
@@ -446,8 +477,10 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyOutputCollector<Text, FuzzyKMeansInfo> mapCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
-      MockMapperContext<Text, FuzzyKMeansInfo> mapContext = new MockMapperContext<Text, FuzzyKMeansInfo>(mapper, conf, mapCollector);
+      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                        conf,
+                                                                                                                        mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
@@ -455,31 +488,34 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run combiner
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-      DummyOutputCollector<Text, FuzzyKMeansInfo> combinerCollector = new DummyOutputCollector<Text, FuzzyKMeansInfo>();
-      MockReducerContext<Text, FuzzyKMeansInfo> combinerContext = new MockReducerContext<Text, FuzzyKMeansInfo>(combiner, conf,
-          combinerCollector, Text.class, FuzzyKMeansInfo.class);
+      DummyRecordWriter<Text, FuzzyKMeansInfo> combinerWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
+      Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, FuzzyKMeansInfo.class);
       combiner.setup(combinerContext);
-      for (Text key : mapCollector.getKeys()) {
-        List<FuzzyKMeansInfo> values = mapCollector.getValue(key);
+      for (Text key : mapWriter.getKeys()) {
+        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
         combiner.reduce(new Text(key), values, combinerContext);
       }
 
       // run reducer
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
-      DummyOutputCollector<Text, SoftCluster> reducerCollector = new DummyOutputCollector<Text, SoftCluster>();
-      MockReducerContext<Text, SoftCluster> reducerContext = new MockReducerContext<Text, SoftCluster>(reducer, conf,
-          reducerCollector, Text.class, SoftCluster.class);
+      DummyRecordWriter<Text, SoftCluster> reducerWriter = new DummyRecordWriter<Text, SoftCluster>();
+      Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster>.Context reducerContext = DummyRecordWriter.build(reducer,
+                                                                                                         conf,
+                                                                                                         reducerWriter,
+                                                                                                         Text.class,
+                                                                                                         FuzzyKMeansInfo.class);
       reducer.setup(clusterList, conf);
 
-      for (Text key : combinerCollector.getKeys()) {
-        List<FuzzyKMeansInfo> values = combinerCollector.getValue(key);
+      for (Text key : combinerWriter.getKeys()) {
+        List<FuzzyKMeansInfo> values = combinerWriter.getValue(key);
         reducer.reduce(new Text(key), values, reducerContext);
       }
 
       // run clusterMapper
       List<SoftCluster> reducerClusters = new ArrayList<SoftCluster>();
-      for (Text key : reducerCollector.getKeys()) {
-        List<SoftCluster> values = reducerCollector.getValue(key);
+      for (Text key : reducerWriter.getKeys()) {
+        List<SoftCluster> values = reducerWriter.getValue(key);
         reducerClusters.add(values.get(0));
       }
       for (SoftCluster softCluster : reducerClusters) {
@@ -487,13 +523,13 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
 
       FuzzyKMeansClusterMapper clusterMapper = new FuzzyKMeansClusterMapper();
-      DummyOutputCollector<IntWritable, WeightedVectorWritable> clusterMapperCollector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
-      MockMapperContext<IntWritable, WeightedVectorWritable> clusterMapperContext = new MockMapperContext<IntWritable, WeightedVectorWritable>(
-          clusterMapper, conf, clusterMapperCollector);
+      DummyRecordWriter<IntWritable, WeightedVectorWritable> clusterWriter = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
+      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context clusterContext = DummyRecordWriter
+          .build(clusterMapper, conf, clusterWriter);
       clusterMapper.setup(reducerClusters, conf);
 
       for (VectorWritable point : points) {
-        clusterMapper.map(new Text(), point, clusterMapperContext);
+        clusterMapper.map(new Text(), point, clusterContext);
       }
 
       // compute the reference result after one iteration and compare
@@ -508,26 +544,28 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         pointsVectors.add((Vector) point.get());
       }
 
-      List<List<SoftCluster>> clusters = FuzzyKMeansClusterer.clusterPoints(pointsVectors, reference,
-          new EuclideanDistanceMeasure(), 0.001, 2, 1);
+      List<List<SoftCluster>> clusters = FuzzyKMeansClusterer.clusterPoints(pointsVectors,
+                                                                            reference,
+                                                                            new EuclideanDistanceMeasure(),
+                                                                            0.001,
+                                                                            2,
+                                                                            1);
 
       computeCluster(pointsVectors, clusters.get(clusters.size() - 1), new FuzzyKMeansClusterer(new EuclideanDistanceMeasure(),
-          0.001, 2), refClusters);
+                                                                                                0.001,
+                                                                                                2), refClusters);
 
       // Now compare the clustermapper results with reference implementation
-      assertEquals("mapper and reference sizes", refClusters.size(), clusterMapperCollector.getKeys().size());
+      assertEquals("mapper and reference sizes", refClusters.size(), clusterWriter.getKeys().size());
       for (Map.Entry<Integer, List<WeightedVectorWritable>> entry : refClusters.entrySet()) {
         int key = entry.getKey();
         List<WeightedVectorWritable> value = entry.getValue();
-        System.out.println("refClusters=" + value + " mapClusters="
-            + clusterMapperCollector.getValue(new IntWritable(key)));
-        assertEquals("cluster " + key + " sizes",
-                     value.size(),
-                     clusterMapperCollector.getValue(new IntWritable(key)).size());
+        System.out.println("refClusters=" + value + " mapClusters=" + clusterWriter.getValue(new IntWritable(key)));
+        assertEquals("cluster " + key + " sizes", value.size(), clusterWriter.getValue(new IntWritable(key)).size());
       }
       // make sure all points are allocated to a cluster
       int size = 0;
-      for (List<WeightedVectorWritable> pts: refClusters.values()) {
+      for (List<WeightedVectorWritable> pts : refClusters.values()) {
         size += pts.size();
       }
       assertEquals("total size", size, points.size());

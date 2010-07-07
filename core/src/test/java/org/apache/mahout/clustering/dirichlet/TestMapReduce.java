@@ -27,16 +27,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
-import org.apache.mahout.clustering.MockMapperContext;
-import org.apache.mahout.clustering.MockReducerContext;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
-import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
@@ -114,13 +115,16 @@ public class TestMapReduce extends MahoutTestCase {
   /** Test the basic Mapper */
   public void testMapper() throws Exception {
     generateSamples(10, 0, 0, 1);
-    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new NormalModelDistribution(new VectorWritable(
-        new DenseVector(2))), 5, 1);
+    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new NormalModelDistribution(new VectorWritable(new DenseVector(2))),
+                                                                              5,
+                                                                              1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.setup(state);
 
-    DummyOutputCollector<Text, VectorWritable> collector = new DummyOutputCollector<Text, VectorWritable>();
-    MockMapperContext<Text, VectorWritable> context = new MockMapperContext<Text, VectorWritable>(mapper, conf, collector);
+    DummyRecordWriter<Text, VectorWritable> writer = new DummyRecordWriter<Text, VectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context context = DummyRecordWriter.build(mapper,
+                                                                                                                  conf,
+                                                                                                                  writer);
     for (VectorWritable v : sampleData) {
       mapper.map(null, v, context);
     }
@@ -135,24 +139,27 @@ public class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 2, 0, 1);
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
-    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new SampledNormalDistribution(new VectorWritable(
-        new DenseVector(2))), 20, 1);
+    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new SampledNormalDistribution(new VectorWritable(new DenseVector(2))),
+                                                                              20,
+                                                                              1);
     DirichletMapper mapper = new DirichletMapper();
     mapper.setup(state);
 
-    DummyOutputCollector<Text, VectorWritable> mapCollector = new DummyOutputCollector<Text, VectorWritable>();
-    MockMapperContext<Text, VectorWritable> mapContext = new MockMapperContext<Text, VectorWritable>(mapper, conf, mapCollector);
+    DummyRecordWriter<Text, VectorWritable> mapWriter = new DummyRecordWriter<Text, VectorWritable>();
+    Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                     conf,
+                                                                                                                     mapWriter);
     for (VectorWritable v : sampleData) {
       mapper.map(null, v, mapContext);
     }
 
     DirichletReducer reducer = new DirichletReducer();
     reducer.setup(state);
-    DummyOutputCollector<Text, DirichletCluster<VectorWritable>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<VectorWritable>>();
-    MockReducerContext<Text, DirichletCluster<VectorWritable>> reduceContext = new MockReducerContext<Text, DirichletCluster<VectorWritable>>(
-        reducer, conf, reduceCollector, Text.class, DirichletCluster.class);
-    for (Text key : mapCollector.getKeys()) {
-      reducer.reduce(new Text(key), mapCollector.getValue(key), reduceContext);
+    DummyRecordWriter<Text, DirichletCluster<VectorWritable>> reduceWriter = new DummyRecordWriter<Text, DirichletCluster<VectorWritable>>();
+    Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>>.Context reduceContext = DummyRecordWriter
+        .build(reducer, conf, reduceWriter, Text.class, VectorWritable.class);
+    for (Text key : mapWriter.getKeys()) {
+      reducer.reduce(new Text(key), mapWriter.getValue(key), reduceContext);
     }
 
     Model<VectorWritable>[] newModels = reducer.getNewModels();
@@ -180,27 +187,30 @@ public class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 2, 0, 1);
     generateSamples(100, 0, 2, 1);
     generateSamples(100, 2, 2, 1);
-    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new SampledNormalDistribution(new VectorWritable(
-        new DenseVector(2))), 20, 1.0);
+    DirichletState<VectorWritable> state = new DirichletState<VectorWritable>(new SampledNormalDistribution(new VectorWritable(new DenseVector(2))),
+                                                                              20,
+                                                                              1.0);
 
     List<Model<VectorWritable>[]> models = new ArrayList<Model<VectorWritable>[]>();
 
     for (int iteration = 0; iteration < 10; iteration++) {
       DirichletMapper mapper = new DirichletMapper();
       mapper.setup(state);
-      DummyOutputCollector<Text, VectorWritable> mapCollector = new DummyOutputCollector<Text, VectorWritable>();
-      MockMapperContext<Text, VectorWritable> mapContext = new MockMapperContext<Text, VectorWritable>(mapper, conf, mapCollector);
+      DummyRecordWriter<Text, VectorWritable> mapWriter = new DummyRecordWriter<Text, VectorWritable>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                       conf,
+                                                                                                                       mapWriter);
       for (VectorWritable v : sampleData) {
         mapper.map(null, v, mapContext);
       }
 
       DirichletReducer reducer = new DirichletReducer();
       reducer.setup(state);
-      DummyOutputCollector<Text, DirichletCluster<VectorWritable>> reduceCollector = new DummyOutputCollector<Text, DirichletCluster<VectorWritable>>();
-      MockReducerContext<Text, DirichletCluster<VectorWritable>> reduceContext = new MockReducerContext<Text, DirichletCluster<VectorWritable>>(
-          reducer, conf, reduceCollector, Text.class, DirichletCluster.class);
-      for (Text key : mapCollector.getKeys()) {
-        reducer.reduce(new Text(key), mapCollector.getValue(key), reduceContext);
+      DummyRecordWriter<Text, DirichletCluster<VectorWritable>> reduceWriter = new DummyRecordWriter<Text, DirichletCluster<VectorWritable>>();
+      Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>>.Context reduceContext = DummyRecordWriter
+          .build(reducer, conf, reduceWriter, Text.class, VectorWritable.class);
+      for (Text key : mapWriter.getKeys()) {
+        reducer.reduce(new Text(key), mapWriter.getValue(key), reduceContext);
       }
 
       Model<VectorWritable>[] newModels = reducer.getNewModels();
@@ -219,9 +229,17 @@ public class TestMapReduce extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver
     int maxIterations = 5;
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", "org.apache.mahout.math.DenseVector", 20,
-        maxIterations, 1.0, 1, false, true, 0);
+    DirichletDriver.runJob(getTestTempDirPath("input"),
+                           getTestTempDirPath("output"),
+                           "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+                           "org.apache.mahout.math.DenseVector",
+                           20,
+                           maxIterations,
+                           1.0,
+                           1,
+                           false,
+                           true,
+                           0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();
@@ -258,9 +276,17 @@ public class TestMapReduce extends MahoutTestCase {
     generate4Datasets();
     // Now run the driver
     int maxIterations = 3;
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", "org.apache.mahout.math.DenseVector", 20,
-        maxIterations, 1.0, 1, false, true, 0);
+    DirichletDriver.runJob(getTestTempDirPath("input"),
+                           getTestTempDirPath("output"),
+                           "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+                           "org.apache.mahout.math.DenseVector",
+                           20,
+                           maxIterations,
+                           1.0,
+                           1,
+                           false,
+                           true,
+                           0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();
@@ -295,9 +321,17 @@ public class TestMapReduce extends MahoutTestCase {
     generate4Datasets();
     // Now run the driver
     int maxIterations = 3;
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution", "org.apache.mahout.math.DenseVector", 20, maxIterations,
-        1.0, 2, false, true, 0);
+    DirichletDriver.runJob(getTestTempDirPath("input"),
+                           getTestTempDirPath("output"),
+                           "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+                           "org.apache.mahout.math.DenseVector",
+                           20,
+                           maxIterations,
+                           1.0,
+                           2,
+                           false,
+                           true,
+                           0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();
@@ -332,9 +366,17 @@ public class TestMapReduce extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data4.txt"), fs, conf);
     // Now run the driver
     int maxIterations = 3;
-    DirichletDriver.runJob(getTestTempDirPath("input"), getTestTempDirPath("output"),
-        "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution", "org.apache.mahout.math.DenseVector",
-        20, maxIterations, 1.0, 2, false, true, 0);
+    DirichletDriver.runJob(getTestTempDirPath("input"),
+                           getTestTempDirPath("output"),
+                           "org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution",
+                           "org.apache.mahout.math.DenseVector",
+                           20,
+                           maxIterations,
+                           1.0,
+                           2,
+                           false,
+                           true,
+                           0);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();

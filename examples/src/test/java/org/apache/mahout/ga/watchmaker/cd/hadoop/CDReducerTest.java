@@ -25,8 +25,8 @@ import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.mahout.clustering.MockReducerContext;
-import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
@@ -64,19 +64,23 @@ public class CDReducerTest extends MahoutTestCase {
   public void testReduce() throws IOException, InterruptedException {
     CDReducer reducer = new CDReducer();
     Configuration conf = new Configuration();
-    DummyOutputCollector<LongWritable, CDFitness> collector = new DummyOutputCollector<LongWritable, CDFitness>();
-    MockReducerContext<LongWritable, CDFitness> context = new MockReducerContext<LongWritable, CDFitness>(reducer, conf, collector,
-        LongWritable.class, CDFitness.class);
+    DummyRecordWriter<LongWritable, CDFitness> reduceWriter = new DummyRecordWriter<LongWritable, CDFitness>();
+    Reducer<LongWritable, CDFitness, LongWritable, CDFitness>.Context reduceContext = DummyRecordWriter.build(reducer,
+                                                                                                              conf,
+                                                                                                              reduceWriter,
+                                                                                                              LongWritable.class,
+                                                                                                              CDFitness.class);
+
     LongWritable zero = new LongWritable(0);
-    reducer.reduce(zero, evaluations, context);
+    reducer.reduce(zero, evaluations, reduceContext);
 
     // check if the expectations are met
-    Set<LongWritable> keys = collector.getKeys();
+    Set<LongWritable> keys = reduceWriter.getKeys();
     assertEquals("nb keys", 1, keys.size());
     assertTrue("bad key", keys.contains(zero));
 
-    assertEquals("nb values", 1, collector.getValue(zero).size());
-    CDFitness fitness = collector.getValue(zero).get(0);
+    assertEquals("nb values", 1, reduceWriter.getValue(zero).size());
+    CDFitness fitness = reduceWriter.getValue(zero).get(0);
     assertEquals(expected, fitness);
 
   }

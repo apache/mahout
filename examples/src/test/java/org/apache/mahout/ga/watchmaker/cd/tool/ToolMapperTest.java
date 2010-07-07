@@ -22,8 +22,8 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.mahout.clustering.MockMapperContext;
-import org.apache.mahout.common.DummyOutputCollector;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 
 public class ToolMapperTest extends MahoutTestCase {
@@ -33,8 +33,8 @@ public class ToolMapperTest extends MahoutTestCase {
     Text value = new Text();
     Configuration conf = new Configuration();
     ToolMapper mapper = new ToolMapper();
-    DummyOutputCollector<LongWritable, Text> output = new DummyOutputCollector<LongWritable, Text>();
-    MockMapperContext<LongWritable, Text> context = new MockMapperContext<LongWritable, Text>(mapper, conf, output);
+    DummyRecordWriter<LongWritable, Text> writer = new DummyRecordWriter<LongWritable, Text>();
+    Mapper<LongWritable, Text, LongWritable, Text>.Context context = DummyRecordWriter.build(mapper, conf, writer);
 
     // no attribute is ignored
     char[] descriptors = { 'N', 'N', 'C', 'C', 'N', 'N' };
@@ -45,7 +45,7 @@ public class ToolMapperTest extends MahoutTestCase {
     mapper.map(key, value, context);
 
     for (int index = 0; index < 6; index++) {
-      List<Text> values = output.getValue(new LongWritable(index));
+      List<Text> values = writer.getValue(new LongWritable(index));
       assertEquals("should extract one value per attribute", 1, values.size());
       assertEquals("Bad extracted value", "A" + (index + 1), values.get(0).toString());
     }
@@ -56,8 +56,8 @@ public class ToolMapperTest extends MahoutTestCase {
     Text value = new Text();
     ToolMapper mapper = new ToolMapper();
     Configuration conf = new Configuration();
-    DummyOutputCollector<LongWritable, Text> output = new DummyOutputCollector<LongWritable, Text>();
-    MockMapperContext<LongWritable, Text> context = new MockMapperContext<LongWritable, Text>(mapper, conf, output);
+    DummyRecordWriter<LongWritable, Text> writer = new DummyRecordWriter<LongWritable, Text>();
+    Mapper<LongWritable, Text, LongWritable, Text>.Context context = DummyRecordWriter.build(mapper, conf, writer);
 
     // no attribute is ignored
     char[] descriptors = { 'N', 'I', 'C', 'I', 'I', 'N' };
@@ -68,7 +68,7 @@ public class ToolMapperTest extends MahoutTestCase {
     mapper.map(key, value, context);
 
     for (int index = 0; index < 6; index++) {
-      List<Text> values = output.getValue(new LongWritable(index));
+      List<Text> values = writer.getValue(new LongWritable(index));
       if (index == 1 || index == 3 || index == 4) {
         // this attribute should be ignored
         assertNull("Attribute (" + index + ") should be ignored", values);
