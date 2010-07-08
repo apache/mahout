@@ -200,7 +200,7 @@ public final class CollocDriver extends AbstractJob {
                                           boolean emitUnigrams,
                                           int maxNGramSize,
                                           int reduceTasks,
-                                          int minSupport) throws IOException {
+                                          int minSupport) throws IOException, ClassNotFoundException, InterruptedException {
 
     Configuration con = new Configuration(baseConf);
     con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
@@ -230,6 +230,8 @@ public final class CollocDriver extends AbstractJob {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setReducerClass(CollocReducer.class);
     job.setNumReduceTasks(reduceTasks);
+    
+    job.waitForCompletion(true);
 
     return job.getCounters().findCounter(CollocMapper.Count.NGRAM_TOTAL).getValue();
   }
