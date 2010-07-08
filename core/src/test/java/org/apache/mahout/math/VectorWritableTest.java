@@ -28,7 +28,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class VectorTest extends TestCase {
+public class VectorWritableTest extends TestCase {
 
   public void testSequentialAccessSparseVectorWritable() throws Exception {
     Vector v = new SequentialAccessSparseVector(5);
