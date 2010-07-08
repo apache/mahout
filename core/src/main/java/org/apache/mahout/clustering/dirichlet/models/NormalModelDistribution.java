@@ -24,7 +24,7 @@ import org.apache.mahout.math.VectorWritable;
  * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
  * Uses a Normal Distribution
  */
-public class NormalModelDistribution extends VectorModelDistribution {
+public class NormalModelDistribution extends AbstractVectorModelDistribution {
   
   public NormalModelDistribution(VectorWritable modelPrototype) {
     super(modelPrototype);

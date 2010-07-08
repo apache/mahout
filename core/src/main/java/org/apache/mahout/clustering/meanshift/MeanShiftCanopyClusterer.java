@@ -41,28 +41,6 @@ public class MeanShiftCanopyClusterer {
   private DistanceMeasure measure;
 
   public MeanShiftCanopyClusterer(Configuration configuration) {
-    configure(configuration);
-  }
-
-  public MeanShiftCanopyClusterer(DistanceMeasure aMeasure, double aT1, double aT2, double aDelta) {
-    config(aMeasure, aT1, aT2, aDelta);
-  }
-
-  public double getT1() {
-    return t1;
-  }
-
-  public double getT2() {
-    return t2;
-  }
-
-  /**
-   * Configure the Canopy and its distance measure
-   * 
-   * @param configuration
-   *          the JobConf for this job
-   */
-  public void configure(Configuration configuration) {
     try {
       measure = Class.forName(configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY))
           .asSubclass(DistanceMeasure.class).newInstance();
@@ -80,18 +58,20 @@ public class MeanShiftCanopyClusterer {
     convergenceDelta = Double.parseDouble(configuration.get(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY));
   }
 
-  /**
-   * Configure the Canopy for unit tests
-   * 
-   * @param aDelta
-   *          the convergence criteria
-   */
-  public void config(DistanceMeasure aMeasure, double aT1, double aT2, double aDelta) {
+  public MeanShiftCanopyClusterer(DistanceMeasure aMeasure, double aT1, double aT2, double aDelta) {
     // nextCanopyId = 100; // so canopyIds will sort properly // never read?
     measure = aMeasure;
     t1 = aT1;
     t2 = aT2;
     convergenceDelta = aDelta;
+  }
+
+  public double getT1() {
+    return t1;
+  }
+
+  public double getT2() {
+    return t2;
   }
 
   /**

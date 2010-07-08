@@ -26,7 +26,7 @@ import org.apache.mahout.math.VectorWritable;
  * Uses a Normal Distribution to sample the prior model values. Model values have a vector standard deviation,
  * allowing assymetrical regions to be covered by a model.
  */
-public class AsymmetricSampledNormalDistribution extends VectorModelDistribution {
+public class AsymmetricSampledNormalDistribution extends AbstractVectorModelDistribution {
   
   public AsymmetricSampledNormalDistribution() {
   }

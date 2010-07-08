@@ -23,7 +23,7 @@ public class DummyStatusReporter extends StatusReporter {
   public Counter getCounter(String group, String name) {
     if (!counterGroups.containsKey(group + name))
       counterGroups.put(group + name, new DummyCounter());
-    return counterGroups.get(name);
+    return counterGroups.get(group+name);
   }
 
   @Override

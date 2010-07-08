@@ -42,7 +42,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.dirichlet.models.VectorModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
@@ -261,8 +261,8 @@ public final class DirichletDriver {
              SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<? extends VectorModelDistribution> cl = ccl.loadClass(modelFactory).asSubclass(VectorModelDistribution.class);
-    VectorModelDistribution factory = cl.newInstance();
+    Class<? extends AbstractVectorModelDistribution> cl = ccl.loadClass(modelFactory).asSubclass(AbstractVectorModelDistribution.class);
+    AbstractVectorModelDistribution factory = cl.newInstance();
 
     Class<? extends Vector> vcl = ccl.loadClass(modelPrototype).asSubclass(Vector.class);
     Constructor<? extends Vector> v = vcl.getConstructor(int.class);

@@ -43,8 +43,6 @@ public class TestMeanShift extends MahoutTestCase {
 
   private Vector[] raw = null;
 
-  private Configuration conf;
-
   // DistanceMeasure manhattanDistanceMeasure = new ManhattanDistanceMeasure();
 
   private final DistanceMeasure euclideanDistanceMeasure = new EuclideanDistanceMeasure();
@@ -93,7 +91,6 @@ public class TestMeanShift extends MahoutTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    conf = new Configuration();
     raw = new Vector[100];
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
@@ -137,6 +134,7 @@ public class TestMeanShift extends MahoutTestCase {
       printImage(canopies);
       System.out.println(iter++);
     }
+    assertTrue(true);
   }
 
   /**
@@ -290,6 +288,7 @@ public class TestMeanShift extends MahoutTestCase {
    */
   public void testCanopyEuclideanMRJob() throws Exception {
     Path input = getTestTempDirPath("testdata");
+    Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     for (Vector v : raw) {
@@ -300,7 +299,6 @@ public class TestMeanShift extends MahoutTestCase {
     // now run the Job
     Path output = getTestTempDirPath("output");
     MeanShiftCanopyDriver.runJob(input, output, EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
-    Configuration conf = new Configuration();
     Path outPart = new Path(output, "clusters-3/part-r-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();

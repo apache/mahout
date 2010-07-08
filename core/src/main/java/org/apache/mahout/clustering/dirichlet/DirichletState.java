@@ -49,7 +49,7 @@ public class DirichletState<O> {
       clusters.add(new DirichletCluster<O>(m));
     }
     // sample the mixture parameters from a Dirichlet distribution on the totalCounts
-    mixture = UncommonDistributions.rDirichlet(totalCounts(), alpha0);
+    mixture = UncommonDistributions.rDirichlet(computeTotalCounts(), alpha0);
   }
   
   public DirichletState() { }
@@ -87,6 +87,10 @@ public class DirichletState<O> {
   }
   
   public Vector totalCounts() {
+    return computeTotalCounts();
+  }
+
+  private Vector computeTotalCounts() {
     Vector result = new DenseVector(numClusters);
     for (int i = 0; i < numClusters; i++) {
       result.set(i, clusters.get(i).getTotalCount());
@@ -125,6 +129,7 @@ public class DirichletState<O> {
     return mix * pdf;
   }
   
+  @SuppressWarnings("unchecked")
   public Model<O>[] getModels() {
     Model<O>[] result = new Model[numClusters];
     for (int i = 0; i < numClusters; i++) {

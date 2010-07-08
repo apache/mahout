@@ -41,7 +41,7 @@ public class L1Model implements Model<VectorWritable> {
 
   private Vector coefficients;
 
-  private int count;
+  private int counter;
 
   private Vector observed;
 
@@ -56,17 +56,17 @@ public class L1Model implements Model<VectorWritable> {
 
   @Override
   public void computeParameters() {
-    coefficients = observed.divide(count);
+    coefficients = observed.divide(counter);
   }
 
   @Override
   public int count() {
-    return count;
+    return counter;
   }
 
   @Override
   public void observe(VectorWritable x) {
-    count++;
+    counter++;
     x.get().addTo(observed);
   }
 
@@ -78,7 +78,7 @@ public class L1Model implements Model<VectorWritable> {
   @Override
   public void readFields(DataInput in) throws IOException {
     this.id = in.readInt();
-    this.count = in.readInt();
+    this.counter = in.readInt();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
     this.coefficients = temp.get();
@@ -88,7 +88,7 @@ public class L1Model implements Model<VectorWritable> {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
-    out.writeInt(count);
+    out.writeInt(counter);
     VectorWritable.writeVector(out, coefficients);
   }
 
@@ -104,7 +104,7 @@ public class L1Model implements Model<VectorWritable> {
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
-    buf.append("l1m{n=").append(count).append(" c=");
+    buf.append("l1m{n=").append(counter).append(" c=");
     if (coefficients != null) {
       buf.append(ClusterBase.formatVector(coefficients, bindings));
     }
@@ -132,7 +132,7 @@ public class L1Model implements Model<VectorWritable> {
 
   @Override
   public int getNumPoints() {
-    return count;
+    return counter;
   }
 
 }

@@ -77,6 +77,7 @@ public class DirichletCluster<O> implements Writable, Cluster {
   }
 
   /** Reads a typed Model instance from the input stream */
+  @SuppressWarnings("unchecked")
   public static <O> Model<O> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
     Model<O> model;
