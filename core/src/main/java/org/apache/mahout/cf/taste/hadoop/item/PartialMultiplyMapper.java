@@ -21,53 +21,37 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector;
 
+/**
+ * maps similar items and their preference values per user
+ */
 public final class PartialMultiplyMapper extends
-    Mapper<VarIntWritable,VectorAndPrefsWritable,VarLongWritable,VectorWritable> {
+    Mapper<VarIntWritable,VectorAndPrefsWritable,VarLongWritable,PrefAndSimilarityColumnWritable> {
 
   @Override
   protected void map(VarIntWritable key,
                      VectorAndPrefsWritable vectorAndPrefsWritable,
                      Context context) throws IOException, InterruptedException {
 
-    int itemIndex = key.get();
-
-    Vector cooccurrenceColumn = vectorAndPrefsWritable.getVector();
+    Vector similarityMatrixColumn = vectorAndPrefsWritable.getVector();
     List<Long> userIDs = vectorAndPrefsWritable.getUserIDs();
     List<Float> prefValues = vectorAndPrefsWritable.getValues();
 
     VarLongWritable userIDWritable = new VarLongWritable();
-
-    // These single-element vectors ensure that each user will not be recommended
-    // this item
-    Vector excludeVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
-    excludeVector.set(itemIndex, Double.NaN);
-    VectorWritable excludeWritable = new VectorWritable(excludeVector);
-    excludeWritable.setWritesLaxPrecision(true);
-    for (long userID : userIDs) {
-      userIDWritable.set(userID);
-      context.write(userIDWritable, excludeWritable);
-    }
-
-    VectorWritable vectorWritable = new VectorWritable();
-    vectorWritable.setWritesLaxPrecision(true);
+    PrefAndSimilarityColumnWritable prefAndSimilarityColumn = new PrefAndSimilarityColumnWritable();
 
     for (int i = 0; i < userIDs.size(); i++) {
       long userID = userIDs.get(i);
       float prefValue = prefValues.get(i);
       if (!Float.isNaN(prefValue)) {
-        Vector partialProduct = prefValue == 1.0f ? cooccurrenceColumn : cooccurrenceColumn.times(prefValue);
+        prefAndSimilarityColumn.set(prefValue, similarityMatrixColumn);
         userIDWritable.set(userID);
-        vectorWritable.set(partialProduct);
-        context.write(userIDWritable, vectorWritable);
+        context.write(userIDWritable, prefAndSimilarityColumn);
       }
     }
-
   }
 
 }

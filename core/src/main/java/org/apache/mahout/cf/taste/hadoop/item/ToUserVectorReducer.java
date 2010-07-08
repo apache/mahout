@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
@@ -52,7 +53,7 @@ public final class ToUserVectorReducer extends
                         Context context) throws IOException, InterruptedException {
     Vector userVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     for (VarLongWritable itemPref : itemPrefs) {
-      int index = ItemIDIndexMapper.idToIndex(itemPref.get());
+      int index = TasteHadoopUtils.idToIndex(itemPref.get());
       float value = itemPref instanceof EntityPrefWritable ? ((EntityPrefWritable) itemPref).getPrefValue() : 1.0f;
       userVector.set(index, value);
     }

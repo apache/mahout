@@ -18,20 +18,18 @@
 package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.ToEntityPrefsMapper;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 
 public final class ItemIDIndexMapper extends
     Mapper<LongWritable,Text, VarIntWritable, VarLongWritable> {
-  
-  private static final Pattern COMMA = Pattern.compile(",");
 
   private boolean transpose;
 
@@ -45,14 +43,9 @@ public final class ItemIDIndexMapper extends
   protected void map(LongWritable key,
                      Text value,
                      Context context) throws IOException, InterruptedException {
-    String[] tokens = ItemIDIndexMapper.COMMA.split(value.toString());
+    String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
     long itemID = Long.parseLong(tokens[transpose ? 0 : 1]);
-    int index = idToIndex(itemID);
+    int index = TasteHadoopUtils.idToIndex(itemID);
     context.write(new VarIntWritable(index), new VarLongWritable(itemID));
-  }
-  
-  static int idToIndex(long itemID) {
-    return 0x7FFFFFFF & ((int) itemID ^ (int) (itemID >>> 32));
-  }
-  
+  }  
 }

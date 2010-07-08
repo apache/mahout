@@ -34,8 +34,8 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.MathHelper;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
+import org.apache.mahout.math.hadoop.MathHelper;
 import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob.EntriesToVectorsReducer;
 import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob.SimilarityReducer;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
@@ -275,7 +275,7 @@ public class TestRowSimilarityJob extends MahoutTestCase {
 
     Matrix similarityMatrix =
       MathHelper.readEntries(fs, conf, new Path(outputDir.getAbsolutePath(), "part-r-00000"), 3, 3);
-
+    
     assertNotNull(similarityMatrix);
     assertEquals(3, similarityMatrix.numCols());
     assertEquals(3, similarityMatrix.numRows());
@@ -367,7 +367,7 @@ public class TestRowSimilarityJob extends MahoutTestCase {
 
     Matrix similarityMatrix =
         MathHelper.readEntries(fs, conf, new Path(outputDir.getAbsolutePath(), "part-r-00000"), 3, 3);
-
+    
     assertNotNull(similarityMatrix);
     assertEquals(3, similarityMatrix.numCols());
     assertEquals(3, similarityMatrix.numRows());

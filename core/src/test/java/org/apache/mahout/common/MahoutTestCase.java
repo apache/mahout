@@ -81,10 +81,39 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     return tempFileOrDir;
   }
 
-  protected static void setField(Object target, String fieldname, Object value)
+  /**
+   * try to directly set a (possibly private) field on an Object 
+   * 
+   * @param target
+   * @param fieldname
+   * @param value
+   * @throws NoSuchFieldException
+   * @throws IllegalAccessException
+   */
+  protected void setField(Object target, String fieldname, Object value)
       throws NoSuchFieldException, IllegalAccessException {
-    Field field = target.getClass().getDeclaredField(fieldname);
+    Field field = findDeclaredField(target.getClass(), fieldname);
     field.setAccessible(true);
     field.set(target, value);
   }
+  
+  /**
+   * find a declared field in a class or one of it's super classes
+   * 
+   * @param inClass
+   * @param fieldname
+   * @return
+   * @throws NoSuchFieldException
+   */
+  private Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
+      if (Object.class.equals(inClass)) {
+        throw new NoSuchFieldException();
+      }     
+      for (Field field : inClass.getDeclaredFields()) {
+        if (field.getName().equalsIgnoreCase(fieldname)) {
+          return field;
+        }
+      }
+      return findDeclaredField(inClass.getSuperclass(), fieldname);    
+    }
 }

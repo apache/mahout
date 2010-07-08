@@ -19,28 +19,29 @@ package org.apache.mahout.cf.taste.hadoop.item;
 
 import java.io.IOException;
 
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.math.VarLongWritable;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public final class AggregateCombiner extends
-    Reducer<VarLongWritable,VectorWritable,VarLongWritable,VectorWritable> {
+/**
+ * maps a row of the similarity matrix to a {@link VectorOrPrefWritable}
+ * 
+ * actually a column from that matrix has to be used but as the similarity matrix is symmetric, 
+ * we can use a row instead of having to transpose it
+ */
+public final class SimilarityMatrixRowWrapperMapper extends
+    Mapper<IntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable> {
 
   @Override
-  protected void reduce(VarLongWritable key,
-                        Iterable<VectorWritable> values,
-                        Context context) throws IOException, InterruptedException {
-
-    Vector partial = null;
-    for (VectorWritable vectorWritable : values) {
-      partial = partial == null ? vectorWritable.get() : partial.plus(vectorWritable.get());
-    }
-    if (partial != null) {
-      VectorWritable vw = new VectorWritable(partial);
-      vw.setWritesLaxPrecision(true);
-      context.write(key, vw);
-    }
+  protected void map(IntWritable key,
+                     VectorWritable value,
+                     Context context) throws IOException, InterruptedException {
+    Vector similarityMatrixRow = value.get();
+    /* remove self similarity */
+    similarityMatrixRow.set(key.get(), Double.NaN);
+    context.write(new VarIntWritable(key.get()), new VectorOrPrefWritable(similarityMatrixRow));
   }
 
 }

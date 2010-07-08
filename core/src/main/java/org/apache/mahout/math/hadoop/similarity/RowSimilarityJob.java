@@ -86,7 +86,7 @@ public class RowSimilarityJob extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
     addInputOption();
     addOutputOption();

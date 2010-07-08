@@ -136,13 +136,7 @@ public class MathHelper {
       public boolean matches(Object argument) {
         if (argument instanceof VectorWritable) {
           Vector v = ((VectorWritable) argument).get();
-          for (Element element : elements) {
-            boolean matches = Math.abs(element.get() - v.get(element.index())) <= EPSILON;
-            if (!matches) {
-              return false;
-            }
-          }
-          return true;
+          return consistsOf(v, elements);
         }
         return false;
       }
@@ -153,6 +147,44 @@ public class MathHelper {
     return null;
   }
 
+  /**
+   * checks whether the {@link Vector} is equivalent to the set of {@link Vector.Element}s 
+   * 
+   * @param vector
+   * @param elements
+   * @return
+   */
+  public static boolean consistsOf(Vector vector, Vector.Element... elements) {
+    if (elements.length != numberOfNoNZeroNonNaNElements(vector)) {
+      return false;
+    }
+    for (Vector.Element element : elements) {
+      boolean matches = Math.abs(element.get() - vector.get(element.index())) <= EPSILON;
+      if (!matches) {
+        return false;
+      }
+    }
+    return true;    
+  }
+  
+  /**
+   * returns the number of elements in the {@link Vector} that are neither 0 nor NaN
+   * 
+   * @param vector
+   * @return
+   */
+  public static int numberOfNoNZeroNonNaNElements(Vector vector) {
+    int elementsInVector = 0;
+    Iterator<Element> vectorIterator = vector.iterateNonZero();
+    while (vectorIterator.hasNext()) {
+      Element currentElement = vectorIterator.next();
+      if (!Double.isNaN(currentElement.get())) {
+        elementsInVector++;
+      }      
+    }
+    return elementsInVector;
+  }
+  
   /**
    * read a {@link Matrix} from a SequenceFile<IntWritable,VectorWritable>
    * @param fs

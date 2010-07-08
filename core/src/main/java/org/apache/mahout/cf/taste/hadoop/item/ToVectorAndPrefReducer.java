@@ -35,7 +35,7 @@ public final class ToVectorAndPrefReducer extends
 
     List<Long> userIDs = new ArrayList<Long>();
     List<Float> prefValues = new ArrayList<Float>();
-    Vector cooccurrenceColumn = null;
+    Vector similarityMatrixColumn = null;
     for (VectorOrPrefWritable value : values) {
       if (value.getVector() == null) {
         // Then this is a user-pref value
@@ -43,18 +43,18 @@ public final class ToVectorAndPrefReducer extends
         prefValues.add(value.getValue());
       } else {
         // Then this is the column vector
-        if (cooccurrenceColumn != null) {
-          throw new IllegalStateException("Found two co-occurrence columns for item index " + key.get());
+        if (similarityMatrixColumn != null) {
+          throw new IllegalStateException("Found two similarity-matrix columns for item index " + key.get());
         }
-        cooccurrenceColumn = value.getVector();
+        similarityMatrixColumn = value.getVector();
       }
     }
 
-    if (cooccurrenceColumn == null) {
+    if (similarityMatrixColumn == null) {
       return;
     }
 
-    VectorAndPrefsWritable vectorAndPrefs = new VectorAndPrefsWritable(cooccurrenceColumn, userIDs, prefValues);
+    VectorAndPrefsWritable vectorAndPrefs = new VectorAndPrefsWritable(similarityMatrixColumn, userIDs, prefValues);
     context.write(key, vectorAndPrefs);
   }
 

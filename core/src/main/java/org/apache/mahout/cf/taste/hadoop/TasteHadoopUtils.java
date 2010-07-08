@@ -17,10 +17,17 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.io.IOUtils;
 
 /**
  * some helper methods for the hadoop-related stuff in org.apache.mahout.cf.taste
@@ -59,5 +66,27 @@ public final class TasteHadoopUtils {
    */
   public static int idToIndex(long id) {
     return 0x7FFFFFFF & ((int) id ^ (int) (id >>> 32));
+  }
+  
+  /**
+   * reads a text-based outputfile that only contains an int
+   * 
+   * @param conf
+   * @param outputDir
+   * @return
+   * @throws IOException
+   */
+  public static int readIntFromFile(Configuration conf, Path outputDir) throws IOException {
+    FileSystem fs = FileSystem.get(conf);
+    Path outputFile = fs.listStatus(outputDir, TasteHadoopUtils.PARTS_FILTER)[0].getPath();
+    InputStream in = null;
+    try  {
+      in = fs.open(outputFile);
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      IOUtils.copyBytes(in, out, conf);
+      return Integer.parseInt(new String(out.toByteArray(), Charset.forName("UTF-8")).trim());
+    } finally {
+      IOUtils.closeStream(in);
+    }
   }
 }

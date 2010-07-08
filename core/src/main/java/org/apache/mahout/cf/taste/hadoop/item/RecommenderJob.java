@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -36,29 +38,38 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
+import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersKeyWritable;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersMapper;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersReducer;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixMapper;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixReducer;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.math.hadoop.DistributedRowMatrix;
+import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob;
 
 /**
  * <p>Runs a completely distributed recommender job as a series of mapreduces.</p>
- * 
+ *
  * <p>Command line arguments specific to this class are:</p>
- * 
+ *
  * <ol>
  * <li>-Dmapred.input.dir=(path): Directory containing a text file containing user IDs
  *  for which recommendations should be computed, one per line</li>
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
+ * <li>--similarityClassname (classname): Name of distributed similarity class to instantiate</li>
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * <li>--itemsFile (path): file containing item IDs to recommend for (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
  * <li>--booleanData (boolean): Treat input data as having to pref values (false)</li>
  * <li>--maxPrefsPerUserConsidered (integer): Maximum number of preferences considered per user in
  *  final recommendation phase (10)</li>
- * <li>--maxCooccurrencesPerItemConsidered: Maximum number of cooccurrences considered per item
- *  in count phase (100)</li>
+ * <li>--maxSimilaritiesPerItemConsidered (integer): Maximum number of similarities considered per item (optional;
+ *  default 100)</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>
@@ -68,8 +79,12 @@ import org.apache.mahout.math.VectorWritable;
  */
 public final class RecommenderJob extends AbstractJob {
 
+  static final String MAX_SIMILARITIES_PER_ITEM_CONSIDERED = RecommenderJob.class.getName() +
+      ".maxSimilaritiesPerItemConsidered";
+
   public static final String BOOLEAN_DATA = "booleanData";
-  
+  public static final int DEFAULT_MAX_SIMILARITIES_PER_ITEM_CONSIDERED = 100;
+
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
@@ -83,15 +98,16 @@ public final class RecommenderJob extends AbstractJob {
     addOption("maxPrefsPerUserConsidered", null,
       "Maximum number of preferences considered per user in final recommendation phase",
       String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
-    addOption("maxCooccurrencesPerItemConsidered", null,
-      "Maximum number of cooccurrences considered per item in count phase",
-      String.valueOf(UserVectorToCooccurrenceMapper.DEFAULT_MAX_COOCCURRENCES_PER_ITEM_CONSIDERED));
+    addOption("maxSimilaritiesPerItemConsidered", null,
+      "Maximum number of similarities considered per item ",
+      String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM_CONSIDERED));
+    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
-    
+
     Path inputPath = getInputPath();
     Path outputPath = getOutputPath();
     Path tempDirPath = new Path(parsedArgs.get("--tempDir"));
@@ -100,11 +116,15 @@ public final class RecommenderJob extends AbstractJob {
     String itemsFile = parsedArgs.get("--itemsFile");
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
     int maxPrefsPerUserConsidered = Integer.parseInt(parsedArgs.get("--maxPrefsPerUserConsidered"));
-    int maxCooccurrencesPerItemConsidered = Integer.parseInt(parsedArgs.get("--maxCooccurrencesPerItemConsidered"));
+    int maxSimilaritiesPerItemConsidered = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItemConsidered"));
+    String similarityClassname = parsedArgs.get("--similarityClassname");
 
     Path userVectorPath = new Path(tempDirPath, "userVectors");
     Path itemIDIndexPath = new Path(tempDirPath, "itemIDIndex");
-    Path cooccurrencePath = new Path(tempDirPath, "cooccurrence");
+    Path countUsersPath = new Path(tempDirPath, "countUsers");
+    Path itemUserMatrixPath = new Path(tempDirPath, "itemUserMatrix");
+    Path maybePruneItemUserMatrixPath = new Path(tempDirPath, "maybePruneItemUserMatrixPath");
+    Path similarityMatrixPath = new Path(tempDirPath, "similarityMatrix");
     Path prePartialMultiplyPath1 = new Path(tempDirPath, "prePartialMultiply1");
     Path prePartialMultiplyPath2 = new Path(tempDirPath, "prePartialMultiply2");
     Path partialMultiplyPath = new Path(tempDirPath, "partialMultiply");
@@ -132,21 +152,70 @@ public final class RecommenderJob extends AbstractJob {
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job toCooccurrence = prepareJob(
-        userVectorPath, cooccurrencePath, SequenceFileInputFormat.class,
-        UserVectorToCooccurrenceMapper.class, VarIntWritable.class, VarIntWritable.class,
-        UserVectorToCooccurrenceReducer.class, VarIntWritable.class, VectorWritable.class,
-        SequenceFileOutputFormat.class);
-      setIOSort(toCooccurrence);
-      toCooccurrence.getConfiguration().setInt(UserVectorToCooccurrenceMapper.MAX_COOCCURRENCES_PER_ITEM_CONSIDERED,
-                                               maxCooccurrencesPerItemConsidered);
-      toCooccurrence.waitForCompletion(true);
+      Job countUsers = prepareJob(inputPath,
+                                  countUsersPath,
+                                  TextInputFormat.class,
+                                  CountUsersMapper.class,
+                                  CountUsersKeyWritable.class,
+                                  VarLongWritable.class,
+                                  CountUsersReducer.class,
+                                  VarIntWritable.class,
+                                  NullWritable.class,
+                                  TextOutputFormat.class);
+        countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
+        countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
+        countUsers.waitForCompletion(true);
+    }
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job itemUserMatrix = prepareJob(inputPath,
+                                  itemUserMatrixPath,
+                                  TextInputFormat.class,
+                                  PrefsToItemUserMatrixMapper.class,
+                                  VarIntWritable.class,
+                                  DistributedRowMatrix.MatrixEntryWritable.class,
+                                  PrefsToItemUserMatrixReducer.class,
+                                  IntWritable.class,
+                                  VectorWritable.class,
+                                  SequenceFileOutputFormat.class);
+      itemUserMatrix.waitForCompletion(true);
+    }
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job maybePruneItemUserMatrix = prepareJob(itemUserMatrixPath,
+                                  maybePruneItemUserMatrixPath,
+                                  SequenceFileInputFormat.class,
+                                  MaybePruneRowsMapper.class,
+                                  IntWritable.class,
+                                  VectorWritable.class,
+                                  Reducer.class,
+                                  IntWritable.class,
+                                  VectorWritable.class,
+                                  SequenceFileOutputFormat.class);
+      maybePruneItemUserMatrix.getConfiguration().setInt(MAX_SIMILARITIES_PER_ITEM_CONSIDERED,
+          maxSimilaritiesPerItemConsidered);
+      maybePruneItemUserMatrix.waitForCompletion(true);
+    }
+
+    int numberOfUsers = TasteHadoopUtils.readIntFromFile(getConf(), countUsersPath);
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
+       * new DistributedRowMatrix(...).rowSimilarity(...) */
+      try {
+        RowSimilarityJob.main(new String[] { "-Dmapred.input.dir=" + maybePruneItemUserMatrixPath.toString(),
+            "-Dmapred.output.dir=" + similarityMatrixPath.toString(), "--numberOfColumns",
+            String.valueOf(numberOfUsers), "--similarityClassname", similarityClassname, "--maxSimilaritiesPerRow",
+            String.valueOf(maxSimilaritiesPerItemConsidered + 1), "--tempDir", tempDirPath.toString() });
+      } catch (Exception e) {
+        throw new IllegalStateException("item-item-similarity computation failed", e);
+      }
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job prePartialMultiply1 = prepareJob(
-        cooccurrencePath, prePartialMultiplyPath1, SequenceFileInputFormat.class,
-        CooccurrenceColumnWrapperMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
+        similarityMatrixPath, prePartialMultiplyPath1, SequenceFileInputFormat.class,
+        SimilarityMatrixRowWrapperMapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
         Reducer.class, VarIntWritable.class, VectorOrPrefWritable.class,
         SequenceFileOutputFormat.class);
       prePartialMultiply1.waitForCompletion(true);
@@ -173,20 +242,19 @@ public final class RecommenderJob extends AbstractJob {
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-    
       Job aggregateAndRecommend = prepareJob(
           partialMultiplyPath, outputPath, SequenceFileInputFormat.class,
-          PartialMultiplyMapper.class, VarLongWritable.class, VectorWritable.class,
+          PartialMultiplyMapper.class, VarLongWritable.class, PrefAndSimilarityColumnWritable.class,
           AggregateAndRecommendReducer.class, VarLongWritable.class, RecommendedItemsWritable.class,
           TextOutputFormat.class);
       Configuration jobConf = aggregateAndRecommend.getConfiguration();
       if (itemsFile != null) {
     	  jobConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
-    }
+      }
       setIOSort(aggregateAndRecommend);
-      aggregateAndRecommend.setCombinerClass(AggregateCombiner.class);
       jobConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath.toString());
       jobConf.setInt(AggregateAndRecommendReducer.NUM_RECOMMENDATIONS, numRecommendations);
+      jobConf.setBoolean(BOOLEAN_DATA, booleanData);
       aggregateAndRecommend.waitForCompletion(true);
     }
 
@@ -213,9 +281,8 @@ public final class RecommenderJob extends AbstractJob {
     // timeout when running these jobs
     conf.setInt("mapred.task.timeout", 60 * 60 * 1000);
   }
-  
+
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new RecommenderJob(), args);
   }
-  
 }

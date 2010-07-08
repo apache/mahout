@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,22 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.hadoop.item;
+package org.apache.mahout.math.hadoop.similarity.vector;
 
-import java.io.IOException;
+import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.math.VarIntWritable;
-import org.apache.mahout.math.VectorWritable;
-
-public final class CooccurrenceColumnWrapperMapper extends
-    Mapper<VarIntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable> {
+/**
+ * uses the co-occcurence count as vector similarity
+ */
+public class DistributedCooccurrenceVectorSimilarity extends AbstractDistributedVectorSimilarity {
 
   @Override
-  protected void map(VarIntWritable key,
-                     VectorWritable value,
-                     Context context) throws IOException, InterruptedException {
-    context.write(key, new VectorOrPrefWritable(value.get()));
+  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
+      double weightOfVectorB, int numberOfColumns) {
+    return countElements(cooccurrences);
   }
 
 }
