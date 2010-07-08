@@ -17,6 +17,22 @@
 #                      mappings and the default properties files
 #                      defaults to "$MAHOUT_HOME/conf"
 #
+#   MAHOUT_LOCAL       set to anything other than an empty string to force
+#                      mahout to run locally even if
+#                      HADOOP_CONF_DIR and HADOOP_HOME are set
+#
+#   MAHOUT_CORE        set to anything other than an empty string to force
+#                      mahout to run in developer 'core' mode, just as if the
+#                      -core option was presented on the command-line
+# Commane-line Options
+#
+#   -core              -core is used to switch into 'developer mode' when
+#                      running mahout locally. If specified, the classes
+#                      from the 'target/classes' directories in each project
+#                      are used. Otherwise classes will be retrived from
+#                      jars in the binary releas collection or *.job files
+#                      found in build directories. When running on hadoop
+#                      the job files will always be used.
 
 #
 #/**
@@ -54,10 +70,13 @@ while [ -h "$THIS" ]; do
 done
 
 IS_CORE=0
-#check for -core option
 if [ "$1" == "-core" ] ; then
   IS_CORE=1
   shift
+fi
+
+if [ "$MAHOUT_CORE" != "" ]; then
+  IS_CORE=1
 fi
 
 # some directories
@@ -165,18 +184,29 @@ done
 
 if [ "$MAHOUT_JOB" = "" ]; then
   for f in $MAHOUT_HOME/mahout-examples-*.job; do
-    MAHOUT_JOB=$f
+    if [ -e "$f" ]; then
+      MAHOUT_JOB=$f
+    fi
   done
 fi
 
 # run it
 
-if [ "$HADOOP_CONF_DIR" = "" ] || [ "$HADOOP_HOME" = "" ]; then
-  echo "no HADOOP_CONF_DIR or HADOOP_HOME set, running locally"
+if [ "$HADOOP_CONF_DIR" = "" ] || [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
+  if [ "$HADOOP_CONF_DIR" = "" ] || [ "$HADOOP_HOME" = "" ] ; then
+    echo "no HADOOP_CONF_DIR or HADOOP_HOME set, running locally"
+  elif [ "$MAHOUT_LOCAL" != "" ] ; then 
+    echo "MAHOUT_LOCAL is set, running locally"
+  fi
   exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
 else
   echo "running on hadoop, using HADOOP_HOME=$HADOOP_HOME and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+  if [ "$MAHOUT_JOB" = "" ] ; then
+    echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
+    exit 1
+  else
   export HADOOP_CLASSPATH=$MAHOUT_CONF_DIR:${HADOOP_CLASSPATH}
   exec "$HADOOP_HOME/bin/hadoop" jar $MAHOUT_JOB $CLASS "$@"
+  fi 
 fi
 
