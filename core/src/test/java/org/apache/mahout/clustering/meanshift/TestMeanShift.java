@@ -69,7 +69,7 @@ public class TestMeanShift extends MahoutTestCase {
     }
     for (MeanShiftCanopy canopy : canopies) {
       int ch = 'A' + canopy.getCanopyId();
-      for (int pid : canopy.getBoundPoints().elements()) {
+      for (int pid : canopy.getBoundPoints().toList()) {
         Vector pt = raw[pid];
         out[(int) pt.getQuick(0)][(int) pt.getQuick(1)] = (char) ch;
       }
@@ -136,6 +136,18 @@ public class TestMeanShift extends MahoutTestCase {
     }
     assertTrue(true);
   }
+  
+  /**
+   * Test the MeanShiftCanopyClusterer's reference implementation. Should produce the same final output as above.
+   */
+  public void testClustererReferenceImplementation() {
+    List<Vector> points = new ArrayList<Vector>();
+    for (Vector v: raw)
+      points.add(v);
+    List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.5, 4, 1, 10);
+    printCanopies(canopies);
+    printImage(canopies);
+  }
 
   /**
    * Story: User can produce initial canopy centers using a EuclideanDistanceMeasure and a
@@ -193,7 +205,7 @@ public class TestMeanShift extends MahoutTestCase {
       MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "V-" : "C-") + ref.getCanopyId());
       assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId());
       assertEquals("centers(" + ref.getIdentifier() + ')', ref.getCenter().asFormatString(), canopy.getCenter().asFormatString());
-      assertEquals("bound points", ref.getBoundPoints().size(), canopy.getBoundPoints().size());
+      assertEquals("bound points", ref.getBoundPoints().toList().size(), canopy.getBoundPoints().toList().size());
     }
   }
 
@@ -278,7 +290,7 @@ public class TestMeanShift extends MahoutTestCase {
       String refCenter = refCanopy.getCenter().asFormatString();
       String reducerCenter = reducerCanopy.getCenter().asFormatString();
       assertEquals("centers(" + mapEntry.getKey() + ')', refCenter, reducerCenter);
-      assertEquals("bound points", refCanopy.getBoundPoints().size(), reducerCanopy.getBoundPoints().size());
+      assertEquals("bound points", refCanopy.getBoundPoints().toList().size(), reducerCanopy.getBoundPoints().toList().size());
     }
   }
 

@@ -41,11 +41,12 @@ final class DisplayMeanShift extends DisplayDirichlet {
   private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
   private static double t1;
+
   private static double t2;
 
   private DisplayMeanShift() {
     initialize();
-    this.setTitle("Canopy Clusters (> 1.5% of population)");
+    this.setTitle("MeanShiftCanopy Clusters (> 1.5% of population)");
   }
 
   @Override
@@ -72,11 +73,17 @@ final class DisplayMeanShift extends DisplayDirichlet {
     for (MeanShiftCanopy canopy : canopies) {
       if (canopy.getBoundPoints().toList().size() > 0.015 * DisplayDirichlet.SAMPLE_DATA.size()) {
         g2.setColor(COLORS[Math.min(i++, DisplayDirichlet.COLORS.length - 1)]);
-        for (int v : canopy.getBoundPoints().elements()) {
-          DisplayDirichlet.plotRectangle(g2, SAMPLE_DATA.get(v).get(), dv);
+        int count = 0;
+        Vector center = new DenseVector(2);
+        for (int vix : canopy.getBoundPoints().toList()) {
+          Vector v = SAMPLE_DATA.get(vix).get();
+          count++;
+          v.addTo(center);
+          DisplayDirichlet.plotRectangle(g2, v, dv);
         }
-        DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv1);
-        DisplayDirichlet.plotEllipse(g2, canopy.getCenter(), dv2);
+        center = center.divide(count);
+        DisplayDirichlet.plotEllipse(g2, center, dv1);
+        DisplayDirichlet.plotEllipse(g2, center, dv2);
       }
     }
   }

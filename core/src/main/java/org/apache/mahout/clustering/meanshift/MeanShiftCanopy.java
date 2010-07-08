@@ -150,13 +150,6 @@ public class MeanShiftCanopy extends ClusterBase {
     return (converged ? "V-" : "C-") + getId();
   }
   
-  void init(MeanShiftCanopy canopy) {
-    setId(canopy.getId());
-    setCenter(canopy.getCenter());
-    addPoints(getCenter(), 1);
-    boundPoints.addAllOf(canopy.getBoundPoints());
-  }
-  
   public boolean isConverged() {
     return converged;
   }
