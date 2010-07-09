@@ -23,7 +23,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
+import org.apache.mahout.clustering.dirichlet.DisplayClustering;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -31,7 +31,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-class DisplayFuzzyKMeans extends DisplayDirichlet {
+class DisplayFuzzyKMeans extends DisplayClustering {
 
   private static List<List<SoftCluster>> clusters;
   
@@ -48,11 +48,11 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
     int i = DisplayFuzzyKMeans.clusters.size() - 1;
     for (List<SoftCluster> cls : clusters) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(COLORS[Math.min(DisplayDirichlet.COLORS.length - 1, i--)]);
+      g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, i--)]);
       for (SoftCluster cluster : cls) {
         // if (true || cluster.getWeightedPointTotal().zSum() > sampleData.size() * 0.05) {
         dv.assign(Math.max(cluster.std(), 0.3) * 3);
-        DisplayDirichlet.plotEllipse(g2, cluster.getCenter(), dv);
+        DisplayClustering.plotEllipse(g2, cluster.getCenter(), dv);
         // }
       }
     }
@@ -60,7 +60,7 @@ class DisplayFuzzyKMeans extends DisplayDirichlet {
   
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
-    DisplayDirichlet.generateSamples();
+    DisplayClustering.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : SAMPLE_DATA) {
       points.add((Vector) sample.get());

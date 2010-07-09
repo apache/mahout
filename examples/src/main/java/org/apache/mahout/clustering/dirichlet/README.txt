@@ -15,13 +15,12 @@ DisplayDirichlet - generates 1000 samples from three, symmetric distributions. T
     colored (orange, yellow, green, blue, magenta) in order after which all earlier clusters are in
     light grey. This helps to visualize how the clusters converge upon a solution over multiple
     iterations.
-  * NOTE: by changing the UncommonDistributions.init(...) call in DisplayDirichlet, you can get
-    different behaviors. Removing the initialization altogether will use a random seed for each run.
+  * NOTE: by changing the parameter values (k, ALPHA_0, numIterations) and the display SIGNIFICANCE
+    you can obtain different results.
     
 DisplayOutputState - this program can be run after any of the SampledNormalDistribution M/R Dirichlet test 
   cases in TestMapReduce. It draws the points and the resulting clusters from the output directory in 
-  a manner similar to the above. By changing the initialization seed in TestMapReduce you can get 
-  different data points.
+  a manner similar to the above. 
 DisplayASNOutputState - similar to above but uses the AsymmetricSampledNormalDistribution.
 
   

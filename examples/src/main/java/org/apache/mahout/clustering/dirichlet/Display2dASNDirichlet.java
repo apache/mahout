@@ -29,7 +29,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-class Display2dASNDirichlet extends DisplayDirichlet {
+class Display2dASNDirichlet extends DisplayClustering {
   Display2dASNDirichlet() {
     initialize();
     this.setTitle("Dirichlet Process Clusters - 2-d Asymmetric Sampled Normal Distribution (>"
@@ -42,15 +42,15 @@ class Display2dASNDirichlet extends DisplayDirichlet {
     Graphics2D g2 = (Graphics2D) g;
     
     Vector dv = new DenseVector(2);
-    int i = DisplayDirichlet.result.size() - 1;
+    int i = DisplayClustering.result.size() - 1;
     for (Model<VectorWritable>[] models : result) {
       g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(COLORS[Math.min(DisplayDirichlet.COLORS.length - 1, i--)]);
+      g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, i--)]);
       for (Model<VectorWritable> m : models) {
         AsymmetricSampledNormalModel mm = (AsymmetricSampledNormalModel) m;
         dv.assign(mm.getStdDev().times(3));
-        if (DisplayDirichlet.isSignificant(mm)) {
-          DisplayDirichlet.plotEllipse(g2, mm.getMean(), dv);
+        if (DisplayClustering.isSignificant(mm)) {
+          DisplayClustering.plotEllipse(g2, mm.getMean(), dv);
         }
       }
     }
@@ -58,14 +58,15 @@ class Display2dASNDirichlet extends DisplayDirichlet {
   
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
-    k = 10;
-    DisplayDirichlet.generate2dSamples();
+    k = 20;
+    numIterations = 20;
+    DisplayClustering.generate2dSamples();
     generateResults();
     new Display2dASNDirichlet();
   }
   
   private static void generateResults() {
-    DisplayDirichlet.generateResults(new AsymmetricSampledNormalDistribution(new VectorWritable(
+    DisplayClustering.generateResults(new AsymmetricSampledNormalDistribution(new VectorWritable(
         new DenseVector(2))));
   }
 }

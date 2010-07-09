@@ -24,7 +24,7 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.clustering.dirichlet.DisplayDirichlet;
+import org.apache.mahout.clustering.dirichlet.DisplayClustering;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -34,7 +34,7 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class DisplayMeanShift extends DisplayDirichlet {
+final class DisplayMeanShift extends DisplayClustering {
 
   private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);
 
@@ -60,37 +60,37 @@ final class DisplayMeanShift extends DisplayDirichlet {
     Vector dv = new DenseVector(2).assign(SIZE / 2.0);
     Vector dv1 = new DenseVector(2).assign(t1);
     Vector dv2 = new DenseVector(2).assign(t2);
-    DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(2), dv);
-    DisplayDirichlet.plotRectangle(g2, new DenseVector(2).assign(-2), dv);
+    DisplayClustering.plotRectangle(g2, new DenseVector(2).assign(2), dv);
+    DisplayClustering.plotRectangle(g2, new DenseVector(2).assign(-2), dv);
 
     // plot the sample data
     g2.setColor(Color.DARK_GRAY);
     dv.assign(0.03);
     for (VectorWritable v : SAMPLE_DATA) {
-      DisplayDirichlet.plotRectangle(g2, v.get(), dv);
+      DisplayClustering.plotRectangle(g2, v.get(), dv);
     }
     int i = 0;
     for (MeanShiftCanopy canopy : canopies) {
-      if (canopy.getBoundPoints().toList().size() > 0.015 * DisplayDirichlet.SAMPLE_DATA.size()) {
-        g2.setColor(COLORS[Math.min(i++, DisplayDirichlet.COLORS.length - 1)]);
+      if (canopy.getBoundPoints().toList().size() > 0.015 * DisplayClustering.SAMPLE_DATA.size()) {
+        g2.setColor(COLORS[Math.min(i++, DisplayClustering.COLORS.length - 1)]);
         int count = 0;
         Vector center = new DenseVector(2);
         for (int vix : canopy.getBoundPoints().toList()) {
           Vector v = SAMPLE_DATA.get(vix).get();
           count++;
           v.addTo(center);
-          DisplayDirichlet.plotRectangle(g2, v, dv);
+          DisplayClustering.plotRectangle(g2, v, dv);
         }
         center = center.divide(count);
-        DisplayDirichlet.plotEllipse(g2, center, dv1);
-        DisplayDirichlet.plotEllipse(g2, center, dv2);
+        DisplayClustering.plotEllipse(g2, center, dv1);
+        DisplayClustering.plotEllipse(g2, center, dv2);
       }
     }
   }
 
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
-    DisplayDirichlet.generateSamples();
+    DisplayClustering.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : SAMPLE_DATA) {
       points.add(sample.get());
@@ -105,6 +105,6 @@ final class DisplayMeanShift extends DisplayDirichlet {
   }
 
   static void generateResults() {
-    DisplayDirichlet.generateResults(new NormalModelDistribution());
+    DisplayClustering.generateResults(new NormalModelDistribution());
   }
 }
