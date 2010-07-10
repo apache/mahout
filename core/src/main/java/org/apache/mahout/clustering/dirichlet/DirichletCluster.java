@@ -128,4 +128,9 @@ public class DirichletCluster<O> implements Writable, Cluster {
     return model.getNumPoints();
   }
 
+  @Override
+  public Vector getRadius() {
+    return model.getRadius();
+  }
+
 }

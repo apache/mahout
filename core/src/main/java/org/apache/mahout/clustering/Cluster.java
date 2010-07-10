@@ -46,6 +46,14 @@ public interface Cluster {
    * @return a Vector
    */
   Vector getCenter();
+  
+  /**
+   * Get the "radius" of the Cluster as a Vector. Usually the radius is the standard deviation expressed
+   * as a Vector of size equal to the center. Some clusters may return zero values if not appropriate.
+   * 
+   * @return aVector
+   */
+  Vector getRadius();
 
   /**
    * Get an integer denoting the number of points observed by this cluster

@@ -135,4 +135,9 @@ public class L1Model implements Model<VectorWritable> {
     return counter;
   }
 
+  @Override
+  public Vector getRadius() {
+    return null;
+  }
+
 }

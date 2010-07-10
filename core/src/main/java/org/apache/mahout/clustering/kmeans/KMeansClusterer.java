@@ -118,10 +118,8 @@ public class KMeansClusterer {
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration < maxIter) {
-      //System.out.println("iteration: " + iteration);
       List<Cluster> next = new ArrayList<Cluster>();
-      List<Cluster> cs = clustersList.get(iteration++);
-      for (Cluster c : cs) {
+      for (Cluster c : clustersList.get(iteration++)) {
         next.add(new Cluster(c.getCenter()));
       }
       clustersList.add(next);

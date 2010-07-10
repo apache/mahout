@@ -247,5 +247,10 @@ public class MeanShiftCanopy extends ClusterBase {
     Gson gson = gBuilder.create();
     return gson.fromJson(formattedString, MeanShiftCanopy.class);
   }
+
+  @Override
+  public Vector getRadius() {
+    return getCenter().like();
+  }
   
 }

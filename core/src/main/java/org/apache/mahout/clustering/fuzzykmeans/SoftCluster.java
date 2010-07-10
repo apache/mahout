@@ -240,6 +240,8 @@ public class SoftCluster extends ClusterBase {
   /** Compute the centroid and set the center to it. */
   public void recomputeCenter() {
     this.setCenter(computeCentroid());
+    // set a reasonable value, for consistency with other Clusters
+    setNumPoints((int) weightedPointTotal.zSum());
     pointProbSum = 0;
     weightedPointTotal = getCenter().like();
   }
@@ -259,6 +261,11 @@ public class SoftCluster extends ClusterBase {
   @Override
   public String asFormatString() {
     return formatCluster(this);
+  }
+
+  @Override
+  public Vector getRadius() {
+    return getCenter().like().assign(std());
   }
 
 }

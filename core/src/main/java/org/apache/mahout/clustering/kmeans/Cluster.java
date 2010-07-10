@@ -209,9 +209,6 @@ public class Cluster extends ClusterBase {
     std = getStd();
     setCenter(computeCentroid());
     centroid = null;
-    setNumPoints(0);
-    this.setPointTotal(getCenter().like());
-    this.pointSquaredTotal = getCenter().like();
   }
   
   /**
@@ -247,4 +244,9 @@ public class Cluster extends ClusterBase {
     return stds.zSum() / stds.size();
   }
   
+  @Override
+  public Vector getRadius() {
+    return getCenter().like().assign(getStd());
+  }
+
 }

@@ -127,4 +127,9 @@ public class Canopy extends ClusterBase {
   public Vector computeCentroid() {
     return getPointTotal().divide(getNumPoints());
   }
+
+  @Override
+  public Vector getRadius() {
+    return getCenter().like();
+  }
 }

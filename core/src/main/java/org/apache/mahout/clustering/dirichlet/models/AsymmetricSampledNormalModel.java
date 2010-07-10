@@ -209,4 +209,9 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
   public int getNumPoints() {
     return s0;
   }
+
+  @Override
+  public Vector getRadius() {
+    return getStdDev();
+  }
 }
