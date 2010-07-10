@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.meanshift;
+package org.apache.mahout.clustering.display;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -24,8 +24,8 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.clustering.dirichlet.DisplayClustering;
-import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopyClusterer;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -46,7 +46,7 @@ final class DisplayMeanShift extends DisplayClustering {
 
   private DisplayMeanShift() {
     initialize();
-    this.setTitle("MeanShiftCanopy Clusters (> 1.5% of population)");
+    this.setTitle("k-Means Clusters (>" + (int) (SIGNIFICANCE * 100) + "% of population)");
   }
 
   @Override
@@ -71,7 +71,7 @@ final class DisplayMeanShift extends DisplayClustering {
     }
     int i = 0;
     for (MeanShiftCanopy canopy : canopies) {
-      if (canopy.getBoundPoints().toList().size() > 0.015 * DisplayClustering.SAMPLE_DATA.size()) {
+      if (canopy.getBoundPoints().toList().size() >= SIGNIFICANCE * DisplayClustering.SAMPLE_DATA.size()) {
         g2.setColor(COLORS[Math.min(i++, DisplayClustering.COLORS.length - 1)]);
         int count = 0;
         Vector center = new DenseVector(2);
@@ -89,22 +89,20 @@ final class DisplayMeanShift extends DisplayClustering {
   }
 
   public static void main(String[] args) {
+    t1 = 1.5;
+    t2 = 0.1;
+    SIGNIFICANCE = 0.02;
+
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : SAMPLE_DATA) {
       points.add(sample.get());
     }
-    t1 = 1.5;
-    t2 = 0.5;
     canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.005, t1, t2, 20);
     for (MeanShiftCanopy canopy : canopies) {
       log.info(canopy.toString());
     }
     new DisplayMeanShift();
-  }
-
-  static void generateResults() {
-    DisplayClustering.generateResults(new NormalModelDistribution());
   }
 }

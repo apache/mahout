@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.dirichlet;
+package org.apache.mahout.clustering.display;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
@@ -30,8 +31,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.clustering.dirichlet.models.Model;
-import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -43,31 +44,26 @@ public class DisplayClustering extends Frame {
 
   private static final Logger log = LoggerFactory.getLogger(DisplayClustering.class);
 
-  private static final List<Vector> SAMPLE_PARAMS = new ArrayList<Vector>();
-
   protected static final int DS = 72; // default scale = 72 pixels per inch
 
   protected static final int SIZE = 8; // screen size in inches
 
+  private static final List<Vector> SAMPLE_PARAMS = new ArrayList<Vector>();
+
   protected static final List<VectorWritable> SAMPLE_DATA = new ArrayList<VectorWritable>();
+
+  protected static final List<List<Cluster>> CLUSTERS = new ArrayList<List<Cluster>>();
 
   protected static double SIGNIFICANCE = 0.05;
 
   protected static final Color[] COLORS = { Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
       Color.lightGray };
 
-  protected static List<Model<VectorWritable>[]> result;
-
-  protected int res; // screen resolution
-
-  protected static double ALPHA_0 = 1.0;
-
-  protected static int k = 12;
-
-  protected static int numIterations = 20;
+  protected static int res; // screen resolution
 
   public DisplayClustering() {
     initialize();
+    this.setTitle("Sample Data");
   }
 
   public void initialize() {
@@ -90,7 +86,7 @@ public class DisplayClustering extends Frame {
 
   public static void main(String[] args) throws Exception {
     RandomUtils.useTestSeed();
-    generate2dSamples();
+    generateSamples();
     new DisplayClustering();
   }
 
@@ -98,13 +94,27 @@ public class DisplayClustering extends Frame {
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    plotSampleData(g);
+    plotSampleData(g2);
+    plotSampleParameters(g2);
+    plotClusters(g2);
+  }
+
+  protected void plotClusters(Graphics2D g2) {
+    int cx = CLUSTERS.size() - 1;
+    for (List<Cluster> clusters : CLUSTERS) {
+      g2.setStroke(new BasicStroke(cx == 0 ? 3 : 1));
+      g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, cx--)]);
+      for (Cluster cluster : clusters) {
+        plotEllipse(g2, cluster.getCenter(), cluster.getRadius().times(3));
+      }
+    }
+  }
+
+  protected void plotSampleParameters(Graphics2D g2) {
     Vector v = new DenseVector(2);
     Vector dv = new DenseVector(2);
     g2.setColor(Color.RED);
-    int i = 0;
     for (Vector param : SAMPLE_PARAMS) {
-      i++;
       v.set(0, param.get(0));
       v.set(1, param.get(1));
       dv.set(0, param.get(2) * 3);
@@ -113,8 +123,7 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  public void plotSampleData(Graphics g) {
-    Graphics2D g2 = (Graphics2D) g;
+  protected void plotSampleData(Graphics2D g2) {
     double sx = (double) res / DS;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
 
@@ -142,7 +151,7 @@ public class DisplayClustering extends Frame {
    * @param dv
    *          a Vector of rectangle dimensions
    */
-  public static void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
+  protected static void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = { 1, -1 };
     Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
@@ -162,7 +171,7 @@ public class DisplayClustering extends Frame {
    * @param dv
    *          a Vector of ellipse dimensions
    */
-  public static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
+  protected static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
     double[] flip = { 1, -1 };
     Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
@@ -172,30 +181,13 @@ public class DisplayClustering extends Frame {
     g2.draw(new Ellipse2D.Double(x * DS, y * DS, dv.get(0) * DS, dv.get(1) * DS));
   }
 
-  private static void printModels(List<Model<VectorWritable>[]> results, int significant) {
-    int row = 0;
-    StringBuilder models = new StringBuilder();
-    for (Model<VectorWritable>[] r : results) {
-      models.append("sample[").append(row++).append("]= ");
-      for (int k = 0; k < r.length; k++) {
-        Model<VectorWritable> model = r[k];
-        if (model.count() > significant) {
-          models.append('m').append(k).append(model).append(", ");
-        }
-      }
-      models.append('\n');
-    }
-    models.append('\n');
-    log.info(models.toString());
-  }
-
-  public static void generateSamples() {
+  protected static void generateSamples() {
     generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);
   }
 
-  public static void generate2dSamples() {
+  protected static void generate2dSamples() {
     generate2dSamples(500, 1, 1, 3, 1);
     generate2dSamples(300, 1, 0, 0.5, 1);
     generate2dSamples(300, 0, 2, 0.1, 0.5);
@@ -213,7 +205,7 @@ public class DisplayClustering extends Frame {
    * @param sd
    *          double standard deviation of the samples
    */
-  private static void generateSamples(int num, double mx, double my, double sd) {
+  protected static void generateSamples(int num, double mx, double my, double sd) {
     double[] params = { mx, my, sd, sd };
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] { num, mx, my, sd });
@@ -237,7 +229,7 @@ public class DisplayClustering extends Frame {
    * @param sdy
    *          double y-value standard deviation of the samples
    */
-  private static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
+  protected static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
     double[] params = { mx, my, sdx, sdy };
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] { num, mx, my, sdx, sdy });
@@ -247,14 +239,8 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  public static void generateResults(ModelDistribution<VectorWritable> modelDist) {
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(SAMPLE_DATA, modelDist, ALPHA_0, k, 2, 2);
-    result = dc.cluster(numIterations);
-    printModels(result, 5);
-  }
-
-  public static boolean isSignificant(Model<VectorWritable> model) {
-    return (double) model.count() / SAMPLE_DATA.size() > SIGNIFICANCE;
+  protected static boolean isSignificant(Cluster cluster) {
+    return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > SIGNIFICANCE;
   }
 
 }

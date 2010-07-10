@@ -15,69 +15,73 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.fuzzykmeans;
+package org.apache.mahout.clustering.display;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.clustering.dirichlet.DisplayClustering;
+import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansClusterer;
+import org.apache.mahout.clustering.fuzzykmeans.SoftCluster;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayFuzzyKMeans extends DisplayClustering {
 
-  private static List<List<SoftCluster>> clusters;
-  
   DisplayFuzzyKMeans() {
     initialize();
-    this.setTitle("Fuzzy K-Means Clusters (> 5% of population)");
+    this.setTitle("Fuzzy k-Means Clusters (>" + (int) (SIGNIFICANCE * 100) + "% of population)");
   }
-  
+
+  // Override the paint() method
   @Override
   public void paint(Graphics g) {
-    plotSampleData(g);
-    Graphics2D g2 = (Graphics2D) g;
-    Vector dv = new DenseVector(2);
-    int i = DisplayFuzzyKMeans.clusters.size() - 1;
-    for (List<SoftCluster> cls : clusters) {
-      g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, i--)]);
-      for (SoftCluster cluster : cls) {
-        // if (true || cluster.getWeightedPointTotal().zSum() > sampleData.size() * 0.05) {
-        dv.assign(Math.max(cluster.std(), 0.3) * 3);
-        DisplayClustering.plotEllipse(g2, cluster.getCenter(), dv);
-        // }
-      }
-    }
+    plotSampleData((Graphics2D) g);
+    plotClusters((Graphics2D) g);
   }
-  
+
   public static void main(String[] args) {
+    DistanceMeasure measure = new ManhattanDistanceMeasure();
+    double threshold = 0.001;
+    int numClusters = 3;
+    int numIterations = 10;
+    int m = 3;
+    
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : SAMPLE_DATA) {
       points.add((Vector) sample.get());
     }
-    DistanceMeasure measure = new ManhattanDistanceMeasure();
+    int id = 0;
     List<SoftCluster> initialClusters = new ArrayList<SoftCluster>();
-    
-    k = 3;
-    int i = 0;
     for (Vector point : points) {
-      if (initialClusters.size() < Math.min(k, points.size())) {
-        initialClusters.add(new SoftCluster(point, i++));
+      if (initialClusters.size() < Math.min(numClusters, points.size())) {
+        initialClusters.add(new SoftCluster(point, id++));
       } else {
         break;
       }
     }
-    clusters = FuzzyKMeansClusterer.clusterPoints(points, initialClusters, measure, 0.001, 3, 10);
+    List<List<SoftCluster>> results = FuzzyKMeansClusterer.clusterPoints(points,
+                                                                         initialClusters,
+                                                                         measure,
+                                                                         threshold,
+                                                                         m,
+                                                                         numIterations);
+    for (List<SoftCluster> models : results) {
+      List<org.apache.mahout.clustering.Cluster> clusters = new ArrayList<org.apache.mahout.clustering.Cluster>();
+      for (SoftCluster cluster : models) {
+        org.apache.mahout.clustering.Cluster cluster2 = (org.apache.mahout.clustering.Cluster) cluster;
+        if (isSignificant(cluster2)) {
+          clusters.add(cluster2);
+        }
+      }
+      CLUSTERS.add(clusters);
+    }
     new DisplayFuzzyKMeans();
   }
 }

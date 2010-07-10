@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.canopy;
+package org.apache.mahout.clustering.display;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics;
@@ -23,8 +23,8 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.clustering.dirichlet.DisplayClustering;
-import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
+import org.apache.mahout.clustering.canopy.Canopy;
+import org.apache.mahout.clustering.canopy.CanopyClusterer;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -48,8 +48,8 @@ class DisplayCanopy extends DisplayClustering {
 
   @Override
   public void paint(Graphics g) {
-    super.plotSampleData(g);
     Graphics2D g2 = (Graphics2D) g;
+    plotSampleData(g2);
     Vector dv = new DenseVector(2);
     for (Canopy canopy : canopies) {
       if (canopy.getNumPoints() > DisplayClustering.SAMPLE_DATA.size() * SIGNIFICANCE) {
@@ -68,7 +68,6 @@ class DisplayCanopy extends DisplayClustering {
 
   public static void main(String[] args) {
     RandomUtils.useTestSeed();
-    SIGNIFICANCE = 0.1;
     DisplayClustering.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : SAMPLE_DATA) {
@@ -77,9 +76,5 @@ class DisplayCanopy extends DisplayClustering {
     canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), T1, T2);
     CanopyClusterer.updateCentroids(canopies);
     new DisplayCanopy();
-  }
-
-  static void generateResults() {
-    DisplayClustering.generateResults(new NormalModelDistribution());
   }
 }

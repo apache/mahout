@@ -15,70 +15,71 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.kmeans;
+package org.apache.mahout.clustering.display;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mahout.clustering.dirichlet.DisplayClustering;
+import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.clustering.kmeans.KMeansClusterer;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayKMeans extends DisplayClustering {
 
-  private static List<List<Cluster>> clusters;
+  static List<List<Cluster>> result;
 
   DisplayKMeans() {
     initialize();
-    this.setTitle("K-Means Clusters (> 5% of population)");
-  }
-
-  @Override
-  public void paint(Graphics g) {
-    super.plotSampleData(g);
-    Graphics2D g2 = (Graphics2D) g;
-    Vector dv = new DenseVector(2);
-    int i = DisplayKMeans.clusters.size() - 1;
-    for (List<Cluster> cls : clusters) {
-      g2.setStroke(new BasicStroke(i == 0 ? 3 : 1));
-      g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, i--)]);
-      for (Cluster cluster : cls) {
-        // if (true || cluster.getNumPoints() > sampleData.size() * 0.05) {
-        dv.assign(cluster.getStd() * 3);
-        System.out.println(cluster.getCenter().asFormatString() + ' ' + dv.asFormatString());
-        DisplayClustering.plotEllipse(g2, cluster.getCenter(), dv);
-        // }
-      }
-    }
+    this.setTitle("k-Means Clusters (>" + (int) (SIGNIFICANCE * 100) + "% of population)");
   }
 
   public static void main(String[] args) {
+    DistanceMeasure measure = new ManhattanDistanceMeasure();
+    int numClusters = 3;
+    int maxIter = 10;
+    double distanceThreshold = 0.001;
+    
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     List<Vector> points = new ArrayList<Vector>();
     for (VectorWritable sample : SAMPLE_DATA) {
       points.add(sample.get());
     }
-    DistanceMeasure measure = new ManhattanDistanceMeasure();
     List<Cluster> initialClusters = new ArrayList<Cluster>();
-    k = 3;
-    int i = 0;
+    int id = 0;
     for (Vector point : points) {
-      if (initialClusters.size() < Math.min(k, points.size())) {
-        initialClusters.add(new Cluster(point, i++));
+      if (initialClusters.size() < Math.min(numClusters, points.size())) {
+        initialClusters.add(new Cluster(point, id++));
       } else {
         break;
       }
     }
-    clusters = KMeansClusterer.clusterPoints(points, initialClusters, measure, 10, 0.001);
-    System.out.println(clusters.size());
+    result = KMeansClusterer.clusterPoints(points, initialClusters, measure, maxIter, distanceThreshold);
+    for (List<Cluster> models : result) {
+      List<org.apache.mahout.clustering.Cluster> clusters = new ArrayList<org.apache.mahout.clustering.Cluster>();
+      for (Cluster cluster : models) {
+        org.apache.mahout.clustering.Cluster cluster2 = (org.apache.mahout.clustering.Cluster) cluster;
+        if (isSignificant(cluster2)) {
+          clusters.add(cluster2);
+        }
+      }
+      CLUSTERS.add(clusters);
+    }
+
+    System.out.println(result.size());
     new DisplayKMeans();
+  }
+
+  // Override the paint() method
+  @Override
+  public void paint(Graphics g) {
+    plotSampleData((Graphics2D) g);
+    plotClusters((Graphics2D) g);
   }
 }
