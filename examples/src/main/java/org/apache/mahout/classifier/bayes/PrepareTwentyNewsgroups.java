@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -29,6 +29,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.util.Version;
 import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -84,7 +85,12 @@ public final class PrepareTwentyNewsgroups {
       File outputDir = new File((String) cmdLine.getValue(outputDirOpt));
       String analyzerName = (String) cmdLine.getValue(analyzerNameOpt);
       Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
-      Analyzer analyzer = (Analyzer) Class.forName(analyzerName).newInstance();
+      Analyzer analyzer;
+      try {
+        analyzer = (Analyzer) Class.forName(analyzerName).newInstance();
+      } catch (InstantiationException e) {
+        analyzer = (Analyzer) Class.forName(analyzerName).getConstructor(Version.class).newInstance(Version.LUCENE_30);
+      }
       // parent dir contains dir by category
       File[] categoryDirs = parentDir.listFiles();
       for (File dir : categoryDirs) {
