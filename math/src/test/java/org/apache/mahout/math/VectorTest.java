@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,13 +25,13 @@ import java.util.Iterator;
 
 public class VectorTest extends MahoutTestCase {
 
-  public void testSparseVector() throws Exception {
+  public void testSparseVector()  {
     Vector vec1 = new RandomAccessSparseVector(3);
     Vector vec2 = new RandomAccessSparseVector(3);
     doTestVectors(vec1, vec2);
   }
 
-  public void testEquivalent() throws Exception {
+  public void testEquivalent()  {
     //names are not used for equivalent
     RandomAccessSparseVector randomAccessLeft = new RandomAccessSparseVector(3);
     Vector sequentialAccessLeft = new SequentialAccessSparseVector(3);
@@ -121,7 +121,7 @@ public class VectorTest extends MahoutTestCase {
     assertEquals(vec, left);
   }
 
-  public void testGetDistanceSquared() throws Exception {
+  public void testGetDistanceSquared()  {
     Vector v = new DenseVector(5);
     Vector w = new DenseVector(5);
     setUpV(v);
@@ -161,7 +161,7 @@ public class VectorTest extends MahoutTestCase {
     assertEquals(expected, v.getDistanceSquared(w), 1.0e-6);
   }
 
-  public void testGetLengthSquared() throws Exception {
+  public void testGetLengthSquared()  {
     Vector v = new DenseVector(5);
     setUpV(v);
     doTestGetLengthSquared(v);
@@ -312,7 +312,7 @@ public class VectorTest extends MahoutTestCase {
     assertTrue(expectedIndices.isEmpty());
   }
 
-  public void testNormalize() throws Exception {
+  public void testNormalize()  {
     Vector vec1 = new RandomAccessSparseVector(3);
 
     vec1.setQuick(0, 1);
@@ -395,7 +395,7 @@ public class VectorTest extends MahoutTestCase {
     }
   }
 
-  public void testMax() throws Exception {
+  public void testMax()  {
     Vector vec1 = new RandomAccessSparseVector(3);
 
     vec1.setQuick(0, -1);
@@ -467,13 +467,85 @@ public class VectorTest extends MahoutTestCase {
 
   }
 
-  public void testDenseVector() throws Exception {
+  public void testMin()  {
+    Vector vec1 = new RandomAccessSparseVector(3);
+
+    vec1.setQuick(0, 1);
+    vec1.setQuick(1, 3);
+    vec1.setQuick(2, 2);
+
+    double max = vec1.minValue();
+    assertEquals(max + " does not equal: " + (1.0), 1.0, max, 0.0);
+
+    int idx = vec1.maxValueIndex();
+    assertEquals(idx + " does not equal: " + 1, 1, idx);
+
+    vec1 = new RandomAccessSparseVector(3);
+
+    vec1.setQuick(0, -1);
+    vec1.setQuick(2, -2);
+
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+
+    idx = vec1.maxValueIndex();
+    assertEquals(idx + " does not equal: " + 1, 1, idx);
+
+    vec1 = new SequentialAccessSparseVector(3);
+
+    vec1.setQuick(0, -1);
+    vec1.setQuick(2, -2);
+
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+
+    idx = vec1.maxValueIndex();
+    assertEquals(idx + " does not equal: " + 1, 1, idx);
+
+    vec1 = new DenseVector(3);
+
+    vec1.setQuick(0, -1);
+    vec1.setQuick(2, -2);
+
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal: " + 0, 0.0, max, 0.0);
+
+    idx = vec1.maxValueIndex();
+    assertEquals(idx + " does not equal: " + 1, 1, idx);
+
+    vec1 = new RandomAccessSparseVector(3);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal 0", 0.0, max);
+
+    vec1 = new DenseVector(3);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal 0", 0.0, max);
+
+    vec1 = new SequentialAccessSparseVector(3);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal 0", 0.0, max);
+
+    vec1 = new RandomAccessSparseVector(0);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+
+    vec1 = new DenseVector(0);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+
+    vec1 = new SequentialAccessSparseVector(0);
+    max = vec1.maxValue();
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+
+  }
+
+  public void testDenseVector()  {
     Vector vec1 = new DenseVector(3);
     Vector vec2 = new DenseVector(3);
     doTestVectors(vec1, vec2);
   }
 
-  public void testVectorView() throws Exception {
+  public void testVectorView()  {
     RandomAccessSparseVector vec1 = new RandomAccessSparseVector(3);
     RandomAccessSparseVector vec2 = new RandomAccessSparseVector(6);
     SequentialAccessSparseVector vec3 = new SequentialAccessSparseVector(3);
@@ -500,7 +572,7 @@ public class VectorTest extends MahoutTestCase {
     }
   }
 
-  public void testEnumeration() throws Exception {
+  public void testEnumeration()  {
     double[] apriori = {0, 1, 2, 3, 4};
 
     doTestEnumeration(apriori, new VectorView(new DenseVector(new double[]{
@@ -526,7 +598,7 @@ public class VectorTest extends MahoutTestCase {
 
   }
 
-  public void testAggregation() throws Exception {
+  public void testAggregation()  {
     Vector v = new DenseVector(5);
     Vector w = new DenseVector(5);
     setUpFirstVector(v);
@@ -578,7 +650,7 @@ public class VectorTest extends MahoutTestCase {
     v.setQuick(3, 2);
   }
 
-  public void testNameSerialization() throws Exception {
+  public void testNameSerialization()  {
     double[] values = {1.1, 2.2, 3.3};
     Vector test = new DenseVector(values);
     String formatString = test.asFormatString();

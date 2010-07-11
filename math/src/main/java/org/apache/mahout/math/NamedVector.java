@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -161,6 +161,14 @@ public class NamedVector implements Vector {
 
   public int maxValueIndex() {
     return delegate.maxValueIndex();
+  }
+
+  public double minValue() {
+    return delegate.minValue();
+  }
+
+  public int minValueIndex() {
+    return delegate.minValueIndex();
   }
 
   public Vector plus(double x) {

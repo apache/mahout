@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -233,6 +233,12 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    * @see #normalize(double)
    */
   double norm(double power);
+
+  /** @return The minimum value in the Vector */
+  double minValue();
+
+  /** @return The index of the minimum value */
+  int minValueIndex();
 
   /** @return The maximum value in the Vector */
   double maxValue();

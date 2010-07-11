@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -262,8 +262,51 @@ public abstract class AbstractVector implements Vector {
       }
     }
     // if the maxElement is negative and the vector is sparse then any
-    // unfilled element(0.0) could be the maxValue hence return -1;
+    // unfilled element(0.0) could be the maxValue hence we need to
+    // find one of those elements
     if (nonZeroElements < size && max < 0.0) {
+      for (Element element : this) {
+        if (element.get() == 0.0) {
+          return element.index();
+        }
+      }
+    }
+    return result;
+  }
+
+  public double minValue() {
+    double result = Double.POSITIVE_INFINITY;
+    int nonZeroElements = 0;
+    Iterator<Element> iter = this.iterateNonZero();
+    while (iter.hasNext()) {
+      nonZeroElements++;
+      Element element = iter.next();
+      result = Math.min(result, element.get());
+    }
+    if (nonZeroElements < size) {
+      return Math.min(result, 0.0);
+    }
+    return result;
+  }
+
+  public int minValueIndex() {
+    int result = -1;
+    double min = Double.POSITIVE_INFINITY;
+    int nonZeroElements = 0;
+    Iterator<Element> iter = this.iterateNonZero();
+    while (iter.hasNext()) {
+      nonZeroElements++;
+      Element element = iter.next();
+      double tmp = element.get();
+      if (tmp < min) {
+        min = tmp;
+        result = element.index();
+      }
+    }
+    // if the maxElement is positive and the vector is sparse then any
+    // unfilled element(0.0) could be the maxValue hence we need to
+    // find one of those elements
+    if (nonZeroElements < size && min > 0.0) {
       for (Element element : this) {
         if (element.get() == 0.0) {
           return element.index();
