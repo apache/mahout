@@ -182,10 +182,10 @@ public abstract class AbstractJob extends Configured implements Tool {
     return option;
   }
   
-  /** Add the default output directory option, '-o' which takes a directory
+  /** Add the default input directory option, '-i' which takes a directory
    *  name as an argument. When {@link #parseArguments(String[])} is 
-   *  called, the outputPath will be set based upon the value for this option.
-   *  This this method is called, the output is required. 
+   *  called, the inputPath will be set based upon the value for this option.
+   *  If this method is called, the input is required.
    */
   protected void addInputOption() {
     this.inputOption = addOption(DefaultOptionCreator.inputOption().create());
@@ -194,7 +194,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   /** Add the default output directory option, '-o' which takes a directory
    *  name as an argument. When {@link #parseArguments(String[])} is 
    *  called, the outputPath will be set based upon the value for this option.
-   *  This this method is called, the output is required. 
+   *  If this method is called, the output is required. 
    */
   protected void addOutputOption() {
     this.outputOption = addOption(DefaultOptionCreator.outputOption().create());

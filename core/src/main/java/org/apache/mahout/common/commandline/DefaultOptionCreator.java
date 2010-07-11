@@ -43,7 +43,7 @@ public final class DefaultOptionCreator {
   public static DefaultOptionBuilder inputOption() {
     return new DefaultOptionBuilder().withLongName("input").withRequired(false).withShortName("i").withArgument(
         new ArgumentBuilder().withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-        "Path to job input directory. Must be a SequenceFile of VectorWritable");
+        "Path to job input directory.");
   }
 
   /**
