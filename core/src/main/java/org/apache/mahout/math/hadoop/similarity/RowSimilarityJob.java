@@ -91,7 +91,8 @@ public class RowSimilarityJob extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption("numberOfColumns", "r", "Number of columns in the input matrix");
-    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
+    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use " + 
+        "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')');
     addOption("maxSimilaritiesPerRow", "m", "Number of maximum similarities per row (default: "
               + DEFAULT_MAX_SIMILARITIES_PER_ROW + ')', String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ROW));
 
@@ -101,7 +102,15 @@ public class RowSimilarityJob extends AbstractJob {
     }
 
     int numberOfColumns = Integer.parseInt(parsedArgs.get("--numberOfColumns"));
-    String distributedSimilarityClassname = parsedArgs.get("--similarityClassname");
+    String similarityClassnameArg = parsedArgs.get("--similarityClassname");
+    String distributedSimilarityClassname;
+    try {
+      distributedSimilarityClassname =
+          SimilarityType.valueOf(similarityClassnameArg).getSimilarityImplementationClassName();
+    } catch (IllegalArgumentException iae) {
+      distributedSimilarityClassname = similarityClassnameArg;
+    }
+
     int maxSimilaritiesPerRow = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerRow"));
 
     Path inputPath = getInputPath();

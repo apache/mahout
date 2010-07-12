@@ -20,3 +20,5 @@ org.apache.mahout.classifier.bayes.TestClassifier = testclassifier : Test Bayes 
 org.apache.mahout.classifier.bayes.TrainClassifier = trainclassifier : Train Bayes Classifier
 org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver = svd : Lanczos Singular Value Decomposition
 org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob = cleansvd : Cleanup and verification of SVD output
+org.apache.mahout.math.hadoop.similarity.RowSimilarityJob = rowsimilarity : Compute the pairwise similarities of the rows of a matrix
+org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob = itemsimilarity : Compute the item-item-similarities for item-based collaborative filtering

@@ -41,7 +41,6 @@ import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
@@ -253,8 +252,8 @@ public final class ItemSimilarityTest extends TasteTestCase {
        DistributedUncenteredZeroAssumingCosineVectorSimilarity.class.getName() });
 
     File countUsersPart = new File(tmpDir, "countUsers");
-    int numberOfUsers = ItemSimilarityJob.readNumberOfUsers(new Configuration(),
-                                                            new Path(countUsersPart.getAbsolutePath()));
+    int numberOfUsers = TasteHadoopUtils.readIntFromFile(new Configuration(),
+        new Path(countUsersPart.getAbsolutePath()));
 
     assertEquals(3, numberOfUsers);
 

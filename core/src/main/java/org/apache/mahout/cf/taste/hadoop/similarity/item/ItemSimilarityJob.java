@@ -17,18 +17,12 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -47,6 +41,7 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob;
+import org.apache.mahout.math.hadoop.similarity.SimilarityType;
 
 public final class ItemSimilarityJob extends AbstractJob {
 
@@ -64,7 +59,8 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
+    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use " +
+        "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')');
     addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number " +
         "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
 
@@ -127,7 +123,7 @@ public final class ItemSimilarityJob extends AbstractJob {
       itemUserMatrix.waitForCompletion(true);
     }
 
-    int numberOfUsers = readNumberOfUsers(getConf(), countUsersPath);
+    int numberOfUsers = TasteHadoopUtils.readIntFromFile(getConf(), countUsersPath);
 
     /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
      * new DistributedRowMatrix(...).rowSimilarity(...) */
@@ -155,19 +151,5 @@ public final class ItemSimilarityJob extends AbstractJob {
     }
 
     return 0;
-  }
-
-  static int readNumberOfUsers(Configuration conf, Path outputDir) throws IOException {
-    FileSystem fs = FileSystem.get(conf);
-    Path outputFile = fs.listStatus(outputDir, TasteHadoopUtils.PARTS_FILTER)[0].getPath();
-    InputStream in = null;
-    try  {
-      in = fs.open(outputFile);
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      IOUtils.copyBytes(in, out, conf);
-      return Integer.parseInt(new String(out.toByteArray(), Charset.forName("UTF-8")).trim());
-    } finally {
-      IOUtils.closeStream(in);
-    }
   }
 }
