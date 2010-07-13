@@ -164,6 +164,18 @@ public final class WikipediaDatasetCreatorDriver {
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters can make or break a piece of code
     
+    Set<String> categories = new HashSet<String>();
+    for (String line : new FileLineIterable(new File(catFile))) {
+      categories.add(line.trim().toLowerCase(Locale.ENGLISH));
+    }
+    
+    DefaultStringifier<Set<String>> setStringifier =
+        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
+    
+    String categoriesStr = setStringifier.toString(categories);
+    
+    conf.set("wikipedia.categories", categoriesStr);
+    
     Job job = new Job(conf);
     if (log.isInfoEnabled()) {
       log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output, catFile});
@@ -180,18 +192,6 @@ public final class WikipediaDatasetCreatorDriver {
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(job, outPath);
     HadoopUtil.overwriteOutput(outPath);
-
-    Set<String> categories = new HashSet<String>();
-    for (String line : new FileLineIterable(new File(catFile))) {
-      categories.add(line.trim().toLowerCase(Locale.ENGLISH));
-    }
-    
-    DefaultStringifier<Set<String>> setStringifier =
-        new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(categories));
-    
-    String categoriesStr = setStringifier.toString(categories);
-    
-    conf.set("wikipedia.categories", categoriesStr);
     
     job.waitForCompletion(true);
   }
