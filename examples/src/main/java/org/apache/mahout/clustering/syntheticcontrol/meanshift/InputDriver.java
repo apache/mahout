@@ -82,6 +82,7 @@ public final class InputDriver {
     job.setMapperClass(org.apache.mahout.clustering.syntheticcontrol.meanshift.InputMapper.class);
     job.setReducerClass(Reducer.class);
     job.setNumReduceTasks(0);
+    job.setJarByClass(InputDriver.class);
 
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);

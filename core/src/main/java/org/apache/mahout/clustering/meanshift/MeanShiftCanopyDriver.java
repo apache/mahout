@@ -144,7 +144,7 @@ public final class MeanShiftCanopyDriver {
     job.setNumReduceTasks(1);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
-
+    job.setJarByClass(MeanShiftCanopyDriver.class);
     job.waitForCompletion(true);
   }
 
@@ -192,6 +192,7 @@ public final class MeanShiftCanopyDriver {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setNumReduceTasks(0);
+    job.setJarByClass(MeanShiftCanopyDriver.class);
 
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, output);

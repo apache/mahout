@@ -273,6 +273,7 @@ public final class FuzzyKMeansDriver {
     job.setReducerClass(FuzzyKMeansReducer.class);
     //TODO: job.setNumMapTasks(numMapTasks);
     job.setNumReduceTasks(numReduceTasks);
+    job.setJarByClass(FuzzyKMeansDriver.class);
 
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, clustersOut);
@@ -351,6 +352,8 @@ public final class FuzzyKMeansDriver {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     //TODO: job.setNumMapTasks(numMapTasks);
     job.setNumReduceTasks(0);
+    job.setJarByClass(FuzzyKMeansDriver.class);
+
     job.waitForCompletion(true);
   }
 

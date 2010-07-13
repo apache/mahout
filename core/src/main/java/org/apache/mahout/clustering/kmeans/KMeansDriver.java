@@ -259,6 +259,7 @@ public final class KMeansDriver {
 
     job.setMapperClass(KMeansClusterMapper.class);
     job.setNumReduceTasks(0);
+    job.setJarByClass(KMeansDriver.class);
 
     job.waitForCompletion(true);
   }

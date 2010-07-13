@@ -44,6 +44,13 @@ public class DisplayDirichlet extends DisplayClustering {
     this.setTitle("Dirichlet Process Clusters - Normal Distribution (>" + (int) (SIGNIFICANCE * 100) + "% of population)");
   }
 
+  // Override the paint() method
+  @Override
+  public void paint(Graphics g) {
+    plotSampleData((Graphics2D) g);
+    plotClusters((Graphics2D) g);
+  }
+
   protected static void printModels(List<Model<VectorWritable>[]> results, int significant) {
     int row = 0;
     StringBuilder models = new StringBuilder();
@@ -98,16 +105,9 @@ public class DisplayDirichlet extends DisplayClustering {
     int burnin = 5;
     
     RandomUtils.useTestSeed();
-    generate2dSamples();
+    generateSamples();
     generateResults(modelDist, numClusters, numIterations, alpha_0, thin, burnin);
     new DisplayDirichlet();
-  }
-
-  // Override the paint() method
-  @Override
-  public void paint(Graphics g) {
-    plotSampleData((Graphics2D) g);
-    plotClusters((Graphics2D) g);
   }
 
 }

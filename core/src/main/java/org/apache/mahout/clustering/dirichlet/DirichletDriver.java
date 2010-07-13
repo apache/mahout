@@ -323,6 +323,7 @@ public final class DirichletDriver {
     job.setMapperClass(DirichletMapper.class);
     job.setReducerClass(DirichletReducer.class);
     job.setNumReduceTasks(numReducers);
+    job.setJarByClass(DirichletDriver.class);
 
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, stateOut);
@@ -361,6 +362,7 @@ public final class DirichletDriver {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setNumReduceTasks(0);
+    job.setJarByClass(DirichletDriver.class);
     
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
