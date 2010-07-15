@@ -84,7 +84,6 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   private final String itemIDColumn;
   private final String preferenceColumn;
   private final String getPreferenceSQL;
-  private final String getPreferenceTimeSQL;
   private final String getUserSQL;
   private final String getAllUsersSQL;
   private final String getNumItemsSQL;
