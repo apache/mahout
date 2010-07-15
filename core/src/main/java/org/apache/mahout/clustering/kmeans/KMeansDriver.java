@@ -17,13 +17,8 @@
 package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
+import java.util.Map;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -38,73 +33,23 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class KMeansDriver {
+public class KMeansDriver extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
 
-  private KMeansDriver() {
+  protected KMeansDriver() {
   }
 
   public static void main(String[] args) throws Exception {
-    Option inputOpt = DefaultOptionCreator.inputOption().create();
-    Option clustersOpt = DefaultOptionCreator.clustersInOption().withDescription(
-        "The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected"
-            + " and written out to this path first")
-        .create();
-    Option kOpt = DefaultOptionCreator.kOption().withDescription(
-        "The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
-            + " as the Centroid and written to the clusters input path.").create();
-    Option outputOpt = DefaultOptionCreator.outputOption().create();
-    Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
-    Option measureClassOpt = DefaultOptionCreator.distanceMeasureOption().create();
-    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().create();
-    Option maxIterationsOpt = DefaultOptionCreator.maxIterationsOption().create();
-    Option numReduceTasksOpt = DefaultOptionCreator.numReducersOption().create();
-    Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
-    Option helpOpt = DefaultOptionCreator.helpOption();
-
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(clustersOpt)
-        .withOption(outputOpt).withOption(measureClassOpt).withOption(convergenceDeltaOpt)
-        .withOption(maxIterationsOpt).withOption(numReduceTasksOpt).withOption(kOpt).withOption(overwriteOutput)
-        .withOption(helpOpt).withOption(clusteringOpt).create();
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      parser.setHelpOption(helpOpt);
-      CommandLine cmdLine = parser.parse(args);
-
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-      Path input = new Path(cmdLine.getValue(inputOpt).toString());
-      Path clusters = new Path(cmdLine.getValue(clustersOpt).toString());
-      Path output = new Path(cmdLine.getValue(outputOpt).toString());
-      String measureClass = cmdLine.getValue(measureClassOpt).toString();
-      double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt).toString());
-      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterationsOpt).toString());
-      int numReduceTasks = Integer.parseInt(cmdLine.getValue(numReduceTasksOpt).toString());
-      if (cmdLine.hasOption(overwriteOutput)) {
-        HadoopUtil.overwriteOutput(output);
-      }
-      if (cmdLine.hasOption(kOpt)) {
-        clusters = RandomSeedGenerator.buildRandom(input, clusters,
-                                                   Integer.parseInt(cmdLine.getValue(kOpt).toString()));
-      }
-      runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, cmdLine
-          .hasOption(clusteringOpt));
-    } catch (OptionException e) {
-      log.error("Exception", e);
-      CommandLineUtil.printHelp(group);
-    }
+    new KMeansDriver().run(args);
   }
 
   /**
@@ -129,16 +74,77 @@ public final class KMeansDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  public static void runJob(Path input, Path clustersIn, Path output, String measureClass, double convergenceDelta,
-      int maxIterations, int numReduceTasks, boolean runClustering) throws IOException, InterruptedException,
-      ClassNotFoundException {
+  public static void runJob(Path input,
+                            Path clustersIn,
+                            Path output,
+                            String measureClass,
+                            double convergenceDelta,
+                            int maxIterations,
+                            int numReduceTasks,
+                            boolean runClustering) throws IOException, InterruptedException, ClassNotFoundException {
+    new KMeansDriver().job(input, clustersIn, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, runClustering);
+  }
+
+  @Override
+  public int run(String[] args) throws Exception {
+
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.clustersInOption()
+        .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
+            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
+        .create());
+    addOption(DefaultOptionCreator.numClustersOption()
+        .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
+            + " as the Centroid and written to the clusters input path.").create());
+    addOption(DefaultOptionCreator.convergenceOption().create());
+    addOption(DefaultOptionCreator.maxIterationsOption().create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
+    addOption(DefaultOptionCreator.numReducersOption().create());
+    addOption(DefaultOptionCreator.clusteringOption().create());
+
+    Map<String, String> argMap = parseArguments(args);
+    if (argMap == null) {
+      return -1;
+    }
+
+    Path input = getInputPath();
+    Path clusters = new Path(argMap.get(DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY));
+    Path output = getOutputPath();
+    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
+    if (measureClass == null) {
+      measureClass = SquaredEuclideanDistanceMeasure.class.getName();
+    }
+    double convergenceDelta = Double.parseDouble(argMap.get(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY));
+    int numReduceTasks = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
+    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
+    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    if (argMap.containsKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)) {
+      clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(argMap
+          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)));
+    }
+    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+    job(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, runClustering);
+    return 0;
+  }
+
+  private void job(Path input,
+                   Path clustersIn,
+                   Path output,
+                   String measureClass,
+                   double convergenceDelta,
+                   int maxIterations,
+                   int numReduceTasks,
+                   boolean runClustering) throws IOException, InterruptedException, ClassNotFoundException {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}",
-               new Object[] { input, clustersIn, output, measureClass });
-      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
-               new Object[] { convergenceDelta, maxIterations, numReduceTasks, VectorWritable.class.getName() });
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output, measureClass });
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", new Object[] { convergenceDelta,
+          maxIterations, numReduceTasks, VectorWritable.class.getName() });
     }
     boolean converged = false;
     int iteration = 1;
@@ -177,13 +183,12 @@ public final class KMeansDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  private static boolean runIteration(Path input,
-                                      Path clustersIn,
-                                      Path clustersOut,
-                                      String measureClass,
-                                      String convergenceDelta,
-                                      int numReduceTasks)
-    throws IOException, InterruptedException, ClassNotFoundException {
+  private boolean runIteration(Path input,
+                               Path clustersIn,
+                               Path clustersOut,
+                               String measureClass,
+                               String convergenceDelta,
+                               int numReduceTasks) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
@@ -230,16 +235,11 @@ public final class KMeansDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  private static void runClustering(Path input,
-                                    Path clustersIn,
-                                    Path output,
-                                    String measureClass,
-                                    String convergenceDelta)
-    throws IOException, InterruptedException, ClassNotFoundException {
+  private void runClustering(Path input, Path clustersIn, Path output, String measureClass, String convergenceDelta)
+      throws IOException, InterruptedException, ClassNotFoundException {
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}",
-               new Object[] { input, clustersIn, output, measureClass });
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output, measureClass });
       log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class.getName());
     }
     Configuration conf = new Configuration();
@@ -277,7 +277,7 @@ public final class KMeansDriver {
    * @throws IOException
    *           if there was an IO error
    */
-  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
+  private boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     FileStatus[] parts = fs.listStatus(filePath);
     for (FileStatus part : parts) {
       String name = part.getPath().getName();

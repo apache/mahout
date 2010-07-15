@@ -20,13 +20,10 @@ package org.apache.mahout.clustering.dirichlet;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -43,16 +40,18 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
-import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class DirichletDriver {
+public class DirichletDriver extends AbstractJob {
 
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.dirichlet.stateIn";
 
@@ -70,62 +69,85 @@ public final class DirichletDriver {
 
   public static final String THRESHOLD_KEY = "org.apache.mahout.clustering.dirichlet.threshold";
 
+  protected static final String MODEL_PROTOTYPE_CLASS_OPTION = "modelPrototypeClass";
+
+  public static final String MODEL_PROTOTYPE_CLASS_OPTION_KEY = "--" + MODEL_PROTOTYPE_CLASS_OPTION;
+
+  protected static final String MODEL_DISTRIBUTION_CLASS_OPTION = "modelDistClass";
+
+  public static final String MODEL_DISTRIBUTION_CLASS_OPTION_KEY = "--" + MODEL_DISTRIBUTION_CLASS_OPTION;
+
+  protected static final String ALPHA_OPTION = "alpha";
+
+  public static final String ALPHA_OPTION_KEY = "--" + ALPHA_OPTION;
+
   private static final Logger log = LoggerFactory.getLogger(DirichletDriver.class);
 
-  private DirichletDriver() {
+  protected DirichletDriver() {
   }
 
   public static void main(String[] args) throws Exception {
-    Option helpOpt = DefaultOptionCreator.helpOption();
-    Option inputOpt = DefaultOptionCreator.inputOption().create();
-    Option outputOpt = DefaultOptionCreator.outputOption().create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().create();
-    Option kOpt = DefaultOptionCreator.kOption().withRequired(true).create();
-    Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
-    Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
-    Option alphaOpt = DefaultOptionCreator.alphaOption().create();
-    Option modelDistOpt = DefaultOptionCreator.modelDistributionOption().create();
-    Option prototypeOpt = DefaultOptionCreator.modelPrototypeOption().create();
-    Option numRedOpt = DefaultOptionCreator.numReducersOption().create();
-    Option emitMostLikelyOpt = DefaultOptionCreator.emitMostLikelyOption().create();
-    Option thresholdOpt = DefaultOptionCreator.thresholdOption().create();
+    new DirichletDriver().run(args);
+  }
 
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(overwriteOutput).withOption(modelDistOpt).withOption(prototypeOpt)
-        .withOption(maxIterOpt).withOption(alphaOpt).withOption(kOpt).withOption(helpOpt)
-        .withOption(numRedOpt).withOption(clusteringOpt).withOption(emitMostLikelyOpt)
-        .withOption(thresholdOpt).create();
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
+   */
+  public int run(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+      NoSuchMethodException, InvocationTargetException, InterruptedException {
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.maxIterationsOption().create());
+    addOption(DefaultOptionCreator.numClustersOption().withRequired(true).create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
+    addOption(DefaultOptionCreator.clusteringOption().create());
+    addOption(new DefaultOptionBuilder().withLongName(ALPHA_OPTION).withRequired(false).withShortName("m")
+        .withArgument(new ArgumentBuilder().withName(ALPHA_OPTION).withDefault("1.0").withMinimum(1).withMaximum(1).create())
+        .withDescription("The alpha0 value for the DirichletDistribution. Defaults to 1.0").create());
+    addOption(new DefaultOptionBuilder().withLongName(MODEL_DISTRIBUTION_CLASS_OPTION).withRequired(false).withShortName("md")
+        .withArgument(new ArgumentBuilder().withName(MODEL_DISTRIBUTION_CLASS_OPTION).withDefault(NormalModelDistribution.class
+            .getName()).withMinimum(1).withMaximum(1).create()).withDescription("The ModelDistribution class name. "
+            + "Defaults to NormalModelDistribution").create());
+    addOption(new DefaultOptionBuilder().withLongName(MODEL_PROTOTYPE_CLASS_OPTION).withRequired(false).withShortName("mp")
+        .withArgument(new ArgumentBuilder().withName("prototypeClass").withDefault(RandomAccessSparseVector.class.getName())
+            .withMinimum(1).withMaximum(1).create())
+        .withDescription("The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector").create());
+    addOption(DefaultOptionCreator.emitMostLikelyOption().create());
+    addOption(DefaultOptionCreator.thresholdOption().create());
+    addOption(DefaultOptionCreator.numReducersOption().create());
 
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      parser.setHelpOption(helpOpt);
-      CommandLine cmdLine = parser.parse(args);
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-
-      Path input = new Path(cmdLine.getValue(inputOpt).toString());
-      Path output = new Path(cmdLine.getValue(outputOpt).toString());
-      if (cmdLine.hasOption(overwriteOutput)) {
-        HadoopUtil.overwriteOutput(output);
-      }
-      String modelFactory = cmdLine.getValue(modelDistOpt).toString();
-      String modelPrototype = cmdLine.getValue(prototypeOpt).toString();
-      int numModels = Integer.parseInt(cmdLine.getValue(kOpt).toString());
-      int numReducers = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
-      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
-      boolean emitMostLikely = Boolean.parseBoolean(cmdLine.getValue(emitMostLikelyOpt).toString());
-      double threshold = Double.parseDouble(cmdLine.getValue(thresholdOpt).toString());
-      double alpha0 = Double.parseDouble(cmdLine.getValue(alphaOpt).toString());
-
-      runJob(input, output, modelFactory, modelPrototype, numModels, maxIterations, alpha0, numReducers, cmdLine
-          .hasOption(clusteringOpt), emitMostLikely, threshold);
-    } catch (OptionException e) {
-      log.error("Exception parsing command line: ", e);
-      CommandLineUtil.printHelp(group);
+    Map<String, String> argMap = parseArguments(args);
+    if (argMap == null) {
+      return -1;
     }
+
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    String modelFactory = argMap.get(MODEL_DISTRIBUTION_CLASS_OPTION_KEY);
+    String modelPrototype = argMap.get(MODEL_PROTOTYPE_CLASS_OPTION_KEY);
+    int numModels = Integer.parseInt(argMap.get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY));
+    int numReducers = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
+    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
+    boolean emitMostLikely = Boolean.parseBoolean(argMap.get(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY));
+    double threshold = Double.parseDouble(argMap.get(DefaultOptionCreator.THRESHOLD_OPTION_KEY));
+    double alpha0 = Double.parseDouble(argMap.get(ALPHA_OPTION_KEY));
+    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+
+    job(input,
+        output,
+        modelFactory,
+        modelPrototype,
+        numModels,
+        maxIterations,
+        alpha0,
+        numReducers,
+        runClustering,
+        emitMostLikely,
+        threshold);
+    return 0;
   }
 
   /**
@@ -165,75 +187,20 @@ public final class DirichletDriver {
                             int numReducers,
                             boolean runClustering,
                             boolean emitMostLikely,
-                            double threshold)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
-             SecurityException, NoSuchMethodException, InvocationTargetException, InterruptedException {
+                            double threshold) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+      IOException, SecurityException, NoSuchMethodException, InvocationTargetException, InterruptedException {
 
-    Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
-
-    int protoSize = readPrototypeSize(input);
-
-    writeInitialState(output, clustersIn, modelFactory, modelPrototype, protoSize, numClusters, alpha0);
-
-    for (int iteration = 1; iteration <= maxIterations; iteration++) {
-      log.info("Iteration {}", iteration);
-      // point the output to a new directory per iteration
-      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      runIteration(input,
-                   clustersIn,
-                   clustersOut,
-                   modelFactory,
-                   modelPrototype,
-                   protoSize,
-                   numClusters,
-                   alpha0,
-                   numReducers);
-      // now point the input to the old output directory
-      clustersIn = clustersOut;
-    }
-    if (runClustering) {
-      // now cluster the most likely points
-      runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), emitMostLikely, threshold);
-    }
-  }
-
-  private static int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
-    int protoSize = 0;
-    for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      WritableComparable<?> key = (WritableComparable<?>) reader.getKeyClass().newInstance();
-      VectorWritable value = new VectorWritable();
-      if (reader.next(key, value)) {
-        protoSize = value.get().size();
-      }
-      reader.close();
-      break;
-    }
-    return protoSize;
-  }
-
-  private static void writeInitialState(Path output,
-                                        Path stateIn,
-                                        String modelFactory,
-                                        String modelPrototype,
-                                        int prototypeSize,
-                                        int numModels,
-                                        double alpha0)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
-             SecurityException, NoSuchMethodException, InvocationTargetException {
-
-    DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha0);
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(output.toUri(), conf);
-    for (int i = 0; i < numModels; i++) {
-      Path path = new Path(stateIn, "part-" + i);
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, DirichletCluster.class);
-      writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
-      writer.close();
-    }
+    new DirichletDriver().job(input,
+                              output,
+                              modelFactory,
+                              modelPrototype,
+                              numClusters,
+                              maxIterations,
+                              alpha0,
+                              numReducers,
+                              runClustering,
+                              emitMostLikely,
+                              threshold);
   }
 
   /**
@@ -252,16 +219,16 @@ public final class DirichletDriver {
    *          the double alpha_0 argument to the algorithm
    * @return an initialized DirichletState
    */
-  public static DirichletState<VectorWritable> createState(String modelFactory,
-                                                           String modelPrototype,
-                                                           int prototypeSize,
-                                                           int numModels,
-                                                           double alpha0)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-             SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+  static DirichletState<VectorWritable> createState(String modelFactory,
+                                                    String modelPrototype,
+                                                    int prototypeSize,
+                                                    int numModels,
+                                                    double alpha0) throws ClassNotFoundException, InstantiationException,
+      IllegalAccessException, SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<? extends AbstractVectorModelDistribution> cl = ccl.loadClass(modelFactory).asSubclass(AbstractVectorModelDistribution.class);
+    Class<? extends AbstractVectorModelDistribution> cl = ccl.loadClass(modelFactory)
+        .asSubclass(AbstractVectorModelDistribution.class);
     AbstractVectorModelDistribution factory = cl.newInstance();
 
     Class<? extends Vector> vcl = ccl.loadClass(modelPrototype).asSubclass(Vector.class);
@@ -271,7 +238,70 @@ public final class DirichletDriver {
   }
 
   /**
-   * Run the job using supplied arguments
+   * Read the first input vector to determine the prototype size for the modelPrototype
+   * @param input
+   * @return
+   * @throws IOException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   */
+  private int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(input.toUri(), conf);
+    FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
+    int protoSize = 0;
+    for (FileStatus s : status) {
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
+      WritableComparable<?> key = (WritableComparable<?>) reader.getKeyClass().newInstance();
+      VectorWritable value = new VectorWritable();
+      if (reader.next(key, value)) {
+        protoSize = value.get().size();
+      }
+      reader.close();
+      break;
+    }
+    return protoSize;
+  }
+
+  /**
+   * Write initial state (prior distribution) to the output path directory
+   * @param output the output Path
+   * @param stateIn the state input Path
+   * @param modelFactory the String class name of the modelFactory
+   * @param modelPrototype the String class name of the modelPrototype
+   * @param prototypeSize the int size of the modelPrototype vectors
+   * @param numModels the int number of models to generate
+   * @param alpha0 the double alpha_0 argument to the DirichletDistribution
+   * @throws ClassNotFoundException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   * @throws IOException
+   * @throws SecurityException
+   * @throws NoSuchMethodException
+   * @throws InvocationTargetException
+   */
+  private void writeInitialState(Path output,
+                                 Path stateIn,
+                                 String modelFactory,
+                                 String modelPrototype,
+                                 int prototypeSize,
+                                 int numModels,
+                                 double alpha0) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+      IOException, SecurityException, NoSuchMethodException, InvocationTargetException {
+
+    DirichletState<VectorWritable> state = createState(modelFactory, modelPrototype, prototypeSize, numModels, alpha0);
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    for (int i = 0; i < numModels; i++) {
+      Path path = new Path(stateIn, "part-" + i);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, DirichletCluster.class);
+      writer.append(new Text(Integer.toString(i)), state.getClusters().get(i));
+      writer.close();
+    }
+  }
+
+  /**
+   * Run an iteration using supplied arguments
    * 
    * @param input
    *          the directory pathname for input points
@@ -295,15 +325,15 @@ public final class DirichletDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  public static void runIteration(Path input,
-                                  Path stateIn,
-                                  Path stateOut,
-                                  String modelFactory,
-                                  String modelPrototype,
-                                  int prototypeSize,
-                                  int numClusters,
-                                  double alpha0,
-                                  int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+  private void runIteration(Path input,
+                            Path stateIn,
+                            Path stateOut,
+                            String modelFactory,
+                            String modelPrototype,
+                            int prototypeSize,
+                            int numClusters,
+                            double alpha0,
+                            int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(MODEL_FACTORY_KEY, modelFactory);
@@ -313,7 +343,7 @@ public final class DirichletDriver {
     conf.set(ALPHA_0_KEY, Double.toString(alpha0));
 
     Job job = new Job(conf);
-    
+
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(Text.class);
@@ -348,13 +378,12 @@ public final class DirichletDriver {
    * @throws InterruptedException 
    * @throws IOException 
    */
-  public static void runClustering(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
-    throws IOException, InterruptedException, ClassNotFoundException {
+  private void runClustering(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold) throws IOException,
+      InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
     conf.set(THRESHOLD_KEY, Double.toString(threshold));
-
     Job job = new Job(conf);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(WeightedVectorWritable.class);
@@ -363,10 +392,74 @@ public final class DirichletDriver {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setNumReduceTasks(0);
     job.setJarByClass(DirichletDriver.class);
-    
+
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
 
     job.waitForCompletion(true);
+  }
+
+  /**
+   * Run the job
+   * @param input
+   *          the directory pathname for input points
+   * @param output
+   *          the directory pathname for output points
+   * @param modelFactory
+   *          the String ModelDistribution class name to use
+   * @param modelPrototype
+   *          the String class name of the model prototype
+   * @param numClusters
+   *          the number of models
+   * @param maxIterations
+   *          the maximum number of iterations
+   * @param alpha0
+   *          the alpha_0 value for the DirichletDistribution
+   * @param numReducers
+   *          the number of Reducers desired
+   * @param runClustering 
+   *          true if clustering of points to be done after iterations
+   * @param emitMostLikely
+   *          a boolean if true emit only most likely cluster for each point
+   * @param threshold 
+   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @throws IOException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   * @throws ClassNotFoundException
+   * @throws NoSuchMethodException
+   * @throws InvocationTargetException
+   * @throws InterruptedException
+   */
+  private void job(Path input,
+                   Path output,
+                   String modelFactory,
+                   String modelPrototype,
+                   int numClusters,
+                   int maxIterations,
+                   double alpha0,
+                   int numReducers,
+                   boolean runClustering,
+                   boolean emitMostLikely,
+                   double threshold) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException,
+      NoSuchMethodException, InvocationTargetException, InterruptedException {
+    Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
+
+    int protoSize = readPrototypeSize(input);
+
+    writeInitialState(output, clustersIn, modelFactory, modelPrototype, protoSize, numClusters, alpha0);
+
+    for (int iteration = 1; iteration <= maxIterations; iteration++) {
+      log.info("Iteration {}", iteration);
+      // point the output to a new directory per iteration
+      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
+      runIteration(input, clustersIn, clustersOut, modelFactory, modelPrototype, protoSize, numClusters, alpha0, numReducers);
+      // now point the input to the old output directory
+      clustersIn = clustersOut;
+    }
+    if (runClustering) {
+      // now cluster the most likely points
+      runClustering(input, clustersIn, new Path(output, Cluster.CLUSTERED_POINTS_DIR), emitMostLikely, threshold);
+    }
   }
 }

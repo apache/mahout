@@ -18,13 +18,8 @@
 package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
+import java.util.Map;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -36,68 +31,24 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class CanopyDriver {
-
-  private static final Logger log = LoggerFactory.getLogger(CanopyDriver.class);
+public class CanopyDriver extends AbstractJob {
 
   public static final String DEFAULT_CLUSTERED_POINTS_DIRECTORY = "clusteredPoints";
 
-  private CanopyDriver() {
+  private static final Logger log = LoggerFactory.getLogger(CanopyDriver.class);
+
+  public CanopyDriver() {
   }
 
-  public static void main(String[] args) throws IOException {
-    Option helpOpt = DefaultOptionCreator.helpOption();
-    Option inputOpt = DefaultOptionCreator.inputOption().create();
-    Option outputOpt = DefaultOptionCreator.outputOption().create();
-    Option measureClassOpt = DefaultOptionCreator.distanceMeasureOption().create();
-    Option t1Opt = DefaultOptionCreator.t1Option().create();
-    Option t2Opt = DefaultOptionCreator.t2Option().create();
-
-    Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
-    Option clusteringOpt = DefaultOptionCreator.clusteringOption().create();
-
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(overwriteOutput).withOption(measureClassOpt).withOption(t1Opt).withOption(t2Opt)
-        .withOption(clusteringOpt).withOption(helpOpt).create();
-
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      parser.setHelpOption(helpOpt);
-      CommandLine cmdLine = parser.parse(args);
-
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-
-      Path input = new Path(cmdLine.getValue(inputOpt).toString());
-      Path output = new Path(cmdLine.getValue(outputOpt).toString());
-      if (cmdLine.hasOption(overwriteOutput)) {
-        HadoopUtil.overwriteOutput(output);
-      }
-      String measureClass = cmdLine.getValue(measureClassOpt).toString();
-      double t1 = Double.parseDouble(cmdLine.getValue(t1Opt).toString());
-      double t2 = Double.parseDouble(cmdLine.getValue(t2Opt).toString());
-
-      runJob(input, output, measureClass, t1, t2, cmdLine.hasOption(clusteringOpt));
-    } catch (OptionException e) {
-      log.error("OptionException", e);
-      CommandLineUtil.printHelp(group);
-    } catch (InterruptedException e) {
-      log.error("InterruptedException", e);
-      CommandLineUtil.printHelp(group);
-    } catch (ClassNotFoundException e) {
-      log.error("ClassNotFoundException", e);
-      CommandLineUtil.printHelp(group);
-    }
+  public static void main(String[] args) throws Exception {
+    new CanopyDriver().run(args);
   }
 
   /**
@@ -119,6 +70,41 @@ public final class CanopyDriver {
    * @throws InterruptedException 
    */
   public static void runJob(Path input, Path output, String measureClassName, double t1, double t2, boolean runClustering)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    new CanopyDriver().job(input, output, measureClassName, t1, t2, runClustering);
+  }
+
+  @Override
+  public int run(String[] args) throws Exception {
+
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.t1Option().create());
+    addOption(DefaultOptionCreator.t2Option().create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
+    addOption(DefaultOptionCreator.clusteringOption().create());
+
+    Map<String, String> argMap = parseArguments(args);
+    if (argMap == null) {
+      return -1;
+    }
+
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
+    double t1 = Double.parseDouble(argMap.get(DefaultOptionCreator.T1_OPTION_KEY));
+    double t2 = Double.parseDouble(argMap.get(DefaultOptionCreator.T2_OPTION_KEY));
+    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+
+    job(input, output, measureClass, t1, t2, runClustering);
+    return 0;
+  }
+
+  private void job(Path input, Path output, String measureClassName, double t1, double t2, boolean runClustering)
       throws IOException, InterruptedException, ClassNotFoundException {
     log.info("Input: {} Out: {} " + "Measure: {} t1: {} t2: {}", new Object[] { input, output, measureClassName, t1, t2 });
     Configuration conf = new Configuration();
@@ -166,9 +152,9 @@ public final class CanopyDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  public static void runClustering(Path points, Path canopies, Path output, String measureClassName, double t1, double t2)
+  private void runClustering(Path points, Path canopies, Path output, String measureClassName, double t1, double t2)
       throws IOException, InterruptedException, ClassNotFoundException {
-    
+
     Configuration conf = new Configuration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
@@ -188,7 +174,7 @@ public final class CanopyDriver {
     Path outPath = new Path(output, DEFAULT_CLUSTERED_POINTS_DIRECTORY);
     FileOutputFormat.setOutputPath(job, outPath);
     HadoopUtil.overwriteOutput(outPath);
-    
+
     job.waitForCompletion(true);
   }
 

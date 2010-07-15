@@ -21,94 +21,104 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
-import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Job {
-  
+public final class Job extends DirichletDriver {
+
+  private Job() {
+    super();
+  }
+
   private static final Logger log = LoggerFactory.getLogger(Job.class);
-  
-  private Job() { }
-  
+
   public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-    
-    Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
-    Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().withRequired(false).create();
-    Option topicsOpt = DefaultOptionCreator.kOption().withRequired(false).create();
-    
-    Option redOpt = obuilder.withLongName("reducerNum").withRequired(false).withArgument(
-      abuilder.withName("r").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The number of reducers to use.").withShortName("r").create();
-    
-    Option vectorOpt = obuilder.withLongName("vector").withRequired(false).withArgument(
-      abuilder.withName("v").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The vector implementation to use.").withShortName("v").create();
-    
-    Option mOpt = obuilder.withLongName("alpha").withRequired(false).withShortName("m").withArgument(
-      abuilder.withName("alpha").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The alpha0 value for the DirichletDistribution.").create();
-    
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(false).withShortName("d")
-        .withArgument(abuilder.withName("modelClass").withMinimum(1).withMaximum(1).create())
-        .withDescription("The ModelDistribution class name.").create();
-    Option helpOpt = DefaultOptionCreator.helpOption();
-    
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(modelOpt).withOption(maxIterOpt).withOption(mOpt).withOption(topicsOpt)
-        .withOption(redOpt).withOption(helpOpt).create();
-    
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      CommandLine cmdLine = parser.parse(args);
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-      
-      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
-      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
-      String modelFactory = cmdLine.getValue(modelOpt,
-        "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution").toString();
-      int numModels = Integer.parseInt(cmdLine.getValue(topicsOpt, "10").toString());
-      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "5").toString());
-      double alpha0 = Double.parseDouble(cmdLine.getValue(mOpt, "1.0").toString());
-      int numReducers = Integer.parseInt(cmdLine.getValue(redOpt, "1").toString());
-      String vectorClassName = cmdLine.getValue(vectorOpt, "org.apache.mahout.math.RandomAccessSparseVector")
-          .toString();
-      runJob(input, output, modelFactory, numModels, maxIterations, alpha0, numReducers,
-            vectorClassName);
-    } catch (OptionException e) {
-      log.error("Exception parsing command line: ", e);
-      CommandLineUtil.printHelp(group);
+    if (args.length > 0) {
+      log.info("Running with only user-supplied arguments");
+      new Job().run(args);
+    } else {
+      log.info("Running with default arguments");
+      Path output = new Path("output");
+      HadoopUtil.overwriteOutput(output);
+      new Job().job(new Path("testdata"),
+                    output,
+                    "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution",
+                    "org.apache.mahout.math.RandomAccessSparseVector",
+                    10,
+                    5,
+                    1.0,
+                    1,
+                    false,
+                    0.001);
     }
   }
-  
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
+   */
+  public int run(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+      NoSuchMethodException, InvocationTargetException, InterruptedException {
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.maxIterationsOption().create());
+    addOption(DefaultOptionCreator.numClustersOption().withRequired(true).create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
+    addOption(new DefaultOptionBuilder().withLongName(ALPHA_OPTION).withRequired(false).withShortName("m")
+        .withArgument(new ArgumentBuilder().withName(ALPHA_OPTION).withDefault("1.0").withMinimum(1).withMaximum(1).create())
+        .withDescription("The alpha0 value for the DirichletDistribution. Defaults to 1.0").create());
+    addOption(new DefaultOptionBuilder().withLongName(MODEL_DISTRIBUTION_CLASS_OPTION).withRequired(false).withShortName("md")
+        .withArgument(new ArgumentBuilder().withName(MODEL_DISTRIBUTION_CLASS_OPTION).withDefault(NormalModelDistribution.class
+            .getName()).withMinimum(1).withMaximum(1).create()).withDescription("The ModelDistribution class name. "
+            + "Defaults to NormalModelDistribution").create());
+    addOption(new DefaultOptionBuilder().withLongName(MODEL_PROTOTYPE_CLASS_OPTION).withRequired(false).withShortName("mp")
+        .withArgument(new ArgumentBuilder().withName("prototypeClass").withDefault(RandomAccessSparseVector.class.getName())
+            .withMinimum(1).withMaximum(1).create())
+        .withDescription("The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector").create());
+    addOption(DefaultOptionCreator.emitMostLikelyOption().create());
+    addOption(DefaultOptionCreator.thresholdOption().create());
+    addOption(DefaultOptionCreator.numReducersOption().create());
+
+    Map<String, String> argMap = parseArguments(args);
+    if (argMap == null) {
+      return -1;
+    }
+
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    String modelFactory = argMap.get(MODEL_DISTRIBUTION_CLASS_OPTION_KEY);
+    String modelPrototype = argMap.get(MODEL_PROTOTYPE_CLASS_OPTION_KEY);
+    int numModels = Integer.parseInt(argMap.get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY));
+    int numReducers = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
+    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
+    boolean emitMostLikely = Boolean.parseBoolean(argMap.get(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY));
+    double threshold = Double.parseDouble(argMap.get(DefaultOptionCreator.THRESHOLD_OPTION_KEY));
+    double alpha0 = Double.parseDouble(argMap.get(ALPHA_OPTION_KEY));
+
+    job(input, output, modelFactory, modelPrototype, numModels, maxIterations, alpha0, numReducers, emitMostLikely, threshold);
+    return 0;
+  }
+
   /**
    * Run the job using supplied arguments, deleting the output directory if it exists beforehand
    * 
@@ -126,32 +136,43 @@ public final class Job {
    *          the alpha0 value for the DirichletDistribution
    * @param numReducers
    *          the desired number of reducers
+   * @param emitMostLikely 
+   * @param threshold 
    * @throws InterruptedException 
    * @throws SecurityException 
    */
-  public static void runJob(Path input,
-                            Path output,
-                            String modelFactory,
-                            int numModels,
-                            int maxIterations,
-                            double alpha0,
-                            int numReducers,
-                            String vectorClassName) throws IOException,
-                                                   ClassNotFoundException,
-                                                   InstantiationException,
-                                                   IllegalAccessException,
-                                                   NoSuchMethodException,
-                                                   InvocationTargetException, SecurityException, InterruptedException {
-    HadoopUtil.overwriteOutput(output);
-
+  private void job(Path input,
+                   Path output,
+                   String modelFactory,
+                   String modelPrototype,
+                   int numModels,
+                   int maxIterations,
+                   double alpha0,
+                   int numReducers,
+                   boolean emitMostLikely,
+                   double threshold) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+      NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
-    InputDriver.runJob(input, directoryContainingConvertedInput, vectorClassName);
-    DirichletDriver.runJob(directoryContainingConvertedInput, output, modelFactory,
-      vectorClassName, numModels, maxIterations, alpha0, numReducers, true, true, 0);
+    InputDriver.runJob(input, directoryContainingConvertedInput, modelPrototype);
+    DirichletDriver.runJob(directoryContainingConvertedInput,
+                           output,
+                           modelFactory,
+                           modelPrototype,
+                           numModels,
+                           maxIterations,
+                           alpha0,
+                           numReducers,
+                           true,
+                           emitMostLikely,
+                           threshold);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
+                                                                                                            "clusteredPoints"));
+    clusterDumper.printClusters(null);
   }
-  
+
   /**
-   * Prints out all of the clusters during each iteration
+   * Prints out all of the clusters for each iteration
    * 
    * @param output
    *          the String output directory
@@ -177,8 +198,7 @@ public final class Job {
                                   int prototypeSize,
                                   int numIterations,
                                   int numModels,
-                                  double alpha0) throws NoSuchMethodException,
-                                                 InvocationTargetException {
+                                  double alpha0) throws NoSuchMethodException, InvocationTargetException {
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);
@@ -190,10 +210,10 @@ public final class Job {
       conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
       clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
-    printResults(clusters, 0);
-    
+    printClusters(clusters, 0);
+
   }
-  
+
   /**
    * Actually prints out the clusters
    * 
@@ -202,7 +222,7 @@ public final class Job {
    * @param significant
    *          the minimum number of samples to enable printing a model
    */
-  private static void printResults(List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
+  private static void printClusters(List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
     int row = 0;
     StringBuilder result = new StringBuilder();
     for (List<DirichletCluster<VectorWritable>> r : clusters) {

@@ -38,6 +38,7 @@ import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -376,7 +377,14 @@ public class TestKmeansClustering extends MahoutTestCase {
       writer.close();
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
-      KMeansDriver.runJob(pointsPath, clustersPath, outputPath, EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
+      //KMeansDriver.runJob(pointsPath, clustersPath, outputPath, EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
+      String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, pointsPath.toString(), DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY,
+          clustersPath.toString(), DefaultOptionCreator.OUTPUT_OPTION_KEY, outputPath.toString(),
+          DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY, EuclideanDistanceMeasure.class.getName(),
+          DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY, "0.001", DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY, "2",
+          DefaultOptionCreator.CLUSTERING_OPTION_KEY, DefaultOptionCreator.OVERWRITE_OPTION_KEY };
+      new KMeansDriver().run(args);
+
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       // assertEquals("output dir files?", 4, outFiles.length);

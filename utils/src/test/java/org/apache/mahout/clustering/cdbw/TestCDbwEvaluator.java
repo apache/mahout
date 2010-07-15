@@ -168,7 +168,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     // now run the KMeans job
     Path output = getTestTempDirPath("output");
     FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
-                             EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 1, 2, false, true, 0);
+                             EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 2, true, true, 0);
     int numIterations = 2;
     CDbwDriver.runJob(new Path(output, "clusters-4"), new Path(output, "clusteredPoints"), output,
                       EuclideanDistanceMeasure.class.getName(), numIterations, 1);

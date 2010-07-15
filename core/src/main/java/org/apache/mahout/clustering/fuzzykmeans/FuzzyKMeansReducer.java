@@ -43,12 +43,11 @@ public class FuzzyKMeansReducer extends Reducer<Text, FuzzyKMeansInfo, Text, Sof
       } else {
         cluster.addPoints(value.getVector(), value.getProbability());
       }
-
     }
     // force convergence calculation
     boolean converged = clusterer.computeConvergence(cluster);
     if (converged) {
-      // TODO: reporter.incrCounter("Clustering", "Converged Clusters", 1);
+      context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
     context.write(new Text(cluster.getIdentifier()), cluster);
   }

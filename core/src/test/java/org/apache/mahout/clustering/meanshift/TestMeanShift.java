@@ -33,6 +33,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -136,13 +137,13 @@ public class TestMeanShift extends MahoutTestCase {
     }
     assertTrue(true);
   }
-  
+
   /**
    * Test the MeanShiftCanopyClusterer's reference implementation. Should produce the same final output as above.
    */
   public void testClustererReferenceImplementation() {
     List<Vector> points = new ArrayList<Vector>();
-    for (Vector v: raw)
+    for (Vector v : raw)
       points.add(v);
     List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.5, 4, 1, 10);
     printCanopies(canopies);
@@ -308,9 +309,15 @@ public class TestMeanShift extends MahoutTestCase {
     }
     ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
-    // now run the Job
+    // now run the Job using the run() command. Other tests can continue to use runJob().
     Path output = getTestTempDirPath("output");
-    MeanShiftCanopyDriver.runJob(input, output, EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
+    //MeanShiftCanopyDriver.runJob(input, output, EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
+    String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, getTestTempDirPath("testdata").toString(),
+        DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(), DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY,
+        EuclideanDistanceMeasure.class.getName(), DefaultOptionCreator.T1_OPTION_KEY, "4", DefaultOptionCreator.T2_OPTION_KEY, "1",
+        DefaultOptionCreator.CLUSTERING_OPTION_KEY, DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY, "4",
+        DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY, "0.5", DefaultOptionCreator.OVERWRITE_OPTION_KEY  };
+    new MeanShiftCanopyDriver().run(args);
     Path outPart = new Path(output, "clusters-3/part-r-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Text key = new Text();

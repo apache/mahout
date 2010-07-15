@@ -18,79 +18,34 @@
 package org.apache.mahout.clustering.syntheticcontrol.canopy;
 
 import java.io.IOException;
+import java.util.Map;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
-import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Job {
+public final class Job extends CanopyDriver {
+
+  private Job() {
+    super();
+  }
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
-  private Job() {
-  }
-
   public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-
-    Option inputOpt = obuilder.withLongName("input").withRequired(false).withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Path for input Vectors. Must be a SequenceFile of Writable, Vector").withShortName("i").create();
-    Option outputOpt = obuilder.withLongName("output").withRequired(false).withArgument(
-        abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription("The Path to put the output in")
-        .withShortName("o").create();
-
-    Option measureClassOpt = obuilder.withLongName("distance").withRequired(false).withArgument(
-        abuilder.withName("distance").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The Distance Measure to use.  Default is SquaredEuclidean").withShortName("m").create();
-
-    Option t1Opt = obuilder.withLongName("t1").withRequired(false).withArgument(
-        abuilder.withName("t1").withMinimum(1).withMaximum(1).create()).withDescription("t1").withShortName("t1").create();
-    Option t2Opt = obuilder.withLongName("t2").withRequired(false).withArgument(
-        abuilder.withName("t2").withMinimum(1).withMaximum(1).create()).withDescription("t2").withShortName("t2").create();
-
-    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(measureClassOpt).withOption(
-        t1Opt).withOption(t2Opt).withOption(helpOpt).create();
-
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      parser.setHelpOption(helpOpt);
-      CommandLine cmdLine = parser.parse(args);
-
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-
-      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
-      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
-      String measureClass = cmdLine.getValue(measureClassOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure")
-          .toString();
-
-      double t1 = Double.parseDouble(cmdLine.getValue(t1Opt, "80").toString());
-      double t2 = Double.parseDouble(cmdLine.getValue(t2Opt, "55").toString());
-
-      runJob(input, output, measureClass, t1, t2);
-    } catch (OptionException e) {
-      Job.log.error("Exception", e);
-      CommandLineUtil.printHelp(group);
+    if (args.length > 0) {
+      log.info("Running with only user-supplied arguments");
+      new Job().run(args);
+    } else {
+      log.info("Running with default arguments");
+      Path output = new Path("output");
+      HadoopUtil.overwriteOutput(output);
+      new Job().job(new Path("testdata"), output, "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55);
     }
   }
 
@@ -115,14 +70,43 @@ public final class Job {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  private static void runJob(Path input, Path output, String measureClassName, double t1, double t2) throws IOException,
+  private void job(Path input, Path output, String measureClassName, double t1, double t2) throws IOException,
       InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
-    HadoopUtil.overwriteOutput(output);
-
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2, true);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"),
+                                                    new Path(output, "clusteredPoints"));
+    clusterDumper.printClusters(null);
+  }
 
+  @Override
+  public int run(String[] args) throws Exception {
+
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.t1Option().create());
+    addOption(DefaultOptionCreator.t2Option().create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
+
+    Map<String, String> argMap = parseArguments(args);
+    if (argMap == null) {
+      return -1;
+    }
+
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
+    double t1 = Double.parseDouble(argMap.get(DefaultOptionCreator.T1_OPTION_KEY));
+    double t2 = Double.parseDouble(argMap.get(DefaultOptionCreator.T2_OPTION_KEY));
+
+    job(input, output, measureClass, t1, t2);
+    return 0;
   }
 
 }

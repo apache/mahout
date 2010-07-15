@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,7 +41,6 @@ import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.NamedVector;
@@ -81,17 +79,6 @@ public class TestClusterDumper extends MahoutTestCase {
     // Create test data
     getSampleData(DOCS);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
-  }
-
-  private static void rmDir(File f) {
-    if (f != null && f.exists()) {
-      if (f.isDirectory()) {
-        for (File g : f.listFiles()) {
-          rmDir(g);
-        }
-      }
-      f.delete();
-    }
   }
 
   private void getSampleData(String[] docs2) throws IOException {
@@ -178,7 +165,7 @@ public class TestClusterDumper extends MahoutTestCase {
     // now run the KMeans job
     FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
                              EuclideanDistanceMeasure.class.getName(), 0.001, 10,
-        1, 1, (float) 1.1, true, true, 0);
+        1, (float) 1.1, true, true, 0);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"),
                                                     new Path(output, "clusteredPoints"));

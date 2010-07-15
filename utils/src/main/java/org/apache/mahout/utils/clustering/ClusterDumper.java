@@ -314,7 +314,7 @@ public final class ClusterDumper {
     FileStatus[] children = fs.listStatus(pointsPathDir, new PathFilter() {
       @Override
       public boolean accept(Path path) {
-        return !path.getName().endsWith(".crc");
+        return !(path.getName().endsWith(".crc") || path.getName().equals("_logs"));
       }
     });
 

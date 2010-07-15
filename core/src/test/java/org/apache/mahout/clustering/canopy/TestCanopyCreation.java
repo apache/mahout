@@ -37,6 +37,7 @@ import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -510,9 +511,13 @@ public class TestCanopyCreation extends MahoutTestCase {
     Configuration conf = new Configuration();
     ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file1"), fs, conf);
     ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
-    // now run the Job
+    // now run the Job using the run() command. Others can use runJob().
     Path output = getTestTempDirPath("output");
-    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true);
+    String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, getTestTempDirPath("testdata").toString(),
+        DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(), DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY,
+        EuclideanDistanceMeasure.class.getName(), DefaultOptionCreator.T1_OPTION_KEY, "3.1", DefaultOptionCreator.T2_OPTION_KEY,
+        "2.1", DefaultOptionCreator.CLUSTERING_OPTION_KEY, DefaultOptionCreator.OVERWRITE_OPTION_KEY  };
+    new CanopyDriver().run(args);
     Path path = new Path(output, "clusteredPoints/part-m-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     int count = 0;

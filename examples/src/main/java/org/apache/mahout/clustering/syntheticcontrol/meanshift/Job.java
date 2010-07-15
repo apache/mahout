@@ -18,83 +18,77 @@
 package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
 import java.io.IOException;
+import java.util.Map;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobClient;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
-import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Job {
+public final class Job extends MeanShiftCanopyDriver {
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
   private Job() {
+    super();
   }
 
   public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
-
-    Option inputOpt = DefaultOptionCreator.inputOption().withRequired(false).create();
-    Option outputOpt = DefaultOptionCreator.outputOption().withRequired(false).create();
-    Option convergenceDeltaOpt = DefaultOptionCreator.convergenceOption().withRequired(false).create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().withRequired(false).create();
-    Option helpOpt = DefaultOptionCreator.helpOption();
-
-    Option modelOpt = obuilder.withLongName("distanceClass").withRequired(false).withShortName("d").withArgument(
-        abuilder.withName("distanceClass").withMinimum(1).withMaximum(1).create()).withDescription(
-        "The distance measure class name.").create();
-
-    Option threshold1Opt = obuilder.withLongName("threshold_1").withRequired(false).withShortName("t1").withArgument(
-        abuilder.withName("threshold_1").withMinimum(1).withMaximum(1).create())
-        .withDescription("The T1 distance threshold.").create();
-
-    Option threshold2Opt = obuilder.withLongName("threshold_2").withRequired(false).withShortName("t2").withArgument(
-        abuilder.withName("threshold_2").withMinimum(1).withMaximum(1).create())
-        .withDescription("The T1 distance threshold.").create();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(modelOpt).withOption(helpOpt)
-        .withOption(convergenceDeltaOpt).withOption(threshold1Opt).withOption(maxIterOpt)
-        .withOption(threshold2Opt).create();
-
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      CommandLine cmdLine = parser.parse(args);
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-
-      Path input = new Path(cmdLine.getValue(inputOpt, "testdata").toString());
-      Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
-      String measureClassName =
-          cmdLine.getValue(modelOpt, "org.apache.mahout.common.distance.EuclideanDistanceMeasure").toString();
-      double t1 = Double.parseDouble(cmdLine.getValue(threshold1Opt, "47.6").toString());
-      double t2 = Double.parseDouble(cmdLine.getValue(threshold2Opt, "1").toString());
-      double convergenceDelta = Double.parseDouble(cmdLine.getValue(convergenceDeltaOpt, "0.5").toString());
-      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt, "10").toString());
-      runJob(input, output, measureClassName, t1, t2, convergenceDelta, maxIterations);
-    } catch (OptionException e) {
-      log.error("Exception parsing command line: ", e);
-      CommandLineUtil.printHelp(group);
+    if (args.length > 0) {
+      log.info("Running with only user-supplied arguments");
+      new Job().run(args);
+    } else {
+      log.info("Running with default arguments");
+      Path output = new Path("output");
+      HadoopUtil.overwriteOutput(output);
+      new Job().job(new Path("testdata"), output, "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 47.6, 1, 0.5, 10);
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
+   */
+  @Override
+  public int run(String[] args) throws Exception {
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.convergenceOption().create());
+    addOption(DefaultOptionCreator.maxIterationsOption().create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
+    addOption(new DefaultOptionBuilder().withLongName(INPUT_IS_CANOPIES_OPTION).withRequired(false).withShortName("ic")
+        .withArgument(new ArgumentBuilder().withName(INPUT_IS_CANOPIES_OPTION).withMinimum(1).withMaximum(1).create())
+        .withDescription("If present, the input directory already contains MeanShiftCanopies").create());
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.t1Option().create());
+    addOption(DefaultOptionCreator.t2Option().create());
+    addOption(DefaultOptionCreator.clusteringOption().create());
+
+    Map<String, String> argMap = parseArguments(args);
+    if (argMap == null) {
+      return -1;
+    }
+
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
+    double t1 = Double.parseDouble(argMap.get(DefaultOptionCreator.T1_OPTION_KEY));
+    double t2 = Double.parseDouble(argMap.get(DefaultOptionCreator.T2_OPTION_KEY));
+    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+    double convergenceDelta = Double.parseDouble(argMap.get(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY));
+    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
+    boolean inputIsCanopies = argMap.containsKey(INPUT_IS_CANOPIES_OPTION_KEY);
+
+    runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering);
+    return 0;
   }
 
   /**
@@ -123,24 +117,31 @@ public final class Job {
    * @throws InterruptedException 
    * @throws IllegalAccessException 
    * @throws InstantiationException 
+   * @throws IllegalAccessException 
+   * @throws InstantiationException 
    */
-  private static void runJob(Path input,
-                             Path output,
-                             String measureClassName,
-                             double t1,
-                             double t2,
-                             double convergenceDelta,
-                             int maxIterations) throws IOException, InterruptedException, ClassNotFoundException {
-    JobClient client = new JobClient();
-    Configuration conf = new Configuration();
-
-    client.setConf(conf);
-    HadoopUtil.overwriteOutput(output);
-
+  private void job(Path input,
+                   Path output,
+                   String measureClassName,
+                   double t1,
+                   double t2,
+                   double convergenceDelta,
+                   int maxIterations) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
-    MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2,
-        convergenceDelta, maxIterations, true, true);
+    MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput,
+                                 output,
+                                 measureClassName,
+                                 t1,
+                                 t2,
+                                 convergenceDelta,
+                                 maxIterations,
+                                 true,
+                                 true);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
+                                                                                                            "clusteredPoints"));
+    clusterDumper.printClusters(null);
   }
 
 }

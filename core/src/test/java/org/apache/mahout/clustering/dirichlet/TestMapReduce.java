@@ -40,6 +40,7 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -227,19 +228,16 @@ public class TestMapReduce extends MahoutTestCase {
     generateSamples(100, 0, 2, 0.3);
     generateSamples(100, 2, 2, 1);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
-    // Now run the driver
-    int maxIterations = 5;
-    DirichletDriver.runJob(getTestTempDirPath("input"),
-                           getTestTempDirPath("output"),
-                           "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
-                           "org.apache.mahout.math.DenseVector",
-                           20,
-                           maxIterations,
-                           1.0,
-                           1,
-                           false,
-                           true,
-                           0);
+    // Now run the driver using the run() method. Others can use runJob() as before
+    Integer maxIterations = 5;
+    String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, getTestTempDirPath("input").toString(),
+        DefaultOptionCreator.OUTPUT_OPTION_KEY, getTestTempDirPath("output").toString(),
+        DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION_KEY,
+        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+        DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION_KEY, "org.apache.mahout.math.DenseVector",
+        DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY, "20", DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY,
+        maxIterations.toString(), DirichletDriver.ALPHA_OPTION_KEY, "1.0", DefaultOptionCreator.OVERWRITE_OPTION_KEY };
+    new DirichletDriver().run(args);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();

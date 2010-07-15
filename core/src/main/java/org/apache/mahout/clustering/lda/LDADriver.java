@@ -18,14 +18,11 @@
 package org.apache.mahout.clustering.lda;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -37,7 +34,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.IntPairWritable;
 import org.apache.mahout.common.RandomUtils;
@@ -50,7 +47,19 @@ import org.slf4j.LoggerFactory;
  * Estimates an LDA model from a corpus of documents, which are SparseVectors of word counts. At each phase,
  * it outputs a matrix of log probabilities of each topic.
  */
-public final class LDADriver {
+public final class LDADriver extends AbstractJob {
+
+  private static final String TOPIC_SMOOTHING_OPTION = "topicSmoothing";
+
+  private static final String TOPIC_SMOOTHING_OPTION_KEY = "--" + TOPIC_SMOOTHING_OPTION;
+
+  private static final String NUM_WORDS_OPTION = "numWords";
+
+  private static final String NUM_WORDS_OPTION_KEY = "--" + NUM_WORDS_OPTION;
+
+  private static final String NUM_TOPICS_OPTION = "numTopics";
+
+  private static final String NUM_TOPICS_OPTION_KEY = "--" + NUM_TOPICS_OPTION;
 
   static final String STATE_IN_KEY = "org.apache.mahout.clustering.lda.stateIn";
 
@@ -71,50 +80,8 @@ public final class LDADriver {
   private LDADriver() {
   }
 
-  public static void main(String[] args) throws ClassNotFoundException, IOException, InterruptedException {
-    Option inputOpt = DefaultOptionCreator.inputOption().create();
-    Option outputOpt = DefaultOptionCreator.outputOption().create();
-    Option overwriteOutput = DefaultOptionCreator.overwriteOption().create();
-    Option topicsOpt = DefaultOptionCreator.numTopicsOption().create();
-    Option wordsOpt = DefaultOptionCreator.numWordsOption().create();
-    Option topicSmOpt = DefaultOptionCreator.topicSmoothingOption().create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().withRequired(false).create();
-    Option numReducOpt = DefaultOptionCreator.numReducersOption().create();
-    Option helpOpt = DefaultOptionCreator.helpOption();
-
-    Group group = new GroupBuilder().withName("Options").withOption(inputOpt).withOption(outputOpt)
-        .withOption(topicsOpt).withOption(wordsOpt).withOption(topicSmOpt).withOption(maxIterOpt)
-        .withOption(numReducOpt).withOption(overwriteOutput).withOption(helpOpt).create();
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      parser.setHelpOption(helpOpt);
-      CommandLine cmdLine = parser.parse(args);
-
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-      Path input = new Path(cmdLine.getValue(inputOpt).toString());
-      Path output = new Path(cmdLine.getValue(outputOpt).toString());
-      if (cmdLine.hasOption(overwriteOutput)) {
-        HadoopUtil.overwriteOutput(output);
-      }
-      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
-      int numReduceTasks = Integer.parseInt(cmdLine.getValue(numReducOpt).toString());
-      int numTopics = Integer.parseInt(cmdLine.getValue(topicsOpt).toString());
-      int numWords = Integer.parseInt(cmdLine.getValue(wordsOpt).toString());
-      double topicSmoothing = Double.parseDouble(cmdLine.getValue(maxIterOpt).toString());
-      if (topicSmoothing < 1) {
-        topicSmoothing = 50.0 / numTopics;
-      }
-
-      runJob(input, output, numTopics, numWords, topicSmoothing, maxIterations, numReduceTasks);
-
-    } catch (OptionException e) {
-      log.error("Exception", e);
-      CommandLineUtil.printHelp(group);
-    }
+  public static void main(String[] args) throws Exception {
+    new LDADriver().run(args);
   }
 
   /**
@@ -144,124 +111,7 @@ public final class LDADriver {
                             int maxIterations,
                             int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
 
-    Path stateIn = new Path(output, "state-0");
-    writeInitialState(stateIn, numTopics, numWords);
-    double oldLL = Double.NEGATIVE_INFINITY;
-    boolean converged = false;
-
-    for (int iteration = 1; ((maxIterations < 1) || (iteration <= maxIterations)) && !converged; iteration++) {
-      log.info("Iteration {}", iteration);
-      // point the output to a new directory per iteration
-      Path stateOut = new Path(output, "state-" + iteration);
-      double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing, numReducers);
-      double relChange = (oldLL - ll) / oldLL;
-
-      // now point the input to the old output directory
-      log.info("Iteration {} finished. Log Likelihood: {}", iteration, ll);
-      log.info("(Old LL: {})", oldLL);
-      log.info("(Rel Change: {})", relChange);
-
-      converged = (iteration > 3) && (relChange < OVERALL_CONVERGENCE);
-      stateIn = stateOut;
-      oldLL = ll;
-    }
-  }
-
-  private static void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {
-    Configuration job = new Configuration();
-    FileSystem fs = statePath.getFileSystem(job);
-
-    DoubleWritable v = new DoubleWritable();
-
-    Random random = RandomUtils.getRandom();
-
-    for (int k = 0; k < numTopics; ++k) {
-      Path path = new Path(statePath, "part-" + k);
-      SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, IntPairWritable.class, DoubleWritable.class);
-
-      double total = 0.0; // total number of pseudo counts we made
-      for (int w = 0; w < numWords; ++w) {
-        IntPairWritable kw = new IntPairWritable(k, w);
-        // A small amount of random noise, minimized by having a floor.
-        double pseudocount = random.nextDouble() + 1.0E-8;
-        total += pseudocount;
-        v.set(Math.log(pseudocount));
-        writer.append(kw, v);
-      }
-      IntPairWritable kTsk = new IntPairWritable(k, TOPIC_SUM_KEY);
-      v.set(Math.log(total));
-      writer.append(kTsk, v);
-
-      writer.close();
-    }
-  }
-
-  private static double findLL(Path statePath, Configuration job) throws IOException {
-    FileSystem fs = statePath.getFileSystem(job);
-
-    double ll = 0.0;
-
-    IntPairWritable key = new IntPairWritable();
-    DoubleWritable value = new DoubleWritable();
-    for (FileStatus status : fs.globStatus(new Path(statePath, "part-*"))) {
-      Path path = status.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-      while (reader.next(key, value)) {
-        if (key.getFirst() == LOG_LIKELIHOOD_KEY) {
-          ll = value.get();
-          break;
-        }
-      }
-      reader.close();
-    }
-
-    return ll;
-  }
-
-  /**
-   * Run the job using supplied arguments
-   * 
-   * @param input
-   *          the directory pathname for input points
-   * @param stateIn
-   *          the directory pathname for input state
-   * @param stateOut
-   *          the directory pathname for output state
-   * @param numTopics
-   *          the number of clusters
-   * @param numReducers
-   *          the number of Reducers desired
-   */
-  public static double runIteration(Path input,
-                                    Path stateIn,
-                                    Path stateOut,
-                                    int numTopics,
-                                    int numWords,
-                                    double topicSmoothing,
-                                    int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
-    conf.set(STATE_IN_KEY, stateIn.toString());
-    conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));
-    conf.set(NUM_WORDS_KEY, Integer.toString(numWords));
-    conf.set(TOPIC_SMOOTHING_KEY, Double.toString(topicSmoothing));
-
-    Job job = new Job(conf);
-
-    job.setOutputKeyClass(IntPairWritable.class);
-    job.setOutputValueClass(DoubleWritable.class);
-    FileInputFormat.addInputPaths(job, input.toString());
-    FileOutputFormat.setOutputPath(job, stateOut);
-
-    job.setMapperClass(LDAMapper.class);
-    job.setReducerClass(LDAReducer.class);
-    job.setCombinerClass(LDAReducer.class);
-    job.setNumReduceTasks(numReducers);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setJarByClass(LDADriver.class);
-
-    job.waitForCompletion(true);
-    return findLL(stateOut, conf);
+    new LDADriver().job(input, output, numTopics, numWords, topicSmoothing, maxIterations, numReducers);
   }
 
   static LDAState createState(Configuration job) throws IOException {
@@ -309,5 +159,182 @@ public final class LDADriver {
     }
 
     return new LDAState(numTopics, numWords, topicSmoothing, pWgT, logTotals, ll);
+  }
+
+  @Override
+  public int run(String[] args) throws Exception {
+
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.overwriteOption().create());
+    addOption(new DefaultOptionBuilder().withLongName(NUM_TOPICS_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
+        .withName(NUM_TOPICS_OPTION).withMinimum(1).withMaximum(1).create())
+        .withDescription("The total number of topics in the corpus").withShortName("k").create());
+    addOption(new DefaultOptionBuilder().withLongName(NUM_WORDS_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
+        .withName(NUM_WORDS_OPTION).withMinimum(1).withMaximum(1).create())
+        .withDescription("The total number of words in the corpus (can be approximate, needs to exceed the actual value)")
+        .withShortName("v").create());
+    addOption(new DefaultOptionBuilder().withLongName(TOPIC_SMOOTHING_OPTION).withRequired(false)
+        .withArgument(new ArgumentBuilder().withName(TOPIC_SMOOTHING_OPTION).withDefault(-1.0).withMinimum(0).withMaximum(1)
+            .create()).withDescription("Topic smoothing parameter. Default is 50/numTopics.").withShortName("a").create());
+    addOption(DefaultOptionCreator.maxIterationsOption().withRequired(false).create());
+    addOption(DefaultOptionCreator.numReducersOption().create());
+
+    Map<String, String> argMap = parseArguments(args);
+    if (argMap == null) {
+      return -1;
+    }
+
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
+    int numReduceTasks = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
+    int numTopics = Integer.parseInt(argMap.get(NUM_TOPICS_OPTION_KEY));
+    int numWords = Integer.parseInt(argMap.get(NUM_WORDS_OPTION_KEY));
+    double topicSmoothing = Double.parseDouble(argMap.get(TOPIC_SMOOTHING_OPTION_KEY));
+    if (topicSmoothing < 1) {
+      topicSmoothing = 50.0 / numTopics;
+    }
+
+    job(input, output, numTopics, numWords, topicSmoothing, maxIterations, numReduceTasks);
+
+    return 0;
+  }
+
+  /**
+   * @param input
+   * @param output
+   * @param numTopics
+   * @param numWords
+   * @param topicSmoothing
+   * @param maxIterations
+   * @param numReducers
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
+  private void job(Path input, Path output, int numTopics, int numWords, double topicSmoothing, int maxIterations, int numReducers)
+      throws IOException, InterruptedException, ClassNotFoundException {
+    Path stateIn = new Path(output, "state-0");
+    writeInitialState(stateIn, numTopics, numWords);
+    double oldLL = Double.NEGATIVE_INFINITY;
+    boolean converged = false;
+
+    for (int iteration = 1; ((maxIterations < 1) || (iteration <= maxIterations)) && !converged; iteration++) {
+      log.info("Iteration {}", iteration);
+      // point the output to a new directory per iteration
+      Path stateOut = new Path(output, "state-" + iteration);
+      double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing, numReducers);
+      double relChange = (oldLL - ll) / oldLL;
+
+      // now point the input to the old output directory
+      log.info("Iteration {} finished. Log Likelihood: {}", iteration, ll);
+      log.info("(Old LL: {})", oldLL);
+      log.info("(Rel Change: {})", relChange);
+
+      converged = (iteration > 3) && (relChange < OVERALL_CONVERGENCE);
+      stateIn = stateOut;
+      oldLL = ll;
+    }
+  }
+
+  private void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {
+    Configuration job = new Configuration();
+    FileSystem fs = statePath.getFileSystem(job);
+
+    DoubleWritable v = new DoubleWritable();
+
+    Random random = RandomUtils.getRandom();
+
+    for (int k = 0; k < numTopics; ++k) {
+      Path path = new Path(statePath, "part-" + k);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, path, IntPairWritable.class, DoubleWritable.class);
+
+      double total = 0.0; // total number of pseudo counts we made
+      for (int w = 0; w < numWords; ++w) {
+        IntPairWritable kw = new IntPairWritable(k, w);
+        // A small amount of random noise, minimized by having a floor.
+        double pseudocount = random.nextDouble() + 1.0E-8;
+        total += pseudocount;
+        v.set(Math.log(pseudocount));
+        writer.append(kw, v);
+      }
+      IntPairWritable kTsk = new IntPairWritable(k, TOPIC_SUM_KEY);
+      v.set(Math.log(total));
+      writer.append(kTsk, v);
+
+      writer.close();
+    }
+  }
+
+  private double findLL(Path statePath, Configuration job) throws IOException {
+    FileSystem fs = statePath.getFileSystem(job);
+
+    double ll = 0.0;
+
+    IntPairWritable key = new IntPairWritable();
+    DoubleWritable value = new DoubleWritable();
+    for (FileStatus status : fs.globStatus(new Path(statePath, "part-*"))) {
+      Path path = status.getPath();
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
+      while (reader.next(key, value)) {
+        if (key.getFirst() == LOG_LIKELIHOOD_KEY) {
+          ll = value.get();
+          break;
+        }
+      }
+      reader.close();
+    }
+
+    return ll;
+  }
+
+  /**
+   * Run the job using supplied arguments
+   * 
+   * @param input
+   *          the directory pathname for input points
+   * @param stateIn
+   *          the directory pathname for input state
+   * @param stateOut
+   *          the directory pathname for output state
+   * @param numTopics
+   *          the number of clusters
+   * @param numReducers
+   *          the number of Reducers desired
+   */
+  private double runIteration(Path input,
+                              Path stateIn,
+                              Path stateOut,
+                              int numTopics,
+                              int numWords,
+                              double topicSmoothing,
+                              int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration();
+    conf.set(STATE_IN_KEY, stateIn.toString());
+    conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));
+    conf.set(NUM_WORDS_KEY, Integer.toString(numWords));
+    conf.set(TOPIC_SMOOTHING_KEY, Double.toString(topicSmoothing));
+
+    Job job = new Job(conf);
+
+    job.setOutputKeyClass(IntPairWritable.class);
+    job.setOutputValueClass(DoubleWritable.class);
+    FileInputFormat.addInputPaths(job, input.toString());
+    FileOutputFormat.setOutputPath(job, stateOut);
+
+    job.setMapperClass(LDAMapper.class);
+    job.setReducerClass(LDAReducer.class);
+    job.setCombinerClass(LDAReducer.class);
+    job.setNumReduceTasks(numReducers);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setJarByClass(LDADriver.class);
+
+    job.waitForCompletion(true);
+    return findLL(stateOut, conf);
   }
 }

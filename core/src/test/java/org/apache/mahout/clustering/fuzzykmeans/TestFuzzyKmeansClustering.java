@@ -37,6 +37,7 @@ import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -208,21 +209,31 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
       writer.close();
 
-      // now run the Job
+      // now run the Job using the run() command line options.
       Path output = getTestTempDirPath("output");
-      FuzzyKMeansDriver.runJob(pointsPath,
+/*      FuzzyKMeansDriver.runJob(pointsPath,
                                clustersPath,
                                output,
                                EuclideanDistanceMeasure.class.getName(),
                                0.001,
                                2,
-                               1,
                                k + 1,
                                2,
                                false,
                                true,
                                0);
-
+*/
+      String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, pointsPath.toString(), 
+          DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY, clustersPath.toString(), 
+          DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(),
+          DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY, EuclideanDistanceMeasure.class.getName(),
+          DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY, "0.001", 
+          DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY, "2",
+          FuzzyKMeansDriver.M_OPTION_KEY, "2.0", 
+          DefaultOptionCreator.CLUSTERING_OPTION_KEY,
+          DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY,
+          DefaultOptionCreator.OVERWRITE_OPTION_KEY };
+      new FuzzyKMeansDriver().run(args);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-00000"), conf);
       IntWritable key = new IntWritable();
       WeightedVectorWritable out = new WeightedVectorWritable();

@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.syntheticcontrol.kmeans;
+package org.apache.mahout.clustering.syntheticcontrol.fuzzykmeans;
 
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.cli2.builder.ArgumentBuilder;
+import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
@@ -34,7 +36,7 @@ import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Job extends KMeansDriver {
+public final class Job extends FuzzyKMeansDriver {
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
@@ -50,7 +52,17 @@ public final class Job extends KMeansDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"), output, "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55, 0.5, 10);
+      new Job().job(new Path("testdata"),
+                    output,
+                    "org.apache.mahout.common.distance.EuclideanDistanceMeasure",
+                    80,
+                    55,
+                    10,
+                    1,
+                    (float) 2,
+                    0.5,
+                    true);
+
     }
   }
 
@@ -72,6 +84,8 @@ public final class Job extends KMeansDriver {
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.numReducersOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
+    addOption(DefaultOptionCreator.t1Option().create());
+    addOption(DefaultOptionCreator.t2Option().create());
 
     Map<String, String> argMap = parseArguments(args);
     if (argMap == null) {
@@ -88,6 +102,11 @@ public final class Job extends KMeansDriver {
     double convergenceDelta = Double.parseDouble(argMap.get(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY));
     int numReduceTasks = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
     int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
+    float fuzziness = Float.parseFloat(argMap.get(M_OPTION_KEY));
+
+    addOption(new DefaultOptionBuilder().withLongName(M_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
+        .withName(M_OPTION).withMinimum(1).withMaximum(1).create())
+        .withDescription("coefficient normalization factor, must be greater than 1").withShortName(M_OPTION).create());
     if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
       HadoopUtil.overwriteOutput(output);
     }
@@ -96,7 +115,9 @@ public final class Job extends KMeansDriver {
           .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)));
     }
     boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
-    runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, runClustering);
+    double t1 = Double.parseDouble(argMap.get(DefaultOptionCreator.T1_OPTION_KEY));
+    double t2 = Double.parseDouble(argMap.get(DefaultOptionCreator.T2_OPTION_KEY));
+    job(input, output, measureClass, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta, runClustering);
     return 0;
   }
 
@@ -113,41 +134,57 @@ public final class Job extends KMeansDriver {
    * @param output
    *          the String denoting the output directory path
    * @param measureClass
-   *          the String class name of the DistanceMeasure to use
-   * @param t1
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
+   * @param maxIterations 
+   *          the int maximum number of iterations
+   * @param numReducerTasks 
+   *          the int number of reducer tasks
+   * @param fuzziness 
+   *          the float "m" fuzziness coefficient
    * @param convergenceDelta
    *          the double convergence criteria for iterations
-   * @param maxIterations
+   * @param runClustering
    *          the int maximum number of iterations
+   * @param output2
+   *          the String class name of the DistanceMeasure to use
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  private void job(Path input, Path output, String measureClass, double t1, double t2, double convergenceDelta, int maxIterations)
-      throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
-    HadoopUtil.overwriteOutput(output);
+  private void job(Path input,
+                   Path output,
+                   String measureClass,
+                   double t1,
+                   double t2,
+                   int maxIterations,
+                   int numReducerTasks,
+                   float fuzziness,
+                   double convergenceDelta,
+                   boolean runClustering) throws IOException, InstantiationException, IllegalAccessException, InterruptedException,
+      ClassNotFoundException {
 
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
     CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2, false);
-    log.info("Running KMeans");
-    KMeansDriver.runJob(directoryContainingConvertedInput,
-                        new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
-                        output,
-                        measureClass,
-                        convergenceDelta,
-                        maxIterations,
-                        1,
-                        true);
+    log.info("Running FuzzyKMeans");
+    FuzzyKMeansDriver.runJob(directoryContainingConvertedInput,
+                             new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
+                             output,
+                             measureClass,
+                             convergenceDelta,
+                             maxIterations,
+                             numReducerTasks,
+                             fuzziness,
+                             true,
+                             false,
+                             0.0);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 }
