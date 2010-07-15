@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.model;
 
 import java.util.Collection;
 
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -124,10 +125,15 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   
   @Override
   public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
-    PreferenceArray delegatePrefs = delegate.getPreferencesForItem(itemID);
+    PreferenceArray delegatePrefs = null;
+    try {
+      delegatePrefs = delegate.getPreferencesForItem(itemID);
+    } catch (NoSuchItemException nsie) {
+      // OK. Probably an item that only the anonymous user has
+    }
     for (int i = 0; i < tempPrefs.length(); i++) {
       if (tempPrefs.getItemID(i) == itemID) {
-        int length = delegatePrefs.length();
+        int length = delegatePrefs == null ? 0 : delegatePrefs.length();
         PreferenceArray newPreferenceArray = new GenericItemPreferenceArray(length + 1);
         for (int j = 0; j < length; j++) {
           newPreferenceArray.setUserID(j, delegatePrefs.getUserID(j));
@@ -140,6 +146,10 @@ public final class PlusAnonymousUserDataModel implements DataModel {
         newPreferenceArray.sortByUser();
         return newPreferenceArray;
       }
+    }
+    if (delegatePrefs == null) {
+      // No, didn't find it among the anonymous user prefs
+      throw new NoSuchItemException();
     }
     return delegatePrefs;
   }
@@ -156,7 +166,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
     }
     return delegate.getPreferenceValue(userID, itemID);
   }
-  
+
   @Override
   public int getNumItems() throws TasteException {
     return delegate.getNumItems();

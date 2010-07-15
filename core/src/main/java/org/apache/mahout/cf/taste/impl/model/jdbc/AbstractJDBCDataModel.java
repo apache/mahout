@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
 
 import javax.sql.DataSource;
 
+import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.NoSuchUserException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -75,13 +76,15 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   public static final String DEFAULT_USER_ID_COLUMN = "user_id";
   public static final String DEFAULT_ITEM_ID_COLUMN = "item_id";
   public static final String DEFAULT_PREFERENCE_COLUMN = "preference";
-  
+  public static final String DEFAULT_PREFERENCE_TIME_COLUMN = "timestamp";
+
   private final DataSource dataSource;
   private final String preferenceTable;
   private final String userIDColumn;
   private final String itemIDColumn;
   private final String preferenceColumn;
   private final String getPreferenceSQL;
+  private final String getPreferenceTimeSQL;
   private final String getUserSQL;
   private final String getAllUsersSQL;
   private final String getNumItemsSQL;
@@ -442,7 +445,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       IOUtils.quietClose(rs, stmt, conn);
     }
   }
-  
+
   @Override
   public LongPrimitiveIterator getItemIDs() throws TasteException {
     log.debug("Retrieving all items...");
@@ -452,6 +455,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   @Override
   public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
     List<Preference> list = doGetPreferencesForItem(itemID);
+    if (list.isEmpty()) {
+      throw new NoSuchItemException();
+    }
     return new GenericItemPreferenceArray(list);
   }
   
