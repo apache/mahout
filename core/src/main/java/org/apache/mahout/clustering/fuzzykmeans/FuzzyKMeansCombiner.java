@@ -37,7 +37,6 @@ public class FuzzyKMeansCombiner extends Reducer<Text,FuzzyKMeansInfo,Text,Fuzzy
       }
       value.setCombinerPass(value.getCombinerPass() + 1);
     }
-    // TODO: how do we pass along the combinerPass? Or do we not need to?
     context.write(key, new FuzzyKMeansInfo(cluster.getPointProbSum(), cluster.getWeightedPointTotal(), 1));
   }
 

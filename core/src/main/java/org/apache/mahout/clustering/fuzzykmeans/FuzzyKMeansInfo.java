@@ -64,12 +64,14 @@ public class FuzzyKMeansInfo implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeDouble(probability);
+    out.writeInt(combinerPass);
     VectorWritable.writeVector(out, pointTotal);
   }
   
   @Override
   public void readFields(DataInput in) throws IOException {
     this.probability = in.readDouble();
+    this.combinerPass = in.readInt();
     VectorWritable temp = new VectorWritable();
     temp.readFields(in);
     this.pointTotal = temp.get();

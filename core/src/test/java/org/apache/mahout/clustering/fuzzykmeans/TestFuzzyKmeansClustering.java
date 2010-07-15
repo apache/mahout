@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,8 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DataInputBuffer;
+import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -40,6 +43,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -211,28 +215,24 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // now run the Job using the run() command line options.
       Path output = getTestTempDirPath("output");
-/*      FuzzyKMeansDriver.runJob(pointsPath,
-                               clustersPath,
-                               output,
-                               EuclideanDistanceMeasure.class.getName(),
-                               0.001,
-                               2,
-                               k + 1,
-                               2,
-                               false,
-                               true,
-                               0);
-*/
-      String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, pointsPath.toString(), 
-          DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY, clustersPath.toString(), 
-          DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(),
+      /*      FuzzyKMeansDriver.runJob(pointsPath,
+                                     clustersPath,
+                                     output,
+                                     EuclideanDistanceMeasure.class.getName(),
+                                     0.001,
+                                     2,
+                                     k + 1,
+                                     2,
+                                     false,
+                                     true,
+                                     0);
+      */
+      String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, pointsPath.toString(), DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY,
+          clustersPath.toString(), DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(),
           DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY, EuclideanDistanceMeasure.class.getName(),
-          DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY, "0.001", 
-          DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY, "2",
-          FuzzyKMeansDriver.M_OPTION_KEY, "2.0", 
-          DefaultOptionCreator.CLUSTERING_OPTION_KEY,
-          DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY,
-          DefaultOptionCreator.OVERWRITE_OPTION_KEY };
+          DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY, "0.001", DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY, "2",
+          FuzzyKMeansDriver.M_OPTION_KEY, "2.0", DefaultOptionCreator.CLUSTERING_OPTION_KEY,
+          DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY, DefaultOptionCreator.OVERWRITE_OPTION_KEY };
       new FuzzyKMeansDriver().run(args);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-00000"), conf);
       IntWritable key = new IntWritable();
@@ -581,6 +581,21 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
       assertEquals("total size", size, points.size());
     }
+  }
+
+  public void testFuzzyKMeansInfoSerialization() throws IOException {
+    double[] data = { 1.1, 2.2, 3.3 };
+    Vector vector = new DenseVector(data);
+    FuzzyKMeansInfo reference = new FuzzyKMeansInfo(2.0, vector, 1);
+    DataOutputBuffer out = new DataOutputBuffer();
+    reference.write(out);
+    FuzzyKMeansInfo info = new FuzzyKMeansInfo();
+    DataInputBuffer in = new DataInputBuffer();
+    in.reset(out.getData(), out.getLength());
+    info.readFields(in);
+    assertEquals("probability", reference.getProbability(), info.getProbability());
+    assertTrue("point total", reference.getVector().equals(info.getVector()));
+    assertEquals("combiner", reference.getCombinerPass(), info.getCombinerPass());
   }
 
 }

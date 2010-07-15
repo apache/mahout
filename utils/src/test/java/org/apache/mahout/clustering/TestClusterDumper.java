@@ -162,7 +162,7 @@ public class TestClusterDumper extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
                         EuclideanDistanceMeasure.class.getName(), 8, 4, false);
-    // now run the KMeans job
+    // now run the Fuzzy KMeans job
     FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
                              EuclideanDistanceMeasure.class.getName(), 0.001, 10,
         1, (float) 1.1, true, true, 0);
