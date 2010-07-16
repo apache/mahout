@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -132,9 +130,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(new DefaultOptionBuilder().withLongName(M_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
-        .withName(M_OPTION).withMinimum(1).withMaximum(1).create())
-        .withDescription("coefficient normalization factor, must be greater than 1").withShortName(M_OPTION).create());
+    addOption(M_OPTION, M_OPTION,"coefficient normalization factor, must be greater than 1", true);
     addOption(DefaultOptionCreator.numReducersOption().create());
     //TODO: addOption(DefaultOptionCreator.numMappersOption().create()); but how to set in new Job?
     addOption(DefaultOptionCreator.clusteringOption().create());

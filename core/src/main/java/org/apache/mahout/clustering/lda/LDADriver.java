@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -167,16 +165,11 @@ public final class LDADriver extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(new DefaultOptionBuilder().withLongName(NUM_TOPICS_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
-        .withName(NUM_TOPICS_OPTION).withMinimum(1).withMaximum(1).create())
-        .withDescription("The total number of topics in the corpus").withShortName("k").create());
-    addOption(new DefaultOptionBuilder().withLongName(NUM_WORDS_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
-        .withName(NUM_WORDS_OPTION).withMinimum(1).withMaximum(1).create())
-        .withDescription("The total number of words in the corpus (can be approximate, needs to exceed the actual value)")
-        .withShortName("v").create());
-    addOption(new DefaultOptionBuilder().withLongName(TOPIC_SMOOTHING_OPTION).withRequired(false)
-        .withArgument(new ArgumentBuilder().withName(TOPIC_SMOOTHING_OPTION).withDefault(-1.0).withMinimum(0).withMaximum(1)
-            .create()).withDescription("Topic smoothing parameter. Default is 50/numTopics.").withShortName("a").create());
+    addOption(NUM_TOPICS_OPTION, "k", "The total number of topics in the corpus", true);
+    addOption(NUM_WORDS_OPTION,
+              "v",
+              "The total number of words in the corpus (can be approximate, needs to exceed the actual value)");
+    addOption(TOPIC_SMOOTHING_OPTION, "a", "Topic smoothing parameter. Default is 50/numTopics.", "-1.0");
     addOption(DefaultOptionCreator.maxIterationsOption().withRequired(false).create());
     addOption(DefaultOptionCreator.numReducersOption().create());
 

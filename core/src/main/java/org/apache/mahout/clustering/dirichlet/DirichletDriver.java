@@ -22,8 +22,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -101,17 +99,15 @@ public class DirichletDriver extends AbstractJob {
     addOption(DefaultOptionCreator.numClustersOption().withRequired(true).create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
-    addOption(new DefaultOptionBuilder().withLongName(ALPHA_OPTION).withRequired(false).withShortName("m")
-        .withArgument(new ArgumentBuilder().withName(ALPHA_OPTION).withDefault("1.0").withMinimum(1).withMaximum(1).create())
-        .withDescription("The alpha0 value for the DirichletDistribution. Defaults to 1.0").create());
-    addOption(new DefaultOptionBuilder().withLongName(MODEL_DISTRIBUTION_CLASS_OPTION).withRequired(false).withShortName("md")
-        .withArgument(new ArgumentBuilder().withName(MODEL_DISTRIBUTION_CLASS_OPTION).withDefault(NormalModelDistribution.class
-            .getName()).withMinimum(1).withMaximum(1).create()).withDescription("The ModelDistribution class name. "
-            + "Defaults to NormalModelDistribution").create());
-    addOption(new DefaultOptionBuilder().withLongName(MODEL_PROTOTYPE_CLASS_OPTION).withRequired(false).withShortName("mp")
-        .withArgument(new ArgumentBuilder().withName("prototypeClass").withDefault(RandomAccessSparseVector.class.getName())
-            .withMinimum(1).withMaximum(1).create())
-        .withDescription("The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector").create());
+    addOption(ALPHA_OPTION, "a0", "The alpha0 value for the DirichletDistribution. Defaults to 1.0", "1.0");
+    addOption(MODEL_DISTRIBUTION_CLASS_OPTION,
+              "md",
+              "The ModelDistribution class name. Defaults to NormalModelDistribution",
+              NormalModelDistribution.class.getName());
+    addOption(MODEL_PROTOTYPE_CLASS_OPTION,
+              "mp",
+              "The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector",
+              RandomAccessSparseVector.class.getName());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
     addOption(DefaultOptionCreator.numReducersOption().create());

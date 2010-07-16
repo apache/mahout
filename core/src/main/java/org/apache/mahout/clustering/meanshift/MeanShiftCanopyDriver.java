@@ -20,8 +20,6 @@ package org.apache.mahout.clustering.meanshift;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -113,9 +111,9 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(new DefaultOptionBuilder().withLongName(INPUT_IS_CANOPIES_OPTION).withRequired(false).withShortName("ic")
-        .withArgument(new ArgumentBuilder().withName(INPUT_IS_CANOPIES_OPTION).withMinimum(1).withMaximum(1).create())
-        .withDescription("If present, the input directory already contains MeanShiftCanopies").create());
+    addOption(INPUT_IS_CANOPIES_OPTION,
+              INPUT_IS_CANOPIES_OPTION,
+              "If present, the input directory already contains MeanShiftCanopies");
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.t1Option().create());
     addOption(DefaultOptionCreator.t2Option().create());
