@@ -21,7 +21,8 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.mahout.cf.taste.common.TasteException;
+import java.util.Collection;
+import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.model.IDMigrator;
 
 public abstract class AbstractIDMigrator implements IDMigrator {
@@ -59,12 +60,9 @@ public abstract class AbstractIDMigrator implements IDMigrator {
   public long toLongID(String stringID) {
     return hash(stringID);
   }
-  
+
   @Override
-  public void initialize(Iterable<String> stringIDs) throws TasteException {
-    for (String stringID : stringIDs) {
-      storeMapping(toLongID(stringID), stringID);
-    }
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
   }
   
 }

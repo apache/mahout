@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.model.UpdatableIDMigrator;
 import org.apache.mahout.common.IOUtils;
 
 /**
@@ -32,7 +33,7 @@ import org.apache.mahout.common.IOUtils;
  * configure the class to operate with particular databases by supplying appropriate SQL statements to the
  * constructor.
  */
-public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator {
+public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator implements UpdatableIDMigrator {
   
   public static final String DEFAULT_MAPPING_TABLE = "taste_id_mapping";
   public static final String DEFAULT_LONG_ID_COLUMN = "long_id";
@@ -96,5 +97,12 @@ public abstract class AbstractJDBCIDMigrator extends AbstractIDMigrator {
       IOUtils.quietClose(rs, stmt, conn);
     }
   }
-  
+
+  @Override
+  public void initialize(Iterable<String> stringIDs) throws TasteException {
+    for (String stringID : stringIDs) {
+      storeMapping(toLongID(stringID), stringID);
+    }
+  }
+
 }

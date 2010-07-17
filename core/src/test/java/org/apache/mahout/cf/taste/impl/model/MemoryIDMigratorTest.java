@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.model.IDMigrator;
 import org.apache.mahout.common.MahoutTestCase;
 
 import java.util.Collections;
+import org.apache.mahout.cf.taste.model.UpdatableIDMigrator;
 
 public final class MemoryIDMigratorTest extends MahoutTestCase {
 
@@ -34,7 +35,7 @@ public final class MemoryIDMigratorTest extends MahoutTestCase {
   }
 
   public void testStore() throws Exception {
-    IDMigrator migrator = new MemoryIDMigrator();
+    UpdatableIDMigrator migrator = new MemoryIDMigrator();
     long id = migrator.toLongID(DUMMY_STRING);
     assertNull(migrator.toStringID(id));
     migrator.storeMapping(id, DUMMY_STRING);
@@ -42,7 +43,7 @@ public final class MemoryIDMigratorTest extends MahoutTestCase {
   }
 
   public void testInitialize() throws Exception {
-    IDMigrator migrator = new MemoryIDMigrator();
+    UpdatableIDMigrator migrator = new MemoryIDMigrator();
     long id = migrator.toLongID(DUMMY_STRING);
     assertNull(migrator.toStringID(id));
     migrator.initialize(Collections.singleton(DUMMY_STRING));
