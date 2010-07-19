@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.lda;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
@@ -49,15 +48,9 @@ public final class LDADriver extends AbstractJob {
 
   private static final String TOPIC_SMOOTHING_OPTION = "topicSmoothing";
 
-  private static final String TOPIC_SMOOTHING_OPTION_KEY = "--" + TOPIC_SMOOTHING_OPTION;
-
   private static final String NUM_WORDS_OPTION = "numWords";
 
-  private static final String NUM_WORDS_OPTION_KEY = "--" + NUM_WORDS_OPTION;
-
   private static final String NUM_TOPICS_OPTION = "numTopics";
-
-  private static final String NUM_TOPICS_OPTION_KEY = "--" + NUM_TOPICS_OPTION;
 
   static final String STATE_IN_KEY = "org.apache.mahout.clustering.lda.stateIn";
 
@@ -173,21 +166,20 @@ public final class LDADriver extends AbstractJob {
     addOption(DefaultOptionCreator.maxIterationsOption().withRequired(false).create());
     addOption(DefaultOptionCreator.numReducersOption().create());
 
-    Map<String, String> argMap = parseArguments(args);
-    if (argMap == null) {
+    if (parseArguments(args) == null) {
       return -1;
     }
 
     Path input = getInputPath();
     Path output = getOutputPath();
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
-    int numReduceTasks = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
-    int numTopics = Integer.parseInt(argMap.get(NUM_TOPICS_OPTION_KEY));
-    int numWords = Integer.parseInt(argMap.get(NUM_WORDS_OPTION_KEY));
-    double topicSmoothing = Double.parseDouble(argMap.get(TOPIC_SMOOTHING_OPTION_KEY));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    int numReduceTasks = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
+    int numTopics = Integer.parseInt(getOption(NUM_TOPICS_OPTION));
+    int numWords = Integer.parseInt(getOption(NUM_WORDS_OPTION));
+    double topicSmoothing = Double.parseDouble(getOption(TOPIC_SMOOTHING_OPTION));
     if (topicSmoothing < 1) {
       topicSmoothing = 50.0 / numTopics;
     }

@@ -513,10 +513,14 @@ public class TestCanopyCreation extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, getTestTempFilePath("testdata/file2"), fs, conf);
     // now run the Job using the run() command. Others can use runJob().
     Path output = getTestTempDirPath("output");
-    String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, getTestTempDirPath("testdata").toString(),
-        DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(), DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY,
-        EuclideanDistanceMeasure.class.getName(), DefaultOptionCreator.T1_OPTION_KEY, "3.1", DefaultOptionCreator.T2_OPTION_KEY,
-        "2.1", DefaultOptionCreator.CLUSTERING_OPTION_KEY, DefaultOptionCreator.OVERWRITE_OPTION_KEY  };
+    String[] args = { 
+        optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("testdata").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(), 
+        optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(), 
+        optKey(DefaultOptionCreator.T1_OPTION), "3.1", 
+        optKey(DefaultOptionCreator.T2_OPTION), "2.1", 
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION), 
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION)  };
     new CanopyDriver().run(args);
     Path path = new Path(output, "clusteredPoints/part-m-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);

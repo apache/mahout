@@ -19,14 +19,6 @@ package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
 
-import org.apache.commons.cli2.CommandLine;
-import org.apache.commons.cli2.Group;
-import org.apache.commons.cli2.Option;
-import org.apache.commons.cli2.OptionException;
-import org.apache.commons.cli2.builder.ArgumentBuilder;
-import org.apache.commons.cli2.builder.DefaultOptionBuilder;
-import org.apache.commons.cli2.builder.GroupBuilder;
-import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -42,13 +34,13 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
-import org.apache.mahout.common.CommandLineUtil;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class CDbwDriver {
+public final class CDbwDriver extends AbstractJob {
 
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.dirichlet.stateIn";
 
@@ -62,47 +54,27 @@ public final class CDbwDriver {
   }
 
   public static void main(String[] args) throws Exception {
-    DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
-    ArgumentBuilder abuilder = new ArgumentBuilder();
-    GroupBuilder gbuilder = new GroupBuilder();
+    new CDbwDriver().run(args);
+  }
 
-    Option inputOpt = DefaultOptionCreator.inputOption().create();
-    Option outputOpt = DefaultOptionCreator.outputOption().create();
-    Option maxIterOpt = DefaultOptionCreator.maxIterationsOption().create();
-    Option helpOpt = DefaultOptionCreator.helpOption();
-
-    Option modelOpt = obuilder.withLongName("modelClass").withRequired(true).withShortName("d").withArgument(abuilder
-        .withName("modelClass").withMinimum(1).withMaximum(1).create()).withDescription("The ModelDistribution class name. "
-        + "Defaults to org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution").create();
-
-    Option numRedOpt = obuilder.withLongName("maxRed").withRequired(true).withShortName("r").withArgument(abuilder
-        .withName("maxRed").withMinimum(1).withMaximum(1).create()).withDescription("The number of reduce tasks.").create();
-
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(modelOpt)
-        .withOption(maxIterOpt).withOption(helpOpt).withOption(numRedOpt).create();
-
-    try {
-      Parser parser = new Parser();
-      parser.setGroup(group);
-      CommandLine cmdLine = parser.parse(args);
-      if (cmdLine.hasOption(helpOpt)) {
-        CommandLineUtil.printHelp(group);
-        return;
-      }
-
-      Path input = new Path(cmdLine.getValue(inputOpt).toString());
-      Path output = new Path(cmdLine.getValue(outputOpt).toString());
-      String modelFactory = "org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution";
-      if (cmdLine.hasOption(modelOpt)) {
-        modelFactory = cmdLine.getValue(modelOpt).toString();
-      }
-      int numReducers = Integer.parseInt(cmdLine.getValue(numRedOpt).toString());
-      int maxIterations = Integer.parseInt(cmdLine.getValue(maxIterOpt).toString());
-      runJob(input, null, output, modelFactory, maxIterations, numReducers);
-    } catch (OptionException e) {
-      log.error("Exception parsing command line: ", e);
-      CommandLineUtil.printHelp(group);
+  public int run(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
+      InterruptedException {
+    addInputOption();
+    addOutputOption();
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.numReducersOption().create());
+    addOption(DefaultOptionCreator.maxIterationsOption().create());
+    if (parseArguments(args) == null) {
+      return -1;
     }
+
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
+    int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    job(input, null, output, distanceMeasureClass, maxIterations, numReducers);
+    return 0;
   }
 
   /**
@@ -130,6 +102,16 @@ public final class CDbwDriver {
                             int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
       IOException, InterruptedException {
 
+    new CDbwDriver().job(clustersIn, clusteredPointsIn, output, distanceMeasureClass, numIterations, numReducers);
+  }
+
+  private void job(Path clustersIn,
+                   Path clusteredPointsIn,
+                   Path output,
+                   String distanceMeasureClass,
+                   int numIterations,
+                   int numReducers) throws InstantiationException, IllegalAccessException, IOException, InterruptedException,
+      ClassNotFoundException {
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
 
@@ -146,8 +128,11 @@ public final class CDbwDriver {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    // now print out the CDbw
+    // now print out the Results
     System.out.println("CDbw = " + evaluator.CDbw());
+    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
+    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
+    System.out.println("Separation = " + evaluator.separation());
   }
 
   private static void writeInitialState(Path output, Path clustersIn) throws InstantiationException, IllegalAccessException,
@@ -191,7 +176,8 @@ public final class CDbwDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  public static void runIteration(Path input, Path stateIn, Path stateOut, String distanceMeasureClass, int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void runIteration(Path input, Path stateIn, Path stateOut, String distanceMeasureClass, int numReducers)
+      throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);

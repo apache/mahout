@@ -92,13 +92,13 @@ public class CanopyDriver extends AbstractJob {
 
     Path input = getInputPath();
     Path output = getOutputPath();
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
-    double t1 = Double.parseDouble(argMap.get(DefaultOptionCreator.T1_OPTION_KEY));
-    double t2 = Double.parseDouble(argMap.get(DefaultOptionCreator.T2_OPTION_KEY));
-    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+    String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
+    double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
+    double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
+    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
 
     job(input, output, measureClass, t1, t2, runClustering);
     return 0;

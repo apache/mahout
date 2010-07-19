@@ -72,29 +72,35 @@ import org.slf4j.LoggerFactory;
  * <p>Note that because of how Hadoop parses arguments, all "-D" arguments must appear before all other
  * arguments.</p>
  */
+/**
+ * @author jeff
+ *
+ */
 public abstract class AbstractJob extends Configured implements Tool {
-  
+
   private static final Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
   /** option used to specify the input path */
   private Option inputOption;
-  
+
   /** option used to specify the output path */
   private Option outputOption;
-  
+
   /** input path, populated by {@link #parseArguments(String[])} */
-  private Path   inputPath; 
-  
+  private Path inputPath;
+
   /** output path, populated by {@link #parseArguments(String[]) */
-  private Path   outputPath;
-  
+  private Path outputPath;
+
+  private Map<String, String> argMap;
+
   /** internal list of options that have been added */
   private final List<Option> options;
-  
+
   protected AbstractJob() {
     options = new LinkedList<Option>();
   }
-  
+
   /** Returns the input path established by a call to {@link #parseArguments(String[])}.
    *  The source of the path may be an input option added using {@link #addInputOption()}
    *  or it may be the value of the <code>mapred.input.dir</code> configuration
@@ -104,7 +110,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected Path getInputPath() {
     return inputPath;
   }
-  
+
   /** Returns the output path established by a call to {@link #parseArguments(String[])}.
    *  The source of the path may be an output option added using {@link #addOutputOption()}
    *  or it may be the value of the <code>mapred.input.dir</code> configuration
@@ -114,7 +120,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected Path getOutputPath() {
     return outputPath;
   }
-  
+
   /** Add an option with no argument whose presence can be checked for using
    *  <code>containsKey<code> method on the map returned by 
    *  {@link #parseArguments(String[])};
@@ -126,7 +132,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected void addFlag(String name, String shortName, String description) {
     options.add(buildOption(name, shortName, description, false, false, null));
   }
-  
+
   /** Add an option to the the set of options this job will parse when
    *  {@link #parseArguments(String[])} is called. This options has an argument
    *  with null as its default value.
@@ -138,7 +144,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected void addOption(String name, String shortName, String description) {
     options.add(buildOption(name, shortName, description, true, false, null));
   }
-  
+
   /** Add an option to the the set of options this job will parse when
    *  {@link #parseArguments(String[])} is called.
    * 
@@ -152,7 +158,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected void addOption(String name, String shortName, String description, boolean required) {
     options.add(buildOption(name, shortName, description, true, required, null));
   }
-  
+
   /** Add an option to the the set of options this job will parse when
    *  {@link #parseArguments(String[])} is called. If this option is not 
    *  specified on the command line the default value will be 
@@ -181,7 +187,7 @@ public abstract class AbstractJob extends Configured implements Tool {
     options.add(option);
     return option;
   }
-  
+
   /** Add the default input directory option, '-i' which takes a directory
    *  name as an argument. When {@link #parseArguments(String[])} is 
    *  called, the inputPath will be set based upon the value for this option.
@@ -190,7 +196,7 @@ public abstract class AbstractJob extends Configured implements Tool {
   protected void addInputOption() {
     this.inputOption = addOption(DefaultOptionCreator.inputOption().create());
   }
-  
+
   /** Add the default output directory option, '-o' which takes a directory
    *  name as an argument. When {@link #parseArguments(String[])} is 
    *  called, the outputPath will be set based upon the value for this option.
@@ -212,40 +218,35 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @return the option.
    */
   private static Option buildOption(String name,
-                                      String shortName,
-                                      String description,
-                                      boolean hasArg,
-                                      boolean required,
-                                      String defaultValue) {
+                                    String shortName,
+                                    String description,
+                                    boolean hasArg,
+                                    boolean required,
+                                    String defaultValue) {
 
-    DefaultOptionBuilder optBuilder = new DefaultOptionBuilder()
-      .withLongName(name)
-      .withDescription(description)
-      .withRequired(required);
-      
+    DefaultOptionBuilder optBuilder = new DefaultOptionBuilder().withLongName(name).withDescription(description)
+        .withRequired(required);
+
     if (shortName != null) {
       optBuilder.withShortName(shortName);
     }
-    
+
     if (hasArg) {
-      ArgumentBuilder argBuilder = new ArgumentBuilder()
-        .withName(name)
-        .withMinimum(1)
-        .withMaximum(1);
-      
+      ArgumentBuilder argBuilder = new ArgumentBuilder().withName(name).withMinimum(1).withMaximum(1);
+
       if (defaultValue != null) {
         argBuilder = argBuilder.withDefault(defaultValue);
       }
-      
+
       optBuilder.withArgument(argBuilder.create());
     }
 
     return optBuilder.create();
   }
-  
+
   /** Parse the arguments specified based on the options defined using the 
    *  various <code>addOption</code> methods. If -h is specified or an 
-   *  exception is encountered pring help and return null. Has the 
+   *  exception is encountered print help and return null. Has the 
    *  side effect of setting inputPath and outputPath 
    *  if <code>addInputOption</code> or <code>addOutputOption</code> 
    *  or <code>mapred.input.dir</code> or <code>mapred.output.dir</code>
@@ -259,40 +260,39 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  
    * 
    */
-  public Map<String,String> parseArguments(String[] args) {
-    
+  public Map<String, String> parseArguments(String[] args) {
+
     Option helpOpt = addOption(DefaultOptionCreator.helpOption());
     addOption("tempDir", null, "Intermediate output directory", "temp");
     addOption("startPhase", null, "First phase to run", "0");
     addOption("endPhase", null, "Last phase to run", String.valueOf(Integer.MAX_VALUE));
 
     GroupBuilder gBuilder = new GroupBuilder().withName("Job-Specific Options:");
-    
+
     for (Option opt : options) {
       gBuilder = gBuilder.withOption(opt);
     }
-    
+
     Group group = gBuilder.create();
-    
+
     CommandLine cmdLine;
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
       parser.setHelpOption(helpOpt);
       cmdLine = parser.parse(args);
-      
-      
+
     } catch (OptionException e) {
       log.error(e.getMessage());
       CommandLineUtil.printHelpWithGenericOptions(group);
       return null;
     }
-    
+
     if (cmdLine.hasOption(helpOpt)) {
       CommandLineUtil.printHelpWithGenericOptions(group);
       return null;
     }
-    
+
     try {
       parseDirectories(cmdLine);
     } catch (IllegalArgumentException e) {
@@ -300,15 +300,41 @@ public abstract class AbstractJob extends Configured implements Tool {
       CommandLineUtil.printHelpWithGenericOptions(group);
       return null;
     }
-    
-    
-    Map<String,String> result = new TreeMap<String,String>();
-    maybePut(result, cmdLine, this.options.toArray(new Option[this.options.size()]));
 
-    log.info("Command line arguments: {}", result);
-    return result;
+    argMap = new TreeMap<String, String>();
+    maybePut(argMap, cmdLine, this.options.toArray(new Option[this.options.size()]));
+
+    log.info("Command line arguments: {}", argMap);
+    return argMap;
   }
   
+  /**
+   * Build the option key (--name) from the option name
+   * @param optionName
+   * @return
+   */
+  public static String keyFor(String optionName) {
+    return "--" + optionName;
+  }
+
+  /**
+   * Return the requested option, or null if it has not been specified
+   * @param optionName a String
+   * @return
+   */
+  public String getOption(String optionName) {
+    return argMap.get(keyFor(optionName));
+  }
+
+  /**
+   * Return if the requested option has been specified
+   * @param optionName a String
+   * @return
+   */
+  public boolean hasOption(String optionName) {
+    return argMap.containsKey(keyFor(optionName));
+  }
+
   /** Obtain input and output directories from command-line options or hadoop
    *  properties. If <code>addInputOption</code> or <code>addOutputOption</code>
    *  has been called, this method will throw an <code>OptionException</code> if
@@ -323,45 +349,42 @@ public abstract class AbstractJob extends Configured implements Tool {
    *   specified or outputOption is present and neither <code>--output</code> 
    *   nor <code>-Dmapred.output.dir</code> are specified.
    */
-  protected void parseDirectories(CommandLine cmdLine) 
-    throws IllegalArgumentException {
-    
+  protected void parseDirectories(CommandLine cmdLine) throws IllegalArgumentException {
+
     Configuration conf = getConf();
-    
+
     if (inputOption != null && cmdLine.hasOption(inputOption)) {
       this.inputPath = new Path(cmdLine.getValue(inputOption).toString());
     }
     if (inputPath == null && conf.get("mapred.input.dir") != null) {
       this.inputPath = new Path(conf.get("mapred.input.dir"));
     }
-    
+
     if (outputOption != null && cmdLine.hasOption(outputOption)) {
       this.outputPath = new Path(cmdLine.getValue(outputOption).toString());
     }
     if (outputPath == null && conf.get("mapred.output.dir") != null) {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
     }
-    
+
     if (inputOption != null && inputPath == null) {
-      throw new IllegalArgumentException("No input specified: " +
-          inputOption.getPreferredName() + " or -Dmapred.input.dir " +
-          "must be provided to specify input directory");
+      throw new IllegalArgumentException("No input specified: " + inputOption.getPreferredName() + " or -Dmapred.input.dir "
+          + "must be provided to specify input directory");
     }
-    
+
     if (outputOption != null && outputPath == null) {
-      throw new IllegalArgumentException("No output specified: " +
-          outputOption.getPreferredName() + " or -Dmapred.output.dir " +
-          "must be provided to specify output directory");
+      throw new IllegalArgumentException("No output specified: " + outputOption.getPreferredName() + " or -Dmapred.output.dir "
+          + "must be provided to specify output directory");
     }
   }
-  
-  protected static void maybePut(Map<String,String> args, CommandLine cmdLine, Option... opt) {
+
+  protected static void maybePut(Map<String, String> args, CommandLine cmdLine, Option... opt) {
     for (Option o : opt) {
-      
+
       // the option appeared on the command-line, or it has a value
       // (which is likely a default value). 
       if (cmdLine.hasOption(o) || cmdLine.getValue(o) != null) {
-        
+
         // nulls are ok, for cases where options are simple flags.
         Object vo = cmdLine.getValue(o);
         String value = (vo == null) ? null : vo.toString();
@@ -370,18 +393,18 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
   }
 
-  protected static boolean shouldRunNextPhase(Map<String,String> args, AtomicInteger currentPhase) {
+  protected static boolean shouldRunNextPhase(Map<String, String> args, AtomicInteger currentPhase) {
     int phase = currentPhase.getAndIncrement();
     String startPhase = args.get("--startPhase");
     String endPhase = args.get("--endPhase");
-    boolean phaseSkipped = (startPhase != null && phase < Integer.parseInt(startPhase)) 
+    boolean phaseSkipped = (startPhase != null && phase < Integer.parseInt(startPhase))
         || (endPhase != null && phase > Integer.parseInt(endPhase));
     if (phaseSkipped) {
       log.info("Skipping phase {}", phase);
     }
     return !phaseSkipped;
   }
-  
+
   protected Job prepareJob(Path inputPath,
                            Path outputPath,
                            Class<? extends InputFormat> inputFormat,
@@ -392,7 +415,7 @@ public abstract class AbstractJob extends Configured implements Tool {
                            Class<? extends Writable> reducerKey,
                            Class<? extends Writable> reducerValue,
                            Class<? extends OutputFormat> outputFormat) throws IOException {
-    
+
     Job job = new Job(new Configuration(getConf()));
     Configuration jobConf = job.getConfiguration();
 
@@ -428,7 +451,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     job.setOutputFormatClass(outputFormat);
     jobConf.set("mapred.output.dir", outputPath.toString());
-    
+
     return job;
   }
 }

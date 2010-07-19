@@ -230,13 +230,15 @@ public class TestMapReduce extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver using the run() method. Others can use runJob() as before
     Integer maxIterations = 5;
-    String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, getTestTempDirPath("input").toString(),
-        DefaultOptionCreator.OUTPUT_OPTION_KEY, getTestTempDirPath("output").toString(),
-        DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION_KEY,
-        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
-        DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION_KEY, "org.apache.mahout.math.DenseVector",
-        DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY, "20", DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY,
-        maxIterations.toString(), DirichletDriver.ALPHA_OPTION_KEY, "1.0", DefaultOptionCreator.OVERWRITE_OPTION_KEY };
+    String[] args = { 
+        optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
+        optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+        optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), "org.apache.mahout.math.DenseVector",
+        optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", 
+        optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), maxIterations.toString(), 
+        optKey(DirichletDriver.ALPHA_OPTION), "1.0", 
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
     new DirichletDriver().run(args);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();

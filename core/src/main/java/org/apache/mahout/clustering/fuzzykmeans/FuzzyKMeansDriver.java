@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.fuzzykmeans;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -137,33 +136,32 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
 
-    Map<String, String> argMap = parseArguments(args);
-    if (argMap == null) {
+    if (parseArguments(args) == null) {
       return -1;
     }
 
     Path input = getInputPath();
-    Path clusters = new Path(argMap.get(DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY));
+    Path clusters = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));
     Path output = getOutputPath();
-    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
+    String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     if (measureClass == null) {
       measureClass = SquaredEuclideanDistanceMeasure.class.getName();
     }
-    double convergenceDelta = Double.parseDouble(argMap.get(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY));
-    float fuzziness = Float.parseFloat(argMap.get(M_OPTION_KEY));
+    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    float fuzziness = Float.parseFloat(getOption(M_OPTION));
 
-    int numReduceTasks = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
-    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    int numReduceTasks = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    boolean emitMostLikely = Boolean.parseBoolean(argMap.get(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY));
-    double threshold = Double.parseDouble(argMap.get(DefaultOptionCreator.THRESHOLD_OPTION_KEY));
-    if (argMap.containsKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)) {
-      clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(argMap
-          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)));
+    boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
+    double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
+    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
+      clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(parseArguments(args)
+          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)));
     }
-    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     job(input,
         clusters,
         output,

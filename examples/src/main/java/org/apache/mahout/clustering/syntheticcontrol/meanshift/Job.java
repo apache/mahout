@@ -76,16 +76,16 @@ public final class Job extends MeanShiftCanopyDriver {
 
     Path input = getInputPath();
     Path output = getOutputPath();
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
-    double t1 = Double.parseDouble(argMap.get(DefaultOptionCreator.T1_OPTION_KEY));
-    double t2 = Double.parseDouble(argMap.get(DefaultOptionCreator.T2_OPTION_KEY));
-    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
-    double convergenceDelta = Double.parseDouble(argMap.get(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY));
-    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
-    boolean inputIsCanopies = argMap.containsKey(INPUT_IS_CANOPIES_OPTION_KEY);
+    String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
+    double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
+    double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
+    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
+    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    boolean inputIsCanopies = hasOption(INPUT_IS_CANOPIES_OPTION);
 
     runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering);
     return 0;

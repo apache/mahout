@@ -24,63 +24,34 @@ import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 
 public final class DefaultOptionCreator {
 
-  // private option keywords
-  private static final String THRESHOLD_OPTION = "threshold";
+  // option keywords
+  public static final String THRESHOLD_OPTION = "threshold";
 
-  private static final String EMIT_MOST_LIKELY_OPTION = "emitMostLikely";
+  public static final String EMIT_MOST_LIKELY_OPTION = "emitMostLikely";
 
-  private static final String CLUSTERING_OPTION = "clustering";
+  public static final String CLUSTERING_OPTION = "clustering";
 
-  private static final String MAX_REDUCERS_OPTION = "maxRed";
+  public static final String MAX_REDUCERS_OPTION = "maxRed";
 
-  private static final String CONVERGENCE_DELTA_OPTION = "convergenceDelta";
+  public static final String CONVERGENCE_DELTA_OPTION = "convergenceDelta";
 
-  private static final String NUM_CLUSTERS_OPTION = "numClusters";
+  public static final String NUM_CLUSTERS_OPTION = "numClusters";
 
-  private static final String MAX_ITERATIONS_OPTION = "maxIter";
+  public static final String MAX_ITERATIONS_OPTION = "maxIter";
 
-  private static final String T2_OPTION = "t2";
+  public static final String T2_OPTION = "t2";
 
-  private static final String T1_OPTION = "t1";
+  public static final String T1_OPTION = "t1";
 
-  private static final String DISTANCE_MEASURE_OPTION = "distanceMeasure";
+  public static final String DISTANCE_MEASURE_OPTION = "distanceMeasure";
 
-  private static final String OVERWRITE_OPTION = "overwrite";
+  public static final String OVERWRITE_OPTION = "overwrite";
 
-  private static final String OUTPUT_OPTION = "output";
+  public static final String OUTPUT_OPTION = "output";
 
-  private static final String CLUSTERS_IN_OPTION = "clusters";
+  public static final String CLUSTERS_IN_OPTION = "clusters";
 
-  private static final String INPUT_OPTION = "input";
-
-  // public keys used to access parsed arguments map
-  public static final String T2_OPTION_KEY = "--" + T2_OPTION;
-
-  public static final String T1_OPTION_KEY = "--" + T1_OPTION;
-
-  public static final String DISTANCE_MEASURE_OPTION_KEY = "--" + DISTANCE_MEASURE_OPTION;
-
-  public static final String OVERWRITE_OPTION_KEY = "--" + OVERWRITE_OPTION;
-
-  public static final String CLUSTERING_OPTION_KEY = "--" + CLUSTERING_OPTION;
-
-  public static final String NUM_CLUSTERS_OPTION_KEY = "--" + NUM_CLUSTERS_OPTION;
-
-  public static final String MAX_REDUCERS_OPTION_KEY = "--" + MAX_REDUCERS_OPTION;
-
-  public static final String MAX_ITERATIONS_OPTION_KEY = "--" + MAX_ITERATIONS_OPTION;
-
-  public static final String EMIT_MOST_LIKELY_OPTION_KEY = "--" + EMIT_MOST_LIKELY_OPTION;
-
-  public static final String THRESHOLD_OPTION_KEY = "--" + THRESHOLD_OPTION;
-
-  public static final String CLUSTERS_IN_OPTION_KEY = "--" + CLUSTERS_IN_OPTION;
-
-  public static final String CONVERGENCE_DELTA_OPTION_KEY = "--" + CONVERGENCE_DELTA_OPTION;
-
-  public static final String INPUT_OPTION_KEY = "--" + INPUT_OPTION;
-
-  public static final String OUTPUT_OPTION_KEY = "--" + OUTPUT_OPTION;
+  public static final String INPUT_OPTION = "input";
 
   private DefaultOptionCreator() {
   }

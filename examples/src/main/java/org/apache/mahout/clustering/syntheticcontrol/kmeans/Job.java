@@ -79,23 +79,23 @@ public final class Job extends KMeansDriver {
     }
 
     Path input = getInputPath();
-    Path clusters = new Path(argMap.get(DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY));
+    Path clusters = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));
     Path output = getOutputPath();
-    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
+    String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     if (measureClass == null) {
       measureClass = SquaredEuclideanDistanceMeasure.class.getName();
     }
-    double convergenceDelta = Double.parseDouble(argMap.get(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY));
-    int numReduceTasks = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
-    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    int numReduceTasks = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    if (argMap.containsKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(argMap
-          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)));
+          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)));
     }
-    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, runClustering);
     return 0;
   }

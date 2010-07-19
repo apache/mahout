@@ -103,17 +103,17 @@ public final class Job extends DirichletDriver {
 
     Path input = getInputPath();
     Path output = getOutputPath();
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    String modelFactory = argMap.get(MODEL_DISTRIBUTION_CLASS_OPTION_KEY);
-    String modelPrototype = argMap.get(MODEL_PROTOTYPE_CLASS_OPTION_KEY);
-    int numModels = Integer.parseInt(argMap.get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY));
-    int numReducers = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
-    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
-    boolean emitMostLikely = Boolean.parseBoolean(argMap.get(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY));
-    double threshold = Double.parseDouble(argMap.get(DefaultOptionCreator.THRESHOLD_OPTION_KEY));
-    double alpha0 = Double.parseDouble(argMap.get(ALPHA_OPTION_KEY));
+    String modelFactory = getOption(MODEL_DISTRIBUTION_CLASS_OPTION);
+    String modelPrototype = getOption(MODEL_PROTOTYPE_CLASS_OPTION);
+    int numModels = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
+    int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
+    double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
+    double alpha0 = Double.parseDouble(getOption(ALPHA_OPTION));
 
     job(input, output, modelFactory, modelPrototype, numModels, maxIterations, alpha0, numReducers, emitMostLikely, threshold);
     return 0;

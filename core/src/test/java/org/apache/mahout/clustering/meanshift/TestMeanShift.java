@@ -312,11 +312,16 @@ public class TestMeanShift extends MahoutTestCase {
     // now run the Job using the run() command. Other tests can continue to use runJob().
     Path output = getTestTempDirPath("output");
     //MeanShiftCanopyDriver.runJob(input, output, EuclideanDistanceMeasure.class.getName(), 4, 1, 0.5, 10, false, false);
-    String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, getTestTempDirPath("testdata").toString(),
-        DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(), DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY,
-        EuclideanDistanceMeasure.class.getName(), DefaultOptionCreator.T1_OPTION_KEY, "4", DefaultOptionCreator.T2_OPTION_KEY, "1",
-        DefaultOptionCreator.CLUSTERING_OPTION_KEY, DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY, "4",
-        DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY, "0.5", DefaultOptionCreator.OVERWRITE_OPTION_KEY  };
+    String[] args = { 
+        optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("testdata").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(), 
+        optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(), 
+        optKey(DefaultOptionCreator.T1_OPTION), "4", 
+        optKey(DefaultOptionCreator.T2_OPTION), "1",
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION), 
+        optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "4",
+        optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.5", 
+        optKey(DefaultOptionCreator.OVERWRITE_OPTION)  };
     new MeanShiftCanopyDriver().run(args);
     Path outPart = new Path(output, "clusters-3/part-r-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);

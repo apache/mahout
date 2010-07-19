@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.dirichlet;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -67,17 +66,11 @@ public class DirichletDriver extends AbstractJob {
 
   public static final String THRESHOLD_KEY = "org.apache.mahout.clustering.dirichlet.threshold";
 
-  protected static final String MODEL_PROTOTYPE_CLASS_OPTION = "modelPrototypeClass";
+  protected static final String MODEL_PROTOTYPE_CLASS_OPTION = "modelPrototype";
 
-  public static final String MODEL_PROTOTYPE_CLASS_OPTION_KEY = "--" + MODEL_PROTOTYPE_CLASS_OPTION;
-
-  protected static final String MODEL_DISTRIBUTION_CLASS_OPTION = "modelDistClass";
-
-  public static final String MODEL_DISTRIBUTION_CLASS_OPTION_KEY = "--" + MODEL_DISTRIBUTION_CLASS_OPTION;
+  protected static final String MODEL_DISTRIBUTION_CLASS_OPTION = "modelDist";
 
   protected static final String ALPHA_OPTION = "alpha";
-
-  public static final String ALPHA_OPTION_KEY = "--" + ALPHA_OPTION;
 
   private static final Logger log = LoggerFactory.getLogger(DirichletDriver.class);
 
@@ -112,25 +105,24 @@ public class DirichletDriver extends AbstractJob {
     addOption(DefaultOptionCreator.thresholdOption().create());
     addOption(DefaultOptionCreator.numReducersOption().create());
 
-    Map<String, String> argMap = parseArguments(args);
-    if (argMap == null) {
+    if (parseArguments(args) == null) {
       return -1;
     }
 
     Path input = getInputPath();
     Path output = getOutputPath();
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    String modelFactory = argMap.get(MODEL_DISTRIBUTION_CLASS_OPTION_KEY);
-    String modelPrototype = argMap.get(MODEL_PROTOTYPE_CLASS_OPTION_KEY);
-    int numModels = Integer.parseInt(argMap.get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY));
-    int numReducers = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
-    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
-    boolean emitMostLikely = Boolean.parseBoolean(argMap.get(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY));
-    double threshold = Double.parseDouble(argMap.get(DefaultOptionCreator.THRESHOLD_OPTION_KEY));
-    double alpha0 = Double.parseDouble(argMap.get(ALPHA_OPTION_KEY));
-    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
+    String modelFactory = getOption(MODEL_DISTRIBUTION_CLASS_OPTION);
+    String modelPrototype = getOption(MODEL_PROTOTYPE_CLASS_OPTION);
+    int numModels = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
+    int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
+    double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
+    double alpha0 = Double.parseDouble(getOption(ALPHA_OPTION));
+    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
 
     job(input,
         output,

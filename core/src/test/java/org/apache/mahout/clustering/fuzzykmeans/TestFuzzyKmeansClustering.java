@@ -227,12 +227,17 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
                                      true,
                                      0);
       */
-      String[] args = { DefaultOptionCreator.INPUT_OPTION_KEY, pointsPath.toString(), DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY,
-          clustersPath.toString(), DefaultOptionCreator.OUTPUT_OPTION_KEY, output.toString(),
-          DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY, EuclideanDistanceMeasure.class.getName(),
-          DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY, "0.001", DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY, "2",
-          FuzzyKMeansDriver.M_OPTION_KEY, "2.0", DefaultOptionCreator.CLUSTERING_OPTION_KEY,
-          DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION_KEY, DefaultOptionCreator.OVERWRITE_OPTION_KEY };
+      String[] args = { 
+          optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(), 
+          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), 
+          optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
+          optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", 
+          optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", 
+          optKey(FuzzyKMeansDriver.M_OPTION), "2.0", 
+          optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+          optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION), 
+          optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
       new FuzzyKMeansDriver().run(args);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-00000"), conf);
       IntWritable key = new IntWritable();
@@ -241,7 +246,6 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         // make sure we can read all the clusters
       }
       reader.close();
-
     }
 
   }

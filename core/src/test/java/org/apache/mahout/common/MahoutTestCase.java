@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
 
   private Path testTempDirPath;
+
   private FileSystem fs;
 
   @Override
@@ -51,8 +52,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     if (testTempDirPath == null) {
       fs = FileSystem.get(new Configuration());
       long simpleRandomLong = (long) (Long.MAX_VALUE * Math.random());
-      testTempDirPath =
-          fs.makeQualified(new Path("/tmp/mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong));
+      testTempDirPath = fs.makeQualified(new Path("/tmp/mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong));
       if (!fs.mkdirs(testTempDirPath)) {
         throw new IOException("Could not create " + testTempDirPath);
       }
@@ -90,13 +90,12 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
    * @throws NoSuchFieldException
    * @throws IllegalAccessException
    */
-  protected void setField(Object target, String fieldname, Object value)
-      throws NoSuchFieldException, IllegalAccessException {
+  protected void setField(Object target, String fieldname, Object value) throws NoSuchFieldException, IllegalAccessException {
     Field field = findDeclaredField(target.getClass(), fieldname);
     field.setAccessible(true);
     field.set(target, value);
   }
-  
+
   /**
    * find a declared field in a class or one of it's super classes
    * 
@@ -106,14 +105,23 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
    * @throws NoSuchFieldException
    */
   private Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
-      if (Object.class.equals(inClass)) {
-        throw new NoSuchFieldException();
-      }     
-      for (Field field : inClass.getDeclaredFields()) {
-        if (field.getName().equalsIgnoreCase(fieldname)) {
-          return field;
-        }
-      }
-      return findDeclaredField(inClass.getSuperclass(), fieldname);    
+    if (Object.class.equals(inClass)) {
+      throw new NoSuchFieldException();
     }
+    for (Field field : inClass.getDeclaredFields()) {
+      if (field.getName().equalsIgnoreCase(fieldname)) {
+        return field;
+      }
+    }
+    return findDeclaredField(inClass.getSuperclass(), fieldname);
+  }
+
+  /**
+   * return a job option key string (--name) from the given option name
+   * @param optionName
+   * @return
+   */
+  protected String optKey(String optionName) {
+    return AbstractJob.keyFor(optionName);
+  }
 }

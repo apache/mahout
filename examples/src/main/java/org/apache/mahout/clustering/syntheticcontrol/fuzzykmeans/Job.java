@@ -93,30 +93,30 @@ public final class Job extends FuzzyKMeansDriver {
     }
 
     Path input = getInputPath();
-    Path clusters = new Path(argMap.get(DefaultOptionCreator.CLUSTERS_IN_OPTION_KEY));
+    Path clusters = new Path(getOption(DefaultOptionCreator.CLUSTERS_IN_OPTION));
     Path output = getOutputPath();
-    String measureClass = argMap.get(DefaultOptionCreator.DISTANCE_MEASURE_OPTION_KEY);
+    String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     if (measureClass == null) {
       measureClass = SquaredEuclideanDistanceMeasure.class.getName();
     }
-    double convergenceDelta = Double.parseDouble(argMap.get(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION_KEY));
-    int numReduceTasks = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_REDUCERS_OPTION_KEY));
-    int maxIterations = Integer.parseInt(argMap.get(DefaultOptionCreator.MAX_ITERATIONS_OPTION_KEY));
-    float fuzziness = Float.parseFloat(argMap.get(M_OPTION_KEY));
+    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    int numReduceTasks = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    float fuzziness = Float.parseFloat(getOption(M_OPTION));
 
     addOption(new DefaultOptionBuilder().withLongName(M_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
         .withName(M_OPTION).withMinimum(1).withMaximum(1).create())
         .withDescription("coefficient normalization factor, must be greater than 1").withShortName(M_OPTION).create());
-    if (argMap.containsKey(DefaultOptionCreator.OVERWRITE_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
-    if (argMap.containsKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)) {
+    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(argMap
-          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION_KEY)));
+          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)));
     }
-    boolean runClustering = argMap.containsKey(DefaultOptionCreator.CLUSTERING_OPTION_KEY);
-    double t1 = Double.parseDouble(argMap.get(DefaultOptionCreator.T1_OPTION_KEY));
-    double t2 = Double.parseDouble(argMap.get(DefaultOptionCreator.T2_OPTION_KEY));
+    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
+    double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
+    double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
     job(input, output, measureClass, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta, runClustering);
     return 0;
   }
