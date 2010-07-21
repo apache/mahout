@@ -1,4 +1,21 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
 is hereby granted without fee, provided that the above copyright notice appear in all copies and 
@@ -11,68 +28,71 @@ package org.apache.mahout.math.jet.random;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public class Gamma extends AbstractContinousDistribution {
-
+  // shape
   private double alpha;
-  private double lambda;
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Gamma shared = new Gamma(1.0, 1.0, makeDefaultGenerator());
+  // rate
+  private double beta;
 
   /**
-   * Constructs a Gamma distribution. Example: alpha=1.0, lambda=1.0.
+   * Constructs a Gamma distribution with a given shape (alpha) and rate (beta).
    *
-   * @throws IllegalArgumentException if <tt>alpha &lt;= 0.0 || lambda &lt;= 0.0</tt>.
+   * @param alpha The shape parameter.
+   * @param beta The rate parameter.
+   * @param randomGenerator The random number generator that generates bits for us.
+   * @throws IllegalArgumentException if <tt>alpha &lt;= 0.0 || alpha &lt;= 0.0</tt>.
    */
-  public Gamma(double alpha, double lambda, RandomEngine randomGenerator) {
+  public Gamma(double alpha, double beta, RandomEngine randomGenerator) {
+    this.alpha = alpha;
+    this.beta = beta;
     setRandomGenerator(randomGenerator);
-    setState(alpha, lambda);
   }
 
-  /** Returns the cumulative distribution function. */
+  /**
+   * Returns the cumulative distribution function.
+   * @param x The end-point where the cumulation should end.
+   */
   public double cdf(double x) {
-    return Probability.gamma(alpha, lambda, x);
+    return Probability.gamma(alpha, beta, x);
   }
 
   /** Returns a random number from the distribution. */
   @Override
   public double nextDouble() {
-    return nextDouble(alpha, lambda);
+    return nextDouble(alpha, beta);
   }
 
-  /** Returns a random number from the distribution; bypasses the internal state. */
-  public double nextDouble(double alpha, double lambda) {
-/******************************************************************
- *                                                                *
- *    Gamma Distribution - Acceptance Rejection combined with     *
- *                         Acceptance Complement                  *
- *                                                                *
- ******************************************************************
- *                                                                *
- * FUNCTION:    - gds samples a random number from the standard   *
- *                gamma distribution with parameter  a > 0.       *
- *                Acceptance Rejection  gs  for  a < 1 ,          *
- *                Acceptance Complement gd  for  a >= 1 .         *
- * REFERENCES:  - J.H. Ahrens, U. Dieter (1974): Computer methods *
- *                for sampling from gamma, beta, Poisson and      *
- *                binomial distributions, Computing 12, 223-246.  *
- *              - J.H. Ahrens, U. Dieter (1982): Generating gamma *
- *                variates by a modified rejection technique,     *
- *                Communications of the ACM 25, 47-54.            *
- * SUBPROGRAMS: - drand(seed) ... (0,1)-Uniform generator with    *
- *                unsigned long integer *seed                     *
- *              - NORMAL(seed) ... Normal generator N(0,1).       *
- *                                                                *
- ******************************************************************/
-
-    // Check for invalid input values
-
+  /** Returns a random number from the distribution; bypasses the internal state.
+   *                                                                *
+   *    Gamma Distribution - Acceptance Rejection combined with     *
+   *                         Acceptance Complement                  *
+   *                                                                *
+   ******************************************************************
+   *                                                                *
+   * FUNCTION:    - gds samples a random number from the standard   *
+   *                gamma distribution with parameter  a > 0.       *
+   *                Acceptance Rejection  gs  for  a < 1 ,          *
+   *                Acceptance Complement gd  for  a >= 1 .         *
+   * REFERENCES:  - J.H. Ahrens, U. Dieter (1974): Computer methods *
+   *                for sampling from gamma, beta, Poisson and      *
+   *                binomial distributions, Computing 12, 223-246.  *
+   *              - J.H. Ahrens, U. Dieter (1982): Generating gamma *
+   *                variates by a modified rejection technique,     *
+   *                Communications of the ACM 25, 47-54.            *
+   * SUBPROGRAMS: - drand(seed) ... (0,1)-Uniform generator with    *
+   *                unsigned long integer *seed                     *
+   *              - NORMAL(seed) ... Normal generator N(0,1).       *
+   *                                                                *
+   * @param beta  Scale parameter.
+   * @param alpha   Shape parameter.
+   * @return A gamma distributed sample.
+   */
+  public double nextDouble(double alpha, double beta) {
     if (alpha <= 0.0) {
       throw new IllegalArgumentException();
     }
-    if (lambda <= 0.0) {
+    if (beta <= 0.0) {
       throw new IllegalArgumentException();
     }
 
@@ -85,12 +105,12 @@ public class Gamma extends AbstractContinousDistribution {
         if (p <= 1.0) {                       // Step 2. Case gds <= 1
           gds = Math.exp(Math.log(p) / alpha);
           if (Math.log(randomGenerator.raw()) <= -gds) {
-            return (gds / lambda);
+            return (gds / beta);
           }
         } else {                                // Step 3. Case gds > 1
           gds = -Math.log((b - p) / alpha);
           if (Math.log(randomGenerator.raw()) <= ((alpha - 1.0) * Math.log(gds))) {
-            return (gds / lambda);
+            return (gds / beta);
           }
         }
       }
@@ -117,12 +137,12 @@ public class Gamma extends AbstractContinousDistribution {
       double x = s + 0.5 * t;
       gds = x * x;
       if (t >= 0.0) {
-        return (gds / lambda);
+        return (gds / beta);
       }         // Immediate acceptance
 
       double u = randomGenerator.raw();
       if (d * u <= t * t * t) {
-        return (gds / lambda);
+        return (gds / beta);
       } // Squeeze acceptance
 
       double q0 = 0.0;
@@ -179,7 +199,7 @@ public class Gamma extends AbstractContinousDistribution {
               v + a5) * v + a4) * v + a3) * v + a2) * v + a1) * v;
         }                  // Step 7. Quotient acceptance
         if (Math.log(1.0 - u) <= q) {
-          return (gds / lambda);
+          return (gds / beta);
         }
       }
 
@@ -219,61 +239,37 @@ public class Gamma extends AbstractContinousDistribution {
         }                            // Step 12. Hat acceptance
         if (c * u * sign_u <= w * Math.exp(e - 0.5 * t * t)) {
           x = s + 0.5 * t;
-          return (x * x / lambda);
+          return (x * x / beta);
         }
       }
     }
   }
 
-  /** Returns the probability distribution function. */
+  /** Returns the probability distribution function.
+   * @param x Where to compute the density function.
+   *
+   * @return The value of the gamma density at x.
+   */
   public double pdf(double x) {
     if (x < 0) {
       throw new IllegalArgumentException();
     }
     if (x == 0) {
       if (alpha == 1.0) {
-        return 1.0 / lambda;
+        return beta;
+      } else if (alpha < 1) {
+        return Double.POSITIVE_INFINITY;
       } else {
-        return 0.0;
+        return 0;
       }
     }
     if (alpha == 1.0) {
-      return Math.exp(-x / lambda) / lambda;
+      return beta * Math.exp(-x * beta);
     }
-
-    return Math.exp((alpha - 1.0) * Math.log(x / lambda) - x / lambda - Fun.logGamma(alpha)) / lambda;
+    return beta * Math.exp((alpha - 1.0) * Math.log(x * beta) - x * beta - Fun.logGamma(alpha));
   }
 
-  /**
-   * Sets the mean and variance.
-   *
-   * @throws IllegalArgumentException if <tt>alpha &lt;= 0.0 || lambda &lt;= 0.0</tt>.
-   */
-  public void setState(double alpha, double lambda) {
-    if (alpha <= 0.0) {
-      throw new IllegalArgumentException();
-    }
-    if (lambda <= 0.0) {
-      throw new IllegalArgumentException();
-    }
-    this.alpha = alpha;
-    this.lambda = lambda;
-  }
-
-  /**
-   * Returns a random number from the distribution.
-   *
-   * @throws IllegalArgumentException if <tt>alpha &lt;= 0.0 || lambda &lt;= 0.0</tt>.
-   */
-  public static double staticNextDouble(double alpha, double lambda) {
-    synchronized (shared) {
-      return shared.nextDouble(alpha, lambda);
-    }
-  }
-
-  /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + '(' + alpha + ',' + lambda + ')';
+    return this.getClass().getName() + '(' + beta + ',' + alpha + ')';
   }
-
 }

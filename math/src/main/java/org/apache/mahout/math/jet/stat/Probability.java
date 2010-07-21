@@ -1,4 +1,21 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
 Copyright 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
 is hereby granted without fee, provided that the above copyright notice appear in all copies and 
@@ -417,54 +434,53 @@ public class Probability extends Constants {
   /**
    * Returns the integral from zero to <tt>x</tt> of the gamma probability density function.
    * <pre>
-   *                x
-   *        b       -
-   *       a       | |   b-1  -at
-   * y =  -----    |    t    e    dt
-   *       -     | |
-   *      | (b)   -
-   *               0
+   *
+   *          alpha     - x
+   *       beta        |     alpha-1  -beta t
+   * y =  ---------    |    t         e        dt
+   *       -           |
+   *      | (alpha)   -  0
    * </pre>
    * The incomplete gamma integral is used, according to the relation
    *
-   * <tt>y = Gamma.incompleteGamma( b, a*x )</tt>.
+   * <tt>y = Gamma.incompleteGamma( alpha, beta*x )</tt>.
    *
-   * @param a the paramater a (alpha) of the gamma distribution.
-   * @param b the paramater b (beta, lambda) of the gamma distribution.
+   * See http://en.wikipedia.org/wiki/Gamma_distribution#Probability_density_function
+   *
+   * @param alpha the shape parameter of the gamma distribution.
+   * @param beta the rate parameter of the gamma distribution.
    * @param x integration end point.
    */
-  @Deprecated
-  public static double gamma(double a, double b, double x) {
+  public static double gamma(double alpha, double beta, double x) {
     if (x < 0.0) {
       return 0.0;
     }
-    return Gamma.incompleteGamma(b, a * x);
+    return Gamma.incompleteGamma(alpha, beta * x);
   }
 
   /**
    * Returns the integral from <tt>x</tt> to infinity of the gamma probability density function:
    * <pre>
-   *               inf.
-   *        b       -
-   *       a       | |   b-1  -at
-   * y =  -----    |    t    e    dt
-   *       -     | |
-   *      | (b)   -
-   *               x
+   *          alpha     - infinity
+   *       beta        |     alpha-1  -beta t
+   * y =  ---------    |    t         e        dt
+   *       -           |
+   *      | (alpha)   -  x
    * </pre>
    * The incomplete gamma integral is used, according to the relation <p> y = Gamma.incompleteGammaComplement( b, a*x
    * ).
    *
-   * @param a the paramater a (alpha) of the gamma distribution.
-   * @param b the paramater b (beta, lambda) of the gamma distribution.
+   * TODO this method is inconsistent with gamma(alpha, beta, x)
+   *
+   * @param alpha the shape parameter of the gamma distribution.
+   * @param beta the rate parameter of the gamma distribution.
    * @param x integration end point.
    */
-  @Deprecated
-  public static double gammaComplemented(double a, double b, double x) {
+  public static double gammaComplemented(double alpha, double beta, double x) {
     if (x < 0.0) {
       return 0.0;
     }
-    return Gamma.incompleteGammaComplement(b, a * x);
+    return Gamma.incompleteGammaComplement(alpha, beta * x);
   }
 
   /**

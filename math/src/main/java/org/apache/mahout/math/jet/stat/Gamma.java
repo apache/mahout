@@ -1,4 +1,21 @@
 /*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
 Copyright 1999 CERN - European Organization for Nuclear Research.
 Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
 is hereby granted without fee, provided that the above copyright notice appear in all copies and 
@@ -26,22 +43,25 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
    *                     -
    *                    | (a+b)
    * </pre>
+   * @param alpha
+   * @param beta
+   * @return The beta function for given values of alpha and beta.
    */
   @Deprecated
-  public static double beta(double a, double b) throws ArithmeticException {
+  public static double beta(double alpha, double beta) {
 
-    double y = a + b;
+    double y = alpha + beta;
     y = gamma(y);
     if (y == 0.0) {
       return 1.0;
     }
 
-    if (a > b) {
-      y = gamma(a) / y;
-      y *= gamma(b);
+    if (alpha > beta) {
+      y = gamma(alpha) / y;
+      y *= gamma(beta);
     } else {
-      y = gamma(b) / y;
-      y *= gamma(a);
+      y = gamma(beta) / y;
+      y *= gamma(alpha);
     }
 
     return (y);
@@ -411,24 +431,21 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   /**
    * Returns the Incomplete Gamma function; formerly named <tt>igamma</tt>.
    *
-   * @param a the parameter of the gamma distribution.
+   * @param alpha the shape parameter of the gamma distribution.
    * @param x the integration end point.
+   * @return The value of the unnormalized incomplete gamma function.
    */
-  @Deprecated
-  public static double incompleteGamma(double a, double x)
-      throws ArithmeticException {
-
-
-    if (x <= 0 || a <= 0) {
+  public static double incompleteGamma(double alpha, double x){
+    if (x <= 0 || alpha <= 0) {
       return 0.0;
     }
 
-    if (x > 1.0 && x > a) {
-      return 1.0 - incompleteGammaComplement(a, x);
+    if (x > 1.0 && x > alpha) {
+      return 1.0 - incompleteGammaComplement(alpha, x);
     }
 
     /* Compute  x**a * exp(-x) / gamma(a)  */
-    double ax = a * Math.log(x) - x - logGamma(a);
+    double ax = alpha * Math.log(x) - x - logGamma(alpha);
     if (ax < -MAXLOG) {
       return (0.0);
     }
@@ -436,7 +453,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     ax = Math.exp(ax);
 
     /* power series */
-    double r = a;
+    double r = alpha;
     double c = 1.0;
     double ans = 1.0;
 
@@ -447,28 +464,27 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     }
     while (c / ans > MACHEP);
 
-    return (ans * ax / a);
+    return (ans * ax / alpha);
 
   }
 
   /**
    * Returns the Complemented Incomplete Gamma function; formerly named <tt>igamc</tt>.
    *
-   * @param a the parameter of the gamma distribution.
+   * @param alpha the shape parameter of the gamma distribution.
    * @param x the integration start point.
    */
-  @Deprecated
-  public static double incompleteGammaComplement(double a, double x) throws ArithmeticException {
+  public static double incompleteGammaComplement(double alpha, double x) {
 
-    if (x <= 0 || a <= 0) {
+    if (x <= 0 || alpha <= 0) {
       return 1.0;
     }
 
-    if (x < 1.0 || x < a) {
-      return 1.0 - incompleteGamma(a, x);
+    if (x < 1.0 || x < alpha) {
+      return 1.0 - incompleteGamma(alpha, x);
     }
 
-    double ax = a * Math.log(x) - x - logGamma(a);
+    double ax = alpha * Math.log(x) - x - logGamma(alpha);
     if (ax < -MAXLOG) {
       return 0.0;
     }
@@ -476,7 +492,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     ax = Math.exp(ax);
 
     /* continued fraction */
-    double y = 1.0 - a;
+    double y = 1.0 - alpha;
     double z = x + y + 1.0;
     double c = 0.0;
     double pkm2 = 1.0;
@@ -517,7 +533,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   }
 
   /** Returns the natural logarithm of the gamma function; formerly named <tt>lgamma</tt>. */
-  public static double logGamma(double x) throws ArithmeticException {
+  public static double logGamma(double x) {
     double p, q, z;
 
     double[] A = {
