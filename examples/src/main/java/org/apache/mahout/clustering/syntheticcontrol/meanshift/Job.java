@@ -87,7 +87,7 @@ public final class Job extends MeanShiftCanopyDriver {
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     boolean inputIsCanopies = hasOption(INPUT_IS_CANOPIES_OPTION);
 
-    runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering);
+    runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering, false);
     return 0;
   }
 
@@ -137,7 +137,7 @@ public final class Job extends MeanShiftCanopyDriver {
                                  convergenceDelta,
                                  maxIterations,
                                  true,
-                                 true);
+                                 true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
                                                                                                             "clusteredPoints"));

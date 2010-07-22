@@ -154,7 +154,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     // now run the KMeans job
     Path output = getTestTempDirPath("output");
     KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
-                        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
+                        EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true, false);
     int numIterations = 2;
     CDbwDriver.runJob(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"), output,
                       EuclideanDistanceMeasure.class.getName(), numIterations, 1);
@@ -168,7 +168,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     // now run the KMeans job
     Path output = getTestTempDirPath("output");
     FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
-                             EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 2, true, true, 0);
+                             EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, 2, true, true, 0, false);
     int numIterations = 2;
     CDbwDriver.runJob(new Path(output, "clusters-4"), new Path(output, "clusteredPoints"), output,
                       EuclideanDistanceMeasure.class.getName(), numIterations, 1);
@@ -177,7 +177,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
 
   public void testMeanShift() throws Exception {
     MeanShiftCanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
-                                 EuclideanDistanceMeasure.class.getName(), 2.1, 1.0, 0.001, 10, false, true);
+                                 EuclideanDistanceMeasure.class.getName(), 2.1, 1.0, 0.001, 10, false, true, false);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
     CDbwDriver.runJob(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"), output,

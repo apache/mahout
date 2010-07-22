@@ -30,8 +30,6 @@ public class MeanShiftCanopyClusterer {
 
   private double convergenceDelta;
 
-  // the next canopyId to be allocated
-  // private int nextCanopyId = 0;
   // the T1 distance threshold
   private double t1;
 
@@ -166,29 +164,37 @@ public class MeanShiftCanopyClusterer {
                                                     double t2,
                                                     int numIter) {
     MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure, t1, t2, convergenceThreshold);
+    int nextCanopyId = 0;
 
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-    int nextCanopyId = 0;
     for (Vector point : points) {
       clusterer.mergeCanopy(new MeanShiftCanopy(point, nextCanopyId++), canopies);
     }
-
-    boolean converged = false;
-    for (int iter = 0; !converged && iter < numIter; iter++) {
-      converged = true;
-      List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
-      for (MeanShiftCanopy canopy : canopies) {
-        converged = clusterer.shiftToMean(canopy) && converged;
-        clusterer.mergeCanopy(canopy, migratedCanopies);
-      }
-      canopies = migratedCanopies;
-
-      //verifyNonOverlap(canopies); useful for debugging
+    List<MeanShiftCanopy> newCanopies = canopies;
+    boolean[] converged = { false };
+    for (int iter = 0; !converged[0] && iter < numIter; iter++) {
+      newCanopies = clusterer.iterate(newCanopies, converged);
     }
+    canopies = newCanopies;
     return canopies;
   }
 
-   @SuppressWarnings("unused")
+  /**
+   * @param canopies
+   * @param converged
+   * @return
+   */
+  protected List<MeanShiftCanopy> iterate(List<MeanShiftCanopy> canopies, boolean[] converged) {
+    converged[0] = true;
+    List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
+    for (MeanShiftCanopy canopy : canopies) {
+      converged[0] = shiftToMean(canopy) && converged[0];
+      mergeCanopy(canopy, migratedCanopies);
+    }
+    return migratedCanopies;
+  }
+
+  @SuppressWarnings("unused")
   private static void verifyNonOverlap(List<MeanShiftCanopy> canopies) {
     Set<Integer> coveredPoints = new HashSet<Integer>();
     // verify no overlap
@@ -201,6 +207,24 @@ public class MeanShiftCanopyClusterer {
           //System.out.println("Added bound point: " + v + " to Canopy: " + canopy.asFormatString(null));
         }
     }
+  }
+
+  /**
+   * @param canopy
+   * @param clusters
+   * @return
+   */
+  protected MeanShiftCanopy findCoveringCanopy(MeanShiftCanopy canopy, List<MeanShiftCanopy> clusters) {
+    // canopies use canopyIds assigned when input vectors are processed as vectorIds too
+    int vectorId = canopy.getId();
+    for (MeanShiftCanopy msc : clusters) {
+      for (int containedId : msc.getBoundPoints().toList()) {
+        if (vectorId == containedId) {
+          return msc;
+        }
+      }
+    }
+    return null;
   }
 
 }

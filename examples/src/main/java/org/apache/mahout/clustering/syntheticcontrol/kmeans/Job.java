@@ -96,7 +96,7 @@ public final class Job extends KMeansDriver {
           .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)));
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, runClustering);
+    runJob(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, runClustering, false);
     return 0;
   }
 
@@ -144,7 +144,7 @@ public final class Job extends KMeansDriver {
                         convergenceDelta,
                         maxIterations,
                         1,
-                        true);
+                        true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
                                                                                                             "clusteredPoints"));

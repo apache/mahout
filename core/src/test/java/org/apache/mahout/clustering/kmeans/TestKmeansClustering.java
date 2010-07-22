@@ -351,6 +351,61 @@ public class TestKmeansClustering extends MahoutTestCase {
   }
 
   /** Story: User wishes to run kmeans job on reference data */
+  public void testKMeansSeqJob() throws Exception {
+    List<VectorWritable> points = getPointsWritable(reference);
+  
+    Path pointsPath = getTestTempDirPath("points");
+    Path clustersPath = getTestTempDirPath("clusters");
+    Configuration conf = new Configuration();
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file2"), fs, conf);
+    for (int k = 1; k < points.size(); k++) {
+      System.out.println("testKMeansMRJob k= " + k);
+      // pick k initial cluster centers at random
+      Path path = new Path(clustersPath, "part-00000");
+      FileSystem fs = FileSystem.get(path.toUri(), conf);
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Cluster.class);
+  
+      for (int i = 0; i < k + 1; i++) {
+        Vector vec = points.get(i).get();
+  
+        Cluster cluster = new Cluster(vec, i);
+        // add the center so the centroid will be correct upon output
+        cluster.addPoint(cluster.getCenter());
+        writer.append(new Text(cluster.getIdentifier()), cluster);
+      }
+      writer.close();
+      // now run the Job
+      Path outputPath = getTestTempDirPath("output");
+      //KMeansDriver.runJob(pointsPath, clustersPath, outputPath, EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
+      String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
+          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
+          outputPath.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2",
+          optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+          optKey(DefaultOptionCreator.METHOD_OPTION), DefaultOptionCreator.SEQUENTIAL_METHOD };
+      new KMeansDriver().run(args);
+  
+      // now compare the expected clusters with actual
+      Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-m-0"), conf);
+      int[] expect = expectedNumPoints[k];
+      DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
+      // The key is the clusterId
+      IntWritable clusterId = new IntWritable(0);
+      // The value is the weighted vector
+      WeightedVectorWritable value = new WeightedVectorWritable();
+      while (reader.next(clusterId, value)) {
+        collector.collect(clusterId, value);
+        clusterId = new IntWritable(0);
+        value = new WeightedVectorWritable();
+      }
+      reader.close();
+      assertEquals("clusters[" + k + ']', expect.length, collector.getKeys().size());
+    }
+  }
+
+  /** Story: User wishes to run kmeans job on reference data */
   public void testKMeansMRJob() throws Exception {
     List<VectorWritable> points = getPointsWritable(reference);
 
@@ -378,15 +433,11 @@ public class TestKmeansClustering extends MahoutTestCase {
       // now run the Job
       Path outputPath = getTestTempDirPath("output");
       //KMeansDriver.runJob(pointsPath, clustersPath, outputPath, EuclideanDistanceMeasure.class.getName(), 0.001, 10, k + 1, true);
-      String[] args = { 
-          optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(), 
-          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), 
-          optKey(DefaultOptionCreator.OUTPUT_OPTION), outputPath.toString(),
-          optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
-          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", 
-          optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2",
-          optKey(DefaultOptionCreator.CLUSTERING_OPTION), 
-          optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
+      String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
+          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
+          outputPath.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2",
+          optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
       new KMeansDriver().run(args);
 
       // now compare the expected clusters with actual
@@ -435,7 +486,8 @@ public class TestKmeansClustering extends MahoutTestCase {
                         0.001,
                         10,
                         1,
-                        true);
+                        true,
+                        false);
 
     // now compare the expected clusters with actual
     Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");

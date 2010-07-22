@@ -183,6 +183,74 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     }
   }
 
+  public void testFuzzyKMeansSeqJob() throws Exception {
+    List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.reference);
+  
+    Path pointsPath = getTestTempDirPath("points");
+    Path clustersPath = getTestTempDirPath("clusters");
+    Configuration conf = new Configuration();
+    ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
+  
+    for (int k = 0; k < points.size(); k++) {
+      System.out.println("testKFuzzyKMeansMRJob k= " + k);
+      // pick k initial cluster centers at random
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs,
+                                                           conf,
+                                                           new Path(clustersPath, "part-00000"),
+                                                           Text.class,
+                                                           SoftCluster.class);
+      for (int i = 0; i < k + 1; i++) {
+        Vector vec = tweakValue(points.get(i).get());
+  
+        SoftCluster cluster = new SoftCluster(vec);
+        // add the center so the centroid will be correct upon output
+        cluster.addPoint(cluster.getCenter(), 1);
+        /*
+         * writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
+         */
+        writer.append(new Text(cluster.getIdentifier()), cluster);
+  
+      }
+      writer.close();
+  
+      // now run the Job using the run() command line options.
+      Path output = getTestTempDirPath("output");
+      /*      FuzzyKMeansDriver.runJob(pointsPath,
+                                     clustersPath,
+                                     output,
+                                     EuclideanDistanceMeasure.class.getName(),
+                                     0.001,
+                                     2,
+                                     k + 1,
+                                     2,
+                                     false,
+                                     true,
+                                     0);
+      */
+      String[] args = { 
+          optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(), 
+          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), 
+          optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
+          optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", 
+          optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", 
+          optKey(FuzzyKMeansDriver.M_OPTION), "2.0", 
+          optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+          optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION), 
+          optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+          optKey(DefaultOptionCreator.METHOD_OPTION), DefaultOptionCreator.SEQUENTIAL_METHOD };
+      new FuzzyKMeansDriver().run(args);
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-0"), conf);
+      IntWritable key = new IntWritable();
+      WeightedVectorWritable out = new WeightedVectorWritable();
+      while (reader.next(key, out)) {
+        // make sure we can read all the clusters
+      }
+      reader.close();
+    }
+  
+  }
+
   public void testFuzzyKMeansMRJob() throws Exception {
     List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.reference);
 

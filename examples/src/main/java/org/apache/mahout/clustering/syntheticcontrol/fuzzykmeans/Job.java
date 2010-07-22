@@ -182,7 +182,8 @@ public final class Job extends FuzzyKMeansDriver {
                              fuzziness,
                              true,
                              true,
-                             0.0);
+                             0.0,
+                             false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);

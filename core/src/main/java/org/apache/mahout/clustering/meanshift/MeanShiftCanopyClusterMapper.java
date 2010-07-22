@@ -66,15 +66,15 @@ public class MeanShiftCanopyClusterMapper
     }
   }
 
-  public static List<MeanShiftCanopy> getCanopies(Configuration configuration) {
-    String statePath = configuration.get(MeanShiftCanopyDriver.STATE_IN_KEY);
+  public static List<MeanShiftCanopy> getCanopies(Configuration conf) {
+    String statePath = conf.get(MeanShiftCanopyDriver.STATE_IN_KEY);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     try {
       Path path = new Path(statePath);
-      FileSystem fs = FileSystem.get(path.toUri(), configuration);
+      FileSystem fs = FileSystem.get(path.toUri(), conf);
       FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
       for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), configuration);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           Text key = new Text();
           MeanShiftCanopy canopy = new MeanShiftCanopy();
