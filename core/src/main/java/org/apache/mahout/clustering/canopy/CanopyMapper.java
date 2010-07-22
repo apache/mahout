@@ -35,7 +35,7 @@ class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, V
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
-    canopyClusterer.addPointToCanopies(point.get(), canopies, context);
+    canopyClusterer.addPointToCanopies(point.get(), canopies);
   }
 
   @Override
@@ -48,8 +48,7 @@ class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, V
   protected void cleanup(Context context) throws IOException, InterruptedException {
     for (Canopy canopy : canopies) {
       Vector centroid = canopy.computeCentroid();
-      VectorWritable vw = new VectorWritable(centroid);
-      context.write(new Text("centroid"), vw);
+      context.write(new Text("centroid"), new VectorWritable(centroid));
     }
     super.cleanup(context);
   }

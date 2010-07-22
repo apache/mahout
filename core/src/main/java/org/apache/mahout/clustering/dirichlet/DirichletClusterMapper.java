@@ -37,6 +37,7 @@ import org.apache.mahout.math.VectorWritable;
 public class DirichletClusterMapper extends Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
   private List<DirichletCluster<VectorWritable>> clusters;
+
   private DirichletClusterer<VectorWritable> clusterer;
 
   @Override
@@ -52,8 +53,7 @@ public class DirichletClusterMapper extends Mapper<WritableComparable<?>, Vector
       clusters = getClusters(conf);
       String emitMostLikely = conf.get(DirichletDriver.EMIT_MOST_LIKELY_KEY);
       String threshold = conf.get(DirichletDriver.THRESHOLD_KEY);
-      clusterer = new DirichletClusterer<VectorWritable>(Boolean.parseBoolean(emitMostLikely),
-                                                         Double.parseDouble(threshold));
+      clusterer = new DirichletClusterer<VectorWritable>(Boolean.parseBoolean(emitMostLikely), Double.parseDouble(threshold));
     } catch (SecurityException e) {
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
@@ -61,15 +61,18 @@ public class DirichletClusterMapper extends Mapper<WritableComparable<?>, Vector
     }
   }
 
-  public static List<DirichletCluster<VectorWritable>> getClusters(Configuration job) {
-    String statePath = job.get(DirichletDriver.STATE_IN_KEY);
+  public static List<DirichletCluster<VectorWritable>> getClusters(Configuration conf) {
+    String statePath = conf.get(DirichletDriver.STATE_IN_KEY);
+    return loadClusters(conf, new Path(statePath));
+  }
+
+  protected static List<DirichletCluster<VectorWritable>> loadClusters(Configuration conf, Path stateIn) {
     List<DirichletCluster<VectorWritable>> clusters = new ArrayList<DirichletCluster<VectorWritable>>();
     try {
-      Path path = new Path(statePath);
-      FileSystem fs = FileSystem.get(path.toUri(), job);
-      FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
+      FileSystem fs = FileSystem.get(stateIn.toUri(), conf);
+      FileStatus[] status = fs.listStatus(stateIn, new OutputLogFilter());
       for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), job);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           Text key = new Text();
           DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();

@@ -61,7 +61,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
   }
 
   /**
-   * Run the job using supplied arguments
+   * Run the job using supplied arguments on a new driver instance (convenience)
    * 
    * @param input
    *          the directory pathname for input points
@@ -129,7 +129,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(M_OPTION, M_OPTION,"coefficient normalization factor, must be greater than 1", true);
+    addOption(M_OPTION, M_OPTION, "coefficient normalization factor, must be greater than 1", true);
     addOption(DefaultOptionCreator.numReducersOption().create());
     //TODO: addOption(DefaultOptionCreator.numMappersOption().create()); but how to set in new Job?
     addOption(DefaultOptionCreator.clusteringOption().create());
@@ -174,64 +174,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
         emitMostLikely,
         threshold);
     return 0;
-  }
-
-  /**
-   * Run the full clustering job
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measureClass
-   * @param convergenceDelta
-   * @param maxIterations
-   * @param numReduceTasks
-   * @param m
-   * @param runClustering
-   * @param emitMostLikely 
-   * @param threshold
-   * @throws IOException
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
-   */
-  private void job(Path input,
-                   Path clustersIn,
-                   Path output,
-                   String measureClass,
-                   double convergenceDelta,
-                   int maxIterations,
-                   int numReduceTasks,
-                   float m,
-                   boolean runClustering,
-                   boolean emitMostLikely,
-                   double threshold) throws IOException, ClassNotFoundException, InterruptedException {
-    boolean converged = false;
-    int iteration = 1;
-
-    // iterate until the clusters converge
-    while (!converged && (iteration <= maxIterations)) {
-      log.info("Iteration {}", iteration);
-
-      // point the output to a new directory per iteration
-      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      converged = runIteration(input, clustersIn, clustersOut, measureClass, convergenceDelta, numReduceTasks, iteration, m);
-
-      // now point the input to the old output directory
-      clustersIn = clustersOut;
-      iteration++;
-    }
-
-    // now actually cluster the points if requested
-    if (runClustering) {
-      log.info("Clustering ");
-      runClustering(input,
-                    clustersIn,
-                    new Path(output, Cluster.CLUSTERED_POINTS_DIR),
-                    measureClass,
-                    convergenceDelta,
-                    m,
-                    emitMostLikely,
-                    threshold);
-    }
   }
 
   /**
@@ -307,6 +249,111 @@ public class FuzzyKMeansDriver extends AbstractJob {
   }
 
   /**
+   * Iterate over the input vectors to produce clusters and, if requested, use the
+   * results of the final iteration to cluster the input vectors.
+   * 
+   * @param input
+   *          the directory pathname for input points
+   * @param clustersIn
+   *          the directory pathname for initial & computed clusters
+   * @param output
+   *          the directory pathname for output points
+   * @param measureClass
+   *          the classname of the DistanceMeasure
+   * @param convergenceDelta
+   *          the convergence delta value
+   * @param maxIterations
+   *          the maximum number of iterations
+   * @param numReduceTasks
+   *          the number of reduce tasks
+   * @param m
+   *          the fuzzification factor, see
+   *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
+   * @param runClustering 
+   *          true if points are to be clustered after iterations complete
+   * @param emitMostLikely
+   *          a boolean if true emit only most likely cluster for each point
+   * @param threshold 
+   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @throws IOException
+   * @throws ClassNotFoundException
+   * @throws InterruptedException
+   */
+  public void job(Path input,
+                  Path clustersIn,
+                  Path output,
+                  String measureClass,
+                  double convergenceDelta,
+                  int maxIterations,
+                  int numReduceTasks,
+                  float m,
+                  boolean runClustering,
+                  boolean emitMostLikely,
+                  double threshold) throws IOException, ClassNotFoundException, InterruptedException {
+    Path clustersOut = buildClusters(input, clustersIn, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, m);
+    if (runClustering) {
+      log.info("Clustering ");
+      clusterData(input,
+                  clustersOut,
+                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
+                  measureClass,
+                  convergenceDelta,
+                  m,
+                  emitMostLikely,
+                  threshold);
+    }
+  }
+
+  /**
+   * Iterate over the input vectors to produce cluster directories for each iteration
+   * 
+   * @param input
+   *          the directory pathname for input points
+   * @param clustersIn
+   *          the directory pathname for initial & computed clusters
+   * @param output
+   *          the directory pathname for output points
+   * @param measureClass
+   *          the classname of the DistanceMeasure
+   * @param convergenceDelta
+   *          the convergence delta value
+   * @param maxIterations
+   *          the maximum number of iterations
+   * @param numReduceTasks
+   *          the number of reduce tasks
+   * @param m
+   *          the fuzzification factor, see
+   *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
+   * @return the Path of the final clusters directory
+   * @throws IOException
+   */
+  public Path buildClusters(Path input,
+                            Path clustersIn,
+                            Path output,
+                            String measureClass,
+                            double convergenceDelta,
+                            int maxIterations,
+                            int numReduceTasks,
+                            float m) throws IOException {
+    boolean converged = false;
+    int iteration = 1;
+
+    // iterate until the clusters converge
+    while (!converged && (iteration <= maxIterations)) {
+      log.info("Iteration {}", iteration);
+
+      // point the output to a new directory per iteration
+      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
+      converged = runIteration(input, clustersIn, clustersOut, measureClass, convergenceDelta, numReduceTasks, iteration, m);
+
+      // now point the input to the old output directory
+      clustersIn = clustersOut;
+      iteration++;
+    }
+    return clustersIn;
+  }
+
+  /**
    * Run the job using supplied arguments
    * 
    * @param input
@@ -325,14 +372,14 @@ public class FuzzyKMeansDriver extends AbstractJob {
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @throws IOException 
    */
-  private void runClustering(Path input,
-                             Path clustersIn,
-                             Path output,
-                             String measureClass,
-                             double convergenceDelta,
-                             float m,
-                             boolean emitMostLikely,
-                             double threshold) throws IOException, ClassNotFoundException, InterruptedException {
+  public void clusterData(Path input,
+                          Path clustersIn,
+                          Path output,
+                          String measureClass,
+                          double convergenceDelta,
+                          float m,
+                          boolean emitMostLikely,
+                          double threshold) throws IOException, ClassNotFoundException, InterruptedException {
 
     Configuration conf = new Configuration();
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());

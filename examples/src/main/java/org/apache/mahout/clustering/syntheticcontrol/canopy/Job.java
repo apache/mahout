@@ -74,7 +74,7 @@ public final class Job extends CanopyDriver {
       InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
-    CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2, true);
+    CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2, true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"),
                                                     new Path(output, "clusteredPoints"));

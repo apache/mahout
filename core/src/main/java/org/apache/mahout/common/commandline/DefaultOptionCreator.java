@@ -24,34 +24,23 @@ import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 
 public final class DefaultOptionCreator {
 
-  // option keywords
-  public static final String THRESHOLD_OPTION = "threshold";
-
-  public static final String EMIT_MOST_LIKELY_OPTION = "emitMostLikely";
-
   public static final String CLUSTERING_OPTION = "clustering";
-
-  public static final String MAX_REDUCERS_OPTION = "maxRed";
-
-  public static final String CONVERGENCE_DELTA_OPTION = "convergenceDelta";
-
-  public static final String NUM_CLUSTERS_OPTION = "numClusters";
-
-  public static final String MAX_ITERATIONS_OPTION = "maxIter";
-
-  public static final String T2_OPTION = "t2";
-
-  public static final String T1_OPTION = "t1";
-
-  public static final String DISTANCE_MEASURE_OPTION = "distanceMeasure";
-
-  public static final String OVERWRITE_OPTION = "overwrite";
-
-  public static final String OUTPUT_OPTION = "output";
-
   public static final String CLUSTERS_IN_OPTION = "clusters";
-
+  public static final String CONVERGENCE_DELTA_OPTION = "convergenceDelta";
+  public static final String DISTANCE_MEASURE_OPTION = "distanceMeasure";
+  public static final String EMIT_MOST_LIKELY_OPTION = "emitMostLikely";
   public static final String INPUT_OPTION = "input";
+  public static final String MAX_ITERATIONS_OPTION = "maxIter";
+  public static final String MAX_REDUCERS_OPTION = "maxRed";
+  public static final String METHOD_OPTION = "method";
+  public static final String NUM_CLUSTERS_OPTION = "numClusters";
+  public static final String OUTPUT_OPTION = "output";
+  public static final String OVERWRITE_OPTION = "overwrite";
+  public static final String T1_OPTION = "t1";
+  public static final String T2_OPTION = "t2";
+  public static final String THRESHOLD_OPTION = "threshold";
+  public static final String SEQUENTIAL_METHOD = "sequential";
+  public static final String MAPREDUCE_METHOD = "mapreduce";
 
   private DefaultOptionCreator() {
   }
@@ -108,6 +97,16 @@ public final class DefaultOptionCreator {
         .withArgument(new ArgumentBuilder().withName(DISTANCE_MEASURE_OPTION).withDefault(SquaredEuclideanDistanceMeasure.class
             .getName()).withMinimum(1).withMaximum(1).create())
         .withDescription("The classname of the DistanceMeasure. Default is SquaredEuclidean");
+  }
+
+  /**
+   * Returns a default command line option for specification of sequential or parallel operation.
+   * Used by Canopy, FuzzyKmeans, Kmeans, MeanShift, Dirichlet
+   */
+  public static DefaultOptionBuilder methodOption() {
+    return new DefaultOptionBuilder().withLongName(METHOD_OPTION).withRequired(false).withShortName("xm")
+        .withArgument(new ArgumentBuilder().withName(METHOD_OPTION).withDefault(MAPREDUCE_METHOD).withMinimum(1).withMaximum(1).create())
+        .withDescription("The execution method to use: sequential or mapreduce. Default is mapreduce");
   }
 
   /**

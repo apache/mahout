@@ -32,7 +32,7 @@ public class CanopyReducer extends Reducer<Text, VectorWritable, Text, Canopy> {
   protected void reduce(Text arg0, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
     for (VectorWritable value : values) {
       Vector point = value.get();
-      canopyClusterer.addPointToCanopies(point, canopies, context);
+      canopyClusterer.addPointToCanopies(point, canopies);
     }
     for (Canopy canopy : canopies) {
       context.write(new Text(canopy.getIdentifier()), canopy);

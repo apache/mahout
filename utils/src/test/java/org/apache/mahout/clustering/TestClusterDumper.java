@@ -136,7 +136,7 @@ public class TestClusterDumper extends MahoutTestCase {
   public void testCanopy() throws Exception { // now run the Job
     Path output = getTestTempDirPath("output");
     CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
-                        EuclideanDistanceMeasure.class.getName(), 8, 4, true);
+                        EuclideanDistanceMeasure.class.getName(), 8, 4, true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"),
                                                     new Path(output, "clusteredPoints"));
@@ -147,7 +147,7 @@ public class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     Path output = getTestTempDirPath("output");
     CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
-                        EuclideanDistanceMeasure.class.getName(), 8, 4, false);
+                        EuclideanDistanceMeasure.class.getName(), 8, 4, false, false);
     // now run the KMeans job
     KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
                         EuclideanDistanceMeasure.class.getName(), 0.001, 10, 1, true);
@@ -161,7 +161,7 @@ public class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     Path output = getTestTempDirPath("output");
     CanopyDriver.runJob(getTestTempDirPath("testdata"), output,
-                        EuclideanDistanceMeasure.class.getName(), 8, 4, false);
+                        EuclideanDistanceMeasure.class.getName(), 8, 4, false, false);
     // now run the Fuzzy KMeans job
     FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
                              EuclideanDistanceMeasure.class.getName(), 0.001, 10,
@@ -187,7 +187,7 @@ public class TestClusterDumper extends MahoutTestCase {
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
     DirichletDriver.runJob(getTestTempDirPath("testdata"), output,
                            L1ModelDistribution.class.getName(), prototype.getDelegate().getClass().getName(),
-                           15, 10, 1.0, 1, true, true, 0);
+                           15, 10, 1.0, 1, true, true, 0, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"),
                                                     new Path(output, "clusteredPoints"));

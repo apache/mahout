@@ -164,7 +164,7 @@ public final class Job extends DirichletDriver {
                            numReducers,
                            true,
                            emitMostLikely,
-                           threshold);
+                           threshold, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
                                                                                                             "clusteredPoints"));

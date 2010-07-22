@@ -139,7 +139,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
 
   public void testCanopy() throws Exception { // now run the Job
     CanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
-                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true);
+                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, true, false);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
     CDbwDriver.runJob(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"), output,
@@ -150,7 +150,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
   public void testKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
-                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
+                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false, false);
     // now run the KMeans job
     Path output = getTestTempDirPath("output");
     KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
@@ -164,7 +164,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
   public void testFuzzyKmeans() throws Exception {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
-                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false);
+                        EuclideanDistanceMeasure.class.getName(), 3.1, 2.1, false, false);
     // now run the KMeans job
     Path output = getTestTempDirPath("output");
     FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output,
@@ -189,7 +189,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     Vector prototype = new DenseVector(2);
     DirichletDriver.runJob(getTestTempDirPath("testdata"), getTestTempDirPath("output"),
                            L1ModelDistribution.class.getName(), prototype.getClass().getName(),
-                           15, 5, 1.0, 1, true, true, 0);
+                           15, 5, 1.0, 1, true, true, 0, false);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
     CDbwDriver.runJob(new Path(output, "clusters-5"), new Path(output, "clusteredPoints"), output,

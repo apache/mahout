@@ -46,7 +46,7 @@ public class KMeansReducer extends Reducer<Text, KMeansInfo, Text, Cluster> {
     // force convergence calculation
     boolean converged = cluster.computeConvergence(this.measure, this.convergenceDelta);
     if (converged) {
-      //context.getCounter("Clustering", "Converged Clusters").increment(1);
+      context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
     context.write(new Text(cluster.getIdentifier()), cluster);
   }

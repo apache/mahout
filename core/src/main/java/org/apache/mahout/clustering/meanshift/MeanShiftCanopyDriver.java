@@ -47,7 +47,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
 
   private static final String CONTROL_CONVERGED = "control/converged";
 
-  protected MeanShiftCanopyDriver() {
+  public MeanShiftCanopyDriver() {
   }
 
   public static void main(String[] args) throws Exception {
@@ -55,7 +55,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
   }
 
   /**
-   * Run the job where the input format can be either Vectors or Canopies
+   * Run the job on a new driver instance (convenience)
    * 
    * @param input
    *          the input pathname String
@@ -138,70 +138,6 @@ public class MeanShiftCanopyDriver extends AbstractJob {
   }
 
   /**
-   * Run the job where the input format can be either Vectors or Canopies
-   * 
-   * @param input
-   *          the input pathname String
-   * @param output
-   *          the output pathname String
-   * @param measureClassName
-   *          the DistanceMeasure class name
-   * @param t1
-   *          the T1 distance threshold
-   * @param t2
-   *          the T2 distance threshold
-   * @param convergenceDelta
-   *          the double convergence criteria
-   * @param maxIterations
-   *          an int number of iterations
-   * @param inputIsCanopies 
-              true if the input path already contains MeanShiftCanopies and does not need to be converted from Vectors
-   * @param runClustering 
-   *          true if the input points are to be clustered once the iterations complete
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   */
-  private void job(Path input,
-                   Path output,
-                   String measureClassName,
-                   double t1,
-                   double t2,
-                   double convergenceDelta,
-                   int maxIterations,
-                   boolean inputIsCanopies,
-                   boolean runClustering) throws IOException, InterruptedException, ClassNotFoundException {
-    Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
-    if (inputIsCanopies) {
-      clustersIn = input;
-    } else {
-      createCanopyFromVectors(input, clustersIn);
-    }
-
-    // iterate until the clusters converge
-    boolean converged = false;
-    int iteration = 1;
-    while (!converged && (iteration <= maxIterations)) {
-      log.info("Iteration {}", iteration);
-      // point the output to a new directory per iteration
-      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      Path controlOut = new Path(output, CONTROL_CONVERGED);
-      runIteration(clustersIn, clustersOut, controlOut, measureClassName, t1, t2, convergenceDelta);
-      converged = FileSystem.get(new Configuration()).exists(controlOut);
-      // now point the input to the old output directory
-      clustersIn = clustersOut;
-      iteration++;
-    }
-
-    if (runClustering) {
-      // now cluster the points
-      runClustering(inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
-                    clustersIn,
-                    new Path(output, Cluster.CLUSTERED_POINTS_DIR));
-    }
-  }
-
-  /**
    * Run an iteration
    * 
    * @param input
@@ -254,7 +190,56 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     job.waitForCompletion(true);
   }
 
-  private void createCanopyFromVectors(Path input, Path output) throws IOException, InterruptedException, ClassNotFoundException {
+  /**
+   * Run the job where the input format can be either Vectors or Canopies.
+   * If requested, cluster the input data using the computed Canopies
+   * 
+   * @param input
+   *          the input pathname String
+   * @param output
+   *          the output pathname String
+   * @param measureClassName
+   *          the DistanceMeasure class name
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
+   * @param convergenceDelta
+   *          the double convergence criteria
+   * @param maxIterations
+   *          an int number of iterations
+   * @param inputIsCanopies 
+              true if the input path already contains MeanShiftCanopies and does not need to be converted from Vectors
+   * @param runClustering 
+   *          true if the input points are to be clustered once the iterations complete
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
+  public void job(Path input,
+                  Path output,
+                  String measureClassName,
+                  double t1,
+                  double t2,
+                  double convergenceDelta,
+                  int maxIterations,
+                  boolean inputIsCanopies,
+                  boolean runClustering) throws IOException, InterruptedException, ClassNotFoundException {
+    Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
+    if (inputIsCanopies) {
+      clustersIn = input;
+    } else {
+      createCanopyFromVectors(input, clustersIn);
+    }
+    Path clustersOut = buildClusters(clustersIn, output, measureClassName, t1, t2, convergenceDelta, maxIterations);
+    if (runClustering) {
+      clusterData(inputIsCanopies ? input : new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
+                  clustersOut,
+                  new Path(output, Cluster.CLUSTERED_POINTS_DIR));
+    }
+  }
+
+  public void createCanopyFromVectors(Path input, Path output) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     Job job = new Job(conf);
     job.setOutputKeyClass(Text.class);
@@ -271,6 +256,55 @@ public class MeanShiftCanopyDriver extends AbstractJob {
   }
 
   /**
+   * Iterate over the input clusters to produce the next cluster directories for each iteration
+   * 
+   * @param clustersIn
+   *          the input directory Path
+   * @param output
+   *          the output Path
+   * @param measureClassName
+   *          the DistanceMeasure class name
+   * @param t1
+   *          the T1 distance threshold
+   * @param t2
+   *          the T2 distance threshold
+   * @param convergenceDelta
+   *          the double convergence criteria
+   * @param maxIterations
+   *          an int number of iterations
+   * @param input
+   *          the input pathname String
+   * 
+   * @return
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   */
+  public Path buildClusters(Path clustersIn,
+                            Path output,
+                            String measureClassName,
+                            double t1,
+                            double t2,
+                            double convergenceDelta,
+                            int maxIterations) throws IOException, InterruptedException, ClassNotFoundException {
+    // iterate until the clusters converge
+    boolean converged = false;
+    int iteration = 1;
+    while (!converged && (iteration <= maxIterations)) {
+      log.info("Iteration {}", iteration);
+      // point the output to a new directory per iteration
+      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
+      Path controlOut = new Path(output, CONTROL_CONVERGED);
+      runIteration(clustersIn, clustersOut, controlOut, measureClassName, t1, t2, convergenceDelta);
+      converged = FileSystem.get(new Configuration()).exists(controlOut);
+      // now point the input to the old output directory
+      clustersIn = clustersOut;
+      iteration++;
+    }
+    return clustersIn;
+  }
+
+  /**
    * Run the job using supplied arguments
    * 
    * @param input
@@ -283,7 +317,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    * @throws InterruptedException 
    * @throws IOException 
    */
-  private void runClustering(Path input, Path clustersIn, Path output) throws IOException, InterruptedException,
+  public void clusterData(Path input, Path clustersIn, Path output) throws IOException, InterruptedException,
       ClassNotFoundException {
 
     Configuration conf = new Configuration();

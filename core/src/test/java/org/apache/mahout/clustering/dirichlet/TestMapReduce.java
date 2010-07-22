@@ -167,21 +167,6 @@ public class TestMapReduce extends MahoutTestCase {
     state.update(newModels);
   }
 
-  private static void printModels(Iterable<Model<VectorWritable>[]> results, int significant) {
-    int row = 0;
-    for (Model<VectorWritable>[] r : results) {
-      System.out.print("sample[" + row++ + "]= ");
-      for (int k = 0; k < r.length; k++) {
-        Model<VectorWritable> model = r[k];
-        if (model.count() > significant) {
-          System.out.print("m" + k + model.toString() + ", ");
-        }
-      }
-      System.out.println();
-    }
-    System.out.println();
-  }
-
   /** Test the Mapper and Reducer in an iteration loop */
   public void testMRIterations() throws Exception {
     generateSamples(100, 0, 0, 1);
@@ -221,38 +206,19 @@ public class TestMapReduce extends MahoutTestCase {
     printModels(models, 0);
   }
 
-  /** Test the Mapper and Reducer using the Driver */
-  public void testDriverMRIterations() throws Exception {
-    generateSamples(100, 0, 0, 0.5);
-    generateSamples(100, 2, 0, 0.2);
-    generateSamples(100, 0, 2, 0.3);
-    generateSamples(100, 2, 2, 1);
-    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
-    // Now run the driver using the run() method. Others can use runJob() as before
-    Integer maxIterations = 5;
-    String[] args = { 
-        optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
-        optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
-        optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
-        optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), "org.apache.mahout.math.DenseVector",
-        optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", 
-        optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), maxIterations.toString(), 
-        optKey(DirichletDriver.ALPHA_OPTION), "1.0", 
-        optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
-    new DirichletDriver().run(args);
-    // and inspect results
-    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
-    Configuration conf = new Configuration();
-    conf.set(DirichletDriver.MODEL_FACTORY_KEY, "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
-    conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, "org.apache.mahout.math.DenseVector");
-    conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, "2");
-    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
-    conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
-    for (int i = 0; i <= maxIterations; i++) {
-      conf.set(DirichletDriver.STATE_IN_KEY, new Path(getTestTempDirPath("output"), "clusters-" + i).toString());
-      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
+  private static void printModels(Iterable<Model<VectorWritable>[]> results, int significant) {
+    int row = 0;
+    for (Model<VectorWritable>[] r : results) {
+      System.out.print("sample[" + row++ + "]= ");
+      for (int k = 0; k < r.length; k++) {
+        Model<VectorWritable> model = r[k];
+        if (model.count() > significant) {
+          System.out.print("m" + k + model.toString() + ", ");
+        }
+      }
+      System.out.println();
     }
-    printResults(clusters, 0);
+    System.out.println();
   }
 
   private static void printResults(List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
@@ -271,6 +237,73 @@ public class TestMapReduce extends MahoutTestCase {
     System.out.println();
   }
 
+  /** Test the Mapper and Reducer using the Driver in sequential execution mode */
+  public void testDriverIterationsSeq() throws Exception {
+    generateSamples(100, 0, 0, 0.5);
+    generateSamples(100, 2, 0, 0.2);
+    generateSamples(100, 0, 2, 0.3);
+    generateSamples(100, 2, 2, 1);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
+    // Now run the driver using the run() method. Others can use runJob() as before
+    Integer maxIterations = 5;
+    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
+        optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION),
+        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+        optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), "org.apache.mahout.math.DenseVector",
+        optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
+        maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0", optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
+        DefaultOptionCreator.SEQUENTIAL_METHOD };
+    new DirichletDriver().run(args);
+    // and inspect results
+    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
+    Configuration conf = new Configuration();
+    conf.set(DirichletDriver.MODEL_FACTORY_KEY, "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
+    conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, "org.apache.mahout.math.DenseVector");
+    conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, "2");
+    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
+    conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
+    for (int i = 0; i <= maxIterations; i++) {
+      conf.set(DirichletDriver.STATE_IN_KEY, new Path(getTestTempDirPath("output"), "clusters-" + i).toString());
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
+    }
+    printResults(clusters, 0);
+  }
+
+  /** Test the Mapper and Reducer using the Driver in mapreduce mode */
+  public void testDriverIterationsMR() throws Exception {
+    generateSamples(100, 0, 0, 0.5);
+    generateSamples(100, 2, 0, 0.2);
+    generateSamples(100, 0, 2, 0.3);
+    generateSamples(100, 2, 2, 1);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
+    // Now run the driver using the run() method. Others can use runJob() as before
+    Integer maxIterations = 5;
+    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
+        optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION),
+        "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution",
+        optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), "org.apache.mahout.math.DenseVector",
+        optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
+        maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0", optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION) };
+    new DirichletDriver().run(args);
+    // and inspect results
+    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
+    Configuration conf = new Configuration();
+    conf.set(DirichletDriver.MODEL_FACTORY_KEY, "org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution");
+    conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, "org.apache.mahout.math.DenseVector");
+    conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, "2");
+    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
+    conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
+    for (int i = 0; i <= maxIterations; i++) {
+      conf.set(DirichletDriver.STATE_IN_KEY, new Path(getTestTempDirPath("output"), "clusters-" + i).toString());
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
+    }
+    printResults(clusters, 0);
+  }
+
   /** Test the Mapper and Reducer using the Driver */
   public void testDriverMnRIterations() throws Exception {
     generate4Datasets();
@@ -286,7 +319,8 @@ public class TestMapReduce extends MahoutTestCase {
                            1,
                            false,
                            true,
-                           0);
+                           0,
+                           false);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();
@@ -331,7 +365,8 @@ public class TestMapReduce extends MahoutTestCase {
                            2,
                            false,
                            true,
-                           0);
+                           0,
+                           false);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();
@@ -376,7 +411,8 @@ public class TestMapReduce extends MahoutTestCase {
                            2,
                            false,
                            true,
-                           0);
+                           0,
+                           false);
     // and inspect results
     List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();

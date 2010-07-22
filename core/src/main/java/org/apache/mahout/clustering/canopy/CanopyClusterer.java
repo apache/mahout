@@ -25,17 +25,23 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * @author jeff
+ *
+ */
 public class CanopyClusterer {
 
-  private int nextCanopyId;
+  private static final Logger log = LoggerFactory.getLogger(CanopyClusterer.class);
 
-  private int numVectors;
+  private int nextCanopyId;
 
   // the T1 distance threshold
   private double t1;
@@ -94,37 +100,49 @@ public class CanopyClusterer {
    * points. Because of this it does not need to actually store the points, instead storing a total points
    * vector and the number of points. From this a centroid can be computed.
    * <p/>
-   * This method is used by the CanopyReducer.
+   * This method is used by the CanopyMapper, CanopyReducer and CanopyDriver.
    * 
    * @param point
    *          the point to be added
    * @param canopies
    *          the List<Canopy> to be appended
-   * @param context
-   *          Object to report status to the MR interface
    * @throws IOException 
    */
-  public void addPointToCanopies(Vector point, List<Canopy> canopies, TaskAttemptContext context) throws IOException {
+  public void addPointToCanopies(Vector point, List<Canopy> canopies) throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
+        log.info("Added point: " + ClusterBase.formatVector(point, null) + " to canopy: " + canopy.getIdentifier());
         canopy.addPoint(point);
       }
       pointStronglyBound = pointStronglyBound || (dist < t2);
     }
     if (!pointStronglyBound) {
-      context.setStatus("Created new Canopy:" + nextCanopyId + " numPoints:" + numVectors);
+      log.info("Created new Canopy:" + nextCanopyId + " at center:" + ClusterBase.formatVector(point, null));
       canopies.add(new Canopy(point, nextCanopyId++));
     }
-    numVectors++;
   }
 
+  /**
+   * Emit the point to the closest Canopy
+   * 
+   * @param point
+   * @param canopies
+   * @param context
+   * @throws IOException
+   * @throws InterruptedException
+   */
   public void emitPointToClosestCanopy(Vector point,
                                        List<Canopy> canopies,
-                                       Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-      throws IOException, InterruptedException {
+                                       Mapper<?, ?, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
+      InterruptedException {
+    Canopy closest = findClosestCanopy(point, canopies);
+    context.write(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
+    context.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
+  }
 
+  protected Canopy findClosestCanopy(Vector point, List<Canopy> canopies) {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     // find closest canopy
@@ -135,9 +153,7 @@ public class CanopyClusterer {
         closest = canopy;
       }
     }
-    // emit to closest canopy
-    context.write(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
-    context.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
+    return closest;
   }
 
   /**

@@ -135,7 +135,7 @@ public final class Job extends KMeansDriver {
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
-    CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2, false);
+    CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2, false, false);
     log.info("Running KMeans");
     KMeansDriver.runJob(directoryContainingConvertedInput,
                         new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
