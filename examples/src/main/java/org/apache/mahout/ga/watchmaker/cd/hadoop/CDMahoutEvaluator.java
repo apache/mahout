@@ -70,6 +70,7 @@ public final class CDMahoutEvaluator {
     Configuration conf = new Configuration();
 
     Job job = new Job(conf);
+    
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
 
     // check the input
@@ -152,6 +153,7 @@ public final class CDMahoutEvaluator {
     FileInputFormat.setInputPaths(job, inpath);
     FileOutputFormat.setOutputPath(job, outpath);
 
+    job.setJarByClass(CDMahoutEvaluator.class);
     job.setOutputKeyClass(LongWritable.class);
     job.setOutputValueClass(CDFitness.class);
 

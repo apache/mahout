@@ -180,6 +180,7 @@ public final class WikipediaDatasetCreatorDriver {
     if (log.isInfoEnabled()) {
       log.info("Input: {} Out: {} Categories: {}", new Object[] {input, output, catFile});
     }
+    job.setJarByClass(WikipediaDatasetCreatorDriver.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
     job.setMapperClass(WikipediaDatasetCreatorMapper.class);

@@ -57,6 +57,7 @@ public final class MahoutEvaluator {
   public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations)
       throws IOException, ClassNotFoundException, InterruptedException {
     Job job = new Job();
+    job.setJarByClass(MahoutEvaluator.class);
     Configuration conf = job.getConfiguration();
     FileSystem fs = FileSystem.get(conf);
     Path inpath = prepareInput(fs, population);

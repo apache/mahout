@@ -106,6 +106,7 @@ public final class CDInfosTool {
     FileInputFormat.setInputPaths(job, inpath);
     FileOutputFormat.setOutputPath(job, outpath);
 
+    job.setJarByClass(CDInfosTool.class);
     job.setOutputKeyClass(LongWritable.class);
     job.setOutputValueClass(Text.class);
 
