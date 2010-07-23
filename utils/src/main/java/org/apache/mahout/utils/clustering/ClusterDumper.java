@@ -136,6 +136,7 @@ public final class ClusterDumper extends AbstractJob {
     if (hasOption(NUM_WORDS_OPTION)) {
       setNumTopFeatures(Integer.parseInt(getOption(NUM_WORDS_OPTION)));
     }
+    init();
     printClusters(null);
     return 0;
   }
