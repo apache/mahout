@@ -272,6 +272,7 @@ public final class DictionaryVectorizer {
     Job job = new Job(conf);
     job.setJobName("DictionaryVectorizer::MakePartialVectors: input-folder: " + input
                     + ", dictionary-file: " + dictionaryFilePath.toString());
+    job.setJarByClass(DictionaryVectorizer.class);
     
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(StringTuple.class);
@@ -309,6 +310,7 @@ public final class DictionaryVectorizer {
     Job job = new Job(conf);
     
     job.setJobName("DictionaryVectorizer::WordCount: input-folder: " + input.toString());
+    job.setJarByClass(DictionaryVectorizer.class);
     
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(LongWritable.class);

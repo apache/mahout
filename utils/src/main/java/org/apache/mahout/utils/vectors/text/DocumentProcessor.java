@@ -80,6 +80,7 @@ public final class DocumentProcessor {
     
     Job job = new Job(conf);
     job.setJobName("DocumentProcessor::DocumentTokenizer: input-folder: " + input);
+    job.setJarByClass(DocumentProcessor.class);
     
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(StringTuple.class);

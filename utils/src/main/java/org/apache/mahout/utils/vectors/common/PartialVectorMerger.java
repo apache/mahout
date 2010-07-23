@@ -92,7 +92,8 @@ public final class PartialVectorMerger {
 
     Job job = new Job(conf);
     job.setJobName("PartialVectorMerger::MergePartialVectors");
-
+    job.setJarByClass(PartialVectorMerger.class);
+    
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(VectorWritable.class);
 

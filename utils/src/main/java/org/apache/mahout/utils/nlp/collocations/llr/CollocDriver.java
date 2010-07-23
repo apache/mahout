@@ -206,9 +206,11 @@ public final class CollocDriver extends AbstractJob {
     con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
     con.setInt(CollocMapper.MAX_SHINGLE_SIZE, maxNGramSize);
     con.setInt(CollocReducer.MIN_SUPPORT, minSupport);
+    
     Job job = new Job(con);
     job.setJobName(CollocDriver.class.getSimpleName() + ".generateCollocations:" + input);
-
+    job.setJarByClass(CollocDriver.class);
+    
     job.setMapOutputKeyClass(GramKey.class);
     job.setMapOutputValueClass(Gram.class);
     job.setPartitionerClass(GramKeyPartitioner.class);
@@ -253,7 +255,8 @@ public final class CollocDriver extends AbstractJob {
  
     Job job = new Job(conf);
     job.setJobName(CollocDriver.class.getSimpleName() + ".computeNGrams: " + output);
-
+    job.setJarByClass(CollocDriver.class);
+    
     job.setMapOutputKeyClass(Gram.class);
     job.setMapOutputValueClass(Gram.class);
 

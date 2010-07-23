@@ -331,6 +331,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
   private void createCanopyFromVectorsMR(Path input, Path output) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     Job job = new Job(conf);
+    job.setJarByClass(MeanShiftCanopyDriver.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(MeanShiftCanopy.class);
     job.setMapperClass(MeanShiftCanopyCreatorMapper.class);

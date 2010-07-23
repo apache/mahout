@@ -174,6 +174,7 @@ public final class WikipediaToSequenceFile {
     job.setInputFormatClass(XmlInputFormat.class);
     job.setReducerClass(Reducer.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setJarByClass(WikipediaToSequenceFile.class);
     
     /*
      * conf.set("mapred.compress.map.output", "true"); conf.set("mapred.map.output.compression.type",

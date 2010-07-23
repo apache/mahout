@@ -319,6 +319,8 @@ public final class TFIDFConverter {
     
     Job job = new Job(conf);
     job.setJobName("VectorTfIdf Document Frequency Count running over input: " + input.toString());
+    job.setJarByClass(TFIDFConverter.class);
+    
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(LongWritable.class);
 

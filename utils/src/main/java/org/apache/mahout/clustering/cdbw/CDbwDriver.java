@@ -182,6 +182,7 @@ public final class CDbwDriver extends AbstractJob {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
     Job job = new Job(conf);
+    job.setJarByClass(CDbwDriver.class);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
     job.setMapOutputKeyClass(IntWritable.class);
