@@ -288,6 +288,7 @@ public final class TFIDFConverter {
 
     Job job = new Job(conf);
     job.setJobName(": MakePartialVectors: input-folder: " + input + ", dictionary-file: " + dictionaryFilePath.toString());
+    job.setJarByClass(TFIDFConverter.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(VectorWritable.class);
     FileInputFormat.setInputPaths(job, input);
