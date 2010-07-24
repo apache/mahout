@@ -34,42 +34,14 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   protected Gamma() {
   }
 
-  /**
-   * Returns the beta function of the arguments.
-   * <pre>
-   *                   -     -
-   *                  | (a) | (b)
-   * beta( a, b )  =  -----------.
-   *                     -
-   *                    | (a+b)
-   * </pre>
-   * @param alpha
-   * @param beta
-   * @return The beta function for given values of alpha and beta.
-   */
-  @Deprecated
-  public static double beta(double alpha, double beta) {
-
-    double y = alpha + beta;
-    y = gamma(y);
-    if (y == 0.0) {
-      return 1.0;
-    }
-
-    if (alpha > beta) {
-      y = gamma(alpha) / y;
-      y *= gamma(beta);
-    } else {
-      y = gamma(beta) / y;
-      y *= gamma(alpha);
-    }
-
-    return (y);
-  }
-
-  /** Returns the Gamma function of the argument. */
-  @Deprecated
-  public static double gamma(double x) throws ArithmeticException {
+  /** Returns the Gamma function of the argument.  This can be dangerous since a
+   * very moderate value of x will lead to overflow.  Usually it is better to use
+   * logGamma instead.  One interesting exception is for negative values of x where
+   * logGamma loses the sign information.
+   * @param x  The value for which we want Gamma(x)
+   * @return The value of the gamma function evaluated at x.
+   * */
+  public static double gamma(double x) {
 
     double[] P = {
         1.60119522476751861407E-4,
@@ -160,272 +132,43 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   }
 
   /**
-   * Returns the Incomplete Beta Function evaluated from zero to <tt>xx</tt>; formerly named <tt>ibeta</tt>.
-   *
-   * @param aa the alpha parameter of the beta distribution.
-   * @param bb the beta parameter of the beta distribution.
-   * @param xx the integration end point.
+   * Power series for incomplete beta integral; formerly named <tt>pseries</tt>. Use when b*x is small and x not too
+   * close to 1.
    */
   @Deprecated
-  public static double incompleteBeta(double aa, double bb, double xx) throws ArithmeticException {
+  static double powerSeries(double a, double b, double x) {
 
-    if (aa <= 0.0 || bb <= 0.0) {
-      throw new
-          ArithmeticException("ibeta: Domain error!");
+    double ai = 1.0 / a;
+    double u = (1.0 - b) * x;
+    double v = u / (a + 1.0);
+    double t1 = v;
+    double t = u;
+    double n = 2.0;
+    double s = 0.0;
+    double z = MACHEP * ai;
+    while (Math.abs(v) > z) {
+      u = (n - b) * x / n;
+      t *= u;
+      v = t / (a + n);
+      s += v;
+      n += 1.0;
     }
+    s += t1;
+    s += ai;
 
-    if ((xx <= 0.0) || (xx >= 1.0)) {
-      if (xx == 0.0) {
-        return 0.0;
-      }
-      if (xx == 1.0) {
-        return 1.0;
-      }
-      throw new ArithmeticException("ibeta: Domain error!");
-    }
-
-    double t;
-    if ((bb * xx) <= 1.0 && xx <= 0.95) {
-      t = powerSeries(aa, bb, xx);
-      return t;
-    }
-
-    double w = 1.0 - xx;
-
-    /* Reverse a and b if x is greater than the mean. */
-    double xc;
-    double x;
-    double b;
-    double a;
-    boolean flag = false;
-    if (xx > (aa / (aa + bb))) {
-      flag = true;
-      a = bb;
-      b = aa;
-      xc = xx;
-      x = w;
+    u = a * Math.log(x);
+    if ((a + b) < MAXGAM && Math.abs(u) < MAXLOG) {
+      t = gamma(a + b) / (gamma(a) * gamma(b));
+      s = s * t * Math.pow(x, a);
     } else {
-      a = aa;
-      b = bb;
-      xc = w;
-      x = xx;
-    }
-
-    if (flag && (b * x) <= 1.0 && x <= 0.95) {
-      t = powerSeries(a, b, x);
-      if (t <= MACHEP) {
-        t = 1.0 - MACHEP;
+      t = logGamma(a + b) - logGamma(a) - logGamma(b) + u + Math.log(s);
+      if (t < MINLOG) {
+        s = 0.0;
       } else {
-        t = 1.0 - t;
-      }
-      return t;
-    }
-
-    /* Choose expansion for better convergence. */
-    double y = x * (a + b - 2.0) - (a - 1.0);
-    if (y < 0.0) {
-      w = incompleteBetaFraction1(a, b, x);
-    } else {
-      w = incompleteBetaFraction2(a, b, x) / xc;
-    }
-
-    /* Multiply w by the factor
-       a      b   _             _     _
-      x  (1-x)   | (a+b) / ( a | (a) | (b) ) .   */
-
-    y = a * Math.log(x);
-    t = b * Math.log(xc);
-    if ((a + b) < MAXGAM && Math.abs(y) < MAXLOG && Math.abs(t) < MAXLOG) {
-      t = Math.pow(xc, b);
-      t *= Math.pow(x, a);
-      t /= a;
-      t *= w;
-      t *= gamma(a + b) / (gamma(a) * gamma(b));
-      if (flag) {
-        if (t <= MACHEP) {
-          t = 1.0 - MACHEP;
-        } else {
-          t = 1.0 - t;
-        }
-      }
-      return t;
-    }
-    /* Resort to logarithms.  */
-    y += t + logGamma(a + b) - logGamma(a) - logGamma(b);
-    y += Math.log(w / a);
-    if (y < MINLOG) {
-      t = 0.0;
-    } else {
-      t = Math.exp(y);
-    }
-
-    if (flag) {
-      if (t <= MACHEP) {
-        t = 1.0 - MACHEP;
-      } else {
-        t = 1.0 - t;
+        s = Math.exp(t);
       }
     }
-    return t;
-  }
-
-  /** Continued fraction expansion #1 for incomplete beta integral; formerly named <tt>incbcf</tt>. */
-  @Deprecated
-  static double incompleteBetaFraction1(double a, double b, double x) throws ArithmeticException {
-
-    double k1 = a;
-    double k2 = a + b;
-    double k3 = a;
-    double k4 = a + 1.0;
-    double k5 = 1.0;
-    double k6 = b - 1.0;
-    double k7 = k4;
-    double k8 = a + 2.0;
-
-    double pkm2 = 0.0;
-    double qkm2 = 1.0;
-    double pkm1 = 1.0;
-    double qkm1 = 1.0;
-    double ans = 1.0;
-    double r = 1.0;
-    int n = 0;
-    double thresh = 3.0 * MACHEP;
-    do {
-      double xk = -(x * k1 * k2) / (k3 * k4);
-      double pk = pkm1 + pkm2 * xk;
-      double qk = qkm1 + qkm2 * xk;
-      pkm2 = pkm1;
-      pkm1 = pk;
-      qkm2 = qkm1;
-      qkm1 = qk;
-
-      xk = (x * k5 * k6) / (k7 * k8);
-      pk = pkm1 + pkm2 * xk;
-      qk = qkm1 + qkm2 * xk;
-      pkm2 = pkm1;
-      pkm1 = pk;
-      qkm2 = qkm1;
-      qkm1 = qk;
-
-      if (qk != 0) {
-        r = pk / qk;
-      }
-      double t;
-      if (r != 0) {
-        t = Math.abs((ans - r) / r);
-        ans = r;
-      } else {
-        t = 1.0;
-      }
-
-      if (t < thresh) {
-        return ans;
-      }
-
-      k1 += 1.0;
-      k2 += 1.0;
-      k3 += 2.0;
-      k4 += 2.0;
-      k5 += 1.0;
-      k6 -= 1.0;
-      k7 += 2.0;
-      k8 += 2.0;
-
-      if ((Math.abs(qk) + Math.abs(pk)) > big) {
-        pkm2 *= biginv;
-        pkm1 *= biginv;
-        qkm2 *= biginv;
-        qkm1 *= biginv;
-      }
-      if ((Math.abs(qk) < biginv) || (Math.abs(pk) < biginv)) {
-        pkm2 *= big;
-        pkm1 *= big;
-        qkm2 *= big;
-        qkm1 *= big;
-      }
-    } while (++n < 300);
-
-    return ans;
-  }
-
-  /** Continued fraction expansion #2 for incomplete beta integral; formerly named <tt>incbd</tt>. */
-  @Deprecated
-  static double incompleteBetaFraction2(double a, double b, double x) throws ArithmeticException {
-
-    double k1 = a;
-    double k2 = b - 1.0;
-    double k3 = a;
-    double k4 = a + 1.0;
-    double k5 = 1.0;
-    double k6 = a + b;
-    double k7 = a + 1.0;
-    double k8 = a + 2.0;
-
-    double pkm2 = 0.0;
-    double qkm2 = 1.0;
-    double pkm1 = 1.0;
-    double qkm1 = 1.0;
-    double z = x / (1.0 - x);
-    double ans = 1.0;
-    double r = 1.0;
-    int n = 0;
-    double thresh = 3.0 * MACHEP;
-    do {
-      double xk = -(z * k1 * k2) / (k3 * k4);
-      double pk = pkm1 + pkm2 * xk;
-      double qk = qkm1 + qkm2 * xk;
-      pkm2 = pkm1;
-      pkm1 = pk;
-      qkm2 = qkm1;
-      qkm1 = qk;
-
-      xk = (z * k5 * k6) / (k7 * k8);
-      pk = pkm1 + pkm2 * xk;
-      qk = qkm1 + qkm2 * xk;
-      pkm2 = pkm1;
-      pkm1 = pk;
-      qkm2 = qkm1;
-      qkm1 = qk;
-
-      if (qk != 0) {
-        r = pk / qk;
-      }
-      double t;
-      if (r != 0) {
-        t = Math.abs((ans - r) / r);
-        ans = r;
-      } else {
-        t = 1.0;
-      }
-
-      if (t < thresh) {
-        return ans;
-      }
-
-      k1 += 1.0;
-      k2 -= 1.0;
-      k3 += 2.0;
-      k4 += 2.0;
-      k5 += 1.0;
-      k6 += 1.0;
-      k7 += 2.0;
-      k8 += 2.0;
-
-      if ((Math.abs(qk) + Math.abs(pk)) > big) {
-        pkm2 *= biginv;
-        pkm1 *= biginv;
-        qkm2 *= biginv;
-        qkm1 *= biginv;
-      }
-      if ((Math.abs(qk) < biginv) || (Math.abs(pk) < biginv)) {
-        pkm2 *= big;
-        pkm1 *= big;
-        qkm2 *= big;
-        qkm1 *= big;
-      }
-    } while (++n < 300);
-
-    return ans;
+    return s;
   }
 
   /**
@@ -630,51 +373,10 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   }
 
   /**
-   * Power series for incomplete beta integral; formerly named <tt>pseries</tt>. Use when b*x is small and x not too
-   * close to 1.
-   */
-  @Deprecated
-  static double powerSeries(double a, double b, double x) throws ArithmeticException {
-
-    double ai = 1.0 / a;
-    double u = (1.0 - b) * x;
-    double v = u / (a + 1.0);
-    double t1 = v;
-    double t = u;
-    double n = 2.0;
-    double s = 0.0;
-    double z = MACHEP * ai;
-    while (Math.abs(v) > z) {
-      u = (n - b) * x / n;
-      t *= u;
-      v = t / (a + n);
-      s += v;
-      n += 1.0;
-    }
-    s += t1;
-    s += ai;
-
-    u = a * Math.log(x);
-    if ((a + b) < MAXGAM && Math.abs(u) < MAXLOG) {
-      t = gamma(a + b) / (gamma(a) * gamma(b));
-      s = s * t * Math.pow(x, a);
-    } else {
-      t = logGamma(a + b) - logGamma(a) - logGamma(b) + u + Math.log(s);
-      if (t < MINLOG) {
-        s = 0.0;
-      } else {
-        s = Math.exp(t);
-      }
-    }
-    return s;
-  }
-
-  /**
    * Returns the Gamma function computed by Stirling's formula; formerly named <tt>stirf</tt>. The polynomial STIR is
    * valid for 33 <= x <= 172.
    */
-  @Deprecated
-  static double stirlingFormula(double x) throws ArithmeticException {
+  private static double stirlingFormula(double x) {
     double[] STIR = {
         7.87311395793093628397E-4,
         -2.29549961613378126380E-4,
@@ -698,5 +400,307 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     }
     y = SQTPI * y * w;
     return y;
+  }
+
+  /**
+   * Returns the beta function of the arguments.
+   * <pre>
+   *                   -     -
+   *                  | (a) | (b)
+   * beta( a, b )  =  -----------.
+   *                     -
+   *                    | (a+b)
+   * </pre>
+   * @param alpha
+   * @param beta
+   * @return The beta function for given values of alpha and beta.
+   */
+  @Deprecated
+  public static double beta(double alpha, double beta) {
+
+    double y = alpha + beta;
+    y = gamma(y);
+    if (y == 0.0) {
+      return 1.0;
+    }
+
+    if (alpha > beta) {
+      y = gamma(alpha) / y;
+      y *= gamma(beta);
+    } else {
+      y = gamma(beta) / y;
+      y *= gamma(alpha);
+    }
+
+    return (y);
+  }
+
+  /**
+   * Returns the Incomplete Beta Function evaluated from zero to <tt>xx</tt>; formerly named <tt>ibeta</tt>.
+   *
+   * @param aa the alpha parameter of the beta distribution.
+   * @param bb the beta parameter of the beta distribution.
+   * @param xx the integration end point.
+   */
+  @Deprecated
+  public static double incompleteBeta(double aa, double bb, double xx) throws ArithmeticException {
+
+    if (aa <= 0.0 || bb <= 0.0) {
+      throw new
+          ArithmeticException("ibeta: Domain error!");
+    }
+
+    if ((xx <= 0.0) || (xx >= 1.0)) {
+      if (xx == 0.0) {
+        return 0.0;
+      }
+      if (xx == 1.0) {
+        return 1.0;
+      }
+      throw new ArithmeticException("ibeta: Domain error!");
+    }
+
+    double t;
+    if ((bb * xx) <= 1.0 && xx <= 0.95) {
+      t = powerSeries(aa, bb, xx);
+      return t;
+    }
+
+    double w = 1.0 - xx;
+
+    /* Reverse a and b if x is greater than the mean. */
+    double xc;
+    double x;
+    double b;
+    double a;
+    boolean flag = false;
+    if (xx > (aa / (aa + bb))) {
+      flag = true;
+      a = bb;
+      b = aa;
+      xc = xx;
+      x = w;
+    } else {
+      a = aa;
+      b = bb;
+      xc = w;
+      x = xx;
+    }
+
+    if (flag && (b * x) <= 1.0 && x <= 0.95) {
+      t = powerSeries(a, b, x);
+      if (t <= MACHEP) {
+        t = 1.0 - MACHEP;
+      } else {
+        t = 1.0 - t;
+      }
+      return t;
+    }
+
+    /* Choose expansion for better convergence. */
+    double y = x * (a + b - 2.0) - (a - 1.0);
+    if (y < 0.0) {
+      w = incompleteBetaFraction1(a, b, x);
+    } else {
+      w = incompleteBetaFraction2(a, b, x) / xc;
+    }
+
+    /* Multiply w by the factor
+       a      b   _             _     _
+      x  (1-x)   | (a+b) / ( a | (a) | (b) ) .   */
+
+    y = a * Math.log(x);
+    t = b * Math.log(xc);
+    if ((a + b) < MAXGAM && Math.abs(y) < MAXLOG && Math.abs(t) < MAXLOG) {
+      t = Math.pow(xc, b);
+      t *= Math.pow(x, a);
+      t /= a;
+      t *= w;
+      t *= gamma(a + b) / (gamma(a) * gamma(b));
+      if (flag) {
+        if (t <= MACHEP) {
+          t = 1.0 - MACHEP;
+        } else {
+          t = 1.0 - t;
+        }
+      }
+      return t;
+    }
+    /* Resort to logarithms.  */
+    y += t + logGamma(a + b) - logGamma(a) - logGamma(b);
+    y += Math.log(w / a);
+    if (y < MINLOG) {
+      t = 0.0;
+    } else {
+      t = Math.exp(y);
+    }
+
+    if (flag) {
+      if (t <= MACHEP) {
+        t = 1.0 - MACHEP;
+      } else {
+        t = 1.0 - t;
+      }
+    }
+    return t;
+  }
+
+  /** Continued fraction expansion #1 for incomplete beta integral; formerly named <tt>incbcf</tt>. */
+  @Deprecated
+  private static double incompleteBetaFraction1(double a, double b, double x) throws ArithmeticException {
+
+    double k1 = a;
+    double k2 = a + b;
+    double k3 = a;
+    double k4 = a + 1.0;
+    double k5 = 1.0;
+    double k6 = b - 1.0;
+    double k7 = k4;
+    double k8 = a + 2.0;
+
+    double pkm2 = 0.0;
+    double qkm2 = 1.0;
+    double pkm1 = 1.0;
+    double qkm1 = 1.0;
+    double ans = 1.0;
+    double r = 1.0;
+    int n = 0;
+    double thresh = 3.0 * MACHEP;
+    do {
+      double xk = -(x * k1 * k2) / (k3 * k4);
+      double pk = pkm1 + pkm2 * xk;
+      double qk = qkm1 + qkm2 * xk;
+      pkm2 = pkm1;
+      pkm1 = pk;
+      qkm2 = qkm1;
+      qkm1 = qk;
+
+      xk = (x * k5 * k6) / (k7 * k8);
+      pk = pkm1 + pkm2 * xk;
+      qk = qkm1 + qkm2 * xk;
+      pkm2 = pkm1;
+      pkm1 = pk;
+      qkm2 = qkm1;
+      qkm1 = qk;
+
+      if (qk != 0) {
+        r = pk / qk;
+      }
+      double t;
+      if (r != 0) {
+        t = Math.abs((ans - r) / r);
+        ans = r;
+      } else {
+        t = 1.0;
+      }
+
+      if (t < thresh) {
+        return ans;
+      }
+
+      k1 += 1.0;
+      k2 += 1.0;
+      k3 += 2.0;
+      k4 += 2.0;
+      k5 += 1.0;
+      k6 -= 1.0;
+      k7 += 2.0;
+      k8 += 2.0;
+
+      if ((Math.abs(qk) + Math.abs(pk)) > big) {
+        pkm2 *= biginv;
+        pkm1 *= biginv;
+        qkm2 *= biginv;
+        qkm1 *= biginv;
+      }
+      if ((Math.abs(qk) < biginv) || (Math.abs(pk) < biginv)) {
+        pkm2 *= big;
+        pkm1 *= big;
+        qkm2 *= big;
+        qkm1 *= big;
+      }
+    } while (++n < 300);
+
+    return ans;
+  }
+
+  /** Continued fraction expansion #2 for incomplete beta integral; formerly named <tt>incbd</tt>. */
+  @Deprecated
+  private static double incompleteBetaFraction2(double a, double b, double x) throws ArithmeticException {
+
+    double k1 = a;
+    double k2 = b - 1.0;
+    double k3 = a;
+    double k4 = a + 1.0;
+    double k5 = 1.0;
+    double k6 = a + b;
+    double k7 = a + 1.0;
+    double k8 = a + 2.0;
+
+    double pkm2 = 0.0;
+    double qkm2 = 1.0;
+    double pkm1 = 1.0;
+    double qkm1 = 1.0;
+    double z = x / (1.0 - x);
+    double ans = 1.0;
+    double r = 1.0;
+    int n = 0;
+    double thresh = 3.0 * MACHEP;
+    do {
+      double xk = -(z * k1 * k2) / (k3 * k4);
+      double pk = pkm1 + pkm2 * xk;
+      double qk = qkm1 + qkm2 * xk;
+      pkm2 = pkm1;
+      pkm1 = pk;
+      qkm2 = qkm1;
+      qkm1 = qk;
+
+      xk = (z * k5 * k6) / (k7 * k8);
+      pk = pkm1 + pkm2 * xk;
+      qk = qkm1 + qkm2 * xk;
+      pkm2 = pkm1;
+      pkm1 = pk;
+      qkm2 = qkm1;
+      qkm1 = qk;
+
+      if (qk != 0) {
+        r = pk / qk;
+      }
+      double t;
+      if (r != 0) {
+        t = Math.abs((ans - r) / r);
+        ans = r;
+      } else {
+        t = 1.0;
+      }
+
+      if (t < thresh) {
+        return ans;
+      }
+
+      k1 += 1.0;
+      k2 -= 1.0;
+      k3 += 2.0;
+      k4 += 2.0;
+      k5 += 1.0;
+      k6 += 1.0;
+      k7 += 2.0;
+      k8 += 2.0;
+
+      if ((Math.abs(qk) + Math.abs(pk)) > big) {
+        pkm2 *= biginv;
+        pkm1 *= biginv;
+        qkm2 *= biginv;
+        qkm1 *= biginv;
+      }
+      if ((Math.abs(qk) < biginv) || (Math.abs(pk) < biginv)) {
+        pkm2 *= big;
+        pkm1 *= big;
+        qkm2 *= big;
+        qkm1 *= big;
+      }
+    } while (++n < 300);
+
+    return ans;
   }
 }

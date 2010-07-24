@@ -50,7 +50,8 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
    */
   public NegativeBinomial(int n, double p, RandomEngine randomGenerator) {
     setRandomGenerator(randomGenerator);
-    setNandP(n, p);
+    this.n = n;
+    this.p = p;
     this.gamma = new Gamma(n, 1, randomGenerator);
     this.poisson = new Poisson(0.0, randomGenerator);
   }

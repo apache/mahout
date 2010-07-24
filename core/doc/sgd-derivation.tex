@@ -1,0 +1,125 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{Derivation of formulae used in sgd package}
+\author{Ted Dunning}
+\date{December, 2009}                                           % Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+%\subsection{}
+
+\section{Student's $t$-distribution as a Prior}
+The $t$-distribution prior is implemented by the class {\tt TPrior}. The definition of the $t$-distribution (http://en.wikipedia.org/wiki/Student's\_t-distribution) is
+\begin{equation*}
+p(x) = {\Gamma \left({\nu + 1 \over 2} \right) \over {\sqrt{\nu \pi} \Gamma \left( {\nu \over 2} \right) } }
+\left( 1 + {x^2 \over \nu} \right)^{- {\nu+1 \over 2}}
+\end{equation*}
+Taking the log,
+\begin{equation*}
+\log p(x) = \log {\Gamma \left({\nu + 1 \over 2} \right) \over {\sqrt{\nu \pi} \Gamma \left( {\nu \over 2} \right) } }
+- {\nu+1 \over 2} \log \left( 1 + {x^2 \over \nu} \right)
+\end{equation*}
+Which comes apart as this
+\begin{equation*}
+\log p(x) = \log {\Gamma \left({\nu + 1 \over 2} \right)} - {\log {\nu \pi} \over 2} - \log \Gamma \left( {\nu \over 2} \right) 
+- {\nu+1 \over 2} \log \left( 1 + {x^2 \over \nu} \right)
+\end{equation*}
+Taking the derivative
+\begin{equation*}
+{d \log p(x) \over d x} =  
+- {\nu+1 \over 2} {d \log \left( 1 + {x^2 \over \nu} \right) \over d x}
+\end{equation*}
+
+\begin{equation*}
+{d \log p(x) \over d x} =  
+- {\nu+1 \over 2} {1 \over 1 + {x^2 \over \nu}}{{2 x \over \nu}}
+\end{equation*}
+Which simplifies to this
+\begin{equation*}
+{d \log p(x) \over d x} =  
+- {x (\nu+1) \over \nu + {x^2 }} 
+\end{equation*}
+
+\section{Normal Prior Distribution}
+The normal distribution prior is implemented by {\tt L2}.
+\begin{equation*}
+p(x) = {\exp \left({-x^2 \over 2  \sigma^2} \right) \over \sigma \sqrt{2  \pi}} 
+\end{equation*}
+\begin{equation*}
+\log p(x) = -{x^2 \over 2  \sigma^2} - \log \sigma - {1 \over 2}\log{2  \pi } 
+\end{equation*}
+\begin{equation*}
+{d \log p(x) \over dx} = -{ x \over   \sigma^2} 
+\end{equation*}
+
+\section{Laplacian, Biexponential or $L_1$ Prior Distribution}
+The Laplacian prior is implemented by the class {\tt L1}.
+\begin{equation*}
+p(x) = e^{-|x|/\sigma}
+\end{equation*}
+\begin{equation*}
+\log p(x) = {-|x|/\sigma}
+\end{equation*}
+\begin{equation*}
+{d \log p(x) \over dx} = -{\mathrm {signum} \,x \over \sigma}
+\end{equation*}
+
+\section{Logistic Distribution}
+The logistic distribution is used as the inverse link function in logistic regression.  There are several properties that simplify expressions using it.
+By definition, the CDF is
+\begin{align*}
+P(x) &= {1 \over 1+e^{-x}} \\
+&= {e^x \over 1+e^x}
+\end{align*}
+Due to symmetry about $0$,
+\begin{equation*}
+1-P(x) = {e^{-x} \over 1+e^{-x}} = P(-x) 
+\end{equation*}
+Finding the derivative of the cumulative distribution is helped by the simple form of the log itself
+\begin{equation*}
+\log P(x) = -\log (1+e^{-x}) 
+\end{equation*}
+This gives the interesting identities
+\begin{equation*}
+{d \log P(x)\over dx} = {e^{-x} \over 1+e^{-x}} = P(-x)
+\end{equation*}
+and
+\begin{equation*}
+{d \log (1-P(x))\over dx} = {d \log P(-x) \over d x}= - {e^x \over 1+e^x} = -P(x)
+\end{equation*}
+
+Note that 
+\begin{equation*}
+P(x) + P(-x) = P(x) + (1-P(x))=1
+\end{equation*}
+Subsequently I will use $w(x) = P(x)$ to indicate the logistic cumulative distribution function.
+\section{Logistic Regression}
+In logistic regression, the logistic function is used as the inverse link in a generalized linear regression
+\begin{equation*}
+p(y_i = 1 \mid x_i, \beta) =w(\beta' x_i)= {1 \over 1+e^{-\beta' x_i}}
+\end{equation*}
+The likelihood of observed outcomes $Y$ based on input vectors $X$ is
+\begin{equation*}
+ p(Y \mid X, \beta) = \prod_i w(\beta' x_i)^{y_i} (1-w(\beta' x_i))^{1-y_i}
+\end{equation*}
+Taking the log,
+\begin{equation*}
+\log p(Y \mid X, \beta) = \sum_i y_i \log w(\beta' x_i) + (1-y_i) \log (1-w(\beta' x_i))
+\end{equation*}
+The gradient with respect to each coefficient $\beta_j$ is found using the identities for the logistic function from earlier,
+\begin{align*}
+{\partial \log p(Y \mid X, \beta) \over \partial \beta_j} &= \sum_i y_i { x_{ij} w(-\beta' x_i)} - (1-y_i) x_{ij} w(\beta' x_i))  \\
+&=\sum_i x_{ij} \left(y_i  w(-\beta' x_i) - (1-y_i)  w(\beta' x_i) \right) \\
+&=\sum_i x_{ij} \left(y_i ( w(-\beta' x_i)+w(\beta' x)) -   w(\beta' x_i) \right) \\
+&=\sum_i x_{ij} \left(y_i  -   w(\beta' x_i) \right) \\
+\end{align*}
+\end{document}  
