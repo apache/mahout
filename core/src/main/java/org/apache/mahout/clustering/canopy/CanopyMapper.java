@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
@@ -47,8 +46,7 @@ class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, V
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
     for (Canopy canopy : canopies) {
-      Vector centroid = canopy.computeCentroid();
-      context.write(new Text("centroid"), new VectorWritable(centroid));
+      context.write(new Text("centroid"), new VectorWritable(canopy.computeCentroid()));
     }
     super.cleanup(context);
   }

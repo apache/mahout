@@ -19,7 +19,7 @@ package org.apache.mahout.clustering.dirichlet.models;
 
 import java.util.Locale;
 
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.math.Vector;
 
 public class SampledNormalModel extends NormalModel {
@@ -51,7 +51,7 @@ public class SampledNormalModel extends NormalModel {
     StringBuilder buf = new StringBuilder();
     buf.append("snm{n=").append(getS0()).append(" m=");
     if (getMean() != null) {
-      buf.append(ClusterBase.formatVector(getMean(), bindings));
+      buf.append(AbstractCluster.formatVector(getMean(), bindings));
     }
     buf.append(" sd=").append(String.format(Locale.ENGLISH, "%.2f", getStdDev())).append('}');
     return buf.toString();

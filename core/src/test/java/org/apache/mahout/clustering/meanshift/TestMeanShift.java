@@ -69,7 +69,7 @@ public class TestMeanShift extends MahoutTestCase {
       }
     }
     for (MeanShiftCanopy canopy : canopies) {
-      int ch = 'A' + canopy.getCanopyId();
+      int ch = 'A' + canopy.getId();
       for (int pid : canopy.getBoundPoints().toList()) {
         Vector pt = raw[pid];
         out[(int) pt.getQuick(0)][(int) pt.getQuick(1)] = (char) ch;
@@ -203,8 +203,8 @@ public class TestMeanShift extends MahoutTestCase {
     for (Map.Entry<String, MeanShiftCanopy> stringMeanShiftCanopyEntry : refCanopyMap.entrySet()) {
       MeanShiftCanopy ref = stringMeanShiftCanopyEntry.getValue();
 
-      MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "V-" : "C-") + ref.getCanopyId());
-      assertEquals("ids", ref.getCanopyId(), canopy.getCanopyId());
+      MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "MSV-" : "MSC-") + ref.getId());
+      assertEquals("ids", ref.getId(), canopy.getId());
       assertEquals("centers(" + ref.getIdentifier() + ')', ref.getCenter().asFormatString(), canopy.getCenter().asFormatString());
       assertEquals("bound points", ref.getBoundPoints().toList().size(), canopy.getBoundPoints().toList().size());
     }
@@ -241,6 +241,7 @@ public class TestMeanShift extends MahoutTestCase {
     conf.set(MeanShiftCanopyConfigKeys.T1_KEY, "4");
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, "1");
     conf.set(MeanShiftCanopyConfigKeys.CLUSTER_CONVERGENCE_KEY, "0.5");
+    conf.set(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, "output/control");
 
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     DummyRecordWriter<Text, MeanShiftCanopy> mapWriter = new DummyRecordWriter<Text, MeanShiftCanopy>();
@@ -280,11 +281,10 @@ public class TestMeanShift extends MahoutTestCase {
     for (Map.Entry<String, MeanShiftCanopy> mapEntry : reducerReferenceMap.entrySet()) {
       MeanShiftCanopy refCanopy = mapEntry.getValue();
 
-      List<MeanShiftCanopy> values = reduceWriter.getValue(new Text((refCanopy.isConverged() ? "V-" : "C-")
-          + refCanopy.getCanopyId()));
+      List<MeanShiftCanopy> values = reduceWriter.getValue(new Text((refCanopy.isConverged() ? "MSV-" : "MSC-") + refCanopy.getId()));
       assertEquals("values", 1, values.size());
       MeanShiftCanopy reducerCanopy = values.get(0);
-      assertEquals("ids", refCanopy.getCanopyId(), reducerCanopy.getCanopyId());
+      assertEquals("ids", refCanopy.getId(), reducerCanopy.getId());
       int refNumPoints = refCanopy.getNumPoints();
       int reducerNumPoints = reducerCanopy.getNumPoints();
       assertEquals("numPoints", refNumPoints, reducerNumPoints);

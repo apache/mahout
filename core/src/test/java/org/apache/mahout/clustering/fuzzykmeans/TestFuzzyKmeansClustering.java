@@ -35,6 +35,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
@@ -185,12 +187,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
   public void testFuzzyKMeansSeqJob() throws Exception {
     List<VectorWritable> points = TestKmeansClustering.getPointsWritable(TestKmeansClustering.reference);
-  
+
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
     Configuration conf = new Configuration();
     ClusteringTestUtils.writePointsToFile(points, new Path(pointsPath, "file1"), fs, conf);
-  
+
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
@@ -201,18 +203,18 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
                                                            SoftCluster.class);
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
-  
-        SoftCluster cluster = new SoftCluster(vec);
+
+        SoftCluster cluster = new SoftCluster(vec, i);
         // add the center so the centroid will be correct upon output
-        cluster.addPoint(cluster.getCenter(), 1);
+        cluster.observe(cluster.getCenter(), 1);
         /*
          * writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
          */
         writer.append(new Text(cluster.getIdentifier()), cluster);
-  
+
       }
       writer.close();
-  
+
       // now run the Job using the run() command line options.
       Path output = getTestTempDirPath("output");
       /*      FuzzyKMeansDriver.runJob(pointsPath,
@@ -227,17 +229,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
                                      true,
                                      0);
       */
-      String[] args = { 
-          optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(), 
-          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), 
-          optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
-          optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
-          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", 
-          optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", 
-          optKey(FuzzyKMeansDriver.M_OPTION), "2.0", 
-          optKey(DefaultOptionCreator.CLUSTERING_OPTION),
-          optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION), 
-          optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+      String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
+          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
+          output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2",
+          optKey(FuzzyKMeansDriver.M_OPTION), "2.0", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+          optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION), optKey(DefaultOptionCreator.OVERWRITE_OPTION),
           optKey(DefaultOptionCreator.METHOD_OPTION), DefaultOptionCreator.SEQUENTIAL_METHOD };
       new FuzzyKMeansDriver().run(args);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-0"), conf);
@@ -248,7 +245,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
       reader.close();
     }
-  
+
   }
 
   public void testFuzzyKMeansMRJob() throws Exception {
@@ -270,9 +267,9 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
 
-        SoftCluster cluster = new SoftCluster(vec);
+        SoftCluster cluster = new SoftCluster(vec, i);
         // add the center so the centroid will be correct upon output
-        cluster.addPoint(cluster.getCenter(), 1);
+        cluster.observe(cluster.getCenter(), 1);
         /*
          * writer.write(cluster.getIdentifier() + '\t' + SoftCluster.formatCluster(cluster) + '\n');
          */
@@ -295,17 +292,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
                                      true,
                                      0);
       */
-      String[] args = { 
-          optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(), 
-          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), 
-          optKey(DefaultOptionCreator.OUTPUT_OPTION), output.toString(),
-          optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
-          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", 
-          optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2", 
-          optKey(FuzzyKMeansDriver.M_OPTION), "2.0", 
-          optKey(DefaultOptionCreator.CLUSTERING_OPTION),
-          optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION), 
-          optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
+      String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), pointsPath.toString(),
+          optKey(DefaultOptionCreator.CLUSTERS_IN_OPTION), clustersPath.toString(), optKey(DefaultOptionCreator.OUTPUT_OPTION),
+          output.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
+          optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2",
+          optKey(FuzzyKMeansDriver.M_OPTION), "2.0", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
+          optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION), optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
       new FuzzyKMeansDriver().run(args);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-00000"), conf);
       IntWritable key = new IntWritable();
@@ -330,7 +322,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         Vector vec = tweakValue(points.get(i).get());
 
         SoftCluster cluster = new SoftCluster(vec, i);
-        cluster.addPoint(cluster.getCenter(), 1);
+        cluster.observe(cluster.getCenter(), 1);
         clusterList.add(cluster);
       }
 
@@ -345,10 +337,9 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
-                                                                                                                        conf,
-                                                                                                                        mapWriter);
+      DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
+          .build(mapper, conf, mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
@@ -361,15 +352,15 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       for (Text key : mapWriter.getKeys()) {
         // SoftCluster cluster = SoftCluster.decodeCluster(key);
-        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
+        List<ClusterObservations> values = mapWriter.getValue(key);
 
-        for (FuzzyKMeansInfo value : values) {
-          Double val = pointTotalProbMap.get(value.getVector());
+        for (ClusterObservations value : values) {
+          Double val = pointTotalProbMap.get(value.getS1());
           double probVal = 0.0;
           if (val != null) {
             probVal = val;
           }
-          pointTotalProbMap.put(value.getVector(), probVal + value.getProbability());
+          pointTotalProbMap.put(value.getS1(), probVal + value.getS0());
         }
       }
       for (Map.Entry<Vector, Double> entry : pointTotalProbMap.entrySet()) {
@@ -393,7 +384,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         Vector vec = tweakValue(points.get(i).get());
 
         SoftCluster cluster = new SoftCluster(vec, i);
-        cluster.addPoint(cluster.getCenter(), 1);
+        cluster.observe(cluster.getCenter(), 1);
         clusterList.add(cluster);
       }
 
@@ -408,10 +399,9 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
-                                                                                                                        conf,
-                                                                                                                        mapWriter);
+      DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
+          .build(mapper, conf, mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
@@ -419,12 +409,12 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run combiner
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-      DummyRecordWriter<Text, FuzzyKMeansInfo> combinerWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
-      Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo>.Context combinerContext = DummyRecordWriter
-          .build(combiner, conf, combinerWriter, Text.class, FuzzyKMeansInfo.class);
+      DummyRecordWriter<Text, ClusterObservations> combinerWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Reducer<Text, ClusterObservations, Text, ClusterObservations>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, ClusterObservations.class);
       combiner.setup(combinerContext);
       for (Text key : mapWriter.getKeys()) {
-        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
+        List<ClusterObservations> values = mapWriter.getValue(key);
         combiner.reduce(new Text(key), values, combinerContext);
       }
 
@@ -432,7 +422,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       assertEquals("Combiner Output", k + 1, combinerWriter.getData().size());
 
       for (Text key : combinerWriter.getKeys()) {
-        List<FuzzyKMeansInfo> values = combinerWriter.getValue(key);
+        List<ClusterObservations> values = combinerWriter.getValue(key);
         assertEquals("too many values", 1, values.size());
       }
     }
@@ -465,10 +455,9 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
-                                                                                                                        conf,
-                                                                                                                        mapWriter);
+      DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
+          .build(mapper, conf, mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
@@ -476,27 +465,24 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run combiner
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-      DummyRecordWriter<Text, FuzzyKMeansInfo> combinerWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
-      Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo>.Context combinerContext = DummyRecordWriter
-          .build(combiner, conf, combinerWriter, Text.class, FuzzyKMeansInfo.class);
+      DummyRecordWriter<Text, ClusterObservations> combinerWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Reducer<Text, ClusterObservations, Text, ClusterObservations>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, ClusterObservations.class);
       combiner.setup(combinerContext);
       for (Text key : mapWriter.getKeys()) {
-        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
+        List<ClusterObservations> values = mapWriter.getValue(key);
         combiner.reduce(new Text(key), values, combinerContext);
       }
 
       // run reducer
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
       DummyRecordWriter<Text, SoftCluster> reducerWriter = new DummyRecordWriter<Text, SoftCluster>();
-      Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster>.Context reducerContext = DummyRecordWriter.build(reducer,
-                                                                                                         conf,
-                                                                                                         reducerWriter,
-                                                                                                         Text.class,
-                                                                                                         FuzzyKMeansInfo.class);
+      Reducer<Text, ClusterObservations, Text, SoftCluster>.Context reducerContext = DummyRecordWriter
+          .build(reducer, conf, reducerWriter, Text.class, ClusterObservations.class);
       reducer.setup(clusterList, conf);
 
       for (Text key : combinerWriter.getKeys()) {
-        List<FuzzyKMeansInfo> values = combinerWriter.getValue(key);
+        List<ClusterObservations> values = combinerWriter.getValue(key);
         reducer.reduce(new Text(key), values, reducerContext);
       }
 
@@ -522,9 +508,9 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         List<SoftCluster> values = reducerWriter.getValue(new Text(clusterId));
         SoftCluster cluster = values.get(0);
         System.out.println("ref= " + key.toString() + " cluster= " + cluster.toString());
-        cluster.recomputeCenter();
-        assertEquals("key center: " + key.getCenter().asFormatString() + " does not equal cluster: "
-            + cluster.getCenter().asFormatString(), key.getCenter(), cluster.getCenter());
+        cluster.computeParameters();
+        assertEquals("key center: " + AbstractCluster.formatVector(key.getCenter(), null) + " does not equal cluster: "
+            + AbstractCluster.formatVector(cluster.getCenter(), null), key.getCenter(), cluster.getCenter());
       }
     }
   }
@@ -541,11 +527,11 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         Vector vec = tweakValue(points.get(i).get());
 
         SoftCluster cluster = new SoftCluster(vec, i);
-        cluster.addPoint(cluster.getCenter(), 1);
+        cluster.observe(cluster.getCenter(), 1);
         clusterList.add(cluster);
       }
       for (SoftCluster softCluster : clusterList) {
-        softCluster.recomputeCenter();
+        softCluster.computeParameters();
       }
 
       // run mapper
@@ -560,10 +546,9 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
       conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, "true");
       conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, "0");
 
-      DummyRecordWriter<Text, FuzzyKMeansInfo> mapWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
-                                                                                                                        conf,
-                                                                                                                        mapWriter);
+      DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
+          .build(mapper, conf, mapWriter);
       mapper.setup(mapContext);
       for (VectorWritable point : points) {
         mapper.map(new Text(), point, mapContext);
@@ -571,27 +556,24 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
 
       // run combiner
       FuzzyKMeansCombiner combiner = new FuzzyKMeansCombiner();
-      DummyRecordWriter<Text, FuzzyKMeansInfo> combinerWriter = new DummyRecordWriter<Text, FuzzyKMeansInfo>();
-      Reducer<Text, FuzzyKMeansInfo, Text, FuzzyKMeansInfo>.Context combinerContext = DummyRecordWriter
-          .build(combiner, conf, combinerWriter, Text.class, FuzzyKMeansInfo.class);
+      DummyRecordWriter<Text, ClusterObservations> combinerWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Reducer<Text, ClusterObservations, Text, ClusterObservations>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, ClusterObservations.class);
       combiner.setup(combinerContext);
       for (Text key : mapWriter.getKeys()) {
-        List<FuzzyKMeansInfo> values = mapWriter.getValue(key);
+        List<ClusterObservations> values = mapWriter.getValue(key);
         combiner.reduce(new Text(key), values, combinerContext);
       }
 
       // run reducer
       FuzzyKMeansReducer reducer = new FuzzyKMeansReducer();
       DummyRecordWriter<Text, SoftCluster> reducerWriter = new DummyRecordWriter<Text, SoftCluster>();
-      Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster>.Context reducerContext = DummyRecordWriter.build(reducer,
-                                                                                                         conf,
-                                                                                                         reducerWriter,
-                                                                                                         Text.class,
-                                                                                                         FuzzyKMeansInfo.class);
+      Reducer<Text, ClusterObservations, Text, SoftCluster>.Context reducerContext = DummyRecordWriter
+          .build(reducer, conf, reducerWriter, Text.class, ClusterObservations.class);
       reducer.setup(clusterList, conf);
 
       for (Text key : combinerWriter.getKeys()) {
-        List<FuzzyKMeansInfo> values = combinerWriter.getValue(key);
+        List<ClusterObservations> values = combinerWriter.getValue(key);
         reducer.reduce(new Text(key), values, reducerContext);
       }
 
@@ -602,7 +584,7 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
         reducerClusters.add(values.get(0));
       }
       for (SoftCluster softCluster : reducerClusters) {
-        softCluster.recomputeCenter();
+        softCluster.computeParameters();
       }
 
       FuzzyKMeansClusterMapper clusterMapper = new FuzzyKMeansClusterMapper();
@@ -655,19 +637,19 @@ public class TestFuzzyKmeansClustering extends MahoutTestCase {
     }
   }
 
-  public void testFuzzyKMeansInfoSerialization() throws IOException {
+  public void testClusterObservationsSerialization() throws IOException {
     double[] data = { 1.1, 2.2, 3.3 };
     Vector vector = new DenseVector(data);
-    FuzzyKMeansInfo reference = new FuzzyKMeansInfo(2.0, vector, 1);
+    ClusterObservations reference = new ClusterObservations(1, 2.0, vector, vector);
     DataOutputBuffer out = new DataOutputBuffer();
     reference.write(out);
-    FuzzyKMeansInfo info = new FuzzyKMeansInfo();
+    ClusterObservations info = new ClusterObservations();
     DataInputBuffer in = new DataInputBuffer();
     in.reset(out.getData(), out.getLength());
     info.readFields(in);
-    assertEquals("probability", reference.getProbability(), info.getProbability());
-    assertTrue("point total", reference.getVector().equals(info.getVector()));
-    assertEquals("combiner", reference.getCombinerPass(), info.getCombinerPass());
+    assertEquals("probability", reference.getS0(), info.getS0());
+    assertTrue("point total", reference.getS1().equals(info.getS1()));
+    assertEquals("combiner", reference.getCombinerState(), info.getCombinerState());
   }
 
 }

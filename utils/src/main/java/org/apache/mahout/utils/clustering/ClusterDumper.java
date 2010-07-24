@@ -40,8 +40,8 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
@@ -191,7 +191,7 @@ public final class ClusterDumper extends AbstractJob {
                 WeightedVectorWritable point = iterator.next();
                 writer.write(String.valueOf(point.getWeight()));
                 writer.write(": ");
-                writer.write(ClusterBase.formatVector(point.getVector().get(), dictionary));
+                writer.write(AbstractCluster.formatVector(point.getVector().get(), dictionary));
                 if (iterator.hasNext()) {
                   writer.write("\n\t");
                 }

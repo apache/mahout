@@ -35,8 +35,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.AbstractJob;
@@ -227,8 +227,9 @@ public class CanopyDriver extends AbstractJob {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Canopy.class);
     try {
       for (Canopy canopy : canopies) {
-        log.info("Writing Canopy:" + canopy.getIdentifier() + " center:" + ClusterBase.formatVector(canopy.getCenter(), null)
-            + " numPoints:" + canopy.getNumPoints() + " centroid:" + ClusterBase.formatVector(canopy.computeCentroid(), null));
+        canopy.computeParameters();
+        log.info("Writing Canopy:" + canopy.getIdentifier() + " center:" + AbstractCluster.formatVector(canopy.getCenter(), null)
+            + " numPoints:" + canopy.getNumPoints() + " radius:" + AbstractCluster.formatVector(canopy.getRadius(), null));
         writer.append(new Text(canopy.getIdentifier()), canopy);
       }
     } finally {

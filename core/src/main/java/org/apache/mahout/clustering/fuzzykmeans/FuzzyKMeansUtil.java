@@ -29,6 +29,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ final class FuzzyKMeansUtil {
             throw new IllegalStateException(e);
           }
           if (valueClass.equals(Cluster.class)) {
-            Cluster value = new Cluster();
+            AbstractCluster value = new Cluster();
             while (reader.next(key, value)) {
               // get the cluster info
               SoftCluster theCluster = new SoftCluster(value.getCenter(), value.getId());

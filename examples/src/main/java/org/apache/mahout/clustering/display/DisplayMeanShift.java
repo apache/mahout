@@ -21,11 +21,16 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.Path;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyClusterer;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -37,8 +42,6 @@ import org.slf4j.LoggerFactory;
 final class DisplayMeanShift extends DisplayClustering {
 
   private static final Logger log = LoggerFactory.getLogger(DisplayMeanShift.class);
-
-  private static List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
 
   private static double t1;
 
@@ -70,7 +73,8 @@ final class DisplayMeanShift extends DisplayClustering {
       DisplayClustering.plotRectangle(g2, v.get(), dv);
     }
     int i = 0;
-    for (MeanShiftCanopy canopy : canopies) {
+    for (Cluster cluster : CLUSTERS.get(CLUSTERS.size()-1)) {
+      MeanShiftCanopy canopy = (MeanShiftCanopy) cluster;
       if (canopy.getBoundPoints().toList().size() >= SIGNIFICANCE * DisplayClustering.SAMPLE_DATA.size()) {
         g2.setColor(COLORS[Math.min(i++, DisplayClustering.COLORS.length - 1)]);
         int count = 0;
@@ -88,20 +92,35 @@ final class DisplayMeanShift extends DisplayClustering {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException, InstantiationException, IllegalAccessException, InterruptedException,
+      ClassNotFoundException {
     t1 = 1.5;
-    t2 = 0.1;
+    t2 = 0.5;
     SIGNIFICANCE = 0.02;
+    EuclideanDistanceMeasure measure = new EuclideanDistanceMeasure();
+
+    Path samples = new Path("samples");
+    Path output = new Path("output");
+    HadoopUtil.overwriteOutput(samples);
+    HadoopUtil.overwriteOutput(output);
 
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
-    List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : SAMPLE_DATA) {
-      points.add(sample.get());
-    }
-    canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.005, t1, t2, 20);
-    for (MeanShiftCanopy canopy : canopies) {
-      log.info(canopy.toString());
+    writeSampleData(samples);
+    boolean b = true;
+    if (b) {
+      MeanShiftCanopyDriver.runJob(samples, output, measure.getClass().getName(), t1, t2, 0.005, 20, false, true, true);
+      loadClusters(output);
+    } else {
+      List<Vector> points = new ArrayList<Vector>();
+      for (VectorWritable sample : SAMPLE_DATA) {
+        points.add(sample.get());
+      }
+      List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
+      canopies = MeanShiftCanopyClusterer.clusterPoints(points, measure, 0.005, t1, t2, 20);
+      for (MeanShiftCanopy canopy : canopies) {
+        log.info(canopy.toString());
+      }
     }
     new DisplayMeanShift();
   }

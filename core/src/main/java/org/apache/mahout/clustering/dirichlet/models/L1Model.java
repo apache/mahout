@@ -21,7 +21,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -106,7 +106,7 @@ public class L1Model implements Model<VectorWritable> {
     StringBuilder buf = new StringBuilder();
     buf.append("l1m{n=").append(counter).append(" c=");
     if (coefficients != null) {
-      buf.append(ClusterBase.formatVector(coefficients, bindings));
+      buf.append(AbstractCluster.formatVector(coefficients, bindings));
     }
     buf.append('}');
     return buf.toString();

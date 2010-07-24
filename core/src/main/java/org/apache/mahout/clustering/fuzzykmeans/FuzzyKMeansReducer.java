@@ -27,21 +27,22 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.clustering.ClusterObservations;
 
-public class FuzzyKMeansReducer extends Reducer<Text, FuzzyKMeansInfo, Text, SoftCluster> {
+public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text, SoftCluster> {
 
   private final Map<String, SoftCluster> clusterMap = new HashMap<String, SoftCluster>();
 
   private FuzzyKMeansClusterer clusterer;
 
   @Override
-  protected void reduce(Text key, Iterable<FuzzyKMeansInfo> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context) throws IOException, InterruptedException {
     SoftCluster cluster = clusterMap.get(key.toString());
-    for (FuzzyKMeansInfo value : values) {
-      if (value.getCombinerPass() == 0) { // escaped from combiner
-        cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), clusterer.getM()));
+    for (ClusterObservations value : values) {
+      if (value.getCombinerState() == 0) { // escaped from combiner
+        cluster.observe(value.getS1(), Math.pow(value.getS0(), clusterer.getM()));
       } else {
-        cluster.addPoints(value.getVector(), value.getProbability());
+        cluster.observe(value);
       }
     }
     // force convergence calculation

@@ -112,11 +112,8 @@ public class MeanShiftCanopyClusterer {
    * @return if the cluster is converged
    */
   public boolean shiftToMean(MeanShiftCanopy canopy) {
-    Vector centroid = canopy.computeCentroid();
-    canopy.setConverged(measure.distance(centroid, canopy.getCenter()) < convergenceDelta);
-    canopy.setCenter(centroid);
-    canopy.setNumPoints(1);
-    canopy.setPointTotal(centroid.clone());
+    canopy.computeConvergence(measure, convergenceDelta);
+    canopy.computeParameters();
     return canopy.isConverged();
   }
 
@@ -194,8 +191,7 @@ public class MeanShiftCanopyClusterer {
     return migratedCanopies;
   }
 
-  @SuppressWarnings("unused")
-  private static void verifyNonOverlap(List<MeanShiftCanopy> canopies) {
+  protected static void verifyNonOverlap(List<MeanShiftCanopy> canopies) {
     Set<Integer> coveredPoints = new HashSet<Integer>();
     // verify no overlap
     for (MeanShiftCanopy canopy : canopies) {

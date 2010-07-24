@@ -85,7 +85,7 @@ public final class RandomSeedGenerator {
         VectorWritable value = (VectorWritable) reader.getValueClass().newInstance();
         while (reader.next(key, value)) {
           Cluster newCluster = new Cluster(value.get(), nextClusterId++);
-          newCluster.addPoint(value.get());
+          newCluster.observe(value.get(), 1);
           Text newText = new Text(key.toString());
           int currentSize = chosenTexts.size();
           if (currentSize < k) {

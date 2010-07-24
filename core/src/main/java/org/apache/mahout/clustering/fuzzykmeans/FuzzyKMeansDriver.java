@@ -36,7 +36,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
@@ -230,7 +232,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
     Job job = new Job(conf);
     job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(FuzzyKMeansInfo.class);
+    job.setMapOutputValueClass(ClusterObservations.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(SoftCluster.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
@@ -409,6 +411,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     boolean converged = false;
     int iteration = 1;
     while (!converged && iteration <= maxIterations) {
+      log.info("Fuzzy k-Means Iteration: " + iteration);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(input.toUri(), conf);
       FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
@@ -434,12 +437,16 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                                            SoftCluster.class);
       try {
         for (SoftCluster cluster : clusters) {
+          log.info("Writing Cluster:" + cluster.getId() + " center:" + AbstractCluster.formatVector(cluster.getCenter(), null)
+              + " numPoints:" + cluster.getNumPoints() + " radius:" + AbstractCluster.formatVector(cluster.getRadius(), null) + " to: "
+              + clustersOut.getName());
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
         writer.close();
       }
       clustersIn = clustersOut;
+      iteration++;
     }
     return clustersIn;
   }

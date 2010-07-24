@@ -26,11 +26,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FuzzyKMeansMapper extends Mapper<WritableComparable<?>,VectorWritable,Text,FuzzyKMeansInfo> {
+public class FuzzyKMeansMapper extends Mapper<WritableComparable<?>,VectorWritable,Text,ClusterObservations> {
   
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansMapper.class);
   

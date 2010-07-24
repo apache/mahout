@@ -29,8 +29,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.ClusterBase;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
@@ -77,7 +77,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
             IntWritable clusterId = new IntWritable(0);
             VectorWritable point = new VectorWritable();
             while (reader.next(clusterId, point)) {
-              System.out.println("\tC-" + clusterId + ": " + ClusterBase.formatVector(point.get(), null));
+              System.out.println("\tC-" + clusterId + ": " + AbstractCluster.formatVector(point.get(), null));
             }
           } finally {
             reader.close();

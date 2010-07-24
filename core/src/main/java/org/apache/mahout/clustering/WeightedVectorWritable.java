@@ -66,7 +66,7 @@ public class WeightedVectorWritable implements Writable {
   }
 
   public String toString() {
-    return weight + ": " + (vector == null ? "null" : ClusterBase.formatVector(vector.get(), null));
+    return weight + ": " + (vector == null ? "null" : AbstractCluster.formatVector(vector.get(), null));
   }
 
 }

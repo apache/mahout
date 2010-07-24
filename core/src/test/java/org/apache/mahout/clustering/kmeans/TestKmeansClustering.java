@@ -32,6 +32,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
@@ -111,27 +113,16 @@ public class TestKmeansClustering extends MahoutTestCase {
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i);
-        clusters.add(new VisibleCluster(vec));
+        clusters.add(new Cluster(vec, i));
       }
       // iterate clusters until they converge
       int maxIter = 10;
       List<List<Cluster>> clustersList = KMeansClusterer.clusterPoints(points, clusters, measure, maxIter, 0.001);
       clusters = clustersList.get(clustersList.size() - 1);
       for (int c = 0; c < clusters.size(); c++) {
-        Cluster cluster = clusters.get(c);
-        System.out.println(cluster.toString());
+        AbstractCluster cluster = clusters.get(c);
+        System.out.println(cluster.asFormatString(null));
         assertEquals("Cluster " + c + " test " + (k + 1), expectedNumPoints[k][c], cluster.getNumPoints());
-      }
-    }
-  }
-
-  public void testStd() {
-    List<Vector> points = getPoints(reference);
-    Cluster c = new Cluster(points.get(0));
-    for (Vector p : points) {
-      c.addPoint(p);
-      if (c.getNumPoints() > 1) {
-        assertTrue(c.getStd() > 0.0);
       }
     }
   }
@@ -156,16 +147,15 @@ public class TestKmeansClustering extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(reference);
     for (int k = 0; k < points.size(); k++) {
       // pick k initial cluster centers at random
-      DummyRecordWriter<Text, KMeansInfo> mapWriter = new DummyRecordWriter<Text, KMeansInfo>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, KMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
-                                                                                                                   conf,
-                                                                                                                   mapWriter);
+      DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
+          .build(mapper, conf, mapWriter);
       List<Cluster> clusters = new ArrayList<Cluster>();
 
       for (int i = 0; i < k + 1; i++) {
         Cluster cluster = new Cluster(points.get(i).get(), i);
         // add the center so the centroid will be correct upon output
-        cluster.addPoint(cluster.getCenter());
+        cluster.observe(cluster.getCenter(), 1);
         clusters.add(cluster);
       }
       mapper.setup(clusters, measure);
@@ -175,16 +165,14 @@ public class TestKmeansClustering extends MahoutTestCase {
         mapper.map(new Text(), point, mapContext);
       }
       assertEquals("Number of map results", k + 1, mapWriter.getData().size());
-      // now verify that all points are correctly allocated
-      EuclideanDistanceMeasure euclideanDistanceMeasure = measure;
       Map<String, Cluster> clusterMap = loadClusterMap(clusters);
       for (Text key : mapWriter.getKeys()) {
-        Cluster cluster = clusterMap.get(key.toString());
-        List<KMeansInfo> values = mapWriter.getValue(key);
-        for (KMeansInfo value : values) {
-          double distance = euclideanDistanceMeasure.distance(cluster.getCenter(), value.getPointTotal());
-          for (Cluster c : clusters) {
-            assertTrue("distance error", distance <= euclideanDistanceMeasure.distance(value.getPointTotal(), c.getCenter()));
+        AbstractCluster cluster = clusterMap.get(key.toString());
+        List<ClusterObservations> values = mapWriter.getValue(key);
+        for (ClusterObservations value : values) {
+          double distance = measure.distance(cluster.getCenter(), value.getS1());
+          for (AbstractCluster c : clusters) {
+            assertTrue("distance error", distance <= measure.distance(value.getS1(), c.getCenter()));
           }
         }
       }
@@ -205,17 +193,16 @@ public class TestKmeansClustering extends MahoutTestCase {
     List<VectorWritable> points = getPointsWritable(reference);
     for (int k = 0; k < points.size(); k++) {
       // pick k initial cluster centers at random
-      DummyRecordWriter<Text, KMeansInfo> mapWriter = new DummyRecordWriter<Text, KMeansInfo>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, KMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
-                                                                                                                   conf,
-                                                                                                                   mapWriter);
+      DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
+          .build(mapper, conf, mapWriter);
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
 
         Cluster cluster = new Cluster(vec, i);
         // add the center so the centroid will be correct upon output
-        cluster.addPoint(cluster.getCenter());
+        cluster.observe(cluster.getCenter(), 1);
         clusters.add(cluster);
       }
       mapper.setup(clusters, measure);
@@ -225,12 +212,9 @@ public class TestKmeansClustering extends MahoutTestCase {
       }
       // now combine the data
       KMeansCombiner combiner = new KMeansCombiner();
-      DummyRecordWriter<Text, KMeansInfo> combinerWriter = new DummyRecordWriter<Text, KMeansInfo>();
-      Reducer<Text, KMeansInfo, Text, KMeansInfo>.Context combinerContext = DummyRecordWriter.build(combiner,
-                                                                                                    conf,
-                                                                                                    combinerWriter,
-                                                                                                    Text.class,
-                                                                                                    KMeansInfo.class);
+      DummyRecordWriter<Text, ClusterObservations> combinerWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Reducer<Text, ClusterObservations, Text, ClusterObservations>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, ClusterObservations.class);
       for (Text key : mapWriter.getKeys()) {
         combiner.reduce(new Text(key), mapWriter.getValue(key), combinerContext);
       }
@@ -240,13 +224,12 @@ public class TestKmeansClustering extends MahoutTestCase {
       int count = 0;
       Vector total = new DenseVector(2);
       for (Text key : combinerWriter.getKeys()) {
-        List<KMeansInfo> values = combinerWriter.getValue(key);
+        List<ClusterObservations> values = combinerWriter.getValue(key);
         assertEquals("too many values", 1, values.size());
-        // String value = values.get(0).toString();
-        KMeansInfo info = values.get(0);
+        ClusterObservations info = values.get(0);
 
-        count += info.getPoints();
-        total = total.plus(info.getPointTotal());
+        count += info.getS0();
+        total = total.plus(info.getS1());
       }
       assertEquals("total points", 9, count);
       assertEquals("point total[0]", 27, (int) total.get(0));
@@ -269,10 +252,9 @@ public class TestKmeansClustering extends MahoutTestCase {
     for (int k = 0; k < points.size(); k++) {
       System.out.println("K = " + k);
       // pick k initial cluster centers at random
-      DummyRecordWriter<Text, KMeansInfo> mapWriter = new DummyRecordWriter<Text, KMeansInfo>();
-      Mapper<WritableComparable<?>, VectorWritable, Text, KMeansInfo>.Context mapContext = DummyRecordWriter.build(mapper,
-                                                                                                                   conf,
-                                                                                                                   mapWriter);
+      DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
+          .build(mapper, conf, mapWriter);
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
@@ -288,12 +270,9 @@ public class TestKmeansClustering extends MahoutTestCase {
       }
       // now combine the data
       KMeansCombiner combiner = new KMeansCombiner();
-      DummyRecordWriter<Text, KMeansInfo> combinerWriter = new DummyRecordWriter<Text, KMeansInfo>();
-      Reducer<Text, KMeansInfo, Text, KMeansInfo>.Context combinerContext = DummyRecordWriter.build(combiner,
-                                                                                                    conf,
-                                                                                                    combinerWriter,
-                                                                                                    Text.class,
-                                                                                                    KMeansInfo.class);
+      DummyRecordWriter<Text, ClusterObservations> combinerWriter = new DummyRecordWriter<Text, ClusterObservations>();
+      Reducer<Text, ClusterObservations, Text, ClusterObservations>.Context combinerContext = DummyRecordWriter
+          .build(combiner, conf, combinerWriter, Text.class, ClusterObservations.class);
       for (Text key : mapWriter.getKeys()) {
         combiner.reduce(new Text(key), mapWriter.getValue(key), combinerContext);
       }
@@ -302,11 +281,11 @@ public class TestKmeansClustering extends MahoutTestCase {
       KMeansReducer reducer = new KMeansReducer();
       reducer.setup(clusters, measure);
       DummyRecordWriter<Text, Cluster> reducerWriter = new DummyRecordWriter<Text, Cluster>();
-      Reducer<Text, KMeansInfo, Text, Cluster>.Context reducerContext = DummyRecordWriter.build(reducer,
-                                                                                                conf,
-                                                                                                reducerWriter,
-                                                                                                Text.class,
-                                                                                                KMeansInfo.class);
+      Reducer<Text, ClusterObservations, Text, Cluster>.Context reducerContext = DummyRecordWriter.build(reducer,
+                                                                                                         conf,
+                                                                                                         reducerWriter,
+                                                                                                         Text.class,
+                                                                                                         ClusterObservations.class);
       for (Text key : combinerWriter.getKeys()) {
         reducer.reduce(new Text(key), combinerWriter.getValue(key), reducerContext);
       }
@@ -339,7 +318,7 @@ public class TestKmeansClustering extends MahoutTestCase {
         converged = converged && cluster.isConverged();
         // Since we aren't roundtripping through Writable, we need to compare the reference center with the
         // cluster centroid
-        cluster.recomputeCenter();
+        cluster.computeParameters();
         assertEquals(ref.getCenter(), cluster.getCenter());
       }
       if (k == 8) {
@@ -353,7 +332,7 @@ public class TestKmeansClustering extends MahoutTestCase {
   /** Story: User wishes to run kmeans job on reference data */
   public void testKMeansSeqJob() throws Exception {
     List<VectorWritable> points = getPointsWritable(reference);
-  
+
     Path pointsPath = getTestTempDirPath("points");
     Path clustersPath = getTestTempDirPath("clusters");
     Configuration conf = new Configuration();
@@ -365,13 +344,13 @@ public class TestKmeansClustering extends MahoutTestCase {
       Path path = new Path(clustersPath, "part-00000");
       FileSystem fs = FileSystem.get(path.toUri(), conf);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Cluster.class);
-  
+
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
-  
+
         Cluster cluster = new Cluster(vec, i);
         // add the center so the centroid will be correct upon output
-        cluster.addPoint(cluster.getCenter());
+        cluster.observe(cluster.getCenter(), 1);
         writer.append(new Text(cluster.getIdentifier()), cluster);
       }
       writer.close();
@@ -385,7 +364,7 @@ public class TestKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.OVERWRITE_OPTION),
           optKey(DefaultOptionCreator.METHOD_OPTION), DefaultOptionCreator.SEQUENTIAL_METHOD };
       new KMeansDriver().run(args);
-  
+
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-m-0"), conf);
@@ -426,7 +405,7 @@ public class TestKmeansClustering extends MahoutTestCase {
 
         Cluster cluster = new Cluster(vec, i);
         // add the center so the centroid will be correct upon output
-        cluster.addPoint(cluster.getCenter());
+        cluster.observe(cluster.getCenter(), 1);
         writer.append(new Text(cluster.getIdentifier()), cluster);
       }
       writer.close();
@@ -491,8 +470,6 @@ public class TestKmeansClustering extends MahoutTestCase {
 
     // now compare the expected clusters with actual
     Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
-    //String[] outFiles = outDir.list();
-    //assertEquals("output dir files?", 4, outFiles.length);
     DummyOutputCollector<IntWritable, WeightedVectorWritable> collector = new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-m-00000"), conf);
 

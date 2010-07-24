@@ -32,7 +32,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.DummyRecordWriter;
@@ -92,7 +92,7 @@ public class TestCanopyCreation extends MahoutTestCase {
    */
   private static void printCanopies(List<Canopy> canopies) {
     for (Canopy canopy : canopies) {
-      System.out.println(canopy.toString());
+      System.out.println(canopy.asFormatString(null));
     }
   }
 
@@ -110,9 +110,9 @@ public class TestCanopyCreation extends MahoutTestCase {
     super.setUp();
     fs = FileSystem.get(new Configuration());
     referenceManhattan = CanopyClusterer.createCanopies(getPoints(), manhattanDistanceMeasure, 3.1, 2.1);
-    manhattanCentroids = CanopyClusterer.calculateCentroids(referenceManhattan);
+    manhattanCentroids = CanopyClusterer.getCenters(referenceManhattan);
     referenceEuclidean = CanopyClusterer.createCanopies(getPoints(), euclideanDistanceMeasure, 3.1, 2.1);
-    euclideanCentroids = CanopyClusterer.calculateCentroids(referenceEuclidean);
+    euclideanCentroids = CanopyClusterer.getCenters(referenceEuclidean);
   }
 
   /** Story: User can cluster points using a ManhattanDistanceMeasure and a reference implementation */
@@ -437,7 +437,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     WeightedVectorWritable vector = new WeightedVectorWritable();
     while (reader.next(clusterId, vector)) {
       count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + ClusterBase.formatVector(vector.getVector().get(), null));
+      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector().get(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();
@@ -477,7 +477,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     WeightedVectorWritable vector = new WeightedVectorWritable();
     while (reader.next(clusterId, vector)) {
       count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + ClusterBase.formatVector(vector.getVector().get(), null));
+      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector().get(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();
@@ -502,7 +502,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     WeightedVectorWritable vector = new WeightedVectorWritable();
     while (reader.next(clusterId, vector)) {
       count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + ClusterBase.formatVector(vector.getVector().get(), null));
+      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector().get(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();
@@ -532,7 +532,7 @@ public class TestCanopyCreation extends MahoutTestCase {
     WeightedVectorWritable vw = new WeightedVectorWritable();
     while (reader.next(canopyId, vw)) {
       count++;
-      System.out.println("Txt: " + canopyId.toString() + " Vec: " + ClusterBase.formatVector(vw.getVector().get(), null));
+      System.out.println("Txt: " + canopyId.toString() + " Vec: " + AbstractCluster.formatVector(vw.getVector().get(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();

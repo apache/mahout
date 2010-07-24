@@ -21,23 +21,23 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.clustering.ClusterObservations;
 
-public class FuzzyKMeansCombiner extends Reducer<Text,FuzzyKMeansInfo,Text,FuzzyKMeansInfo> {
-  
+public class FuzzyKMeansCombiner extends Reducer<Text, ClusterObservations, Text, ClusterObservations> {
+
   private FuzzyKMeansClusterer clusterer;
 
   @Override
-  protected void reduce(Text key, Iterable<FuzzyKMeansInfo> values, Context context) throws IOException, InterruptedException {
-    SoftCluster cluster = new SoftCluster(key.toString().trim());
-    for (FuzzyKMeansInfo value : values) {
-      if (value.getCombinerPass() == 0) { // first time thru combiner
-        cluster.addPoint(value.getVector(), Math.pow(value.getProbability(), clusterer.getM()));
+  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context) throws IOException, InterruptedException {
+    SoftCluster cluster = new SoftCluster();
+    for (ClusterObservations value : values) {
+      if (value.getCombinerState() == 0) { // first time thru combiner
+        cluster.observe(value.getS1(), Math.pow(value.getS0(), clusterer.getM()));
       } else {
-        cluster.addPoints(value.getVector(), value.getProbability());
+        cluster.observe(value);
       }
-      value.setCombinerPass(value.getCombinerPass() + 1);
     }
-    context.write(key, new FuzzyKMeansInfo(cluster.getPointProbSum(), cluster.getWeightedPointTotal(), 1));
+    context.write(key, cluster.getObservations().incrementCombinerState());
   }
 
   @Override

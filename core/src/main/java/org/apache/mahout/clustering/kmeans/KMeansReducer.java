@@ -26,28 +26,27 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.common.distance.DistanceMeasure;
 
-public class KMeansReducer extends Reducer<Text, KMeansInfo, Text, Cluster> {
+public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Cluster> {
 
   private Map<String, Cluster> clusterMap;
 
-  private double convergenceDelta;
-
-  private DistanceMeasure measure;
+  private KMeansClusterer clusterer;
 
   @Override
-  protected void reduce(Text key, Iterable<KMeansInfo> values, Context context)
-    throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context) throws IOException, InterruptedException {
     Cluster cluster = clusterMap.get(key.toString());
-    for (KMeansInfo delta : values) {
-      cluster.addPoints(delta.getPoints(), delta.getPointTotal());
+    for (ClusterObservations delta : values) {
+      cluster.observe(delta);
     }
     // force convergence calculation
-    boolean converged = cluster.computeConvergence(this.measure, this.convergenceDelta);
+    boolean converged = clusterer.computeConvergence(cluster);
     if (converged) {
       context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
+    cluster.computeParameters();
     context.write(new Text(cluster.getIdentifier()), cluster);
   }
 
@@ -56,13 +55,7 @@ public class KMeansReducer extends Reducer<Text, KMeansInfo, Text, Cluster> {
     super.setup(context);
     Configuration conf = context.getConfiguration();
     try {
-      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
-      this.measure = (DistanceMeasure) cl.newInstance();
-      this.measure.configure(conf);
-
-      this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
-
+      this.clusterer = new KMeansClusterer(conf);
       this.clusterMap = new HashMap<String, Cluster>();
 
       String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
@@ -93,7 +86,7 @@ public class KMeansReducer extends Reducer<Text, KMeansInfo, Text, Cluster> {
 
   public void setup(List<Cluster> clusters, DistanceMeasure measure) {
     setClusterMap(clusters);
-    this.measure = measure;
+    this.clusterer = new KMeansClusterer(measure);
   }
 
 }

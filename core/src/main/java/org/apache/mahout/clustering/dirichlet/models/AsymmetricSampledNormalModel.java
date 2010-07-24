@@ -22,7 +22,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -152,11 +152,11 @@ public class AsymmetricSampledNormalModel implements Model<VectorWritable> {
     StringBuilder buf = new StringBuilder(50);
     buf.append("asnm{n=").append(s0).append(" m=");
     if (mean != null) {
-      buf.append(ClusterBase.formatVector(mean, bindings));
+      buf.append(AbstractCluster.formatVector(mean, bindings));
     }
     buf.append(" sd=");
     if (stdDev != null) {
-      buf.append(ClusterBase.formatVector(stdDev, bindings));
+      buf.append(AbstractCluster.formatVector(stdDev, bindings));
     }
     buf.append('}');
     return buf.toString();

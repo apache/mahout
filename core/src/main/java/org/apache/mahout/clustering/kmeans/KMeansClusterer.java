@@ -20,11 +20,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -43,6 +46,8 @@ public class KMeansClusterer {
   /** Distance to use for point to cluster comparison. */
   private final DistanceMeasure measure;
 
+  private final double convergenceDelta;
+
   /**
    * Init the k-means clusterer with the distance measure to use for comparison.
    * 
@@ -52,6 +57,16 @@ public class KMeansClusterer {
    */
   public KMeansClusterer(DistanceMeasure measure) {
     this.measure = measure;
+    this.convergenceDelta = 0;
+  }
+
+  public KMeansClusterer(Configuration conf) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    Class<?> cl = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
+    this.measure = (DistanceMeasure) cl.newInstance();
+    this.measure.configure(conf);
+
+    this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
   }
 
   /**
@@ -67,7 +82,7 @@ public class KMeansClusterer {
    */
   public void emitPointToNearestCluster(Vector point,
                                         List<Cluster> clusters,
-                                        Mapper<WritableComparable<?>, VectorWritable, Text, KMeansInfo>.Context context)
+                                        Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context context)
       throws IOException, InterruptedException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
@@ -82,7 +97,7 @@ public class KMeansClusterer {
         nearestDistance = distance;
       }
     }
-    context.write(new Text(nearestCluster.getIdentifier()), new KMeansInfo(1, point));
+    context.write(new Text(nearestCluster.getIdentifier()), new ClusterObservations(1, point, point.times(point)));
   }
 
   /**
@@ -100,7 +115,7 @@ public class KMeansClusterer {
         closestDistance = distance;
       }
     }
-    closestCluster.addPoint(point);
+    closestCluster.observe(point, 1);
   }
 
   /**
@@ -111,18 +126,12 @@ public class KMeansClusterer {
    * @return
    */
   protected boolean testConvergence(List<Cluster> clusters, double distanceThreshold) {
-    // test for convergence
     boolean converged = true;
     for (Cluster cluster : clusters) {
-      if (!cluster.computeConvergence(measure, distanceThreshold)) {
+      if (!computeConvergence(cluster)) {
         converged = false;
       }
-    }
-    // update the cluster centers
-    if (!converged) {
-      for (Cluster cluster : clusters) {
-        cluster.recomputeCenter();
-      }
+      cluster.computeParameters();
     }
     return converged;
   }
@@ -131,9 +140,9 @@ public class KMeansClusterer {
                                          List<Cluster> clusters,
                                          Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context)
       throws IOException, InterruptedException {
-    Cluster nearestCluster = null;
+    AbstractCluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
-    for (Cluster cluster : clusters) {
+    for (AbstractCluster cluster : clusters) {
       Vector clusterCenter = cluster.getCenter();
       double distance = measure.distance(clusterCenter.getLengthSquared(), clusterCenter, vector);
       if ((distance < nearestDistance) || (nearestCluster == null)) {
@@ -157,9 +166,9 @@ public class KMeansClusterer {
    */
   protected void emitPointToNearestCluster(Vector point, List<Cluster> clusters, Writer writer) throws IOException,
       InterruptedException {
-    Cluster nearestCluster = null;
+    AbstractCluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
-    for (Cluster cluster : clusters) {
+    for (AbstractCluster cluster : clusters) {
       Vector clusterCenter = cluster.getCenter();
       double distance = this.measure.distance(clusterCenter.getLengthSquared(), clusterCenter, point);
       if (log.isDebugEnabled()) {
@@ -197,12 +206,14 @@ public class KMeansClusterer {
     boolean converged = false;
     int iteration = 0;
     while (!converged && iteration < maxIter) {
+      log.info("Reference Iteration: " + iteration);
       List<Cluster> next = new ArrayList<Cluster>();
-      for (Cluster c : clustersList.get(iteration++)) {
-        next.add(new Cluster(c.getCenter()));
+      for (Cluster c : clustersList.get(iteration)) {
+        next.add(new Cluster(c.getCenter(), c.getId()));
       }
       clustersList.add(next);
       converged = runKMeansIteration(points, next, measure, distanceThreshold);
+      iteration++;
     }
     return clustersList;
   }
@@ -229,6 +240,10 @@ public class KMeansClusterer {
       clusterer.addPointToNearestCluster(point, clusters);
     }
     return clusterer.testConvergence(clusters, distanceThreshold);
+  }
+
+  public boolean computeConvergence(Cluster cluster) {
+    return cluster.computeConvergence(measure, convergenceDelta);
   }
 
 }

@@ -21,15 +21,11 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Iterator;
-import java.util.Locale;
 
 import com.google.gson.reflect.TypeToken;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.JsonVectorAdapter;
-import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.Vector.Element;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -100,7 +96,7 @@ public abstract class ClusterBase implements Writable, Cluster {
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
-    buf.append(getIdentifier()).append(": ").append(formatVector(getCenter(), bindings));
+    buf.append(getIdentifier()).append(": ").append(AbstractCluster.formatVector(getCenter(), bindings));
     return buf.toString();
   }
 
@@ -125,60 +121,13 @@ public abstract class ClusterBase implements Writable, Cluster {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
+    out.writeInt(numPoints);
   }
 
   /** Reads in the id, nothing else */
   @Override
   public void readFields(DataInput in) throws IOException {
     id = in.readInt();
-  }
-
-  /**
-   * Return a human-readable formatted string representation of the vector, not intended to be complete nor
-   * usable as an input/output representation such as Json
-   * 
-   * @param v
-   *          a Vector
-   * @return a String
-   */
-  public static String formatVector(Vector v, String[] bindings) {
-    StringBuilder buf = new StringBuilder();
-    if (v instanceof NamedVector) {
-      buf.append(((NamedVector) v).getName()).append(" = ");
-    }
-    int nzero = 0;
-    Iterator<Element> iterateNonZero = v.iterateNonZero();
-    while (iterateNonZero.hasNext()) {
-      iterateNonZero.next();
-      nzero++;
-    }
-    // if vector is sparse or if we have bindings, use sparse notation
-    if ((nzero < v.size()) || (bindings != null)) {
-      buf.append('[');
-      for (int i = 0; i < v.size(); i++) {
-        double elem = v.get(i);
-        if (elem == 0.0) {
-          continue;
-        }
-        String label;
-        if ((bindings != null) && ((label = bindings[i]) != null)) {
-          buf.append(label).append(':');
-        } else {
-          buf.append(i).append(':');
-        }
-        buf.append(String.format(Locale.ENGLISH, "%.3f", elem)).append(", ");
-      }
-    } else {
-      buf.append('[');
-      for (int i = 0; i < v.size(); i++) {
-        double elem = v.get(i);
-        buf.append(String.format(Locale.ENGLISH, "%.3f", elem)).append(", ");
-      }
-    }
-    if (buf.length() > 1) {
-      buf.setLength(buf.length() - 2);
-    }
-    buf.append(']');
-    return buf.toString();
+    numPoints = in.readInt();
   }
 }

@@ -176,7 +176,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new Canopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [1.100, 2.200, 3.300]", formatString);
+    assertEquals("format", "C-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
   }
 
   public void testCanopyAsFormatStringSparse() {
@@ -186,7 +186,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new Canopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [0:1.100, 2:3.300]", formatString);
+    assertEquals("format", "C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
   public void testCanopyAsFormatStringWithBindings() {
@@ -196,7 +196,7 @@ public class TestClusterInterface extends MahoutTestCase {
     String[] bindings = { "fee", null, null };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [fee:1.100, 1:2.200, 2:3.300]", formatString);
+    assertEquals("format", "C-123{n=0 c=[fee:1.100, 1:2.200, 2:3.300] r=[]}", formatString);
   }
 
   public void testCanopyAsFormatStringSparseWithBindings() {
@@ -206,7 +206,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new Canopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [0:1.100, 2:3.300]", formatString);
+    assertEquals("format", "C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
   public void testClusterAsFormatString() {
@@ -215,7 +215,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [1.100, 2.200, 3.300]", formatString);
+    assertEquals("format", "CL-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
   }
 
   public void testClusterAsFormatStringSparse() {
@@ -225,7 +225,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [0:1.100, 2:3.300]", formatString);
+    assertEquals("format", "CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
   public void testClusterAsFormatStringWithBindings() {
@@ -235,7 +235,7 @@ public class TestClusterInterface extends MahoutTestCase {
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [fee:1.100, 1:2.200, foo:3.300]", formatString);
+    assertEquals("format", "CL-123{n=0 c=[fee:1.100, 1:2.200, foo:3.300] r=[]}", formatString);
   }
 
   public void testClusterAsFormatStringSparseWithBindings() {
@@ -245,7 +245,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [0:1.100, 2:3.300]", formatString);
+    assertEquals("format", "CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
   public void testMSCanopyAsFormatString() {
@@ -254,7 +254,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new MeanShiftCanopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [1.100, 2.200, 3.300]", formatString);
+    assertEquals("format", "MSC-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
   }
 
   public void testMSCanopyAsFormatStringSparse() {
@@ -264,7 +264,7 @@ public class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new MeanShiftCanopy(m, 123);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [0:1.100, 2:3.300]", formatString);
+    assertEquals("format", "MSC-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
   public void testMSCanopyAsFormatStringWithBindings() {
@@ -274,7 +274,7 @@ public class TestClusterInterface extends MahoutTestCase {
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [fee:1.100, 1:2.200, foo:3.300]", formatString);
+    assertEquals("format", "MSC-123{n=0 c=[fee:1.100, 1:2.200, foo:3.300] r=[]}", formatString);
   }
 
   public void testMSCanopyAsFormatStringSparseWithBindings() {
@@ -285,7 +285,7 @@ public class TestClusterInterface extends MahoutTestCase {
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
-    assertEquals("format", "C-123: [fee:1.100, foo:3.300]", formatString);
+    assertEquals("format", "MSC-123{n=0 c=[fee:1.100, foo:3.300] r=[]}", formatString);
   }
 
 }

@@ -29,6 +29,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -87,7 +88,7 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
     
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "part-randomSeed"), conf);
     Writable key = (Writable) reader.getKeyClass().newInstance();
-    Cluster value = (Cluster) reader.getValueClass().newInstance();
+    AbstractCluster value = (AbstractCluster) reader.getValueClass().newInstance();
     
     int clusterCount = 0;
     Set<Integer> set = new HashSet<Integer>();

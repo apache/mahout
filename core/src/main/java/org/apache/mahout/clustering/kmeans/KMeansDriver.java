@@ -34,6 +34,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -199,7 +201,7 @@ public class KMeansDriver extends AbstractJob {
     Path clustersOut = buildClusters(input, clustersIn, output, measure, maxIterations, numReduceTasks, delta, runSequential);
     if (runClustering) {
       log.info("Clustering data");
-      clusterData(input, clustersOut, new Path(output, Cluster.CLUSTERED_POINTS_DIR), measure, delta, runSequential);
+      clusterData(input, clustersOut, new Path(output, AbstractCluster.CLUSTERED_POINTS_DIR), measure, delta, runSequential);
     }
   }
 
@@ -276,6 +278,7 @@ public class KMeansDriver extends AbstractJob {
     boolean converged = false;
     int iteration = 1;
     while (!converged && iteration <= maxIterations) {
+      log.info("K-Means Iteration: " + iteration);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(input.toUri(), conf);
       FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
@@ -293,7 +296,7 @@ public class KMeansDriver extends AbstractJob {
         }
       }
       converged = clusterer.testConvergence(clusters, Double.parseDouble(delta));
-      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
+      Path clustersOut = new Path(output, AbstractCluster.CLUSTERS_DIR + iteration);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs,
                                                            conf,
                                                            new Path(clustersOut, "part-r-00000"),
@@ -301,12 +304,16 @@ public class KMeansDriver extends AbstractJob {
                                                            Cluster.class);
       try {
         for (Cluster cluster : clusters) {
+          log.info("Writing Cluster:" + cluster.getId() + " center:" + AbstractCluster.formatVector(cluster.getCenter(), null)
+              + " numPoints:" + cluster.getNumPoints() + " radius:" + AbstractCluster.formatVector(cluster.getRadius(), null) + " to: "
+              + clustersOut.getName());
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
         writer.close();
       }
       clustersIn = clustersOut;
+      iteration++;
     }
     return clustersIn;
   }
@@ -336,7 +343,7 @@ public class KMeansDriver extends AbstractJob {
     while (!converged && (iteration <= maxIterations)) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
-      Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
+      Path clustersOut = new Path(output, AbstractCluster.CLUSTERS_DIR + iteration);
       converged = runIteration(input, clustersIn, clustersOut, measure.getClass().getName(), delta, numReduceTasks);
       // now point the input to the old output directory
       clustersIn = clustersOut;
@@ -378,7 +385,7 @@ public class KMeansDriver extends AbstractJob {
     Job job = new Job(conf);
 
     job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(KMeansInfo.class);
+    job.setMapOutputValueClass(ClusterObservations.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Cluster.class);
 

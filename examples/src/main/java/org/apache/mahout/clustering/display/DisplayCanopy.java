@@ -17,29 +17,26 @@
 
 package org.apache.mahout.clustering.display;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.Path;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyClusterer;
+import org.apache.mahout.clustering.canopy.CanopyDriver;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 class DisplayCanopy extends DisplayClustering {
 
   private static final long serialVersionUID = 1L;
-
-  private static List<Canopy> canopies;
-
-  private static final double T1 = 3.0;
-
-  private static final double T2 = 1.6;
 
   DisplayCanopy() {
     initialize();
@@ -48,33 +45,38 @@ class DisplayCanopy extends DisplayClustering {
 
   @Override
   public void paint(Graphics g) {
-    Graphics2D g2 = (Graphics2D) g;
-    plotSampleData(g2);
-    Vector dv = new DenseVector(2);
-    for (Canopy canopy : canopies) {
-      if (canopy.getNumPoints() > DisplayClustering.SAMPLE_DATA.size() * SIGNIFICANCE) {
-        g2.setStroke(new BasicStroke(2));
-        g2.setColor(COLORS[1]);
-        dv.assign(T1);
-        Vector center = canopy.computeCentroid();
-        DisplayClustering.plotEllipse(g2, center, dv);
-        g2.setStroke(new BasicStroke(3));
-        g2.setColor(COLORS[0]);
-        dv.assign(T2);
-        DisplayClustering.plotEllipse(g2, center, dv);
-      }
-    }
+    plotSampleData((Graphics2D) g);
+    plotClusters((Graphics2D) g);
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException {
+    SIGNIFICANCE = 0.05;
+    Path samples = new Path("samples");
+    Path output = new Path("output");
+    HadoopUtil.overwriteOutput(samples);
+    HadoopUtil.overwriteOutput(output);
     RandomUtils.useTestSeed();
-    DisplayClustering.generateSamples();
-    List<Vector> points = new ArrayList<Vector>();
-    for (VectorWritable sample : SAMPLE_DATA) {
-      points.add(sample.get());
+    generateSamples();
+    writeSampleData(samples);
+    boolean b = true;
+    if (b) {
+      new CanopyDriver().buildClusters(samples, output, ManhattanDistanceMeasure.class.getName(), T1, T2, true);
+      loadClusters(output);
+    } else {
+      List<Vector> points = new ArrayList<Vector>();
+      for (VectorWritable sample : SAMPLE_DATA) {
+        points.add(sample.get());
+      }
+      List<Canopy> canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), T1, T2);
+      CanopyClusterer.updateCentroids(canopies);
+      List<Cluster> clusters = new ArrayList<Cluster>();
+      for (Canopy canopy : canopies)
+        clusters.add(canopy);
+      CLUSTERS.add(clusters);
     }
-    canopies = CanopyClusterer.createCanopies(points, new ManhattanDistanceMeasure(), T1, T2);
-    CanopyClusterer.updateCentroids(canopies);
+
     new DisplayCanopy();
   }
+
 }

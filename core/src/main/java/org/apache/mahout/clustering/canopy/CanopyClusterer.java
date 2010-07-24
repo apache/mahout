@@ -25,7 +25,7 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.clustering.ClusterBase;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -113,13 +113,13 @@ public class CanopyClusterer {
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);
       if (dist < t1) {
-        log.info("Added point: " + ClusterBase.formatVector(point, null) + " to canopy: " + canopy.getIdentifier());
-        canopy.addPoint(point);
+        log.info("Added point: " + AbstractCluster.formatVector(point, null) + " to canopy: " + canopy.getIdentifier());
+        canopy.observe(point);
       }
       pointStronglyBound = pointStronglyBound || (dist < t2);
     }
     if (!pointStronglyBound) {
-      log.info("Created new Canopy:" + nextCanopyId + " at center:" + ClusterBase.formatVector(point, null));
+      log.info("Created new Canopy:" + nextCanopyId + " at center:" + AbstractCluster.formatVector(point, null));
       canopies.add(new Canopy(point, nextCanopyId++));
     }
   }
@@ -202,12 +202,15 @@ public class CanopyClusterer {
         double dist = measure.distance(p1, p2);
         // Put all points that are within distance threshold T1 into the canopy
         if (dist < t1) {
-          canopy.addPoint(p2);
+          canopy.observe(p2);
         }
         // Remove from the list all points that are within distance threshold T2
         if (dist < t2) {
           ptIter.remove();
         }
+      }
+      for (Canopy c : canopies) {
+        c.computeParameters();
       }
     }
     return canopies;
@@ -220,10 +223,10 @@ public class CanopyClusterer {
    *          a List<Canopy>
    * @return the List<Vector>
    */
-  public static List<Vector> calculateCentroids(List<Canopy> canopies) {
+  public static List<Vector> getCenters(List<Canopy> canopies) {
     List<Vector> result = new ArrayList<Vector>();
     for (Canopy canopy : canopies) {
-      result.add(canopy.computeCentroid());
+      result.add(canopy.getCenter());
     }
     return result;
   }
@@ -236,7 +239,7 @@ public class CanopyClusterer {
    */
   public static void updateCentroids(List<Canopy> canopies) {
     for (Canopy canopy : canopies) {
-      canopy.setCenter(canopy.computeCentroid());
+      canopy.computeParameters();
     }
   }
 

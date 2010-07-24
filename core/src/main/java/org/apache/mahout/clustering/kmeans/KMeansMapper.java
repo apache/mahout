@@ -25,10 +25,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, KMeansInfo> {
+public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations> {
 
   private KMeansClusterer clusterer;
 

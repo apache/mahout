@@ -27,6 +27,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.DenseVector;
@@ -115,7 +116,9 @@ public class FuzzyKMeansClusterer {
    * @param clusterList
    *          the List<Cluster> clusters
    */
-  protected static boolean runFuzzyKMeansIteration(List<Vector> points, List<SoftCluster> clusterList, FuzzyKMeansClusterer clusterer) {
+  protected static boolean runFuzzyKMeansIteration(List<Vector> points,
+                                                   List<SoftCluster> clusterList,
+                                                   FuzzyKMeansClusterer clusterer) {
     for (Vector point : points) {
       clusterer.addPointToClusters(clusterList, point);
     }
@@ -162,7 +165,7 @@ public class FuzzyKMeansClusterer {
    */
   public void emitPointProbToCluster(Vector point,
                                      List<SoftCluster> clusters,
-                                     Mapper<WritableComparable<?>, VectorWritable, Text, FuzzyKMeansInfo>.Context context)
+                                     Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context context)
       throws IOException, InterruptedException {
 
     List<Double> clusterDistanceList = new ArrayList<Double>();
@@ -171,9 +174,11 @@ public class FuzzyKMeansClusterer {
     }
 
     for (int i = 0; i < clusters.size(); i++) {
-      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-      Text key = new Text(clusters.get(i).getIdentifier());
-      FuzzyKMeansInfo value = new FuzzyKMeansInfo(probWeight, point);
+      SoftCluster cluster = clusters.get(i);
+      Text key = new Text(cluster.getIdentifier());
+      ClusterObservations value = new ClusterObservations(computeProbWeight(clusterDistanceList.get(i), clusterDistanceList),
+                                                          point,
+                                                          point.times(point));
       context.write(key, value);
     }
   }
@@ -199,9 +204,7 @@ public class FuzzyKMeansClusterer {
    * @return if the cluster is converged
    */
   public boolean computeConvergence(SoftCluster cluster) {
-    Vector centroid = cluster.computeCentroid();
-    cluster.setConverged(measure.distance(cluster.getCenter(), centroid) <= convergenceDelta);
-    return cluster.isConverged();
+    return cluster.computeConvergence(measure, convergenceDelta);
   }
 
   public double getM() {
@@ -285,22 +288,17 @@ public class FuzzyKMeansClusterer {
 
     for (int i = 0; i < clusterList.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-      clusterList.get(i).addPoint(point, Math.pow(probWeight, getM()));
+      clusterList.get(i).observe(point, Math.pow(probWeight, getM()));
     }
   }
 
   protected boolean testConvergence(List<SoftCluster> clusters) {
     boolean converged = true;
     for (SoftCluster cluster : clusters) {
-      if (!computeConvergence(cluster)) {
+      if (!cluster.computeConvergence(measure, convergenceDelta)) {
         converged = false;
       }
-    }
-    // update the cluster centers
-    if (!converged) {
-      for (SoftCluster cluster : clusters) {
-        cluster.recomputeCenter();
-      }
+      cluster.computeParameters();
     }
     return converged;
   }

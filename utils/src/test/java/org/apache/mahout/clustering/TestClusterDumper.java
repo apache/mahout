@@ -129,7 +129,7 @@ public class TestClusterDumper extends MahoutTestCase {
       } else {
         namedVector = new NamedVector(vector, "P(" + i + ')');
       }
-      System.out.println(ClusterBase.formatVector(namedVector, termDictionary));
+      System.out.println(AbstractCluster.formatVector(namedVector, termDictionary));
       sampleData.add(new VectorWritable(namedVector));
       i++;
     }

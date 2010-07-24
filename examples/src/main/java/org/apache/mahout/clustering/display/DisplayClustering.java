@@ -28,11 +28,21 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
+import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -58,6 +68,10 @@ public class DisplayClustering extends Frame {
 
   protected static final Color[] COLORS = { Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
       Color.lightGray };
+
+  protected static final double T1 = 3.0;
+
+  protected static final double T2 = 2.8;
 
   protected static int res; // screen resolution
 
@@ -212,6 +226,54 @@ public class DisplayClustering extends Frame {
     for (int i = 0; i < num; i++) {
       SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sd),
           UncommonDistributions.rNorm(my, sd) })));
+    }
+  }
+
+  protected static void writeSampleData(Path output) throws IOException {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, output, Text.class, VectorWritable.class);
+    try {
+      for (VectorWritable vw : SAMPLE_DATA) {
+        writer.append(new Text(), vw);
+      }
+    } finally {
+      writer.close();
+    }
+  }
+
+  protected static List<Cluster> readClusters(Path clustersIn) throws IOException, InstantiationException, IllegalAccessException {
+    List<Cluster> clusters = new ArrayList<Cluster>();
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
+    FileStatus[] status = fs.listStatus(clustersIn, new OutputLogFilter());
+    for (FileStatus s : status) {
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
+      try {
+        Text key = new Text();
+        Writable value = (Writable) reader.getValueClass().newInstance();
+        while (reader.next(key, value)) {
+          Cluster cluster = (Cluster) value;
+          log.info("Reading Cluster:" + cluster.getId() + " center:" + AbstractCluster.formatVector(cluster.getCenter(), null)
+            + " numPoints:" + cluster.getNumPoints() + " radius:" + AbstractCluster.formatVector(cluster.getRadius(), null));
+          clusters.add(cluster);
+          value = (Writable) reader.getValueClass().newInstance();
+        }
+      } finally {
+        reader.close();
+      }
+    }
+    return clusters;
+  }
+  
+  protected static void loadClusters(Path output) throws IOException, InstantiationException, IllegalAccessException{
+    List<Cluster> clusters = new ArrayList<Cluster>();
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    FileStatus[] status = fs.listStatus(output, new ClustersFilter());
+    for (FileStatus s : status) {
+      clusters = readClusters(s.getPath());
+      CLUSTERS.add(clusters);
     }
   }
 
