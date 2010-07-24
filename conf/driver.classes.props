@@ -18,6 +18,7 @@ org.apache.mahout.utils.vectors.RowIdJob = rowid : Map SequenceFile<Text,VectorW
 org.apache.mahout.text.WikipediaToSequenceFile = seqwiki : Wikipedia xml dump to sequence file
 org.apache.mahout.classifier.bayes.TestClassifier = testclassifier : Test Bayes Classifier
 org.apache.mahout.classifier.bayes.TrainClassifier = trainclassifier : Train Bayes Classifier
+org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups = prepare20newsgroups : Reformat 20 newsgroups data
 org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver = svd : Lanczos Singular Value Decomposition
 org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob = cleansvd : Cleanup and verification of SVD output
 org.apache.mahout.math.hadoop.similarity.RowSimilarityJob = rowsimilarity : Compute the pairwise similarities of the rows of a matrix

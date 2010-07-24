@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier.bayes;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.cli2.CommandLine;
@@ -92,9 +93,16 @@ public final class PrepareTwentyNewsgroups {
         analyzer = (Analyzer) Class.forName(analyzerName).getConstructor(Version.class).newInstance(Version.LUCENE_30);
       }
       // parent dir contains dir by category
+      if (!parentDir.exists()) {
+        throw new FileNotFoundException("Can't find input directory " + parentDir);
+      }
       File[] categoryDirs = parentDir.listFiles();
       for (File dir : categoryDirs) {
         if (dir.isDirectory()) {
+          if (!outputDir.exists() && !outputDir.mkdirs()) {
+            throw new IllegalArgumentException("Can't create output directory");
+          }
+
           File outputFile = new File(outputDir, dir.getName() + ".txt");
           BayesFileFormatter.collapse(dir.getName(), analyzer, dir, charset, outputFile);
         }
