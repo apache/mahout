@@ -47,28 +47,29 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
    * @param beta
    * @return The beta function for given values of alpha and beta.
    */
-  @Deprecated
   public static double beta(double alpha, double beta) {
+    double y = 0;
+    if (alpha < 40 && beta < 40) {
+      y = gamma(alpha + beta);
+      if (y == 0.0) {
+        return 1.0;
+      }
 
-    double y = alpha + beta;
-    y = gamma(y);
-    if (y == 0.0) {
-      return 1.0;
-    }
-
-    if (alpha > beta) {
-      y = gamma(alpha) / y;
-      y *= gamma(beta);
+      if (alpha > beta) {
+        y = gamma(alpha) / y;
+        y *= gamma(beta);
+      } else {
+        y = gamma(beta) / y;
+        y *= gamma(alpha);
+      }
     } else {
-      y = gamma(beta) / y;
-      y *= gamma(alpha);
+      y = Math.exp(logGamma(alpha) + logGamma(beta) - logGamma(alpha + beta));
     }
 
     return (y);
   }
 
   /** Returns the Gamma function of the argument. */
-  @Deprecated
   public static double gamma(double x) throws ArithmeticException {
 
     double[] P = {
@@ -160,33 +161,35 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   }
 
   /**
-   * Returns the Incomplete Beta Function evaluated from zero to <tt>xx</tt>; formerly named <tt>ibeta</tt>.
+   * Returns the regularized Incomplete Beta Function evaluated from zero to <tt>xx</tt>; formerly named <tt>ibeta</tt>.
    *
-   * @param aa the alpha parameter of the beta distribution.
-   * @param bb the beta parameter of the beta distribution.
+   * See http://en.wikipedia.org/wiki/Incomplete_beta_function#Incomplete_beta_function
+   *
+   * @param alpha the alpha parameter of the beta distribution.
+   * @param beta the beta parameter of the beta distribution.
    * @param xx the integration end point.
    */
-  @Deprecated
-  public static double incompleteBeta(double aa, double bb, double xx) throws ArithmeticException {
+  public static double incompleteBeta(double alpha, double beta, double xx) throws ArithmeticException {
 
-    if (aa <= 0.0 || bb <= 0.0) {
-      throw new
-          ArithmeticException("ibeta: Domain error!");
+    if (alpha <= 0.0) {
+      throw new ArithmeticException("incompleteBeta: Domain error! alpha must be > 0, but was " + alpha);
     }
 
-    if ((xx <= 0.0) || (xx >= 1.0)) {
-      if (xx == 0.0) {
-        return 0.0;
-      }
-      if (xx == 1.0) {
-        return 1.0;
-      }
-      throw new ArithmeticException("ibeta: Domain error!");
+    if (beta <= 0.0) {
+      throw new ArithmeticException("incompleteBeta: Domain error! beta must be > 0, but was " + beta);
+    }
+
+    if (xx <= 0.0) {
+      return 0.0;
+    }
+
+    if (xx >= 1.0) {
+      return 1.0;
     }
 
     double t;
-    if ((bb * xx) <= 1.0 && xx <= 0.95) {
-      t = powerSeries(aa, bb, xx);
+    if ((beta * xx) <= 1.0 && xx <= 0.95) {
+      t = powerSeries(alpha, beta, xx);
       return t;
     }
 
@@ -198,15 +201,15 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     double b;
     double a;
     boolean flag = false;
-    if (xx > (aa / (aa + bb))) {
+    if (xx > (alpha / (alpha + beta))) {
       flag = true;
-      a = bb;
-      b = aa;
+      a = beta;
+      b = alpha;
       xc = xx;
       x = w;
     } else {
-      a = aa;
-      b = bb;
+      a = alpha;
+      b = beta;
       xc = w;
       x = xx;
     }
@@ -270,7 +273,6 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   }
 
   /** Continued fraction expansion #1 for incomplete beta integral; formerly named <tt>incbcf</tt>. */
-  @Deprecated
   static double incompleteBetaFraction1(double a, double b, double x) throws ArithmeticException {
 
     double k1 = a;
@@ -349,7 +351,6 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
   }
 
   /** Continued fraction expansion #2 for incomplete beta integral; formerly named <tt>incbd</tt>. */
-  @Deprecated
   static double incompleteBetaFraction2(double a, double b, double x) throws ArithmeticException {
 
     double k1 = a;
@@ -633,8 +634,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
    * Power series for incomplete beta integral; formerly named <tt>pseries</tt>. Use when b*x is small and x not too
    * close to 1.
    */
-  @Deprecated
-  static double powerSeries(double a, double b, double x) throws ArithmeticException {
+  static private double powerSeries(double a, double b, double x) throws ArithmeticException {
 
     double ai = 1.0 / a;
     double u = (1.0 - b) * x;
@@ -673,7 +673,6 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
    * Returns the Gamma function computed by Stirling's formula; formerly named <tt>stirf</tt>. The polynomial STIR is
    * valid for 33 <= x <= 172.
    */
-  @Deprecated
   static double stirlingFormula(double x) throws ArithmeticException {
     double[] STIR = {
         7.87311395793093628397E-4,

@@ -33,19 +33,19 @@ public class Gamma extends AbstractContinousDistribution {
   private double alpha;
 
   // rate
-  private double beta;
+  private double rate;
 
   /**
    * Constructs a Gamma distribution with a given shape (alpha) and rate (beta).
    *
    * @param alpha The shape parameter.
-   * @param beta The rate parameter.
+   * @param rate The rate parameter.
    * @param randomGenerator The random number generator that generates bits for us.
    * @throws IllegalArgumentException if <tt>alpha &lt;= 0.0 || alpha &lt;= 0.0</tt>.
    */
-  public Gamma(double alpha, double beta, RandomEngine randomGenerator) {
+  public Gamma(double alpha, double rate, RandomEngine randomGenerator) {
     this.alpha = alpha;
-    this.beta = beta;
+    this.rate = rate;
     setRandomGenerator(randomGenerator);
   }
 
@@ -54,13 +54,13 @@ public class Gamma extends AbstractContinousDistribution {
    * @param x The end-point where the cumulation should end.
    */
   public double cdf(double x) {
-    return Probability.gamma(alpha, beta, x);
+    return Probability.gamma(alpha, rate, x);
   }
 
   /** Returns a random number from the distribution. */
   @Override
   public double nextDouble() {
-    return nextDouble(alpha, beta);
+    return nextDouble(alpha, rate);
   }
 
   /** Returns a random number from the distribution; bypasses the internal state.
@@ -84,15 +84,15 @@ public class Gamma extends AbstractContinousDistribution {
    *                unsigned long integer *seed                     *
    *              - NORMAL(seed) ... Normal generator N(0,1).       *
    *                                                                *
-   * @param beta  Scale parameter.
    * @param alpha   Shape parameter.
+   * @param rate    Rate parameter (=1/scale).
    * @return A gamma distributed sample.
    */
-  public double nextDouble(double alpha, double beta) {
+  public double nextDouble(double alpha, double rate) {
     if (alpha <= 0.0) {
       throw new IllegalArgumentException();
     }
-    if (beta <= 0.0) {
+    if (rate <= 0.0) {
       throw new IllegalArgumentException();
     }
 
@@ -105,12 +105,12 @@ public class Gamma extends AbstractContinousDistribution {
         if (p <= 1.0) {                       // Step 2. Case gds <= 1
           gds = Math.exp(Math.log(p) / alpha);
           if (Math.log(randomGenerator.raw()) <= -gds) {
-            return (gds / beta);
+            return (gds / rate);
           }
         } else {                                // Step 3. Case gds > 1
           gds = -Math.log((b - p) / alpha);
           if (Math.log(randomGenerator.raw()) <= ((alpha - 1.0) * Math.log(gds))) {
-            return (gds / beta);
+            return (gds / rate);
           }
         }
       }
@@ -137,12 +137,12 @@ public class Gamma extends AbstractContinousDistribution {
       double x = s + 0.5 * t;
       gds = x * x;
       if (t >= 0.0) {
-        return (gds / beta);
+        return (gds / rate);
       }         // Immediate acceptance
 
       double u = randomGenerator.raw();
       if (d * u <= t * t * t) {
-        return (gds / beta);
+        return (gds / rate);
       } // Squeeze acceptance
 
       double q0 = 0.0;
@@ -199,7 +199,7 @@ public class Gamma extends AbstractContinousDistribution {
               v + a5) * v + a4) * v + a3) * v + a2) * v + a1) * v;
         }                  // Step 7. Quotient acceptance
         if (Math.log(1.0 - u) <= q) {
-          return (gds / beta);
+          return (gds / rate);
         }
       }
 
@@ -239,7 +239,7 @@ public class Gamma extends AbstractContinousDistribution {
         }                            // Step 12. Hat acceptance
         if (c * u * sign_u <= w * Math.exp(e - 0.5 * t * t)) {
           x = s + 0.5 * t;
-          return (x * x / beta);
+          return (x * x / rate);
         }
       }
     }
@@ -256,7 +256,7 @@ public class Gamma extends AbstractContinousDistribution {
     }
     if (x == 0) {
       if (alpha == 1.0) {
-        return beta;
+        return rate;
       } else if (alpha < 1) {
         return Double.POSITIVE_INFINITY;
       } else {
@@ -264,12 +264,12 @@ public class Gamma extends AbstractContinousDistribution {
       }
     }
     if (alpha == 1.0) {
-      return beta * Math.exp(-x * beta);
+      return rate * Math.exp(-x * rate);
     }
-    return beta * Math.exp((alpha - 1.0) * Math.log(x * beta) - x * beta - Fun.logGamma(alpha));
+    return rate * Math.exp((alpha - 1.0) * Math.log(x * rate) - x * rate - Fun.logGamma(alpha));
   }
 
   public String toString() {
-    return this.getClass().getName() + '(' + beta + ',' + alpha + ')';
+    return this.getClass().getName() + '(' + rate + ',' + alpha + ')';
   }
 }

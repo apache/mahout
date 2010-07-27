@@ -12,9 +12,6 @@ package org.apache.mahout.math.jet.random;
  * Abstract base class for all discrete distributions.
  *
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
 public abstract class AbstractDiscreteDistribution extends AbstractDistribution {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */

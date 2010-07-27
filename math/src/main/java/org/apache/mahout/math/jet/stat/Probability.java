@@ -503,7 +503,6 @@ public class Probability extends Constants {
    * @param n the number of trials.
    * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
    */
-  @Deprecated
   public static double negativeBinomial(int k, int n, double p) {
     if ((p < 0.0) || (p > 1.0)) {
       throw new IllegalArgumentException();
@@ -669,7 +668,6 @@ public class Probability extends Constants {
    * @param k    number of terms.
    * @param mean the mean of the poisson distribution.
    */
-  @Deprecated
   public static double poisson(int k, double mean) throws ArithmeticException {
     if (mean < 0) {
       throw new IllegalArgumentException();

@@ -1,9 +1,9 @@
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.
-Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose 
-is hereby granted without fee, provided that the above copyright notice appear in all copies and 
-that both that copyright notice and this permission notice appear in supporting documentation. 
-CERN makes no representations about the suitability of this software for any purpose. 
+Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose
+is hereby granted without fee, provided that the above copyright notice appear in all copies and
+that both that copyright notice and this permission notice appear in supporting documentation.
+CERN makes no representations about the suitability of this software for any purpose.
 It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
@@ -12,8 +12,7 @@ import org.apache.mahout.math.jet.math.Arithmetic;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
+/** Partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 public class Poisson extends AbstractDiscreteDistribution {
 
   private double mean;
@@ -62,16 +61,14 @@ public class Poisson extends AbstractDiscreteDistribution {
   private static final double SWITCH_MEAN = 10.0; // switch from method A to method B
 
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Poisson shared = new Poisson(0.0, makeDefaultGenerator());
-
   /** Constructs a poisson distribution. Example: mean=1.0. */
   public Poisson(double mean, RandomEngine randomGenerator) {
     setRandomGenerator(randomGenerator);
-    setMean(mean);
+    this.mean = mean;
   }
 
   /** Returns the cumulative distribution function. */
+  @Deprecated
   public double cdf(int k) {
     return Probability.poisson(k, this.mean);
   }
@@ -83,6 +80,7 @@ public class Poisson extends AbstractDiscreteDistribution {
    * @return a copy of the receiver.
    */
   @Override
+  @Deprecated
   public Object clone() {
     Poisson copy = (Poisson) super.clone();
     if (this.pp != null) {
@@ -120,7 +118,6 @@ public class Poisson extends AbstractDiscreteDistribution {
  *                                                                *
  *****************************************************************/
     RandomEngine gen = this.randomGenerator;
-    double my = theMean;
 
     //double t, g, my_k;
 
@@ -131,16 +128,16 @@ public class Poisson extends AbstractDiscreteDistribution {
     //static long ll,m;
 
     int m;
-    if (my < SWITCH_MEAN) { // CASE B: Inversion- start new table and calculate p0
-      if (my != my_old) {
-        my_old = my;
+    if (theMean < SWITCH_MEAN) { // CASE B: Inversion- start new table and calculate p0
+      if (theMean != my_old) {
+        my_old = theMean;
         llll = 0;
-        p = Math.exp(-my);
+        p = Math.exp(-theMean);
         q = p;
         p0 = p;
         //for (k=pp.length; --k >=0; ) pp[k] = 0;
       }
-      m = (my > 1.0) ? (int) my : 1;
+      m = (theMean > 1.0) ? (int) theMean : 1;
       while (true) {
         double u = gen.raw();
         int k = 0;
@@ -159,7 +156,7 @@ public class Poisson extends AbstractDiscreteDistribution {
           }
         }
         for (k = llll + 1; k <= 35; k++) { // Step C. Creation of new prob.
-          p *= my / (double) k;
+          p *= theMean / (double) k;
           q += p;
           pp[k] = q;
           if (u <= q) {
@@ -170,23 +167,23 @@ public class Poisson extends AbstractDiscreteDistribution {
         llll = 35;
       }
     }     // end my < SWITCH_MEAN
-    else if (my < MEAN_MAX) { // CASE A: acceptance complement
+    else if (theMean < MEAN_MAX) { // CASE A: acceptance complement
       //static double        my_last = -1.0;
       //static long int      m,  k2, k4, k1, k5;
       //static double        dl, dr, r1, r2, r4, r5, ll, lr, l_my, c_pm,
       //             f1, f2, f4, f5, p1, p2, p3, p4, p5, p6;
 
-      m = (int) my;
-      if (my != my_last) { //  set-up
-        my_last = my;
+      m = (int) theMean;
+      if (theMean != my_last) { //  set-up
+        my_last = theMean;
 
         // approximate deviation of reflection points k2, k4 from my - 1/2
-        double Ds = Math.sqrt(my + 0.25);
+        double Ds = Math.sqrt(theMean + 0.25);
 
         // mode m, reflection points k2 and k4, and points k1 and k5, which
         // delimit the centre region of h(x)
-        k2 = (int) Math.ceil(my - 0.5 - Ds);
-        k4 = (int) (my - 0.5 + Ds);
+        k2 = (int) Math.ceil(theMean - 0.5 - Ds);
+        k4 = (int) (theMean - 0.5 + Ds);
         k1 = k2 + k2 - m + 1;
         k5 = k4 + k4 - m;
 
@@ -195,17 +192,17 @@ public class Poisson extends AbstractDiscreteDistribution {
         dr = (double) (k5 - k4);
 
         // recurrence constants r(k) = p(k)/p(k-1) at k = k1, k2, k4+1, k5+1
-        r1 = my / (double) k1;
-        r2 = my / (double) k2;
-        r4 = my / (double) (k4 + 1);
-        r5 = my / (double) (k5 + 1);
+        r1 = theMean / (double) k1;
+        r2 = theMean / (double) k2;
+        r4 = theMean / (double) (k4 + 1);
+        r5 = theMean / (double) (k5 + 1);
 
         // reciprocal values of the scale parameters of expon. tail envelopes
         ll = Math.log(r1);                     // expon. tail left
         lr = -Math.log(r5);                     // expon. tail right
 
         // Poisson constants, necessary for computing function values f(k)
-        l_my = Math.log(my);
+        l_my = Math.log(theMean);
         c_pm = m * l_my - Arithmetic.logFactorial(m);
 
         // function values f(k) = p(k)/p(m) at k = k2, k4, k1, k5
@@ -315,11 +312,12 @@ public class Poisson extends AbstractDiscreteDistribution {
         }
       }
     } else { // mean is too large
-      return (int) my;
+      return (int) theMean;
     }
   }
 
   /** Returns the probability distribution function. */
+  @Deprecated
   public double pdf(int k) {
     return Math.exp(k * Math.log(this.mean) - Arithmetic.logFactorial(k) - this.mean);
 
@@ -328,19 +326,13 @@ public class Poisson extends AbstractDiscreteDistribution {
   }
 
   /** Sets the mean. */
+  @Deprecated
   public void setMean(double mean) {
     this.mean = mean;
   }
 
-  /** Returns a random number from the distribution with the given mean. */
-  public static int staticNextInt(double mean) {
-    synchronized (shared) {
-      shared.setMean(mean);
-      return shared.nextInt();
-    }
-  }
-
   /** Returns a String representation of the receiver. */
+  @Deprecated
   public String toString() {
     return this.getClass().getName() + '(' + mean + ')';
   }

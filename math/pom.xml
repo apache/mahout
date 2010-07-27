@@ -87,6 +87,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r03</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-collections</artifactId>
     </dependency>
