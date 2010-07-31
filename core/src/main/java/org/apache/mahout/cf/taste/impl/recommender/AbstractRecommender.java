@@ -17,13 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
@@ -34,14 +33,24 @@ public abstract class AbstractRecommender implements Recommender {
   private static final Logger log = LoggerFactory.getLogger(AbstractRecommender.class);
   
   private final DataModel dataModel;
+  private final CandidateItemsStrategy candidateItemsStrategy;
   
-  protected AbstractRecommender(DataModel dataModel) {
+  protected AbstractRecommender(DataModel dataModel, CandidateItemsStrategy candidateItemsStrategy) {
     if (dataModel == null) {
       throw new IllegalArgumentException("dataModel is null");
     }
     this.dataModel = dataModel;
+    this.candidateItemsStrategy = candidateItemsStrategy;
   }
-  
+
+  protected AbstractRecommender(DataModel dataModel) {
+    this(dataModel, getDefaultCandidateItemsStrategy());
+  }
+
+  protected static CandidateItemsStrategy getDefaultCandidateItemsStrategy() {
+    return new PreferredItemsNeighborhoodCandidateItemsStrategy();
+  }
+
   /**
    * <p>
    * Default implementation which just calls
@@ -99,19 +108,7 @@ public abstract class AbstractRecommender implements Recommender {
    *           if an error occurs while listing items
    */
   protected FastIDSet getAllOtherItems(long theUserID) throws TasteException {
-    FastIDSet possibleItemsIDs = new FastIDSet();
-    FastIDSet itemIDs = dataModel.getItemIDsFromUser(theUserID);
-    LongPrimitiveIterator itemIDIterator = itemIDs.iterator();
-    while (itemIDIterator.hasNext()) {
-      long itemID = itemIDIterator.next();
-      PreferenceArray prefs2 = dataModel.getPreferencesForItem(itemID);
-      int size2 = prefs2.length();
-      for (int j = 0; j < size2; j++) {
-        possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(prefs2.getUserID(j)));
-      }
-    }
-    possibleItemsIDs.removeAll(itemIDs);
-    return possibleItemsIDs;
+    return candidateItemsStrategy.getCandidateItems(theUserID, dataModel);
   }
   
 }

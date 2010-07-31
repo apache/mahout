@@ -73,7 +73,7 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
     this.id = id;
     this.values = values;
   }
-  
+
   @Override
   public int length() {
     return ids.length;

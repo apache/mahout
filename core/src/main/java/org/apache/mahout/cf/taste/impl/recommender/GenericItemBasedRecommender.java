@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -69,8 +70,10 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   private final RefreshHelper refreshHelper;
   private EstimatedPreferenceCapper capper;
 
-  public GenericItemBasedRecommender(DataModel dataModel, ItemSimilarity similarity) {
-    super(dataModel);
+  public GenericItemBasedRecommender(DataModel dataModel,
+                                     ItemSimilarity similarity,
+                                     CandidateItemsStrategy candidateItemsStrategy) {
+    super(dataModel, candidateItemsStrategy);
     if (similarity == null) {
       throw new IllegalArgumentException("similarity is null");
     }
@@ -80,7 +83,12 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     refreshHelper.addDependency(similarity);
     capper = buildCapper();
   }
-  
+
+  public GenericItemBasedRecommender(DataModel dataModel,
+                                     ItemSimilarity similarity) {
+    this(dataModel, similarity, AbstractRecommender.getDefaultCandidateItemsStrategy());
+  }
+
   public ItemSimilarity getSimilarity() {
     return similarity;
   }

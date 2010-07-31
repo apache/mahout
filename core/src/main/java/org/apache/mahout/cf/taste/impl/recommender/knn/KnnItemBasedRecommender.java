@@ -26,6 +26,7 @@ import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -45,10 +46,18 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   public KnnItemBasedRecommender(DataModel dataModel,
                                  ItemSimilarity similarity,
                                  Optimizer optimizer,
+                                 CandidateItemsStrategy candidateItemsStrategy,
                                  int neighborhoodSize) {
-    super(dataModel, similarity);
+    super(dataModel, similarity, candidateItemsStrategy);
     this.optimizer = optimizer;
     this.neighborhoodSize = neighborhoodSize;
+  }
+
+  public KnnItemBasedRecommender(DataModel dataModel,
+                                 ItemSimilarity similarity,
+                                 Optimizer optimizer,
+                                 int neighborhoodSize) {
+    this(dataModel, similarity, optimizer, getDefaultCandidateItemsStrategy(), neighborhoodSize);
   }
   
   private List<RecommendedItem> mostSimilarItems(long itemID,

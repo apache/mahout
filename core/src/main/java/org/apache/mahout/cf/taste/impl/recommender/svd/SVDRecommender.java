@@ -38,6 +38,7 @@ import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.RandomUtils;
@@ -70,8 +71,11 @@ public final class SVDRecommender extends AbstractRecommender {
    * @param initialSteps
    *          number of initial training steps
    */
-  public SVDRecommender(DataModel dataModel, int numFeatures, int initialSteps) throws TasteException {
-    super(dataModel);
+  public SVDRecommender(DataModel dataModel,
+                        CandidateItemsStrategy candidateItemsStrategy,
+                        int numFeatures,
+                        int initialSteps) throws TasteException {
+    super(dataModel, candidateItemsStrategy);
     
     this.numFeatures = numFeatures;
     
@@ -111,6 +115,12 @@ public final class SVDRecommender extends AbstractRecommender {
     refreshHelper.addDependency(dataModel);
     
     train(initialSteps);
+  }
+
+  public SVDRecommender(DataModel dataModel,
+                        int numFeatures,
+                        int initialSteps) throws TasteException {
+    this(dataModel, getDefaultCandidateItemsStrategy(), numFeatures, initialSteps);
   }
   
   private void recachePreferences() throws TasteException {
