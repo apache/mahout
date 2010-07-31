@@ -28,7 +28,12 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-/** See <a href="http://citeseer.ist.psu.edu/29096.html">http://citeseer.ist.psu.edu/29096.html</a>. */
+/**
+ * See <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.14.5962">
+ * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.14.5962</a> and
+ * <a href="http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html">
+ * http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html</a>.
+ */
 public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimilarity {
   
   private final DataModel dataModel;
