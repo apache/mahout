@@ -91,7 +91,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     }
   }
 
-  public void testIteratorSet() {
+  public void testIteratorSet() throws CloneNotSupportedException {
     Vector clone = test.clone();
     Iterator<Vector.Element> it = clone.iterateNonZero();
     while (it.hasNext()) {
@@ -219,7 +219,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     assertEquals("dot", expected, res, EPSILON);
   }
 
-  public void testDot2() {
+  public void testDot2() throws CloneNotSupportedException {
     Vector test2 = test.clone();
     test2.set(1, 0.0);
     test2.set(3, 0.0);

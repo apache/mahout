@@ -71,13 +71,22 @@ public abstract class AbstractVector implements Vector {
   }
 
   @Override
-  public abstract Vector clone();
+  public Vector clone() {
+    try {
+      AbstractVector r = (AbstractVector) super.clone();
+      r.size = size;
+      r.lengthSquared = lengthSquared;
+      return r;
+    } catch (CloneNotSupportedException e) {
+      throw new IllegalStateException("Can't happen");
+    }
+  }
 
   public Vector divide(double x) {
     if (x == 1.0) {
-      return clone();
+      return like().assign(this);
     }
-    Vector result = clone();
+    Vector result = like().assign(this);
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
@@ -94,9 +103,9 @@ public abstract class AbstractVector implements Vector {
       return dotSelf();
     }
     double result = 0.0;
-    Iterator<Element> iter = iterateNonZero();
+    Iterator<Vector.Element> iter = iterateNonZero();
     while (iter.hasNext()) {
-      Element element = iter.next();
+      Vector.Element element = iter.next();
       result += element.get() * x.getQuick(element.index());
     }
     return result;
@@ -104,7 +113,7 @@ public abstract class AbstractVector implements Vector {
   
   public double dotSelf() {
     double result = 0.0;
-    Iterator<Element> iter = iterateNonZero();
+    Iterator<Vector.Element> iter = iterateNonZero();
     while (iter.hasNext()) {
       double value = iter.next().get();
       result += value * value;
@@ -119,26 +128,17 @@ public abstract class AbstractVector implements Vector {
     return getQuick(index);
   }
 
-  public Element getElement(final int index) {
-    return new Element() {
-      public double get() {
-        return AbstractVector.this.get(index);
-      }
-      public int index() {
-        return index;
-      }
-      public void set(double value) {
-        AbstractVector.this.set(index, value);
-      }
-    };
+  public Vector.Element getElement(final int index) {
+    return new LocalElement(index);
   }
 
   public Vector minus(Vector that) {
     if (size != that.size()) {
       throw new CardinalityException(size, that.size());
     }
+
     // TODO: check the numNonDefault elements to further optimize
-    Vector result = this.clone();
+    Vector result = like().assign(this);
     Iterator<Element> iter = that.iterateNonZero();
     while (iter.hasNext()) {
       Element thatElement = iter.next();
@@ -163,7 +163,7 @@ public abstract class AbstractVector implements Vector {
     // we can special case certain powers
     if (Double.isInfinite(power)) {
       double val = 0.0;
-      Iterator<Element> iter = this.iterateNonZero();
+      Iterator<Vector.Element> iter = this.iterateNonZero();
       while (iter.hasNext()) {
         val = Math.max(val, Math.abs(iter.next().get()));
       }
@@ -172,7 +172,7 @@ public abstract class AbstractVector implements Vector {
       return Math.sqrt(dotSelf());
     } else if (power == 1.0) {
       double val = 0.0;
-      Iterator<Element> iter = this.iterateNonZero();
+      Iterator<Vector.Element> iter = this.iterateNonZero();
       while (iter.hasNext()) {
         val += Math.abs(iter.next().get());
       }
@@ -180,16 +180,16 @@ public abstract class AbstractVector implements Vector {
     } else if (power == 0.0) {
       // this is the number of non-zero elements
       double val = 0.0;
-      Iterator<Element> iter = this.iterateNonZero();
+      Iterator<Vector.Element> iter = this.iterateNonZero();
       while (iter.hasNext()) {
         val += iter.next().get() == 0 ? 0 : 1;
       }
       return val;
     } else {
       double val = 0.0;
-      Iterator<Element> iter = this.iterateNonZero();
+      Iterator<Vector.Element> iter = this.iterateNonZero();
       while (iter.hasNext()) {
-        Element element = iter.next();
+        Vector.Element element = iter.next();
         val += Math.pow(element.get(), power);
       }
       return Math.pow(val, 1.0 / power);
@@ -212,7 +212,7 @@ public abstract class AbstractVector implements Vector {
       return lengthSquared + v.getLengthSquared() - 2 * this.dot(v);
     }
     Vector randomlyAccessed;
-    Iterator<Element> it;
+    Iterator<Vector.Element> it;
     double d = 0.0;
     if (lengthSquared >= 0.0) {
       it = v.iterateNonZero();
@@ -224,7 +224,7 @@ public abstract class AbstractVector implements Vector {
       d += v.getLengthSquared();
     }
     while(it.hasNext()) {
-      Element e = it.next();
+      Vector.Element e = it.next();
       double value = e.get();
       d += value * (value - 2.0 * randomlyAccessed.getQuick(e.index()));
     }
@@ -235,10 +235,10 @@ public abstract class AbstractVector implements Vector {
   public double maxValue() {
     double result = Double.NEGATIVE_INFINITY;
     int nonZeroElements = 0;
-    Iterator<Element> iter = this.iterateNonZero();
+    Iterator<Vector.Element> iter = this.iterateNonZero();
     while (iter.hasNext()) {
       nonZeroElements++;
-      Element element = iter.next();
+      Vector.Element element = iter.next();
       result = Math.max(result, element.get());
     }
     if (nonZeroElements < size) {
@@ -251,10 +251,10 @@ public abstract class AbstractVector implements Vector {
     int result = -1;
     double max = Double.NEGATIVE_INFINITY;
     int nonZeroElements = 0;
-    Iterator<Element> iter = this.iterateNonZero();
+    Iterator<Vector.Element> iter = this.iterateNonZero();
     while (iter.hasNext()) {
       nonZeroElements++;
-      Element element = iter.next();
+      Vector.Element element = iter.next();
       double tmp = element.get();
       if (tmp > max) {
         max = tmp;
@@ -265,7 +265,7 @@ public abstract class AbstractVector implements Vector {
     // unfilled element(0.0) could be the maxValue hence we need to
     // find one of those elements
     if (nonZeroElements < size && max < 0.0) {
-      for (Element element : this) {
+      for (Vector.Element element : this) {
         if (element.get() == 0.0) {
           return element.index();
         }
@@ -277,10 +277,10 @@ public abstract class AbstractVector implements Vector {
   public double minValue() {
     double result = Double.POSITIVE_INFINITY;
     int nonZeroElements = 0;
-    Iterator<Element> iter = this.iterateNonZero();
+    Iterator<Vector.Element> iter = this.iterateNonZero();
     while (iter.hasNext()) {
       nonZeroElements++;
-      Element element = iter.next();
+      Vector.Element element = iter.next();
       result = Math.min(result, element.get());
     }
     if (nonZeroElements < size) {
@@ -293,10 +293,10 @@ public abstract class AbstractVector implements Vector {
     int result = -1;
     double min = Double.POSITIVE_INFINITY;
     int nonZeroElements = 0;
-    Iterator<Element> iter = this.iterateNonZero();
+    Iterator<Vector.Element> iter = this.iterateNonZero();
     while (iter.hasNext()) {
       nonZeroElements++;
-      Element element = iter.next();
+      Vector.Element element = iter.next();
       double tmp = element.get();
       if (tmp < min) {
         min = tmp;
@@ -307,7 +307,7 @@ public abstract class AbstractVector implements Vector {
     // unfilled element(0.0) could be the maxValue hence we need to
     // find one of those elements
     if (nonZeroElements < size && min > 0.0) {
-      for (Element element : this) {
+      for (Vector.Element element : this) {
         if (element.get() == 0.0) {
           return element.index();
         }
@@ -317,10 +317,10 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector plus(double x) {
+    Vector result = like().assign(this);
     if (x == 0.0) {
-      return clone();
+      return result;
     }
-    Vector result = clone();
     int size = result.size();
     for (int i = 0; i < size; i++) {
       result.setQuick(i, getQuick(i) + x);
@@ -333,30 +333,25 @@ public abstract class AbstractVector implements Vector {
       throw new CardinalityException(size, x.size());
     }
 
-    Vector to = this;
-    Vector from = x;
-    // Clone and edit to the sparse one; if both are sparse, add from the more sparse one
-    if (isDense() || (!x.isDense() &&
-        getNumNondefaultElements() < x.getNumNondefaultElements())) {
-      to = x;
-      from = this;
+    // prefer to have this be the denser than x
+    if (!isDense() && (x.isDense() || x.getNumNondefaultElements() > this.getNumNondefaultElements())) {
+      return x.plus(this);
     }
 
-    //TODO: get smarter about this, if we are adding a dense to a sparse, then we should return a dense
-    Vector result = to.clone();
-    Iterator<Element> iter = from.iterateNonZero();
+    Vector result = like().assign(this);
+    Iterator<Vector.Element> iter = x.iterateNonZero();
     while (iter.hasNext()) {
-      Element e = iter.next();
+      Vector.Element e = iter.next();
       int index = e.index();
-      result.setQuick(index, result.getQuick(index) + e.get());
+      result.setQuick(index, this.getQuick(index) + e.get());
     }
     return result;
   }
 
   public void addTo(Vector v) {
-    Iterator<Element> it = iterateNonZero();
+    Iterator<Vector.Element> it = iterateNonZero();
     while(it.hasNext() ) {
-      Element e = it.next();
+      Vector.Element e = it.next();
       int index = e.index();
       v.setQuick(index, v.getQuick(index) + e.get());
     }
@@ -370,13 +365,13 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector times(double x) {
+    Vector result = like().assign(this);
     if (x == 1.0) {
-      return clone();
+      return result;
     }
     if (x == 0.0) {
       return like();
     }
-    Vector result = clone();
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
@@ -399,7 +394,7 @@ public abstract class AbstractVector implements Vector {
       from = this;
     }
 
-    Vector result = to.clone();
+    Vector result = to.like().assign(to);
     Iterator<Element> iter = result.iterateNonZero();
     while (iter.hasNext()) {
       Element element = iter.next();
@@ -411,7 +406,7 @@ public abstract class AbstractVector implements Vector {
 
   public double zSum() {
     double result = 0.0;
-    Iterator<Element> iter = iterateNonZero();
+    Iterator<Vector.Element> iter = iterateNonZero();
     while (iter.hasNext()) {
       result += iter.next().get();
     }
@@ -447,28 +442,28 @@ public abstract class AbstractVector implements Vector {
   }
 
   public Vector assign(BinaryFunction f, double y) {
-    Iterator<Element> it;
+    Iterator<Vector.Element> it;
     if(f.apply(0, y) == 0) {
       it = iterateNonZero();
     } else {
       it = iterator();
     }
     while(it.hasNext()) {
-      Element e = it.next();
+      Vector.Element e = it.next();
       e.set(f.apply(e.get(), y));
     }
     return this;
   }
 
   public Vector assign(UnaryFunction function) {
-    Iterator<Element> it;
+    Iterator<Vector.Element> it;
     if(function.apply(0) == 0) {
       it = iterateNonZero();
     } else {
       it = iterator();
     }
     while(it.hasNext()) {
-      Element e = it.next();
+      Vector.Element e = it.next();
       e.set(function.apply(e.get()));
     }
     return this;
@@ -520,9 +515,9 @@ public abstract class AbstractVector implements Vector {
   @Override
   public int hashCode() {
     int result = size;
-    Iterator<Element> iter = iterateNonZero();
+    Iterator<Vector.Element> iter = iterateNonZero();
     while (iter.hasNext()) {
-      Element ele = iter.next();
+      Vector.Element ele = iter.next();
       long v = Double.doubleToLongBits(ele.get());
       result += ele.index() * (int) (v ^ (v >>> 32));
     }
@@ -573,4 +568,24 @@ public abstract class AbstractVector implements Vector {
     return result.toString();
   }
 
+
+  protected final class LocalElement implements Vector.Element {
+    protected int index;
+
+    LocalElement(int index) {
+      this.index = index;
+    }
+
+    public double get() {
+        return getQuick(index);
+      }
+
+      public int index() {
+        return index;
+      }
+
+      public void set(double value) {
+        setQuick(index, value);
+      }
+  }
 }

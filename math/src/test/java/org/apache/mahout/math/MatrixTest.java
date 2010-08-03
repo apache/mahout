@@ -17,11 +17,15 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.VectorFunction;
+
 import static org.apache.mahout.math.function.Functions.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 public abstract class MatrixTest extends MahoutTestCase {
 
@@ -237,6 +241,85 @@ public abstract class MatrixTest extends MahoutTestCase {
             .getQuick(row, col));
       }
     }
+  }
+
+  public void testRowView() {
+    int[] c = test.size();
+    for (int row = 0; row < c[ROW]; row++) {
+      assertEquals(0.0, test.getRow(row).minus(test.viewRow(row)).norm(1), 0);
+    }
+
+    assertEquals(c[COL], test.viewRow(3).size());
+    assertEquals(c[COL], test.viewRow(5).size());
+
+    Random gen = new Random(1);
+    for (int row = 0; row < c[ROW]; row++) {
+      int j = gen.nextInt(c[COL]);
+      double old = test.get(row, j);
+      double v = gen.nextGaussian();
+      test.viewRow(row).set(j, v);
+      assertEquals(v, test.get(row, j), 0);
+      assertEquals(v, test.viewRow(row).get(j), 0);
+      test.set(row, j, old);
+      assertEquals(old, test.get(row, j), 0);
+      assertEquals(old, test.viewRow(row).get(j), 0);
+    }
+  }
+
+  public void testColumnView() {
+    int[] c = test.size();
+    for (int col = 0; col < c[COL]; col++) {
+      assertEquals(0.0, test.getColumn(col).minus(test.viewColumn(col)).norm(1), 0);
+    }
+
+    assertEquals(c[ROW], test.viewColumn(3).size());
+    assertEquals(c[ROW], test.viewColumn(5).size());
+
+    Random gen = new Random(1);
+    for (int col = 0; col < c[COL]; col++) {
+      int j = gen.nextInt(c[COL]);
+      double old = test.get(col, j);
+      double v = gen.nextGaussian();
+      test.viewColumn(col).set(j, v);
+      assertEquals(v, test.get(j, col), 0);
+      assertEquals(v, test.viewColumn(col).get(j), 0);
+      test.set(j, col, old);
+      assertEquals(old, test.get(j, col), 0);
+      assertEquals(old, test.viewColumn(col).get(j), 0);
+    }
+  }
+
+  public void testAggregateRows() {
+    Vector v = test.aggregateRows(new VectorFunction() {
+      public double apply(Vector v) {
+        return v.zSum();
+      }
+    });
+
+    for (int i = 0; i < test.numRows(); i++) {
+      assertEquals(test.getRow(i).zSum(), v.get(i));
+    }
+  }
+
+  public void testAggregateCols() {
+    Vector v = test.aggregateColumns(new VectorFunction() {
+      public double apply(Vector v) {
+        return v.zSum();
+      }
+    });
+
+    for (int i = 0; i < test.numCols(); i++) {
+      assertEquals(test.getColumn(i).zSum(), v.get(i));
+    }
+  }
+
+  public void testAggregate() {
+    double total = test.aggregate(Functions.plus, Functions.identity);
+    assertEquals(test.aggregateRows(new VectorFunction() {
+      public double apply(Vector v) {
+        return v.zSum();
+      }
+    }).zSum(), total);
   }
 
   public void testDivide() {

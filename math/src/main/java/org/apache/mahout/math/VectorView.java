@@ -46,7 +46,10 @@ public class VectorView extends AbstractVector {
 
   @Override
   public Vector clone() {
-    return new VectorView(vector.clone(), offset, size());
+    VectorView r = (VectorView) super.clone();
+    r.vector = vector.clone();
+    r.offset = offset;
+    return r;
   }
 
   public boolean isDense() {

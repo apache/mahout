@@ -19,9 +19,7 @@ package org.apache.mahout.math;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -251,6 +249,69 @@ public abstract class AbstractMatrix implements Matrix {
       }
     }
     return this;
+  }
+
+  /**
+   * Collects the results of a function applied to each row of a matrix.
+   *
+   * @param f The function to be applied to each row.
+   * @return The vector of results.
+   */
+  public Vector aggregateRows(VectorFunction f) {
+    Vector r = new DenseVector(numRows());
+    int n = numRows();
+    for (int row = 0; row < n; row++) {
+      r.set(row, f.apply(viewRow(row)));
+    }
+    return r;
+  }
+
+  /**
+   * Returns a view of a row.  Changes to the view will affect the original.
+   * @param row  Which row to return.
+   * @return A vector that references the desired row.
+   */
+  public Vector viewRow(int row) {
+    return new MatrixVectorView(this, row, 0, 0, 1);
+  }
+
+
+  /**
+   * Returns a view of a row.  Changes to the view will affect the original.
+   * @param column Which column to return.
+   * @return A vector that references the desired column.
+   */
+  public Vector viewColumn(int column) {
+    return new MatrixVectorView(this, 0, column, 1, 0);
+  }
+
+  /**
+   * Collects the results of a function applied to each column of a matrix.
+   *
+   * @param f The function to be applied to each column.
+   * @return The vector of results.
+   */
+  public Vector aggregateColumns(VectorFunction f) {
+    Vector r = new DenseVector(numCols());
+    for (int col = 0; col < numCols(); col++) {
+      r.set(col, f.apply(viewColumn(col)));
+    }
+    return r;
+  }
+
+  /**
+   * Collects the results of a function applied to each element of a matrix and then aggregated.
+   *
+   * @param combiner A function that combines the results of the mapper.
+   * @param mapper   A function to apply to each element.
+   * @return The result.
+   */
+  public double aggregate(final BinaryFunction combiner, final UnaryFunction mapper) {
+    return aggregateRows(new VectorFunction() {
+      public double apply(Vector v) {
+        return v.aggregate(combiner, mapper);
+      }
+    }).aggregate(combiner, Functions.identity);
   }
 
   public double determinant() {

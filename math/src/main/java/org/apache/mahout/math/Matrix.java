@@ -19,6 +19,7 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.VectorFunction;
 
 import java.util.Map;
 
@@ -91,6 +92,29 @@ public interface Matrix extends Cloneable, VectorIterable {
    * @throws CardinalityException if the cardinalities differ
    */
   Matrix assignRow(int row, Vector other);
+
+  /**
+   * Collects the results of a function applied to each row of a matrix.
+   * @param f  The function to be applied to each row.
+   * @return  The vector of results.
+   */
+  Vector aggregateRows(VectorFunction f);
+
+  /**
+   * Collects the results of a function applied to each column of a matrix.
+   * @param f  The function to be applied to each column.
+   * @return  The vector of results.
+   */
+  Vector aggregateColumns(VectorFunction f);
+
+  /**
+   * Collects the results of a function applied to each element of a matrix and then
+   * aggregated.
+   * @param combiner  A function that combines the results of the mapper.
+   * @param mapper  A function to apply to each element.
+   * @return  The result.
+   */
+  double aggregate(BinaryFunction combiner, UnaryFunction mapper);
 
   /**
    * Return the cardinality of the recipient (the maximum number of values)
@@ -359,4 +383,8 @@ public interface Matrix extends Cloneable, VectorIterable {
   // BinaryFunction map);
   // NewMatrix assign(Matrix y, BinaryFunction function, IntArrayList
   // nonZeroIndexes);
+
+  Vector viewRow(int row);
+
+  Vector viewColumn(int column);
 }

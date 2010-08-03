@@ -100,6 +100,7 @@ public abstract class LinearTrainer {
           }
         }
       }
+      iteration++;
     }
   }
   
