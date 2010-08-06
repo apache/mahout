@@ -142,7 +142,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     Path outPath = new Path(outputTmpBasePath.getParent(), "productWith");
     JobConf conf = MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
     JobClient.runJob(conf);
-    DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numRows, other.numCols());
+    DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numCols, other.numCols());
     out.configure(conf);
     return out;
   }
