@@ -17,10 +17,10 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.Functions;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import org.apache.mahout.math.function.Functions;
 
 /**
  * <p>
@@ -94,6 +94,25 @@ public class SequentialAccessSparseVector extends AbstractVector {
   @Override
   public SequentialAccessSparseVector clone() {
     return new SequentialAccessSparseVector(size(), values.clone());
+  }
+
+  @Override
+  public Vector assign(Vector other) {
+    int size = size();
+    if (size != other.size()) {
+      throw new CardinalityException(size, other.size());
+    }
+    if(other instanceof SequentialAccessSparseVector) {
+      values = ((SequentialAccessSparseVector)other).values.clone();
+    } else {
+      values = new OrderedIntDoubleMapping();
+      Iterator<Vector.Element> othersElems = other.iterateNonZero();
+      while (othersElems.hasNext()) {
+        Vector.Element elem = othersElems.next();
+        setQuick(elem.index(), elem.get());
+      }
+    }
+    return this;
   }
 
   @Override
