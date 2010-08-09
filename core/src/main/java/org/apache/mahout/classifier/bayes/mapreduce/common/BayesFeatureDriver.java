@@ -41,14 +41,15 @@ public class BayesFeatureDriver implements BayesJob {
     conf.setJobName("Bayes Feature Driver running over input: " + input);
     conf.setOutputKeyClass(StringTuple.class);
     conf.setOutputValueClass(DoubleWritable.class);
-    
+    conf.setPartitionerClass(FeaturePartitioner.class);
+    conf.setOutputKeyComparatorClass(FeatureLabelComparator.class);
     FileInputFormat.setInputPaths(conf, input);
     FileOutputFormat.setOutputPath(conf, output);
     
     conf.setMapperClass(BayesFeatureMapper.class);
     
     conf.setInputFormat(KeyValueTextInputFormat.class);
-    conf.setCombinerClass(BayesFeatureReducer.class);
+    conf.setCombinerClass(BayesFeatureCombiner.class);
     conf.setReducerClass(BayesFeatureReducer.class);
     conf.setOutputFormat(BayesFeatureOutputFormat.class);
     conf.set("io.serializations",
@@ -61,5 +62,14 @@ public class BayesFeatureDriver implements BayesJob {
     client.setConf(conf);
     JobClient.runJob(conf);
     
+  }
+  
+  public static void main(String[] args) throws IOException {
+    // test harness, delete me
+    BayesFeatureDriver driver = new BayesFeatureDriver();
+    BayesParameters p = new BayesParameters(1);
+    Path input = new Path("/home/drew/mahout/bayes/20news-input");
+    Path output = new Path("/home/drew/mahout/bayes/20-news-features");
+    driver.runJob(input, output, p);
   }
 }

@@ -32,6 +32,8 @@ public final class BayesConstants {
   
   public static final String FEATURE_COUNT = "__FC"; // ,
   
+  public static final String FEATURE_TF = "__FF"; // ,
+  
   public static final String WEIGHT = "__WT";
   
   public static final String FEATURE_SET_SIZE = "__FS";

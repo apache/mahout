@@ -24,8 +24,33 @@ import org.apache.mahout.common.Parameters;
  */
 public class BayesParameters extends Parameters {
   
-  public BayesParameters(int gramSize) {
-    set("gramSize", Integer.toString(gramSize));
+  
+  public BayesParameters() {
+    
   }
   
+  /** Create BayesParameters with the specified gram size
+   *  
+   * @param gramSize
+   * @deprecated use {@link #BayesParameters()} and {@link #setGramSize(int)} instead
+   */
+  public BayesParameters(int gramSize) {
+    this.setGramSize(gramSize);
+  }
+  
+  public void setGramSize(int gramSize) {
+    set("gramSize", Integer.toBinaryString(gramSize));
+  }
+  
+  public void setMinSupport(int minSupport) {
+    set("minSupport", Integer.toString(minSupport));
+  }
+  
+  public void setMinDF(int minDf) {
+    set("minDf", Integer.toString(minDf)); 
+  }
+  
+  public void setSkipCleanup(boolean b) {
+    set("skipCleanup", Boolean.toString(b));
+  }
 }

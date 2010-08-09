@@ -80,6 +80,14 @@ public final class TrainClassifier {
       abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription(
       "Size of the n-gram. Default Value: 1 ").withShortName("ng").create();
     
+    Option minDfOpt = obuilder.withLongName("minDf").withRequired(false).withArgument(
+        abuilder.withName("minDf").withMinimum(1).withMaximum(1).create()).withDescription(
+        "Minimum Term Document Frequency: 1 ").withShortName("mf").create();
+    
+    Option minSupportOpt = obuilder.withLongName("minSupport").withRequired(false).withArgument(
+        abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(
+        "Minimum Support (Term Frequency): 1 ").withShortName("ms").create();
+    
     Option alphaOpt = obuilder.withLongName("alpha").withRequired(false).withArgument(
       abuilder.withName("a").withMinimum(1).withMaximum(1).create()).withDescription(
       "Smoothing parameter Default Value: 1.0").withShortName("a").create();
@@ -87,13 +95,17 @@ public final class TrainClassifier {
     Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
       abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).withDescription(
       "Type of classifier: bayes|cbayes. Default: bayes").withShortName("type").create();
+    
     Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(true).withArgument(
       abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
       "Location of model: hdfs|hbase. Default Value: hdfs").withShortName("source").create();
     
+    Option skipCleanupOpt = obuilder.withLongName("skipCleanup").withRequired(false).withDescription(
+        "Skip cleanup of feature extraction output").withShortName("sc").create();
+    
     Group group = gbuilder.withName("Options").withOption(gramSizeOpt).withOption(helpOpt).withOption(
       inputDirOpt).withOption(outputOpt).withOption(typeOpt).withOption(dataSourceOpt).withOption(alphaOpt)
-        .create();
+        .withOption(minDfOpt).withOption(minSupportOpt).withOption(skipCleanupOpt).create();
     try {
       Parser parser = new Parser();
       
@@ -108,7 +120,18 @@ public final class TrainClassifier {
       String classifierType = (String) cmdLine.getValue(typeOpt);
       String dataSourceType = (String) cmdLine.getValue(dataSourceOpt);
       
-      BayesParameters params = new BayesParameters(Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+      BayesParameters params = new BayesParameters();
+      if (cmdLine.hasOption(gramSizeOpt)) 
+        params.setGramSize(Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+      
+      if (cmdLine.hasOption(minDfOpt))
+        params.setMinDF(Integer.parseInt((String) cmdLine.getValue(minDfOpt)));
+      
+      if (cmdLine.hasOption(minSupportOpt))
+        params.setMinSupport(Integer.parseInt((String) cmdLine.getValue(minSupportOpt)));
+      
+      if (cmdLine.hasOption(skipCleanupOpt))
+        params.setSkipCleanup(true);
       
       String alphaI = "1.0";
       if (cmdLine.hasOption(alphaOpt)) {

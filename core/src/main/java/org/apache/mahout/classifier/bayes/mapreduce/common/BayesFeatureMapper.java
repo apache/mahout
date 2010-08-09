@@ -132,9 +132,11 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
     reporter.setStatus("Bayes Feature Mapper: Document Label: " + label);
     
     // Output Document Frequency per Word per Class
-    wordList.forEachKey(new ObjectProcedure<String>() {
+    // Corpus Document Frequency (FEATURE_COUNT)
+    // Corpus Term Frequency (FEATURE_TF)
+    wordList.forEachPair(new ObjectIntProcedure<String>() {
       @Override
-      public boolean apply(String token) {
+      public boolean apply(String token, int dKJ) {
         try {
           StringTuple dfTuple = new StringTuple();
           dfTuple.add(BayesConstants.DOCUMENT_FREQUENCY);
@@ -146,6 +148,11 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
           tokenCountTuple.add(BayesConstants.FEATURE_COUNT);
           tokenCountTuple.add(token);
           output.collect(tokenCountTuple, ONE);
+          
+          StringTuple tokenTfTuple = new StringTuple();
+          tokenTfTuple.add(BayesConstants.FEATURE_TF);
+          tokenTfTuple.add(token);
+          output.collect(tokenTfTuple, new DoubleWritable(dKJ));
         } catch (IOException e) {
           throw new IllegalStateException(e);
         }
@@ -164,8 +171,8 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
   @Override
   public void configure(JobConf job) {
     try {
-      log.info("Bayes Parameter {}", job.get("bayes.parameters"));
       Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      log.info("Bayes Parameter {}", params.print());
       gramSize = Integer.valueOf(params.get("gramSize"));
       
     } catch (IOException ex) {
