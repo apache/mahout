@@ -131,7 +131,7 @@ public final class AggregateAndRecommendReducer extends
       int itemIDIndex = predictions.next().index();
       long itemID = indexItemIDMap.get(itemIDIndex);
       if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemID)) {
-        recommendations.add(new GenericRecommendedItem(itemID, 1f));
+        recommendations.add(new GenericRecommendedItem(itemID, 1.0f));
       }
     }
 

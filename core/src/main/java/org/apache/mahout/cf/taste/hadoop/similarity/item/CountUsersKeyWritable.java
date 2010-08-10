@@ -65,10 +65,7 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
 
   @Override
   public boolean equals(Object other) {
-    if (!(other instanceof CountUsersKeyWritable)) {
-      return false;
-    }
-    return userID == ((CountUsersKeyWritable) other).userID;
+    return other instanceof CountUsersKeyWritable && userID == ((CountUsersKeyWritable) other).userID;
   }
 
   @Override

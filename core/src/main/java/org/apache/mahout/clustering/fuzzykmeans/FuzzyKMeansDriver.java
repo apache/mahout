@@ -59,9 +59,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansDriver.class);
 
-  public FuzzyKMeansDriver() {
-  }
-
   public static void main(String[] args) throws Exception {
     new FuzzyKMeansDriver().run(args);
   }
@@ -379,28 +376,14 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
   }
 
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure
-   * @param convergenceDelta
-   * @param maxIterations
-   * @param numReduceTasks
-   * @param m
-   * @return
-   * @throws IOException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   */
-  private Path buildClustersSeq(Path input,
-                                Path clustersIn,
-                                Path output,
-                                DistanceMeasure measure,
-                                double convergenceDelta,
-                                int maxIterations,
-                                int numReduceTasks,
-                                float m) throws IOException, InstantiationException, IllegalAccessException {
+  private static Path buildClustersSeq(Path input,
+                                       Path clustersIn,
+                                       Path output,
+                                       DistanceMeasure measure,
+                                       double convergenceDelta,
+                                       int maxIterations,
+                                       int numReduceTasks,
+                                       float m) throws IOException, InstantiationException, IllegalAccessException {
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
 
@@ -451,18 +434,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
     return clustersIn;
   }
 
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure.getClass().
-   * @param convergenceDelta
-   * @param maxIterations
-   * @param numReduceTasks
-   * @param m
-   * @return
-   * @throws IOException
-   */
   private Path buildClustersMR(Path input,
                                Path clustersIn,
                                Path output,
@@ -535,29 +506,15 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
   }
 
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure
-   * @param convergenceDelta
-   * @param m
-   * @param emitMostLikely
-   * @param threshold
-   * @throws IOException 
-   * @throws InterruptedException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   */
-  private void clusterDataSeq(Path input,
-                              Path clustersIn,
-                              Path output,
-                              DistanceMeasure measure,
-                              double convergenceDelta,
-                              float m,
-                              boolean emitMostLikely,
-                              double threshold) throws IOException, InterruptedException, InstantiationException,
-      IllegalAccessException {
+  private static void clusterDataSeq(Path input,
+                                     Path clustersIn,
+                                     Path output,
+                                     DistanceMeasure measure,
+                                     double convergenceDelta,
+                                     float m,
+                                     boolean emitMostLikely,
+                                     double threshold)
+      throws IOException, InterruptedException, InstantiationException, IllegalAccessException {
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
@@ -589,28 +546,14 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
 
   }
-
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure
-   * @param convergenceDelta
-   * @param m
-   * @param emitMostLikely
-   * @param threshold
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   */
-  private void clusterDataMR(Path input,
-                             Path clustersIn,
-                             Path output,
-                             DistanceMeasure measure,
-                             double convergenceDelta,
-                             float m,
-                             boolean emitMostLikely,
-                             double threshold) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void clusterDataMR(Path input,
+                                    Path clustersIn,
+                                    Path output,
+                                    DistanceMeasure measure,
+                                    double convergenceDelta,
+                                    float m,
+                                    boolean emitMostLikely,
+                                    double threshold) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
@@ -652,7 +595,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
    * @throws IOException
    *           if there was an IO error
    */
-  private boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
+  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
 
     Path clusterPath = new Path(filePath, "*");
     List<Path> result = new ArrayList<Path>();

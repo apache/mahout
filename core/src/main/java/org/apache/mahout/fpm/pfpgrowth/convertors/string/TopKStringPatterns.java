@@ -21,6 +21,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public final class TopKStringPatterns implements Writable {
     frequentPatterns = new ArrayList<Pair<List<String>,Long>>();
   }
   
-  public TopKStringPatterns(List<Pair<List<String>,Long>> patterns) {
+  public TopKStringPatterns(Collection<Pair<List<String>, Long>> patterns) {
     frequentPatterns = new ArrayList<Pair<List<String>,Long>>();
     frequentPatterns.addAll(patterns);
   }

@@ -28,9 +28,14 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
-public class MostSimilarItemPairsMapper
+public final class MostSimilarItemPairsMapper
     extends Mapper<IntWritable,VectorWritable,EntityEntityWritable,DoubleWritable> {
 
   private OpenIntLongHashMap indexItemIDMap;
@@ -39,7 +44,7 @@ public class MostSimilarItemPairsMapper
   @Override
   protected void setup(Context ctx) {
     Configuration conf = ctx.getConfiguration();
-    String itemIDIndexPathStr = conf.get(ItemSimilarityJob.ITEM_ID_INDEX_PATH_STR);
+    //String itemIDIndexPathStr = conf.get(ItemSimilarityJob.ITEM_ID_INDEX_PATH_STR);
     maxSimilarItemsPerItem = conf.getInt(ItemSimilarityJob.MAX_SIMILARITIES_PER_ITEM, -1);
     if (maxSimilarItemsPerItem < 1) {
       throw new IllegalStateException("maxSimilarItemsPerItem was not correctly set!");

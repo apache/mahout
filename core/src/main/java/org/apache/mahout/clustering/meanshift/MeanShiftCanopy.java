@@ -145,6 +145,7 @@ public class MeanShiftCanopy extends Cluster {
     this.boundPoints = boundPoints;
   }
 
+  @Override
   public String getIdentifier() {
     return (isConverged() ? "MSV-" : "MSC-") + getId();
   }

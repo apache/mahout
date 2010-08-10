@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.io.IntWritable;
@@ -258,24 +259,14 @@ public class DirichletClusterer<O> {
     return k;
   }
 
-  @SuppressWarnings("unchecked")
   protected void updateModels(Model<VectorWritable>[] newModels) {
     state.update((Model<O>[]) newModels);
   }
 
-  /**
-   * @return
-   */
   protected Model<O>[] samplePosteriorModels() {
     return state.getModelFactory().sampleFromPosterior(state.getModels());
   }
 
-  /**
-   * @param model
-   * @param k
-   * @return
-   */
-  @SuppressWarnings("unchecked")
   protected DirichletCluster<VectorWritable> updateCluster(Model<VectorWritable> model, int k) {
     model.computeParameters();
     DirichletCluster<O> cluster = state.getClusters().get(k);
@@ -336,7 +327,7 @@ public class DirichletClusterer<O> {
   /**
    * Emit the point to the most likely cluster
    * 
-   * @param vector a VectorWritable holding the Vector
+   * @param point a VectorWritable holding the Vector
    * @param clusters a List of DirichletClusters
    * @param pi the normalized pdf Vector for the point
    * @param context a Mapper.Context to emit to
@@ -344,7 +335,7 @@ public class DirichletClusterer<O> {
    * @throws InterruptedException
    */
   private void emitMostLikelyCluster(VectorWritable point,
-                                     List<DirichletCluster<VectorWritable>> clusters,
+                                     Collection<DirichletCluster<VectorWritable>> clusters,
                                      Vector pi,
                                      Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context context)
       throws IOException, InterruptedException {
@@ -363,7 +354,7 @@ public class DirichletClusterer<O> {
 
   /**
    * Emit the point to all clusters if pdf exceeds the threshold
-   * @param vector a VectorWritable holding the Vector
+   * @param point a VectorWritable holding the Vector
    * @param clusters a List of DirichletClusters
    * @param pi the normalized pdf Vector for the point
    * @param context a Mapper.Context to emit to

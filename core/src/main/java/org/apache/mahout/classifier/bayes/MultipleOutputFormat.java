@@ -19,7 +19,6 @@
 package org.apache.mahout.classifier.bayes;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.TreeMap;
 
 import org.apache.hadoop.conf.Configuration;
@@ -65,7 +64,8 @@ public abstract class MultipleOutputFormat<K, V> extends FileOutputFormat<K, V> 
    * @return a composite record writer
    * @throws IOException
    */
-  public RecordWriter<K, V> getRecordWriter(FileSystem fs, Configuration job, String name, Progressable arg3) throws IOException {
+  public RecordWriter<K, V> getRecordWriter(FileSystem fs, Configuration job, String name, Progressable arg3)
+      throws IOException {
 
     final FileSystem myFS = fs;
     final String myName = generateLeafFileName(name);
@@ -75,8 +75,9 @@ public abstract class MultipleOutputFormat<K, V> extends FileOutputFormat<K, V> 
     return new RecordWriter<K, V>() {
 
       // a cache storing the record writers for different output files.
-      TreeMap<String, RecordWriter<K, V>> recordWriters = new TreeMap<String, RecordWriter<K, V>>();
+      private final TreeMap<String, RecordWriter<K, V>> recordWriters = new TreeMap<String, RecordWriter<K, V>>();
 
+      @Override
       public void write(K key, V value) throws IOException {
 
         // get the file name based on the key
@@ -100,19 +101,13 @@ public abstract class MultipleOutputFormat<K, V> extends FileOutputFormat<K, V> 
         try {
           rw.write(actualKey, actualValue);
         } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          // continue
         }
-      };
+      }
 
-      /* (non-Javadoc)
-       * @see org.apache.hadoop.mapreduce.RecordWriter#close(org.apache.hadoop.mapreduce.TaskAttemptContext)
-       */
       @Override
       public void close(TaskAttemptContext context) throws IOException, InterruptedException {
-        Iterator<String> keys = this.recordWriters.keySet().iterator();
-        while (keys.hasNext()) {
-          RecordWriter<K, V> rw = this.recordWriters.get(keys.next());
+        for (RecordWriter<K, V> rw : recordWriters.values()) {
           rw.close(context);
         }
         this.recordWriters.clear();
@@ -205,11 +200,13 @@ public abstract class MultipleOutputFormat<K, V> extends FileOutputFormat<K, V> 
     String midName = infile.getName();
     Path outPath = new Path(midName);
     for (int i = 1; i < numOfTrailingLegsToUse; i++) {
-      if (parent == null)
+      if (parent == null) {
         break;
+      }
       midName = parent.getName();
-      if (midName.length() == 0)
+      if (midName.length() == 0) {
         break;
+      }
       parent = parent.getParent();
       outPath = new Path(midName, outPath);
     }
@@ -230,6 +227,8 @@ public abstract class MultipleOutputFormat<K, V> extends FileOutputFormat<K, V> 
    * @return A RecordWriter object over the given file
    * @throws IOException
    */
-  abstract protected RecordWriter<K, V> getBaseRecordWriter(FileSystem fs, Configuration job, String name, Progressable arg3)
-      throws IOException;
+  protected abstract RecordWriter<K, V> getBaseRecordWriter(FileSystem fs,
+                                                            Configuration job,
+                                                            String name,
+                                                            Progressable arg3) throws IOException;
 }

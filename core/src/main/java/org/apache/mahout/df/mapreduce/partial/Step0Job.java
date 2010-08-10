@@ -280,10 +280,7 @@ public class Step0Job {
     
     @Override
     public boolean equals(Object other) {
-      if (!(other instanceof Step0Output)) {
-        return false;
-      }
-      return firstId == ((Step0Output) other).firstId;
+      return other instanceof Step0Output && firstId == ((Step0Output) other).firstId;
     }
     
     @Override

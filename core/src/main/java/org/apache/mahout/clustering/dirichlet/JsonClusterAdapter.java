@@ -51,7 +51,6 @@ public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>,
     return obj;
   }
   
-  @SuppressWarnings("unchecked")
   @Override
   public DirichletCluster<?> deserialize(JsonElement json,
                                          Type typeOfT,

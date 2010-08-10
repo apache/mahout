@@ -93,14 +93,13 @@ public class FileIDMigrator extends AbstractIDMigrator {
       reloadLock.lock();
       try {
         longToString.clear();
-        FileLineIterable lines = new FileLineIterable(dataFile);
-        for (String line : lines) {
+        for (String line : new FileLineIterable(dataFile)) {
           longToString.put(toLongID(line), line);
         }
         lastModified = dataFile.lastModified();
         loaded = true;
-      } catch(IOException ioe) {
-        throw new RuntimeException("Unable to reload dataFile [" + dataFile.getAbsolutePath() + "]", ioe);
+      } catch (IOException ioe) {
+        throw new IllegalStateException(ioe);
       } finally {
         reloadLock.unlock();
       }

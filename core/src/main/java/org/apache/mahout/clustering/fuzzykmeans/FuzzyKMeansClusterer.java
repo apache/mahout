@@ -303,8 +303,7 @@ public class FuzzyKMeansClusterer {
     return converged;
   }
 
-  public void emitPointToClusters(VectorWritable point, List<SoftCluster> clusters, Writer writer) throws IOException,
-      InterruptedException {
+  public void emitPointToClusters(VectorWritable point, List<SoftCluster> clusters, Writer writer) throws IOException {
     // calculate point distances for all clusters    
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
@@ -333,7 +332,8 @@ public class FuzzyKMeansClusterer {
     }
   }
 
-  private void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector pi, Writer writer) throws IOException {
+  private static void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector pi, Writer writer)
+      throws IOException {
     int clusterId = -1;
     double clusterPdf = 0;
     for (int i = 0; i < clusters.size(); i++) {

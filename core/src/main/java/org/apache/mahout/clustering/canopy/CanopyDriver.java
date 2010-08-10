@@ -53,9 +53,6 @@ public class CanopyDriver extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(CanopyDriver.class);
 
-  public CanopyDriver() {
-  }
-
   public static void main(String[] args) throws Exception {
     new CanopyDriver().run(args);
   }
@@ -190,17 +187,9 @@ public class CanopyDriver extends AbstractJob {
    * @param measureClassName the String class name of the DistanceMeasure 
    * @param t1 the double T1 distance metric
    * @param t2 the double T2 distance metric
-   * @param runSequential a boolean indicates to run sequential (reference) algorithm
-   * @return the canopy output directory Path 
-   * @throws ClassNotFoundException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   * @throws IOException 
+   * @return the canopy output directory Path
    */
-  private Path buildClustersSeq(Path input, Path output, String measureClassName, double t1, double t2)
+  private static Path buildClustersSeq(Path input, Path output, String measureClassName, double t1, double t2)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = (DistanceMeasure) ccl.loadClass(measureClassName).newInstance();
@@ -247,14 +236,10 @@ public class CanopyDriver extends AbstractJob {
    * @param measureClassName the String class name of the DistanceMeasure 
    * @param t1 the double T1 distance metric
    * @param t2 the double T2 distance metric
-   * @param runSequential a boolean indicates to run sequential (reference) algorithm
-   * @return the canopy output directory Path 
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
+   * @return the canopy output directory Path
    */
-  private Path buildClustersMR(Path input, Path output, String measureClassName, double t1, double t2) throws IOException,
-      InterruptedException, ClassNotFoundException {
+  private static Path buildClustersMR(Path input, Path output, String measureClassName, double t1, double t2)
+      throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
@@ -309,8 +294,13 @@ public class CanopyDriver extends AbstractJob {
     }
   }
 
-  private void clusterDataSeq(Path points, Path canopies, Path output, String measureClassName, double t1, double t2)
-      throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, InterruptedException {
+  private static void clusterDataSeq(Path points,
+                                     Path canopies,
+                                     Path output,
+                                     String measureClassName,
+                                     double t1,
+                                     double t2)
+      throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = (DistanceMeasure) ccl.loadClass(measureClassName).newInstance();
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
@@ -359,18 +349,12 @@ public class CanopyDriver extends AbstractJob {
     }
   }
 
-  /**
-   * @param points
-   * @param canopies
-   * @param output
-   * @param measureClassName
-   * @param t1
-   * @param t2
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   */
-  private void clusterDataMR(Path points, Path canopies, Path output, String measureClassName, double t1, double t2)
+  private static void clusterDataMR(Path points,
+                                    Path canopies,
+                                    Path output,
+                                    String measureClassName,
+                                    double t1,
+                                    double t2)
       throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);

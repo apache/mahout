@@ -46,7 +46,7 @@ public class CBayesThetaNormalizerReducer extends MapReduceBase implements
   
   private HTable table;
   
-  private ThreadLocal<HBaseConfiguration> hBconf = new ThreadLocal<HBaseConfiguration>();
+  private final ThreadLocal<HBaseConfiguration> hBconf = new ThreadLocal<HBaseConfiguration>();
   
   private boolean useHbase;
   

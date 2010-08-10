@@ -25,19 +25,23 @@ import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MeanShiftCanopyClusterer {
 
-  private double convergenceDelta;
+  private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyClusterer.class);
+
+  private final double convergenceDelta;
 
   // the T1 distance threshold
-  private double t1;
+  private final double t1;
 
   // the T2 distance threshold
-  private double t2;
+  private final double t2;
 
   // the distance measure
-  private DistanceMeasure measure;
+  private final DistanceMeasure measure;
 
   public MeanShiftCanopyClusterer(Configuration configuration) {
     try {
@@ -195,22 +199,18 @@ public class MeanShiftCanopyClusterer {
     Set<Integer> coveredPoints = new HashSet<Integer>();
     // verify no overlap
     for (MeanShiftCanopy canopy : canopies) {
-      for (int v : canopy.getBoundPoints().toList())
-        if (coveredPoints.contains(v))
-          System.out.println("Duplicate bound point: " + v + " in Canopy: " + canopy.asFormatString(null));
-        else {
+      for (int v : canopy.getBoundPoints().toList()) {
+        if (coveredPoints.contains(v)) {
+          log.info("Duplicate bound point: {} in Canopy: {}", v, canopy.asFormatString(null));
+        } else {
           coveredPoints.add(v);
           //System.out.println("Added bound point: " + v + " to Canopy: " + canopy.asFormatString(null));
         }
+      }
     }
   }
 
-  /**
-   * @param canopy
-   * @param clusters
-   * @return
-   */
-  protected MeanShiftCanopy findCoveringCanopy(MeanShiftCanopy canopy, List<MeanShiftCanopy> clusters) {
+  protected static MeanShiftCanopy findCoveringCanopy(MeanShiftCanopy canopy, List<MeanShiftCanopy> clusters) {
     // canopies use canopyIds assigned when input vectors are processed as vectorIds too
     int vectorId = canopy.getId();
     for (MeanShiftCanopy msc : clusters) {

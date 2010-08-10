@@ -38,10 +38,10 @@ public interface Parametered {
    * @param prefix
    *          ends with a dot if not empty.
    * @param jobConf
-   *          configuration used for retreiving values
+   *          configuration used for retrieving values
    * @see ParameteredGeneralizations#configureParameters(String,Parametered,Configuration)
    *      invoking method
-   * @see ParameteredGeneralizations#configureParametersRecusivly(Parametered,String,Configuration)
+   * @see ParameteredGeneralizations#configureParametersRecursively(Parametered,String,Configuration)
    *      invoking method
    */
   void createParameters(String prefix, Configuration jobConf);
@@ -61,7 +61,7 @@ public interface Parametered {
     /**
      * Calls
      * {@link Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
-     * on parameter parmetered, and then recurse down its composite tree to invoke
+     * on parameter parmetered, and then recur down its composite tree to invoke
      * {@link Parametered#createParameters(String,org.apache.hadoop.conf.Configuration)}
      * and {@link Parametered#configure(org.apache.hadoop.conf.Configuration)} on
      * each composite part.
@@ -71,14 +71,14 @@ public interface Parametered {
      * @param parametered
      *          instance to be configured
      * @param jobConf
-     *          configuration used for retreiving values
+     *          configuration used for retrieving values
      */
     public static void configureParameters(String prefix, Parametered parametered, Configuration jobConf) {
       parametered.createParameters(prefix, jobConf);
-      configureParametersRecusivly(parametered, prefix, jobConf);
+      configureParametersRecursively(parametered, prefix, jobConf);
     }
     
-    private static void configureParametersRecusivly(Parametered parametered, String prefix, Configuration jobConf) {
+    private static void configureParametersRecursively(Parametered parametered, String prefix, Configuration jobConf) {
       for (Parameter<?> parameter : parametered.getParameters()) {
         if (log.isDebugEnabled()) {
           log.debug("Configuring {}{}", prefix, parameter.name());
@@ -87,7 +87,7 @@ public interface Parametered {
         parameter.createParameters(name, jobConf);
         parameter.configure(jobConf);
         if (!parameter.getParameters().isEmpty()) {
-          configureParametersRecusivly(parameter, name, jobConf);
+          configureParametersRecursively(parameter, name, jobConf);
         }
       }
     }

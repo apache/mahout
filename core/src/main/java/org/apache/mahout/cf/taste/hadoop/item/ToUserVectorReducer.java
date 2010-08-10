@@ -40,7 +40,7 @@ import org.apache.mahout.math.VectorWritable;
  * <p>
  * The same user ID mapped to a {@link RandomAccessSparseVector} representation of the same item IDs and
  * preference values. Item IDs are used as vector indexes; they are hashed into ints to work as indexes with
- * {@link ItemIDIndexMapper#idToIndex(long)}. The mapping is remembered for later with a combination of
+ * {@link TasteHadoopUtils#idToIndex(long)}. The mapping is remembered for later with a combination of
  * {@link ItemIDIndexMapper} and {@link ItemIDIndexReducer}.
  * </p>
  */

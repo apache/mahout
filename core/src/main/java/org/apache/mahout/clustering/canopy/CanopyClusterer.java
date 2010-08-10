@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -106,9 +107,8 @@ public class CanopyClusterer {
    *          the point to be added
    * @param canopies
    *          the List<Canopy> to be appended
-   * @throws IOException 
    */
-  public void addPointToCanopies(Vector point, List<Canopy> canopies) throws IOException {
+  public void addPointToCanopies(Vector point, Collection<Canopy> canopies) throws IOException {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);

@@ -43,7 +43,9 @@ public interface Parameter<T> extends Parametered {
    */
   void setStringValue(String stringValue);
   
-  /** @return value string reprentation of current value */
+  /**
+   * @return value string representation of current value
+   */
   String getStringValue();
   
   /**

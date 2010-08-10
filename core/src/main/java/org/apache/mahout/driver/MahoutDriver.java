@@ -186,19 +186,11 @@ public final class MahoutDriver {
   }
 
   private static String shortName(String valueString) {
-    if (valueString.contains(":")) {
-      return valueString.substring(0, valueString.indexOf(':')).trim();
-    } else {
-      return valueString;
-    }
+    return valueString.contains(":") ? valueString.substring(0, valueString.indexOf(':')).trim() : valueString;
   }
 
   private static String desc(String valueString) {
-    if (valueString.contains(":")) {
-      return valueString.substring(valueString.indexOf(':')).trim();
-    } else {
-      return valueString;
-    }
+    return valueString.contains(":") ? valueString.substring(valueString.indexOf(':')).trim() : valueString;
   }
 
   private static void addClass(ProgramDriver driver, String classString, String descString) {

@@ -84,10 +84,7 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof SimilarityMatrixEntryKey) {
-      return row == ((SimilarityMatrixEntryKey)other).row;
-    }
-    return false;
+    return other instanceof SimilarityMatrixEntryKey && row == ((SimilarityMatrixEntryKey) other).row;
   }
 
   public static class SimilarityMatrixEntryKeyComparator extends WritableComparator {

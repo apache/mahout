@@ -44,11 +44,10 @@ import org.apache.mahout.math.MatrixWritable;
 //See http://en.wikipedia.org/wiki/Mahalanobis_distance for details
 public class MahalanobisDistanceMeasure implements DistanceMeasure {
   
-  private Matrix inverseCovarianceMatrix=null;
-  private Vector meanVector=null;
+  private Matrix inverseCovarianceMatrix;
+  private Vector meanVector;
   
   private ClassParameter vectorClass;
-  private ClassParameter matrixClass;
   private List<Parameter<?>> parameters;
   private Parameter<Path> inverseCovarianceFile;
   private Parameter<Path> meanVectorFile;
@@ -118,9 +117,9 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     inverseCovarianceFile = new PathParameter(prefix, "inverseCovarianceFile", jobConf, null,
     "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);
-    
-    matrixClass = new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class, 
-    "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
+
+    ClassParameter matrixClass = new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class,
+                                                    "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
     parameters.add(matrixClass);      
     
     meanVectorFile=new PathParameter(prefix, "meanVectorFile", jobConf, null,
@@ -181,15 +180,16 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     }
     //see http://www.mlahanas.de/Math/svd.htm for details, which specifically details the case of covariance matrix inversion
     //Complexity: O(min(nm2,mn2))
-    SingularValueDecomposition svd=new SingularValueDecomposition(m);
-    Matrix SInv=svd.getS();
+    SingularValueDecomposition svd = new SingularValueDecomposition(m);
+    Matrix SInv = svd.getS();
     //Inverse Diagonal Elems
-    for(int i=0;i<SInv.numRows();i++) {
-      double diagElem=SInv.get(i,i);
-      if(diagElem>0.0)
-        SInv.set(i,i,1/diagElem);
-      else
+    for(int i = 0; i < SInv.numRows(); i++) {
+      double diagElem = SInv.get(i,i);
+      if (diagElem > 0.0) {
+        SInv.set(i, i, 1 / diagElem);
+      } else {
         throw new IllegalArgumentException("Eigen Value equals to 0 found.");
+      }
     }
     inverseCovarianceMatrix=svd.getU().times(SInv.times(svd.getU().transpose()));    
   }

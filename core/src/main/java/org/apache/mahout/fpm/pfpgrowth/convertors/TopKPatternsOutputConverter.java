@@ -30,7 +30,7 @@ import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FrequentPatternMaxHeap;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.Pattern;
 
 /**
- * An output converter which converts the output patterns and collectes them in a
+ * An output converter which converts the output patterns and collects them in a
  * {@link FrequentPatternMaxHeap}
  * 
  * @param <A>

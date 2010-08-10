@@ -281,10 +281,7 @@ public class FrequenciesJob {
     
     @Override
     public boolean equals(Object other) {
-      if (!(other instanceof Frequencies)) {
-        return false;
-      }
-      return firstId == ((Frequencies) other).firstId;
+      return other instanceof Frequencies && firstId == ((Frequencies) other).firstId;
     }
     
     @Override

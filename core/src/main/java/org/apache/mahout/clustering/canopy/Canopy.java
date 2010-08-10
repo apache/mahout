@@ -51,12 +51,7 @@ public class Canopy extends AbstractCluster {
     this.setRadius(center.like());
     observe(center);
   }
-  
-  @Override
-  public void write(DataOutput out) throws IOException {
-    super.write(out);
-  }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
@@ -95,6 +90,7 @@ public class Canopy extends AbstractCluster {
     return getIdentifier() + ": " + getCenter().asFormatString();
   }
   
+  @Override
   public String getIdentifier() {
     return "C-" + getId();
   }

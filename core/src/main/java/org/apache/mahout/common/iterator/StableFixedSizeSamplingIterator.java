@@ -68,7 +68,7 @@ public class StableFixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
     
     @Override
     public boolean equals(Object other) {
-      return other instanceof Entry<?> && originalIndex == ((Entry<T>) other).originalIndex;
+      return other instanceof Entry<?> && originalIndex == ((Entry<?>) other).originalIndex;
     }
     
     @Override

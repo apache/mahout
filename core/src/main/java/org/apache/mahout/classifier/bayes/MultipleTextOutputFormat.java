@@ -13,10 +13,9 @@ import org.apache.hadoop.util.Progressable;
  * This class extends the MultipleOutputFormat, allowing to write the output
  * data to different output files in Text output format.
  */
-public class MultipleTextOutputFormat<K, V>
-    extends MultipleOutputFormat<K, V> {
+public class MultipleTextOutputFormat<K, V> extends MultipleOutputFormat<K, V> {
 
-  private TextOutputFormat<K, V> theTextOutputFormat = null;
+  private TextOutputFormat<K, V> theTextOutputFormat;
 
   @Override
   protected RecordWriter<K, V> getBaseRecordWriter(FileSystem fs, Configuration conf, String name, Progressable arg3)
@@ -27,8 +26,7 @@ public class MultipleTextOutputFormat<K, V>
     try {
       return theTextOutputFormat.getRecordWriter(new TaskAttemptContext(conf, new TaskAttemptID()));
     } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      // continue
     }
     return null;
   }

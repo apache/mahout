@@ -113,6 +113,8 @@ public class Cluster extends AbstractCluster {
     return asFormatString(null);
   }
 
+  @Override
+  @Override
   public String getIdentifier() {
     return (converged ? "VL-" : "CL-") + getId();
   }

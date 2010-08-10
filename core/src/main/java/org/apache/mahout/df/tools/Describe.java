@@ -19,6 +19,7 @@ package org.apache.mahout.df.tools;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.cli2.CommandLine;
@@ -130,7 +131,7 @@ public final class Describe {
     return path;
   }
   
-  private static List<String> convert(List<?> values) {
+  private static List<String> convert(Collection<?> values) {
     List<String> list = new ArrayList<String>(values.size());
     for (Object value : values) {
       list.add(value.toString());

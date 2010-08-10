@@ -75,6 +75,7 @@ public class SoftCluster extends Cluster {
     return formatCluster(this);
   }
 
+  @Override
   public String getIdentifier() {
     return (isConverged() ? "SV-" : "SC-") + getId();
   }

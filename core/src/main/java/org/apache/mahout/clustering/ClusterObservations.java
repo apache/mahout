@@ -10,7 +10,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class ClusterObservations implements Writable {
 
-  private int combinerState = 0;
+  private int combinerState;
 
   private double s0;
 
@@ -19,14 +19,12 @@ public class ClusterObservations implements Writable {
   private Vector s2;
 
   public ClusterObservations(double s0, Vector s1, Vector s2) {
-    super();
     this.s0 = s0;
     this.s1 = s1;
     this.s2 = s2;
   }
 
   public ClusterObservations(int combinerState, double s0, Vector s1, Vector s2) {
-    super();
     this.combinerState = combinerState;
     this.s0 = s0;
     this.s1 = s1;
@@ -34,7 +32,6 @@ public class ClusterObservations implements Writable {
   }
 
   public ClusterObservations() {
-    super();
   }
 
   @Override

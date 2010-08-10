@@ -50,9 +50,6 @@ public class KMeansDriver extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(KMeansDriver.class);
 
-  public KMeansDriver() {
-  }
-
   public static void main(String[] args) throws Exception {
     new KMeansDriver().run(args);
   }
@@ -246,28 +243,14 @@ public class KMeansDriver extends AbstractJob {
     }
   }
 
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure
-   * @param maxIterations
-   * @param numReduceTasks
-   * @param delta
-   * @return
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws IOException 
-   * @throws ClassNotFoundException 
-   */
-  private Path buildClustersSeq(Path input,
-                                Path clustersIn,
-                                Path output,
-                                DistanceMeasure measure,
-                                int maxIterations,
-                                int numReduceTasks,
-                                String delta) throws InstantiationException, IllegalAccessException, IOException,
-      ClassNotFoundException {
+  private static Path buildClustersSeq(Path input,
+                                       Path clustersIn,
+                                       Path output,
+                                       DistanceMeasure measure,
+                                       int maxIterations,
+                                       int numReduceTasks,
+                                       String delta)
+      throws InstantiationException, IllegalAccessException, IOException {
     KMeansClusterer clusterer = new KMeansClusterer(measure);
     List<Cluster> clusters = new ArrayList<Cluster>();
 
@@ -420,7 +403,7 @@ public class KMeansDriver extends AbstractJob {
    * @throws IOException
    *           if there was an IO error
    */
-  private boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
+  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     FileStatus[] parts = fs.listStatus(filePath);
     for (FileStatus part : parts) {
       String name = part.getPath().getName();
@@ -486,18 +469,11 @@ public class KMeansDriver extends AbstractJob {
     }
   }
 
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure
-   * @param convergenceDelta
-   * @throws InterruptedException 
-   * @throws IOException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   */
-  private void clusterDataSeq(Path input, Path clustersIn, Path output, DistanceMeasure measure, String convergenceDelta)
+  private static void clusterDataSeq(Path input,
+                                     Path clustersIn,
+                                     Path output,
+                                     DistanceMeasure measure,
+                                     String convergenceDelta)
       throws IOException, InterruptedException, InstantiationException, IllegalAccessException {
     KMeansClusterer clusterer = new KMeansClusterer(measure);
     List<Cluster> clusters = new ArrayList<Cluster>();
@@ -531,17 +507,11 @@ public class KMeansDriver extends AbstractJob {
 
   }
 
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure
-   * @param convergenceDelta
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   */
-  private void clusterDataMR(Path input, Path clustersIn, Path output, DistanceMeasure measure, String convergenceDelta)
+  private static void clusterDataMR(Path input,
+                                    Path clustersIn,
+                                    Path output,
+                                    DistanceMeasure measure,
+                                    String convergenceDelta)
       throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());

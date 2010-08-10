@@ -76,16 +76,11 @@ public class DirichletDriver extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(DirichletDriver.class);
 
-  public DirichletDriver() {
-  }
-
   public static void main(String[] args) throws Exception {
     new DirichletDriver().run(args);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
-   */
+  @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, InterruptedException {
     addInputOption();
@@ -235,13 +230,8 @@ public class DirichletDriver extends AbstractJob {
 
   /**
    * Read the first input vector to determine the prototype size for the modelPrototype
-   * @param input
-   * @return
-   * @throws IOException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
    */
-  private int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
+  private static int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
@@ -289,7 +279,8 @@ public class DirichletDriver extends AbstractJob {
     writeState(output, stateOut, numModels, state);
   }
 
-  private void writeState(Path output, Path stateOut, int numModels, DirichletState<VectorWritable> state) throws IOException {
+  private static void writeState(Path output, Path stateOut, int numModels, DirichletState<VectorWritable> state)
+      throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (int i = 0; i < numModels; i++) {
@@ -321,19 +312,16 @@ public class DirichletDriver extends AbstractJob {
    *          alpha_0
    * @param numReducers
    *          the number of Reducers desired
-   * @throws IOException 
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  private void runIteration(Path input,
-                            Path stateIn,
-                            Path stateOut,
-                            String modelFactory,
-                            String modelPrototype,
-                            int prototypeSize,
-                            int numClusters,
-                            double alpha0,
-                            int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void runIteration(Path input,
+                                   Path stateIn,
+                                   Path stateOut,
+                                   String modelFactory,
+                                   String modelPrototype,
+                                   int prototypeSize,
+                                   int numClusters,
+                                   double alpha0,
+                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(MODEL_FACTORY_KEY, modelFactory);
@@ -443,18 +431,7 @@ public class DirichletDriver extends AbstractJob {
    * @param numReducers
    *          the number of Reducers desired
    * @param runSequential execute sequentially if true
-   * @param emitMostLikely
-   *          a boolean if true emit only most likely cluster for each point
-   * @param threshold 
-   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @return the Path of the final clusters directory
-   * @throws IOException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws ClassNotFoundException
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
-   * @throws InterruptedException
    */
   public Path buildClusters(Path input,
                             Path output,
@@ -527,8 +504,9 @@ public class DirichletDriver extends AbstractJob {
                                 double alpha0,
                                 int numReducers,
                                 Path clustersIn,
-                                int protoSize) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+                                int protoSize)
+      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+             NoSuchMethodException, InvocationTargetException {
     for (int iteration = 1; iteration <= maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
@@ -633,8 +611,12 @@ public class DirichletDriver extends AbstractJob {
     }
   }
 
-  private void clusterDataSeq(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold) throws IOException,
-      InstantiationException, IllegalAccessException {
+  private static void clusterDataSeq(Path input,
+                                     Path stateIn,
+                                     Path output,
+                                     boolean emitMostLikely,
+                                     double threshold)
+      throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
     List<DirichletCluster<VectorWritable>> clusters = DirichletClusterMapper.loadClusters(conf, stateIn);
     DirichletClusterer<VectorWritable> clusterer = new DirichletClusterer<VectorWritable>(emitMostLikely, threshold);
@@ -664,18 +646,8 @@ public class DirichletDriver extends AbstractJob {
 
   }
 
-  /**
-   * @param input
-   * @param stateIn
-   * @param output
-   * @param emitMostLikely
-   * @param threshold
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   */
-  private void clusterDataMR(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold) throws IOException,
-      InterruptedException, ClassNotFoundException {
+  private static void clusterDataMR(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
+      throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));

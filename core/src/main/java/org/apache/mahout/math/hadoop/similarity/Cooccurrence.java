@@ -79,9 +79,6 @@ public class Cooccurrence implements Writable {
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof Cooccurrence) {
-      return column == ((Cooccurrence)other).column;
-    }
-    return false;
+    return other instanceof Cooccurrence && column == ((Cooccurrence) other).column;
   }
 }

@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -51,7 +52,7 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
    * @param canopies
    *          a List<Canopy>
    */
-  public void config(List<Canopy> canopies) {
+  public void config(Collection<Canopy> canopies) {
     this.canopies.clear();
     this.canopies.addAll(canopies);
   }

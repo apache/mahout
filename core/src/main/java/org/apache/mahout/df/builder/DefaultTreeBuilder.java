@@ -111,14 +111,14 @@ public class DefaultTreeBuilder implements TreeBuilder {
       selected[best.getAttr()] = true;
       
       double[] values = data.values(best.getAttr());
-      Node[] childs = new Node[values.length];
+      Node[] children = new Node[values.length];
       
       for (int index = 0; index < values.length; index++) {
         Data subset = data.subset(Condition.equals(best.getAttr(), values[index]));
-        childs[index] = build(rng, subset);
+        children[index] = build(rng, subset);
       }
       
-      childNode = new CategoricalNode(best.getAttr(), values, childs);
+      childNode = new CategoricalNode(best.getAttr(), values, children);
       
       if (!alreadySelected) {
         selected[best.getAttr()] = false;
