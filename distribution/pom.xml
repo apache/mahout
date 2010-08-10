@@ -105,6 +105,7 @@
       <groupId>org.apache.mahout</groupId>
       <artifactId>mahout-taste-webapp</artifactId>
       <version>${project.version}</version>
+      <type>war</type>
     </dependency>
   </dependencies>
 
