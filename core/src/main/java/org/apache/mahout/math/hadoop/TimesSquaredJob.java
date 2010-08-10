@@ -81,7 +81,7 @@ public final class TimesSquaredJob {
   public static JobConf createTimesSquaredJobConf(Vector v,
                                                   Path matrixInputPath,
                                                   Path outputVectorPathBase,
-                                                  Class<? extends TimesSquaredMapper<?>> mapClass,
+                                                  Class<? extends TimesSquaredMapper> mapClass,
                                                   Class<? extends VectorSummingReducer> redClass) throws IOException {
     return createTimesSquaredJobConf(v, v.size(), matrixInputPath, outputVectorPathBase, mapClass, redClass);
   }
@@ -90,7 +90,7 @@ public final class TimesSquaredJob {
                                                   int outputVectorDim,
                                                   Path matrixInputPath,
                                                   Path outputVectorPathBase,
-                                                  Class<? extends TimesSquaredMapper<?>> mapClass,
+                                                  Class<? extends TimesSquaredMapper> mapClass,
                                                   Class<? extends VectorSummingReducer> redClass) throws IOException {
     JobConf conf = new JobConf(TimesSquaredJob.class);
     conf.setJobName("TimesSquaredJob: " + matrixInputPath);
@@ -143,8 +143,8 @@ public final class TimesSquaredJob {
   public static class TimesSquaredMapper<T extends WritableComparable> extends MapReduceBase
       implements Mapper<T,VectorWritable, NullWritable,VectorWritable> {
 
-    private Vector outputVector;
-    private OutputCollector<NullWritable,VectorWritable> out;
+    Vector outputVector;
+    OutputCollector<NullWritable,VectorWritable> out;
     private Vector inputVector;
 
     @Override
