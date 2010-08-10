@@ -17,14 +17,11 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.PriorityQueue;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.common.FileLineIterable;
@@ -32,6 +29,10 @@ import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.PriorityQueue;
 
 public final class UserVectorSplitterMapper extends
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable> {
@@ -46,23 +47,24 @@ public final class UserVectorSplitterMapper extends
   @Override
   protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
-    maxPrefsPerUserConsidered = jobConf.getInt(MAX_PREFS_PER_USER_CONSIDERED,
-                                               DEFAULT_MAX_PREFS_PER_USER_CONSIDERED);
-    try {
-      FileSystem fs = FileSystem.get(jobConf);
-      String usersFilePathString = jobConf.get(USERS_FILE);
-      if (usersFilePathString == null) {
-        usersToRecommendFor = null;
-      } else {
+    maxPrefsPerUserConsidered = jobConf.getInt(MAX_PREFS_PER_USER_CONSIDERED, DEFAULT_MAX_PREFS_PER_USER_CONSIDERED);
+    String usersFilePathString = jobConf.get(USERS_FILE);
+    if (usersFilePathString != null) {
+      FSDataInputStream in = null;
+      try {
+        Path unqualifiedUsersFilePath = new Path(usersFilePathString);
+        FileSystem fs = FileSystem.get(unqualifiedUsersFilePath.toUri(), jobConf);
         usersToRecommendFor = new FastIDSet();
-        Path usersFilePath = new Path(usersFilePathString).makeQualified(fs);
-        FSDataInputStream in = fs.open(usersFilePath);
+        Path usersFilePath = unqualifiedUsersFilePath.makeQualified(fs);
+        in = fs.open(usersFilePath);
         for (String line : new FileLineIterable(in)) {
           usersToRecommendFor.add(Long.parseLong(line));
-        }
+        }     
+      } catch (IOException ioe) {
+        throw new IllegalStateException(ioe);
+      } finally {
+        IOUtils.closeStream(in);
       }
-    } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
     }
   }
 

@@ -17,30 +17,18 @@
 
 package org.apache.mahout.cf.taste.hadoop.similarity.item;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
-import org.apache.mahout.math.VarIntWritable;
-import org.apache.mahout.math.VarLongWritable;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
+
+import java.io.IOException;
+import java.util.*;
 
 public class MostSimilarItemPairsMapper
     extends Mapper<IntWritable,VectorWritable,EntityEntityWritable,DoubleWritable> {
@@ -56,25 +44,7 @@ public class MostSimilarItemPairsMapper
     if (maxSimilarItemsPerItem < 1) {
       throw new IllegalStateException("maxSimilarItemsPerItem was not correctly set!");
     }
-
-    try {
-      FileSystem fs = FileSystem.get(conf);
-      Path itemIDIndexPath = new Path(itemIDIndexPathStr).makeQualified(fs);
-      indexItemIDMap = new OpenIntLongHashMap();
-      VarIntWritable index = new VarIntWritable();
-      VarLongWritable id = new VarLongWritable();
-      for (FileStatus status : fs.listStatus(itemIDIndexPath, TasteHadoopUtils.PARTS_FILTER)) {
-        String path = status.getPath().toString();
-        SequenceFile.Reader reader =
-            new SequenceFile.Reader(fs, new Path(path).makeQualified(fs), conf);
-        while (reader.next(index, id)) {
-          indexItemIDMap.put(index.get(), id.get());
-        }
-        reader.close();
-      }
-    } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
-    }
+    indexItemIDMap = TasteHadoopUtils.readItemIDIndexMap(conf.get(ItemSimilarityJob.ITEM_ID_INDEX_PATH_STR), conf);
   }
 
   @Override

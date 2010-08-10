@@ -17,20 +17,11 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
@@ -40,12 +31,14 @@ import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * <p>computes prediction values for each user</p>
@@ -77,40 +70,27 @@ public final class AggregateAndRecommendReducer extends
     Configuration jobConf = context.getConfiguration();
     recommendationsPerUser = jobConf.getInt(NUM_RECOMMENDATIONS, DEFAULT_NUM_RECOMMENDATIONS);
     booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
-    try {
-      FileSystem fs = FileSystem.get(jobConf);
-      Path itemIDIndexPath = new Path(jobConf.get(ITEMID_INDEX_PATH)).makeQualified(fs);
-      indexItemIDMap = new OpenIntLongHashMap();
-      VarIntWritable index = new VarIntWritable();
-      VarLongWritable id = new VarLongWritable();
-      for (FileStatus status : fs.listStatus(itemIDIndexPath, TasteHadoopUtils.PARTS_FILTER)) {
-        String path = status.getPath().toString();
-        SequenceFile.Reader reader =
-            new SequenceFile.Reader(fs, new Path(path).makeQualified(fs), jobConf);
-        while (reader.next(index, id)) {
-          indexItemIDMap.put(index.get(), id.get());
-        }
-        reader.close();
-      }
-    } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
-    }
+    indexItemIDMap = TasteHadoopUtils.readItemIDIndexMap(jobConf.get(ITEMID_INDEX_PATH), jobConf);
 
+    FSDataInputStream in = null;
     try {
-        FileSystem fs = FileSystem.get(jobConf);
-        String itemFilePathString = jobConf.get(ITEMS_FILE);
+        String itemFilePathString = jobConf.get(ITEMS_FILE);        
         if (itemFilePathString == null) {
-        	itemsToRecommendFor = null;
+          itemsToRecommendFor = null;
         } else {
-        	itemsToRecommendFor = new FastIDSet();
-          Path usersFilePath = new Path(itemFilePathString).makeQualified(fs);
-          FSDataInputStream in = fs.open(usersFilePath);
+          Path unqualifiedItemsFilePath = new Path(itemFilePathString);
+          FileSystem fs = FileSystem.get(unqualifiedItemsFilePath.toUri(), jobConf);
+          itemsToRecommendFor = new FastIDSet();
+          Path itemsFilePath = unqualifiedItemsFilePath.makeQualified(fs);
+          in = fs.open(itemsFilePath);
           for (String line : new FileLineIterable(in)) {
         	  itemsToRecommendFor.add(Long.parseLong(line));
           }
         }
       } catch (IOException ioe) {
         throw new IllegalStateException(ioe);
+      } finally {
+        IOUtils.closeStream(in);
       }
   }
 

@@ -17,13 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop.item;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -40,17 +35,19 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersKeyWritable;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersReducer;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixReducer;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.*;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>Runs a completely distributed recommender job as a series of mapreduces.</p>
@@ -238,6 +235,13 @@ public final class RecommenderJob extends AbstractJob {
         Mapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
         ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
         SequenceFileOutputFormat.class);
+
+      /* necessary to make this job (having a combined input path) work on Amazon S3 */
+      Configuration partialMultiplyConf = partialMultiply.getConfiguration();
+      FileSystem fs = FileSystem.get(tempDirPath.toUri(), partialMultiplyConf);
+      prePartialMultiplyPath1 = prePartialMultiplyPath1.makeQualified(fs);
+      prePartialMultiplyPath2 = prePartialMultiplyPath2.makeQualified(fs);
+      SequenceFileInputFormat.setInputPaths(partialMultiply, prePartialMultiplyPath1, prePartialMultiplyPath2);
       partialMultiply.waitForCompletion(true);
     }
 
