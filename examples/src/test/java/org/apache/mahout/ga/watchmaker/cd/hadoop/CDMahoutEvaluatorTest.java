@@ -17,19 +17,21 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRuleResults;
-import org.apache.mahout.common.RandomUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import com.google.common.io.Resources;
 
 public class CDMahoutEvaluatorTest extends MahoutTestCase {
 
@@ -47,7 +49,7 @@ public class CDMahoutEvaluatorTest extends MahoutTestCase {
     // dataset
     // This is sensitive to the working directory where the test is run:
     FileSystem fs = FileSystem.get(new Configuration());
-    Path input = fs.makeQualified(new Path(this.getClass().getResource("/wdbc/").getPath()));
+    Path input = fs.makeQualified(new Path(Resources.getResource("wdbc").toString()));
     CDMahoutEvaluator.initializeDataSet(input);
 
     // evaluate the rules

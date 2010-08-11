@@ -24,6 +24,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.MahoutTestCase;
 
+import com.google.common.io.Resources;
+
 import java.io.IOException;
 import java.io.File;
 
@@ -31,13 +33,13 @@ public class FileInfosDatasetTest extends MahoutTestCase {
 
   public void testRanges() throws IOException {
     FileSystem fs = FileSystem.get(new Configuration());
-    Path inpath = fs.makeQualified(new Path(this.getClass().getResource("/wdbc/").getPath()));
+    Path inpath = fs.makeQualified(new Path(Resources.getResource("wdbc").toString()));
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
 
     DataLine dl = new DataLine();
-    for (String line : new FileLineIterable(new File(this.getClass().getResource("/wdbc/wdbc.data").getPath()))) {
+    for (String line : new FileLineIterable(new File(Resources.getResource("wdbc/wdbc.data").getPath()))) {
       dl.set(line);
       for (int index = 0; index < dataset.getNbAttributes(); index++) {
         if (dataset.isNumerical(index)) {

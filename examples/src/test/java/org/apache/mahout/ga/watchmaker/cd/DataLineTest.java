@@ -22,6 +22,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.MahoutTestCase;
 
+import com.google.common.io.Resources;
+
 public class DataLineTest extends MahoutTestCase {
 
   private static final String[] datalines = {
@@ -31,7 +33,7 @@ public class DataLineTest extends MahoutTestCase {
 
   public void testSet() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
-    Path inpath = fs.makeQualified(new Path(this.getClass().getResource("/wdbc/").getPath()));
+    Path inpath = fs.makeQualified(new Path(Resources.getResource("wdbc").toString()));
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
