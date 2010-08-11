@@ -30,8 +30,9 @@ public class DataLineTest extends MahoutTestCase {
       "852781,M,18.61,20.25,122.1,1094,0.0944,0.1066,0.149,0.07731,0.1697,0.05699,0.8529,1.849,5.632,93.54,0.01075,0.02722,0.05081,0.01911,0.02293,0.004217,21.31,27.26,139.9,1403,0.1338,0.2117,0.3446,0.149,0.2341,0.07421" };
 
   public void testSet() throws Exception {
-    Path inpath = new Path(this.getClass().getResource("/wdbc/").getPath());
-    FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
+    FileSystem fs = FileSystem.get(new Configuration());
+    Path inpath = fs.makeQualified(new Path(this.getClass().getResource("/wdbc/").getPath()));
+    
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);
     

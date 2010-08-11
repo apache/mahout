@@ -30,8 +30,8 @@ import java.io.File;
 public class FileInfosDatasetTest extends MahoutTestCase {
 
   public void testRanges() throws IOException {
-    Path inpath = new Path(this.getClass().getResource("/wdbc/").getPath());
-    FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
+    FileSystem fs = FileSystem.get(new Configuration());
+    Path inpath = fs.makeQualified(new Path(this.getClass().getResource("/wdbc/").getPath()));
     
     DataSet dataset = FileInfoParser.parseFile(fs, inpath);
     DataSet.initialize(dataset);

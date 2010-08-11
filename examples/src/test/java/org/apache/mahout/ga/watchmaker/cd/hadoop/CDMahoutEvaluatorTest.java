@@ -46,13 +46,14 @@ public class CDMahoutEvaluatorTest extends MahoutTestCase {
 
     // dataset
     // This is sensitive to the working directory where the test is run:
-    Path input = new Path(this.getClass().getResource("/wdbc/").getPath());
+    FileSystem fs = FileSystem.get(new Configuration());
+    Path input = fs.makeQualified(new Path(this.getClass().getResource("/wdbc/").getPath()));
     CDMahoutEvaluator.initializeDataSet(input);
 
     // evaluate the rules
     List<CDFitness> results = new ArrayList<CDFitness>();
     Path output = getTestTempDirPath("output");
-    FileSystem fs = output.getFileSystem(new Configuration());
+    fs = output.getFileSystem(new Configuration());
     fs.delete(output, true); // It's unhappy if this directory exists
     CDMahoutEvaluator.evaluate(rules, target, input, output, results);
 
