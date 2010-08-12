@@ -637,6 +637,33 @@ public class VectorTest extends MahoutTestCase {
         v.aggregate(w, Functions.plus, Functions.chain(Functions.pow(2), Functions.minus)));
   }
 
+  public static void testEmptyAggregate() {
+    assertEquals(1.0, new DenseVector(new double[]{1}).aggregate(Functions.min, Functions.identity));
+    assertEquals(1.0, new DenseVector(new double[]{2, 1}).aggregate(Functions.min, Functions.identity));
+
+    try {
+      new DenseVector(new double[]{}).aggregate(Functions.min, Functions.identity);
+      fail("Should have thrown exception with empty vector");
+    } catch (IllegalArgumentException e) {
+      // as it should be
+    }
+
+    assertEquals(3.0,
+            new DenseVector(new double[]{1}).aggregate(
+                    new DenseVector(new double[]{2}),
+                    Functions.min, Functions.plus));
+
+    try {
+      new DenseVector(new double[]{}).aggregate(
+              new DenseVector(new double[]{}),
+              Functions.min, Functions.plus);
+      
+      fail("Should have thrown exception with empty vector");
+    } catch (IllegalArgumentException e) {
+      // as it should be
+    }
+  }
+
   private static void setUpFirstVector(Vector v) {
     v.setQuick(1, 2);
     v.setQuick(2, 0.5);
