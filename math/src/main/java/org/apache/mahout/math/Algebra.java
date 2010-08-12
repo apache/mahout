@@ -16,8 +16,7 @@
  */
 
 package org.apache.mahout.math;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.Vector;
+
 
 public class Algebra {
   
