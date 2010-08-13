@@ -36,7 +36,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Override
-  protected void setUp() throws Exception {
+  protected void setUp() {
     super.setUp();
     test = generateTestVector(2 * values.length + 1);
     for (int i = 0; i < values.length; i++) {

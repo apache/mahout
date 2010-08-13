@@ -21,8 +21,8 @@ public class Beta extends AbstractContinousDistribution {
   private double PDF_CONST; // cache to speed up pdf()
 
   // cached values shared by bXX
-  private double a_last = 0.0, b_last = 0.0;
-  private double a_, b_, t, fa, fb, p1, p2;
+  private double aLast = 0.0, bLast = 0.0;
+  private double aMinus1, bMinus1, t, fa, fb, p1, p2;
 
   // cached values for b00
 
@@ -30,12 +30,12 @@ public class Beta extends AbstractContinousDistribution {
   private double ml, mu;
 
   // chached values for b1prs
-  private double p_last = 0.0, q_last = 0.0;
+  private double pLast = 0.0, qLast = 0.0;
   private double a;
   private double b;
   private double m;
-  private double D;
-  private double Dl;
+  private double d;
+  private double d1;
   private double x1;
   private double x2;
   private double x4;
@@ -61,20 +61,20 @@ public class Beta extends AbstractContinousDistribution {
    */
   protected double b00(double a, double b, RandomEngine randomGenerator) {
 
-    if (a != a_last || b != b_last) {
-      a_last = a;
-      b_last = b;
+    if (a != aLast || b != bLast) {
+      aLast = a;
+      bLast = b;
 
-      a_ = a - 1.0;
-      b_ = b - 1.0;
-      double c = (b * b_) / (a * a_);
+      aMinus1 = a - 1.0;
+      bMinus1 = b - 1.0;
+      double c = (b * bMinus1) / (a * aMinus1);
       if (Math.abs(c - 1.0) < 1e-8) {
         t = 0.5;
       } else {
         t = (1.0 - Math.sqrt(c)) / (1.0 - c);
       }
-      fa = Math.exp(a_ * Math.log(t));
-      fb = Math.exp(b_ * Math.log(1.0 - t));              // f(t) = fa * fb
+      fa = Math.exp(aMinus1 * Math.log(t));
+      fb = Math.exp(bMinus1 * Math.log(1.0 - t));              // f(t) = fa * fb
 
       p1 = t / a;                                           // 0 < X < t
       p2 = (1.0 - t) / b + p1;                              // t < X < 1
@@ -89,13 +89,13 @@ public class Beta extends AbstractContinousDistribution {
         Z = Math.exp(Math.log(U / p1) / a);
         X = t * Z;
         // squeeze accept:   L(x) = 1 + (1 - b)x
-        if ((V = randomGenerator.raw() * fb) <= 1.0 - b_ * X) {
+        if ((V = randomGenerator.raw() * fb) <= 1.0 - bMinus1 * X) {
           break;
         }
         // squeeze reject:   U(x) = 1 + ((1 - t)^(b-1) - 1)/t * x
         if (V <= 1.0 + (fb - 1.0) * Z) {
           // quotient accept:  q(x) = (1 - x)^(b-1) / fb
-          if (Math.log(V) <= b_ * Math.log(1.0 - X)) {
+          if (Math.log(V) <= bMinus1 * Math.log(1.0 - X)) {
             break;
           }
         }
@@ -103,13 +103,13 @@ public class Beta extends AbstractContinousDistribution {
         Z = Math.exp(Math.log((U - p1) / (p2 - p1)) / b);
         X = 1.0 - (1.0 - t) * Z;
         // squeeze accept:   L(x) = 1 + (1 - a)(1 - x)
-        if ((V = randomGenerator.raw() * fa) <= 1.0 - a_ * (1.0 - X)) {
+        if ((V = randomGenerator.raw() * fa) <= 1.0 - aMinus1 * (1.0 - X)) {
           break;
         }
         // squeeze reject:   U(x) = 1 + (t^(a-1) - 1)/(1 - t) * (1 - x)
         if (V <= 1.0 + (fa - 1.0) * Z) {
           // quotient accept:  q(x) = x^(a-1) / fa
-          if (Math.log(V) <= a_ * Math.log(X)) {
+          if (Math.log(V) <= aMinus1 * Math.log(X)) {
             break;
           }
         }
@@ -123,23 +123,23 @@ public class Beta extends AbstractContinousDistribution {
    */
   protected double b01(double a, double b, RandomEngine randomGenerator) {
 
-    if (a != a_last || b != b_last) {
-      a_last = a;
-      b_last = b;
+    if (a != aLast || b != bLast) {
+      aLast = a;
+      bLast = b;
 
-      a_ = a - 1.0;
-      b_ = b - 1.0;
-      t = a_ / (a - b);                   // one step Newton * start value t
-      fb = Math.exp((b_ - 1.0) * Math.log(1.0 - t));
-      fa = a - (a + b_) * t;
+      aMinus1 = a - 1.0;
+      bMinus1 = b - 1.0;
+      t = aMinus1 / (a - b);                   // one step Newton * start value t
+      fb = Math.exp((bMinus1 - 1.0) * Math.log(1.0 - t));
+      fa = a - (a + bMinus1) * t;
       t -= (t - (1.0 - fa) * (1.0 - t) * fb / b) / (1.0 - fa * fb);
-      fa = Math.exp(a_ * Math.log(t));
-      fb = Math.exp(b_ * Math.log(1.0 - t));             // f(t) = fa * fb
-      if (b_ <= 1.0) {
+      fa = Math.exp(aMinus1 * Math.log(t));
+      fb = Math.exp(bMinus1 * Math.log(1.0 - t));             // f(t) = fa * fb
+      if (bMinus1 <= 1.0) {
         ml = (1.0 - fb) / t;                           //   ml = -m1
-        mu = b_ * t;                                   //   mu = -m2 * t
+        mu = bMinus1 * t;                                   //   mu = -m2 * t
       } else {
-        ml = b_;
+        ml = bMinus1;
         mu = 1.0 - fb;
       }
       p1 = t / a;                                           //  0 < X < t
@@ -161,7 +161,7 @@ public class Beta extends AbstractContinousDistribution {
         // squeeze reject:   U(x) = 1 + m2*x,  mu = -m2 * t
         if (V <= 1.0 - mu * Z) {
           // quotient accept:  q(x) = (1 - x)^(b-1)
-          if (Math.log(V) <= b_ * Math.log(1.0 - X)) {
+          if (Math.log(V) <= bMinus1 * Math.log(1.0 - X)) {
             break;
           }
         }
@@ -169,13 +169,13 @@ public class Beta extends AbstractContinousDistribution {
         Z = Math.exp(Math.log((U - p1) / (p2 - p1)) / b);
         X = 1.0 - (1.0 - t) * Z;
         // squeeze accept:   L(x) = 1 + (1 - a)(1 - x)
-        if ((V = randomGenerator.raw() * fa) <= 1.0 - a_ * (1.0 - X)) {
+        if ((V = randomGenerator.raw() * fa) <= 1.0 - aMinus1 * (1.0 - X)) {
           break;
         }
         // squeeze reject:   U(x) = 1 + (t^(a-1) - 1)/(1 - t) * (1 - x)
         if (V <= 1.0 + (fa - 1.0) * Z) {
           // quotient accept:  q(x) = (x)^(a-1) / fa
-          if (Math.log(V) <= a_ * Math.log(X)) {
+          if (Math.log(V) <= aMinus1 * Math.log(X)) {
             break;
           }
         }
@@ -189,32 +189,32 @@ public class Beta extends AbstractContinousDistribution {
    */
   protected double b1prs(double p, double q, RandomEngine randomGenerator) {
 
-    if (p != p_last || q != q_last) {
-      p_last = p;
-      q_last = q;
+    if (p != pLast || q != qLast) {
+      pLast = p;
+      qLast = q;
 
       a = p - 1.0;
       b = q - 1.0;
       double s = a + b;
       m = a / s;
       if (a > 1.0 || b > 1.0) {
-        D = Math.sqrt(m * (1.0 - m) / (s - 1.0));
+        d = Math.sqrt(m * (1.0 - m) / (s - 1.0));
       }
 
       if (a <= 1.0) {
-        x2 = (Dl = m * 0.5);
+        x2 = (d1 = m * 0.5);
         x1 = z2 = 0.0;
         f1 = ll = 0.0;
       } else {
-        x2 = m - D;
-        x1 = x2 - D;
-        z2 = x2 * (1.0 - (1.0 - x2) / (s * D));
+        x2 = m - d;
+        x1 = x2 - d;
+        z2 = x2 * (1.0 - (1.0 - x2) / (s * d));
         if (x1 <= 0.0 || (s - 6.0) * x2 - a + 3.0 > 0.0) {
           x1 = z2;
           x2 = (x1 + m) * 0.5;
-          Dl = m - x2;
+          d1 = m - x2;
         } else {
-          Dl = D;
+          d1 = d;
         }
         f1 = f(x1, a, b, m);
         ll = x1 * (1.0 - x1) / (s * (m - x1));          // z1 = x1 - ll
@@ -222,25 +222,25 @@ public class Beta extends AbstractContinousDistribution {
       f2 = f(x2, a, b, m);
 
       if (b <= 1.0) {
-        x4 = 1.0 - (D = (1.0 - m) * 0.5);
+        x4 = 1.0 - (d = (1.0 - m) * 0.5);
         x5 = z4 = 1.0;
         f5 = lr = 0.0;
       } else {
-        x4 = m + D;
-        x5 = x4 + D;
-        z4 = x4 * (1.0 + (1.0 - x4) / (s * D));
+        x4 = m + d;
+        x5 = x4 + d;
+        z4 = x4 * (1.0 + (1.0 - x4) / (s * d));
         if (x5 >= 1.0 || (s - 6.0) * x4 - a + 3.0 < 0.0) {
           x5 = z4;
           x4 = (m + x5) * 0.5;
-          D = x4 - m;
+          d = x4 - m;
         }
         f5 = f(x5, a, b, m);
         lr = x5 * (1.0 - x5) / (s * (x5 - m));          // z5 = x5 + lr
       }
       f4 = f(x4, a, b, m);
 
-      p1 = f2 * (Dl + Dl);                                //  x1 < X < m
-      p2 = f4 * (D + D) + p1;                            //  m  < X < x5
+      p1 = f2 * (d1 + d1);                                //  x1 < X < m
+      p2 = f4 * (d + d) + p1;                            //  m  < X < x5
       p3 = f1 * ll + p2;                            //       X < x1
       p4 = f5 * lr + p3;                            //  x5 < X
     }
@@ -253,15 +253,15 @@ public class Beta extends AbstractContinousDistribution {
       double U;
       if ((U = randomGenerator.raw() * p4) <= p1) {
         // immediate accept:  x2 < X < m, - f(x2) < W < 0
-        if ((W = U / Dl - f2) <= 0.0) {
+        if ((W = U / d1 - f2) <= 0.0) {
           return (m - U / f2);
         }
         // immediate accept:  x1 < X < x2, 0 < W < f(x1)
         if (W <= f1) {
-          return (x2 - W / f1 * Dl);
+          return (x2 - W / f1 * d1);
         }
         // candidates for acceptance-rejection-test
-        V = Dl * (U = randomGenerator.raw());
+        V = d1 * (U = randomGenerator.raw());
         X = x2 - V;
         Y = x2 + V;
         // squeeze accept:    L(x) = f(x2) (x - z2) / (x2 - z2)
@@ -281,15 +281,15 @@ public class Beta extends AbstractContinousDistribution {
       } else if (U <= p2) {
         U -= p1;
         // immediate accept:  m < X < x4, - f(x4) < W < 0
-        if ((W = U / D - f4) <= 0.0) {
+        if ((W = U / d - f4) <= 0.0) {
           return (m + U / f4);
         }
         // immediate accept:  x4 < X < x5, 0 < W < f(x5)
         if (W <= f5) {
-          return (x4 + W / f5 * D);
+          return (x4 + W / f5 * d);
         }
         // candidates for acceptance-rejection-test
-        V = D * (U = randomGenerator.raw());
+        V = d * (U = randomGenerator.raw());
         X = x4 + V;
         Y = x4 - V;
         // squeeze accept:    L(x) = f(x4) (z4 - x) / (z4 - x4)
@@ -433,7 +433,7 @@ public class Beta extends AbstractContinousDistribution {
   }
 
   /** Sets the parameters. */
-  public void setState(double alpha, double beta) {
+  public final void setState(double alpha, double beta) {
     this.alpha = alpha;
     this.beta = beta;
     this.PDF_CONST = Fun.logGamma(alpha + beta) - Fun.logGamma(alpha) - Fun.logGamma(beta);

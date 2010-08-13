@@ -333,17 +333,17 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       k7 += 2.0;
       k8 += 2.0;
 
-      if ((Math.abs(qk) + Math.abs(pk)) > big) {
-        pkm2 *= biginv;
-        pkm1 *= biginv;
-        qkm2 *= biginv;
-        qkm1 *= biginv;
+      if ((Math.abs(qk) + Math.abs(pk)) > BIG) {
+        pkm2 *= BIG_INVERSE;
+        pkm1 *= BIG_INVERSE;
+        qkm2 *= BIG_INVERSE;
+        qkm1 *= BIG_INVERSE;
       }
-      if ((Math.abs(qk) < biginv) || (Math.abs(pk) < biginv)) {
-        pkm2 *= big;
-        pkm1 *= big;
-        qkm2 *= big;
-        qkm1 *= big;
+      if ((Math.abs(qk) < BIG_INVERSE) || (Math.abs(pk) < BIG_INVERSE)) {
+        pkm2 *= BIG;
+        pkm1 *= BIG;
+        qkm2 *= BIG;
+        qkm1 *= BIG;
       }
     } while (++n < 300);
 
@@ -412,17 +412,17 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       k7 += 2.0;
       k8 += 2.0;
 
-      if ((Math.abs(qk) + Math.abs(pk)) > big) {
-        pkm2 *= biginv;
-        pkm1 *= biginv;
-        qkm2 *= biginv;
-        qkm1 *= biginv;
+      if ((Math.abs(qk) + Math.abs(pk)) > BIG) {
+        pkm2 *= BIG_INVERSE;
+        pkm1 *= BIG_INVERSE;
+        qkm2 *= BIG_INVERSE;
+        qkm1 *= BIG_INVERSE;
       }
-      if ((Math.abs(qk) < biginv) || (Math.abs(pk) < biginv)) {
-        pkm2 *= big;
-        pkm1 *= big;
-        qkm2 *= big;
-        qkm1 *= big;
+      if ((Math.abs(qk) < BIG_INVERSE) || (Math.abs(pk) < BIG_INVERSE)) {
+        pkm2 *= BIG;
+        pkm1 *= BIG;
+        qkm2 *= BIG;
+        qkm1 *= BIG;
       }
     } while (++n < 300);
 
@@ -522,11 +522,11 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       pkm1 = pk;
       qkm2 = qkm1;
       qkm1 = qk;
-      if (Math.abs(pk) > big) {
-        pkm2 *= biginv;
-        pkm1 *= biginv;
-        qkm2 *= biginv;
-        qkm1 *= biginv;
+      if (Math.abs(pk) > BIG) {
+        pkm2 *= BIG_INVERSE;
+        pkm1 *= BIG_INVERSE;
+        qkm2 *= BIG_INVERSE;
+        qkm1 *= BIG_INVERSE;
       }
     } while (t > MACHEP);
 

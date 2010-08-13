@@ -29,16 +29,14 @@ public abstract class MahoutTestCase extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    super.setUp();
     testTempDir = null;
   }
 
   @Override
-  protected void tearDown() throws Exception {
+  protected void tearDown() {
     if (testTempDir != null) {
       new DeletingVisitor().accept(testTempDir);
     }
-    super.tearDown();
   }
 
   protected final File getTestTempDir() throws IOException {

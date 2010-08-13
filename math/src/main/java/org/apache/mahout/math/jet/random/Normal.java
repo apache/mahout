@@ -22,7 +22,7 @@ public class Normal extends AbstractContinousDistribution {
   private double cache; // cache for Box-Mueller algorithm
   private boolean cacheFilled; // Box-Mueller
 
-  private double SQRT_INV; // performance cache
+  private double normalizer; // performance cache
 
   // The uniform random number generated shared by all <b>static</b> methods.
   private static final Normal shared = new Normal(0.0, 1.0, makeDefaultGenerator());
@@ -68,7 +68,7 @@ public class Normal extends AbstractContinousDistribution {
   /** Returns the probability distribution function. */
   public double pdf(double x) {
     double diff = x - mean;
-    return SQRT_INV * Math.exp(-(diff * diff) / (2.0 * variance));
+    return normalizer * Math.exp(-(diff * diff) / (2.0 * variance));
   }
 
   /** Sets the uniform random generator internally used. */
@@ -86,7 +86,7 @@ public class Normal extends AbstractContinousDistribution {
       this.variance = standardDeviation * standardDeviation;
       this.cacheFilled = false;
 
-      this.SQRT_INV = 1.0 / Math.sqrt(2.0 * Math.PI * variance);
+      this.normalizer = 1.0 / Math.sqrt(2.0 * Math.PI * variance);
     }
   }
 

@@ -44,7 +44,7 @@ public final class Utils {
 
   private static class LogCallback implements PredictionCallback {
   
-    private final Logger log;
+    private static Logger log;
   
     private LogCallback(Logger log) {
       this.log = log;

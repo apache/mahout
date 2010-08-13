@@ -19,7 +19,7 @@ public class Poisson extends AbstractDiscreteDistribution {
 
   // precomputed and cached values (for performance only)
   // cache for < SWITCH_MEAN
-  private double my_old = -1.0;
+  private double myOld = -1.0;
   private double p;
   private double q;
   private double p0;
@@ -27,7 +27,7 @@ public class Poisson extends AbstractDiscreteDistribution {
   private int llll;
 
   // cache for >= SWITCH_MEAN
-  private double my_last = -1.0;
+  private double myLast = -1.0;
   private double ll;
   private int k2;
   private int k4;
@@ -40,8 +40,8 @@ public class Poisson extends AbstractDiscreteDistribution {
   private double r4;
   private double r5;
   private double lr;
-  private double l_my;
-  private double c_pm;
+  private double lMy;
+  private double cPm;
   private double f1;
   private double f2;
   private double f4;
@@ -129,8 +129,8 @@ public class Poisson extends AbstractDiscreteDistribution {
 
     int m;
     if (theMean < SWITCH_MEAN) { // CASE B: Inversion- start new table and calculate p0
-      if (theMean != my_old) {
-        my_old = theMean;
+      if (theMean != myOld) {
+        myOld = theMean;
         llll = 0;
         p = Math.exp(-theMean);
         q = p;
@@ -174,8 +174,8 @@ public class Poisson extends AbstractDiscreteDistribution {
       //             f1, f2, f4, f5, p1, p2, p3, p4, p5, p6;
 
       m = (int) theMean;
-      if (theMean != my_last) { //  set-up
-        my_last = theMean;
+      if (theMean != myLast) { //  set-up
+        myLast = theMean;
 
         // approximate deviation of reflection points k2, k4 from my - 1/2
         double Ds = Math.sqrt(theMean + 0.25);
@@ -202,14 +202,14 @@ public class Poisson extends AbstractDiscreteDistribution {
         lr = -Math.log(r5);                     // expon. tail right
 
         // Poisson constants, necessary for computing function values f(k)
-        l_my = Math.log(theMean);
-        c_pm = m * l_my - Arithmetic.logFactorial(m);
+        lMy = Math.log(theMean);
+        cPm = m * lMy - Arithmetic.logFactorial(m);
 
         // function values f(k) = p(k)/p(m) at k = k2, k4, k1, k5
-        f2 = f(k2, l_my, c_pm);
-        f4 = f(k4, l_my, c_pm);
-        f1 = f(k1, l_my, c_pm);
-        f5 = f(k5, l_my, c_pm);
+        f2 = f(k2, lMy, cPm);
+        f4 = f(k4, lMy, cPm);
+        f1 = f(k1, lMy, cPm);
+        f5 = f(k5, lMy, cPm);
 
         // area of the two centre and the two exponential tail regions
         // area of the two immediate acceptance regions between k2, k4
@@ -252,7 +252,7 @@ public class Poisson extends AbstractDiscreteDistribution {
             if (V <= f2 + Dk * (1.0 - f2) / (dl + 1.0)) {// quick accept of
               return (Y);                             // Y = k2 + Dk
             }
-            if (V <= f(Y, l_my, c_pm)) {
+            if (V <= f(Y, lMy, cPm)) {
               return (Y);
             }    // final accept of Y
           }
@@ -278,7 +278,7 @@ public class Poisson extends AbstractDiscreteDistribution {
             if (V <= f4 + Dk * (1.0 - f4) / dr) {       // quick accept of
               return (Y);                             // Y = k4 - Dk
             }
-            if (V <= f(Y, l_my, c_pm)) {
+            if (V <= f(Y, lMy, cPm)) {
               return (Y);
             }    // final accept of Y
           }
@@ -307,7 +307,7 @@ public class Poisson extends AbstractDiscreteDistribution {
         // acceptance-rejection test of candidate X from the original area
         // test, whether  W <= f(k),    with  W = U*h(x)  and  U -- U(0, 1)
         // log f(X) = (X - m)*log(my) - log X! + log m!
-        if (Math.log(W) <= X * l_my - Arithmetic.logFactorial(X) - c_pm) {
+        if (Math.log(W) <= X * lMy - Arithmetic.logFactorial(X) - cPm) {
           return (X);
         }
       }

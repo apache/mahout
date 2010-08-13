@@ -21,12 +21,12 @@ class Fun {
   private Fun() {
   }
 
-  private static double _fkt_value(double lambda, double z1, double z2, double x_value) {
+  private static double fktValue(double lambda, double z1, double z2, double xValue) {
 
-    return Math.cos(z1 * x_value) / (Math.pow((x_value * x_value + z2 * z2), (lambda + 0.5)));
+    return Math.cos(z1 * xValue) / (Math.pow((xValue * xValue + z2 * z2), (lambda + 0.5)));
   }
 
-  public static double bessel2_fkt(double lambda, double beta) {
+  public static double bessel2Fkt(double lambda, double beta) {
 
     double[] b0 = {-1.5787132, -0.6130827, 0.1735823, 1.4793411,
         2.6667307, 4.9086836, 8.1355339,
@@ -262,29 +262,29 @@ class Fun {
 
     double x = 0.0;
 
-    double new_value;
+    double newValue;
     double x1;
     double step;
     if (beta < 1.57) {
-      double fx = (fkt2_value(lambda, beta, x)) * 0.01;
+      double fx = (fkt2Value(lambda, beta, x)) * 0.01;
       double y = 0.0;
       while (true) { //while (!NULL) {
         y += 0.1;
-        if ((fkt2_value(lambda, beta, y)) < fx) {
+        if ((fkt2Value(lambda, beta, y)) < fx) {
           break;
         }
       }
       step = y * 0.001;
       x1 = step;
-      sum = (0.5 * (10.0 * step + fkt2_value(lambda, beta, x1))) * step;
-      double first_value = sum;
+      sum = (0.5 * (10.0 * step + fkt2Value(lambda, beta, x1))) * step;
+      double firstValue = sum;
       double epsilon = 0.01;
       while (true) { //while (!NULL) {
         x = x1;
         x1 += step;
-        new_value = (0.5 * (fkt2_value(lambda, beta, x) + fkt2_value(lambda, beta, x1))) * step;
-        sum += new_value;
-        if ((new_value / first_value) < epsilon) {
+        newValue = (0.5 * (fkt2Value(lambda, beta, x) + fkt2Value(lambda, beta, x1))) * step;
+        sum += newValue;
+        if ((newValue / firstValue) < epsilon) {
           break;
         }
       }
@@ -296,33 +296,33 @@ class Fun {
       double period = pi / z1;
       step = 0.1 * period;
       double border = 100.0 / ((lambda + 0.1) * (lambda + 0.1));
-      int nr_per = (int) Math.ceil((border / period)) + 20;
+      int nrPer = (int) Math.ceil((border / period)) + 20;
       x1 = step;
       int j;
       double z2 = 1.57;
-      for (i = 1; i <= nr_per; i++) {
+      for (i = 1; i <= nrPer; i++) {
         for (j = 1; j <= 10; j++) {
-          new_value = (0.5 * (_fkt_value(lambda, z1, z2, x) + _fkt_value(lambda, z1, z2, x1))) * step;
-          sum += new_value;
+          newValue = (0.5 * (fktValue(lambda, z1, z2, x) + fktValue(lambda, z1, z2, x1))) * step;
+          sum += newValue;
           x = x1;
           x1 += step;
         }
       }
       for (j = 1; j <= 5; j++) {
-        new_value = (0.5 * (_fkt_value(lambda, z1, z2, x) + _fkt_value(lambda, z1, z2, x1))) * step;
-        sum += new_value;
+        newValue = (0.5 * (fktValue(lambda, z1, z2, x) + fktValue(lambda, z1, z2, x1))) * step;
+        sum += newValue;
         x = x1;
         x1 += step;
       }
-      double first_sum = sum;
+      double firstSum = sum;
       for (j = 1; j <= 10; j++) {
-        new_value = (0.5 * (_fkt_value(lambda, z1, z2, x) + _fkt_value(lambda, z1, z2, x1))) * step;
-        sum += new_value;
+        newValue = (0.5 * (fktValue(lambda, z1, z2, x) + fktValue(lambda, z1, z2, x1))) * step;
+        sum += newValue;
         x = x1;
         x1 += step;
       }
-      double second_sum = sum;
-      sum = 0.5 * (first_sum + second_sum);
+      double secondSum = sum;
+      sum = 0.5 * (firstSum + secondSum);
       erg = gamma(lambda + 0.5) * Math.pow((2.0 * z2), lambda) / (Math.sqrt(pi) * Math.pow(z1, lambda)) * sum;
       erg = -Math.log(2.0 * erg);
       return (erg);
@@ -375,9 +375,9 @@ class Fun {
     return Arithmetic.longFactorial(n);
   }
 
-  private static double fkt2_value(double lambda, double beta, double x_value) {
+  private static double fkt2Value(double lambda, double beta, double xValue) {
 
-    return cosh(lambda * x_value) * Math.exp(-beta * cosh(x_value));
+    return cosh(lambda * xValue) * Math.exp(-beta * cosh(xValue));
   }
 
   private static double cosh(double x) {

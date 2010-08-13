@@ -45,9 +45,9 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private final OpenObjectIntHashMap<String> labelDictionary = new OpenObjectIntHashMap<String>();
   
-  private final OpenIntDoubleHashMap sigma_j = new OpenIntDoubleHashMap();
+  private final OpenIntDoubleHashMap sigmaJ = new OpenIntDoubleHashMap();
   
-  private final OpenIntDoubleHashMap sigma_k = new OpenIntDoubleHashMap();
+  private final OpenIntDoubleHashMap sigmaK = new OpenIntDoubleHashMap();
   
   private final OpenIntDoubleHashMap thetaNormalizerPerLabel = new OpenIntDoubleHashMap();
   
@@ -59,7 +59,7 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private double alphaI = 1.0;
   
-  private double sigma_jSigma_k = 1.0;
+  private double sigmaJsigmaK = 1.0;
   
   public InMemoryBayesDatastore(Parameters params) {
     String basePath = params.get("basePath");
@@ -100,7 +100,7 @@ public class InMemoryBayesDatastore implements Datastore {
   public double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException {
     if (matrixName.equals("weight")) {
       if (column.equals("sigma_j")) {
-        return sigma_j.get(getFeatureID(row));
+        return sigmaJ.get(getFeatureID(row));
       } else {
         return weightMatrix.getQuick(getFeatureID(row), getLabelID(column));
       }
@@ -113,7 +113,7 @@ public class InMemoryBayesDatastore implements Datastore {
   public double getWeight(String vectorName, String index) throws InvalidDatastoreException {
     if (vectorName.equals("sumWeight")) {
       if (index.equals("sigma_jSigma_k")) {
-        return sigma_jSigma_k;
+        return sigmaJsigmaK;
       } else if (index.equals("vocabCount")) {
         return featureDictionary.size();
       } else {
@@ -128,7 +128,7 @@ public class InMemoryBayesDatastore implements Datastore {
         throw new InvalidDatastoreException();
       }
     } else if (vectorName.equals("labelWeight")) {
-      return sigma_k.get(getLabelID(index));
+      return sigmaK.get(getLabelID(index));
     } else {
       throw new InvalidDatastoreException();
     }
@@ -162,12 +162,12 @@ public class InMemoryBayesDatastore implements Datastore {
   
   public void setSumFeatureWeight(String feature, double weight) {
     int fid = getFeatureID(feature);
-    sigma_j.put(fid, weight);
+    sigmaJ.put(fid, weight);
   }
   
   public void setSumLabelWeight(String label, double weight) {
     int lid = getLabelID(label);
-    sigma_k.put(lid, weight);
+    sigmaK.put(lid, weight);
   }
   
   public void setThetaNormalizer(String label, double weight) {
@@ -177,6 +177,6 @@ public class InMemoryBayesDatastore implements Datastore {
   }
   
   public void setSigmaJSigmaK(double weight) {
-    this.sigma_jSigma_k = weight;
+    this.sigmaJsigmaK = weight;
   }
 }

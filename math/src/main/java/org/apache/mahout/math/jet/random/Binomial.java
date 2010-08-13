@@ -15,22 +15,22 @@ import org.apache.mahout.math.jet.stat.Probability;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Binomial extends AbstractDiscreteDistribution {
+  private static final int DMAX_KM = 20;
 
   private int n;
   private double p;
 
   // cache vars for method generateBinomial(...)
-  private int n_last = -1, n_prev = -1;
-  private double par, np, p0, q, p_last = -1.0, p_prev = -1.0;
+  private int nLast = -1, nPrev = -1;
+  private double par, np, p0, q, pLast = -1.0, pPrev = -1.0;
   private int b, m, nm;
   private double pq, rc, ss, xm, xl, xr, ll, lr, c, p1, p2, p3, p4, ch;
 
   // cache vars for method pdf(...)
-  private double log_p, log_q, log_n;
+  private double logP, logQ, logN;
 
   // The uniform random number generated shared by all <b>static</b> methods.
   private static final Binomial shared = new Binomial(1, 0.5, makeDefaultGenerator());
-
   /**
    * Constructs a binomial distribution. Example: n=1, p=0.5.
    *
@@ -89,9 +89,9 @@ public class Binomial extends AbstractDiscreteDistribution {
     int i;
     double f;
 
-    if (n != n_last || p != p_last) {                 // set-up
-      n_last = n;
-      p_last = p;
+    if (n != nLast || p != pLast) {                 // set-up
+      nLast = n;
+      pLast = p;
       par = Math.min(p, 1.0 - p);
       q = 1.0 - par;
       np = n * par;
@@ -149,10 +149,6 @@ public class Binomial extends AbstractDiscreteDistribution {
       return ((p > 0.5) ? (n - K) : K);
     }
 
-    int DMAX_KM = 20;
-    double C1_6 = 0.16666666666666667;
-    double C5_8 = 0.62500000000000000;
-    double C1_3 = 0.33333333333333333;
     while (true) {
       double V = randomGenerator.raw();
       if ((U = randomGenerator.raw() * p4) <= p1) {    // triangular region
@@ -206,14 +202,14 @@ public class Binomial extends AbstractDiscreteDistribution {
         // lower and upper squeeze tests, based on lower bounds for log p(K)
         V = Math.log(V);
         double T = -Km * Km / (ss + ss);
-        double E = (Km / ss) * ((Km * (Km * C1_3 + C5_8) + C1_6) / ss + 0.5);
+        double E = (Km / ss) * ((Km * (Km * 1.0 / 3 + 5.0 / 8) + 1.0 / 6) / ss + 0.5);
         if (V <= T - E) {
           break;
         }
         if (V <= T + E) {
-          if (n != n_prev || par != p_prev) {
-            n_prev = n;
-            p_prev = par;
+          if (n != nPrev || par != pPrev) {
+            nPrev = n;
+            pPrev = par;
 
             nm = n - m + 1;
             ch = xm * Math.log((m + 1.0) / (pq * nm)) +
@@ -261,7 +257,7 @@ public class Binomial extends AbstractDiscreteDistribution {
     }
     int r = this.n - k;
     return Math
-        .exp(this.log_n - Arithmetic.logFactorial(k) - Arithmetic.logFactorial(r) + this.log_p * k + this.log_q * r);
+        .exp(this.logN - Arithmetic.logFactorial(k) - Arithmetic.logFactorial(r) + this.logP * k + this.logQ * r);
   }
 
   /**
@@ -271,16 +267,16 @@ public class Binomial extends AbstractDiscreteDistribution {
    * @param p the probability of success.
    * @throws IllegalArgumentException if <tt>n*Math.min(p,1-p) &lt;= 0.0</tt>
    */
-  public void setNandP(int n, double p) {
+  public final void setNandP(int n, double p) {
     if (n * Math.min(p, 1 - p) <= 0.0) {
       throw new IllegalArgumentException();
     }
     this.n = n;
     this.p = p;
 
-    this.log_p = Math.log(p);
-    this.log_q = Math.log(1.0 - p);
-    this.log_n = Arithmetic.logFactorial(n);
+    this.logP = Math.log(p);
+    this.logQ = Math.log(1.0 - p);
+    this.logN = Arithmetic.logFactorial(n);
   }
 
   /**

@@ -24,15 +24,15 @@ import org.apache.mahout.common.RandomUtils;
 
 public class DataConverterTest extends MahoutTestCase {
 
-  private static final int nbAttributes = 10;
+  private static final int ATTRIBUTE_COUNT = 10;
   
-  private static final int nbInstances = 100;
+  private static final int INSTANCE_COUNT = 100;
   
-  public void testConvert() throws Exception {
+  public void testConvert() throws DescriptorException {
     Random rng = RandomUtils.getRandom();
     
-    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
-    double[][] source = Utils.randomDoubles(rng, descriptor, nbInstances);
+    String descriptor = Utils.randomDescriptor(rng, ATTRIBUTE_COUNT);
+    double[][] source = Utils.randomDoubles(rng, descriptor, INSTANCE_COUNT);
     String[] sData = Utils.double2String(source);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
     Data data = DataLoader.loadData(dataset, sData);
