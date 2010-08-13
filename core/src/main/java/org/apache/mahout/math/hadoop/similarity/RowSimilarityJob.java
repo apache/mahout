@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -167,7 +168,7 @@ public class RowSimilarityJob extends AbstractJob {
                                IntWritable.class,
                                VectorWritable.class,
                                SequenceFileOutputFormat.class);
-      asMatrix.setPartitionerClass(SimilarityMatrixEntryKey.SimilarityMatrixEntryKeyPartitioner.class);
+      asMatrix.setPartitionerClass(HashPartitioner.class);
       asMatrix.setGroupingComparatorClass(SimilarityMatrixEntryKey.SimilarityMatrixEntryKeyGroupingComparator.class);
       asMatrix.getConfiguration().setInt(MAX_SIMILARITIES_PER_ROW, maxSimilaritiesPerRow);
       asMatrix.waitForCompletion(true);

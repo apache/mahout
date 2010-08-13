@@ -23,9 +23,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
-import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.mahout.math.Varint;
-import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob.EntriesToVectorsReducer;
 
 /**
@@ -111,14 +109,6 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
 
     protected static int compare(double a, double b) {
       return (a == b) ? 0 : (a < b) ? -1 : 1;
-    }
-  }
-
-  public static class SimilarityMatrixEntryKeyPartitioner
-      extends Partitioner<SimilarityMatrixEntryKey,MatrixEntryWritable> {
-    @Override
-    public int getPartition(SimilarityMatrixEntryKey key, MatrixEntryWritable value, int numPartitions) {
-      return (key.hashCode() * 127) % numPartitions;
     }
   }
 
