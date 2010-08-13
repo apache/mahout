@@ -33,7 +33,7 @@ public abstract class MahoutTestCase extends TestCase {
   }
 
   @Override
-  protected void tearDown() {
+  protected void tearDown() throws Exception {
     if (testTempDir != null) {
       new DeletingVisitor().accept(testTempDir);
     }
