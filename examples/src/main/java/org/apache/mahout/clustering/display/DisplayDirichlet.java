@@ -39,7 +39,8 @@ public class DisplayDirichlet extends DisplayClustering {
 
   public DisplayDirichlet() {
     initialize();
-    this.setTitle("Dirichlet Process Clusters - Normal Distribution (>" + (int) (SIGNIFICANCE * 100) + "% of population)");
+    this.setTitle("Dirichlet Process Clusters - Normal Distribution (>" +
+        (int) (getSignificance() * 100) + "% of population)");
   }
 
   // Override the paint() method
@@ -66,10 +67,12 @@ public class DisplayDirichlet extends DisplayClustering {
     log.info(models.toString());
   }
 
-  protected static void generateResults(ModelDistribution<VectorWritable> modelDist,
-                                        int numClusters,
-                                        int numIterations,
-                                        double alpha_0, int thin, int burnin) {
+  protected void generateResults(ModelDistribution<VectorWritable> modelDist,
+                                 int numClusters,
+                                 int numIterations,
+                                 double alpha_0,
+                                 int thin,
+                                 int burnin) {
     DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(SAMPLE_DATA,
                                                                       modelDist,
                                                                       alpha_0,
@@ -102,8 +105,7 @@ public class DisplayDirichlet extends DisplayClustering {
     int alpha_0 = 1;
     int thin = 3;
     int burnin = 5;
-    generateResults(modelDist, numClusters, numIterations, alpha_0, thin, burnin);
-    new DisplayDirichlet();
+    new DisplayDirichlet().generateResults(modelDist, numClusters, numIterations, alpha_0, thin, burnin);
   }
 
 }
