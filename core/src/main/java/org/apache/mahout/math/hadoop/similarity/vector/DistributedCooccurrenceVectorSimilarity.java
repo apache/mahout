@@ -17,17 +17,26 @@
 
 package org.apache.mahout.math.hadoop.similarity.vector;
 
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 
 /**
  * uses the co-occcurence count as vector similarity
  */
-public class DistributedCooccurrenceVectorSimilarity extends AbstractDistributedVectorSimilarity {
+public class DistributedCooccurrenceVectorSimilarity implements DistributedVectorSimilarity {
 
   @Override
-  protected double doComputeResult(int rowA, int rowB, Iterable<Cooccurrence> cooccurrences, double weightOfVectorA,
-      double weightOfVectorB, int numberOfColumns) {
-    return countElements(cooccurrences);
+  public double weight(Vector v) {
+    return Double.NaN;
   }
 
+  @Override
+  public double similarity(int rowA,
+                           int rowB,
+                           Iterable<Cooccurrence> cooccurrences,
+                           double weightOfVectorA,
+                           double weightOfVectorB,
+                           int numberOfColumns) {
+    return AbstractDistributedVectorSimilarity.countElements(cooccurrences);
+  }
 }

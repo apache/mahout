@@ -35,13 +35,18 @@ import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.*;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersKeyWritable;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersMapper;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersReducer;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixMapper;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixReducer;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob;
+import org.apache.mahout.math.hadoop.similarity.SimilarityType;
 
 import java.io.IOException;
 import java.util.Map;
@@ -88,17 +93,18 @@ public final class RecommenderJob extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption("numRecommendations", "n", "Number of recommendations per user",
-      String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
+        String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
     addOption("usersFile", "u", "File of users to recommend for", null);
     addOption("itemsFile", "u", "File of items to recommend for", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("maxPrefsPerUserConsidered", null,
-      "Maximum number of preferences considered per user in final recommendation phase",
-      String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
-    addOption("maxSimilaritiesPerItemConsidered", null,
-      "Maximum number of similarities considered per item ",
-      String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM_CONSIDERED));
-    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate");
+        "Maximum number of preferences considered per user in final recommendation phase",
+        String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
+    addOption("maxSimilaritiesPerItemConsidered", null,"Maximum number of similarities considered per item ",
+        String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM_CONSIDERED));    
+    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use " +
+        "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')',
+        String.valueOf(SimilarityType.SIMILARITY_COOCCURRENCE));    
 
     Map<String,String> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {

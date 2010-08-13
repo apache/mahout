@@ -47,7 +47,7 @@ public abstract class AbstractDistributedVectorSimilarity implements Distributed
   /**
    * computes the number of elements in the {@link Iterable}
    */
-  protected int countElements(Iterable<?> iterable) {
+  protected static int countElements(Iterable<?> iterable) {
     return countElements(iterable.iterator());
   }
 
