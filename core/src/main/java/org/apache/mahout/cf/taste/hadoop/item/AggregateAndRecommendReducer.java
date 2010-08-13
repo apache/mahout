@@ -65,6 +65,8 @@ public final class AggregateAndRecommendReducer extends
   private FastIDSet itemsToRecommendFor;
   private OpenIntLongHashMap indexItemIDMap;
 
+  private static final float BOOLEAN_PREF_VALUE = 1.0f;
+
   @Override
   protected void setup(Context context) {
     Configuration jobConf = context.getConfiguration();
@@ -128,10 +130,13 @@ public final class AggregateAndRecommendReducer extends
     Iterator<Element> predictions = predictionVector.iterateNonZero();
     List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>();
     while (predictions.hasNext() && recommendations.size() < recommendationsPerUser) {
-      int itemIDIndex = predictions.next().index();
-      long itemID = indexItemIDMap.get(itemIDIndex);
-      if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemID)) {
-        recommendations.add(new GenericRecommendedItem(itemID, 1.0f));
+      Vector.Element prediction = predictions.next();
+      /* NaN means the user already knows this item */
+      if (!Double.isNaN(prediction.get())) {
+        long itemID = indexItemIDMap.get(prediction.index());
+        if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemID)) {
+          recommendations.add(new GenericRecommendedItem(itemID, BOOLEAN_PREF_VALUE));
+        }
       }
     }
 
@@ -161,8 +166,8 @@ public final class AggregateAndRecommendReducer extends
       }
 
       numerators = numerators == null
-          ? prefValue == 1.0f ? simColumn.clone() : simColumn.times(prefValue)
-          : numerators.plus(prefValue == 1.0f ? simColumn : simColumn.times(prefValue));
+          ? prefValue == BOOLEAN_PREF_VALUE ? simColumn.clone() : simColumn.times(prefValue)
+          : numerators.plus(prefValue == BOOLEAN_PREF_VALUE ? simColumn : simColumn.times(prefValue));
 
       simColumn.assign(ABSOLUTE_VALUES);
       denominators = denominators == null ? simColumn : denominators.plus(simColumn);

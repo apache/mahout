@@ -181,6 +181,7 @@ public final class RecommenderJob extends AbstractJob {
                                   IntWritable.class,
                                   VectorWritable.class,
                                   SequenceFileOutputFormat.class);
+      itemUserMatrix.getConfiguration().setBoolean(PrefsToItemUserMatrixMapper.BOOLEAN_DATA, booleanData);
       itemUserMatrix.waitForCompletion(true);
     }
 

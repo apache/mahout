@@ -47,6 +47,7 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.MathHelper;
+import org.apache.mahout.math.hadoop.similarity.vector.DistributedCooccurrenceVectorSimilarity;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.easymock.IArgumentMatcher;
@@ -713,6 +714,54 @@ public class RecommenderJobTest extends TasteTestCase {
         assertEquals(4d, item.getValue(), 0.05d);
       }
     }
+  }
+
+  /**
+   * small integration test for boolean data
+   */
+  public void testCompleteJobBoolean() throws Exception {
+
+    File inputFile = getTestTempFile("prefs.txt");
+    File outputDir = getTestTempDir("output");
+    outputDir.delete();
+    File tmpDir = getTestTempDir("tmp");
+    File usersFile = getTestTempFile("users.txt");
+    writeLines(usersFile, "3");
+
+    writeLines(inputFile,
+        "1,1",
+        "1,2",
+        "1,3",
+        "2,1",
+        "2,3",
+        "2,4",
+        "3,2",
+        "3,4",
+        "4,1",
+        "4,4");
+
+    RecommenderJob recommenderJob = new RecommenderJob();
+
+    Configuration conf = new Configuration();
+    conf.set("mapred.input.dir", inputFile.getAbsolutePath());
+    conf.set("mapred.output.dir", outputDir.getAbsolutePath());
+    conf.setBoolean("mapred.output.compress", false);
+
+    recommenderJob.setConf(conf);
+
+    recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+        DistributedCooccurrenceVectorSimilarity.class.getName(), "--booleanData", "true",
+        "--usersFile", usersFile.getAbsolutePath() });
+
+    Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));
+
+    List<RecommendedItem> recommendedToCow = recommendations.get(3L);
+    assertEquals(2, recommendedToCow.size());
+
+    long itemID1 = recommendedToCow.get(0).getItemID();
+    long itemID2 = recommendedToCow.get(1).getItemID();
+
+    assertTrue((itemID1 == 1L && itemID2 == 3L) || (itemID1 == 3L && itemID2 == 1L));
   }
 
   static Map<Long,List<RecommendedItem>> readRecommendations(File file) throws IOException {

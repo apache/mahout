@@ -32,6 +32,15 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 public class PrefsToItemUserMatrixMapper
     extends Mapper<LongWritable,Text,VarIntWritable,DistributedRowMatrix.MatrixEntryWritable> {
 
+  public static final String BOOLEAN_DATA = PrefsToItemUserMatrixMapper.class.getName() + ".booleanData";
+
+  private boolean booleanData;
+  
+  @Override
+  protected void setup(Context ctx) throws IOException, InterruptedException {
+    booleanData = ctx.getConfiguration().getBoolean(BOOLEAN_DATA, false);
+  }
+
   @Override
   protected void map(LongWritable key, Text value, Context ctx)
       throws IOException, InterruptedException {
@@ -39,7 +48,9 @@ public class PrefsToItemUserMatrixMapper
     String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
     long userID = Long.parseLong(tokens[0]);
     long itemID = Long.parseLong(tokens[1]);
-    float prefValue = tokens.length > 2 ? Float.parseFloat(tokens[2]) : 1.0f;
+
+    boolean treatAsBoolean = booleanData || tokens.length < 3;
+    float prefValue = treatAsBoolean ? 1.0f : Float.parseFloat(tokens[2]);
 
     int row = TasteHadoopUtils.idToIndex(itemID);
     int column = TasteHadoopUtils.idToIndex(userID);

@@ -138,6 +138,24 @@ public final class ItemSimilarityTest extends TasteTestCase {
     EasyMock.verify(context);
   }
 
+  public void testPrefsToItemUserMatrixMapperBoolean() throws Exception {
+    Mapper<LongWritable,Text,VarIntWritable, MatrixEntryWritable>.Context context =
+      EasyMock.createMock(Mapper.Context.class);
+    context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(100L))),
+        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(100L),
+        TasteHadoopUtils.idToIndex(12L), 1d));
+    context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(20L))),
+        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(20L), TasteHadoopUtils.idToIndex(35L), 1d));
+    EasyMock.replay(context);
+
+    PrefsToItemUserMatrixMapper mapper = new PrefsToItemUserMatrixMapper();
+    setField(mapper, "booleanData", Boolean.TRUE);
+    mapper.map(null, new Text("12,100"), context);
+    mapper.map(null, new Text("35,20,3.0"), context);
+
+    EasyMock.verify(context);
+  }
+
   /**
    * tests {@link PrefsToItemUserMatrixReducer}
    *
