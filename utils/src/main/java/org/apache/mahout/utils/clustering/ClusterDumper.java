@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -302,7 +303,7 @@ public final class ClusterDumper extends AbstractJob {
   static class TermIndexWeight {
     private int index = -1;
 
-    private double weight;
+    private final double weight;
 
     TermIndexWeight(int index, double weight) {
       this.index = index;
@@ -328,7 +329,7 @@ public final class ClusterDumper extends AbstractJob {
       }
     });
 
-    List<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
+    Collection<Pair<String, Double>> topTerms = new LinkedList<Pair<String, Double>>();
 
     for (int i = 0; (i < vectorTerms.size()) && (i < numTerms); i++) {
       int index = vectorTerms.get(i).index;

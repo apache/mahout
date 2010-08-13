@@ -22,6 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -179,7 +180,7 @@ public class ClusterLabels {
   /**
    * Get the list of labels, sorted by best score.
    */
-  protected List<TermInfoClusterInOut> getClusterLabels(Integer integer, List<WeightedVectorWritable> wvws)
+  protected List<TermInfoClusterInOut> getClusterLabels(Integer integer, Collection<WeightedVectorWritable> wvws)
       throws IOException {
 
     if (wvws.size() < minNumIds) {
@@ -266,7 +267,7 @@ public class ClusterLabels {
     return clusteredTermInfo.subList(0, Math.min(clusteredTermInfo.size(), maxLabels));
   }
 
-  private static OpenBitSet getClusterDocBitset(IndexReader reader, Set<String> idSet, String idField)
+  private static OpenBitSet getClusterDocBitset(IndexReader reader, Collection<String> idSet, String idField)
       throws IOException {
     int numDocs = reader.numDocs();
 

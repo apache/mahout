@@ -36,19 +36,19 @@ import org.apache.mahout.utils.vectors.tfidf.TFIDFConverter;
  */
 public class DictionaryVectorizerTest extends MahoutTestCase {
 
-  public static final int AVG_DOCUMENT_LENGTH = 20;
+  private static final int AVG_DOCUMENT_LENGTH = 20;
 
-  public static final int AVG_SENTENCE_LENGTH = 8;
+  private static final int AVG_SENTENCE_LENGTH = 8;
 
-  public static final int AVG_WORD_LENGTH = 6;
+  private static final int AVG_WORD_LENGTH = 6;
 
-  public static final int NUM_DOCS = 100;
+  private static final int NUM_DOCS = 100;
 
-  public static final String CHARSET = "abcdef";
+  private static final String CHARSET = "abcdef";
 
-  public static final String DELIM = " .,?;:!\t\n\r";
+  private static final String DELIM = " .,?;:!\t\n\r";
 
-  public static final String ERRORSET = "`1234567890" + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
+  private static final String ERRORSET = "`1234567890" + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
 
   private static final Random random = RandomUtils.getRandom();
 
@@ -58,7 +58,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     return DELIM.charAt(random.nextInt(DictionaryVectorizerTest.DELIM.length()));
   }
 
-  public static String getRandomDocument() {
+  private static String getRandomDocument() {
     int length = (AVG_DOCUMENT_LENGTH >> 1) + DictionaryVectorizerTest.random.nextInt(AVG_DOCUMENT_LENGTH);
     StringBuilder sb = new StringBuilder(length * AVG_SENTENCE_LENGTH * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
@@ -67,7 +67,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     return sb.toString();
   }
 
-  public static String getRandomSentence() {
+  private static String getRandomSentence() {
     int length = (AVG_SENTENCE_LENGTH >> 1) + DictionaryVectorizerTest.random.nextInt(AVG_SENTENCE_LENGTH);
     StringBuilder sb = new StringBuilder(length * AVG_WORD_LENGTH);
     for (int i = 0; i < length; i++) {
@@ -77,7 +77,7 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     return sb.toString();
   }
 
-  public static String getRandomString() {
+  private static String getRandomString() {
     int length = (AVG_WORD_LENGTH >> 1) + DictionaryVectorizerTest.random.nextInt(AVG_WORD_LENGTH);
     StringBuilder sb = new StringBuilder(length);
     for (int i = 0; i < length; i++) {

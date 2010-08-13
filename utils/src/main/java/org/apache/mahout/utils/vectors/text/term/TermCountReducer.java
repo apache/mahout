@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.text.term;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -32,24 +31,17 @@ public class TermCountReducer extends Reducer<Text, LongWritable, Text, LongWrit
 
   private int minSupport;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
     long sum = 0;
-    Iterator<LongWritable> it = values.iterator();
-    while (it.hasNext()) {
-      sum += it.next().get();
+    for (LongWritable value : values) {
+      sum += value.get();
     }
     if (sum >= minSupport) {
       context.write(key, new LongWritable(sum));
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

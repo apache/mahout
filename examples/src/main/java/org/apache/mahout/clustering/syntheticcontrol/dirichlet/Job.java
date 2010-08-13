@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -44,11 +45,10 @@ import org.slf4j.LoggerFactory;
 
 public final class Job extends DirichletDriver {
 
-  private Job() {
-    super();
-  }
-
   private static final Logger log = LoggerFactory.getLogger(Job.class);
+
+  private Job() {
+  }
 
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
@@ -71,10 +71,9 @@ public final class Job extends DirichletDriver {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
-   */
-  public int run(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+  @Override
+  public int run(String[] args)
+      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, InterruptedException {
     addInputOption();
     addOutputOption();
@@ -136,10 +135,6 @@ public final class Job extends DirichletDriver {
    *          the alpha0 value for the DirichletDistribution
    * @param numReducers
    *          the desired number of reducers
-   * @param emitMostLikely 
-   * @param threshold 
-   * @throws InterruptedException 
-   * @throws SecurityException 
    */
   private void job(Path input,
                    Path output,
@@ -150,8 +145,9 @@ public final class Job extends DirichletDriver {
                    double alpha0,
                    int numReducers,
                    boolean emitMostLikely,
-                   double threshold) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
+                   double threshold)
+      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+        NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, modelPrototype);
     DirichletDriver.runJob(directoryContainingConvertedInput,
@@ -166,8 +162,8 @@ public final class Job extends DirichletDriver {
                            emitMostLikely,
                            threshold, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
@@ -188,9 +184,6 @@ public final class Job extends DirichletDriver {
    *          the int number of models
    * @param alpha0
    *          the double alpha_0 value
-   * @throws InvocationTargetException
-   * @throws NoSuchMethodException
-   * @throws SecurityException
    */
   public static void printResults(String output,
                                   String modelDistribution,
@@ -199,15 +192,15 @@ public final class Job extends DirichletDriver {
                                   int numIterations,
                                   int numModels,
                                   double alpha0) throws NoSuchMethodException, InvocationTargetException {
-    List<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
+    Collection<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
     Configuration conf = new Configuration();
-    conf.set(DirichletDriver.MODEL_FACTORY_KEY, modelDistribution);
-    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(numModels));
-    conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha0));
+    conf.set(MODEL_FACTORY_KEY, modelDistribution);
+    conf.set(NUM_CLUSTERS_KEY, Integer.toString(numModels));
+    conf.set(ALPHA_0_KEY, Double.toString(alpha0));
     for (int i = 0; i < numIterations; i++) {
-      conf.set(DirichletDriver.STATE_IN_KEY, output + "/clusters-" + i);
-      conf.set(DirichletDriver.MODEL_PROTOTYPE_KEY, vectorClassName);
-      conf.set(DirichletDriver.PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
+      conf.set(STATE_IN_KEY, output + "/clusters-" + i);
+      conf.set(MODEL_PROTOTYPE_KEY, vectorClassName);
+      conf.set(PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
       clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printClusters(clusters, 0);
@@ -222,7 +215,7 @@ public final class Job extends DirichletDriver {
    * @param significant
    *          the minimum number of samples to enable printing a model
    */
-  private static void printClusters(List<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
+  private static void printClusters(Iterable<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
     int row = 0;
     StringBuilder result = new StringBuilder();
     for (List<DirichletCluster<VectorWritable>> r : clusters) {

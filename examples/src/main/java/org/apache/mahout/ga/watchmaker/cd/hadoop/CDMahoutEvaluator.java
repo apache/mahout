@@ -20,6 +20,7 @@ package org.apache.mahout.ga.watchmaker.cd.hadoop;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -28,6 +29,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -182,7 +184,10 @@ public final class CDMahoutEvaluator {
    *        sorted in the same order as the candidates.
    * @throws IOException
    */
-  private static void importEvaluations(FileSystem fs, Configuration conf, Path outpath, List<CDFitness> evaluations) throws IOException {
+  private static void importEvaluations(FileSystem fs,
+                                        Configuration conf, Path outpath,
+                                        Collection<CDFitness> evaluations)
+      throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, CDFitness.class, conf);
 
     // merge and sort the outputs
@@ -191,7 +196,7 @@ public final class CDMahoutEvaluator {
     sorter.merge(outfiles, output);
 
     // import the evaluations
-    LongWritable key = new LongWritable();
+    Writable key = new LongWritable();
     CDFitness value = new CDFitness();
     Reader reader = new Reader(fs, output, conf);
 

@@ -21,7 +21,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +31,7 @@ import org.apache.mahout.clustering.meanshift.MeanShiftCanopyClusterer;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -49,7 +49,7 @@ final class DisplayMeanShift extends DisplayClustering {
 
   private DisplayMeanShift() {
     initialize();
-    this.setTitle("k-Means Clusters (>" + (int) (SIGNIFICANCE * 100) + "% of population)");
+    this.setTitle("k-Means Clusters (>" + (int) (getSignificance() * 100) + "% of population)");
   }
 
   @Override
@@ -75,7 +75,7 @@ final class DisplayMeanShift extends DisplayClustering {
     int i = 0;
     for (Cluster cluster : CLUSTERS.get(CLUSTERS.size()-1)) {
       MeanShiftCanopy canopy = (MeanShiftCanopy) cluster;
-      if (canopy.getBoundPoints().toList().size() >= SIGNIFICANCE * DisplayClustering.SAMPLE_DATA.size()) {
+      if (canopy.getBoundPoints().toList().size() >= getSignificance() * DisplayClustering.SAMPLE_DATA.size()) {
         g2.setColor(COLORS[Math.min(i++, DisplayClustering.COLORS.length - 1)]);
         int count = 0;
         Vector center = new DenseVector(2);
@@ -92,12 +92,15 @@ final class DisplayMeanShift extends DisplayClustering {
     }
   }
 
-  public static void main(String[] args) throws IOException, InstantiationException, IllegalAccessException, InterruptedException,
-      ClassNotFoundException {
+  @Override
+  protected double getSignificance() {
+    return 0.02;
+  }
+
+  public static void main(String[] args) throws Exception {
     t1 = 1.5;
     t2 = 0.5;
-    SIGNIFICANCE = 0.02;
-    EuclideanDistanceMeasure measure = new EuclideanDistanceMeasure();
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
 
     Path samples = new Path("samples");
     Path output = new Path("output");

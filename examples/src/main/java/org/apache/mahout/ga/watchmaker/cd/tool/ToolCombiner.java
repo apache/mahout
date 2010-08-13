@@ -42,17 +42,12 @@ public class ToolCombiner extends Reducer<LongWritable, Text, LongWritable, Text
 
   private Descriptors descriptors;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
-  protected void reduce(LongWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(LongWritable key, Iterable<Text> values, Context context)
+      throws IOException, InterruptedException {
     context.write(key, new Text(createDescription((int) key.get(), values.iterator())));
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

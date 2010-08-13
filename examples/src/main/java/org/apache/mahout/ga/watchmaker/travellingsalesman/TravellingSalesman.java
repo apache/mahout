@@ -18,6 +18,7 @@
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,12 +41,10 @@ import org.uncommons.watchmaker.framework.FitnessEvaluator;
  * This class has been modified to add a main function that runs the JApplet inside a JDialog.
  */
 public final class TravellingSalesman extends JApplet {
+
   private final ItineraryPanel itineraryPanel;
-  
   private final StrategyPanel strategyPanel;
-  
   private final ExecutionPanel executionPanel;
-  
   private final FitnessEvaluator<List<String>> evaluator;
   
   /**
@@ -58,7 +57,7 @@ public final class TravellingSalesman extends JApplet {
     strategyPanel = new StrategyPanel(distances);
     executionPanel = new ExecutionPanel();
     add(itineraryPanel, BorderLayout.WEST);
-    JPanel innerPanel = new JPanel(new BorderLayout());
+    Container innerPanel = new JPanel(new BorderLayout());
     innerPanel.add(strategyPanel, BorderLayout.NORTH);
     innerPanel.add(executionPanel, BorderLayout.CENTER);
     add(innerPanel, BorderLayout.CENTER);
@@ -92,54 +91,9 @@ public final class TravellingSalesman extends JApplet {
    *          The set of cities to generate a route for.
    * @return A Swing task that will execute on a background thread and update the GUI when it is done.
    */
-  private SwingBackgroundTask<List<String>> createTask(final Collection<String> cities) {
-    final TravellingSalesmanStrategy strategy = strategyPanel.getStrategy();
-    return new SwingBackgroundTask<List<String>>() {
-      private long elapsedTime;
-      
-      @Override
-      protected List<String> performTask() {
-        long startTime = System.currentTimeMillis();
-        List<String> result = strategy.calculateShortestRoute(cities, executionPanel);
-        elapsedTime = System.currentTimeMillis() - startTime;
-        return result;
-      }
-      
-      @Override
-      protected void postProcessing(List<String> result) {
-        executionPanel.appendOutput(createResultString(strategy.getDescription(), result,
-          evaluator.getFitness(result, null), elapsedTime));
-        setEnabled(true);
-      }
-    };
-  }
-  
-  /**
-   * Helper method for formatting a result as a string for display.
-   */
-  private static String createResultString(String strategyDescription,
-                                           List<String> shortestRoute,
-                                           double distance,
-                                           long elapsedTime) {
-    StringBuilder buffer = new StringBuilder(100);
-    buffer.append('[');
-    buffer.append(strategyDescription);
-    buffer.append("]\n");
-    buffer.append("ROUTE: ");
-    for (String s : shortestRoute) {
-      buffer.append(s);
-      buffer.append(" -> ");
-    }
-    buffer.append(shortestRoute.get(0));
-    buffer.append('\n');
-    buffer.append("TOTAL DISTANCE: ");
-    buffer.append(String.valueOf(distance));
-    buffer.append("km\n");
-    buffer.append("(Search Time: ");
-    double seconds = (double) elapsedTime / 1000;
-    buffer.append(String.valueOf(seconds));
-    buffer.append(" seconds)\n\n");
-    return buffer.toString();
+  private SwingBackgroundTask<List<String>> createTask(Collection<String> cities) {
+    TravellingSalesmanStrategy strategy = strategyPanel.getStrategy();
+    return new TSSwingBackgroundTask(strategy, cities, executionPanel, evaluator);
   }
   
   /**
@@ -165,5 +119,67 @@ public final class TravellingSalesman extends JApplet {
     dialog.setLocationRelativeTo(null);
     
     dialog.setVisible(true);
+  }
+
+  private class TSSwingBackgroundTask extends SwingBackgroundTask<List<String>> {
+
+    private long elapsedTime;
+    private final TravellingSalesmanStrategy strategy;
+    private final Collection<String> cities;
+    private final ExecutionPanel executionPanel;
+    private final FitnessEvaluator<List<String>> evaluator;
+
+    private TSSwingBackgroundTask(TravellingSalesmanStrategy strategy,
+                                  Collection<String> cities,
+                                  ExecutionPanel executionPanel,
+                                  FitnessEvaluator<List<String>> evaluator) {
+      this.strategy = strategy;
+      this.cities = cities;
+      this.executionPanel = executionPanel;
+      this.evaluator = evaluator;
+    }
+
+    @Override
+    protected List<String> performTask() {
+      long startTime = System.currentTimeMillis();
+      List<String> result = strategy.calculateShortestRoute(cities, executionPanel);
+      elapsedTime = System.currentTimeMillis() - startTime;
+      return result;
+    }
+
+    @Override
+    protected void postProcessing(List<String> result) {
+      executionPanel.appendOutput(createResultString(strategy.getDescription(), result,
+        evaluator.getFitness(result, null), elapsedTime));
+      setEnabled(true);
+    }
+
+    /**
+     * Helper method for formatting a result as a string for display.
+     */
+    private String createResultString(String strategyDescription,
+                                      List<String> shortestRoute,
+                                      double distance,
+                                      long elapsedTime) {
+      StringBuilder buffer = new StringBuilder(100);
+      buffer.append('[');
+      buffer.append(strategyDescription);
+      buffer.append("]\n");
+      buffer.append("ROUTE: ");
+      for (String s : shortestRoute) {
+        buffer.append(s);
+        buffer.append(" -> ");
+      }
+      buffer.append(shortestRoute.get(0));
+      buffer.append('\n');
+      buffer.append("TOTAL DISTANCE: ");
+      buffer.append(String.valueOf(distance));
+      buffer.append("km\n");
+      buffer.append("(Search Time: ");
+      double seconds = (double) elapsedTime / 1000;
+      buffer.append(String.valueOf(seconds));
+      buffer.append(" seconds)\n\n");
+      return buffer.toString();
+    }
   }
 }

@@ -43,10 +43,10 @@ public class FileInfosDatasetTest extends MahoutTestCase {
       dl.set(line);
       for (int index = 0; index < dataset.getNbAttributes(); index++) {
         if (dataset.isNumerical(index)) {
-          assertInRange(dl.getAttribut(index), dataset.getMin(index), dataset
+          assertInRange(dl.getAttribute(index), dataset.getMin(index), dataset
               .getMax(index));
         } else {
-          assertInRange(dl.getAttribut(index), 0, dataset.getNbValues(index));
+          assertInRange(dl.getAttribute(index), 0, dataset.getNbValues(index));
         }
       }
     }

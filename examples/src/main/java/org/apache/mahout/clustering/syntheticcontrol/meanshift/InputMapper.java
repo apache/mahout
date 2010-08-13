@@ -19,7 +19,7 @@ package org.apache.mahout.clustering.syntheticcontrol.meanshift;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
@@ -33,16 +33,12 @@ public class InputMapper extends Mapper<LongWritable,Text,Text,MeanShiftCanopy> 
   
   private static final Pattern SPACE = Pattern.compile(" ");
   private int nextCanopyId;
-  
-  
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
+
   @Override
   protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
     String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
-    List<Double> doubles = new ArrayList<Double>();
+    Collection<Double> doubles = new ArrayList<Double>();
     for (String value : numbers) {
       if (value.length() > 0) {
         doubles.add(Double.valueOf(value));

@@ -38,9 +38,7 @@ public class TermDocumentCountMapper extends Mapper<WritableComparable<?>, Vecto
 
   private static final IntWritable TOTAL_COUNT = new IntWritable(-1);
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
+  @Override
   protected void map(WritableComparable<?> key, VectorWritable value, Context context)
       throws IOException, InterruptedException {
     Vector vector = value.get();

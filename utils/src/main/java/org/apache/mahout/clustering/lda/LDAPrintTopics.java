@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -84,7 +85,7 @@ public final class LDAPrintTopics {
   }
   
   // Expands the queue list to have a Queue for topic K
-  private static void ensureQueueSize(List<PriorityQueue<StringDoublePair>> queues, int k) {
+  private static void ensureQueueSize(Collection<PriorityQueue<StringDoublePair>> queues, int k) {
     for (int i = queues.size(); i <= k; ++i) {
       queues.add(new PriorityQueue<StringDoublePair>());
     }
@@ -193,10 +194,10 @@ public final class LDAPrintTopics {
     }
   }
   
-  public static List<List<String>> topWordsForTopics(String dir,
-                                                     Configuration job,
-                                                     List<String> wordList,
-                                                     int numWordsToPrint) throws IOException {
+  private static List<List<String>> topWordsForTopics(String dir,
+                                                      Configuration job,
+                                                      List<String> wordList,
+                                                      int numWordsToPrint) throws IOException {
     FileSystem fs = new Path(dir).getFileSystem(job);
     
     List<PriorityQueue<StringDoublePair>> queues = new ArrayList<PriorityQueue<StringDoublePair>>();

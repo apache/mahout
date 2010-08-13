@@ -41,6 +41,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.Summarizable;
@@ -268,7 +269,7 @@ public class VectorBenchmarks implements Summarizable {
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf,
       new Path("/tmp/dense-vector"), IntWritable.class, VectorWritable.class);
 
-    IntWritable one = new IntWritable(0);
+    Writable one = new IntWritable(0);
     VectorWritable vec = new VectorWritable();
     
     TimingStatistics stats = new TimingStatistics();
@@ -320,8 +321,8 @@ public class VectorBenchmarks implements Summarizable {
     SequenceFile.Reader reader = new SequenceFile.Reader(fs,
       new Path("/tmp/dense-vector"), conf);
 
-    IntWritable one = new IntWritable(0);
-    VectorWritable vec = new VectorWritable();
+    Writable one = new IntWritable(0);
+    Writable vec = new VectorWritable();
     TimingStatistics stats = new TimingStatistics();
     for (int l = 0; l < loop; l++) {
       for (int i = 0; i < numVectors; i++) {

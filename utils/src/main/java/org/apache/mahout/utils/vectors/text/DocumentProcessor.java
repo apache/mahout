@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.text;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -47,7 +46,7 @@ public final class DocumentProcessor {
   public static final String TOKENIZED_DOCUMENT_OUTPUT_FOLDER = "tokenized-documents";
   public static final String ANALYZER_CLASS = "analyzer.class";
   
-  public static final Charset CHARSET = Charset.forName("UTF-8");
+  //public static final Charset CHARSET = Charset.forName("UTF-8");
   
   /**
    * Cannot be initialized. Use the static functions

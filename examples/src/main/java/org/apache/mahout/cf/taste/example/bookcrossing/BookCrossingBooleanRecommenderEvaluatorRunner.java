@@ -40,13 +40,9 @@ public final class BookCrossingBooleanRecommenderEvaluatorRunner {
 
   public static void main(String... args) throws IOException, TasteException, OptionException {
     RecommenderIRStatsEvaluator evaluator = new GenericRecommenderIRStatsEvaluator();
-    DataModel model;
     File ratingsFile = TasteOptionParser.getRatings(args);
-    if (ratingsFile != null) {
-      model = new BookCrossingDataModel(ratingsFile, true);
-    } else {
-      model = new BookCrossingDataModel(true);
-    }
+    DataModel model =
+        ratingsFile == null ? new BookCrossingDataModel(true) : new BookCrossingDataModel(ratingsFile, true);
 
     IRStatistics evaluation = evaluator.evaluate(
         new BookCrossingBooleanRecommenderBuilder(),

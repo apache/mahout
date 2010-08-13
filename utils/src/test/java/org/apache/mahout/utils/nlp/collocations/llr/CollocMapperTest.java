@@ -39,13 +39,12 @@ import org.junit.Test;
 /**
  * Test for CollocMapper 
  */
-@SuppressWarnings("deprecation")
 public class CollocMapperTest {
   
   private Mapper<Text,StringTuple,GramKey,Gram>.Context context;
   private Counter counter;
+
   @Before
-  @SuppressWarnings("unchecked")
   public void setUp() {
     counter = EasyMock.createMock(Counter.class);
     context = EasyMock.createMock(Context.class);

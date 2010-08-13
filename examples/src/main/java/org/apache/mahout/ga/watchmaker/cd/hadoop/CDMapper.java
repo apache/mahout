@@ -45,9 +45,6 @@ public class CDMapper extends Mapper<LongWritable, Text, LongWritable, CDFitness
 
   int target;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     DataLine dl = new DataLine(value.toString());
@@ -58,9 +55,6 @@ public class CDMapper extends Mapper<LongWritable, Text, LongWritable, CDFitness
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

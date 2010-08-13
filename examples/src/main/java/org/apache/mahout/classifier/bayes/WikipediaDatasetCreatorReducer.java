@@ -18,7 +18,6 @@
 package org.apache.mahout.classifier.bayes;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -28,16 +27,12 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class WikipediaDatasetCreatorReducer extends Reducer<Text, Text, Text, Text> {
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
-    Iterator<Text> it = values.iterator();
-    while (it.hasNext()) {
-      context.write(key, it.next());
+    for (Text value : values) {
+      context.write(key, value);
     }
   }
 }

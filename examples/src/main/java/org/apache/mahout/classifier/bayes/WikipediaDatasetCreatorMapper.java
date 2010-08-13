@@ -58,20 +58,17 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
 
   private Analyzer analyzer;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     StringBuilder contents = new StringBuilder();
     String document = value.toString();
     String catMatch = findMatchingCategory(document);
 
-    if (!catMatch.equals("Unknown")) {
+    if (!"Unknown".equals(catMatch)) {
       document = StringEscapeUtils.unescapeHtml(WikipediaDatasetCreatorMapper.CLOSE_TEXT_TAG_PATTERN.matcher(
           WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
       TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
-      TermAttribute termAtt = (TermAttribute) stream.addAttribute(TermAttribute.class);
+      TermAttribute termAtt = stream.addAttribute(TermAttribute.class);
       while (stream.incrementToken()) {
         contents.append(termAtt.termBuffer(), 0, termAtt.termLength()).append(' ');
       }
@@ -80,10 +77,6 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
-  @SuppressWarnings("unchecked")
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -103,7 +96,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       exactMatchOnly = conf.getBoolean("exact.match.only", false);
       if (analyzer == null) {
         String analyzerStr = conf.get("analyzer.class", WikipediaAnalyzer.class.getName());
-        Class<? extends Analyzer> analyzerClass = (Class<? extends Analyzer>) Class.forName(analyzerStr);
+        Class<? extends Analyzer> analyzerClass = Class.forName(analyzerStr).asSubclass(Analyzer.class);
         analyzer = analyzerClass.newInstance();
       }
     } catch (IOException ex) {

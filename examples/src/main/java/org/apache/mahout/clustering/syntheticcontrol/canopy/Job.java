@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 public final class Job extends CanopyDriver {
 
   private Job() {
-    super();
   }
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
@@ -45,7 +44,7 @@ public final class Job extends CanopyDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"), output, "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55);
+      job(new Path("testdata"), output, "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55);
     }
   }
 
@@ -67,10 +66,9 @@ public final class Job extends CanopyDriver {
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  private void job(Path input, Path output, String measureClassName, double t1, double t2) throws IOException,
+  private static void job(Path input, Path output, String measureClassName, double t1, double t2)
+      throws IOException,
       InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");

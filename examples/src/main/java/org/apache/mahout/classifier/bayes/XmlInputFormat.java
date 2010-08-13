@@ -33,7 +33,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 
 /**
- * Reads records that are delimited by a specifc begin/end tag.
+ * Reads records that are delimited by a specific begin/end tag.
  */
 public class XmlInputFormat extends TextInputFormat {
 
@@ -41,17 +41,12 @@ public class XmlInputFormat extends TextInputFormat {
 
   public static final String END_TAG_KEY = "xmlinput.end";
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.lib.input.TextInputFormat#createRecordReader(org.apache.hadoop.mapreduce.InputSplit, org.apache.hadoop.mapreduce.TaskAttemptContext)
-   */
   @Override
   public RecordReader<LongWritable, Text> createRecordReader(InputSplit split,
       TaskAttemptContext context) {
     try {
       return new XmlRecordReader((FileSplit) split, context.getConfiguration());
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
       return null;
     }
   }

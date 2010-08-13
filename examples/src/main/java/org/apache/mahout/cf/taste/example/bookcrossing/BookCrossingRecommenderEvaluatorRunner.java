@@ -39,14 +39,10 @@ public final class BookCrossingRecommenderEvaluatorRunner {
   
   public static void main(String... args) throws IOException, TasteException, OptionException {
     RecommenderEvaluator evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
-    DataModel model;
     File ratingsFile = TasteOptionParser.getRatings(args);
-    if (ratingsFile != null) {
-      model = new BookCrossingDataModel(ratingsFile, false);
-    } else {
-      model = new BookCrossingDataModel(false);
-    }
-    
+    DataModel model =
+        ratingsFile == null ? new BookCrossingDataModel(false) : new BookCrossingDataModel(ratingsFile, false);
+
     double evaluation = evaluator.evaluate(new BookCrossingRecommenderBuilder(),
       null,
       model,

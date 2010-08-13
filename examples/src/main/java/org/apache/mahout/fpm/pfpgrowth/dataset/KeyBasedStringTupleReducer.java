@@ -18,8 +18,8 @@
 package org.apache.mahout.fpm.pfpgrowth.dataset;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -33,7 +33,7 @@ public class KeyBasedStringTupleReducer extends Reducer<Text,StringTuple,Text,Te
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException,
                                                                                 InterruptedException {
-    Set<String> items = new HashSet<String>();
+    Collection<String> items = new HashSet<String>();
     
     for (StringTuple value : values) {
       for (String field : value.getEntries()) {

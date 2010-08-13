@@ -182,18 +182,13 @@ public class BuildForest extends Configured implements Tool {
     log.info("Build Time: {}", DFUtils.elapsedTime(time));
     
     if (isOob) {
-      Random rng;
-      if (seed != null) {
-        rng = RandomUtils.getRandom(seed);
-      } else {
-        rng = RandomUtils.getRandom();
-      }
-      
+      Random rng = seed == null ? RandomUtils.getRandom() : RandomUtils.getRandom(seed);
+
       FileSystem fs = dataPath.getFileSystem(getConf());
       int[] labels = Data.extractLabels(dataset, fs, dataPath);
       
-      log.info("oob error estimate : "
-                           + ErrorEstimate.errorRate(labels, callback.computePredictions(rng)));
+      log.info("oob error estimate : {}",
+               ErrorEstimate.errorRate(labels, callback.computePredictions(rng)));
     }
     
     return forest;

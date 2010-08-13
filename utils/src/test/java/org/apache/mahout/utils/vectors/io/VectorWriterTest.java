@@ -20,6 +20,7 @@ package org.apache.mahout.utils.vectors.io;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -29,6 +30,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -64,13 +66,13 @@ public class VectorWriterTest extends MahoutTestCase {
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
     SequenceFileVectorWriter writer = new SequenceFileVectorWriter(seqWriter);
-    RandomVectorIterable iter = new RandomVectorIterable(50);
+    Iterable<Vector> iter = new RandomVectorIterable(50);
     writer.write(iter);
     writer.close();
     
     SequenceFile.Reader seqReader = new SequenceFile.Reader(fs, path, conf);
-    LongWritable key = new LongWritable();
-    VectorWritable value = new VectorWritable();
+    Writable key = new LongWritable();
+    Writable value = new VectorWritable();
     int count = 0;
     while (seqReader.next(key, value)){
       count++;
@@ -81,7 +83,7 @@ public class VectorWriterTest extends MahoutTestCase {
   public void test() throws Exception {
     StringWriter strWriter = new StringWriter();
     VectorWriter writer = new JWriterVectorWriter(strWriter);
-    List<Vector> vectors = new ArrayList<Vector>();
+    Collection<Vector> vectors = new ArrayList<Vector>();
     vectors.add(new DenseVector(new double[]{0.3, 1.5, 4.5}));
     vectors.add(new DenseVector(new double[]{1.3, 1.5, 3.5}));
     writer.write(vectors);

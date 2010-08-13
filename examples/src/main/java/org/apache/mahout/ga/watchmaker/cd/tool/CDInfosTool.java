@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -41,6 +42,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Sorter;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -130,7 +132,9 @@ public final class CDInfosTool {
    * @param descriptions List of attribute's descriptions
    * @throws IOException
    */
-  private static void importDescriptions(FileSystem fs, Configuration conf, Path outpath, List<String> descriptions)
+  private static void importDescriptions(FileSystem fs,
+                                         Configuration conf, Path outpath,
+                                         Collection<String> descriptions)
       throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, Text.class, conf);
 
@@ -140,8 +144,8 @@ public final class CDInfosTool {
     sorter.merge(outfiles, output);
 
     // import the descriptions
-    LongWritable key = new LongWritable();
-    Text value = new Text();
+    Writable key = new LongWritable();
+    Writable value = new Text();
     Reader reader = new Reader(fs, output, conf);
 
     while (reader.next(key, value)) {

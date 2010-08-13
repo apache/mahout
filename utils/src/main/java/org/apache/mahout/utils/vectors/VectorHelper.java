@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.FileLineIterator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -95,7 +96,7 @@ public final class VectorHelper {
   public static String[] loadTermDictionary(Configuration conf, FileSystem fs, String filePattern) throws IOException {
     FileStatus[] dictionaryFiles = fs.globStatus(new Path(filePattern));
     OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<String>();
-    Text key = new Text();
+    Writable key = new Text();
     IntWritable value = new IntWritable();
     for (FileStatus fileStatus : dictionaryFiles) {
       Path path = fileStatus.getPath();
@@ -119,7 +120,7 @@ public final class VectorHelper {
    * term DocFreq Index
    * </pre>
    */
-  public static String[] loadTermDictionary(InputStream is) throws IOException {
+  private static String[] loadTermDictionary(InputStream is) throws IOException {
     FileLineIterator it = new FileLineIterator(is);
     
     int numEntries = Integer.parseInt(it.next());

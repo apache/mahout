@@ -48,12 +48,12 @@ import org.apache.mahout.math.VectorWritable;
 
 public class TestCDbwEvaluator extends MahoutTestCase {
 
-  public static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 },
+  private static final double[][] reference = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 },
       { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
-  Map<Integer, Cluster> clusters;
+  private Map<Integer, Cluster> clusters;
 
   @Override
   protected void setUp() throws Exception {
@@ -100,7 +100,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     clusters.put(7, new Canopy(new DenseVector(new double[] { dC, -dC }), 7));
     representativePoints = new HashMap<Integer, List<VectorWritable>>();
     for (Cluster cluster : clusters.values()) {
-      ArrayList<VectorWritable> points = new ArrayList<VectorWritable>();
+      List<VectorWritable> points = new ArrayList<VectorWritable>();
       representativePoints.put(cluster.getId(), points);
       points.add(new VectorWritable(cluster.getCenter().clone()));
       points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { dP, dP }))));

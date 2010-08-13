@@ -152,8 +152,16 @@ public final class CDGA {
     }
   }
 
-  private static void runJob(String dataset, int target, double threshold, int crosspnts, double mutrate, double mutrange,
-      int mutprec, int popSize, int genCount) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void runJob(String dataset,
+                             int target,
+                             double threshold,
+                             int crosspnts,
+                             double mutrate,
+                             double mutrange,
+                             int mutprec,
+                             int popSize,
+                             int genCount)
+      throws IOException, InterruptedException, ClassNotFoundException {
     Path inpath = new Path(dataset);
     CDMahoutEvaluator.initializeDataSet(inpath);
 

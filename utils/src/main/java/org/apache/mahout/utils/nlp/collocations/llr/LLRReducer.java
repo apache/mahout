@@ -78,9 +78,7 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
     // FIXME: better way to handle errors? Wouldn't an exception thrown here
     // cause hadoop to re-try the job?
     String[] gram = new String[2];
-    Iterator<Gram> it = values.iterator();
-    while (it.hasNext()) {
-      Gram value = it.next();
+    for (Gram value : values) {
 
       int pos = value.getType() == Gram.Type.HEAD ? 0 : 1;
 
@@ -132,9 +130,6 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

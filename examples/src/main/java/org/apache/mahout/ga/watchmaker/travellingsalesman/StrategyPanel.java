@@ -19,6 +19,7 @@ package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -91,11 +92,7 @@ final class StrategyPanel extends JPanel {
   }
   
   public TravellingSalesmanStrategy getStrategy() {
-    if (bruteForceOption.isSelected()) {
-      return new BruteForceTravellingSalesman(distances);
-    } else {
-      return evolutionPanel.getStrategy();
-    }
+    return bruteForceOption.isSelected() ? new BruteForceTravellingSalesman(distances) : evolutionPanel.getStrategy();
   }
   
   @Override
@@ -134,7 +131,7 @@ final class StrategyPanel extends JPanel {
     
     EvolutionPanel() {
       super(new FlowLayout(FlowLayout.LEFT, 0, 0));
-      JPanel innerPanel = new JPanel(new SpringLayout());
+      Container innerPanel = new JPanel(new SpringLayout());
       
       populationLabel = new JLabel("Population Size: ");
       populationSpinner = new JSpinner(new SpinnerNumberModel(300, 2, 10000, 1));

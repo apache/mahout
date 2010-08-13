@@ -26,7 +26,6 @@ import org.apache.lucene.util.Version;
  */
 public class DefaultAnalyzer extends StandardAnalyzer {
 
-  @SuppressWarnings("deprecation")
   public DefaultAnalyzer() {
     super(Version.LUCENE_CURRENT);
   }

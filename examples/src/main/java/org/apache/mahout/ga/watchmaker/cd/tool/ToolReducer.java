@@ -42,17 +42,11 @@ public class ToolReducer extends Reducer<LongWritable, Text, LongWritable, Text>
 
   private final Set<String> distinct = new HashSet<String>();
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(LongWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
     context.write(key, new Text(combineDescriptions((int) key.get(), values.iterator())));
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

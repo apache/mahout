@@ -59,9 +59,6 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
 
   private boolean all;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
@@ -89,9 +86,6 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     context.write(new Text(SPACE_NON_ALPHA_PATTERN.matcher(title).replaceAll("_")), new Text(document));
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -112,7 +106,8 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     } catch (IOException ex) {
       throw new IllegalStateException(ex);
     }
-    log.info("Configure: Input Categories size: {} All: {} Exact Match: {}", new Object[] { inputCategories.size(), all,
+    log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
+             new Object[] { inputCategories.size(), all,
         exactMatchOnly });
   }
 
@@ -122,7 +117,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
     return xml.substring(start, end);
   }
 
-  private static String getTitle(String xml) {
+  private static String getTitle(CharSequence xml) {
     Matcher m = TITLE.matcher(xml);
     return m.find() ? m.group(1) : "";
   }

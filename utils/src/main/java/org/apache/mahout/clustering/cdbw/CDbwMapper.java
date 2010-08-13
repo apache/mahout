@@ -40,24 +40,18 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
-  private Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<Integer, WeightedVectorWritable>();
+  private final Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<Integer, WeightedVectorWritable>();
 
   private DistanceMeasure measure = new EuclideanDistanceMeasure();
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#cleanup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
-    for (Integer clusterId : mostDistantPoints.keySet()) {
-      context.write(new IntWritable(clusterId), mostDistantPoints.get(clusterId));
+    for (Map.Entry<Integer, WeightedVectorWritable> entry : mostDistantPoints.entrySet()) {
+      context.write(new IntWritable(entry.getKey()), entry.getValue());
     }
     super.cleanup(context);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context) throws IOException, InterruptedException {
     int key = clusterId.get();
@@ -73,9 +67,6 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

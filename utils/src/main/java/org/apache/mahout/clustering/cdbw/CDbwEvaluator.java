@@ -251,6 +251,7 @@ public class CDbwEvaluator {
     stDevs.put(cI, d);
   }
 
+  /*
   double minRpDistance(Iterable<VectorWritable> repI, Iterable<VectorWritable> repJ) {
     double minDistance = Double.MAX_VALUE;
     for (VectorWritable aRepI : repI) {
@@ -263,6 +264,7 @@ public class CDbwEvaluator {
     }
     return minDistance;
   }
+   */
 
   double intraDensity(Vector clusterCenter, Vector repPoint, double avgStd) {
     return measure.distance(clusterCenter, repPoint) <= avgStd ? 1.0 : 0.0;

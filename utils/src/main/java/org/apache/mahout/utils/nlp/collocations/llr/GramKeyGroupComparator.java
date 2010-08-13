@@ -23,9 +23,9 @@ import org.apache.hadoop.io.WritableComparator;
 /** Group GramKeys based on their Gram, ignoring the secondary sort key, so that all keys with the same Gram are sent
  *  to the same call of the reduce method, sorted in natural order (for GramKeys).
  */
-public class GramKeyGroupComparator extends WritableComparator {
+class GramKeyGroupComparator extends WritableComparator {
 
-  protected GramKeyGroupComparator() {
+  GramKeyGroupComparator() {
     super(GramKey.class, true);
   }
 

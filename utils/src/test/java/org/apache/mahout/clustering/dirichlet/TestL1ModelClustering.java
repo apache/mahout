@@ -54,7 +54,6 @@ public class TestL1ModelClustering extends MahoutTestCase {
   private class MapElement implements Comparable<MapElement> {
     
     MapElement(double pdf, String doc) {
-      super();
       this.pdf = pdf;
       this.doc = doc;
     }

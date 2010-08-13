@@ -81,7 +81,7 @@ public class CDRuleTest extends MahoutTestCase {
 
     // the dataline has all its attributes set to 0d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(0.0).atLeastOnce();
+    EasyMock.expect(dl.getAttribute(EasyMock.anyInt())).andReturn(0.0).atLeastOnce();
     EasyMock.replay(dl);
 
     // all the conditions are : attribut < 0
@@ -117,7 +117,7 @@ public class CDRuleTest extends MahoutTestCase {
 
     // the dataline has all its attributes set to 1d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0).atLeastOnce();
+    EasyMock.expect(dl.getAttribute(EasyMock.anyInt())).andReturn(1.0).atLeastOnce();
     EasyMock.replay(dl);
 
     int n = 100; // repeat the test n times
@@ -150,7 +150,7 @@ public class CDRuleTest extends MahoutTestCase {
 
     // the dataline has all its attributes set to 1d
     DataLine dl = EasyMock.createMock(DataLine.class);
-    EasyMock.expect(dl.getAttribut(EasyMock.anyInt())).andReturn(1.0).atLeastOnce();
+    EasyMock.expect(dl.getAttribute(EasyMock.anyInt())).andReturn(1.0).atLeastOnce();
     EasyMock.replay(dl);
 
     int n = 100; // repeat the test n times

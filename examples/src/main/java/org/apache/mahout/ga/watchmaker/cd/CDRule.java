@@ -161,32 +161,22 @@ public class CDRule implements Rule {
     if (getW(condInd) < threshold) {
       return true; // no
     }
-    
-    if (DataSet.getDataSet().isNumerical(attrInd)) {
-      return numericalCondition(condInd, dl);
-    } else {
-      return categoricalCondition(condInd, dl);
-    }
+
+    return DataSet.getDataSet().isNumerical(attrInd)
+        ? numericalCondition(condInd, dl)
+        : categoricalCondition(condInd, dl);
   }
   
   boolean numericalCondition(int condInd, DataLine dl) {
     int attrInd = attributeIndex(condInd);
-    
-    if (getO(condInd)) {
-      return dl.getAttribut(attrInd) >= getV(condInd);
-    } else {
-      return dl.getAttribut(attrInd) < getV(condInd);
-    }
+
+    return getO(condInd) ? dl.getAttribute(attrInd) >= getV(condInd) : dl.getAttribute(attrInd) < getV(condInd);
   }
   
   boolean categoricalCondition(int condInd, DataLine dl) {
     int attrInd = attributeIndex(condInd);
-    
-    if (getO(condInd)) {
-      return dl.getAttribut(attrInd) == getV(condInd);
-    } else {
-      return dl.getAttribut(attrInd) != getV(condInd);
-    }
+
+    return getO(condInd) ? dl.getAttribute(attrInd) == getV(condInd) : dl.getAttribute(attrInd) != getV(condInd);
   }
   
   @Override

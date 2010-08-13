@@ -39,7 +39,6 @@ public final class Job extends KMeansDriver {
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
   private Job() {
-    super();
   }
 
   public static void main(String[] args) throws Exception {

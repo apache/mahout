@@ -19,6 +19,7 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -51,9 +52,6 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
 
   private Descriptors descriptors;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     extractAttributes(value, attributes);
@@ -71,9 +69,6 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -95,11 +90,8 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
   /**
    * Extract attribute values from the input Text. The attributes are separated by a colon ','. Skips ignored
    * attributes.
-   * 
-   * @param value
-   * @param attributes
    */
-  static void extractAttributes(Text value, List<String> attributes) {
+  static void extractAttributes(Text value, Collection<String> attributes) {
     StringTokenizer tokenizer = new StringTokenizer(value.toString(), ",");
 
     attributes.clear();

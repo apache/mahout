@@ -74,7 +74,7 @@ public class ARFFVectorIterableTest extends MahoutTestCase {
   
   public void testDense() throws Exception {
     ARFFModel model = new MapBackedARFFModel();
-    ARFFVectorIterable iterable = new ARFFVectorIterable(SAMPLE_DENSE_ARFF, model);
+    Iterable<Vector> iterable = new ARFFVectorIterable(SAMPLE_DENSE_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
       Assert.assertTrue("Vector is not dense", vector instanceof DenseVector);
@@ -85,7 +85,7 @@ public class ARFFVectorIterableTest extends MahoutTestCase {
   
   public void testSparse() throws Exception {
     ARFFModel model = new MapBackedARFFModel();
-    ARFFVectorIterable iterable = new ARFFVectorIterable(SAMPLE_SPARSE_ARFF, model);
+    Iterable<Vector> iterable = new ARFFVectorIterable(SAMPLE_SPARSE_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
       Assert.assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);

@@ -31,9 +31,6 @@ import org.apache.mahout.math.map.OpenObjectLongHashMap;
  */
 public class TermCountMapper extends Mapper<Text, StringTuple, Text, LongWritable> {
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(Text key, StringTuple value, final Context context) throws IOException, InterruptedException {
     OpenObjectLongHashMap<String> wordCount = new OpenObjectLongHashMap<String>();

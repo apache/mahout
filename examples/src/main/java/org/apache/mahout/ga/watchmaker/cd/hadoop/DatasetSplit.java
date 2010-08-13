@@ -23,11 +23,9 @@ import java.util.Random;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.LineRecordReader;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.RandomWrapper;
@@ -162,8 +160,6 @@ public class DatasetSplit {
       try {
         return reader.getProgress();
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
         return 0;
       }
     }
@@ -210,18 +206,13 @@ public class DatasetSplit {
   }
 
   /**
-   * {@link org.apache.hadoop.mapred.TextInputFormat TextInputFormat that uses a {@link RndLineRecordReader
-   * RndLineRecordReader} as a RecordReader
+   * {@link TextInputFormat) that uses a {@link RndLineRecordReader} as a RecordReader
    */
   public static class DatasetTextInputFormat extends TextInputFormat {
-
-    public RecordReader<LongWritable, Text> getRecordReader(InputSplit split, TaskAttemptContext context, Reporter reporter)
-        throws IOException {
-      reporter.setStatus(split.toString());
-
-      LineRecordReader lineRecordReader = new LineRecordReader();
-      lineRecordReader.initialize(split, context);
-      return new RndLineRecordReader((RecordReader<LongWritable, Text>) lineRecordReader, context.getConfiguration());
+    @Override
+    public RecordReader<LongWritable, Text> createRecordReader(InputSplit split,
+                                                               TaskAttemptContext context) {
+      return new RndLineRecordReader(super.createRecordReader(split, context), context.getConfiguration());
     }
   }
 }

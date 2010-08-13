@@ -24,6 +24,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VectorWritable;
@@ -52,7 +53,7 @@ public class RowIdJob extends AbstractJob {
                                                                  IntWritable.class,
                                                                  VectorWritable.class);
     IntWritable docId = new IntWritable();
-    Text inputKey = new Text();
+    Writable inputKey = new Text();
     VectorWritable v = new VectorWritable();
 
     int i = 0;

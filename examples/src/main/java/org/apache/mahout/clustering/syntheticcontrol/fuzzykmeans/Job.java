@@ -41,7 +41,6 @@ public final class Job extends FuzzyKMeansDriver {
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
   private Job() {
-    super();
   }
 
   public static void main(String[] args) throws Exception {
@@ -147,12 +146,6 @@ public final class Job extends FuzzyKMeansDriver {
    *          the double convergence criteria for iterations
    * @param runClustering
    *          the int maximum number of iterations
-   * @param output2
-   *          the String class name of the DistanceMeasure to use
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   private void job(Path input,
                    Path output,
@@ -163,8 +156,8 @@ public final class Job extends FuzzyKMeansDriver {
                    int numReducerTasks,
                    float fuzziness,
                    double convergenceDelta,
-                   boolean runClustering) throws IOException, InstantiationException, IllegalAccessException, InterruptedException,
-      ClassNotFoundException {
+                   boolean runClustering)
+      throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
 
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
@@ -185,7 +178,8 @@ public final class Job extends FuzzyKMeansDriver {
                              0.0,
                              false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 }

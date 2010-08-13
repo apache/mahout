@@ -22,15 +22,13 @@ import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.NGRAM;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.mahout.math.stats.LogLikelihood;
 import org.apache.mahout.utils.nlp.collocations.llr.LLRReducer.LLCallback;
 import org.easymock.classextension.EasyMock;
@@ -52,7 +50,6 @@ public class LLRReducerTest {
   private LLCallback cl;
   
   @Before
-  @SuppressWarnings("unchecked")
   public void setUp() {
     context   = EasyMock.createMock(Reducer.Context.class);
     ll        = EasyMock.createMock(LLCallback.class);
@@ -109,7 +106,7 @@ public class LLRReducerTest {
     reducer.setup(context);
     
     for (Gram[] ii: input) {
-      List<Gram> vv = new LinkedList<Gram>();
+      Collection<Gram> vv = new LinkedList<Gram>();
       vv.addAll(Arrays.asList(ii).subList(1, ii.length));
       reducer.reduce(ii[0], vv, context);
     }

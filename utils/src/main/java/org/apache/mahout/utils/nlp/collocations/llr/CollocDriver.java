@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /** Driver for LLR Collocation discovery mapreduce job */
 public final class CollocDriver extends AbstractJob {
-  public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
+  //public static final String DEFAULT_OUTPUT_DIRECTORY = "output";
 
   public static final String SUBGRAM_OUTPUT_DIRECTORY = "subgrams";
 
@@ -52,9 +52,9 @@ public final class CollocDriver extends AbstractJob {
 
   public static final boolean DEFAULT_EMIT_UNIGRAMS = false;
 
-  public static final int DEFAULT_MAX_NGRAM_SIZE = 2;
+  private static final int DEFAULT_MAX_NGRAM_SIZE = 2;
 
-  public static final int DEFAULT_PASS1_NUM_REDUCE_TASKS = 1;
+  private static final int DEFAULT_PASS1_NUM_REDUCE_TASKS = 1;
 
   private static final Logger log = LoggerFactory.getLogger(CollocDriver.class);
 
@@ -194,13 +194,14 @@ public final class CollocDriver extends AbstractJob {
   /**
    * pass1: generate collocations, ngrams
    */
-  public static long generateCollocations(Path input,
-                                          Path output,
-                                          Configuration baseConf,
-                                          boolean emitUnigrams,
-                                          int maxNGramSize,
-                                          int reduceTasks,
-                                          int minSupport) throws IOException, ClassNotFoundException, InterruptedException {
+  private static long generateCollocations(Path input,
+                                           Path output,
+                                           Configuration baseConf,
+                                           boolean emitUnigrams,
+                                           int maxNGramSize,
+                                           int reduceTasks,
+                                           int minSupport)
+      throws IOException, ClassNotFoundException, InterruptedException {
 
     Configuration con = new Configuration(baseConf);
     con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
@@ -240,15 +241,14 @@ public final class CollocDriver extends AbstractJob {
 
   /**
    * pass2: perform the LLR calculation
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  public static void computeNGramsPruneByLLR(Path output,
-                                             Configuration baseConf,
-                                             long nGramTotal,
-                                             boolean emitUnigrams,
-                                             float minLLRValue,
-                                             int reduceTasks) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void computeNGramsPruneByLLR(Path output,
+                                              Configuration baseConf,
+                                              long nGramTotal,
+                                              boolean emitUnigrams,
+                                              float minLLRValue,
+                                              int reduceTasks)
+      throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration(baseConf);
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);

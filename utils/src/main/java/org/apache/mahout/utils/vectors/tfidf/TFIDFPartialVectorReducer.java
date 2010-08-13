@@ -60,12 +60,9 @@ public class TFIDFPartialVectorReducer extends
 
   private boolean sequentialAccess;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
-  protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context) throws IOException,
-      InterruptedException {
+  protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
+      throws IOException, InterruptedException {
     Iterator<VectorWritable> it = values.iterator();
     if (!it.hasNext()) {
       return;
@@ -94,9 +91,6 @@ public class TFIDFPartialVectorReducer extends
     context.write(key, vectorWritable);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

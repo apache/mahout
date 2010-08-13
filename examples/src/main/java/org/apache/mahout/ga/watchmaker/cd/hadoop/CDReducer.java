@@ -18,7 +18,6 @@
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -29,18 +28,14 @@ import org.apache.mahout.ga.watchmaker.cd.CDFitness;
  */
 public class CDReducer extends Reducer<LongWritable, CDFitness, LongWritable, CDFitness> {
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
-  protected void reduce(LongWritable key, Iterable<CDFitness> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(LongWritable key, Iterable<CDFitness> values, Context context)
+      throws IOException, InterruptedException {
     int tp = 0;
     int fp = 0;
     int tn = 0;
     int fn = 0;
-    Iterator<CDFitness> it = values.iterator();
-    while (it.hasNext()) {
-      CDFitness v = it.next();
+    for (CDFitness v : values) {
       tp += v.getTp();
       fp += v.getFp();
       tn += v.getTn();

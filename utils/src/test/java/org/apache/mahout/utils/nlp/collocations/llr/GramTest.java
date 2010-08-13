@@ -19,7 +19,9 @@ package org.apache.mahout.utils.nlp.collocations.llr;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -57,8 +59,7 @@ public class GramTest {
     try {
       new Gram(null, 4, Gram.Type.UNIGRAM);
       Assert.fail("expected exception");
-    }
-    catch (NullPointerException ex) {
+    } catch (NullPointerException ex) {
       /* ok */
     }
    
@@ -66,8 +67,7 @@ public class GramTest {
     try {
       new Gram("foo", 4, null);
       Assert.fail("expected exception");
-    }
-    catch (NullPointerException ex) {
+    } catch (NullPointerException ex) {
       /* ok */
     }
   }
@@ -173,14 +173,14 @@ public class GramTest {
    Assert.assertEquals(Gram.Type.UNIGRAM, two.getType());
    
    ByteArrayOutputStream bout = new ByteArrayOutputStream();
-   DataOutputStream out = new DataOutputStream(bout);
+   DataOutput out = new DataOutputStream(bout);
    
    two.write(out);
    
    byte[] b = bout.toByteArray();
    
    ByteArrayInputStream bin = new ByteArrayInputStream(b);
-   DataInputStream din = new DataInputStream(bin);
+   DataInput din = new DataInputStream(bin);
    
    one.readFields(din);
 

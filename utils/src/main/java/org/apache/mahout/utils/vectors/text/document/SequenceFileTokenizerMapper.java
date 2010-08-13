@@ -36,9 +36,6 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
 
   private Analyzer analyzer;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(Text key, Text value, Context context) throws IOException, InterruptedException {
     TokenStream stream = analyzer.tokenStream(key.toString(), new StringReader(value.toString()));
@@ -52,9 +49,6 @@ public class SequenceFileTokenizerMapper extends Mapper<Text, Text, Text, String
     context.write(key, document);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

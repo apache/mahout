@@ -60,12 +60,12 @@ public class SequenceFileVectorIterableTest extends MahoutTestCase {
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
     SequenceFileVectorWriter writer = new SequenceFileVectorWriter(seqWriter);
-    RandomVectorIterable iter = new RandomVectorIterable(50);
+    Iterable<Vector> iter = new RandomVectorIterable(50);
     writer.write(iter);
     writer.close();
     
     SequenceFile.Reader seqReader = new SequenceFile.Reader(fs, path, conf);
-    SequenceFileVectorIterable sfvi = new SequenceFileVectorIterable(seqReader);
+    Iterable<Vector> sfvi = new SequenceFileVectorIterable(seqReader);
     int count = 0;
     for (Vector vector : sfvi) {
       //System.out.println("Vec: " + vector.asFormatString());

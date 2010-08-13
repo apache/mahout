@@ -62,7 +62,7 @@ public final class TFIDFConverter {
 
   public static final String MAX_DF_PERCENTAGE = "max.df.percentage";
 
-  public static final String TFIDF_OUTPUT_FOLDER = "tfidf";
+  //public static final String TFIDF_OUTPUT_FOLDER = "tfidf";
 
   private static final String DOCUMENT_VECTOR_OUTPUT_FOLDER = "tfidf-vectors";
 

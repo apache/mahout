@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.text.term;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -29,15 +28,11 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class TermDocumentCountReducer extends Reducer<IntWritable, LongWritable, IntWritable, LongWritable> {
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(IntWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
     long sum = 0;
-    Iterator<LongWritable> it = values.iterator();
-    while (it.hasNext()) {
-      sum += it.next().get();
+    for (LongWritable value : values) {
+      sum += value.get();
     }
     context.write(key, new LongWritable(sum));
   }

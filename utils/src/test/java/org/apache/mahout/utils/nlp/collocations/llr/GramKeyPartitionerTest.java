@@ -19,6 +19,7 @@ package org.apache.mahout.utils.nlp.collocations.llr;
 
 import junit.framework.Assert;
 
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.junit.Test;
 
 
@@ -38,7 +39,7 @@ public class GramKeyPartitionerTest {
     GramKey d = new GramKey(new Gram("foo", 1, Gram.Type.TAIL), empty);
     GramKey e = new GramKey(new Gram("foo", 2, Gram.Type.TAIL), foo);
     
-    GramKeyPartitioner p = new GramKeyPartitioner();
+    Partitioner<GramKey, Gram> p = new GramKeyPartitioner();
     int numPartitions = 5;
     
     int ap = p.getPartition(a, null, numPartitions);

@@ -18,12 +18,12 @@
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,10 +44,10 @@ final class ItineraryPanel extends JPanel {
   private final JButton selectAllButton;
   private final JButton clearButton;
   
-  ItineraryPanel(List<String> cities) {
+  ItineraryPanel(Collection<String> cities) {
     super(new BorderLayout());
     
-    JPanel checkBoxPanel = new JPanel(new GridLayout(0, 1));
+    Container checkBoxPanel = new JPanel(new GridLayout(0, 1));
     checkBoxes = new ArrayList<JCheckBox>(cities.size());
     for (String city : cities) {
       JCheckBox checkBox = new JCheckBox(city, false);
@@ -56,7 +56,7 @@ final class ItineraryPanel extends JPanel {
     }
     add(checkBoxPanel, BorderLayout.CENTER);
     
-    JPanel buttonPanel = new JPanel(new GridLayout(2, 1));
+    Container buttonPanel = new JPanel(new GridLayout(2, 1));
     selectAllButton = new JButton("Select All");
     buttonPanel.add(selectAllButton);
     clearButton = new JButton("Clear Selection");

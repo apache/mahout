@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
@@ -37,15 +37,12 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
 
   private Constructor<?> constructor;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#map(java.lang.Object, java.lang.Object, org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
 
     String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
-    List<Double> doubles = new ArrayList<Double>();
+    Collection<Double> doubles = new ArrayList<Double>();
     for (String value : numbers) {
       if (value.length() > 0) {
         doubles.add(Double.valueOf(value));
@@ -69,17 +66,13 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
-  @SuppressWarnings("unchecked")
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
     String vectorImplClassName = conf.get("vector.implementation.class.name");
     try {
-      Class<? extends Vector> outputClass = (Class<? extends Vector>) conf.getClassByName(vectorImplClassName);
+      Class<? extends Vector> outputClass = conf.getClassByName(vectorImplClassName).asSubclass(Vector.class);
       constructor = outputClass.getConstructor(int.class);
     } catch (NoSuchMethodException e) {
       throw new IllegalStateException(e);

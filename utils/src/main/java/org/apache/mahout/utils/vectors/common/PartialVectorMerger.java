@@ -112,7 +112,7 @@ public final class PartialVectorMerger {
     job.waitForCompletion(true);
   }
 
-  private static String getCommaSeparatedPaths(List<Path> paths) {
+  private static String getCommaSeparatedPaths(Iterable<Path> paths) {
     StringBuilder commaSeparatedPaths = new StringBuilder();
     String sep = "";
     for (Path path : paths) {

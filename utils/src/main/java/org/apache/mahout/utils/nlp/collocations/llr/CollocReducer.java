@@ -82,9 +82,6 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -99,9 +96,9 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
 
   /**
    * Sum frequencies for unigrams and deliver to the collector
-   * @throws InterruptedException 
    */
-  protected void processUnigram(GramKey key, Iterator<Gram> values, Context context) throws IOException, InterruptedException {
+  protected void processUnigram(GramKey key, Iterator<Gram> values, Context context)
+      throws IOException, InterruptedException {
 
     int freq = 0;
     Gram value = null;

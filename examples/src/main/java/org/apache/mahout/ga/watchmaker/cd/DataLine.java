@@ -43,7 +43,7 @@ public class DataLine {
     return (int) attributes[labelPos];
   }
   
-  public double getAttribut(int index) {
+  public double getAttribute(int index) {
     return attributes[index];
   }
   

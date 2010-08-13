@@ -36,7 +36,6 @@ public final class Job extends MeanShiftCanopyDriver {
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
   private Job() {
-    super();
   }
 
   public static void main(String[] args) throws Exception {
@@ -51,9 +50,6 @@ public final class Job extends MeanShiftCanopyDriver {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
-   */
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
@@ -113,12 +109,6 @@ public final class Job extends MeanShiftCanopyDriver {
    *          the double convergence criteria for iterations
    * @param maxIterations
    *          the int maximum number of iterations
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
    */
   private void job(Path input,
                    Path output,
@@ -126,7 +116,8 @@ public final class Job extends MeanShiftCanopyDriver {
                    double t1,
                    double t2,
                    double convergenceDelta,
-                   int maxIterations) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+                   int maxIterations)
+      throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
     MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput,
@@ -139,8 +130,8 @@ public final class Job extends MeanShiftCanopyDriver {
                                  true,
                                  true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations),
+                                                    new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 

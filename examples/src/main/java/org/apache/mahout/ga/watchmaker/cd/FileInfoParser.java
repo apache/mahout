@@ -19,6 +19,7 @@ package org.apache.mahout.ga.watchmaker.cd;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -138,7 +139,7 @@ public final class FileInfoParser {
    * @param tokenizer
    */
   private static NominalAttr parseNominal(StringTokenizer tokenizer) {
-    List<String> vlist = new ArrayList<String>();
+    Collection<String> vlist = new ArrayList<String>();
     while (tokenizer.hasMoreTokens()) {
       vlist.add(nextToken(tokenizer));
     }

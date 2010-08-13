@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,30 +31,23 @@ public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, In
 
   private Map<Integer, List<VectorWritable>> referencePoints;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#cleanup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
-    for (Integer clusterId : referencePoints.keySet()) {
-      for (VectorWritable vw : referencePoints.get(clusterId)) {
-        context.write(new IntWritable(clusterId), vw);
+    for (Map.Entry<Integer, List<VectorWritable>> entry : referencePoints.entrySet()) {
+      IntWritable iw = new IntWritable(entry.getKey());
+      for (VectorWritable vw : entry.getValue()) {
+        context.write(iw, vw);
       }
     }
     super.cleanup(context);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(IntWritable key, Iterable<WeightedVectorWritable> values, Context context) throws IOException,
       InterruptedException {
     // find the most distant point
     WeightedVectorWritable mdp = null;
-    Iterator<WeightedVectorWritable> it = values.iterator();
-    while (it.hasNext()) {
-      WeightedVectorWritable dpw = it.next();
+    for (WeightedVectorWritable dpw : values) {
       if (mdp == null || mdp.getWeight() < dpw.getWeight()) {
         mdp = new WeightedVectorWritable(dpw.getWeight(), dpw.getVector());
       }
@@ -63,9 +55,6 @@ public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, In
     context.write(new IntWritable(key.get()), mdp.getVector());
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

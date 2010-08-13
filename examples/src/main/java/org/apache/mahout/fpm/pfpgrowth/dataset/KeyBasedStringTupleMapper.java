@@ -19,6 +19,7 @@ package org.apache.mahout.fpm.pfpgrowth.dataset;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -52,7 +53,7 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable,Text,Text,Str
       context.getCounter("Map", "ERROR").increment(1);
       return;
     }
-    List<String> oKey = new ArrayList<String>();
+    Collection<String> oKey = new ArrayList<String>();
     for (int groupingField : groupingFields) {
       oKey.add(fields[groupingField]);
       context.setStatus(fields[groupingField]);

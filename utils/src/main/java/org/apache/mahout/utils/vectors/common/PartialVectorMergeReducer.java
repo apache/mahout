@@ -41,17 +41,12 @@ public class PartialVectorMergeReducer extends
 
   private boolean sequentialAccess;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context) throws IOException,
       InterruptedException {
 
     Vector vector = new RandomAccessSparseVector(dimension, 10);
-    Iterator<VectorWritable> it = values.iterator();
-    while (it.hasNext()) {
-      VectorWritable value = it.next();
+    for (VectorWritable value : values) {
       value.get().addTo(vector);
     }
     if (normPower != PartialVectorMerger.NO_NORMALIZING) {
@@ -64,9 +59,6 @@ public class PartialVectorMergeReducer extends
     context.write(key, vectorWritable);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);

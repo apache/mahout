@@ -18,6 +18,7 @@
 package org.apache.mahout.ga.watchmaker.travellingsalesman;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 
@@ -45,7 +46,7 @@ final class ExecutionPanel extends JPanel implements ProgressListener {
   
   ExecutionPanel() {
     super(new BorderLayout());
-    JPanel controlPanel = new JPanel(new BorderLayout());
+    Container controlPanel = new JPanel(new BorderLayout());
     startButton = new JButton("Start");
     controlPanel.add(startButton, BorderLayout.WEST);
     progressBar = new JProgressBar(0, 100);

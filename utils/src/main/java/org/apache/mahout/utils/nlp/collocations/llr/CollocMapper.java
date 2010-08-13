@@ -44,7 +44,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
 
   public static final String MAX_SHINGLE_SIZE = "maxShingleSize";
 
-  public static final int DEFAULT_MAX_SHINGLE_SIZE = 2;
+  private static final int DEFAULT_MAX_SHINGLE_SIZE = 2;
 
   public enum Count {
     NGRAM_TOTAL
@@ -85,12 +85,6 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
    * CollocDriver.Count.NGRAM_TOTAL
    * </p>
    * 
-   * @param collector
-   *          The collector to send output to
-   * 
-   * @param reporter
-   *          Used to deliver the final ngram-count.
-   * 
    * @throws IOException
    *           if there's a problem with the ShingleFilter reading data or the collector collecting output.
    */
@@ -104,8 +98,8 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
     OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
 
     do {
-      String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
-      String type = ((TypeAttribute) sf.getAttribute(TypeAttribute.class)).type();
+      String term = (sf.getAttribute(TermAttribute.class)).term();
+      String type = (sf.getAttribute(TypeAttribute.class)).type();
       if ("shingle".equals(type)) {
         count++;
         ngrams.adjustOrPutValue(term, 1, 1);
@@ -182,9 +176,6 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
     sf.close();
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Mapper#setup(org.apache.hadoop.mapreduce.Mapper.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -207,7 +198,7 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
 
     public IteratorTokenStream(Iterator<String> iterator) {
       this.iterator = iterator;
-      this.termAtt = (TermAttribute) addAttribute(TermAttribute.class);
+      this.termAtt = addAttribute(TermAttribute.class);
     }
 
     @Override

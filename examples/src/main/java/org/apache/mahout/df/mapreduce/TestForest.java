@@ -134,7 +134,7 @@ public class TestForest extends Configured implements Tool {
         outputPath = new Path(outputName);
       }
     } catch (OptionException e) {
-      System.out.println("Exception : " + e);
+      log.warn(e.toString(), e);
       CommandLineUtil.printHelp(group);
       return -1;
     }

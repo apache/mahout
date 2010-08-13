@@ -64,8 +64,6 @@ public class DisplayClustering extends Frame {
 
   protected static final List<List<Cluster>> CLUSTERS = new ArrayList<List<Cluster>>();
 
-  protected static double SIGNIFICANCE = 0.05;
-
   protected static final Color[] COLORS = { Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
       Color.lightGray };
 
@@ -113,7 +111,7 @@ public class DisplayClustering extends Frame {
     plotClusters(g2);
   }
 
-  protected void plotClusters(Graphics2D g2) {
+  protected static void plotClusters(Graphics2D g2) {
     int cx = CLUSTERS.size() - 1;
     for (List<Cluster> clusters : CLUSTERS) {
       g2.setStroke(new BasicStroke(cx == 0 ? 3 : 1));
@@ -124,7 +122,7 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  protected void plotSampleParameters(Graphics2D g2) {
+  protected static void plotSampleParameters(Graphics2D g2) {
     Vector v = new DenseVector(2);
     Vector dv = new DenseVector(2);
     g2.setColor(Color.RED);
@@ -137,7 +135,7 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  protected void plotSampleData(Graphics2D g2) {
+  protected static void plotSampleData(Graphics2D g2) {
     double sx = (double) res / DS;
     g2.setTransform(AffineTransform.getScaleInstance(sx, sx));
 
@@ -250,7 +248,7 @@ public class DisplayClustering extends Frame {
     for (FileStatus s : status) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       try {
-        Text key = new Text();
+        Writable key = new Text();
         Writable value = (Writable) reader.getValueClass().newInstance();
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
@@ -267,12 +265,11 @@ public class DisplayClustering extends Frame {
   }
   
   protected static void loadClusters(Path output) throws IOException, InstantiationException, IllegalAccessException{
-    List<Cluster> clusters = new ArrayList<Cluster>();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     FileStatus[] status = fs.listStatus(output, new ClustersFilter());
     for (FileStatus s : status) {
-      clusters = readClusters(s.getPath());
+      List<Cluster> clusters = readClusters(s.getPath());
       CLUSTERS.add(clusters);
     }
   }
@@ -301,8 +298,12 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  protected static boolean isSignificant(Cluster cluster) {
-    return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > SIGNIFICANCE;
+  protected boolean isSignificant(Cluster cluster) {
+    return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > getSignificance();
+  }
+
+  protected double getSignificance() {
+    return 0.05;
   }
 
 }

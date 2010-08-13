@@ -27,8 +27,6 @@ import org.apache.mahout.clustering.dirichlet.DirichletClusterer;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
 import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.ModelDistribution;
-import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
-import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
@@ -51,7 +49,7 @@ public class DisplayDirichlet extends DisplayClustering {
     plotClusters((Graphics2D) g);
   }
 
-  protected static void printModels(List<Model<VectorWritable>[]> results, int significant) {
+  protected static void printModels(Iterable<Model<VectorWritable>[]> results, int significant) {
     int row = 0;
     StringBuilder models = new StringBuilder();
     for (Model<VectorWritable>[] r : results) {
@@ -73,17 +71,16 @@ public class DisplayDirichlet extends DisplayClustering {
                                         int numIterations,
                                         double alpha_0, int thin, int burnin) {
     DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(SAMPLE_DATA,
-                                                                                   modelDist,
-                                                                                   alpha_0,
-                                                                                   numClusters,
-                                                                                   thin,
-                                                                                   burnin);
+                                                                      modelDist,
+                                                                      alpha_0,
+                                                                      numClusters,
+                                                                      thin,
+                                                                      burnin);
     List<Model<VectorWritable>[]> result = dc.cluster(numIterations);
     printModels(result, burnin);
     for (Model<VectorWritable>[] models : result) {
       List<Cluster> clusters = new ArrayList<Cluster>();
-      for (Model<VectorWritable> model : models) {
-        Cluster cluster = (Cluster) model;
+      for (Model<VectorWritable> cluster : models) {
         if (isSignificant(cluster)) {
           clusters.add(cluster);
         }
@@ -94,18 +91,17 @@ public class DisplayDirichlet extends DisplayClustering {
 
   public static void main(String[] args) throws Exception {
     VectorWritable modelPrototype = new VectorWritable(new DenseVector(2));
-    ModelDistribution<VectorWritable> modelDist;
-    modelDist = new NormalModelDistribution(modelPrototype);
-    modelDist = new SampledNormalDistribution(modelPrototype);
-    modelDist = new AsymmetricSampledNormalDistribution(modelPrototype);
+    // ModelDistribution<VectorWritable> modelDist = new NormalModelDistribution(modelPrototype);
+    // ModelDistribution<VectorWritable> modelDist = new SampledNormalDistribution(modelPrototype);
+    ModelDistribution<VectorWritable> modelDist = new AsymmetricSampledNormalDistribution(modelPrototype);
+
+    RandomUtils.useTestSeed();
+    generateSamples();
     int numIterations = 40;
     int numClusters = 40;
     int alpha_0 = 1;
     int thin = 3;
     int burnin = 5;
-    
-    RandomUtils.useTestSeed();
-    generateSamples();
     generateResults(modelDist, numClusters, numIterations, alpha_0, thin, burnin);
     new DisplayDirichlet();
   }

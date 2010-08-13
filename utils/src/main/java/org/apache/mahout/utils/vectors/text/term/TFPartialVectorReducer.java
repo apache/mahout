@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
@@ -55,9 +56,6 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
   private int maxNGramSize = 1;
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#reduce(java.lang.Object, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
@@ -72,7 +70,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxNGramSize);
 
       do {
-        String term = ((TermAttribute) sf.getAttribute(TermAttribute.class)).term();
+        String term = (sf.getAttribute(TermAttribute.class)).term();
         if (term.length() > 0) { // ngram
           if (dictionary.containsKey(term)) {
             int termId = dictionary.get(term);
@@ -105,9 +103,6 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.hadoop.mapreduce.Reducer#setup(org.apache.hadoop.mapreduce.Reducer.Context)
-   */
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
@@ -123,7 +118,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       Path dictionaryFile = new Path(localFiles[0].getPath());
       FileSystem fs = dictionaryFile.getFileSystem(conf);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
-      Text key = new Text();
+      Writable key = new Text();
       IntWritable value = new IntWritable();
 
       // key is word value is id

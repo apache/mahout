@@ -23,8 +23,8 @@ import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.TAIL;
 import static org.apache.mahout.utils.nlp.collocations.llr.Gram.Type.UNIGRAM;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
@@ -38,9 +38,8 @@ import org.junit.Test;
 public class CollocReducerTest {
   
   private Reducer<GramKey,Gram,Gram,Gram>.Context context;
-;  
+
   @Before
-  @SuppressWarnings("unchecked")
   public void setUp() {
     context = EasyMock.createMock(Context.class);
   }
@@ -78,7 +77,7 @@ public class CollocReducerTest {
     for (Gram[] ii : input) {
       key.set(ii[0], empty);
 
-      List<Gram> vv = new LinkedList<Gram>();
+      Collection<Gram> vv = new LinkedList<Gram>();
       vv.addAll(Arrays.asList(ii));
       c.reduce(key, vv, context);
     }
