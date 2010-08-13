@@ -39,7 +39,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
   }
 
   @Override
-  protected void tearDown() {
+  protected void tearDown() throws Exception {
     if (testTempDirPath != null) {
       try {
         fs.delete(testTempDirPath, true);
