@@ -81,6 +81,9 @@ import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
  * </pre>
  * 
  * </p>
+ *
+ * <p>The table may optionally have a <code>timestamp</code> column whose type is compatible with Java
+ * <code>long</code>.</p>
  * 
  * <h3>Performance Notes</h3>
  * 
@@ -156,7 +159,8 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
          DEFAULT_ITEM_ID_COLUMN,
-         DEFAULT_PREFERENCE_COLUMN);
+         DEFAULT_PREFERENCE_COLUMN,
+         DEFAULT_PREFERENCE_TIME_COLUMN);
   }
   
   /**
@@ -172,7 +176,8 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
          DEFAULT_ITEM_ID_COLUMN,
-         DEFAULT_PREFERENCE_COLUMN);
+         DEFAULT_PREFERENCE_COLUMN,
+         DEFAULT_PREFERENCE_TIME_COLUMN);
   }
   
   /**
@@ -190,15 +195,20 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
    *          item ID column name
    * @param preferenceColumn
    *          preference column name
+   * @param timestampColumn timestamp column name (may be null)
    */
   public MySQLJDBCDataModel(DataSource dataSource,
                             String preferenceTable,
                             String userIDColumn,
                             String itemIDColumn,
-                            String preferenceColumn) {
+                            String preferenceColumn,
+                            String timestampColumn) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn, preferenceColumn,
         // getPreferenceSQL
         "SELECT " + preferenceColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND "
+            + itemIDColumn + "=?",
+        // getPreferenceTimeSQL
+        "SELECT " + timestampColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND "
             + itemIDColumn + "=?",
         // getUserSQL
         "SELECT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable

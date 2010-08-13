@@ -93,6 +93,18 @@ public interface DataModel extends Refreshable, Serializable {
    *           if an error occurs while accessing the data
    */
   Float getPreferenceValue(long userID, long itemID) throws TasteException;
+
+  /**
+   * Retrieves the time at which a preference value from a user and item was set, if known.
+   * Time is expressed in the usual way, as a number of milliseconds since the epoch.
+   *
+   * @param userID user ID for preference in question
+   * @param itemID item ID for preference in question
+   * @return time at which preference was set or null if no preference exists or its time is not known
+   * @throws org.apache.mahout.cf.taste.common.NoSuchUserException if the user does not exist
+   * @throws TasteException if an error occurs while accessing the data
+   */
+  Long getPreferenceTime(long userID, long itemID) throws TasteException;
   
   /**
    * @return total number of items known to the model. This is generally the union of all items preferred by

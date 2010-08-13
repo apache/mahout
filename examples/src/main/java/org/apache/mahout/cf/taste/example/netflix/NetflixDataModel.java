@@ -135,7 +135,12 @@ public final class NetflixDataModel implements DataModel {
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     return delegate.getPreferenceValue(userID, itemID);
   }
-  
+
+  @Override
+  public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+    return delegate.getPreferenceTime(userID, itemID);
+  }
+
   @Override
   public int getNumItems() throws TasteException {
     return delegate.getNumItems();

@@ -106,11 +106,11 @@ public final class FileDiffStorage implements DiffStorage {
         
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         String firstLine = iterator.peek();
-        while ((firstLine.length() == 0) || (firstLine.charAt(0) == COMMENT_CHAR)) {
+        while (firstLine.length() == 0 || firstLine.charAt(0) == COMMENT_CHAR) {
           iterator.next();
           firstLine = iterator.peek();
         }
-        char delimiter = FileDataModel.determineDelimiter(firstLine, 2);
+        char delimiter = FileDataModel.determineDelimiter(firstLine);
         long averageCount = 0L;
         while (iterator.hasNext()) {
           averageCount = processLine(iterator.next(), delimiter, averageCount);

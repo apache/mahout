@@ -43,6 +43,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                              String itemIDColumn,
                                              String preferenceColumn,
                                              String getPreferenceSQL,
+                                             String getPreferenceTimeSQL,
                                              String getUserSQL,
                                              String getAllUsersSQL,
                                              String getNumItemsSQL,
@@ -56,10 +57,26 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
                                              String getNumPreferenceForItemsSQL,
                                              String getMaxPreferenceSQL,
                                              String getMinPreferenceSQL) {
-    super(dataSource, preferenceTable, userIDColumn, itemIDColumn, preferenceColumn, getPreferenceSQL,
-        getUserSQL, getAllUsersSQL, getNumItemsSQL, getNumUsersSQL, setPreferenceSQL, removePreferenceSQL,
-        getUsersSQL, getItemsSQL, getPrefsForItemSQL, getNumPreferenceForItemSQL, getNumPreferenceForItemsSQL,
-        getMaxPreferenceSQL, getMinPreferenceSQL);
+    super(dataSource,
+          preferenceTable,
+          userIDColumn,
+          itemIDColumn,
+          preferenceColumn,
+          getPreferenceSQL,
+          getPreferenceTimeSQL,
+          getUserSQL,
+          getAllUsersSQL,
+          getNumItemsSQL,
+          getNumUsersSQL,
+          setPreferenceSQL,
+          removePreferenceSQL,
+          getUsersSQL,
+          getItemsSQL,
+          getPrefsForItemSQL,
+          getNumPreferenceForItemSQL,
+          getNumPreferenceForItemsSQL,
+          getMaxPreferenceSQL,
+          getMinPreferenceSQL);
     this.setPreferenceSQL = setPreferenceSQL;
   }
   

@@ -42,6 +42,7 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
   
   public static final String DATA_SOURCE_KEY = "dataSource";
   public static final String GET_PREFERENCE_SQL_KEY = "getPreferenceSQL";
+  public static final String GET_PREFERENCE_TIME_SQL_KEY = "getPreferenceTimeSQL";
   public static final String GET_USER_SQL_KEY = "getUserSQL";
   public static final String GET_ALL_USERS_SQL_KEY = "getAllUsersSQL";
   public static final String GET_NUM_USERS_SQL_KEY = "getNumUsersSQL";
@@ -68,22 +69,22 @@ public final class GenericJDBCDataModel extends AbstractJDBCDataModel {
    *           if anything goes wrong during initialization
    */
   public GenericJDBCDataModel(Properties props) throws TasteException {
-    super(AbstractJDBCComponent.lookupDataSource(
-        props.getProperty(DATA_SOURCE_KEY)),
-        props.getProperty(GET_PREFERENCE_SQL_KEY),
-        props.getProperty(GET_USER_SQL_KEY),
-        props.getProperty(GET_ALL_USERS_SQL_KEY),
-        props.getProperty(GET_NUM_USERS_SQL_KEY),
-        props.getProperty(GET_NUM_ITEMS_SQL_KEY),
-        props.getProperty(SET_PREFERENCE_SQL_KEY),
-        props.getProperty(REMOVE_PREFERENCE_SQL_KEY),
-        props.getProperty(GET_USERS_SQL_KEY),
-        props.getProperty(GET_ITEMS_SQL_KEY),
-        props.getProperty(GET_PREFS_FOR_ITEM_SQL_KEY),
-        props.getProperty(GET_NUM_PREFERENCE_FOR_ITEM_KEY),
-        props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY),
-        props.getProperty(GET_MAX_PREFERENCE_KEY),
-        props.getProperty(GET_MIN_PREFERENCE_KEY));
+    super(AbstractJDBCComponent.lookupDataSource(props.getProperty(DATA_SOURCE_KEY)),
+          props.getProperty(GET_PREFERENCE_SQL_KEY),
+          props.getProperty(GET_PREFERENCE_TIME_SQL_KEY),
+          props.getProperty(GET_USER_SQL_KEY),
+          props.getProperty(GET_ALL_USERS_SQL_KEY),
+          props.getProperty(GET_NUM_USERS_SQL_KEY),
+          props.getProperty(GET_NUM_ITEMS_SQL_KEY),
+          props.getProperty(SET_PREFERENCE_SQL_KEY),
+          props.getProperty(REMOVE_PREFERENCE_SQL_KEY),
+          props.getProperty(GET_USERS_SQL_KEY),
+          props.getProperty(GET_ITEMS_SQL_KEY),
+          props.getProperty(GET_PREFS_FOR_ITEM_SQL_KEY),
+          props.getProperty(GET_NUM_PREFERENCE_FOR_ITEM_KEY),
+          props.getProperty(GET_NUM_PREFERENCE_FOR_ITEMS_KEY),
+          props.getProperty(GET_MAX_PREFERENCE_KEY),
+          props.getProperty(GET_MIN_PREFERENCE_KEY));
   }
   
   /**

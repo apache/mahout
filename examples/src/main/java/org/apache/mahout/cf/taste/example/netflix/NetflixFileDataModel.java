@@ -75,7 +75,12 @@ public final class NetflixFileDataModel implements DataModel {
   public Float getPreferenceValue(long userID, long itemID) {
     throw new UnsupportedOperationException(); // TODO
   }
-  
+
+  @Override
+  public Long getPreferenceTime(long userID, long itemID) {
+    throw new UnsupportedOperationException(); // TODO
+  }
+
   @Override
   public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
     StringBuilder itemIDPadded = new StringBuilder(5);

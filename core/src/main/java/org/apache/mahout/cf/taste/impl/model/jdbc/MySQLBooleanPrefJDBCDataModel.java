@@ -76,7 +76,8 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
     this(AbstractJDBCComponent.lookupDataSource(dataSourceName),
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN);
+         DEFAULT_ITEM_ID_COLUMN,
+         DEFAULT_PREFERENCE_TIME_COLUMN);
   }
   
   /**
@@ -92,7 +93,8 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
     this(dataSource,
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
-         DEFAULT_ITEM_ID_COLUMN);
+         DEFAULT_ITEM_ID_COLUMN,
+         DEFAULT_PREFERENCE_TIME_COLUMN);
   }
   
   /**
@@ -109,15 +111,20 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
    *          user ID column name
    * @param itemIDColumn
    *          item ID column name
+   * @param timestampColumn timestamp column name (may be null)
    */
   public MySQLBooleanPrefJDBCDataModel(DataSource dataSource,
                                        String preferenceTable,
                                        String userIDColumn,
-                                       String itemIDColumn) {
+                                       String itemIDColumn,
+                                       String timestampColumn) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn,
         NO_SUCH_COLUMN,
         // getPreferenceSQL
         "SELECT 1 FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
+        // getPreferenceTimeSQL
+        "SELECT " + timestampColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND "
+            + itemIDColumn + "=?",
         // getUserSQL
         "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
             + userIDColumn + "=?",

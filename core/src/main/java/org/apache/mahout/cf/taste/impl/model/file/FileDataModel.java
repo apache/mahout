@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -46,14 +47,36 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * A {@link DataModel} backed by a comma-delimited file. This class typically expects a file where each line
- * contains a user ID, followed by item ID, followed by preferences value, separated by commas. You may also
- * use tabs.
+ * A {@link DataModel} backed by a delimited file. This class expects a file where each line
+ * contains a user ID, followed by item ID, followed by optional preference value, followed by
+ * optional timestamp. Commas or tabs delimit fields:
+ * </p>
+ *
+ * <p><code>userID,itemID[,preference[,timestamp]]</code></p>
+ *
+ * <p>
+ * Preference value is optional to accommodate applications that have no notion of a
+ * preference value (that is, the user simply expresses a
+ * preference for an item, but no degree of preference).
  * </p>
  *
  * <p>
  * The preference value is assumed to be parseable as a <code>double</code>. The user IDs and item IDs are
- * read parsed as <code>long</code>s.
+ * read parsed as <code>long</code>s. The timestamp, if present, is assumed to be parseable as a
+ * <code>long</code>, though this can be overridden via {@link #readTimestampFromString(String)}.
+ * The preference value may be empty, to indicate "no preference value", but cannot be empty. That is,
+ * this is legal:
+ * </p>
+ *
+ * <p><code>123,456,,129050099059</code></p>
+ *
+ * <p>But this isn't:</p>
+ *
+ * <p><code>123,456,129050099059</code></p>
+ *
+ * <p>
+ * It is also acceptable for the lines to contain additional fields. Fields beyond the third will be ignored.
+ * An empty line, or one that begins with '#' will be ignored as a comment.
  * </p>
  *
  * <p>
@@ -63,25 +86,14 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * This class will also look for update "delta" files in the same directory, with file names that start the
- * same way (up to the first period). These files should have the same format, and provide updated data that
+ * same way (up to the first period). These files have the same format, and provide updated data that
  * supersedes what is in the main data file. This is a mechanism that allows an application to push updates to
  *  without re-copying the entire data file.
  * </p>
  *
  * <p>
- * The line may contain a blank preference value (e.g. "123,456,"). This is interpreted to mean
- * "delete preference", and is only useful in the context of an update delta file (see above). Note that if
- * the line is empty or begins with '#' it will be ignored as a comment.
- * </p>
- *
- * <p>
- * It is also acceptable for the lines to contain additional fields. Fields beyond the third will be ignored.
- * </p>
- *
- * <p>
- * Finally, for application that have no notion of a preference value (that is, the user simply expresses a
- * preference for an item, but no degree of preference), the caller can simply omit the third token in each
- * line altogether -- for example, "123,456".
+ * One small format difference exists. Update files must also be able to express deletes.
+ * This is done by ending with a blank preference value, as in "123,456,".
  * </p>
  *
  * <p>
@@ -97,8 +109,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * It is possible and likely useful to subclass this class and customize its behavior to accommodate
- * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap, boolean)} and
- * {@link #processLineWithoutID(String, FastByIDMap)}
+ * application-specific needs and input formats. See {@link #processLine(String, FastByIDMap, FastByIDMap, boolean)} and
+ * {@link #processLineWithoutID(String, FastByIDMap, FastByIDMap)}
  */
 public class FileDataModel extends AbstractDataModel {
 
@@ -111,6 +123,7 @@ public class FileDataModel extends AbstractDataModel {
   private long lastModified;
   private long lastUpdateFileModified;
   private final char delimiter;
+  private final Pattern delimiterPattern;
   private final boolean hasPrefValues;
   private boolean loaded;
   private DataModel delegate;
@@ -163,8 +176,12 @@ public class FileDataModel extends AbstractDataModel {
       firstLine = iterator.peek();
     }
     iterator.close();
-    delimiter = determineDelimiter(firstLine, 2);
-    hasPrefValues = firstLine.indexOf(delimiter, firstLine.indexOf(delimiter) + 1) >= 0;
+
+    delimiter = determineDelimiter(firstLine);
+    delimiterPattern = Pattern.compile(String.valueOf(delimiter));
+    String[] firstLineSplit = delimiterPattern.split(firstLine);
+    // If preference value exists and isn't empty then the file is specifying pref values
+    hasPrefValues = firstLineSplit.length >= 3 && firstLineSplit[2].length() > 0;
 
     this.reloadLock = new ReentrantLock();
     this.transpose = transpose;
@@ -203,29 +220,31 @@ public class FileDataModel extends AbstractDataModel {
     lastModified = newLastModified;
     lastUpdateFileModified = newLastUpdateFileModified;
 
+    FastByIDMap<FastByIDMap<Long>> timestamps = new FastByIDMap<FastByIDMap<Long>>();
+
     if (hasPrefValues) {
 
       if (loadFreshData) {
 
         FastByIDMap<Collection<Preference>> data = new FastByIDMap<Collection<Preference>>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
-        processFile(iterator, data, false);
+        processFile(iterator, data, timestamps, false);
 
         for (File updateFile : findUpdateFiles()) {
-          processFile(new FileLineIterator(updateFile, false), data, false);
+          processFile(new FileLineIterator(updateFile, false), data, timestamps, false);
         }
 
-        return new GenericDataModel(GenericDataModel.toDataMap(data, true));
+        return new GenericDataModel(GenericDataModel.toDataMap(data, true), timestamps);
 
       } else {
 
         FastByIDMap<PreferenceArray> rawData = ((GenericDataModel) delegate).getRawUserData();
 
         for (File updateFile : findUpdateFiles()) {
-          processFile(new FileLineIterator(updateFile, false), rawData, true);
+          processFile(new FileLineIterator(updateFile, false), rawData, timestamps, true);
         }
 
-        return new GenericDataModel(rawData);
+        return new GenericDataModel(rawData, timestamps);
 
       }
 
@@ -235,23 +254,23 @@ public class FileDataModel extends AbstractDataModel {
 
         FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>();
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
-        processFileWithoutID(iterator, data);
+        processFileWithoutID(iterator, data, timestamps);
 
         for (File updateFile : findUpdateFiles()) {
-          processFileWithoutID(new FileLineIterator(updateFile, false), data);
+          processFileWithoutID(new FileLineIterator(updateFile, false), data, timestamps);
         }
 
-        return new GenericBooleanPrefDataModel(data);
+        return new GenericBooleanPrefDataModel(data, timestamps);
 
       } else {
 
         FastByIDMap<FastIDSet> rawData = ((GenericBooleanPrefDataModel) delegate).getRawUserData();
 
         for (File updateFile : findUpdateFiles()) {
-          processFileWithoutID(new FileLineIterator(updateFile, false), rawData);
+          processFileWithoutID(new FileLineIterator(updateFile, false), rawData, timestamps);
         }
 
-        return new GenericBooleanPrefDataModel(rawData);
+        return new GenericBooleanPrefDataModel(rawData, timestamps);
 
       }
 
@@ -288,41 +307,26 @@ public class FileDataModel extends AbstractDataModel {
     return mostRecentModification;
   }
 
-  public static char determineDelimiter(String line, int maxDelimiters) {
-    char delimiter;
+  public static char determineDelimiter(String line) {
     if (line.indexOf(',') >= 0) {
-      delimiter = ',';
-    } else if (line.indexOf('\t') >= 0) {
-      delimiter = '\t';
-    } else {
-      throw new IllegalArgumentException("Did not find a delimiter in first line");
+      return ',';
     }
-    int delimiterCount = 0;
-    int lastDelimiter = line.indexOf(delimiter);
-    int nextDelimiter;
-    while ((nextDelimiter = line.indexOf(delimiter, lastDelimiter + 1)) >= 0) {
-      delimiterCount++;
-      if (delimiterCount > maxDelimiters) {
-        throw new IllegalArgumentException("More than " + maxDelimiters + " delimiters per line");
-      }
-      if (nextDelimiter == lastDelimiter + 1) {
-        // empty field
-        throw new IllegalArgumentException("Empty field");
-      }
-      lastDelimiter = nextDelimiter;
+    if (line.indexOf('\t') >= 0) {
+      return '\t';
     }
-    return delimiter;
+    throw new IllegalArgumentException("Did not find a delimiter in first line");
   }
 
   protected void processFile(FileLineIterator dataOrUpdateFileIterator,
                              FastByIDMap<?> data,
+                             FastByIDMap<FastByIDMap<Long>> timestamps,
                              boolean fromPriorData) {
     log.info("Reading file info...");
     int count = 0;
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
       if (line.length() > 0) {
-        processLine(line, data, fromPriorData);
+        processLine(line, data, timestamps, fromPriorData);
         if (++count % 1000000 == 0) {
           log.info("Processed {} lines", count);
         }
@@ -354,31 +358,25 @@ public class FileDataModel extends AbstractDataModel {
    *  {@link Preference}s, since it's reading fresh data. Subclasses must be prepared
    *  to handle this wrinkle.
    */
-  protected void processLine(String line, FastByIDMap<?> data, boolean fromPriorData) {
+  protected void processLine(String line,
+                             FastByIDMap<?> data, 
+                             FastByIDMap<FastByIDMap<Long>> timestamps,
+                             boolean fromPriorData) {
 
-    if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
+    // Ignore empty lines and comments
+    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
       return;
     }
 
-    int delimiterOne = line.indexOf(delimiter);
-    if (delimiterOne < 0) {
+    String[] tokens = delimiterPattern.split(line);
+    if (tokens.length < 3) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
-    int delimiterTwo = line.indexOf(delimiter, delimiterOne + 1);
-    if (delimiterTwo < 0) {
-      throw new IllegalArgumentException("Bad line: " + line);
-    }
-    // Look for beginning of additional, ignored fields:
-    int delimiterThree = line.indexOf(delimiter, delimiterTwo + 1);
 
-    String userIDString = line.substring(0, delimiterOne);
-    String itemIDString = line.substring(delimiterOne + 1, delimiterTwo);
-    String preferenceValueString;
-    if (delimiterThree > delimiterTwo) {
-      preferenceValueString = line.substring(delimiterTwo + 1, delimiterThree);
-    } else {
-      preferenceValueString = line.substring(delimiterTwo + 1);
-    }
+    String userIDString = tokens[0];
+    String itemIDString = tokens[1];
+    String preferenceValueString = tokens[2];
+    String timestampString = tokens.length >= 4 ? tokens[3] : null;
 
     long userID = readUserIDFromString(userIDString);
     long itemID = readItemIDFromString(itemIDString);
@@ -392,9 +390,11 @@ public class FileDataModel extends AbstractDataModel {
     // This is kind of gross but need to handle two types of storage
     Object maybePrefs = data.get(userID);
     if (fromPriorData) {
+      // Data are PreferenceArray
 
       PreferenceArray prefs = (PreferenceArray) maybePrefs;
-      if (preferenceValueString.length() == 0) {
+      if (tokens.length == 3 && preferenceValueString.length() == 0) {
+        // Then line is of form "userID,itemID,", meaning remove
         if (prefs != null) {
           boolean exists = false;
           int length = prefs.length();
@@ -419,6 +419,8 @@ public class FileDataModel extends AbstractDataModel {
             }
           }
         }
+
+        removeTimestamp(userID, itemID, timestamps);
 
       } else {
 
@@ -452,11 +454,15 @@ public class FileDataModel extends AbstractDataModel {
         }
       }
 
+      addTimestamp(userID, itemID, timestampString, timestamps);
+
     } else {
+      // Data are Collection<Preference>
 
       Collection<Preference> prefs = (Collection<Preference>) maybePrefs;
 
-      if (preferenceValueString.length() == 0) {
+      if (tokens.length == 3 && preferenceValueString.length() == 0) {
+        // Then line is of form "userID,itemID,", meaning remove
         if (prefs != null) {
           // remove pref
           Iterator<Preference> prefsIterator = prefs.iterator();
@@ -468,6 +474,9 @@ public class FileDataModel extends AbstractDataModel {
             }
           }
         }
+
+        removeTimestamp(userID, itemID, timestamps);
+        
       } else {
 
         float preferenceValue = Float.parseFloat(preferenceValueString);
@@ -490,18 +499,23 @@ public class FileDataModel extends AbstractDataModel {
           }
           prefs.add(new GenericPreference(userID, itemID, preferenceValue));
         }
+
+        addTimestamp(userID, itemID, timestampString, timestamps);
+
       }
 
     }
   }
 
-  protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator, FastByIDMap<FastIDSet> data) {
+  protected void processFileWithoutID(FileLineIterator dataOrUpdateFileIterator,
+                                      FastByIDMap<FastIDSet> data,
+                                      FastByIDMap<FastByIDMap<Long>> timestamps) {
     log.info("Reading file info...");
     int count = 0;
     while (dataOrUpdateFileIterator.hasNext()) {
       String line = dataOrUpdateFileIterator.next();
       if (line.length() > 0) {
-        processLineWithoutID(line, data);
+        processLineWithoutID(line, data, timestamps);
         if (++count % 100000 == 0) {
           log.info("Processed {} lines", count);
         }
@@ -510,33 +524,80 @@ public class FileDataModel extends AbstractDataModel {
     log.info("Read lines: {}", count);
   }
 
-  protected void processLineWithoutID(String line, FastByIDMap<FastIDSet> data) {
+  protected void processLineWithoutID(String line,
+                                      FastByIDMap<FastIDSet> data,
+                                      FastByIDMap<FastByIDMap<Long>> timestamps) {
 
-    if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
+    if (line.length() == 0 || line.charAt(0) == COMMENT_CHAR) {
       return;
     }
 
-    int delimiterOne = line.indexOf(delimiter);
-    if (delimiterOne < 0) {
+    String[] tokens = delimiterPattern.split(line);
+    if (tokens.length < 2) {
       throw new IllegalArgumentException("Bad line: " + line);
     }
 
-    long userID = readUserIDFromString(line.substring(0, delimiterOne));
-    long itemID = readItemIDFromString(line.substring(delimiterOne + 1));
+    String userIDString = tokens[0];
+    String itemIDString = tokens[1];
+    String preferenceValueString = tokens.length >= 3 ? tokens[2] : "";
+    String timestampString = tokens.length >= 4 ? tokens[3] : null;
+
+    long userID = readUserIDFromString(userIDString);
+    long itemID = readItemIDFromString(itemIDString);
 
     if (transpose) {
       long tmp = userID;
       userID = itemID;
       itemID = tmp;
     }
-    FastIDSet itemIDs = data.get(userID);
-    if (itemIDs == null) {
-      itemIDs = new FastIDSet(2);
-      data.put(userID, itemIDs);
+
+    if (tokens.length == 3 && preferenceValueString.length() == 0) {
+      // Then line is of form "userID,itemID,", meaning remove
+
+      FastIDSet itemIDs = data.get(userID);
+      if (itemIDs != null) {
+        itemIDs.remove(itemID);
+      }
+
+      removeTimestamp(userID, itemID, timestamps);
+
+    } else {
+
+      FastIDSet itemIDs = data.get(userID);
+      if (itemIDs == null) {
+        itemIDs = new FastIDSet(2);
+        data.put(userID, itemIDs);
+      }
+      itemIDs.add(itemID);
+
+      addTimestamp(userID, itemID, timestampString, timestamps);
+
     }
-    itemIDs.add(itemID);
   }
 
+  private void addTimestamp(long userID,
+                            long itemID,
+                            String timestampString,
+                            FastByIDMap<FastByIDMap<Long>> timestamps) {
+    if (timestampString != null) {
+      FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
+      if (itemTimestamps == null) {
+        itemTimestamps = new FastByIDMap<Long>();
+        timestamps.put(userID, itemTimestamps);
+      }
+      long timestamp = readTimestampFromString(timestampString);
+      itemTimestamps.put(itemID, timestamp);
+    }
+  }
+
+  private void removeTimestamp(long userID,
+                               long itemID,
+                               FastByIDMap<FastByIDMap<Long>> timestamps) {
+    FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
+    if (itemTimestamps != null) {
+      itemTimestamps.remove(itemID);
+    }
+  }
   private void checkLoaded() {
     if (!loaded) {
       reload();
@@ -558,6 +619,14 @@ public class FileDataModel extends AbstractDataModel {
    * translation.
    */
   protected long readItemIDFromString(String value) {
+    return Long.parseLong(value);
+  }
+
+  /**
+   * Subclasses may wish to override this to change how time values in the input file are parsed.
+   * By default they are expected to be numeric, expressing a time as milliseconds since the epoch.
+   */
+  protected long readTimestampFromString(String value) {
     return Long.parseLong(value);
   }
 
@@ -595,6 +664,12 @@ public class FileDataModel extends AbstractDataModel {
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     checkLoaded();
     return delegate.getPreferenceValue(userID, itemID);
+  }
+
+  @Override
+  public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+    checkLoaded();
+    return delegate.getPreferenceTime(userID, itemID);
   }
 
   @Override

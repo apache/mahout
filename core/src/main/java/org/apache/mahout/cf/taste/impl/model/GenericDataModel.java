@@ -51,6 +51,7 @@ public final class GenericDataModel extends AbstractDataModel {
   private final FastByIDMap<PreferenceArray> preferenceFromUsers;
   private final long[] itemIDs;
   private final FastByIDMap<PreferenceArray> preferenceForItems;
+  private final FastByIDMap<FastByIDMap<Long>> timestamps;
   
   /**
    * <p>
@@ -58,11 +59,23 @@ public final class GenericDataModel extends AbstractDataModel {
    * {@link DataModel} retains all this information in memory and is effectively immutable.
    * </p>
    * 
-   * @param userData
-   *          users to include in this  (see also
-   *          {@link #toDataMap(FastByIDMap, boolean)})
+   * @param userData users to include; (see also {@link #toDataMap(FastByIDMap, boolean)})
    */
   public GenericDataModel(FastByIDMap<PreferenceArray> userData) {
+    this(userData, null);
+  }
+
+  /**
+   * <p>
+   * Creates a new  from the given users (and their preferences). This
+   * {@link DataModel} retains all this information in memory and is effectively immutable.
+   * </p>
+   *
+   * @param userData users to include; (see also {@link #toDataMap(FastByIDMap, boolean)})
+   * @param timestamps optionally, provided timestamps of preferences as milliseconds since the epoch.
+   *  User IDs are mapped to maps of item IDs to Long timestamps.
+   */
+  public GenericDataModel(FastByIDMap<PreferenceArray> userData, FastByIDMap<FastByIDMap<Long>> timestamps) {
     if (userData == null) {
       throw new IllegalArgumentException("userData is null");
     }
@@ -119,19 +132,22 @@ public final class GenericDataModel extends AbstractDataModel {
       userIDs[i++] = it.next();
     }
     Arrays.sort(userIDs);
+
+    this.timestamps = timestamps;
   }
-  
+
   /**
    * <p>
-   * Creates a new  containing an immutable copy of the data from another given
+   * Creates a new containing an immutable copy of the data from another given
    * {@link DataModel}.
    * </p>
-   * 
-   * @param dataModel
-   *          {@link DataModel} to copy
-   * @throws TasteException
-   *           if an error occurs while retrieving the other {@link DataModel}'s users
+   *
+   * @param dataModel {@link DataModel} to copy
+   * @throws TasteException if an error occurs while retrieving the other {@link DataModel}'s users
+   * @deprecated without direct replacement.
+   *  Consider {@link #toDataMap(DataModel)} with {@link #GenericDataModel(FastByIDMap)}
    */
+  @Deprecated
   public GenericDataModel(DataModel dataModel) throws TasteException {
     this(toDataMap(dataModel));
   }
@@ -222,7 +238,19 @@ public final class GenericDataModel extends AbstractDataModel {
     }
     return null;
   }
-  
+
+  @Override
+  public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+    if (timestamps == null) {
+      return null;
+    }
+    FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
+    if (itemTimestamps == null) {
+      throw new NoSuchUserException();
+    }
+    return itemTimestamps.get(itemID);
+  }
+
   @Override
   public int getNumItems() {
     return itemIDs.length;

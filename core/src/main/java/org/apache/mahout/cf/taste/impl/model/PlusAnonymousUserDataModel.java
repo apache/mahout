@@ -168,6 +168,14 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   }
 
   @Override
+  public Long getPreferenceTime(long userID, long itemID) throws TasteException {
+    if (userID == TEMP_USER_ID) {
+      return null;
+    }
+    return delegate.getPreferenceTime(userID, itemID);
+  }
+  
+  @Override
   public int getNumItems() throws TasteException {
     return delegate.getNumItems();
   }
