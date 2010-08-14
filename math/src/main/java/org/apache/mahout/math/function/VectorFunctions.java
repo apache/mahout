@@ -21,6 +21,9 @@ import org.apache.mahout.math.Vector;
 
 public class VectorFunctions {
 
+  private VectorFunctions() {
+  }
+
   /*** Vector functions ****/
   public static VectorFunction mean() {
     return new VectorFunction() {

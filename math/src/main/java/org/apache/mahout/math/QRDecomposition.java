@@ -47,7 +47,8 @@ public class QRDecomposition {
   private final Matrix QR;
 
   /** Row and column dimensions. */
-  private final int originalRows, originalColumns;
+  private final int originalRows;
+  private final int originalColumns;
 
   /** Array for internal storage of diagonal of R. */
   private final Vector Rdiag;

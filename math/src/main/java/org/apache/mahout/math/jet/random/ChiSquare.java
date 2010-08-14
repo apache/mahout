@@ -71,7 +71,11 @@ public class ChiSquare extends AbstractContinousDistribution {
  * Implemented by R. Kremer, 1990                                 *
  ******************************************************************/
 
-    double u, v, z, zz, r;
+    double u;
+    double v;
+    double z;
+    double zz;
+    double r;
 
     //if( a < 1 )  return (-1.0); // Check for invalid input value
 

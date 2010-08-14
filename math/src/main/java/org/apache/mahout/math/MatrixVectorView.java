@@ -18,6 +18,7 @@
 package org.apache.mahout.math;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Provides a virtual vector that is really a row or column or diagonal of a matrix.
@@ -75,15 +76,18 @@ public class MatrixVectorView extends AbstractVector {
    * @return An {@link java.util.Iterator} over all elements
    */
   public Iterator<Element> iterator() {
-    final AbstractVector.LocalElement r = new LocalElement(0);
+    final LocalElement r = new LocalElement(0);
     return new Iterator<Element>() {
-      int i = 0;
+      private int i;
 
       public boolean hasNext() {
         return i < size();
       }
 
       public Element next() {
+        if (i >= size()) {
+          throw new NoSuchElementException();
+        }
         r.index = i++;
         return r;
       }

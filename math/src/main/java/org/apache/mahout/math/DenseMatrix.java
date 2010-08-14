@@ -25,7 +25,6 @@ public class DenseMatrix extends AbstractMatrix {
   protected double[][] values;
   
   public DenseMatrix() {
-    super();
   }
   
   protected int columnSize() {

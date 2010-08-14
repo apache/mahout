@@ -48,7 +48,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
    * @return The beta function for given values of alpha and beta.
    */
   public static double beta(double alpha, double beta) {
-    double y = 0;
+    double y;
     if (alpha < 40 && beta < 40) {
       y = gamma(alpha + beta);
       if (y == 0.0) {
@@ -94,7 +94,8 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
 //double MAXGAM = 171.624376956302725;
 //double LOGPI  = 1.14472988584940017414;
 
-    double p, z;
+    double p;
+    double z;
 
     double q = Math.abs(x);
 
@@ -216,21 +217,13 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
 
     if (flag && (b * x) <= 1.0 && x <= 0.95) {
       t = powerSeries(a, b, x);
-      if (t <= MACHEP) {
-        t = 1.0 - MACHEP;
-      } else {
-        t = 1.0 - t;
-      }
+      t = t <= MACHEP ? 1.0 - MACHEP : 1.0 - t;
       return t;
     }
 
     /* Choose expansion for better convergence. */
     double y = x * (a + b - 2.0) - (a - 1.0);
-    if (y < 0.0) {
-      w = incompleteBetaFraction1(a, b, x);
-    } else {
-      w = incompleteBetaFraction2(a, b, x) / xc;
-    }
+    w = y < 0.0 ? incompleteBetaFraction1(a, b, x) : incompleteBetaFraction2(a, b, x) / xc;
 
     /* Multiply w by the factor
        a      b   _             _     _
@@ -245,29 +238,17 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       t *= w;
       t *= gamma(a + b) / (gamma(a) * gamma(b));
       if (flag) {
-        if (t <= MACHEP) {
-          t = 1.0 - MACHEP;
-        } else {
-          t = 1.0 - t;
-        }
+        t = t <= MACHEP ? 1.0 - MACHEP : 1.0 - t;
       }
       return t;
     }
     /* Resort to logarithms.  */
     y += t + logGamma(a + b) - logGamma(a) - logGamma(b);
     y += Math.log(w / a);
-    if (y < MINLOG) {
-      t = 0.0;
-    } else {
-      t = Math.exp(y);
-    }
+    t = y < MINLOG ? 0.0 : Math.exp(y);
 
     if (flag) {
-      if (t <= MACHEP) {
-        t = 1.0 - MACHEP;
-      } else {
-        t = 1.0 - t;
-      }
+      t = t <= MACHEP ? 1.0 - MACHEP : 1.0 - t;
     }
     return t;
   }
@@ -535,7 +516,9 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
 
   /** Returns the natural logarithm of the gamma function; formerly named <tt>lgamma</tt>. */
   public static double logGamma(double x) {
-    double p, q, z;
+    double p;
+    double q;
+    double z;
 
     double[] A = {
         8.11614167470508450300E-4,
@@ -634,7 +617,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
    * Power series for incomplete beta integral; formerly named <tt>pseries</tt>. Use when b*x is small and x not too
    * close to 1.
    */
-  static private double powerSeries(double a, double b, double x) throws ArithmeticException {
+  private static double powerSeries(double a, double b, double x) throws ArithmeticException {
 
     double ai = 1.0 / a;
     double u = (1.0 - b) * x;
@@ -660,11 +643,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       s = s * t * Math.pow(x, a);
     } else {
       t = logGamma(a + b) - logGamma(a) - logGamma(b) + u + Math.log(s);
-      if (t < MINLOG) {
-        s = 0.0;
-      } else {
-        s = Math.exp(t);
-      }
+      s = t < MINLOG ? 0.0 : Math.exp(t);
     }
     return s;
   }

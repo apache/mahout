@@ -750,7 +750,7 @@ public class Algebra extends PersistentObject {
     // finally, format properties
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < names.size(); i++) {
-      String name = ((String) names.get(i));
+      String name = names.get(i);
       buf.append(name);
       buf.append(Property.blanks(maxLength - name.length()));
       buf.append(" : ");

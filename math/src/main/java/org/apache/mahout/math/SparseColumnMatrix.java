@@ -28,7 +28,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
   private Vector[] columns;
 
   public SparseColumnMatrix() {
-    super();
   }
 
   /**
@@ -78,24 +77,22 @@ public class SparseColumnMatrix extends AbstractMatrix {
    * @param index of the column number to grab as a vector (shallowly)
    * @return the column vector at that index.
    */
+  @Override
   protected Vector slice(int index) {
     return getColumn(index);
   }
 
   /**
    * Abstracted out for the iterator
-   * @return numColumns()
+   * @return {@link #numCols()} 
    */
+  @Override
   public int numSlices() {
     return numCols();
   }
 
   public double getQuick(int row, int column) {
-    if (columns[column] == null) {
-      return 0.0;
-    } else {
-      return columns[column].getQuick(row);
-    }
+    return columns[column] == null ? 0.0 : columns[column].getQuick(row);
   }
 
   public Matrix like() {

@@ -20,17 +20,43 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
   private int my_n;
 
   // cached vars shared by hmdu(...) and hprs(...)
-  private int N_last = -1, M_last = -1, n_last = -1;
-  private int N_Mn, m;
+  private int N_last = -1;
+  private int M_last = -1;
+  private int n_last = -1;
+  private int N_Mn;
+  private int m;
 
   // cached vars for hmdu(...)
-  private int mp, b;
-  private double Mp, np, fm;
+  private int mp;
+  private int b;
+  private double Mp;
+  private double np;
+  private double fm;
 
   // cached vars for hprs(...)
-  private int k2, k4, k1, k5;
-  private double dl, dr, r1, r2, r4, r5, ll, lr, c_pm,
-      f1, f2, f4, f5, p1, p2, p3, p4, p5, p6;
+  private int k2;
+  private int k4;
+  private int k1;
+  private int k5;
+  private double dl;
+  private double dr;
+  private double r1;
+  private double r2;
+  private double r4;
+  private double r5;
+  private double ll;
+  private double lr;
+  private double c_pm;
+  private double f1;
+  private double f2;
+  private double f4;
+  private double f5;
+  private double p1;
+  private double p2;
+  private double p3;
+  private double p4;
+  private double p5;
+  private double p6;
 
 
   // The uniform random number generated shared by all <b>static</b> methods.

@@ -209,12 +209,7 @@ public class Distributions {
    * approximate method for generating asymmetric variables, Communications ACM 17, 78-82. <p>
    */
   public static double nextLambda(double l3, double l4, RandomEngine randomGenerator) {
-    double l_sign;
-    if ((l3 < 0) || (l4 < 0)) {
-      l_sign = -1.0;                          // sign(l)
-    } else {
-      l_sign = 1.0;
-    }
+    double l_sign = (l3 < 0) || (l4 < 0) ? -1.0 : 1.0;
 
     double u = randomGenerator.raw();                           // U(0/1)
     return l_sign * (Math.exp(Math.log(u) * l3) - Math.exp(Math.log(1.0 - u) * l4));
@@ -228,11 +223,7 @@ public class Distributions {
   public static double nextLaplace(RandomEngine randomGenerator) {
     double u = randomGenerator.raw();
     u = u + u - 1.0;
-    if (u > 0) {
-      return -Math.log(1.0 - u);
-    } else {
-      return Math.log(1.0 + u);
-    }
+    return u > 0 ? -Math.log(1.0 - u) : Math.log(1.0 + u);
   }
 
   /**
@@ -275,11 +266,7 @@ public class Distributions {
  ******************************************************************/
 
     double u = randomGenerator.raw();
-    if (u <= 0.5) {
-      return (Math.sqrt(2.0 * u) - 1.0);                      /* -1 <= x <= 0 */
-    } else {
-      return (1.0 - Math.sqrt(2.0 * (1.0 - u)));
-    }                 /*  0 <= x <= 1 */
+    return u <= 0.5 ? Math.sqrt(2.0 * u) - 1.0 : 1.0 - Math.sqrt(2.0 * (1.0 - u));
   }
 
   /**

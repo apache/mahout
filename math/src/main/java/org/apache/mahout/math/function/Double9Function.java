@@ -30,7 +30,6 @@ package org.apache.mahout.math.function;
  * Interface that represents a function object: a function that takes 9 arguments and returns a single value.
  *
  */
-@SuppressWarnings({"JavaDoc"})
 public interface Double9Function {
 
   /**

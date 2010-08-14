@@ -52,7 +52,9 @@ public class Normal extends AbstractContinousDistribution {
       return cache;
     }
 
-    double x, y, r;
+    double x;
+    double y;
+    double r;
     do {
       x = 2.0 * randomGenerator.raw() - 1.0;
       y = 2.0 * randomGenerator.raw() - 1.0;

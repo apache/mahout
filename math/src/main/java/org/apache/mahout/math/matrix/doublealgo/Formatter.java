@@ -357,11 +357,10 @@ public class Formatter extends AbstractFormatter {
    */
   public String toSourceCode(DoubleMatrix2D matrix) {
     Formatter copy = (Formatter) this.clone();
-    String b3 = blanks(3);
     copy.setPrintShape(false);
     copy.setColumnSeparator(", ");
-    copy.setRowSeparator("},\n" + b3 + '{');
-    String lead = "{\n" + b3 + '{';
+    copy.setRowSeparator("},\n   {");
+    String lead = "{\n   {";
     String trail = "}\n};";
     return lead + copy.toString(matrix) + trail;
   }
@@ -373,14 +372,12 @@ public class Formatter extends AbstractFormatter {
    */
   public String toSourceCode(DoubleMatrix3D matrix) {
     Formatter copy = (Formatter) this.clone();
-    String b3 = blanks(3);
-    String b6 = blanks(6);
     copy.setPrintShape(false);
     copy.setColumnSeparator(", ");
-    copy.setRowSeparator("},\n" + b6 + '{');
-    copy.setSliceSeparator("}\n" + b3 + "},\n" + b3 + "{\n" + b6 + '{');
-    String lead = "{\n" + b3 + "{\n" + b6 + '{';
-    String trail = "}\n" + b3 + "}\n}";
+    copy.setRowSeparator("},\n      {");
+    copy.setSliceSeparator("}\n   },\n   {\n      {");
+    String lead = "{\n   {\n      {";
+    String trail = "}\n   }\n}";
     return lead + copy.toString(matrix) + trail;
   }
 

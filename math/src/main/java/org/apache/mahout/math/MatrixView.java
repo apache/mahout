@@ -29,7 +29,6 @@ public class MatrixView extends AbstractMatrix {
   private int[] cardinality;
 
   public MatrixView() {
-    super();
   }
 
   /**

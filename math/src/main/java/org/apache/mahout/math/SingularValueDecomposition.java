@@ -8,12 +8,6 @@ It is provided "as is" without expressed or implied warranty.
  */
 package org.apache.mahout.math;
 
-//import org.apache.mahout.math.matrix.DoubleFactory2D;
-//import org.apache.mahout.math.matrix.DoubleMatrix2D;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.Algebra;
-
-
 public class SingularValueDecomposition implements java.io.Serializable {
   
   /** Arrays for internal storage of U and V. */
@@ -49,25 +43,26 @@ public class SingularValueDecomposition implements java.io.Serializable {
     
     // Derived from LINPACK code.
     // Initialize.
-    double[][] A;  
-    if(!transpositionNeeded)
-    {	
-      m = Arg.numRows();
-      n = Arg.numCols();
-      A = new double[m][n];
-      for(int i=0;i<m;i++)
-        for(int j=0;j<n;j++)
-          A[i][j]=Arg.get(i,j);
-    }
-    else
-    {
+    double[][] A;
+    if (transpositionNeeded) {
       //use the transpose Matrix
       m = Arg.numCols();
       n = Arg.numRows();
       A = new double[m][n];
-      for(int i=0;i<m;i++)
-        for(int j=0;j<n;j++)
-          A[i][j]=Arg.get(j,i);
+      for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+          A[i][j] = Arg.get(j, i);
+        }
+      }
+    } else {
+      m = Arg.numRows();
+      n = Arg.numCols();
+      A = new double[m][n];
+      for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+          A[i][j] = Arg.get(i, j);
+        }
+      }
     }
     
     
@@ -523,17 +518,18 @@ public class SingularValueDecomposition implements java.io.Serializable {
    * @return <tt>U</tt>
    */
   public Matrix getU() {
-    if (!transpositionNeeded) {
+    if (transpositionNeeded) { //case numRows() < numCols()
+      return new DenseMatrix(V);
+    } else {
       int numCols = Math.min(m + 1, n);
       Matrix r = new DenseMatrix(m, numCols);
-      for (int i = 0; i < m; i++)
-        for (int j = 0; j < numCols; j++)
+      for (int i = 0; i < m; i++) {
+        for (int j = 0; j < numCols; j++) {
           r.set(i, j, U[i][j]);
-      
+        }
+      }
+
       return r;
-    }
-    else { //case numRows() < numCols()
-      return new DenseMatrix(V);
     }
   }
   
@@ -543,17 +539,18 @@ public class SingularValueDecomposition implements java.io.Serializable {
    * @return <tt>V</tt>
    */
   public Matrix getV() {
-    if (!transpositionNeeded) {			
-      return new DenseMatrix(V);
-    }
-    else { //case numRows() < numCols()
+    if (transpositionNeeded) { //case numRows() < numCols()
       int numCols = Math.min(m + 1, n);
       Matrix r = new DenseMatrix(m, numCols);
-      for (int i = 0; i < m; i++)
-        for (int j = 0; j < numCols; j++)
+      for (int i = 0; i < m; i++) {
+        for (int j = 0; j < numCols; j++) {
           r.set(i, j, U[i][j]);
-      
+        }
+      }
+
       return r;
+    } else {
+      return new DenseMatrix(V);
     }
   }
   
@@ -585,12 +582,12 @@ public class SingularValueDecomposition implements java.io.Serializable {
    * @parameter minSingularValue 
    * minSingularValue - value below which singular values are ignored (a 0 or negative value implies all singular value will be used) 
    */
-  Matrix getCovariance(double minSingularValue)
-  {	
-    DenseMatrix J=new DenseMatrix(s.length,s.length);
-    Matrix VMat=new DenseMatrix(this.V);
-    for(int i=0;i<s.length;i++)		
-      J.set(i,i,(s[i]>=minSingularValue)?1/(s[i]*s[i]):0.0);					
+  Matrix getCovariance(double minSingularValue) {
+    DenseMatrix J = new DenseMatrix(s.length,s.length);
+    Matrix VMat = new DenseMatrix(this.V);
+    for (int i = 0; i < s.length; i++) {
+      J.set(i, i, (s[i] >= minSingularValue) ? 1 / (s[i] * s[i]) : 0.0);
+    }
     return VMat.times(J).times(VMat.transpose());		
   }
   

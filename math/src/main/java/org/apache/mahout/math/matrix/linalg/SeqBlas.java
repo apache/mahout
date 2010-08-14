@@ -246,10 +246,6 @@ public class SeqBlas implements Blas {
    * @param b b
    */
   private static double sign(double a, double b) {
-    if (b < 0.0) {
-      return -Math.abs(a);
-    } else {
-      return Math.abs(a);
-    }
+    return b < 0.0 ? -Math.abs(a) : Math.abs(a);
   }
 }

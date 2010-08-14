@@ -54,7 +54,7 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
     String klass = obj.get(JsonMatrixAdapter.CLASS).getAsString();
     String vector = obj.get(VECTOR).getAsString();
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl = null;
+    Class<?> cl;
     try {
       cl = ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {

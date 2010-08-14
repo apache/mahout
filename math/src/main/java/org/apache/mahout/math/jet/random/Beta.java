@@ -21,16 +21,25 @@ public class Beta extends AbstractContinousDistribution {
   private double PDF_CONST; // cache to speed up pdf()
 
   // cached values shared by bXX
-  private double aLast = 0.0, bLast = 0.0;
-  private double aMinus1, bMinus1, t, fa, fb, p1, p2;
+  private double aLast = 0.0;
+  private double bLast = 0.0;
+  private double aMinus1;
+  private double bMinus1;
+  private double t;
+  private double fa;
+  private double fb;
+  private double p1;
+  private double p2;
 
   // cached values for b00
 
-  // chached values for b01
-  private double ml, mu;
+  // cached values for b01
+  private double ml;
+  private double mu;
 
-  // chached values for b1prs
-  private double pLast = 0.0, qLast = 0.0;
+  // cached values for b1prs
+  private double pLast = 0.0;
+  private double qLast = 0.0;
   private double a;
   private double b;
   private double m;
@@ -44,7 +53,12 @@ public class Beta extends AbstractContinousDistribution {
   private double f2;
   private double f4;
   private double f5;
-  private double ll, lr, z2, z4, p3, p4;
+  private double ll;
+  private double lr;
+  private double z2;
+  private double z4;
+  private double p3;
+  private double p4;
 
 
   // The uniform random number generated shared by all <b>static</b> methods.
@@ -68,11 +82,7 @@ public class Beta extends AbstractContinousDistribution {
       aMinus1 = a - 1.0;
       bMinus1 = b - 1.0;
       double c = (b * bMinus1) / (a * aMinus1);
-      if (Math.abs(c - 1.0) < 1e-8) {
-        t = 0.5;
-      } else {
-        t = (1.0 - Math.sqrt(c)) / (1.0 - c);
-      }
+      t = Math.abs(c - 1.0) < 1.0e-8 ? 0.5 : (1.0 - Math.sqrt(c)) / (1.0 - c);
       fa = Math.exp(aMinus1 * Math.log(t));
       fb = Math.exp(bMinus1 * Math.log(1.0 - t));              // f(t) = fa * fb
 
@@ -417,11 +427,7 @@ public class Beta extends AbstractContinousDistribution {
       return (Math.exp(Math.log(randomGenerator.raw()) / alpha));
     }
 
-    if (beta != 1.0) {
-      return (1.0 - Math.exp(Math.log(randomGenerator.raw()) / beta));
-    } else {
-      return (randomGenerator.raw());
-    }
+    return beta == 1.0 ? randomGenerator.raw() : 1.0 - Math.exp(Math.log(randomGenerator.raw()) / beta);
   }
 
   /** Returns the cumulative distribution function. */

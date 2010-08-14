@@ -19,7 +19,10 @@ package org.apache.mahout.math;
 
 
 public class Algebra {
-  
+
+  private Algebra() {
+  }
+
   public static Vector mult(Matrix m, Vector v) {
     if (m.numRows() != v.size()) {
       throw new CardinalityException(m.numRows(), v.size());
@@ -54,14 +57,16 @@ public class Algebra {
    * http://mathworld.wolfram.com/MaximumAbsoluteRowSumNorm.html 
    */	
   public static double getNorm(Matrix m) {
-    double max=0.0;
-    Vector cv;
-    for(int i=0;i<m.numRows();i++) 	{
-      int sum=0;
-      cv=m.getRow(i);			
-      for(int j=0;j<cv.size();j++)	
-        sum+=Math.abs(cv.getQuick(j));			
-      if(sum>max) max=sum;
+    double max = 0.0;
+    for(int i = 0; i < m.numRows(); i++) 	{
+      int sum = 0;
+      Vector cv = m.getRow(i);
+      for (int j = 0; j < cv.size(); j++) {
+        sum += Math.abs(cv.getQuick(j));
+      }
+      if (sum > max) {
+        max = sum;
+      }
     }
     return max;
   }	

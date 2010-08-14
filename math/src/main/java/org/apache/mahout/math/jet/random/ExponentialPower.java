@@ -17,7 +17,9 @@ public class ExponentialPower extends AbstractContinousDistribution {
   private double tau;
 
   // cached vars for method nextDouble(tau) (for performance only)
-  private double s, sm1, tau_set = -1.0;
+  private double s;
+  private double sm1;
+  private double tau_set = -1.0;
 
   // The uniform random number generated shared by all <b>static</b> methods.
   private static final ExponentialPower shared = new ExponentialPower(1.0, makeDefaultGenerator());
@@ -75,11 +77,7 @@ public class ExponentialPower extends AbstractContinousDistribution {
     while (Math.log(v) > -Math.exp(Math.log(x) * tau));
 
     // Random sign
-    if (u < 0.0) {
-      return x;
-    } else {
-      return -x;
-    }
+    return u < 0.0 ? x : -x;
   }
 
   /**

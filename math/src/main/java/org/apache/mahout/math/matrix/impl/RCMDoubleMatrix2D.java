@@ -144,15 +144,12 @@ class RCMDoubleMatrix2D extends WrapperDoubleMatrix2D {
    * should only use this method when you are absolutely sure that the coordinate is within bounds.</b> Precondition
    * (unchecked): <tt>0 &lt;= column &lt; columns() && 0 &lt;= row &lt; rows()</tt>.
    *
-   * @param row    the index of the row-coordinate.
-   * @param column the index of the column-coordinate.
+   * @param i    the index of the row-coordinate.
+   * @param j the index of the column-coordinate.
    * @param value  the value to be filled into the specified cell.
    */
   @Override
-  public void setQuick(int row, int column, double value) {
-    int i = row;
-    int j = column;
-
+  public void setQuick(int i, int j, double value) {
     int k = -1;
     IntArrayList indexList = indexes[i];
     if (indexList != null) {

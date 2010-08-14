@@ -108,7 +108,6 @@ public class LanczosSolver {
     Vector previousVector = new DenseVector(currentVector.size());
     Matrix basis = new SparseRowMatrix(new int[]{desiredRank, corpus.numCols()});
     basis.assignRow(0, currentVector);
-    double alpha = 0;
     double beta = 0;
     DoubleMatrix2D triDiag = new DenseDoubleMatrix2D(desiredRank, desiredRank);
     for (int i = 1; i < desiredRank; i++) {
@@ -119,7 +118,7 @@ public class LanczosSolver {
       nextVector.assign(new Scale(1 / scaleFactor));
       nextVector.assign(previousVector, new PlusMult(-beta));
       // now orthogonalize
-      alpha = currentVector.dot(nextVector);
+      double alpha = currentVector.dot(nextVector);
       nextVector.assign(currentVector, new PlusMult(-alpha));
       endTime(TimingSection.ITERATE);
       startTime(TimingSection.ORTHOGANLIZE);
@@ -131,8 +130,7 @@ public class LanczosSolver {
         log.warn("Lanczos parameters out of range: alpha = {}, beta = {}.  Bailing out early!", alpha, beta);
         break;
       }
-      final double b = beta;
-      nextVector.assign(new Scale(1 / b));
+      nextVector.assign(new Scale(1 / beta));
       basis.assignRow(i, nextVector);
       previousVector = currentVector;
       currentVector = nextVector;

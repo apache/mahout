@@ -19,7 +19,11 @@ package org.apache.mahout.math;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.mahout.math.function.*;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.PlusMult;
+import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.VectorFunction;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,6 +50,9 @@ public abstract class AbstractMatrix implements Matrix {
       }
 
       public MatrixSlice next() {
+        if (slice >= numSlices()) {
+          throw new NoSuchElementException();
+        }
         int i = slice++;
         return new MatrixSlice(slice(i), i);
       }
@@ -612,6 +619,7 @@ public abstract class AbstractMatrix implements Matrix {
       return iterator();
     }
 
+    @Override
     public Element getElement(final int i) {
       return new Element() {
         public double get() {

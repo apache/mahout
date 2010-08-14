@@ -399,7 +399,8 @@ public class Bessel extends Constants {
   public static double j1(double x) throws ArithmeticException {
     double ax;
     double y;
-    double ans1, ans2;
+    double ans1;
+    double ans2;
 
     if ((ax = Math.abs(x)) < 8.0) {
       y = x * x;
@@ -627,13 +628,7 @@ asymptotically, where
 */
 
 
-    int n;
-
-    if (nn < 0) {
-      n = -nn;
-    } else {
-      n = nn;
-    }
+    int n = nn < 0 ? -nn : nn;
 
     int MAXFAC = 31;
     if (n > MAXFAC) {

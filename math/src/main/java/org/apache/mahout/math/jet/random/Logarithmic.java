@@ -17,7 +17,9 @@ public class Logarithmic extends AbstractContinousDistribution {
   private double my_p;
 
   // cached vars for method nextDouble(a) (for performance only)
-  private double t, h, a_prev = -1.0;
+  private double t;
+  private double h;
+  private double a_prev = -1.0;
 
   // The uniform random number generated shared by all <b>static</b> methods.
   private static final Logarithmic shared = new Logarithmic(0.5, makeDefaultGenerator());

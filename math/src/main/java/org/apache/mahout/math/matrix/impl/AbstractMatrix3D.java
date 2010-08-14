@@ -42,7 +42,9 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
   protected int columnStride;
 
   /** the index of the first element */
-  protected int sliceZero, rowZero, columnZero;
+  protected int sliceZero;
+  protected int rowZero;
+  protected int columnZero;
 
   // this.isNoView implies: offset==0, sliceStride==rows*slices, rowStride==columns, columnStride==1
 

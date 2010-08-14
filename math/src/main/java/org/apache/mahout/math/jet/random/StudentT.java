@@ -63,7 +63,9 @@ public class StudentT extends AbstractContinousDistribution {
     if (degreesOfFreedom <= 0.0) {
       throw new IllegalArgumentException();
     }
-    double u, v, w;
+    double u;
+    double v;
+    double w;
 
     do {
       u = 2.0 * randomGenerator.raw() - 1.0;

@@ -234,11 +234,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
   /** Returns the number of cells having non-zero values. */
   @Override
   public int cardinality() {
-    if (this.isNoView) {
-      return this.elements.size();
-    } else {
-      return super.cardinality();
-    }
+    return this.isNoView ? this.elements.size() : super.cardinality();
   }
 
   /**

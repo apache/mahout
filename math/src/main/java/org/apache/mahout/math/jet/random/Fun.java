@@ -331,7 +331,8 @@ class Fun {
 
   /** Modified Bessel Functions of First Kind - Order 0. */
   public static double bessi0(double x) {
-    double ax, ans;
+    double ax;
+    double ans;
     double y;
 
     if ((ax = Math.abs(x)) < 3.75) {
@@ -351,7 +352,8 @@ class Fun {
 
   /** Modified Bessel Functions of First Kind - Order 1. */
   public static double bessi1(double x) {
-    double ax, ans;
+    double ax;
+    double ans;
     double y;
 
     if ((ax = Math.abs(x)) < 3.75) {

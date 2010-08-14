@@ -162,7 +162,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @param A             any matrix.
    */
   public void decompose(DoubleMatrix2D A, int semiBandwidth) {
-    if (!algebra.property().isSquare(A) || semiBandwidth < 0 || semiBandwidth > 2) {
+    if (!Property.isSquare(A) || semiBandwidth < 0 || semiBandwidth > 2) {
       decompose(A);
       return;
     }
@@ -365,7 +365,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
   public void solve(DoubleMatrix1D B) {
-    algebra.property().checkRectangular(LU);
+    Property.checkRectangular(LU);
     int m = m();
     int n = n();
     if (B.size() != m) {
@@ -428,7 +428,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
   public void solve(DoubleMatrix2D B) {
-    algebra.property().checkRectangular(LU);
+    Property.checkRectangular(LU);
     int m = m();
     int n = n();
     if (B.rows() != m) {
@@ -541,7 +541,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
   private void solveOld(DoubleMatrix2D B) {
-    algebra.property().checkRectangular(LU);
+    Property.checkRectangular(LU);
     int m = m();
     int n = n();
     if (B.rows() != m) {

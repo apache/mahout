@@ -75,14 +75,9 @@ public abstract class AbstractFormatter extends PersistentObject {
   /** Tells whether String representations are to be preceded with summary of the shape; currently <tt>true</tt>. */
   protected boolean printShape = true;
 
-
-  private static String[] blanksCache; // for efficient String manipulations
-
   private static final FormerFactory factory = new FormerFactory();
 
-  static {
-    setupBlanksCache();
-  }
+  private static final String blanksCache = "                                        ";
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected AbstractFormatter() {
@@ -159,26 +154,26 @@ public abstract class AbstractFormatter extends PersistentObject {
       String c = row[column];
       //if (alignment==1) {
       if (alignment.equals(RIGHT)) {
-        s.append(blanks(maxColWidth[column] - s.length()));
+        blanks(maxColWidth[column] - s.length(), s);
         s.append(c);
       }
       //else if (alignment==2) {
       else if (alignment.equals(DECIMAL)) {
-        s.append(blanks(maxColLead[column] - lead(c)));
+        blanks(maxColLead[column] - lead(c), s);
         s.append(c);
-        s.append(blanks(maxColWidth[column] - s.length()));
+        blanks(maxColWidth[column] - s.length(), s);
       }
       //else if (align==0) {
       else if (alignment.equals(CENTER)) {
-        s.append(blanks((maxColWidth[column] - c.length()) / 2));
+        blanks((maxColWidth[column] - c.length()) / 2, s);
         s.append(c);
-        s.append(blanks(maxColWidth[column] - s.length()));
+        blanks(maxColWidth[column] - s.length(), s);
 
       }
       //else if (align<0) {
       else if (alignment.equals(LEFT)) {
         s.append(c);
-        s.append(blanks(maxColWidth[column] - s.length()));
+        blanks(maxColWidth[column] - s.length(), s);
       } else {
         throw new InternalError();
       }
@@ -187,20 +182,16 @@ public abstract class AbstractFormatter extends PersistentObject {
     }
   }
 
-  /** Returns a String with <tt>length</tt> blanks. */
-  protected static String blanks(int length) {
-    if (length < 0) {
-      length = 0;
+  /** Appends <tt>length</tt> blanks. */
+  protected static void blanks(int length, StringBuilder s) {
+    if (length <= blanksCache.length()) {
+      s.append(blanksCache, 0, length);
+    } else {
+      s.append(blanksCache);
+      for (int k = length - blanksCache.length(); k >= 0; k--) {
+        s.append(' ');
+      }
     }
-    if (length < blanksCache.length) {
-      return blanksCache[length];
-    }
-
-    StringBuilder buf = new StringBuilder(length);
-    for (int k = 0; k < length; k++) {
-      buf.append(' ');
-    }
-    return buf.toString();
   }
 
   /** Converts a given cell to a String; no alignment considered. */
@@ -223,21 +214,6 @@ public abstract class AbstractFormatter extends PersistentObject {
   /** Returns the number of characters or the number of characters before the decimal point. */
   protected int lead(String s) {
     return s.length();
-  }
-
-  /** Returns a String with the given character repeated <tt>length</tt> times. */
-  protected String repeat(char character, int length) {
-    if (character == ' ') {
-      return blanks(length);
-    }
-    if (length < 0) {
-      length = 0;
-    }
-    StringBuilder buf = new StringBuilder(length);
-    for (int k = 0; k < length; k++) {
-      buf.append(character);
-    }
-    return buf.toString();
   }
 
   /**
@@ -304,23 +280,6 @@ public abstract class AbstractFormatter extends PersistentObject {
    */
   public void setSliceSeparator(String sliceSeparator) {
     this.sliceSeparator = sliceSeparator;
-  }
-
-  /** Cache for faster string processing. */
-  private static void setupBlanksCache() {
-    // Pre-fabricate 40 static strings with 0,1,2,..,39 blanks, for usage within method blanks(length).
-    // Now, we don't need to construct and fill them on demand, and garbage collect them again.
-    // All 40 strings share the identical char[] array, only with different offset and length --> somewhat smaller static memory footprint
-    int size = 40;
-    blanksCache = new String[size];
-    StringBuilder buf = new StringBuilder(size);
-    for (int i = size; --i >= 0;) {
-      buf.append(' ');
-    }
-    String str = buf.toString();
-    for (int i = size; --i >= 0;) {
-      blanksCache[i] = str.substring(0, i);
-    }
   }
 
   /** Returns a short string representation describing the shape of the matrix. */

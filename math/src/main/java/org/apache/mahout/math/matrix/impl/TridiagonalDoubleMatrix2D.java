@@ -233,7 +233,8 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   @Override
   public DoubleMatrix2D forEachNonZero(IntIntDoubleFunction function) {
     for (int kind = 0; kind <= 2; kind++) {
-      int i = 0, j = 0;
+      int i = 0;
+      int j = 0;
       switch (kind) {
         case 0: {
           i = 1;
@@ -278,14 +279,11 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
    * should only use this method when you are absolutely sure that the coordinate is within bounds.</b> Precondition
    * (unchecked): <tt>0 &lt;= column &lt; columns() && 0 &lt;= row &lt; rows()</tt>.
    *
-   * @param row    the index of the row-coordinate.
-   * @param column the index of the column-coordinate.
+   * j@param column the index of the column-coordinate.
    * @return the value at the specified coordinate.
    */
   @Override
-  public double getQuick(int row, int column) {
-    int i = row;
-    int j = column;
+  public double getQuick(int i, int j) {
 
     int k = j - i + 1;
     int q = i;
@@ -354,14 +352,12 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
    * should only use this method when you are absolutely sure that the coordinate is within bounds.</b> Precondition
    * (unchecked): <tt>0 &lt;= column &lt; columns() && 0 &lt;= row &lt; rows()</tt>.
    *
-   * @param row    the index of the row-coordinate.
-   * @param column the index of the column-coordinate.
+   * @param i    the index of the row-coordinate.
+   * @param j the index of the column-coordinate.
    * @param value  the value to be filled into the specified cell.
    */
   @Override
-  public void setQuick(int row, int column, double value) {
-    int i = row;
-    int j = column;
+  public void setQuick(int i, int j, double value) {
 
     boolean isZero = (value == 0);
 
@@ -388,7 +384,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
 
     if (!isZero) {
       throw new IllegalArgumentException(
-          "Can't store non-zero value to non-tridiagonal coordinate: row=" + row + ", column=" + column + ", value=" +
+          "Can't store non-zero value to non-tridiagonal coordinate: row=" + i + ", column=" + j + ", value=" +
               value);
     }
 

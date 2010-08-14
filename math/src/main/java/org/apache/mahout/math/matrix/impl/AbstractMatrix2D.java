@@ -23,7 +23,8 @@ package org.apache.mahout.math.matrix.impl;
 public abstract class AbstractMatrix2D extends AbstractMatrix {
 
   /** the number of colums and rows this matrix (view) has */
-  protected int columns, rows;
+  protected int columns;
+  protected int rows;
 
   /** the number of elements between two rows, i.e. <tt>index(i+1,j,k) - index(i,j,k)</tt>. */
   protected int rowStride;
@@ -32,7 +33,8 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
   protected int columnStride;
 
   /** the index of the first element */
-  protected int rowZero, columnZero;
+  protected int rowZero;
+  protected int columnZero;
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected AbstractMatrix2D() {

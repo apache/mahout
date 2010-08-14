@@ -420,15 +420,13 @@ return result;
     }
 
     int ncols = (int) Math.round(matrix.size() * fraction);
-    int max = ncols;
-    long[] selected = new long[max]; // sampler works on long's, not int's
+    long[] selected = new long[ncols]; // sampler works on long's, not int's
 
     // sample
-    int n = ncols;
     int N = matrix.size();
-    RandomSampler.sample(n, N, n, 0, selected, 0, randomGenerator);
-    int[] selectedCols = new int[n];
-    for (int i = 0; i < n; i++) {
+    RandomSampler.sample(ncols, N, ncols, 0, selected, 0, randomGenerator);
+    int[] selectedCols = new int[ncols];
+    for (int i = 0; i < ncols; i++) {
       selectedCols[i] = (int) selected[i];
     }
 

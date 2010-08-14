@@ -68,7 +68,9 @@ public class Descriptive {
     double[] elements1 = data1.elements();
     double[] elements2 = data2.elements();
 
-    double sumx = elements1[0], sumy = elements2[0], Sxy = 0;
+    double sumx = elements1[0];
+    double sumy = elements2[0];
+    double Sxy = 0;
     for (int i = 1; i < size; ++i) {
       double x = elements1[i];
       double y = elements2[i];
@@ -757,13 +759,11 @@ public class Descriptive {
    * Ref: R.R. Sokal, F.J. Rohlf, Biometry: the principles and practice of statistics in biological research (W.H.
    * Freeman and Company, New York, 1998, 3rd edition) p. 114-115.
    *
-   * @param size           the number of elements of the data sequence.
+   * @param n           the number of elements of the data sequence.
    * @param moment4        the fourth central moment, which is <tt>moment(data,4,mean)</tt>.
-   * @param sampleVariance the <b>sample variance</b>.
+   * @param s2 the <b>sample variance</b>.
    */
-  public static double sampleKurtosis(int size, double moment4, double sampleVariance) {
-    int n = size;
-    double s2 = sampleVariance; // (y-ymean)^2/(n-1)
+  public static double sampleKurtosis(int n, double moment4, double s2) {
     double m4 = moment4 * n;    // (y-ymean)^4
     return m4 * n * (n + 1) / ((n - 1) * (n - 2) * (n - 3) * s2 * s2)
         - 3.0 * (n - 1) * (n - 1) / ((n - 2) * (n - 3));
@@ -780,10 +780,9 @@ public class Descriptive {
    * Ref: R.R. Sokal, F.J. Rohlf, Biometry: the principles and practice of statistics in biological research (W.H.
    * Freeman and Company, New York, 1998, 3rd edition) p. 138.
    *
-   * @param size the number of elements of the data sequence.
+   * @param n the number of elements of the data sequence.
    */
-  public static double sampleKurtosisStandardError(int size) {
-    int n = size;
+  public static double sampleKurtosisStandardError(int n) {
     return Math.sqrt(24.0 * n * (n - 1) * (n - 1) / ((n - 3) * (n - 2) * (n + 3) * (n + 5)));
   }
 
@@ -793,12 +792,11 @@ public class Descriptive {
    * Ref: R.R. Sokal, F.J. Rohlf, Biometry: the principles and practice of statistics in biological research (W.H.
    * Freeman and Company, New York, 1998, 3rd edition) p. 114-115.
    *
-   * @param size           the number of elements of the data sequence.
+   * @param n           the number of elements of the data sequence.
    * @param moment3        the third central moment, which is <tt>moment(data,3,mean)</tt>.
    * @param sampleVariance the <b>sample variance</b>.
    */
-  public static double sampleSkew(int size, double moment3, double sampleVariance) {
-    int n = size;
+  public static double sampleSkew(int n, double moment3, double sampleVariance) {
     double s = Math.sqrt(sampleVariance); // sqrt( (y-ymean)^2/(n-1) )
     double m3 = moment3 * n;    // (y-ymean)^3
     return n * m3 / ((n - 1) * (n - 2) * s * s * s);
@@ -815,10 +813,9 @@ public class Descriptive {
    * Ref: R.R. Sokal, F.J. Rohlf, Biometry: the principles and practice of statistics in biological research (W.H.
    * Freeman and Company, New York, 1998, 3rd edition) p. 138.
    *
-   * @param size the number of elements of the data sequence.
+   * @param n the number of elements of the data sequence.
    */
-  public static double sampleSkewStandardError(int size) {
-    int n = size;
+  public static double sampleSkewStandardError(int n) {
     return Math.sqrt(6.0 * n * (n - 1) / ((n - 2) * (n + 1) * (n + 3)));
   }
 
@@ -828,12 +825,10 @@ public class Descriptive {
    * Ref: R.R. Sokal, F.J. Rohlf, Biometry: the principles and practice of statistics in biological research (W.H.
    * Freeman and Company, New York, 1998, 3rd edition) p. 53.
    *
-   * @param size           the number of elements of the data sequence.
+   * @param n           the number of elements of the data sequence.
    * @param sampleVariance the <b>sample variance</b>.
    */
-  public static double sampleStandardDeviation(int size, double sampleVariance) {
-    int n = size;
-
+  public static double sampleStandardDeviation(int n, double sampleVariance) {
     // The standard deviation calculated as the sqrt of the variance underestimates
     // the unbiased standard deviation.
     double s = Math.sqrt(sampleVariance);

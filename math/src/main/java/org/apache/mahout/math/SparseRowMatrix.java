@@ -30,7 +30,6 @@ public class SparseRowMatrix extends AbstractMatrix {
   private boolean randomAccessRows;
 
   public SparseRowMatrix() {
-    super();
   }
 
   /**
@@ -90,11 +89,7 @@ public class SparseRowMatrix extends AbstractMatrix {
   }
 
   public double getQuick(int row, int column) {
-    if (rows[row] == null) {
-      return 0.0;
-    } else {
-      return rows[row].getQuick(column);
-    }
+    return rows[row] == null ? 0.0 : rows[row].getQuick(column);
   }
 
   public Matrix like() {

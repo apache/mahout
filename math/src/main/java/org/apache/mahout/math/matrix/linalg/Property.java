@@ -1069,14 +1069,14 @@ public class Property extends PersistentObject {
     // determine padding for nice formatting
     int maxLength = 0;
     for (int i = 0; i < names.size(); i++) {
-      int length = ((CharSequence) names.get(i)).length();
+      int length = names.get(i).length();
       maxLength = Math.max(length, maxLength);
     }
 
     // finally, format properties
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < names.size(); i++) {
-      String name = ((String) names.get(i));
+      String name = names.get(i);
       buf.append(name);
       buf.append(blanks(maxLength - name.length()));
       buf.append(" : ");

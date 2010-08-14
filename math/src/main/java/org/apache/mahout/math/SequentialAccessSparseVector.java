@@ -106,9 +106,9 @@ public class SequentialAccessSparseVector extends AbstractVector {
       values = ((SequentialAccessSparseVector)other).values.clone();
     } else {
       values = new OrderedIntDoubleMapping();
-      Iterator<Vector.Element> othersElems = other.iterateNonZero();
+      Iterator<Element> othersElems = other.iterateNonZero();
       while (othersElems.hasNext()) {
-        Vector.Element elem = othersElems.next();
+        Element elem = othersElems.next();
         setQuick(elem.index(), elem.get());
       }
     }

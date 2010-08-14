@@ -304,7 +304,7 @@ public class HebbianSolver {
       log.error("{} must contain values for solver.input.dir and solver.output.dir", propertiesFile);
       return;
     }
-    int inBufferSize = Integer.parseInt(props.getProperty("solver.input.bufferSize"));
+    //int inBufferSize = Integer.parseInt(props.getProperty("solver.input.bufferSize"));
     int rank = Integer.parseInt(props.getProperty("solver.output.desiredRank"));
     double convergence = Double.parseDouble(props.getProperty("solver.convergence"));
     int maxPasses = Integer.parseInt(props.getProperty("solver.maxPasses"));

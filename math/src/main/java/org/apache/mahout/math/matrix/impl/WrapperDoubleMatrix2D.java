@@ -279,7 +279,7 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
     if (rows == 0) {
       return this;
     }
-    DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
+    return new WrapperDoubleMatrix2D(WrapperDoubleMatrix2D.this) {
       @Override
       public double getQuick(int row, int column) {
         return content.get(rows - 1 - row, column);
@@ -290,7 +290,6 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
         content.set(rows - 1 - row, column, value);
       }
     };
-    return view;
   }
 
   /**

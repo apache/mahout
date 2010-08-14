@@ -45,7 +45,7 @@ public class OnlineSummarizer {
   private DoubleArrayList starter = new DoubleArrayList(100);
 
   // quartile estimates
-  private double q[] = new double[5];
+  private final double[] q = new double[5];
 
   // mean and variance estimates
   private double mean = 0;
@@ -109,11 +109,7 @@ public class OnlineSummarizer {
     if (n == 0) {
       throw new IllegalArgumentException("Must have at least one sample to estimate minimum value");
     }
-    if (n <= 100) {
-      return starter.get(0);
-    } else {
-      return q[0];
-    }
+    return n <= 100 ? starter.get(0) : q[0];
   }
 
   private void sort() {
@@ -128,11 +124,7 @@ public class OnlineSummarizer {
     if (n == 0) {
       throw new IllegalArgumentException("Must have at least one sample to estimate maximum value");
     }
-    if (n <= 100) {
-      return starter.get(99);
-    } else {
-      return q[4];
-    }
+    return n <= 100 ? starter.get(99) : q[4];
   }
 
   public double quartile(int i) {

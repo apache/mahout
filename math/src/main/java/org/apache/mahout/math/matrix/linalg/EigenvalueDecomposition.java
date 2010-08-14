@@ -23,7 +23,8 @@ public class EigenvalueDecomposition implements java.io.Serializable {
   private final int n;
 
   /** Arrays for internal storage of eigenvalues. */
-  private final double[] d, e;
+  private final double[] d;
+  private final double[] e;
 
   /** Array for internal storage of eigenvectors. */
   private final double[][] V;
@@ -36,7 +37,8 @@ public class EigenvalueDecomposition implements java.io.Serializable {
 
   // Complex scalar division.
 
-  private transient double cdivr, cdivi;
+  private transient double cdivr;
+  private transient double cdivi;
 
   /**
    * Constructs and returns a new eigenvalue decomposition object; The decomposed matrices can be retrieved via instance
@@ -88,7 +90,8 @@ public class EigenvalueDecomposition implements java.io.Serializable {
   }
 
   private void cdiv(double xr, double xi, double yr, double yi) {
-    double r, d;
+    double r;
+    double d;
     if (Math.abs(yr) > Math.abs(yi)) {
       r = yi / yr;
       d = yr + r * yi;

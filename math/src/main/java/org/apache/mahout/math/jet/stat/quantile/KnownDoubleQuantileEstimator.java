@@ -62,11 +62,9 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
     this.samplingRate = samplingRate;
     this.N = N;
 
-    if (this.samplingRate <= 1.0) {
-      this.samplingAssistant = null;
-    } else {
-      this.samplingAssistant = new RandomSamplingAssistant(Arithmetic.floor(N / samplingRate), N, generator);
-    }
+    this.samplingAssistant = this.samplingRate <= 1.0
+        ? null
+        : new RandomSamplingAssistant(Arithmetic.floor(N / samplingRate), N, generator);
 
     setUp(b, k);
     this.clear();

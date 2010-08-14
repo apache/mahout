@@ -29,7 +29,6 @@ public class SparseMatrix extends AbstractMatrix {
   private OpenIntObjectHashMap<Vector> rows;
   
   public SparseMatrix() {
-    super();
   }
   
   /**
@@ -74,11 +73,7 @@ public class SparseMatrix extends AbstractMatrix {
   
   public double getQuick(int row, int column) {
     Vector r = rows.get(row);
-    if (r == null) {
-      return 0.0;
-    } else {
-      return r.getQuick(column);
-    }
+    return r == null ? 0.0 : r.getQuick(column);
   }
   
   public Matrix like() {

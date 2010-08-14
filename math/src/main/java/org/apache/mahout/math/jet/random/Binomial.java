@@ -15,19 +15,43 @@ import org.apache.mahout.math.jet.stat.Probability;
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Binomial extends AbstractDiscreteDistribution {
+
   private static final int DMAX_KM = 20;
 
   private int n;
   private double p;
 
   // cache vars for method generateBinomial(...)
-  private int nLast = -1, nPrev = -1;
-  private double par, np, p0, q, pLast = -1.0, pPrev = -1.0;
-  private int b, m, nm;
-  private double pq, rc, ss, xm, xl, xr, ll, lr, c, p1, p2, p3, p4, ch;
+  private int nLast = -1;
+  private int nPrev = -1;
+  private double par;
+  private double np;
+  private double p0;
+  private double q;
+  private double pLast = -1.0;
+  private double pPrev = -1.0;
+  private int b;
+  private int m;
+  private int nm;
+  private double pq;
+  private double rc;
+  private double ss;
+  private double xm;
+  private double xl;
+  private double xr;
+  private double ll;
+  private double lr;
+  private double c;
+  private double p1;
+  private double p2;
+  private double p3;
+  private double p4;
+  private double ch;
 
   // cache vars for method pdf(...)
-  private double logP, logQ, logN;
+  private double logP;
+  private double logQ;
+  private double logN;
 
   // The uniform random number generated shared by all <b>static</b> methods.
   private static final Binomial shared = new Binomial(1, 0.5, makeDefaultGenerator());

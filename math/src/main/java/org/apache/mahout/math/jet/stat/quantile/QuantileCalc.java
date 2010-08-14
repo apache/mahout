@@ -170,13 +170,14 @@ class QuantileCalc {
       }
     }
 
-    long b, k;
-    if (minB != -1) { // epsilon large enough?
-      b = minB;
-      k = kMinimums[minB - 2];
-    } else {     // epsilon is very small or zero.
+    long b;
+    long k;
+    if (minB == -1) {     // epsilon is very small or zero.
       b = 1; // the only possible solution without violating the
       k = N; // approximation guarantees is exact quantile search.
+    } else { // epsilon large enough?
+      b = minB;
+      k = kMinimums[minB - 2];
     }
 
     long[] result = new long[2];

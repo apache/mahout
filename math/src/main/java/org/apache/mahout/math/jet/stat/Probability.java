@@ -313,8 +313,7 @@ public class Probability extends Constants {
       return (1.0 - errorFunctionComplemented(x));
     }
     double z = x * x;
-    double y = x * Polynomial.polevl(z, T, 4) / Polynomial.p1evl(z, U, 5);
-    return y;
+    return x * Polynomial.polevl(z, T, 4) / Polynomial.p1evl(z, U, 5);
   }
 
   /**
@@ -382,11 +381,7 @@ public class Probability extends Constants {
         3.36907645100081516050E0
     };
 
-    if (a < 0.0) {
-      x = -a;
-    } else {
-      x = a;
-    }
+    x = a < 0.0 ? -a : a;
 
     if (x < 1.0) {
       return 1.0 - errorFunction(a);
@@ -395,11 +390,7 @@ public class Probability extends Constants {
     double z = -a * a;
 
     if (z < -MAXLOG) {
-      if (a < 0) {
-        return (2.0);
-      } else {
-        return (0.0);
-      }
+      return a < 0 ? 2.0 : 0.0;
     }
 
     z = Math.exp(z);
@@ -421,11 +412,7 @@ public class Probability extends Constants {
     }
 
     if (y == 0.0) {
-      if (a < 0) {
-        return 2.0;
-      } else {
-        return (0.0);
-      }
+      return a < 0 ? 2.0 : 0.0;
     }
 
     return y;
@@ -570,7 +557,12 @@ public class Probability extends Constants {
     if (a < 0) {
       return 1 - normal(-a);
     }
-    double b0 = 0.2316419, b1 = 0.319381530, b2 = -0.356563782, b3 = 1.781477937, b4 = -1.821255978, b5 = 1.330274429;
+    double b0 = 0.2316419;
+    double b1 = 0.319381530;
+    double b2 = -0.356563782;
+    double b3 = 1.781477937;
+    double b4 = -1.821255978;
+    double b5 = 1.330274429;
     double t = 1 / (1 + b0 * a);
     return 1 - unitNormal.pdf(a) * t * (b1 + t * (b2 + t * (b3 + t * (b4 + t * b5))));
   }
@@ -767,10 +759,10 @@ public class Probability extends Constants {
       return x1;
     }
 
-    // Find a pair of x1,x2 that braket zero
+    // Find a pair of x1,x2 that bracket zero
     double f1 = studentT(size, x1) - cumProb;
     double x2 = x1;
-    double f2 = f1;
+    double f2;
     do {
       if (f1 > 0) {
         x2 /= 2;
@@ -807,10 +799,6 @@ public class Probability extends Constants {
       }
     } while (Math.abs(x2 - x1) > 0.001);
 
-    if (Math.abs(f2) <= Math.abs(f1)) {
-      return x2;
-    } else {
-      return x1;
-    }
+    return Math.abs(f2) <= Math.abs(f1) ? x2 : x1;
   }
 }

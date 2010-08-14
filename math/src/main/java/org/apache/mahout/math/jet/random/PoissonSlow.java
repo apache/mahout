@@ -64,11 +64,10 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
   }
 
   /** Returns a random number from the distribution; bypasses the internal state. */
-  private int nextInt(double theMean) {
+  private int nextInt(double xm) {
     /*
     * Adapted from "Numerical Recipes in C".
     */
-    double xm = theMean;
     double g = this.cached_g;
 
     if (xm == -1.0) {

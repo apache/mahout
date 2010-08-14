@@ -410,7 +410,7 @@ public class Sorting extends PersistentObject {
    * given <tt>[row,column]</tt> position. The returned view is backed by this matrix, so changes in the returned view
    * are reflected in this matrix, and vice-versa. To sort ranges use sub-ranging views. To sort by other dimensions,
    * use dice views. To sort descending, use flip views ... <p> The algorithm compares two 2-d slices at a time,
-   * determinining whether one is smaller, equal or larger than the other. Comparison is based on the cell
+   * determining whether one is smaller, equal or larger than the other. Comparison is based on the cell
    * <tt>[row,column]</tt> within a slice. Let <tt>A</tt> and <tt>B</tt> be two 2-d slices. Then we have the following
    * rules <ul> <li><tt>A &lt;  B iff A.get(row,column) &lt;  B.get(row,column)</tt> <li><tt>A == B iff
    * A.get(row,column) == B.get(row,column)</tt> <li><tt>A &gt;  B  iff A.get(row,column) &gt;  B.get(row,column)</tt>
@@ -459,7 +459,7 @@ public class Sorting extends PersistentObject {
   /**
    * Sorts the matrix slices according to the order induced by the specified comparator. The returned view is backed by
    * this matrix, so changes in the returned view are reflected in this matrix, and vice-versa. The algorithm compares
-   * two slices (2-d matrices) at a time, determinining whether one is smaller, equal or larger than the other. To sort
+   * two slices (2-d matrices) at a time, determining whether one is smaller, equal or larger than the other. To sort
    * ranges use sub-ranging views. To sort by other dimensions, use dice views. To sort descending, use flip views ...
    * <p> <b>Example:</b>
    * <pre>

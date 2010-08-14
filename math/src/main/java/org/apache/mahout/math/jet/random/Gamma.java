@@ -30,10 +30,10 @@ import org.apache.mahout.math.jet.stat.Probability;
 
 public class Gamma extends AbstractContinousDistribution {
   // shape
-  private double alpha;
+  private final double alpha;
 
   // rate
-  private double rate;
+  private final double rate;
 
   /**
    * Constructs a Gamma distribution with a given shape (alpha) and rate (beta).
@@ -118,9 +118,7 @@ public class Gamma extends AbstractContinousDistribution {
       double ss = 0.0;
       double s = 0.0;
       double d = 0.0;
-      double aa = -1.0;
-      if (alpha != aa) {                        // Step 1. Preparations
-        aa = alpha;
+      if (alpha != -1.0) {                        // Step 1. Preparations
         ss = alpha - 0.5;
         s = Math.sqrt(ss);
         d = 5.656854249 - 12.0 * s;
@@ -148,9 +146,7 @@ public class Gamma extends AbstractContinousDistribution {
       double q0 = 0.0;
       double si = 0.0;
       double c = 0.0;
-      double aaa = -1.0;
-      if (alpha != aaa) {                           // Step 4. Set-up for hat case
-        aaa = alpha;
+      if (alpha != -1.0) {                           // Step 4. Set-up for hat case
         double r = 1.0 / alpha;
         double q9 = 0.0001710320;
         double q8 = -0.0004701849;

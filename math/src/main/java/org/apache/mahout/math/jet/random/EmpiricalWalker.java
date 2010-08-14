@@ -185,11 +185,7 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
     if (f == 1.0) {
       return c;
     }
-    if (u < f) {
-      return c;
-    } else {
-      return this.A[c];
-    }
+    return u < f ? c : this.A[c];
   }
 
   /** Returns the probability distribution function. */

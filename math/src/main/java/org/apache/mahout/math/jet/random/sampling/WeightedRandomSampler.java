@@ -85,11 +85,7 @@ public class WeightedRandomSampler extends PersistentObject {
     }
 
     if (nextTriggerPos == UNDEFINED) {
-      if (weight == 1) {
-        nextTriggerPos = 0; // tuned for speed
-      } else {
-        nextTriggerPos = generator.nextIntFromTo(0, weight - 1);
-      }
+      nextTriggerPos = weight == 1 ? 0 : generator.nextIntFromTo(0, weight - 1);
 
       nextSkip = weight - 1 - nextTriggerPos;
     }

@@ -65,11 +65,7 @@ public class DoubleFactory1D extends PersistentObject {
    * @param values The values to be filled into the new matrix.
    */
   public DoubleMatrix1D make(double[] values) {
-    if (this == sparse) {
-      return new SparseDoubleMatrix1D(values);
-    } else {
-      return new DenseDoubleMatrix1D(values);
-    }
+    return this == sparse ? new SparseDoubleMatrix1D(values) : new DenseDoubleMatrix1D(values);
   }
 
   /** Constructs a matrix which is the concatenation of all given parts. Cells are copied. */

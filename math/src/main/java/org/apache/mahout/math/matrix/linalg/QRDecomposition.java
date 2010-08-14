@@ -34,7 +34,8 @@ public class QRDecomposition implements java.io.Serializable {
   //private double[][] QR;
 
   /** Row and column dimensions. */
-  private final int m, n;
+  private final int m;
+  private final int n;
 
   /** Array for internal storage of diagonal of R. */
   private final DoubleMatrix1D Rdiag;
