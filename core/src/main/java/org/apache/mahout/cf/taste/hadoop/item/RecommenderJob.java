@@ -100,7 +100,7 @@ public final class RecommenderJob extends AbstractJob {
     addOption("maxPrefsPerUserConsidered", null,
         "Maximum number of preferences considered per user in final recommendation phase",
         String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
-    addOption("maxSimilaritiesPerItemConsidered", null,"Maximum number of similarities considered per item ",
+    addOption("maxSimilaritiesPerItemConsidered", null, "Maximum number of similarities considered per item ",
         String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM_CONSIDERED));    
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use " +
         "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')',
