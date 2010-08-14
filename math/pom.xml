@@ -124,9 +124,9 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/math</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/lucene/mahout/trunk/math</developerConnection>
-    <url>https://svn.apache.org/repos/asf/lucene/mahout/mahout-math</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/mahout-math</url>
   </scm>
   <repositories>
     <repository>
