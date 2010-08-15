@@ -16,205 +16,202 @@ import org.apache.mahout.math.jet.math.Arithmetic;
  * <b>Implementation:</b> High performance implementation. <dt>This is a port of <tt>gen_fun.cpp</tt> from the <A
  * HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND / WIN-RAND</A> library.
  */
-class Fun {
+public class Fun {
+  private static final double[] B_0 = new double[]{-1.5787132, -0.6130827, 0.1735823, 1.4793411,
+    2.6667307, 4.9086836, 8.1355339,
+  };
+  private static final double[] B_05 = new double[]{-1.9694802, -0.7642538, 0.0826017, 1.4276355,
+    2.6303682, 4.8857787, 8.1207968,
+  };
+  private static final double[] B_1 = new double[]{-2.9807345, -1.1969943, -0.1843161, 1.2739241,
+    2.5218256, 4.8172216, 8.0765633,
+  };
+  private static final double[] B_2 = new double[]{-5.9889676, -2.7145389, -1.1781269, 0.6782201,
+    2.0954009, 4.5452152, 7.9003173,
+  };
+  private static final double[] B_3 = new double[]{-9.6803440, -4.8211925, -2.6533185, -0.2583337,
+    1.4091915, 4.0993448, 7.6088310,
+  };
+  private static final double[] B_5 = new double[]{-18.1567152, -10.0939408, -6.5819139, -2.9371545,
+    -0.6289005, 2.7270412, 6.6936799,
+  };
+  private static final double[] B_8 = new double[]{-32.4910195, -19.6065943, -14.0347298, -8.3839439,
+    -4.9679730, -0.3567823, 4.5589697,
+  };
 
   private Fun() {
   }
 
   private static double fktValue(double lambda, double z1, double z2, double xValue) {
-
-    return Math.cos(z1 * xValue) / (Math.pow((xValue * xValue + z2 * z2), (lambda + 0.5)));
+    return Math.cos(z1 * xValue) / Math.pow(xValue * xValue + z2 * z2, lambda + 0.5);
   }
 
   public static double bessel2Fkt(double lambda, double beta) {
-
-    double[] b0 = {-1.5787132, -0.6130827, 0.1735823, 1.4793411,
-        2.6667307, 4.9086836, 8.1355339,
-    };
-    double[] b05 = {-1.9694802, -0.7642538, 0.0826017, 1.4276355,
-        2.6303682, 4.8857787, 8.1207968,
-    };
-    double[] b1 = {-2.9807345, -1.1969943, -0.1843161, 1.2739241,
-        2.5218256, 4.8172216, 8.0765633,
-    };
-    double[] b2 = {-5.9889676, -2.7145389, -1.1781269, 0.6782201,
-        2.0954009, 4.5452152, 7.9003173,
-    };
-    double[] b3 = {-9.6803440, -4.8211925, -2.6533185, -0.2583337,
-        1.4091915, 4.0993448, 7.6088310,
-    };
-    double[] b5 = {-18.1567152, -10.0939408, -6.5819139, -2.9371545,
-        -0.6289005, 2.7270412, 6.6936799,
-    };
-    double[] b8 = {-32.4910195, -19.6065943, -14.0347298, -8.3839439,
-        -4.9679730, -0.3567823, 4.5589697,
-    };
-
     if (lambda == 0.0) {
       if (beta == 0.1) {
-        return (b0[0]);
+        return B_0[0];
       }
       if (beta == 0.5) {
-        return (b0[1]);
+        return B_0[1];
       }
       if (beta == 1.0) {
-        return (b0[2]);
+        return B_0[2];
       }
       if (beta == 2.0) {
-        return (b0[3]);
+        return B_0[3];
       }
       if (beta == 3.0) {
-        return (b0[4]);
+        return B_0[4];
       }
       if (beta == 5.0) {
-        return (b0[5]);
+        return B_0[5];
       }
       if (beta == 8.0) {
-        return (b0[6]);
+        return B_0[6];
       }
     }
 
     if (lambda == 0.5) {
       if (beta == 0.1) {
-        return (b05[0]);
+        return B_05[0];
       }
       if (beta == 0.5) {
-        return (b05[1]);
+        return B_05[1];
       }
       if (beta == 1.0) {
-        return (b05[2]);
+        return B_05[2];
       }
       if (beta == 2.0) {
-        return (b05[3]);
+        return B_05[3];
       }
       if (beta == 3.0) {
-        return (b05[4]);
+        return B_05[4];
       }
       if (beta == 5.0) {
-        return (b05[5]);
+        return B_05[5];
       }
       if (beta == 8.0) {
-        return (b05[6]);
+        return B_05[6];
       }
     }
 
     if (lambda == 1.0) {
       if (beta == 0.1) {
-        return (b1[0]);
+        return B_1[0];
       }
       if (beta == 0.5) {
-        return (b1[1]);
+        return B_1[1];
       }
       if (beta == 1.0) {
-        return (b1[2]);
+        return B_1[2];
       }
       if (beta == 2.0) {
-        return (b1[3]);
+        return B_1[3];
       }
       if (beta == 3.0) {
-        return (b1[4]);
+        return B_1[4];
       }
       if (beta == 5.0) {
-        return (b1[5]);
+        return B_1[5];
       }
       if (beta == 8.0) {
-        return (b1[6]);
+        return B_1[6];
       }
     }
 
     if (lambda == 2.0) {
       if (beta == 0.1) {
-        return (b2[0]);
+        return B_2[0];
       }
       if (beta == 0.5) {
-        return (b2[1]);
+        return B_2[1];
       }
       if (beta == 1.0) {
-        return (b2[2]);
+        return B_2[2];
       }
       if (beta == 2.0) {
-        return (b2[3]);
+        return B_2[3];
       }
       if (beta == 3.0) {
-        return (b2[4]);
+        return B_2[4];
       }
       if (beta == 5.0) {
-        return (b2[5]);
+        return B_2[5];
       }
       if (beta == 8.0) {
-        return (b2[6]);
+        return B_2[6];
       }
     }
 
     if (lambda == 3.0) {
       if (beta == 0.1) {
-        return (b3[0]);
+        return B_3[0];
       }
       if (beta == 0.5) {
-        return (b3[1]);
+        return B_3[1];
       }
       if (beta == 1.0) {
-        return (b3[2]);
+        return B_3[2];
       }
       if (beta == 2.0) {
-        return (b3[3]);
+        return B_3[3];
       }
       if (beta == 3.0) {
-        return (b3[4]);
+        return B_3[4];
       }
       if (beta == 5.0) {
-        return (b3[5]);
+        return B_3[5];
       }
       if (beta == 8.0) {
-        return (b3[6]);
+        return B_3[6];
       }
     }
 
     if (lambda == 5.0) {
       if (beta == 0.1) {
-        return (b5[0]);
+        return B_5[0];
       }
       if (beta == 0.5) {
-        return (b5[1]);
+        return B_5[1];
       }
       if (beta == 1.0) {
-        return (b5[2]);
+        return B_5[2];
       }
       if (beta == 2.0) {
-        return (b5[3]);
+        return B_5[3];
       }
       if (beta == 3.0) {
-        return (b5[4]);
+        return B_5[4];
       }
       if (beta == 5.0) {
-        return (b5[5]);
+        return B_5[5];
       }
       if (beta == 8.0) {
-        return (b5[6]);
+        return B_5[6];
       }
     }
 
     if (lambda == 8.0) {
       if (beta == 0.1) {
-        return (b8[0]);
+        return B_8[0];
       }
       if (beta == 0.5) {
-        return (b8[1]);
+        return B_8[1];
       }
       if (beta == 1.0) {
-        return (b8[2]);
+        return B_8[2];
       }
       if (beta == 2.0) {
-        return (b8[3]);
+        return B_8[3];
       }
       if (beta == 3.0) {
-        return (b8[4]);
+        return B_8[4];
       }
       if (beta == 5.0) {
-        return (b8[5]);
+        return B_8[5];
       }
       if (beta == 8.0) {
-        return (b8[6]);
+        return B_8[6];
       }
     }
 
@@ -235,25 +232,25 @@ class Fun {
           prod = my - 1.0;
         } else {
           value += diff;
-          prod *= (my - value);
+          prod *= my - value;
           diff *= 2.0;
         }
         sum += prod / (factorial(i) * Math.pow((8.0 * beta), i));
         i++;
       }
       erg = c - Math.log(sum);
-      return (erg);
+      return erg;
     }
 
     double pi = Math.PI;
     if ((lambda > 0.0) && ((beta - 0.04 * lambda) <= 0.0)) {
       if (lambda < 11.5) {
         erg = -Math.log(gamma(lambda)) - lambda * Math.log(2.0) + lambda * Math.log(beta);
-        return (erg);
+        return erg;
       } else {
         erg = -(lambda + 1.0) * Math.log(2.0) - (lambda - 0.5) * Math.log(lambda) + lambda + lambda * Math.log(beta) -
             0.5 * Math.log(0.5 * pi);
-        return (erg);
+        return erg;
       }
     }
 
@@ -289,7 +286,7 @@ class Fun {
         }
       }
       erg = -Math.log(2.0 * sum);
-      return (erg);
+      return erg;
     } else {
       double z1 = beta / 1.57;
       sum = 0.0;
@@ -309,7 +306,7 @@ class Fun {
         }
       }
       for (j = 1; j <= 5; j++) {
-        newValue = (0.5 * (fktValue(lambda, z1, z2, x) + fktValue(lambda, z1, z2, x1))) * step;
+        newValue = 0.5 * (fktValue(lambda, z1, z2, x) + fktValue(lambda, z1, z2, x1)) * step;
         sum += newValue;
         x = x1;
         x1 += step;
@@ -325,7 +322,7 @@ class Fun {
       sum = 0.5 * (firstSum + secondSum);
       erg = gamma(lambda + 0.5) * Math.pow((2.0 * z2), lambda) / (Math.sqrt(pi) * Math.pow(z1, lambda)) * sum;
       erg = -Math.log(2.0 * erg);
-      return (erg);
+      return erg;
     }
   }
 
