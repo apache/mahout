@@ -21,6 +21,11 @@ import org.apache.mahout.math.matrix.DoubleMatrix3D;
 import org.apache.mahout.math.matrix.impl.AbstractFormatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 
+import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.List;
+import java.util.TreeMap;
+
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Property extends PersistentObject {
@@ -63,9 +68,9 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
-  public static void checkRectangular(AbstractMatrix2D A) {
-    if (A.rows() < A.columns()) {
-      throw new IllegalArgumentException("Matrix must be rectangular: " + AbstractFormatter.shape(A));
+  public static void checkRectangular(AbstractMatrix2D a) {
+    if (a.rows() < a.columns()) {
+      throw new IllegalArgumentException("Matrix must be rectangular: " + AbstractFormatter.shape(a));
     }
   }
 
@@ -74,39 +79,39 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>A.rows() != A.columns()</tt>.
    */
-  public static void checkSquare(AbstractMatrix2D A) {
-    if (A.rows() != A.columns()) {
-      throw new IllegalArgumentException("Matrix must be square: " + AbstractFormatter.shape(A));
+  public static void checkSquare(AbstractMatrix2D a) {
+    if (a.rows() != a.columns()) {
+      throw new IllegalArgumentException("Matrix must be square: " + AbstractFormatter.shape(a));
     }
   }
 
   /** Returns the matrix's fraction of non-zero cells; <tt>A.cardinality() / A.size()</tt>. */
-  public static double density(DoubleMatrix2D A) {
-    return A.cardinality() / (double) A.size();
+  public static double density(DoubleMatrix2D a) {
+    return a.cardinality() / (double) a.size();
   }
 
   /**
    * Returns whether all cells of the given matrix <tt>A</tt> are equal to the given value. The result is <tt>true</tt>
    * if and only if <tt>A != null</tt> and <tt>! (Math.abs(value - A[i]) > tolerance())</tt> holds for all coordinates.
    *
-   * @param A     the first matrix to compare.
+   * @param a     the first matrix to compare.
    * @param value the value to compare against.
    * @return <tt>true</tt> if the matrix is equal to the value; <tt>false</tt> otherwise.
    */
-  public boolean equals(DoubleMatrix1D A, double value) {
-    if (A == null) {
+  public boolean equals(DoubleMatrix1D a, double value) {
+    if (a == null) {
       return false;
     }
     double epsilon = tolerance();
-    for (int i = A.size(); --i >= 0;) {
+    for (int i = a.size(); --i >= 0;) {
       //if (!(A.getQuick(i) == value)) return false;
       //if (Math.abs(value - A.getQuick(i)) > epsilon) return false;
-      double x = A.getQuick(i);
+      double x = a.getQuick(i);
       double diff = Math.abs(value - x);
-      if ((diff != diff) && ((value != value && x != x) || value == x)) {
+      if (Double.isNaN(diff) && (Double.isNaN(value) && Double.isNaN(x) || value == x)) {
         diff = 0;
       }
-      if (!(diff <= epsilon)) {
+      if (diff > epsilon) {
         return false;
       }
     }
@@ -118,19 +123,19 @@ public class Property extends PersistentObject {
    * <tt>A==B</tt>. Otherwise, the result is <tt>true</tt> if and only if both arguments are <tt>!= null</tt>, have the
    * same size and <tt>! (Math.abs(A[i] - B[i]) > tolerance())</tt> holds for all indexes.
    *
-   * @param A the first matrix to compare.
-   * @param B the second matrix to compare.
+   * @param a the first matrix to compare.
+   * @param b the second matrix to compare.
    * @return <tt>true</tt> if both matrices are equal; <tt>false</tt> otherwise.
    */
-  public boolean equals(DoubleMatrix1D A, DoubleMatrix1D B) {
-    if (A == B) {
+  public boolean equals(DoubleMatrix1D a, DoubleMatrix1D b) {
+    if (a == b) {
       return true;
     }
-    if (!(A != null && B != null)) {
+    if (!(a != null && b != null)) {
       return false;
     }
-    int size = A.size();
-    if (size != B.size()) {
+    int size = a.size();
+    if (size != b.size()) {
       return false;
     }
 
@@ -138,10 +143,10 @@ public class Property extends PersistentObject {
     for (int i = size; --i >= 0;) {
       //if (!(getQuick(i) == B.getQuick(i))) return false;
       //if (Math.abs(A.getQuick(i) - B.getQuick(i)) > epsilon) return false;
-      double x = A.getQuick(i);
-      double value = B.getQuick(i);
+      double x = a.getQuick(i);
+      double value = b.getQuick(i);
       double diff = Math.abs(value - x);
-      if ((diff != diff) && ((value != value && x != x) || value == x)) {
+      if (Double.isNaN(diff ) && ((Double.isNaN(value ) && Double.isNaN(x)) || value == x)) {
         diff = 0;
       }
       if (!(diff <= epsilon)) {
@@ -156,25 +161,25 @@ public class Property extends PersistentObject {
    * if and only if <tt>A != null</tt> and <tt>! (Math.abs(value - A[row,col]) > tolerance())</tt> holds for all
    * coordinates.
    *
-   * @param A     the first matrix to compare.
+   * @param a     the first matrix to compare.
    * @param value the value to compare against.
    * @return <tt>true</tt> if the matrix is equal to the value; <tt>false</tt> otherwise.
    */
-  public boolean equals(DoubleMatrix2D A, double value) {
-    if (A == null) {
+  public boolean equals(DoubleMatrix2D a, double value) {
+    if (a == null) {
       return false;
     }
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
 
     double epsilon = tolerance();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         //if (!(A.getQuick(row,column) == value)) return false;
         //if (Math.abs(value - A.getQuick(row,column)) > epsilon) return false;
-        double x = A.getQuick(row, column);
+        double x = a.getQuick(row, column);
         double diff = Math.abs(value - x);
-        if ((diff != diff) && ((value != value && x != x) || value == x)) {
+        if (Double.isNaN(diff) && (Double.isNaN(value) && Double.isNaN(x) || value == x)) {
           diff = 0;
         }
         if (!(diff <= epsilon)) {
@@ -191,20 +196,20 @@ public class Property extends PersistentObject {
    * same number of columns and rows and <tt>! (Math.abs(A[row,col] - B[row,col]) > tolerance())</tt> holds for all
    * coordinates.
    *
-   * @param A the first matrix to compare.
-   * @param B the second matrix to compare.
+   * @param a the first matrix to compare.
+   * @param b the second matrix to compare.
    * @return <tt>true</tt> if both matrices are equal; <tt>false</tt> otherwise.
    */
-  public boolean equals(DoubleMatrix2D A, DoubleMatrix2D B) {
-    if (A == B) {
+  public boolean equals(DoubleMatrix2D a, DoubleMatrix2D b) {
+    if (a == b) {
       return true;
     }
-    if (!(A != null && B != null)) {
+    if (!(a != null && b != null)) {
       return false;
     }
-    int rows = A.rows();
-    int columns = A.columns();
-    if (columns != B.columns() || rows != B.rows()) {
+    int rows = a.rows();
+    int columns = a.columns();
+    if (columns != b.columns() || rows != b.rows()) {
       return false;
     }
 
@@ -213,13 +218,13 @@ public class Property extends PersistentObject {
       for (int column = columns; --column >= 0;) {
         //if (!(A.getQuick(row,column) == B.getQuick(row,column))) return false;
         //if (Math.abs((A.getQuick(row,column) - B.getQuick(row,column)) > epsilon) return false;
-        double x = A.getQuick(row, column);
-        double value = B.getQuick(row, column);
+        double x = a.getQuick(row, column);
+        double value = b.getQuick(row, column);
         double diff = Math.abs(value - x);
-        if ((diff != diff) && ((value != value && x != x) || value == x)) {
+        if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
           diff = 0;
         }
-        if (!(diff <= epsilon)) {
+        if (diff > epsilon) {
           return false;
         }
       }
@@ -232,29 +237,29 @@ public class Property extends PersistentObject {
    * if and only if <tt>A != null</tt> and <tt>! (Math.abs(value - A[slice,row,col]) > tolerance())</tt> holds for all
    * coordinates.
    *
-   * @param A     the first matrix to compare.
+   * @param a     the first matrix to compare.
    * @param value the value to compare against.
    * @return <tt>true</tt> if the matrix is equal to the value; <tt>false</tt> otherwise.
    */
-  public boolean equals(DoubleMatrix3D A, double value) {
-    if (A == null) {
+  public boolean equals(DoubleMatrix3D a, double value) {
+    if (a == null) {
       return false;
     }
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
 
     double epsilon = tolerance();
-    for (int slice = A.slices(); --slice >= 0;) {
+    for (int slice = a.slices(); --slice >= 0;) {
       for (int row = rows; --row >= 0;) {
         for (int column = columns; --column >= 0;) {
           //if (!(A.getQuick(slice,row,column) == value)) return false;
           //if (Math.abs(value - A.getQuick(slice,row,column)) > epsilon) return false;
-          double x = A.getQuick(slice, row, column);
+          double x = a.getQuick(slice, row, column);
           double diff = Math.abs(value - x);
-          if ((diff != diff) && ((value != value && x != x) || value == x)) {
+          if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
             diff = 0;
           }
-          if (!(diff <= epsilon)) {
+          if (diff > epsilon) {
             return false;
           }
         }
@@ -269,62 +274,63 @@ public class Property extends PersistentObject {
    * same number of columns, rows and slices, and <tt>! (Math.abs(A[slice,row,col] - B[slice,row,col]) >
    * tolerance())</tt> holds for all coordinates.
    *
-   * @param A the first matrix to compare.
-   * @param B the second matrix to compare.
+   * @param a the first matrix to compare.
+   * @param b the second matrix to compare.
    * @return <tt>true</tt> if both matrices are equal; <tt>false</tt> otherwise.
    */
-  public boolean equals(DoubleMatrix3D A, DoubleMatrix3D B) {
-    if (A == B) {
+  public boolean equals(DoubleMatrix3D a, DoubleMatrix3D b) {
+    if (a == b) {
       return true;
     }
-    if (!(A != null && B != null)) {
+    if (a == null || b == null) {
       return false;
-    }
-    int slices = A.slices();
-    int rows = A.rows();
-    int columns = A.columns();
-    if (columns != B.columns() || rows != B.rows() || slices != B.slices()) {
-      return false;
-    }
+    } else {
+      int slices = a.slices();
+      int rows = a.rows();
+      int columns = a.columns();
+      if (columns != b.columns() || rows != b.rows() || slices != b.slices()) {
+        return false;
+      }
 
-    double epsilon = tolerance();
-    for (int slice = slices; --slice >= 0;) {
-      for (int row = rows; --row >= 0;) {
-        for (int column = columns; --column >= 0;) {
-          //if (!(A.getQuick(slice,row,column) == B.getQuick(slice,row,column))) return false;
-          //if (Math.abs(A.getQuick(slice,row,column) - B.getQuick(slice,row,column)) > epsilon) return false;
-          double x = A.getQuick(slice, row, column);
-          double value = B.getQuick(slice, row, column);
-          double diff = Math.abs(value - x);
-          if ((diff != diff) && ((value != value && x != x) || value == x)) {
-            diff = 0;
-          }
-          if (!(diff <= epsilon)) {
-            return false;
+      double epsilon = tolerance();
+      for (int slice = slices; --slice >= 0;) {
+        for (int row = rows; --row >= 0;) {
+          for (int column = columns; --column >= 0;) {
+            //if (!(A.getQuick(slice,row,column) == B.getQuick(slice,row,column))) return false;
+            //if (Math.abs(A.getQuick(slice,row,column) - B.getQuick(slice,row,column)) > epsilon) return false;
+            double x = a.getQuick(slice, row, column);
+            double value = b.getQuick(slice, row, column);
+            double diff = Math.abs(value - x);
+            if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
+              diff = 0;
+            }
+            if (diff > epsilon) {
+              return false;
+            }
           }
         }
       }
+      return true;
     }
-    return true;
   }
 
   /**
    * Modifies the given matrix square matrix <tt>A</tt> such that it is diagonally dominant by row and column, hence
    * non-singular, hence invertible. For testing purposes only.
    *
-   * @param A the square matrix to modify.
+   * @param a the square matrix to modify.
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    */
-  public static void generateNonSingular(DoubleMatrix2D A) {
-    checkSquare(A);
-    int min = Math.min(A.rows(), A.columns());
+  public static void generateNonSingular(DoubleMatrix2D a) {
+    checkSquare(a);
+    int min = Math.min(a.rows(), a.columns());
     for (int i = min; --i >= 0;) {
-      A.setQuick(i, i, 0);
+      a.setQuick(i, i, 0);
     }
     for (int i = min; --i >= 0;) {
-      double rowSum = A.viewRow(i).aggregate(Functions.plus, Functions.abs);
-      double colSum = A.viewColumn(i).aggregate(Functions.plus, Functions.abs);
-      A.setQuick(i, i, Math.max(rowSum, colSum) + i + 1);
+      double rowSum = a.viewRow(i).aggregate(Functions.plus, Functions.abs);
+      double colSum = a.viewColumn(i).aggregate(Functions.plus, Functions.abs);
+      a.setQuick(i, i, Math.max(rowSum, colSum) + i + 1);
     }
   }
 
@@ -336,14 +342,14 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>diagonal</i> if <tt>A[i,j] == 0</tt> whenever <tt>i != j</tt>. Matrix may but need not be
    * square.
    */
-  public boolean isDiagonal(DoubleMatrix2D A) {
+  public boolean isDiagonal(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         //if (row!=column && A.getQuick(row,column) != 0) return false;
-        if (row != column && !(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+        if (row != column && Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
       }
@@ -357,13 +363,13 @@ public class Property extends PersistentObject {
    * true if for all i: abs(A[i,i]) &gt; Sum(abs(A[j,i])); j != i.</tt> Matrix may but need not be square. <p> Note:
    * Ignores tolerance.
    */
-  public static boolean isDiagonallyDominantByColumn(DoubleMatrix2D A) {
+  public static boolean isDiagonallyDominantByColumn(DoubleMatrix2D a) {
     //double epsilon = tolerance();
-    int min = Math.min(A.rows(), A.columns());
+    int min = Math.min(a.rows(), a.columns());
     for (int i = min; --i >= 0;) {
-      double diag = Math.abs(A.getQuick(i, i));
+      double diag = Math.abs(a.getQuick(i, i));
       diag += diag;
-      if (diag <= A.viewColumn(i).aggregate(Functions.plus, Functions.abs)) {
+      if (diag <= a.viewColumn(i).aggregate(Functions.plus, Functions.abs)) {
         return false;
       }
     }
@@ -376,13 +382,13 @@ public class Property extends PersistentObject {
    * all i: abs(A[i,i]) &gt; Sum(abs(A[i,j])); j != i.</tt> Matrix may but need not be square. <p> Note: Ignores
    * tolerance.
    */
-  public static boolean isDiagonallyDominantByRow(DoubleMatrix2D A) {
+  public static boolean isDiagonallyDominantByRow(DoubleMatrix2D a) {
     //double epsilon = tolerance();
-    int min = Math.min(A.rows(), A.columns());
+    int min = Math.min(a.rows(), a.columns());
     for (int i = min; --i >= 0;) {
-      double diag = Math.abs(A.getQuick(i, i));
+      double diag = Math.abs(a.getQuick(i, i));
       diag += diag;
-      if (diag <= A.viewRow(i).aggregate(Functions.plus, Functions.abs)) {
+      if (diag <= a.viewRow(i).aggregate(Functions.plus, Functions.abs)) {
         return false;
       }
     }
@@ -393,18 +399,18 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is an <i>identity</i> matrix if <tt>A[i,i] == 1</tt> and all other cells are zero. Matrix may
    * but need not be square.
    */
-  public boolean isIdentity(DoubleMatrix2D A) {
+  public boolean isIdentity(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
-        double v = A.getQuick(row, column);
+        double v = a.getQuick(row, column);
         if (row == column) {
-          if (!(Math.abs(1 - v) < epsilon)) {
+          if (Math.abs(1 - v) > epsilon) {
             return false;
           }
-        } else if (!(Math.abs(v) <= epsilon)) {
+        } else if (Math.abs(v) > epsilon) {
           return false;
         }
       }
@@ -416,15 +422,15 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>lower bidiagonal</i> if <tt>A[i,j]==0</tt> unless <tt>i==j || i==j+1</tt>. Matrix may but
    * need not be square.
    */
-  public boolean isLowerBidiagonal(DoubleMatrix2D A) {
+  public boolean isLowerBidiagonal(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         if (!(row == column || row == column + 1)) {
           //if (A.getQuick(row,column) != 0) return false;
-          if (!(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+          if (Math.abs(a.getQuick(row, column)) > epsilon) {
             return false;
           }
         }
@@ -437,14 +443,14 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>lower triangular</i> if <tt>A[i,j]==0</tt> whenever <tt>i &lt; j</tt>. Matrix may but
    * need not be square.
    */
-  public boolean isLowerTriangular(DoubleMatrix2D A) {
+  public boolean isLowerTriangular(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int column = columns; --column >= 0;) {
       for (int row = Math.min(column, rows); --row >= 0;) {
         //if (A.getQuick(row,column) != 0) return false;
-        if (!(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+        if (Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
       }
@@ -456,12 +462,12 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>non-negative</i> if <tt>A[i,j] &gt;= 0</tt> holds for all cells. <p> Note: Ignores
    * tolerance.
    */
-  public static boolean isNonNegative(DoubleMatrix2D A) {
-    int rows = A.rows();
-    int columns = A.columns();
+  public static boolean isNonNegative(DoubleMatrix2D a) {
+    int rows = a.rows();
+    int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
-        if (!(A.getQuick(row, column) >= 0)) {
+        if (a.getQuick(row, column) < 0) {
           return false;
         }
       }
@@ -474,19 +480,19 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    */
-  public boolean isOrthogonal(DoubleMatrix2D A) {
-    checkSquare(A);
-    return equals(A.zMult(A, null, 1, 0, false, true),
-        DoubleFactory2D.dense.identity(A.rows()));
+  public boolean isOrthogonal(DoubleMatrix2D a) {
+    checkSquare(a);
+    return equals(a.zMult(a, null, 1, 0, false, true),
+        DoubleFactory2D.dense.identity(a.rows()));
   }
 
   /** A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells. <p> Note: Ignores tolerance. */
-  public static boolean isPositive(DoubleMatrix2D A) {
-    int rows = A.rows();
-    int columns = A.columns();
+  public static boolean isPositive(DoubleMatrix2D a) {
+    int rows = a.rows();
+    int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
-        if (!(A.getQuick(row, column) > 0)) {
+        if (a.getQuick(row, column) <= 0) {
           return false;
         }
       }
@@ -495,8 +501,8 @@ public class Property extends PersistentObject {
   }
 
   /** A matrix <tt>A</tt> is <i>singular</i> if it has no inverse, that is, iff <tt>det(A)==0</tt>. */
-  public boolean isSingular(DoubleMatrix2D A) {
-    return Math.abs(Algebra.det(A)) < tolerance();
+  public boolean isSingular(DoubleMatrix2D a) {
+    return Math.abs(Algebra.det(a)) < tolerance();
   }
 
   /**
@@ -505,15 +511,15 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    */
-  public boolean isSkewSymmetric(DoubleMatrix2D A) {
-    checkSquare(A);
+  public boolean isSkewSymmetric(DoubleMatrix2D a) {
+    checkSquare(a);
     double epsilon = tolerance();
-    int rows = A.rows();
+    int rows = a.rows();
     //int columns = A.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = rows; --column >= 0;) {
         //if (A.getQuick(row,column) != -A.getQuick(column,row)) return false;
-        if (!(Math.abs(A.getQuick(row, column) + A.getQuick(column, row)) <= epsilon)) {
+        if (Math.abs(a.getQuick(row, column) + a.getQuick(column, row)) > epsilon) {
           return false;
         }
       }
@@ -522,22 +528,22 @@ public class Property extends PersistentObject {
   }
 
   /** A matrix <tt>A</tt> is <i>square</i> if it has the same number of rows and columns. */
-  public static boolean isSquare(AbstractMatrix2D A) {
-    return A.rows() == A.columns();
+  public static boolean isSquare(AbstractMatrix2D a) {
+    return a.rows() == a.columns();
   }
 
   /**
    * A matrix <tt>A</tt> is <i>strictly lower triangular</i> if <tt>A[i,j]==0</tt> whenever <tt>i &lt;= j</tt>. Matrix
    * may but need not be square.
    */
-  public boolean isStrictlyLowerTriangular(DoubleMatrix2D A) {
+  public boolean isStrictlyLowerTriangular(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int column = columns; --column >= 0;) {
       for (int row = Math.min(rows, column + 1); --row >= 0;) {
         //if (A.getQuick(row,column) != 0) return false;
-        if (!(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+        if (Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
       }
@@ -549,33 +555,33 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>strictly triangular</i> if it is triangular and its diagonal elements all equal 0. Matrix
    * may but need not be square.
    */
-  public boolean isStrictlyTriangular(DoubleMatrix2D A) {
-    if (!isTriangular(A)) {
+  public boolean isStrictlyTriangular(DoubleMatrix2D a) {
+    if (isTriangular(a)) {
+      double epsilon = tolerance();
+      for (int i = Math.min(a.rows(), a.columns()); --i >= 0;) {
+        //if (A.getQuick(i,i) != 0) return false;
+        if (Math.abs(a.getQuick(i, i)) > epsilon) {
+          return false;
+        }
+      }
+      return true;
+    } else {
       return false;
     }
-
-    double epsilon = tolerance();
-    for (int i = Math.min(A.rows(), A.columns()); --i >= 0;) {
-      //if (A.getQuick(i,i) != 0) return false;
-      if (!(Math.abs(A.getQuick(i, i)) <= epsilon)) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**
    * A matrix <tt>A</tt> is <i>strictly upper triangular</i> if <tt>A[i,j]==0</tt> whenever <tt>i &gt;= j</tt>. Matrix
    * may but need not be square.
    */
-  public boolean isStrictlyUpperTriangular(DoubleMatrix2D A) {
+  public boolean isStrictlyUpperTriangular(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int column = columns; --column >= 0;) {
       for (int row = rows; --row >= column;) {
         //if (A.getQuick(row,column) != 0) return false;
-        if (!(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+        if (Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
       }
@@ -588,32 +594,32 @@ public class Property extends PersistentObject {
    *
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    */
-  public boolean isSymmetric(DoubleMatrix2D A) {
-    checkSquare(A);
-    return equals(A, A.viewDice());
+  public boolean isSymmetric(DoubleMatrix2D a) {
+    checkSquare(a);
+    return equals(a, a.viewDice());
   }
 
   /**
    * A matrix <tt>A</tt> is <i>triangular</i> iff it is either upper or lower triangular. Matrix may but need not be
    * square.
    */
-  public boolean isTriangular(DoubleMatrix2D A) {
-    return isLowerTriangular(A) || isUpperTriangular(A);
+  public boolean isTriangular(DoubleMatrix2D a) {
+    return isLowerTriangular(a) || isUpperTriangular(a);
   }
 
   /**
    * A matrix <tt>A</tt> is <i>tridiagonal</i> if <tt>A[i,j]==0</tt> whenever <tt>Math.abs(i-j) > 1</tt>. Matrix may but
    * need not be square.
    */
-  public boolean isTridiagonal(DoubleMatrix2D A) {
+  public boolean isTridiagonal(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         if (Math.abs(row - column) > 1) {
           //if (A.getQuick(row,column) != 0) return false;
-          if (!(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+          if (Math.abs(a.getQuick(row, column)) > epsilon) {
             return false;
           }
         }
@@ -626,34 +632,34 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>unit triangular</i> if it is triangular and its diagonal elements all equal 1. Matrix may
    * but need not be square.
    */
-  public boolean isUnitTriangular(DoubleMatrix2D A) {
-    if (!isTriangular(A)) {
+  public boolean isUnitTriangular(DoubleMatrix2D a) {
+    if (isTriangular(a)) {
+      double epsilon = tolerance();
+      for (int i = Math.min(a.rows(), a.columns()); --i >= 0;) {
+        //if (A.getQuick(i,i) != 1) return false;
+        if (Math.abs(1 - a.getQuick(i, i)) > epsilon) {
+          return false;
+        }
+      }
+      return true;
+    } else {
       return false;
     }
-
-    double epsilon = tolerance();
-    for (int i = Math.min(A.rows(), A.columns()); --i >= 0;) {
-      //if (A.getQuick(i,i) != 1) return false;
-      if (!(Math.abs(1 - A.getQuick(i, i)) <= epsilon)) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**
    * A matrix <tt>A</tt> is <i>upper bidiagonal</i> if <tt>A[i,j]==0</tt> unless <tt>i==j || i==j-1</tt>. Matrix may but
    * need not be square.
    */
-  public boolean isUpperBidiagonal(DoubleMatrix2D A) {
+  public boolean isUpperBidiagonal(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         if (!(row == column || row == column - 1)) {
           //if (A.getQuick(row,column) != 0) return false;
-          if (!(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+          if (Math.abs(a.getQuick(row, column)) > epsilon) {
             return false;
           }
         }
@@ -666,14 +672,14 @@ public class Property extends PersistentObject {
    * A matrix <tt>A</tt> is <i>upper triangular</i> if <tt>A[i,j]==0</tt> whenever <tt>i &gt; j</tt>. Matrix may but
    * need not be square.
    */
-  public boolean isUpperTriangular(DoubleMatrix2D A) {
+  public boolean isUpperTriangular(DoubleMatrix2D a) {
     double epsilon = tolerance();
-    int rows = A.rows();
-    int columns = A.columns();
+    int rows = a.rows();
+    int columns = a.columns();
     for (int column = columns; --column >= 0;) {
       for (int row = rows; --row > column;) {
         //if (A.getQuick(row,column) != 0) return false;
-        if (!(Math.abs(A.getQuick(row, column)) <= epsilon)) {
+        if (Math.abs(a.getQuick(row, column)) > epsilon) {
           return false;
         }
       }
@@ -682,8 +688,8 @@ public class Property extends PersistentObject {
   }
 
   /** A matrix <tt>A</tt> is <i>zero</i> if all its cells are zero. */
-  public boolean isZero(DoubleMatrix2D A) {
-    return equals(A, 0);
+  public boolean isZero(DoubleMatrix2D a) {
+    return equals(a, 0);
   }
 
   /**
@@ -691,22 +697,22 @@ public class Property extends PersistentObject {
    * nonzero and <tt>i &gt; j</tt>. A <i>banded</i> matrix has a "band" about the diagonal. Diagonal, tridiagonal and
    * triangular matrices are special cases.
    *
-   * @param A the square matrix to analyze.
+   * @param a the square matrix to analyze.
    * @return the lower bandwith.
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    * @see #semiBandwidth(DoubleMatrix2D)
    * @see #upperBandwidth(DoubleMatrix2D)
    */
-  public int lowerBandwidth(DoubleMatrix2D A) {
-    checkSquare(A);
+  public int lowerBandwidth(DoubleMatrix2D a) {
+    checkSquare(a);
     double epsilon = tolerance();
-    int rows = A.rows();
+    int rows = a.rows();
 
     for (int k = rows; --k >= 0;) {
       for (int i = rows - k; --i >= 0;) {
         int j = i + k;
         //if (A.getQuick(j,i) != 0) return k;
-        if (!(Math.abs(A.getQuick(j, i)) <= epsilon)) {
+        if (Math.abs(a.getQuick(j, i)) > epsilon) {
           return k;
         }
       }
@@ -753,26 +759,26 @@ public class Property extends PersistentObject {
    * align="center"><tt>unstructured</tt></div> </td> <td align="center" valign="middle"> <div
    * align="center"><tt>unstructured</tt></div> </td> </tr> </table>
    *
-   * @param A the square matrix to analyze.
+   * @param a the square matrix to analyze.
    * @return the semi-bandwith <tt>l</tt>.
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    * @see #lowerBandwidth(DoubleMatrix2D)
    * @see #upperBandwidth(DoubleMatrix2D)
    */
-  public int semiBandwidth(DoubleMatrix2D A) {
-    checkSquare(A);
+  public int semiBandwidth(DoubleMatrix2D a) {
+    checkSquare(a);
     double epsilon = tolerance();
-    int rows = A.rows();
+    int rows = a.rows();
 
     for (int k = rows; --k >= 0;) {
       for (int i = rows - k; --i >= 0;) {
         int j = i + k;
         //if (A.getQuick(j,i) != 0) return k+1;
         //if (A.getQuick(i,j) != 0) return k+1;
-        if (!(Math.abs(A.getQuick(j, i)) <= epsilon)) {
+        if (!(Math.abs(a.getQuick(j, i)) <= epsilon)) {
           return k + 1;
         }
-        if (!(Math.abs(A.getQuick(i, j)) <= epsilon)) {
+        if (Math.abs(a.getQuick(i, j)) > epsilon) {
           return k + 1;
         }
       }
@@ -830,263 +836,208 @@ public class Property extends PersistentObject {
    * upperBandwidth               : Illegal operation or error: Matrix must be square.
    * </pre>
    */
-  public String toString(DoubleMatrix2D A) {
-    final ObjectArrayList<String> names = new ObjectArrayList<String>();
-    final ObjectArrayList<String> values = new ObjectArrayList<String>();
+  public String toString(DoubleMatrix2D a) {
+    TreeMap<String, String> messages = new TreeMap<String, String>();
 
     // determine properties
-    names.add("density");
+    String name = "density";
     String unknown = "Illegal operation or error: ";
     try {
-      values.add(String.valueOf(density(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
-    }
-
-    // determine properties
-    names.add("isDiagonal");
-    try {
-      values.add(String.valueOf(isDiagonal(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(density(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
     // determine properties
-    names.add("isDiagonallyDominantByRow");
+    name = "isDiagonal";
     try {
-      values.add(String.valueOf(isDiagonallyDominantByRow(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isDiagonal(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
     // determine properties
-    names.add("isDiagonallyDominantByColumn");
+    name = "isDiagonallyDominantByRow";
     try {
-      values.add(String.valueOf(isDiagonallyDominantByColumn(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isDiagonallyDominantByRow(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isIdentity");
+    // determine properties
+    name = "isDiagonallyDominantByColumn";
     try {
-      values.add(String.valueOf(isIdentity(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isDiagonallyDominantByColumn(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isLowerBidiagonal");
+    name = "isIdentity";
     try {
-      values.add(String.valueOf(isLowerBidiagonal(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isIdentity(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isLowerTriangular");
+    name = "isLowerBidiagonal";
     try {
-      values.add(String.valueOf(isLowerTriangular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isLowerBidiagonal(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isNonNegative");
+    name = "isLowerTriangular";
     try {
-      values.add(String.valueOf(isNonNegative(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isLowerTriangular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isOrthogonal");
+    name = "isNonNegative";
     try {
-      values.add(String.valueOf(isOrthogonal(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isNonNegative(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isPositive");
+    name = "isOrthogonal";
     try {
-      values.add(String.valueOf(isPositive(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isOrthogonal(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isSingular");
+    name = "isPositive";
     try {
-      values.add(String.valueOf(isSingular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isPositive(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isSkewSymmetric");
+    name = "isSingular";
     try {
-      values.add(String.valueOf(isSkewSymmetric(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isSingular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isSquare");
+    name = "isSkewSymmetric";
     try {
-      values.add(String.valueOf(isSquare(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isSkewSymmetric(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isStrictlyLowerTriangular");
+    name = "isSquare";
     try {
-      values.add(String.valueOf(isStrictlyLowerTriangular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isSquare(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isStrictlyTriangular");
+    name = "isStrictlyLowerTriangular";
     try {
-      values.add(String.valueOf(isStrictlyTriangular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isStrictlyLowerTriangular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isStrictlyUpperTriangular");
+    name = "isStrictlyTriangular";
     try {
-      values.add(String.valueOf(isStrictlyUpperTriangular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isStrictlyTriangular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isSymmetric");
+    name = "isStrictlyUpperTriangular";
     try {
-      values.add(String.valueOf(isSymmetric(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isStrictlyUpperTriangular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isTriangular");
+    name = "isSymmetric";
     try {
-      values.add(String.valueOf(isTriangular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isSymmetric(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isTridiagonal");
+    name = "isTriangular";
     try {
-      values.add(String.valueOf(isTridiagonal(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isTriangular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isUnitTriangular");
+    name = "isTridiagonal";
     try {
-      values.add(String.valueOf(isUnitTriangular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isTridiagonal(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isUpperBidiagonal");
+    name = "isUnitTriangular";
     try {
-      values.add(String.valueOf(isUpperBidiagonal(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isUnitTriangular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isUpperTriangular");
+    name = "isUpperBidiagonal";
     try {
-      values.add(String.valueOf(isUpperTriangular(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isUpperBidiagonal(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("isZero");
+    name = "isUpperTriangular";
     try {
-      values.add(String.valueOf(isZero(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isUpperTriangular(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("lowerBandwidth");
+    name = "isZero";
     try {
-      values.add(String.valueOf(lowerBandwidth(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(isZero(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("semiBandwidth");
+    name = "lowerBandwidth";
     try {
-      values.add(String.valueOf(semiBandwidth(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(lowerBandwidth(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-    names.add("upperBandwidth");
+    name = "semiBandwidth";
     try {
-      values.add(String.valueOf(upperBandwidth(A)));
-    }
-    catch (IllegalArgumentException exc) {
-      values.add(unknown + exc.getMessage());
+      messages.put(name, String.valueOf(semiBandwidth(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
     }
 
-
-    // sort ascending by property name
-    IntComparator comp = new IntComparator() {
-      public int compare(int a, int b) {
-        return get(names, a).compareTo(get(names, b));
-      }
-    };
-    Swapper swapper = new Swapper() {
-      public void swap(int a, int b) {
-        String tmp = names.get(a);
-        names.set(a, names.get(b));
-        names.set(b, tmp);
-        tmp = values.get(a);
-        values.set(a, values.get(b));
-        values.set(b, tmp);
-      }
-    };
-    Sorting.quickSort(0, names.size(), comp, swapper);
+    name = "upperBandwidth";
+    try {
+      messages.put(name, String.valueOf(upperBandwidth(a)));
+    } catch (IllegalArgumentException exc) {
+      messages.put(name, unknown + exc.getMessage());
+    }
 
     // determine padding for nice formatting
     int maxLength = 0;
-    for (int i = 0; i < names.size(); i++) {
-      int length = names.get(i).length();
-      maxLength = Math.max(length, maxLength);
+    for (String key : messages.keySet()) {
+      maxLength = Math.max(key.length(), maxLength);
     }
+    String format = String.format("\\%%ds: \\%s\n", maxLength);
 
-    // finally, format properties
-    StringBuilder buf = new StringBuilder();
-    for (int i = 0; i < names.size(); i++) {
-      String name = names.get(i);
-      buf.append(name);
-      buf.append(blanks(maxLength - name.length()));
-      buf.append(" : ");
-      buf.append(values.get(i));
-      if (i < names.size() - 1) {
-        buf.append('\n');
-      }
+    Formatter r = new Formatter();
+    for (String key : messages.keySet()) {
+      r.format(format, maxLength, key, messages.get(key));
     }
-
-    return buf.toString();
+    return r.toString();
   }
 
   /**
@@ -1094,22 +1045,22 @@ public class Property extends PersistentObject {
    * nonzero and <tt>j &gt; i</tt>. A <i>banded</i> matrix has a "band" about the diagonal. Diagonal, tridiagonal and
    * triangular matrices are special cases.
    *
-   * @param A the square matrix to analyze.
+   * @param a the square matrix to analyze.
    * @return the upper bandwith.
    * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
    * @see #semiBandwidth(DoubleMatrix2D)
    * @see #lowerBandwidth(DoubleMatrix2D)
    */
-  public int upperBandwidth(DoubleMatrix2D A) {
-    checkSquare(A);
+  public int upperBandwidth(DoubleMatrix2D a) {
+    checkSquare(a);
     double epsilon = tolerance();
-    int rows = A.rows();
+    int rows = a.rows();
 
     for (int k = rows; --k >= 0;) {
       for (int i = rows - k; --i >= 0;) {
         int j = i + k;
         //if (A.getQuick(i,j) != 0) return k;
-        if (!(Math.abs(A.getQuick(i, j)) <= epsilon)) {
+        if (!(Math.abs(a.getQuick(i, j)) <= epsilon)) {
           return k;
         }
       }
