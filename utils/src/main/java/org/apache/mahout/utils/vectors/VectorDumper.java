@@ -79,7 +79,7 @@ public final class VectorDumper {
     Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
             "Output the centroid as JSON.  Otherwise it substitutes in the terms for vector cell entries")
             .withShortName("j").create();
-    Option sizeOpt = obuilder.withLongName("sizeOnly").withRequired(true).
+    Option sizeOpt = obuilder.withLongName("sizeOnly").withRequired(false).
             withDescription("Dump only the size of the vector").withShortName("sz").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
             .create();
