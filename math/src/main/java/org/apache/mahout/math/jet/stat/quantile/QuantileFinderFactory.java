@@ -19,12 +19,14 @@ import org.apache.mahout.math.list.DoubleArrayList;
  * Also see {@link hep.aida.bin.QuantileBin1D}, demonstrating how this package can be used.
  *
  * The approx. algorithms compute approximate quantiles of large data sequences in a single pass.
- * The approximation guarantees are explicit, and apply for arbitrary value distributions and arrival distributions of the data sequence.
- * The main memory requirements are smaller than for any other known technique by an order of magnitude.
+ * The approximation guarantees are explicit, and apply for arbitrary value distributions and arrival
+ * distributions of the data sequence.  The main memory requirements are smaller than for any other
+ * known technique by an order of magnitude.
  *
  * <p>The approx. algorithms are primarily intended to help applications scale.
- * When faced with a large data sequences, traditional methods either need very large memories or time consuming disk based sorting.
- * In constrast, the approx. algorithms can deal with > 10^10 values without disk based sorting.
+ * When faced with a large data sequences, traditional methods either need very large memories
+ * or time consuming disk based sorting.  In contrast, the approx. algorithms can deal
+ * with > 10^10 values without disk based sorting.
  *
  * <p>All classes can be seen from various angles, for example as
  * <dt>1. Algorithm to compute quantiles.
@@ -36,23 +38,31 @@ import org.apache.mahout.math.list.DoubleArrayList;
  *
  * <p>Use methods <tt>newXXX(...)</tt> to get new instances of one of the following quantile finders.
  *
- * <p><b>1. Exact quantile finding algorithm for known and unknown <tt>N</tt> requiring large main memory.</b></p>
+ * <p><b>1. Exact quantile finding algorithm for known and unknown <tt>N</tt> requiring
+ * large main memory.</b></p>
  * The folkore algorithm: Keeps all elements in main memory, sorts the list, then picks the quantiles.
  *
  *
  *
  *
- * <p><p><b>2. Approximate quantile finding algorithm for known <tt>N</tt> requiring only one pass and little main memory.</b></p>
+ * <p><p><b>2. Approximate quantile finding algorithm for known <tt>N</tt> requiring only one pass
+ * and little main memory.</b></p>
  *
  * <p>Needs as input the following parameters:<p>
- * <dt>1. <tt>N</tt> - the number of values of the data sequence over which quantiles are to be determined.
- * <dt>2. <tt>quantiles</tt> - the number of quantiles to be computed. If unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
- * <dt>3. <tt>epsilon</tt> - the allowed approximation error on quantiles. The approximation guarantee of this algorithm is explicit.
+ * <dt>1. <tt>N</tt> - the number of values of the data sequence over which quantiles are to
+ * be determined.
+ * <dt>2. <tt>quantiles</tt> - the number of quantiles to be computed. If unknown in advance, set
+ * this number large, e.g. <tt>quantiles &gt;= 10000</tt>.
+ * <dt>3. <tt>epsilon</tt> - the allowed approximation error on quantiles. The approximation
+ * guarantee of this algorithm is explicit.
  *
- * <p>It is also possible to couple the approximation algorithm with random sampling to further reduce memory requirements. 
- * With sampling, the approximation guarantees are explicit but probabilistic, i.e. they apply with respect to a (user controlled) confidence parameter "delta".
+ * <p>It is also possible to couple the approximation algorithm with random sampling to further
+ * reduce memory requirements.
+ * With sampling, the approximation guarantees are explicit but probabilistic, i.e. they apply
+ * with respect to a (user controlled) confidence parameter "delta".
  *
- * <dt>4. <tt>delta</tt> - the probability allowed that the approximation error fails to be smaller than epsilon. Set <tt>delta</tt> to zero for explicit non probabilistic guarantees.
+ * <dt>4. <tt>delta</tt> - the probability allowed that the approximation error fails to be smaller
+ * than epsilon. Set <tt>delta</tt> to zero for explicit non probabilistic guarantees.
  *
  * <p>After Gurmeet Singh Manku, Sridhar Rajagopalan and Bruce G. Lindsay, 
  * Approximate Medians and other Quantiles in One Pass and with Limited Memory,
@@ -62,29 +72,29 @@ import org.apache.mahout.math.list.DoubleArrayList;
  *
  *
  *
- * <p><p><b>3. Approximate quantile finding algorithm for unknown <tt>N</tt> requiring only one pass and little main memory.</b></p>
- * This algorithm requires at most two times the memory of a corresponding approx. quantile finder knowing <tt>N</tt>.
+ * <p><p><b>3. Approximate quantile finding algorithm for unknown <tt>N</tt> requiring only one pass
+ * and little main memory.</b></p>
+ * This algorithm requires at most two times the memory of a corresponding approx. quantile
+ * finder knowing <tt>N</tt>.
  *
  * <p>Needs as input the following parameters:<p>
- * <dt>2. <tt>quantiles</tt> - the number of quantiles to be computed. If unknown in advance, set this number large, e.g. <tt>quantiles &gt;= 1000</tt>.
- * <dt>2. <tt>epsilon</tt> - the allowed approximation error on quantiles. The approximation guarantee of this algorithm is explicit.
+ * <dt>2. <tt>quantiles</tt> - the number of quantiles to be computed. If unknown in advance,
+ * set this number large, e.g. <tt>quantiles &gt;= 1000</tt>.
+ * <dt>2. <tt>epsilon</tt> - the allowed approximation error on quantiles. The approximation
+ * guarantee of this algorithm is explicit.
  *
- * <p>It is also possible to couple the approximation algorithm with random sampling to further reduce memory requirements. 
- * With sampling, the approximation guarantees are explicit but probabilistic, i.e. they apply with respect to a (user controlled) confidence parameter "delta".
+ * <p>It is also possible to couple the approximation algorithm with random sampling to
+ * further reduce memory requirements.
+ * With sampling, the approximation guarantees are explicit but probabilistic, i.e.
+ * they apply with respect to a (user controlled) confidence parameter "delta".
  *
- * <dt>3. <tt>delta</tt> - the probability allowed that the approximation error fails to be smaller than epsilon. Set <tt>delta</tt> to zero for explicit non probabilistic guarantees.
+ * <dt>3. <tt>delta</tt> - the probability allowed that the approximation error fails to
+ * be smaller than epsilon. Set <tt>delta</tt> to zero for explicit non probabilistic guarantees.
  *
  * <p>After Gurmeet Singh Manku, Sridhar Rajagopalan and Bruce G. Lindsay,
  * Random Sampling Techniques for Space Efficient Online Computation of Order Statistics of Large Datasets.
  * Proc. of the 1999 ACM SIGMOD Int. Conf. on Management of Data,
  * Paper available <A HREF="http://www-cad.eecs.berkeley.edu/~manku/papers/unknown.ps.gz"> here</A>.
- *
- * <p><b>Example usage:</b>
- *
- *<pre>
- * _TODO_
- *</pre><p>
- *
  *
  * @see KnownDoubleQuantileEstimator
  * @see UnknownDoubleQuantileEstimator
@@ -117,7 +127,7 @@ public class QuantileFinderFactory {
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.
    */
-  public static long[] known_N_compute_B_and_K(long N, double epsilon, double delta, int quantiles,
+  public static long[] knownNcomputeBandK(long N, double epsilon, double delta, int quantiles,
                                                double[] returnSamplingRate) {
     returnSamplingRate[0] = 1.0;
     if (epsilon <= 0.0) {
@@ -136,9 +146,9 @@ public class QuantileFinderFactory {
     }
 
     if (delta > 0.0) {
-      return known_N_compute_B_and_K_slow(N, epsilon, delta, quantiles, returnSamplingRate);
+      return knownNcomputeBandKslow(N, epsilon, delta, quantiles, returnSamplingRate);
     }
-    return known_N_compute_B_and_K_quick(N, epsilon);
+    return knownNcomputeBandKquick(N, epsilon);
   }
 
   /**
@@ -146,17 +156,17 @@ public class QuantileFinderFactory {
    * <b>guaranteed</b> approximation error no more than epsilon. Assumes that quantiles are to be computed over N
    * values.
    *
-   * @param N       the anticipated number of values over which quantiles shall be determined.
+   * @param n       the anticipated number of values over which quantiles shall be determined.
    * @param epsilon the approximation error which is guaranteed not to be exceeded (e.g. <tt>0.001</tt>) (<tt>0 &lt;=
    *                epsilon &lt;= 1</tt>). To get exact result, set <tt>epsilon=0.0</tt>;
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer.
    */
-  protected static long[] known_N_compute_B_and_K_quick(long N, double epsilon) {
+  protected static long[] knownNcomputeBandKquick(long n, double epsilon) {
     int maxBuffers = 50;
     int maxHeight = 50;
-    double N_double = (double) N;
-    double c = N_double * epsilon * 2.0;
+    double nDouble = (double) n;
+    double c = nDouble * epsilon * 2.0;
     int[] heightMaximums = new int[maxBuffers - 1];
 
     // for each b, determine maximum height, i.e. the height for which x<=0 and x is a maximum
@@ -165,19 +175,18 @@ public class QuantileFinderFactory {
       int h = 3;
 
       while (h <= maxHeight && // skip heights until x<=0
-          (h - 2) * (Arithmetic.binomial(b + h - 2, h - 1)) -
-              (Arithmetic.binomial(b + h - 3, h - 3)) +
-              (Arithmetic.binomial(b + h - 3, h - 2)) - c
-              > 0.0
-          ) {
+        (h - 2) * (Arithmetic.binomial(b + h - 2, h - 1))
+          - (Arithmetic.binomial(b + h - 3, h - 3))
+          + (Arithmetic.binomial(b + h - 3, h - 2))
+          > c
+        ) {
         h++;
       }
       //from now on x is monotonically growing...
       while (h <= maxHeight && // skip heights until x>0
-          (h - 2) * (Arithmetic.binomial(b + h - 2, h - 1)) -
-              (Arithmetic.binomial(b + h - 3, h - 3)) +
-              (Arithmetic.binomial(b + h - 3, h - 2)) - c
-              <= 0.0
+          (h - 2) * (Arithmetic.binomial(b + h - 2, h - 1))
+            - (Arithmetic.binomial(b + h - 3, h - 3)) + (Arithmetic.binomial(b + h - 3, h - 2))
+              <= c
           ) {
         h++;
       }
@@ -186,10 +195,9 @@ public class QuantileFinderFactory {
       // was x>0 or did we loop without finding anything?
       int hMax;
       if (h >= maxHeight &&
-          (h - 2) * (Arithmetic.binomial(b + h - 2, h - 1)) -
-              (Arithmetic.binomial(b + h - 3, h - 3)) +
-              (Arithmetic.binomial(b + h - 3, h - 2)) - c
-              > 0.0) {
+        (h - 2) * (Arithmetic.binomial(b + h - 2, h - 1))
+          - (Arithmetic.binomial(b + h - 3, h - 3)) + (Arithmetic.binomial(b + h - 3, h - 2))
+          > c) {
         hMax = Integer.MIN_VALUE;
       } else {
         hMax = h;
@@ -206,8 +214,8 @@ public class QuantileFinderFactory {
       int h = heightMaximums[b - 2];
       long kMin = Long.MAX_VALUE;
       if (h > Integer.MIN_VALUE) {
-        double value = (Arithmetic.binomial(b + h - 2, h - 1));
-        long tmpK = (long) (Math.ceil(N_double / value));
+        double value = Arithmetic.binomial(b + h - 2, h - 1);
+        long tmpK = (long) (Math.ceil(nDouble / value));
         if (tmpK <= kMin) {
           kMin = tmpK;
         }
@@ -232,7 +240,7 @@ public class QuantileFinderFactory {
     long k;
     if (minB == -1) {     // epsilon is very small or zero.
       b = 1; // the only possible solution without violating the
-      k = N; // approximation guarantees is exact quantile search.
+      k = n; // approximation guarantees is exact quantile search.
     } else { // epsilon large enough?
       b = minB;
       k = kMinimums[minB - 2];
@@ -250,7 +258,7 @@ public class QuantileFinderFactory {
    * N values. The required sampling rate is computed and stored in the first element of the provided
    * <tt>returnSamplingRate</tt> array, which, therefore must be at least of length 1.
    *
-   * @param N                  the anticipated number of values over which quantiles shall be computed (e.g 10^6).
+   * @param n                  the anticipated number of values over which quantiles shall be computed (e.g 10^6).
    * @param epsilon            the approximation error which is guaranteed not to be exceeded (e.g. <tt>0.001</tt>)
    *                           (<tt>0 &lt;= epsilon &lt;= 1</tt>). To get exact result, set <tt>epsilon=0.0</tt>;
    * @param delta              the probability that the approximation error is more than than epsilon (e.g.
@@ -262,18 +270,18 @@ public class QuantileFinderFactory {
    * @return <tt>long[2]</tt> - <tt>long[0]</tt>=the number of buffers, <tt>long[1]</tt>=the number of elements per
    *         buffer, <tt>returnSamplingRate[0]</tt>=the required sampling rate.
    */
-  protected static long[] known_N_compute_B_and_K_slow(long N, double epsilon, double delta, int quantiles,
+  protected static long[] knownNcomputeBandKslow(long n, double epsilon, double delta, int quantiles,
                                                        double[] returnSamplingRate) {
     int maxBuffers = 50;
     int maxHeight = 50;
-    double N_double = N;
+    double nDouble = n;
 
     // One possibility is to use one buffer of size N
     //
-    long ret_b = 1;
-    long ret_k = N;
-    double sampling_rate = 1.0;
-    long memory = N;
+    long retB = 1;
+    long retK = n;
+    double samplingRate = 1.0;
+    long memory = n;
 
 
     // Otherwise, there are at least two buffers (b >= 2)
@@ -283,18 +291,18 @@ public class QuantileFinderFactory {
     // practical values of    epsilon >= 0.001   and    delta >= 0.00001
     //
     double logarithm = Math.log(2.0 * quantiles / delta);
-    double c = 2.0 * epsilon * N_double;
+    double c = 2.0 * epsilon * nDouble;
     for (long b = 2; b < maxBuffers; b++) {
       for (long h = 3; h < maxHeight; h++) {
         double binomial = Arithmetic.binomial(b + h - 2, h - 1);
-        long tmp = (long) Math.ceil(N_double / binomial);
+        long tmp = (long) Math.ceil(nDouble / binomial);
         if ((b * tmp < memory) &&
             ((h - 2) * binomial - Arithmetic.binomial(b + h - 3, h - 3) + Arithmetic.binomial(b + h - 3, h - 2)
                 <= c)) {
-          ret_k = tmp;
-          ret_b = b;
-          memory = ret_k * b;
-          sampling_rate = 1.0;
+          retK = tmp;
+          retB = b;
+          memory = retK * b;
+          samplingRate = 1.0;
         }
         if (delta > 0.0) {
           double t = (h - 2) * Arithmetic.binomial(b + h - 2, h - 1) - Arithmetic.binomial(b + h - 3, h - 3) +
@@ -317,19 +325,19 @@ public class QuantileFinderFactory {
           double x = 0.5 + 0.5 * Math.sqrt(1.0 + 4.0 * t / u);
           long k = (long) Math.ceil(w * x * x / v);
           if (b * k < memory) {
-            ret_k = k;
-            ret_b = b;
+            retK = k;
+            retB = b;
             memory = b * k;
-            sampling_rate = N_double * 2.0 * epsilon * epsilon / logarithm;
+            samplingRate = nDouble * 2.0 * epsilon * epsilon / logarithm;
           }
         }
       }
     }
 
     long[] result = new long[2];
-    result[0] = ret_b;
-    result[1] = ret_k;
-    returnSamplingRate[0] = sampling_rate;
+    result[0] = retB;
+    result[1] = retK;
+    returnSamplingRate[0] = samplingRate;
     return result;
   }
 
@@ -342,8 +350,8 @@ public class QuantileFinderFactory {
    * don't know how many values you will fill, but you probably do know that you will fill at most <tt>S</tt> elements,
    * the size of your database.
    *
-   * @param known_N   specifies whether the number of elements over which quantiles are to be computed is known or not.
-   * @param N         if <tt>known_N==true</tt>, the number of elements over which quantiles are to be computed. if
+   * @param knownN   specifies whether the number of elements over which quantiles are to be computed is known or not.
+   * @param n         if <tt>known_N==true</tt>, the number of elements over which quantiles are to be computed. if
    *                  <tt>known_N==false</tt>, the upper limit on the number of elements over which quantiles are to be
    *                  computed. If such an upper limit is a-priori unknown, then set <tt>N = Long.MAX_VALUE</tt>.
    * @param epsilon   the approximation error which is guaranteed not to be exceeded (e.g. <tt>0.001</tt>) (<tt>0 &lt;=
@@ -356,13 +364,13 @@ public class QuantileFinderFactory {
    *                  generator.
    * @return the quantile finder minimizing memory requirements under the given constraints.
    */
-  public static DoubleQuantileFinder newDoubleQuantileFinder(boolean known_N, long N, double epsilon, double delta,
+  public static DoubleQuantileFinder newDoubleQuantileFinder(boolean knownN, long n, double epsilon, double delta,
                                                              int quantiles, RandomEngine generator) {
     //boolean known_N = true;
     //if (N==Long.MAX_VALUE) known_N = false;
     // check parameters.
     // if they are illegal, keep quite and return an exact finder.
-    if (epsilon <= 0.0 || N < 1000) {
+    if (epsilon <= 0.0 || n < 1000) {
       return new ExactDoubleQuantileFinder();
     }
     if (epsilon > 1) {
@@ -377,22 +385,22 @@ public class QuantileFinderFactory {
     if (quantiles < 1) {
       quantiles = 1;
     }
-    if (quantiles > N) {
-      N = quantiles;
+    if (quantiles > n) {
+      n = quantiles;
     }
 
     //KnownDoubleQuantileEstimator finder;
-    if (known_N) {
+    if (knownN) {
       double[] samplingRate = new double[1];
-      long[] resultKnown = known_N_compute_B_and_K(N, epsilon, delta, quantiles, samplingRate);
+      long[] resultKnown = knownNcomputeBandK(n, epsilon, delta, quantiles, samplingRate);
       long b = resultKnown[0];
       long k = resultKnown[1];
       if (b == 1) {
         return new ExactDoubleQuantileFinder();
       }
-      return new KnownDoubleQuantileEstimator((int) b, (int) k, N, samplingRate[0], generator);
+      return new KnownDoubleQuantileEstimator((int) b, (int) k, n, samplingRate[0], generator);
     } else {
-      long[] resultUnknown = unknown_N_compute_B_and_K(epsilon, delta, quantiles);
+      long[] resultUnknown = unknownNcomputeBandK(epsilon, delta, quantiles);
       long b1 = resultUnknown[0];
       long k1 = resultUnknown[1];
       long h1 = resultUnknown[2];
@@ -418,7 +426,7 @@ public class QuantileFinderFactory {
       // IMPORTANT: for known finder, switch sampling off (delta == 0) !!!
       // with knownN-sampling we can only guarantee the errors if the input sequence has EXACTLY N elements.
       // with knownN-no sampling we can also guarantee the errors for sequences SMALLER than N elements.
-      long[] resultKnown = known_N_compute_B_and_K(N, epsilon, 0, quantiles, samplingRate);
+      long[] resultKnown = knownNcomputeBandK(N, epsilon, 0, quantiles, samplingRate);
 
       long b2 = resultKnown[0];
       long k2 = resultKnown[1];
@@ -464,31 +472,8 @@ public class QuantileFinderFactory {
    *         buffer, <tt>long[2]</tt>=the tree height where sampling shall start, <tt>long[3]==1</tt> if precomputing is
    *         better, otherwise 0;
    */
-  public static long[] unknown_N_compute_B_and_K(double epsilon, double delta, int quantiles) {
-    return unknown_N_compute_B_and_K_raw(epsilon, delta, quantiles);
-    // move stuff from _raw(..) here and delete _raw(...)
-
-    /*
-    long[] result_1 = unknown_N_compute_B_and_K_raw(epsilon,delta,quantiles);
-    long b1 = result_1[0];
-    long k1 = result_1[1];
-
-
-    int quantilesToPrecompute = (int) Doubles.ceiling(1.0 / epsilon);
-
-    if (quantiles>quantilesToPrecompute) {
-      // try if precomputing quantiles requires less memory.
-      long[] result_2 = unknown_N_compute_B_and_K_raw(epsilon/2.0,delta,quantilesToPrecompute);
-
-      long b2 = result_2[0];
-      long k2 = result_2[1];
-      if (b2*k2 < b1*k1) {
-        result_2[3] = 1; //precomputation is better
-        result_1 = result_2;
-      }
-    }
-    return result_1;
-    */
+  public static long[] unknownNcomputeBandK(double epsilon, double delta, int quantiles) {
+    return unknownNcomputeBandKraw(epsilon, delta, quantiles);
   }
 
   /**
@@ -506,7 +491,7 @@ public class QuantileFinderFactory {
    *         buffer, <tt>long[2]</tt>=the tree height where sampling shall start, <tt>long[3]==1</tt> if precomputing is
    *         better, otherwise 0;
    */
-  protected static long[] unknown_N_compute_B_and_K_raw(double epsilon, double delta, int quantiles) {
+  protected static long[] unknownNcomputeBandKraw(double epsilon, double delta, int quantiles) {
     // delta can be set to zero, i.e., all quantiles should be approximate with probability 1
     if (epsilon <= 0.0) {
       long[] result = new long[4];
@@ -535,37 +520,37 @@ public class QuantileFinderFactory {
       return result;
     }
 
-    int max_b = 50;
-    int max_h = 50;
-    int max_H = 50;
-    int max_Iterations = 2;
+    int maxB = 50;
+    int maxSmallH = 50;
+    int maxH = 50;
+    int maxIterations = 2;
 
-    long best_b = Long.MAX_VALUE;
-    long best_k = Long.MAX_VALUE;
-    long best_h = Long.MAX_VALUE;
-    long best_memory = Long.MAX_VALUE;
+    long bestB = Long.MAX_VALUE;
+    long bestK = Long.MAX_VALUE;
+    long bestH = Long.MAX_VALUE;
+    long bestMemory = Long.MAX_VALUE;
 
-    double pow = Math.pow(2.0, max_H);
+    double pow = Math.pow(2.0, maxH);
     double logDelta = Math.log(2.0 / (delta / quantiles)) / (2.0 * epsilon * epsilon);
     //double logDelta =  Math.log(2.0/(quantiles*delta)) / (2.0*epsilon*epsilon);
 
-    while (best_b == Long.MAX_VALUE && max_Iterations-- > 0) { //until we find a solution
+    while (bestB == Long.MAX_VALUE && maxIterations-- > 0) { //until we find a solution
       // identify that combination of b and h that minimizes b*k.
       // exhaustive search.
-      for (int b = 2; b <= max_b; b++) {
-        for (int h = 2; h <= max_h; h++) {
-          double Ld = Arithmetic.binomial(b + h - 2, h - 1);
-          double Ls = Arithmetic.binomial(b + h - 3, h - 1);
+      for (int b = 2; b <= maxB; b++) {
+        for (int h = 2; h <= maxSmallH; h++) {
+          double ld = Arithmetic.binomial(b + h - 2, h - 1);
+          double ls = Arithmetic.binomial(b + h - 3, h - 1);
 
           // now we have k>=c*(1-alpha)^-2.
           // let's compute c.
           //double c = Math.log(2.0/(delta/quantiles)) / (2.0*epsilon*epsilon*Math.min(Ld, 8.0*Ls/3.0));
-          double c = logDelta / Math.min(Ld, 8.0 * Ls / 3.0);
+          double c = logDelta / Math.min(ld, 8.0 * ls / 3.0);
 
           // now we have k>=d/alpha.
           // let's compute d.
-          double beta = Ld / Ls;
-          double cc = (beta - 2.0) * (max_H - 2.0) / (beta + pow - 2.0);
+          double beta = ld / ls;
+          double cc = (beta - 2.0) * (maxH - 2.0) / (beta + pow - 2.0);
           double d = (h + 3 + cc) / (2.0 * epsilon);
 
           /*
@@ -581,60 +566,60 @@ public class QuantileFinderFactory {
             continue;
           } // non real solution to equation
           double root = Math.sqrt(f);
-          double alpha_one = (c + 2.0 * d + root) / (2.0 * d);
-          double alpha_two = (c + 2.0 * d - root) / (2.0 * d);
+          double alphaOne = (c + 2.0 * d + root) / (2.0 * d);
+          double alphaTwo = (c + 2.0 * d - root) / (2.0 * d);
 
           // any alpha must satisfy 0<alpha<1 to yield valid solutions
-          boolean alpha_one_OK = 0.0 < alpha_one && alpha_one < 1.0;
-          boolean alpha_two_OK = 0.0 < alpha_two && alpha_two < 1.0;
-          if (alpha_one_OK || alpha_two_OK) {
+          boolean alphaOneOk = 0.0 < alphaOne && alphaOne < 1.0;
+          boolean alphaTwoOk = 0.0 < alphaTwo && alphaTwo < 1.0;
+          if (alphaOneOk || alphaTwoOk) {
             double alpha;
-            if (alpha_one_OK) {
-              if (alpha_two_OK) {
+            if (alphaOneOk) {
+              if (alphaTwoOk) {
                 // take the alpha that minimizes d/alpha
-                alpha = Math.max(alpha_one, alpha_two);
+                alpha = Math.max(alphaOne, alphaTwo);
               } else {
-                alpha = alpha_one;
+                alpha = alphaOne;
               }
             } else {
-              alpha = alpha_two;
+              alpha = alphaTwo;
             }
             // now we have k=Ceiling(Max(d/alpha, (h+1)/(2*epsilon)))
             long k = (long) Math.ceil(Math.max(d / alpha, (h + 1) / (2.0 * epsilon)));
             if (k > 0) { // valid solution?
               long memory = b * k;
-              if (memory < best_memory) {
+              if (memory < bestMemory) {
                 // found a solution requiring less memory
-                best_k = k;
-                best_b = b;
-                best_h = h;
-                best_memory = memory;
+                bestK = k;
+                bestB = b;
+                bestH = h;
+                bestMemory = memory;
               }
             }
           }
         } //end for h
       } //end for b
 
-      if (best_b == Long.MAX_VALUE) {
+      if (bestB == Long.MAX_VALUE) {
         // no solution found so far. very unlikely. Anyway, try again.
-        max_b *= 2;
-        max_h *= 2;
-        max_H *= 2;
+        maxB *= 2;
+        maxSmallH *= 2;
+        maxH *= 2;
       }
     } //end while
 
     long[] result = new long[4];
     result[3] = 0;
-    if (best_b == Long.MAX_VALUE) {
+    if (bestB == Long.MAX_VALUE) {
       // no solution found.
       // no way around exact quantile search.
       result[0] = 1;
       result[1] = Long.MAX_VALUE;
       result[2] = Long.MAX_VALUE;
     } else {
-      result[0] = best_b;
-      result[1] = best_k;
-      result[2] = best_h;
+      result[0] = bestB;
+      result[1] = bestK;
+      result[2] = bestH;
     }
 
     return result;
