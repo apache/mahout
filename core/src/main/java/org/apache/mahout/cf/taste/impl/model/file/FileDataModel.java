@@ -725,6 +725,16 @@ public class FileDataModel extends AbstractDataModel {
   }
 
   @Override
+  public float getMaxPreference() {
+    return delegate.getMaxPreference();
+  }
+
+  @Override
+  public float getMinPreference() {
+    return delegate.getMinPreference();
+  }
+
+  @Override
   public String toString() {
     return "FileDataModel[dataFile:" + dataFile + ']';
   }
