@@ -9,15 +9,18 @@ public class OnlineAucTest {
   @Test
   public void binaryCase() {
     OnlineAuc a1 = new OnlineAuc();
+    a1.setRandom(new Random(1));
     a1.setPolicy(OnlineAuc.ReplacementPolicy.FAIR);
 
     OnlineAuc a2 = new OnlineAuc();
+    a2.setRandom(new Random(2));
     a2.setPolicy(OnlineAuc.ReplacementPolicy.FIFO);
 
     OnlineAuc a3 = new OnlineAuc();
+    a3.setRandom(new Random(3));
     a3.setPolicy(OnlineAuc.ReplacementPolicy.RANDOM);
 
-    Random gen = new Random(1);
+    Random gen = new Random(100);
     for (int i = 0; i < 10000; i++) {
       double x = gen.nextGaussian();
 

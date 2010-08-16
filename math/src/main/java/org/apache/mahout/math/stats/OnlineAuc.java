@@ -97,4 +97,8 @@ public class OnlineAuc {
   public void setPolicy(ReplacementPolicy policy) {
     this.policy = policy;
   }
+
+  public void setRandom(Random random) {
+    this.random = random;
+  }
 }
