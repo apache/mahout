@@ -24,6 +24,8 @@ import org.apache.mahout.vectors.StaticWordValueEncoder;
 import org.apache.mahout.vectors.TextValueEncoder;
 import org.junit.Test;
 
+import java.util.Locale;
+
 import static org.junit.Assert.assertEquals;
 
 public class TextValueEncoderTest {
@@ -59,6 +61,7 @@ public class TextValueEncoderTest {
 
   @Test
   public void testAsString() {
+    Locale.setDefault(new Locale("EN", "US"));
     TextValueEncoder enc = new TextValueEncoder("text");
     assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
   }

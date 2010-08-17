@@ -27,6 +27,7 @@ import org.apache.mahout.vectors.StaticWordValueEncoder;
 import org.junit.Test;
 
 import java.util.Iterator;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,6 +51,7 @@ public class WordLikeValueEncoderTest {
 
   @Test
   public void testAsString() {
+    Locale.setDefault(new Locale("EN", "US"));
     FeatureVectorEncoder enc = new StaticWordValueEncoder("word");
     assertEquals("word:w1:1.0000", enc.asString("w1"));
   }
