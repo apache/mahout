@@ -1,2 +1,10 @@
 .idea/*
 *.iml
+target/*
+core/target/*
+math/target/*
+examples/target/*
+buildtools/target/*
+utils/target/*
+eclipse/target/*
+taste-web/target/*
