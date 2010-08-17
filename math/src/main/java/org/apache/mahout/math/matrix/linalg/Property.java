@@ -9,10 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix.linalg;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.Sorting;
-import org.apache.mahout.math.Swapper;
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.IntComparator;
 import org.apache.mahout.math.list.ObjectArrayList;
 import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
@@ -21,9 +18,7 @@ import org.apache.mahout.math.matrix.DoubleMatrix3D;
 import org.apache.mahout.math.matrix.impl.AbstractFormatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 
-import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.List;
 import java.util.TreeMap;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
@@ -328,8 +323,8 @@ public class Property extends PersistentObject {
       a.setQuick(i, i, 0);
     }
     for (int i = min; --i >= 0;) {
-      double rowSum = a.viewRow(i).aggregate(Functions.plus, Functions.abs);
-      double colSum = a.viewColumn(i).aggregate(Functions.plus, Functions.abs);
+      double rowSum = a.viewRow(i).aggregate(Functions.PLUS, Functions.ABS);
+      double colSum = a.viewColumn(i).aggregate(Functions.PLUS, Functions.ABS);
       a.setQuick(i, i, Math.max(rowSum, colSum) + i + 1);
     }
   }
@@ -369,7 +364,7 @@ public class Property extends PersistentObject {
     for (int i = min; --i >= 0;) {
       double diag = Math.abs(a.getQuick(i, i));
       diag += diag;
-      if (diag <= a.viewColumn(i).aggregate(Functions.plus, Functions.abs)) {
+      if (diag <= a.viewColumn(i).aggregate(Functions.PLUS, Functions.ABS)) {
         return false;
       }
     }
@@ -388,7 +383,7 @@ public class Property extends PersistentObject {
     for (int i = min; --i >= 0;) {
       double diag = Math.abs(a.getQuick(i, i));
       diag += diag;
-      if (diag <= a.viewRow(i).aggregate(Functions.plus, Functions.abs)) {
+      if (diag <= a.viewRow(i).aggregate(Functions.PLUS, Functions.ABS)) {
         return false;
       }
     }

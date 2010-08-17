@@ -31,7 +31,6 @@ public final class DataUtils {
    * Computes the sum of the values
    * 
    * @param values
-   * @return
    */
   public static int sum(int[] values) {
     int sum = 0;
@@ -44,9 +43,6 @@ public final class DataUtils {
   
   /**
    * foreach i : array1[i] += array2[i]
-   * 
-   * @param array1
-   * @param array2
    */
   public static void add(int[] array1, int[] array2) {
     if (array1.length != array2.length) {
@@ -60,9 +56,6 @@ public final class DataUtils {
   
   /**
    * foreach i : array1[i] -= array2[i]
-   * 
-   * @param array1
-   * @param array2
    */
   public static void dec(int[] array1, int[] array2) {
     if (array1.length != array2.length) {
@@ -79,7 +72,6 @@ public final class DataUtils {
    * 
    * @param rng
    *          used to break ties
-   * @param values
    * @return index of the maximum
    */
   public static int maxindex(Random rng, int[] values) {
@@ -95,15 +87,7 @@ public final class DataUtils {
         maxindices.add(index);
       }
     }
-    
-    int bestind;
-    if (maxindices.size() > 1) {
-      // break ties randomly
-      bestind = maxindices.get(rng.nextInt(maxindices.size()));
-    } else {
-      bestind = maxindices.get(0);
-    }
-    
-    return bestind;
+
+    return maxindices.size() > 1 ? maxindices.get(rng.nextInt(maxindices.size())) : maxindices.get(0);
   }
 }

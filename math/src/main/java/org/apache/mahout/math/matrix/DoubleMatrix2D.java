@@ -980,6 +980,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(Functions.plus, Functions.identity);
+    return aggregate(Functions.PLUS, Functions.IDENTITY);
   }
 }

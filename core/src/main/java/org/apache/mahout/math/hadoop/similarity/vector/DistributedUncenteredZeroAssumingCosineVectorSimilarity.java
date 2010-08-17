@@ -20,7 +20,6 @@ package org.apache.mahout.math.hadoop.similarity.vector;
 import java.util.Iterator;
 
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 
 /**
@@ -46,7 +45,7 @@ public class DistributedUncenteredZeroAssumingCosineVectorSimilarity extends Abs
   @Override
   public double weight(Vector v) {
     double length = 0.0;
-    Iterator<Element> elemIterator = v.iterateNonZero();
+    Iterator<Vector.Element> elemIterator = v.iterateNonZero();
     while (elemIterator.hasNext()) {
       double value = elemIterator.next().get();
       length += value * value;

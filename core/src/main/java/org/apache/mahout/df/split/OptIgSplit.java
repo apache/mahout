@@ -46,10 +46,6 @@ public class OptIgSplit extends IgSplit {
   
   /**
    * Computes the split for a CATEGORICAL attribute
-   * 
-   * @param data
-   * @param attr
-   * @return
    */
   private static Split categoricalSplit(Data data, int attr) {
     double[] values = data.values(attr);
@@ -79,10 +75,6 @@ public class OptIgSplit extends IgSplit {
   
   /**
    * Return the sorted list of distinct values for the given attribute
-   * 
-   * @param data
-   * @param attr
-   * @return
    */
   private static double[] sortedValues(Data data, int attr) {
     double[] values = data.values(attr);
@@ -93,9 +85,6 @@ public class OptIgSplit extends IgSplit {
   
   /**
    * Instantiates the counting arrays
-   * 
-   * @param data
-   * @param values
    */
   protected void initCounts(Data data, double[] values) {
     counts = new int[values.length][data.getDataset().nblabels()];
@@ -113,10 +102,6 @@ public class OptIgSplit extends IgSplit {
   
   /**
    * Computes the best split for a NUMERICAL attribute
-   * 
-   * @param data
-   * @param attr
-   * @return
    */
   protected Split numericalSplit(Data data, int attr) {
     double[] values = sortedValues(data, attr);
@@ -166,7 +151,6 @@ public class OptIgSplit extends IgSplit {
    *          counts[i] = numInstances with label i
    * @param dataSize
    *          numInstances
-   * @return
    */
   private static double entropy(int[] counts, int dataSize) {
     if (dataSize == 0) {

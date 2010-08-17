@@ -31,16 +31,16 @@ import org.apache.mahout.df.node.Node;
 public class InterResultsTest extends MahoutTestCase {
 
   /** nb attributes per generated data instance */
-  private static final int nbAttributes = 4;
+  private static final int NUM_ATTRIBUTES = 4;
 
   /** nb generated data instances */
-  private static final int nbInstances = 100;
+  private static final int NUM_INSTANCES = 100;
 
   /** nb trees to build */
-  private static final int nbTrees = 11;
+  private static final int NUM_TREES = 11;
 
   /** nb mappers to use */
-  private static final int nbMappers = 5;
+  private static final int NUM_MAPPERS = 5;
 
   private String[][] splits;
 
@@ -56,23 +56,23 @@ public class InterResultsTest extends MahoutTestCase {
     Random rng = RandomUtils.getRandom();
 
     // prepare the data
-    double[][] source = Utils.randomDoubles(rng, nbAttributes, nbInstances);
+    double[][] source = Utils.randomDoubles(rng, NUM_ATTRIBUTES, NUM_INSTANCES);
     String[] sData = Utils.double2String(source);
 
-    splits = Utils.splitData(sData, nbMappers);
+    splits = Utils.splitData(sData, NUM_MAPPERS);
 
-    sizes = new int[nbMappers];
-    for (int p = 0; p < nbMappers; p++) {
+    sizes = new int[NUM_MAPPERS];
+    for (int p = 0; p < NUM_MAPPERS; p++) {
       sizes[p] = splits[p].length;
     }
 
     // prepare first step output
-    keys = new TreeID[nbTrees];
-    trees = new Node[nbTrees];
+    keys = new TreeID[NUM_TREES];
+    trees = new Node[NUM_TREES];
 
     int treeIndex = 0;
-    for (int partition = 0; partition < nbMappers; partition++) {
-      int nbMapTrees = Step1Mapper.nbTrees(nbMappers, nbTrees, partition);
+    for (int partition = 0; partition < NUM_MAPPERS; partition++) {
+      int nbMapTrees = Step1Mapper.nbTrees(NUM_MAPPERS, NUM_TREES, partition);
 
       for (int index = 0; index < nbMapTrees; index++, treeIndex++) {
         keys[treeIndex] = new TreeID(partition, treeIndex);
@@ -91,21 +91,21 @@ public class InterResultsTest extends MahoutTestCase {
 
     InterResults.store(fs, forestPath, keys, trees, sizes);
 
-    for (int partition = 0; partition < nbMappers; partition++) {
-      int nbConcerned = Step2Mapper.nbConcerned(nbMappers, nbTrees, partition);
+    for (int partition = 0; partition < NUM_MAPPERS; partition++) {
+      int nbConcerned = Step2Mapper.nbConcerned(NUM_MAPPERS, NUM_TREES, partition);
 
       TreeID[] newKeys = new TreeID[nbConcerned];
       Node[] newValues = new Node[nbConcerned];
 
-      int numInstances = InterResults.load(fs, forestPath, nbMappers,
-          nbTrees, partition, newKeys, newValues);
+      int numInstances = InterResults.load(fs, forestPath, NUM_MAPPERS,
+          NUM_TREES, partition, newKeys, newValues);
 
       // verify the partition's size
       assertEquals(splits[partition].length, numInstances);
 
       // verify (key, tree)
       int current = 0;
-      for (int index = 0; index < nbTrees; index++) {
+      for (int index = 0; index < NUM_TREES; index++) {
         // the trees of the current partition should not be loaded
         if (current < nbConcerned) {
           assertFalse("A tree from the current partition has been loaded",
@@ -136,13 +136,13 @@ public class InterResultsTest extends MahoutTestCase {
 
     try {
       // partitions' sizes
-      for (int p = 0; p < nbMappers; p++) {
+      for (int p = 0; p < NUM_MAPPERS; p++) {
         assertEquals(splits[p].length, in.readInt());
       }
 
       // load (key, tree)
       TreeID key = new TreeID();
-      for (int index = 0; index < nbTrees; index++) {
+      for (int index = 0; index < NUM_TREES; index++) {
         key.readFields(in);
         Node value = Node.read(in);
 

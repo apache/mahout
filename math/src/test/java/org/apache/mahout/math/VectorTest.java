@@ -220,7 +220,7 @@ public class VectorTest extends MahoutTestCase {
     expected = lengthSquaredSlowly(v);
     assertEquals("mutation via assign(double) fails to change lengthSquared", expected, v.getLengthSquared());
 
-    v.assign(Functions.square);
+    v.assign(Functions.SQUARE);
     expected = lengthSquaredSlowly(v);
     assertEquals("mutation via assign(square) fails to change lengthSquared", expected, v.getLengthSquared());
 
@@ -249,11 +249,11 @@ public class VectorTest extends MahoutTestCase {
     expected = lengthSquaredSlowly(v);
     assertEquals("mutation via times(vector) fails to change lengthSquared", expected, v.getLengthSquared());
 
-    v.assign(Functions.pow, 3.0);
+    v.assign(Functions.POW, 3.0);
     expected = lengthSquaredSlowly(v);
     assertEquals("mutation via assign(pow, 3.0) fails to change lengthSquared", expected, v.getLengthSquared());
 
-    v.assign(v, Functions.plus);
+    v.assign(v, Functions.PLUS);
     expected = lengthSquaredSlowly(v);
     assertEquals("mutation via assign(v,plus) fails to change lengthSquared", expected, v.getLengthSquared());
   }
@@ -621,28 +621,28 @@ public class VectorTest extends MahoutTestCase {
   private static void doTestAggregation(Vector v, Vector w) {
     assertEquals("aggregate(plus, pow(2)) not equal to " + v.getLengthSquared(),
         v.getLengthSquared(),
-        v.aggregate(Functions.plus, Functions.pow(2)));
+        v.aggregate(Functions.PLUS, Functions.pow(2)));
     assertEquals("aggregate(plus, abs) not equal to " + v.norm(1),
         v.norm(1),
-        v.aggregate(Functions.plus, Functions.abs));
+        v.aggregate(Functions.PLUS, Functions.ABS));
     assertEquals("aggregate(max, abs) not equal to " + v.norm(Double.POSITIVE_INFINITY),
         v.norm(Double.POSITIVE_INFINITY),
-        v.aggregate(Functions.max, Functions.abs));
+        v.aggregate(Functions.MAX, Functions.ABS));
 
     assertEquals("v.dot(w) != v.aggregate(w, plus, mult)",
         v.dot(w),
-        v.aggregate(w, Functions.plus, Functions.mult));
+        v.aggregate(w, Functions.PLUS, Functions.MULT));
     assertEquals("|(v-w)|^2 != v.aggregate(w, plus, chain(pow(2), minus))",
         v.minus(w).dot(v.minus(w)),
-        v.aggregate(w, Functions.plus, Functions.chain(Functions.pow(2), Functions.minus)));
+        v.aggregate(w, Functions.PLUS, Functions.chain(Functions.pow(2), Functions.MINUS)));
   }
 
   public static void testEmptyAggregate() {
-    assertEquals(1.0, new DenseVector(new double[]{1}).aggregate(Functions.min, Functions.identity));
-    assertEquals(1.0, new DenseVector(new double[]{2, 1}).aggregate(Functions.min, Functions.identity));
+    assertEquals(1.0, new DenseVector(new double[]{1}).aggregate(Functions.MIN, Functions.IDENTITY));
+    assertEquals(1.0, new DenseVector(new double[]{2, 1}).aggregate(Functions.MIN, Functions.IDENTITY));
 
     try {
-      new DenseVector(new double[]{}).aggregate(Functions.min, Functions.identity);
+      new DenseVector(new double[]{}).aggregate(Functions.MIN, Functions.IDENTITY);
       fail("Should have thrown exception with empty vector");
     } catch (IllegalArgumentException e) {
       // as it should be
@@ -651,12 +651,12 @@ public class VectorTest extends MahoutTestCase {
     assertEquals(3.0,
             new DenseVector(new double[]{1}).aggregate(
                     new DenseVector(new double[]{2}),
-                    Functions.min, Functions.plus));
+                    Functions.MIN, Functions.PLUS));
 
     try {
       new DenseVector(new double[]{}).aggregate(
               new DenseVector(new double[]{}),
-              Functions.min, Functions.plus);
+              Functions.MIN, Functions.PLUS);
       
       fail("Should have thrown exception with empty vector");
     } catch (IllegalArgumentException e) {

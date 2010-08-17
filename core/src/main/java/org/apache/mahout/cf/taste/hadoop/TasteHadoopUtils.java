@@ -35,27 +35,26 @@ import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
 /**
- * some helper methods for the hadoop-related stuff in org.apache.mahout.cf.taste
+ * Some helper methods for the hadoop-related stuff in org.apache.mahout.cf.taste
  */
 public final class TasteHadoopUtils {
 
-  /** standard delimiter of textual preference data */
+  /** Standard delimiter of textual preference data */
   private static final Pattern PREFERENCE_TOKEN_DELIMITER = Pattern.compile("[\t,]");
 
   private TasteHadoopUtils() {
   }
 
   /**
-   * splits a preference data line into string tokens
-   *
-   * @param line
-   * @return
+   * Splits a preference data line into string tokens
    */
-  public static String[] splitPrefTokens(String line) {
+  public static String[] splitPrefTokens(CharSequence line) {
     return PREFERENCE_TOKEN_DELIMITER.split(line);
   }
 
-  /** a path filter used to read files written by hadoop */
+  /**
+   * A path filter used to read files written by Hadoop.
+   */
   public static final PathFilter PARTS_FILTER = new PathFilter() {
     @Override
     public boolean accept(Path path) {
@@ -64,21 +63,14 @@ public final class TasteHadoopUtils {
   };
 
   /**
-   * maps a long to an int
-   *
-   * @param id
-   * @return
+   * Maps a long to an int
    */
   public static int idToIndex(long id) {
     return 0x7FFFFFFF & ((int) id ^ (int) (id >>> 32));
   }
 
   /**
-   * reads a binary mapping file
-   * 
-   * @param itemIDIndexPathStr
-   * @param conf
-   * @return
+   * Reads a binary mapping file
    */
   public static OpenIntLongHashMap readItemIDIndexMap(String itemIDIndexPathStr, Configuration conf) {
     OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
@@ -104,16 +96,11 @@ public final class TasteHadoopUtils {
   }
 
   /**
-   * reads a text-based outputfile that only contains an int
-   * 
-   * @param conf
-   * @param outputDir
-   * @return
-   * @throws IOException
+   * Reads a text-based outputfile that only contains an int
    */
   public static int readIntFromFile(Configuration conf, Path outputDir) throws IOException {
     FileSystem fs = FileSystem.get(outputDir.toUri(), conf);
-    Path outputFile = fs.listStatus(outputDir, TasteHadoopUtils.PARTS_FILTER)[0].getPath();
+    Path outputFile = fs.listStatus(outputDir, PARTS_FILTER)[0].getPath();
     InputStream in = null;
     try  {
       in = fs.open(outputFile);

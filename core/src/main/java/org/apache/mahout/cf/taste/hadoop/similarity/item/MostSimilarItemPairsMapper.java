@@ -23,7 +23,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.EntityEntityWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
-import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
@@ -61,10 +61,10 @@ public final class MostSimilarItemPairsMapper
     Queue<SimilarItem> topMostSimilarItems = new PriorityQueue<SimilarItem>(maxSimilarItemsPerItem + 1,
         Collections.reverseOrder(SimilarItem.COMPARE_BY_SIMILARITY));
 
-    Iterator<Element> similarityVectorIterator = similarityVector.get().iterateNonZero();
+    Iterator<Vector.Element> similarityVectorIterator = similarityVector.get().iterateNonZero();
 
     while (similarityVectorIterator.hasNext()) {
-      Element element = similarityVectorIterator.next();
+      Vector.Element element = similarityVectorIterator.next();
       int index = element.index();
       double value = element.get();
       /* ignore self similarities */

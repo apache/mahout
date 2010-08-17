@@ -23,14 +23,8 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.mahout.common.StringTuple;
 
-/**
- * 
- */
 public class FeatureLabelComparator extends WritableComparator {
-  
-  /**
-   * @param keyClass
-   */
+
   public FeatureLabelComparator() {
     super(StringTuple.class, true);
   }
@@ -39,37 +33,31 @@ public class FeatureLabelComparator extends WritableComparator {
   public int compare(WritableComparable a, WritableComparable b) {
     StringTuple ta = (StringTuple) a;
     StringTuple tb = (StringTuple) b;
-    
-    String tmpa, tmpb;
-    int cmp;
-    
-    if (ta.length() < 2 || ta.length() > 3 || tb.length() < 2
-        || tb.length() > 3) {
+
+    if (ta.length() < 2 || ta.length() > 3 || tb.length() < 2 || tb.length() > 3) {
       throw new IllegalArgumentException("StringTuple length out of bounds");
     }
     
     // token
-    tmpa = ta.length() == 2 ? ta.stringAt(1) : ta.stringAt(2);
-    tmpb = tb.length() == 2 ? tb.stringAt(1) : tb.stringAt(2);
-    cmp = tmpa.compareTo(tmpb);
-    if (cmp != 0) return cmp;
+    String tmpa = ta.length() == 2 ? ta.stringAt(1) : ta.stringAt(2);
+    String tmpb = tb.length() == 2 ? tb.stringAt(1) : tb.stringAt(2);
+    int cmp = tmpa.compareTo(tmpb);
+    if (cmp != 0) {
+      return cmp;
+    }
     
     // type, FEATURE_TF first, then FEATURE_COUNT, then DF or anything else.
     cmp = ta.stringAt(0).compareTo(tb.stringAt(0));
     if (cmp != 0) {
       if (ta.stringAt(0).equals(BayesConstants.FEATURE_TF)) {
         return -1;
-      }
-      else if (tb.stringAt(0).equals(BayesConstants.FEATURE_TF)) {
+      } else if (tb.stringAt(0).equals(BayesConstants.FEATURE_TF)) {
         return 1;
-      }
-      else if (ta.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
+      } else if (ta.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
         return -1;
-      }
-      else if (tb.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
+      } else if (tb.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
         return 1;
-      }
-      else {
+      } else {
         return cmp;
       }
     }
@@ -80,7 +68,6 @@ public class FeatureLabelComparator extends WritableComparator {
     
     cmp = tmpa.compareTo(tmpb);
     return cmp;
-    
   }
   
 }

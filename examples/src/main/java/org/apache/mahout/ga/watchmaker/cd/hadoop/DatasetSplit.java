@@ -206,7 +206,7 @@ public class DatasetSplit {
   }
 
   /**
-   * {@link TextInputFormat) that uses a {@link RndLineRecordReader} as a RecordReader
+   * {@link TextInputFormat} that uses a {@link RndLineRecordReader} as a RecordReader
    */
   public static class DatasetTextInputFormat extends TextInputFormat {
     @Override

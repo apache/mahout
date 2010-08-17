@@ -44,7 +44,7 @@ public class VectorFunctions {
   public static VectorFunction max() {
     return new VectorFunction() {
       public double apply(Vector f) {
-        return f.aggregate(Functions.max, Functions.identity);
+        return f.aggregate(Functions.MAX, Functions.IDENTITY);
       }
     };
   }
@@ -52,7 +52,7 @@ public class VectorFunctions {
   public static VectorFunction min() {
     return new VectorFunction() {
       public double apply(Vector f) {
-        return f.aggregate(Functions.min, Functions.identity);
+        return f.aggregate(Functions.MIN, Functions.IDENTITY);
       }
     };
   }

@@ -119,7 +119,7 @@ public class QRDecompositionTest {
   }
 
   private void assertEquals(Matrix ref, Matrix actual, double epsilon) {
-    Assert.assertEquals(0, ref.minus(actual).aggregate(Functions.max, Functions.abs), epsilon);
+    Assert.assertEquals(0, ref.minus(actual).aggregate(Functions.MAX, Functions.ABS), epsilon);
   }
 
   private void printMatrix(String name, Matrix m) {

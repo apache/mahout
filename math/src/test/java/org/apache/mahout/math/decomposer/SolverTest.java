@@ -76,12 +76,6 @@ public abstract class SolverTest extends MahoutTestCase {
   /**
    * Builds up a consistently random (same seed every time) sparse matrix, with sometimes
    * repeated rows.
-   * @param numRows
-   * @param nonNullRows
-   * @param numCols
-   * @param entriesPerRow
-   * @param entryMean
-   * @return
    */
   public static Matrix randomSequentialAccessSparseMatrix(int numRows,
                                                           int nonNullRows,

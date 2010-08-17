@@ -19,7 +19,6 @@ package org.apache.mahout.classifier.discriminative;
 import java.util.Iterator;
 
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.Vector.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,18 +69,18 @@ public class WinnowTrainer extends LinearTrainer {
       // case one
       Vector updateVector = dataPoint.times(1 / this.promotionStep);
       log.info("Winnow update positive: {}", updateVector);
-      Iterator<Element> iter = updateVector.iterateNonZero();
+      Iterator<Vector.Element> iter = updateVector.iterateNonZero();
       while (iter.hasNext()) {
-        Element element = iter.next();
+        Vector.Element element = iter.next();
         model.timesDelta(element.index(), element.get());
       }
     } else {
       // case two
       Vector updateVector = dataPoint.times(1 / this.promotionStep);
       log.info("Winnow update negative: {}", updateVector);
-      Iterator<Element> iter = updateVector.iterateNonZero();
+      Iterator<Vector.Element> iter = updateVector.iterateNonZero();
       while (iter.hasNext()) {
-        Element element = iter.next();
+        Vector.Element element = iter.next();
         model.timesDelta(element.index(), element.get());
       }
     }

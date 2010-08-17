@@ -21,7 +21,7 @@
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-eclipse-support</artifactId>
     <version>0.4-SNAPSHOT</version>
-    <name>Package up files needed by Eclipse</name>
+    <name>Mahout Eclipse</name>
     <!-- skips top level project for parent purposes, otherwise we get a cycle -->
     <parent>
         <groupId>org.apache</groupId>

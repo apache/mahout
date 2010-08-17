@@ -82,9 +82,6 @@ public class ForestPredictions implements PredictionCallback {
   /**
    * compute the prediction for each instance. the prediction of an instance is the index of the label that
    * got most of the votes
-   * 
-   * @param rng
-   * @return
    */
   public int[] computePredictions(Random rng) {
     int[] result = new int[predictions.length];

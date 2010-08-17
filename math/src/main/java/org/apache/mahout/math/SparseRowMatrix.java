@@ -55,7 +55,7 @@ public class SparseRowMatrix extends AbstractMatrix {
     this.randomAccessRows = randomAccess;
     this.rows = rows.clone();
     for (int row = 0; row < cardinality[ROW]; row++) {
-      if(rows[row] == null) {
+      if (rows[row] == null) {
         rows[row] = randomAccess
                   ? new RandomAccessSparseVector(numCols(), 10)
                   : new SequentialAccessSparseVector(numCols(), 10);

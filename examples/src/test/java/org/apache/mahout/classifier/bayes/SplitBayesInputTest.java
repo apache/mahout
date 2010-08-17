@@ -25,7 +25,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 
 import org.apache.mahout.classifier.ClassifierData;
 import org.apache.mahout.common.IOUtils;
@@ -35,16 +35,15 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 public class SplitBayesInputTest extends MahoutTestCase {
 
-  OpenObjectIntHashMap<String> countMap;
-  
-  Charset charset;
-  File tempInputFile;
-  File tempTrainingDirectory;
-  File tempTestDirectory;
-  File tempInputDirectory;
-  
-  SplitBayesInput si;
+  private OpenObjectIntHashMap<String> countMap;
+  private Charset charset;
+  private File tempInputFile;
+  private File tempTrainingDirectory;
+  private File tempTestDirectory;
+  private File tempInputDirectory;
+  private SplitBayesInput si;
     
+  @Override
   public void setUp() throws Exception {
     super.setUp();
   
@@ -69,7 +68,9 @@ public class SplitBayesInputTest extends MahoutTestCase {
     for (String[] entry : ClassifierData.DATA) {
       if (!entry[0].equals(currentLabel)) {
         currentLabel = entry[0];
-        if (writer != null) IOUtils.quietClose(writer);
+        if (writer != null) {
+          IOUtils.quietClose(writer);
+        }
         writer = new BufferedWriter(
             new OutputStreamWriter(
                 new FileOutputStream(new File(tempInputDirectory, currentLabel)), Charset.forName("UTF-8")));
@@ -90,21 +91,16 @@ public class SplitBayesInputTest extends MahoutTestCase {
   }
   
   public void testSplitDirectory() throws Exception {
-    final int testSplitSize = 1;
-    
+
     writeMultipleInputFiles();
-    
+
+    final int testSplitSize = 1;
     si.setTestSplitSize(testSplitSize);
     si.setCallback(new SplitBayesInput.SplitCallback() {
           @Override
           public void splitComplete(File inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
             int trainingLines = countMap.get(inputFile.getName()) - testSplitSize;
-            try {
-              assertSplit(inputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
-            }
-            catch (Exception e) {
-              throw new RuntimeException(e);
-            }
+            assertSplit(inputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
           }
     });
     
@@ -160,19 +156,19 @@ public class SplitBayesInputTest extends MahoutTestCase {
   
   public void testValidate() throws Exception {
     SplitBayesInput st = new SplitBayesInput();
-    assertValidateException(st, IllegalStateException.class);
+    assertValidateException(st, IllegalArgumentException.class);
     
     st.setTestSplitSize(100);
-    assertValidateException(st, NullPointerException.class); 
+    assertValidateException(st, IllegalArgumentException.class);
     
     st.setTestOutputDirectory(tempTestDirectory);
-    assertValidateException(st, NullPointerException.class); 
+    assertValidateException(st, IllegalArgumentException.class); 
     
     st.setTrainingOutputDirectory(tempTrainingDirectory);
     st.validate();
     
     st.setTestSplitPct(50);
-    assertValidateException(st, IllegalStateException.class);
+    assertValidateException(st, IllegalArgumentException.class);
     
     st = new SplitBayesInput();
     st.setTestRandomSelectionPct(50);
@@ -181,7 +177,7 @@ public class SplitBayesInputTest extends MahoutTestCase {
     st.validate();
     
     st.setTestSplitPct(50);
-    assertValidateException(st, IllegalStateException.class);
+    assertValidateException(st, IllegalArgumentException.class);
     
     st = new SplitBayesInput();
     st.setTestRandomSelectionPct(50);
@@ -190,51 +186,52 @@ public class SplitBayesInputTest extends MahoutTestCase {
     st.validate();
     
     st.setTestSplitSize(100);
-    assertValidateException(st, IllegalStateException.class);
+    assertValidateException(st, IllegalArgumentException.class);
   }
   
   private class TestCallback implements SplitBayesInput.SplitCallback {
-    int testSplitSize;
-    int trainingLines;
+    private int testSplitSize;
+    private int trainingLines;
     
-    public TestCallback(int testSplitSize, int trainingLines) {
+    private TestCallback(int testSplitSize, int trainingLines) {
       this.testSplitSize = testSplitSize;
       this.trainingLines = trainingLines;
     }
     
     @Override
     public void splitComplete(File inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
-      try {
-        assertSplit(tempInputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
-      }
-      catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+      assertSplit(tempInputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
     }
   }
   
-  private void assertValidateException(SplitBayesInput st, Class<?> clazz) {
+  private void assertValidateException(SplitBayesInput st, Class<?> clazz) throws Exception {
     try {
       st.validate();
-      TestCase.fail("Expected valdate() to throw an exception, received none");
-    }
-    catch (Exception e) {
+      Assert.fail("Expected valdate() to throw an exception, received none");
+    } catch (Exception e) {
       if (!e.getClass().isAssignableFrom(clazz)) {
-        e.printStackTrace();
-        TestCase.fail("Unexpected exception. Expected " + clazz.getName() + " received " + e.getClass().getName());
+        throw e;
       }
     } 
   }
   
-  private void assertSplit(File tempInputFile, Charset charset, int testSplitSize, int trainingLines, 
-      File tempTrainingDirectory, File tempTestDirectory) throws Exception {
-    
-    File testFile = new File(tempTestDirectory, tempInputFile.getName());
-    TestCase.assertTrue("test file exists", testFile.isFile());
-    TestCase.assertEquals("test line count", testSplitSize, SplitBayesInput.countLines(testFile,charset));
-    
-    File trainingFile = new File(tempTrainingDirectory, tempInputFile.getName());
-    TestCase.assertTrue("training file exists", trainingFile.isFile());
-    TestCase.assertEquals("training line count", trainingLines, SplitBayesInput.countLines(trainingFile, charset));  
+  private static void assertSplit(File tempInputFile,
+                                  Charset charset,
+                                  int testSplitSize,
+                                  int trainingLines,
+                                  File tempTrainingDirectory,
+                                  File tempTestDirectory) {
+
+    try {
+      File testFile = new File(tempTestDirectory, tempInputFile.getName());
+      Assert.assertTrue("test file exists", testFile.isFile());
+      Assert.assertEquals("test line count", testSplitSize, SplitBayesInput.countLines(testFile, charset));
+
+      File trainingFile = new File(tempTrainingDirectory, tempInputFile.getName());
+      Assert.assertTrue("training file exists", trainingFile.isFile());
+      Assert.assertEquals("training line count", trainingLines, SplitBayesInput.countLines(trainingFile, charset));
+    } catch (IOException ioe) {
+      Assert.fail(ioe.toString());
+    }
   }
 }

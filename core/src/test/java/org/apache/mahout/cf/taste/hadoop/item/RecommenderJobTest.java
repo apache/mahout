@@ -57,8 +57,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ItemIDIndexMapper}
-   *
-   * @throws Exception
    */
   public void testItemIDIndexMapper() throws Exception {
     Mapper<LongWritable,Text, VarIntWritable, VarLongWritable>.Context context =
@@ -74,8 +72,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ItemIDIndexReducer}
-   *
-   * @throws Exception
    */
   public void testItemIDIndexReducer() throws Exception {
     Reducer<VarIntWritable, VarLongWritable, VarIntWritable,VarLongWritable>.Context context =
@@ -92,15 +88,13 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ToItemPrefsMapper}
-   *
-   * @throws Exception
    */
   public void testToItemPrefsMapper() throws Exception {
     Mapper<LongWritable,Text, VarLongWritable,VarLongWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
 
-    context.write(new VarLongWritable(12L), new EntityPrefWritable(34L, 1f));
-    context.write(new VarLongWritable(56L), new EntityPrefWritable(78L, 2f));
+    context.write(new VarLongWritable(12L), new EntityPrefWritable(34L, 1.0f));
+    context.write(new VarLongWritable(56L), new EntityPrefWritable(78L, 2.0f));
     EasyMock.replay(context);
 
     ToItemPrefsMapper mapper = new ToItemPrefsMapper();
@@ -112,8 +106,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ToItemPrefsMapper} using boolean data
-   *
-   * @throws Exception
    */
   public void testToItemPrefsMapperBooleanData() throws Exception {
     Mapper<LongWritable,Text, VarLongWritable,VarLongWritable>.Context context =
@@ -133,21 +125,19 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ToUserVectorReducer}
-   *
-   * @throws Exception
    */
   public void testToUserVectorReducer() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
-        MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1d), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 2d)));
+        MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 2.0)));
 
     EasyMock.replay(context);
 
     List<VarLongWritable> varLongWritables = new LinkedList<VarLongWritable>();
-    varLongWritables.add(new EntityPrefWritable(34L, 1f));
-    varLongWritables.add(new EntityPrefWritable(56L, 2f));
+    varLongWritables.add(new EntityPrefWritable(34L, 1.0f));
+    varLongWritables.add(new EntityPrefWritable(56L, 2.0f));
 
     new ToUserVectorReducer().reduce(new VarLongWritable(12L), varLongWritables, context);
 
@@ -156,15 +146,13 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ToUserVectorReducer} using boolean data
-   *
-   * @throws Exception
    */
   public void testToUserVectorReducerWithBooleanData() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
     context.write(EasyMock.eq(new VarLongWritable(12L)), MathHelper.vectorMatches(
-        MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1d), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 1d)));
+        MathHelper.elem(TasteHadoopUtils.idToIndex(34L), 1.0), MathHelper.elem(TasteHadoopUtils.idToIndex(56L), 1.0)));
 
     EasyMock.replay(context);
 
@@ -176,22 +164,20 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link SimilarityMatrixRowWrapperMapper}
-   *
-   * @throws Exception
    */
   public void testSimilarityMatrixRowWrapperMapper() throws Exception {
     Mapper<IntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
 
-    context.write(EasyMock.eq(new VarIntWritable(12)), vectorOfVectorOrPrefWritableMatches(MathHelper.elem(34, 0.5d),
-        MathHelper.elem(56, 0.7d)));
+    context.write(EasyMock.eq(new VarIntWritable(12)), vectorOfVectorOrPrefWritableMatches(MathHelper.elem(34, 0.5),
+        MathHelper.elem(56, 0.7)));
 
     EasyMock.replay(context);
 
     RandomAccessSparseVector vector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    vector.set(12, 1d);
-    vector.set(34, 0.5d);
-    vector.set(56, 0.7d);
+    vector.set(12, 1.0);
+    vector.set(34, 0.5);
+    vector.set(56, 0.7);
 
     new SimilarityMatrixRowWrapperMapper().map(new IntWritable(12), new VectorWritable(vector), context);
 
@@ -200,9 +186,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * verifies the {@link Vector} included in a {@link VectorOrPrefWritable}
-   *
-   * @param elements
-   * @return
    */
   public static VectorOrPrefWritable vectorOfVectorOrPrefWritableMatches(final Vector.Element... elements) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
@@ -239,8 +222,8 @@ public class RecommenderJobTest extends TasteTestCase {
     setField(mapper, "maxPrefsPerUserConsidered", 10);
 
     RandomAccessSparseVector vector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    vector.set(34, 0.5d);
-    vector.set(56, 0.7d);
+    vector.set(34, 0.5);
+    vector.set(56, 0.7);
 
     mapper.map(new VarLongWritable(123L), new VectorWritable(vector), context);
 
@@ -249,10 +232,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * verifies a preference in a {@link VectorOrPrefWritable}
-   *
-   * @param userID
-   * @param prefValue
-   * @return
    */
   public static VectorOrPrefWritable prefOfVectorOrPrefWritableMatches(final long userID, final float prefValue) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
@@ -273,8 +252,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link UserVectorSplitterMapper} in the special case that some userIDs shall be excluded
-   *
-   * @throws Exception
    */
   public void testUserVectorSplitterMapperUserExclusion() throws Exception {
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable>.Context context =
@@ -294,8 +271,8 @@ public class RecommenderJobTest extends TasteTestCase {
 
 
     RandomAccessSparseVector vector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    vector.set(34, 0.5d);
-    vector.set(56, 0.7d);
+    vector.set(34, 0.5);
+    vector.set(56, 0.7);
 
     mapper.map(new VarLongWritable(123L), new VectorWritable(vector), context);
     mapper.map(new VarLongWritable(456L), new VectorWritable(vector), context);
@@ -306,8 +283,6 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link UserVectorSplitterMapper} in the special case that the number of preferences to be considered
    * is less than the number of available preferences
-   *
-   * @throws Exception
    */
   public void testUserVectorSplitterMapperOnlySomePrefsConsidered() throws Exception {
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable>.Context context =
@@ -322,8 +297,8 @@ public class RecommenderJobTest extends TasteTestCase {
     setField(mapper, "maxPrefsPerUserConsidered", 1);
 
     RandomAccessSparseVector vector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    vector.set(34, 0.5d);
-    vector.set(56, 0.7d);
+    vector.set(34, 0.5);
+    vector.set(56, 0.7);
 
     mapper.map(new VarLongWritable(123L), new VectorWritable(vector), context);
 
@@ -332,9 +307,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * verifies that a preference value is NaN in a {@link VectorOrPrefWritable}
-   *
-   * @param userID
-   * @return
    */
   public static VectorOrPrefWritable prefOfVectorOrPrefWritableMatchesNaN(final long userID) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
@@ -355,24 +327,22 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ToVectorAndPrefReducer}
-   *
-   * @throws Exception
    */
   public void testToVectorAndPrefReducer() throws Exception {
     Reducer<VarIntWritable,VectorOrPrefWritable,VarIntWritable,VectorAndPrefsWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
     context.write(EasyMock.eq(new VarIntWritable(1)), vectorAndPrefsWritableMatches(Arrays.asList(123L, 456L),
-        Arrays.asList(1f, 2f), MathHelper.elem(3, 0.5d), MathHelper.elem(7, 0.8d)));
+        Arrays.asList(1.0f, 2.0f), MathHelper.elem(3, 0.5), MathHelper.elem(7, 0.8)));
 
     EasyMock.replay(context);
 
     Vector similarityColumn = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumn.set(3, 0.5d);
-    similarityColumn.set(7, 0.8d);
+    similarityColumn.set(3, 0.5);
+    similarityColumn.set(7, 0.8);
 
-    VectorOrPrefWritable itemPref1 = new VectorOrPrefWritable(123L, 1f);
-    VectorOrPrefWritable itemPref2 = new VectorOrPrefWritable(456L, 2f);
+    VectorOrPrefWritable itemPref1 = new VectorOrPrefWritable(123L, 1.0f);
+    VectorOrPrefWritable itemPref2 = new VectorOrPrefWritable(456L, 2.0f);
     VectorOrPrefWritable similarities = new VectorOrPrefWritable(similarityColumn);
 
     new ToVectorAndPrefReducer().reduce(new VarIntWritable(1), Arrays.asList(itemPref1, itemPref2, similarities),
@@ -383,11 +353,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * verifies a {@link VectorAndPrefsWritable}
-   *
-   * @param userIDs
-   * @param prefValues
-   * @param elements
-   * @return
    */
   public static VectorAndPrefsWritable vectorAndPrefsWritableMatches(final List<Long> userIDs,
       final List<Float> prefValues, final Vector.Element... elements) {
@@ -417,8 +382,6 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link ToVectorAndPrefReducer} in the error case that two similarity column vectors a supplied for the same
    * item (which should never happen)
-   *
-   * @throws Exception
    */
   public void testToVectorAndPrefReducerExceptionOn2Vectors() throws Exception {
     Reducer<VarIntWritable,VectorOrPrefWritable,VarIntWritable,VectorAndPrefsWritable>.Context context =
@@ -435,29 +398,29 @@ public class RecommenderJobTest extends TasteTestCase {
     try {
       new ToVectorAndPrefReducer().reduce(new VarIntWritable(1), Arrays.asList(similarities1, similarities2), context);
       fail();
-    } catch (IllegalStateException e) {}
+    } catch (IllegalStateException e) {
+      // good
+    }
 
     EasyMock.verify(context);
   }
 
   /**
    * tests {@link PartialMultiplyMapper}
-   *
-   * @throws Exception
    */
   public void testPartialMultiplyMapper() throws Exception {
 
     Vector similarityColumn = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumn.set(3, 0.5d);
-    similarityColumn.set(7, 0.8d);
+    similarityColumn.set(3, 0.5);
+    similarityColumn.set(7, 0.8);
 
     Mapper<VarIntWritable,VectorAndPrefsWritable,VarLongWritable,PrefAndSimilarityColumnWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
 
     PrefAndSimilarityColumnWritable one = new PrefAndSimilarityColumnWritable();
     PrefAndSimilarityColumnWritable two = new PrefAndSimilarityColumnWritable();
-    one.set(1f, similarityColumn);
-    two.set(3f, similarityColumn);
+    one.set(1.0f, similarityColumn);
+    two.set(3.0f, similarityColumn);
 
     context.write(EasyMock.eq(new VarLongWritable(123L)), EasyMock.eq(one));
     context.write(EasyMock.eq(new VarLongWritable(456L)), EasyMock.eq(two));
@@ -475,29 +438,27 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link AggregateAndRecommendReducer}
-   *
-   * @throws Exception
    */
   public void testAggregateAndRecommendReducer() throws Exception {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
 
     context.write(EasyMock.eq(new VarLongWritable(123L)), recommendationsMatch(new GenericRecommendedItem(1L, 2.8f),
-        new GenericRecommendedItem(2L, 2f)));
+        new GenericRecommendedItem(2L, 2.0f)));
 
     EasyMock.replay(context);
 
     RandomAccessSparseVector similarityColumnOne = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumnOne.set(1, 0.1d);
-    similarityColumnOne.set(2, 0.5d);
+    similarityColumnOne.set(1, 0.1);
+    similarityColumnOne.set(2, 0.5);
 
     RandomAccessSparseVector similarityColumnTwo = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumnTwo.set(1, 0.9d);
-    similarityColumnTwo.set(2, 0.5d);
+    similarityColumnTwo.set(1, 0.9);
+    similarityColumnTwo.set(2, 0.5);
 
     List<PrefAndSimilarityColumnWritable> values = Arrays.asList(
-        new PrefAndSimilarityColumnWritable(1f, similarityColumnOne),
-        new PrefAndSimilarityColumnWritable(3f, similarityColumnTwo));
+        new PrefAndSimilarityColumnWritable(1.0f, similarityColumnOne),
+        new PrefAndSimilarityColumnWritable(3.0f, similarityColumnTwo));
 
     OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
     indexItemIDMap.put(1, 1L);
@@ -515,8 +476,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link AggregateAndRecommendReducer}
-   *
-   * @throws Exception
    */
   public void testAggregateAndRecommendReducerExcludeRecommendationsBasedOnOneItem() throws Exception {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
@@ -527,15 +486,15 @@ public class RecommenderJobTest extends TasteTestCase {
     EasyMock.replay(context);
 
     RandomAccessSparseVector similarityColumnOne = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumnOne.set(1, 0.1d);
+    similarityColumnOne.set(1, 0.1);
 
     RandomAccessSparseVector similarityColumnTwo = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumnTwo.set(1, 0.9d);
-    similarityColumnTwo.set(2, 0.5d);
+    similarityColumnTwo.set(1, 0.9);
+    similarityColumnTwo.set(2, 0.5);
 
     List<PrefAndSimilarityColumnWritable> values = Arrays.asList(
-        new PrefAndSimilarityColumnWritable(1f, similarityColumnOne),
-        new PrefAndSimilarityColumnWritable(3f, similarityColumnTwo));
+        new PrefAndSimilarityColumnWritable(1.0f, similarityColumnOne),
+        new PrefAndSimilarityColumnWritable(3.0f, similarityColumnTwo));
 
     OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
     indexItemIDMap.put(1, 1L);
@@ -553,8 +512,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link AggregateAndRecommendReducer} with a limit on the recommendations per user
-   *
-   * @throws Exception
    */
   public void testAggregateAndRecommendReducerLimitNumberOfRecommendations() throws Exception {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
@@ -565,16 +522,16 @@ public class RecommenderJobTest extends TasteTestCase {
     EasyMock.replay(context);
 
     RandomAccessSparseVector similarityColumnOne = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumnOne.set(1, 0.1d);
-    similarityColumnOne.set(2, 0.5d);
+    similarityColumnOne.set(1, 0.1);
+    similarityColumnOne.set(2, 0.5);
 
     RandomAccessSparseVector similarityColumnTwo = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    similarityColumnTwo.set(1, 0.9d);
-    similarityColumnTwo.set(2, 0.5d);
+    similarityColumnTwo.set(1, 0.9);
+    similarityColumnTwo.set(2, 0.5);
 
     List<PrefAndSimilarityColumnWritable> values = Arrays.asList(
-        new PrefAndSimilarityColumnWritable(1f, similarityColumnOne),
-        new PrefAndSimilarityColumnWritable(3f, similarityColumnTwo));
+        new PrefAndSimilarityColumnWritable(1.0f, similarityColumnOne),
+        new PrefAndSimilarityColumnWritable(3.0f, similarityColumnTwo));
 
     OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
     indexItemIDMap.put(1, 1L);
@@ -592,9 +549,6 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * verifies a {@link RecommendedItemsWritable}
-   *
-   * @param items
-   * @return
    */
   static RecommendedItemsWritable recommendationsMatch(final RecommendedItem... items) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
@@ -602,10 +556,7 @@ public class RecommenderJobTest extends TasteTestCase {
       public boolean matches(Object argument) {
         if (argument instanceof RecommendedItemsWritable) {
           RecommendedItemsWritable recommendedItemsWritable = ((RecommendedItemsWritable) argument);
-          List<RecommendedItem> expectedItems = new LinkedList<RecommendedItem>();
-          for (RecommendedItem item : items) {
-            expectedItems.add(item);
-          }
+          List<RecommendedItem> expectedItems = new LinkedList<RecommendedItem>(Arrays.asList(items));
           return expectedItems.equals(recommendedItemsWritable.getRecommendedItems());
         }
         return false;
@@ -651,9 +602,6 @@ public class RecommenderJobTest extends TasteTestCase {
    *  Prediction(donkey, berries) = (0.66 * 3 + 0.25 * 5) / (0.66 + 0.25)                   ~ 3,6
    *
    * </pre>
-   *
-   *
-   * @throws Exception
    */
   public void testCompleteJob() throws Exception {
 
@@ -684,7 +632,7 @@ public class RecommenderJobTest extends TasteTestCase {
     recommenderJob.setConf(conf);
 
     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-       DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--numRecommendations", String.valueOf(1) });
+       DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--numRecommendations", "1" });
 
     Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));
 
@@ -699,19 +647,19 @@ public class RecommenderJobTest extends TasteTestCase {
 
       if (userID == 1L) {
         assertEquals(4L, item.getItemID());
-        assertEquals(4.3d, item.getValue(), 0.05d);
+        assertEquals(4.3, item.getValue(), 0.05);
       }
       if (userID == 2L) {
         assertEquals(2L, item.getItemID());
-        assertEquals(3.3d, item.getValue(), 0.05d);
+        assertEquals(3.3, item.getValue(), 0.05);
       }
       if (userID == 3L) {
         assertEquals(3L, item.getItemID());
-        assertEquals(4.1d, item.getValue(), 0.05d);
+        assertEquals(4.1, item.getValue(), 0.05);
       }
       if (userID == 4L) {
         assertEquals(2L, item.getItemID());
-        assertEquals(4d, item.getValue(), 0.05d);
+        assertEquals(4.0, item.getValue(), 0.05);
       }
     }
   }
@@ -766,7 +714,7 @@ public class RecommenderJobTest extends TasteTestCase {
 
   static Map<Long,List<RecommendedItem>> readRecommendations(File file) throws IOException {
     Map<Long,List<RecommendedItem>> recommendations = new HashMap<Long,List<RecommendedItem>>();
-    FileLineIterable lineIterable = new FileLineIterable(file);
+    Iterable<String> lineIterable = new FileLineIterable(file);
     for (String line : lineIterable) {
 
       String[] keyValue = line.split("\t");

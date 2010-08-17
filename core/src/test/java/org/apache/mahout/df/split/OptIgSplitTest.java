@@ -26,9 +26,9 @@ import org.apache.mahout.df.data.Utils;
 
 public class OptIgSplitTest extends MahoutTestCase {
 
-  private static final int nbAttributes = 20;
+  private static final int NUM_ATTRIBUTES = 20;
 
-  private static final int numInstances = 100;
+  private static final int NUM_INSTANCES = 100;
  
   public void testComputeSplit() throws Exception {
     int n = 100;
@@ -37,7 +37,7 @@ public class OptIgSplitTest extends MahoutTestCase {
     IgSplit opt = new OptIgSplit();
 
     Random rng = RandomUtils.getRandom();
-    Data data = Utils.randomData(rng, nbAttributes, numInstances);
+    Data data = Utils.randomData(rng, NUM_ATTRIBUTES, NUM_INSTANCES);
 
     for (int nloop = 0; nloop < n; nloop++) {
       int attr = rng.nextInt(data.getDataset().nbAttributes());

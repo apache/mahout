@@ -62,7 +62,7 @@ public interface RecommenderEvaluator {
    * @param recommenderBuilder
    *          object that can build a {@link org.apache.mahout.cf.taste.recommender.Recommender} to test
    * @param dataModelBuilder
-   *          @param dataModelBuilder {@link DataModelBuilder} to use, or if null, a default {@link DataModel}
+   *          {@link DataModelBuilder} to use, or if null, a default {@link DataModel}
    *          implementation will be used
    * @param dataModel
    *          dataset to test on

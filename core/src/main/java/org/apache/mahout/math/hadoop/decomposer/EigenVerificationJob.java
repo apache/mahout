@@ -72,7 +72,6 @@ public class EigenVerificationJob extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(EigenVerificationJob.class);
 
   private SingularVectorVerifier eigenVerifier;
-  private OrthonormalityVerifier orthoVerifier;
   private VectorIterable eigensToVerify;
   private VectorIterable corpus;
   private double maxError;
@@ -110,7 +109,6 @@ public class EigenVerificationJob extends AbstractJob {
     // set up eigenverifier and orthoverifier TODO: allow multithreaded execution
 
     eigenVerifier = new SimpleEigenVerifier();
-    orthoVerifier = new OrthonormalityVerifier();
 
     VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
 
@@ -139,7 +137,7 @@ public class EigenVerificationJob extends AbstractJob {
   }
 
   public VectorIterable computePairwiseInnerProducts() {
-    return orthoVerifier.pairwiseInnerProducts(eigensToVerify);
+    return OrthonormalityVerifier.pairwiseInnerProducts(eigensToVerify);
   }
 
   public void saveCleanEigens(List<Map.Entry<MatrixSlice,EigenStatus>> prunedEigenMeta) throws IOException {

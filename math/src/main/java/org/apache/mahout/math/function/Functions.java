@@ -109,35 +109,35 @@ public class Functions {
    * <H3>Unary functions</H3>
    */
   /** Function that returns <tt>Math.abs(a)</tt>. */
-  public static final UnaryFunction abs = new UnaryFunction() {
+  public static final UnaryFunction ABS = new UnaryFunction() {
     public double apply(double a) {
       return Math.abs(a);
     }
   };
 
   /** Function that returns <tt>Math.acos(a)</tt>. */
-  public static final UnaryFunction acos = new UnaryFunction() {
+  public static final UnaryFunction ACOS = new UnaryFunction() {
     public double apply(double a) {
       return Math.acos(a);
     }
   };
 
   /** Function that returns <tt>Math.asin(a)</tt>. */
-  public static final UnaryFunction asin = new UnaryFunction() {
+  public static final UnaryFunction ASIN = new UnaryFunction() {
     public double apply(double a) {
       return Math.asin(a);
     }
   };
 
   /** Function that returns <tt>Math.atan(a)</tt>. */
-  public static final UnaryFunction atan = new UnaryFunction() {
+  public static final UnaryFunction ATAN = new UnaryFunction() {
     public double apply(double a) {
       return Math.atan(a);
     }
   };
 
   /** Function that returns <tt>Math.ceil(a)</tt>. */
-  public static final UnaryFunction ceil = new UnaryFunction() {
+  public static final UnaryFunction CEIL = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.ceil(a);
@@ -145,7 +145,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.cos(a)</tt>. */
-  public static final UnaryFunction cos = new UnaryFunction() {
+  public static final UnaryFunction COS = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.cos(a);
@@ -153,7 +153,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.exp(a)</tt>. */
-  public static final UnaryFunction exp = new UnaryFunction() {
+  public static final UnaryFunction EXP = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.exp(a);
@@ -161,7 +161,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.floor(a)</tt>. */
-  public static final UnaryFunction floor = new UnaryFunction() {
+  public static final UnaryFunction FLOOR = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.floor(a);
@@ -169,7 +169,7 @@ public class Functions {
   };
 
   /** Function that returns its argument. */
-  public static final UnaryFunction identity = new UnaryFunction() {
+  public static final UnaryFunction IDENTITY = new UnaryFunction() {
 
     public double apply(double a) {
       return a;
@@ -177,7 +177,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>1.0 / a</tt>. */
-  public static final UnaryFunction inv = new UnaryFunction() {
+  public static final UnaryFunction INV = new UnaryFunction() {
 
     public double apply(double a) {
       return 1.0 / a;
@@ -185,7 +185,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.log(a)</tt>. */
-  public static final UnaryFunction logarithm = new UnaryFunction() {
+  public static final UnaryFunction LOGARITHM = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.log(a);
@@ -193,7 +193,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.log(a) / Math.log(2)</tt>. */
-  public static final UnaryFunction log2 = new UnaryFunction() {
+  public static final UnaryFunction LOG2 = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.log(a) * 1.4426950408889634;
@@ -201,7 +201,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>-a</tt>. */
-  public static final UnaryFunction negate = new UnaryFunction() {
+  public static final UnaryFunction NEGATE = new UnaryFunction() {
 
     public double apply(double a) {
       return -a;
@@ -209,7 +209,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.rint(a)</tt>. */
-  public static final UnaryFunction rint = new UnaryFunction() {
+  public static final UnaryFunction RINT = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.rint(a);
@@ -217,7 +217,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a < 0 ? -1 : a > 0 ? 1 : 0</tt>. */
-  public static final UnaryFunction sign = new UnaryFunction() {
+  public static final UnaryFunction SIGN = new UnaryFunction() {
 
     public double apply(double a) {
       return a < 0 ? -1 : a > 0 ? 1 : 0;
@@ -225,7 +225,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.sin(a)</tt>. */
-  public static final UnaryFunction sin = new UnaryFunction() {
+  public static final UnaryFunction SIN = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.sin(a);
@@ -233,7 +233,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.sqrt(a)</tt>. */
-  public static final UnaryFunction sqrt = new UnaryFunction() {
+  public static final UnaryFunction SQRT = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.sqrt(a);
@@ -241,7 +241,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a * a</tt>. */
-  public static final UnaryFunction square = new UnaryFunction() {
+  public static final UnaryFunction SQUARE = new UnaryFunction() {
 
     public double apply(double a) {
       return a * a;
@@ -249,7 +249,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.tan(a)</tt>. */
-  public static final UnaryFunction tan = new UnaryFunction() {
+  public static final UnaryFunction TAN = new UnaryFunction() {
 
     public double apply(double a) {
       return Math.tan(a);
@@ -262,7 +262,7 @@ public class Functions {
    */
 
   /** Function that returns <tt>Math.atan2(a,b)</tt>. */
-  public static final BinaryFunction atan2 = new BinaryFunction() {
+  public static final BinaryFunction ATAN2 = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return Math.atan2(a, b);
@@ -270,7 +270,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. */
-  public static final BinaryFunction compare = new BinaryFunction() {
+  public static final BinaryFunction COMPARE = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return a < b ? -1 : a > b ? 1 : 0;
@@ -278,7 +278,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a / b</tt>. */
-  public static final BinaryFunction div = new BinaryFunction() {
+  public static final BinaryFunction DIV = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return a / b;
@@ -286,7 +286,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a == b ? 1 : 0</tt>. */
-  public static final BinaryFunction equals = new BinaryFunction() {
+  public static final BinaryFunction EQUALS = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return a == b ? 1 : 0;
@@ -294,7 +294,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a > b ? 1 : 0</tt>. */
-  public static final BinaryFunction greater = new BinaryFunction() {
+  public static final BinaryFunction GREATER = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return a > b ? 1 : 0;
@@ -302,7 +302,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.IEEEremainder(a,b)</tt>. */
-  public static final BinaryFunction IEEEremainder = new BinaryFunction() {
+  public static final BinaryFunction IEEE_REMAINDER = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return Math.IEEEremainder(a, b);
@@ -310,7 +310,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a == b</tt>. */
-  public static final DoubleDoubleProcedure isEqual = new DoubleDoubleProcedure() {
+  public static final DoubleDoubleProcedure IS_EQUAL = new DoubleDoubleProcedure() {
 
     public boolean apply(double a, double b) {
       return a == b;
@@ -318,7 +318,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a < b</tt>. */
-  public static final DoubleDoubleProcedure isLess = new DoubleDoubleProcedure() {
+  public static final DoubleDoubleProcedure IS_LESS = new DoubleDoubleProcedure() {
 
     public boolean apply(double a, double b) {
       return a < b;
@@ -326,7 +326,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a > b</tt>. */
-  public static final DoubleDoubleProcedure isGreater = new DoubleDoubleProcedure() {
+  public static final DoubleDoubleProcedure IS_GREATER = new DoubleDoubleProcedure() {
 
     public boolean apply(double a, double b) {
       return a > b;
@@ -334,7 +334,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a < b ? 1 : 0</tt>. */
-  public static final BinaryFunction less = new BinaryFunction() {
+  public static final BinaryFunction LESS = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return a < b ? 1 : 0;
@@ -342,7 +342,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.log(a) / Math.log(b)</tt>. */
-  public static final BinaryFunction lg = new BinaryFunction() {
+  public static final BinaryFunction LG = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return Math.log(a) / Math.log(b);
@@ -350,7 +350,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.max(a,b)</tt>. */
-  public static final BinaryFunction max = new BinaryFunction() {
+  public static final BinaryFunction MAX = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return Math.max(a, b);
@@ -358,7 +358,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.min(a,b)</tt>. */
-  public static final BinaryFunction min = new BinaryFunction() {
+  public static final BinaryFunction MIN = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return Math.min(a, b);
@@ -366,7 +366,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a - b</tt>. */
-  public static final BinaryFunction minus = plusMult(-1);
+  public static final BinaryFunction MINUS = plusMult(-1);
   /*
   new BinaryFunction() {
     public final double apply(double a, double b) { return a - b; }
@@ -374,7 +374,7 @@ public class Functions {
   */
 
   /** Function that returns <tt>a % b</tt>. */
-  public static final BinaryFunction mod = new BinaryFunction() {
+  public static final BinaryFunction MOD = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return a % b;
@@ -382,7 +382,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>a * b</tt>. */
-  public static final BinaryFunction mult = new BinaryFunction() {
+  public static final BinaryFunction MULT = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return a * b;
@@ -390,7 +390,7 @@ public class Functions {
   };
   
   /** Function that returns <tt>a + b</tt>. */
-  public static final BinaryFunction plus = new BinaryFunction() {
+  public static final BinaryFunction PLUS = new BinaryFunction() {
     
     public double apply(double a, double b) {
       return a + b;
@@ -398,7 +398,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.abs(a) + Math.abs(b)</tt>. */
-  public static final BinaryFunction plusAbs = new BinaryFunction() {
+  public static final BinaryFunction PLUS_ABS = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return Math.abs(a) + Math.abs(b);
@@ -406,7 +406,7 @@ public class Functions {
   };
 
   /** Function that returns <tt>Math.pow(a,b)</tt>. */
-  public static final BinaryFunction pow = new BinaryFunction() {
+  public static final BinaryFunction POW = new BinaryFunction() {
 
     public double apply(double a, double b) {
       return Math.pow(a, b);

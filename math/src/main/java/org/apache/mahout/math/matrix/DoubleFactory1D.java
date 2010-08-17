@@ -45,7 +45,7 @@ public class DoubleFactory1D extends PersistentObject {
 
   /** Constructs a matrix with cells having ascending values. For debugging purposes. Example: <tt>0 1 2</tt> */
   public DoubleMatrix1D ascending(int size) {
-    return descending(size).assign(Functions.chain(Functions.negate, Functions.minus(size)));
+    return descending(size).assign(Functions.chain(Functions.NEGATE, Functions.minus(size)));
   }
 
   /** Constructs a matrix with cells having descending values. For debugging purposes. Example: <tt>2 1 0</tt> */

@@ -102,11 +102,6 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
 
   /**
    * find a declared field in a class or one of it's super classes
-   * 
-   * @param inClass
-   * @param fieldname
-   * @return
-   * @throws NoSuchFieldException
    */
   private Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
     if (Object.class.equals(inClass)) {
@@ -121,9 +116,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
   }
 
   /**
-   * return a job option key string (--name) from the given option name
-   * @param optionName
-   * @return
+   * @return a job option key string (--name) from the given option name
    */
   protected String optKey(String optionName) {
     return AbstractJob.keyFor(optionName);

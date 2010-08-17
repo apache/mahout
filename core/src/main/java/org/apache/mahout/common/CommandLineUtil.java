@@ -34,10 +34,12 @@ public final class CommandLineUtil {
     formatter.print();
   }
  
-  /** print the options supported by <code>GenericOptionsParser</code>
-   *  in addition to the options supported by the job, passed in as the
-   *  group parameter.
-   *  @params group job-specific command-line options.
+  /**
+   * Print the options supported by <code>GenericOptionsParser</code>.
+   * In addition to the options supported by the job, passed in as the
+   * group parameter.
+   *
+   * @param group job-specific command-line options.
    */
   public static void printHelpWithGenericOptions(Group group) {
     org.apache.commons.cli.Options ops = new org.apache.commons.cli.Options();
@@ -52,7 +54,6 @@ public final class CommandLineUtil {
     formatter.setPrintWriter(pw);
     formatter.printHelp();
     pw.flush();
-    
-    
   }
+
 }

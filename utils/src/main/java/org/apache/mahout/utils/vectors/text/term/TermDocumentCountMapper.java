@@ -26,7 +26,6 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.Vector.Element;
 
 /**
  * TextVectorizer Document Frequency Count Mapper. Outputs 1 for each feature
@@ -42,10 +41,10 @@ public class TermDocumentCountMapper extends Mapper<WritableComparable<?>, Vecto
   protected void map(WritableComparable<?> key, VectorWritable value, Context context)
       throws IOException, InterruptedException {
     Vector vector = value.get();
-    Iterator<Element> it = vector.iterateNonZero();
+    Iterator<Vector.Element> it = vector.iterateNonZero();
 
     while (it.hasNext()) {
-      Element e = it.next();
+      Vector.Element e = it.next();
       context.write(new IntWritable(e.index()), ONE);
     }
     context.write(TOTAL_COUNT, ONE);

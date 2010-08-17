@@ -71,27 +71,27 @@ public class Step1MapperTest extends MahoutTestCase {
   }
 
   /** nb attributes per generated data instance */
-  protected static final int nbAttributes = 4;
+  protected static final int NUM_ATTRIBUTES = 4;
 
   /** nb generated data instances */
-  protected static final int nbInstances = 100;
+  protected static final int NUM_INSTANCES = 100;
 
   /** nb trees to build */
-  protected static final int nbTrees = 10;
+  protected static final int NUM_TREES = 10;
 
   /** nb mappers to use */
-  protected static final int nbMappers = 2;
+  protected static final int NUM_MAPPERS = 2;
            
   public void testMapper() throws Exception {
     Long seed = null;
     Random rng = RandomUtils.getRandom();
 
     // prepare the data
-    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
-    double[][] source = Utils.randomDoubles(rng, descriptor, nbInstances);
+    String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
+    double[][] source = Utils.randomDoubles(rng, descriptor, NUM_INSTANCES);
     String[] sData = Utils.double2String(source);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
-    String[][] splits = Utils.splitData(sData, nbMappers);
+    String[][] splits = Utils.splitData(sData, NUM_MAPPERS);
 
     MockTreeBuilder treeBuilder = new MockTreeBuilder();
 
@@ -100,18 +100,18 @@ public class Step1MapperTest extends MahoutTestCase {
 
     int treeIndex = 0;
 
-    for (int partition = 0; partition < nbMappers; partition++) {
+    for (int partition = 0; partition < NUM_MAPPERS; partition++) {
       String[] split = splits[partition];
       treeBuilder.setExpected(DataLoader.loadData(dataset, split));
 
       // expected number of trees that this mapper will build
-      int mapNbTrees = Step1Mapper.nbTrees(nbMappers, nbTrees, partition);
+      int mapNbTrees = Step1Mapper.nbTrees(NUM_MAPPERS, NUM_TREES, partition);
 
       MockContext context = new MockContext(new Step1Mapper(),
           new Configuration(), new TaskAttemptID(), mapNbTrees);
 
       MockStep1Mapper mapper = new MockStep1Mapper(treeBuilder, dataset, seed,
-          partition, nbMappers, nbTrees);
+          partition, NUM_MAPPERS, NUM_TREES);
 
       // make sure the mapper computed firstTreeId correctly
       assertEquals(treeIndex, mapper.getFirstTreeId());

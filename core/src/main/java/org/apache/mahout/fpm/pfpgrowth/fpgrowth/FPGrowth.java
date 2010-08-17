@@ -474,7 +474,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
     FrequentPatternMaxHeap frequentPatterns = new FrequentPatternMaxHeap(k,
       true);
 
-    if (conditionalOfCurrentAttribute == false) {
+    if (!conditionalOfCurrentAttribute) {
       int index = Arrays.binarySearch(tree.getHeaderTableAttributes(),
         currentAttribute);
       if (index < 0) {
@@ -654,12 +654,11 @@ public class FPGrowth<A extends Comparable<? super A>> {
 
         int parent = tree.parent(nextNode);
 
-        if (prevNode.containsKey(parent) == false) {
+        if (!prevNode.containsKey(parent)) {
           prevNode.put(parent, nextNode);
         } else {
           int prevNodeId = prevNode.get(parent);
-          if (1 >= tree.childCount(prevNodeId)
-              && 1 >= tree.childCount(nextNode)) {
+          if (tree.childCount(prevNodeId) <= 1 && tree.childCount(nextNode) <= 1) {
             tree.addCount(prevNodeId, tree.count(nextNode));
             if (tree.childCount(nextNode) == 1) {
               tree.addChild(prevNodeId, tree.childAtIndex(nextNode, 0));
@@ -697,7 +696,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
   private static int treeAddCount(FPTree tree,
                                   int[] myList,
                                   long addCount,
-                                  MutableLong minSupport,
+                                  Number minSupport,
                                   long[] attributeFrequency) {
 
     int temp = FPTree.ROOTNODEID;

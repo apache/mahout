@@ -128,7 +128,6 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
    *          total number of trees to build
    * @param partition
    *          partition to compute the number of trees for
-   * @return
    */
   public static int nbTrees(int numMaps, int numTrees, int partition) {
     int nbTrees = numTrees / numMaps;

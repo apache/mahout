@@ -327,10 +327,10 @@ public interface Matrix extends Cloneable, VectorIterable {
    * @param rowLabel    a String row label
    * @param columnLabel a String column label
    * @return the double at the index
+   * 
    * @throws IndexException if the index is out of bounds
    */
-  double get(String rowLabel, String columnLabel) throws IndexException,
-      UnboundLabelException;
+  double get(String rowLabel, String columnLabel);
 
   /**
    * Set the value at the given index
@@ -340,8 +340,7 @@ public interface Matrix extends Cloneable, VectorIterable {
    * @param value       a double value to set
    * @throws IndexException if the index is out of bounds
    */
-  void set(String rowLabel, String columnLabel, double value) throws IndexException,
-      UnboundLabelException;
+  void set(String rowLabel, String columnLabel, double value);
 
   /**
    * Set the value at the given index, updating the row and column label bindings
@@ -352,8 +351,7 @@ public interface Matrix extends Cloneable, VectorIterable {
    * @param column      an int column index
    * @param value       a double value
    */
-  void set(String rowLabel, String columnLabel, int row, int column, double value) throws IndexException,
-      UnboundLabelException;
+  void set(String rowLabel, String columnLabel, int row, int column, double value);
 
   /**
    * Sets the row values at the given row label

@@ -50,9 +50,6 @@ public final class ErrorEstimate {
   
   /**
    * Counts the number of classified instances (prediction != -1)
-   * 
-   * @param predictions
-   * @return
    */
   public static int nbPredicted(int[] predictions) {
     int nbpredicted = 0;
@@ -68,10 +65,6 @@ public final class ErrorEstimate {
   
   /**
    * Counts the number of instance that got bad predictions
-   * 
-   * @param labels
-   * @param predictions
-   * @return
    */
   public static int nbErrors(int[] labels, int[] predictions) {
     if (labels.length != predictions.length) {

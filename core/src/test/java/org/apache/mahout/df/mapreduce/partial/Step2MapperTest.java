@@ -49,35 +49,35 @@ public class Step2MapperTest extends MahoutTestCase {
   }
 
   /** nb attributes per generated data instance */
-  protected static final int nbAttributes = 4;
+  protected static final int NUM_ATTRIBUTES = 4;
 
   /** nb generated data instances */
-  protected static final int nbInstances = 100;
+  protected static final int NUM_INSTANCES = 100;
 
   /** nb trees to build */
-  protected static final int nbTrees = 11;
+  protected static final int NUM_TREES = 11;
 
   /** nb mappers to use */
-  protected static final int nbMappers = 5;
+  protected static final int NUM_MAPPERS = 5;
  
   public void testMapper() throws Exception {
     Random rng = RandomUtils.getRandom();
 
     // prepare the data
-    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
-    double[][] source = Utils.randomDoubles(rng, descriptor, nbInstances);
+    String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
+    double[][] source = Utils.randomDoubles(rng, descriptor, NUM_INSTANCES);
     String[] sData = Utils.double2String(source);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
-    String[][] splits = Utils.splitData(sData, nbMappers);
+    String[][] splits = Utils.splitData(sData, NUM_MAPPERS);
 
     // prepare first step output
-    TreeID[] keys = new TreeID[nbTrees];
-    Node[] trees = new Node[nbTrees];
-    int[] sizes = new int[nbMappers];
+    TreeID[] keys = new TreeID[NUM_TREES];
+    Node[] trees = new Node[NUM_TREES];
+    int[] sizes = new int[NUM_MAPPERS];
 
     int treeIndex = 0;
-    for (int partition = 0; partition < nbMappers; partition++) {
-      int nbMapTrees = Step1Mapper.nbTrees(nbMappers, nbTrees, partition);
+    for (int partition = 0; partition < NUM_MAPPERS; partition++) {
+      int nbMapTrees = Step1Mapper.nbTrees(NUM_MAPPERS, NUM_TREES, partition);
 
       for (int tree = 0; tree < nbMapTrees; tree++, treeIndex++) {
         keys[treeIndex] = new TreeID(partition, treeIndex);
@@ -97,11 +97,11 @@ public class Step2MapperTest extends MahoutTestCase {
     LongWritable key = new LongWritable();
     Text value = new Text();
 
-    for (int partition = 0; partition < nbMappers; partition++) {
+    for (int partition = 0; partition < NUM_MAPPERS; partition++) {
       String[] split = splits[partition];
 
       // number of trees that will be handled by the mapper
-      int nbConcerned = Step2Mapper.nbConcerned(nbMappers, nbTrees, partition);
+      int nbConcerned = Step2Mapper.nbConcerned(NUM_MAPPERS, NUM_TREES, partition);
 
       MockContext context = new MockContext(new Step2Mapper(),
           new Configuration(), new TaskAttemptID(), nbConcerned);
@@ -109,7 +109,7 @@ public class Step2MapperTest extends MahoutTestCase {
       // load the current mapper's (key, tree) pairs
       TreeID[] curKeys = new TreeID[nbConcerned];
       Node[] curTrees = new Node[nbConcerned];
-      InterResults.load(fs, forestPath, nbMappers, nbTrees, partition, curKeys,
+      InterResults.load(fs, forestPath, NUM_MAPPERS, NUM_TREES, partition, curKeys,
           curTrees);
 
       // simulate the job
@@ -129,7 +129,7 @@ public class Step2MapperTest extends MahoutTestCase {
 
       // check the returned results
       int current = 0;
-      for (int index = 0; index < nbTrees; index++) {
+      for (int index = 0; index < NUM_TREES; index++) {
         if (keys[index].partition() == partition) {
           // should not be part of the results
           continue;

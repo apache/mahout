@@ -224,7 +224,7 @@ public class ClusterLabels {
     Map<String, TermEntry> termEntryMap = new LinkedHashMap<String, TermEntry>();
     do {
       Term term = te.term();
-      if (term == null || term.field().equals(contentField) == false) {
+      if (term == null || !term.field().equals(contentField)) {
         break;
       }
       OpenBitSet termBitset = new OpenBitSet(reader.maxDoc());

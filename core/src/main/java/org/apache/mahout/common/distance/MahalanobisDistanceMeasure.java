@@ -118,11 +118,12 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);
 
-    ClassParameter matrixClass = new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class,
-                                                    "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
+    ClassParameter matrixClass =
+        new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class,
+                           "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
     parameters.add(matrixClass);      
     
-    meanVectorFile=new PathParameter(prefix, "meanVectorFile", jobConf, null,
+    meanVectorFile = new PathParameter(prefix, "meanVectorFile", jobConf, null,
     "Path on DFS to a file containing the mean Vector.");
     parameters.add(meanVectorFile);
     
@@ -137,7 +138,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
    */
   public double distance(Vector v)
   {
-    if (meanVector==null || inverseCovarianceMatrix==null) {
+    if (meanVector == null || inverseCovarianceMatrix == null) {
       throw new IllegalArgumentException("meanVector or inverseCovarianceMatrix not initialized");
     }
     
@@ -150,7 +151,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
       throw new CardinalityException(v1.size(), v2.size());
     }
     
-    if (meanVector==null || inverseCovarianceMatrix==null) {
+    if (meanVector == null || inverseCovarianceMatrix == null) {
       throw new IllegalArgumentException("meanVector or inverseCovarianceMatrix not initialized");
     }
     

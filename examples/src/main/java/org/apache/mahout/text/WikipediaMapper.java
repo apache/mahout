@@ -134,7 +134,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       String category = document.substring(categoryIndex, endIndex).toLowerCase(Locale.ENGLISH).trim();
       if (exactMatchOnly && inputCategories.contains(category)) {
         return category;
-      } else if (exactMatchOnly == false) {
+      } else if (!exactMatchOnly) {
         for (String inputCategory : inputCategories) {
           if (category.contains(inputCategory)) { // we have an inexact match
             return inputCategory;

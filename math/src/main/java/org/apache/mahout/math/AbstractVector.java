@@ -229,12 +229,12 @@ public abstract class AbstractVector implements Vector {
       randomlyAccessed = v;
       d += v.getLengthSquared();
     }
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Element e = it.next();
       double value = e.get();
       d += value * (value - 2.0 * randomlyAccessed.getQuick(e.index()));
     }
-    assert(d > -1.0e-9); // round-off errors should never be too far off!
+    assert d > -1.0e-9; // round-off errors should never be too far off!
     return Math.abs(d);
   }
 
@@ -356,7 +356,7 @@ public abstract class AbstractVector implements Vector {
 
   public void addTo(Vector v) {
     Iterator<Element> it = iterateNonZero();
-    while(it.hasNext() ) {
+    while (it.hasNext()) {
       Element e = it.next();
       int index = e.index();
       v.setQuick(index, v.getQuick(index) + e.get());
@@ -449,7 +449,7 @@ public abstract class AbstractVector implements Vector {
 
   public Vector assign(BinaryFunction f, double y) {
     Iterator<Element> it = f.apply(0, y) == 0 ? iterateNonZero() : iterator();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Element e = it.next();
       e.set(f.apply(e.get(), y));
     }
@@ -458,7 +458,7 @@ public abstract class AbstractVector implements Vector {
 
   public Vector assign(UnaryFunction function) {
     Iterator<Element> it = function.apply(0) == 0 ? iterateNonZero() : iterator();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Element e = it.next();
       e.set(function.apply(e.get()));
     }
@@ -518,7 +518,7 @@ public abstract class AbstractVector implements Vector {
       result += ele.index() * (int) (v ^ (v >>> 32));
     }
     return result;
-   }
+  }
 
   /**
    * Determines whether this {@link Vector} represents the same logical vector as another

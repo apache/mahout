@@ -55,10 +55,6 @@ public class DefaultIgSplit extends IgSplit {
   
   /**
    * Computes the Information Gain for a CATEGORICAL attribute
-   * 
-   * @param data
-   * @param attr
-   * @return
    */
   protected double categoricalIg(Data data, int attr) {
     double[] values = data.values(attr);
@@ -76,11 +72,6 @@ public class DefaultIgSplit extends IgSplit {
   
   /**
    * Computes the Information Gain for a NUMERICAL attribute given a splitting value
-   * 
-   * @param data
-   * @param attr
-   * @param split
-   * @return
    */
   protected double numericalIg(Data data, int attr, double split) {
     double hy = entropy(data);
@@ -99,9 +90,6 @@ public class DefaultIgSplit extends IgSplit {
   
   /**
    * Computes the Entropy
-   * 
-   * @param data
-   * @return
    */
   protected double entropy(Data data) {
     double invDataSize = 1.0 / data.size();

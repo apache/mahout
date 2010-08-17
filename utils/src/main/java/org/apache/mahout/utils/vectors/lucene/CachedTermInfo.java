@@ -47,7 +47,7 @@ public class CachedTermInfo implements TermInfo {
     int count = 0;
     do {
       Term term = te.term();
-      if (term == null || term.field().equals(field) == false) {
+      if (term == null || !term.field().equals(field)) {
         break;
       }
       int df = te.docFreq();
@@ -67,7 +67,7 @@ public class CachedTermInfo implements TermInfo {
   
   @Override
   public TermEntry getTermEntry(String field, String term) {
-    if (this.field.equals(field) == false) {
+    if (!this.field.equals(field)) {
       return null;
     }
     return termEntries.get(term);

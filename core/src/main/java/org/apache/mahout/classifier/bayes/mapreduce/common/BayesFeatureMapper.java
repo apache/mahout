@@ -36,7 +36,6 @@ import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.ArrayIterator;
 import org.apache.mahout.math.function.ObjectIntProcedure;
-import org.apache.mahout.math.function.ObjectProcedure;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

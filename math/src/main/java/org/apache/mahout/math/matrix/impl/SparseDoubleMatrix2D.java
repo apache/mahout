@@ -196,7 +196,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
       return this;
     }
 
-    if (function == Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.MULT) { // x[i] = x[i] * y[i]
       this.elements.forEachPair(
           new IntDoubleProcedure() {
             public boolean apply(int key, double value) {
@@ -212,7 +212,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
       );
     }
 
-    if (function == Functions.div) { // x[i] = x[i] / y[i]
+    if (function == Functions.DIV) { // x[i] = x[i] / y[i]
       this.elements.forEachPair(
           new IntDoubleProcedure() {
             public boolean apply(int key, double value) {

@@ -57,9 +57,6 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
   /**
    * Used for DEBUG purposes only. if true and a seed is available, all the mappers use the same seed, thus
    * all the mapper should take the same time to build their trees.
-   * 
-   * @param conf
-   * @return
    */
   private static boolean isSingleSeed(Configuration conf) {
     return conf.getBoolean("debug.mahout.rf.single.seed", false);
@@ -110,9 +107,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
   }
   
   /**
-   * Return the seed for the next InputSplit
-   * 
-   * @return
+   * @return the seed for the next InputSplit
    */
   private Long nextSeed() {
     if (seed == null) {
@@ -137,11 +132,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     
     @Override
     public float getProgress() throws IOException {
-      if (pos == 0) {
-        return 0.0f;
-      } else {
-        return (float) (pos - 1) / split.nbTrees;
-      }
+      return pos == 0 ? 0.0f : (float) (pos - 1) / split.nbTrees;
     }
     
     @Override
@@ -200,27 +191,21 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
     }
     
     /**
-     * Return the Id of the first tree of this split
-     * 
-     * @return
+     * @return the Id of the first tree of this split
      */
     public int getFirstId() {
       return firstId;
     }
     
     /**
-     * Return the number of trees
-     * 
-     * @return
+     * @return the number of trees
      */
     public int getNbTrees() {
       return nbTrees;
     }
     
     /**
-     * Return the random seed
-     * 
-     * @return null if no seed is available
+     * @return the random seed or null if no seed is available
      */
     public Long getSeed() {
       return seed;

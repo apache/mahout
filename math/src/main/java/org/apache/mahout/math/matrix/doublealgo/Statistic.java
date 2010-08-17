@@ -25,15 +25,15 @@ public class Statistic {
   /** Euclidean distance function; <tt>Sqrt(Sum( (x[i]-y[i])^2 ))</tt>. */
   public static final VectorVectorFunction EUCLID = new VectorVectorFunction() {
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-      return Math.sqrt(a.aggregate(b, Functions.plus, Functions.chain(Functions.square, Functions.minus)));
+      return Math.sqrt(a.aggregate(b, Functions.PLUS, Functions.chain(Functions.SQUARE, Functions.MINUS)));
     }
   };
 
   /** Bray-Curtis distance function; <tt>Sum( abs(x[i]-y[i]) )  /  Sum( x[i]+y[i] )</tt>. */
   public static final VectorVectorFunction BRAY_CURTIS = new VectorVectorFunction() {
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-      return a.aggregate(b, Functions.plus, Functions.chain(Functions.abs, Functions.minus)) /
-          a.aggregate(b, Functions.plus, Functions.plus);
+      return a.aggregate(b, Functions.PLUS, Functions.chain(Functions.ABS, Functions.MINUS)) /
+          a.aggregate(b, Functions.PLUS, Functions.PLUS);
     }
   };
 
@@ -46,21 +46,21 @@ public class Statistic {
     };
 
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-      return a.aggregate(b, Functions.plus, fun);
+      return a.aggregate(b, Functions.PLUS, fun);
     }
   };
 
   /** Maximum distance function; <tt>Max( abs(x[i]-y[i]) )</tt>. */
   public static final VectorVectorFunction MAXIMUM = new VectorVectorFunction() {
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-      return a.aggregate(b, Functions.max, Functions.chain(Functions.abs, Functions.minus));
+      return a.aggregate(b, Functions.MAX, Functions.chain(Functions.ABS, Functions.MINUS));
     }
   };
 
   /** Manhattan distance function; <tt>Sum( abs(x[i]-y[i]) )</tt>. */
   public static final VectorVectorFunction MANHATTAN = new VectorVectorFunction() {
     public double apply(DoubleMatrix1D a, DoubleMatrix1D b) {
-      return a.aggregate(b, Functions.plus, Functions.chain(Functions.abs, Functions.minus));
+      return a.aggregate(b, Functions.PLUS, Functions.chain(Functions.ABS, Functions.MINUS));
     }
   };
 

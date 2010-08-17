@@ -30,7 +30,7 @@
     <version>6</version>
   </parent>
   
-  <name>Buildtools - jar file used to configure PMD and Checkstyle</name>
+  <name>Mahout Build Tools</name>
 
   <packaging>jar</packaging>
 

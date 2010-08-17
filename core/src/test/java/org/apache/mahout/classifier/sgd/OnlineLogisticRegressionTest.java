@@ -190,10 +190,10 @@ public class OnlineLogisticRegressionTest {
     // now test the accuracy
     Matrix tmp = lr.classify(input);
     // mean(abs(tmp - target))
-    double meanAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.plus, Functions.abs) / 60;
+    double meanAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.PLUS, Functions.ABS) / 60;
 
     // max(abs(tmp - target)
-    double maxAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.max, Functions.abs);
+    double maxAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.MAX, Functions.ABS);
 
     System.out.printf("mAE = %.4f, maxAE = %.4f\n", meanAbsoluteError, maxAbsoluteError);
     assertEquals(0, meanAbsoluteError , 0.05);

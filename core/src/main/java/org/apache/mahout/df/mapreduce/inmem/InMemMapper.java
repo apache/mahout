@@ -55,11 +55,6 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
   
   /**
    * Load the training data
-   * 
-   * @param conf
-   * @return
-   * @throws RuntimeException
-   *           if the data could not be loaded
    */
   private static Data loadData(Configuration conf, Dataset dataset) throws IOException {
     Path dataPath = Builder.getDistributedCacheFile(conf, 1);
@@ -114,12 +109,7 @@ public class InMemMapper extends MapredMapper<IntWritable,NullWritable,IntWritab
     if (rng == null) { // first execution of this mapper
       Long seed = split.getSeed();
       log.debug("Initialising rng with seed : {}", seed);
-      
-      if (seed == null) {
-        rng = RandomUtils.getRandom();
-      } else {
-        rng = RandomUtils.getRandom(seed);
-      }
+      rng = seed == null ? RandomUtils.getRandom() : RandomUtils.getRandom(seed);
     }
   }
   

@@ -164,7 +164,6 @@ public class DefaultTreeBuilder implements TreeBuilder {
    *          attributes' state (selected or not)
    * @param m
    *          number of attributes to choose
-   * @return
    */
   protected static int[] randomAttributes(Random rng, boolean[] selected, int m) {
     int nbNonSelected = 0; // number of non selected attributes

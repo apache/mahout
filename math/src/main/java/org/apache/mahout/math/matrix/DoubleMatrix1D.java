@@ -237,7 +237,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
     int[] nonZeroElements = nonZeroIndexes.elements();
 
     // specialized for speed
-    if (function == Functions.mult) {  // x[i] = x[i] * y[i]
+    if (function == Functions.MULT) {  // x[i] = x[i] * y[i]
       int j = 0;
       for (int index = nonZeroIndexes.size(); --index >= 0;) {
         int i = nonZeroElements[index];
@@ -858,6 +858,6 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(Functions.plus, Functions.identity);
+    return aggregate(Functions.PLUS, Functions.IDENTITY);
   }
 }

@@ -41,23 +41,23 @@ import org.apache.mahout.df.node.Node;
 
 public class PartialBuilderTest extends MahoutTestCase {
 
-  private static final int numMaps = 5;
+  private static final int NUM_MAPS = 5;
 
-  private static final int numTrees = 32;
+  private static final int NUM_TREES = 32;
 
   /** instances per partition */
   private static final int numInstances = 20;
   
   public void testProcessOutput() throws Exception {
     Configuration conf = new Configuration();
-    conf.setInt("mapred.map.tasks", numMaps);
+    conf.setInt("mapred.map.tasks", NUM_MAPS);
 
     Random rng = RandomUtils.getRandom();
 
     // prepare the output
-    TreeID[] keys = new TreeID[numTrees];
-    MapredOutput[] values = new MapredOutput[numTrees];
-    int[] firstIds = new int[numMaps];
+    TreeID[] keys = new TreeID[NUM_TREES];
+    MapredOutput[] values = new MapredOutput[NUM_TREES];
+    int[] firstIds = new int[NUM_MAPS];
     randomKeyValues(rng, keys, values, firstIds);
 
     // store the output in a sequence file
@@ -68,20 +68,20 @@ public class PartialBuilderTest extends MahoutTestCase {
     Writer writer = SequenceFile.createWriter(fs, conf, outputFile,
         TreeID.class, MapredOutput.class);
 
-    for (int index = 0; index < numTrees; index++) {
+    for (int index = 0; index < NUM_TREES; index++) {
       writer.append(keys[index], values[index]);
     }
     writer.close();
 
     // load the output and make sure its valid
-    TreeID[] newKeys = new TreeID[numTrees];
-    Node[] newTrees = new Node[numTrees];
+    TreeID[] newKeys = new TreeID[NUM_TREES];
+    Node[] newTrees = new Node[NUM_TREES];
     
     PartialBuilder.processOutput(new Job(conf), base, firstIds, newKeys, newTrees, 
         new TestCallback(keys, values));
 
     // check the forest
-    for (int tree = 0; tree < numTrees; tree++) {
+    for (int tree = 0; tree < NUM_TREES; tree++) {
       assertEquals(values[tree].getTree(), newTrees[tree]);
     }
 
@@ -115,16 +115,16 @@ public class PartialBuilderTest extends MahoutTestCase {
     int firstId = 0;
     List<Integer> partitions = new ArrayList<Integer>();
 
-    for (int p = 0; p < numMaps; p++) {
+    for (int p = 0; p < NUM_MAPS; p++) {
       // select a random partition, not yet selected
       int partition;
       do {
-        partition = rng.nextInt(numMaps);
+        partition = rng.nextInt(NUM_MAPS);
       } while (partitions.contains(partition));
 
       partitions.add(partition);
 
-      int nbTrees = Step1Mapper.nbTrees(numMaps, numTrees, partition);
+      int nbTrees = Step1Mapper.nbTrees(NUM_MAPS, NUM_TREES, partition);
 
       for (int treeId = 0; treeId < nbTrees; treeId++) {
         Node tree = new Leaf(rng.nextInt(100));
@@ -179,7 +179,7 @@ public class PartialBuilderTest extends MahoutTestCase {
       // of map tasks
       assertEquals(1, conf.getInt("mapred.map.tasks", -1));
 
-      assertEquals(numTrees, getNbTrees(conf));
+      assertEquals(NUM_TREES, getNbTrees(conf));
 
       assertFalse(isOutput(conf));
       assertTrue(isOobEstimate(conf));

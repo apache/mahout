@@ -31,7 +31,6 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
@@ -42,18 +41,13 @@ import org.easymock.classextension.EasyMock;
 public class MathHelper {
 
   /** the "close enough" value for floating point computations */
-  public static final double EPSILON = 0.00001d;
+  public static final double EPSILON = 0.00001;
 
   private MathHelper() {
   }
 
   /**
    * applies an {@link IArgumentMatcher} to {@link MatrixEntryWritable}s
-   *
-   * @param row
-   * @param col
-   * @param value
-   * @return
    */
   public static MatrixEntryWritable matrixEntryMatches(final int row, final int col, final double value) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
@@ -74,11 +68,6 @@ public class MathHelper {
 
   /**
    * convenience method to create a {@link MatrixEntryWritable}
-   *
-   * @param row
-   * @param col
-   * @param value
-   * @return
    */
   public static MatrixEntryWritable matrixEntry(int row, int col, double value) {
     MatrixEntryWritable entry = new MatrixEntryWritable();
@@ -89,20 +78,16 @@ public class MathHelper {
   }
 
   /**
-   * convenience method to create a {@link Element}
-   *
-   * @param index
-   * @param value
-   * @return
+   * convenience method to create a {@link Vector.Element}
    */
-  public static Element elem(int index, double value) {
+  public static Vector.Element elem(int index, double value) {
     return new ElementToCheck(index, value);
   }
 
   /**
-   * a simple implementation of {@link Element}
+   * a simple implementation of {@link Vector.Element}
    */
-  static class ElementToCheck implements Element {
+  static class ElementToCheck implements Vector.Element {
     private final int index;
     private double value;
 
@@ -126,11 +111,8 @@ public class MathHelper {
 
   /**
    * applies an {@link IArgumentMatcher} to a {@link VectorWritable} that checks whether all elements are included
-   *
-   * @param elements
-   * @return
    */
-  public static VectorWritable vectorMatches(final Element... elements) {
+  public static VectorWritable vectorMatches(final Vector.Element... elements) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
@@ -148,11 +130,7 @@ public class MathHelper {
   }
 
   /**
-   * checks whether the {@link Vector} is equivalent to the set of {@link Vector.Element}s 
-   * 
-   * @param vector
-   * @param elements
-   * @return
+   * checks whether the {@link Vector} is equivalent to the set of {@link Vector.Element}s
    */
   public static boolean consistsOf(Vector vector, Vector.Element... elements) {
     if (elements.length != numberOfNoNZeroNonNaNElements(vector)) {
@@ -169,15 +147,12 @@ public class MathHelper {
   
   /**
    * returns the number of elements in the {@link Vector} that are neither 0 nor NaN
-   * 
-   * @param vector
-   * @return
    */
   public static int numberOfNoNZeroNonNaNElements(Vector vector) {
     int elementsInVector = 0;
-    Iterator<Element> vectorIterator = vector.iterateNonZero();
+    Iterator<Vector.Element> vectorIterator = vector.iterateNonZero();
     while (vectorIterator.hasNext()) {
-      Element currentElement = vectorIterator.next();
+      Vector.Element currentElement = vectorIterator.next();
       if (!Double.isNaN(currentElement.get())) {
         elementsInVector++;
       }      
@@ -187,13 +162,6 @@ public class MathHelper {
   
   /**
    * read a {@link Matrix} from a SequenceFile<IntWritable,VectorWritable>
-   * @param fs
-   * @param conf
-   * @param path
-   * @param rows
-   * @param columns
-   * @return
-   * @throws IOException
    */
   public static Matrix readEntries(FileSystem fs, Configuration conf, Path path, int rows, int columns)
       throws IOException {
@@ -207,9 +175,9 @@ public class MathHelper {
       VectorWritable value = new VectorWritable();
       while (reader.next(key, value)) {
         int row = key.get();
-        Iterator<Element> elementsIterator = value.get().iterateNonZero();
+        Iterator<Vector.Element> elementsIterator = value.get().iterateNonZero();
         while (elementsIterator.hasNext()) {
-          Element element = elementsIterator.next();
+          Vector.Element element = elementsIterator.next();
           matrix.set(row, element.index(), element.get());
         }
       }
@@ -221,12 +189,6 @@ public class MathHelper {
 
   /**
    * write a two-dimensional double array to an SequenceFile<IntWritable,VectorWritable>
-   *
-   * @param entries
-   * @param fs
-   * @param conf
-   * @param path
-   * @throws IOException
    */
   public static void writeEntries(double[][] entries, FileSystem fs, Configuration conf, Path path)
       throws IOException {

@@ -44,8 +44,6 @@ public class TreeID extends LongWritable implements Cloneable {
   
   /**
    * Data partition (InputSplit's index) that was used to grow the tree
-   * 
-   * @return
    */
   public int partition() {
     return (int) (get() / MAX_TREEID);

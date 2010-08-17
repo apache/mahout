@@ -988,6 +988,6 @@ public abstract class DoubleMatrix3D extends AbstractMatrix3D {
     if (size() == 0) {
       return 0;
     }
-    return aggregate(Functions.plus, Functions.identity);
+    return aggregate(Functions.PLUS, Functions.IDENTITY);
   }
 }

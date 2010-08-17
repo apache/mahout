@@ -38,13 +38,13 @@ import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Node;
 
 public class PartitionBugTest extends MahoutTestCase {
-  static final int numAttributes = 40;
+  static final int NUM_ATTRIBUTES = 40;
 
-  static final int numInstances = 200;
+  static final int NUM_INSTANCES = 200;
 
-  static final int numTrees = 10;
+  static final int NUM_TREES = 10;
 
-  static final int numMaps = 5;
+  static final int NUM_MAPS = 5;
     
   /**
    * Make sure that the correct instance ids are being computed
@@ -54,12 +54,12 @@ public class PartitionBugTest extends MahoutTestCase {
     //long seed = rng.nextLong();
 
     // create a dataset large enough to be split up
-    String descriptor = Utils.randomDescriptor(rng, numAttributes);
-    double[][] source = Utils.randomDoubles(rng, descriptor, numInstances);
+    String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
+    double[][] source = Utils.randomDoubles(rng, descriptor, NUM_INSTANCES);
 
     // each instance label is its index in the dataset
     int labelId = Utils.findLabel(descriptor);
-    for (int index = 0; index < numInstances; index++) {
+    for (int index = 0; index < NUM_INSTANCES; index++) {
       source[index][labelId] = index;
     }
 
@@ -70,7 +70,7 @@ public class PartitionBugTest extends MahoutTestCase {
     Data data = DataLoader.loadData(dataset, sData);
 
     Configuration conf = new Configuration();
-    Step0JobTest.setMaxSplitSize(conf, dataPath, numMaps);
+    Step0JobTest.setMaxSplitSize(conf, dataPath, NUM_MAPS);
 
     // prepare a custom TreeBuilder that will classify each
     // instance with its own label (in this case its index in the dataset)
@@ -87,7 +87,7 @@ public class PartitionBugTest extends MahoutTestCase {
     Path outputPath = builder.getOutputPath(conf);
     HadoopUtil.overwriteOutput(outputPath);
 
-    builder.build(numTrees, new MockCallback(data));
+    builder.build(NUM_TREES, new MockCallback(data));
   }
 
   /**

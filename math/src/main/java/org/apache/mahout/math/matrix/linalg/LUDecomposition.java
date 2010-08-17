@@ -32,7 +32,6 @@ public class LUDecomposition implements java.io.Serializable {
    * of the returned decomposition object.
    *
    * @param A Rectangular matrix
-   * @return Structure to access L, U and piv.
    */
   public LUDecomposition(DoubleMatrix2D A) {
     quick = new LUDecompositionQuick(0); // zero tolerance for compatibility with Jama

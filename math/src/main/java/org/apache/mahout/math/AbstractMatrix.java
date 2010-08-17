@@ -43,7 +43,7 @@ public abstract class AbstractMatrix implements Matrix {
 
   public Iterator<MatrixSlice> iterateAll() {
     return new Iterator<MatrixSlice>() {
-      private int slice = 0;
+      private int slice;
 
       public boolean hasNext() {
         return slice < numSlices();
@@ -80,8 +80,7 @@ public abstract class AbstractMatrix implements Matrix {
     return numRows();
   }
 
-  public double get(String rowLabel, String columnLabel) throws IndexException,
-      UnboundLabelException {
+  public double get(String rowLabel, String columnLabel) {
     if (columnLabelBindings == null || rowLabelBindings == null) {
       throw new UnboundLabelException();
     }
@@ -121,8 +120,7 @@ public abstract class AbstractMatrix implements Matrix {
     set(row, rowData);
   }
 
-  public void set(String rowLabel, String columnLabel, double value)
-      throws IndexException, UnboundLabelException {
+  public void set(String rowLabel, String columnLabel, double value) {
     if (columnLabelBindings == null || rowLabelBindings == null) {
       throw new UnboundLabelException();
     }
@@ -134,8 +132,7 @@ public abstract class AbstractMatrix implements Matrix {
     set(row, col, value);
   }
 
-  public void set(String rowLabel, String columnLabel, int row, int column,
-                  double value) throws IndexException, UnboundLabelException {
+  public void set(String rowLabel, String columnLabel, int row, int column, double value) {
     if (rowLabelBindings == null) {
       rowLabelBindings = new HashMap<String, Integer>();
     }
@@ -202,12 +199,12 @@ public abstract class AbstractMatrix implements Matrix {
       throw new CardinalityException(c[ROW], values.length);
     }
     for (int row = 0; row < c[ROW]; row++) {
-      if (c[COL] != values[row].length) {
-        throw new CardinalityException(c[COL], values[row].length);
-      } else {
+      if (c[COL] == values[row].length) {
         for (int col = 0; col < c[COL]; col++) {
           setQuick(row, col, values[row][col]);
         }
+      } else {
+        throw new CardinalityException(c[COL], values[row].length);
       }
     }
     return this;
@@ -318,7 +315,7 @@ public abstract class AbstractMatrix implements Matrix {
       public double apply(Vector v) {
         return v.aggregate(combiner, mapper);
       }
-    }).aggregate(combiner, Functions.identity);
+    }).aggregate(combiner, Functions.IDENTITY);
   }
 
   public double determinant() {
@@ -643,7 +640,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     public void setQuick(int index, double value) {
       Vector v = rowToColumn ? matrix.getRow(index) : matrix.getColumn(index);
-      if(v == null) {
+      if (v == null) {
         v = newVector(numCols);
         matrix.assignRow(index, v);
       }

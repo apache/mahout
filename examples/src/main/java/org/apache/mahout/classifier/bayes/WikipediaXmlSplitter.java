@@ -175,7 +175,7 @@ public final class WikipediaXmlSplitter {
       String thisLine = it.next();
       if (thisLine.trim().startsWith("<page>")) {
         boolean end = false;
-        while (thisLine.trim().startsWith("</page>") == false) {
+        while (!thisLine.trim().startsWith("</page>")) {
           content.append(thisLine).append('\n');
           if (it.hasNext()) {
             thisLine = it.next();

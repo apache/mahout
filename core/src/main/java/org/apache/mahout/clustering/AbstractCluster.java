@@ -12,7 +12,6 @@ import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.SquareRootFunction;
 
 import com.google.gson.Gson;
@@ -214,11 +213,7 @@ public abstract class AbstractCluster implements Writable, Cluster {
    * @return the new centroid
    */
   public Vector computeCentroid() {
-    if (s0 == 0) {
-      return getCenter();
-    } else {
-      return s1.divide(s0);
-    }
+    return s0 == 0 ? getCenter() : s1.divide(s0);
   }
 
   /**
@@ -235,7 +230,7 @@ public abstract class AbstractCluster implements Writable, Cluster {
       buf.append(((NamedVector) v).getName()).append(" = ");
     }
     int nzero = 0;
-    Iterator<Element> iterateNonZero = v.iterateNonZero();
+    Iterator<Vector.Element> iterateNonZero = v.iterateNonZero();
     while (iterateNonZero.hasNext()) {
       iterateNonZero.next();
       nzero++;

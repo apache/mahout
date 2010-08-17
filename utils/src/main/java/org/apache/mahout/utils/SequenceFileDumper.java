@@ -104,7 +104,7 @@ public final class SequenceFileDumper {
         .append(String.valueOf(value.getClass())).append('\n');
         writer.flush();
         long count = 0;
-        if (countOnly == false) {
+        if (!countOnly) {
           while (reader.next(key, value)) {
             writer.append("Key: ").append(String.valueOf(key));
             String str = value.toString();

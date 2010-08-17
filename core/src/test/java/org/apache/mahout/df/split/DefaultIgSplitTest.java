@@ -28,11 +28,11 @@ import org.apache.mahout.df.data.Utils;
 
 public class DefaultIgSplitTest extends MahoutTestCase {
 
-  private static final int nbAttributes = 10;
+  private static final int NUM_ATTRIBUTES = 10;
    
   public void testEntropy() throws Exception {
     Random rng = RandomUtils.getRandom();
-    String descriptor = Utils.randomDescriptor(rng, nbAttributes);
+    String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
     int label = Utils.findLabel(descriptor);
 
     // all the vectors have the same label (0)

@@ -18,9 +18,9 @@
 package org.apache.mahout.clustering.meanshift;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -45,8 +45,8 @@ public class MeanShiftCanopyClusterer {
 
   public MeanShiftCanopyClusterer(Configuration configuration) {
     try {
-      measure = Class.forName(configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
-          .newInstance();
+      measure = Class.forName(configuration.get(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(configuration);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
@@ -88,7 +88,7 @@ public class MeanShiftCanopyClusterer {
    * @param canopies
    *          the List<Canopy> to be appended
    */
-  public void mergeCanopy(MeanShiftCanopy aCanopy, List<MeanShiftCanopy> canopies) {
+  public void mergeCanopy(MeanShiftCanopy aCanopy, Collection<MeanShiftCanopy> canopies) {
     MeanShiftCanopy closestCoveringCanopy = null;
     double closestNorm = Double.MAX_VALUE;
     for (MeanShiftCanopy canopy : canopies) {
@@ -158,7 +158,7 @@ public class MeanShiftCanopyClusterer {
    * @param numIter
    *          the maximum number of iterations
    */
-  public static List<MeanShiftCanopy> clusterPoints(List<Vector> points,
+  public static List<MeanShiftCanopy> clusterPoints(Iterable<Vector> points,
                                                     DistanceMeasure measure,
                                                     double convergenceThreshold,
                                                     double t1,
@@ -180,12 +180,7 @@ public class MeanShiftCanopyClusterer {
     return canopies;
   }
 
-  /**
-   * @param canopies
-   * @param converged
-   * @return
-   */
-  protected List<MeanShiftCanopy> iterate(List<MeanShiftCanopy> canopies, boolean[] converged) {
+  protected List<MeanShiftCanopy> iterate(Iterable<MeanShiftCanopy> canopies, boolean[] converged) {
     converged[0] = true;
     List<MeanShiftCanopy> migratedCanopies = new ArrayList<MeanShiftCanopy>();
     for (MeanShiftCanopy canopy : canopies) {
@@ -195,8 +190,8 @@ public class MeanShiftCanopyClusterer {
     return migratedCanopies;
   }
 
-  protected static void verifyNonOverlap(List<MeanShiftCanopy> canopies) {
-    Set<Integer> coveredPoints = new HashSet<Integer>();
+  protected static void verifyNonOverlap(Iterable<MeanShiftCanopy> canopies) {
+    Collection<Integer> coveredPoints = new HashSet<Integer>();
     // verify no overlap
     for (MeanShiftCanopy canopy : canopies) {
       for (int v : canopy.getBoundPoints().toList()) {
@@ -210,7 +205,7 @@ public class MeanShiftCanopyClusterer {
     }
   }
 
-  protected static MeanShiftCanopy findCoveringCanopy(MeanShiftCanopy canopy, List<MeanShiftCanopy> clusters) {
+  protected static MeanShiftCanopy findCoveringCanopy(MeanShiftCanopy canopy, Iterable<MeanShiftCanopy> clusters) {
     // canopies use canopyIds assigned when input vectors are processed as vectorIds too
     int vectorId = canopy.getId();
     for (MeanShiftCanopy msc : clusters) {

@@ -39,7 +39,6 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.utils.vectors.Weight;
@@ -147,7 +146,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
   private static String formatVector(Vector v) {
     StringBuilder buf = new StringBuilder();
     int nzero = 0;
-    Iterator<Element> iterateNonZero = v.iterateNonZero();
+    Iterator<Vector.Element> iterateNonZero = v.iterateNonZero();
     while (iterateNonZero.hasNext()) {
       iterateNonZero.next();
       nzero++;

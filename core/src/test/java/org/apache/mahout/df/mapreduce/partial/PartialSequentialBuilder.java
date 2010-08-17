@@ -178,11 +178,6 @@ public class PartialSequentialBuilder extends PartialBuilder {
 
   /**
    * extract the decision forest and call the callback after correcting the instance ids
-   * 
-   * @param keys
-   * @param values
-   * @param callback
-   * @return
    */
   protected DecisionForest processOutput(TreeID[] keys, MapredOutput[] values, PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();

@@ -88,7 +88,6 @@ public abstract class ClusterBase implements Writable, Cluster {
 
   /**
    * @deprecated
-   * @return
    */
   @Deprecated
   public abstract String asFormatString();

@@ -27,9 +27,9 @@ import org.apache.mahout.math.VectorIterable;
 public class AsyncEigenVerifier extends SimpleEigenVerifier {
 
   private final Executor threadPool;
-  private EigenStatus status = null;
-  private boolean finished = false;
-  private boolean started = false;
+  private EigenStatus status;
+  private boolean finished;
+  private boolean started;
 
   public AsyncEigenVerifier() {
     threadPool = Executors.newFixedThreadPool(1);
@@ -39,8 +39,7 @@ public class AsyncEigenVerifier extends SimpleEigenVerifier {
   @Override
   public EigenStatus verify(VectorIterable corpus, Vector vector) {
     synchronized (status) {
-      if (!finished && !started) // not yet started or finished, so start!
-      {
+      if (!finished && !started) { // not yet started or finished, so start!
         status = new EigenStatus(-1, 0);
         Vector vectorCopy = vector.clone();
         threadPool.execute(new VerifierRunnable(corpus, vectorCopy));

@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
  * control the position in the input from which the test data is extracted and
  * is described further below.</li>
  * <li>A random sampling of items can be chosen from the input files(s) using
- * the {@link #setTestRandomSelectSize(int)} or
+ * the {@link #setTestRandomSelectionSize(int)} or
  * {@link #setTestRandomSelectionPct(int)} methods, each choosing a fixed test
  * set size or percentage of the input set size as described above. The
  * {@link org.apache.mahout.math.jet.random.sampling.RandomSampler
@@ -133,7 +133,6 @@ public class SplitBayesInput {
   /** Configure this instance based on the command-line arguments contained within provided array. 
    * Calls {@link #validate()} to ensure consistency of configuration.
    * 
-   * @param args.
    * @return true if the arguments were parsed successfully and execution should proceed.
    * @throws Exception if there is a problem parsing the command-line arguments or the particular
    *   combination would violate class invariants.
@@ -247,7 +246,6 @@ public class SplitBayesInput {
   /** Perform a split on directory specified by {@link #setInputDirectory(File)} by calling {@link #splitFile(File)} 
    *  on each file found within that directory.
    *  
-   * @param inputDir
    * @throws IOException
    */
   public void splitDirectory() throws IOException {
@@ -261,26 +259,26 @@ public class SplitBayesInput {
    * @throws IOException
    */
   public void splitDirectory(File inputDir) throws IOException {
-    if (!inputDir.isDirectory()) 
+    if (!inputDir.isDirectory()) {
       throw new IOException(inputDir + " does not exist, or is not a directory");
+    }
     
     // input dir contains one file per category.
     File[] inputFiles = inputDir.listFiles();
     for (File inputFile : inputFiles) {
-      if (inputFile.isFile())
+      if (inputFile.isFile()) {
         splitFile(inputFile);
+      }
     }
   }
 
   /** Perform a split on the specified input file. Results will be written to files of the same name in the specified 
    *  training and test output directories. The {@link #validate()} method is called prior to executing the split.
-   *  
-   * @param inputFile
-   * @throws IOException
    */
   public void splitFile(File inputFile) throws IOException {
-    if (!inputFile.isFile()) 
+    if (!inputFile.isFile()) {
       throw new IOException(inputFile + " does not exist, or is not a file");
+    }
     
     validate();
     
@@ -289,7 +287,7 @@ public class SplitBayesInput {
     
     int lineCount = countLines(inputFile, charset);
     
-    log.info(inputFile.getName() + " has " + lineCount + " lines");
+    log.info("{} has {} lines", inputFile.getName(), lineCount);
     
     int testSplitStart = 0;
     int testSplitSize  = this.testSplitSize; // don't modify state
@@ -301,33 +299,32 @@ public class SplitBayesInput {
       if (testRandomSelectionPct > 0) {
         testSplitSize = Math.round(lineCount * ( testRandomSelectionPct / 100.0f ));
       }
-      log.info(inputFile.getName() + " test split size is " + testSplitSize + 
-          " based on random selection percentage " + testRandomSelectionPct);
+      log.info("{} test split size is {} based on random selection percentage {}",
+               new Object[] {inputFile.getName(), testSplitSize, testRandomSelectionPct});
       long[] ridx = new long[testSplitSize];
       RandomSampler.sample(testSplitSize, lineCount-1, testSplitSize, 0, ridx, 0, new MersenneTwister(new Date()));
       randomSel = new BitSet(lineCount);
-      for (int i=0; i < ridx.length; i++) {
-        randomSel.set((int) ridx[i] + 1);
+      for (long idx : ridx) {
+        randomSel.set((int) idx + 1);
       }
     }
     else {
       if (testSplitPct > 0) { // calculate split size based on percentage
-        testSplitSize = Math.round(lineCount * ( testSplitPct / 100.0f ));
-        log.info(inputFile.getName() + " test split size is " + testSplitSize + 
-            " based on percentage " + testSplitPct);
-      }
-      else {
-        log.info(inputFile.getName() + " test split size is " + testSplitSize);
+        testSplitSize = Math.round(lineCount * (testSplitPct / 100.0f));
+        log.info("{} test split size is {} based on percentage {}",
+                 new Object[] {inputFile.getName(), testSplitSize, testSplitPct});
+      } else {
+        log.info("{} test split size is {}", inputFile.getName(), testSplitSize);
       }
       
       if (splitLocation > 0) { // calculate start of split based on percentage
-        testSplitStart =  Math.round(lineCount * ( splitLocation / 100.0f ));
+        testSplitStart =  Math.round(lineCount * (splitLocation / 100.0f));
         if (lineCount - testSplitStart < testSplitSize) {
           // adjust split start downwards based on split size.
           testSplitStart = lineCount - testSplitSize;
         }
-        log.info(inputFile.getName() + " test split start is " + testSplitStart + 
-            " based on split location " + splitLocation);
+        log.info("{} test split start is {} based on split location {}",
+                 new Object[] {inputFile.getName(), testSplitStart, splitLocation});
       }
       
       if (testSplitStart < 0) {
@@ -335,15 +332,15 @@ public class SplitBayesInput {
             + "empty training set from the initial set of " + lineCount + " examples");
       }
       else if ((lineCount - testSplitSize) < testSplitSize) {
-        log.warn("CAUTION: Test set size for " + inputFile + " may be too large, " + testSplitSize + 
-            " is larger than the number of lines remaining in the training set: " + (lineCount - testSplitSize));
+        log.warn("Test set size for {} may be too large, {} is larger than the number of "
+                 + "lines remaining in the training set: {}",
+                 new Object[] {inputFile, testSplitSize, (lineCount - testSplitSize)});
       }
     }
     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), charset));
     Writer trainingWriter = new OutputStreamWriter(new FileOutputStream(trainingOutputFile), charset);
     Writer testWriter     = new OutputStreamWriter(new FileOutputStream(testOutputFile), charset);
-    Writer writer;
-    
+
     int pos = 0;
     int trainCount = 0;
     int testCount = 0;
@@ -351,19 +348,20 @@ public class SplitBayesInput {
     String line;
     while ((line = reader.readLine()) != null) {
       pos++;
-      
+
+      Writer writer;
       if (testRandomSelectionPct > 0) { // Randomly choose
         writer =  randomSel.get(pos) ? testWriter : trainingWriter;
-      }
-      else { // Choose based on location
+      } else { // Choose based on location
         writer = pos > testSplitStart ? testWriter : trainingWriter;
       }
-      
+
       if (writer == testWriter) {
-        if (testCount >= testSplitSize) 
+        if (testCount >= testSplitSize) {
           writer = trainingWriter;
-        else
+        } else {
           testCount++;
+        }
       }
       
       if (writer == trainingWriter) {
@@ -377,8 +375,8 @@ public class SplitBayesInput {
     IOUtils.quietClose(trainingWriter);
     IOUtils.quietClose(testWriter);
     
-    log.info("file: " + inputFile.getName()+ ", input: " + lineCount + " train: " + trainCount + ", test: " + 
-        testCount + " starting at " + testSplitStart);
+    log.info("file: {}, input: {} train: {}, test: {} starting at {}",
+             new Object[] {inputFile.getName(), lineCount, trainCount, testCount, testSplitStart});
     
     // testing;
     if (callback != null) {
@@ -429,9 +427,7 @@ public class SplitBayesInput {
     return charset;
   }
 
-  /** Set the charset used to read and write files 
-   * 
-   * @param charset
+  /** Set the charset used to read and write files
    */
   public void setCharset(Charset charset) {
     this.charset = charset;
@@ -442,8 +438,6 @@ public class SplitBayesInput {
   }
 
   /** Set the directory from which input data will be read when the the {@link #splitDirectory()} method is invoked
-   * 
-   * @param inputDir
    */
   public void setInputDirectory(File inputDir) {
     this.inputDirectory = inputDir;
@@ -454,8 +448,6 @@ public class SplitBayesInput {
   }
 
   /** Set the directory to which training data will be written.
-   * 
-   * @param trainingOutputDir
    */
   public void setTrainingOutputDirectory(File trainingOutputDir) {
     this.trainingOutputDirectory = trainingOutputDir;
@@ -466,8 +458,6 @@ public class SplitBayesInput {
   }
 
   /** Set the directory to which test data will be written.
-   * 
-   * @param testOutputDir
    */
   public void setTestOutputDirectory(File testOutputDir) {
     this.testOutputDirectory = testOutputDir;
@@ -478,8 +468,6 @@ public class SplitBayesInput {
   }
 
   /** Sets the callback used to inform the caller that an input file has been successfully split
-   * 
-   * @param callback
    */
   public void setCallback(SplitCallback callback) {
     this.callback = callback;
@@ -490,8 +478,6 @@ public class SplitBayesInput {
   }
 
   /** Sets number of random input samples that will be saved to the test set.
-   * 
-   * @param testRandomSelectionSize 
    */
   public void setTestRandomSelectionSize(int testRandomSelectionSize) {
     this.testRandomSelectionSize = testRandomSelectionSize;
@@ -505,8 +491,7 @@ public class SplitBayesInput {
   /** Sets number of random input samples that will be saved to the test set as a percentage of the size of the 
    *  input set.
    * 
-   * @param testRandomSelectionPct 
-   *   a value between 0 and 100 inclusive.
+   * @param randomSelectionPct a value between 0 and 100 inclusive.
    */
   public void setTestRandomSelectionPct(int randomSelectionPct) {
     this.testRandomSelectionPct = randomSelectionPct;
@@ -514,58 +499,71 @@ public class SplitBayesInput {
 
   /** Validates that the current instance is in a consistent state
    * 
-   * @throws IllegalStateException 
+   * @throws IllegalArgumentException
    *   if settings violate class invariants.
-   *   
    * @throws IOException 
    *   if output directories do not exist or are not directories.
-   *   
-   * @throws NullPointerException 
-   *   if output directories are not set.
    */
   public void validate() throws IOException {
-    if ((testSplitSize < 1) && (testSplitSize != -1))
-      throw new IllegalStateException("test split size must be 1 or greater");
+    if ((testSplitSize < 1) && (testSplitSize != -1)) {
+      throw new IllegalArgumentException("test split size must be 1 or greater");
+    }
     
-    if ((splitLocation < 0 || splitLocation > 100) && (splitLocation != -1))
-      throw new IllegalStateException("test split percentage must be between 0 and 100");
-    
-    if ((testSplitPct < 0 || testSplitPct > 100) && (testSplitPct != -1))
-      throw new IllegalStateException("test split percentage must be between 0 and 100");
-    
-    if ((splitLocation < 0 || splitLocation > 100) && (splitLocation != -1))
-      throw new IllegalStateException("test split percentage must be between 0 and 100");
-    
-    if ((testRandomSelectionPct < 0 || testRandomSelectionPct > 100) && (testRandomSelectionPct != -1))
-      throw new IllegalStateException("test split percentage must be between 0 and 100");
+    if ((splitLocation < 0 || splitLocation > 100) && (splitLocation != -1)) {
+      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
+    }
+
+    if ((testSplitPct < 0 || testSplitPct > 100) && (testSplitPct != -1)) {
+      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
+    }
+
+    if ((splitLocation < 0 || splitLocation > 100) && (splitLocation != -1)) {
+      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
+    }
+
+    if ((testRandomSelectionPct < 0 || testRandomSelectionPct > 100) && (testRandomSelectionPct != -1)) {
+      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
+    }
 
     // only one of the following may be set, one must be set.
     int count = 0;
-    if (testSplitSize > 0) count++;
-    if (testSplitPct  > 0) count++;
-    if (testRandomSelectionSize > 0) count++;
-    if (testRandomSelectionPct > 0) count++;
-    
+    if (testSplitSize > 0) {
+      count++;
+    }
+    if (testSplitPct  > 0) {
+      count++;
+    }
+    if (testRandomSelectionSize > 0) {
+      count++;
+    }
+    if (testRandomSelectionPct > 0) {
+      count++;
+    }
+
     if (count == 0) {
-      throw new IllegalStateException("either test split size, test split pct, " +
+      throw new IllegalArgumentException("either test split size, test split pct, " +
         "random selection size or random selection pct must be specified and a positive integer");
     }
     else if (count > 1) {
-      throw new IllegalStateException("only test split size, test split pct, " +
+      throw new IllegalArgumentException("only test split size, test split pct, " +
         "random selection size or random selection pct may be specified");
     }
 
-    if (trainingOutputDirectory == null)
-      throw new NullPointerException("no training output directory was specified");
-   
-    if (testOutputDirectory == null)
-      throw new NullPointerException("no test output directory was specified");
-    
-    if (!trainingOutputDirectory.isDirectory())
+    if (trainingOutputDirectory == null) {
+      throw new IllegalArgumentException("no training output directory was specified");
+    }
+
+    if (testOutputDirectory == null) {
+      throw new IllegalArgumentException("no test output directory was specified");
+    }
+
+    if (!trainingOutputDirectory.isDirectory()) {
       throw new IOException(inputDirectory + " does not exist, or is not a directory");
-    
-    if (!testOutputDirectory.isDirectory()) 
+    }
+
+    if (!testOutputDirectory.isDirectory()) {
       throw new IOException(inputDirectory + " does not exist, or is not a directory");
+    }
   }
   
   /** Count the lines in the file specified as returned by <code>BufferedReader.readLine()</code>
@@ -584,14 +582,17 @@ public class SplitBayesInput {
   public static int countLines(File inputFile, Charset charset) throws IOException {
     BufferedReader countReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), charset));
     int lineCount = 0;
-    while (countReader.readLine() != null) lineCount++;
+    while (countReader.readLine() != null) {
+      lineCount++;
+    }
     IOUtils.quietClose(countReader);
     
     return lineCount;
   }
   
   /** Used to pass information back to a caller once a file has been split without the need for a data object */
-  public static interface SplitCallback {
-    public void splitComplete(File inputFile, int lineCount, int trainCount, int testCount, int testSplitStart);
+  public interface SplitCallback {
+    void splitComplete(File inputFile, int lineCount, int trainCount, int testCount, int testSplitStart);
   }
+
 }

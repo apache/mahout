@@ -34,8 +34,6 @@ public abstract class DistributedVectorSimilarityTestCase extends MahoutTestCase
 
   /**
    * convenience method to create a {@link Vector}
-   * @param values
-   * @return
    */
   static Vector asVector(double... values) {
     return new DenseVector(values);
@@ -77,7 +75,7 @@ public abstract class DistributedVectorSimilarityTestCase extends MahoutTestCase
     for (int n = 0; n < numberOfColumns; n++) {
       double valueA = v1.get(n);
       double valueB = v2.get(n);
-      if (valueA != 0.0d && valueB != 0.0d) {
+      if (valueA != 0.0 && valueB != 0.0) {
         cooccurrences.add(new Cooccurrence(n, valueA, valueB));
       }
     }

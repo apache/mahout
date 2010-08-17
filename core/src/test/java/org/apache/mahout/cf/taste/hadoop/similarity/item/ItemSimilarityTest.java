@@ -57,7 +57,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
   /**
    * tests {@link CountUsersMapper}
-   * @throws Exception
    */
   public void testCountUsersMapper() throws Exception {
     Mapper<LongWritable,Text,CountUsersKeyWritable,VarLongWritable>.Context context =
@@ -75,9 +74,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
   /**
    * applies an {@link IArgumentMatcher} to a {@link CountUsersKeyWritable} checking whether it matches the userID
-   *
-   * @param userID
-   * @return
    */
   static CountUsersKeyWritable keyForUserID(final long userID) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
@@ -99,8 +95,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
   /**
    * tests {@link CountUsersReducer}
-   *
-   * @throws Exception
    */
   public void testCountUsersReducer() throws Exception {
     Reducer<CountUsersKeyWritable,VarLongWritable,VarIntWritable,NullWritable>.Context context =
@@ -126,9 +120,9 @@ public final class ItemSimilarityTest extends TasteTestCase {
       EasyMock.createMock(Mapper.Context.class);
     context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(100L))),
         MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(100L),
-        TasteHadoopUtils.idToIndex(12L), 1.3d));
+        TasteHadoopUtils.idToIndex(12L), 1.3));
     context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(20L))),
-        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(20L), TasteHadoopUtils.idToIndex(35L), 3.0d));
+        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(20L), TasteHadoopUtils.idToIndex(35L), 3.0));
     EasyMock.replay(context);
 
     PrefsToItemUserMatrixMapper mapper = new PrefsToItemUserMatrixMapper();
@@ -143,9 +137,9 @@ public final class ItemSimilarityTest extends TasteTestCase {
       EasyMock.createMock(Mapper.Context.class);
     context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(100L))),
         MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(100L),
-        TasteHadoopUtils.idToIndex(12L), 1d));
+        TasteHadoopUtils.idToIndex(12L), 1.0));
     context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(20L))),
-        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(20L), TasteHadoopUtils.idToIndex(35L), 1d));
+        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(20L), TasteHadoopUtils.idToIndex(35L), 1.0));
     EasyMock.replay(context);
 
     PrefsToItemUserMatrixMapper mapper = new PrefsToItemUserMatrixMapper();
@@ -158,19 +152,17 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
   /**
    * tests {@link PrefsToItemUserMatrixReducer}
-   *
-   * @throws Exception
    */
   public void testPrefsToItemUserMatrixReducer() throws Exception {
     Reducer<VarIntWritable, MatrixEntryWritable,IntWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
-    context.write(EasyMock.eq(new IntWritable(123)), MathHelper.vectorMatches(MathHelper.elem(1, 0.5d),
-        MathHelper.elem(7, 2.0d)));
+    context.write(EasyMock.eq(new IntWritable(123)), MathHelper.vectorMatches(MathHelper.elem(1, 0.5),
+        MathHelper.elem(7, 2.0)));
     EasyMock.replay(context);
 
-    List<MatrixEntryWritable> entries = Arrays.asList(MathHelper.matrixEntry(123, 1, 0.5d),
-        MathHelper.matrixEntry(123, 7, 2.0d));
+    List<MatrixEntryWritable> entries = Arrays.asList(MathHelper.matrixEntry(123, 1, 0.5),
+        MathHelper.matrixEntry(123, 7, 2.0));
 
     new PrefsToItemUserMatrixReducer().reduce(new VarIntWritable(123), entries, context);
 
@@ -179,8 +171,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
   /**
    * tests {@link MostSimilarItemPairsMapper}
-   *
-   * @throws Exception
    */
   public void testMostSimilarItemsPairsMapper() throws Exception {
 
@@ -192,14 +182,14 @@ public final class ItemSimilarityTest extends TasteTestCase {
     Mapper<IntWritable,VectorWritable,EntityEntityWritable,DoubleWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
 
-    context.write(new EntityEntityWritable(34L, 56L), new DoubleWritable(0.9d));
+    context.write(new EntityEntityWritable(34L, 56L), new DoubleWritable(0.9));
 
     EasyMock.replay(context);
 
     Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE);
-    vector.set(12, 0.2d);
-    vector.set(34, 1.0d);
-    vector.set(56, 0.9d);
+    vector.set(12, 0.2);
+    vector.set(34, 1.0);
+    vector.set(56, 0.9);
 
     MostSimilarItemPairsMapper mapper = new MostSimilarItemPairsMapper();
     setField(mapper, "indexItemIDMap", indexItemIDMap);
@@ -212,19 +202,17 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
   /**
    * tests {@link MostSimilarItemPairsReducer}
-   *
-   * @throws Exception
    */
   public void testMostSimilarItemPairsReducer() throws Exception {
     Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
-    context.write(new EntityEntityWritable(123L, 456L), new DoubleWritable(0.5d));
+    context.write(new EntityEntityWritable(123L, 456L), new DoubleWritable(0.5));
 
     EasyMock.replay(context);
 
     new MostSimilarItemPairsReducer().reduce(new EntityEntityWritable(123L, 456L),
-        Arrays.asList(new DoubleWritable(0.5d), new DoubleWritable(0.5d)), context);
+        Arrays.asList(new DoubleWritable(0.5), new DoubleWritable(0.5)), context);
 
     EasyMock.verify(context);
   }
@@ -240,8 +228,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
    * Paul    1       -      1      -
    * Fred    -       -      -      1
    * </pre>
-   *
-   * @throws Exception
    */
   public void testCompleteJob() throws Exception {
 
@@ -336,8 +322,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
    *    i2 --> i1
    *    i3 --> i1
    * </pre>
-   *
-   * @throws Exception
    */
   public void testMaxSimilaritiesPerItem() throws Exception {
 
@@ -382,7 +366,7 @@ public final class ItemSimilarityTest extends TasteTestCase {
 
     String line;
     int currentLine = 1;
-    while ( (line = reader.readLine()) != null) {
+    while ((line = reader.readLine()) != null) {
 
       String[] tokens = line.split("\t");
 
@@ -393,19 +377,19 @@ public final class ItemSimilarityTest extends TasteTestCase {
       if (currentLine == 1) {
         assertEquals(1L, itemAID);
         assertEquals(2L, itemBID);
-        assertEquals(0.5d, similarity, 0.0001d);
+        assertEquals(0.5, similarity, 0.0001);
       }
 
       if (currentLine == 2) {
         assertEquals(1L, itemAID);
         assertEquals(3L, itemBID);
-        assertEquals(0.4, similarity, 0.0001d);
+        assertEquals(0.4, similarity, 0.0001);
       }
 
       currentLine++;
     }
 
-    int linesWritten = currentLine-1;
+    int linesWritten = currentLine - 1;
     assertEquals(2, linesWritten);
   }
 

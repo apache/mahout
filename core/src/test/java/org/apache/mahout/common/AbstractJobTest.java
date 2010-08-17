@@ -22,31 +22,28 @@ package org.apache.mahout.common;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.Assert;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
-/**
- * 
- */
 public class AbstractJobTest {
   
   interface AbstractJobFactory {
-    public AbstractJob getJob();
+    AbstractJob getJob();
   }
   
   @Test
   public void testFlag() throws Exception {
     final Map<String,String> testMap = new HashMap<String,String>();
     
-    final AbstractJobFactory fact = new AbstractJobFactory() {
+    AbstractJobFactory fact = new AbstractJobFactory() {
+      @Override
       public AbstractJob getJob() {
         return new AbstractJob() {
           @Override
-          public int run(String[] args) throws Exception {
+          public int run(String[] args) {
             addFlag("testFlag", "t", "a simple test flag");
             
             Map<String,String> argMap = parseArguments(args);
@@ -60,14 +57,13 @@ public class AbstractJobTest {
     
     // testFlag will only be present if speciied on the command-line
     
-    String[] noFlag   = new String[0];
-    ToolRunner.run(fact.getJob(), noFlag);
-    TestCase.assertFalse("test map for absent flag",
+    ToolRunner.run(fact.getJob(), new String[0]);
+    Assert.assertFalse("test map for absent flag",
         testMap.containsKey("--testFlag"));
     
     String[] withFlag = { "--testFlag" };
     ToolRunner.run(fact.getJob(), withFlag);
-    TestCase.assertTrue("test map for present flag",
+    Assert.assertTrue("test map for present flag",
         testMap.containsKey("--testFlag"));
   }
   
@@ -75,11 +71,12 @@ public class AbstractJobTest {
   public void testOptions() throws Exception {
     final Map<String,String> testMap = new HashMap<String,String>();
     
-    final AbstractJobFactory fact = new AbstractJobFactory() {
+    AbstractJobFactory fact = new AbstractJobFactory() {
+      @Override
       public AbstractJob getJob() {
         return new AbstractJob() {
           @Override
-          public int run(String[] args) throws Exception {
+          public int run(String[] args) {
             this.addOption(DefaultOptionCreator.overwriteOption().create());
             this.addOption("option", "o", "option");
             this.addOption("required", "r", "required", true /* required */);
@@ -100,33 +97,31 @@ public class AbstractJobTest {
         };
       }
     };
-    
-    int ret;
-    
-    ret = ToolRunner.run(fact.getJob(), new String[0]);
-    TestCase.assertEquals("-1 for missing required options", -1, ret);
+
+    int ret = ToolRunner.run(fact.getJob(), new String[0]);
+    Assert.assertEquals("-1 for missing required options", -1, ret);
     
     ret = ToolRunner.run(fact.getJob(), new String[]{
       "--required", "requiredArg"
     });
-    TestCase.assertEquals("0 for no missing required options", 0, ret);
-    TestCase.assertEquals("requiredArg", testMap.get("--required"));
-    TestCase.assertEquals("defaultValue", testMap.get("--hasDefault"));
-    TestCase.assertNull(testMap.get("--option"));
-    TestCase.assertNull(testMap.get("--notRequired"));
-    TestCase.assertFalse(testMap.containsKey("--overwrite"));
+    Assert.assertEquals("0 for no missing required options", 0, ret);
+    Assert.assertEquals("requiredArg", testMap.get("--required"));
+    Assert.assertEquals("defaultValue", testMap.get("--hasDefault"));
+    Assert.assertNull(testMap.get("--option"));
+    Assert.assertNull(testMap.get("--notRequired"));
+    Assert.assertFalse(testMap.containsKey("--overwrite"));
     
     ret = ToolRunner.run(fact.getJob(), new String[]{
       "--required", "requiredArg",
       "--unknownArg"
     });
-    TestCase.assertEquals("-1 for including unknown options", -1, ret);
+    Assert.assertEquals("-1 for including unknown options", -1, ret);
 
     ret = ToolRunner.run(fact.getJob(), new String[]{
       "--required", "requiredArg",
       "--required", "requiredArg2",
     });
-    TestCase.assertEquals("-1 for including duplicate options", -1, ret);
+    Assert.assertEquals("-1 for including duplicate options", -1, ret);
     
     ret = ToolRunner.run(fact.getJob(), new String[]{
       "--required", "requiredArg", 
@@ -135,12 +130,12 @@ public class AbstractJobTest {
       "--option", "optionValue",
       "--notRequired", "notRequired"
     });
-    TestCase.assertEquals("0 for no missing required options", 0, ret);
-    TestCase.assertEquals("requiredArg", testMap.get("--required"));
-    TestCase.assertEquals("nonDefault", testMap.get("--hasDefault"));
-    TestCase.assertEquals("optionValue", testMap.get("--option"));
-    TestCase.assertEquals("notRequired", testMap.get("--notRequired"));
-    TestCase.assertTrue(testMap.containsKey("--overwrite"));
+    Assert.assertEquals("0 for no missing required options", 0, ret);
+    Assert.assertEquals("requiredArg", testMap.get("--required"));
+    Assert.assertEquals("nonDefault", testMap.get("--hasDefault"));
+    Assert.assertEquals("optionValue", testMap.get("--option"));
+    Assert.assertEquals("notRequired", testMap.get("--notRequired"));
+    Assert.assertTrue(testMap.containsKey("--overwrite"));
     
     ret = ToolRunner.run(fact.getJob(), new String[]{
       "-r", "requiredArg", 
@@ -149,23 +144,24 @@ public class AbstractJobTest {
       "-o", "optionValue",
       "-nr", "notRequired"
     });
-    TestCase.assertEquals("0 for no missing required options", 0, ret);
-    TestCase.assertEquals("requiredArg", testMap.get("--required"));
-    TestCase.assertEquals("nonDefault", testMap.get("--hasDefault"));
-    TestCase.assertEquals("optionValue", testMap.get("--option"));
-    TestCase.assertEquals("notRequired", testMap.get("--notRequired"));
-    TestCase.assertTrue(testMap.containsKey("--overwrite"));
+    Assert.assertEquals("0 for no missing required options", 0, ret);
+    Assert.assertEquals("requiredArg", testMap.get("--required"));
+    Assert.assertEquals("nonDefault", testMap.get("--hasDefault"));
+    Assert.assertEquals("optionValue", testMap.get("--option"));
+    Assert.assertEquals("notRequired", testMap.get("--notRequired"));
+    Assert.assertTrue(testMap.containsKey("--overwrite"));
     
   }
   
   @Test
   public void testInputOutputPaths() throws Exception {
     
-    final AbstractJobFactory fact = new AbstractJobFactory() {
+    AbstractJobFactory fact = new AbstractJobFactory() {
+      @Override
       public AbstractJob getJob() {
         return new AbstractJob() {
           @Override
-          public int run(String[] args) throws Exception {
+          public int run(String[] args) {
             addInputOption();
             addOutputOption();
             
@@ -177,67 +173,64 @@ public class AbstractJobTest {
             }
             
             Path inputPath = getInputPath();
-            TestCase.assertNotNull("getInputPath() returns non-null", inputPath);
+            Assert.assertNotNull("getInputPath() returns non-null", inputPath);
             
             Path outputPath = getInputPath();
-            TestCase.assertNotNull("getOutputPath() returns non-null", outputPath);
+            Assert.assertNotNull("getOutputPath() returns non-null", outputPath);
             return 0;
           }
         };
       }
     };
+
+    int ret = ToolRunner.run(fact.getJob(), new String[0]);
+    Assert.assertEquals("-1 for missing input option", -1, ret);
     
-    AbstractJob job;
-    int ret;
-    
-    ret = ToolRunner.run(fact.getJob(), new String[0]);
-    TestCase.assertEquals("-1 for missing input option", -1, ret);
-    
-    final String testInputPath = "testInputPath";
-    final String testOutputPath = "testOutputPath";
-    final String testInputPropertyPath = "testInputPropertyPath";
-    final String testOutputPropertyPath = "testOutputPropertyPath";
-    
-    job = fact.getJob();
-    ret = ToolRunner.run(job, new String[]{ 
+    String testInputPath = "testInputPath";
+    String testOutputPath = "testOutputPath";
+    String testInputPropertyPath = "testInputPropertyPath";
+    String testOutputPropertyPath = "testOutputPropertyPath";
+
+    AbstractJob job = fact.getJob();
+    ret = ToolRunner.run(job, new String[]{
         "--input", testInputPath });
-    TestCase.assertEquals("-1 for missing output option", -1, ret);
-    TestCase.assertEquals("input path is correct", testInputPath, 
+    Assert.assertEquals("-1 for missing output option", -1, ret);
+    Assert.assertEquals("input path is correct", testInputPath,
         job.getInputPath().toString());
     
     job = fact.getJob();
-    ret = ToolRunner.run(job, new String[]{ 
+    ret = ToolRunner.run(job, new String[]{
         "--output", testOutputPath });
-    TestCase.assertEquals("-1 for missing input option", -1, ret);
-    TestCase.assertEquals("output path is correct", testOutputPath, 
+    Assert.assertEquals("-1 for missing input option", -1, ret);
+    Assert.assertEquals("output path is correct", testOutputPath,
+        job.getOutputPath().toString());
+    
+    job = fact.getJob();
+    ret = ToolRunner.run(job, new String[]{
+        "--input", testInputPath, "--output", testOutputPath });
+    Assert.assertEquals("0 for complete options", 0, ret);
+    Assert.assertEquals("input path is correct", testInputPath,
+        job.getInputPath().toString());
+    Assert.assertEquals("output path is correct", testOutputPath,
         job.getOutputPath().toString());
     
     job = fact.getJob();
     ret = ToolRunner.run(job, new String[]{ 
         "--input", testInputPath, "--output", testOutputPath });
-    TestCase.assertEquals("0 for complete options", 0, ret);
-    TestCase.assertEquals("input path is correct", testInputPath, 
+    Assert.assertEquals("0 for complete options", 0, ret);
+    Assert.assertEquals("input path is correct", testInputPath,
         job.getInputPath().toString());
-    TestCase.assertEquals("output path is correct", testOutputPath, 
-        job.getOutputPath().toString());
-    
-    job = fact.getJob();
-    ret = ToolRunner.run(job, new String[]{ 
-        "--input", testInputPath, "--output", testOutputPath });
-    TestCase.assertEquals("0 for complete options", 0, ret);
-    TestCase.assertEquals("input path is correct", testInputPath, 
-        job.getInputPath().toString());
-    TestCase.assertEquals("output path is correct", testOutputPath, 
+    Assert.assertEquals("output path is correct", testOutputPath,
         job.getOutputPath().toString());
     
     job = fact.getJob();
     ret = ToolRunner.run(job, new String[]{ 
         "-Dmapred.input.dir=" + testInputPropertyPath, 
         "-Dmapred.output.dir=" + testOutputPropertyPath });
-    TestCase.assertEquals("0 for complete options", 0, ret);
-    TestCase.assertEquals("input path from property is correct", 
+    Assert.assertEquals("0 for complete options", 0, ret);
+    Assert.assertEquals("input path from property is correct",
         testInputPropertyPath, job.getInputPath().toString());
-    TestCase.assertEquals("output path from property is correct", 
+    Assert.assertEquals("output path from property is correct",
         testOutputPropertyPath, job.getOutputPath().toString());
     
     job = fact.getJob();
@@ -246,9 +239,9 @@ public class AbstractJobTest {
         "-Dmapred.output.dir=" + testOutputPropertyPath,
         "--input", testInputPath,
         "--output", testOutputPath });
-    TestCase.assertEquals("input command-line option precedes property", 
+    Assert.assertEquals("input command-line option precedes property",
         testInputPath, job.getInputPath().toString());
-    TestCase.assertEquals("output command-line option precedes property", 
+    Assert.assertEquals("output command-line option precedes property",
         testOutputPath, job.getOutputPath().toString());
 	}
 }

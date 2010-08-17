@@ -173,8 +173,6 @@ public class Dataset implements Writable {
    * 
    * @param attr
    *          attribute's index
-   * @param token
-   * @return
    */
   public int valueOf(int attr, String token) {
     if (isNumerical(attr)) {
@@ -195,7 +193,6 @@ public class Dataset implements Writable {
   /**
    * Counts the number of attributes, except IGNORED and LABEL
    * 
-   * @param attrs
    * @return number of attributes that are not IGNORED or LABEL
    */
   protected static int countAttributes(Attribute[] attrs) {
@@ -225,9 +222,7 @@ public class Dataset implements Writable {
   }
   
   /**
-   * Number of attributes
-   * 
-   * @return
+   * @return number of attributes
    */
   public int nbAttributes() {
     return attributes.length;
@@ -291,8 +286,6 @@ public class Dataset implements Writable {
   
   /**
    * Loads the dataset from a file
-   * 
-   * @throws IOException
    */
   public static Dataset load(Configuration conf, Path path) throws IOException {
     FileSystem fs = path.getFileSystem(conf);

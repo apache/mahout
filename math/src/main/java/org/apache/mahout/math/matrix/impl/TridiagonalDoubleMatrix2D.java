@@ -32,7 +32,8 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   private final double[] values;
 
   /*
-  * The startIndexes and number of non zeros: {lowerStart, diagonalStart, upperStart, values.length, lowerNonZeros, diagonalNonZeros, upperNonZeros}.
+  * The startIndexes and number of non zeros:
+  * {lowerStart, diagonalStart, upperStart, values.length, lowerNonZeros, diagonalNonZeros, upperNonZeros}.
   * lowerStart = 0
   * diagonalStart = lowerStart + lower.length
   * upperStart = diagonalStart + diagonal.length
@@ -203,7 +204,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.MULT) { // x[i] = x[i] * y[i]
       forEachNonZero(
           new IntIntDoubleFunction() {
             public double apply(int i, int j, double value) {
@@ -215,7 +216,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == Functions.div) { // x[i] = x[i] / y[i]
+    if (function == Functions.DIV) { // x[i] = x[i] / y[i]
       forEachNonZero(
           new IntIntDoubleFunction() {
             public double apply(int i, int j, double value) {
@@ -453,10 +454,10 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C, final double alpha, double beta,
+  public DoubleMatrix2D zMult(DoubleMatrix2D b, DoubleMatrix2D c, final double alpha, double beta,
                               final boolean transposeA, boolean transposeB) {
     if (transposeB) {
-      B = B.viewDice();
+      b = b.viewDice();
     }
     int m = rows;
     int n = columns;
@@ -464,37 +465,36 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       m = columns;
       n = rows;
     }
-    int p = B.columns;
-    boolean ignore = (C == null);
-    if (C == null) {
-      C = new DenseDoubleMatrix2D(m, p);
+    int p = b.columns;
+    boolean ignore = c == null;
+    if (ignore) {
+      c = new DenseDoubleMatrix2D(m, p);
     }
 
-    if (B.rows != n) {
-      throw new IllegalArgumentException("Matrix2D inner dimensions must agree:" + toStringShort() + ", " +
-          (transposeB ? B.viewDice() : B).toStringShort());
+    if (b.rows != n) {
+      throw new IllegalArgumentException("Matrix2D inner dimensions must agree:"
+          + toStringShort() + ", " + (transposeB ? b.viewDice() : b).toStringShort());
     }
-    if (C.rows != m || C.columns != p) {
-      throw new IllegalArgumentException(
-          "Incompatibel result matrix: " + toStringShort() + ", " + (transposeB ? B.viewDice() : B).toStringShort() +
-              ", " + C.toStringShort());
+    if (c.rows != m || c.columns != p) {
+      throw new IllegalArgumentException("Incompatibel result matrix: " + toStringShort()
+              + ", " + (transposeB ? b.viewDice() : b).toStringShort() + ", " + c.toStringShort());
     }
-    if (this == C || B == C) {
+    if (this == c || b == c) {
       throw new IllegalArgumentException("Matrices must not be identical");
     }
 
     if (!ignore) {
-      C.assign(Functions.mult(beta));
+      c.assign(Functions.mult(beta));
     }
 
     // cache views
-    final DoubleMatrix1D[] Brows = new DoubleMatrix1D[n];
+    final DoubleMatrix1D[] bRows = new DoubleMatrix1D[n];
     for (int i = n; --i >= 0;) {
-      Brows[i] = B.viewRow(i);
+      bRows[i] = b.viewRow(i);
     }
-    final DoubleMatrix1D[] Crows = new DoubleMatrix1D[m];
+    final DoubleMatrix1D[] cRows = new DoubleMatrix1D[m];
     for (int i = m; --i >= 0;) {
-      Crows[i] = C.viewRow(i);
+      cRows[i] = c.viewRow(i);
     }
 
     final PlusMult fun = PlusMult.plusMult(0);
@@ -503,16 +503,16 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
         new IntIntDoubleFunction() {
           public double apply(int i, int j, double value) {
             fun.setMultiplicator(value * alpha);
-            if (!transposeA) {
-              Crows[i].assign(Brows[j], fun);
+            if (transposeA) {
+              cRows[j].assign(bRows[i], fun);
             } else {
-              Crows[j].assign(Brows[i], fun);
+              cRows[i].assign(bRows[j], fun);
             }
             return value;
           }
         }
     );
 
-    return C;
+    return c;
   }
 }

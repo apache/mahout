@@ -162,7 +162,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
       try {
         while ((line = buff.readLine()) != null) {
           line = line.trim();
-          if (line.length() > 0 && line.startsWith(ARFFModel.ARFF_COMMENT) == false) {
+          if (line.length() > 0 && !line.startsWith(ARFFModel.ARFF_COMMENT)) {
             break;
           }
         }

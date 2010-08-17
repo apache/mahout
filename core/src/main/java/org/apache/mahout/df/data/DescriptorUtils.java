@@ -18,6 +18,7 @@
 package org.apache.mahout.df.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -33,8 +34,6 @@ public final class DescriptorUtils {
   /**
    * Parses a descriptor string and generates the corresponding array of Attributes
    * 
-   * @param descriptor
-   * @return
    * @throws DescriptorException
    *           if a bad token is encountered
    */
@@ -64,14 +63,10 @@ public final class DescriptorUtils {
    * Generates a valid descriptor string from a user-friendly representation.<br>
    * for example "3 N I N N 2 C L 5 I" generates "N N N I N N C C L I I I I I".<br>
    * this useful when describing datasets with a large number of attributes
-   * 
-   * @param description
-   * @return
-   * @throws DescriptorException
    */
   public static String generateDescriptor(String description) throws DescriptorException {
     StringTokenizer tokenizer = new StringTokenizer(description, " ");
-    List<String> tokens = new ArrayList<String>();
+    Collection<String> tokens = new ArrayList<String>();
     
     while (tokenizer.hasMoreTokens()) {
       tokens.add(tokenizer.nextToken());
@@ -82,12 +77,8 @@ public final class DescriptorUtils {
   
   /**
    * Generates a valid descriptor string from a list of tokens
-   * 
-   * @param tokens
-   * @return
-   * @throws DescriptorException
    */
-  public static String generateDescriptor(List<String> tokens) throws DescriptorException {
+  public static String generateDescriptor(Iterable<String> tokens) throws DescriptorException {
     StringBuilder descriptor = new StringBuilder();
     
     int multiplicator = 0;

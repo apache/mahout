@@ -56,7 +56,7 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,TransactionTree,
         Integer item = prunedItems[j];
         Long groupID = gListInt.get(item);
         
-        if (groups.contains(groupID) == false) {
+        if (!groups.contains(groupID)) {
           Integer[] tempItems = new Integer[j + 1];
           System.arraycopy(prunedItems, 0, tempItems, 0, j + 1);
           context.setStatus("Parallel FPGrowth: Generating Group Dependent transactions for: " + item);

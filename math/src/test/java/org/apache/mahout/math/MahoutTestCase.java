@@ -29,6 +29,7 @@ public abstract class MahoutTestCase extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
+    super.setUp();
     testTempDir = null;
   }
 
@@ -37,6 +38,7 @@ public abstract class MahoutTestCase extends TestCase {
     if (testTempDir != null) {
       new DeletingVisitor().accept(testTempDir);
     }
+    super.tearDown();
   }
 
   protected final File getTestTempDir() throws IOException {

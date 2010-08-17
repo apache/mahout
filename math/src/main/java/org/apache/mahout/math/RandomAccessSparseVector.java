@@ -50,7 +50,7 @@ public class RandomAccessSparseVector extends AbstractVector {
     this(other.size(), other.getNumNondefaultElements());
     Iterator<Element> it = other.iterateNonZero();
     Element e;
-    while(it.hasNext() && (e = it.next()) != null) {
+    while (it.hasNext() && (e = it.next()) != null) {
       values.put(e.index(), e.get());
     }
   }
@@ -62,7 +62,7 @@ public class RandomAccessSparseVector extends AbstractVector {
 
   public RandomAccessSparseVector(RandomAccessSparseVector other, boolean shallowCopy) {
     super(other.size());
-    values = shallowCopy ? other.values : (OpenIntDoubleHashMap)other.values.clone() ;
+    values = shallowCopy ? other.values : (OpenIntDoubleHashMap)other.values.clone();
   }
 
   @Override
@@ -102,7 +102,7 @@ public class RandomAccessSparseVector extends AbstractVector {
     values.clear();
     Iterator<Element> it = other.iterateNonZero();
     Element e;
-    while(it.hasNext() && (e = it.next()) != null) {
+    while (it.hasNext() && (e = it.next()) != null) {
       setQuick(e.index(), e.get());
     }
     return this;
@@ -194,7 +194,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   }
 
 
-  private static class AddToVector implements IntDoubleProcedure {
+  private static final class AddToVector implements IntDoubleProcedure {
     private final Vector v;
     private AddToVector(Vector v) {
       this.v = v;
@@ -243,11 +243,11 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
 
     public boolean hasNext() {
-      return element.index+1 < size();
+      return element.index + 1 < size();
     }
 
     public Element next() {
-      if (element.index+1 >= size()) {
+      if (element.index + 1 >= size()) {
         throw new NoSuchElementException();
       } else {
         element.index++;

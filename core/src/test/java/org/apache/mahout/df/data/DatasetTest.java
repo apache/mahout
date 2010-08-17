@@ -31,7 +31,7 @@ import org.apache.mahout.common.RandomUtils;
 
 public class DatasetTest extends MahoutTestCase {
 
-  private static final int nbAttributes = 10;
+  private static final int NUM_ATTRIBUTES = 10;
 
   private static Dataset readDataset(byte[] bytes) throws IOException {
     ByteArrayInputStream byteInStream = new ByteArrayInputStream(bytes);
@@ -49,7 +49,7 @@ public class DatasetTest extends MahoutTestCase {
     for (int nloop=0; nloop< n; nloop++) {
       byteOutStream.reset();
       
-      Dataset dataset = Utils.randomData(rng, nbAttributes, 1).getDataset();
+      Dataset dataset = Utils.randomData(rng, NUM_ATTRIBUTES, 1).getDataset();
       
       dataset.write(out);
       

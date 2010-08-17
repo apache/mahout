@@ -18,6 +18,7 @@
 package org.apache.mahout.df.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -59,7 +60,7 @@ public class DataLoaderTest extends MahoutTestCase {
 
   /**
    * Test method for
-   * {@link org.apache.mahout.df.data.DataLoader#generateDataset(java.lang.String, java.lang.String[])}.
+   * {@link DataLoader#generateDataset(String, String[])}.
    */
   public void testGenerateDataset() throws Exception {
     int nbAttributes = 10;
@@ -83,11 +84,8 @@ public class DataLoaderTest extends MahoutTestCase {
   /**
    * Converts the data to an array of comma-separated strings and adds some
    * missing values in all but IGNORED attributes
-   * 
-   * @param data
-   * @param attrs
+   *
    * @param missings indexes of vectors with missing values
-   * @return
    */
   protected String[] prepareData(double[][] data, Attribute[] attrs, List<Integer> missings) {
     int nbAttributes = attrs.length;
@@ -127,11 +125,8 @@ public class DataLoaderTest extends MahoutTestCase {
 
   /**
    * Test if the loaded data matches the source data
-   * 
-   * @param data
-   * @param attrs
+   *
    * @param missings indexes of instance with missing values
-   * @param loaded
    */
   protected static void testLoadedData(double[][] data, Attribute[] attrs, List<Integer> missings, Data loaded) {
     int nbAttributes = attrs.length;
@@ -176,13 +171,13 @@ public class DataLoaderTest extends MahoutTestCase {
   
   /**
    * Test if the loaded dataset matches the source data
-   * 
-   * @param data
-   * @param attrs
+   *
    * @param missings indexes of instance with missing values
-   * @param loaded
    */
-  protected static void testLoadedDataset(double[][] data, Attribute[] attrs, List<Integer> missings, Data loaded) {
+  protected static void testLoadedDataset(double[][] data,
+                                          Attribute[] attrs,
+                                          Collection<Integer> missings,
+                                          Data loaded) {
     int nbAttributes = attrs.length;
 
     int iId = 0;
@@ -236,7 +231,7 @@ public class DataLoaderTest extends MahoutTestCase {
 
   /**
    * Test method for
-   * {@link org.apache.mahout.df.data.DataLoader#generateDataset(java.lang.String, org.apache.hadoop.fs.FileSystem, org.apache.hadoop.fs.Path)}.
+   * {@link DataLoader#generateDataset(String, FileSystem, Path)}.
    */
   public void testGenerateDatasetFromFile() throws Exception {
     int nbAttributes = 10;
@@ -263,16 +258,19 @@ public class DataLoaderTest extends MahoutTestCase {
   /**
    * each time oValue appears in data for the attribute 'attr', the nValue must
    * appear in vectors for the same attribute.
-   * 
-   * @param source
-   * @param loaded
+   *
    * @param attr attribute's index in source
    * @param aId attribute's index in loaded
    * @param oValue old value in source
    * @param nValue new value in loaded
    */
-  protected static void checkCategorical(double[][] source, List<Integer> missings,
-      Data loaded, int attr, int aId, double oValue, double nValue) {
+  protected static void checkCategorical(double[][] source,
+                                         Collection<Integer> missings,
+                                         Data loaded,
+                                         int attr,
+                                         int aId,
+                                         double oValue,
+                                         double nValue) {
     int lind = 0;
 
     for (int index = 0; index < source.length; index++) {
@@ -293,14 +291,15 @@ public class DataLoaderTest extends MahoutTestCase {
   /**
    * each time value appears in data as a label, its corresponding code must
    * appear in all the instances with the same label.
-   * 
-   * @param source
-   * @param loaded
+   *
    * @param labelInd label's index in source
    * @param value source label's value
    */
-  protected static void checkLabel(double[][] source, List<Integer> missings,
-      Data loaded, int labelInd, double value) {
+  protected static void checkLabel(double[][] source,
+                                   Collection<Integer> missings,
+                                   Data loaded,
+                                   int labelInd,
+                                   double value) {
     // label's code that corresponds to the value
     int code = loaded.getDataset().labelCode(Double.toString(value));
 

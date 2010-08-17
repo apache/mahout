@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.math.stats;
 
 import org.apache.mahout.math.DenseMatrix;
@@ -16,7 +33,6 @@ import java.util.Random;
  * on-line.
  */
 public class OnlineAuc {
-  private Random random = new Random();
 
   enum ReplacementPolicy {
     FIFO, FAIR, RANDOM
@@ -25,11 +41,10 @@ public class OnlineAuc {
   public static final int HISTORY = 10;
 
   private ReplacementPolicy policy = ReplacementPolicy.FAIR;
-
-  private Matrix scores;
-  private Vector averages;
-
-  private Vector samples;
+  private Random random = new Random();
+  private final Matrix scores;
+  private final Vector averages;
+  private final Vector samples;
 
   public OnlineAuc() {
     int numCategories = 2;
@@ -40,7 +55,7 @@ public class OnlineAuc {
     samples = new DenseVector(numCategories);
   }
 
-  public double addSample(int category, final double score) {
+  public double addSample(int category, double score) {
     int n = (int) samples.get(category);
     if (n < HISTORY) {
       scores.set(category, n, score);
@@ -50,14 +65,14 @@ public class OnlineAuc {
           scores.set(category, n % HISTORY, score);
           break;
         case FAIR:
-          int j = random.nextInt(n + 1);
-          if (j < HISTORY) {
-            scores.set(category, j, score);
+          int j1 = random.nextInt(n + 1);
+          if (j1 < HISTORY) {
+            scores.set(category, j1, score);
           }
           break;
         case RANDOM:
-          j = random.nextInt(HISTORY);
-          scores.set(category, j, score);
+          int j2 = random.nextInt(HISTORY);
+          scores.set(category, j2, score);
           break;
       }
     }
@@ -67,22 +82,21 @@ public class OnlineAuc {
     if (samples.minValue() >= 1) {
       // compare to previous scores for other category
       Vector row = scores.viewRow(1 - category);
-      double m = 0;
+      double m = 0.0;
       int count = 0;
       for (Vector.Element element : row) {
         double v = element.get();
-        if (!Double.isNaN(v)) {
-          count++;
-          double z = 0.5;
-          if (score > v) {
-            z = 1;
-          } else if (score < v) {
-            z = 0;
-          }
-          m += (z - m) / count;
-        } else {
+        if (Double.isNaN(v)) {
           break;
         }
+        count++;
+        double z = 0.5;
+        if (score > v) {
+          z = 1.0;
+        } else if (score < v) {
+          z = 0.0;
+        }
+        m += (z - m) / count;
       }
       averages.set(category, averages.get(category) + (m - averages.get(category)) / samples.get(category));
     }

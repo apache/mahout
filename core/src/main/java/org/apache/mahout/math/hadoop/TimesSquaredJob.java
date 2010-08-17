@@ -186,7 +186,7 @@ public final class TimesSquaredJob {
       this.out = out;
       double d = scale(v);
       if (d == 1.0) {
-        outputVector.assign(v.get(), Functions.plus);
+        outputVector.assign(v.get(), Functions.PLUS);
       } else if (d != 0.0) {
         outputVector.assign(v.get(), Functions.plusMult(d));
       }

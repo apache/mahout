@@ -129,10 +129,10 @@ public class DenseVector extends AbstractVector {
       throw new CardinalityException(size(), other.size());
     }
     // is there some other way to know if function.apply(0, x) = x for all x?
-    if(function instanceof PlusMult) {
+    if (function instanceof PlusMult) {
       Iterator<Element> it = other.iterateNonZero();
       Element e;
-      while(it.hasNext() && (e = it.next()) != null) {
+      while (it.hasNext() && (e = it.next()) != null) {
         values[e.index()] = function.apply(values[e.index()], e.get());
       }
     } else {
@@ -288,11 +288,11 @@ public class DenseVector extends AbstractVector {
     }
 
     public boolean hasNext() {
-      return element.index+1 < size();
+      return element.index + 1 < size();
     }
 
     public Element next() {
-      if (element.index+1 >= size()) {
+      if (element.index + 1 >= size()) {
         throw new NoSuchElementException();
       } else {
         element.index++;

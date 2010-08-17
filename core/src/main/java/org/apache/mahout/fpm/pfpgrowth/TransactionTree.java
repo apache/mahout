@@ -354,9 +354,10 @@ public final class TransactionTree implements Writable {
         vLong.readFields(in);
         nodeCount[i] = vLong.get();
         vInt.readFields(in);
-        childCount[i] = vInt.get();
-        nodeChildren[i] = new int[childCount[i]];
-        for (int j = 0, k = childCount[i]; j < k; j++) {
+        int childCountI = vInt.get();
+        childCount[i] = childCountI;
+        nodeChildren[i] = new int[childCountI];
+        for (int j = 0; j < childCountI; j++) {
           vInt.readFields(in);
           nodeChildren[i][j] = vInt.get();
         }
@@ -370,9 +371,10 @@ public final class TransactionTree implements Writable {
     VIntWritable vInt = new VIntWritable();
     VLongWritable vLong = new VLongWritable();
     if (representedAsList) {
-      vInt.set(transactionSet.size());
+      int transactionSetSize = transactionSet.size();
+      vInt.set(transactionSetSize);
       vInt.write(out);
-      for (int i = 0, j = transactionSet.size(); i < j; i++) {
+      for (int i = 0; i < transactionSetSize; i++) {
         Pair<List<Integer>,Long> transaction = transactionSet.get(i);
         
         vLong.set(transaction.getSecond());

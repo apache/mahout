@@ -47,7 +47,7 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>, JsonDeserializ
   }
 
   public Matrix deserialize(JsonElement json, Type typeOfT,
-                            JsonDeserializationContext context) throws JsonParseException {
+                            JsonDeserializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());

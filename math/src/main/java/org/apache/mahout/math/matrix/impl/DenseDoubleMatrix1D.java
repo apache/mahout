@@ -242,13 +242,13 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     int otherIndex = other.index(0);
 
     // specialized for speed
-    if (function == Functions.mult) {  // x[i] = x[i] * y[i]
+    if (function == Functions.MULT) {  // x[i] = x[i] * y[i]
       for (int k = size; --k >= 0;) {
         elems[index] *= otherElems[otherIndex];
         index += s;
         otherIndex += ys;
       }
-    } else if (function == Functions.div) { // x[i] = x[i] / y[i]
+    } else if (function == Functions.DIV) { // x[i] = x[i] / y[i]
       for (int k = size; --k >= 0;) {
         elems[index] /= otherElems[otherIndex];
         index += s;

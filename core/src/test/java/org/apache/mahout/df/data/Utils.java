@@ -30,9 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.data.Dataset.Attribute;
-import org.slf4j.Logger;
 
 /**
  * Helper methods used by the tests
@@ -40,22 +38,6 @@ import org.slf4j.Logger;
  */
 public final class Utils {
   private Utils() {
-  }
-
-  private static class LogCallback implements PredictionCallback {
-  
-    private static Logger log;
-  
-    private LogCallback(Logger log) {
-      this.log = log;
-    }
-  
-    @Override
-    public void prediction(int treeId, int instanceId, int prediction) {
-      log.info(String.format("treeId:%04d, instanceId:%06d, prediction:%d",
-          treeId, instanceId, prediction));
-    }
-  
   }
 
   /** Used when generating random CATEGORICAL values */
@@ -72,7 +54,6 @@ public final class Utils {
    * 
    * @param rng Random number generator
    * @param nbTokens number of tokens to generate
-   * @return
    */
   public static char[] randomTokens(Random rng, int nbTokens) {
     char[] result = new char[nbTokens];
@@ -96,9 +77,6 @@ public final class Utils {
 
   /**
    * Generates a space-separated String that contains all the tokens
-   * 
-   * @param tokens
-   * @return
    */
   public static String generateDescriptor(char[] tokens) {
     StringBuilder builder = new StringBuilder();
@@ -117,9 +95,6 @@ public final class Utils {
    * <li>10% of the attributes are IGNORED</li>
    * <li>one randomly chosen attribute becomes the LABEL</li>
    * </ul>
-   * 
-   * @param nbAttributes
-   * @return
    */
   public static String randomDescriptor(Random rng, int nbAttributes) {
     return generateDescriptor(randomTokens(rng, nbAttributes));
@@ -131,8 +106,6 @@ public final class Utils {
    * @param rng Random number generator
    * @param nbAttributes number of attributes
    * @param number of data lines to generate
-   * @return
-   * @throws Exception 
    */
   public static double[][] randomDoubles(Random rng, int nbAttributes,int number) throws DescriptorException {
     String descriptor = randomDescriptor(rng, nbAttributes);
@@ -172,8 +145,6 @@ public final class Utils {
    * @param rng Random number generator
    * @param nbAttributes number of attributes
    * @param size data size
-   * @return
-   * @throws Exception 
    */
   public static Data randomData(Random rng, int nbAttributes, int size) throws DescriptorException {
     String descriptor = randomDescriptor(rng, nbAttributes);
@@ -194,9 +165,7 @@ public final class Utils {
    * range [0, CATEGORICAL_RANGE[</li>
    * </ul>
    * 
-   * @param rng
    * @param attrs attributes description
-   * @return
    */
   private static double[] randomVector(Random rng, Attribute[] attrs) {
     double[] vector = new double[attrs.length];
@@ -254,8 +223,6 @@ public final class Utils {
    * @param descriptor
    * @param number data size
    * @param value label value
-   * @return
-   * @throws Exception 
    */
   public static double[][] randomDoublesWithSameLabel(Random rng,
       String descriptor, int number, int value) throws DescriptorException {
@@ -272,10 +239,6 @@ public final class Utils {
 
   /**
    * finds the label attribute's index
-   * 
-   * @param descriptor
-   * @return
-   * @throws Exception 
    */
   public static int findLabel(String descriptor) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
@@ -332,10 +295,6 @@ public final class Utils {
 
   /**
    * Split the data into numMaps splits
-   * 
-   * @param sData
-   * @param numMaps
-   * @return
    */
   public static String[][] splitData(String[] sData, int numMaps) {
     int nbInstances = sData.length;

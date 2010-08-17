@@ -295,7 +295,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     int index = index(0, 0);
 
     // specialized for speed
-    if (function == Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.MULT) { // x[i] = x[i] * y[i]
       for (int row = rows; --row >= 0;) {
         for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
           elems[i] *= otherElems[j];
@@ -305,7 +305,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
         index += rs;
         otherIndex += ors;
       }
-    } else if (function == Functions.div) { // x[i] = x[i] / y[i]
+    } else if (function == Functions.DIV) { // x[i] = x[i] / y[i]
       for (int row = rows; --row >= 0;) {
         for (int i = index, j = otherIndex, column = columns; --column >= 0;) {
           elems[i] /= otherElems[j];

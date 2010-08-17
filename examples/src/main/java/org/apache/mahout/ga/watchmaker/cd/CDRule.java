@@ -75,9 +75,6 @@ public class CDRule implements Rule {
   
   /**
    * Random rule.
-   * 
-   * @param threshold
-   * @param rng
    */
   public CDRule(double threshold, Random rng) {
     this(threshold);
@@ -152,7 +149,6 @@ public class CDRule implements Rule {
    * 
    * @param condInd
    *          index of the condition
-   * @return
    */
   boolean condition(int condInd, DataLine dl) {
     int attrInd = attributeIndex(condInd);
@@ -218,7 +214,6 @@ public class CDRule implements Rule {
   /**
    * operator
    * 
-   * @param index
    * @return true if '&gt;='; false if '&lt;'
    */
   public boolean getO(int index) {
@@ -228,9 +223,7 @@ public class CDRule implements Rule {
   /**
    * set the operator
    * 
-   * @param index
-   * @param o
-   *          true if '&gt;='; false if '&lt;'
+   * @param o true if '&gt;='; false if '&lt;'
    */
   public void setO(int index, boolean o) {
     operators.setBit(index, o);
@@ -275,9 +268,7 @@ public class CDRule implements Rule {
   
   /**
    * Compares a given gene between two rules
-   * 
-   * @param rule1
-   * @param rule2
+   *
    * @param index
    *          gene index
    * @return true if the gene is the same

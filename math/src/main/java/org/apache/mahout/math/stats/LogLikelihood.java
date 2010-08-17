@@ -76,8 +76,7 @@ public final class LogLikelihood {
   
   /** 
    * Calculate the Root Log-likelihood ratio for two events.
-   * 
-   * @see #logLikelihoodRatio(int, int, int, int);
+   * See {@link #logLikelihoodRatio(int, int, int, int)}.
 
    * @param k11 The number of times the two events occurred together
    * @param k12 The number of times the second event occurred WITHOUT the first event
@@ -92,7 +91,7 @@ public final class LogLikelihood {
   public static double rootLogLikelihoodRatio(int k11, int k12, int k21, int k22) {
     double llr = logLikelihoodRatio(k11, k12, k21, k22);
     double sqrt = Math.sqrt(llr);
-    if (((double) k11 / (k11+k12)) < ((double) k21 / (k21+k22))) {
+    if (((double) k11 / (k11 + k12)) < ((double) k21 / (k21 + k22))) {
       sqrt = -sqrt;
     }
     return sqrt;

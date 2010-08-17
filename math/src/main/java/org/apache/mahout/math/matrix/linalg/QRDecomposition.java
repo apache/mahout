@@ -45,8 +45,6 @@ public class QRDecomposition implements java.io.Serializable {
    * can be retrieved via instance methods of the returned decomposition object.
    *
    * @param A A rectangular matrix.
-   * @return a decomposition object to access <tt>R</tt> and the Householder vectors <tt>H</tt>, and to compute
-   *         <tt>Q</tt>.
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
 

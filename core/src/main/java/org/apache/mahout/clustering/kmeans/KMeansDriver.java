@@ -73,11 +73,7 @@ public class KMeansDriver extends AbstractJob {
    *          the number of reducers
    * @param runClustering 
    *          true if points are to be clustered after iterations are completed
-   * @param runSequential if true execute sequential algorithm 
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
+   * @param runSequential if true execute sequential algorithm
    */
   public static void runJob(Path input,
                             Path clustersIn,
@@ -87,8 +83,8 @@ public class KMeansDriver extends AbstractJob {
                             int maxIterations,
                             int numReduceTasks,
                             boolean runClustering,
-                            boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+                            boolean runSequential)
+      throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     new KMeansDriver().job(input,
                            clustersIn,
                            output,
@@ -108,7 +104,8 @@ public class KMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected"
+            + " and written out to this path first")
         .create());
     addOption(DefaultOptionCreator.numClustersOption()
         .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -142,8 +139,17 @@ public class KMeansDriver extends AbstractJob {
           .parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)));
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD));
-    job(input, clusters, output, measureClass, convergenceDelta, maxIterations, numReduceTasks, runClustering, runSequential);
+    boolean runSequential =
+        getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
+    job(input,
+        clusters,
+        output,
+        measureClass,
+        convergenceDelta,
+        maxIterations,
+        numReduceTasks,
+        runClustering,
+        runSequential);
     return 0;
   }
 
@@ -168,11 +174,6 @@ public class KMeansDriver extends AbstractJob {
    * @param runClustering 
    *          true if points are to be clustered after iterations are completed
    * @param runSequential if true execute sequential algorithm
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
    */
   public void job(Path input,
                   Path clustersIn,
@@ -182,7 +183,8 @@ public class KMeansDriver extends AbstractJob {
                   int maxIterations,
                   int numReduceTasks,
                   boolean runClustering,
-                  boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException,
+                  boolean runSequential)
+      throws IOException, InterruptedException, ClassNotFoundException, InstantiationException,
       IllegalAccessException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = ccl.loadClass(measureClass);
@@ -191,14 +193,24 @@ public class KMeansDriver extends AbstractJob {
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
-      log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output, measureClass });
-      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", new Object[] { convergenceDelta,
-          maxIterations, numReduceTasks, VectorWritable.class.getName() });
+      log.info("Input: {} Clusters In: {} Out: {} Distance: {}",
+               new Object[] { input, clustersIn, output, measureClass });
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
+               new Object[] { convergenceDelta, maxIterations, numReduceTasks, VectorWritable.class.getName() });
     }
-    Path clustersOut = buildClusters(input, clustersIn, output, measure, maxIterations, numReduceTasks, delta, runSequential);
+    Path clustersOut = buildClusters(input,
+                                     clustersIn,
+                                     output,
+                                     measure,
+                                     maxIterations,
+                                     numReduceTasks,
+                                     delta,
+                                     runSequential);
     if (runClustering) {
       log.info("Clustering data");
-      clusterData(input, clustersOut, new Path(output, AbstractCluster.CLUSTERED_POINTS_DIR), measure, delta, runSequential);
+      clusterData(input,
+                  clustersOut,
+                  new Path(output, AbstractCluster.CLUSTERED_POINTS_DIR), measure, delta, runSequential);
     }
   }
 
@@ -218,14 +230,9 @@ public class KMeansDriver extends AbstractJob {
    * @param numReduceTasks
    *          the number of reducers
    * @param runSequential if true execute sequential algorithm
-   * @param convergenceDelta
+   * @param delta
    *          the convergence delta value
    * @return the Path of the final clusters directory
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
    */
   public Path buildClusters(Path input,
                             Path clustersIn,
@@ -287,9 +294,12 @@ public class KMeansDriver extends AbstractJob {
                                                            Cluster.class);
       try {
         for (Cluster cluster : clusters) {
-          log.info("Writing Cluster:" + cluster.getId() + " center:" + AbstractCluster.formatVector(cluster.getCenter(), null)
-              + " numPoints:" + cluster.getNumPoints() + " radius:" + AbstractCluster.formatVector(cluster.getRadius(), null) + " to: "
-              + clustersOut.getName());
+          log.info("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
+              new Object[] { cluster.getId(),
+                             AbstractCluster.formatVector(cluster.getCenter(), null),
+                             cluster.getNumPoints(),
+                             AbstractCluster.formatVector(cluster.getRadius(), null),
+                             clustersOut.getName() });
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
@@ -301,19 +311,6 @@ public class KMeansDriver extends AbstractJob {
     return clustersIn;
   }
 
-  /**
-   * @param input
-   * @param clustersIn
-   * @param output
-   * @param measure
-   * @param maxIterations
-   * @param numReduceTasks
-   * @param delta
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   */
   private Path buildClustersMR(Path input,
                                Path clustersIn,
                                Path output,
@@ -351,15 +348,14 @@ public class KMeansDriver extends AbstractJob {
    * @param numReduceTasks
    *          the number of reducer tasks
    * @return true if the iteration successfully runs
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  private boolean runIteration(Path input,
-                               Path clustersIn,
-                               Path clustersOut,
-                               String measureClass,
-                               String convergenceDelta,
-                               int numReduceTasks) throws IOException, InterruptedException, ClassNotFoundException {
+  private static boolean runIteration(Path input,
+                                      Path clustersIn,
+                                      Path clustersOut,
+                                      String measureClass,
+                                      String convergenceDelta,
+                                      int numReduceTasks)
+      throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
@@ -445,10 +441,6 @@ public class KMeansDriver extends AbstractJob {
    * @param convergenceDelta
    *          the convergence delta value
    * @param runSequential if true execute sequential algorithm
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
    */
   public void clusterData(Path input,
                           Path clustersIn,
@@ -493,8 +485,8 @@ public class KMeansDriver extends AbstractJob {
                                                            IntWritable.class,
                                                            WeightedVectorWritable.class);
       try {
-        WritableComparable<?> key = (WritableComparable<?>) reader.getKeyClass().newInstance();
-        VectorWritable vw = (VectorWritable) reader.getValueClass().newInstance();
+        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, vw)) {
           clusterer.emitPointToNearestCluster(vw.get(), clusters, writer);
           vw = (VectorWritable) reader.getValueClass().newInstance();

@@ -49,22 +49,20 @@ import org.easymock.classextension.EasyMock;
 public class TestRowSimilarityJob extends MahoutTestCase {
 
   /**
-   * @tests {@link RowSimilarityJob.RowWeightMapper}
-   *
-   * @throws Exception
+   * Tests {@link RowSimilarityJob.RowWeightMapper}
    */
   public void testRowWeightMapper() throws Exception {
     Mapper<IntWritable,VectorWritable,VarIntWritable,WeightedOccurrence>.Context context =
       EasyMock.createMock(Mapper.Context.class);
 
-    context.write(new VarIntWritable(456), new WeightedOccurrence(123, 0.5d, 2.0d));
-    context.write(new VarIntWritable(789), new WeightedOccurrence(123, 0.1d, 2.0d));
+    context.write(new VarIntWritable(456), new WeightedOccurrence(123, 0.5, 2.0));
+    context.write(new VarIntWritable(789), new WeightedOccurrence(123, 0.1, 2.0));
 
     EasyMock.replay(context);
 
     Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE);
-    vector.set(456, 0.5d);
-    vector.set(789, 0.1d);
+    vector.set(456, 0.5);
+    vector.set(789, 0.1);
 
     RowSimilarityJob.RowWeightMapper mapper = new RowSimilarityJob.RowWeightMapper();
     setField(mapper, "similarity", new DistributedTanimotoCoefficientVectorSimilarity());
@@ -75,14 +73,12 @@ public class TestRowSimilarityJob extends MahoutTestCase {
   }
 
   /**
-   * @tests {@link RowSimilarityJob.WeightedOccurrencesPerColumnReducer}
-   *
-   * @throws Exception
+   * Tests {@link RowSimilarityJob.WeightedOccurrencesPerColumnReducer}
    */
   public void testWeightedOccurrencesPerColumnReducer() throws Exception {
 
-    List<WeightedOccurrence> weightedOccurrences = Arrays.asList(new WeightedOccurrence(45, 0.5d, 1.0d),
-        new WeightedOccurrence(78, 3.0d, 9.0d));
+    List<WeightedOccurrence> weightedOccurrences = Arrays.asList(new WeightedOccurrence(45, 0.5, 1.0),
+        new WeightedOccurrence(78, 3.0, 9.0));
 
     Reducer<VarIntWritable,WeightedOccurrence,VarIntWritable,WeightedOccurrenceArray>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -100,8 +96,6 @@ public class TestRowSimilarityJob extends MahoutTestCase {
   /**
    * applies an {@link IArgumentMatcher} to a {@link WeightedOccurrenceArray} that checks whether
    * it matches all {@link WeightedOccurrence}
-   *
-   * @throws Exception
    */
   static WeightedOccurrenceArray weightedOccurrenceArrayMatches(
       final Collection<WeightedOccurrence> occurrencesToMatch) {
@@ -130,22 +124,20 @@ public class TestRowSimilarityJob extends MahoutTestCase {
   }
 
   /**
-   * @tests {@link RowSimilarityJob.CooccurrencesMapper}
-   *
-   * @throws Exception
+   * Tests {@link RowSimilarityJob.CooccurrencesMapper}
    */
   public void testCooccurrencesMapper() throws Exception {
     Mapper<VarIntWritable,WeightedOccurrenceArray,WeightedRowPair,Cooccurrence>.Context context =
       EasyMock.createMock(Mapper.Context.class);
 
-    context.write(new WeightedRowPair(34, 34, 1.0d, 1.0d), new Cooccurrence(12, 0.5d, 0.5d));
-    context.write(new WeightedRowPair(34, 56, 1.0d, 3.0d), new Cooccurrence(12, 0.5d, 1.0d));
-    context.write(new WeightedRowPair(56, 56, 3.0d, 3.0d), new Cooccurrence(12, 1.0d, 1.0d));
+    context.write(new WeightedRowPair(34, 34, 1.0, 1.0), new Cooccurrence(12, 0.5, 0.5));
+    context.write(new WeightedRowPair(34, 56, 1.0, 3.0), new Cooccurrence(12, 0.5, 1.0));
+    context.write(new WeightedRowPair(56, 56, 3.0, 3.0), new Cooccurrence(12, 1.0, 1.0));
 
     EasyMock.replay(context);
 
     WeightedOccurrenceArray weightedOccurrences = new WeightedOccurrenceArray(new WeightedOccurrence[] {
-        new WeightedOccurrence(34, 0.5d, 1.0d), new WeightedOccurrence(56, 1.0d, 3.0d) });
+        new WeightedOccurrence(34, 0.5, 1.0), new WeightedOccurrence(56, 1.0, 3.0) });
 
     new RowSimilarityJob.CooccurrencesMapper().map(new VarIntWritable(12), weightedOccurrences, context);
 
@@ -153,74 +145,68 @@ public class TestRowSimilarityJob extends MahoutTestCase {
   }
 
   /**
-   * @tests {@link SimilarityReducer}
-   *
-   * @throws Exception
+   * Tests {@link SimilarityReducer}
    */
   public void testSimilarityReducer() throws Exception {
 
     Reducer<WeightedRowPair,Cooccurrence,SimilarityMatrixEntryKey,MatrixEntryWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
-    context.write(EasyMock.eq(new SimilarityMatrixEntryKey(12, 0.5d)),
-        MathHelper.matrixEntryMatches(12, 34, 0.5d));
-    context.write(EasyMock.eq(new SimilarityMatrixEntryKey(34, 0.5d)),
-        MathHelper.matrixEntryMatches(34, 12, 0.5d));
+    context.write(EasyMock.eq(new SimilarityMatrixEntryKey(12, 0.5)),
+        MathHelper.matrixEntryMatches(12, 34, 0.5));
+    context.write(EasyMock.eq(new SimilarityMatrixEntryKey(34, 0.5)),
+        MathHelper.matrixEntryMatches(34, 12, 0.5));
 
     EasyMock.replay(context);
 
     SimilarityReducer reducer = new SimilarityReducer();
     setField(reducer, "similarity", new DistributedTanimotoCoefficientVectorSimilarity());
 
-    reducer.reduce(new WeightedRowPair(12, 34, 3.0d, 3.0d), Arrays.asList(new Cooccurrence(56, 1.0d, 2.0d),
-        new Cooccurrence(78, 3.0d, 6.0d)), context);
+    reducer.reduce(new WeightedRowPair(12, 34, 3.0, 3.0), Arrays.asList(new Cooccurrence(56, 1.0, 2.0),
+        new Cooccurrence(78, 3.0, 6.0)), context);
 
     EasyMock.verify(context);
   }
 
   /**
-   * @tests {@link SimilarityReducer} in the special case of computing the similarity of a row to
+   * Tests {@link SimilarityReducer} in the special case of computing the similarity of a row to
    * itself
-   *
-   * @throws Exception
    */
   public void testSimilarityReducerSelfSimilarity() throws Exception {
 
     Reducer<WeightedRowPair,Cooccurrence,SimilarityMatrixEntryKey,MatrixEntryWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
-    context.write(EasyMock.eq(new SimilarityMatrixEntryKey(90, 1.0d)), MathHelper.matrixEntryMatches(90, 90, 1.0d));
+    context.write(EasyMock.eq(new SimilarityMatrixEntryKey(90, 1.0)), MathHelper.matrixEntryMatches(90, 90, 1.0));
 
     EasyMock.replay(context);
 
     SimilarityReducer reducer = new SimilarityReducer();
     setField(reducer, "similarity", new DistributedTanimotoCoefficientVectorSimilarity());
 
-    reducer.reduce(new WeightedRowPair(90, 90, 2.0d, 2.0d), Arrays.asList(new Cooccurrence(56, 1.0d, 2.0d),
-        new Cooccurrence(78, 3.0d, 6.0d)), context);
+    reducer.reduce(new WeightedRowPair(90, 90, 2.0, 2.0), Arrays.asList(new Cooccurrence(56, 1.0, 2.0),
+        new Cooccurrence(78, 3.0, 6.0)), context);
 
     EasyMock.verify(context);
   }
 
   /**
-   * @tests {@link EntriesToVectorsReducer}
-   *
-   * @throws Exception
+   * Tests {@link EntriesToVectorsReducer}
    */
   public void testEntriesToVectorsReducer() throws Exception {
     Reducer<SimilarityMatrixEntryKey,MatrixEntryWritable,IntWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
 
-    context.write(EasyMock.eq(new IntWritable(12)), MathHelper.vectorMatches(MathHelper.elem(34, 0.8d)));
+    context.write(EasyMock.eq(new IntWritable(12)), MathHelper.vectorMatches(MathHelper.elem(34, 0.8)));
 
     EasyMock.replay(context);
 
     EntriesToVectorsReducer reducer = new EntriesToVectorsReducer();
     setField(reducer, "maxSimilaritiesPerRow", 1);
 
-    reducer.reduce(new SimilarityMatrixEntryKey(12, 1.0d), Arrays.asList(
-        MathHelper.matrixEntry(12, 34, 0.8d),
-        MathHelper.matrixEntry(12, 56, 0.7d)), context);
+    reducer.reduce(new SimilarityMatrixEntryKey(12, 1.0), Arrays.asList(
+        MathHelper.matrixEntry(12, 34, 0.8),
+        MathHelper.matrixEntry(12, 56, 0.7)), context);
 
     EasyMock.verify(context);
 
@@ -243,8 +229,6 @@ public class TestRowSimilarityJob extends MahoutTestCase {
    * 0.666, 1,     0
    * 0,     0,     1
    * </pre>
-   *
-   * @throws Exception
    */
   public void testSmallSampleMatrix() throws Exception {
 
@@ -280,17 +264,17 @@ public class TestRowSimilarityJob extends MahoutTestCase {
     assertEquals(3, similarityMatrix.numCols());
     assertEquals(3, similarityMatrix.numRows());
 
-    assertEquals(1.0d, similarityMatrix.get(0, 0));
-    assertEquals(1.0d, similarityMatrix.get(1, 1));
-    assertEquals(1.0d, similarityMatrix.get(2, 2));
+    assertEquals(1.0, similarityMatrix.get(0, 0));
+    assertEquals(1.0, similarityMatrix.get(1, 1));
+    assertEquals(1.0, similarityMatrix.get(2, 2));
 
-    assertEquals(0.0d, similarityMatrix.get(2, 0));
-    assertEquals(0.0d, similarityMatrix.get(2, 1));
-    assertEquals(0.0d, similarityMatrix.get(0, 2));
-    assertEquals(0.0d, similarityMatrix.get(1, 2));
+    assertEquals(0.0, similarityMatrix.get(2, 0));
+    assertEquals(0.0, similarityMatrix.get(2, 1));
+    assertEquals(0.0, similarityMatrix.get(0, 2));
+    assertEquals(0.0, similarityMatrix.get(1, 2));
 
-    assertEquals(0.6666d, similarityMatrix.get(0, 1), 0.0001);
-    assertEquals(0.6666d, similarityMatrix.get(1, 0), 0.0001);
+    assertEquals(0.6666, similarityMatrix.get(0, 1), 0.0001);
+    assertEquals(0.6666, similarityMatrix.get(1, 0), 0.0001);
   }
 
   /**
@@ -334,8 +318,6 @@ public class TestRowSimilarityJob extends MahoutTestCase {
    * r2 --> r1
    * r3 --> r1
    * </pre>
-   *
-   * @throws Exception
    */
   public void testLimitEntriesInSimilarityMatrix() throws Exception {
 
@@ -372,17 +354,17 @@ public class TestRowSimilarityJob extends MahoutTestCase {
     assertEquals(3, similarityMatrix.numCols());
     assertEquals(3, similarityMatrix.numRows());
 
-    assertEquals(0.0d, similarityMatrix.get(0, 0));
-    assertEquals(0.5d, similarityMatrix.get(0, 1));
-    assertEquals(0.0d, similarityMatrix.get(0, 2));
+    assertEquals(0.0, similarityMatrix.get(0, 0));
+    assertEquals(0.5, similarityMatrix.get(0, 1));
+    assertEquals(0.0, similarityMatrix.get(0, 2));
 
-    assertEquals(0.5d, similarityMatrix.get(1, 0));
-    assertEquals(0.0d, similarityMatrix.get(1, 1));
-    assertEquals(0.0d, similarityMatrix.get(1, 2));
+    assertEquals(0.5, similarityMatrix.get(1, 0));
+    assertEquals(0.0, similarityMatrix.get(1, 1));
+    assertEquals(0.0, similarityMatrix.get(1, 2));
 
-    assertEquals(0.4d, similarityMatrix.get(2, 0));
-    assertEquals(0.0d, similarityMatrix.get(2, 1));
-    assertEquals(0.0d, similarityMatrix.get(2, 2));
+    assertEquals(0.4, similarityMatrix.get(2, 0));
+    assertEquals(0.0, similarityMatrix.get(2, 1));
+    assertEquals(0.0, similarityMatrix.get(2, 2));
   }
 
 }

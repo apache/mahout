@@ -81,8 +81,7 @@ public final class PFPGrowth {
     
     DefaultStringifier<List<Pair<String,Long>>> listStringifier = new DefaultStringifier<List<Pair<String,Long>>>(
         conf, GenericsUtil.getClass(list));
-    String serializedString = listStringifier.toString(list);
-    serializedString = params.get(key, serializedString);
+    String serializedString = params.get(key, listStringifier.toString(list));
     list = listStringifier.fromString(serializedString);
     return list;
   }
@@ -104,8 +103,7 @@ public final class PFPGrowth {
     
     DefaultStringifier<Map<String,Long>> mapStringifier = new DefaultStringifier<Map<String,Long>>(conf,
         GenericsUtil.getClass(map));
-    String gListString = mapStringifier.toString(map);
-    gListString = params.get(key, gListString);
+    String gListString = params.get(key, mapStringifier.toString(map));
     map = mapStringifier.fromString(gListString);
     return map;
   }
@@ -151,7 +149,7 @@ public final class PFPGrowth {
       }
     }
     List<Pair<String,Long>> fList = new ArrayList<Pair<String,Long>>();
-    while (queue.isEmpty() == false) {
+    while (!queue.isEmpty()) {
       fList.add(queue.poll());
     }
     return fList;

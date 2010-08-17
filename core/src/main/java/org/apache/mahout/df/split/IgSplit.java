@@ -28,10 +28,6 @@ public abstract class IgSplit {
   
   /**
    * Computes the best split for the given attribute
-   * 
-   * @param data
-   * @param attr
-   * @return
    */
   public abstract Split computeSplit(Data data, int attr);
   

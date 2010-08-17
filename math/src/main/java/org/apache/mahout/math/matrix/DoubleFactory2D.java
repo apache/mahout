@@ -176,7 +176,7 @@ public class DoubleFactory2D extends PersistentObject {
    * </pre>
    */
   public DoubleMatrix2D ascending(int rows, int columns) {
-    return descending(rows, columns).assign(Functions.chain(Functions.negate, Functions.minus(columns * rows)));
+    return descending(rows, columns).assign(Functions.chain(Functions.NEGATE, Functions.minus(columns * rows)));
   }
 
   /**

@@ -44,35 +44,35 @@ import org.apache.mahout.math.function.Functions;
 public class QRDecomposition {
 
   /** Array for internal storage of decomposition. */
-  private final Matrix QR;
+  private final Matrix qr;
 
   /** Row and column dimensions. */
   private final int originalRows;
   private final int originalColumns;
 
   /** Array for internal storage of diagonal of R. */
-  private final Vector Rdiag;
+  private final Vector rDiag;
 
   /**
    * Constructs and returns a new QR decomposition object;  computed by Householder reflections; The decomposed matrices
    * can be retrieved via instance methods of the returned decomposition object.
    *
-   * @param A A rectangular matrix.
+   * @param a A rectangular matrix.
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
 
-  public QRDecomposition(Matrix A) {
+  public QRDecomposition(Matrix a) {
 
     // Initialize.
-    QR = A.clone();
-    originalRows = A.numRows();
-    originalColumns = A.numCols();
-    Rdiag = new DenseVector(originalColumns);
+    qr = a.clone();
+    originalRows = a.numRows();
+    originalColumns = a.numCols();
+    rDiag = new DenseVector(originalColumns);
 
     // precompute and cache some views to avoid regenerating them time and again
     Vector[] QRcolumnsPart = new Vector[originalColumns];
     for (int k = 0; k < originalColumns; k++) {
-      QRcolumnsPart[k] = QR.viewColumn(k).viewPart(k, originalRows - k);
+      QRcolumnsPart[k] = qr.viewColumn(k).viewPart(k, originalRows - k);
     }
 
     // Main loop.
@@ -83,13 +83,13 @@ public class QRDecomposition {
       //if (k<m) nrm = QRcolumnsPart[k].aggregate(hypot,F.identity);
 
       for (int i = k; i < originalRows; i++) { // fixes bug reported by hong.44@osu.edu
-        nrm = Algebra.hypot(nrm, QR.getQuick(i, k));
+        nrm = Algebra.hypot(nrm, qr.getQuick(i, k));
       }
 
 
       if (nrm != 0.0) {
         // Form k-th Householder vector.
-        if (QR.getQuick(k, k) < 0) {
+        if (qr.getQuick(k, k) < 0) {
           nrm = -nrm;
         }
         QRcolumnsPart[k].assign(Functions.div(nrm));
@@ -99,11 +99,11 @@ public class QRDecomposition {
         }
         */
 
-        QR.setQuick(k, k, QR.getQuick(k, k) + 1);
+        qr.setQuick(k, k, qr.getQuick(k, k) + 1);
 
         // Apply transformation to remaining columns.
         for (int j = k + 1; j < originalColumns; j++) {
-          Vector QRcolj = QR.viewColumn(j).viewPart(k, originalRows - k);
+          Vector QRcolj = qr.viewColumn(j).viewPart(k, originalRows - k);
           double s = QRcolumnsPart[k].dot(QRcolj);
           /*
           // fixes bug reported by John Chambers
@@ -114,16 +114,16 @@ public class QRDecomposition {
             s += QR[i][k]*QR[i][j];
           }
           */
-          s = -s / QR.getQuick(k, k);
+          s = -s / qr.getQuick(k, k);
           //QRcolumnsPart[j].assign(QRcolumns[k], F.plusMult(s));
 
           for (int i = k; i < originalRows; i++) {
-            QR.setQuick(i, j, QR.getQuick(i, j) + s * QR.getQuick(i, k));
+            qr.setQuick(i, j, qr.getQuick(i, j) + s * qr.getQuick(i, k));
           }
 
         }
       }
-      Rdiag.setQuick(k, -nrm);
+      rDiag.setQuick(k, -nrm);
     }
   }
 
@@ -135,15 +135,15 @@ public class QRDecomposition {
    */
   @Deprecated
   public Matrix getH() {
-    Matrix H = QR.clone();
-    int rows = H.numRows();
-    int columns = H.numCols();
+    Matrix h = qr.clone();
+    int rows = h.numRows();
+    int columns = h.numCols();
     for (int i = 0; i < rows; i++) {
       for (int j = i + 1; j < columns; j++) {
-        H.setQuick(i, j, 0);
+        h.setQuick(i, j, 0);
       }
     }
-    return H;
+    return h;
   }
 
   /**
@@ -153,19 +153,19 @@ public class QRDecomposition {
    */
   public Matrix getQ() {
     int columns = Math.min(originalColumns, originalRows);
-    Matrix Q = QR.like(originalRows, columns);
+    Matrix q = qr.like(originalRows, columns);
     for (int k = columns - 1; k >= 0; k--) {
-      Vector QRcolk = QR.viewColumn(k).viewPart(k, originalRows - k);
-      Q.set(k, k, 1);
+      Vector QRcolk = qr.viewColumn(k).viewPart(k, originalRows - k);
+      q.set(k, k, 1);
       for (int j = k; j < columns; j++) {
-        if (QR.get(k, k) != 0) {
-          Vector Qcolj = Q.viewColumn(j).viewPart(k, originalRows - k);
-          double s = -QRcolk.dot(Qcolj) / QR.get(k, k);
+        if (qr.get(k, k) != 0) {
+          Vector Qcolj = q.viewColumn(j).viewPart(k, originalRows - k);
+          double s = -QRcolk.dot(Qcolj) / qr.get(k, k);
           Qcolj.assign(QRcolk, Functions.plusMult(s));
         }
       }
     }
-    return Q;
+    return q;
   }
 
   /**
@@ -175,19 +175,19 @@ public class QRDecomposition {
    */
   public Matrix getR() {
     int rows = Math.min(originalRows, originalColumns);
-    Matrix R = QR.like(rows, originalColumns);
+    Matrix r = qr.like(rows, originalColumns);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < originalColumns; j++) {
         if (i < j) {
-          R.setQuick(i, j, QR.getQuick(i, j));
+          r.setQuick(i, j, qr.getQuick(i, j));
         } else if (i == j) {
-          R.setQuick(i, j, Rdiag.getQuick(i));
+          r.setQuick(i, j, rDiag.getQuick(i));
         } else {
-          R.setQuick(i, j, 0);
+          r.setQuick(i, j, 0);
         }
       }
     }
-    return R;
+    return r;
   }
 
   /**
@@ -197,7 +197,7 @@ public class QRDecomposition {
    */
   public boolean hasFullRank() {
     for (int j = 0; j < originalColumns; j++) {
-      if (Rdiag.getQuick(j) == 0) {
+      if (rDiag.getQuick(j) == 0) {
         return false;
       }
     }
@@ -217,26 +217,26 @@ public class QRDecomposition {
     }
 
     int columns = B.numCols();
-    Matrix X = B.like(originalColumns, columns);
+    Matrix x = B.like(originalColumns, columns);
 
     // this can all be done a bit more efficiently if we don't actually
     // form explicit versions of Q^T and R but this code isn't soo bad
     // and it is much easier to understand
-    Matrix Qt = getQ().transpose();
-    Matrix Y = Qt.times(B);
+    Matrix qt = getQ().transpose();
+    Matrix y = qt.times(B);
 
-    Matrix R = getR();
+    Matrix r = getR();
     for (int k = Math.min(originalColumns, originalRows) - 1; k >= 0; k--) {
       // X[k,] = Y[k,] / R[k,k], note that X[k,] starts with 0 so += is same as =
-      X.viewRow(k).assign(Y.viewRow(k), Functions.plusMult(1 / R.get(k, k)));
+      x.viewRow(k).assign(y.viewRow(k), Functions.plusMult(1 / r.get(k, k)));
 
       // Y[0:(k-1),] -= R[0:(k-1),k] * X[k,]
-      Vector rColumn = R.viewColumn(k).viewPart(0, k);
+      Vector rColumn = r.viewColumn(k).viewPart(0, k);
       for (int c = 0; c < columns; c++) {
-        Y.viewColumn(c).viewPart(0, k).assign(rColumn, Functions.plusMult(-X.get(k, c)));
+        y.viewColumn(c).viewPart(0, k).assign(rColumn, Functions.plusMult(-x.get(k, c)));
       }
     }
-    return X;
+    return x;
   }
 
   /**

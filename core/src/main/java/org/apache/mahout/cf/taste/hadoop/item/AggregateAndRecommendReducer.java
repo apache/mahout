@@ -33,12 +33,16 @@ import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 /**
  * <p>computes prediction values for each user</p>
@@ -127,7 +131,7 @@ public final class AggregateAndRecommendReducer extends
           : predictionVector.plus(prefAndSimilarityColumn.getSimilarityColumn());
     }
 
-    Iterator<Element> predictions = predictionVector.iterateNonZero();
+    Iterator<Vector.Element> predictions = predictionVector.iterateNonZero();
     List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>();
     while (predictions.hasNext() && recommendations.size() < recommendationsPerUser) {
       Vector.Element prediction = predictions.next();
@@ -159,7 +163,7 @@ public final class AggregateAndRecommendReducer extends
       Vector simColumn = prefAndSimilarityColumn.getSimilarityColumn();
       float prefValue = prefAndSimilarityColumn.getPrefValue();
       /* count the number of items used for each prediction */
-      Iterator<Element> usedItemsIterator = simColumn.iterateNonZero();
+      Iterator<Vector.Element> usedItemsIterator = simColumn.iterateNonZero();
       while (usedItemsIterator.hasNext()) {
         int itemIDIndex = usedItemsIterator.next().index();
         numberOfSimilarItemsUsed.setQuick(itemIDIndex, numberOfSimilarItemsUsed.getQuick(itemIDIndex) + 1);
@@ -178,9 +182,9 @@ public final class AggregateAndRecommendReducer extends
     }
 
     Vector recommendationVector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
-    Iterator<Element> iterator = numerators.iterateNonZero();
+    Iterator<Vector.Element> iterator = numerators.iterateNonZero();
     while (iterator.hasNext()) {
-      Element element = iterator.next();
+      Vector.Element element = iterator.next();
       int itemIDIndex = element.index();
       /* preference estimations must be based on at least 2 datapoints */
       if (numberOfSimilarItemsUsed.getQuick(itemIDIndex) > 1) {

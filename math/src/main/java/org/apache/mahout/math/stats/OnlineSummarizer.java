@@ -48,11 +48,11 @@ public class OnlineSummarizer {
   private final double[] q = new double[5];
 
   // mean and variance estimates
-  private double mean = 0;
-  private double variance = 0;
+  private double mean;
+  private double variance;
 
   // number of samples seen so far
-  private int n = 0;
+  private int n;
 
   public void add(double sample) {
     sorted = false;

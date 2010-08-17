@@ -59,7 +59,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   @Override
   protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
-    if (it.hasNext() == false) {
+    if (!it.hasNext()) {
       return;
     }
     StringTuple value = it.next();

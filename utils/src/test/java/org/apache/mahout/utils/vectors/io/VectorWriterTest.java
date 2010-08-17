@@ -17,11 +17,9 @@
 
 package org.apache.mahout.utils.vectors.io;
 
-import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import junit.framework.Assert;
 
@@ -38,30 +36,9 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
 
 public class VectorWriterTest extends MahoutTestCase {
-  
-  private File tmpLoc;
-  private File tmpFile;
-  
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    tmpLoc = new File(tmpDir, "sfvwt");
-    tmpLoc.deleteOnExit();
-    tmpLoc.mkdirs();
-    tmpFile = File.createTempFile("sfvwt", ".dat", tmpLoc);
-    tmpFile.deleteOnExit();
-  }
-  
-  @Override
-  public void tearDown() throws Exception {
-    tmpFile.delete();
-    tmpLoc.delete();
-    super.tearDown();
-  }
-  
+
   public void testSFVW() throws Exception {
-    Path path = new Path(tmpFile.getAbsolutePath());
+    Path path = getTestTempFilePath("sfvw");
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
@@ -88,7 +65,7 @@ public class VectorWriterTest extends MahoutTestCase {
     vectors.add(new DenseVector(new double[]{1.3, 1.5, 3.5}));
     writer.write(vectors);
     writer.close();
-    StringBuffer buffer = strWriter.getBuffer();
+    String buffer = strWriter.toString();
     Assert.assertNotNull(buffer);
     Assert.assertTrue(buffer.length() > 0);
     

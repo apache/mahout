@@ -112,8 +112,7 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
       DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(job,
           GenericsUtil.getClass(labelWeightSumTemp));
       
-      String labelWeightSumString = mapStringifier.toString(labelWeightSumTemp);
-      labelWeightSumString = job.get("cnaivebayes.sigma_k", labelWeightSumString);
+      String labelWeightSumString = job.get("cnaivebayes.sigma_k", mapStringifier.toString(labelWeightSumTemp));
       labelWeightSumTemp = mapStringifier.fromString(labelWeightSumString);
       for (Map.Entry<String, Double> stringDoubleEntry : labelWeightSumTemp.entrySet()) {
         this.labelWeightSum.put(stringDoubleEntry.getKey(), stringDoubleEntry.getValue());
@@ -121,12 +120,10 @@ public class CBayesThetaNormalizerMapper extends MapReduceBase implements
       
       DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(job, GenericsUtil
           .getClass(sigmaJSigmaK));
-      String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
-      sigmaJSigmaKString = job.get("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
+      String sigmaJSigmaKString = job.get("cnaivebayes.sigma_jSigma_k", stringifier.toString(sigmaJSigmaK));
       sigmaJSigmaK = stringifier.fromString(sigmaJSigmaKString);
       
-      String vocabCountString = stringifier.toString(vocabCount);
-      vocabCountString = job.get("cnaivebayes.vocabCount", vocabCountString);
+      String vocabCountString = job.get("cnaivebayes.vocabCount", stringifier.toString(vocabCount));
       vocabCount = stringifier.fromString(vocabCountString);
       
       Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));

@@ -409,14 +409,14 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   public void testAssignUnaryFunction() {
-    test.assign(negate);
+    test.assign(NEGATE);
     for (int i = 1; i < values.length; i += 2) {
       assertEquals("value[" + i + ']', -values[i], test.getQuick(i+2));
     }
   }
 
   public void testAssignBinaryFunction() throws Exception {
-    test.assign(test, plus);
+    test.assign(test, PLUS);
     for (int i = 0; i < values.length; i++) {
       if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, test.get(i));

@@ -139,7 +139,7 @@ public final class VectorDumper {
                 writer.write(iterator.key().toString());
                 writer.write("\t");
               }
-              if (sizeOnly == false) {
+              if (!sizeOnly) {
                 String fmtStr = useJSON ? vector.asFormatString() : VectorHelper.vectorToString(vector, dictionary);
                 writer.write(fmtStr);
                 writer.write('\n');

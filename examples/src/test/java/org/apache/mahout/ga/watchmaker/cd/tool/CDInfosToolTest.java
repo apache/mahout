@@ -70,9 +70,6 @@ public class CDInfosToolTest extends MahoutTestCase {
    * generate random descriptions given the attibutes descriptors.<br> -
    * numerical attributes: generate random min and max values<br> - nominal
    * attributes: generate a random list of values
-   *
-   * @param descriptors
-   * @return
    */
   private Object[][] randomDescriptions(Descriptors descriptors) {
     int nbattrs = descriptors.size();
@@ -138,7 +135,6 @@ public class CDInfosToolTest extends MahoutTestCase {
    *        nominal attributes
    * @param appeared used to make sure that each nominal attribute's value
    *        appears at least once in the dataset
-   * @return
    */
   private String randomLine(Descriptors descriptors, Object[][] descriptions, boolean[][] appeared) {
     StringBuilder buffer = new StringBuilder();

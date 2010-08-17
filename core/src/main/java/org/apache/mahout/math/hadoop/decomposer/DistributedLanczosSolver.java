@@ -54,8 +54,6 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   /**
    * For the distributed case, the best guess at a useful initialization state for Lanczos we'll chose to be
    * uniform over all input dimensions, L_2 normalized.
-   * @param corpus
-   * @return
    */
   @Override
   protected Vector getInitialVector(VectorIterable corpus) {

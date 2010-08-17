@@ -53,13 +53,13 @@ public class Step0JobTest extends MahoutTestCase {
 
   // the generated data must be big enough to be splited by FileInputFormat
 
-  private static final int numAttributes = 40;
+  private static final int NUM_ATTRIBUTES = 40;
 
-  private static final int numInstances = 2000;
+  private static final int NUM_INSTANCES = 2000;
 
   //int numTrees = 10;
 
-  private static final int numMaps = 5;
+  private static final int NUM_MAPS = 5;
 
   /**
    * Computes the "mapred.max.split.size" that will generate the desired number
@@ -82,8 +82,8 @@ public class Step0JobTest extends MahoutTestCase {
     Random rng = RandomUtils.getRandom();
 
     // create a dataset large enough to be split up
-    String descriptor = Utils.randomDescriptor(rng, numAttributes);
-    double[][] source = Utils.randomDoubles(rng, descriptor, numInstances);
+    String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
+    double[][] source = Utils.randomDoubles(rng, descriptor, NUM_INSTANCES);
     String[] sData = Utils.double2String(source);
 
     // write the data to a file
@@ -93,21 +93,21 @@ public class Step0JobTest extends MahoutTestCase {
     job.setInputFormatClass(TextInputFormat.class);
     FileInputFormat.setInputPaths(job, dataPath);
 
-    setMaxSplitSize(job.getConfiguration(), dataPath, numMaps);
+    setMaxSplitSize(job.getConfiguration(), dataPath, NUM_MAPS);
 
     // retrieve the splits
     TextInputFormat input = new TextInputFormat();
     List<InputSplit> splits = input.getSplits(job);
-    assertEquals(numMaps, splits.size());
+    assertEquals(NUM_MAPS, splits.size());
 
-    InputSplit[] sorted = new InputSplit[numMaps];
+    InputSplit[] sorted = new InputSplit[NUM_MAPS];
     splits.toArray(sorted);
     Builder.sortSplits(sorted);
 
     Step0Context context = new Step0Context(new Step0Mapper(), job.getConfiguration(),
-                                            new TaskAttemptID(), numMaps);
+                                            new TaskAttemptID(), NUM_MAPS);
 
-    for (int p = 0; p < numMaps; p++) {
+    for (int p = 0; p < NUM_MAPS; p++) {
       InputSplit split = sorted[p];
 
       RecordReader<LongWritable, Text> reader = input.createRecordReader(split,
@@ -146,12 +146,12 @@ public class Step0JobTest extends MahoutTestCase {
     Random rng = RandomUtils.getRandom();
 
     // create a dataset large enough to be split up
-    String descriptor = Utils.randomDescriptor(rng, numAttributes);
-    double[][] source = Utils.randomDoubles(rng, descriptor, numInstances);
+    String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
+    double[][] source = Utils.randomDoubles(rng, descriptor, NUM_INSTANCES);
 
     // each instance label is its index in the dataset
     int labelId = Utils.findLabel(descriptor);
-    for (int index = 0; index < numInstances; index++) {
+    for (int index = 0; index < NUM_INSTANCES; index++) {
       source[index][labelId] = index;
     }
 
@@ -168,26 +168,26 @@ public class Step0JobTest extends MahoutTestCase {
     job.setInputFormatClass(TextInputFormat.class);
     FileInputFormat.setInputPaths(job, dataPath);
 
-    setMaxSplitSize(job.getConfiguration(), dataPath, numMaps);
+    setMaxSplitSize(job.getConfiguration(), dataPath, NUM_MAPS);
 
     // retrieve the splits
     TextInputFormat input = new TextInputFormat();
     List<InputSplit> splits = input.getSplits(job);
-    assertEquals(numMaps, splits.size());
+    assertEquals(NUM_MAPS, splits.size());
 
-    InputSplit[] sorted = new InputSplit[numMaps];
+    InputSplit[] sorted = new InputSplit[NUM_MAPS];
     splits.toArray(sorted);
     Builder.sortSplits(sorted);
 
     List<Integer> keys = new ArrayList<Integer>();
     List<Step0Output> values = new ArrayList<Step0Output>();
 
-    int[] expectedIds = new int[numMaps];
+    int[] expectedIds = new int[NUM_MAPS];
 
     TaskAttemptContext context = new TaskAttemptContext(job.getConfiguration(),
         new TaskAttemptID());
 
-    for (int p = 0; p < numMaps; p++) {
+    for (int p = 0; p < NUM_MAPS; p++) {
       InputSplit split = sorted[p];
       RecordReader<LongWritable, Text> reader = input.createRecordReader(split,
           context);
@@ -251,9 +251,7 @@ public class Step0JobTest extends MahoutTestCase {
     }
 
     /**
-     * Number of outputs collected
-     * 
-     * @return
+     * @return number of outputs collected
      */
     public int nbOutputs() {
       return index;

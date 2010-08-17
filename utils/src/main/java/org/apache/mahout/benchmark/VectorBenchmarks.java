@@ -94,7 +94,7 @@ public class VectorBenchmarks implements Summarizable {
       while (j < sparsity) {
         double value = r.nextGaussian();
         int index = r.nextInt(cardinality);
-        if (featureSpace.get(index) == false) {
+        if (!featureSpace.get(index)) {
           featureSpace.set(index);
           indexes[j] = index;
           values[j++] = value;
@@ -128,11 +128,11 @@ public class VectorBenchmarks implements Summarizable {
       new Object[] {benchmarkName, implName, content, stats.toString(), opsPerSec, speed});
     String info = stats.toString().replaceAll("\n", "\t") + "\tSpeed = " + opsPerSec + " /sec\tRate = "
                   + speed + " MB/s";
-    if (implType.containsKey(implName) == false) {
+    if (!implType.containsKey(implName)) {
       implType.put(implName, implType.size());
     }
     int implId = implType.get(implName);
-    if (statsMap.containsKey(benchmarkName) == false) {
+    if (!statsMap.containsKey(benchmarkName)) {
       statsMap.put(benchmarkName, new ArrayList<String[]>());
     }
     List<String[]> implStats = statsMap.get(benchmarkName);

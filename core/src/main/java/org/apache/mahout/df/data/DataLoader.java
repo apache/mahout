@@ -57,7 +57,6 @@ public final class DataLoader {
    *          attributes description
    * @param values
    *          used to convert CATEGORICAL attribute values to Integer
-   * @param string
    * @return null if there are missing values '?'
    */
   private static Instance parseString(int id, Attribute[] attrs, List<String>[] values, String string) {
@@ -125,12 +124,10 @@ public final class DataLoader {
   /**
    * Loads the data from a file
    * 
-   * @param dataset
    * @param fs
    *          file system
    * @param fpath
    *          data file path
-   * @return
    * @throws IOException
    *           if any problem is encountered
    */
@@ -234,7 +231,6 @@ public final class DataLoader {
    * 
    * @param descriptor
    *          attributes description
-   * @param data
    */
   public static Dataset generateDataset(String descriptor, String[] data) throws DescriptorException {
     Attribute[] attrs = DescriptorUtils.parseDescriptor(descriptor);
@@ -265,9 +261,6 @@ public final class DataLoader {
    *          data elements
    * @param values
    *          used to convert CATEGORICAL attributes to Integer
-   * @return
-   * @throws RuntimeException
-   *           if no LABEL is found in the attributes description
    */
   private static Data constructData(Attribute[] attrs, List<Instance> vectors, List<String>[] values) {
     Dataset dataset = new Dataset(attrs, values, vectors.size());

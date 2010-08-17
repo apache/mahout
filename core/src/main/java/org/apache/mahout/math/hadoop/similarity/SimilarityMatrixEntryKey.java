@@ -24,10 +24,10 @@ import java.io.IOException;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.mahout.math.Varint;
-import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob.EntriesToVectorsReducer;
 
 /**
- * used as key for the {@link EntriesToVectorsReducer} to collect all rows similar to the specified row
+ * used as key for the {@link RowSimilarityJob.EntriesToVectorsReducer}
+ * to collect all rows similar to the specified row
  *
  * ensures that the similarity matrix entries for a row are seen in descending order
  * by their similarity value via secondary sort

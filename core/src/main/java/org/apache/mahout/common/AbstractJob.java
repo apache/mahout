@@ -36,11 +36,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.util.Tool;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -105,7 +101,6 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  The source of the path may be an input option added using {@link #addInputOption()}
    *  or it may be the value of the <code>mapred.input.dir</code> configuration
    *  property. 
-   * @return
    */
   protected Path getInputPath() {
     return inputPath;
@@ -115,7 +110,6 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  The source of the path may be an output option added using {@link #addOutputOption()}
    *  or it may be the value of the <code>mapred.input.dir</code> configuration
    *  property. 
-   * @return
    */
   protected Path getOutputPath() {
     return outputPath;
@@ -124,10 +118,6 @@ public abstract class AbstractJob extends Configured implements Tool {
   /** Add an option with no argument whose presence can be checked for using
    *  <code>containsKey<code> method on the map returned by 
    *  {@link #parseArguments(String[])};
-   *  
-   * @param name
-   * @param shortName
-   * @param description
    */
   protected void addFlag(String name, String shortName, String description) {
     options.add(buildOption(name, shortName, description, false, false, null));
@@ -136,10 +126,6 @@ public abstract class AbstractJob extends Configured implements Tool {
   /** Add an option to the the set of options this job will parse when
    *  {@link #parseArguments(String[])} is called. This options has an argument
    *  with null as its default value.
-   *  
-   * @param name
-   * @param shortName
-   * @param description
    */
   protected void addOption(String name, String shortName, String description) {
     options.add(buildOption(name, shortName, description, true, false, null));
@@ -147,10 +133,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
   /** Add an option to the the set of options this job will parse when
    *  {@link #parseArguments(String[])} is called.
-   * 
-   * @param name
-   * @param shortName
-   * @param description
+   *
    * @param required if true the {@link #parseArguments(String[])} will throw
    *    fail with an error and usage message if this option is not specified
    *    on the command line.
@@ -163,10 +146,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  {@link #parseArguments(String[])} is called. If this option is not 
    *  specified on the command line the default value will be 
    *  used.
-   *  
-   * @param name
-   * @param shortName
-   * @param description
+   *
    * @param defaultValue the default argument value if this argument is not
    *   found on the command-line. null is allowed.
    */
@@ -180,7 +160,6 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  <code>parseArguments</code> to check for its presence. Otherwise, the
    *  string value of the option will be placed in the map using a key
    *  equal to this options long name preceded by '--'.
-   * @param option
    * @return the option added.
    */
   protected Option addOption(Option option) {
@@ -252,7 +231,6 @@ public abstract class AbstractJob extends Configured implements Tool {
    *  or <code>mapred.input.dir</code> or <code>mapred.output.dir</code>
    *  are present in the Configuration.
    * 
-   * @param args
    * @return a Map<String,Sting> containing options and their argument values.
    *  The presence of a flag can be tested using <code>containsKey</code>, while
    *  argument values can be retrieved using <code>get(optionName</code>. The
@@ -310,26 +288,20 @@ public abstract class AbstractJob extends Configured implements Tool {
   
   /**
    * Build the option key (--name) from the option name
-   * @param optionName
-   * @return
    */
   public static String keyFor(String optionName) {
     return "--" + optionName;
   }
 
   /**
-   * Return the requested option, or null if it has not been specified
-   * @param optionName a String
-   * @return
+   * @return the requested option, or null if it has not been specified
    */
   public String getOption(String optionName) {
     return argMap.get(keyFor(optionName));
   }
 
   /**
-   * Return if the requested option has been specified
-   * @param optionName a String
-   * @return
+   * @return if the requested option has been specified
    */
   public boolean hasOption(String optionName) {
     return argMap.containsKey(keyFor(optionName));
@@ -441,17 +413,27 @@ public abstract class AbstractJob extends Configured implements Tool {
     job.setOutputKeyClass(reducerKey);
     job.setOutputValueClass(reducerValue);
 
-    String customJobName = job.getJobName();
-    if (customJobName == null || customJobName.trim().length() == 0) {
-      customJobName = getClass().getSimpleName();
-    }
-    customJobName += '-' + mapper.getSimpleName();
-    customJobName += '-' + reducer.getSimpleName();
-    job.setJobName(customJobName);
+    job.setJobName(getCustomJobName(job, mapper, reducer));
 
     job.setOutputFormatClass(outputFormat);
     jobConf.set("mapred.output.dir", outputPath.toString());
 
     return job;
   }
+
+  private String getCustomJobName(JobContext job,
+                                  Class<? extends Mapper> mapper,
+                                  Class<? extends Reducer> reducer) {
+    StringBuilder name = new StringBuilder(100);
+    String customJobName = job.getJobName();
+    if (customJobName == null || customJobName.trim().length() == 0) {
+      name.append(getClass().getSimpleName());
+    } else {
+      name.append(customJobName);
+    }
+    name.append('-').append(mapper.getSimpleName());
+    name.append('-').append(reducer.getSimpleName());
+    return name.toString();
+  }
+
 }

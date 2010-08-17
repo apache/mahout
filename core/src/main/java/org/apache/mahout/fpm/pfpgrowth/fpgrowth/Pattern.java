@@ -135,7 +135,7 @@ public class Pattern implements Comparable<Pattern> {
   
   @Override
   public int hashCode() {
-    if (dirty == false) {
+    if (!dirty) {
       return hashCode;
     }
     int result = Arrays.hashCode(pattern);

@@ -46,7 +46,7 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
   }
 
   public Vector deserialize(JsonElement json, Type typeOfT,
-                            JsonDeserializationContext context) throws JsonParseException {
+                            JsonDeserializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();

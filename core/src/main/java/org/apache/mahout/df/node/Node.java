@@ -39,22 +39,17 @@ public abstract class Node implements Writable {
   /**
    * predicts the label for the instance
    * 
-   * @param instance
    * @return -1 if the label cannot be predicted
    */
   public abstract int classify(Instance instance);
   
   /**
-   * returns the total number of nodes of the tree
-   * 
-   * @return
+   * @return the total number of nodes of the tree
    */
   public abstract long nbNodes();
   
   /**
-   * returns the maximum depth of the tree
-   * 
-   * @return
+   * @return the maximum depth of the tree
    */
   public abstract long maxDepth();
   

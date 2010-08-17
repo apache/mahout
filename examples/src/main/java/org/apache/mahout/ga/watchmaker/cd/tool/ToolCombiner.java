@@ -73,7 +73,6 @@ public class ToolCombiner extends Reducer<LongWritable, Text, LongWritable, Text
    *          attribute index
    * @param values
    *          available values
-   * @return
    * @throws IllegalArgumentException
    *           if the attribute should be ignored.
    */

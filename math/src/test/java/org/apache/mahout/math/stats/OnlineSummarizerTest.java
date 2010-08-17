@@ -19,24 +19,22 @@ package org.apache.mahout.math.stats;
 
 import org.apache.mahout.math.jet.random.Gamma;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class OnlineSummarizerTest {
   @Test
   public void testCount() {
     OnlineSummarizer x = new OnlineSummarizer();
-    assertEquals(0, x.count());
+    Assert.assertEquals(0, x.count());
     x.add(1);
-    assertEquals(1, x.count());
+    Assert.assertEquals(1, x.count());
 
     for (int i = 2; i < 110; i++) {
       x.add(i);
-      assertEquals(i, x.count());
+      Assert.assertEquals(i, x.count());
     }
   }
 
@@ -80,23 +78,23 @@ public class OnlineSummarizerTest {
 //            8.10277696526878, 12.1426255901507);              // standard dev
   }
 
-  private void check(OnlineSummarizer x, double... values) {
+  private static void check(OnlineSummarizer x, double... values) {
     for (int i = 0; i < 5; i++) {
       checkRange(String.format("quartile %d", i), x.quartile(i), values[2 * i], values[2 * i + 1]);
     }
-    assertEquals(x.quartile(2), x.median(), 0);
+    Assert.assertEquals(x.quartile(2), x.median(), 0);
 
     checkRange("mean", x.mean(), values[10], values[11]);
     checkRange("sd", x.sd(), values[12], values[13]);
   }
 
-  private void checkRange(String msg, double v, double low, double high) {
+  private static void checkRange(String msg, double v, double low, double high) {
     if (v < low || v > high) {
-      fail(String.format("Wanted %s to be in range [%e,%e] but got %e", msg, low, high, v));
+      Assert.fail(String.format("Wanted %s to be in range [%e,%e] but got %e", msg, low, high, v));
     }
   }
 
-  private OnlineSummarizer normal(int n, int seed) {
+  private static OnlineSummarizer normal(int n, int seed) {
     OnlineSummarizer x = new OnlineSummarizer();
     Random gen = new Random(seed);
     for (int i = 0; i < n; i++) {
@@ -105,7 +103,7 @@ public class OnlineSummarizerTest {
     return x;
   }
 
-  private OnlineSummarizer exp(int n, int seed) {
+  private static OnlineSummarizer exp(int n, int seed) {
     OnlineSummarizer x = new OnlineSummarizer();
     Random gen = new Random(seed);
     for (int i = 0; i < n; i++) {
@@ -114,7 +112,7 @@ public class OnlineSummarizerTest {
     return x;
   }
 
-  private OnlineSummarizer gamma(int n, int seed) {
+  private static OnlineSummarizer gamma(int n, int seed) {
     OnlineSummarizer x = new OnlineSummarizer();
     Gamma g = new Gamma(0.01, 100, new MersenneTwister(seed));
     for (int i = 0; i < n; i++) {

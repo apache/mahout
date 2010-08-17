@@ -95,8 +95,8 @@ public class BayesTfIdfMapper extends MapReduceBase implements
       DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(job,
           GenericsUtil.getClass(labelDocCountTemp));
       
-      String labelDocumentCountString = mapStringifier.toString(labelDocCountTemp);
-      labelDocumentCountString = job.get("cnaivebayes.labelDocumentCounts", labelDocumentCountString);
+      String labelDocumentCountString =
+          job.get("cnaivebayes.labelDocumentCounts", mapStringifier.toString(labelDocCountTemp));
       
       labelDocCountTemp = mapStringifier.fromString(labelDocumentCountString);
       for (Map.Entry<String, Double> stringDoubleEntry : labelDocCountTemp.entrySet()) {

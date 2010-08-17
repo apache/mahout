@@ -197,9 +197,15 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    StringBuffer buf = new StringBuffer(super.toString());
+    StringBuilder buf = new StringBuilder(super.toString());
     buf.setLength(buf.length() - 1);
-    return buf + ", h=" + currentTreeHeight + ", hStartSampling=" + treeHeightStartingSampling +
-        ", precomputeEpsilon=" + precomputeEpsilon + ')';
+    buf.append(", h=");
+    buf.append(currentTreeHeight);
+    buf.append(", hStartSampling=");
+    buf.append(treeHeightStartingSampling);
+    buf.append(", precomputeEpsilon=");
+    buf.append(precomputeEpsilon);
+    buf.append(')');
+    return buf.toString();
   }
 }

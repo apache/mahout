@@ -157,10 +157,6 @@ public class Step0Job {
   
   /**
    * Replaces the first id for each partition in Hadoop's order
-   * 
-   * @param keys
-   * @param values
-   * @return
    */
   protected static Step0Output[] processOutput(List<Integer> keys, List<Step0Output> values) {
     int numMaps = values.size();

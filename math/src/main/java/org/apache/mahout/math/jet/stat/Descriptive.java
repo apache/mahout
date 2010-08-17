@@ -215,7 +215,6 @@ public class Descriptive {
    *              as follows <ul> <li><tt>inOut[0] = Double.POSITIVE_INFINITY</tt> as the old minimum. <li><tt>inOut[1]
    *              = Double.NEGATIVE_INFINITY</tt> as the old maximum. <li><tt>inOut[2] = 0.0</tt> as the old sum.
    *              <li><tt>inOut[3] = 0.0</tt> as the old sum of squares. </ul>
-   * @return the updated values filled into the <tt>inOut</tt> array.
    */
   public static void incrementalUpdate(DoubleArrayList data, int from, int to, double[] inOut) {
     checkRangeFromTo(from, to, data.size());
@@ -289,7 +288,6 @@ public class Descriptive {
    *                    <tt>Sum(data[i]<sup>fromSumIndex+1</sup>)</tt>. <li>... <li><tt>sumOfPowers[toSumIndex-fromSumIndex]</tt>
    *                    is the old <tt>Sum(data[i]<sup>toSumIndex</sup>)</tt>. </ul> If no data sequence elements have
    *                    so far been recorded set all old values of the sums to <tt>0.0</tt>.
-   * @return the updated values filled into the <tt>sumOfPowers</tt> array.
    */
   public static void incrementalUpdateSumsOfPowers(DoubleArrayList data, int from, int to, int fromSumIndex,
                                                    int toSumIndex, double[] sumOfPowers) {
@@ -402,7 +400,6 @@ public class Descriptive {
    *                <li><tt>inOut[1]</tt> is the old sum of squares. </ul> If no data sequence elements have so far been
    *                recorded set the values as follows <ul> <li><tt>inOut[0] = 0.0</tt> as the old sum. <li><tt>inOut[1]
    *                = 0.0</tt> as the old sum of squares. </ul>
-   * @return the updated values filled into the <tt>inOut</tt> array.
    */
   public static void incrementalWeightedUpdate(DoubleArrayList data, DoubleArrayList weights, int from, int to,
                                                double[] inOut) {

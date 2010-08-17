@@ -41,7 +41,7 @@ import java.util.NoSuchElementException;
  * TODO: this need not be the case - both are ordered, so this should be very fast if implmented in this class
  * </p>
  *
- * {@see OrderedIntDoubleMapping}
+ * See {@link OrderedIntDoubleMapping}
  */
 public class SequentialAccessSparseVector extends AbstractVector {
 
@@ -65,7 +65,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     this(other.size(), other.getNumNondefaultElements());
     Iterator<Element> it = other.iterateNonZero();
     Element e;
-    while(it.hasNext() && (e = it.next()) != null) {
+    while (it.hasNext() && (e = it.next()) != null) {
       set(e.index(), e.get());
     }
   }
@@ -102,7 +102,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     if (size != other.size()) {
       throw new CardinalityException(size, other.size());
     }
-    if(other instanceof SequentialAccessSparseVector) {
+    if (other instanceof SequentialAccessSparseVector) {
       values = ((SequentialAccessSparseVector)other).values.clone();
     } else {
       values = new OrderedIntDoubleMapping();
@@ -236,7 +236,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
       int index = thisElement.index();
       result.setQuick(index, that.getQuick(index) - thisElement.get());
     }
-    result.assign(Functions.negate);
+    result.assign(Functions.NEGATE);
     return result;
   }
 
@@ -268,11 +268,11 @@ public class SequentialAccessSparseVector extends AbstractVector {
     private final AllElement element = new AllElement();
 
     public boolean hasNext() {
-      return element.getNextIndex() < values.getIndices()[values.getNumMappings()-1];
+      return element.getNextIndex() < values.getIndices()[values.getNumMappings() - 1];
     }
 
     public Element next() {
-      if (element.getNextIndex() >= values.getIndices()[values.getNumMappings()-1]) {
+      if (element.getNextIndex() >= values.getIndices()[values.getNumMappings() - 1]) {
         throw new NoSuchElementException();
       } else {
         element.advanceIndex();
@@ -314,7 +314,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
   private final class AllElement implements Element {
 
     private int index = -1;
-    private int nextOffset = 0;
+    private int nextOffset;
 
     void advanceIndex() {
       index++;

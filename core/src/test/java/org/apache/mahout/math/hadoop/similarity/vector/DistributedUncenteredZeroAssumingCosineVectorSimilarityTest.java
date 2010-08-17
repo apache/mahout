@@ -26,7 +26,7 @@ public class DistributedUncenteredZeroAssumingCosineVectorSimilarityTest
   public void testUncenteredZeroAssumingCosine() throws Exception {
     assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
         asVector(0, 0, 0, 0, 1),
-        asVector(0, 1, 1, 1, 1), 5, 0.5d);
+        asVector(0, 1, 1, 1, 1), 5, 0.5);
 
     assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
         asVector(0, 1),
@@ -34,6 +34,6 @@ public class DistributedUncenteredZeroAssumingCosineVectorSimilarityTest
 
     assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
         asVector(1, 0),
-        asVector(1, 0), 2, 1.0d);
+        asVector(1, 0), 2, 1.0);
   }
 }

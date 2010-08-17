@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
@@ -37,7 +38,8 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
   private DirichletClusterer<VectorWritable> clusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable v, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable v, Context context)
+      throws IOException, InterruptedException {
     int k = clusterer.assignToModel(v);
     context.write(new Text(String.valueOf(k)), v);
   }
@@ -98,30 +100,15 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     }
   }
 
-  /**
-   * @param conf
-   * @param statePath
-   * @param modelFactory
-   * @param modelPrototype
-   * @param alpha
-   * @param pSize
-   * @param k
-   * @return
-   * @throws ClassNotFoundException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws NoSuchMethodException
-   * @throws InvocationTargetException
-   * @throws IOException
-   */
   protected static DirichletState<VectorWritable> loadState(Configuration conf,
                                                             String statePath,
                                                             String modelFactory,
                                                             String modelPrototype,
                                                             double alpha,
                                                             int pSize,
-                                                            int k) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException {
+                                                            int k)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+      NoSuchMethodException, InvocationTargetException, IOException {
     DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory, modelPrototype, pSize, k, alpha);
     Path path = new Path(statePath);
     FileSystem fs = FileSystem.get(path.toUri(), conf);
@@ -129,7 +116,7 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     for (FileStatus s : status) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       try {
-        Text key = new Text();
+        Writable key = new Text();
         DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();
         while (reader.next(key, cluster)) {
           int index = Integer.parseInt(key.toString());

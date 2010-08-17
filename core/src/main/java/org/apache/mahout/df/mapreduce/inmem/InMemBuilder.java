@@ -108,10 +108,6 @@ public class InMemBuilder extends Builder {
   
   /**
    * Process the output, extracting the trees and passing the predictions to the callback
-   * 
-   * @param output
-   * @param callback
-   * @return
    */
   private static DecisionForest processOutput(Map<Integer,MapredOutput> output, PredictionCallback callback) {
     List<Node> trees = new ArrayList<Node>();

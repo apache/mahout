@@ -100,7 +100,7 @@ public class VectorView extends AbstractVector {
     return new AllIterator();
   }
 
-  public class NonZeroIterator implements Iterator<Element> {
+  public final class NonZeroIterator implements Iterator<Element> {
 
     private final Iterator<Element> it;
 
@@ -154,7 +154,7 @@ public class VectorView extends AbstractVector {
     }
   }
 
-  public class AllIterator implements Iterator<Element> {
+  public final class AllIterator implements Iterator<Element> {
 
     private final Iterator<Element> it;
 

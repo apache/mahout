@@ -76,11 +76,11 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   private Vector logisticLink(Vector v) {
     double max = v.maxValue();
     if (max < 40) {
-      v.assign(Functions.exp);
+      v.assign(Functions.EXP);
       double sum = 1 + v.norm(1);
       return v.divide(sum);
     } else {
-      v.assign(Functions.minus(max)).assign(Functions.exp);
+      v.assign(Functions.minus(max)).assign(Functions.EXP);
       return v;
     }
   }

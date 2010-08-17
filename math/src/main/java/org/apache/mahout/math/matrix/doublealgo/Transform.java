@@ -28,7 +28,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix1D abs(DoubleMatrix1D A) {
-    return A.assign(Functions.abs);
+    return A.assign(Functions.ABS);
   }
 
   /**
@@ -38,7 +38,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D abs(DoubleMatrix2D A) {
-    return A.assign(Functions.abs);
+    return A.assign(Functions.ABS);
   }
 
   /**
@@ -60,7 +60,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix1D div(DoubleMatrix1D A, DoubleMatrix1D B) {
-    return A.assign(B, Functions.div);
+    return A.assign(B, Functions.DIV);
   }
 
   /**
@@ -82,7 +82,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D div(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.div);
+    return A.assign(B, Functions.DIV);
   }
 
   /**
@@ -104,7 +104,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D equals(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.equals);
+    return A.assign(B, Functions.EQUALS);
   }
 
   /**
@@ -126,7 +126,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D greater(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.greater);
+    return A.assign(B, Functions.GREATER);
   }
 
   /**
@@ -148,7 +148,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D less(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.less);
+    return A.assign(B, Functions.LESS);
   }
 
   /**
@@ -170,7 +170,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix1D minus(DoubleMatrix1D A, DoubleMatrix1D B) {
-    return A.assign(B, Functions.minus);
+    return A.assign(B, Functions.MINUS);
   }
 
   /**
@@ -192,7 +192,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D minus(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.minus);
+    return A.assign(B, Functions.MINUS);
   }
 
   /**
@@ -238,7 +238,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix1D mult(DoubleMatrix1D A, DoubleMatrix1D B) {
-    return A.assign(B, Functions.mult);
+    return A.assign(B, Functions.MULT);
   }
 
   /**
@@ -260,7 +260,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D mult(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.mult);
+    return A.assign(B, Functions.MULT);
   }
 
   /**
@@ -300,7 +300,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix1D plus(DoubleMatrix1D A, DoubleMatrix1D B) {
-    return A.assign(B, Functions.plus);
+    return A.assign(B, Functions.PLUS);
   }
 
   /**
@@ -322,7 +322,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D plus(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.plus);
+    return A.assign(B, Functions.PLUS);
   }
 
   /**
@@ -368,7 +368,7 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix1D pow(DoubleMatrix1D A, DoubleMatrix1D B) {
-    return A.assign(B, Functions.pow);
+    return A.assign(B, Functions.POW);
   }
 
   /**
@@ -390,6 +390,6 @@ public class Transform extends PersistentObject {
    * @return <tt>A</tt> (for convenience only).
    */
   public static DoubleMatrix2D pow(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.assign(B, Functions.pow);
+    return A.assign(B, Functions.POW);
   }
 }

@@ -200,7 +200,7 @@ public class LanczosSolver {
       if (v == null) {
         v = new DenseVector(vector.size()).plus(vector);
       } else {
-        v.assign(vector, plus);
+        v.assign(vector, PLUS);
       }
     }
     v.assign(div(v.norm(2)));

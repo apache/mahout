@@ -18,9 +18,9 @@
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -40,7 +40,7 @@ public class ToolReducer extends Reducer<LongWritable, Text, LongWritable, Text>
 
   private Descriptors descriptors;
 
-  private final Set<String> distinct = new HashSet<String>();
+  private final Collection<String> distinct = new HashSet<String>();
 
   @Override
   protected void reduce(LongWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -72,7 +72,6 @@ public class ToolReducer extends Reducer<LongWritable, Text, LongWritable, Text>
    *          attribute index
    * @param values
    *          available descriptions
-   * @return
    * @throws IllegalArgumentException
    *           if the attribute should be ignored.
    */

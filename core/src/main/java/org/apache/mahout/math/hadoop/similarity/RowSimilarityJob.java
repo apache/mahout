@@ -40,7 +40,6 @@ import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedVectorSimilarity;
@@ -209,9 +208,9 @@ public class RowSimilarityJob extends AbstractJob {
       Vector v = vectorWritable.get();
       double weight = similarity.weight(v);
 
-      Iterator<Element> elementsIterator = v.iterateNonZero();
+      Iterator<Vector.Element> elementsIterator = v.iterateNonZero();
       while (elementsIterator.hasNext()) {
-        Element element = elementsIterator.next();
+        Vector.Element element = elementsIterator.next();
         int column = element.index();
         double value = element.get();
         ctx.write(new VarIntWritable(column), new WeightedOccurrence(row.get(), value, weight));

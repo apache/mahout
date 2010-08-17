@@ -57,9 +57,7 @@ class MockContext extends Context {
   }
 
   /**
-   * Number of outputs collected
-   * 
-   * @return
+   * @return number of outputs collected
    */
   public int nbOutputs() {
     return index;

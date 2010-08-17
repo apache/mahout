@@ -35,7 +35,6 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.common.PartialVectorMerger;
@@ -68,10 +67,10 @@ public class TFIDFPartialVectorReducer extends
       return;
     }
     Vector value = it.next().get();
-    Iterator<Element> it1 = value.iterateNonZero();
+    Iterator<Vector.Element> it1 = value.iterateNonZero();
     Vector vector = new RandomAccessSparseVector((int) featureCount, value.getNumNondefaultElements());
     while (it1.hasNext()) {
-      Element e = it1.next();
+      Vector.Element e = it1.next();
       if (!dictionary.containsKey(e.index())) {
         continue;
       }

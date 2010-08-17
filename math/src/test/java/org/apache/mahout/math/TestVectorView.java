@@ -285,21 +285,21 @@ public class TestVectorView extends MahoutTestCase {
   }
 
   public void testAssignUnaryFunction() {
-    test.assign(negate);
+    test.assign(NEGATE);
     for (int i = 0; i < test.size(); i++) {
       assertEquals("value[" + i + ']', -values[i + 1], test.getQuick(i));
     }
   }
 
   public void testAssignBinaryFunction() throws Exception {
-    test.assign(test, plus);
+    test.assign(test, PLUS);
     for (int i = 0; i < test.size(); i++) {
       assertEquals("value[" + i + ']', 2 * values[i + 1], test.getQuick(i));
     }
   }
 
   public void testAssignBinaryFunction2() throws Exception {
-    test.assign(plus, 4);
+    test.assign(PLUS, 4);
     for (int i = 0; i < test.size(); i++) {
       assertEquals("value[" + i + ']', values[i + 1] + 4, test.getQuick(i));
     }

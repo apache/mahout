@@ -9,14 +9,13 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.stat.quantile;
 
 /** Holds some utility methods shared by different quantile finding implementations. */
-class Utils {
+final class Utils {
 
   private Utils() {
   }
 
   /** Similar to Math.ceil(value), but adjusts small numerical rounding errors +- epsilon. */
   public static long epsilonCeiling(double value) {
-    double epsilon = 0.0000001;
-    return (long) Math.ceil(value - epsilon);
+    return (long) Math.ceil(value - 0.0000001);
   }
 }

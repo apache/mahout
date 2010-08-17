@@ -49,18 +49,18 @@ public class FileItemSimilarityTest extends TasteTestCase {
   public void testLoadFromFile() throws Exception {
     ItemSimilarity similarity = new FileItemSimilarity(testFile);
 
-    assertEquals(0.125d, similarity.itemSimilarity(1L, 5L));
-    assertEquals(0.125d, similarity.itemSimilarity(5L, 1L));
-    assertEquals(0.5d, similarity.itemSimilarity(1L, 7L));
-    assertEquals(0.5d, similarity.itemSimilarity(7L, 1L));
+    assertEquals(0.125, similarity.itemSimilarity(1L, 5L));
+    assertEquals(0.125, similarity.itemSimilarity(5L, 1L));
+    assertEquals(0.5, similarity.itemSimilarity(1L, 7L));
+    assertEquals(0.5, similarity.itemSimilarity(7L, 1L));
 
     assertTrue(Double.isNaN(similarity.itemSimilarity(7L, 8L)));
 
     double[] valuesForOne = similarity.itemSimilarities(1L, new long[] { 5L, 7L });
     assertNotNull(valuesForOne);
     assertEquals(2, valuesForOne.length);
-    assertEquals(0.125d, valuesForOne[0]);
-    assertEquals(0.5d, valuesForOne[1]);
+    assertEquals(0.125, valuesForOne[0]);
+    assertEquals(0.5, valuesForOne[1]);
   }
 
   public void testNoRefreshAfterFileUpdate() throws Exception {
@@ -75,8 +75,8 @@ public class FileItemSimilarityTest extends TasteTestCase {
     writeLines(testFile, changedData);
 
     /* we shouldn't see any changes in the data as we have not yet refreshed */
-    assertEquals(0.5d, similarity.itemSimilarity(1L, 7L));
-    assertEquals(0.5d, similarity.itemSimilarity(7L, 1L));
+    assertEquals(0.5, similarity.itemSimilarity(1L, 7L));
+    assertEquals(0.5, similarity.itemSimilarity(7L, 1L));
     assertTrue(Double.isNaN(similarity.itemSimilarity(7L, 8L)));
   }
 
@@ -94,14 +94,14 @@ public class FileItemSimilarityTest extends TasteTestCase {
     similarity.refresh(null);
 
     /* we should now see the changes in the data */
-    assertEquals(0.9d, similarity.itemSimilarity(1L, 7L));
-    assertEquals(0.9d, similarity.itemSimilarity(7L, 1L));
-    assertEquals(0.125d, similarity.itemSimilarity(1L, 5L));
-    assertEquals(0.125d, similarity.itemSimilarity(5L, 1L));
+    assertEquals(0.9, similarity.itemSimilarity(1L, 7L));
+    assertEquals(0.9, similarity.itemSimilarity(7L, 1L));
+    assertEquals(0.125, similarity.itemSimilarity(1L, 5L));
+    assertEquals(0.125, similarity.itemSimilarity(5L, 1L));
 
     assertFalse(Double.isNaN(similarity.itemSimilarity(7L, 8L)));
-    assertEquals(0.112d, similarity.itemSimilarity(7L, 8L));
-    assertEquals(0.112d, similarity.itemSimilarity(8L, 7L));
+    assertEquals(0.112, similarity.itemSimilarity(7L, 8L));
+    assertEquals(0.112, similarity.itemSimilarity(8L, 7L));
   }
 
   public void testFileNotFoundExceptionForNonExistingFile() throws Exception {
@@ -115,18 +115,18 @@ public class FileItemSimilarityTest extends TasteTestCase {
     Iterable<ItemItemSimilarity> similarityIterable = new FileItemSimilarity.FileItemItemSimilarityIterable(testFile);
     GenericItemSimilarity similarity = new GenericItemSimilarity(similarityIterable);
 
-    assertEquals(0.125d, similarity.itemSimilarity(1L, 5L));
-    assertEquals(0.125d, similarity.itemSimilarity(5L, 1L));
-    assertEquals(0.5d, similarity.itemSimilarity(1L, 7L));
-    assertEquals(0.5d, similarity.itemSimilarity(7L, 1L));
+    assertEquals(0.125, similarity.itemSimilarity(1L, 5L));
+    assertEquals(0.125, similarity.itemSimilarity(5L, 1L));
+    assertEquals(0.5, similarity.itemSimilarity(1L, 7L));
+    assertEquals(0.5, similarity.itemSimilarity(7L, 1L));
 
     assertTrue(Double.isNaN(similarity.itemSimilarity(7L, 8L)));
 
     double[] valuesForOne = similarity.itemSimilarities(1L, new long[] { 5L, 7L });
     assertNotNull(valuesForOne);
     assertEquals(2, valuesForOne.length);
-    assertEquals(0.125d, valuesForOne[0]);
-    assertEquals(0.5d, valuesForOne[1]);
+    assertEquals(0.125, valuesForOne[0]);
+    assertEquals(0.5, valuesForOne[1]);
   }
 
   public void testToString() throws Exception {

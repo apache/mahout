@@ -195,7 +195,7 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   public void testAssignMatrixBinaryFunction() {
     int[] c = test.size();
-    test.assign(test, plus);
+    test.assign(test, PLUS);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 2 * values[row][col],
@@ -206,7 +206,7 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   public void testAssignMatrixBinaryFunctionCardinality() {
     try {
-      test.assign(test.transpose(), plus);
+      test.assign(test.transpose(), PLUS);
       fail("exception expected");
     } catch (CardinalityException e) {
     }
@@ -314,7 +314,7 @@ public abstract class MatrixTest extends MahoutTestCase {
   }
 
   public void testAggregate() {
-    double total = test.aggregate(Functions.plus, Functions.identity);
+    double total = test.aggregate(Functions.PLUS, Functions.IDENTITY);
     assertEquals(test.aggregateRows(new VectorFunction() {
       public double apply(Vector v) {
         return v.zSum();

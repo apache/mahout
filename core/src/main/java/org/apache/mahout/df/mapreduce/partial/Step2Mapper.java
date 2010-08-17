@@ -105,7 +105,6 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
    *          total number of trees in the forest
    * @param partition
    *          mapper's partition
-   * @return
    */
   public static int nbConcerned(int numMaps, int numTrees, int partition) {
     if (partition < 0) {

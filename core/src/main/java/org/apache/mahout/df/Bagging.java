@@ -51,11 +51,6 @@ public class Bagging {
    * 
    * @param treeId
    *          tree identifier
-   * @param rng
-   * @param callback
-   * @return
-   * @throws RuntimeException
-   *           if the data is not set
    */
   public Node build(int treeId, Random rng, PredictionCallback callback) {
     log.debug("Bagging...");

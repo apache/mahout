@@ -63,9 +63,6 @@ public class PartialBuilder extends Builder {
   /**
    * Indicates if we should run the second step of the builder.<br>
    * This parameter is only meant for debuging, so we keep it protected.
-   *
-   * @param conf
-   * @return
    */
   protected static boolean isStep2(Configuration conf) {
     return conf.getBoolean("debug.mahout.rf.partial.step2", true);
@@ -74,7 +71,6 @@ public class PartialBuilder extends Builder {
   /**
    * Should run the second step of the builder ?
    *
-   * @param conf
    * @param value
    *          true to indicate that the second step will be launched
    *
@@ -211,8 +207,6 @@ public class PartialBuilder extends Builder {
    * 
    * @param firstIds
    *          partitions' first ids in hadoop's order
-   * @param callback
-   * @return
    */
   private static void processOutput(int[] firstIds,
                                     TreeID key,

@@ -49,7 +49,7 @@ public class DummyReporter implements Reporter {
   
   @Override
   public void incrCounter(Enum<?> key, long amount) {
-    if (count1.containsKey(key) == false) {
+    if (!count1.containsKey(key)) {
       count1.put(key, new MutableLong(0));
     }
     count1.get(key).add(amount);
@@ -57,10 +57,10 @@ public class DummyReporter implements Reporter {
   
   @Override
   public void incrCounter(String group, String counter, long amount) {
-    if (count2.containsKey(group) == false) {
+    if (!count2.containsKey(group)) {
       count2.put(group, new HashMap<String,MutableLong>());
     }
-    if (count2.get(group).containsKey(counter) == false) {
+    if (!count2.get(group).containsKey(counter)) {
       count2.get(group).put(counter, new MutableLong(0));
     }
     count2.get(group).get(counter).add(amount);

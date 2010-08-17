@@ -204,7 +204,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == Functions.mult) { // x[i] = x[i] * y[i]
+    if (function == Functions.MULT) { // x[i] = x[i] * y[i]
       int[] idx = indexes.elements();
       double[] vals = values.elements();
 
@@ -221,7 +221,7 @@ public class RCDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (function == Functions.div) { // x[i] = x[i] / y[i]
+    if (function == Functions.DIV) { // x[i] = x[i] / y[i]
       int[] idx = indexes.elements();
       double[] vals = values.elements();
 

@@ -45,7 +45,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
    * methods of the returned decomposition object. Checks for symmetry, then constructs the eigenvalue decomposition.
    *
    * @param A A square matrix.
-   * @return A decomposition object to access <tt>D</tt> and <tt>V</tt>.
    * @throws IllegalArgumentException if <tt>A</tt> is not square.
    */
   public EigenvalueDecomposition(DoubleMatrix2D A) {
