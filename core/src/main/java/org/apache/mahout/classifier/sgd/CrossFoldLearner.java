@@ -19,13 +19,16 @@ import java.util.List;
  * record should be passed with each training example.
  */
 class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner, Comparable<CrossFoldLearner> {
-  int record = 0;
-  OnlineAuc auc = new OnlineAuc();
-  double logLikelihood = 0;
-  List<OnlineLogisticRegression> models = Lists.newArrayList();
+  private static volatile int nextId = 0;
+
+  private final int id = nextId++;
+  private int record = 0;
+  private OnlineAuc auc = new OnlineAuc();
+  private double logLikelihood = 0;
+  private List<OnlineLogisticRegression> models = Lists.newArrayList();
 
   // lambda, learningRate, perTermOffset, perTermExponent
-  double[] parameters = new double[4];
+  private double[] parameters = new double[4];
 
   CrossFoldLearner(int folds, int numCategories, int numFeatures, PriorFunction prior) {
     for (int i = 0; i < folds; i++) {
@@ -35,6 +38,37 @@ class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner
     }
   }
 
+  // -------- builder-like configuration methods
+
+  public CrossFoldLearner lambda(double v) {
+    for (OnlineLogisticRegression model : models) {
+      model.lambda(v);
+    }
+    return this;
+  }
+
+  public CrossFoldLearner learningRate(double x) {
+    for (OnlineLogisticRegression model : models) {
+      model.learningRate(x);
+    }
+    return this;
+  }
+
+  public CrossFoldLearner stepOffset(int x) {
+    for (OnlineLogisticRegression model : models) {
+      model.stepOffset(x);
+    }
+    return this;
+  }
+
+  public CrossFoldLearner decayExponent(double x) {
+    for (OnlineLogisticRegression model : models) {
+      model.decayExponent(x);
+    }
+    return this;
+  }
+
+  // -------- training methods
   @Override
   public void train(int actual, Vector instance) {
     train(record, actual, instance);
@@ -68,43 +102,7 @@ class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner
     record = 0;
   }
 
-  @Override
-  public int compareTo(CrossFoldLearner other) {
-    return Double.compare(this.logLikelihood, other.logLikelihood);
-  }
-
-  public CrossFoldLearner lambda(double v) {
-    for (OnlineLogisticRegression model : models) {
-      model.lambda(v);
-    }
-    return this;
-  }
-
-  public CrossFoldLearner learningRate(double x) {
-    for (OnlineLogisticRegression model : models) {
-      model.learningRate(x);
-    }
-    return this;
-  }
-
-  public CrossFoldLearner stepOffset(int x) {
-    for (OnlineLogisticRegression model : models) {
-      model.stepOffset(x);
-    }
-    return this;
-  }
-
-  public CrossFoldLearner decayExponent(double x) {
-    for (OnlineLogisticRegression model : models) {
-      model.decayExponent(x);
-    }
-    return this;
-  }
-
-  @Override
-  public int numCategories() {
-    return models.get(0).numCategories();
-  }
+  // -------- classification methods
 
   @Override
   public Vector classify(Vector instance) {
@@ -127,11 +125,42 @@ class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner
     return r / n;
   }
 
+  // -------- status reporting methods
+  
+  @Override
+  public int numCategories() {
+    return models.get(0).numCategories();
+  }
+
   public double auc() {
     return auc.auc();
   }
 
   public double logLikelihood() {
     return logLikelihood;
+  }
+  // -------- general object and ordering stuff
+
+  /**
+   * Orders primarily by AUC descending with a fallback to object creation order so that
+   * <pre>
+   * a.compareTo(b) == 0  <==>  a.equals(b)
+   * </pre>
+   * Without the id comparison, it is dangerous to insert CrossFoldLearner's into a
+   * TreeSet since if they ever have the same score, they can't be distinguished.
+   */
+  @Override
+  public int compareTo(CrossFoldLearner other) {
+    int r = Double.compare(this.auc(), other.auc());
+    if (r != 0) {
+      return r;
+    } else {
+      return id - other.id;
+    }
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof CrossFoldLearner && id == ((CrossFoldLearner) other).id;
   }
 }

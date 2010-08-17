@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;

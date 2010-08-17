@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.vectors.ContinuousValueEncoder;
+import org.apache.mahout.vectors.FeatureVectorEncoder;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

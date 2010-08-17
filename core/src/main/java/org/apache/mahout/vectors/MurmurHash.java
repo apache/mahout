@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier;
+package org.apache.mahout.vectors;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -148,22 +148,22 @@ public class MurmurHash {
   }
 
   @Deprecated
-  public static int hash_original(byte[] data, int seed) {
+  public static int hashOriginal(byte[] data, int seed) {
     int m = 0x5bd1e995;
     int r = 24;
 
     int h = seed ^ data.length;
 
     int len = data.length;
-    int len_4 = len >> 2;
+    int len4 = len >> 2;
 
     int k;
-    for (int i = 0; i < len_4; i++) {
-      int i_4 = i << 2;
-      k = data[i_4];
-      k |= data[i_4 + 1] << 8;
-      k |= data[i_4 + 2] << 16;
-      k |= data[i_4 + 3] << 24;
+    for (int i = 0; i < len4; i++) {
+      int i4 = i << 2;
+      k = data[i4];
+      k |= data[i4 + 1] << 8;
+      k |= data[i4 + 2] << 16;
+      k |= data[i4 + 3] << 24;
 
       k *= m;
       k ^= k >>> r;
@@ -173,18 +173,18 @@ public class MurmurHash {
       h ^= k;
     }
 
-    int len_m = len_4 << 2;
-    int left = len - len_m;
+    int lenM = len4 << 2;
+    int left = len - lenM;
 
-    switch (left) {
-      case 3:
-        h ^= (int) data[len_m + 2] << 16;
-      case 2:
-        h ^= (int) data[len_m + 1] << 8;
-      case 1:
-        h ^= (int) data[len_m];
-        h *= m;
-      default:
+    if (left == 3) {
+      h ^= (int) data[lenM + 2] << 16;
+    }
+    if (left >= 2) {
+      h ^= (int) data[lenM + 1] << 8;
+    }
+    if (left >= 1) {
+      h ^= (int) data[lenM];
+      h *= m;
     }
 
     h ^= h >>> 13;
@@ -195,26 +195,26 @@ public class MurmurHash {
   }
 
   @Deprecated
-  public static long hash64A_original(byte[] data, int seed) {
+  public static long hash64AOriginal(byte[] data, int seed) {
     long m = 0xc6a4a7935bd1e995L;
     int r = 47;
 
     int len = data.length;
-    int len_8 = len >> 3;
+    int len8 = len >> 3;
 
     long h = seed ^ (len * m);
 
     long k;
-    for (int i = 0; i < len_8; i++) {
-      int i_8 = i << 3;
-      k = (data[i_8 + 7] & 0xffL) << 56;
-      k |= (data[i_8 + 6] & 0xffL) << 48;
-      k |= (data[i_8 + 5] & 0xffL) << 40;
-      k |= (data[i_8 + 4] & 0xffL) << 32;
-      k |= (data[i_8 + 3] & 0xffL) << 24;
-      k |= (data[i_8 + 2] & 0xffL) << 16;
-      k |= (data[i_8 + 1] & 0xffL) << 8;
-      k |= (data[i_8] & 0xffL);
+    for (int i = 0; i < len8; i++) {
+      int i8 = i << 3;
+      k = (data[i8 + 7] & 0xffL) << 56;
+      k |= (data[i8 + 6] & 0xffL) << 48;
+      k |= (data[i8 + 5] & 0xffL) << 40;
+      k |= (data[i8 + 4] & 0xffL) << 32;
+      k |= (data[i8 + 3] & 0xffL) << 24;
+      k |= (data[i8 + 2] & 0xffL) << 16;
+      k |= (data[i8 + 1] & 0xffL) << 8;
+      k |= (data[i8] & 0xffL);
 
       k *= m;
       k ^= k >>> r;
@@ -224,26 +224,30 @@ public class MurmurHash {
       h *= m;
     }
 
-    int len_m = len_8 << 3;
-    int left = len - len_m;
+    int lenM = len8 << 3;
+    int left = len - lenM;
 
-    switch (left) {
-      case 7:
-        h ^= (data[len_m + 6] & 0xffL) << 48;
-      case 6:
-        h ^= (data[len_m + 5] & 0xffL) << 40;
-      case 5:
-        h ^= (data[len_m + 4] & 0xffL) << 32;
-      case 4:
-        h ^= (data[len_m + 3] & 0xffL) << 24;
-      case 3:
-        h ^= (data[len_m + 2] & 0xffL) << 16;
-      case 2:
-        h ^= (data[len_m + 1] & 0xffL) << 8;
-      case 1:
-        h ^= data[len_m] & 0xffL;
-        h *= m;
-      default:
+    if (left == 7) {
+      h ^= (data[lenM + 6] & 0xffL) << 48;
+    }
+    if (left >= 6) {
+      h ^= (data[lenM + 5] & 0xffL) << 40;
+    }
+    if (left >= 5) {
+      h ^= (data[lenM + 4] & 0xffL) << 32;
+    }
+    if (left >= 4) {
+      h ^= (data[lenM + 3] & 0xffL) << 24;
+    }
+    if (left >= 3) {
+      h ^= (data[lenM + 2] & 0xffL) << 16;
+    }
+    if (left >= 2) {
+      h ^= (data[lenM + 1] & 0xffL) << 8;
+    }
+    if (left >= 1) {
+      h ^= data[lenM] & 0xffL;
+      h *= m;
     }
 
     h ^= h >>> r;

@@ -18,7 +18,11 @@
 package org.apache.mahout.classifier.sgd;
 
 /**
- * A prior is used to regularize the learning algorithm.
+ * A prior is used to regularize the learning algorithm.  This allows a trade-off to
+ * be made between complexity of the model being learned and the accuracy with which
+ * the model fits the training data.  There are different definitions of complexity
+ * which can be approximated using different priors.  For large sparse systems, such
+ * as text classification, the L1 prior is often used which favors sparse models.
  */
 public abstract class PriorFunction {
   /**
@@ -32,8 +36,8 @@ public abstract class PriorFunction {
 
   /**
    * Returns the log of the probability of a particular coefficient value according to the prior.
-   * @param beta_ij         The coefficient.
+   * @param betaIJ          The coefficient.
    * @return                The log probability.
    */
-  public abstract double logP(double beta_ij);
+  public abstract double logP(double betaIJ);
 }

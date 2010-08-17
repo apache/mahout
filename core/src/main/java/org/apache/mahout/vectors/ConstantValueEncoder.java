@@ -15,37 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
-import com.google.common.collect.Maps;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import org.apache.mahout.math.Vector;
 
 /**
-* Assigns integer codes to strings as they appear.
-*/
-public class Dictionary {
-  private Map<String, Integer> dict = Maps.newLinkedHashMap();
-
-  public int intern(String s) {
-    if (!dict.containsKey(s)) {
-      dict.put(s, dict.size());
-    }
-    return dict.get(s);
+ * An encoder that does the standard thing for a virtual bias term.
+ */
+public class ConstantValueEncoder extends FeatureVectorEncoder {
+  public ConstantValueEncoder(String name) {
+    super(name);
   }
 
-  public List<String> values() {
-    // order of keySet is guaranteed to be insertion order
-    return new ArrayList<String>(dict.keySet());
+  @Override
+  public void addToVector(String originalForm, double weight, Vector data) {
+    for (int i = 0; i < probes; i++) {
+      int n = hash(name, i, data.size());
+      trace(name, null, n);
+      data.set(n, data.get(n) + weight);
+    }
   }
 
-  public static Dictionary fromList(List<String> values) {
-    Dictionary dict = new Dictionary();
-    for (String value : values) {
-      dict.intern(value);
-    }
-    return dict;
+  @Override
+  public String asString(String originalForm) {
+    return name;
   }
 }

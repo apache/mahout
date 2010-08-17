@@ -15,19 +15,37 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
+
+import com.google.common.collect.Maps;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
- * A uniform prior.  This is an improper prior that corresponds to no regularization at all.
- */
-public class UniformPrior extends PriorFunction {
-  @Override
-  public double age(double oldValue, double generations, double learningRate) {
-    return oldValue;
+* Assigns integer codes to strings as they appear.
+*/
+public class Dictionary {
+  private Map<String, Integer> dict = Maps.newLinkedHashMap();
+
+  public int intern(String s) {
+    if (!dict.containsKey(s)) {
+      dict.put(s, dict.size());
+    }
+    return dict.get(s);
   }
 
-  @Override
-  public double logP(double betaIJ) {
-    return 0;
+  public List<String> values() {
+    // order of keySet is guaranteed to be insertion order
+    return new ArrayList<String>(dict.keySet());
+  }
+
+  public static Dictionary fromList(List<String> values) {
+    Dictionary dict = new Dictionary();
+    for (String value : values) {
+      dict.intern(value);
+    }
+    return dict;
   }
 }

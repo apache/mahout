@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
 import java.util.Collections;
 import java.util.Map;

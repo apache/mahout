@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.vectors.AdaptiveWordValueEncoder;
+import org.apache.mahout.vectors.FeatureVectorEncoder;
+import org.apache.mahout.vectors.StaticWordValueEncoder;
 import org.junit.Test;
 
 import java.util.Iterator;

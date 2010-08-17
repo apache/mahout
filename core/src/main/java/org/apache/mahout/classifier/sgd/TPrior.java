@@ -39,7 +39,7 @@ public class TPrior extends PriorFunction {
   }
 
   @Override
-  public double logP(double beta_ij) {
-    return logGamma((df + 1) / 2) - log(df * Math.PI) - logGamma(df / 2) - (df + 1) / 2 * log(1 + beta_ij * beta_ij);
+  public double logP(double betaIJ) {
+    return logGamma((df + 1) / 2) - log(df * Math.PI) - logGamma(df / 2) - (df + 1) / 2 * log(1 + betaIJ * betaIJ);
   }
 }

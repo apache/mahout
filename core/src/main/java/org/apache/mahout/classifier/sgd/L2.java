@@ -38,7 +38,7 @@ public class L2 extends PriorFunction {
   }
 
   @Override
-  public double logP(double beta_ij) {
-    return -beta_ij * beta_ij / s2 / 2 - log(s) - log(2 * Math.PI) / 2;
+  public double logP(double betaIJ) {
+    return -betaIJ * betaIJ / s2 / 2 - log(s) - log(2 * Math.PI) / 2;
   }
 }

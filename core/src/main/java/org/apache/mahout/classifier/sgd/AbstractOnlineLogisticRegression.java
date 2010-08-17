@@ -179,7 +179,8 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
         int j = updateLocation.index();
         double missingUpdates = getStep() - updateSteps.get(j);
         if (missingUpdates > 0) {
-          double newValue = prior.age(beta.get(i, j), missingUpdates, getLambda() * learningRate * perTermLearningRate(j));
+          double rate = getLambda() * learningRate * perTermLearningRate(j);
+          double newValue = prior.age(beta.get(i, j), missingUpdates, rate);
           beta.set(i, j, newValue);
         }
       }
@@ -205,8 +206,8 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     return beta;
   }
 
-  public void setBeta(int i, int j, double beta_ij) {
-    beta.set(i, j, beta_ij);
+  public void setBeta(int i, int j, double betaIJ) {
+    beta.set(i, j, betaIJ);
   }
 
   public int numCategories() {

@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
 import com.google.common.collect.Sets;
-import org.apache.mahout.classifier.MurmurHash;
+import org.apache.mahout.vectors.MurmurHash;
 import org.apache.mahout.math.Vector;
 
 import java.nio.charset.Charset;

@@ -39,7 +39,7 @@ public class L1 extends PriorFunction {
   }
 
   @Override
-  public double logP(double beta_ij) {
-    return - Math.abs(beta_ij) ;
+  public double logP(double betaIJ) {
+    return -Math.abs(betaIJ);
   }
 }

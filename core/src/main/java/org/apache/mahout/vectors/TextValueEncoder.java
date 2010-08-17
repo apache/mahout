@@ -15,35 +15,43 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
+import com.google.common.base.Splitter;
 import org.apache.mahout.math.Vector;
 
-/**
- * Encodes words as sparse vector updates to a Vector.  Weighting is defined by a
- * sub-class.
- */
-public abstract class WordValueEncoder extends FeatureVectorEncoder {
+import java.util.regex.Pattern;
 
-  public WordValueEncoder(String name) {
+/**
+ * Encodes text that is tokenized on non-alphanum separators.  Each word is encoded using a
+ * settable encoder which is by default an StaticWordValueEncoder which gives all
+ * words the same weight.
+ */
+public class TextValueEncoder extends FeatureVectorEncoder {
+  Splitter onNonWord = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
+  private FeatureVectorEncoder wordEncoder;
+
+  public TextValueEncoder(String name) {
     super(name);
+    wordEncoder = new StaticWordValueEncoder(name);
     probes = 2;
   }
 
   /**
-   * Adds a value to a vector.
+   * Adds a value to a vector after tokenizing it by splitting on non-alphanum characters.
    *
    * @param originalForm The original form of the value as a string.
    * @param data         The vector to which the value should be added.
    */
   @Override
-  public void addToVector(String originalForm, double w, Vector data) {
-    double weight = w * weight(originalForm);
-    for (int i = 0; i < probes; i++) {
-      int n = hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + i, data.size());
-      trace(name, originalForm, n);
-      data.set(n, data.get(n) + weight);
+  public void addToVector(String originalForm, double weight, Vector data) {
+    for (String word : tokenize(originalForm)) {
+      wordEncoder.addToVector(word, weight, data);
     }
+  }
+
+  private Iterable<String> tokenize(String originalForm) {
+    return onNonWord.split(originalForm);
   }
 
   /**
@@ -56,8 +64,18 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    return String.format("%s:%s:%.4f", name, originalForm, weight(originalForm));
+    StringBuilder r = new StringBuilder("[");
+    String sep = "";
+    for (String word : tokenize(originalForm)) {
+      r.append(sep);
+      r.append(wordEncoder.asString(word));
+      sep = ", ";
+    }
+    r.append("]");
+    return r.toString();
   }
 
-  protected abstract double weight(String originalForm);
+  public void setWordEncoder(FeatureVectorEncoder wordEncoder) {
+    this.wordEncoder = wordEncoder;
+  }
 }

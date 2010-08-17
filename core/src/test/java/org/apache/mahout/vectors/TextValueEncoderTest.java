@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.classifier.sgd;
+package org.apache.mahout.vectors;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.vectors.StaticWordValueEncoder;
+import org.apache.mahout.vectors.TextValueEncoder;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

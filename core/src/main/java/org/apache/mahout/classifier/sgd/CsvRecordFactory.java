@@ -25,6 +25,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.vectors.ConstantValueEncoder;
+import org.apache.mahout.vectors.ContinuousValueEncoder;
+import org.apache.mahout.vectors.Dictionary;
+import org.apache.mahout.vectors.FeatureVectorEncoder;
+import org.apache.mahout.vectors.StaticWordValueEncoder;
+import org.apache.mahout.vectors.TextValueEncoder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -65,7 +71,7 @@ public class CsvRecordFactory implements RecordFactory {
   // commas inside.  Also, escaped quotes will not be unescaped.  Good enough for now.
   private Splitter onComma = Splitter.on(",").trimResults(CharMatcher.is('"'));
 
-  private static final Map<String, Class<? extends FeatureVectorEncoder>> typeDictionary =
+  private static Map<String, Class<? extends FeatureVectorEncoder>> typeDictionary =
           ImmutableMap.<String, Class<? extends FeatureVectorEncoder>>builder()
                   .put("continuous", ContinuousValueEncoder.class)
                   .put("numeric", ContinuousValueEncoder.class)
@@ -88,6 +94,7 @@ public class CsvRecordFactory implements RecordFactory {
   private Map<String, String> typeMap;
   private List<String> variableNames;
   private boolean includeBiasTerm;
+  private static final String CANNOT_CONSTRUCT_CONVERTER = "Unable to construct type converter... shouldn't be possible";
 
   /**
    * Construct a parser for CSV lines that encodes the parsed data in vector form.
@@ -109,7 +116,8 @@ public class CsvRecordFactory implements RecordFactory {
   @Override
   public void defineTargetCategories(List<String> values) {
     if (values.size() > maxTargetValue) {
-      throw new IllegalArgumentException("Must have less than or equal to " + maxTargetValue + " categories for target variable, but found " + values.size());
+      throw new IllegalArgumentException("Must have less than or equal to " + maxTargetValue
+        + " categories for target variable, but found " + values.size());
     }
 
     if (maxTargetValue == Integer.MAX_VALUE) {
@@ -188,7 +196,8 @@ public class CsvRecordFactory implements RecordFactory {
       }
       try {
         if (c == null) {
-          throw new IllegalArgumentException("Invalid type of variable " + typeMap.get(name) + " wanted on of " + typeDictionary.keySet());
+          throw new IllegalArgumentException("Invalid type of variable " + typeMap.get(name)
+            + " wanted one of " + typeDictionary.keySet());
         }
         Constructor<? extends FeatureVectorEncoder> constructor = c.getConstructor(String.class);
         if (constructor == null) {
@@ -198,13 +207,13 @@ public class CsvRecordFactory implements RecordFactory {
         predictorEncoders.put(predictor, encoder);
         encoder.setTraceDictionary(traceDictionary);
       } catch (InstantiationException e) {
-        throw new ImpossibleException("Unable to construct type converter... shouldn't be possible", e);
+        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
       } catch (IllegalAccessException e) {
-        throw new ImpossibleException("Unable to construct type converter... shouldn't be possible", e);
+        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
       } catch (InvocationTargetException e) {
-        throw new ImpossibleException("Unable to construct type converter... shouldn't be possible", e);
+        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
       } catch (NoSuchMethodException e) {
-        throw new ImpossibleException("Unable to construct type converter... shouldn't be possible", e);
+        throw new ImpossibleException(CANNOT_CONSTRUCT_CONVERTER, e);
       }
     }
   }
@@ -280,7 +289,7 @@ public class CsvRecordFactory implements RecordFactory {
     return r;
   }
 
-  private static class ImpossibleException extends RuntimeException {
+  private static final class ImpossibleException extends RuntimeException {
     private ImpossibleException(String message, Throwable cause) {
       super(message, cause);
     }
