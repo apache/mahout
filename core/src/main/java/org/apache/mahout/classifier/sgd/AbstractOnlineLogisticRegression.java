@@ -251,4 +251,18 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
       sealed = true;
     }
   }
+
+  public void copyFrom(AbstractOnlineLogisticRegression other) {
+    beta.assign(other.beta);
+
+    // number of categories we are classifying.  This should the number of rows of beta plus one.
+    if (numCategories != other.numCategories) {
+      throw new IllegalArgumentException("Can't copy unless number of target categories is the same");
+    }
+
+    step = other.step;
+
+    updateSteps.assign(other.updateSteps);
+    updateCounts.assign(other.updateCounts);
+  }
 }

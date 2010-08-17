@@ -3,8 +3,8 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.jet.random.NegativeBinomial;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
+import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,13 +23,16 @@ public class AdaptiveAnnealedLogisticRegression   implements OnlineLearner {
   private int record = 0;
   private List<CrossFoldLearner> pool = Lists.newArrayList();
   private int evaluationInterval = 1000;
+  private RandomEngine rand;
+  private int depth = 10;
 
   public AdaptiveAnnealedLogisticRegression(int poolSize, int numCategories, int numFeatures, PriorFunction prior) {
     for (int i = 0; i < poolSize; i++) {
       CrossFoldLearner model = new CrossFoldLearner(5, numCategories, numFeatures, prior);
       pool.add(model);
     }
-    NegativeBinomial nb = new NegativeBinomial(10, 0.1, new MersenneTwister());
+    depth = poolSize / 5;
+    rand = new MersenneTwister();
   }
 
   @Override
@@ -40,8 +43,12 @@ public class AdaptiveAnnealedLogisticRegression   implements OnlineLearner {
     record++;
     if (record % evaluationInterval == 0) {
       Collections.sort(pool);
-      // pick a parent from the top half of the pool weighted toward the top few
+      for (int i = pool.size() / 2; i < pool.size(); i++) {
+        // pick a parent from the top half of the pool weighted toward the top few
+        int n = ((int) Math.floor(-depth * Math.log(rand.nextDouble()))) % pool.size();
 
+        pool.get(i).copyFrom(pool.get(n));
+      }
     }
   }
 

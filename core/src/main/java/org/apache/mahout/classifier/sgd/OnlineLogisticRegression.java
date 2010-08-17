@@ -28,7 +28,7 @@ import org.apache.mahout.math.Vector;
 public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
   // these next two control decayFactor^steps exponential type of annealing
   // learning rate and decay factor
-  private double mu_0 = 1;
+  private double mu0 = 1;
   private double decayFactor = 1 - 1e-3;
 
 
@@ -76,7 +76,7 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
    * @return This, so other configurations can be chained.
    */
   public OnlineLogisticRegression learningRate(double learningRate) {
-    this.mu_0 = learningRate;
+    this.mu0 = learningRate;
     return this;
   }
 
@@ -101,11 +101,22 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
 
   @Override
   public double currentLearningRate() {
-    return mu_0 * Math.pow(decayFactor, getStep()) * Math.pow(getStep() + stepOffset, forgettingExponent);
+    return mu0 * Math.pow(decayFactor, getStep()) * Math.pow(getStep() + stepOffset, forgettingExponent);
   }
 
   @Override
   public void train(int trackingKey, int actual, Vector instance) {
     train(actual, instance);
+  }
+
+  public void copyFrom(OnlineLogisticRegression other) {
+    super.copyFrom(other);
+    mu0 = other.mu0;
+    decayFactor = other.decayFactor;
+
+    stepOffset = other.stepOffset;
+    forgettingExponent = other.forgettingExponent;
+
+    perTermAnnealingOffset = other.perTermAnnealingOffset;
   }
 }

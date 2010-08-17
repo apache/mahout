@@ -139,6 +139,18 @@ class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner
   public double logLikelihood() {
     return logLikelihood;
   }
+
+  // -------- evolutionary optimization
+
+  public void copyFrom(CrossFoldLearner other) {
+    int i = 0;
+    for (OnlineLogisticRegression model : models) {
+      model.copyFrom(other.models.get(i++));
+    }
+    System.arraycopy(other.parameters, 0, parameters, 0, parameters.length);
+    // TODO mutate parameters
+  }
+
   // -------- general object and ordering stuff
 
   /**
