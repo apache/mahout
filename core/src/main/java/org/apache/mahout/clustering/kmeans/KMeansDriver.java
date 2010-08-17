@@ -250,7 +250,7 @@ public class KMeansDriver extends AbstractJob {
     }
   }
 
-  private static Path buildClustersSeq(Path input,
+  private Path buildClustersSeq(Path input,
                                        Path clustersIn,
                                        Path output,
                                        DistanceMeasure measure,
@@ -349,7 +349,7 @@ public class KMeansDriver extends AbstractJob {
    *          the number of reducer tasks
    * @return true if the iteration successfully runs
    */
-  private static boolean runIteration(Path input,
+  private boolean runIteration(Path input,
                                       Path clustersIn,
                                       Path clustersOut,
                                       String measureClass,
@@ -399,7 +399,7 @@ public class KMeansDriver extends AbstractJob {
    * @throws IOException
    *           if there was an IO error
    */
-  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
+  private boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
     FileStatus[] parts = fs.listStatus(filePath);
     for (FileStatus part : parts) {
       String name = part.getPath().getName();
@@ -461,7 +461,7 @@ public class KMeansDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path input,
+  private void clusterDataSeq(Path input,
                                      Path clustersIn,
                                      Path output,
                                      DistanceMeasure measure,
@@ -499,7 +499,7 @@ public class KMeansDriver extends AbstractJob {
 
   }
 
-  private static void clusterDataMR(Path input,
+  private void clusterDataMR(Path input,
                                     Path clustersIn,
                                     Path output,
                                     DistanceMeasure measure,

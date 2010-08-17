@@ -234,7 +234,7 @@ public class DirichletDriver extends AbstractJob {
   /**
    * Read the first input vector to determine the prototype size for the modelPrototype
    */
-  private static int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
+  private int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
@@ -276,7 +276,7 @@ public class DirichletDriver extends AbstractJob {
     writeState(output, stateOut, numModels, state);
   }
 
-  private static void writeState(Path output, Path stateOut, int numModels, DirichletState<VectorWritable> state)
+  private void writeState(Path output, Path stateOut, int numModels, DirichletState<VectorWritable> state)
       throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -310,7 +310,7 @@ public class DirichletDriver extends AbstractJob {
    * @param numReducers
    *          the number of Reducers desired
    */
-  private static void runIteration(Path input,
+  private void runIteration(Path input,
                                    Path stateIn,
                                    Path stateOut,
                                    String modelFactory,
@@ -471,7 +471,7 @@ public class DirichletDriver extends AbstractJob {
     return clustersIn;
   }
 
-  private static Path buildClustersSeq(Path input,
+  private Path buildClustersSeq(Path input,
                                        Path output,
                                        String modelFactory,
                                        String modelPrototype,
@@ -521,7 +521,7 @@ public class DirichletDriver extends AbstractJob {
     return clustersIn;
   }
 
-  private static Path buildClustersMR(Path input,
+  private Path buildClustersMR(Path input,
                                       Path output,
                                       String modelFactory,
                                       String modelPrototype,
@@ -565,7 +565,7 @@ public class DirichletDriver extends AbstractJob {
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential execute sequentially if true
    */
-  public static void clusterData(Path input,
+  public void clusterData(Path input,
                                  Path stateIn,
                                  Path output,
                                  boolean emitMostLikely,
@@ -579,7 +579,7 @@ public class DirichletDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path input,
+  private void clusterDataSeq(Path input,
                                      Path stateIn,
                                      Path output,
                                      boolean emitMostLikely,
@@ -614,7 +614,7 @@ public class DirichletDriver extends AbstractJob {
 
   }
 
-  private static void clusterDataMR(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
+  private void clusterDataMR(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
       throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());

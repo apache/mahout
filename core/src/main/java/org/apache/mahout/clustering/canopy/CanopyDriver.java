@@ -189,7 +189,7 @@ public class CanopyDriver extends AbstractJob {
    * @param t2 the double T2 distance metric
    * @return the canopy output directory Path
    */
-  private static Path buildClustersSeq(Path input, Path output, String measureClassName, double t1, double t2)
+  private Path buildClustersSeq(Path input, Path output, String measureClassName, double t1, double t2)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = (DistanceMeasure) ccl.loadClass(measureClassName).newInstance();
@@ -238,7 +238,7 @@ public class CanopyDriver extends AbstractJob {
    * @param t2 the double T2 distance metric
    * @return the canopy output directory Path
    */
-  private static Path buildClustersMR(Path input, Path output, String measureClassName, double t1, double t2)
+  private Path buildClustersMR(Path input, Path output, String measureClassName, double t1, double t2)
       throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
@@ -294,7 +294,7 @@ public class CanopyDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path points,
+  private void clusterDataSeq(Path points,
                                      Path canopies,
                                      Path output,
                                      String measureClassName,
@@ -349,7 +349,7 @@ public class CanopyDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataMR(Path points,
+  private void clusterDataMR(Path points,
                                     Path canopies,
                                     Path output,
                                     String measureClassName,

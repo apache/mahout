@@ -376,7 +376,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
   }
 
-  private static Path buildClustersSeq(Path input,
+  private Path buildClustersSeq(Path input,
                                        Path clustersIn,
                                        Path output,
                                        DistanceMeasure measure,
@@ -506,7 +506,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path input,
+  private void clusterDataSeq(Path input,
                                      Path clustersIn,
                                      Path output,
                                      DistanceMeasure measure,
@@ -546,7 +546,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     }
 
   }
-  private static void clusterDataMR(Path input,
+  private void clusterDataMR(Path input,
                                     Path clustersIn,
                                     Path output,
                                     DistanceMeasure measure,
@@ -595,7 +595,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
    * @throws IOException
    *           if there was an IO error
    */
-  private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
+  private boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
 
     Path clusterPath = new Path(filePath, "*");
     List<Path> result = new ArrayList<Path>();

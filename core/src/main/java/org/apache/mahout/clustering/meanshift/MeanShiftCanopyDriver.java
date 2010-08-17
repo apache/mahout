@@ -174,7 +174,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    * @param convergenceDelta
    *          the double convergence criteria
    */
-  private static void runIteration(Path input,
+  private void runIteration(Path input,
                                    Path output,
                                    Path control,
                                    String measureClassName,
@@ -263,7 +263,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     }
   }
 
-  public static void createCanopyFromVectors(Path input, Path output, boolean runSequential)
+  public void createCanopyFromVectors(Path input, Path output, boolean runSequential)
       throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     if (runSequential) {
       createCanopyFromVectorsSeq(input, output);
@@ -276,7 +276,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    * @param input the Path to the input VectorWritable data
    * @param output the Path to the initial clusters directory
    */
-  private static void createCanopyFromVectorsSeq(Path input, Path output)
+  private void createCanopyFromVectorsSeq(Path input, Path output)
       throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
@@ -304,7 +304,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     }
   }
 
-  private static void createCanopyFromVectorsMR(Path input, Path output)
+  private void createCanopyFromVectorsMR(Path input, Path output)
       throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     Job job = new Job(conf);
@@ -341,7 +341,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    *          an int number of iterations
    * @param runSequential if true run in sequential execution mode
    */
-  public static Path buildClusters(Path clustersIn,
+  public Path buildClusters(Path clustersIn,
                                     Path output,
                                    DistanceMeasure measure,
                                    double t1,
@@ -357,7 +357,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     }
   }
 
-  private static Path buildClustersSeq(Path clustersIn,
+  private Path buildClustersSeq(Path clustersIn,
                                        Path output,
                                        DistanceMeasure measure,
                                        double t1,
@@ -413,7 +413,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     return clustersIn;
   }
 
-  private static Path buildClustersMR(Path clustersIn,
+  private Path buildClustersMR(Path clustersIn,
                                       Path output,
                                       DistanceMeasure measure,
                                       double t1,
@@ -450,7 +450,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    * @param runSequential if true run in sequential execution mode
    * @param measure the DistanceMeasure to use
    */
-  public static void clusterData(Path input,
+  public void clusterData(Path input,
                                  Path clustersIn,
                                  Path output,
                                  boolean runSequential,
@@ -463,10 +463,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path input, Path clustersIn, Path output, DistanceMeasure measure)
+  private void clusterDataSeq(Path input, Path clustersIn, Path output, DistanceMeasure measure)
       throws IOException, InstantiationException, IllegalAccessException {
-    MeanShiftCanopyClusterer clusterer = new MeanShiftCanopyClusterer(measure, 0, 0, 0);
-
     Collection<MeanShiftCanopy> clusters = new ArrayList<MeanShiftCanopy>();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
@@ -512,7 +510,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataMR(Path input, Path clustersIn, Path output)
+  private void clusterDataMR(Path input, Path clustersIn, Path output)
       throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, clustersIn.toString());

@@ -226,7 +226,7 @@ public final class LDADriver extends AbstractJob {
     }
   }
 
-  private static void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {
+  private void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {
     Configuration job = new Configuration();
     FileSystem fs = statePath.getFileSystem(job);
 
@@ -255,7 +255,7 @@ public final class LDADriver extends AbstractJob {
     }
   }
 
-  private static double findLL(Path statePath, Configuration job) throws IOException {
+  private double findLL(Path statePath, Configuration job) throws IOException {
     FileSystem fs = statePath.getFileSystem(job);
 
     double ll = 0.0;
