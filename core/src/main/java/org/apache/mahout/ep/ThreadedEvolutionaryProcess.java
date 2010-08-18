@@ -2,8 +2,6 @@ package org.apache.mahout.ep;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.sun.xml.internal.bind.v2.util.QNameMap;
-import org.apache.mahout.math.function.UnaryFunction;
 
 import java.util.Deque;
 import java.util.Iterator;
