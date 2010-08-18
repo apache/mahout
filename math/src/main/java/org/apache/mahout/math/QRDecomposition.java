@@ -27,6 +27,8 @@ package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.Functions;
 
+import java.util.Locale;
+
 
 /**
  For an <tt>m x n</tt> matrix <tt>A</tt> with <tt>m >= n</tt>, the QR decomposition is an <tt>m x n</tt>
@@ -243,6 +245,6 @@ public class QRDecomposition {
    * Returns a rough string rendition of a QR.
    */
   public String toString() {
-    return String.format("QR(%d,%d,fullRank=%s)", originalColumns, originalRows, hasFullRank());
+    return String.format(Locale.ENGLISH, "QR(%d,%d,fullRank=%s)", originalColumns, originalRows, hasFullRank());
   }
 }

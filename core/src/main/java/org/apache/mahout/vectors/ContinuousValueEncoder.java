@@ -23,6 +23,7 @@ import org.apache.mahout.math.Vector;
  * Continuous values are stored in fixed randomized location in the feature vector.
  */
 public class ContinuousValueEncoder extends FeatureVectorEncoder {
+
   public ContinuousValueEncoder(String name) {
     super(name);
   }
@@ -35,9 +36,11 @@ public class ContinuousValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(String originalForm, double weight, Vector data) {
+    int probes = getProbes();
+    String name = getName();
     for (int i = 0; i < probes; i++) {
       int n = hash(name, CONTINUOUS_VALUE_HASH_SEED + i, data.size());
-      trace(name, null, n);
+      trace(null, n);
       data.set(n, data.get(n) + weight * Double.parseDouble(originalForm));
     }
   }
@@ -52,6 +55,6 @@ public class ContinuousValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    return name + ":" + originalForm;
+    return getName() + ':' + originalForm;
   }
 }

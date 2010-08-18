@@ -20,13 +20,8 @@ package org.apache.mahout.vectors;
 import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.vectors.StaticWordValueEncoder;
-import org.apache.mahout.vectors.TextValueEncoder;
+import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Locale;
-
-import static org.junit.Assert.assertEquals;
 
 public class TextValueEncoderTest {
   @Test
@@ -35,8 +30,8 @@ public class TextValueEncoderTest {
     Vector v1 = new DenseVector(200);
     enc.addToVector("test1 and more", v1);
     // should set 6 distinct locations to 1
-    assertEquals(6.0, v1.norm(1), 0);
-    assertEquals(1.0, v1.maxValue(), 0);
+    Assert.assertEquals(6.0, v1.norm(1), 0);
+    Assert.assertEquals(1.0, v1.maxValue(), 0);
 
     // now some fancy weighting
     StaticWordValueEncoder w = new StaticWordValueEncoder("text");
@@ -53,16 +48,15 @@ public class TextValueEncoderTest {
     w.addToVector("and", v3);
     w.addToVector("more", v3);
 
-    assertEquals(0, v3.minus(v2).norm(1), 0);
+    Assert.assertEquals(0, v3.minus(v2).norm(1), 0);
 
     // moreover, the locations set in the unweighted case should be the same as in the weighted case
-    assertEquals(v3.zSum(), v3.dot(v1), 0);
+    Assert.assertEquals(v3.zSum(), v3.dot(v1), 0);
   }
 
   @Test
   public void testAsString() {
-    Locale.setDefault(new Locale("EN", "US"));
-    TextValueEncoder enc = new TextValueEncoder("text");
-    assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
+    FeatureVectorEncoder enc = new TextValueEncoder("text");
+    Assert.assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
   }
 }

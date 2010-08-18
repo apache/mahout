@@ -18,7 +18,6 @@
 package org.apache.mahout.vectors;
 
 import com.google.common.collect.Sets;
-import org.apache.mahout.vectors.MurmurHash;
 import org.apache.mahout.math.Vector;
 
 import java.nio.charset.Charset;
@@ -33,16 +32,22 @@ import java.util.Set;
  * dictionary.
  */
 public abstract class FeatureVectorEncoder {
+
   protected static final int CONTINUOUS_VALUE_HASH_SEED = 1;
   protected static final int WORD_LIKE_VALUE_HASH_SEED = 100;
 
-  protected String name;
-  protected int probes = 1;
+  private final String name;
+  private int probes;
 
-  private Map<String, Set<Integer>> traceDictionary = null;
+  private Map<String, Set<Integer>> traceDictionary;
 
-  public FeatureVectorEncoder(String name) {
+  protected FeatureVectorEncoder(String name) {
+    this(name, 1);
+  }
+
+  protected FeatureVectorEncoder(String name, int probes) {
     this.name = name;
+    this.probes = probes;
   }
 
   /**
@@ -114,6 +119,10 @@ public abstract class FeatureVectorEncoder {
    */
   public abstract String asString(String originalForm);
 
+  public int getProbes() {
+    return probes;
+  }
+
   /**
    * Sets the number of locations in the feature vector that a value should be in.
    *
@@ -127,11 +136,11 @@ public abstract class FeatureVectorEncoder {
     return name;
   }
 
-  protected void trace(String name, String subName, int n) {
+  protected void trace(String subName, int n) {
     if (traceDictionary != null) {
       String key = name;
       if (subName != null) {
-        key = name + "=" + subName;
+        key = name + '=' + subName;
       }
       Set<Integer> trace = traceDictionary.get(key);
       if (trace == null) {

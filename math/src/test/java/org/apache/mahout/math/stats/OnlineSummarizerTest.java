@@ -80,7 +80,7 @@ public class OnlineSummarizerTest {
 
   private static void check(OnlineSummarizer x, double... values) {
     for (int i = 0; i < 5; i++) {
-      checkRange(String.format("quartile %d", i), x.quartile(i), values[2 * i], values[2 * i + 1]);
+      checkRange("quartile " + i, x.quartile(i), values[2 * i], values[2 * i + 1]);
     }
     Assert.assertEquals(x.quartile(2), x.median(), 0);
 
@@ -90,7 +90,7 @@ public class OnlineSummarizerTest {
 
   private static void checkRange(String msg, double v, double low, double high) {
     if (v < low || v > high) {
-      Assert.fail(String.format("Wanted %s to be in range [%e,%e] but got %e", msg, low, high, v));
+      Assert.fail("Wanted " + msg + " to be in range [" + low + "," + high + "] but got " + v);
     }
   }
 

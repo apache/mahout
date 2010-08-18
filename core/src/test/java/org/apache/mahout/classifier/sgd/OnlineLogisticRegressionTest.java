@@ -31,6 +31,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -38,8 +39,6 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
 
 public class OnlineLogisticRegressionTest {
   private Matrix input;
@@ -53,7 +52,7 @@ public class OnlineLogisticRegressionTest {
     Vector target = readStandardData();
 
     CrossFoldLearner lr = new CrossFoldLearner(5, 2, 8, new L1())
-            .lambda(1 * 1e-3)
+            .lambda(1 * 1.0e-3)
             .learningRate(50);
 
 
@@ -73,7 +72,7 @@ public class OnlineLogisticRegressionTest {
     CrossFoldLearner lr = new CrossFoldLearner(5, 2, 10, new L1())
             .stepOffset(10)
             .decayExponent(0.7)
-            .lambda(1 * 1e-3)
+            .lambda(1 * 1.0e-3)
             .learningRate(5);
     int k = 0;
     int[] ordering = permute(gen, data.numRows());
@@ -97,52 +96,52 @@ public class OnlineLogisticRegressionTest {
 
     // zero vector gives no information.  All classes are equal.
     Vector v = lr.classify(new DenseVector(new double[]{0, 0}));
-    assertEquals(1 / 3.0, v.get(0), 1e-8);
-    assertEquals(1 / 3.0, v.get(1), 1e-8);
+    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-8);
+    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-8);
 
     v = lr.classifyFull(new DenseVector(new double[]{0, 0}));
-    assertEquals(1.0, v.zSum(), 1e-8);
-    assertEquals(1 / 3.0, v.get(0), 1e-8);
-    assertEquals(1 / 3.0, v.get(1), 1e-8);
-    assertEquals(1 / 3.0, v.get(2), 1e-8);
+    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
+    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-8);
+    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-8);
+    Assert.assertEquals(1 / 3.0, v.get(2), 1.0e-8);
 
     // weights for second vector component are still zero so all classifications are equally likely
     v = lr.classify(new DenseVector(new double[]{0, 1}));
-    assertEquals(1 / 3.0, v.get(0), 1e-3);
-    assertEquals(1 / 3.0, v.get(1), 1e-3);
+    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-3);
+    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-3);
 
     v = lr.classifyFull(new DenseVector(new double[]{0, 1}));
-    assertEquals(1.0, v.zSum(), 1e-8);
-    assertEquals(1 / 3.0, v.get(0), 1e-3);
-    assertEquals(1 / 3.0, v.get(1), 1e-3);
-    assertEquals(1 / 3.0, v.get(2), 1e-3);
+    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
+    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-3);
+    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-3);
+    Assert.assertEquals(1 / 3.0, v.get(2), 1.0e-3);
 
     // but the weights on the first component are non-zero
     v = lr.classify(new DenseVector(new double[]{1, 0}));
-    assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1e-8);
-    assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1e-8);
+    Assert.assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1.0e-8);
+    Assert.assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1.0e-8);
 
     v = lr.classifyFull(new DenseVector(new double[]{1, 0}));
-    assertEquals(1.0, v.zSum(), 1e-8);
-    assertEquals(1 / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1e-8);
-    assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1e-8);
-    assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(2), 1e-8);
+    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
+    Assert.assertEquals(1 / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1.0e-8);
+    Assert.assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1.0e-8);
+    Assert.assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(2), 1.0e-8);
 
     lr.setBeta(0, 1, 1);
 
     v = lr.classifyFull(new DenseVector(new double[]{1, 1}));
-    assertEquals(1.0, v.zSum(), 1e-8);
-    assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(-2)), v.get(1), 1e-3);
-    assertEquals(Math.exp(-2) / (1 + Math.exp(0) + Math.exp(-2)), v.get(2), 1e-3);
-    assertEquals(1 / (1 + Math.exp(0) + Math.exp(-2)), v.get(0), 1e-3);
+    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
+    Assert.assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(-2)), v.get(1), 1.0e-3);
+    Assert.assertEquals(Math.exp(-2) / (1 + Math.exp(0) + Math.exp(-2)), v.get(2), 1.0e-3);
+    Assert.assertEquals(1 / (1 + Math.exp(0) + Math.exp(-2)), v.get(0), 1.0e-3);
 
     lr.setBeta(1, 1, 3);
 
     v = lr.classifyFull(new DenseVector(new double[]{1, 1}));
-    assertEquals(1.0, v.zSum(), 1e-8);
-    assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(1)), v.get(1), 1e-8);
-    assertEquals(Math.exp(1) / (1 + Math.exp(0) + Math.exp(1)), v.get(2), 1e-8);
-    assertEquals(1 / (1 + Math.exp(0) + Math.exp(1)), v.get(0), 1e-8);
+    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
+    Assert.assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(1)), v.get(1), 1.0e-8);
+    Assert.assertEquals(Math.exp(1) / (1 + Math.exp(0) + Math.exp(1)), v.get(2), 1.0e-8);
+    Assert.assertEquals(1 / (1 + Math.exp(0) + Math.exp(1)), v.get(0), 1.0e-8);
   }
 
   @Test
@@ -153,9 +152,10 @@ public class OnlineLogisticRegressionTest {
     // lambda here needs to be relatively small to avoid swamping the actual signal, but can be
     // larger than usual because the data are dense.  The learning rate doesn't matter too much
     // for this example, but should generally be < 1
-    // --passes 1 --rate 50 --lambda 0.001 --input sgd-y.csv --features 21 --output model --noBias --target y --categories 2 --predictors  V2 V3 V4 V5 V6 V7 --types n
+    // --passes 1 --rate 50 --lambda 0.001 --input sgd-y.csv --features 21 --output model --noBias
+    //   --target y --categories 2 --predictors  V2 V3 V4 V5 V6 V7 --types n
     OnlineLogisticRegression lr = new OnlineLogisticRegression(2, 8, new L1())
-            .lambda(1 * 1e-3)
+            .lambda(1 * 1.0e-3)
             .learningRate(50);
 
     train(input, target, lr);
@@ -175,7 +175,7 @@ public class OnlineLogisticRegressionTest {
     return target;
   }
 
-  private void train(Matrix input, Vector target, OnlineLearner lr) {
+  private static void train(Matrix input, Vector target, OnlineLearner lr) {
     RandomUtils.useTestSeed();
     Random gen = RandomUtils.getRandom();
 
@@ -186,7 +186,7 @@ public class OnlineLogisticRegressionTest {
     lr.close();
   }
 
-  private void test(Matrix input, Vector target, AbstractVectorClassifier lr) {
+  private static void test(Matrix input, Vector target, AbstractVectorClassifier lr) {
     // now test the accuracy
     Matrix tmp = lr.classify(input);
     // mean(abs(tmp - target))
@@ -196,14 +196,14 @@ public class OnlineLogisticRegressionTest {
     double maxAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.MAX, Functions.ABS);
 
     System.out.printf("mAE = %.4f, maxAE = %.4f\n", meanAbsoluteError, maxAbsoluteError);
-    assertEquals(0, meanAbsoluteError , 0.05);
-    assertEquals(0, maxAbsoluteError, 0.3);
+    Assert.assertEquals(0, meanAbsoluteError , 0.05);
+    Assert.assertEquals(0, maxAbsoluteError, 0.3);
 
     // convenience methods should give the same results
     Vector v = lr.classifyScalar(input);
-    assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1e-5);
+    Assert.assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-5);
     v = lr.classifyFull(input).getColumn(1);
-    assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1e-4);
+    Assert.assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-4);
   }
 
   /**
@@ -213,16 +213,16 @@ public class OnlineLogisticRegressionTest {
    * @param max The number of integers to permute
    * @return An array of jumbled integer values
    */
-  private int[] permute(Random gen, int max) {
+  private static int[] permute(Random gen, int max) {
     int[] permutation = new int[max];
     permutation[0] = 0;
     for (int i = 1; i < max; i++) {
       int n = gen.nextInt(i + 1);
-      if (n != i) {
+      if (n == i) {
+        permutation[i] = i;
+      } else {
         permutation[i] = permutation[n];
         permutation[n] = i;
-      } else {
-        permutation[i] = i;
       }
     }
     return permutation;
@@ -236,12 +236,12 @@ public class OnlineLogisticRegressionTest {
    *
    * @param resourceName Where to get the data.
    * @return A matrix of the results.
-   * @throws java.io.IOException If there is an error reading the data
+   * @throws IOException If there is an error reading the data
    */
-  private Matrix readCsv(String resourceName) throws IOException {
+  private static Matrix readCsv(String resourceName) throws IOException {
     Splitter onCommas = Splitter.on(",").trimResults(CharMatcher.anyOf(" \""));
 
-    InputStreamReader isr = new InputStreamReader(Resources.getResource(resourceName).openStream());
+    Readable isr = new InputStreamReader(Resources.getResource(resourceName).openStream());
     List<String> data = CharStreams.readLines(isr);
     String first = data.get(0);
     data = data.subList(1, data.size());

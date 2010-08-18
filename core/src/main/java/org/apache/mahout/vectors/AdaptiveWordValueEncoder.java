@@ -27,7 +27,8 @@ import org.apache.mahout.math.Vector;
  * without a pre-scan of all of the data.
  */
 public class AdaptiveWordValueEncoder extends WordValueEncoder {
-  private Multiset<String> dictionary;
+
+  private final Multiset<String> dictionary;
 
   public AdaptiveWordValueEncoder(String name) {
     super(name);

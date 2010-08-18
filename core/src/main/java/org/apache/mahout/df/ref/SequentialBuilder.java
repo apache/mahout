@@ -70,7 +70,7 @@ public class SequentialBuilder {
   private static void logProgress(float progress) {
     int percent = (int) (progress * 100);
     if (percent % 10 == 0) {
-      log.info(String.format("Building %2d%%", percent));
+      log.info("Building {}%", percent);
     }
     
   }

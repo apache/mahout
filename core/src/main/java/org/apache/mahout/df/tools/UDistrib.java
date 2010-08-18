@@ -167,7 +167,7 @@ public final class UDistrib {
     int id = 0;
     while (scanner.hasNextLine()) {
       if (id % 1000 == 0) {
-        log.info(String.format("progress : %d / %d", id, nbInstances));
+        log.info("progress : {} / {}", id, nbInstances);
       }
       
       String line = scanner.nextLine();

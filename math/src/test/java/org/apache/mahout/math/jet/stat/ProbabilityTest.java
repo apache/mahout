@@ -19,6 +19,8 @@ package org.apache.mahout.math.jet.stat;
 
 import junit.framework.TestCase;
 
+import java.util.Locale;
+
 public class ProbabilityTest extends TestCase {
   public void testNormalCdf() {
     // computed by R
@@ -168,7 +170,9 @@ public class ProbabilityTest extends TestCase {
     for (int j = 0; j < 4; j++) {
       for (int i = 0; i < 100; i++) {
         double x = i / 99.0;
-        String p = String.format("pbeta(q=%6.4f, shape1=%5.3f shape2=%5.3f) = %.8f", x, alpha[j], beta[j], ref[j][i]);
+        String p = String.format(Locale.ENGLISH,
+                                 "pbeta(q=%6.4f, shape1=%5.3f shape2=%5.3f) = %.8f", 
+                                 x, alpha[j], beta[j], ref[j][i]);
         assertEquals(p, ref[j][i], Probability.beta(alpha[j], beta[j], x), 1.0e-7);
       }
     }

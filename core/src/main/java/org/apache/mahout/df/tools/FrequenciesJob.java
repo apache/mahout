@@ -158,8 +158,8 @@ public class FrequenciesJob {
     }
     
     if (index < numMaps) {
-      throw new IllegalStateException(String.format(
-        "number of output Frequencies (%d) is lesser than the number of mappers!", index));
+      throw new IllegalStateException("number of output Frequencies (" + index
+          + ") is lesser than the number of mappers!");
     }
     
     // sort the frequencies using the firstIds

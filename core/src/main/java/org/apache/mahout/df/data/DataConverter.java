@@ -18,6 +18,7 @@
 package org.apache.mahout.df.data;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -67,8 +68,7 @@ public class DataConverter {
       if (attr == dataset.getLabelId()) {
         label = dataset.labelCode(token);
         if (label == -1) {
-          log.error(String.format("label token: %s\ndataset.labels: %s", token, Arrays
-              .toString(dataset.labels())));
+          log.error("label token: {} dataset.labels: {}", token, Arrays.toString(dataset.labels()));
           throw new IllegalStateException("Label value (" + token + ") not known");
         }
       } else if (dataset.isNumerical(aId)) {
@@ -80,7 +80,7 @@ public class DataConverter {
     }
     
     if (label == -1) {
-      log.error(String.format("Label not found, instance id : %d, \nstring : %s", id, string));
+      log.error("Label not found, instance id : {}, string : {}", id, string);
       throw new IllegalStateException("Label not found!");
     }
     

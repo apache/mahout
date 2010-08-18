@@ -29,15 +29,17 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
 
   @Override
   public void addToVector(String originalForm, double weight, Vector data) {
+    int probes = getProbes();
+    String name = getName();
     for (int i = 0; i < probes; i++) {
       int n = hash(name, i, data.size());
-      trace(name, null, n);
+      trace(null, n);
       data.set(n, data.get(n) + weight);
     }
   }
 
   @Override
   public String asString(String originalForm) {
-    return name;
+    return getName();
   }
 }

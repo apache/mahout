@@ -28,13 +28,13 @@ import java.util.regex.Pattern;
  * words the same weight.
  */
 public class TextValueEncoder extends FeatureVectorEncoder {
-  Splitter onNonWord = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
+
+  private final Splitter onNonWord = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
   private FeatureVectorEncoder wordEncoder;
 
   public TextValueEncoder(String name) {
-    super(name);
+    super(name, 2);
     wordEncoder = new StaticWordValueEncoder(name);
-    probes = 2;
   }
 
   /**
@@ -50,7 +50,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
     }
   }
 
-  private Iterable<String> tokenize(String originalForm) {
+  private Iterable<String> tokenize(CharSequence originalForm) {
     return onNonWord.split(originalForm);
   }
 
@@ -64,14 +64,15 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    StringBuilder r = new StringBuilder("[");
-    String sep = "";
+    StringBuilder r = new StringBuilder();
+    r.append('[');
     for (String word : tokenize(originalForm)) {
-      r.append(sep);
+      if (r.length() > 1) {
+        r.append(", ");
+      }
       r.append(wordEncoder.asString(word));
-      sep = ", ";
     }
-    r.append("]");
+    r.append(']');
     return r.toString();
   }
 

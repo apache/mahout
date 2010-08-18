@@ -21,16 +21,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.vectors.AdaptiveWordValueEncoder;
-import org.apache.mahout.vectors.FeatureVectorEncoder;
-import org.apache.mahout.vectors.StaticWordValueEncoder;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.Locale;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class WordLikeValueEncoderTest {
   @Test
@@ -43,17 +38,17 @@ public class WordLikeValueEncoderTest {
     Iterator<Integer> j = ImmutableList.of(7, 118, 119, 199).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
-      assertEquals(j.next().intValue(), element.index());
-      assertEquals(1, element.get(), 0);
+      Assert.assertEquals(j.next().intValue(), element.index());
+      Assert.assertEquals(1, element.get(), 0);
     }
-    assertFalse(j.hasNext());
+    Assert.assertFalse(j.hasNext());
   }
 
   @Test
   public void testAsString() {
     Locale.setDefault(new Locale("EN", "US"));
     FeatureVectorEncoder enc = new StaticWordValueEncoder("word");
-    assertEquals("word:w1:1.0000", enc.asString("w1"));
+    Assert.assertEquals("word:w1:1.0000", enc.asString("w1"));
   }
 
   @Test
@@ -69,10 +64,10 @@ public class WordLikeValueEncoderTest {
     Iterator<Double> k = ImmutableList.of(3.0, 0.75, 1.5, 1.5, 0.75, 3.0).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
-      assertEquals(j.next().intValue(), element.index());
-      assertEquals(k.next(), element.get(), 0);
+      Assert.assertEquals(j.next().intValue(), element.index());
+      Assert.assertEquals(k.next(), element.get(), 0);
     }
-    assertFalse(j.hasNext());
+    Assert.assertFalse(j.hasNext());
   }
 
   @Test
@@ -85,12 +80,15 @@ public class WordLikeValueEncoderTest {
     enc.addToVector("word3", v);  // weight is log(6 / 1.5)
     Iterator<Vector.Element> i = v.iterateNonZero();
     Iterator<Integer> j = ImmutableList.of(7, 101, 118, 119, 152, 199).iterator();
-    Iterator<Double> k = ImmutableList.of(Math.log(2 / 1.5) + Math.log(4.5 / 2.5), Math.log(6 / 1.5), Math.log(3.5 / 1.5), Math.log(3.5 / 1.5), Math.log(6 / 1.5), Math.log(2 / 1.5) + Math.log(4.5 / 2.5)).iterator();
+    Iterator<Double> k = ImmutableList.of(Math.log(2 / 1.5) + Math.log(4.5 / 2.5),
+                                          Math.log(6 / 1.5), Math.log(3.5 / 1.5),
+                                          Math.log(3.5 / 1.5), Math.log(6 / 1.5),
+                                          Math.log(2 / 1.5) + Math.log(4.5 / 2.5)).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
-      assertEquals(j.next().intValue(), element.index());
-      assertEquals(k.next(), element.get(), 1e-6);
+      Assert.assertEquals(j.next().intValue(), element.index());
+      Assert.assertEquals(k.next(), element.get(), 1.0e-6);
     }
-    assertFalse(j.hasNext());
+    Assert.assertFalse(j.hasNext());
   }
 }

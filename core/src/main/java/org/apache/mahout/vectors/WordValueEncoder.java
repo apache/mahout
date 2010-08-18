@@ -19,15 +19,16 @@ package org.apache.mahout.vectors;
 
 import org.apache.mahout.math.Vector;
 
+import java.util.Locale;
+
 /**
  * Encodes words as sparse vector updates to a Vector.  Weighting is defined by a
  * sub-class.
  */
 public abstract class WordValueEncoder extends FeatureVectorEncoder {
 
-  public WordValueEncoder(String name) {
-    super(name);
-    probes = 2;
+  protected WordValueEncoder(String name) {
+    super(name, 2);
   }
 
   /**
@@ -38,10 +39,12 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(String originalForm, double w, Vector data) {
+    int probes = getProbes();
+    String name = getName();
     double weight = w * weight(originalForm);
     for (int i = 0; i < probes; i++) {
       int n = hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + i, data.size());
-      trace(name, originalForm, n);
+      trace(originalForm, n);
       data.set(n, data.get(n) + weight);
     }
   }
@@ -56,7 +59,7 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    return String.format("%s:%s:%.4f", name, originalForm, weight(originalForm));
+    return String.format(Locale.ENGLISH, "%s:%s:%.4f", getName(), originalForm, weight(originalForm));
   }
 
   protected abstract double weight(String originalForm);
