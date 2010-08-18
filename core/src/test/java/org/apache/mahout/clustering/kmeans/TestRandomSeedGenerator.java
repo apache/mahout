@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -84,7 +85,7 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
     Path output = getTestTempDirPath("random-output");
     ClusteringTestUtils.writePointsToFile(points, input, fs, conf);
     
-    RandomSeedGenerator.buildRandom(input, output, 4);
+    RandomSeedGenerator.buildRandom(input, output, 4, new ManhattanDistanceMeasure());
     
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "part-randomSeed"), conf);
     Writable key = (Writable) reader.getKeyClass().newInstance();

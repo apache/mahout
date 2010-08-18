@@ -120,7 +120,7 @@ public class CanopyClusterer {
     }
     if (!pointStronglyBound) {
       log.info("Created new Canopy:" + nextCanopyId + " at center:" + AbstractCluster.formatVector(point, null));
-      canopies.add(new Canopy(point, nextCanopyId++));
+      canopies.add(new Canopy(point, nextCanopyId++, measure));
     }
   }
 
@@ -195,7 +195,7 @@ public class CanopyClusterer {
       Iterator<Vector> ptIter = points.iterator();
       Vector p1 = ptIter.next();
       ptIter.remove();
-      Canopy canopy = new Canopy(p1, nextCanopyId++);
+      Canopy canopy = new Canopy(p1, nextCanopyId++, measure);
       canopies.add(canopy);
       while (ptIter.hasNext()) {
         Vector p2 = ptIter.next();

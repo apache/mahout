@@ -201,7 +201,7 @@ public class KMeansClusterer {
       log.info("Reference Iteration: " + iteration);
       List<Cluster> next = new ArrayList<Cluster>();
       for (Cluster c : clustersList.get(iteration)) {
-        next.add(new Cluster(c.getCenter(), c.getId()));
+        next.add(new Cluster(c.getCenter(), c.getId(), measure));
       }
       clustersList.add(next);
       converged = runKMeansIteration(points, next, measure, distanceThreshold);

@@ -84,7 +84,7 @@ public class TestMeanShift extends MahoutTestCase {
     int nextCanopyId = 0;
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
     for (Vector point : raw) {
-      canopies.add(new MeanShiftCanopy(point, nextCanopyId++));
+      canopies.add(new MeanShiftCanopy(point, nextCanopyId++, euclideanDistanceMeasure));
     }
     return canopies;
   }
@@ -119,7 +119,7 @@ public class TestMeanShift extends MahoutTestCase {
     // add all points to the canopies
     int nextCanopyId = 0;
     for (Vector aRaw : raw) {
-      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), canopies);
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++, euclideanDistanceMeasure), canopies);
     }
     boolean done = false;
     int iter = 1;
@@ -145,7 +145,7 @@ public class TestMeanShift extends MahoutTestCase {
     List<Vector> points = new ArrayList<Vector>();
     for (Vector v : raw)
       points.add(v);
-    List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, new EuclideanDistanceMeasure(), 0.5, 4, 1, 10);
+    List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, euclideanDistanceMeasure, 0.5, 4, 1, 10);
     printCanopies(canopies);
     printImage(canopies);
   }
@@ -162,7 +162,7 @@ public class TestMeanShift extends MahoutTestCase {
     List<MeanShiftCanopy> refCanopies = new ArrayList<MeanShiftCanopy>();
     int nextCanopyId = 0;
     for (Vector aRaw : raw) {
-      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), refCanopies);
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++, euclideanDistanceMeasure), refCanopies);
     }
 
     Configuration conf = new Configuration();
@@ -222,7 +222,7 @@ public class TestMeanShift extends MahoutTestCase {
     List<MeanShiftCanopy> mapperReference = new ArrayList<MeanShiftCanopy>();
     int nextCanopyId = 0;
     for (Vector aRaw : raw) {
-      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++), mapperReference);
+      clusterer.mergeCanopy(new MeanShiftCanopy(aRaw, nextCanopyId++, euclideanDistanceMeasure), mapperReference);
     }
     for (MeanShiftCanopy canopy : mapperReference) {
       clusterer.shiftToMean(canopy);

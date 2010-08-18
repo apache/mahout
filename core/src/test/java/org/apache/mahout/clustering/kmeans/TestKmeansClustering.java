@@ -113,7 +113,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i);
-        clusters.add(new Cluster(vec, i));
+        clusters.add(new Cluster(vec, i, measure));
       }
       // iterate clusters until they converge
       int maxIter = 10;
@@ -153,7 +153,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       List<Cluster> clusters = new ArrayList<Cluster>();
 
       for (int i = 0; i < k + 1; i++) {
-        Cluster cluster = new Cluster(points.get(i).get(), i);
+        Cluster cluster = new Cluster(points.get(i).get(), i, measure);
         // add the center so the centroid will be correct upon output
         cluster.observe(cluster.getCenter(), 1);
         clusters.add(cluster);
@@ -200,7 +200,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
 
-        Cluster cluster = new Cluster(vec, i);
+        Cluster cluster = new Cluster(vec, i, measure);
         // add the center so the centroid will be correct upon output
         cluster.observe(cluster.getCenter(), 1);
         clusters.add(cluster);
@@ -258,7 +258,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
-        Cluster cluster = new Cluster(vec, i);
+        Cluster cluster = new Cluster(vec, i, measure);
         // add the center so the centroid will be correct upon output
         // cluster.addPoint(cluster.getCenter());
         clusters.add(cluster);
@@ -296,7 +296,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       List<Cluster> reference = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
-        reference.add(new Cluster(vec, i));
+        reference.add(new Cluster(vec, i, measure));
       }
       List<Vector> pointsVectors = new ArrayList<Vector>();
       for (VectorWritable point : points) {
@@ -331,6 +331,7 @@ public class TestKmeansClustering extends MahoutTestCase {
 
   /** Story: User wishes to run kmeans job on reference data */
   public void testKMeansSeqJob() throws Exception {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
     List<VectorWritable> points = getPointsWritable(reference);
 
     Path pointsPath = getTestTempDirPath("points");
@@ -348,7 +349,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
 
-        Cluster cluster = new Cluster(vec, i);
+        Cluster cluster = new Cluster(vec, i, measure);
         // add the center so the centroid will be correct upon output
         cluster.observe(cluster.getCenter(), 1);
         writer.append(new Text(cluster.getIdentifier()), cluster);
@@ -386,6 +387,7 @@ public class TestKmeansClustering extends MahoutTestCase {
 
   /** Story: User wishes to run kmeans job on reference data */
   public void testKMeansMRJob() throws Exception {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
     List<VectorWritable> points = getPointsWritable(reference);
 
     Path pointsPath = getTestTempDirPath("points");
@@ -403,7 +405,7 @@ public class TestKmeansClustering extends MahoutTestCase {
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
 
-        Cluster cluster = new Cluster(vec, i);
+        Cluster cluster = new Cluster(vec, i, measure);
         // add the center so the centroid will be correct upon output
         cluster.observe(cluster.getCenter(), 1);
         writer.append(new Text(cluster.getIdentifier()), cluster);
@@ -455,13 +457,13 @@ public class TestKmeansClustering extends MahoutTestCase {
 
     Path outputPath = getTestTempDirPath("output");
     // now run the Canopy job
-    CanopyDriver.runJob(pointsPath, outputPath, ManhattanDistanceMeasure.class.getName(), 3.1, 2.1, false, false);
+    CanopyDriver.runJob(pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, false);
 
     // now run the KMeans job
     KMeansDriver.runJob(pointsPath,
                         new Path(outputPath, "clusters-0"),
                         outputPath,
-                        EuclideanDistanceMeasure.class.getName(),
+                        new EuclideanDistanceMeasure(),
                         0.001,
                         10,
                         1,

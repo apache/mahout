@@ -50,7 +50,7 @@ class DisplayCanopy extends DisplayClustering {
     writeSampleData(samples);
     //boolean b = true;
     //if (b) {
-      new CanopyDriver().buildClusters(samples, output, ManhattanDistanceMeasure.class.getName(), T1, T2, true);
+      new CanopyDriver().buildClusters(samples, output, new ManhattanDistanceMeasure(), T1, T2, true);
       loadClusters(output);
     //} else {
     //  List<Vector> points = new ArrayList<Vector>();

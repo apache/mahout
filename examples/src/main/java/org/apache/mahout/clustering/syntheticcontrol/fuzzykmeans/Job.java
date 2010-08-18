@@ -31,6 +31,8 @@ import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
@@ -51,16 +53,7 @@ public final class Job extends FuzzyKMeansDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"),
-                    output,
-                    "org.apache.mahout.common.distance.EuclideanDistanceMeasure",
-                    80,
-                    55,
-                    10,
-                    1,
-                    (float) 2,
-                    0.5,
-                    true);
+      new Job().job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 10, 1, (float) 2, 0.5, true);
 
     }
   }
@@ -109,14 +102,17 @@ public final class Job extends FuzzyKMeansDriver {
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
     }
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(argMap
-          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)));
+          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    job(input, output, measureClass, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta, runClustering);
+    job(input, output, measure, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta, runClustering);
     return 0;
   }
 
@@ -149,26 +145,26 @@ public final class Job extends FuzzyKMeansDriver {
    */
   private void job(Path input,
                    Path output,
-                   String measureClass,
+                   DistanceMeasure measure,
                    double t1,
                    double t2,
                    int maxIterations,
                    int numReducerTasks,
                    float fuzziness,
                    double convergenceDelta,
-                   boolean runClustering)
-      throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+                   boolean runClustering) throws IOException, InstantiationException, IllegalAccessException, InterruptedException,
+      ClassNotFoundException {
 
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
-    CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClass, t1, t2, false, false);
+    CanopyDriver.runJob(directoryContainingConvertedInput, output, measure, t1, t2, false, false);
     log.info("Running FuzzyKMeans");
     FuzzyKMeansDriver.runJob(directoryContainingConvertedInput,
                              new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
                              output,
-                             measureClass,
+                             measure,
                              convergenceDelta,
                              maxIterations,
                              numReducerTasks,
@@ -178,8 +174,7 @@ public final class Job extends FuzzyKMeansDriver {
                              0.0,
                              false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"),
-                                                    new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 }

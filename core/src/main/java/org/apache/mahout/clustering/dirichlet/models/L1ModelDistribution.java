@@ -47,7 +47,7 @@ public class L1ModelDistribution extends AbstractVectorModelDistribution {
   public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
     Model<VectorWritable>[] result = new L1Model[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
-      result[i] = ((L1Model) posterior[i]).sample();
+      result[i] = ((L1Model) posterior[i]).sampleFromPosterior();
     }
     return result;
   }

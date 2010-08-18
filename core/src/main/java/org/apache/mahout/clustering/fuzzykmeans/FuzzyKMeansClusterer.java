@@ -96,7 +96,7 @@ public class FuzzyKMeansClusterer {
       List<SoftCluster> next = new ArrayList<SoftCluster>();
       List<SoftCluster> cs = clustersList.get(iteration++);
       for (SoftCluster c : cs) {
-        next.add(new SoftCluster(c.getCenter(), c.getId()));
+        next.add(new SoftCluster(c.getCenter(), c.getId(), measure));
       }
       clustersList.add(next);
       converged = runFuzzyKMeansIteration(points, clustersList.get(iteration), clusterer);

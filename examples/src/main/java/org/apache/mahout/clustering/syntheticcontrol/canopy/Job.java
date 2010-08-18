@@ -25,6 +25,8 @@ import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,7 @@ public final class Job extends CanopyDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      job(new Path("testdata"), output, "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 80, 55);
+      job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55);
     }
   }
 
@@ -60,22 +62,20 @@ public final class Job extends CanopyDriver {
    *          the String denoting the input directory path
    * @param output
    *          the String denoting the output directory path
-   * @param measureClassName
-   *          the String class name of the DistanceMeasure to use
+   * @param measure
+   *          the DistanceMeasure to use
    * @param t1
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
    */
-  private static void job(Path input, Path output, String measureClassName, double t1, double t2)
-      throws IOException,
+  private static void job(Path input, Path output, DistanceMeasure measure, double t1, double t2) throws IOException,
       InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
-    CanopyDriver.runJob(directoryContainingConvertedInput, output, measureClassName, t1, t2, true, false);
+    CanopyDriver.runJob(directoryContainingConvertedInput, output, measure, t1, t2, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"),
-                                                    new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
@@ -102,8 +102,10 @@ public final class Job extends CanopyDriver {
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
 
-    job(input, output, measureClass, t1, t2);
+    job(input, output, measure, t1, t2);
     return 0;
   }
 

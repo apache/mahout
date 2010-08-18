@@ -31,6 +31,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public final class RandomSeedGenerator {
   private RandomSeedGenerator() {
   }
   
-  public static Path buildRandom(Path input, Path output, int k) throws IOException,
+  public static Path buildRandom(Path input, Path output, int k, DistanceMeasure measure) throws IOException,
                                                                     IllegalAccessException,
                                                                     InstantiationException {
     // delete the output directory
@@ -84,7 +85,7 @@ public final class RandomSeedGenerator {
         Writable key = (Writable) reader.getKeyClass().newInstance();
         VectorWritable value = (VectorWritable) reader.getValueClass().newInstance();
         while (reader.next(key, value)) {
-          Cluster newCluster = new Cluster(value.get(), nextClusterId++);
+          Cluster newCluster = new Cluster(value.get(), nextClusterId++, measure);
           newCluster.observe(value.get(), 1);
           Text newText = new Text(key.toString());
           int currentSize = chosenTexts.size();

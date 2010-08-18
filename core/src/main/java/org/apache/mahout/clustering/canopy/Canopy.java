@@ -20,9 +20,8 @@ package org.apache.mahout.clustering.canopy;
 import java.io.DataInput;
 import java.io.IOException;
 
-import org.apache.mahout.clustering.AbstractCluster;
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.clustering.DistanceMeasureCluster;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 
 /**
@@ -30,7 +29,7 @@ import org.apache.mahout.math.Vector;
  * to the application of some distance metric, and a point total which is the sum of all the points and is
  * used to compute the centroid when needed.
  */
-public class Canopy extends AbstractCluster {
+public class Canopy extends DistanceMeasureCluster {
   
   /** Used for deserializaztion as a writable */
   public Canopy() { }
@@ -38,16 +37,12 @@ public class Canopy extends AbstractCluster {
   /**
    * Create a new Canopy containing the given point and canopyId
    * 
-   * @param center
-   *          a point in vector space
-   * @param canopyId
-   *          an int identifying the canopy local to this process only
+   * @param center a point in vector space
+   * @param canopyId an int identifying the canopy local to this process only
+   * @param measure a DistanceMeasure to use
    */
-  public Canopy(Vector center, int canopyId) {
-    this.setId(canopyId);
-    this.setNumPoints(0);
-    this.setCenter(new RandomAccessSparseVector(center));
-    this.setRadius(center.like());
+  public Canopy(Vector center, int canopyId, DistanceMeasure measure) {
+    super(center, canopyId, measure);
     observe(center);
   }
 
@@ -56,32 +51,8 @@ public class Canopy extends AbstractCluster {
     super.readFields(in);
   }
   
-  /** Format the canopy for output */
-  public static String formatCanopy(Canopy canopy) {
-    return "C" + canopy.getId() + ": " + canopy.computeCentroid().asFormatString();
-  }
-  
   public String asFormatString() {
-    return formatCanopy(this);
-  }
-  
-  /**
-   * Decodes and returns a Canopy from the formattedString
-   * 
-   * @param formattedString
-   *          a String prouced by formatCanopy
-   * @return a new Canopy
-   */
-  public static Canopy decodeCanopy(String formattedString) {
-    int beginIndex = formattedString.indexOf('{');
-    String id = formattedString.substring(0, beginIndex);
-    String centroid = formattedString.substring(beginIndex);
-    if (id.charAt(0) == 'C') {
-      int canopyId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
-      Vector canopyCentroid = AbstractVector.decodeVector(centroid);
-      return new Canopy(canopyCentroid, canopyId);
-    }
-    return null;
+    return "C" + this.getId() + ": " + this.computeCentroid().asFormatString();
   }
   
   @Override

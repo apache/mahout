@@ -42,6 +42,7 @@ import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
@@ -136,48 +137,54 @@ public class TestClusterDumper extends MahoutTestCase {
   }
 
   public void testCanopy() throws Exception { // now run the Job
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
+
     Path output = getTestTempDirPath("output");
-    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, EuclideanDistanceMeasure.class.getName(), 8, 4, true, false);
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 8, 4, true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   public void testKmeans() throws Exception {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Path output = getTestTempDirPath("output");
-    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, EuclideanDistanceMeasure.class.getName(), 8, 4, false, false);
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 8, 4, false, false);
     // now run the KMeans job
-    KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output, EuclideanDistanceMeasure.class
-        .getName(), 0.001, 10, 1, true, false);
+    KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output, measure, 0.001, 10, 1, true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   public void testFuzzyKmeans() throws Exception {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
     Path output = getTestTempDirPath("output");
-    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, EuclideanDistanceMeasure.class.getName(), 8, 4, false, false);
+    CanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 8, 4, false, false);
     // now run the Fuzzy KMeans job
-    FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output, EuclideanDistanceMeasure.class
-        .getName(), 0.001, 10, 1, (float) 1.1, true, true, 0, false);
+    FuzzyKMeansDriver.runJob(getTestTempDirPath("testdata"),
+                             new Path(output, "clusters-0"),
+                             output,
+                             measure,
+                             0.001,
+                             10,
+                             1,
+                             (float) 1.1,
+                             true,
+                             true,
+                             0,
+                             false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
   public void testMeanShift() throws Exception {
+    DistanceMeasure measure = new CosineDistanceMeasure();
     Path output = getTestTempDirPath("output");
-    MeanShiftCanopyDriver.runJob(getTestTempDirPath("testdata"),
-                                 output,
-                                 CosineDistanceMeasure.class.getName(),
-                                 0.5,
-                                 0.01,
-                                 0.05,
-                                 10,
-                                 false,
-                                 true, false);
+    MeanShiftCanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 0.5, 0.01, 0.05, 10, false, true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-1"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);

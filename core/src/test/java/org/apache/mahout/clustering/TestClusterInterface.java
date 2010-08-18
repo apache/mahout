@@ -29,6 +29,8 @@ import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -42,6 +44,7 @@ public class TestClusterInterface extends MahoutTestCase {
 
   private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
   private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster<Vector>>() {}.getType();
+  private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
 
   public void testDirichletNormalModel() {
     double[] d = { 1.1, 2.2, 3.3 };
@@ -173,7 +176,7 @@ public class TestClusterInterface extends MahoutTestCase {
   public void testCanopyAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
@@ -183,7 +186,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
@@ -192,7 +195,7 @@ public class TestClusterInterface extends MahoutTestCase {
   public void testCanopyAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123, measure);
     String[] bindings = { "fee", null, null };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
@@ -203,7 +206,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new Canopy(m, 123);
+    Cluster cluster = new Canopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
@@ -212,7 +215,7 @@ public class TestClusterInterface extends MahoutTestCase {
   public void testClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "CL-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
@@ -222,7 +225,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
@@ -231,7 +234,7 @@ public class TestClusterInterface extends MahoutTestCase {
   public void testClusterAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
@@ -242,7 +245,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123);
+    Cluster cluster = new org.apache.mahout.clustering.kmeans.Cluster(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
@@ -251,7 +254,7 @@ public class TestClusterInterface extends MahoutTestCase {
   public void testMSCanopyAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "MSC-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
@@ -261,7 +264,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
     String formatString = cluster.asFormatString(null);
     System.out.println(formatString);
     assertEquals("format", "MSC-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
@@ -270,7 +273,7 @@ public class TestClusterInterface extends MahoutTestCase {
   public void testMSCanopyAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);
@@ -281,7 +284,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
     m.assign(d);
-    Cluster cluster = new MeanShiftCanopy(m, 123);
+    Cluster cluster = new MeanShiftCanopy(m, 123, measure);
     String[] bindings = { "fee", null, "foo" };
     String formatString = cluster.asFormatString(bindings);
     System.out.println(formatString);

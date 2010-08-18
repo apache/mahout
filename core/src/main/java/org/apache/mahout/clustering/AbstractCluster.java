@@ -8,8 +8,10 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.NamedVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.SquareRootFunction;
@@ -18,7 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public abstract class AbstractCluster implements Writable, Cluster {
+public abstract class AbstractCluster implements Cluster, Model<VectorWritable> {
 
   private static final Type VECTOR_TYPE = new TypeToken<Vector>() {
   }.getType();
@@ -31,6 +33,23 @@ public abstract class AbstractCluster implements Writable, Cluster {
   private Vector center;
 
   private Vector radius;
+
+  public AbstractCluster() {
+  }
+
+  public AbstractCluster(Vector point, int id2) {
+    this.numPoints = 0;
+    this.center = new RandomAccessSparseVector(point);
+    this.radius = point.like();
+    this.id = id2;
+  }
+
+  public AbstractCluster(Vector center2, Vector radius2, int id2) {
+    this.numPoints = 0;
+    this.center = new RandomAccessSparseVector(center2);
+    this.radius = new RandomAccessSparseVector(radius2);
+    this.id = id2;
+  }
 
   /**
    * @param id the id to set
@@ -67,6 +86,8 @@ public abstract class AbstractCluster implements Writable, Cluster {
 
   private transient Vector s2;
 
+  protected static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
+
   /**
    * @return the s0
    */
@@ -88,23 +109,6 @@ public abstract class AbstractCluster implements Writable, Cluster {
     return s2;
   }
 
-  public void computeParameters() {
-    if (s0 == 0) {
-      return;
-    }
-    numPoints = (int) s0;
-    center = s1.divide(s0);
-    // compute the component stds
-    if (s0 > 1) {
-      radius = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
-    } else {
-      radius.assign(Double.MIN_NORMAL);
-    }
-    s0 = 0;
-    s1 = null;
-    s2 = null;
-  }
-
   public void observe(ClusterObservations observations) {
     s0 += observations.getS0();
     if (s1 == null) {
@@ -119,8 +123,12 @@ public abstract class AbstractCluster implements Writable, Cluster {
     }
   }
 
-  public ClusterObservations getObservations() {
-    return new ClusterObservations(s0, s1, s2);
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.dirichlet.models.Model#observe(java.lang.Object)
+   */
+  @Override
+  public void observe(VectorWritable x) {
+    observe(x.get());
   }
 
   public void observe(Vector x, double weight) {
@@ -141,6 +149,32 @@ public abstract class AbstractCluster implements Writable, Cluster {
 
   public void observe(Vector x) {
     observe(x, 1.0);
+  }
+
+  @Override
+  public int getNumPoints() {
+    return numPoints;
+  }
+
+  public ClusterObservations getObservations() {
+    return new ClusterObservations(s0, s1, s2);
+  }
+
+  public void computeParameters() {
+    if (s0 == 0) {
+      return;
+    }
+    numPoints = (int) s0;
+    center = s1.divide(s0);
+    // compute the component stds
+    if (s0 > 1) {
+      radius = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
+    } else {
+      radius.assign(Double.MIN_NORMAL);
+    }
+    s0 = 0;
+    s1 = null;
+    s2 = null;
   }
 
   @Override
@@ -195,11 +229,6 @@ public abstract class AbstractCluster implements Writable, Cluster {
   @Override
   public int getId() {
     return id;
-  }
-
-  @Override
-  public int getNumPoints() {
-    return numPoints;
   }
 
   @Override
@@ -263,5 +292,13 @@ public abstract class AbstractCluster implements Writable, Cluster {
     }
     buf.append(']');
     return buf.toString();
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.dirichlet.models.Model#count()
+   */
+  @Override
+  public int count() {
+    return getNumPoints();
   }
 }

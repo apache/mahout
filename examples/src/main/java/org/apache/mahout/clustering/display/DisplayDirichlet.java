@@ -84,8 +84,8 @@ public class DisplayDirichlet extends DisplayClustering {
     for (Model<VectorWritable>[] models : result) {
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (Model<VectorWritable> cluster : models) {
-        if (isSignificant(cluster)) {
-          clusters.add(cluster);
+        if (isSignificant((Cluster)cluster)) {
+          clusters.add((Cluster)cluster);
         }
       }
       CLUSTERS.add(clusters);

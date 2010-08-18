@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.apache.mahout.clustering.kmeans.Cluster;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.list.IntArrayList;
@@ -53,11 +54,12 @@ public class MeanShiftCanopy extends Cluster {
   /**
    * Create a new Canopy containing the given point
    * 
-   * @param point
-   *          a Vector
+   * @param point   a Vector
+   * @param id      an int canopy id
+   * @param measure a DistanceMeasure
    */
-  public MeanShiftCanopy(Vector point, int id) {
-    super(point, id);
+  public MeanShiftCanopy(Vector point, int id, DistanceMeasure measure) {
+    super(point, id, measure);
     boundPoints.add(id);
   }
 
@@ -128,6 +130,7 @@ public class MeanShiftCanopy extends Cluster {
 
   public MeanShiftCanopy shallowCopy() {
     MeanShiftCanopy result = new MeanShiftCanopy();
+    result.setMeasure(this.getMeasure());
     result.setId(this.getId());
     result.setCenter(this.getCenter());
     result.setRadius(this.getRadius());
@@ -138,7 +141,10 @@ public class MeanShiftCanopy extends Cluster {
 
   @Override
   public String asFormatString() {
-    return formatCanopy(this);
+    GsonBuilder gBuilder = new GsonBuilder();
+    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
+    Gson gson = gBuilder.create();
+    return gson.toJson(this, MeanShiftCanopy.class);
   }
 
   public void setBoundPoints(IntArrayList boundPoints) {
@@ -148,28 +154,6 @@ public class MeanShiftCanopy extends Cluster {
   @Override
   public String getIdentifier() {
     return (isConverged() ? "MSV-" : "MSC-") + getId();
-  }
-
-  /** Format the canopy for output */
-  public static String formatCanopy(MeanShiftCanopy canopy) {
-    GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
-    Gson gson = gBuilder.create();
-    return gson.toJson(canopy, MeanShiftCanopy.class);
-  }
-
-  /**
-   * Decodes and returns a Canopy from the formattedString
-   * 
-   * @param formattedString
-   *          a String produced by formatCanopy
-   * @return a new Canopy
-   */
-  public static MeanShiftCanopy decodeCanopy(String formattedString) {
-    GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
-    Gson gson = gBuilder.create();
-    return gson.fromJson(formattedString, MeanShiftCanopy.class);
   }
 
 }

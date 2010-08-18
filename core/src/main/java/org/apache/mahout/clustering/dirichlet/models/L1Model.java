@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
@@ -32,7 +33,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class L1Model implements Model<VectorWritable> {
+public class L1Model implements Model<VectorWritable>, Cluster {
 
   private static final DistanceMeasure MEASURE = new ManhattanDistanceMeasure();
   private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
@@ -92,7 +93,7 @@ public class L1Model implements Model<VectorWritable> {
     VectorWritable.writeVector(out, coefficients);
   }
 
-  public L1Model sample() {
+  public L1Model sampleFromPosterior() {
     return new L1Model(id, coefficients.clone());
   }
 

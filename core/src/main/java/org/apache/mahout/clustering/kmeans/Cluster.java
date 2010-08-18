@@ -20,35 +20,29 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.DistanceMeasureCluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.AbstractVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
-public class Cluster extends AbstractCluster {
-
-  /** Error message for unknown cluster format in output. */
-  private static final String ERROR_UNKNOWN_CLUSTER_FORMAT = "Unknown cluster format:\n";
+public class Cluster extends DistanceMeasureCluster {
 
   /** Has the centroid converged with the center? */
   private boolean converged;
 
   /** For (de)serialization as a Writable */
   public Cluster() {
+    super();
   }
 
   /**
    * Construct a new cluster with the given point as its center
    *
-   * @param center
-   *          the center point
+   * @param center  the Vector center
+   * @param clusterId the int cluster id
+   * @param measure a DistanceMeasure
    */
-  public Cluster(Vector center, int clusterId) {
-    this.setId(clusterId);
-    this.setNumPoints(0);
-    this.setCenter(new RandomAccessSparseVector(center));
-    this.setRadius(center.like());
+  public Cluster(Vector center, int clusterId, DistanceMeasure measure) {
+    super(center, clusterId, measure);
   }
 
   /**
@@ -64,36 +58,6 @@ public class Cluster extends AbstractCluster {
 
   public String asFormatString() {
     return formatCluster(this);
-  }
-
-  /**
-   * Decodes and returns a Cluster from the formattedString.
-   * 
-   * @param formattedString
-   *          a String produced by formatCluster
-   * @return a decoded Cluster, not null
-   * @throws IllegalArgumentException
-   *           when the string is wrongly formatted
-   */
-  public static AbstractCluster decodeCluster(String formattedString) {
-    int beginIndex = formattedString.indexOf('{');
-    if (beginIndex <= 0) {
-      throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
-    }
-    String id = formattedString.substring(0, beginIndex);
-    String center = formattedString.substring(beginIndex);
-    char firstChar = id.charAt(0);
-    boolean startsWithV = firstChar == 'V';
-    Cluster cluster;
-    if ((firstChar == 'C') || startsWithV) {
-      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
-      Vector clusterCenter = AbstractVector.decodeVector(center);
-      cluster = new Cluster(clusterCenter, clusterId);
-      cluster.setConverged(startsWithV);
-    } else {
-      throw new IllegalArgumentException(ERROR_UNKNOWN_CLUSTER_FORMAT + formattedString);
-    }
-    return cluster;
   }
 
   @Override

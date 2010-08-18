@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.kmeans.KMeansConfigKeys;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
 public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, MeanShiftCanopy> {
@@ -31,15 +33,29 @@ public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, 
 
   private static int nextCanopyId = -1;
 
+  private DistanceMeasure measure;
+
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
-    MeanShiftCanopy canopy = new MeanShiftCanopy(point.get(), nextCanopyId++);
+    MeanShiftCanopy canopy = new MeanShiftCanopy(point.get(), nextCanopyId++, measure);
     context.write(new Text(key.toString()), canopy);
   }
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
+    String measureClass = context.getConfiguration().get(KMeansConfigKeys.DISTANCE_MEASURE_KEY);
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    try {
+      measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+    } catch (InstantiationException e) {
+      new IllegalStateException(e);
+    } catch (IllegalAccessException e) {
+      new IllegalStateException(e);
+    } catch (ClassNotFoundException e) {
+      new IllegalStateException(e);
+    }
+
     if (nextCanopyId == -1) {
       String taskId = context.getConfiguration().get("mapred.task.id");
       String[] parts = UNDERSCORE_PATTERN.split(taskId);

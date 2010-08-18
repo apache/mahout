@@ -26,12 +26,14 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-public class InputMapper extends Mapper<LongWritable,Text,Text,MeanShiftCanopy> {
-  
+public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
+
   private static final Pattern SPACE = Pattern.compile(" ");
+
   private int nextCanopyId;
 
   @Override
@@ -49,7 +51,7 @@ public class InputMapper extends Mapper<LongWritable,Text,Text,MeanShiftCanopy> 
     for (Double d : doubles) {
       point.set(index++, d);
     }
-    MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++);
+    MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++, new EuclideanDistanceMeasure());
     context.write(new Text(), canopy);
   }
 }

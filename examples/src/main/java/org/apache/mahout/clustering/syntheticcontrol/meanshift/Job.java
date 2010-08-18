@@ -27,6 +27,8 @@ import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,7 @@ public final class Job extends MeanShiftCanopyDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"), output, "org.apache.mahout.common.distance.EuclideanDistanceMeasure", 47.6, 1, 0.5, 10);
+      new Job().job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
     }
   }
 
@@ -82,8 +84,10 @@ public final class Job extends MeanShiftCanopyDriver {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     boolean inputIsCanopies = hasOption(INPUT_IS_CANOPIES_OPTION);
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
 
-    runJob(input, output, measureClass, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering, false);
+    runJob(input, output, measure, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering, false);
     return 0;
   }
 
@@ -99,8 +103,8 @@ public final class Job extends MeanShiftCanopyDriver {
    *          the String denoting the input directory path
    * @param output
    *          the String denoting the output directory path
-   * @param measureClassName
-   *          the String class name of the DistanceMeasure to use
+   * @param measure
+   *          the DistanceMeasure to use
    * @param t1
    *          the meanshift canopy T1 threshold
    * @param t2
@@ -112,26 +116,27 @@ public final class Job extends MeanShiftCanopyDriver {
    */
   private void job(Path input,
                    Path output,
-                   String measureClassName,
+                   DistanceMeasure measure,
                    double t1,
                    double t2,
                    double convergenceDelta,
-                   int maxIterations)
-      throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+                   int maxIterations) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
     MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput,
                                  output,
-                                 measureClassName,
+                                 measure,
                                  t1,
                                  t2,
                                  convergenceDelta,
                                  maxIterations,
                                  true,
-                                 true, false);
+                                 true,
+                                 false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations),
-                                                    new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
+                                                                                                            "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 

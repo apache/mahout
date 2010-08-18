@@ -76,6 +76,14 @@ public class DirichletCluster<O> implements Writable, Cluster {
     writeModel(out, model);
   }
 
+  /************* Methods required by Cluster *****************/
+  
+  /** Writes a typed Model instance to the output stream */
+  public static void writeModel(DataOutput out, Model<?> model) throws IOException {
+    out.writeUTF(model.getClass().getName());
+    model.write(out);
+  }
+
   /** Reads a typed Model instance from the input stream */
   public static <O> Model<O> readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
@@ -93,15 +101,11 @@ public class DirichletCluster<O> implements Writable, Cluster {
     return model;
   }
 
-  /** Writes a typed Model instance to the output stream */
-  public static void writeModel(DataOutput out, Model<?> model) throws IOException {
-    out.writeUTF(model.getClass().getName());
-    model.write(out);
-  }
-
+  /************* Methods required by Cluster *****************/
+  
   @Override
   public String asFormatString(String[] bindings) {
-    return "C-" + model.getId() + ": " + model.asFormatString(bindings);
+    return "C-" + ((Cluster)model).getId() + ": " + ((Cluster)model).asFormatString(bindings);
   }
 
   @Override
@@ -114,22 +118,22 @@ public class DirichletCluster<O> implements Writable, Cluster {
 
   @Override
   public int getId() {
-    return model.getId();
+    return ((Cluster)model).getId();
   }
 
   @Override
   public Vector getCenter() {
-    return model.getCenter();
+    return ((Cluster)model).getCenter();
   }
 
   @Override
   public int getNumPoints() {
-    return model.getNumPoints();
+    return ((Cluster)model).getNumPoints();
   }
 
   @Override
   public Vector getRadius() {
-    return model.getRadius();
+    return ((Cluster) model).getRadius();
   }
 
 }

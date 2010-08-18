@@ -18,7 +18,7 @@
 package org.apache.mahout.clustering.fuzzykmeans;
 
 import org.apache.mahout.clustering.kmeans.Cluster;
-import org.apache.mahout.math.AbstractVector;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 
 public class SoftCluster extends Cluster {
@@ -30,49 +30,16 @@ public class SoftCluster extends Cluster {
   /**
    * Construct a new SoftCluster with the given point as its center
    *
-   * @param center
-   *          the center point
+   * @param center the center point
+   * @param measure the DistanceMeasure
    */
-  public SoftCluster(Vector center, int clusterId) {
-    super(center, clusterId);
-  }
-
-  /**
-   * Format the SoftCluster for output
-   *
-   * @param cluster
-   *          the Cluster
-   */
-  public static String formatCluster(SoftCluster cluster) {
-    return cluster.getIdentifier() + ": " + cluster.computeCentroid().asFormatString();
-  }
-
-  /**
-   * Decodes and returns a SoftCluster from the formattedString
-   *
-   * @param formattedString
-   *          a String produced by formatCluster
-   */
-  public static SoftCluster decodeCluster(String formattedString) {
-    int beginIndex = formattedString.indexOf('{');
-    String id = formattedString.substring(0, beginIndex);
-    String center = formattedString.substring(beginIndex);
-    char firstChar = id.charAt(0);
-    boolean startsWithV = firstChar == 'V';
-    if ((firstChar == 'C') || startsWithV) {
-      int clusterId = Integer.parseInt(formattedString.substring(1, beginIndex - 2));
-      Vector clusterCenter = AbstractVector.decodeVector(center);
-
-      SoftCluster cluster = new SoftCluster(clusterCenter, clusterId);
-      cluster.setConverged(startsWithV);
-      return cluster;
-    }
-    return null;
+  public SoftCluster(Vector center, int clusterId, DistanceMeasure measure) {
+    super(center, clusterId, measure);
   }
 
   @Override
   public String asFormatString() {
-    return formatCluster(this);
+    return this.getIdentifier() + ": " + this.computeCentroid().asFormatString();
   }
 
   @Override

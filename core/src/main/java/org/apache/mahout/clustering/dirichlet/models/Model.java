@@ -18,14 +18,23 @@
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * A model is a probability distribution over observed data points and allows the probability of any data
- * point to be computed.
+ * point to be computed. All Models have a persistent representation and extend WritablesampleFromPosterior(Model<VectorWritable>[])
  */
-public interface Model<O> extends Writable, Cluster {
+public interface Model<O> extends Writable {
   
+  /**
+   * Return the probability that the observation is described by this model
+   * 
+   * @param x
+   *          an Observation from the posterior
+   * @return the probability that x is in the receiver
+   */
+  double pdf(O x);
+
   /**
    * Observe the given observation, retaining information about it
    * 
@@ -41,18 +50,14 @@ public interface Model<O> extends Writable, Cluster {
   void computeParameters();
   
   /**
-   * Return the probability that the observation is described by this model
-   * 
-   * @param x
-   *          an Observation from the posterior
-   * @return the probability that x is in the receiver
-   */
-  double pdf(O x);
-  
-  /**
    * Return the number of observations that have been observed by this model
    * 
    * @return an int
    */
   int count();
+
+  /**
+   * @return a sample of my posterior model
+   */
+  public Model<VectorWritable> sampleFromPosterior();
 }

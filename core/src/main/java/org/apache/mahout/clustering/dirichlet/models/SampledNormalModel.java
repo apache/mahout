@@ -42,7 +42,7 @@ public class SampledNormalModel extends NormalModel {
    * @return an SampledNormalModel
    */
   @Override
-  public NormalModel sample() {
+  public NormalModel sampleFromPosterior() {
     return new SampledNormalModel(getId(), getMean(), getStdDev());
   }
   

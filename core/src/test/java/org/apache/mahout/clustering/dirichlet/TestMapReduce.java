@@ -441,7 +441,6 @@ public class TestMapReduce extends MahoutTestCase {
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
     assertEquals("models", model.toString(), model2.toString());
-    assertEquals("ids", 5, model.getId());
   }
 
   public void testSampledNormalModelWritableSerialization() throws Exception {
@@ -454,7 +453,6 @@ public class TestMapReduce extends MahoutTestCase {
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
     assertEquals("models", model.toString(), model2.toString());
-    assertEquals("ids", 5, model.getId());
   }
 
   public void testAsymmetricSampledNormalModelWritableSerialization() throws Exception {
@@ -468,7 +466,6 @@ public class TestMapReduce extends MahoutTestCase {
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
     assertEquals("models", model.toString(), model2.toString());
-    assertEquals("ids", 5, model.getId());
   }
 
   public void testClusterWritableSerialization() throws Exception {
@@ -483,7 +480,6 @@ public class TestMapReduce extends MahoutTestCase {
     assertEquals("count", cluster.getTotalCount(), cluster2.getTotalCount());
     assertNotNull("model null", cluster2.getModel());
     assertEquals("model", cluster.getModel().toString(), cluster2.getModel().toString());
-    assertEquals("ids", 5, cluster.getId());
   }
 
 }

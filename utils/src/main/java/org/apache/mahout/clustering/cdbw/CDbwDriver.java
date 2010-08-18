@@ -36,6 +36,7 @@ import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +59,8 @@ public final class CDbwDriver extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, InterruptedException {
+  public int run(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
+      InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -74,7 +75,10 @@ public final class CDbwDriver extends AbstractJob {
     String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
-    job(input, null, output, distanceMeasureClass, maxIterations, numReducers);
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(distanceMeasureClass)).newInstance();
+
+    job(input, null, output, measure, maxIterations, numReducers);
     return 0;
   }
 
@@ -87,8 +91,8 @@ public final class CDbwDriver extends AbstractJob {
               the directory pathname for input clustered points [clusterId :: VectorWritable]
    * @param output
    *          the directory pathname for output reference points [clusterId :: VectorWritable]
-   * @param distanceMeasureClass
-   *          the String ModelDistribution class name to use
+   * @param measure
+   *          the DistanceMeasure to use
    * @param numIterations
    *          the number of iterations
    * @param numReducers
@@ -98,21 +102,20 @@ public final class CDbwDriver extends AbstractJob {
   public static void runJob(Path clustersIn,
                             Path clusteredPointsIn,
                             Path output,
-                            String distanceMeasureClass,
+                            DistanceMeasure measure,
                             int numIterations,
-                            int numReducers)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-        IOException, InterruptedException {
-    job(clustersIn, clusteredPointsIn, output, distanceMeasureClass, numIterations, numReducers);
+                            int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+      IOException, InterruptedException {
+    job(clustersIn, clusteredPointsIn, output, measure, numIterations, numReducers);
   }
 
   private static void job(Path clustersIn,
                           Path clusteredPointsIn,
                           Path output,
-                          String distanceMeasureClass,
+                          DistanceMeasure measure,
                           int numIterations,
-                          int numReducers)
-      throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
+                          int numReducers) throws InstantiationException, IllegalAccessException, IOException,
+      InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
 
@@ -120,14 +123,14 @@ public final class CDbwDriver extends AbstractJob {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "representativePoints-" + (iteration + 1));
-      runIteration(clusteredPointsIn, stateIn, stateOut, distanceMeasureClass, numReducers);
+      runIteration(clusteredPointsIn, stateIn, stateOut, measure, numReducers);
       // now point the input to the old output directory
       stateIn = stateOut;
     }
 
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
-    conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
+    conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("CDbw = " + evaluator.CDbw());
@@ -169,20 +172,16 @@ public final class CDbwDriver extends AbstractJob {
    *          the directory pathname for input state
    * @param stateOut
    *          the directory pathname for output state
-   * @param distanceMeasureClass
-   *          the class name of the DistanceMeasure class
+   * @param measure
+   *          the DistanceMeasure
    * @param numReducers
    *          the number of Reducers desired
    */
-  private static void runIteration(Path input,
-                                   Path stateIn,
-                                   Path stateOut,
-                                   String distanceMeasureClass,
-                                   int numReducers)
+  private static void runIteration(Path input, Path stateIn, Path stateOut, DistanceMeasure measure, int numReducers)
       throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
-    conf.set(DISTANCE_MEASURE_KEY, distanceMeasureClass);
+    conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     Job job = new Job(conf);
     job.setJarByClass(CDbwDriver.class);
     job.setOutputKeyClass(IntWritable.class);

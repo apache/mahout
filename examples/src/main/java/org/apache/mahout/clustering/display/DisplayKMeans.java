@@ -51,9 +51,9 @@ class DisplayKMeans extends DisplayClustering {
     int maxIter = 10;
     double distanceThreshold = 0.001;
     //if (b) {
-      Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3);
-      KMeansDriver.runJob(samples, clusters, output, measure.getClass().getName(), distanceThreshold, maxIter, 1, true, true);
-      loadClusters(output);
+    Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3, measure);
+    KMeansDriver.runJob(samples, clusters, output, measure, distanceThreshold, maxIter, 1, true, true);
+    loadClusters(output);
     //} else {
     //  List<Vector> points = new ArrayList<Vector>();
     //  for (VectorWritable sample : SAMPLE_DATA) {

@@ -57,11 +57,11 @@ class DisplayFuzzyKMeans extends DisplayClustering {
     int m = 3;
     //if (b) {
       writeSampleData(samples);
-      Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3);
+      Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3, measure);
       FuzzyKMeansDriver.runJob(samples,
                                clusters,
                                output,
-                               measure.getClass().getName(),
+                               measure,
                                threshold,
                                numIterations,
                                1,

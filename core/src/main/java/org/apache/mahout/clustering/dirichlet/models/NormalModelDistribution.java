@@ -48,7 +48,7 @@ public class NormalModelDistribution extends AbstractVectorModelDistribution {
     Model<VectorWritable>[] result = new NormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
       NormalModel m = (NormalModel) posterior[i];
-      result[i] = m.sample();
+      result[i] = m.sampleFromPosterior();
     }
     return result;
   }
