@@ -25,6 +25,8 @@ import org.junit.Test;
 
 import java.util.Locale;
 
+import static org.junit.Assert.assertEquals;
+
 public class TextValueEncoderTest {
   @Test
   public void testAddToVector() {
