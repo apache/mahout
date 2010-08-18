@@ -23,6 +23,8 @@ import org.apache.mahout.math.Vector;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Locale;
+
 public class TextValueEncoderTest {
   @Test
   public void testAddToVector() {
@@ -56,6 +58,7 @@ public class TextValueEncoderTest {
 
   @Test
   public void testAsString() {
+    Locale.setDefault(Locale.ENGLISH);
     FeatureVectorEncoder enc = new TextValueEncoder("text");
     Assert.assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
   }

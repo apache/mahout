@@ -46,7 +46,7 @@ public class WordLikeValueEncoderTest {
 
   @Test
   public void testAsString() {
-    Locale.setDefault(new Locale("EN", "US"));
+    Locale.setDefault(Locale.ENGLISH);
     FeatureVectorEncoder enc = new StaticWordValueEncoder("word");
     Assert.assertEquals("word:w1:1.0000", enc.asString("w1"));
   }

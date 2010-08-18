@@ -1027,7 +1027,7 @@ public class Property extends PersistentObject {
     for (String key : messages.keySet()) {
       maxLength = Math.max(key.length(), maxLength);
     }
-    String format = String.format(Locale.ENGLISH, "\\%%ds: \\%s\n", maxLength);
+    String format = String.format("\\%%ds: \\%s\n", maxLength);
 
     Formatter r = new Formatter();
     for (String key : messages.keySet()) {
