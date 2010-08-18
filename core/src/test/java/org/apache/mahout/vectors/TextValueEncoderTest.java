@@ -61,7 +61,7 @@ public class TextValueEncoderTest {
   @Test
   public void testAsString() {
     Locale.setDefault(Locale.ENGLISH);
-    FeatureVectorEncoder enc = new TextValueEncoder("text");
-    Assert.assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
+    TextValueEncoder enc = new TextValueEncoder("text");
+    assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
   }
 }
