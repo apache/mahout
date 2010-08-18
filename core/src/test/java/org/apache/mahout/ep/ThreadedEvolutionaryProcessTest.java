@@ -16,7 +16,7 @@ public class ThreadedEvolutionaryProcessTest {
        */
       @Override
       public double apply(double[] params) {
-        Random rand = new Random();
+        Random rand = new Random(1);
         double sum = 0;
         int i = 0;
         for (double x : params) {
@@ -38,7 +38,7 @@ public class ThreadedEvolutionaryProcessTest {
     double[] r = x.getMappedParams();
     int i = 0;
     for (double v : r) {
-      Assert.assertEquals(i++, v, 1e-3);
+      Assert.assertEquals(i++, v, 1e-2);
     }
   }
 }
