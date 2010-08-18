@@ -61,7 +61,11 @@ public class MathHelper {
       }
 
       @Override
-      public void appendTo(StringBuffer buffer) {}
+      public void appendTo(StringBuffer buffer) {
+        buffer.append("MatrixEntry[row=").append(row)
+            .append(",col=").append(col)
+            .append(",value=").append(value).append("]");
+      }
     });
     return null;
   }

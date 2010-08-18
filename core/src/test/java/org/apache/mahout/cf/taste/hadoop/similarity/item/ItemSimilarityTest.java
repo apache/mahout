@@ -41,8 +41,6 @@ import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.MathHelper;
-import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoefficientVectorSimilarity;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedUncenteredZeroAssumingCosineVectorSimilarity;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
@@ -107,65 +105,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
                                                   new VarLongWritable(5L), new VarLongWritable(5L));
 
     new CountUsersReducer().reduce(null, userIDs, context);
-    EasyMock.verify(context);
-  }
-
-  /**
-   * tests {@link PrefsToItemUserMatrixMapper}
-   *
-   * @throws Exception
-   */
-  public void testPrefsToItemUserMatrixMapper() throws Exception {
-    Mapper<LongWritable,Text,VarIntWritable, MatrixEntryWritable>.Context context =
-      EasyMock.createMock(Mapper.Context.class);
-    context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(100L))),
-        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(100L),
-        TasteHadoopUtils.idToIndex(12L), 1.3));
-    context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(20L))),
-        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(20L), TasteHadoopUtils.idToIndex(35L), 3.0));
-    EasyMock.replay(context);
-
-    PrefsToItemUserMatrixMapper mapper = new PrefsToItemUserMatrixMapper();
-    mapper.map(null, new Text("12,100,1.3"), context);
-    mapper.map(null, new Text("35,20,3.0"), context);
-
-    EasyMock.verify(context);
-  }
-
-  public void testPrefsToItemUserMatrixMapperBoolean() throws Exception {
-    Mapper<LongWritable,Text,VarIntWritable, MatrixEntryWritable>.Context context =
-      EasyMock.createMock(Mapper.Context.class);
-    context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(100L))),
-        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(100L),
-        TasteHadoopUtils.idToIndex(12L), 1.0));
-    context.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(20L))),
-        MathHelper.matrixEntryMatches(TasteHadoopUtils.idToIndex(20L), TasteHadoopUtils.idToIndex(35L), 1.0));
-    EasyMock.replay(context);
-
-    PrefsToItemUserMatrixMapper mapper = new PrefsToItemUserMatrixMapper();
-    setField(mapper, "booleanData", Boolean.TRUE);
-    mapper.map(null, new Text("12,100"), context);
-    mapper.map(null, new Text("35,20,3.0"), context);
-
-    EasyMock.verify(context);
-  }
-
-  /**
-   * tests {@link PrefsToItemUserMatrixReducer}
-   */
-  public void testPrefsToItemUserMatrixReducer() throws Exception {
-    Reducer<VarIntWritable, MatrixEntryWritable,IntWritable,VectorWritable>.Context context =
-      EasyMock.createMock(Reducer.Context.class);
-
-    context.write(EasyMock.eq(new IntWritable(123)), MathHelper.vectorMatches(MathHelper.elem(1, 0.5),
-        MathHelper.elem(7, 2.0)));
-    EasyMock.replay(context);
-
-    List<MatrixEntryWritable> entries = Arrays.asList(MathHelper.matrixEntry(123, 1, 0.5),
-        MathHelper.matrixEntry(123, 7, 2.0));
-
-    new PrefsToItemUserMatrixReducer().reduce(new VarIntWritable(123), entries, context);
-
     EasyMock.verify(context);
   }
 

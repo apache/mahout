@@ -32,14 +32,14 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.cf.taste.hadoop.EntityPrefWritable;
+import org.apache.mahout.cf.taste.hadoop.MaybePruneRowsMapper;
 import org.apache.mahout.cf.taste.hadoop.RecommendedItemsWritable;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.hadoop.ToItemPrefsMapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersKeyWritable;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersMapper;
 import org.apache.mahout.cf.taste.hadoop.similarity.item.CountUsersReducer;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixMapper;
-import org.apache.mahout.cf.taste.hadoop.similarity.item.PrefsToItemUserMatrixReducer;
+import org.apache.mahout.cf.taste.hadoop.similarity.item.ToItemVectorsReducer;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
@@ -68,9 +68,11 @@ import java.util.regex.Pattern;
  * <li>--itemsFile (path): file containing item IDs to recommend for (optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
  * <li>--booleanData (boolean): Treat input data as having to pref values (false)</li>
- * <li>--maxPrefsPerUserConsidered (integer): Maximum number of preferences considered per user in
+ * <li>--maxPrefsPerUser(integer): Maximum number of preferences considered per user in
  *  final recommendation phase (10)</li>
- * <li>--maxSimilaritiesPerItemConsidered (integer): Maximum number of similarities considered per item (optional;
+ * <li>--maxSimilaritiesPerItem (integer): Maximum number of similarities considered per item (optional;
+ *  default 100)</li>
+ * <li>--maxCooccurrencesPerItem (integer): Maximum number of cooccurrences considered per item (optional;
  *  default 100)</li>
  * </ol>
  *
@@ -81,11 +83,10 @@ import java.util.regex.Pattern;
  */
 public final class RecommenderJob extends AbstractJob {
 
-  static final String MAX_SIMILARITIES_PER_ITEM_CONSIDERED = RecommenderJob.class.getName() +
-      ".maxSimilaritiesPerItemConsidered";
-
   public static final String BOOLEAN_DATA = "booleanData";
-  public static final int DEFAULT_MAX_SIMILARITIES_PER_ITEM_CONSIDERED = 100;
+  
+  private static final int DEFAULT_MAX_SIMILARITIES_PER_ITEM = 100;
+  private static final int DEFAULT_MAX_COOCCURRENCES_PER_ITEM = 100;
 
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
@@ -95,13 +96,16 @@ public final class RecommenderJob extends AbstractJob {
     addOption("numRecommendations", "n", "Number of recommendations per user",
         String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
     addOption("usersFile", "u", "File of users to recommend for", null);
-    addOption("itemsFile", "u", "File of items to recommend for", null);
+    addOption("itemsFile", "i", "File of items to recommend for", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
-    addOption("maxPrefsPerUserConsidered", null,
+    addOption("maxPrefsPerUser", null,
         "Maximum number of preferences considered per user in final recommendation phase",
         String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
-    addOption("maxSimilaritiesPerItemConsidered", null, "Maximum number of similarities considered per item ",
-        String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM_CONSIDERED));    
+    addOption("maxSimilaritiesPerItem", null, "Maximum number of similarities considered per item ",
+        String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM));
+    addOption("maxCooccurrencesPerItem", "o", "try to cap the number of cooccurrences per item to this " +
+        "number (default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')',
+        String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use " +
         "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')',
         String.valueOf(SimilarityType.SIMILARITY_COOCCURRENCE));    
@@ -118,15 +122,15 @@ public final class RecommenderJob extends AbstractJob {
     String usersFile = parsedArgs.get("--usersFile");
     String itemsFile = parsedArgs.get("--itemsFile");
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
-    int maxPrefsPerUserConsidered = Integer.parseInt(parsedArgs.get("--maxPrefsPerUserConsidered"));
-    int maxSimilaritiesPerItemConsidered = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItemConsidered"));
+    int maxPrefsPerUser = Integer.parseInt(parsedArgs.get("--maxPrefsPerUser"));
+    int maxSimilaritiesPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
+    int maxCooccurrencesPerItem = Integer.parseInt(parsedArgs.get("--maxCooccurrencesPerItem"));
     String similarityClassname = parsedArgs.get("--similarityClassname");
 
     Path userVectorPath = new Path(tempDirPath, "userVectors");
     Path itemIDIndexPath = new Path(tempDirPath, "itemIDIndex");
     Path countUsersPath = new Path(tempDirPath, "countUsers");
     Path itemUserMatrixPath = new Path(tempDirPath, "itemUserMatrix");
-    Path maybePruneItemUserMatrixPath = new Path(tempDirPath, "maybePruneItemUserMatrixPath");
     Path similarityMatrixPath = new Path(tempDirPath, "similarityMatrix");
     Path prePartialMultiplyPath1 = new Path(tempDirPath, "prePartialMultiply1");
     Path prePartialMultiplyPath2 = new Path(tempDirPath, "prePartialMultiply2");
@@ -171,34 +175,19 @@ public final class RecommenderJob extends AbstractJob {
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job itemUserMatrix = prepareJob(inputPath,
+      Job maybePruneAndTransponse = prepareJob(userVectorPath,
                                   itemUserMatrixPath,
-                                  TextInputFormat.class,
-                                  PrefsToItemUserMatrixMapper.class,
-                                  VarIntWritable.class,
-                                  DistributedRowMatrix.MatrixEntryWritable.class,
-                                  PrefsToItemUserMatrixReducer.class,
-                                  IntWritable.class,
-                                  VectorWritable.class,
-                                  SequenceFileOutputFormat.class);
-      itemUserMatrix.getConfiguration().setBoolean(PrefsToItemUserMatrixMapper.BOOLEAN_DATA, booleanData);
-      itemUserMatrix.waitForCompletion(true);
-    }
-
-    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job maybePruneItemUserMatrix = prepareJob(itemUserMatrixPath,
-                                  maybePruneItemUserMatrixPath,
                                   SequenceFileInputFormat.class,
                                   MaybePruneRowsMapper.class,
                                   IntWritable.class,
-                                  VectorWritable.class,
-                                  Reducer.class,
+                                  DistributedRowMatrix.MatrixEntryWritable.class,
+                                  ToItemVectorsReducer.class,
                                   IntWritable.class,
                                   VectorWritable.class,
                                   SequenceFileOutputFormat.class);
-      maybePruneItemUserMatrix.getConfiguration().setInt(MAX_SIMILARITIES_PER_ITEM_CONSIDERED,
-          maxSimilaritiesPerItemConsidered);
-      maybePruneItemUserMatrix.waitForCompletion(true);
+      maybePruneAndTransponse.getConfiguration().setInt(MaybePruneRowsMapper.MAX_COOCCURRENCES,
+          maxCooccurrencesPerItem);
+      maybePruneAndTransponse.waitForCompletion(true);
     }
 
     int numberOfUsers = TasteHadoopUtils.readIntFromFile(getConf(), countUsersPath);
@@ -207,10 +196,10 @@ public final class RecommenderJob extends AbstractJob {
       /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
        * new DistributedRowMatrix(...).rowSimilarity(...) */
       try {
-        RowSimilarityJob.main(new String[] { "-Dmapred.input.dir=" + maybePruneItemUserMatrixPath.toString(),
+        RowSimilarityJob.main(new String[] { "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
             "-Dmapred.output.dir=" + similarityMatrixPath.toString(), "--numberOfColumns",
             String.valueOf(numberOfUsers), "--similarityClassname", similarityClassname, "--maxSimilaritiesPerRow",
-            String.valueOf(maxSimilaritiesPerItemConsidered + 1), "--tempDir", tempDirPath.toString() });
+            String.valueOf(maxSimilaritiesPerItem + 1), "--tempDir", tempDirPath.toString() });
       } catch (Exception e) {
         throw new IllegalStateException("item-item-similarity computation failed", e);
       }
@@ -233,7 +222,7 @@ public final class RecommenderJob extends AbstractJob {
         prePartialMultiply2.getConfiguration().set(UserVectorSplitterMapper.USERS_FILE, usersFile);
       }
       prePartialMultiply2.getConfiguration().setInt(UserVectorSplitterMapper.MAX_PREFS_PER_USER_CONSIDERED,
-                                                    maxPrefsPerUserConsidered);
+                                                    maxPrefsPerUser);
       prePartialMultiply2.waitForCompletion(true);
 
       Job partialMultiply = prepareJob(
