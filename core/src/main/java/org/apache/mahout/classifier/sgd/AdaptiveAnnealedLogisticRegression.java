@@ -18,6 +18,13 @@ import java.util.List;
  * seem that it would to maintain multiple learners in memory.  Doing this adaptation on-line as we
  * learn also decreases the number of learning rate parameters required and replaces the normal
  * hyper-parameter search.
+ *
+ * One wrinkle is that the pool of learners that we maintain is actually a pool of CrossFoldLearners
+ * which themselves contain several OnlineLogisticRegression objects.  These pools allow estimation
+ * of performance on the fly even if we make many passes through the data.  This does, however, increase
+ * the cost of training since if we are using 5-fold cross-validation, each vector is used 4 times for
+ * training and once for classification.  If this becomes a problem, then we should probably use a
+ * 2-way unbalanced train/test split rather than full cross validation.
  */
 public class AdaptiveAnnealedLogisticRegression   implements OnlineLearner {
   private int record = 0;
