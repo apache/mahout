@@ -19,7 +19,6 @@ import org.apache.mahout.math.matrix.impl.AbstractFormatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 
 import java.util.Formatter;
-import java.util.Locale;
 import java.util.TreeMap;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
