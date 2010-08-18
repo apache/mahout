@@ -192,15 +192,22 @@ fi
 
 # run it
 
-if [ "$HADOOP_CONF_DIR" = "" ] || [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
-  if [ "$HADOOP_CONF_DIR" = "" ] || [ "$HADOOP_HOME" = "" ] ; then
-    echo "no HADOOP_CONF_DIR or HADOOP_HOME set, running locally"
+if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
+  if [ "$HADOOP_HOME" = "" ] ; then
+    echo "no HADOOP_HOME set, running locally"
   elif [ "$MAHOUT_LOCAL" != "" ] ; then 
     echo "MAHOUT_LOCAL is set, running locally"
   fi
   exec "$JAVA" $JAVA_HEAP_MAX $MAHOUT_OPTS -classpath "$CLASSPATH" $CLASS "$@"
 else
-  echo "running on hadoop, using HADOOP_HOME=$HADOOP_HOME and HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+  echo "Running on hadoop, using HADOOP_HOME=$HADOOP_HOME"
+  if [ "$HADOOP_CONF_DIR" = "" ] ; then
+    HADOOP_CONF_DIR=$HADOOP_HOME/conf
+    echo "No HADOOP_CONF_DIR set, using $HADOOP_HOME/conf "
+  else 
+    echo "HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
+  fi
+	
   if [ "$MAHOUT_JOB" = "" ] ; then
     echo "ERROR: Could not find mahout-examples-*.job in $MAHOUT_HOME or $MAHOUT_HOME/examples/target, please run 'mvn install' to create the .job file"
     exit 1
