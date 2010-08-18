@@ -196,10 +196,13 @@ public final class RecommenderJob extends AbstractJob {
       /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
        * new DistributedRowMatrix(...).rowSimilarity(...) */
       try {
-        RowSimilarityJob.main(new String[] { "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
-            "-Dmapred.output.dir=" + similarityMatrixPath.toString(), "--numberOfColumns",
-            String.valueOf(numberOfUsers), "--similarityClassname", similarityClassname, "--maxSimilaritiesPerRow",
-            String.valueOf(maxSimilaritiesPerItem + 1), "--tempDir", tempDirPath.toString() });
+        ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
+            "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
+            "-Dmapred.output.dir=" + similarityMatrixPath.toString(),
+            "--numberOfColumns", String.valueOf(numberOfUsers),
+            "--similarityClassname", similarityClassname,
+            "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem + 1),
+            "--tempDir", tempDirPath.toString() });
       } catch (Exception e) {
         throw new IllegalStateException("item-item-similarity computation failed", e);
       }
