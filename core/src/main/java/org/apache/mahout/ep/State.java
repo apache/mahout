@@ -69,7 +69,9 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
     r.omni = this.omni;
     r.step = Arrays.copyOf(this.step, this.step.length);
     r.maps = Arrays.copyOf(this.maps, this.maps.length);
-    r.payload = this.payload.copy();
+    if (r.payload != null) {
+      r.payload = this.payload.copy();
+    }
     r.gen = this.gen;
     return r;
   }
@@ -95,7 +97,9 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
       r.step[i] = lambda * step[i] + r.omni * gen.nextGaussian();
       r.params[i] += r.step[i];
     }
-    r.payload.update(r.getMappedParams());
+    if (r.payload != null) {
+      r.payload.update(r.getMappedParams());
+    }
     return r;
   }
 
