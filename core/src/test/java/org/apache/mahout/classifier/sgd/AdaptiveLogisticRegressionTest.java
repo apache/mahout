@@ -43,7 +43,7 @@ public class AdaptiveLogisticRegressionTest {
     final Normal norm = new Normal(0, 1, gen);
     for (int i = 0; i < 20000; i++) {
       AdaptiveLogisticRegression.TrainingExample r = getExample(i, gen, beta);
-      x.train(r.key, r.actual, r.instance);
+      x.train(r.getKey(), r.getActual(), r.getInstance());
       if (i % 1000 == 0) {
         if (x.getBest() != null) {
           System.out.printf("%10d %10.4f %10.8f %.3f\n", i, x.auc(), Math.log10(x.getBest().getMappedParams()[0]), x.getBest().getMappedParams()[1]);
