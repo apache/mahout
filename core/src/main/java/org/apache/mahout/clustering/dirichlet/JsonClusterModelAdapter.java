@@ -18,7 +18,7 @@ package org.apache.mahout.clustering.dirichlet;
 
 import java.lang.reflect.Type;
 
-import org.apache.mahout.clustering.Model;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
@@ -34,12 +34,12 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeserializer<Model<?>> {
+public class JsonClusterModelAdapter implements JsonSerializer<Cluster>, JsonDeserializer<Cluster> {
   
-  private static final Logger log = LoggerFactory.getLogger(JsonModelAdapter.class);
+  private static final Logger log = LoggerFactory.getLogger(JsonClusterModelAdapter.class);
   
   @Override
-  public JsonElement serialize(Model<?> src, Type typeOfSrc, JsonSerializationContext context) {
+  public JsonElement serialize(Cluster src, Type typeOfSrc, JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -50,7 +50,7 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeseriali
   }
   
   @Override
-  public Model<?> deserialize(JsonElement json, Type typeOfT,
+  public Cluster deserialize(JsonElement json, Type typeOfT,
                               JsonDeserializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -65,6 +65,6 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeseriali
     } catch (ClassNotFoundException e) {
       log.warn("Error while loading class", e);
     }
-    return (Model<?>) gson.fromJson(model, cl);
+    return (Cluster) gson.fromJson(model, cl);
   }
 }

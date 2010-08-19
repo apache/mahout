@@ -21,29 +21,29 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.clustering.Model;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class DirichletCluster<O> implements Writable, Cluster {
+public class DirichletCluster implements Cluster {
 
-  private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster<Vector>>() {}.getType();
+  private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster>() {}.getType();
 
-  private Model<O> model; // the model for this iteration
+  private Cluster model; // the model for this iteration
 
   private double totalCount; // total count of observations for the model
 
-  public DirichletCluster(Model<O> model, double totalCount) {
+  public DirichletCluster(Cluster model, double totalCount) {
     this.model = model;
     this.totalCount = totalCount;
   }
 
-  public DirichletCluster(Model<O> model) {
+  public DirichletCluster(Cluster model) {
     this.model = model;
     this.totalCount = 0.0;
   }
@@ -51,11 +51,11 @@ public class DirichletCluster<O> implements Writable, Cluster {
   public DirichletCluster() {
   }
 
-  public Model<O> getModel() {
+  public Cluster getModel() {
     return model;
   }
 
-  public void setModel(Model<O> model) {
+  public void setModel(Cluster model) {
     this.model = model;
     this.totalCount += model.count();
   }
@@ -85,11 +85,11 @@ public class DirichletCluster<O> implements Writable, Cluster {
   }
 
   /** Reads a typed Model instance from the input stream */
-  public static <O> Model<O> readModel(DataInput in) throws IOException {
+  public static Cluster readModel(DataInput in) throws IOException {
     String modelClassName = in.readUTF();
-    Model<O> model;
+    Cluster model;
     try {
-      model = Class.forName(modelClassName).asSubclass(Model.class).newInstance();
+      model = Class.forName(modelClassName).asSubclass(Cluster.class).newInstance();
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -101,39 +101,62 @@ public class DirichletCluster<O> implements Writable, Cluster {
     return model;
   }
 
-  /************* Methods required by Cluster *****************/
-  
   @Override
   public String asFormatString(String[] bindings) {
-    return "C-" + ((Cluster)model).getId() + ": " + ((Cluster)model).asFormatString(bindings);
+    return "C-" + model.getId() + ": " + model.asFormatString(bindings);
   }
 
   @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    builder.registerTypeAdapter(Cluster.class, new JsonClusterModelAdapter());
     Gson gson = builder.create();
     return gson.toJson(this, CLUSTER_TYPE);
   }
 
   @Override
   public int getId() {
-    return ((Cluster)model).getId();
+    return model.getId();
   }
 
   @Override
   public Vector getCenter() {
-    return ((Cluster)model).getCenter();
+    return model.getCenter();
   }
 
   @Override
   public int getNumPoints() {
-    return ((Cluster)model).getNumPoints();
+    return model.getNumPoints();
   }
 
   @Override
   public Vector getRadius() {
-    return ((Cluster) model).getRadius();
+    return model.getRadius();
+  }
+
+  @Override
+  public void computeParameters() {
+    model.computeParameters();
+  }
+
+  @Override
+  public int count() {
+    return model.count();
+  }
+
+  @Override
+  public void observe(VectorWritable x) {
+    model.observe(x);
+  }
+
+  @Override
+  public double pdf(VectorWritable x) {
+    return model.pdf(x);
+  }
+
+  @Override
+  public Model<VectorWritable> sampleFromPosterior() {
+    return model.sampleFromPosterior();
   }
 
 }

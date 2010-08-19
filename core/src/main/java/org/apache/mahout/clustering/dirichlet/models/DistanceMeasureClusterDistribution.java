@@ -17,8 +17,9 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
+import org.apache.mahout.clustering.DistanceMeasureCluster;
 import org.apache.mahout.clustering.Model;
-import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
+import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -27,41 +28,35 @@ import org.apache.mahout.math.VectorWritable;
  * Uses a Normal Distribution to sample the prior model values. Model values have a vector standard deviation,
  * allowing assymetrical regions to be covered by a model.
  */
-public class AsymmetricSampledNormalDistribution extends AbstractVectorModelDistribution {
-  
-  public AsymmetricSampledNormalDistribution() {
+public class DistanceMeasureClusterDistribution extends AbstractVectorModelDistribution {
+
+  ManhattanDistanceMeasure measure = new ManhattanDistanceMeasure();
+
+  public DistanceMeasureClusterDistribution() {
   }
-  
-  public AsymmetricSampledNormalDistribution(VectorWritable modelPrototype) {
+
+  public DistanceMeasureClusterDistribution(VectorWritable modelPrototype) {
     super(modelPrototype);
   }
-  
+
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
-    Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[howMany];
+    Model<VectorWritable>[] result = new DistanceMeasureCluster[howMany];
     for (int i = 0; i < howMany; i++) {
       Vector prototype = getModelPrototype().get();
-      Vector mean = prototype.like();
-      for (int j = 0; j < prototype.size(); j++) {
-        mean.set(j, UncommonDistributions.rNorm(0, 1));
-      }
-      Vector sd = prototype.like();
-      for (int j = 0; j < prototype.size(); j++) {
-        sd.set(j, UncommonDistributions.rNorm(1, 1));
-      }
-      result[i] = new AsymmetricSampledNormalModel(i, mean, sd);
+      result[i] = new DistanceMeasureCluster(prototype.like(), i, measure);
     }
     return result;
   }
-  
+
   @Override
   public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
-    Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[posterior.length];
+    Model<VectorWritable>[] result = new DistanceMeasureCluster[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
-      AsymmetricSampledNormalModel m = (AsymmetricSampledNormalModel) posterior[i];
+      DistanceMeasureCluster m = (DistanceMeasureCluster) posterior[i];
       result[i] = m.sampleFromPosterior();
     }
     return result;
   }
-  
+
 }

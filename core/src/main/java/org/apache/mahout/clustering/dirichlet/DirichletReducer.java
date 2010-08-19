@@ -19,18 +19,19 @@ package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.math.VectorWritable;
 
-public class DirichletReducer extends Reducer<Text, VectorWritable, Text, DirichletCluster<VectorWritable>> {
+public class DirichletReducer extends Reducer<Text, VectorWritable, Text, DirichletCluster> {
 
-  private DirichletClusterer<VectorWritable> clusterer;
+  private DirichletClusterer clusterer;
 
-  private Model<VectorWritable>[] newModels;
+  private Cluster[] newModels;
 
-  public Model<VectorWritable>[] getNewModels() {
+  public Cluster[] getNewModels() {
     return newModels;
   }
 
@@ -38,8 +39,8 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     try {
-      clusterer = new DirichletClusterer<VectorWritable>(DirichletMapper.getDirichletState(context.getConfiguration()));
-      this.newModels = clusterer.samplePosteriorModels();
+      clusterer = new DirichletClusterer(DirichletMapper.getDirichletState(context.getConfiguration()));
+      this.newModels = (Cluster[]) clusterer.samplePosteriorModels();
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -56,20 +57,20 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
   @Override
   protected void reduce(Text key, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
     int k = Integer.parseInt(key.toString());
-    Model<VectorWritable> model = newModels[k];
+    Cluster model = newModels[k];
     for (VectorWritable value : values) {
       // only observe real points, not the empty placeholders emitted by each mapper
       if (value.get().size() > 0) {
         model.observe(value);
       }
     }
-    DirichletCluster<VectorWritable> cluster = clusterer.updateCluster(model, k);
+    DirichletCluster cluster = clusterer.updateCluster(model, k);
     context.write(new Text(String.valueOf(k)), cluster);
   }
 
-  public void setup(DirichletState<VectorWritable> state) {
-    clusterer = new DirichletClusterer<VectorWritable>(state);
-    this.newModels = clusterer.samplePosteriorModels();
+  public void setup(DirichletState state) {
+    clusterer = new DirichletClusterer(state);
+    this.newModels = (Cluster[]) clusterer.samplePosteriorModels();
   }
 
 }

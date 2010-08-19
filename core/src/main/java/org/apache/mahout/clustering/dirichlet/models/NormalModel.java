@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -34,7 +35,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class NormalModel implements Model<VectorWritable>, Cluster {
+public class NormalModel implements Cluster {
   
   private static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
 

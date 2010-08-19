@@ -27,18 +27,18 @@ import org.apache.mahout.math.VectorWritable;
  * Uses a Normal Distribution to sample the prior model values. Model values have a vector standard deviation,
  * allowing assymetrical regions to be covered by a model.
  */
-public class AsymmetricSampledNormalDistribution extends AbstractVectorModelDistribution {
-  
-  public AsymmetricSampledNormalDistribution() {
+public class GaussianClusterDistribution extends AbstractVectorModelDistribution {
+
+  public GaussianClusterDistribution() {
   }
-  
-  public AsymmetricSampledNormalDistribution(VectorWritable modelPrototype) {
+
+  public GaussianClusterDistribution(VectorWritable modelPrototype) {
     super(modelPrototype);
   }
-  
+
   @Override
   public Model<VectorWritable>[] sampleFromPrior(int howMany) {
-    Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[howMany];
+    Model<VectorWritable>[] result = new GaussianCluster[howMany];
     for (int i = 0; i < howMany; i++) {
       Vector prototype = getModelPrototype().get();
       Vector mean = prototype.like();
@@ -49,19 +49,19 @@ public class AsymmetricSampledNormalDistribution extends AbstractVectorModelDist
       for (int j = 0; j < prototype.size(); j++) {
         sd.set(j, UncommonDistributions.rNorm(1, 1));
       }
-      result[i] = new AsymmetricSampledNormalModel(i, mean, sd);
+      result[i] = new GaussianCluster(mean, sd, i);
     }
     return result;
   }
-  
+
   @Override
   public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
-    Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[posterior.length];
+    Model<VectorWritable>[] result = new GaussianCluster[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
-      AsymmetricSampledNormalModel m = (AsymmetricSampledNormalModel) posterior[i];
+      GaussianCluster m = (GaussianCluster) posterior[i];
       result[i] = m.sampleFromPosterior();
     }
     return result;
   }
-  
+
 }

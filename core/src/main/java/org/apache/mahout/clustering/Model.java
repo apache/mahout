@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.dirichlet.models;
+package org.apache.mahout.clustering;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.VectorWritable;

@@ -70,6 +70,8 @@ public class DisplayClustering extends Frame {
   protected static final double T1 = 3.0;
 
   protected static final double T2 = 2.8;
+  
+  protected static double significance = 0.05;
 
   protected static int res; // screen resolution
 
@@ -298,12 +300,7 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  protected boolean isSignificant(Cluster cluster) {
-    return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > getSignificance();
+  protected static boolean isSignificant(Cluster cluster) {
+    return (double) cluster.getNumPoints() / SAMPLE_DATA.size() > significance;
   }
-
-  protected double getSignificance() {
-    return 0.05;
-  }
-
 }

@@ -16,13 +16,14 @@
 package org.apache.mahout.clustering;
 
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * Implementations of this interface have a printable representation and certain
  * attributes that are common across all clustering implementations
  * 
  */
-public interface Cluster {
+public interface Cluster extends Model<VectorWritable> {
   
   // default directory for all clustered points
   String CLUSTERED_POINTS_DIR = "clusteredPoints";

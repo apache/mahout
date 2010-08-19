@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.dirichlet.models;
+package org.apache.mahout.clustering;
+
 
 /** A model distribution allows us to sample a model from its prior distribution. */
 public interface ModelDistribution<O> {

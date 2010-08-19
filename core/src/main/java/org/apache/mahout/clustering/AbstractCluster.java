@@ -7,8 +7,6 @@ import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.Locale;
 
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -20,7 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public abstract class AbstractCluster implements Cluster, Model<VectorWritable> {
+public abstract class AbstractCluster implements Cluster {
 
   private static final Type VECTOR_TYPE = new TypeToken<Vector>() {
   }.getType();

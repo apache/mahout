@@ -4,18 +4,17 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public abstract class DistanceMeasureCluster extends AbstractCluster {
+public class DistanceMeasureCluster extends AbstractCluster {
 
   protected DistanceMeasure measure;
 
-  public DistanceMeasureCluster(Vector point, int id, DistanceMeasure measure2) {
-    super(point,id);
-    this.measure = measure2;
+  public DistanceMeasureCluster(Vector point, int id, DistanceMeasure measure) {
+    super(point, id);
+    this.measure = measure;
   }
 
   public DistanceMeasureCluster() {
@@ -55,7 +54,7 @@ public abstract class DistanceMeasureCluster extends AbstractCluster {
    */
   @Override
   public double pdf(VectorWritable vw) {
-    return 1 / measure.distance(getCenter(), vw.get());
+    return Math.exp(-measure.distance(vw.get(), getCenter()));
   }
 
   /* (non-Javadoc)
@@ -63,8 +62,7 @@ public abstract class DistanceMeasureCluster extends AbstractCluster {
    */
   @Override
   public Model<VectorWritable> sampleFromPosterior() {
-    // TODO: fix this
-    return this;
+    return new DistanceMeasureCluster(getCenter(), getId(), measure);
   }
 
   public DistanceMeasure getMeasure() {
@@ -76,6 +74,11 @@ public abstract class DistanceMeasureCluster extends AbstractCluster {
    */
   public void setMeasure(DistanceMeasure measure) {
     this.measure = measure;
+  }
+
+  @Override
+  public String getIdentifier() {
+    return "DMC:" + getId();
   }
 
 }

@@ -34,7 +34,7 @@ class DisplayKMeans extends DisplayClustering {
 
   DisplayKMeans() {
     initialize();
-    this.setTitle("k-Means Clusters (>" + (int) (getSignificance() * 100) + "% of population)");
+    this.setTitle("k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
   }
 
   public static void main(String[] args) throws Exception {

@@ -21,10 +21,10 @@ import java.lang.reflect.Type;
 
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
+import org.apache.mahout.clustering.dirichlet.JsonClusterModelAdapter;
 import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
 import org.apache.mahout.clustering.dirichlet.models.L1Model;
-import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
@@ -34,7 +34,6 @@ import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,7 +42,7 @@ import com.google.gson.reflect.TypeToken;
 public class TestClusterInterface extends MahoutTestCase {
 
   private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
-  private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster<Vector>>() {}.getType();
+  private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster>() {}.getType();
   private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
 
   public void testDirichletNormalModel() {
@@ -106,7 +105,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     NormalModel model = new NormalModel(5, m, 0.75);
-    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster(model, 35.0);
     String format = cluster.asFormatString(null);
     assertEquals("format", "C-5: nm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
   }
@@ -115,12 +114,12 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     NormalModel model = new NormalModel(5, m, 0.75);
-    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster(model, 35.0);
     String json = cluster.asJsonString();
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    builder.registerTypeAdapter(Cluster.class, new JsonClusterModelAdapter());
     Gson gson = builder.create();
-    DirichletCluster<VectorWritable> result = gson.fromJson(json, CLUSTER_TYPE);
+    DirichletCluster result = gson.fromJson(json, CLUSTER_TYPE);
     assertNotNull("result null", result);
     assertEquals("model", cluster.asFormatString(null), result.asFormatString(null));
   }
@@ -129,7 +128,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     AsymmetricSampledNormalModel model = new AsymmetricSampledNormalModel(5, m, m);
-    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster(model, 35.0);
     String format = cluster.asFormatString(null);
     assertEquals("format", "C-5: asnm{n=0 m=[1.100, 2.200, 3.300] sd=[1.100, 2.200, 3.300]}", format);
   }
@@ -138,13 +137,13 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     AsymmetricSampledNormalModel model = new AsymmetricSampledNormalModel(5, m, m);
-    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster(model, 35.0);
     String json = cluster.asJsonString();
 
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    builder.registerTypeAdapter(Cluster.class, new JsonClusterModelAdapter());
     Gson gson = builder.create();
-    DirichletCluster<VectorWritable> result = gson.fromJson(json, CLUSTER_TYPE);
+    DirichletCluster result = gson.fromJson(json, CLUSTER_TYPE);
     assertNotNull("result null", result);
     assertEquals("model", cluster.asFormatString(null), result.asFormatString(null));
   }
@@ -153,7 +152,7 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     L1Model model = new L1Model(5, m);
-    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster(model, 35.0);
     String format = cluster.asFormatString(null);
     assertEquals("format", "C-5: l1m{n=0 c=[1.100, 2.200, 3.300]}", format);
   }
@@ -162,13 +161,13 @@ public class TestClusterInterface extends MahoutTestCase {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
     L1Model model = new L1Model(5, m);
-    Cluster cluster = new DirichletCluster<VectorWritable>(model, 35.0);
+    Cluster cluster = new DirichletCluster(model, 35.0);
     String json = cluster.asJsonString();
 
     GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
+    builder.registerTypeAdapter(Cluster.class, new JsonClusterModelAdapter());
     Gson gson = builder.create();
-    DirichletCluster<VectorWritable> result = gson.fromJson(json, CLUSTER_TYPE);
+    DirichletCluster result = gson.fromJson(json, CLUSTER_TYPE);
     assertNotNull("result null", result);
     assertEquals("model", cluster.asFormatString(null), result.asFormatString(null));
   }

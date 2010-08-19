@@ -49,7 +49,7 @@ final class DisplayMeanShift extends DisplayClustering {
 
   private DisplayMeanShift() {
     initialize();
-    this.setTitle("k-Means Clusters (>" + (int) (getSignificance() * 100) + "% of population)");
+    this.setTitle("Mean Shift Canopy Clusters (>" + (int) (significance * 100) + "% of population)");
   }
 
   @Override
@@ -75,7 +75,7 @@ final class DisplayMeanShift extends DisplayClustering {
     int i = 0;
     for (Cluster cluster : CLUSTERS.get(CLUSTERS.size()-1)) {
       MeanShiftCanopy canopy = (MeanShiftCanopy) cluster;
-      if (canopy.getBoundPoints().toList().size() >= getSignificance() * DisplayClustering.SAMPLE_DATA.size()) {
+      if (canopy.getBoundPoints().toList().size() >= significance * DisplayClustering.SAMPLE_DATA.size()) {
         g2.setColor(COLORS[Math.min(i++, DisplayClustering.COLORS.length - 1)]);
         int count = 0;
         Vector center = new DenseVector(2);
@@ -92,15 +92,11 @@ final class DisplayMeanShift extends DisplayClustering {
     }
   }
 
-  @Override
-  protected double getSignificance() {
-    return 0.02;
-  }
-
   public static void main(String[] args) throws Exception {
     t1 = 1.5;
     t2 = 0.5;
     DistanceMeasure measure = new EuclideanDistanceMeasure();
+    significance = 0.02;
 
     Path samples = new Path("samples");
     Path output = new Path("output");

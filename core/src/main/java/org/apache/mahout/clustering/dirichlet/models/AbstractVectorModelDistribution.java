@@ -16,6 +16,7 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
+import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.math.VectorWritable;
 
 public abstract class AbstractVectorModelDistribution implements ModelDistribution<VectorWritable> {

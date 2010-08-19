@@ -1,6 +1,7 @@
 package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.clustering.AbstractCluster;
+import org.apache.mahout.clustering.Model;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 

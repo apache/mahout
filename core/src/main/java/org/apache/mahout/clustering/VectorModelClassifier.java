@@ -3,7 +3,6 @@ package org.apache.mahout.clustering;
 import java.util.List;
 
 import org.apache.mahout.classifier.AbstractVectorClassifier;
-import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;

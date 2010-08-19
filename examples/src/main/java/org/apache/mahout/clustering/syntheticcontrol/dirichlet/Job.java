@@ -28,10 +28,10 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletMapper;
-import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
@@ -72,8 +72,7 @@ public final class Job extends DirichletDriver {
   }
 
   @Override
-  public int run(String[] args)
-      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+  public int run(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, InterruptedException {
     addInputOption();
     addOutputOption();
@@ -145,9 +144,8 @@ public final class Job extends DirichletDriver {
                    double alpha0,
                    int numReducers,
                    boolean emitMostLikely,
-                   double threshold)
-      throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-        NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
+                   double threshold) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+      NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, modelPrototype);
     DirichletDriver.runJob(directoryContainingConvertedInput,
@@ -160,10 +158,11 @@ public final class Job extends DirichletDriver {
                            numReducers,
                            true,
                            emitMostLikely,
-                           threshold, false);
+                           threshold,
+                           false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations),
-                                                    new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
+                                                                                                            "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
@@ -192,7 +191,7 @@ public final class Job extends DirichletDriver {
                                   int numIterations,
                                   int numModels,
                                   double alpha0) throws NoSuchMethodException, InvocationTargetException {
-    Collection<List<DirichletCluster<VectorWritable>>> clusters = new ArrayList<List<DirichletCluster<VectorWritable>>>();
+    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
     Configuration conf = new Configuration();
     conf.set(MODEL_FACTORY_KEY, modelDistribution);
     conf.set(NUM_CLUSTERS_KEY, Integer.toString(numModels));
@@ -215,10 +214,10 @@ public final class Job extends DirichletDriver {
    * @param significant
    *          the minimum number of samples to enable printing a model
    */
-  private static void printClusters(Iterable<List<DirichletCluster<VectorWritable>>> clusters, int significant) {
+  private static void printClusters(Iterable<List<DirichletCluster>> clusters, int significant) {
     int row = 0;
     StringBuilder result = new StringBuilder();
-    for (List<DirichletCluster<VectorWritable>> r : clusters) {
+    for (List<DirichletCluster> r : clusters) {
       result.append("sample=").append(row++).append("]= ");
       for (int k = 0; k < r.size(); k++) {
         Model<VectorWritable> model = r.get(k).getModel();

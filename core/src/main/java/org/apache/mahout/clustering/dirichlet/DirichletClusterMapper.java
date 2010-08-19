@@ -36,9 +36,9 @@ import org.apache.mahout.math.VectorWritable;
 
 public class DirichletClusterMapper extends Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable> {
 
-  private List<DirichletCluster<VectorWritable>> clusters;
+  private List<DirichletCluster> clusters;
 
-  private DirichletClusterer<VectorWritable> clusterer;
+  private DirichletClusterer clusterer;
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable vector, Context context) throws IOException, InterruptedException {
@@ -53,7 +53,7 @@ public class DirichletClusterMapper extends Mapper<WritableComparable<?>, Vector
       clusters = getClusters(conf);
       String emitMostLikely = conf.get(DirichletDriver.EMIT_MOST_LIKELY_KEY);
       String threshold = conf.get(DirichletDriver.THRESHOLD_KEY);
-      clusterer = new DirichletClusterer<VectorWritable>(Boolean.parseBoolean(emitMostLikely), Double.parseDouble(threshold));
+      clusterer = new DirichletClusterer(Boolean.parseBoolean(emitMostLikely), Double.parseDouble(threshold));
     } catch (SecurityException e) {
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
@@ -61,13 +61,13 @@ public class DirichletClusterMapper extends Mapper<WritableComparable<?>, Vector
     }
   }
 
-  public static List<DirichletCluster<VectorWritable>> getClusters(Configuration conf) {
+  public static List<DirichletCluster> getClusters(Configuration conf) {
     String statePath = conf.get(DirichletDriver.STATE_IN_KEY);
     return loadClusters(conf, new Path(statePath));
   }
 
-  protected static List<DirichletCluster<VectorWritable>> loadClusters(Configuration conf, Path stateIn) {
-    List<DirichletCluster<VectorWritable>> clusters = new ArrayList<DirichletCluster<VectorWritable>>();
+  protected static List<DirichletCluster> loadClusters(Configuration conf, Path stateIn) {
+    List<DirichletCluster> clusters = new ArrayList<DirichletCluster>();
     try {
       FileSystem fs = FileSystem.get(stateIn.toUri(), conf);
       FileStatus[] status = fs.listStatus(stateIn, new OutputLogFilter());
@@ -75,10 +75,10 @@ public class DirichletClusterMapper extends Mapper<WritableComparable<?>, Vector
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           Text key = new Text();
-          DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();
+          DirichletCluster cluster = new DirichletCluster();
           while (reader.next(key, cluster)) {
             clusters.add(cluster);
-            cluster = new DirichletCluster<VectorWritable>();
+            cluster = new DirichletCluster();
           }
         } finally {
           reader.close();

@@ -20,8 +20,9 @@ package org.apache.mahout.clustering.dirichlet;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
-import org.apache.mahout.clustering.dirichlet.models.Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.common.MahoutTestCase;
@@ -71,7 +72,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(num, mx, my, sd, 2);
   }
 
-  private static void printResults(List<Model<VectorWritable>[]> result,
+  private static void printResults(List<Cluster[]> result,
       int significant) {
     int row = 0;
     for (Model<VectorWritable>[] r : result) {
@@ -92,10 +93,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(30, 1, 0, 0.1);
     generateSamples(30, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new NormalModelDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 2);
     assertNotNull(result);
   }
@@ -106,10 +107,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(30, 1, 0, 0.1);
     generateSamples(30, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new SampledNormalDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 2);
     assertNotNull(result);
   }
@@ -120,10 +121,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(30, 1, 0, 0.1);
     generateSamples(30, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new AsymmetricSampledNormalDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 2);
     assertNotNull(result);
   }
@@ -134,10 +135,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(300, 1, 0, 0.1);
     generateSamples(300, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new NormalModelDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 20);
     assertNotNull(result);
   }
@@ -148,10 +149,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(300, 1, 0, 0.1);
     generateSamples(300, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new SampledNormalDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 20);
     assertNotNull(result);
   }
@@ -162,10 +163,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(300, 1, 0, 0.1);
     generateSamples(300, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new AsymmetricSampledNormalDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 20);
     assertNotNull(result);
   }
@@ -176,10 +177,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(3000, 1, 0, 0.1);
     generateSamples(3000, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new NormalModelDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 200);
     assertNotNull(result);
   }
@@ -190,10 +191,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(3000, 1, 0, 0.1);
     generateSamples(3000, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new AsymmetricSampledNormalDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 200);
     assertNotNull(result);
   }
@@ -204,10 +205,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(3000, 1, 0, 0.1);
     generateSamples(3000, 0, 1, 0.1);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new SampledNormalDistribution(new VectorWritable(
             new DenseVector(2))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 200);
     assertNotNull(result);
   }
@@ -218,10 +219,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(30, 1, 0, 0.1, 3);
     generateSamples(30, 0, 1, 0.1, 3);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new NormalModelDistribution(new VectorWritable(
             new DenseVector(3))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 2);
     assertNotNull(result);
   }
@@ -232,10 +233,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(30, 1, 0, 0.1, 3);
     generateSamples(30, 0, 1, 0.1, 3);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new SampledNormalDistribution(new VectorWritable(
             new DenseVector(3))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 2);
     assertNotNull(result);
   }
@@ -246,10 +247,10 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(30, 1, 0, 0.1, 3);
     generateSamples(30, 0, 1, 0.1, 3);
 
-    DirichletClusterer<VectorWritable> dc = new DirichletClusterer<VectorWritable>(
+    DirichletClusterer dc = new DirichletClusterer(
         sampleData, new AsymmetricSampledNormalDistribution(new VectorWritable(
             new DenseVector(3))), 1.0, 10, 1, 0);
-    List<Model<VectorWritable>[]> result = dc.cluster(30);
+    List<Cluster[]> result = dc.cluster(30);
     printResults(result, 2);
     assertNotNull(result);
   }

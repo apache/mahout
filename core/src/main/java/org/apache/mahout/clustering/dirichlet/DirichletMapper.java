@@ -35,7 +35,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
-  private DirichletClusterer<VectorWritable> clusterer;
+  private DirichletClusterer clusterer;
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable v, Context context)
@@ -48,8 +48,8 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     try {
-      DirichletState<VectorWritable> dirichletState = getDirichletState(context.getConfiguration());
-      clusterer = new DirichletClusterer<VectorWritable>(dirichletState);
+      DirichletState dirichletState = getDirichletState(context.getConfiguration());
+      clusterer = new DirichletClusterer(dirichletState);
       for (int i = 0; i < dirichletState.getNumClusters(); i++) {
         // write an empty vector to each clusterId so that all will be seen by a reducer
         // Reducers will ignore these points but every model will be processed by one of them
@@ -68,11 +68,11 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     }
   }
 
-  public void setup(DirichletState<VectorWritable> state) {
-    this.clusterer = new DirichletClusterer<VectorWritable>(state);
+  public void setup(DirichletState state) {
+    this.clusterer = new DirichletClusterer(state);
   }
 
-  public static DirichletState<VectorWritable> getDirichletState(Configuration conf) throws NoSuchMethodException,
+  public static DirichletState getDirichletState(Configuration conf) throws NoSuchMethodException,
       InvocationTargetException {
     String statePath = conf.get(DirichletDriver.STATE_IN_KEY);
     String modelFactory = conf.get(DirichletDriver.MODEL_FACTORY_KEY);
@@ -100,7 +100,7 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     }
   }
 
-  protected static DirichletState<VectorWritable> loadState(Configuration conf,
+  protected static DirichletState loadState(Configuration conf,
                                                             String statePath,
                                                             String modelFactory,
                                                             String modelPrototype,
@@ -109,7 +109,7 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
                                                             int k)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, IOException {
-    DirichletState<VectorWritable> state = DirichletDriver.createState(modelFactory, modelPrototype, pSize, k, alpha);
+    DirichletState state = DirichletDriver.createState(modelFactory, modelPrototype, pSize, k, alpha);
     Path path = new Path(statePath);
     FileSystem fs = FileSystem.get(path.toUri(), conf);
     FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
@@ -117,11 +117,11 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       try {
         Writable key = new Text();
-        DirichletCluster<VectorWritable> cluster = new DirichletCluster<VectorWritable>();
+        DirichletCluster cluster = new DirichletCluster();
         while (reader.next(key, cluster)) {
           int index = Integer.parseInt(key.toString());
           state.getClusters().set(index, cluster);
-          cluster = new DirichletCluster<VectorWritable>();
+          cluster = new DirichletCluster();
         }
       } finally {
         reader.close();

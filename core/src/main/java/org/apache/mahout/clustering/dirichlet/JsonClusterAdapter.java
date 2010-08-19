@@ -18,7 +18,7 @@ package org.apache.mahout.clustering.dirichlet;
 
 import java.lang.reflect.Type;
 
-import org.apache.mahout.clustering.dirichlet.models.Model;
+import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
@@ -34,13 +34,13 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>,
-    JsonDeserializer<DirichletCluster<?>> {
+public class JsonClusterAdapter implements JsonSerializer<DirichletCluster>,
+    JsonDeserializer<DirichletCluster> {
   
   private static final Logger log = LoggerFactory.getLogger(JsonClusterAdapter.class);
   
   @Override
-  public JsonElement serialize(DirichletCluster<?> src, Type typeOfSrc, JsonSerializationContext context) {
+  public JsonElement serialize(DirichletCluster src, Type typeOfSrc, JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     Gson gson = builder.create();
@@ -52,7 +52,7 @@ public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>,
   }
   
   @Override
-  public DirichletCluster<?> deserialize(JsonElement json,
+  public DirichletCluster deserialize(JsonElement json,
                                          Type typeOfT,
                                          JsonDeserializationContext context) {
     GsonBuilder builder = new GsonBuilder();
@@ -69,7 +69,7 @@ public class JsonClusterAdapter implements JsonSerializer<DirichletCluster<?>>,
     } catch (ClassNotFoundException e) {
       log.warn("Error while loading class", e);
     }
-    Model<Vector> model = (Model<Vector>) gson.fromJson(modelJson, cl);
-    return new DirichletCluster<Vector>(model, total);
+    Cluster model = (Cluster) gson.fromJson(modelJson, cl);
+    return new DirichletCluster(model, total);
   }
 }

@@ -32,7 +32,7 @@ class DisplayFuzzyKMeans extends DisplayClustering {
 
   DisplayFuzzyKMeans() {
     initialize();
-    this.setTitle("Fuzzy k-Means Clusters (>" + (int) (getSignificance() * 100) + "% of population)");
+    this.setTitle("Fuzzy k-Means Clusters (>" + (int) (significance * 100) + "% of population)");
   }
 
   // Override the paint() method
