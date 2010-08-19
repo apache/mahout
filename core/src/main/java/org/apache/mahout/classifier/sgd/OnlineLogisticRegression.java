@@ -17,6 +17,8 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import org.apache.mahout.classifier.OnlineLearner;
+import org.apache.mahout.ep.Copyable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
@@ -25,7 +27,7 @@ import org.apache.mahout.math.Vector;
  * Extends the basic on-line logistic regression learner with a specific set of learning
  * rate annealing schedules.
  */
-public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
+public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression implements Copyable<OnlineLogisticRegression> {
   // these next two control decayFactor^steps exponential type of annealing
   // learning rate and decay factor
   private double mu0 = 1;
@@ -118,5 +120,12 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
     forgettingExponent = other.forgettingExponent;
 
     perTermAnnealingOffset = other.perTermAnnealingOffset;
+  }
+
+  @Override
+  public OnlineLogisticRegression copy() {
+    OnlineLogisticRegression r = new OnlineLogisticRegression(numCategories(), numFeatures(), prior);
+    r.copyFrom(this);
+    return r;
   }
 }

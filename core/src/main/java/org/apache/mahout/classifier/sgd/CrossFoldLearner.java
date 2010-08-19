@@ -3,6 +3,7 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
+import org.apache.mahout.ep.Copyable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
@@ -18,7 +19,7 @@ import java.util.List;
  * time the training data is traversed or a tracking key such as the file offset of the training
  * record should be passed with each training example.
  */
-class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner, Comparable<CrossFoldLearner> {
+public class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner, Copyable<CrossFoldLearner>, Comparable<CrossFoldLearner> {
   private static volatile int nextId = 0;
 
   private final int id = nextId++;
@@ -29,8 +30,12 @@ class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner
 
   // lambda, learningRate, perTermOffset, perTermExponent
   private double[] parameters = new double[4];
+  private int numFeatures;
+  private PriorFunction prior;
 
   CrossFoldLearner(int folds, int numCategories, int numFeatures, PriorFunction prior) {
+    this.numFeatures = numFeatures;
+    this.prior = prior;
     for (int i = 0; i < folds; i++) {
       OnlineLogisticRegression model = new OnlineLogisticRegression(numCategories, numFeatures, prior);
       model.alpha(1).stepOffset(0).decayExponent(0);
@@ -174,5 +179,15 @@ class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner
   @Override
   public boolean equals(Object other) {
     return other instanceof CrossFoldLearner && id == ((CrossFoldLearner) other).id;
+  }
+
+  @Override
+  public CrossFoldLearner copy() {
+    CrossFoldLearner r = new CrossFoldLearner(models.size(), numCategories(), numFeatures, prior);
+    r.models.clear();
+    for (OnlineLogisticRegression model : models) {
+      r.models.add(model.copy());
+    }
+    return r;
   }
 }

@@ -7,7 +7,7 @@ import java.util.Random;
  * Recorded step evolutionary optimization.  You provide the value, this class provides the
  * mutation.
  */
-public class State implements Comparable<State> {
+public class State<T extends Copyable<T>> implements Copyable<State<T>>, Comparable<State<T>> {
   // object count is kept to break ties in comparison.
   static volatile int objectCount = 0;
   private Random gen = new Random();
@@ -29,6 +29,11 @@ public class State implements Comparable<State> {
   // current fitness value
   private double value;
 
+  private T payload;
+
+  private State() {
+  }
+
   /**
    * Invent a new state with no momentum (yet).
    */
@@ -40,17 +45,17 @@ public class State implements Comparable<State> {
   }
 
   /**
-   * Deep clones a state, useful in mutation.
-   *
-   * @param params Current state
-   * @param omni   Current omni-directional mutation
-   * @param step   The step taken to get to this point
+   * Deep copies a state, useful in mutation.
    */
-  private State(double[] params, double omni, double[] step, Mapping[] maps) {
-    this.params = Arrays.copyOf(params, params.length);
-    this.omni = omni;
-    this.step = Arrays.copyOf(step, step.length);
-    this.maps = Arrays.copyOf(maps, maps.length);
+  public State<T> copy() {
+    State<T> r = new State<T>();
+    r.params = Arrays.copyOf(this.params, this.params.length);
+    r.omni = this.omni;
+    r.step = Arrays.copyOf(this.step, this.step.length);
+    r.maps = Arrays.copyOf(this.maps, this.maps.length);
+    r.payload = this.payload.copy();
+    r.gen = this.gen;
+    return r;
   }
 
   /**
@@ -58,14 +63,14 @@ public class State implements Comparable<State> {
    *
    * @return A new state.
    */
-  public State mutate() {
+  public State<T> mutate() {
     double sum = 0;
     for (double v : step) {
       sum += v * v;
     }
     sum = Math.sqrt(sum);
     double lambda = 0.9 + gen.nextGaussian();
-    State r = new State(params, omni, step, maps);
+    State<T> r = this.copy();
     r.omni = -Math.log(1 - gen.nextDouble()) * (0.9 * omni + sum / 10);
     for (int i = 0; i < step.length; i++) {
       r.step[i] = lambda * step[i] + r.omni * gen.nextGaussian();
@@ -149,5 +154,17 @@ public class State implements Comparable<State> {
 
   public void setValue(double v) {
     value = v;
+  }
+
+  public T getPayload() {
+    return payload;
+  }
+
+  public double getValue() {
+    return value;
+  }
+
+  public void setPayload(T payload) {
+    this.payload = payload;
   }
 }
