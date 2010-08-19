@@ -69,7 +69,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
     r.omni = this.omni;
     r.step = Arrays.copyOf(this.step, this.step.length);
     r.maps = Arrays.copyOf(this.maps, this.maps.length);
-    if (r.payload != null) {
+    if (this.payload != null) {
       r.payload = this.payload.copy();
     }
     r.gen = this.gen;
