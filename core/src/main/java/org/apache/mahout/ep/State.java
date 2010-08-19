@@ -4,15 +4,31 @@ import java.util.Arrays;
 import java.util.Random;
 
 /**
- * Recorded step evolutionary optimization.  You provide the value, this class provides the
- * mutation.
+ * Records evolutionary state and provides a mutation operation for recorded-step meta-mutation.
+ *
+ * You provide the payload, this class provides the mutation operations.  During mutation,
+ * the payload is copied and after the state variables are changed, they are passed to the
+ * payload.
+ *
+ * Parameters are internally mutated in a state space that spans all of R^n, but parameters
+ * passed to the payload are transformed as specified by a call to setMap().  The default
+ * mapping is the identity map, but uniform-ish or exponential-ish coverage of a range are
+ * also supported.
+ *
+ * More information on the underlying algorithm can be found in the following paper
+ *
+ * http://arxiv.org/abs/0803.3838
+ *
+ * @see Mapping
+ * @see State
  */
-public class State<T extends Copyable<T>> implements Copyable<State<T>>, Comparable<State<T>> {
+public class State<T extends Payload<T>> implements Comparable<State<T>> {
   // object count is kept to break ties in comparison.
   static volatile int objectCount = 0;
-  private Random gen = new Random();
 
   int id = objectCount++;
+
+  private Random gen = new Random();
 
   // current state
   private double[] params;
@@ -59,7 +75,8 @@ public class State<T extends Copyable<T>> implements Copyable<State<T>>, Compara
   }
 
   /**
-   * Clone this state with a random change in position.
+   * Clones this state with a random change in position.  Copies the payload and
+   * lets it know about the change.
    *
    * @return A new state.
    */
@@ -69,20 +86,24 @@ public class State<T extends Copyable<T>> implements Copyable<State<T>>, Compara
       sum += v * v;
     }
     sum = Math.sqrt(sum);
-    double lambda = 0.9 + gen.nextGaussian();
+    double lambda = 1 + gen.nextGaussian();
+
     State<T> r = this.copy();
-    r.omni = -Math.log(1 - gen.nextDouble()) * (0.9 * omni + sum / 10);
+    double magnitude = 0.9 * omni + sum / 10;
+    r.omni = magnitude * -Math.log(1 - gen.nextDouble());
     for (int i = 0; i < step.length; i++) {
       r.step[i] = lambda * step[i] + r.omni * gen.nextGaussian();
       r.params[i] += r.step[i];
     }
+    r.payload.update(r.getMappedParams());
     return r;
   }
 
   /**
    * Defines the transformation for a parameter.
-   * @param i Which mapping to define.
+   * @param i Which parameter's mapping to define.
    * @param m The mapping to use.
+   * @see org.apache.mahout.ep.Mapping
    */
   public void setMap(int i, Mapping m) {
     maps[i] = m;
@@ -114,10 +135,6 @@ public class State<T extends Copyable<T>> implements Copyable<State<T>>, Compara
     return r;
   }
 
-  public double[] getParams() {
-    return params;
-  }
-
   public double getOmni() {
     return omni;
   }
@@ -126,6 +143,29 @@ public class State<T extends Copyable<T>> implements Copyable<State<T>>, Compara
     return step;
   }
 
+  public T getPayload() {
+    return payload;
+  }
+
+  public double getValue() {
+    return value;
+  }
+
+  public void setRand(Random rand) {
+    this.gen = rand;
+  }
+
+  public void setOmni(double omni) {
+    this.omni = omni;
+  }
+
+  public void setValue(double v) {
+    value = v;
+  }
+
+  public void setPayload(T payload) {
+    this.payload = payload;
+  }
 
   /**
    * Natural order is to sort in descending order of score.  Creation order is used as a
@@ -144,27 +184,11 @@ public class State<T extends Copyable<T>> implements Copyable<State<T>>, Compara
     }
   }
 
-  public void setRand(Random rand) {
-    this.gen = rand;
-  }
-
-  public void setOmni(double omni) {
-    this.omni = omni;
-  }
-
-  public void setValue(double v) {
-    value = v;
-  }
-
-  public T getPayload() {
-    return payload;
-  }
-
-  public double getValue() {
-    return value;
-  }
-
-  public void setPayload(T payload) {
-    this.payload = payload;
+  public String toString() {
+    double sum = 0;
+    for (double v : step) {
+      sum += v * v;
+    }
+    return String.format("<S/%s %.3f %.3f>", payload, omni + Math.sqrt(sum), value);
   }
 }

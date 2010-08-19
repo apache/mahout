@@ -3,7 +3,6 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
-import org.apache.mahout.ep.Copyable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
@@ -19,7 +18,7 @@ import java.util.List;
  * time the training data is traversed or a tracking key such as the file offset of the training
  * record should be passed with each training example.
  */
-public class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner, Copyable<CrossFoldLearner>, Comparable<CrossFoldLearner> {
+public class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner {
   private static volatile int nextId = 0;
 
   private final int id = nextId++;
@@ -73,6 +72,13 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     return this;
   }
 
+  public CrossFoldLearner alpha(double alpha) {
+    for (OnlineLogisticRegression model : models) {
+      model.alpha(alpha);
+    }
+    return this;
+  }
+
   // -------- training methods
   @Override
   public void train(int actual, Vector instance) {
@@ -80,7 +86,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   }
 
   @Override
-  public void train(int trackingKey, int actual, Vector instance) {
+  public void train(long trackingKey, int actual, Vector instance) {
     record++;
     int k = 0;
     for (OnlineLogisticRegression model : models) {
@@ -90,9 +96,9 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
         logLikelihood += (Math.log(score) - logLikelihood) / record;
         auc.addSample(actual, v.get(1));
       } else {
-        model.train(actual, instance);
+        model.train(trackingKey, actual, instance);
       }
-      k = (k + 1) % models.size();
+      k++;
     }
   }
 
@@ -105,6 +111,14 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
 
   public void resetLineCounter() {
     record = 0;
+  }
+
+  public boolean validModel() {
+    boolean r = true;
+    for (OnlineLogisticRegression model : models) {
+      r &= model.validModel();
+    }
+    return r;
   }
 
   // -------- classification methods
@@ -147,46 +161,14 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
 
   // -------- evolutionary optimization
 
-  public void copyFrom(CrossFoldLearner other) {
-    int i = 0;
-    for (OnlineLogisticRegression model : models) {
-      model.copyFrom(other.models.get(i++));
-    }
-    System.arraycopy(other.parameters, 0, parameters, 0, parameters.length);
-    // TODO mutate parameters
-  }
-
-  // -------- general object and ordering stuff
-
-  /**
-   * Orders primarily by AUC descending with a fallback to object creation order so that
-   * <pre>
-   * a.compareTo(b) == 0  <==>  a.equals(b)
-   * </pre>
-   * Without the id comparison, it is dangerous to insert CrossFoldLearner's into a
-   * TreeSet since if they ever have the same score, they can't be distinguished.
-   */
-  @Override
-  public int compareTo(CrossFoldLearner other) {
-    int r = Double.compare(this.auc(), other.auc());
-    if (r != 0) {
-      return r;
-    } else {
-      return id - other.id;
-    }
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    return other instanceof CrossFoldLearner && id == ((CrossFoldLearner) other).id;
-  }
-
-  @Override
   public CrossFoldLearner copy() {
     CrossFoldLearner r = new CrossFoldLearner(models.size(), numCategories(), numFeatures, prior);
     r.models.clear();
     for (OnlineLogisticRegression model : models) {
-      r.models.add(model.copy());
+      model.close();
+      OnlineLogisticRegression newModel = new OnlineLogisticRegression(model.numCategories(), model.numFeatures(), model.prior);
+      newModel.copyFrom(model);
+      r.models.add(newModel);
     }
     return r;
   }

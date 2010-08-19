@@ -39,10 +39,10 @@ public interface OnlineLearner {
    *
    * @param trackingKey The tracking key for this training example.
    * @param actual   The value of the target variable.  This value should be in the half-open
-   *                 interval [0..n) where n is the number of target categories.
+ *                 interval [0..n) where n is the number of target categories.
    * @param instance The feature vector for this example.
    */
-  void train(int trackingKey, int actual, Vector instance);
+  void train(long trackingKey, int actual, Vector instance);
 
   /**
    * Prepares the classifier for classification and deallocates any temporary data structures.

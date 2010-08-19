@@ -17,28 +17,29 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import org.apache.mahout.classifier.OnlineLearner;
-import org.apache.mahout.ep.Copyable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.UnaryFunction;
 
 /**
  * Extends the basic on-line logistic regression learner with a specific set of learning
  * rate annealing schedules.
  */
-public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression implements Copyable<OnlineLogisticRegression> {
+public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
   // these next two control decayFactor^steps exponential type of annealing
   // learning rate and decay factor
   private double mu0 = 1;
   private double decayFactor = 1 - 1e-3;
-
 
   // these next two control 1/steps^forget type annealing
   private int stepOffset = 10;
   // -1 equals even weighting of all examples, 0 means only use exponential annealing
   private double forgettingExponent = -0.5;
 
+  // controls how per term annealing works
   private int perTermAnnealingOffset = 20;
 
   private OnlineLogisticRegression() {
@@ -106,11 +107,6 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression i
     return mu0 * Math.pow(decayFactor, getStep()) * Math.pow(getStep() + stepOffset, forgettingExponent);
   }
 
-  @Override
-  public void train(int trackingKey, int actual, Vector instance) {
-    train(actual, instance);
-  }
-
   public void copyFrom(OnlineLogisticRegression other) {
     super.copyFrom(other);
     mu0 = other.mu0;
@@ -122,10 +118,11 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression i
     perTermAnnealingOffset = other.perTermAnnealingOffset;
   }
 
-  @Override
   public OnlineLogisticRegression copy() {
+    close();
     OnlineLogisticRegression r = new OnlineLogisticRegression(numCategories(), numFeatures(), prior);
     r.copyFrom(this);
     return r;
   }
+
 }

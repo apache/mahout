@@ -4,7 +4,7 @@ import org.apache.mahout.math.function.UnaryFunction;
 
 /**
  * Provides coordinate tranformations so that evolution can proceed on the entire space of
- * reals but have the output limited and squished in convenient ways.
+ * reals but have the output limited and squished in convenient (and safe) ways.
  */
 public abstract class Mapping implements UnaryFunction {
   /**
@@ -48,6 +48,12 @@ public abstract class Mapping implements UnaryFunction {
    * @return A mapped value.
    */
   public static Mapping logLimit(final double low, final double high) {
+    if (low <= 0) {
+      throw new IllegalArgumentException("Lower bound for log limit must be > 0 but was " + low);
+    }
+    if (high <= 0) {
+      throw new IllegalArgumentException("Upper bound for log limit must be > 0 but was " + high);
+    }
     return new Mapping() {
       Mapping wrapped = softLimit(Math.log(low), Math.log(high));
 

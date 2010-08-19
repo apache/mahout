@@ -15,14 +15,15 @@ public class EvolutionaryProcessTest {
     EvolutionaryProcess<Foo> ep = new EvolutionaryProcess<Foo>(10, 100, s0);
 
     State<Foo> best = null;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 20  ; i++) {
       best = ep.parallelDo(new EvolutionaryProcess.Function<Foo>() {
         @Override
-        double apply(Foo payload, double[] params) {
+        public double apply(Foo payload, double[] params) {
           int i = 1;
           double sum = 0;
           for (double x : params) {
             sum += i * (x - i) * (x - i);
+            i++;
           }
           return -sum;
         }
@@ -30,17 +31,22 @@ public class EvolutionaryProcessTest {
 
       ep.mutatePopulation(3);
 
-      System.out.printf("%.3f\n", best.getValue());
+      System.out.printf("%10.3f %.3f\n", best.getValue(), best.getOmni());
     }
 
     Assert.assertNotNull(best);
     Assert.assertEquals(0, best.getValue(), 0.02);
   }
 
-  private static class Foo implements Copyable<Foo> {
+  private static class Foo implements Payload<Foo> {
     @Override
     public Foo copy() {
       return this;
+    }
+
+    @Override
+    public void update(double[] params) {
+      // ignore
     }
   }
 }

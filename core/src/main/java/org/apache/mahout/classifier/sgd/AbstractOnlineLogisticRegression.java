@@ -23,6 +23,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.UnaryFunction;
 
 import java.util.Iterator;
 
@@ -122,6 +123,11 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     return r / (1 + r);
   }
 
+  @Override
+  public void train(long trackingKey, int actual, Vector instance) {
+    train(actual, instance);
+  }
+
   public void train(int actual, Vector instance) {
     unseal();
 
@@ -146,6 +152,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
       while (nonZeros.hasNext()) {
         Vector.Element updateLocation = nonZeros.next();
         int j = updateLocation.index();
+
         double newValue = beta.get(i, j) + learningRate * gradientBase * instance.get(j) * perTermLearningRate(j);
         beta.set(i, j, newValue);
       }
@@ -182,6 +189,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
           double rate = getLambda() * learningRate * perTermLearningRate(j);
           double newValue = prior.age(beta.get(i, j), missingUpdates, rate);
           beta.set(i, j, newValue);
+          updateSteps.set(j, getStep());
         }
       }
     }
@@ -253,16 +261,26 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   }
 
   public void copyFrom(AbstractOnlineLogisticRegression other) {
-    beta.assign(other.beta);
-
     // number of categories we are classifying.  This should the number of rows of beta plus one.
     if (numCategories != other.numCategories) {
       throw new IllegalArgumentException("Can't copy unless number of target categories is the same");
     }
 
+    beta.assign(other.beta);
+
     step = other.step;
 
     updateSteps.assign(other.updateSteps);
     updateCounts.assign(other.updateCounts);
+  }
+
+  public boolean validModel() {
+    double k = beta.aggregate(Functions.PLUS, new UnaryFunction() {
+      @Override
+      public double apply(double v) {
+        return Double.isNaN(v) || Double.isInfinite(v) ? 1 : 0;
+      }
+    });
+    return k < 1;
   }
 }
