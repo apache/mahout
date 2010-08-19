@@ -35,10 +35,12 @@ public class ThreadedEvolutionaryProcessTest {
       }
     }, 5, 200, 2);
 
+    System.out.printf("%s\n", ep);
     double[] r = x.getMappedParams();
     int i = 0;
     for (double v : r) {
-      Assert.assertEquals(i++, v, 1e-2);
+      Assert.assertEquals(String.format("Coordinate %d", i), i, v, 0.02);
+      i++;
     }
   }
 }

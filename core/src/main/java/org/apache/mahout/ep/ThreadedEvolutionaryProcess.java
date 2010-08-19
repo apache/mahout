@@ -17,7 +17,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * Implements threaded evaluation of an objective function for evolutionary optimization.
+ * Implements threaded optimization of an objective function.  The evolving population
+ * is updated incrementally as results are received.  One useful feature is that the
+ * optimization is inherently time-bounded which is useful for some scheduled operations.
  */
 public class ThreadedEvolutionaryProcess {
   private volatile int taskCount = 0;
@@ -84,7 +86,6 @@ public class ThreadedEvolutionaryProcess {
       }
 
       int k = 0;
-      pending.clear();    // should already be empty (i like belt AND suspenders)
       while (pending.size() + working.size() < threadCount) {
         State tmp = parents[(k++) % parentDepth];
         pending.add(tmp.mutate());
@@ -101,6 +102,12 @@ public class ThreadedEvolutionaryProcess {
 
     // now do a final pass over the data to get scores
     return resultPopulation.peek();
+  }
+
+  
+  @Override
+  public String toString() {
+    return String.format("Launched %d function evaluations\nMaximum threading width was %d", processCount, maxTask);
   }
 
   public class EvalTask implements Callable<State> {
