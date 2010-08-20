@@ -110,6 +110,29 @@ public abstract class FeatureVectorEncoder {
   }
 
   /**
+   * Hash four strings and an integer into the range [0..numFeatures-1].
+   *
+   * @param term1       The first string.
+   * @param term2       The second string.
+   * @param term3       The third string
+   * @param term4       And the fourth.
+   * @param probe       An integer that modifies the resulting hash.
+   * @param numFeatures The range into which the resulting hash must fit.
+   * @return An integer in the range [0..numFeatures-1] that has good spread for small changes in
+   *         term and probe.
+   */
+  protected int hash(String term1, String term2, String term3, String term4, int probe, int numFeatures) {
+    long r = MurmurHash.hash64A(term1.getBytes(Charset.forName("UTF-8")), probe);
+    r = MurmurHash.hash64A(term2.getBytes(Charset.forName("UTF-8")), (int) r) % numFeatures;
+    r = MurmurHash.hash64A(term3.getBytes(Charset.forName("UTF-8")), (int) r) % numFeatures;
+    r = MurmurHash.hash64A(term4.getBytes(Charset.forName("UTF-8")), (int) r) % numFeatures;
+    if (r < 0) {
+      r += numFeatures;
+    }
+    return (int) r;
+  }
+
+  /**
    * Converts a value into a form that would help a human understand the internals of how the value
    * is being interpreted.  For text-like things, this is likely to be a list of the terms found
    * with associated weights (if any).
