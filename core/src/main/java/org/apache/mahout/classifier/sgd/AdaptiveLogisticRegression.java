@@ -39,13 +39,18 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   List<TrainingExample> buffer = Lists.newArrayList();
   private EvolutionaryProcess<Wrapper> ep;
   private State<Wrapper> best;
+  private int threadCount = 20;
+  private int poolSize = 20;
+  private State<Wrapper> seed;
+  private int numFeatures;
 
-  public AdaptiveLogisticRegression(int poolSize, int numCategories, int numFeatures, PriorFunction prior) {
-    State<Wrapper> s0 = new State<Wrapper>(new double[2], 10);
+  public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior) {
+    this.numFeatures = numFeatures;
+    seed = new State<Wrapper>(new double[2], 10);
     Wrapper w = new Wrapper(numCategories, numFeatures, prior);
-    s0.setPayload(w);
-    w.setMappings(s0);
-    ep = new EvolutionaryProcess<Wrapper>(20, poolSize, s0);
+    w.setMappings(seed);
+    seed.setPayload(w);
+    setPoolSize(poolSize);
   }
 
   @Override
@@ -111,6 +116,30 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    */
   public void setInterval(int interval) {
     this.evaluationInterval = interval;
+  }
+
+  public void setPoolSize(int poolSize) {
+    this.poolSize = poolSize;
+    setupOptimizer(poolSize);
+  }
+
+  public void setThreadCount(int threadCount) {
+    this.threadCount = threadCount;
+    setupOptimizer(poolSize);
+  }
+
+  private void setupOptimizer(int poolSize) {
+    ep = new EvolutionaryProcess<Wrapper>(threadCount, poolSize, seed);
+  }
+
+  /**
+   * Returns the size of the internal feature vector.  Note that this is not the
+   * same as the number of distinct features, especially if feature hashing is
+   * being used.
+   * @return The internal feature vector size.
+   */
+  public int numFeatures() {
+    return numFeatures;
   }
 
   /**

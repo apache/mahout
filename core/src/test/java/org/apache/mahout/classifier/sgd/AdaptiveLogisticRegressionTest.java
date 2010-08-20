@@ -37,7 +37,7 @@ public class AdaptiveLogisticRegressionTest {
       }
     }
 
-    AdaptiveLogisticRegression x = new AdaptiveLogisticRegression(20, 2, 200, new L1());
+    AdaptiveLogisticRegression x = new AdaptiveLogisticRegression(2, 200, new L1());
     x.setInterval(1000);
 
     final Normal norm = new Normal(0, 1, gen);
