@@ -97,7 +97,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
       r.step[i] = lambda * step[i] + r.omni * gen.nextGaussian();
       r.params[i] += r.step[i];
     }
-    if (r.payload != null) {
+    if (this.payload != null) {
       r.payload.update(r.getMappedParams());
     }
     return r;
