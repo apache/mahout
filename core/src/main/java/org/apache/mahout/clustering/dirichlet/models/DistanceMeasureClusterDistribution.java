@@ -19,24 +19,30 @@ package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.clustering.DistanceMeasureCluster;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 /**
  * An implementation of the ModelDistribution interface suitable for testing the DirichletCluster algorithm.
- * Uses a Normal Distribution to sample the prior model values. Model values have a vector standard deviation,
- * allowing assymetrical regions to be covered by a model.
+ * Models use a DistanceMeasure to calculate pdf values.
  */
 public class DistanceMeasureClusterDistribution extends AbstractVectorModelDistribution {
 
-  ManhattanDistanceMeasure measure = new ManhattanDistanceMeasure();
+  DistanceMeasure measure;
 
   public DistanceMeasureClusterDistribution() {
   }
 
   public DistanceMeasureClusterDistribution(VectorWritable modelPrototype) {
     super(modelPrototype);
+    this.measure = new ManhattanDistanceMeasure();
+  }
+
+  public DistanceMeasureClusterDistribution(VectorWritable modelPrototype, DistanceMeasure measure) {
+    super(modelPrototype);
+    this.measure = measure;
   }
 
   @Override
@@ -57,6 +63,14 @@ public class DistanceMeasureClusterDistribution extends AbstractVectorModelDistr
       result[i] = m.sampleFromPosterior();
     }
     return result;
+  }
+
+  public void setMeasure(DistanceMeasure measure) {
+    this.measure = measure;
+  }
+
+  public DistanceMeasure getMeasure() {
+    return measure;
   }
 
 }

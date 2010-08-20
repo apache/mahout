@@ -22,10 +22,12 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.list.IntArrayList;
 
 import com.google.gson.Gson;
@@ -154,6 +156,15 @@ public class MeanShiftCanopy extends Cluster {
   @Override
   public String getIdentifier() {
     return (isConverged() ? "MSV-" : "MSC-") + getId();
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.DistanceMeasureCluster#pdf(org.apache.mahout.math.VectorWritable)
+   */
+  @Override
+  public double pdf(VectorWritable vw) {
+    // MSCanopy membership is explicit via membership in boundPoints. Can't compute pdf for Arbitrary point
+    throw new NotImplementedException();
   }
 
 }

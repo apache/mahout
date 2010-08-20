@@ -29,9 +29,12 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletMapper;
+import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
@@ -58,16 +61,8 @@ public final class Job extends DirichletDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"),
-                    output,
-                    "org.apache.mahout.clustering.syntheticcontrol.dirichlet.NormalScModelDistribution",
-                    "org.apache.mahout.math.RandomAccessSparseVector",
-                    10,
-                    5,
-                    1.0,
-                    1,
-                    false,
-                    0.001);
+      AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
+      new Job().job(new Path("testdata"), output, modelDistribution, 10, 5, 0.5, 1, false, 0.001);
     }
   }
 
@@ -90,6 +85,7 @@ public final class Job extends DirichletDriver {
         .withArgument(new ArgumentBuilder().withName("prototypeClass").withDefault(RandomAccessSparseVector.class.getName())
             .withMinimum(1).withMaximum(1).create())
         .withDescription("The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector").create());
+    addOption(DefaultOptionCreator.distanceMeasureOption().withRequired(false).create());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
     addOption(DefaultOptionCreator.numReducersOption().create());
@@ -106,14 +102,20 @@ public final class Job extends DirichletDriver {
     }
     String modelFactory = getOption(MODEL_DISTRIBUTION_CLASS_OPTION);
     String modelPrototype = getOption(MODEL_PROTOTYPE_CLASS_OPTION);
+    String distanceMeasure = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     int numModels = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
     int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
     double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
     double alpha0 = Double.parseDouble(getOption(ALPHA_OPTION));
+    int prototypeSize = DirichletDriver.readPrototypeSize(input);
+    AbstractVectorModelDistribution modelDistribution = DirichletDriver.createModelDistribution(modelFactory,
+                                                                                                modelPrototype,
+                                                                                                distanceMeasure,
+                                                                                                prototypeSize);
 
-    job(input, output, modelFactory, modelPrototype, numModels, maxIterations, alpha0, numReducers, emitMostLikely, threshold);
+    job(input, output, modelDistribution, numModels, maxIterations, alpha0, numReducers, emitMostLikely, threshold);
     return 0;
   }
 
@@ -124,8 +126,8 @@ public final class Job extends DirichletDriver {
    *          the directory pathname for input points
    * @param output
    *          the directory pathname for output points
-   * @param modelFactory
-   *          the ModelDistribution class name
+   * @param modelDistribution
+   *          the ModelDistribution
    * @param numModels
    *          the number of Models
    * @param maxIterations
@@ -137,8 +139,7 @@ public final class Job extends DirichletDriver {
    */
   private void job(Path input,
                    Path output,
-                   String modelFactory,
-                   String modelPrototype,
+                   ModelDistribution<VectorWritable> modelDistribution,
                    int numModels,
                    int maxIterations,
                    double alpha0,
@@ -147,11 +148,10 @@ public final class Job extends DirichletDriver {
                    double threshold) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
-    InputDriver.runJob(input, directoryContainingConvertedInput, modelPrototype);
+    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     DirichletDriver.runJob(directoryContainingConvertedInput,
                            output,
-                           modelFactory,
-                           modelPrototype,
+                           modelDistribution,
                            numModels,
                            maxIterations,
                            alpha0,
@@ -172,11 +172,7 @@ public final class Job extends DirichletDriver {
    * @param output
    *          the String output directory
    * @param modelDistribution
-   *          the String class name of the ModelDistribution
-   * @param vectorClassName
-   *          the String class name of the Vector to use
-   * @param prototypeSize
-   *          the size of the Vector prototype for the Dirichlet Models
+   *          the ModelDistribution
    * @param numIterations
    *          the int number of Iterations
    * @param numModels
@@ -185,21 +181,17 @@ public final class Job extends DirichletDriver {
    *          the double alpha_0 value
    */
   public static void printResults(String output,
-                                  String modelDistribution,
-                                  String vectorClassName,
-                                  int prototypeSize,
+                                  ModelDistribution<VectorWritable> modelDistribution,
                                   int numIterations,
                                   int numModels,
                                   double alpha0) throws NoSuchMethodException, InvocationTargetException {
     Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
     Configuration conf = new Configuration();
-    conf.set(MODEL_FACTORY_KEY, modelDistribution);
+    conf.set(MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());
     conf.set(NUM_CLUSTERS_KEY, Integer.toString(numModels));
     conf.set(ALPHA_0_KEY, Double.toString(alpha0));
     for (int i = 0; i < numIterations; i++) {
       conf.set(STATE_IN_KEY, output + "/clusters-" + i);
-      conf.set(MODEL_PROTOTYPE_KEY, vectorClassName);
-      conf.set(PROTOTYPE_SIZE_KEY, Integer.toString(prototypeSize));
       clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
     }
     printClusters(clusters, 0);

@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.JsonClusterModelAdapter;
-import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
 import org.apache.mahout.clustering.dirichlet.models.L1Model;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;

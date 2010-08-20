@@ -17,9 +17,11 @@
 
 package org.apache.mahout.clustering.fuzzykmeans;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
 public class SoftCluster extends Cluster {
 
@@ -45,5 +47,14 @@ public class SoftCluster extends Cluster {
   @Override
   public String getIdentifier() {
     return (isConverged() ? "SV-" : "SC-") + getId();
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.mahout.clustering.DistanceMeasureCluster#pdf(org.apache.mahout.math.VectorWritable)
+   */
+  @Override
+  public double pdf(VectorWritable vw) {
+    // SoftCluster pdf cannot be calculated out of context. See FuzzyKMeansClusterer
+    throw new NotImplementedException();
   }
 }

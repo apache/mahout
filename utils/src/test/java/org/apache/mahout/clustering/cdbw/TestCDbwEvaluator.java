@@ -35,7 +35,8 @@ import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
@@ -44,7 +45,6 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 public class TestCDbwEvaluator extends MahoutTestCase {
@@ -205,11 +205,10 @@ public class TestCDbwEvaluator extends MahoutTestCase {
   }
 
   public void testDirichlet() throws Exception {
-    Vector prototype = new DenseVector(2);
+    AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(new DenseVector(2)));
     DirichletDriver.runJob(getTestTempDirPath("testdata"),
                            getTestTempDirPath("output"),
-                           L1ModelDistribution.class.getName(),
-                           prototype.getClass().getName(),
+                           modelDistribution,
                            15,
                            5,
                            1.0,
@@ -217,7 +216,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
                            true,
                            true,
                            0,
-                           false);
+                           true);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
     CDbwDriver.runJob(new Path(output, "clusters-5"),

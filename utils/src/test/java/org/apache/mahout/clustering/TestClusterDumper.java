@@ -36,7 +36,10 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
+import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
@@ -82,6 +85,7 @@ public class TestClusterDumper extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
   }
 
+  @SuppressWarnings("deprecation")
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
@@ -193,8 +197,28 @@ public class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    DirichletDriver.runJob(getTestTempDirPath("testdata"), output, L1ModelDistribution.class.getName(), prototype.getDelegate()
-        .getClass().getName(), 15, 10, 1.0, 1, true, true, 0, false);
+    AbstractVectorModelDistribution modelDistribution = new SampledNormalDistribution(new VectorWritable(prototype));
+    DirichletDriver.runJob(getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, false);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
+    clusterDumper.printClusters(termDictionary);
+  }
+
+  public void testDirichlet2() throws Exception {
+    Path output = getTestTempDirPath("output");
+    NamedVector prototype = (NamedVector) sampleData.get(0).get();
+    AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(prototype));
+    DirichletDriver.runJob(getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, true);
+    // run ClusterDumper
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
+    clusterDumper.printClusters(termDictionary);
+  }
+
+  public void testDirichlet3() throws Exception {
+    Path output = getTestTempDirPath("output");
+    NamedVector prototype = (NamedVector) sampleData.get(0).get();
+    AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(prototype));
+    DirichletDriver.runJob(getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, true);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);

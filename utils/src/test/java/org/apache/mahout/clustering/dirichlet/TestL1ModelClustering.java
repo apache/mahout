@@ -106,6 +106,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
     RandomUtils.useTestSeed();
   }
 
+  @SuppressWarnings("deprecation")
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();

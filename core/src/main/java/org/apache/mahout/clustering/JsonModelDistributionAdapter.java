@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.mahout.clustering.dirichlet;
+package org.apache.mahout.clustering;
 
 import java.lang.reflect.Type;
 
-import org.apache.mahout.clustering.Model;
+import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
@@ -34,26 +34,27 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeserializer<Model<?>> {
-  
-  private static final Logger log = LoggerFactory.getLogger(JsonModelAdapter.class);
-  
+public class JsonModelDistributionAdapter implements JsonSerializer<ModelDistribution<?>>, JsonDeserializer<ModelDistribution<?>> {
+
+  private static final Logger log = LoggerFactory.getLogger(JsonModelDistributionAdapter.class);
+
   @Override
-  public JsonElement serialize(Model<?> src, Type typeOfSrc, JsonSerializationContext context) {
+  public JsonElement serialize(ModelDistribution<?> src, Type typeOfSrc, JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(DistanceMeasure.class, new JsonDistanceMeasureAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
     obj.add("class", new JsonPrimitive(src.getClass().getName()));
     obj.add("model", new JsonPrimitive(gson.toJson(src)));
     return obj;
   }
-  
+
   @Override
-  public Model<?> deserialize(JsonElement json, Type typeOfT,
-                              JsonDeserializationContext context) {
+  public ModelDistribution<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(DistanceMeasure.class, new JsonDistanceMeasureAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
     String klass = obj.get("class").getAsString();
@@ -65,6 +66,6 @@ public class JsonModelAdapter implements JsonSerializer<Model<?>>, JsonDeseriali
     } catch (ClassNotFoundException e) {
       log.warn("Error while loading class", e);
     }
-    return (Model<?>) gson.fromJson(model, cl);
+    return (ModelDistribution<?>) gson.fromJson(model, cl);
   }
 }

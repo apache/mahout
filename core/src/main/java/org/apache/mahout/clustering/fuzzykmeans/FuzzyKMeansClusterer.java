@@ -62,6 +62,10 @@ public class FuzzyKMeansClusterer {
     this.configure(conf);
   }
 
+  public FuzzyKMeansClusterer() {
+    // TODO Auto-generated constructor stub
+  }
+
   /**
    * This is the reference k-means implementation. Given its inputs it iterates over the points and clusters
    * until their centers converge or until the maximum number of iterations is exceeded.
@@ -222,16 +226,21 @@ public class FuzzyKMeansClusterer {
       clusterDistanceList.add(getMeasure().distance(cluster.getCenter(), point.get()));
     }
     // calculate point pdf for all clusters
-    Vector pi = new DenseVector(clusters.size());
-    for (int i = 0; i < clusters.size(); i++) {
-      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-      pi.set(i, probWeight);
-    }
+    Vector pi = computePi(clusters, clusterDistanceList);
     if (emitMostLikely) {
       emitMostLikelyCluster(point.get(), clusters, pi, context);
     } else {
       emitAllClusters(point.get(), clusters, pi, context);
     }
+  }
+
+  public Vector computePi(List<SoftCluster> clusters, List<Double> clusterDistanceList) {
+    Vector pi = new DenseVector(clusters.size());
+    for (int i = 0; i < clusters.size(); i++) {
+      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
+      pi.set(i, probWeight);
+    }
+    return pi;
   }
 
   /**
@@ -302,12 +311,7 @@ public class FuzzyKMeansClusterer {
     for (SoftCluster cluster : clusters) {
       clusterDistanceList.add(getMeasure().distance(cluster.getCenter(), point.get()));
     }
-    // calculate point pdf for all clusters
-    Vector pi = new DenseVector(clusters.size());
-    for (int i = 0; i < clusters.size(); i++) {
-      double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);
-      pi.set(i, probWeight);
-    }
+    Vector pi = computePi(clusters, clusterDistanceList);
     if (emitMostLikely) {
       emitMostLikelyCluster(point.get(), clusters, pi, writer);
     } else {

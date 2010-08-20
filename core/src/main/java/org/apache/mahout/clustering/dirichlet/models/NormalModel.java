@@ -25,8 +25,8 @@ import java.util.Locale;
 
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.JsonModelAdapter;
 import org.apache.mahout.clustering.Model;
-import org.apache.mahout.clustering.dirichlet.JsonModelAdapter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.SquareRootFunction;

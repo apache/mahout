@@ -29,17 +29,22 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.JsonModelDistributionAdapter;
+import org.apache.mahout.clustering.ModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
   private DirichletClusterer clusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable v, Context context)
-      throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable v, Context context) throws IOException, InterruptedException {
     int k = clusterer.assignToModel(v);
     context.write(new Text(String.valueOf(k)), v);
   }
@@ -72,23 +77,19 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     this.clusterer = new DirichletClusterer(state);
   }
 
-  public static DirichletState getDirichletState(Configuration conf) throws NoSuchMethodException,
-      InvocationTargetException {
+  public static DirichletState getDirichletState(Configuration conf) throws NoSuchMethodException, InvocationTargetException {
     String statePath = conf.get(DirichletDriver.STATE_IN_KEY);
-    String modelFactory = conf.get(DirichletDriver.MODEL_FACTORY_KEY);
-    String modelPrototype = conf.get(DirichletDriver.MODEL_PROTOTYPE_KEY);
-    String prototypeSize = conf.get(DirichletDriver.PROTOTYPE_SIZE_KEY);
+    String json = conf.get(DirichletDriver.MODEL_DISTRIBUTION_KEY);
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(ModelDistribution.class, new JsonModelDistributionAdapter());
+    Gson gson = builder.create();
+    ModelDistribution<VectorWritable> modelDistribution = gson.fromJson(json,
+                                                                        AbstractVectorModelDistribution.MODEL_DISTRIBUTION_TYPE);
     String numClusters = conf.get(DirichletDriver.NUM_CLUSTERS_KEY);
     String alpha0 = conf.get(DirichletDriver.ALPHA_0_KEY);
 
     try {
-      return loadState(conf,
-                       statePath,
-                       modelFactory,
-                       modelPrototype,
-                       Double.parseDouble(alpha0),
-                       Integer.parseInt(prototypeSize),
-                       Integer.parseInt(numClusters));
+      return loadState(conf, statePath, modelDistribution, Double.parseDouble(alpha0), Integer.parseInt(numClusters));
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (InstantiationException e) {
@@ -101,15 +102,12 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
   }
 
   protected static DirichletState loadState(Configuration conf,
-                                                            String statePath,
-                                                            String modelFactory,
-                                                            String modelPrototype,
-                                                            double alpha,
-                                                            int pSize,
-                                                            int k)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+                                            String statePath,
+                                            ModelDistribution<VectorWritable> modelDistribution,
+                                            double alpha,
+                                            int k) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, IOException {
-    DirichletState state = DirichletDriver.createState(modelFactory, modelPrototype, pSize, k, alpha);
+    DirichletState state = DirichletDriver.createState(modelDistribution, k, alpha);
     Path path = new Path(statePath);
     FileSystem fs = FileSystem.get(path.toUri(), conf);
     FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
