@@ -25,7 +25,7 @@ import java.util.List;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.dirichlet.DirichletClusterer;
-import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
+import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalDistribution;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
@@ -66,11 +66,11 @@ public class DisplayDirichlet extends DisplayClustering {
   }
 
   protected static void generateResults(ModelDistribution<VectorWritable> modelDist,
-                                 int numClusters,
-                                 int numIterations,
-                                 double alpha_0,
-                                 int thin,
-                                 int burnin) {
+                                        int numClusters,
+                                        int numIterations,
+                                        double alpha_0,
+                                        int thin,
+                                        int burnin) {
     DirichletClusterer dc = new DirichletClusterer(SAMPLE_DATA, modelDist, alpha_0, numClusters, thin, burnin);
     List<Cluster[]> result = dc.cluster(numIterations);
     printModels(result, burnin);
@@ -87,10 +87,10 @@ public class DisplayDirichlet extends DisplayClustering {
 
   public static void main(String[] args) throws Exception {
     VectorWritable modelPrototype = new VectorWritable(new DenseVector(2));
-    // ModelDistribution<VectorWritable> modelDist = new NormalModelDistribution(modelPrototype);
+    //ModelDistribution<VectorWritable> modelDist = new NormalModelDistribution(modelPrototype);
     // ModelDistribution<VectorWritable> modelDist = new SampledNormalDistribution(modelPrototype);
-    // ModelDistribution<VectorWritable> modelDist = new AsymmetricSampledNormalDistribution(modelPrototype);
-    ModelDistribution<VectorWritable> modelDist = new GaussianClusterDistribution(modelPrototype);
+     ModelDistribution<VectorWritable> modelDist = new AsymmetricSampledNormalDistribution(modelPrototype);
+    //ModelDistribution<VectorWritable> modelDist = new GaussianClusterDistribution(modelPrototype);
 
     RandomUtils.useTestSeed();
     generateSamples();

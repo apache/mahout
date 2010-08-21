@@ -34,7 +34,7 @@ import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
-import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
+import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
@@ -61,8 +61,8 @@ public final class Job extends DirichletDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
-      new Job().job(new Path("testdata"), output, modelDistribution, 10, 5, 0.5, 1, false, 0.001);
+      AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
+      new Job().job(new Path("testdata"), output, modelDistribution, 10, 5, 1.0, 1, true, 0);
     }
   }
 

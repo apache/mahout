@@ -404,12 +404,16 @@ public class DirichletClusterer {
    */
   private void emitMostLikelyCluster(VectorWritable vector, List<DirichletCluster> clusters, Vector pi, Writer writer)
       throws IOException {
+    double maxPdf = 0;
+    int clusterId = -1;
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
-      if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
-        //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-        writer.append(new IntWritable(i), new WeightedVectorWritable(pdf, vector));
+      if (pdf > maxPdf) {
+        maxPdf = pdf;
+        clusterId = i;
       }
     }
+    //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
+    writer.append(new IntWritable(clusterId), new WeightedVectorWritable(maxPdf, vector));
   }
 }

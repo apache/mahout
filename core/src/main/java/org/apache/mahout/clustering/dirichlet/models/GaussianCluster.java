@@ -2,6 +2,7 @@ package org.apache.mahout.clustering.dirichlet.models;
 
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -35,28 +36,17 @@ public class GaussianCluster extends AbstractCluster {
   @Override
   public double pdf(VectorWritable vw) {
     Vector x = vw.get();
-    // return the product of the component pdfs
+    // return the average of the component pdfs
     // TODO: is this reasonable? correct?
-    double pdf = pdf(x, getRadius().get(0));
-    for (int i = 1; i < x.size(); i++) {
-      pdf *= pdf(x, getRadius().get(i));
+    double pdf = 0;
+    for (int i = 0; i < x.size(); i++) {
+      double x2 = x.get(i);
+      double m = getCenter().get(i);
+      double s = getRadius().get(i);
+      double dNorm = UncommonDistributions.dNorm(x2, m, s);
+      pdf += dNorm;
     }
-    return pdf;
-  }
-
-  /**
-   * Calculate a pdf using the supplied sample and stdDev
-   * 
-   * @param x
-   *          a Vector sample
-   * @param sd
-   *          a double std deviation
-   */
-  private double pdf(Vector x, double sd) {
-    double sd2 = sd * sd;
-    double exp = -(x.dot(x) - 2 * x.dot(getCenter()) + getCenter().dot(getCenter())) / (2 * sd2);
-    double ex = Math.exp(exp);
-    return ex / (sd * SQRT2PI);
+    return pdf / x.size();
   }
 
 }
