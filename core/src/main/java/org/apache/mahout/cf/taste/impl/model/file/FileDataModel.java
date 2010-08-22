@@ -726,11 +726,13 @@ public class FileDataModel extends AbstractDataModel {
 
   @Override
   public float getMaxPreference() {
+    checkLoaded();
     return delegate.getMaxPreference();
   }
 
   @Override
   public float getMinPreference() {
+    checkLoaded();    
     return delegate.getMinPreference();
   }
 
