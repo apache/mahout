@@ -18,6 +18,7 @@
 package org.apache.mahout.utils.nlp.collocations.llr;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -28,16 +29,19 @@ public class CollocCombiner extends Reducer<GramKey, Gram, GramKey, Gram> {
   protected void reduce(GramKey key, Iterable<Gram> values, Context context) throws IOException, InterruptedException {
 
     int freq = 0;
-
-    // accumulate frequencies from values.
-    for (Gram gramValue : values) {
-      freq += gramValue.getFrequency();
+    Gram value = null;
+    
+    // accumulate frequencies from values, preserve the last value
+    // to write to the context.
+    for (Iterator<Gram> it = values.iterator(); it.hasNext(); ) {
+      value = it.next();
+      freq += value.getFrequency();
     }
 
-    Gram sum = new Gram();
-    sum.setFrequency(freq);
-
-    context.write(key, sum);
+    if (value != null) {
+      value.setFrequency(freq);
+      context.write(key, value);
+    }
   }
 
 }
