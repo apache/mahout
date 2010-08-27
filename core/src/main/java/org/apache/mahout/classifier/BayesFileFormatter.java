@@ -288,8 +288,7 @@ public final class BayesFileFormatter {
       abuilder.withName("collapse").withMinimum(1).withMaximum(1).create()).withDescription(
       "Collapse a whole directory to a single file, one doc per line").withShortName("p").create();
     
-    Option helpOpt = obuilder.withLongName("help").withRequired(true).withDescription("Print out help").withShortName(
-      "h").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(labelOpt)
         .withOption(analyzerOpt).withOption(charsetOpt).withOption(collapseOpt).withOption(helpOpt).create();
     try {
