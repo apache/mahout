@@ -41,7 +41,7 @@ public class OnlineAuc {
   public static final int HISTORY = 10;
 
   private ReplacementPolicy policy = ReplacementPolicy.FAIR;
-  private Random random = new Random();
+  private Random random = org.apache.mahout.common.RandomUtils.getRandom();
   private final Matrix scores;
   private final Vector averages;
   private final Vector samples;
