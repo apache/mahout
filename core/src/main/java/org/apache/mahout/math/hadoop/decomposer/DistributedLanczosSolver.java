@@ -64,26 +64,26 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
   @Override
   public int run(String[] strings) throws Exception {
-    Configuration originalConfig = getConf();
-    Path inputPath = new Path(originalConfig.get("mapred.input.dir"));
+    Path inputPath = new Path(parsedArgs.get("--input"));
+    Path outputEigenVectorPath =  new Path(parsedArgs.get("--output"));
     Path outputTmpPath = new Path(parsedArgs.get("--tempDir"));
     int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
     boolean isSymmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
     int desiredRank = Integer.parseInt(parsedArgs.get("--rank"));
-    return run(inputPath, outputTmpPath, numRows, numCols, isSymmetric, desiredRank);
+    return run(inputPath, outputTmpPath, outputEigenVectorPath, numRows, numCols, isSymmetric, desiredRank);
   }
 
   public int run(Path inputPath,
                  Path outputTmpPath,
-                 int numRows,
+                 Path outputEigenVectorPath, int numRows,
                  int numCols,
                  boolean isSymmetric,
                  int desiredRank) throws Exception {
     Configuration originalConfig = getConf();
     Matrix eigenVectors = new DenseMatrix(desiredRank, numCols);
     List<Double> eigenValues = new ArrayList<Double>();
-    String outputEigenVectorPath =  originalConfig.get("mapred.output.dir");
+
 
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath,
                                                            outputTmpPath,
@@ -103,12 +103,11 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * @param outputPath The path (relative to the current Configuration's FileSystem) to save the output to.
    * @throws IOException
    */
-  public void serializeOutput(Matrix eigenVectors, List<Double> eigenValues, String outputPath) throws IOException {
+  public void serializeOutput(Matrix eigenVectors, List<Double> eigenValues, Path outputPath) throws IOException {
     log.info("Persisting {} eigenVectors and eigenValues to: {}", eigenVectors.numRows(), outputPath);
-    Path path = new Path(outputPath);
     Configuration conf = getConf();
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
+    SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
     for (int i = 0; i < eigenVectors.numRows() - 1; i++) {
       Vector v = eigenVectors.getRow(i);
@@ -150,7 +149,8 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
-
+      addInputOption();
+      addOutputOption();
       addOption("numRows", "nr", "Number of rows of the input matrix");
       addOption("numCols", "nc", "Number of columns of the input matrix");
       addOption("rank", "r", "Desired decomposition rank (note: only roughly 1/4 to 1/3 "
