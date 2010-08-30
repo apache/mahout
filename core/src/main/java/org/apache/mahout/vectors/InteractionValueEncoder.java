@@ -25,13 +25,9 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
 
   protected static final int INTERACTION_VALUE_HASH_SEED_1 = 100;
   protected static final int INTERACTION_VALUE_HASH_SEED_2 = 200;
-  private final String name1;
-  private final String name2;
 
-  protected InteractionValueEncoder(String name1, String name2) {
-    super(name1 + ':' + name2, 2);
-    this.name1 = name1;
-    this.name2 = name2;
+  protected InteractionValueEncoder(String name) {
+    super(name, 2);
   }
 
   /**
@@ -42,7 +38,6 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(String originalForm, double w, Vector data) {
-    throw new UnsupportedOperationException("Must have two arguments to encode interaction");
   }
 
   /**
@@ -52,11 +47,15 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    * @param originalForm2 The original form of the second value as a string.
    * @param data          The vector to which the value should be added.
    */
-  public void addToVector(String originalForm1, String originalForm2, Vector data) {
+  public void addInteractionToVector(String originalForm1, String originalForm2, Vector data) {
     int probes = getProbes();
+    String name = getName();
     for (int i = 0; i < probes; i++) {
-      int n = hash(name1, originalForm1, name2, originalForm2, i, data.size());
-      trace(String.format(Locale.ENGLISH, "%s:%s", originalForm1, originalForm2), n);
+      int h1 = hash1(name, originalForm1, i, data.size());
+      int h2 = hash2(name, originalForm1, i, data.size());
+      int j = hash1(name, originalForm2, i, data.size());
+      int n = (h1 + j * h2) % data.size();
+      trace(String.format("%s:%s", originalForm1, originalForm2), n);
       data.set(n, data.get(n) + 1);
     }
   }
@@ -72,6 +71,14 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
   @Override
   public String asString(String originalForm) {
     return String.format(Locale.ENGLISH, "%s:%s", getName(), originalForm);
+  }
+
+  protected int hash1(String term1, String term2, int probe, int numFeatures) {
+    return hash(term1, term2, probe + INTERACTION_VALUE_HASH_SEED_1, numFeatures);
+  }
+
+  protected int hash2(String term1, String term2, int probe, int numFeatures) {
+    return hash(term1, term2, probe + INTERACTION_VALUE_HASH_SEED_2, numFeatures);
   }
 }
 
