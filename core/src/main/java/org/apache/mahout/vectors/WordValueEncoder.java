@@ -59,7 +59,7 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    return String.format("%s:%s:%.4f", getName(), originalForm, weight(originalForm));
+    return String.format(Locale.ENGLISH, "%s:%s:%.4f", getName(), originalForm, weight(originalForm));
   }
 
   protected abstract double weight(String originalForm);

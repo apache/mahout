@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -107,7 +108,7 @@ public class ThreadedEvolutionaryProcess {
   
   @Override
   public String toString() {
-    return String.format("Launched %d function evaluations\nMaximum threading width was %d", processCount, maxTask);
+    return String.format(Locale.ENGLISH, "Launched %d function evaluations\nMaximum threading width was %d", processCount, maxTask);
   }
 
   public class EvalTask implements Callable<State> {

@@ -1,6 +1,7 @@
 package org.apache.mahout.ep;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -120,11 +121,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
    */
   public double get(int i) {
     Mapping m = maps[i];
-    if (m == null) {
-      return params[i];
-    } else {
-      return m.apply(params[i]);
-    }
+    return m == null ? params[i] : m.apply(params[i]);
   }
 
   /**
@@ -181,10 +178,10 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
   @Override
   public int compareTo(State other) {
     int r = Double.compare(other.value, this.value);
-    if (r != 0) {
-      return r;
-    } else {
+    if (r == 0) {
       return this.id - other.id;
+    } else {
+      return r;
     }
   }
 
@@ -193,6 +190,6 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
     for (double v : step) {
       sum += v * v;
     }
-    return String.format("<S/%s %.3f %.3f>", payload, omni + Math.sqrt(sum), value);
+    return String.format(Locale.ENGLISH, "<S/%s %.3f %.3f>", payload, omni + Math.sqrt(sum), value);
   }
 }

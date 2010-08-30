@@ -19,6 +19,7 @@ import org.apache.mahout.math.matrix.impl.AbstractFormatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 
 import java.util.Formatter;
+import java.util.Locale;
 import java.util.TreeMap;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
@@ -1026,7 +1027,7 @@ public class Property extends PersistentObject {
     for (String key : messages.keySet()) {
       maxLength = Math.max(key.length(), maxLength);
     }
-    String format = String.format("\\%%ds: \\%s\n", maxLength);
+    String format = String.format(Locale.ENGLISH, "\\%%ds: \\%s\n", maxLength);
 
     Formatter r = new Formatter();
     for (String key : messages.keySet()) {

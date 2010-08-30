@@ -3,6 +3,7 @@ package org.apache.mahout.ep;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -39,7 +40,7 @@ public class ThreadedEvolutionaryProcessTest {
     double[] r = x.getMappedParams();
     int i = 0;
     for (double v : r) {
-      Assert.assertEquals(String.format("Coordinate %d", i), i, v, 0.02);
+      Assert.assertEquals(String.format(Locale.ENGLISH, "Coordinate %d", i), i, v, 0.02);
       i++;
     }
   }

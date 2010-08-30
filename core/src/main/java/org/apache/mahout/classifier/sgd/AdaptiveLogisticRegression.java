@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.Lists;
@@ -9,6 +26,7 @@ import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Vector;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -36,13 +54,13 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int record = 0;
   private int evaluationInterval = 1000;
 
-  List<TrainingExample> buffer = Lists.newArrayList();
+  private final List<TrainingExample> buffer = Lists.newArrayList();
   private EvolutionaryProcess<Wrapper> ep;
   private State<Wrapper> best;
   private int threadCount = 20;
   private int poolSize = 20;
-  private State<Wrapper> seed;
-  private int numFeatures;
+  private final State<Wrapper> seed;
+  private final int numFeatures;
 
   public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior) {
     this.numFeatures = numFeatures;
@@ -71,21 +89,22 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private void trainWithBufferedExamples() {
     try {
       this.best = ep.parallelDo(new EvolutionaryProcess.Function<Wrapper>() {
+        @Override
         public double apply(Wrapper x, double[] params) {
           for (TrainingExample example : buffer) {
             x.train(example);
           }
-          if (!x.getLearner().validModel()) {
-            return Double.NaN;
-          } else {
+          if (x.getLearner().validModel()) {
             return x.wrapped.auc();
+          } else {
+            return Double.NaN;
           }
         }
       });
     } catch (InterruptedException e) {
       // ignore ... shouldn't happen
     } catch (ExecutionException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
 
     ep.mutatePopulation(2);
@@ -148,10 +167,10 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    * @return  The AUC of the best member of the population or NaN if we can't figure that out.
    */
   public double auc() {
-    if (best != null) {
-      return best.getPayload().getLearner().auc();
-    } else {
+    if (best == null) {
       return Double.NaN;
+    } else {
+      return best.getPayload().getLearner().auc();
     }
   }
 
@@ -171,9 +190,9 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    * offset is done.
    */
   public static class Wrapper implements Payload<Wrapper> {
-    private static volatile int counter = 0;
+    //private static volatile int counter = 0;
 
-    private volatile int id = counter++;
+    //private volatile int id = counter++;
     private CrossFoldLearner wrapped;
 
     private Wrapper() {
@@ -204,7 +223,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
     public void setMappings(State<Wrapper> x) {
       int i = 0;
-      x.setMap(i++, Mapping.logLimit(1e-8, 0.1));
+      x.setMap(i++, Mapping.logLimit(1.0e-8, 0.1));
       x.setMap(i++, Mapping.softLimit(0.001, 10));
     }
 
@@ -218,14 +237,14 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
     @Override
     public String toString() {
-      return String.format("auc=%.2f", wrapped.auc());
+      return String.format(Locale.ENGLISH, "auc=%.2f", wrapped.auc());
     }
   }
 
   public static class TrainingExample {
-    private long key;
-    private int actual;
-    private Vector instance;
+    private final long key;
+    private final int actual;
+    private final Vector instance;
 
     public TrainingExample(long key, int actual, Vector instance) {
       this.key = key;

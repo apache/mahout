@@ -19,15 +19,17 @@ package org.apache.mahout.vectors;
 
 import org.apache.mahout.math.Vector;
 
+import java.util.Locale;
+
 public class InteractionValueEncoder extends FeatureVectorEncoder {
 
   protected static final int INTERACTION_VALUE_HASH_SEED_1 = 100;
   protected static final int INTERACTION_VALUE_HASH_SEED_2 = 200;
-  private String name1;
-  private String name2;
+  private final String name1;
+  private final String name2;
 
   protected InteractionValueEncoder(String name1, String name2) {
-    super(name1 + ":" + name2, 2);
+    super(name1 + ':' + name2, 2);
     this.name1 = name1;
     this.name2 = name2;
   }
@@ -52,10 +54,9 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   public void addToVector(String originalForm1, String originalForm2, Vector data) {
     int probes = getProbes();
-    String name = getName();
     for (int i = 0; i < probes; i++) {
       int n = hash(name1, originalForm1, name2, originalForm2, i, data.size());
-      trace(String.format("%s:%s", originalForm1, originalForm2), n);
+      trace(String.format(Locale.ENGLISH, "%s:%s", originalForm1, originalForm2), n);
       data.set(n, data.get(n) + 1);
     }
   }
@@ -70,7 +71,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    return String.format("%s:%s", getName(), originalForm);
+    return String.format(Locale.ENGLISH, "%s:%s", getName(), originalForm);
   }
 }
 
