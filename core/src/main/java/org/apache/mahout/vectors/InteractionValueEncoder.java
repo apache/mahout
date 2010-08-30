@@ -19,9 +19,11 @@ package org.apache.mahout.vectors;
 
 import org.apache.mahout.math.Vector;
 
+import java.util.Locale;
+
 public class InteractionValueEncoder extends FeatureVectorEncoder {
-  private static FeatureVectorEncoder firstEncoder;
-  private static FeatureVectorEncoder secondEncoder;
+  private FeatureVectorEncoder firstEncoder;
+  private FeatureVectorEncoder secondEncoder;
 
   public InteractionValueEncoder(String name, FeatureVectorEncoder encoderOne, FeatureVectorEncoder encoderTwo) {
     super(name, 2);
@@ -80,7 +82,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    return String.format("%s:%s", getName(), originalForm);
+    return String.format(Locale.ENGLISH, "%s:%s", getName(), originalForm);
   }
 
   @Override
