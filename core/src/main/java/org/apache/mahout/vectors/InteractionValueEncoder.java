@@ -40,25 +40,25 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
   public void addToVector(String originalForm, double w, Vector data) {
   }
 
-  /**
-   * Adds a value to a vector.
-   *
-   * @param originalForm1 The original form of the first value as a string.
-   * @param originalForm2 The original form of the second value as a string.
-   * @param data          The vector to which the value should be added.
-   */
-  public void addInteractionToVector(String originalForm1, String originalForm2, Vector data) {
-    int probes = getProbes();
-    String name = getName();
-    for (int i = 0; i < probes; i++) {
-      int h1 = hash1(name, originalForm1, i, data.size());
-      int h2 = hash2(name, originalForm1, i, data.size());
-      int j = hash1(name, originalForm2, i, data.size());
-      int n = (h1 + j * h2) % data.size();
-      trace(String.format("%s:%s", originalForm1, originalForm2), n);
-      data.set(n, data.get(n) + 1);
-    }
-  }
+     /**
+      * Adds a value to a vector.
+      *
+      * @param originalForm1 The original form of the first value as a string.
+      * @param originalForm2 The original form of the second value as a string.
+      * @param data          The vector to which the value should be added.
+      */
+     public void addInteractionToVector(String originalForm1, String originalForm2, Vector data) {
+       int probes = getProbes();
+       String name = getName();
+       for (int i = 0; i < probes; i++) {
+         int h1 = hash1(name, originalForm1, i, data.size());
+         int h2 = hash2(name, originalForm1, i, data.size());
+         int j =  hash1(name, originalForm2, i, data.size());
+         int n = (h1 + (j+1)*h2) % data.size();
+         trace(String.format("%s:%s", originalForm1, originalForm2), n);
+         data.set(n, data.get(n) + 1);
+       }
+     }
 
   /**
    * Converts a value into a form that would help a human understand the internals of how the
