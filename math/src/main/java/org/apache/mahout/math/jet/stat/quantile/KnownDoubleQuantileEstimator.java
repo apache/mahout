@@ -46,25 +46,25 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
 
   protected RandomSamplingAssistant samplingAssistant;
   protected final double samplingRate; // see method sampleNextElement()
-  protected final long N; // see method sampleNextElement()
+  protected final long n; // see method sampleNextElement()
 
   /**
    * Constructs an approximate quantile finder with b buffers, each having k elements.
    *
    * @param b            the number of buffers
    * @param k            the number of elements per buffer
-   * @param N            the total number of elements over which quantiles are to be computed.
+   * @param n            the total number of elements over which quantiles are to be computed.
    * @param samplingRate 1.0 --> all elements are consumed. 10.0 --> Consumes one random element from successive blocks
    *                     of 10 elements each. Etc.
    * @param generator    a uniform random number generator.
    */
-  KnownDoubleQuantileEstimator(int b, int k, long N, double samplingRate, RandomEngine generator) {
+  KnownDoubleQuantileEstimator(int b, int k, long n, double samplingRate, RandomEngine generator) {
     this.samplingRate = samplingRate;
-    this.N = N;
+    this.n = n;
 
     this.samplingAssistant = this.samplingRate <= 1.0
         ? null
-        : new RandomSamplingAssistant(Arithmetic.floor(N / samplingRate), N, generator);
+        : new RandomSamplingAssistant(Arithmetic.floor(n / samplingRate), n, generator);
 
     setUp(b, k);
     this.clear();
@@ -123,7 +123,7 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
     RandomSamplingAssistant assist = this.samplingAssistant;
     if (assist != null) {
       this.samplingAssistant =
-          new RandomSamplingAssistant(Arithmetic.floor(N / samplingRate), N, assist.getRandomGenerator());
+          new RandomSamplingAssistant(Arithmetic.floor(n / samplingRate), n, assist.getRandomGenerator());
     }
   }
 
@@ -194,17 +194,19 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
    */
   @Override
   public DoubleArrayList quantileElements(DoubleArrayList phis) {
-    /*
-  * The KNOWN quantile finder reads off quantiles from FULL buffers only.
-  * Since there might be a partially full buffer, this method first satisfies this constraint by temporarily filling a few +infinity, -infinity elements to make up a full block.
-  * This is in full conformance with the explicit approximation guarantees.
-   *
-   * For those of you working on online apps:
-    * The approximation guarantees are given for computing quantiles AFTER N elements have been filled, not for intermediate displays.
-  * If you have one thread filling and another thread displaying concurrently, you will note that in the very beginning the infinities will dominate the display.
-   * This could confuse users, because, of course, they don't expect any infinities, even if they "disappear" after a short while.
-   * To prevent panic exclude phi's close to zero or one in the early phases of processing.
-    */
+    // The KNOWN quantile finder reads off quantiles from FULL buffers only.
+    // Since there might be a partially full buffer, this method first satisfies this constraint by 
+    // temporarily filling a few +infinity, -infinity elements to make up a full block.
+    // This is in full conformance with the explicit approximation guarantees.
+    //
+    // For those of you working on online apps:
+    // The approximation guarantees are given for computing quantiles AFTER N elements have
+    // been filled, not for intermediate displays.
+    // If you have one thread filling and another thread displaying concurrently, you will
+    // note that in the very beginning the infinities will dominate the display.
+    // This could confuse users, because, of course, they don't expect any infinities,
+    // even if they "disappear" after a short while.
+    // To prevent panic exclude phi's close to zero or one in the early phases of processing.
     DoubleBuffer partial = this.bufferSet._getPartialBuffer();
     int missingValues = 0;
     if (partial != null) { // any auxiliary infinities needed?

@@ -75,10 +75,10 @@ public final class CollocDriver extends AbstractJob {
               "ng",
               "(Optional) The max size of ngrams to create (2 = bigrams, 3 = trigrams, etc) default: 2",
               String.valueOf(DEFAULT_MAX_NGRAM_SIZE));
-    addOption("minSupport", "s", "(Optional) Minimum Support. Default Value: " + CollocReducer.DEFAULT_MIN_SUPPORT, String
-        .valueOf(CollocReducer.DEFAULT_MIN_SUPPORT));
-    addOption("minLLR", "ml", "(Optional)The minimum Log Likelihood Ratio(Float)  Default is " + LLRReducer.DEFAULT_MIN_LLR, String
-        .valueOf(LLRReducer.DEFAULT_MIN_LLR));
+    addOption("minSupport", "s", "(Optional) Minimum Support. Default Value: "
+        + CollocReducer.DEFAULT_MIN_SUPPORT, String.valueOf(CollocReducer.DEFAULT_MIN_SUPPORT));
+    addOption("minLLR", "ml", "(Optional)The minimum Log Likelihood Ratio(Float)  Default is "
+        + LLRReducer.DEFAULT_MIN_LLR, String.valueOf(LLRReducer.DEFAULT_MIN_LLR));
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption("analyzerName", "a", "The class name of the analyzer to use for preprocessing", null);
 
@@ -150,7 +150,8 @@ public final class CollocDriver extends AbstractJob {
     }
 
     // parse input and extract collocations
-    long ngramCount = generateCollocations(input, output, getConf(), emitUnigrams, maxNGramSize, reduceTasks, minSupport);
+    long ngramCount =
+      generateCollocations(input, output, getConf(), emitUnigrams, maxNGramSize, reduceTasks, minSupport);
 
     // tally collocations and perform LLR calculation
     computeNGramsPruneByLLR(output, getConf(), ngramCount, emitUnigrams, minLLRValue, reduceTasks);
@@ -173,9 +174,6 @@ public final class CollocDriver extends AbstractJob {
    *          minimum threshold to prune ngrams
    * @param reduceTasks
    *          number of reducers used
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   public static void generateAllGrams(Path input,
                                       Path output,
@@ -183,7 +181,8 @@ public final class CollocDriver extends AbstractJob {
                                       int maxNGramSize,
                                       int minSupport,
                                       float minLLRValue,
-                                      int reduceTasks) throws IOException, InterruptedException, ClassNotFoundException {
+                                      int reduceTasks)
+    throws IOException, InterruptedException, ClassNotFoundException {
     // parse input and extract collocations
     long ngramCount = generateCollocations(input, output, baseConf, true, maxNGramSize, reduceTasks, minSupport);
 

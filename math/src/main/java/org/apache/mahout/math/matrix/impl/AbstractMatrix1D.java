@@ -43,7 +43,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    * @param absRank the absolute rank of the element.
    * @return the position.
    */
-  protected int _offset(int absRank) {
+  protected int offset(int absRank) {
     return absRank;
   }
 
@@ -124,7 +124,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    * @param rank the rank of the element.
    */
   protected int index(int rank) {
-    return _offset(_rank(rank));
+    return offset(_rank(rank));
   }
 
   /**

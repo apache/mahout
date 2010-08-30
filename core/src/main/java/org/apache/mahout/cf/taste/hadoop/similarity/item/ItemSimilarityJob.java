@@ -86,12 +86,12 @@ public final class ItemSimilarityJob extends AbstractJob {
 
     addInputOption();
     addOutputOption();
-    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use " +
-        "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')');
-    addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number " +
-        "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
-    addOption("maxCooccurrencesPerItem", "o", "try to cap the number of cooccurrences per item to this number " +
-        "(default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
+    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use "
+        + "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')');
+    addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number "
+        + "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
+    addOption("maxCooccurrencesPerItem", "o", "try to cap the number of cooccurrences per item to this number "
+        + "(default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
 
     Map<String,String> parsedArgs = parseArguments(args);
@@ -137,9 +137,9 @@ public final class ItemSimilarityJob extends AbstractJob {
                                   VarIntWritable.class,
                                   NullWritable.class,
                                   TextOutputFormat.class);
-        countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
-        countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
-        countUsers.waitForCompletion(true);
+      countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
+      countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
+      countUsers.waitForCompletion(true);
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -178,12 +178,12 @@ public final class ItemSimilarityJob extends AbstractJob {
     /* Once DistributedRowMatrix uses the hadoop 0.20 API, we should refactor this call to something like
      * new DistributedRowMatrix(...).rowSimilarity(...) */
     ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
-        "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
-        "-Dmapred.output.dir=" + similarityMatrixPath.toString(),
-        "--numberOfColumns", String.valueOf(numberOfUsers),
-        "--similarityClassname", similarityClassName,
-        "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem + 1),
-        "--tempDir", tempDirPath.toString() });
+      "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
+      "-Dmapred.output.dir=" + similarityMatrixPath.toString(),
+      "--numberOfColumns", String.valueOf(numberOfUsers),
+      "--similarityClassname", similarityClassName,
+      "--maxSimilaritiesPerRow", String.valueOf(maxSimilarItemsPerItem + 1),
+      "--tempDir", tempDirPath.toString() });
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job mostSimilarItems = prepareJob(similarityMatrixPath,

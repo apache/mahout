@@ -107,8 +107,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
       throw new IllegalStateException(ex);
     }
     log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
-             new Object[] { inputCategories.size(), all,
-        exactMatchOnly });
+             new Object[] {inputCategories.size(), all, exactMatchOnly});
   }
 
   private static String getDocument(String xml) {

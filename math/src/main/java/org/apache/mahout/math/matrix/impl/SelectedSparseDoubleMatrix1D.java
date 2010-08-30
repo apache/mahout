@@ -80,7 +80,7 @@ class SelectedSparseDoubleMatrix1D extends DoubleMatrix1D {
    * @return the position.
    */
   @Override
-  protected int _offset(int absRank) {
+  protected int offset(int absRank) {
     return offsets[absRank];
   }
 

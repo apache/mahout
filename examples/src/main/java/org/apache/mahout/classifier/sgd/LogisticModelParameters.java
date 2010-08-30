@@ -18,11 +18,26 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.Maps;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
@@ -39,14 +54,11 @@ public class LogisticModelParameters {
   private int numFeatures;
   private boolean useBias;
   private int maxTargetCategories;
-  private List<String> targetCategories = null;
+  private List<String> targetCategories;
   private double lambda;
   private double learningRate;
-  private transient CsvRecordFactory csv = null;
-  private OnlineLogisticRegression lr = null;
-
-  public LogisticModelParameters() {
-  }
+  private transient CsvRecordFactory csv;
+  private OnlineLogisticRegression lr;
 
   /**
    * Returns a CsvRecordFactory compatible with this logistic model.  The reason that this is tied
@@ -78,12 +90,14 @@ public class LogisticModelParameters {
       lr = new OnlineLogisticRegression(getMaxTargetCategories(), getNumFeatures(), new L1())
               .lambda(getLambda())
               .learningRate(getLearningRate())
-              .alpha(1 - 1e-3);
+              .alpha(1 - 1.0e-3);
     }
     return lr;
   }
 
-  public static void saveModel(Writer out, OnlineLogisticRegression model, List<String> targetCategories) throws IOException {
+  public static void saveModel(Writer out,
+                               OnlineLogisticRegression model,
+                               List<String> targetCategories) throws IOException {
     LogisticModelParameters x = new LogisticModelParameters();
     x.setTargetCategories(targetCategories);
     x.setLambda(model.getLambda());
@@ -134,7 +148,7 @@ public class LogisticModelParameters {
    * @throws IOException If there is an error opening or closing the file.
    */
   public static LogisticModelParameters loadFrom(File in) throws IOException {
-    FileReader input = new FileReader(in);
+    InputStreamReader input = new FileReader(in);
     LogisticModelParameters r = loadFrom(input);
     input.close();
     return r;
@@ -147,17 +161,17 @@ public class LogisticModelParameters {
    * @param predictorList The list of variable names.
    * @param typeList      The list of types in the format preferred by CsvRecordFactory.
    */
-  public void setTypeMap(List predictorList, List typeList) {
+  public void setTypeMap(List<String> predictorList, List<String> typeList) {
     typeMap = Maps.newHashMap();
-    if (typeList.size() == 0) {
+    if (typeList.isEmpty()) {
       throw new IllegalArgumentException("Must have at least one type specifier");
     }
-    Iterator iTypes = typeList.iterator();
+    Iterator<String> iTypes = typeList.iterator();
     String lastType = null;
     for (Object x : predictorList) {
       // type list can be short .. we just repeat last spec
       if (iTypes.hasNext()) {
-        lastType = iTypes.next().toString();
+        lastType = iTypes.next();
       }
       typeMap.put(x.toString(), lastType);
     }
@@ -234,7 +248,8 @@ public class LogisticModelParameters {
    * Tells GSON how to (de)serialize a Mahout matrix.  We assume on deserialization that
    * the matrix is dense.
    */
-  public static class MatrixTypeAdapter implements JsonDeserializer<Matrix>, JsonSerializer<Matrix>, InstanceCreator<Matrix> {
+  public static class MatrixTypeAdapter
+    implements JsonDeserializer<Matrix>, JsonSerializer<Matrix>, InstanceCreator<Matrix> {
     @Override
     public JsonElement serialize(Matrix m, Type type, JsonSerializationContext jsonSerializationContext) {
       JsonObject r = new JsonObject();
@@ -253,7 +268,7 @@ public class LogisticModelParameters {
     }
 
     @Override
-    public Matrix deserialize(JsonElement x, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public Matrix deserialize(JsonElement x, Type type, JsonDeserializationContext jsonDeserializationContext) {
       JsonObject data = x.getAsJsonObject();
       Matrix r = new DenseMatrix(data.get("rows").getAsInt(), data.get("cols").getAsInt());
       int i = 0;

@@ -29,23 +29,21 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.classifier.evaluation.Auc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 
-/**
- *
- */
 public class RunLogistic {
-  private static final Logger log = LoggerFactory.getLogger(RunLogistic.class);
+
   private static String inputFile;
   private static String modelFile;
-  private static boolean showAuc = false;
-  private static boolean showScores = false;
-  private static boolean showConfusion = false;
+  private static boolean showAuc;
+  private static boolean showScores;
+  private static boolean showConfusion;
+
+  private RunLogistic() {
+  }
 
   public static void main(String[] args) throws IOException {
     if (parseArgs(args)) {
@@ -82,15 +80,17 @@ public class RunLogistic {
       }
       if (showConfusion) {
         Matrix m = collector.confusion();
-        System.out.printf("confusion: [[%.1f, %.1f], [%.1f, %.1f]]\n", m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
+        System.out.printf("confusion: [[%.1f, %.1f], [%.1f, %.1f]]\n",
+            m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
         m = collector.entropy();
-        System.out.printf("entropy: [[%.1f, %.1f], [%.1f, %.1f]]\n", m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
+        System.out.printf("entropy: [[%.1f, %.1f], [%.1f, %.1f]]\n",
+            m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
       }
     }
   }
 
   private static boolean parseArgs(String[] args) {
-        DefaultOptionBuilder builder = new DefaultOptionBuilder();
+    DefaultOptionBuilder builder = new DefaultOptionBuilder();
 
     Option help = builder.withLongName("help").withDescription("print this list").create();
 
@@ -102,13 +102,13 @@ public class RunLogistic {
     Option scores = builder.withLongName("scores").withDescription("print scores").create();
 
     ArgumentBuilder argumentBuilder = new ArgumentBuilder();
-    Option inputFile = builder.withLongName("input")
+    Option inputFileOption = builder.withLongName("input")
             .withRequired(true)
             .withArgument(argumentBuilder.withName("input").withMaximum(1).create())
             .withDescription("where to get training data")
             .create();
 
-    Option modelFile = builder.withLongName("model")
+    Option modelFileOption = builder.withLongName("model")
             .withRequired(true)
             .withArgument(argumentBuilder.withName("model").withMaximum(1).create())
             .withDescription("where to get a model")
@@ -120,8 +120,8 @@ public class RunLogistic {
             .withOption(auc)
             .withOption(scores)
             .withOption(confusion)
-            .withOption(inputFile)
-            .withOption(modelFile)
+            .withOption(inputFileOption)
+            .withOption(modelFileOption)
             .create();
 
     Parser parser = new Parser();
@@ -129,18 +129,17 @@ public class RunLogistic {
     parser.setHelpTrigger("--help");
     parser.setGroup(normalArgs);
     parser.setHelpFormatter(new HelpFormatter(" ", "", " ", 130));
-    CommandLine cmdLine;
-    cmdLine = parser.parseAndHelp(args);
+    CommandLine cmdLine = parser.parseAndHelp(args);
 
     if (cmdLine == null) {
       return false;
     }
 
-    RunLogistic.inputFile = getStringArgument(cmdLine, inputFile);
-    RunLogistic.modelFile = getStringArgument(cmdLine, modelFile);
-    RunLogistic.showAuc = getBooleanArgument(cmdLine, auc);
-    RunLogistic.showScores = getBooleanArgument(cmdLine, scores);
-    RunLogistic.showConfusion = getBooleanArgument(cmdLine, confusion);
+    inputFile = getStringArgument(cmdLine, inputFileOption);
+    modelFile = getStringArgument(cmdLine, modelFileOption);
+    showAuc = getBooleanArgument(cmdLine, auc);
+    showScores = getBooleanArgument(cmdLine, scores);
+    showConfusion = getBooleanArgument(cmdLine, confusion);
 
     return true;
   }

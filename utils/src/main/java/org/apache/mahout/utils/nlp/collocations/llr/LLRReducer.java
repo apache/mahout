@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.nlp.collocations.llr;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
@@ -67,7 +66,7 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
   @Override
   protected void reduce(Gram ngram, Iterable<Gram> values, Context context) throws IOException, InterruptedException {
 
-    int[] gramFreq = { -1, -1 };
+    int[] gramFreq = {-1, -1};
 
     if (ngram.getType() == Gram.Type.UNIGRAM && emitUnigrams) {
       DoubleWritable dd = new DoubleWritable(ngram.getFrequency());

@@ -16,9 +16,12 @@ import org.apache.mahout.math.list.IntArrayList;
 /**
  * Conveniently computes a stable subsequence of elements from a given input sequence;
  * Picks (samples) exactly one random element from successive blocks of <tt>weight</tt> input elements each.
- * For example, if weight==2 (a block is 2 elements), and the input is 5*2=10 elements long, then picks 5 random elements from the 10 elements such that
- * one element is randomly picked from the first block, one element from the second block, ..., one element from the last block.
- * weight == 1.0 --> all elements are picked (sampled). weight == 10.0 --> Picks one random element from successive blocks of 10 elements each. Etc.
+ * For example, if weight==2 (a block is 2 elements), and the input is 5*2=10 elements long,
+ * then picks 5 random elements from the 10 elements such that
+ * one element is randomly picked from the first block, one element from the second block, ...,
+ * one element from the last block.
+ * weight == 1.0 --> all elements are picked (sampled). weight == 10.0 --> Picks one random
+ * element from successive blocks of 10 elements each. Etc.
  * The subsequence is guaranteed to be <i>stable</i>, i.e. elements never change position relative to each other.
  *
  */

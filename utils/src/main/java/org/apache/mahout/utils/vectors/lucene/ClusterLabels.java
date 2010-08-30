@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ClusterLabels {
 
-  class TermInfoClusterInOut implements Comparable<TermInfoClusterInOut> {
+  static class TermInfoClusterInOut implements Comparable<TermInfoClusterInOut> {
     private final String term;
 
     private final int inClusterDF;

@@ -24,7 +24,7 @@
     <rule ref="rulesets/basic.xml/BooleanInstantiation"/>
     <rule ref="rulesets/basic.xml/CollapsibleIfStatements"/>
     <rule ref="rulesets/basic.xml/DoubleCheckedLocking"/>
-    <rule ref="rulesets/basic.xml/EmptyCatchBlock"/>
+    <!--<rule ref="rulesets/basic.xml/EmptyCatchBlock"/>-->
     <rule ref="rulesets/basic.xml/EmptyFinallyBlock"/>
     <rule ref="rulesets/basic.xml/EmptyIfStmt"/>
     <rule ref="rulesets/basic.xml/EmptyStatementNotInLoop"/>
@@ -52,7 +52,7 @@
     <!--<rule ref="rulesets/clone.xml/CloneThrowsCloneNotSupportedException"/>-->
     <!--<rule ref="rulesets/clone.xml/ProperCloneImplementation"/>-->
 
-    <rule ref="rulesets/codesize.xml/CyclomaticComplexity"/>
+    <!--<rule ref="rulesets/codesize.xml/CyclomaticComplexity"/>-->
     <rule ref="rulesets/codesize.xml/ExcessiveClassLength"/>
     <rule ref="rulesets/codesize.xml/ExcessiveMethodLength"/>
     <rule ref="rulesets/codesize.xml/ExcessiveParameterList"/>
@@ -78,7 +78,7 @@
     <!--<rule ref="rulesets/design.xml/AbstractClassWithoutAbstractMethod"/>-->
     <!--<rule ref="rulesets/design.xml/AccessorClassGeneration"/>-->
     <!--<rule ref="rulesets/design.xml/AssignmentToNonFinalStatic"/>-->
-    <rule ref="rulesets/design.xml/AvoidDeeplyNestedIfStmts"/>
+    <!--<rule ref="rulesets/design.xml/AvoidDeeplyNestedIfStmts"/>-->
     <!--<rule ref="rulesets/design.xml/AvoidInstanceofChecksInCatchClause"/>-->
     <rule ref="rulesets/design.xml/AvoidProtectedFieldInFinalClass"/>
     <!--<rule ref="rulesets/design.xml/AvoidReassigningParameters"/>-->
@@ -153,8 +153,8 @@
     <!--<rule ref="rulesets/naming.xml/MethodWithSameNameAsEnclosingClass"/>-->
     <!--<rule ref="rulesets/naming.xml/SuspiciousHashcodeMethodName"/>-->
     <!--<rule ref="rulesets/naming.xml/SuspiciousConstantFieldName"/>-->
-    <rule ref="rulesets/naming.xml/AvoidFieldNameMatchingTypeName"/>
-    <rule ref="rulesets/naming.xml/AvoidFieldNameMatchingMethodName"/>
+    <!--<rule ref="rulesets/naming.xml/AvoidFieldNameMatchingTypeName"/>-->
+    <!--<rule ref="rulesets/naming.xml/AvoidFieldNameMatchingMethodName"/>-->
     <!-- <rule ref="rulesets/naming.xml/AvoidNonConstructorMethodsWithClassName"/> -->
     <rule ref="rulesets/naming.xml/NoPackage"/>
     <rule ref="rulesets/naming.xml/PackageCase"/>
@@ -163,7 +163,7 @@
     <!--<rule ref="rulesets/optimizations.xml/MethodArgumentCouldBeFinal"/>-->
     <!--<rule ref="rulesets/optimizations.xml/AvoidInstantiatingObjectsInLoops"/>-->
     <!--<rule ref="rulesets/optimizations.xml/UseArrayListInsteadOfVector"/>-->
-    <rule ref="rulesets/optimizations.xml/SimplifyStartsWith"/>
+    <!--<rule ref="rulesets/optimizations.xml/SimplifyStartsWith"/>-->
     <rule ref="rulesets/optimizations.xml/UseStringBufferForStringAppends"/>
 
     <!--<rule ref="rulesets/strictexception.xml/AvoidCatchingThrowable"/>-->
@@ -173,7 +173,7 @@
     <!--<rule ref="rulesets/strictexception.xml/AvoidThrowingRawExceptionTypes"/>-->
     <!--<rule ref="rulesets/strictexception.xml/AvoidThrowingNullPointerException"/>-->
 
-    <rule ref="rulesets/strings.xml/AvoidDuplicateLiterals"/>
+    <!--<rule ref="rulesets/strings.xml/AvoidDuplicateLiterals"/>-->
     <rule ref="rulesets/strings.xml/StringInstantiation"/>
     <rule ref="rulesets/strings.xml/StringToString"/>
     <!-- <rule ref="rulesets/strings.xml/AvoidConcatenatingNonLiteralsInStringBuffer"/>-->

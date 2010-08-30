@@ -66,7 +66,7 @@ public final class SequenceFileDumper {
     withDescription("Print out help").withShortName("h").create();
     
     Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt)
-    .withOption(substringOpt).withOption(countOpt).withOption(helpOpt).create();
+      .withOption(substringOpt).withOption(countOpt).withOption(helpOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -104,18 +104,18 @@ public final class SequenceFileDumper {
         .append(String.valueOf(value.getClass())).append('\n');
         writer.flush();
         long count = 0;
-        if (!countOnly) {
+        if (countOnly) {
+          while (reader.next(key, value)) {
+            count++;
+          }
+          writer.append("Count: ").append(String.valueOf(count)).append('\n');
+        } else {
           while (reader.next(key, value)) {
             writer.append("Key: ").append(String.valueOf(key));
             String str = value.toString();
             writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
             writer.write('\n');
             writer.flush();
-            count++;
-          }
-          writer.append("Count: ").append(String.valueOf(count)).append('\n');
-        } else {
-          while (reader.next(key, value)) {
             count++;
           }
           writer.append("Count: ").append(String.valueOf(count)).append('\n');

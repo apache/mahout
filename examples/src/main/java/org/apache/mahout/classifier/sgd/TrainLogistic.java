@@ -226,8 +226,7 @@ public class TrainLogistic {
     parser.setHelpTrigger("--help");
     parser.setGroup(normalArgs);
     parser.setHelpFormatter(new HelpFormatter(" ", "", " ", 130));
-    CommandLine cmdLine;
-    cmdLine = parser.parseAndHelp(args);
+    CommandLine cmdLine = parser.parseAndHelp(args);
 
     if (cmdLine == null) {
       return false;

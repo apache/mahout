@@ -35,6 +35,7 @@ import java.util.Date;
  * uses a legacy method to initialize the PRNG state. <ul>
  */
 public class MersenneTwisterTest {
+
   /**
    * Convert an unsigned int stored in a long to a double in a fashion compatible with the C
    * reference implementation
@@ -42,12 +43,12 @@ public class MersenneTwisterTest {
    * @param y The long value to convert
    * @return A double in the range [0..1)
    */
-  private double toDouble(long y) {
+  private static double toDouble(long y) {
     return (double) (y & 0xffffffffL) * 2.3283064365386963e-10;
   }
 
   @Test
-  public void test1000_1() {
+  public void test10001() {
     MersenneTwister r = new MersenneTwister();
     r.setReferenceSeed(4357);
 
@@ -62,7 +63,7 @@ public class MersenneTwisterTest {
     r.setReferenceSeed(4357);
     i = 0;
     for (Double x : ref1) {
-      Assert.assertEquals("t-ref-double-" + i, x, toDouble(r.nextInt()), 1e-7);
+      Assert.assertEquals("t-ref-double-" + i, x, toDouble(r.nextInt()), 1.0e-7);
       i++;
     }
   }
@@ -72,7 +73,7 @@ public class MersenneTwisterTest {
     MersenneTwister r = new MersenneTwister(42);
     int i = 0;
     for (double x : reference3) {
-      Assert.assertEquals("t-regression-"+i, x, r.nextDouble(), 1e-7);
+      Assert.assertEquals("t-regression-"+i, x, r.nextDouble(), 1.0e-7);
       i++;
     }
 
@@ -108,7 +109,7 @@ public class MersenneTwisterTest {
 
   // output of first 1000 values of nextInt() as determined by a slight modification of
   // the reference C implementation
-  private long[] reference1 = new long[]{
+  private final long[] reference1 = {
           -1427748157, 1585203162, -1181843167, -1341066457, -1831172428,
           -812701500, 1164297043, -696771727, 589972756, -182733429,
           767115311, -201891849, 1322433849, -937881972, -994918828,
@@ -313,7 +314,7 @@ public class MersenneTwisterTest {
 
   // the first 1000 values output by the reference implementation
   // data from http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/VERSIONS/C-LANG/991029/mt19937-2.out
-  private double[] ref1 = new double[]{
+  private final double[] ref1 = {
           0.66757648, 0.36908387, 0.72483069, 0.68775863, 0.57364694,
           0.81077819, 0.27108403, 0.83777019, 0.13736374, 0.95745406,
           0.17860795, 0.95299339, 0.30790312, 0.78163234, 0.76835241,
@@ -516,7 +517,7 @@ public class MersenneTwisterTest {
           0.44807063, 0.06424586, 0.75766097, 0.40567560, 0.23996701
   };
 
-  private double[] reference3 = new double[]{
+  private final double[] reference3 = {
           0.09575212, 0.03326592, 0.10697744, 0.37992924, 0.13844205,
           0.07550350, 0.89109388, 0.50151205, 0.79222822, 0.41823034,
           0.84440729, 0.66568635, 0.87830555, 0.17024311, 0.43956848,

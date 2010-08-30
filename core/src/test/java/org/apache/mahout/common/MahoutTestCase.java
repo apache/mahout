@@ -77,10 +77,8 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     Path testTempDirPath = getTestTempDirPath();
     Path tempFileOrDir = fs.makeQualified(new Path(testTempDirPath, name));
     fs.deleteOnExit(tempFileOrDir);
-    if (dir) {
-      if (!fs.mkdirs(tempFileOrDir)) {
-        throw new IOException("Could not create " + tempFileOrDir);
-      }
+    if (dir && !fs.mkdirs(tempFileOrDir)) {
+      throw new IOException("Could not create " + tempFileOrDir);
     }
     return tempFileOrDir;
   }
@@ -103,7 +101,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
   /**
    * find a declared field in a class or one of it's super classes
    */
-  private Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
+  private static Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
     if (Object.class.equals(inClass)) {
       throw new NoSuchFieldException();
     }

@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math.stats;
 
-import org.apache.mahout.math.jet.random.Gamma;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,13 +26,13 @@ public class OnlineSummarizerTest {
   @Test
   public void testCount() {
     OnlineSummarizer x = new OnlineSummarizer();
-    Assert.assertEquals(0, x.count());
+    Assert.assertEquals(0, x.getCount());
     x.add(1);
-    Assert.assertEquals(1, x.count());
+    Assert.assertEquals(1, x.getCount());
 
     for (int i = 2; i < 110; i++) {
       x.add(i);
-      Assert.assertEquals(i, x.count());
+      Assert.assertEquals(i, x.getCount());
     }
   }
 
@@ -80,17 +78,17 @@ public class OnlineSummarizerTest {
 
   private static void check(OnlineSummarizer x, double... values) {
     for (int i = 0; i < 5; i++) {
-      checkRange("quartile " + i, x.quartile(i), values[2 * i], values[2 * i + 1]);
+      checkRange("quartile " + i, x.getQuartile(i), values[2 * i], values[2 * i + 1]);
     }
-    Assert.assertEquals(x.quartile(2), x.median(), 0);
+    Assert.assertEquals(x.getQuartile(2), x.getMedian(), 0);
 
-    checkRange("mean", x.mean(), values[10], values[11]);
-    checkRange("sd", x.sd(), values[12], values[13]);
+    checkRange("mean", x.getMean(), values[10], values[11]);
+    checkRange("sd", x.getSD(), values[12], values[13]);
   }
 
   private static void checkRange(String msg, double v, double low, double high) {
     if (v < low || v > high) {
-      Assert.fail("Wanted " + msg + " to be in range [" + low + "," + high + "] but got " + v);
+      Assert.fail("Wanted " + msg + " to be in range [" + low + ',' + high + "] but got " + v);
     }
   }
 
@@ -112,6 +110,7 @@ public class OnlineSummarizerTest {
     return x;
   }
 
+  /*
   private static OnlineSummarizer gamma(int n, int seed) {
     OnlineSummarizer x = new OnlineSummarizer();
     Gamma g = new Gamma(0.01, 100, new MersenneTwister(seed));
@@ -120,6 +119,8 @@ public class OnlineSummarizerTest {
     }
     return x;
   }
+   */
+
 }
 
 

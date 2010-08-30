@@ -30,6 +30,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -58,14 +59,15 @@ public class DisplayClustering extends Frame {
 
   protected static final int SIZE = 8; // screen size in inches
 
-  private static final List<Vector> SAMPLE_PARAMS = new ArrayList<Vector>();
+  private static final Collection<Vector> SAMPLE_PARAMS = new ArrayList<Vector>();
 
   protected static final List<VectorWritable> SAMPLE_DATA = new ArrayList<VectorWritable>();
 
   protected static final List<List<Cluster>> CLUSTERS = new ArrayList<List<Cluster>>();
 
-  protected static final Color[] COLORS = { Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta,
-      Color.lightGray };
+  protected static final Color[] COLORS = {
+      Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta, Color.lightGray
+  };
 
   protected static final double T1 = 3.0;
 
@@ -166,7 +168,7 @@ public class DisplayClustering extends Frame {
    *          a Vector of rectangle dimensions
    */
   protected static void plotRectangle(Graphics2D g2, Vector v, Vector dv) {
-    double[] flip = { 1, -1 };
+    double[] flip = {1, -1};
     Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
     int h = SIZE / 2;
@@ -186,7 +188,7 @@ public class DisplayClustering extends Frame {
    *          a Vector of ellipse dimensions
    */
   protected static void plotEllipse(Graphics2D g2, Vector v, Vector dv) {
-    double[] flip = { 1, -1 };
+    double[] flip = {1, -1};
     Vector v2 = v.times(new DenseVector(flip));
     v2 = v2.minus(dv.divide(2));
     int h = SIZE / 2;
@@ -220,7 +222,7 @@ public class DisplayClustering extends Frame {
    *          double standard deviation of the samples
    */
   protected static void generateSamples(int num, double mx, double my, double sd) {
-    double[] params = { mx, my, sd, sd };
+    double[] params = {mx, my, sd, sd};
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] { num, mx, my, sd });
     for (int i = 0; i < num; i++) {
@@ -242,7 +244,8 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  protected static List<Cluster> readClusters(Path clustersIn) throws IOException, InstantiationException, IllegalAccessException {
+  protected static List<Cluster> readClusters(Path clustersIn)
+    throws IOException, InstantiationException, IllegalAccessException {
     List<Cluster> clusters = new ArrayList<Cluster>();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
@@ -254,8 +257,12 @@ public class DisplayClustering extends Frame {
         Writable value = (Writable) reader.getValueClass().newInstance();
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
-          log.info("Reading Cluster:" + cluster.getId() + " center:" + AbstractCluster.formatVector(cluster.getCenter(), null)
-            + " numPoints:" + cluster.getNumPoints() + " radius:" + AbstractCluster.formatVector(cluster.getRadius(), null));
+          log.info("Reading Cluster:{} center:{} numPoints:{} radius:{}", new Object[] {
+              cluster.getId(),
+              AbstractCluster.formatVector(cluster.getCenter(), null),
+              cluster.getNumPoints(),
+              AbstractCluster.formatVector(cluster.getRadius(), null)
+          });
           clusters.add(cluster);
           value = (Writable) reader.getValueClass().newInstance();
         }
@@ -291,7 +298,7 @@ public class DisplayClustering extends Frame {
    *          double y-value standard deviation of the samples
    */
   protected static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
-    double[] params = { mx, my, sdx, sdy };
+    double[] params = {mx, my, sdx, sdy};
     SAMPLE_PARAMS.add(new DenseVector(params));
     log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] { num, mx, my, sdx, sdy });
     for (int i = 0; i < num; i++) {

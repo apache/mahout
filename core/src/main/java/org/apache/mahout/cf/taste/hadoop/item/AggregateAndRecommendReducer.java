@@ -80,24 +80,24 @@ public final class AggregateAndRecommendReducer extends
 
     FSDataInputStream in = null;
     try {
-        String itemFilePathString = jobConf.get(ITEMS_FILE);        
-        if (itemFilePathString == null) {
-          itemsToRecommendFor = null;
-        } else {
-          Path unqualifiedItemsFilePath = new Path(itemFilePathString);
-          FileSystem fs = FileSystem.get(unqualifiedItemsFilePath.toUri(), jobConf);
-          itemsToRecommendFor = new FastIDSet();
-          Path itemsFilePath = unqualifiedItemsFilePath.makeQualified(fs);
-          in = fs.open(itemsFilePath);
-          for (String line : new FileLineIterable(in)) {
-        	  itemsToRecommendFor.add(Long.parseLong(line));
-          }
+      String itemFilePathString = jobConf.get(ITEMS_FILE);
+      if (itemFilePathString == null) {
+        itemsToRecommendFor = null;
+      } else {
+        Path unqualifiedItemsFilePath = new Path(itemFilePathString);
+        FileSystem fs = FileSystem.get(unqualifiedItemsFilePath.toUri(), jobConf);
+        itemsToRecommendFor = new FastIDSet();
+        Path itemsFilePath = unqualifiedItemsFilePath.makeQualified(fs);
+        in = fs.open(itemsFilePath);
+        for (String line : new FileLineIterable(in)) {
+          itemsToRecommendFor.add(Long.parseLong(line));
         }
-      } catch (IOException ioe) {
-        throw new IllegalStateException(ioe);
-      } finally {
-        IOUtils.closeStream(in);
       }
+    } catch (IOException ioe) {
+      throw new IllegalStateException(ioe);
+    } finally {
+      IOUtils.closeStream(in);
+    }
   }
 
   private static final UnaryFunction ABSOLUTE_VALUES = new UnaryFunction() {

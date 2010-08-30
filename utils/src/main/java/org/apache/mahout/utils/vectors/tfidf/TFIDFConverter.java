@@ -112,9 +112,6 @@ public final class TFIDFConverter {
    *          The number of reducers to spawn. This also affects the possible parallelism since each reducer
    *          will typically produce a single output file containing tf-idf vectors for a subset of the
    *          documents in the corpus.
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   public static void processTfIdf(Path input,
                                   Path output,
@@ -184,10 +181,6 @@ public final class TFIDFConverter {
   /**
    * Read the document frequency List which is built at the end of the DF Count Job. This will use constant
    * memory and will run at the speed of your disk read
-   * 
-   * @param featureCountPath
-   * @param dictionaryPathBase
-   * @throws IOException
    */
   private static Pair<Long[], List<Path>> createDictionaryChunks(Path featureCountPath,
                                                                  Path dictionaryPathBase,
@@ -205,7 +198,8 @@ public final class TFIDFConverter {
     int chunkIndex = 0;
     Path chunkPath = new Path(dictionaryPathBase, FREQUENCY_FILE + chunkIndex);
     chunkPaths.add(chunkPath);
-    SequenceFile.Writer freqWriter = new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
+    SequenceFile.Writer freqWriter =
+      new SequenceFile.Writer(fs, conf, chunkPath, IntWritable.class, LongWritable.class);
 
     long currentChunkSize = 0;
     long featureCount = 0;
@@ -239,7 +233,7 @@ public final class TFIDFConverter {
     }
     featureCount++;
     freqWriter.close();
-    Long[] counts = { featureCount, vectorCount };
+    Long[] counts = {featureCount, vectorCount};
     return new Pair<Long[], List<Path>>(counts, chunkPaths);
   }
 
@@ -262,9 +256,6 @@ public final class TFIDFConverter {
    *          location of the chunk of features and the id's
    * @param output
    *          output directory were the partial vectors have to be created
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   private static void makePartialVectors(Path input,
                                          Long featureCount,
@@ -273,7 +264,8 @@ public final class TFIDFConverter {
                                          int maxDFPercent,
                                          Path dictionaryFilePath,
                                          Path output,
-                                         boolean sequentialAccess) throws IOException, InterruptedException, ClassNotFoundException {
+                                         boolean sequentialAccess)
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     Configuration conf = new Configuration();
     // this conf parameter needs to be set enable serialisation of conf values
@@ -284,10 +276,11 @@ public final class TFIDFConverter {
     conf.setInt(MIN_DF, minDf);
     conf.setInt(MAX_DF_PERCENTAGE, maxDFPercent);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
-    DistributedCache.setCacheFiles(new URI[] { dictionaryFilePath.toUri() }, conf);
+    DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
 
     Job job = new Job(conf);
-    job.setJobName(": MakePartialVectors: input-folder: " + input + ", dictionary-file: " + dictionaryFilePath.toString());
+    job.setJobName(": MakePartialVectors: input-folder: " + input + ", dictionary-file: "
+        + dictionaryFilePath.toString());
     job.setJarByClass(TFIDFConverter.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(VectorWritable.class);
@@ -308,10 +301,9 @@ public final class TFIDFConverter {
   /**
    * Count the document frequencies of features in parallel using Map/Reduce. The input documents have to be
    * in {@link SequenceFile} format
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  private static void startDFCounting(Path input, Path output) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void startDFCounting(Path input, Path output)
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     Configuration conf = new Configuration();
     // this conf parameter needs to be set enable serialisation of conf values

@@ -43,7 +43,7 @@ public class DummyCandidate {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof DummyCandidate)) {
+    if (!(obj instanceof DummyCandidate)) {
       return false;
     }
 

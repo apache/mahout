@@ -53,8 +53,7 @@ public final class Job extends FuzzyKMeansDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 10, 1, (float) 2, 0.5, true);
-
+      job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 10, 1, (float) 2, 0.5);
     }
   }
 
@@ -66,7 +65,8 @@ public final class Job extends FuzzyKMeansDriver {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected"
+            + " and written out to this path first")
         .create());
     addOption(DefaultOptionCreator.numClustersOption()
         .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -112,7 +112,7 @@ public final class Job extends FuzzyKMeansDriver {
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    job(input, output, measure, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta, runClustering);
+    job(input, output, measure, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta);
     return 0;
   }
 
@@ -128,7 +128,7 @@ public final class Job extends FuzzyKMeansDriver {
    *          the String denoting the input directory path
    * @param output
    *          the String denoting the output directory path
-   * @param measureClass
+   * @param t1
    *          the canopy T1 threshold
    * @param t2
    *          the canopy T2 threshold
@@ -140,20 +140,17 @@ public final class Job extends FuzzyKMeansDriver {
    *          the float "m" fuzziness coefficient
    * @param convergenceDelta
    *          the double convergence criteria for iterations
-   * @param runClustering
-   *          the int maximum number of iterations
    */
-  private void job(Path input,
-                   Path output,
-                   DistanceMeasure measure,
-                   double t1,
-                   double t2,
-                   int maxIterations,
-                   int numReducerTasks,
-                   float fuzziness,
-                   double convergenceDelta,
-                   boolean runClustering) throws IOException, InstantiationException, IllegalAccessException, InterruptedException,
-      ClassNotFoundException {
+  private static void job(Path input,
+                          Path output,
+                          DistanceMeasure measure,
+                          double t1,
+                          double t2,
+                          int maxIterations,
+                          int numReducerTasks,
+                          float fuzziness,
+                          double convergenceDelta)
+    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
 
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");

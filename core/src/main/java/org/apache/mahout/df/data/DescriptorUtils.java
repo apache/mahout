@@ -19,7 +19,6 @@ package org.apache.mahout.df.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 

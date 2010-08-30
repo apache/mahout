@@ -36,7 +36,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapreduce.*;
+import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -67,10 +72,6 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Note that because of how Hadoop parses arguments, all "-D" arguments must appear before all other
  * arguments.</p>
- */
-/**
- * @author jeff
- *
  */
 public abstract class AbstractJob extends Configured implements Tool {
 
@@ -321,7 +322,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    *   specified or outputOption is present and neither <code>--output</code> 
    *   nor <code>-Dmapred.output.dir</code> are specified.
    */
-  protected void parseDirectories(CommandLine cmdLine) throws IllegalArgumentException {
+  protected void parseDirectories(CommandLine cmdLine) {
 
     Configuration conf = getConf();
 
@@ -340,13 +341,13 @@ public abstract class AbstractJob extends Configured implements Tool {
     }
 
     if (inputOption != null && inputPath == null) {
-      throw new IllegalArgumentException("No input specified: " + inputOption.getPreferredName() + " or -Dmapred.input.dir "
-          + "must be provided to specify input directory");
+      throw new IllegalArgumentException("No input specified: " + inputOption.getPreferredName()
+          + " or -Dmapred.input.dir must be provided to specify input directory");
     }
 
     if (outputOption != null && outputPath == null) {
-      throw new IllegalArgumentException("No output specified: " + outputOption.getPreferredName() + " or -Dmapred.output.dir "
-          + "must be provided to specify output directory");
+      throw new IllegalArgumentException("No output specified: " + outputOption.getPreferredName()
+          + " or -Dmapred.output.dir must be provided to specify output directory");
     }
   }
 

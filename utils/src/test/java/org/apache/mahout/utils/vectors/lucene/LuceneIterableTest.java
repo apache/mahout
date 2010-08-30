@@ -28,7 +28,6 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.NamedVector;
-import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;

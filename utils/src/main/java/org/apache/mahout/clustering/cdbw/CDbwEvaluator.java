@@ -85,7 +85,7 @@ public class CDbwEvaluator {
     }
   }
 
-  public double CDbw() {
+  public double getCDbw() {
     return intraClusterDensity() * separation();
   }
 

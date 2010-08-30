@@ -46,7 +46,7 @@ public class PartialBuilderTest extends MahoutTestCase {
   private static final int NUM_TREES = 32;
 
   /** instances per partition */
-  private static final int numInstances = 20;
+  private static final int NUM_INSTANCES = 20;
   
   public void testProcessOutput() throws Exception {
     Configuration conf = new Configuration();
@@ -130,13 +130,13 @@ public class PartialBuilderTest extends MahoutTestCase {
         Node tree = new Leaf(rng.nextInt(100));
 
         keys[index] = new TreeID(partition, treeId);
-        values[index] = new MapredOutput(tree, nextIntArray(rng, numInstances));
+        values[index] = new MapredOutput(tree, nextIntArray(rng, NUM_INSTANCES));
 
         index++;
       }
       
       firstIds[p] = firstId;
-      firstId += numInstances;
+      firstId += NUM_INSTANCES;
     }
 
   }
@@ -210,13 +210,13 @@ public class PartialBuilderTest extends MahoutTestCase {
 
     @Override
     public void prediction(int treeId, int instanceId, int prediction) {
-      int partition = instanceId / numInstances;
+      int partition = instanceId / NUM_INSTANCES;
 
       TreeID key = new TreeID(partition, treeId);
       int index = ArrayUtils.indexOf(keys, key);
       assertTrue("key not found", index >= 0);
 
-      assertEquals(values[index].getPredictions()[instanceId % numInstances],
+      assertEquals(values[index].getPredictions()[instanceId % NUM_INSTANCES],
           prediction);
     }
 

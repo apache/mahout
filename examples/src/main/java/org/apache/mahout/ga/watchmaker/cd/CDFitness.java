@@ -86,7 +86,7 @@ public class CDFitness implements Writable {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof CDFitness)) {
+    if (!(obj instanceof CDFitness)) {
       return false;
     }
     

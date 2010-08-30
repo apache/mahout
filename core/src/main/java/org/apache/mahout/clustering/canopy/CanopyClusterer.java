@@ -34,10 +34,6 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jeff
- *
- */
 public class CanopyClusterer {
 
   private static final Logger log = LoggerFactory.getLogger(CanopyClusterer.class);

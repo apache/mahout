@@ -133,7 +133,7 @@ public final class CDbwDriver extends AbstractJob {
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
     // now print out the Results
-    System.out.println("CDbw = " + evaluator.CDbw());
+    System.out.println("CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
     System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
     System.out.println("Separation = " + evaluator.separation());

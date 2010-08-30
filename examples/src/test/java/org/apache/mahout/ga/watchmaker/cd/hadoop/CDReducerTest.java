@@ -33,7 +33,7 @@ import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 
 public class CDReducerTest extends MahoutTestCase {
 
-  private static final int nbevals = 100;
+  private static final int NUM_EVALS = 100;
 
   private List<CDFitness> evaluations;
 
@@ -49,7 +49,7 @@ public class CDReducerTest extends MahoutTestCase {
     int fp = 0;
     int tn = 0;
     int fn = 0;
-    for (int index = 0; index < nbevals; index++) {
+    for (int index = 0; index < NUM_EVALS; index++) {
       CDFitness fitness = new CDFitness(rng.nextInt(100), rng.nextInt(100), rng.nextInt(100), rng.nextInt(100));
       tp += fitness.getTp();
       fp += fitness.getFp();

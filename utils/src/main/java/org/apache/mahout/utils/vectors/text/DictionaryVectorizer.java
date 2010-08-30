@@ -110,9 +110,6 @@ public final class DictionaryVectorizer {
    *          available to you per node. Say, you have 2 cores and around 1GB extra memory to spare we
    *          recommend you use a split size of around 400-500MB so that two simultaneous reducers can create
    *          partial vectors without thrashing the system due to increased swapping
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   public static void createTermFrequencyVectors(Path input,
                                                 Path output,
@@ -122,7 +119,8 @@ public final class DictionaryVectorizer {
                                                 float minLLRValue,
                                                 int numReducers,
                                                 int chunkSizeInMegabytes,
-                                                boolean sequentialAccess) throws IOException, InterruptedException, ClassNotFoundException {
+                                                boolean sequentialAccess)
+    throws IOException, InterruptedException, ClassNotFoundException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
@@ -138,12 +136,12 @@ public final class DictionaryVectorizer {
     List<Path> dictionaryChunks;
     if (maxNGramSize == 1) {
       startWordCounting(input, dictionaryJobPath, minSupport);
-      dictionaryChunks = createDictionaryChunks(minSupport, dictionaryJobPath, output,
+      dictionaryChunks = createDictionaryChunks(dictionaryJobPath, output,
         chunkSizeInMegabytes, new LongWritable(), maxTermDimension);
     } else {
       CollocDriver.generateAllGrams(input, dictionaryJobPath, baseConf, maxNGramSize,
         minSupport, minLLRValue, numReducers);
-      dictionaryChunks = createDictionaryChunks(minSupport, new Path(
+      dictionaryChunks = createDictionaryChunks(new Path(
           new Path(output, DICTIONARY_JOB_FOLDER), CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
         chunkSizeInMegabytes, new DoubleWritable(), maxTermDimension);
     }
@@ -176,13 +174,11 @@ public final class DictionaryVectorizer {
    * Read the feature frequency List which is built at the end of the Word Count Job and assign ids to them.
    * This will use constant memory and will run at the speed of your disk read
    * 
-   * @param minSupport
    * @param wordCountPath
    * @param dictionaryPathBase
    * @throws IOException
    */
-  private static List<Path> createDictionaryChunks(int minSupport,
-                                                   Path wordCountPath,
+  private static List<Path> createDictionaryChunks(Path wordCountPath,
                                                    Path dictionaryPathBase,
                                                    int chunkSizeInMegabytes,
                                                    Writable value,

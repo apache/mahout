@@ -31,11 +31,11 @@ public class LUDecomposition implements java.io.Serializable {
    * Constructs and returns a new LU Decomposition object; The decomposed matrices can be retrieved via instance methods
    * of the returned decomposition object.
    *
-   * @param A Rectangular matrix
+   * @param a Rectangular matrix
    */
-  public LUDecomposition(DoubleMatrix2D A) {
+  public LUDecomposition(DoubleMatrix2D a) {
     quick = new LUDecompositionQuick(0); // zero tolerance for compatibility with Jama
-    quick.decompose(A.copy());
+    quick.decompose(a.copy());
   }
 
   /**
@@ -52,9 +52,11 @@ public class LUDecomposition implements java.io.Serializable {
    *
    * @return (double) piv
    */
+  /*
   private double[] getDoublePivot() {
     return quick.getDoublePivot();
   }
+   */
 
   /**
    * Returns the lower triangular factor, <tt>L</tt>.
@@ -95,17 +97,17 @@ public class LUDecomposition implements java.io.Serializable {
   /**
    * Solves <tt>A*X = B</tt>.
    *
-   * @param B A matrix with as many rows as <tt>A</tt> and any number of columns.
+   * @param b A matrix with as many rows as <tt>A</tt> and any number of columns.
    * @return <tt>X</tt> so that <tt>L*U*X = B(piv,:)</tt>.
    * @throws IllegalArgumentException if </tt>B.rows() != A.rows()</tt>.
    * @throws IllegalArgumentException if A is singular, that is, if <tt>!this.isNonsingular()</tt>.
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
 
-  public DoubleMatrix2D solve(DoubleMatrix2D B) {
-    DoubleMatrix2D X = B.copy();
-    quick.solve(X);
-    return X;
+  public DoubleMatrix2D solve(DoubleMatrix2D b) {
+    DoubleMatrix2D x = b.copy();
+    quick.solve(x);
+    return x;
   }
 
   /**

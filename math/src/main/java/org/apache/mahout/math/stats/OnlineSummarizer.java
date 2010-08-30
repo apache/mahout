@@ -39,7 +39,8 @@ import org.apache.mahout.math.list.DoubleArrayList;
  * http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.1580
  */
 public class OnlineSummarizer {
-  boolean sorted = true;
+
+  private boolean sorted = true;
 
   // the first several samples are kept so we can boot-strap our estimates cleanly
   private DoubleArrayList starter = new DoubleArrayList(100);
@@ -67,11 +68,11 @@ public class OnlineSummarizer {
       starter.add(sample);
     } else if (n == 100) {
       starter.add(sample);
-      q[0] = min();
-      q[1] = quartile(1);
-      q[2] = quartile(2);
-      q[3] = quartile(3);
-      q[4] = max();
+      q[0] = getMin();
+      q[1] = getQuartile(1);
+      q[2] = getQuartile(2);
+      q[3] = getQuartile(3);
+      q[4] = getMax();
       starter = null;
     } else {
       q[0] = Math.min(sample, q[0]);
@@ -92,19 +93,19 @@ public class OnlineSummarizer {
     }
   }
 
-  public int count() {
+  public int getCount() {
     return n;
   }
 
-  public double mean() {
+  public double getMean() {
     return mean;
   }
 
-  public double sd() {
+  public double getSD() {
     return Math.sqrt(variance);
   }
 
-  public double min() {
+  public double getMin() {
     sort();
     if (n == 0) {
       throw new IllegalArgumentException("Must have at least one sample to estimate minimum value");
@@ -119,7 +120,7 @@ public class OnlineSummarizer {
     }
   }
 
-  public double max() {
+  public double getMax() {
     sort();
     if (n == 0) {
       throw new IllegalArgumentException("Must have at least one sample to estimate maximum value");
@@ -127,11 +128,11 @@ public class OnlineSummarizer {
     return n <= 100 ? starter.get(99) : q[4];
   }
 
-  public double quartile(int i) {
+  public double getQuartile(int i) {
     sort();
     switch (i) {
       case 0:
-        return min();
+        return getMin();
       case 1:
       case 2:
       case 3:
@@ -146,13 +147,13 @@ public class OnlineSummarizer {
           return starter.get(k) * (1 - u) + starter.get(k + 1) * u;
         }
       case 4:
-        return max();
+        return getMax();
       default:
         throw new IllegalArgumentException("Quartile number must be in the range [0..4] not " + i);
     }
   }
 
-  public double median() {
-    return quartile(2);
+  public double getMedian() {
+    return getQuartile(2);
   }
 }

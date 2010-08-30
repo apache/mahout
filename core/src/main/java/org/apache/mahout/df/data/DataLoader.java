@@ -262,9 +262,11 @@ public final class DataLoader {
    * @param values
    *          used to convert CATEGORICAL attributes to Integer
    */
+  /*
   private static Data constructData(Attribute[] attrs, List<Instance> vectors, List<String>[] values) {
     Dataset dataset = new Dataset(attrs, values, vectors.size());
     
     return new Data(dataset, vectors);
   }
+   */
 }

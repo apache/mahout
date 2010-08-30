@@ -90,7 +90,8 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
 
     sortAscendingByLevel(fullBuffers);
 
-    // if there is only one buffer at the lowest level, then increase its level so that there are at least two at the lowest level.
+    // if there is only one buffer at the lowest level, then increase its level
+    // so that there are at least two at the lowest level.
     int minLevel = fullBuffers[1].level();
     if (fullBuffers[0].level() < minLevel) {
       fullBuffers[0].level(minLevel);

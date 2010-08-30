@@ -119,7 +119,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity());
     assertEquals("separation", 1.5, evaluator.separation());
     assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity());
-    assertEquals("CDbw", 1.3416407864998736, evaluator.CDbw());
+    assertEquals("CDbw", 1.3416407864998736, evaluator.getCDbw());
   }
 
   public void testCDbw1() {
@@ -129,7 +129,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity());
     assertEquals("separation", 1.0, evaluator.separation());
     assertEquals("intra cluster density", 0.44721359549995787, evaluator.intraClusterDensity());
-    assertEquals("CDbw", 0.44721359549995787, evaluator.CDbw());
+    assertEquals("CDbw", 0.44721359549995787, evaluator.getCDbw());
   }
 
   public void testCDbw2() {
@@ -139,7 +139,7 @@ public class TestCDbwEvaluator extends MahoutTestCase {
     assertEquals("inter cluster density", 1.017921815355728, evaluator.interClusterDensity());
     assertEquals("separation", 0.24777966925931558, evaluator.separation());
     assertEquals("intra cluster density", 0.29814239699997197, evaluator.intraClusterDensity());
-    assertEquals("CDbw", 0.07387362452083261, evaluator.CDbw());
+    assertEquals("CDbw", 0.07387362452083261, evaluator.getCDbw());
   }
 
   public void testCanopy() throws Exception { // now run the Job

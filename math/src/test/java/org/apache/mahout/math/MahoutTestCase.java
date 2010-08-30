@@ -65,10 +65,8 @@ public abstract class MahoutTestCase extends TestCase {
   private File getTestTempFileOrDir(String name, boolean dir) throws IOException {
     File f = new File(getTestTempDir(), name);
     f.deleteOnExit();
-    if (dir) {
-      if (!f.mkdirs()) {
-        throw new IOException("Could not make directory " + f);
-      }
+    if (dir && !f.mkdirs()) {
+      throw new IOException("Could not make directory " + f);
     }
     return f;
   }

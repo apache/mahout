@@ -210,7 +210,7 @@ public class TestForest extends Configured implements Tool {
 
     if (dataFS.getFileStatus(dataPath).isDir()) {
       //the input is a directory of files
-      testDirectory(dataPath, outputPath, converter, forest, dataset, analyzer, rng);
+      testDirectory(outputPath, converter, forest, dataset, analyzer, rng);
     }  else {
       // the input is one single file
       testFile(dataPath, outputPath, converter, forest, dataset, analyzer, rng);
@@ -224,7 +224,7 @@ public class TestForest extends Configured implements Tool {
     }
   }
 
-  private void testDirectory(Path inPath, Path outPath, DataConverter converter, DecisionForest forest, Dataset dataset,
+  private void testDirectory(Path outPath, DataConverter converter, DecisionForest forest, Dataset dataset,
                         ResultAnalyzer analyzer, Random rng) throws IOException {
     Path[] infiles = DFUtils.listOutputFiles(dataFS, dataPath);
 

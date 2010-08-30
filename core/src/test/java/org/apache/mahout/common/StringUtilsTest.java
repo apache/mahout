@@ -30,7 +30,7 @@ public class StringUtilsTest extends MahoutTestCase {
       if (this == obj) {
         return true;
       }
-      if (obj == null || !(obj instanceof DummyTest)) {
+      if (!(obj instanceof DummyTest)) {
         return false;
       }
 

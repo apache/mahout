@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.common;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.WritableComparable;

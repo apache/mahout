@@ -62,7 +62,6 @@ public final class WikipediaDatasetCreatorDriver {
    * <li>The output {@link org.apache.hadoop.fs.Path} where to write the classifier as a
    * {@link org.apache.hadoop.io.SequenceFile}</li>
    * </ol>
-   * @throws InterruptedException 
    */
   public static void main(String[] args) throws IOException, InterruptedException {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
@@ -144,14 +143,13 @@ public final class WikipediaDatasetCreatorDriver {
    * @param exactMatchOnly
    *          if true, then the Wikipedia category must match exactly instead of simply containing the
    *          category string
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   public static void runJob(String input,
                             String output,
                             String catFile,
                             boolean exactMatchOnly,
-                            Class<? extends Analyzer> analyzerClass) throws IOException, InterruptedException, ClassNotFoundException {
+                            Class<? extends Analyzer> analyzerClass)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set("key.value.separator.in.input.line", " ");
     conf.set("xmlinput.start", "<text xml:space=\"preserve\">");
