@@ -39,10 +39,20 @@ public class ContinuousValueEncoder extends FeatureVectorEncoder {
     int probes = getProbes();
     String name = getName();
     for (int i = 0; i < probes; i++) {
-      int n = hash(name, CONTINUOUS_VALUE_HASH_SEED + i, data.size());
+      int n = hashForProbe(originalForm, data, name, i);
       trace(null, n);
-      data.set(n, data.get(n) + weight * Double.parseDouble(originalForm));
+      data.set(n, data.get(n) + getWeight(originalForm,weight));
     }
+  }
+
+  @Override
+  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
+    return hash(name, CONTINUOUS_VALUE_HASH_SEED + i, data.size());
+  }
+
+  @Override
+  protected double getWeight(String originalForm, double w) {
+    return w * Double.parseDouble(originalForm);
   }
 
   /**

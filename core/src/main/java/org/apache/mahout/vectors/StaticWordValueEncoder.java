@@ -17,6 +17,8 @@
 
 package org.apache.mahout.vectors;
 
+import org.apache.mahout.math.Vector;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -37,7 +39,12 @@ public class StaticWordValueEncoder extends WordValueEncoder {
     super(name);
   }
 
-  /**
+  @Override
+  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
+    return hash(name, i, data.size());
+  }
+
+   /**
    * Sets the weighting dictionary to be used by this encoder.  Also sets
    * the missing value weight to be half the smallest weight in the dictionary.
    * @param dictionary  The dictionary to use to look up weights.

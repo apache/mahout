@@ -20,6 +20,8 @@ package org.apache.mahout.vectors;
 import com.google.common.base.Splitter;
 import org.apache.mahout.math.Vector;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -50,7 +52,21 @@ public class TextValueEncoder extends FeatureVectorEncoder {
     }
   }
 
-  private Iterable<String> tokenize(CharSequence originalForm) {
+    @Override
+    protected int hashForProbe(String originalForm, Vector data, String name, int i) {
+        return 0;
+    }
+
+    protected Iterable<Integer> hashesForProbe(String originalForm, Vector data, String name, int i){
+        List<Integer> hashes = new ArrayList<Integer>();
+        for (String word : tokenize(originalForm)){
+            hashes.add(hashForProbe(word,data,name,i));
+        }
+        return hashes;
+    }
+
+
+    private Iterable<String> tokenize(CharSequence originalForm) {
     return onNonWord.split(originalForm);
   }
 

@@ -30,27 +30,40 @@ import static org.junit.Assert.assertEquals;
 public class InteractionValueEncoderTest {
   @Test
   public void testAddToVector() {
-    InteractionValueEncoder enc = new InteractionValueEncoder("interactions");
+    WordValueEncoder wv = new StaticWordValueEncoder("word");
+    ContinuousValueEncoder cv = new ContinuousValueEncoder("cont");
+    InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, cv);
     Vector v1 = new DenseVector(200);
-    enc.addInteractionToVector("a","b",v1);
+    enc.addInteractionToVector("a","1.0",1.0, v1);
     int k = enc.getProbes();
     // should set k distinct locations to 1
     Assert.assertEquals((float) k, v1.norm(1), 0);
     Assert.assertEquals(1.0, v1.maxValue(), 0);
+
     // adding same interaction again should increment weights
-    enc.addInteractionToVector("a","b",v1);
+    enc.addInteractionToVector("a","1.0",1.0,v1);
     Assert.assertEquals((float) k*2, v1.norm(1), 0);
     Assert.assertEquals(2.0, v1.maxValue(), 0);
 
     Vector v2 = new DenseVector(20000);
-    StaticWordValueEncoder wordEncoder = new StaticWordValueEncoder("test");
-    enc.addInteractionToVector("a","b",v2);
-    wordEncoder.addToVector("a", v2);
-    wordEncoder.addToVector("b", v2);
+    enc.addInteractionToVector("a","1.0",1.0,v2);
+    wv.addToVector("a", v2);
+    cv.addToVector("1.0", v2);
     k = enc.getProbes();
-    int j = wordEncoder.getProbes();
     //this assumes no hash collision
-    Assert.assertEquals((float) (k + 2*j), v2.norm(1), 0);
+    Assert.assertEquals((float) (k + wv.getProbes()+cv.getProbes()), v2.norm(1), 1e-3);
   }
 
+  @Test
+  public void testaddToVectorUsesProductOfWeights(){
+    WordValueEncoder wv = new StaticWordValueEncoder("word");
+    ContinuousValueEncoder cv = new ContinuousValueEncoder("cont");
+    InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, cv);
+    Vector v1 = new DenseVector(200);
+    enc.addInteractionToVector("a","0.9",0.5, v1);
+    int k = enc.getProbes();
+    // should set k distinct locations to 0.9*0.5
+    Assert.assertEquals((float) k*0.5*0.9, v1.norm(1), 0);
+    Assert.assertEquals(0.5*0.9, v1.maxValue(), 0);
+  }
 }

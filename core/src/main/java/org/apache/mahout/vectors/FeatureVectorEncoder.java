@@ -21,6 +21,8 @@ import com.google.common.collect.Sets;
 import org.apache.mahout.math.Vector;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,6 +72,19 @@ public abstract class FeatureVectorEncoder {
    * @param data         The vector to which the value should be added.
    */
   public abstract void addToVector(String originalForm, double weight, Vector data);
+
+  protected abstract int hashForProbe(String originalForm, Vector data, String name, int i);
+
+  protected Iterable<Integer> hashesForProbe(String originalForm, Vector data, String name, int i){
+    List<Integer> hashes = new ArrayList<Integer>();
+    hashes.add(hashForProbe(originalForm,data,name,i));
+  return hashes;
+  }
+
+  
+  protected double getWeight(String originalFor, double w){
+    return 1.0;
+  }
 
   // ******* Utility functions used by most implementations
 

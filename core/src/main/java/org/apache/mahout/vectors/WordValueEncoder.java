@@ -41,15 +41,25 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
   public void addToVector(String originalForm, double w, Vector data) {
     int probes = getProbes();
     String name = getName();
-    double weight = w * weight(originalForm);
+    double weight = getWeight(originalForm,w);
     for (int i = 0; i < probes; i++) {
-      int n = hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + i, data.size());
+      int n = hashForProbe(originalForm, data, name, i);
       trace(originalForm, n);
       data.set(n, data.get(n) + weight);
     }
   }
 
-  /**
+  @Override
+  protected double getWeight(String originalForm, double w) {
+    return w*weight(originalForm);    
+  }
+
+  @Override
+  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
+    return hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + i, data.size());
+  }
+
+    /**
    * Converts a value into a form that would help a human understand the internals of how the value
    * is being interpreted.  For text-like things, this is likely to be a list of the terms found with
    * associated weights (if any).

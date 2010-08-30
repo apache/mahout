@@ -25,63 +25,77 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
 
   protected static final int INTERACTION_VALUE_HASH_SEED_1 = 100;
   protected static final int INTERACTION_VALUE_HASH_SEED_2 = 200;
+  protected static FeatureVectorEncoder firstEncoder;
+  protected static FeatureVectorEncoder secondEncoder;
 
-    public InteractionValueEncoder(String name) {
-       super(name, 2);
-     }
+  public InteractionValueEncoder(String name, FeatureVectorEncoder encoderOne, FeatureVectorEncoder encoderTwo) {
+    super(name, 2);
+    firstEncoder = encoderOne;
+    secondEncoder = encoderTwo;
+  }
 
   /**
    * Adds a value to a vector.
    *
    * @param originalForm The original form of the first value as a string.
-   * @param data         The vector to which the value should be added.
+   * @param data          The vector to which the value should be added.
    */
   @Override
   public void addToVector(String originalForm, double w, Vector data) {
   }
 
-     /**
-      * Adds a value to a vector.
-      *
-      * @param originalForm1 The original form of the first value as a string.
-      * @param originalForm2 The original form of the second value as a string.
-      * @param data          The vector to which the value should be added.
-      */
-     public void addInteractionToVector(String originalForm1, String originalForm2, Vector data) {
-       int probes = getProbes();
-       String name = getName();
-       for (int i = 0; i < probes; i++) {
-         int h1 = hash1(name, originalForm1, i, data.size());
-         int h2 = hash2(name, originalForm1, i, data.size());
-         int j =  hash1(name, originalForm2, i, data.size());
-         int n = (h1 + (j+1)*h2) % data.size();
-         if(n < 0){
-             n = n+data.size();
-         }
-         trace(String.format("%s:%s", originalForm1, originalForm2), n);
-         data.set(n, data.get(n) + 1);
-       }
-     }
+  /**
+   * Adds a value to a vector.
+   *
+   * @param originalForm1 The original form of the first value as a string.
+   * @param originalForm2 The original form of the second value as a string.
+   * @param data          The vector to which the value should be added.
+   */
+  public void addInteractionToVector(String originalForm1, String originalForm2, double weight, Vector data) {
+    int probes = getProbes();
+    String name = getName();
+    double w = getWeight(originalForm1, originalForm2, weight);
+    for (int i = 0; i < probes; i++) {
+      int h1 = firstEncoder.hashForProbe(originalForm1, data, name, i);
+      int h2 = secondEncoder.hashForProbe(originalForm1, data, name, i);
+      int j =  firstEncoder.hashForProbe(originalForm2, data, name, i);
+      int n = (h1 + (j+1)*h2) % data.size();
+      if(n < 0){
+        n = n+data.size();
+      }
+      trace(String.format("%s:%s", originalForm1, originalForm2), n);
+      data.set(n, data.get(n) + w);
+    }
+  }
+
+  protected double getWeight(String originalForm1, String originalForm2, double w) {
+    return firstEncoder.getWeight(originalForm1, 1.0) * secondEncoder.getWeight(originalForm2,1.0) * w;
+  }
 
   /**
-   * Converts a value into a form that would help a human understand the internals of how the
-   * value is being interpreted.  For text-like things, this is likely to be a list of the terms
-   * found with associated weights (if any).
+   * Converts a value into a form that would help a human understand the internals of how the value
+   * is being interpreted.  For text-like things, this is likely to be a list of the terms found with
+   * associated weights (if any).
    *
    * @param originalForm The original form of the value as a string.
    * @return A string that a human can read.
    */
   @Override
   public String asString(String originalForm) {
-    return String.format(Locale.ENGLISH, "%s:%s", getName(), originalForm);
+    return String.format("%s:%s", getName(), originalForm);
+  }
+
+  @Override
+  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
+    return hash(name, i, data.size());
   }
 
   protected int hash1(String term1, String term2, int probe, int numFeatures) {
-    return hash(term1, term2, probe + INTERACTION_VALUE_HASH_SEED_1, numFeatures);
+    return hash(term1, term2, probe+INTERACTION_VALUE_HASH_SEED_1,numFeatures);
   }
 
   protected int hash2(String term1, String term2, int probe, int numFeatures) {
-    return hash(term1, term2, probe + INTERACTION_VALUE_HASH_SEED_2, numFeatures);
+    return hash(term1, term2, probe+INTERACTION_VALUE_HASH_SEED_2,numFeatures);
   }
 }
 
