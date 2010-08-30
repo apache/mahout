@@ -21,7 +21,9 @@ import com.google.common.collect.Sets;
 import org.apache.mahout.math.Vector;
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * General interface for objects that record features into a feature vector.
@@ -70,10 +72,33 @@ public abstract class FeatureVectorEncoder {
    */
   public abstract void addToVector(String originalForm, double weight, Vector data);
 
-  protected abstract int hashForProbe(String originalForm, Vector data, String name, int i);
+  /**
+   * Provides the unique hash for a particular probe.  For all encoders except text, this
+   * is all that is needed and the default implementation of hashesForProbe will do the right
+   * thing.  For text and similar values, hashesForProbe should be over-ridden and this method
+   * should not be used.
+   *
+   * @param originalForm  The original string value
+   * @param dataSize      The length of hte vector being encoded
+   * @param name          The name of the variable being encoded
+   * @param probe             The probe number
+   * @return              The hash of the current probe
+   */
+  protected abstract int hashForProbe(String originalForm, int dataSize, String name, int probe);
 
-  protected Iterable<Integer> hashesForProbe(String originalForm, Vector data, String name, int i){
-    return Collections.singletonList(hashForProbe(originalForm,data,name,i));
+  /**
+   * Returns all of the hashes for this probe.  For most encoders, this is a singleton, but
+   * for text, many hashes are returned, one for each word (unique or not).  Most implementations
+   * should only implement hashForProbe for simplicity.
+   *
+   * @param originalForm The original string value.
+   * @param dataSize     The length of the vector being encoded
+   * @param name         The name of the variable being encoded
+   * @param probe        The probe number
+   * @return an Iterable of the hashes
+   */
+  protected Iterable<Integer> hashesForProbe(String originalForm, int dataSize, String name, int probe) {
+    return Collections.singletonList(hashForProbe(originalForm, dataSize, name, probe));
   }
 
   protected double getWeight(String originalForm, double w){

@@ -18,6 +18,8 @@
 package org.apache.mahout.vectors;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import org.apache.mahout.math.Vector;
 
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
 
   private final Splitter onNonWord = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
   private FeatureVectorEncoder wordEncoder;
+  private static final double LOG_2 = Math.log(2);
 
   public TextValueEncoder(String name) {
     super(name, 2);
@@ -47,20 +50,24 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(String originalForm, double weight, Vector data) {
+    Multiset<String> counts = HashMultiset.create();
     for (String word : tokenize(originalForm)) {
-      wordEncoder.addToVector(word, weight, data);
+      counts.add(word);
+    }
+    for (String word : counts.elementSet()) {
+      wordEncoder.addToVector(word, weight * Math.log(1 + counts.count(word))/LOG_2, data);
     }
   }
 
   @Override
-  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
+  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
     return 0;
   }
 
-  protected Iterable<Integer> hashesForProbe(String originalForm, Vector data, String name, int i){
+  protected Iterable<Integer> hashesForProbe(String originalForm, int dataSize, String name, int probe){
     List<Integer> hashes = new ArrayList<Integer>();
     for (String word : tokenize(originalForm)){
-      hashes.add(hashForProbe(word,data,name,i));
+      hashes.add(hashForProbe(word, dataSize, name, probe));
     }
     return hashes;
   }

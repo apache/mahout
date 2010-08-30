@@ -17,8 +17,6 @@
 
 package org.apache.mahout.vectors;
 
-import org.apache.mahout.math.Vector;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -40,8 +38,8 @@ public class StaticWordValueEncoder extends WordValueEncoder {
   }
 
   @Override
-  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
-    return hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + i, data.size());
+  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
+    return hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + probe, dataSize);
   }
 
    /**

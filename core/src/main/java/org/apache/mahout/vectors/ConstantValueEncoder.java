@@ -32,7 +32,7 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
     int probes = getProbes();
     String name = getName();
     for (int i = 0; i < probes; i++) {
-        int n = hashForProbe(originalForm, data, name, i);
+        int n = hashForProbe(originalForm, data.size(), name, i);
         trace(null, n);
       data.set(n, data.get(n) + getWeight(originalForm,weight));
     }
@@ -48,8 +48,8 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
     return getName();
   }
 
-  protected int hashForProbe(String originalForm, Vector data, String name, int i){
-    return hash(name, i, data.size());
+  protected int hashForProbe(String originalForm, int dataSize, String name, int probe){
+    return hash(name, probe, dataSize);
   }
 
 }

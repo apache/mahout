@@ -43,7 +43,7 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
     String name = getName();
     double weight = getWeight(originalForm,w);
     for (int i = 0; i < probes; i++) {
-      int n = hashForProbe(originalForm, data, name, i);
+      int n = hashForProbe(originalForm, data.size(), name, i);
       trace(originalForm, n);
       data.set(n, data.get(n) + weight);
     }
@@ -52,12 +52,12 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
 
   @Override
   protected double getWeight(String originalForm, double w) {
-    return w*weight(originalForm);    
+    return w * weight(originalForm);
   }
 
   @Override
-  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
-    return hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + i, data.size());
+  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
+    return hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + probe, dataSize);
   }
 
     /**
