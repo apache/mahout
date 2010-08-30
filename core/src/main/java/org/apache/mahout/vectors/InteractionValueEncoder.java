@@ -26,9 +26,9 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
   protected static final int INTERACTION_VALUE_HASH_SEED_1 = 100;
   protected static final int INTERACTION_VALUE_HASH_SEED_2 = 200;
 
-  protected InteractionValueEncoder(String name) {
-    super(name, 2);
-  }
+    public InteractionValueEncoder(String name) {
+       super(name, 2);
+     }
 
   /**
    * Adds a value to a vector.
@@ -55,6 +55,9 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
          int h2 = hash2(name, originalForm1, i, data.size());
          int j =  hash1(name, originalForm2, i, data.size());
          int n = (h1 + (j+1)*h2) % data.size();
+         if(n < 0){
+             n = n+data.size();
+         }
          trace(String.format("%s:%s", originalForm1, originalForm2), n);
          data.set(n, data.get(n) + 1);
        }
