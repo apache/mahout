@@ -44,7 +44,7 @@ public class AdaptiveWordValueEncoder extends WordValueEncoder {
   @Override
   public void addToVector(String originalForm, double weight, Vector data) {
     dictionary.add(originalForm);
-    super.addToVector(originalForm, getWeight(originalForm, weight), data);
+    super.addToVector(originalForm, weight, data);
   }
 
   @Override

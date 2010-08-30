@@ -53,8 +53,8 @@ public class CsvRecordFactoryTest {
     Assert.assertEquals(5.3, v.maxValue(), 0);
     v.set(v.maxValueIndex(), 0);
     Assert.assertEquals(8.0, v.norm(0), 0);
-    Assert.assertEquals(12.0, v.norm(1), 0);
-    Assert.assertEquals(2, v.maxValue(), 0);
+    Assert.assertEquals(10.339850002884626, v.norm(1), 1e-6);
+    Assert.assertEquals(1.5849625007211563, v.maxValue(), 1e-6);
 
     v.assign(0);
     t = csv.processLine("ignore,5.3,invalid,line, \"and more text and more\",ignore", v);
@@ -66,8 +66,8 @@ public class CsvRecordFactoryTest {
     Assert.assertEquals(5.3, v.maxValue(), 0);
     v.set(v.maxValueIndex(), 0);
     Assert.assertEquals(8.0, v.norm(0), 0);
-    Assert.assertEquals(12.0, v.norm(1), 0);
-    Assert.assertEquals(2, v.maxValue(), 0);
+    Assert.assertEquals(10.339850002884626, v.norm(1), 1e-6);
+    Assert.assertEquals(1.5849625007211563, v.maxValue(), 1e-6);
   }
 
   @Test
