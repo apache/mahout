@@ -21,10 +21,7 @@ import com.google.common.collect.Sets;
 import org.apache.mahout.math.Vector;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * General interface for objects that record features into a feature vector.
@@ -76,13 +73,10 @@ public abstract class FeatureVectorEncoder {
   protected abstract int hashForProbe(String originalForm, Vector data, String name, int i);
 
   protected Iterable<Integer> hashesForProbe(String originalForm, Vector data, String name, int i){
-    List<Integer> hashes = new ArrayList<Integer>();
-    hashes.add(hashForProbe(originalForm,data,name,i));
-  return hashes;
+    return Collections.singletonList(hashForProbe(originalForm,data,name,i));
   }
 
-  
-  protected double getWeight(String originalFor, double w){
+  protected double getWeight(String originalForm, double w){
     return 1.0;
   }
 

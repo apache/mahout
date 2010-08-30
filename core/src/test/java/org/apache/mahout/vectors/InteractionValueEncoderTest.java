@@ -55,7 +55,7 @@ public class InteractionValueEncoderTest {
   }
 
   @Test
-  public void testaddToVectorUsesProductOfWeights(){
+  public void testAddToVectorUsesProductOfWeights(){
     WordValueEncoder wv = new StaticWordValueEncoder("word");
     ContinuousValueEncoder cv = new ContinuousValueEncoder("cont");
     InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, cv);
@@ -66,4 +66,17 @@ public class InteractionValueEncoderTest {
     Assert.assertEquals((float) k*0.5*0.9, v1.norm(1), 0);
     Assert.assertEquals(0.5*0.9, v1.maxValue(), 0);
   }
+
+  @Test
+  public void testAddToVectorWithTextValueEncoder(){
+    WordValueEncoder wv = new StaticWordValueEncoder("word");
+    TextValueEncoder tv = new TextValueEncoder("text");
+    InteractionValueEncoder enc = new InteractionValueEncoder("interactions", wv, tv);
+    Vector v1 = new DenseVector(200);
+    enc.addInteractionToVector("a","some text here",1.0, v1);
+    int k = enc.getProbes();
+    // should interact "a" with each of "some","text" and "here"
+    Assert.assertEquals((float) k*3, v1.norm(1), 0);    
+  }
+
 }

@@ -52,21 +52,21 @@ public class TextValueEncoder extends FeatureVectorEncoder {
     }
   }
 
-    @Override
-    protected int hashForProbe(String originalForm, Vector data, String name, int i) {
-        return 0;
+  @Override
+  protected int hashForProbe(String originalForm, Vector data, String name, int i) {
+    return 0;
+  }
+
+  protected Iterable<Integer> hashesForProbe(String originalForm, Vector data, String name, int i){
+    List<Integer> hashes = new ArrayList<Integer>();
+    for (String word : tokenize(originalForm)){
+      hashes.add(hashForProbe(word,data,name,i));
     }
-
-    protected Iterable<Integer> hashesForProbe(String originalForm, Vector data, String name, int i){
-        List<Integer> hashes = new ArrayList<Integer>();
-        for (String word : tokenize(originalForm)){
-            hashes.add(hashForProbe(word,data,name,i));
-        }
-        return hashes;
-    }
+    return hashes;
+  }
 
 
-    private Iterable<String> tokenize(CharSequence originalForm) {
+  private Iterable<String> tokenize(CharSequence originalForm) {
     return onNonWord.split(originalForm);
   }
 

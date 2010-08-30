@@ -17,9 +17,10 @@
 
 package org.apache.mahout.vectors;
 
+import org.apache.mahout.common.iterator.ArrayIterator;
 import org.apache.mahout.math.Vector;
 
-import java.util.Locale;
+import java.util.ArrayList;
 
 public class InteractionValueEncoder extends FeatureVectorEncoder {
 
@@ -52,24 +53,33 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    * @param data          The vector to which the value should be added.
    */
   public void addInteractionToVector(String originalForm1, String originalForm2, double weight, Vector data) {
-    int probes = getProbes();
     String name = getName();
     double w = getWeight(originalForm1, originalForm2, weight);
-    for (int i = 0; i < probes; i++) {
-      int h1 = firstEncoder.hashForProbe(originalForm1, data, name, i);
-      int h2 = secondEncoder.hashForProbe(originalForm1, data, name, i);
-      int j =  firstEncoder.hashForProbe(originalForm2, data, name, i);
-      int n = (h1 + (j+1)*h2) % data.size();
-      if(n < 0){
-        n = n+data.size();
+    for (int i = 0; i < probes(); i++) {
+      for(Integer k : firstEncoder.hashesForProbe(originalForm1, data, name, i)){
+        for(Integer j : secondEncoder.hashesForProbe(originalForm2, data, name, i)){
+          int n = linearDoubleHash(hash1(k,name,i,data),hash2(k,name,i,data),j,data.size());
+          trace(String.format("%s:%s", originalForm1, originalForm2), n);
+          data.set(n, data.get(n) + w);
+        }
       }
-      trace(String.format("%s:%s", originalForm1, originalForm2), n);
-      data.set(n, data.get(n) + w);
     }
   }
 
+  private int probes() {
+    return getProbes();
+  }
+
   protected double getWeight(String originalForm1, String originalForm2, double w) {
-    return firstEncoder.getWeight(originalForm1, 1.0) * secondEncoder.getWeight(originalForm2,1.0) * w;
+    return firstEncoder.getWeight(originalForm1, 1.0) * secondEncoder.getWeight(originalForm2, 1.0) * w;
+  }
+
+  private int linearDoubleHash(int h1, int h2, int j, int modulus){
+   int n = (h1 + (j+1)*h2) % modulus;
+   if(n < 0){
+    n = n+modulus;
+   }
+   return n;
   }
 
   /**
@@ -90,12 +100,13 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
     return hash(name, i, data.size());
   }
 
-  protected int hash1(String term1, String term2, int probe, int numFeatures) {
-    return hash(term1, term2, probe+INTERACTION_VALUE_HASH_SEED_1,numFeatures);
+  protected int hash1(int value, String name, int i, Vector data){
+    return hash(name, i+value+INTERACTION_VALUE_HASH_SEED_1, data.size());
   }
 
-  protected int hash2(String term1, String term2, int probe, int numFeatures) {
-    return hash(term1, term2, probe+INTERACTION_VALUE_HASH_SEED_2,numFeatures);
+  protected int hash2(int value, String name, int i, Vector data){
+    return hash(name, i+value+INTERACTION_VALUE_HASH_SEED_2, data.size());
   }
 }
+
 

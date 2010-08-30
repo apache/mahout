@@ -49,6 +49,7 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
     }
   }
 
+
   @Override
   protected double getWeight(String originalForm, double w) {
     return w*weight(originalForm);    
