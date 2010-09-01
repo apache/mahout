@@ -7,6 +7,71 @@ import org.apache.mahout.math.function.UnaryFunction;
  * reals but have the output limited and squished in convenient (and safe) ways.
  */
 public abstract class Mapping implements UnaryFunction {
+  public static class SoftLimit extends Mapping {
+    private double min;
+    private double max;
+    private double scale;
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    private SoftLimit() {
+    }
+
+    private SoftLimit(double min, double max, double scale) {
+      this.min = min;
+      this.max = max;
+      this.scale = scale;
+    }
+
+    public double apply(double v) {
+      return min + (max - min) * 1 / (1 + Math.exp(-v * scale));
+    }
+
+  }
+
+  public static class LogLimit extends Mapping {
+    private Mapping wrapped;
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    private LogLimit() {
+    }
+
+    private LogLimit(double low, double high) {
+      wrapped = softLimit(Math.log(low), Math.log(high));
+    }
+
+    @Override
+    public double apply(double v) {
+      return Math.exp(wrapped.apply(v));
+    }
+  }
+
+  public static class Exponential extends Mapping {
+    private double scale;
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    private Exponential() {
+    }
+
+    private Exponential(double scale) {
+      this.scale = scale;
+    }
+
+    @Override
+    public double apply(double v) {
+      return Math.exp(v * scale);
+    }
+  }
+
+  public static class Identity extends Mapping {
+    private Identity() {
+    }
+
+    @Override
+    public double apply(double v) {
+      return v;
+    }
+  }
+
   /**
    * Maps input to the open interval (min, max) with 0 going to the mean of min and
    * max.  When scale is large, a larger proportion of values are mapped to points
@@ -18,12 +83,7 @@ public abstract class Mapping implements UnaryFunction {
    * @return A mapping that satisfies the desired constraint.
    */
   public static Mapping softLimit(final double min, final double max, final double scale) {
-    return new Mapping() {
-      @Override
-      public double apply(double v) {
-        return min + (max - min) * 1 / (1 + Math.exp(-v * scale));
-      }
-    };
+    return new SoftLimit(min, max, scale);
   }
 
   /**
@@ -54,14 +114,7 @@ public abstract class Mapping implements UnaryFunction {
     if (high <= 0) {
       throw new IllegalArgumentException("Upper bound for log limit must be > 0 but was " + high);
     }
-    return new Mapping() {
-      Mapping wrapped = softLimit(Math.log(low), Math.log(high));
-
-      @Override
-      public double apply(double v) {
-        return Math.exp(wrapped.apply(v));
-      }
-    };
+    return new LogLimit(low, high);
   }
 
   /**
@@ -78,12 +131,7 @@ public abstract class Mapping implements UnaryFunction {
    * @return A positive value.
    */
   public static Mapping exponential(final double scale) {
-    return new Mapping() {
-      @Override
-      public double apply(double v) {
-        return Math.exp(v * scale);
-      }
-    };
+    return new Exponential(scale);
   }
 
   /**
@@ -91,11 +139,6 @@ public abstract class Mapping implements UnaryFunction {
    * @return The original value.
    */
   public static Mapping identity() {
-    return new Mapping() {
-      @Override
-      public double apply(double v) {
-        return v;
-      }
-    };
+    return new Identity();
   }
 }

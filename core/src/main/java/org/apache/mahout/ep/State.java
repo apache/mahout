@@ -1,5 +1,7 @@
 package org.apache.mahout.ep;
 
+import com.google.common.collect.Lists;
+
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
@@ -27,9 +29,9 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
   // object count is kept to break ties in comparison.
   static volatile int objectCount = 0;
 
-  int id = objectCount++;
+  private int id = objectCount++;
 
-  private Random gen = new Random();
+  private transient Random gen = new Random();
 
   // current state
   private double[] params;
@@ -48,7 +50,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
 
   private T payload;
 
-  private State() {
+  public State() {
   }
 
   /**
@@ -124,6 +126,18 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
     return m == null ? params[i] : m.apply(params[i]);
   }
 
+  public int getId() {
+    return id;
+  }
+
+  public double[] getParams() {
+    return params;
+  }
+
+  public Mapping[] getMaps() {
+    return maps;
+  }
+
   /**
    * Returns all the parameters in mapped form.
    * @return An array of parameters.
@@ -158,6 +172,22 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
 
   public void setOmni(double omni) {
     this.omni = omni;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setStep(double[] step) {
+    this.step = step;
+  }
+
+  public void setMaps(Mapping[] maps) {
+    this.maps = maps;
+  }
+
+  public void setMaps(Iterable<Mapping> maps) {
+    this.maps = Lists.newArrayList(maps).toArray(new Mapping[0]);
   }
 
   public void setValue(double v) {

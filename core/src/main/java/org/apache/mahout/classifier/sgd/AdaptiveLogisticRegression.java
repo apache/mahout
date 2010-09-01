@@ -54,13 +54,18 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int record = 0;
   private int evaluationInterval = 1000;
 
-  private final List<TrainingExample> buffer = Lists.newArrayList();
+  private List<TrainingExample> buffer = Lists.newArrayList();
   private EvolutionaryProcess<Wrapper> ep;
   private State<Wrapper> best;
   private int threadCount = 20;
   private int poolSize = 20;
-  private final State<Wrapper> seed;
-  private final int numFeatures;
+  private State<Wrapper> seed;
+  private int numFeatures;
+
+  // for GSON
+  @SuppressWarnings({"UnusedDeclaration"})
+  private AdaptiveLogisticRegression() {
+  }
 
   public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior) {
     this.numFeatures = numFeatures;
@@ -178,6 +183,65 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     return best;
   }
 
+  public void setBest(State<Wrapper> best) {
+    this.best = best;
+  }
+
+  public int getRecord() {
+    return record;
+  }
+
+  public void setRecord(int record) {
+    this.record = record;
+  }
+
+  public int getEvaluationInterval() {
+    return evaluationInterval;
+  }
+
+  public int getNumCategories() {
+    return seed.getPayload().getLearner().numCategories();
+  }
+
+  public PriorFunction getPrior() {
+    return seed.getPayload().getLearner().getPrior();
+  }
+
+  public void setEvaluationInterval(int evaluationInterval) {
+    this.evaluationInterval = evaluationInterval;
+  }
+
+  public void setBuffer(List<TrainingExample> buffer) {
+    this.buffer = buffer;
+  }
+
+  public List<TrainingExample> getBuffer() {
+    return buffer;
+  }
+
+  public EvolutionaryProcess<Wrapper> getEp() {
+    return ep;
+  }
+
+  public void setEp(EvolutionaryProcess<Wrapper> ep) {
+    this.ep = ep;
+  }
+
+  public State<Wrapper> getSeed() {
+    return seed;
+  }
+
+  public void setSeed(State<Wrapper> seed) {
+    this.seed = seed;
+  }
+
+  public int getNumFeatures() {
+    return numFeatures;
+  }
+
+  public void setNumFeatures(int numFeatures) {
+    this.numFeatures = numFeatures;
+  }
 
   /**
    * Provides a shim between the EP optimization stuff and the CrossFoldLearner.  The most important
@@ -190,9 +254,6 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    * offset is done.
    */
   public static class Wrapper implements Payload<Wrapper> {
-    //private static volatile int counter = 0;
-
-    //private volatile int id = counter++;
     private CrossFoldLearner wrapped;
 
     private Wrapper() {
@@ -214,7 +275,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     public void update(double[] params) {
       int i = 0;
       wrapped.lambda(params[i++]);
-      wrapped.learningRate(params[i++]);
+      wrapped.learningRate(params[i]);
 
       wrapped.stepOffset(1);
       wrapped.alpha(1);
@@ -224,7 +285,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     public void setMappings(State<Wrapper> x) {
       int i = 0;
       x.setMap(i++, Mapping.logLimit(1.0e-8, 0.1));
-      x.setMap(i++, Mapping.softLimit(0.001, 10));
+      x.setMap(i, Mapping.softLimit(0.001, 10));
     }
 
     public void train(TrainingExample example) {
@@ -242,9 +303,14 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   }
 
   public static class TrainingExample {
-    private final long key;
-    private final int actual;
-    private final Vector instance;
+    private long key;
+    private int actual;
+    private Vector instance;
+
+    // for GSON
+    @SuppressWarnings({"UnusedDeclaration"})
+    private TrainingExample() {
+    }
 
     public TrainingExample(long key, int actual, Vector instance) {
       this.key = key;

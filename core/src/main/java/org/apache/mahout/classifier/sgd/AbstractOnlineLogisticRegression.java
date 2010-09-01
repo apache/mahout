@@ -50,15 +50,15 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   private int step = 0;
 
   // information about how long since coefficient rows were updated.  This allows lazy regularization.
-  protected transient Vector updateSteps;
+  protected Vector updateSteps;
 
   // information about how many updates we have had on a location.  This allows per-term
   // annealing a la confidence weighted learning.
-  protected transient Vector updateCounts;
+  protected Vector updateCounts;
 
   // weight of the prior on beta
   private double lambda = 1e-5;
-  protected transient PriorFunction prior;
+  protected PriorFunction prior;
 
   // can we ignore any further regularization when doing classification?
   private boolean sealed = false;

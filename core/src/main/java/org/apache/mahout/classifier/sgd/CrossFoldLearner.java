@@ -19,9 +19,6 @@ import java.util.List;
  * record should be passed with each training example.
  */
 public class CrossFoldLearner extends AbstractVectorClassifier implements OnlineLearner {
-  private static volatile int nextId = 0;
-
-  private final int id = nextId++;
   private int record = 0;
   private OnlineAuc auc = new OnlineAuc();
   private double logLikelihood = 0;
@@ -32,7 +29,12 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   private int numFeatures;
   private PriorFunction prior;
 
-  CrossFoldLearner(int folds, int numCategories, int numFeatures, PriorFunction prior) {
+  // pretty much just for GSON
+  @SuppressWarnings({"UnusedDeclaration"})
+  public CrossFoldLearner() {
+  }
+
+  public CrossFoldLearner(int folds, int numCategories, int numFeatures, PriorFunction prior) {
     this.numFeatures = numFeatures;
     this.prior = prior;
     for (int i = 0; i < folds; i++) {
@@ -171,5 +173,61 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
       r.models.add(newModel);
     }
     return r;
+  }
+
+  public int getRecord() {
+    return record;
+  }
+
+  public void setRecord(int record) {
+    this.record = record;
+  }
+
+  public OnlineAuc getAuc() {
+    return auc;
+  }
+
+  public void setAuc(OnlineAuc auc) {
+    this.auc = auc;
+  }
+
+  public double getLogLikelihood() {
+    return logLikelihood;
+  }
+
+  public void setLogLikelihood(double logLikelihood) {
+    this.logLikelihood = logLikelihood;
+  }
+
+  public List<OnlineLogisticRegression> getModels() {
+    return models;
+  }
+
+  public void addModel(OnlineLogisticRegression model) {
+    models.add(model);
+  }
+
+  public double[] getParameters() {
+    return parameters;
+  }
+
+  public void setParameters(double[] parameters) {
+    this.parameters = parameters;
+  }
+
+  public int getNumFeatures() {
+    return numFeatures;
+  }
+
+  public void setNumFeatures(int numFeatures) {
+    this.numFeatures = numFeatures;
+  }
+
+  public PriorFunction getPrior() {
+    return prior;
+  }
+
+  public void setPrior(PriorFunction prior) {
+    this.prior = prior;
   }
 }

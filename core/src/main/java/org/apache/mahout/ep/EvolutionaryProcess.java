@@ -44,14 +44,22 @@ import java.util.concurrent.Future;
  */
 public class EvolutionaryProcess<T extends Payload<T>> {
   // used to execute operations on the population in thread parallel.
-  private ExecutorService pool;
+  private transient ExecutorService pool;
+
+  // threadCount is serialized so that we can reconstruct the thread pool
+  private int threadCount;
 
   // list of members of the population
   private List<State<T>> population;
 
   // how big should the population be.  If this is changed, it will take effect
   // the next time the population is mutated.
+
   private int populationSize;
+
+  public EvolutionaryProcess() {
+    population = Lists.newArrayList();
+  }
 
   /**
    * Creates an evolutionary optimization framework with specified threadiness,
@@ -62,11 +70,19 @@ public class EvolutionaryProcess<T extends Payload<T>> {
    */
   public EvolutionaryProcess(int threadCount, int populationSize, State<T> seed) {
     this.populationSize = populationSize;
-    pool = Executors.newFixedThreadPool(threadCount);
+    setThreadCount(threadCount);
+    initializePopulation(populationSize, seed);
+  }
+
+  private void initializePopulation(int populationSize, State<T> seed) {
     population = Lists.newArrayList(seed);
     for (int i = 0; i < populationSize; i++) {
       population.add(seed.mutate());
     }
+  }
+
+  public void add(State<T> value) {
+    population.add(value);
   }
 
   /**
@@ -130,6 +146,23 @@ public class EvolutionaryProcess<T extends Payload<T>> {
     }
 
     return best;
+  }
+
+  public void setThreadCount(int threadCount) {
+    this.threadCount = threadCount;
+    pool = Executors.newFixedThreadPool(threadCount);
+  }
+
+  public int getThreadCount() {
+    return threadCount;
+  }
+
+  public int getPopulationSize() {
+    return populationSize;
+  }
+
+  public List<State<T>> getPopulation() {
+    return population;
   }
 
   public interface Function<T> {
