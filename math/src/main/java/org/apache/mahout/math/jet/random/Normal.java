@@ -12,6 +12,7 @@ import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
 import java.util.Locale;
+import java.util.Random;
 
 /**
  * Implements a normal distribution specified mean and standard deviation.
@@ -33,7 +34,7 @@ public class Normal extends AbstractContinousDistribution {
    * @param randomGenerator    The random number generator to use.  This can be null if you don't
    * need to generate any numbers.
    */
-  public Normal(double mean, double standardDeviation, RandomEngine randomGenerator) {
+  public Normal(double mean, double standardDeviation, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(mean, standardDeviation);
   }
@@ -68,8 +69,8 @@ public class Normal extends AbstractContinousDistribution {
     double y;
     double r;
     do {
-      x = 2.0 * randomGenerator.raw() - 1.0;
-      y = 2.0 * randomGenerator.raw() - 1.0;
+      x = 2.0 * randomGenerator.nextDouble() - 1.0;
+      y = 2.0 * randomGenerator.nextDouble() - 1.0;
       r = x * x + y * y;
     } while (r >= 1.0);
 
@@ -80,7 +81,7 @@ public class Normal extends AbstractContinousDistribution {
   }
 
   /** Sets the uniform random generator internally used. */
-  public final void setRandomGenerator(RandomEngine randomGenerator) {
+  public final void setRandomGenerator(Random randomGenerator) {
     super.setRandomGenerator(randomGenerator);
     this.cacheFilled = false;
   }

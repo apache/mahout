@@ -8,7 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -21,14 +24,14 @@ public class VonMises extends AbstractContinousDistribution {
   private double r;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final VonMises shared = new VonMises(1.0, makeDefaultGenerator());
+  private static final VonMises shared = new VonMises(1.0, RandomUtils.getRandom());
 
   /**
    * Constructs a Von Mises distribution. Example: k=1.0.
    *
    * @throws IllegalArgumentException if <tt>k &lt;= 0.0</tt>.
    */
-  public VonMises(double freedom, RandomEngine randomGenerator) {
+  public VonMises(double freedom, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(freedom);
   }
@@ -80,14 +83,14 @@ public class VonMises extends AbstractContinousDistribution {
     double w;
     double v;
     do {
-      double u = randomGenerator.raw();
-      v = randomGenerator.raw();                                // U(0/1)
+      double u = randomGenerator.nextDouble();
+      v = randomGenerator.nextDouble();                                // U(0/1)
       double z = Math.cos(Math.PI * u);
       w = (1.0 + r * z) / (r + z);
       c = k * (r - w);
     } while ((c * (2.0 - c) < v) && (Math.log(c / v) + 1.0 < c));         // Acceptance/Rejection
 
-    return (randomGenerator.raw() > 0.5) ? Math.acos(w) : -Math.acos(w);        // Random sign //
+    return (randomGenerator.nextDouble() > 0.5) ? Math.acos(w) : -Math.acos(w);        // Random sign //
     // 0 <= x <= Pi : -Pi <= x <= 0 //
   }
 

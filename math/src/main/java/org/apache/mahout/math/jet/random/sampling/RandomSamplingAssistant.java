@@ -11,6 +11,8 @@ package org.apache.mahout.math.jet.random.sampling;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
+import java.util.Random;
+
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class RandomSamplingAssistant extends PersistentObject {
@@ -32,7 +34,7 @@ public class RandomSamplingAssistant extends PersistentObject {
    * @param randomGenerator a random number generator. Set this parameter to <tt>null</tt> to use the default random
    *                        number generator.
    */
-  public RandomSamplingAssistant(long n, long N, RandomEngine randomGenerator) {
+  public RandomSamplingAssistant(long n, long N, Random randomGenerator) {
     this.n = n;
     this.sampler = new RandomSampler(n, N, 0, randomGenerator);
     this.buffer = new long[(int) Math.min(n, MAX_BUFFER_SIZE)];
@@ -62,7 +64,7 @@ public class RandomSamplingAssistant extends PersistentObject {
   }
 
   /** Returns the used random generator. */
-  public RandomEngine getRandomGenerator() {
+  public Random getRandomGenerator() {
     return this.sampler.getRandomGenerator();
   }
 

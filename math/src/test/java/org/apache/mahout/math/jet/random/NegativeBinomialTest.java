@@ -23,7 +23,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
+import org.apache.mahout.common.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -51,7 +51,7 @@ public class NegativeBinomialTest {
         int r = Integer.parseInt(Iterables.get(values, 2));
         double density = Double.parseDouble(Iterables.get(values, 3));
         double cume = Double.parseDouble(Iterables.get(values, 4));
-        NegativeBinomial nb = new NegativeBinomial(r, p, new MersenneTwister());
+        NegativeBinomial nb = new NegativeBinomial(r, p, RandomUtils.getRandom());
         Assert.assertEquals("cumulative " + k + ',' + p + ',' + r, cume, nb.cdf(k), cume * 1e-05);
         Assert.assertEquals("density " + k + ',' + p + ',' + r, density, nb.pdf(k), density * 1e-05);
       }
@@ -62,7 +62,7 @@ public class NegativeBinomialTest {
   public void sample() {
     for (double p : new double[]{0.1, 0.2, 0.5, 0.9}) {
       for (int r = 1; r < 5; r++) {
-        NegativeBinomial nb = new NegativeBinomial(r, p, new MersenneTwister(1));
+        NegativeBinomial nb = new NegativeBinomial(r, p, RandomUtils.getRandom());
         int[] counts = new int[N];
         for (int i = 0; i < N; i++) {
           int k = nb.nextInt();

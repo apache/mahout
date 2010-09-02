@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
@@ -720,8 +721,7 @@ public class DoubleFactory2D extends PersistentObject {
     }
 
     RandomSamplingAssistant sampler =
-        new RandomSamplingAssistant(n, size,
-            new MersenneTwister());
+        new RandomSamplingAssistant(n, size, RandomUtils.getRandom());
     for (int i = 0; i < size; i++) {
       if (sampler.sampleNextElement()) {
         int row = i / columns;

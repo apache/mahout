@@ -8,7 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -25,16 +28,16 @@ public class Zeta extends AbstractDiscreteDistribution {
   private static final double maxlongint = Long.MAX_VALUE - 1.5;
 
   // The uniform random number generated shared by all <b>static</b> methods. 
-  private static final Zeta shared = new Zeta(1.0, 1.0, makeDefaultGenerator());
+  private static final Zeta shared = new Zeta(1.0, 1.0, RandomUtils.getRandom());
 
   /** Constructs a Zeta distribution. */
-  public Zeta(double ro, double pk, RandomEngine randomGenerator) {
+  public Zeta(double ro, double pk, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(ro, pk);
   }
 
   /** Returns a zeta distributed random number. */
-  protected long generateZeta(double ro, double pk, RandomEngine randomGenerator) {
+  protected long generateZeta(double ro, double pk, Random randomGenerator) {
 /******************************************************************
  *                                                                *
  *            Zeta Distribution - Acceptance Rejection            *
@@ -91,8 +94,8 @@ public class Zeta extends AbstractDiscreteDistribution {
     do {
       double v;
       do {
-        double u = randomGenerator.raw();
-        v = randomGenerator.raw();
+        double u = randomGenerator.nextDouble();
+        v = randomGenerator.nextDouble();
         x = (c + 0.5) * Math.exp(-Math.log(u) / ro) - c;
       } while (x <= 0.5 || x >= maxlongint);
 
@@ -103,24 +106,16 @@ public class Zeta extends AbstractDiscreteDistribution {
     return k;
   }
 
-  /** Returns a random number from the distribution. */
+  /** Returns a random number from the distribution.
   @Override
   public int nextInt() {
-    return (int) generateZeta(ro, pk, randomGenerator);
+    return (int) generateZeta(ro, pk, this.randomGenerator);
   }
 
   /** Sets the parameters. */
   public void setState(double ro, double pk) {
     this.ro = ro;
     this.pk = pk;
-  }
-
-  /** Returns a random number from the distribution. */
-  public static int staticNextInt(double ro, double pk) {
-    synchronized (shared) {
-      shared.setState(ro, pk);
-      return shared.nextInt();
-    }
   }
 
   /** Returns a String representation of the receiver. */

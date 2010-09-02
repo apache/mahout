@@ -8,7 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -22,10 +25,10 @@ public class Logarithmic extends AbstractContinousDistribution {
   private double a_prev = -1.0;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Logarithmic shared = new Logarithmic(0.5, makeDefaultGenerator());
+  private static final Logarithmic shared = new Logarithmic(0.5, RandomUtils.getRandom());
 
   /** Constructs a Logarithmic distribution. */
-  public Logarithmic(double p, RandomEngine randomGenerator) {
+  public Logarithmic(double p, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(p);
   }
@@ -81,7 +84,7 @@ public class Logarithmic extends AbstractContinousDistribution {
       }
     }
 
-    double u = randomGenerator.raw();
+    double u = randomGenerator.nextDouble();
     int k;
     if (a < 0.97) {                        // Inversion/Chop-down
       k = 1;
@@ -97,7 +100,7 @@ public class Logarithmic extends AbstractContinousDistribution {
     if (u > a) {
       return 1;
     }                 // Transformation
-    u = randomGenerator.raw();
+    u = randomGenerator.nextDouble();
     double v = u;
     double q = 1.0 - Math.exp(v * h);
     if (u <= q * q) {

@@ -8,8 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
+import org.apache.mahout.common.RandomUtils;
+
+import java.util.Random;
 
 public class Uniform extends AbstractContinousDistribution {
 
@@ -17,24 +18,24 @@ public class Uniform extends AbstractContinousDistribution {
   private double max;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  protected static final Uniform shared = new Uniform(makeDefaultGenerator());
+  protected static final Uniform shared = new Uniform(RandomUtils.getRandom());
 
   /**
    * Constructs a uniform distribution with the given minimum and maximum, using a {@link
    * org.apache.mahout.math.jet.random.engine.MersenneTwister} seeded with the given seed.
    */
   public Uniform(double min, double max, int seed) {
-    this(min, max, new MersenneTwister(seed));
+    this(min, max, RandomUtils.getRandom(seed));
   }
 
   /** Constructs a uniform distribution with the given minimum and maximum. */
-  public Uniform(double min, double max, RandomEngine randomGenerator) {
+  public Uniform(double min, double max, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(min, max);
   }
 
   /** Constructs a uniform distribution with <tt>min=0.0</tt> and <tt>max=1.0</tt>. */
-  public Uniform(RandomEngine randomGenerator) {
+  public Uniform(Random randomGenerator) {
     this(0, 1, randomGenerator);
   }
 
@@ -51,7 +52,7 @@ public class Uniform extends AbstractContinousDistribution {
 
   /** Returns a uniformly distributed random <tt>boolean</tt>. */
   public boolean nextBoolean() {
-    return randomGenerator.raw() > 0.5;
+    return randomGenerator.nextDouble() > 0.5;
   }
 
   /**
@@ -60,7 +61,7 @@ public class Uniform extends AbstractContinousDistribution {
    */
   @Override
   public double nextDouble() {
-    return min + (max - min) * randomGenerator.raw();
+    return min + (max - min) * randomGenerator.nextDouble();
   }
 
   /**
@@ -68,7 +69,7 @@ public class Uniform extends AbstractContinousDistribution {
    * <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
    */
   public double nextDoubleFromTo(double from, double to) {
-    return from + (to - from) * randomGenerator.raw();
+    return from + (to - from) * randomGenerator.nextDouble();
   }
 
   /**
@@ -80,21 +81,12 @@ public class Uniform extends AbstractContinousDistribution {
   }
 
   /**
-   * Returns a uniformly distributed random number in the closed interval <tt>[min,max]</tt> (including <tt>min</tt> and
-   * <tt>max</tt>).
-   */
-  @Override
-  public int nextInt() {
-    return nextIntFromTo((int) Math.round(min), (int) Math.round(max));
-  }
-
-  /**
    * Returns a uniformly distributed random number in the closed interval
    *  <tt>[from,to]</tt> (including <tt>from</tt>
    * and <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
    */
   public int nextIntFromTo(int from, int to) {
-    return (int) ((long) from + (long) ((1L + (long) to - (long) from) * randomGenerator.raw()));
+    return (int) ((long) from + (long) ((1L + (long) to - (long) from) * randomGenerator.nextDouble()));
   }
 
   /**
@@ -218,17 +210,6 @@ public class Uniform extends AbstractContinousDistribution {
   public static long staticNextLongFromTo(long from, long to) {
     synchronized (shared) {
       return shared.nextLongFromTo(from, to);
-    }
-  }
-
-  /**
-   * Sets the uniform random number generation engine shared by all <b>static</b> methods.
-   *
-   * @param randomGenerator the new uniform random number generation engine to be shared.
-   */
-  public static void staticSetRandomEngine(RandomEngine randomGenerator) {
-    synchronized (shared) {
-      shared.setRandomGenerator(randomGenerator);
     }
   }
 

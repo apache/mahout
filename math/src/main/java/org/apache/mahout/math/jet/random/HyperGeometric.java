@@ -8,8 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.math.Arithmetic;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -60,10 +63,10 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
 
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final HyperGeometric shared = new HyperGeometric(1, 1, 1, makeDefaultGenerator());
+  private static final HyperGeometric shared = new HyperGeometric(1, 1, 1, RandomUtils.getRandom());
 
   /** Constructs a HyperGeometric distribution. */
-  public HyperGeometric(int N, int s, int n, RandomEngine randomGenerator) {
+  public HyperGeometric(int N, int s, int n, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(N, s, n);
   }
@@ -74,7 +77,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
   }
 
   /** Returns a random number from the distribution. */
-  protected int hmdu(int N, int M, int n, RandomEngine randomGenerator) {
+  protected int hmdu(int N, int M, int n, Random randomGenerator) {
 
     if (N != N_last || M != M_last || n != n_last) {   // set-up           */
       N_last = N;
@@ -108,7 +111,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
 
     while (true) {
       double U;
-      if ((U = randomGenerator.raw() - fm) <= 0.0) {
+      if ((U = randomGenerator.nextDouble() - fm) <= 0.0) {
         return (m);
       }
       double d;
@@ -141,7 +144,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
   }
 
   /** Returns a random number from the distribution. */
-  protected int hprs(int N, int M, int n, RandomEngine randomGenerator) {
+  protected int hprs(int N, int M, int n, Random randomGenerator) {
     double U;         /* (X, Y) <-> (V, W) */
 
     if (N != N_last || M != M_last || n != n_last) {  /* set-up            */
@@ -214,7 +217,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
       int V;
       int X;
       int Dk;
-      if ((U = randomGenerator.raw() * p6) < p2) {    // centre left
+      if ((U = randomGenerator.nextDouble() * p6) < p2) {    // centre left
 
         // immediate acceptance region R2 = [k2, m) *[0, f2),  X = k2, ... m -1
         if ((W = U - p1) < 0.0) {
@@ -227,7 +230,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
 
         // computation of candidate X < k2, and its counterpart V > k2
         // either squeeze-acceptance of X or acceptance-rejection of V
-        Dk = (int) (dl * randomGenerator.raw()) + 1;
+        Dk = (int) (dl * randomGenerator.nextDouble()) + 1;
         if (Y <= f2 - Dk * (f2 - f2 / r2)) {            // quick accept of
           return (k2 - Dk);                          // X = k2 - Dk
         }
@@ -254,7 +257,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
 
         // computation of candidate X > k4, and its counterpart V < k4
         // either squeeze-acceptance of X or acceptance-rejection of V
-        Dk = (int) (dr * randomGenerator.raw()) + 1;
+        Dk = (int) (dr * randomGenerator.nextDouble()) + 1;
         if (Y <= f4 - Dk * (f4 - f4 * r4)) {            // quick accept of
           return (k4 + Dk);                          // X = k4 + Dk
         }
@@ -269,7 +272,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
         }
         X = k4 + Dk;
       } else {
-        Y = randomGenerator.raw();
+        Y = randomGenerator.nextDouble();
         if (U < p5) {                                 // expon. tail left
           Dk = (int) (1.0 - Math.log(Y) / ll);
           if ((X = k1 - Dk) < 0) {
@@ -302,7 +305,11 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
     }
   }
 
-  /** Returns a random number from the distribution. */
+  /**
+   *  Returns a random number from the distribution.
+   *
+   * @return An integer sample from this hyper-geometric distribution. 
+   */
   @Override
   public int nextInt() {
     return nextInt(this.my_N, this.my_s, this.my_n, this.randomGenerator);
@@ -314,7 +321,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
   }
 
   /** Returns a random number from the distribution; bypasses the internal state. */
-  protected int nextInt(int N, int M, int n, RandomEngine randomGenerator) {
+  protected int nextInt(int N, int M, int n, Random randomGenerator) {
 /******************************************************************
  *                                                                *
  * Hypergeometric Distribution - Patchwork Rejection/Inversion    *

@@ -39,6 +39,7 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.apache.mahout.math.jet.random.sampling.RandomSampler;
@@ -302,7 +303,7 @@ public class SplitBayesInput {
       log.info("{} test split size is {} based on random selection percentage {}",
                new Object[] {inputFile.getName(), testSplitSize, testRandomSelectionPct});
       long[] ridx = new long[testSplitSize];
-      RandomSampler.sample(testSplitSize, lineCount-1, testSplitSize, 0, ridx, 0, new MersenneTwister(new Date()));
+      RandomSampler.sample(testSplitSize, lineCount-1, testSplitSize, 0, ridx, 0, RandomUtils.getRandom());
       randomSel = new BitSet(lineCount);
       for (long idx : ridx) {
         randomSel.set((int) idx + 1);

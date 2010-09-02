@@ -13,6 +13,8 @@ import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.random.sampling.RandomSamplingAssistant;
 import org.apache.mahout.math.list.DoubleArrayList;
 
+import java.util.Random;
+
 /**
  * Approximate quantile finding algorithm for known <tt>N</tt> requiring only one pass and little main memory; computes
  * quantiles over a sequence of <tt>double</tt> elements.
@@ -58,7 +60,7 @@ class KnownDoubleQuantileEstimator extends DoubleQuantileEstimator {
    *                     of 10 elements each. Etc.
    * @param generator    a uniform random number generator.
    */
-  KnownDoubleQuantileEstimator(int b, int k, long n, double samplingRate, RandomEngine generator) {
+  KnownDoubleQuantileEstimator(int b, int k, long n, double samplingRate, Random generator) {
     this.samplingRate = samplingRate;
     this.n = n;
 

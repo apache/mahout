@@ -8,8 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -60,12 +63,8 @@ public class Beta extends AbstractContinousDistribution {
   private double p3;
   private double p4;
 
-
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Beta shared = new Beta(10.0, 10.0, makeDefaultGenerator());
-
   /** Constructs a Beta distribution. */
-  public Beta(double alpha, double beta, RandomEngine randomGenerator) {
+  public Beta(double alpha, double beta, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(alpha, beta);
   }
@@ -73,7 +72,7 @@ public class Beta extends AbstractContinousDistribution {
   /**
    *
    */
-  protected double b00(double a, double b, RandomEngine randomGenerator) {
+  protected double b00(double a, double b, Random randomGenerator) {
 
     if (a != aLast || b != bLast) {
       aLast = a;
@@ -95,11 +94,11 @@ public class Beta extends AbstractContinousDistribution {
       double Z;
       double V;
       double U;
-      if ((U = randomGenerator.raw() * p2) <= p1) {       //  X < t
+      if ((U = randomGenerator.nextDouble() * p2) <= p1) {       //  X < t
         Z = Math.exp(Math.log(U / p1) / a);
         X = t * Z;
         // squeeze accept:   L(x) = 1 + (1 - b)x
-        if ((V = randomGenerator.raw() * fb) <= 1.0 - bMinus1 * X) {
+        if ((V = randomGenerator.nextDouble() * fb) <= 1.0 - bMinus1 * X) {
           break;
         }
         // squeeze reject:   U(x) = 1 + ((1 - t)^(b-1) - 1)/t * x
@@ -113,7 +112,7 @@ public class Beta extends AbstractContinousDistribution {
         Z = Math.exp(Math.log((U - p1) / (p2 - p1)) / b);
         X = 1.0 - (1.0 - t) * Z;
         // squeeze accept:   L(x) = 1 + (1 - a)(1 - x)
-        if ((V = randomGenerator.raw() * fa) <= 1.0 - aMinus1 * (1.0 - X)) {
+        if ((V = randomGenerator.nextDouble() * fa) <= 1.0 - aMinus1 * (1.0 - X)) {
           break;
         }
         // squeeze reject:   U(x) = 1 + (t^(a-1) - 1)/(1 - t) * (1 - x)
@@ -131,7 +130,7 @@ public class Beta extends AbstractContinousDistribution {
   /**
    *
    */
-  protected double b01(double a, double b, RandomEngine randomGenerator) {
+  protected double b01(double a, double b, Random randomGenerator) {
 
     if (a != aLast || b != bLast) {
       aLast = a;
@@ -161,11 +160,11 @@ public class Beta extends AbstractContinousDistribution {
       double Z;
       double V;
       double U;
-      if ((U = randomGenerator.raw() * p2) <= p1) {       //  X < t
+      if ((U = randomGenerator.nextDouble() * p2) <= p1) {       //  X < t
         Z = Math.exp(Math.log(U / p1) / a);
         X = t * Z;
         // squeeze accept:   L(x) = 1 + m1*x,  ml = -m1
-        if ((V = randomGenerator.raw()) <= 1.0 - ml * X) {
+        if ((V = randomGenerator.nextDouble()) <= 1.0 - ml * X) {
           break;
         }
         // squeeze reject:   U(x) = 1 + m2*x,  mu = -m2 * t
@@ -179,7 +178,8 @@ public class Beta extends AbstractContinousDistribution {
         Z = Math.exp(Math.log((U - p1) / (p2 - p1)) / b);
         X = 1.0 - (1.0 - t) * Z;
         // squeeze accept:   L(x) = 1 + (1 - a)(1 - x)
-        if ((V = randomGenerator.raw() * fa) <= 1.0 - aMinus1 * (1.0 - X)) {
+        V = randomGenerator.nextDouble() * fa;
+        if ((V) <= 1.0 - aMinus1 * (1.0 - X)) {
           break;
         }
         // squeeze reject:   U(x) = 1 + (t^(a-1) - 1)/(1 - t) * (1 - x)
@@ -197,7 +197,7 @@ public class Beta extends AbstractContinousDistribution {
   /**
    *
    */
-  protected double b1prs(double p, double q, RandomEngine randomGenerator) {
+  protected double b1prs(double p, double q, Random randomGenerator) {
 
     if (p != pLast || q != qLast) {
       pLast = p;
@@ -261,7 +261,7 @@ public class Beta extends AbstractContinousDistribution {
       double W;
       double V;
       double U;
-      if ((U = randomGenerator.raw() * p4) <= p1) {
+      if ((U = randomGenerator.nextDouble() * p4) <= p1) {
         // immediate accept:  x2 < X < m, - f(x2) < W < 0
         if ((W = U / d1 - f2) <= 0.0) {
           return (m - U / f2);
@@ -271,7 +271,7 @@ public class Beta extends AbstractContinousDistribution {
           return (x2 - W / f1 * d1);
         }
         // candidates for acceptance-rejection-test
-        V = d1 * (U = randomGenerator.raw());
+        V = d1 * (U = randomGenerator.nextDouble());
         X = x2 - V;
         Y = x2 + V;
         // squeeze accept:    L(x) = f(x2) (x - z2) / (x2 - z2)
@@ -299,7 +299,7 @@ public class Beta extends AbstractContinousDistribution {
           return (x4 + W / f5 * d);
         }
         // candidates for acceptance-rejection-test
-        V = d * (U = randomGenerator.raw());
+        V = d * (U = randomGenerator.nextDouble());
         X = x4 + V;
         Y = x4 - V;
         // squeeze accept:    L(x) = f(x4) (z4 - x) / (z4 - x4)
@@ -321,7 +321,7 @@ public class Beta extends AbstractContinousDistribution {
         if ((X = x1 + ll * Y) <= 0.0) {
           continue;
         }            // X > 0!!
-        W = randomGenerator.raw() * U;
+        W = randomGenerator.nextDouble() * U;
         // squeeze accept:    L(x) = f(x1) (x - z1) / (x1 - z1)
         //                    z1 = x1 - ll,   W <= 1 + (X - x1)/ll
         if (W <= 1.0 + Y) {
@@ -333,7 +333,7 @@ public class Beta extends AbstractContinousDistribution {
         if ((X = x5 - lr * Y) >= 1.0) {
           continue;
         }            // X < 1!!
-        W = randomGenerator.raw() * U;
+        W = randomGenerator.nextDouble() * U;
         // squeeze accept:    L(x) = f(x5) (z5 - x) / (z5 - x5)
         //                    z5 = x5 + lr,   W <= 1 + (x5 - X)/lr
         if (W <= 1.0 + Y) {
@@ -414,7 +414,7 @@ public class Beta extends AbstractContinousDistribution {
       if (beta < 1.0) {
         return (1.0 - b01(beta, alpha, randomGenerator));
       }
-      return (Math.exp(Math.log(randomGenerator.raw()) / alpha));
+      return (Math.exp(Math.log(1 - randomGenerator.nextDouble()) / alpha));
     }
 
     if (alpha < 1.0) {
@@ -424,10 +424,10 @@ public class Beta extends AbstractContinousDistribution {
       if (beta < 1.0) {
         return (b00(alpha, beta, randomGenerator));
       }
-      return (Math.exp(Math.log(randomGenerator.raw()) / alpha));
+      return (Math.exp(Math.log(randomGenerator.nextDouble()) / alpha));
     }
 
-    return beta == 1.0 ? randomGenerator.raw() : 1.0 - Math.exp(Math.log(randomGenerator.raw()) / beta);
+    return beta == 1.0 ? randomGenerator.nextDouble() : 1.0 - Math.exp(Math.log(randomGenerator.nextDouble()) / beta);
   }
 
   /** Returns the cumulative distribution function. */
@@ -443,13 +443,6 @@ public class Beta extends AbstractContinousDistribution {
     this.alpha = alpha;
     this.beta = beta;
     this.PDF_CONST = Fun.logGamma(alpha + beta) - Fun.logGamma(alpha) - Fun.logGamma(beta);
-  }
-
-  /** Returns a random number from the distribution. */
-  public static double staticNextDouble(double alpha, double beta) {
-    synchronized (shared) {
-      return shared.nextDouble(alpha, beta);
-    }
   }
 
   /** Returns a String representation of the receiver. */

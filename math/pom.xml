@@ -94,6 +94,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.uncommons.maths</groupId>
+      <artifactId>uncommons-maths</artifactId>
+      <version>1.2</version>
+    </dependency>
+   
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>r03</version>

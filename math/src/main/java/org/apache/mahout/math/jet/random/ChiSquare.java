@@ -8,8 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -24,7 +27,7 @@ public class ChiSquare extends AbstractContinousDistribution {
   private double vd;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final ChiSquare shared = new ChiSquare(1.0, makeDefaultGenerator());
+  private static final ChiSquare shared = new ChiSquare(1.0, RandomUtils.getRandom());
 
   /**
    * Constructs a ChiSquare distribution. Example: freedom=1.0.
@@ -32,7 +35,7 @@ public class ChiSquare extends AbstractContinousDistribution {
    * @param freedom degrees of freedom.
    * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
    */
-  public ChiSquare(double freedom, RandomEngine randomGenerator) {
+  public ChiSquare(double freedom, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(freedom);
   }
@@ -81,8 +84,8 @@ public class ChiSquare extends AbstractContinousDistribution {
 
     if (freedom == 1.0) {
       while (true) {
-        u = randomGenerator.raw();
-        v = randomGenerator.raw() * 0.857763884960707;
+        u = randomGenerator.nextDouble();
+        v = randomGenerator.nextDouble() * 0.857763884960707;
         z = v / u;
         if (z < 0) {
           continue;
@@ -112,8 +115,8 @@ public class ChiSquare extends AbstractContinousDistribution {
         freedom_in = freedom;
       }
       while (true) {
-        u = randomGenerator.raw();
-        v = randomGenerator.raw() * vd + vm;
+        u = randomGenerator.nextDouble();
+        v = randomGenerator.nextDouble() * vd + vm;
         z = v / u;
         if (z < -b) {
           continue;

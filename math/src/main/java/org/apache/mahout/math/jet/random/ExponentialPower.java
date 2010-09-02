@@ -8,7 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -22,14 +25,14 @@ public class ExponentialPower extends AbstractContinousDistribution {
   private double tau_set = -1.0;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final ExponentialPower shared = new ExponentialPower(1.0, makeDefaultGenerator());
+  private static final ExponentialPower shared = new ExponentialPower(1.0, RandomUtils.getRandom());
 
   /**
    * Constructs an Exponential Power distribution. Example: tau=1.0.
    *
    * @throws IllegalArgumentException if <tt>tau &lt; 1.0</tt>.
    */
-  public ExponentialPower(double tau, RandomEngine randomGenerator) {
+  public ExponentialPower(double tau, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(tau);
   }
@@ -59,10 +62,10 @@ public class ExponentialPower extends AbstractContinousDistribution {
     double v;
     double u;
     do {
-      u = randomGenerator.raw();                             // U(0/1)
+      u = randomGenerator.nextDouble();                             // U(0/1)
       u = (2.0 * u) - 1.0;                                     // U(-1.0/1.0)
       double u1 = Math.abs(u);
-      v = randomGenerator.raw();                             // U(0/1)
+      v = randomGenerator.nextDouble();                             // U(0/1)
 
       if (u1 <= sm1) { // Uniform hat-function for x <= (1-1/tau)
         x = u1;

@@ -32,6 +32,7 @@ import org.apache.mahout.math.jet.random.sampling.WeightedRandomSampler;
 import org.apache.mahout.math.list.DoubleArrayList;
 
 import java.util.Comparator;
+import java.util.Random;
 
 /**
  * Approximate quantile finding algorithm for unknown <tt>N</tt> requiring only one pass and little main memory;
@@ -75,7 +76,7 @@ class UnknownDoubleQuantileEstimator extends DoubleQuantileEstimator {
    *                          shall be precomputed.
    * @param generator         a uniform random number generator.
    */
-  UnknownDoubleQuantileEstimator(int b, int k, int h, double precomputeEpsilon, RandomEngine generator) {
+  UnknownDoubleQuantileEstimator(int b, int k, int h, double precomputeEpsilon, Random generator) {
     this.sampler = new WeightedRandomSampler(1, generator);
     setUp(b, k);
     this.treeHeightStartingSampling = h;

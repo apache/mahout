@@ -8,7 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
+import org.apache.mahout.common.RandomUtils;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -31,10 +33,10 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
       0.1208650973866179e-2, -0.5395239384953e-5};
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final PoissonSlow shared = new PoissonSlow(0.0, makeDefaultGenerator());
+  private static final PoissonSlow shared = new PoissonSlow(0.0, RandomUtils.getRandom());
 
   /** Constructs a poisson distribution. Example: mean=1.0. */
-  public PoissonSlow(double mean, RandomEngine randomGenerator) {
+  public PoissonSlow(double mean, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setMean(mean);
   }
@@ -57,12 +59,6 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
     return -tmp + Math.log(2.5066282746310005 * ser);
   }
 
-  /** Returns a random number from the distribution. */
-  @Override
-  public int nextInt() {
-    return nextInt(this.mean);
-  }
-
   /** Returns a random number from the distribution; bypasses the internal state. */
   private int nextInt(double xm) {
     /*
@@ -78,7 +74,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
       double product = 1;
       do {
         poisson++;
-        product *= randomGenerator.raw();
+        product *= randomGenerator.nextDouble();
       } while (product >= g);
       // bug in CLHEP 1.4.0: was "} while ( product > g );"
       return poisson;
@@ -88,16 +84,16 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
       double sq = this.cached_sq;
       double alxm = this.cached_alxm;
 
-      RandomEngine rand = this.randomGenerator;
+      Random rand = this.randomGenerator;
       do {
         double y;
         do {
-          y = Math.tan(Math.PI * rand.raw());
+          y = Math.tan(Math.PI * rand.nextDouble());
           em = sq * y + xm;
         } while (em < 0.0);
         em = (double) (int) (em); // faster than em = Math.floor(em); (em>=0.0)
         t = 0.9 * (1.0 + y * y) * Math.exp(em * alxm - logGamma(em + 1.0) - g);
-      } while (rand.raw() > t);
+      } while (rand.nextDouble() > t);
       return (int) em;
     } else { // mean is too large
       return (int) xm;
@@ -110,7 +106,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
     int count = 0;
     double product;
     for (product = 1.0; product >= bound && product > 0.0; count++) {
-      product *= randomGenerator.raw();
+      product *= randomGenerator.nextDouble();
     }
     if (product <= 0.0 && bound > 0.0) {
       return (int) Math.round(mean);
@@ -132,14 +128,6 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
         this.cached_alxm = Math.log(mean);
         this.cached_g = mean * cached_alxm - logGamma(mean + 1.0);
       }
-    }
-  }
-
-  /** Returns a random number from the distribution with the given mean. */
-  public static int staticNextInt(double mean) {
-    synchronized (shared) {
-      shared.setMean(mean);
-      return shared.nextInt();
     }
   }
 

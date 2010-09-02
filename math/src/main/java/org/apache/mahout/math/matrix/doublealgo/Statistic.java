@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.doublealgo;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
@@ -17,6 +18,8 @@ import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.DoubleMatrix3D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -401,7 +404,7 @@ return result;
    * @throws IllegalArgumentException if <tt>! (0 <= rowFraction <= 1 && 0 <= columnFraction <= 1)</tt>.
    * @see org.apache.mahout.math.jet.random.sampling.RandomSampler
    */
-  public static DoubleMatrix1D viewSample(DoubleMatrix1D matrix, double fraction, RandomEngine randomGenerator) {
+  public static DoubleMatrix1D viewSample(DoubleMatrix1D matrix, double fraction, Random randomGenerator) {
     // check preconditions and allow for a little tolerance
     double epsilon = 1.0e-09;
     if (fraction < 0 - epsilon || fraction > 1 + epsilon) {
@@ -414,9 +417,8 @@ return result;
       fraction = 1;
     }
 
-    // random generator seeded with current time
     if (randomGenerator == null) {
-      randomGenerator = new MersenneTwister((int) System.currentTimeMillis());
+      randomGenerator = RandomUtils.getRandom();
     }
 
     int ncols = (int) Math.round(matrix.size() * fraction);
@@ -466,7 +468,7 @@ return result;
    * @see org.apache.mahout.math.jet.random.sampling.RandomSampler
    */
   public static DoubleMatrix2D viewSample(DoubleMatrix2D matrix, double rowFraction, double columnFraction,
-                                          RandomEngine randomGenerator) {
+                                          Random randomGenerator) {
     // check preconditions and allow for a little tolerance
     double epsilon = 1.0e-09;
     if (rowFraction < 0 - epsilon || rowFraction > 1 + epsilon) {
@@ -491,7 +493,7 @@ return result;
 
     // random generator seeded with current time
     if (randomGenerator == null) {
-      randomGenerator = new MersenneTwister((int) System.currentTimeMillis());
+      randomGenerator = RandomUtils.getRandom();
     }
 
     int nrows = (int) Math.round(matrix.rows() * rowFraction);
@@ -537,7 +539,7 @@ return result;
    * @see org.apache.mahout.math.jet.random.sampling.RandomSampler
    */
   public static DoubleMatrix3D viewSample(DoubleMatrix3D matrix, double sliceFraction, double rowFraction,
-                                          double columnFraction, RandomEngine randomGenerator) {
+                                          double columnFraction, Random randomGenerator) {
     // check preconditions and allow for a little tolerance
     double epsilon = 1.0e-09;
     if (sliceFraction < 0 - epsilon || sliceFraction > 1 + epsilon) {
@@ -572,7 +574,7 @@ return result;
 
     // random generator seeded with current time
     if (randomGenerator == null) {
-      randomGenerator = new MersenneTwister((int) System.currentTimeMillis());
+      randomGenerator = RandomUtils.getRandom();
     }
 
     int nslices = (int) Math.round(matrix.slices() * sliceFraction);

@@ -14,6 +14,8 @@ import org.apache.mahout.math.jet.math.Arithmetic;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.list.DoubleArrayList;
 
+import java.util.Random;
+
 /**
  * Factory constructing exact and approximate quantile finders for both known and unknown <tt>N</tt>.
  * Also see {@link hep.aida.bin.QuantileBin1D}, demonstrating how this package can be used.
@@ -365,7 +367,7 @@ public class QuantileFinderFactory {
    * @return the quantile finder minimizing memory requirements under the given constraints.
    */
   public static DoubleQuantileFinder newDoubleQuantileFinder(boolean knownN, long n, double epsilon, double delta,
-                                                             int quantiles, RandomEngine generator) {
+                                                             int quantiles, Random generator) {
     //boolean known_N = true;
     //if (N==Long.MAX_VALUE) known_N = false;
     // check parameters.

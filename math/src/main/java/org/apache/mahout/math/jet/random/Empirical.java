@@ -10,6 +10,8 @@ package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
+import java.util.Random;
+
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class Empirical extends AbstractContinousDistribution {
@@ -31,7 +33,7 @@ public class Empirical extends AbstractContinousDistribution {
    * @param randomGenerator   a uniform random number generator.
    * @throws IllegalArgumentException if at least one of the three conditions above is violated.
    */
-  public Empirical(double[] pdf, int interpolationType, RandomEngine randomGenerator) {
+  public Empirical(double[] pdf, int interpolationType, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(pdf, interpolationType);
   }
@@ -65,7 +67,7 @@ public class Empirical extends AbstractContinousDistribution {
   /** Returns a random number from the distribution. */
   @Override
   public double nextDouble() {
-    double rand = randomGenerator.raw();
+    double rand = randomGenerator.nextDouble();
     if (this.cdf == null) {
       return rand;
     } // Non-existing pdf

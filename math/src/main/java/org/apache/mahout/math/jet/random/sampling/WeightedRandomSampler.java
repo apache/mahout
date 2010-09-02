@@ -8,10 +8,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random.sampling;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.jet.random.Uniform;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.list.IntArrayList;
+
+import java.util.Random;
 
 /**
  * Conveniently computes a stable subsequence of elements from a given input sequence;
@@ -54,9 +57,9 @@ public class WeightedRandomSampler extends PersistentObject {
    * @param randomGenerator a random number generator. Set this parameter to <tt>null</tt> to use the default random
    *                        number generator.
    */
-  public WeightedRandomSampler(int weight, RandomEngine randomGenerator) {
+  public WeightedRandomSampler(int weight, Random randomGenerator) {
     if (randomGenerator == null) {
-      randomGenerator = org.apache.mahout.math.jet.random.AbstractDistribution.makeDefaultGenerator();
+      randomGenerator = RandomUtils.getRandom();
     }
     this.generator = new Uniform(randomGenerator);
     setWeight(weight);

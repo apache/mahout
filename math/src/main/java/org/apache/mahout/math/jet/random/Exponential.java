@@ -11,6 +11,7 @@ package org.apache.mahout.math.jet.random;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Locale;
+import java.util.Random;
 
 public class Exponential extends AbstractContinousDistribution {
   // rate parameter for the distribution.  Mean is 1/lambda.
@@ -23,7 +24,7 @@ public class Exponential extends AbstractContinousDistribution {
    * @param lambda          The rate parameter of the distribution.
    * @param randomGenerator The PRNG that is used to generate values.
    */
-  public Exponential(double lambda, RandomEngine randomGenerator) {
+  public Exponential(double lambda, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(lambda);
   }
@@ -46,7 +47,7 @@ public class Exponential extends AbstractContinousDistribution {
    */
   @Override
   public double nextDouble() {
-    return -Math.log(1 - randomGenerator.raw()) / lambda;
+    return -Math.log(1 - randomGenerator.nextDouble()) / lambda;
   }
 
   /**

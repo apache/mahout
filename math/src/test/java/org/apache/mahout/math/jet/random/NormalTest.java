@@ -19,6 +19,7 @@ package org.apache.mahout.math.jet.random;
 
 import org.apache.commons.math.ConvergenceException;
 import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Assert;
 import org.junit.Test;
@@ -53,7 +54,7 @@ public class NormalTest extends DistributionTest {
     double offset = 0;
     double scale = 1;
     for (int k = 0; k < 20; k++) {
-      Normal dist = new Normal(offset, scale, new MersenneTwister());
+      Normal dist = new Normal(offset, scale, RandomUtils.getRandom());
       checkDistribution(dist, breaks, offset, scale, 10000);
       offset = gen.nextGaussian();
       scale = Math.exp(3 * gen.nextGaussian());
@@ -62,7 +63,7 @@ public class NormalTest extends DistributionTest {
 
   @Test
   public void testSetState() throws ConvergenceException, FunctionEvaluationException {
-    Normal dist = new Normal(0, 1, new MersenneTwister());
+    Normal dist = new Normal(0, 1, RandomUtils.getRandom());
     dist.setState(1.3, 5.9);
     checkDistribution(dist, breaks, 1.3, 5.9, 10000);
   }

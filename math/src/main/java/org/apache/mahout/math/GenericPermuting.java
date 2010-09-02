@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.Uniform;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 
@@ -156,7 +157,7 @@ public class GenericPermuting {
       for (int i = N; --i >= 0;) {
         permutation[i] = i;
       }
-      Uniform gen = new Uniform(new MersenneTwister((int) p));
+      Uniform gen = new Uniform(RandomUtils.getRandom());
       for (int i = 0; i < N - 1; i++) {
         int random = gen.nextIntFromTo(i, N - 1);
 

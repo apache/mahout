@@ -19,6 +19,7 @@ package org.apache.mahout.math.jet.random;
 
 import org.apache.commons.math.ConvergenceException;
 import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Test;
 
@@ -34,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 public class ExponentialTest extends DistributionTest {
   @Test
   public void testCdf() {
-    Exponential dist = new Exponential(5.0, new MersenneTwister(1));
+    Exponential dist = new Exponential(5.0, RandomUtils.getRandom());
     for (int i = 0; i < 1000; i++) {
       double x = i / 50.0;
       assertEquals(1 - Math.exp(-x * 5.0), dist.cdf(x), 1e-9);
@@ -69,7 +70,7 @@ public class ExponentialTest extends DistributionTest {
   @Test
   public void testNextDouble() throws ConvergenceException, FunctionEvaluationException {
     double[] x = {-0.01, 0.1053605, 0.2231436, 0.3566749, 0.5108256, 0.6931472, 0.9162907, 1.2039728, 1.6094379, 2.3025851};
-    Exponential dist = new Exponential(1, new MersenneTwister(1));
+    Exponential dist = new Exponential(1, RandomUtils.getRandom());
     for (double lambda : new double[]{13.0, 0.02, 1.6}) {
       dist.setState(lambda);
       checkEmpiricalDistribution(dist, 10000, lambda);

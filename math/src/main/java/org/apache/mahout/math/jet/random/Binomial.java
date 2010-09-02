@@ -8,9 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.math.Arithmetic;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -54,7 +56,7 @@ public class Binomial extends AbstractDiscreteDistribution {
   private double logN;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Binomial shared = new Binomial(1, 0.5, makeDefaultGenerator());
+  private static final Binomial shared = new Binomial(1, 0.5, RandomUtils.getRandom());
   /**
    * Constructs a binomial distribution. Example: n=1, p=0.5.
    *
@@ -63,7 +65,7 @@ public class Binomial extends AbstractDiscreteDistribution {
    * @param randomGenerator a uniform random number generator.
    * @throws IllegalArgumentException if <tt>n*Math.min(p,1-p) &lt;= 0.0</tt>
    */
-  public Binomial(int n, double p, RandomEngine randomGenerator) {
+  public Binomial(int n, double p, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setNandP(n, p);
   }
@@ -158,11 +160,11 @@ public class Binomial extends AbstractDiscreteDistribution {
 
       K = 0;
       double pk = p0;
-      U = randomGenerator.raw();
+      U = randomGenerator.nextDouble();
       while (U > pk) {
         ++K;
         if (K > b) {
-          U = randomGenerator.raw();
+          U = randomGenerator.nextDouble();
           K = 0;
           pk = p0;
         } else {
@@ -174,8 +176,8 @@ public class Binomial extends AbstractDiscreteDistribution {
     }
 
     while (true) {
-      double V = randomGenerator.raw();
-      if ((U = randomGenerator.raw() * p4) <= p1) {    // triangular region
+      double V = randomGenerator.nextDouble();
+      if ((U = randomGenerator.nextDouble() * p4) <= p1) {    // triangular region
         K = (int) (xm - U + p1 * V);
         return (p > 0.5) ? (n - K) : K;  // immediate accept
       }
@@ -252,12 +254,6 @@ public class Binomial extends AbstractDiscreteDistribution {
       }
     }
     return (p > 0.5) ? (n - K) : K;
-  }
-
-  /** Returns a random number from the distribution. */
-  @Override
-  public int nextInt() {
-    return generateBinomial(n, p);
   }
 
   /**

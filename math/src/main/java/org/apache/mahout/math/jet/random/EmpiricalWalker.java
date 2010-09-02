@@ -10,6 +10,8 @@ package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
+import java.util.Random;
+
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class EmpiricalWalker extends AbstractDiscreteDistribution {
@@ -136,7 +138,7 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
    * @param randomGenerator   a uniform random number generator.
    * @throws IllegalArgumentException if at least one of the three conditions above is violated.
    */
-  public EmpiricalWalker(double[] pdf, int interpolationType, RandomEngine randomGenerator) {
+  public EmpiricalWalker(double[] pdf, int interpolationType, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(pdf, interpolationType);
     setState2(pdf);
@@ -174,10 +176,10 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
     return copy;
   }
 
-  /** Returns a random integer <tt>k</tt> with probability <tt>pdf(k)</tt>. */
+  /** Returns a random integer <tt>k</tt> with probability <tt>pdf(k)</tt>.     */
   @Override
   public int nextInt() {
-    double u = this.randomGenerator.raw();
+    double u = this.randomGenerator.nextDouble();
     u *= this.K;
     int c = (int) u;
     u -= c;

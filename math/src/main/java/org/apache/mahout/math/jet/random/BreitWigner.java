@@ -8,7 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -19,14 +22,14 @@ public class BreitWigner extends AbstractContinousDistribution {
   private double cut;
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final BreitWigner shared = new BreitWigner(1.0, 0.2, 1.0, makeDefaultGenerator());
+  private static final BreitWigner shared = new BreitWigner(1.0, 0.2, 1.0, RandomUtils.getRandom());
 
   /**
    * Constructs a BreitWigner distribution.
    *
    * @param cut </tt>cut==Double.NEGATIVE_INFINITY</tt> indicates "don't cut".
    */
-  public BreitWigner(double mean, double gamma, double cut, RandomEngine randomGenerator) {
+  public BreitWigner(double mean, double gamma, double cut, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(mean, gamma, cut);
   }
@@ -50,12 +53,12 @@ public class BreitWigner extends AbstractContinousDistribution {
     double displ;
     double rval;
     if (cut == Double.NEGATIVE_INFINITY) { // don't cut
-      rval = 2.0 * randomGenerator.raw() - 1.0;
+      rval = 2.0 * randomGenerator.nextDouble() - 1.0;
       displ = 0.5 * gamma * Math.tan(rval * (Math.PI / 2.0));
       return mean + displ;
     } else {
       double val = Math.atan(2.0 * cut / gamma);
-      rval = 2.0 * randomGenerator.raw() - 1.0;
+      rval = 2.0 * randomGenerator.nextDouble() - 1.0;
       displ = 0.5 * gamma * Math.tan(rval * val);
 
       return mean + displ;

@@ -8,8 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -19,7 +22,7 @@ public class StudentT extends AbstractContinousDistribution {
 
   private double TERM; // performance cache for pdf()
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final StudentT shared = new StudentT(1.0, makeDefaultGenerator());
+  private static final StudentT shared = new StudentT(1.0, RandomUtils.getRandom());
 
   /**
    * Constructs a StudentT distribution. Example: freedom=1.0.
@@ -27,7 +30,7 @@ public class StudentT extends AbstractContinousDistribution {
    * @param freedom degrees of freedom.
    * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
    */
-  public StudentT(double freedom, RandomEngine randomGenerator) {
+  public StudentT(double freedom, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(freedom);
   }
@@ -68,8 +71,8 @@ public class StudentT extends AbstractContinousDistribution {
     double w;
 
     do {
-      u = 2.0 * randomGenerator.raw() - 1.0;
-      v = 2.0 * randomGenerator.raw() - 1.0;
+      u = 2.0 * randomGenerator.nextDouble() - 1.0;
+      v = 2.0 * randomGenerator.nextDouble() - 1.0;
     }
     while ((w = u * u + v * v) > 1.0);
 

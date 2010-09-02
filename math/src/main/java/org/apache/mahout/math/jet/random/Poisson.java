@@ -12,6 +12,8 @@ import org.apache.mahout.math.jet.math.Arithmetic;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
+import java.util.Random;
+
 /** Partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 public class Poisson extends AbstractDiscreteDistribution {
 
@@ -62,7 +64,7 @@ public class Poisson extends AbstractDiscreteDistribution {
 
 
   /** Constructs a poisson distribution. Example: mean=1.0. */
-  public Poisson(double mean, RandomEngine randomGenerator) {
+  public Poisson(double mean, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     this.mean = mean;
   }
@@ -93,7 +95,7 @@ public class Poisson extends AbstractDiscreteDistribution {
     return Math.exp(k * l_nu - Arithmetic.logFactorial(k) - c_pm);
   }
 
-  /** Returns a random number from the distribution. */
+  /** Returns a random number from the distribution.
   @Override
   public int nextInt() {
     return nextInt(this.mean);
@@ -117,7 +119,7 @@ public class Poisson extends AbstractDiscreteDistribution {
  * exponential functions.                                         *
  *                                                                *
  *****************************************************************/
-    RandomEngine gen = this.randomGenerator;
+    Random gen = this.randomGenerator;
 
     //double t, g, my_k;
 
@@ -139,7 +141,7 @@ public class Poisson extends AbstractDiscreteDistribution {
       }
       m = (theMean > 1.0) ? (int) theMean : 1;
       while (true) {
-        double u = gen.raw();
+        double u = gen.nextDouble();
         int k = 0;
         if (u <= p0) {
           return (k);
@@ -230,7 +232,7 @@ public class Poisson extends AbstractDiscreteDistribution {
         int Y;
         int X;
         int Dk;
-        if ((U = gen.raw() * p6) < p2) {         // centre left
+        if ((U = gen.nextDouble() * p6) < p2) {         // centre left
 
           // immediate acceptance region R2 = [k2, m) *[0, f2),  X = k2, ... m -1
           if ((V = U - p1) < 0.0) {
@@ -243,7 +245,7 @@ public class Poisson extends AbstractDiscreteDistribution {
 
           // computation of candidate X < k2, and its counterpart Y > k2
           // either squeeze-acceptance of X or acceptance-rejection of Y
-          Dk = (int) (dl * gen.raw()) + 1;
+          Dk = (int) (dl * gen.nextDouble()) + 1;
           if (W <= f2 - Dk * (f2 - f2 / r2)) {            // quick accept of
             return (k2 - Dk);                          // X = k2 - Dk
           }
@@ -269,7 +271,7 @@ public class Poisson extends AbstractDiscreteDistribution {
 
           // computation of candidate X > k4, and its counterpart Y < k4
           // either squeeze-acceptance of X or acceptance-rejection of Y
-          Dk = (int) (dr * gen.raw()) + 1;
+          Dk = (int) (dr * gen.nextDouble()) + 1;
           if (W <= f4 - Dk * (f4 - f4 * r4)) {             // quick accept of
             return (k4 + Dk);                           // X = k4 + Dk
           }
@@ -284,7 +286,7 @@ public class Poisson extends AbstractDiscreteDistribution {
           }
           X = k4 + Dk;
         } else {
-          W = gen.raw();
+          W = gen.nextDouble();
           if (U < p5) {                                  // expon. tail left
             Dk = (int) (1.0 - Math.log(W) / ll);
             if ((X = k1 - Dk) < 0) {

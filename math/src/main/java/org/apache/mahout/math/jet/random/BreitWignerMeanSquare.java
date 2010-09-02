@@ -8,7 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -17,14 +20,14 @@ public class BreitWignerMeanSquare extends BreitWigner {
   private Uniform uniform; // helper
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final BreitWigner shared = new BreitWignerMeanSquare(1.0, 0.2, 1.0, makeDefaultGenerator());
+  private static final BreitWigner shared = new BreitWignerMeanSquare(1.0, 0.2, 1.0, RandomUtils.getRandom());
 
   /**
    * Constructs a mean-squared BreitWigner distribution.
    *
    * @param cut </tt>cut==Double.NEGATIVE_INFINITY</tt> indicates "don't cut".
    */
-  public BreitWignerMeanSquare(double mean, double gamma, double cut, RandomEngine randomGenerator) {
+  public BreitWignerMeanSquare(double mean, double gamma, double cut, Random randomGenerator) {
     super(mean, gamma, cut, randomGenerator);
     this.uniform = new Uniform(randomGenerator);
   }

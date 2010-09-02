@@ -8,8 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random.sampling;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /**
  * Space and time efficiently computes a sorted <i>Simple Random Sample Without Replacement (SRSWOR)</i>, that is, a sorted set of <tt>n</tt> random numbers from an interval of <tt>N</tt> numbers;
@@ -115,7 +118,7 @@ public class RandomSampler extends PersistentObject {
   private long n;
   private long N;
   private long low;
-  private RandomEngine randomGenerator;
+  private Random randomGenerator;
 
   /**
    * Constructs a random sampler that computes and delivers sorted random sets in blocks. A set block can be retrieved
@@ -129,7 +132,7 @@ public class RandomSampler extends PersistentObject {
    * @param randomGenerator a random number generator. Set this parameter to <tt>null</tt> to use the default random
    *                        number generator.
    */
-  public RandomSampler(long n, long N, long low, RandomEngine randomGenerator) {
+  public RandomSampler(long n, long N, long low, Random randomGenerator) {
     if (n < 0) {
       throw new IllegalArgumentException("n must be >= 0");
     }
@@ -141,21 +144,13 @@ public class RandomSampler extends PersistentObject {
     this.low = low;
 
     if (randomGenerator == null) {
-      randomGenerator = org.apache.mahout.math.jet.random.AbstractDistribution.makeDefaultGenerator();
+      randomGenerator = RandomUtils.getRandom();
     }
     this.randomGenerator = randomGenerator;
   }
 
-  RandomEngine getRandomGenerator() {
+  Random getRandomGenerator() {
     return randomGenerator;
-  }
-
-  /** Returns a deep copy of the receiver. */
-  @Override
-  public Object clone() {
-    RandomSampler copy = (RandomSampler) super.clone();
-    copy.randomGenerator = (RandomEngine) this.randomGenerator.clone();
-    return copy;
   }
 
   /**
@@ -202,16 +197,16 @@ public class RandomSampler extends PersistentObject {
    * @param n               the total number of elements to choose (must be &gt;= 0).
    * @param N               the interval to choose random numbers from is <tt>[low,low+N-1]</tt>.
    * @param count           the number of elements to be filled into <tt>values</tt> by this call (must be &gt;= 0 and
-   *                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
+*                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
    * @param low             the interval to choose random numbers from is <tt>[low,low+N-1]</tt>. Hint: If
-   *                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
+*                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
    * @param values          the array into which the random numbers are to be filled; must have a length <tt>&gt;=
-   *                        count+fromIndex</tt>.
+*                        count+fromIndex</tt>.
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
   protected static void rejectMethodD(long n, long N, int count, long low, long[] values, int fromIndex,
-                                      RandomEngine randomGenerator) {
+                                      Random randomGenerator) {
     /*  This algorithm is applicable if a large percentage (90%..100%) of N shall be sampled.
       In such cases it is more efficient than sampleMethodA() and sampleMethodD().
         The idea is that it is more efficient to express
@@ -232,7 +227,7 @@ public class RandomSampler extends PersistentObject {
     double nreal = n;
     double ninv = 1.0 / nreal;
     double Nreal = N;
-    double Vprime = Math.exp(Math.log(randomGenerator.raw()) * ninv);
+    double Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
     long qu1 = -n + 1 + N;
     double qu1real = -nreal + 1.0 + Nreal;
     //threshold = -negalphainv * n;
@@ -249,9 +244,9 @@ public class RandomSampler extends PersistentObject {
           if (S < qu1) {
             break;
           }
-          Vprime = Math.exp(Math.log(randomGenerator.raw()) * ninv);
+          Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
         }
-        double U = randomGenerator.raw();
+        double U = randomGenerator.nextDouble();
         negSreal = -S;
 
         //step D3: Accept?
@@ -280,10 +275,10 @@ public class RandomSampler extends PersistentObject {
         }
         if (Nreal / (-X + Nreal) >= y1 * Math.exp(Math.log(y2) * nmin1inv)) {
           // accept !
-          Vprime = Math.exp(Math.log(randomGenerator.raw()) * nmin1inv);
+          Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * nmin1inv);
           break; //break inner loop
         }
-        Vprime = Math.exp(Math.log(randomGenerator.raw()) * ninv);
+        Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
       }
 
       //step D5: reject the (S+1)st record !
@@ -359,7 +354,7 @@ public class RandomSampler extends PersistentObject {
    *                        number generator.
    */
   public static void sample(long n, long N, int count, long low, long[] values, int fromIndex,
-                            RandomEngine randomGenerator) {
+                            Random randomGenerator) {
     if (n <= 0 || count <= 0) {
       return;
     }
@@ -367,7 +362,7 @@ public class RandomSampler extends PersistentObject {
       throw new IllegalArgumentException("count must not be greater than n");
     }
     if (randomGenerator == null) {
-      randomGenerator = org.apache.mahout.math.jet.random.AbstractDistribution.makeDefaultGenerator();
+      randomGenerator = RandomUtils.getRandom();
     }
 
     if (count == N) { // rare case treated quickly
@@ -400,23 +395,23 @@ public class RandomSampler extends PersistentObject {
    * @param n               the total number of elements to choose (must be &gt;= 0).
    * @param N               the interval to choose random numbers from is <tt>[low,low+N-1]</tt>.
    * @param count           the number of elements to be filled into <tt>values</tt> by this call (must be &gt;= 0 and
-   *                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
+*                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
    * @param low             the interval to choose random numbers from is <tt>[low,low+N-1]</tt>. Hint: If
-   *                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
+*                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
    * @param values          the array into which the random numbers are to be filled; must have a length <tt>&gt;=
-   *                        count+fromIndex</tt>.
+*                        count+fromIndex</tt>.
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
   protected static void sampleMethodA(long n, long N, int count, long low, long[] values, int fromIndex,
-                                      RandomEngine randomGenerator) {
+                                      Random randomGenerator) {
     long chosen = -1 + low;
 
     double top = N - n;
     double Nreal = N;
     long S;
     while (n >= 2 && count > 0) {
-      double V = randomGenerator.raw();
+      double V = randomGenerator.nextDouble();
       S = 0;
       double quot = top / Nreal;
       while (quot > V) {
@@ -434,7 +429,7 @@ public class RandomSampler extends PersistentObject {
 
     if (count > 0) {
       // special case n==1
-      S = (long) (Math.round(Nreal) * randomGenerator.raw());
+      S = (long) (Math.round(Nreal) * randomGenerator.nextDouble());
       chosen += S + 1;
       values[fromIndex] = chosen;
     }
@@ -452,22 +447,22 @@ public class RandomSampler extends PersistentObject {
    * @param n               the total number of elements to choose (must be &gt;= 0).
    * @param N               the interval to choose random numbers from is <tt>[low,low+N-1]</tt>.
    * @param count           the number of elements to be filled into <tt>values</tt> by this call (must be &gt;= 0 and
-   *                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
+*                        &lt;=<tt>n</tt>). Normally, you will set <tt>count=n</tt>.
    * @param low             the interval to choose random numbers from is <tt>[low,low+N-1]</tt>. Hint: If
-   *                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
+*                        <tt>low==0</tt>, then draws random numbers from the interval <tt>[0,N-1]</tt>.
    * @param values          the array into which the random numbers are to be filled; must have a length <tt>&gt;=
-   *                        count+fromIndex</tt>.
+*                        count+fromIndex</tt>.
    * @param fromIndex       the first index within <tt>values</tt> to be filled with numbers (inclusive).
    * @param randomGenerator a random number generator.
    */
   protected static void sampleMethodD(long n, long N, int count, long low, long[] values, int fromIndex,
-                                      RandomEngine randomGenerator) {
+                                      Random randomGenerator) {
     long chosen = -1 + low;
 
     double nreal = n;
     double ninv = 1.0 / nreal;
     double Nreal = N;
-    double Vprime = Math.exp(Math.log(randomGenerator.raw()) * ninv);
+    double Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
     long qu1 = -n + 1 + N;
     double qu1real = -nreal + 1.0 + Nreal;
     long negalphainv =
@@ -486,9 +481,9 @@ public class RandomSampler extends PersistentObject {
           if (S < qu1) {
             break;
           }
-          Vprime = Math.exp(Math.log(randomGenerator.raw()) * ninv);
+          Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
         }
-        double U = randomGenerator.raw();
+        double U = randomGenerator.nextDouble();
         negSreal = -S;
 
         //step D3: Accept?
@@ -517,10 +512,10 @@ public class RandomSampler extends PersistentObject {
         }
         if (Nreal / (-X + Nreal) >= y1 * Math.exp(Math.log(y2) * nmin1inv)) {
           // accept !
-          Vprime = Math.exp(Math.log(randomGenerator.raw()) * nmin1inv);
+          Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * nmin1inv);
           break; //break inner loop
         }
-        Vprime = Math.exp(Math.log(randomGenerator.raw()) * ninv);
+        Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
       }
 
       //step D5: select the (S+1)st record !

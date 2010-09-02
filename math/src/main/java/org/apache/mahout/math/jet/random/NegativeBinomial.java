@@ -29,6 +29,8 @@ import org.apache.mahout.math.jet.math.Arithmetic;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
+import java.util.Random;
+
 /** Mostly deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 public class NegativeBinomial extends AbstractDiscreteDistribution {
 
@@ -47,7 +49,7 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
    * @param p               the probability of success.
    * @param randomGenerator a uniform random number generator.
    */
-  public NegativeBinomial(int r, double p, RandomEngine randomGenerator) {
+  public NegativeBinomial(int r, double p, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     this.r = r;
     this.p = p;
@@ -88,14 +90,6 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
     }
     copy.gamma.setRandomGenerator(copy.getRandomGenerator());
     return copy;
-  }
-
-  /**
-   * Returns a random number from the distribution.
-   */
-  @Override
-  public int nextInt() {
-    return nextInt(r, p);
   }
 
   /**

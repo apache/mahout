@@ -8,7 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
+
+import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -32,10 +35,10 @@ public class Hyperbolic extends AbstractContinousDistribution {
 
 
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Hyperbolic shared = new Hyperbolic(10.0, 10.0, makeDefaultGenerator());
+  private static final Hyperbolic shared = new Hyperbolic(10.0, 10.0, RandomUtils.getRandom());
 
   /** Constructs a Beta distribution. */
-  public Hyperbolic(double alpha, double beta, RandomEngine randomGenerator) {
+  public Hyperbolic(double alpha, double beta, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(alpha, beta);
   }
@@ -96,8 +99,8 @@ public class Hyperbolic extends AbstractContinousDistribution {
     // GENERATOR
     double x;
     while (true) {
-      double u = randomGenerator.raw();
-      double v = randomGenerator.raw();
+      double u = randomGenerator.nextDouble();
+      double v = randomGenerator.nextDouble();
       if (u <= pm) { // Rejection with a uniform majorizing function
         // over the body of the distribution
         x = mmb_1 + u * s;

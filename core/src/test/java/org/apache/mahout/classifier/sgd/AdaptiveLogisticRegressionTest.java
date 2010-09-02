@@ -25,19 +25,21 @@ import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Random;
+
 public class AdaptiveLogisticRegressionTest {
   @Test
   public void testTrain() {
     // we make up data for a simple model
 
-    final MersenneTwister gen = new MersenneTwister(1);
-    final Exponential exp = new Exponential(.5, gen);
+    final Random gen = RandomUtils.getRandom();
+    final Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
     for (Vector.Element element : beta) {
-        int sign = 1;
-        if (gen.nextDouble() < 0.5) {
-          sign = -1;
-        }
+      int sign = 1;
+      if (gen.nextDouble() < 0.5) {
+        sign = -1;
+      }
       element.set(sign * exp.nextDouble());
     }
 
@@ -67,7 +69,7 @@ public class AdaptiveLogisticRegressionTest {
     }
   }
 
-  private AdaptiveLogisticRegression.TrainingExample getExample(int i, MersenneTwister gen, Vector beta) {
+  private AdaptiveLogisticRegression.TrainingExample getExample(int i, Random gen, Vector beta) {
     Vector data = new DenseVector(200);
 
     for (Vector.Element element : data) {
@@ -85,9 +87,9 @@ public class AdaptiveLogisticRegressionTest {
   @Test
   public void copyLearnsAsExpected() {
     RandomUtils.useTestSeed();
-    
-    final MersenneTwister gen = new MersenneTwister(1);
-    final Exponential exp = new Exponential(.5, gen);
+
+    final Random gen = RandomUtils.getRandom();
+    final Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
     for (Vector.Element element : beta) {
         int sign = 1;

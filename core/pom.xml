@@ -211,12 +211,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.uncommons.maths</groupId>
-      <artifactId>uncommons-maths</artifactId>
-      <version>1.2</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
       <version>1.3.1</version>
