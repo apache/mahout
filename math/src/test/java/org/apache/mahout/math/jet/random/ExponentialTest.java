@@ -20,7 +20,6 @@ package org.apache.mahout.math.jet.random;
 import org.apache.commons.math.ConvergenceException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -32,7 +31,7 @@ import static org.junit.Assert.assertEquals;
  * Created by IntelliJ IDEA. User: tdunning Date: Aug 31, 2010 Time: 7:14:19 PM To change this
  * template use File | Settings | File Templates.
  */
-public class ExponentialTest extends DistributionTest {
+public class ExponentialTest extends DistributionChecks {
   @Test
   public void testCdf() {
     Exponential dist = new Exponential(5.0, RandomUtils.getRandom());
