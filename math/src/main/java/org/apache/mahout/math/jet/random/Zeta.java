@@ -36,6 +36,11 @@ public class Zeta extends AbstractDiscreteDistribution {
     setState(ro, pk);
   }
 
+  @Override
+  public int nextInt() {
+    return (int) generateZeta(ro, pk, randomGenerator);
+  }
+
   /** Returns a zeta distributed random number. */
   protected long generateZeta(double ro, double pk, Random randomGenerator) {
 /******************************************************************

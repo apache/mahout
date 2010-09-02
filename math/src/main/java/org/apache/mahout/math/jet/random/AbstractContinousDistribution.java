@@ -39,4 +39,13 @@ public abstract class AbstractContinousDistribution extends AbstractDistribution
   public double pdf(double x) {
     throw new UnsupportedOperationException("Can't compute pdf for " + this.getClass().getName());
   }
+
+  /**
+   * @return A random number from the distribution; returns <tt>(int) Math.round(nextDouble())</tt>.
+   *         Override this method if necessary.
+   */
+  @Override
+  public int nextInt() {
+    return (int) Math.round(nextDouble());
+  }
 }

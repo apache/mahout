@@ -92,6 +92,11 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
     return copy;
   }
 
+  @Override
+  public int nextInt() {
+    return nextInt(r, p);
+  }
+
   /**
    * Returns a sample from this distribution.  The value returned will
    * be the number of negative samples required before achieving r

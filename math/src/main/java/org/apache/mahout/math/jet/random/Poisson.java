@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.math.jet.math.Arithmetic;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
 import java.util.Random;
@@ -95,11 +94,17 @@ public class Poisson extends AbstractDiscreteDistribution {
     return Math.exp(k * l_nu - Arithmetic.logFactorial(k) - c_pm);
   }
 
+  @Override
+  public int nextInt() {
+    return nextInt(mean);
+  }
+
   /** Returns a random number from the distribution.
   @Override
   public int nextInt() {
     return nextInt(this.mean);
   }
+
 
   /** Returns a random number from the distribution; bypasses the internal state. */
   public int nextInt(double theMean) {

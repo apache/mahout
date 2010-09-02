@@ -65,9 +65,7 @@ public abstract class AbstractDistribution extends PersistentObject implements U
    * A random number from the distribution; returns <tt>(int) Math.round(nextDouble())</tt>. Override this
    * method if necessary.
    */
-  public int nextInt() {
-    return (int) Math.round(nextDouble());
-  }
+  public abstract int nextInt();
 
   /**
    * Returns the used uniform random number generator;

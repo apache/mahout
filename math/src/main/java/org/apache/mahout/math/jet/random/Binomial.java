@@ -89,6 +89,11 @@ public class Binomial extends AbstractDiscreteDistribution {
     return sum;
   }
 
+  @Override
+  public int nextInt() {
+    return generateBinomial(n, p);
+  }
+
   /**
    * *************************************************************** * Binomial-Distribution - Acceptance
    * Rejection/Inversion     * * ***************************************************************** * Acceptance

@@ -59,17 +59,17 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
     return -tmp + Math.log(2.5066282746310005 * ser);
   }
 
-  /** Returns a random number from the distribution; bypasses the internal state. */
-  private int nextInt(double xm) {
+  @Override
+  public int nextInt() {
     /*
     * Adapted from "Numerical Recipes in C".
     */
     double g = this.cached_g;
 
-    if (xm == -1.0) {
+    if (mean == -1.0) {
       return 0;
     } // not defined
-    if (xm < SWITCH_MEAN) {
+    if (mean < SWITCH_MEAN) {
       int poisson = -1;
       double product = 1;
       do {
@@ -78,7 +78,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
       } while (product >= g);
       // bug in CLHEP 1.4.0: was "} while ( product > g );"
       return poisson;
-    } else if (xm < MEAN_MAX) {
+    } else if (mean < MEAN_MAX) {
       double t;
       double em;
       double sq = this.cached_sq;
@@ -89,14 +89,14 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
         double y;
         do {
           y = Math.tan(Math.PI * rand.nextDouble());
-          em = sq * y + xm;
+          em = sq * y + mean;
         } while (em < 0.0);
         em = (double) (int) (em); // faster than em = Math.floor(em); (em>=0.0)
         t = 0.9 * (1.0 + y * y) * Math.exp(em * alxm - logGamma(em + 1.0) - g);
       } while (rand.nextDouble() > t);
       return (int) em;
     } else { // mean is too large
-      return (int) xm;
+      return (int) mean;
     }
   }
 

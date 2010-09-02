@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
  * samples.  The pdf is checked against the cdf by quadrature.  The sampling is checked
  * against the cdf using a G^2 (similar to chi^2) test.
  */
-public class DistributionTest {
+public class DistributionChecks {
   public void checkDistribution(final AbstractContinousDistribution dist, double[] x, double offset, double scale, int n) throws ConvergenceException, FunctionEvaluationException {
     double[] xs = Arrays.copyOf(x, x.length);
     for (int i = 0; i < xs.length; i++) {
