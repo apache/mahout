@@ -17,15 +17,10 @@
 
 package org.apache.mahout.vectors;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Locale;
-
-import static org.junit.Assert.assertEquals;
 
 public class InteractionValueEncoderTest {
   @Test

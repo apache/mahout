@@ -618,8 +618,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     }
 
     if (columns != y.size || rows > z.size) {
-      throw new IllegalArgumentException(
-          "Incompatible args: " + toStringShort() + ", " + y.toStringShort() + ", " + z.toStringShort());
+      throw new IllegalArgumentException("Incompatible sizes");
     }
 
     DenseDoubleMatrix1D yy = (DenseDoubleMatrix1D) y;
@@ -669,7 +668,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     if (transposeA) {
       return viewDice().zMult(B, C, alpha, beta, false, transposeB);
     }
-    if (B instanceof SparseDoubleMatrix2D || B instanceof RCDoubleMatrix2D) {
+    if (B instanceof SparseDoubleMatrix2D) {
       // exploit quick sparse mult
       // A*B = (B' * A')'
       if (C == null) {
@@ -694,11 +693,11 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     }
     if (B.rows != n) {
       throw new IllegalArgumentException(
-          "Matrix2D inner dimensions must agree:" + toStringShort() + ", " + B.toStringShort());
+          "Matrix2D inner dimensions must agree");
     }
     if (C.rows != m || C.columns != p) {
       throw new IllegalArgumentException(
-          "Incompatibel result matrix: " + toStringShort() + ", " + B.toStringShort() + ", " + C.toStringShort());
+          "Incompatible result matrix");
     }
     if (this == C || B == C) {
       throw new IllegalArgumentException("Matrices must not be identical");

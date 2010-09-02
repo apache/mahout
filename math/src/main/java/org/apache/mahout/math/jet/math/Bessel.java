@@ -24,7 +24,7 @@ public class Bessel extends Constants {
    *
    * lim(x->0){ exp(-x) I0(x) } = 1.
    */
-  protected static final double[] aSubI0 = {
+  static final double[] aSubI0 = {
     -4.41534164647933937950E-18,
     3.33079451882223809783E-17,
     -2.43127984654795469359E-16,
@@ -63,7 +63,7 @@ public class Bessel extends Constants {
    *
    * lim(x->inf){ exp(-x) sqrt(x) I0(x) } = 1/sqrt(2pi).
    */
-  protected static final double[] bSubI0 = {
+  static final double[] bSubI0 = {
     -7.23318048787475395456E-18,
     -4.83050448594418207126E-18,
     4.46562142029675999901E-17,
@@ -100,7 +100,7 @@ public class Bessel extends Constants {
    *
    * lim(x->0){ exp(-x) I1(x) / x } = 1/2.
    */
-  protected static final double[] aSubI1 = {
+  static final double[] aSubI1 = {
     2.77791411276104639959E-18,
     -2.11142121435816608115E-17,
     1.55363195773620046921E-16,
@@ -138,7 +138,7 @@ public class Bessel extends Constants {
    *
    * lim(x->inf){ exp(-x) sqrt(x) I1(x) } = 1/sqrt(2pi).
    */
-  protected static final double[] bSubI1 = {
+  static final double[] bSubI1 = {
     7.51729631084210481353E-18,
     4.41434832307170791151E-18,
     -4.65030536848935832153E-17,
@@ -174,7 +174,7 @@ public class Bessel extends Constants {
    * 
    * lim(x->0){ K0(x) + log(x/2) I0(x) } = -EUL.
    */
-  protected static final double[] aSubK0 = {
+  static final double[] aSubK0 = {
     1.37446543561352307156E-16,
     4.25981614279661018399E-14,
     1.03496952576338420167E-11,
@@ -192,7 +192,7 @@ public class Bessel extends Constants {
    * 
    * lim(x->inf){ exp(x) sqrt(x) K0(x) } = sqrt(pi/2).
    */
-  protected static final double[] bSubK0 = {
+  static final double[] bSubK0 = {
     5.30043377268626276149E-18,
     -1.64758043015242134646E-17,
     5.21039150503902756861E-17,
@@ -227,7 +227,7 @@ public class Bessel extends Constants {
    * 
    * lim(x->0){ x(K1(x) - log(x/2) I1(x)) } = 1.
    */
-  protected static final double[] aSubK1 = {
+  static final double[] aSubK1 = {
     -7.02386347938628759343E-18,
     -2.42744985051936593393E-15,
     -6.66690169419932900609E-13,
@@ -246,7 +246,7 @@ public class Bessel extends Constants {
    *
    * lim(x->inf){ exp(x) sqrt(x) K1(x) } = sqrt(pi/2).
    */
-  protected static final double[] bSubK1 = {
+  static final double[] bSubK1 = {
     -5.75674448366501715755E-18,
     1.79405087314755922667E-17,
     -5.68946255844285935196E-17,
@@ -291,7 +291,7 @@ public class Bessel extends Constants {
       x = -x;
     }
     if (x <= 8.0) {
-      return (Math.exp(x) * Arithmetic.chbevl((x / 2.0) - 2.0, aSubI0, 30));
+      return Math.exp(x) * Arithmetic.chbevl((x / 2.0) - 2.0, aSubI0, 30);
     }
 
     return Math.exp(x) * Arithmetic.chbevl(32.0 / x - 2.0, bSubI0, 25) / Math.sqrt(x);
@@ -309,7 +309,7 @@ public class Bessel extends Constants {
       x = -x;
     }
     if (x <= 8.0) {
-      return (Arithmetic.chbevl((x / 2.0) - 2.0, aSubI0, 30));
+      return Arithmetic.chbevl((x / 2.0) - 2.0, aSubI0, 30);
     }
 
     return Arithmetic.chbevl(32.0 / x - 2.0, bSubI0, 25) / Math.sqrt(x);
@@ -731,15 +731,15 @@ asymptotically, where
     fn = 1.0;
     t = 1.0;
     s = t;
-    double nkf = Double.MAX_VALUE;
     i = 0;
+    double nkf = Double.MAX_VALUE;
     do {
       z = pn - pk * pk;
       t = t * z / (fn * z0);
       nk1f = Math.abs(t);
       if ((i >= n) && (nk1f > nkf)) {
         ans = Math.exp(-x) * Math.sqrt(Math.PI / (2.0 * x)) * s;
-        return (ans);
+        return ans;
       }
       nkf = nk1f;
       s += t;

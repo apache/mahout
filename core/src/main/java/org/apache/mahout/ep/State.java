@@ -1,10 +1,13 @@
 package org.apache.mahout.ep;
 
 import com.google.common.collect.Lists;
+import org.apache.mahout.common.RandomUtils;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Records evolutionary state and provides a mutation operation for recorded-step meta-mutation.
@@ -27,11 +30,11 @@ import java.util.Random;
  */
 public class State<T extends Payload<T>> implements Comparable<State<T>> {
   // object count is kept to break ties in comparison.
-  static volatile int objectCount = 0;
+  private static final AtomicInteger objectCount = new AtomicInteger();
 
-  private int id = objectCount++;
+  private int id = objectCount.getAndIncrement();
 
-  private transient Random gen = new Random();
+  private Random gen = RandomUtils.getRandom();
 
   // current state
   private double[] params;
@@ -187,7 +190,8 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
   }
 
   public void setMaps(Iterable<Mapping> maps) {
-    this.maps = Lists.newArrayList(maps).toArray(new Mapping[0]);
+    Collection<Mapping> list = Lists.newArrayList(maps);
+    this.maps = list.toArray(new Mapping[list.size()]);
   }
 
   public void setValue(double v) {
@@ -206,13 +210,9 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
    * @return -1, 0, 1 if the other state is better, identical or worse than this one.
    */
   @Override
-  public int compareTo(State other) {
+  public int compareTo(State<T> other) {
     int r = Double.compare(other.value, this.value);
-    if (r == 0) {
-      return this.id - other.id;
-    } else {
-      return r;
-    }
+    return r == 0 ? this.id - other.id : r;
   }
 
   public String toString() {

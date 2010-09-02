@@ -83,10 +83,10 @@ public class InMemoryBayesDatastore implements Datastore {
     }
     for (String label : getKeys("")) {
       log.info("{} {} {} {}", new Object[] {
-       label,
-       thetaNormalizerPerLabel.get(getLabelID(label)),
-       thetaNormalizer,
-       thetaNormalizerPerLabel.get(getLabelID(label)) / thetaNormalizer
+        label,
+        thetaNormalizerPerLabel.get(getLabelID(label)),
+        thetaNormalizer,
+        thetaNormalizerPerLabel.get(getLabelID(label)) / thetaNormalizer
       });
     }
   }
@@ -98,8 +98,8 @@ public class InMemoryBayesDatastore implements Datastore {
   
   @Override
   public double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException {
-    if (matrixName.equals("weight")) {
-      if (column.equals("sigma_j")) {
+    if ("weight".equals(matrixName)) {
+      if ("sigma_j".equals(column)) {
         return sigmaJ.get(getFeatureID(row));
       } else {
         return weightMatrix.getQuick(getFeatureID(row), getLabelID(column));
@@ -111,23 +111,23 @@ public class InMemoryBayesDatastore implements Datastore {
   
   @Override
   public double getWeight(String vectorName, String index) throws InvalidDatastoreException {
-    if (vectorName.equals("sumWeight")) {
-      if (index.equals("sigma_jSigma_k")) {
+    if ("sumWeight".equals(vectorName)) {
+      if ("sigma_jSigma_k".equals(index)) {
         return sigmaJsigmaK;
-      } else if (index.equals("vocabCount")) {
+      } else if ("vocabCount".equals(index)) {
         return featureDictionary.size();
       } else {
         throw new InvalidDatastoreException();
       }
-    } else if (vectorName.equals("thetaNormalizer")) {
+    } else if ("thetaNormalizer".equals(vectorName)) {
       return thetaNormalizerPerLabel.get(getLabelID(index)) / thetaNormalizer;
-    } else if (vectorName.equals("params")) {
-      if (index.equals("alpha_i")) {
+    } else if ("params".equals(vectorName)) {
+      if ("alpha_i".equals(index)) {
         return alphaI;
       } else {
         throw new InvalidDatastoreException();
       }
-    } else if (vectorName.equals("labelWeight")) {
+    } else if ("labelWeight".equals(vectorName)) {
       return sigmaK.get(getLabelID(index));
     } else {
       throw new InvalidDatastoreException();

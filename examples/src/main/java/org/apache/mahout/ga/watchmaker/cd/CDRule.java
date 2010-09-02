@@ -242,7 +242,7 @@ public class CDRule implements Rule {
     if (this == obj) {
       return true;
     }
-    if (obj == null || !(obj instanceof CDRule)) {
+    if (!(obj instanceof CDRule)) {
       return false;
     }
     CDRule rule = (CDRule) obj;

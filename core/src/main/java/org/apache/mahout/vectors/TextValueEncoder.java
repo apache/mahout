@@ -64,6 +64,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
     return 0;
   }
 
+  @Override
   protected Iterable<Integer> hashesForProbe(String originalForm, int dataSize, String name, int probe){
     List<Integer> hashes = new ArrayList<Integer>();
     for (String word : tokenize(originalForm)){

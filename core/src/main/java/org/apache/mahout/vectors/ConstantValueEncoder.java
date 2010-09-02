@@ -48,6 +48,7 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
     return getName();
   }
 
+  @Override
   protected int hashForProbe(String originalForm, int dataSize, String name, int probe){
     return hash(name, probe, dataSize);
   }

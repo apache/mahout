@@ -139,19 +139,19 @@ public final class VectorDumper {
                 writer.write(iterator.key().toString());
                 writer.write("\t");
               }
-              if (!sizeOnly) {
-                String fmtStr = useJSON ? vector.asFormatString() : VectorHelper.vectorToString(vector, dictionary);
-                writer.write(fmtStr);
-                writer.write('\n');
-              } else {
-                if (vector instanceof NamedVector){
-                  writer.write(((NamedVector)vector).getName());
+              if (sizeOnly) {
+                if (vector instanceof NamedVector) {
+                  writer.write(((NamedVector) vector).getName());
                   writer.write(":");
                 } else {
                   writer.write(String.valueOf(i++));
                   writer.write(":");
                 }
                 writer.write(String.valueOf(vector.size()));
+                writer.write('\n');
+              } else {
+                String fmtStr = useJSON ? vector.asFormatString() : VectorHelper.vectorToString(vector, dictionary);
+                writer.write(fmtStr);
                 writer.write('\n');
               }
               //i++;

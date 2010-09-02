@@ -441,9 +441,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
     }
 
     if (n != y.size() || m > z.size()) {
-      throw new IllegalArgumentException(
-          "Incompatible args: " + ((transposeA ? viewDice() : this).toStringShort()) + ", " + y.toStringShort() + ", " +
-              z.toStringShort());
+      throw new IllegalArgumentException("Incompatible args");
     }
 
     if (!ignore) {
@@ -508,13 +506,10 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
     }
 
     if (B.rows != n) {
-      throw new IllegalArgumentException("Matrix2D inner dimensions must agree:" + toStringShort() + ", " +
-          (transposeB ? B.viewDice() : B).toStringShort());
+      throw new IllegalArgumentException("Matrix2D inner dimensions must agree");
     }
     if (C.rows != m || C.columns != p) {
-      throw new IllegalArgumentException(
-          "Incompatibel result matrix: " + toStringShort() + ", " + (transposeB ? B.viewDice() : B).toStringShort() +
-              ", " + C.toStringShort());
+      throw new IllegalArgumentException("Incompatible result matrix");
     }
     if (this == C || B == C) {
       throw new IllegalArgumentException("Matrices must not be identical");

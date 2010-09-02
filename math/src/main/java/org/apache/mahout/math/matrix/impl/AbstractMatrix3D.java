@@ -124,8 +124,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
   protected void checkBox(int slice, int row, int column, int depth, int height, int width) {
     if (slice < 0 || depth < 0 || slice + depth > slices || row < 0 || height < 0 || row + height > rows ||
         column < 0 || width < 0 || column + width > columns) {
-      throw new IndexOutOfBoundsException(
-          toStringShort() + ", slice:" + slice + ", row:" + row + " ,column:" + column + ", depth:" + depth +
+      throw new IndexOutOfBoundsException("Slice:" + slice + ", row:" + row + " ,column:" + column + ", depth:" + depth +
               " ,height:" + height + ", width:" + width);
     }
   }
@@ -137,7 +136,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    */
   protected void checkColumn(int column) {
     if (column < 0 || column >= columns) {
-      throw new IndexOutOfBoundsException("Attempted to access " + toStringShort() + " at column=" + column);
+      throw new IndexOutOfBoundsException("Attempted to access at column=" + column);
     }
   }
 
@@ -162,7 +161,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    */
   protected void checkRow(int row) {
     if (row < 0 || row >= rows) {
-      throw new IndexOutOfBoundsException("Attempted to access " + toStringShort() + " at row=" + row);
+      throw new IndexOutOfBoundsException("Attempted to access at row=" + row);
     }
   }
 
@@ -188,7 +187,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    */
   public void checkShape(AbstractMatrix3D B) {
     if (slices != B.slices || rows != B.rows || columns != B.columns) {
-      throw new IllegalArgumentException("Incompatible dimensions: " + toStringShort() + " and " + B.toStringShort());
+      throw new IllegalArgumentException("Incompatible dimensions");
     }
   }
 
@@ -201,8 +200,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
   public void checkShape(AbstractMatrix3D B, AbstractMatrix3D C) {
     if (slices != B.slices || rows != B.rows || columns != B.columns || slices != C.slices || rows != C.rows ||
         columns != C.columns) {
-      throw new IllegalArgumentException(
-          "Incompatible dimensions: " + toStringShort() + ", " + B.toStringShort() + ", " + C.toStringShort());
+      throw new IllegalArgumentException("Incompatible dimensions");
     }
   }
 
@@ -213,7 +211,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    */
   protected void checkSlice(int slice) {
     if (slice < 0 || slice >= slices) {
-      throw new IndexOutOfBoundsException("Attempted to access " + toStringShort() + " at slice=" + slice);
+      throw new IndexOutOfBoundsException("Attempted to access  at slice=" + slice);
     }
   }
 
@@ -321,11 +319,6 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
   /** Returns the number of slices. */
   public int slices() {
     return slices;
-  }
-
-  /** Returns a string representation of the receiver's shape. */
-  public String toStringShort() {
-    return AbstractFormatter.shape(this);
   }
 
   /** Self modifying version of viewColumnFlip(). */

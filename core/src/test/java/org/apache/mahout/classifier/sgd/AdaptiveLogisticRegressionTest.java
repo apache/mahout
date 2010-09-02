@@ -21,7 +21,6 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.jet.random.Exponential;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,8 +31,8 @@ public class AdaptiveLogisticRegressionTest {
   public void testTrain() {
     // we make up data for a simple model
 
-    final Random gen = RandomUtils.getRandom();
-    final Exponential exp = new Exponential(0.5, gen);
+    Random gen = RandomUtils.getRandom();
+    Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
     for (Vector.Element element : beta) {
       int sign = 1;
@@ -44,7 +43,7 @@ public class AdaptiveLogisticRegressionTest {
     }
 
     AdaptiveLogisticRegression.Wrapper cl = new AdaptiveLogisticRegression.Wrapper(2, 200, new L1());
-    cl.update(new double[]{1e-5, 1});
+    cl.update(new double[]{1.0e-5, 1});
 
     for (int i = 0; i < 10000; i++) {
       AdaptiveLogisticRegression.TrainingExample r = getExample(i, gen, beta);
@@ -63,13 +62,15 @@ public class AdaptiveLogisticRegressionTest {
       x.train(r.getKey(), r.getActual(), r.getInstance());
       if (i % 1000 == 0) {
         if (x.getBest() != null) {
-          System.out.printf("%10d %10.4f %10.8f %.3f\n", i, x.auc(), Math.log10(x.getBest().getMappedParams()[0]), x.getBest().getMappedParams()[1]);
+          System.out.printf("%10d %10.4f %10.8f %.3f\n",
+                            i, x.auc(),
+                            Math.log10(x.getBest().getMappedParams()[0]), x.getBest().getMappedParams()[1]);
         }
       }
     }
   }
 
-  private AdaptiveLogisticRegression.TrainingExample getExample(int i, Random gen, Vector beta) {
+  private static AdaptiveLogisticRegression.TrainingExample getExample(int i, Random gen, Vector beta) {
     Vector data = new DenseVector(200);
 
     for (Vector.Element element : data) {
@@ -88,8 +89,8 @@ public class AdaptiveLogisticRegressionTest {
   public void copyLearnsAsExpected() {
     RandomUtils.useTestSeed();
 
-    final Random gen = RandomUtils.getRandom();
-    final Exponential exp = new Exponential(0.5, gen);
+    Random gen = RandomUtils.getRandom();
+    Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
     for (Vector.Element element : beta) {
         int sign = 1;
@@ -113,7 +114,6 @@ public class AdaptiveLogisticRegressionTest {
 
     // then switch to a copy of that learner ... progress should continue
     AdaptiveLogisticRegression.Wrapper w2 = w.copy();
-    double auc2;
 
     for (int i = 0; i < 5000; i++) {
       if (i % 1000 == 0) {
@@ -121,7 +121,7 @@ public class AdaptiveLogisticRegressionTest {
           Assert.assertEquals("Should have started with no data", 0.5, w2.getLearner().auc(), 0.0001);
         }
         if (i == 1000) {
-          auc2 = w2.getLearner().auc();
+          double auc2 = w2.getLearner().auc();
           Assert.assertTrue("Should have had head-start", Math.abs(auc2 - 0.5) > 0.1);
           Assert.assertTrue("AUC should improve quickly on copy", auc1 < auc2);
         }
@@ -130,7 +130,7 @@ public class AdaptiveLogisticRegressionTest {
       AdaptiveLogisticRegression.TrainingExample r = getExample(i, gen, beta);
       w2.train(r);
     }
-    Assert.assertEquals("Original should not change after copy is updated", auc1, w.getLearner().auc(), 1e-5);
+    Assert.assertEquals("Original should not change after copy is updated", auc1, w.getLearner().auc(), 1.0e-5);
 
     // this improvement is really quite lenient
     Assert.assertTrue("AUC should improve significantly on copy", auc1 < w2.getLearner().auc() - 0.05);

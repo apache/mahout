@@ -201,8 +201,7 @@ class RCMDoubleMatrix2D extends WrapperDoubleMatrix2D {
   protected void zMult(DoubleMatrix1D y, DoubleMatrix1D z, org.apache.mahout.math.list.IntArrayList nonZeroIndexes,
                        DoubleMatrix1D[] allRows, double alpha, double beta) {
     if (columns != y.size() || rows > z.size()) {
-      throw new IllegalArgumentException(
-          "Incompatible args: " + toStringShort() + ", " + y.toStringShort() + ", " + z.toStringShort());
+      throw new IllegalArgumentException("Incompatible args");
     }
 
     z.assign(Functions.mult(beta / alpha));

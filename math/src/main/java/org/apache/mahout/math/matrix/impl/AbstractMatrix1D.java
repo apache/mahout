@@ -66,7 +66,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    */
   protected void checkIndex(int index) {
     if (index < 0 || index >= size) {
-      throw new IndexOutOfBoundsException("Attempted to access " + toStringShort() + " at index=" + index);
+      throw new IndexOutOfBoundsException("Attempted to access at index=" + index);
     }
   }
 
@@ -102,7 +102,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    */
   protected void checkSize(double[] B) {
     if (size != B.length) {
-      throw new IllegalArgumentException("Incompatible sizes: " + toStringShort() + " and " + B.length);
+      throw new IllegalArgumentException("Incompatible sizes: " + size + " and " + B.length);
     }
   }
 
@@ -113,7 +113,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    */
   public void checkSize(AbstractMatrix1D B) {
     if (size != B.size) {
-      throw new IllegalArgumentException("Incompatible sizes: " + toStringShort() + " and " + B.toStringShort());
+      throw new IllegalArgumentException("Incompatible sizes: " + size + " and " + B.size);
     }
   }
 
@@ -170,14 +170,9 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    */
   protected int stride(int dimension) {
     if (dimension != 0) {
-      throw new IllegalArgumentException("invalid dimension: " + dimension + "used to access" + toStringShort());
+      throw new IllegalArgumentException("invalid dimension: " + dimension);
     }
     return this.stride;
-  }
-
-  /** Returns a string representation of the receiver's shape. */
-  public String toStringShort() {
-    return AbstractFormatter.shape(this);
   }
 
   /**

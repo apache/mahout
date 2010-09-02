@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.evaluation;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.list.DoubleArrayList;
@@ -33,9 +34,7 @@ import java.util.Random;
  */
 public class Auc {
   private int maxBufferSize = 10000;
-  private DoubleArrayList[] scores = new DoubleArrayList[]{
-          new DoubleArrayList(), new DoubleArrayList()
-  };
+  private final DoubleArrayList[] scores = {new DoubleArrayList(), new DoubleArrayList()};
   private Random rand;
   private int samples = 0;
   private double threshold;
@@ -44,7 +43,7 @@ public class Auc {
 
   private boolean probabilityScore = true;
 
-  private boolean hasScore = false;
+  private boolean hasScore;
 
   // exposed for testing only
 
@@ -61,7 +60,7 @@ public class Auc {
    * @param threshold The threshold to use in computing the confusion matrix.
    */
   public Auc(double threshold) {
-    this(new Random());
+    this(RandomUtils.getRandom());
     this.threshold = threshold;
   }
 
@@ -85,7 +84,7 @@ public class Auc {
     int predictedClass = (score > threshold) ? 1 : 0;
     confusion.set(trueValue, predictedClass, confusion.get(trueValue, predictedClass) + 1);
     if (isProbabilityScore()) {
-      double limited = Math.max(1e-20, Math.min(score, 1 - 1e-20));
+      double limited = Math.max(1.0e-20, Math.min(score, 1 - 1.0e-20));
       entropy.set(trueValue, 0, Math.log(1 - limited));
       entropy.set(trueValue, 1, Math.log(limited));
     }

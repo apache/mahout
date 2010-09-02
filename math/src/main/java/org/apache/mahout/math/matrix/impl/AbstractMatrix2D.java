@@ -94,8 +94,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    */
   protected void checkBox(int row, int column, int height, int width) {
     if (column < 0 || width < 0 || column + width > columns || row < 0 || height < 0 || row + height > rows) {
-      throw new IndexOutOfBoundsException(
-          toStringShort() + ", column:" + column + ", row:" + row + " ,width:" + width + ", height:" + height);
+      throw new IndexOutOfBoundsException("Column:" + column + ", row:" + row + " ,width:" + width + ", height:" + height);
     }
   }
 
@@ -106,7 +105,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    */
   protected void checkColumn(int column) {
     if (column < 0 || column >= columns) {
-      throw new IndexOutOfBoundsException("Attempted to access " + toStringShort() + " at column=" + column);
+      throw new IndexOutOfBoundsException("Attempted to access at column=" + column);
     }
   }
 
@@ -131,7 +130,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    */
   protected void checkRow(int row) {
     if (row < 0 || row >= rows) {
-      throw new IndexOutOfBoundsException("Attempted to access " + toStringShort() + " at row=" + row);
+      throw new IndexOutOfBoundsException("Attempted to access at row=" + row);
     }
   }
 
@@ -156,7 +155,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    */
   public void checkShape(AbstractMatrix2D B) {
     if (columns != B.columns || rows != B.rows) {
-      throw new IllegalArgumentException("Incompatible dimensions: " + toStringShort() + " and " + B.toStringShort());
+      throw new IllegalArgumentException("Incompatible dimensions");
     }
   }
 
@@ -168,8 +167,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    */
   public void checkShape(AbstractMatrix2D B, AbstractMatrix2D C) {
     if (columns != B.columns || rows != B.rows || columns != C.columns || rows != C.rows) {
-      throw new IllegalArgumentException(
-          "Incompatible dimensions: " + toStringShort() + ", " + B.toStringShort() + ", " + C.toStringShort());
+      throw new IllegalArgumentException("Incompatible dimensions");
     }
   }
 
@@ -239,11 +237,6 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
   @Override
   public int size() {
     return rows * columns;
-  }
-
-  /** Returns a string representation of the receiver's shape. */
-  public String toStringShort() {
-    return AbstractFormatter.shape(this);
   }
 
   /** Self modifying version of viewColumnFlip(). */

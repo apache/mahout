@@ -119,12 +119,12 @@ public final class Classify {
     String classifierType = (String) cmdLine.getValue(typeOpt);
     
     String dataSource = (String) cmdLine.getValue(dataSourceOpt);
-    if (dataSource.equals("hdfs")) {
-      if (classifierType.equalsIgnoreCase("bayes")) {
+    if ("hdfs".equals(dataSource)) {
+      if ("bayes".equalsIgnoreCase(classifierType)) {
         log.info("Using Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
-      } else if (classifierType.equalsIgnoreCase("cbayes")) {
+      } else if ("cbayes".equalsIgnoreCase(classifierType)) {
         log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
@@ -132,12 +132,12 @@ public final class Classify {
         throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
       }
       
-    } else if (dataSource.equals("hbase")) {
-      if (classifierType.equalsIgnoreCase("bayes")) {
+    } else if ("hbase".equals(dataSource)) {
+      if ("bayes".equalsIgnoreCase(classifierType)) {
         log.info("Using Bayes Classifier");
         algorithm = new BayesAlgorithm();
         datastore = new HBaseBayesDatastore(modelBasePath, params);
-      } else if (classifierType.equalsIgnoreCase("cbayes")) {
+      } else if ("cbayes".equalsIgnoreCase(classifierType)) {
         log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new HBaseBayesDatastore(modelBasePath, params);

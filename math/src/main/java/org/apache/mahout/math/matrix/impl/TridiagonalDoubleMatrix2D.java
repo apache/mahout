@@ -167,7 +167,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
       return this;
     }
 
-    if (source instanceof RCDoubleMatrix2D || source instanceof SparseDoubleMatrix2D) {
+    if (source instanceof SparseDoubleMatrix2D) {
       assign(0);
       source.forEachNonZero(
           new IntIntDoubleFunction() {
@@ -410,9 +410,7 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     }
 
     if (n != y.size() || m > z.size()) {
-      throw new IllegalArgumentException(
-          "Incompatible args: " + ((transposeA ? viewDice() : this).toStringShort()) + ", " + y.toStringShort() + ", " +
-              z.toStringShort());
+      throw new IllegalArgumentException("Incompatible args");
     }
 
     if (!ignore) {
@@ -472,12 +470,10 @@ class TridiagonalDoubleMatrix2D extends WrapperDoubleMatrix2D {
     }
 
     if (b.rows != n) {
-      throw new IllegalArgumentException("Matrix2D inner dimensions must agree:"
-          + toStringShort() + ", " + (transposeB ? b.viewDice() : b).toStringShort());
+      throw new IllegalArgumentException("Matrix2D inner dimensions must agree");
     }
     if (c.rows != m || c.columns != p) {
-      throw new IllegalArgumentException("Incompatibel result matrix: " + toStringShort()
-              + ", " + (transposeB ? b.viewDice() : b).toStringShort() + ", " + c.toStringShort());
+      throw new IllegalArgumentException("Incompatible result matrix");
     }
     if (this == c || b == c) {
       throw new IllegalArgumentException("Matrices must not be identical");

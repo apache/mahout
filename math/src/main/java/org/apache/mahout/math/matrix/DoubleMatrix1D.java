@@ -15,7 +15,6 @@ import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.function.DoubleProcedure;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.matrix.doublealgo.Formatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix1D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
@@ -591,15 +590,6 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
   }
 
   /**
-   * Returns a string representation using default formatting.
-   *
-   * @see org.apache.mahout.math.matrix.doublealgo.Formatter
-   */
-  public String toString() {
-    return new Formatter().toString(this);
-  }
-
-  /**
    * Constructs and returns a new view equal to the receiver. The view is a shallow clone. Calls <code>clone()</code>
    * and casts the result. <p> <b>Note that the view is not a deep copy.</b> The returned matrix is backed by this
    * matrix, so changes in the returned matrix are reflected in this matrix, and vice-versa. <p> Use {@link #copy()} to
@@ -716,17 +706,6 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @return a new view.
    */
   protected abstract DoubleMatrix1D viewSelectionLike(int[] offsets);
-
-  /**
-   * Sorts the vector into ascending order, according to the <i>natural ordering</i>. This sort is guaranteed to be
-   * <i>stable</i>. For further information, see {@link org.apache.mahout.math.matrix.doublealgo.Sorting#sort(DoubleMatrix1D)}.
-   * For more advanced sorting functionality, see {@link org.apache.mahout.math.matrix.doublealgo.Sorting}.
-   *
-   * @return a new sorted vector (matrix) view.
-   */
-  public DoubleMatrix1D viewSorted() {
-    return org.apache.mahout.math.matrix.doublealgo.Sorting.mergeSort.sort(this);
-  }
 
   /**
    * Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell. More

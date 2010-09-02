@@ -25,6 +25,7 @@ import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,8 +33,14 @@ import java.io.InputStreamReader;
 import java.util.Locale;
 
 public class NegativeBinomialTest {
-  private final Splitter onComma = Splitter.on(",").trimResults();
+
+  private static final Splitter onComma = Splitter.on(",").trimResults();
   private static final int N = 10000;
+
+  @Before
+  public void setUp() {
+    RandomUtils.useTestSeed();
+  }
 
   @Test
   public void testDistributionFunctions() throws IOException {
@@ -52,8 +59,8 @@ public class NegativeBinomialTest {
         double density = Double.parseDouble(Iterables.get(values, 3));
         double cume = Double.parseDouble(Iterables.get(values, 4));
         NegativeBinomial nb = new NegativeBinomial(r, p, RandomUtils.getRandom());
-        Assert.assertEquals("cumulative " + k + ',' + p + ',' + r, cume, nb.cdf(k), cume * 1e-05);
-        Assert.assertEquals("density " + k + ',' + p + ',' + r, density, nb.pdf(k), density * 1e-05);
+        Assert.assertEquals("cumulative " + k + ',' + p + ',' + r, cume, nb.cdf(k), cume * 1.0e-5);
+        Assert.assertEquals("density " + k + ',' + p + ',' + r, density, nb.pdf(k), density * 1.0e-5);
       }
     }
   }

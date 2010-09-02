@@ -19,33 +19,29 @@ package org.apache.mahout.math;
 
 import java.util.Random;
 
-import org.apache.mahout.math.Algebra;
-import org.apache.mahout.math.DenseMatrix;
-
-
 //To launch this test only : mvn test -Dtest=org.apache.mahout.math.TestSingularValueDecomposition
 public class TestSingularValueDecomposition extends MahoutTestCase {
   
-  private double[][] testSquare = {
+  private final double[][] testSquare = {
       { 24.0 / 25.0, 43.0 / 25.0 },
       { 57.0 / 25.0, 24.0 / 25.0 }
   };
   
-  private double[][] testNonSquare = {
+  private final double[][] testNonSquare = {
       {  -540.0 / 625.0,  963.0 / 625.0, -216.0 / 625.0 },
       { -1730.0 / 625.0, -744.0 / 625.0, 1008.0 / 625.0 },
       {  -720.0 / 625.0, 1284.0 / 625.0, -288.0 / 625.0 },
       {  -360.0 / 625.0,  192.0 / 625.0, 1756.0 / 625.0 },
   };
   
-  private static final double normTolerance = 10e-14;
+  private static final double normTolerance = 10.0e-14;
   
   
   public void testMoreRows() {
-    final double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
-    final int rows    = singularValues.length + 2;
-    final int columns = singularValues.length;
-    Random r = new Random(15338437322523l);
+    double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
+    int rows    = singularValues.length + 2;
+    int columns = singularValues.length;
+    Random r = new Random(15338437322523L);
     SingularValueDecomposition svd =
       new SingularValueDecomposition(createTestMatrix(r, rows, columns, singularValues));
     double[] computedSV = svd.getSingularValues();
@@ -57,10 +53,10 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   
   
   public void testMoreColumns() {
-    final double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
-    final int rows    = singularValues.length;
-    final int columns = singularValues.length + 2;
-    Random r = new Random(732763225836210l);
+    double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
+    int rows    = singularValues.length;
+    int columns = singularValues.length + 2;
+    Random r = new Random(732763225836210L);
     SingularValueDecomposition svd =
       new SingularValueDecomposition(createTestMatrix(r, rows, columns, singularValues));
     double[] computedSV = svd.getSingularValues();
@@ -73,8 +69,8 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   /** test dimensions */
   public void testDimensions() {
     Matrix matrix = new DenseMatrix(testSquare);
-    final int m = matrix.numRows();
-    final int n = matrix.numCols();
+    int m = matrix.numRows();
+    int n = matrix.numCols();
     SingularValueDecomposition svd = new SingularValueDecomposition(matrix);
     assertEquals(m, svd.getU().numRows());
     assertEquals(m, svd.getU().numCols());
@@ -127,30 +123,33 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
     checkAEqualUSVt(new DenseMatrix(testNonSquare).transpose());
   }
   
-  public void checkAEqualUSVt(final Matrix matrix) {
+  public static void checkAEqualUSVt(Matrix matrix) {
     SingularValueDecomposition svd = new SingularValueDecomposition(matrix);
     Matrix u = svd.getU();
     Matrix s = svd.getS();
     Matrix v = svd.getV();
     
     //pad with 0, to be able to check some properties if some singular values are equal to 0
-    if(s.numRows()<matrix.numRows())
-    {	
+    if(s.numRows()<matrix.numRows()) {
       
-      DenseMatrix sp=new DenseMatrix(s.numRows()+1,s.numCols());
-      DenseMatrix up=new DenseMatrix(u.numRows(),u.numCols()+1);
+      Matrix sp = new DenseMatrix(s.numRows()+1,s.numCols());
+      Matrix up = new DenseMatrix(u.numRows(),u.numCols()+1);
       
       
-      for(int i=0;i<u.numRows();i++)
-        for(int j=0;j<u.numCols();j++)
-          up.set(i,j,u.get(i,j));
-      
-      for(int i=0;i<s.numRows();i++)
-        for(int j=0;j<s.numCols();j++)
-          sp.set(i,j,s.get(i,j));
-      
-      u=up;
-      s=sp;
+      for (int i = 0; i < u.numRows(); i++) {
+        for (int j = 0; j < u.numCols(); j++) {
+          up.set(i, j, u.get(i, j));
+        }
+      }
+
+      for (int i = 0; i < s.numRows(); i++) {
+        for (int j = 0; j < s.numCols(); j++) {
+          sp.set(i, j, s.get(i, j));
+        }
+      }
+
+      u = up;
+      s = sp;
     }
     
     double norm = Algebra.getNorm(u.times(s).times(v.transpose()).minus(matrix));
@@ -172,10 +171,12 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
     checkOrthogonal(new SingularValueDecomposition(new DenseMatrix(testNonSquare).transpose()).getV());
   }
   
-  public void checkOrthogonal(final Matrix m) {
+  public static void checkOrthogonal(Matrix m) {
     Matrix mTm = m.transpose().times(m);
     Matrix id  = new DenseMatrix(mTm.numRows(),mTm.numRows());
-    for(int i=0;i<mTm.numRows();i++) id.set(i,i,1);
+    for (int i = 0; i < mTm.numRows(); i++) {
+      id.set(i, i, 1);
+    }
     assertEquals(0, Algebra.getNorm(mTm.minus(id)), normTolerance);
   }
   
@@ -215,21 +216,20 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
     assertEquals(3.0, svd.cond(), 1.5e-15);
   }
   
-  private Matrix createTestMatrix(final Random r, final int rows, final int columns,
-      final double[] singularValues) {
-    final Matrix u = createOrthogonalMatrix(r, rows);
-    final Matrix d = createDiagonalMatrix(singularValues, rows, columns);
-    final Matrix v = createOrthogonalMatrix(r, columns);
+  private static Matrix createTestMatrix(Random r, int rows, int columns, double[] singularValues) {
+    Matrix u = createOrthogonalMatrix(r, rows);
+    Matrix d = createDiagonalMatrix(singularValues, rows, columns);
+    Matrix v = createOrthogonalMatrix(r, columns);
     return u.times(d).times(v);
   }
   
   
-  public static Matrix createOrthogonalMatrix(final Random r, final int size) {
+  public static Matrix createOrthogonalMatrix(Random r, int size) {
     
-    final double[][] data = new double[size][size];
+    double[][] data = new double[size][size];
     
     for (int i = 0; i < size; ++i) {
-      final double[] dataI = data[i];
+      double[] dataI = data[i];
       double norm2 = 0;
       do {
         
@@ -240,7 +240,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
         
         // project the row in the subspace orthogonal to previous rows
         for (int k = 0; k < i; ++k) {
-          final double[] dataK = data[k];
+          double[] dataK = data[k];
           double dotProduct = 0;
           for (int j = 0; j < size; ++j) {
             dotProduct += dataI[j] * dataK[j];
@@ -252,10 +252,10 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
         
         // normalize the row
         norm2 = 0;
-        for (final double dataIJ : dataI) {
+        for (double dataIJ : dataI) {
           norm2 += dataIJ * dataIJ;
         }
-        final double inv = 1.0 / Math.sqrt(norm2);
+        double inv = 1.0 / Math.sqrt(norm2);
         for (int j = 0; j < size; ++j) {
           dataI[j] *= inv;
         }
@@ -267,9 +267,8 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
     
   }
   
-  public static Matrix createDiagonalMatrix(final double[] diagonal,
-      final int rows, final int columns) {
-    final double[][] dData = new double[rows][columns];
+  public static Matrix createDiagonalMatrix(double[] diagonal, int rows, int columns) {
+    double[][] dData = new double[rows][columns];
     for (int i = 0; i < Math.min(rows, columns); ++i) {
       dData[i][i] = diagonal[i];
     }

@@ -33,7 +33,6 @@ public class LUDecompositionQuick implements java.io.Serializable {
 
   private transient double[] workDouble;
   private transient int[] work1;
-  protected transient int[] work2;
 
   /**
    * Constructs and returns a new LU Decomposition object with default tolerance <tt>1.0E-9</tt> for singularity
@@ -540,6 +539,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @throws IllegalArgumentException if A is singular, that is, if <tt>!this.isNonsingular()</tt>.
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
+  /*
   private void solveOld(DoubleMatrix2D B) {
     Property.checkRectangular(LU);
     int m = m();
@@ -592,6 +592,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
       }
     }
   }
+   */
 
   /**
    * Returns a String with (propertyName, propertyValue) pairs. Useful for debugging or to quickly get the rough
@@ -612,40 +613,35 @@ public class LUDecompositionQuick implements java.io.Serializable {
     String unknown = "Illegal operation or error: ";
     try {
       buf.append(String.valueOf(this.isNonsingular()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\ndet = ");
     try {
       buf.append(String.valueOf(this.det()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\npivot = ");
     try {
       buf.append(String.valueOf(new IntArrayList(this.getPivot())));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nL = ");
     try {
       buf.append(String.valueOf(this.getL()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nU = ");
     try {
       buf.append(String.valueOf(this.getU()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
@@ -654,8 +650,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     try {
       this.solve(identity);
       buf.append(String.valueOf(identity));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 

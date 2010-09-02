@@ -143,9 +143,9 @@ public class HBaseBayesDatastore implements Datastore {
       return keys.get(name);
     }
     Result r;
-    if (name.equals("labelWeight")) {
+    if ("labelWeight".equals(name)) {
       r = getRowFromHbase(BayesConstants.LABEL_SUM);
-    } else if (name.equals("thetaNormalizer")) {
+    } else if ("thetaNormalizer".equals(name)) {
       r = getRowFromHbase(BayesConstants.LABEL_THETA_NORMALIZER);
     } else {
       r = getRowFromHbase(name);
@@ -169,7 +169,7 @@ public class HBaseBayesDatastore implements Datastore {
   @Override
   public double getWeight(String matrixName, String row, String column) throws InvalidDatastoreException {
     if ("weight".equals(matrixName)) {
-      if (column.equals("sigma_j")) {
+      if ("sigma_j".equals(column)) {
         return getSigmaJFromHbase(row);
       } else {
         return getWeightFromHbase(row, column);
@@ -181,21 +181,21 @@ public class HBaseBayesDatastore implements Datastore {
   
   @Override
   public double getWeight(String vectorName, String index) throws InvalidDatastoreException {
-    if (vectorName.equals("sumWeight")) {
-      if (index.equals("vocabCount")) {
+    if ("sumWeight".equals(vectorName)) {
+      if ("vocabCount".equals(index)) {
         return getVocabCountFromHbase();
-      } else if (index.equals("sigma_jSigma_k")) {
+      } else if ("sigma_jSigma_k".equals(index)) {
         return getSigmaJSigmaKFromHbase();
       } else {
         throw new InvalidDatastoreException();
       }
       
-    } else if (vectorName.equals("labelWeight")) {
+    } else if ("labelWeight".equals(vectorName)) {
       return getWeightFromHbase(BayesConstants.LABEL_SUM, index);
-    } else if (vectorName.equals("thetaNormalizer")) {
+    } else if ("thetaNormalizer".equals(vectorName)) {
       return getWeightFromHbase(BayesConstants.LABEL_THETA_NORMALIZER, index) / thetaNormalizer;
-    } else if (vectorName.equals("params")) {
-      if (index.equals("alpha_i")) {
+    } else if ("params".equals(vectorName)) {
+      if ("alpha_i".equals(index)) {
         return alphaI;
       } else {
         throw new InvalidDatastoreException();

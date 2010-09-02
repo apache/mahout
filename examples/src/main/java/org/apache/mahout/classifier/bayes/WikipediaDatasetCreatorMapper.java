@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.bayes;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -72,8 +73,9 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       while (stream.incrementToken()) {
         contents.append(termAtt.termBuffer(), 0, termAtt.termLength()).append(' ');
       }
-      context.write(new Text(WikipediaDatasetCreatorMapper.SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")), new Text(
-          contents.toString()));
+      context.write(
+          new Text(WikipediaDatasetCreatorMapper.SPACE_NON_ALPHA_PATTERN.matcher(catMatch).replaceAll("_")),
+          new Text(contents.toString()));
     }
   }
 
@@ -108,8 +110,8 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     }
-    log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}", new Object[] { inputCategories.size(),
-        exactMatchOnly, analyzer.getClass().getName() });
+    log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}",
+             new Object[] { inputCategories.size(), exactMatchOnly, analyzer.getClass().getName()});
   }
 
   private String findMatchingCategory(String document) {
@@ -121,7 +123,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       if (endIndex >= document.length() || endIndex < 0) {
         break;
       }
-      String category = document.substring(categoryIndex, endIndex).toLowerCase().trim();
+      String category = document.substring(categoryIndex, endIndex).toLowerCase(Locale.ENGLISH).trim();
       // categories.add(category.toLowerCase());
       if (exactMatchOnly && inputCategories.contains(category)) {
         return category;

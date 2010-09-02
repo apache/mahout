@@ -14,12 +14,11 @@ import org.apache.mahout.math.list.ObjectArrayList;
 import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
-import org.apache.mahout.math.matrix.DoubleMatrix3D;
-import org.apache.mahout.math.matrix.impl.AbstractFormatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 
 import java.util.Formatter;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeMap;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
@@ -66,7 +65,7 @@ public class Property extends PersistentObject {
    */
   public static void checkRectangular(AbstractMatrix2D a) {
     if (a.rows() < a.columns()) {
-      throw new IllegalArgumentException("Matrix must be rectangular: " + AbstractFormatter.shape(a));
+      throw new IllegalArgumentException("Matrix must be rectangular");
     }
   }
 
@@ -77,7 +76,7 @@ public class Property extends PersistentObject {
    */
   public static void checkSquare(AbstractMatrix2D a) {
     if (a.rows() != a.columns()) {
-      throw new IllegalArgumentException("Matrix must be square: " + AbstractFormatter.shape(a));
+      throw new IllegalArgumentException("Matrix must be square");
     }
   }
 
@@ -142,7 +141,7 @@ public class Property extends PersistentObject {
       double x = a.getQuick(i);
       double value = b.getQuick(i);
       double diff = Math.abs(value - x);
-      if (Double.isNaN(diff ) && ((Double.isNaN(value ) && Double.isNaN(x)) || value == x)) {
+      if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
         diff = 0;
       }
       if (!(diff <= epsilon)) {
@@ -229,88 +228,6 @@ public class Property extends PersistentObject {
   }
 
   /**
-   * Returns whether all cells of the given matrix <tt>A</tt> are equal to the given value. The result is <tt>true</tt>
-   * if and only if <tt>A != null</tt> and <tt>! (Math.abs(value - A[slice,row,col]) > tolerance())</tt> holds for all
-   * coordinates.
-   *
-   * @param a     the first matrix to compare.
-   * @param value the value to compare against.
-   * @return <tt>true</tt> if the matrix is equal to the value; <tt>false</tt> otherwise.
-   */
-  public boolean equals(DoubleMatrix3D a, double value) {
-    if (a == null) {
-      return false;
-    }
-    int rows = a.rows();
-    int columns = a.columns();
-
-    double epsilon = tolerance();
-    for (int slice = a.slices(); --slice >= 0;) {
-      for (int row = rows; --row >= 0;) {
-        for (int column = columns; --column >= 0;) {
-          //if (!(A.getQuick(slice,row,column) == value)) return false;
-          //if (Math.abs(value - A.getQuick(slice,row,column)) > epsilon) return false;
-          double x = a.getQuick(slice, row, column);
-          double diff = Math.abs(value - x);
-          if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
-            diff = 0;
-          }
-          if (diff > epsilon) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Returns whether both given matrices <tt>A</tt> and <tt>B</tt> are equal. The result is <tt>true</tt> if
-   * <tt>A==B</tt>. Otherwise, the result is <tt>true</tt> if and only if both arguments are <tt>!= null</tt>, have the
-   * same number of columns, rows and slices, and <tt>! (Math.abs(A[slice,row,col] - B[slice,row,col]) >
-   * tolerance())</tt> holds for all coordinates.
-   *
-   * @param a the first matrix to compare.
-   * @param b the second matrix to compare.
-   * @return <tt>true</tt> if both matrices are equal; <tt>false</tt> otherwise.
-   */
-  public boolean equals(DoubleMatrix3D a, DoubleMatrix3D b) {
-    if (a == b) {
-      return true;
-    }
-    if (a == null || b == null) {
-      return false;
-    } else {
-      int slices = a.slices();
-      int rows = a.rows();
-      int columns = a.columns();
-      if (columns != b.columns() || rows != b.rows() || slices != b.slices()) {
-        return false;
-      }
-
-      double epsilon = tolerance();
-      for (int slice = slices; --slice >= 0;) {
-        for (int row = rows; --row >= 0;) {
-          for (int column = columns; --column >= 0;) {
-            //if (!(A.getQuick(slice,row,column) == B.getQuick(slice,row,column))) return false;
-            //if (Math.abs(A.getQuick(slice,row,column) - B.getQuick(slice,row,column)) > epsilon) return false;
-            double x = a.getQuick(slice, row, column);
-            double value = b.getQuick(slice, row, column);
-            double diff = Math.abs(value - x);
-            if (Double.isNaN(diff) && ((Double.isNaN(value) && Double.isNaN(x)) || value == x)) {
-              diff = 0;
-            }
-            if (diff > epsilon) {
-              return false;
-            }
-          }
-        }
-      }
-      return true;
-    }
-  }
-
-  /**
    * Modifies the given matrix square matrix <tt>A</tt> such that it is diagonally dominant by row and column, hence
    * non-singular, hence invertible. For testing purposes only.
    *
@@ -331,7 +248,7 @@ public class Property extends PersistentObject {
   }
 
   protected static String get(ObjectArrayList<String> list, int index) {
-    return (list.get(index));
+    return list.get(index);
   }
 
   /**
@@ -482,7 +399,9 @@ public class Property extends PersistentObject {
         DoubleFactory2D.dense.identity(a.rows()));
   }
 
-  /** A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells. <p> Note: Ignores tolerance. */
+  /** A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells.
+   * <p> Note: Ignores tolerance.
+   */
   public static boolean isPositive(DoubleMatrix2D a) {
     int rows = a.rows();
     int columns = a.columns();
@@ -833,7 +752,7 @@ public class Property extends PersistentObject {
    * </pre>
    */
   public String toString(DoubleMatrix2D a) {
-    TreeMap<String, String> messages = new TreeMap<String, String>();
+    Map<String, String> messages = new TreeMap<String, String>();
 
     // determine properties
     String name = "density";
@@ -1030,8 +949,8 @@ public class Property extends PersistentObject {
     String format = String.format(Locale.ENGLISH, "\\%%ds: \\%s\n", maxLength);
 
     Formatter r = new Formatter();
-    for (String key : messages.keySet()) {
-      r.format(format, maxLength, key, messages.get(key));
+    for (Map.Entry<String, String> entry : messages.entrySet()) {
+      r.format(format, maxLength, entry.getKey(), entry.getValue());
     }
     return r.toString();
   }

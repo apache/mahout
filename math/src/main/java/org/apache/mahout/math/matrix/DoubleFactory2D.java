@@ -14,7 +14,6 @@ import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.apache.mahout.math.jet.random.sampling.RandomSamplingAssistant;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
-import org.apache.mahout.math.matrix.impl.RCDoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.SparseDoubleMatrix2D;
 
 /**
@@ -90,9 +89,6 @@ public class DoubleFactory2D extends PersistentObject {
 
   /** A factory producing sparse hash matrices. */
   private static final DoubleFactory2D sparse = new DoubleFactory2D();
-
-  /** A factory producing sparse row compressed matrices. */
-  private static final DoubleFactory2D rowCompressed = new DoubleFactory2D();
 
   /*
   * A factory producing sparse row compressed modified matrices.
@@ -622,9 +618,6 @@ public class DoubleFactory2D extends PersistentObject {
   public DoubleMatrix2D make(int rows, int columns) {
     if (this == sparse) {
       return new SparseDoubleMatrix2D(rows, columns);
-    }
-    if (this == rowCompressed) {
-      return new RCDoubleMatrix2D(rows, columns);
     }
     //if (this==rowCompressedModified) return new RCMDoubleMatrix2D(rows,columns);
     else {

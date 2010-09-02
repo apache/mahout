@@ -14,7 +14,6 @@ import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.IntIntDoubleFunction;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
-import org.apache.mahout.math.matrix.doublealgo.Formatter;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix1D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
@@ -525,15 +524,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
   }
 
   /**
-   * Returns a string representation using default formatting.
-   *
-   * @see org.apache.mahout.math.matrix.doublealgo.Formatter
-   */
-  public String toString() {
-    return new Formatter().toString(this);
-  }
-
-  /**
    * Constructs and returns a new view equal to the receiver. The view is a shallow clone. Calls <code>clone()</code>
    * and casts the result. <p> <b>Note that the view is not a deep copy.</b> The returned matrix is backed by this
    * matrix, so changes in the returned matrix are reflected in this matrix, and vice-versa. <p> Use {@link #copy()} to
@@ -766,19 +756,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
   protected abstract DoubleMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets);
 
   /**
-   * Sorts the matrix rows into ascending order, according to the <i>natural ordering</i> of the matrix values in the
-   * given column. This sort is guaranteed to be <i>stable</i>. For further information, see {@link
-   * org.apache.mahout.math.matrix.doublealgo.Sorting#sort(DoubleMatrix2D,int)}. For more advanced sorting
-   * functionality, see {@link org.apache.mahout.math.matrix.doublealgo.Sorting}.
-   *
-   * @return a new sorted vector (matrix) view.
-   * @throws IndexOutOfBoundsException if <tt>column < 0 || column >= columns()</tt>.
-   */
-  public DoubleMatrix2D viewSorted(int column) {
-    return org.apache.mahout.math.matrix.doublealgo.Sorting.mergeSort.sort(this, column);
-  }
-
-  /**
    * Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell. More
    * specifically, the view has <tt>this.rows()/rowStride</tt> rows and <tt>this.columns()/columnStride</tt> columns
    * holding cells <tt>this.get(i*rowStride,j*columnStride)</tt> for all <tt>i = 0..rows()/rowStride - 1, j =
@@ -896,8 +873,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
       z = new DenseDoubleMatrix1D(this.rows);
     }
     if (columns != y.size() || rows > z.size()) {
-      throw new IllegalArgumentException(
-          "Incompatible args: " + toStringShort() + ", " + y.toStringShort() + ", " + z.toStringShort());
+      throw new IllegalArgumentException("Incompatible args");
     }
 
     for (int i = rows; --i >= 0;) {
@@ -948,12 +924,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
       C = new DenseDoubleMatrix2D(m, p);
     }
     if (B.rows != n) {
-      throw new IllegalArgumentException(
-          "Matrix2D inner dimensions must agree:" + toStringShort() + ", " + B.toStringShort());
+      throw new IllegalArgumentException("Matrix2D inner dimensions must agree");
     }
     if (C.rows != m || C.columns != p) {
-      throw new IllegalArgumentException(
-          "Incompatibel result matrix: " + toStringShort() + ", " + B.toStringShort() + ", " + C.toStringShort());
+      throw new IllegalArgumentException("Incompatible result matrix");
     }
     if (this == C || B == C) {
       throw new IllegalArgumentException("Matrices must not be identical");

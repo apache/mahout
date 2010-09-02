@@ -65,7 +65,7 @@ public class DisplayClustering extends Frame {
 
   protected static final List<List<Cluster>> CLUSTERS = new ArrayList<List<Cluster>>();
 
-  protected static final Color[] COLORS = {
+  static final Color[] COLORS = {
       Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta, Color.lightGray
   };
 
@@ -73,7 +73,7 @@ public class DisplayClustering extends Frame {
 
   protected static final double T2 = 2.8;
   
-  protected static double significance = 0.05;
+  static double significance = 0.05;
 
   protected static int res; // screen resolution
 
@@ -224,10 +224,10 @@ public class DisplayClustering extends Frame {
   protected static void generateSamples(int num, double mx, double my, double sd) {
     double[] params = {mx, my, sd, sd};
     SAMPLE_PARAMS.add(new DenseVector(params));
-    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] { num, mx, my, sd });
+    log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] {num, mx, my, sd});
     for (int i = 0; i < num; i++) {
-      SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sd),
-          UncommonDistributions.rNorm(my, sd) })));
+      SAMPLE_DATA.add(new VectorWritable(new DenseVector(
+          new double[] {UncommonDistributions.rNorm(mx, sd), UncommonDistributions.rNorm(my, sd)})));
     }
   }
 
@@ -300,10 +300,10 @@ public class DisplayClustering extends Frame {
   protected static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
     double[] params = {mx, my, sdx, sdy};
     SAMPLE_PARAMS.add(new DenseVector(params));
-    log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] { num, mx, my, sdx, sdy });
+    log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] {num, mx, my, sdx, sdy});
     for (int i = 0; i < num; i++) {
-      SAMPLE_DATA.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sdx),
-          UncommonDistributions.rNorm(my, sdy) })));
+      SAMPLE_DATA.add(new VectorWritable(new DenseVector(
+          new double[] {UncommonDistributions.rNorm(mx, sdx), UncommonDistributions.rNorm(my, sdy)})));
     }
   }
 

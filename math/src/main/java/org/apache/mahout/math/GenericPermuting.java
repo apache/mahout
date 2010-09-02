@@ -8,10 +8,6 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math;
 
-import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.Uniform;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
-
 /**
  Generically reorders (permutes) arbitrary shaped data (for example, an array, three arrays, a 2-d matrix, two linked lists) using an <i>in-place</i> swapping algorithm.
  Imagine having a couple of apples. For some reason you decide to reorder them. The green one before the red one. The pale one after the shiny one, etc. This class helps to do the job.
@@ -104,143 +100,6 @@ public class GenericPermuting {
   }
 
   /**
-   * Returns the <tt>p</tt>-th permutation of the sequence <tt>[0,1,...,N-1]</tt>. A small but smart and efficient
-   * routine, ported from <A HREF="http://www.hep.net/wwwmirrors/cernlib/CNASDOC/shortwrups_html3/node255.html">
-   * Cernlib</A>. The <A HREF="ftp://asisftp.cern.ch/cernlib/share/pro/src/mathlib/gen/v/permu.F"> Fortran source</A>. A
-   * sequence of <tt>N</tt> distinct elements has <tt>N!</tt> permutations, which are enumerated in lexicographical
-   * order <tt>1 .. N!</tt>. <p> This is, for example, useful for Monte-Carlo-tests where one might want to compute
-   * <tt>k</tt> distinct and random permutations of a sequence, obtaining <tt>p</tt> from {@link
-   * org.apache.mahout.math.jet.random.sampling} without replacement or a random engine like {@link
-   * org.apache.mahout.math.jet.random.engine.MersenneTwister}. <br> Note: When <tt>N!</tt> exceeds the 64-bit range (i.e.
-   * for <tt>N > 20</tt>), this method has <i>different</i> behaviour: it makes a sequence <tt>[0,1,...,N-1]</tt> and
-   * randomizes it, seeded with parameter <tt>p</tt>. <p> <b>Examples:</b>
-   * <pre>
-   * http://www.hep.net/wwwmirrors/cernlib/CNASDOC/shortwrups_html3/node255.html
-   * // exactly lexicographically enumerated (ascending)
-   * permutation(1,3) --> [ 0,1,2 ]
-   * permutation(2,3) --> [ 0,2,1 ]
-   * permutation(3,3) --> [ 1,0,2 ]
-   * permutation(4,3) --> [ 1,2,0 ]
-   * permutation(5,3) --> [ 2,0,1 ]
-   * permutation(6,3) --> [ 2,1,0 ]
-   * permutation(1      ,20) --> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-   * permutation(2      ,20) --> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 18]
-   * permutation(1000000,20) --> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 17, 18, 13, 19, 11, 15, 14, 16, 10]
-   * permutation(20! -2 ,20) --> [19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 1, 2, 0]
-   * permutation(20! -1 ,20) --> [19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 0, 1]
-   * permutation(20!    ,20) --> [19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-   * <br>
-   * // not exactly enumerated, rather randomly shuffled
-   * permutation(1,21) --> [18, 20, 11, 0, 15, 1, 19, 13, 3, 6, 16, 17, 9, 5, 12, 4, 7, 14, 8, 10, 2]
-   * permutation(2,21) --> [1, 9, 4, 16, 14, 13, 11, 20, 10, 8, 18, 0, 15, 3, 17, 5, 12, 2, 6, 7, 19]
-   * permutation(3,21) --> [12, 0, 19, 1, 20, 5, 8, 16, 6, 14, 2, 4, 3, 17, 11, 13, 9, 10, 15, 18, 7]
-   * </pre>
-   *
-   * @param p the lexicographical ordinal number of the permutation to be computed.
-   * @param N the length of the sequence to be generated.
-   * @return the <tt>p</tt>-th permutation.
-   * @throws IllegalArgumentException if <tt>p < 1 || N < 0 || p > N!</tt>.
-   */
-  public static int[] permutation(long p, int N) {
-    if (p < 1) {
-      throw new IllegalArgumentException("Permutations are enumerated 1 .. N!");
-    }
-    if (N < 0) {
-      throw new IllegalArgumentException("Must satisfy N >= 0");
-    }
-
-    int[] permutation = new int[N];
-
-    if (N > 20) { // factorial(21) would overflow 64-bit long)
-      // Simply make a list (0,1,..N-1) and randomize it, seeded with "p".
-      // Note that this is perhaps not what you want...
-      for (int i = N; --i >= 0;) {
-        permutation[i] = i;
-      }
-      Uniform gen = new Uniform(RandomUtils.getRandom());
-      for (int i = 0; i < N - 1; i++) {
-        int random = gen.nextIntFromTo(i, N - 1);
-
-        //swap(i, random)
-        int tmp = permutation[random];
-        permutation[random] = permutation[i];
-        permutation[i] = tmp;
-      }
-
-      return permutation;
-    }
-
-    // the normal case - exact enumeration
-    if (p > org.apache.mahout.math.jet.math.Arithmetic.longFactorial(N)) {
-      throw new IllegalArgumentException("N too large (a sequence of N elements only has N! permutations).");
-    }
-
-    int[] tmp = new int[N];
-    for (int i = 1; i <= N; i++) {
-      tmp[i - 1] = i;
-    }
-
-    long io = p - 1;
-    for (int M = N - 1; M >= 1; M--) {
-      long fac = org.apache.mahout.math.jet.math.Arithmetic.longFactorial(M);
-      int in = ((int) (io / fac)) + 1;
-      io %= fac;
-      permutation[N - M - 1] = tmp[in - 1];
-
-      for (int j = in; j <= M; j++) {
-        tmp[j - 1] = tmp[j];
-      }
-    }
-    if (N > 0) {
-      permutation[N - 1] = tmp[0];
-    }
-
-    for (int i = N; --i >= 0;) {
-      permutation[i] -= 1;
-    }
-    return permutation;
-  }
-
-  /**
-   * A non-generic variant of reordering, specialized for <tt>int[]</tt>, same semantics. Quicker than generic
-   * reordering. Also for convenience (forget about the Swapper object).
-   */
-  public static void permute(int[] list, int[] indexes) {
-    int[] copy = list.clone();
-    for (int i = list.length; --i >= 0;) {
-      list[i] = copy[indexes[i]];
-    }
-  }
-
-  /**
-   * Deprecated. Generically reorders arbitrary shaped generic data <tt>g</tt> such that <tt>g[i] == g[indexes[i]]</tt>.
-   * (The generic data may be one array, a 2-d matrix, two linked lists or whatever). This class swaps elements around,
-   * in a way that avoids stumbling over its own feet. <p> <b>Example:</b>
-   * <pre>
-   * Reordering
-   * [A,B,C,D,E] with indexes [0,4,2,3,1] yields
-   * [A,E,C,D,B]
-   * In other words g[0]<--g[0], g[1]<--g[4], g[2]<--g[2], g[3]<--g[3], g[4]<--g[1].
-   *
-   * Reordering
-   * [A,B,C,D,E] with indexes [0,4,1,2,3] yields
-   * [A,E,B,C,D]
-   * In other words g[0]<--g[0], g[1]<--g[4], g[2]<--g[1], g[3]<--g[2], g[4]<--g[3].
-   * </pre>
-   * <p>
-   *
-   * @param indexes the permutation indexes.
-   * @param swapper an object that knows how to swap two indexes a,b.
-   * @param work    the working storage, must satisfy <tt>work.length >= indexes.length</tt>; set <tt>work==null</tt> if
-   *                you don't care about performance.
-   * @deprecated
-   */
-  @Deprecated
-  public static void permute(int[] indexes, org.apache.mahout.math.Swapper swapper, int[] work) {
-    permute(indexes, swapper, work, null);
-  }
-
-  /**
    * Generically reorders arbitrary shaped generic data <tt>g</tt> such that <tt>g[i] == g[indexes[i]]</tt>. (The
    * generic data may be one array, a 2-d matrix, two linked lists or whatever). This class swaps elements around, in a
    * way that avoids stumbling over its own feet. <p> <b>Example:</b>
@@ -300,14 +159,4 @@ public class GenericPermuting {
     }
   }
 
-  /**
-   * A non-generic variant of reordering, specialized for <tt>Object[]</tt>, same semantics. Quicker than generic
-   * reordering. Also for convenience (forget about the Swapper object).
-   */
-  public static void permute(Object[] list, int[] indexes) {
-    Object[] copy = list.clone();
-    for (int i = list.length; --i >= 0;) {
-      list[i] = copy[indexes[i]];
-    }
-  }
 }
