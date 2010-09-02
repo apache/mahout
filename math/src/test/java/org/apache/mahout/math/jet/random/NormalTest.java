@@ -20,7 +20,6 @@ package org.apache.mahout.math.jet.random;
 import org.apache.commons.math.ConvergenceException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +30,7 @@ import java.util.Random;
  * Created by IntelliJ IDEA. User: tdunning Date: Sep 1, 2010 Time: 9:09:44 AM To change this
  * template use File | Settings | File Templates.
  */
-public class NormalTest extends DistributionTest {
+public class NormalTest extends DistributionChecks {
   private double[] breaks = {-1.2815516, -0.8416212, -0.5244005, -0.2533471, 0.0000000, 0.2533471, 0.5244005, 0.8416212, 1.2815516};
   private double[] quantiles = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 
