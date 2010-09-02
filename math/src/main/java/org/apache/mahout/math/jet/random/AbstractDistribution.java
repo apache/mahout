@@ -31,7 +31,6 @@ import org.apache.mahout.math.function.IntFunction;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 public abstract class AbstractDistribution extends PersistentObject implements UnaryFunction, IntFunction {
-
   protected RandomEngine randomGenerator;
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
@@ -93,22 +92,6 @@ public abstract class AbstractDistribution extends PersistentObject implements U
     return (int) Math.round(nextDouble());
   }
   
-  public byte nextByte() {
-    return (byte)nextInt();
-  }
-  
-  public char nextChar() {
-    return (char)nextInt();
-  }
-  
-  public long nextLong() {
-    return Math.round(nextDouble());
-  }
-  
-  public float nextFloat() {
-    return (float)nextDouble();
-  }
-
   /** Sets the uniform random generator internally used. */
   protected void setRandomGenerator(RandomEngine randomGenerator) {
     this.randomGenerator = randomGenerator;

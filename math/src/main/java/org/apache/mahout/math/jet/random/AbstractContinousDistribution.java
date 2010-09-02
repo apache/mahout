@@ -27,8 +27,16 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 /**
- * Abstract base class for all continuous distributions.
+ * Abstract base class for all continuous distributions.  Continuous distributions have
+ * probability density and a cumulative distribution functions.
  *
  */
 public abstract class AbstractContinousDistribution extends AbstractDistribution {
+  public double cdf(double x) {
+    throw new UnsupportedOperationException("Can't compute pdf for " + this.getClass().getName());
+  }
+  
+  public double pdf(double x) {
+    throw new UnsupportedOperationException("Can't compute pdf for " + this.getClass().getName());
+  }
 }

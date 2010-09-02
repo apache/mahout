@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.jet.random;
 
+import org.apache.commons.math.ConvergenceException;
+import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.junit.Test;
 
@@ -29,7 +31,7 @@ import static org.junit.Assert.assertEquals;
  * Created by IntelliJ IDEA. User: tdunning Date: Aug 31, 2010 Time: 7:14:19 PM To change this
  * template use File | Settings | File Templates.
  */
-public class ExponentialTest {
+public class ExponentialTest extends DistributionTest {
   @Test
   public void testCdf() {
     Exponential dist = new Exponential(5.0, new MersenneTwister(1));
@@ -65,10 +67,13 @@ public class ExponentialTest {
   }
 
   @Test
-  public void testNextDouble() {
-    for (double lambda : new double[] {13.0, 0.02, 1.6}) {
-      Exponential dist = new Exponential(lambda, new MersenneTwister(1));
+  public void testNextDouble() throws ConvergenceException, FunctionEvaluationException {
+    double[] x = {-0.01, 0.1053605, 0.2231436, 0.3566749, 0.5108256, 0.6931472, 0.9162907, 1.2039728, 1.6094379, 2.3025851};
+    Exponential dist = new Exponential(1, new MersenneTwister(1));
+    for (double lambda : new double[]{13.0, 0.02, 1.6}) {
+      dist.setState(lambda);
       checkEmpiricalDistribution(dist, 10000, lambda);
+      checkDistribution(dist, x, 0, 1 / lambda, 10000);
     }
   }
 

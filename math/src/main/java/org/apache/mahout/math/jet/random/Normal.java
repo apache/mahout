@@ -11,8 +11,11 @@ package org.apache.mahout.math.jet.random;
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
+import java.util.Locale;
+
+/**
+ * Implements a normal distribution specified mean and standard deviation.
+ */
 public class Normal extends AbstractContinousDistribution {
 
   private double mean;
@@ -24,30 +27,39 @@ public class Normal extends AbstractContinousDistribution {
 
   private double normalizer; // performance cache
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Normal shared = new Normal(0.0, 1.0, makeDefaultGenerator());
-
-  /** Constructs a normal (gauss) distribution. Example: mean=0.0, standardDeviation=1.0. */
+  /**
+   * @param mean               The mean of the resulting distribution.
+   * @param standardDeviation  The standard deviation of the distribution.
+   * @param randomGenerator    The random number generator to use.  This can be null if you don't
+   * need to generate any numbers.
+   */
   public Normal(double mean, double standardDeviation, RandomEngine randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(mean, standardDeviation);
   }
 
-  /** Returns the cumulative distribution function. */
+  /**
+   * Returns the cumulative distribution function.
+   */
+  @Override
   public double cdf(double x) {
     return Probability.normal(mean, variance, x);
   }
 
-  /** Returns a random number from the distribution. */
+  /** Returns the probability density function. */
   @Override
-  public double nextDouble() {
-    return nextDouble(this.mean, this.standardDeviation);
+  public double pdf(double x) {
+    double diff = x - mean;
+    return normalizer * Math.exp(-(diff * diff) / (2.0 * variance));
   }
 
-  /** Returns a random number from the distribution; bypasses the internal state. */
-  public double nextDouble(double mean, double standardDeviation) {
+  /**
+   * Returns a random number from the distribution.
+   */
+  @Override
+  public double nextDouble() {
     // Uses polar Box-Muller transformation.
-    if (cacheFilled && this.mean == mean && this.standardDeviation == standardDeviation) {
+    if (cacheFilled) {
       cacheFilled = false;
       return cache;
     }
@@ -62,26 +74,23 @@ public class Normal extends AbstractContinousDistribution {
     } while (r >= 1.0);
 
     double z = Math.sqrt(-2.0 * Math.log(r) / r);
-    cache = mean + standardDeviation * x * z;
+    cache = this.mean + this.standardDeviation * x * z;
     cacheFilled = true;
-    return mean + standardDeviation * y * z;
-  }
-
-  /** Returns the probability distribution function. */
-  public double pdf(double x) {
-    double diff = x - mean;
-    return normalizer * Math.exp(-(diff * diff) / (2.0 * variance));
+    return this.mean + this.standardDeviation * y * z;
   }
 
   /** Sets the uniform random generator internally used. */
-  @Override
-  protected void setRandomGenerator(RandomEngine randomGenerator) {
+  public final void setRandomGenerator(RandomEngine randomGenerator) {
     super.setRandomGenerator(randomGenerator);
     this.cacheFilled = false;
   }
 
-  /** Sets the mean and variance. */
-  public void setState(double mean, double standardDeviation) {
+  /**
+   * Sets the mean and variance.
+   * @param mean The new value for the mean.
+   * @param standardDeviation The new value for the standard deviation.
+   */
+  public final void setState(double mean, double standardDeviation) {
     if (mean != this.mean || standardDeviation != this.standardDeviation) {
       this.mean = mean;
       this.standardDeviation = standardDeviation;
@@ -92,16 +101,8 @@ public class Normal extends AbstractContinousDistribution {
     }
   }
 
-  /** Returns a random number from the distribution with the given mean and standard deviation. */
-  public static double staticNextDouble(double mean, double standardDeviation) {
-    synchronized (shared) {
-      return shared.nextDouble(mean, standardDeviation);
-    }
-  }
-
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + '(' + mean + ',' + standardDeviation + ')';
+    return String.format(Locale.ENGLISH, "%s(m=%f, sd=%f)", this.getClass().getName(), mean, standardDeviation);
   }
-
 }
