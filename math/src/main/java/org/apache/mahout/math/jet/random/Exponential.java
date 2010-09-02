@@ -10,22 +10,30 @@ package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class Exponential extends AbstractContinousDistribution {
+import java.util.Locale;
 
+public class Exponential extends AbstractContinousDistribution {
+  // rate parameter for the distribution.  Mean is 1/lambda.
   private double lambda;
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Exponential shared = new Exponential(1.0, makeDefaultGenerator());
-
-  /** Constructs a Negative Exponential distribution. */
+  /**
+   * Provides a negative exponential distribution given a rate parameter lambda and an underlying
+   * random number generator.  The mean of this distribution will be equal to 1/lambda.
+   *
+   * @param lambda          The rate parameter of the distribution.
+   * @param randomGenerator The PRNG that is used to generate values.
+   */
   public Exponential(double lambda, RandomEngine randomGenerator) {
     setRandomGenerator(randomGenerator);
     setState(lambda);
   }
 
-  /** Returns the cumulative distribution function. */
+  /**
+   * Returns the cumulative distribution function.
+   * @param x  The point at which the cumulative distribution function is to be evaluated.
+   * @return Returns the integral from -infinity to x of the PDF, also known as the cumulative distribution
+   * function.
+   */
   public double cdf(double x) {
     if (x <= 0.0) {
       return 0.0;
@@ -33,18 +41,19 @@ public class Exponential extends AbstractContinousDistribution {
     return 1.0 - Math.exp(-x * lambda);
   }
 
-  /** Returns a random number from the distribution. */
+  /**
+   * Returns a random number from the distribution.
+   */
   @Override
   public double nextDouble() {
-    return nextDouble(lambda);
+    return -Math.log(1 - randomGenerator.raw()) / lambda;
   }
 
-  /** Returns a random number from the distribution; bypasses the internal state. */
-  public double nextDouble(double lambda) {
-    return -Math.log(randomGenerator.raw()) / lambda;
-  }
-
-  /** Returns the probability distribution function. */
+  /**
+   * Returns the value of the probability density function at a particular point.
+   * @param x   The point at which the probability density function is to be evaluated.
+   * @return  The value of the probability density function at the specified point.
+   */
   public double pdf(double x) {
     if (x < 0.0) {
       return 0.0;
@@ -52,21 +61,19 @@ public class Exponential extends AbstractContinousDistribution {
     return lambda * Math.exp(-x * lambda);
   }
 
-  /** Sets the mean. */
+  /**
+   * Sets the rate parameter.
+   * @param lambda  The new value of the rate parameter.
+   */
   public void setState(double lambda) {
     this.lambda = lambda;
   }
 
-  /** Returns a random number from the distribution with the given lambda. */
-  public static double staticNextDouble(double lambda) {
-    synchronized (shared) {
-      return shared.nextDouble(lambda);
-    }
-  }
-
-  /** Returns a String representation of the receiver. */
+  /**
+   * Returns a String representation of the receiver.
+   */
   public String toString() {
-    return this.getClass().getName() + '(' + lambda + ')';
+    return String.format(Locale.ENGLISH, "%s(%.4f)", this.getClass().getName(), lambda);
   }
 
 }
