@@ -19,6 +19,9 @@ package org.apache.mahout.common;
 
 import org.uncommons.maths.random.MersenneTwisterRNG;
 import org.uncommons.maths.random.RepeatableRNG;
+import org.uncommons.maths.random.SecureRandomSeedGenerator;
+import org.uncommons.maths.random.SeedException;
+import org.uncommons.maths.random.SeedGenerator;
 
 import java.nio.charset.Charset;
 import java.util.Random;
@@ -26,6 +29,7 @@ import java.util.Random;
 public final class RandomWrapper extends Random {
 
   private static final byte[] STANDARD_SEED = "Mahout=Hadoop+ML".getBytes(Charset.forName("US-ASCII"));
+  private static final SeedGenerator SEED_GENERATOR = new SecureRandomSeedGenerator();
 
   private static boolean testSeed;
 
@@ -50,7 +54,14 @@ public final class RandomWrapper extends Random {
     if (testSeed) {
       return new MersenneTwisterRNG(STANDARD_SEED);
     } else if (fixedSeed == null) {
-      return new MersenneTwisterRNG();
+      // Force use of standard generator, and disallow use of those based on /dev/random since
+      // it causes hangs on Ubuntu
+      try {
+        return new MersenneTwisterRNG(SEED_GENERATOR);
+      } catch (SeedException se) {
+        // Can't happen
+        throw new IllegalStateException(se);
+      }
     } else {
       return new MersenneTwisterRNG(RandomUtils.longSeedtoBytes(fixedSeed));
     }
