@@ -18,6 +18,7 @@ package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 /** <p>Tests {@link GenericItemSimilarity}.</p> */
 public final class GenericItemSimilarityTest extends SimilarityTestCase {
 
+  @Test
   public void testSimple() {
     List<GenericItemSimilarity.ItemItemSimilarity> similarities =
         new ArrayList<GenericItemSimilarity.ItemItemSimilarity>(4);
@@ -33,13 +35,14 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 1, 0.5));
     similarities.add(new GenericItemSimilarity.ItemItemSimilarity(1, 3, 0.3));
     GenericItemSimilarity itemCorrelation = new GenericItemSimilarity(similarities);
-    assertEquals(1.0, itemCorrelation.itemSimilarity(1, 1));
-    assertEquals(0.6, itemCorrelation.itemSimilarity(1, 2));
-    assertEquals(0.6, itemCorrelation.itemSimilarity(2, 1));
-    assertEquals(0.3, itemCorrelation.itemSimilarity(1, 3));
+    assertEquals(1.0, itemCorrelation.itemSimilarity(1, 1), EPSILON);
+    assertEquals(0.6, itemCorrelation.itemSimilarity(1, 2), EPSILON);
+    assertEquals(0.6, itemCorrelation.itemSimilarity(2, 1), EPSILON);
+    assertEquals(0.3, itemCorrelation.itemSimilarity(1, 3), EPSILON);
     assertTrue(Double.isNaN(itemCorrelation.itemSimilarity(3, 4)));
   }
 
+  @Test
   public void testFromCorrelation() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},

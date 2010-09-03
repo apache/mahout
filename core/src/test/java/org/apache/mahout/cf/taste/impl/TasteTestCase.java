@@ -37,9 +37,6 @@ import java.util.List;
 
 public abstract class TasteTestCase extends MahoutTestCase {
 
-  /** "Close enough" value for floating-point comparisons. */
-  protected static final double EPSILON = 0.00001;
-
   public static DataModel getDataModel(long[] userIDs, Double[][] prefValues) {
     FastByIDMap<PreferenceArray> result = new FastByIDMap<PreferenceArray>();
     for (int i = 0; i < userIDs.length; i++) {

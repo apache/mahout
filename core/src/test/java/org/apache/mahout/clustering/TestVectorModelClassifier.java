@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.clustering;
 
 import java.util.ArrayList;
@@ -17,9 +34,11 @@ import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.junit.Test;
 
-public class TestVectorModelClassifier extends MahoutTestCase {
+public final class TestVectorModelClassifier extends MahoutTestCase {
 
+  @Test
   public void testDMClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -33,6 +52,7 @@ public class TestVectorModelClassifier extends MahoutTestCase {
     assertEquals("[2,2]", "[0.867, 0.117, 0.016]", AbstractCluster.formatVector(pdf, null));
   }
 
+  @Test
   public void testCanopyClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -46,6 +66,7 @@ public class TestVectorModelClassifier extends MahoutTestCase {
     assertEquals("[2,2]", "[0.867, 0.117, 0.016]", AbstractCluster.formatVector(pdf, null));
   }
 
+  @Test
   public void testClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -59,6 +80,7 @@ public class TestVectorModelClassifier extends MahoutTestCase {
     assertEquals("[2,2]", "[0.867, 0.117, 0.016]", AbstractCluster.formatVector(pdf, null));
   }
 
+  @Test
   public void testMSCanopyClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -74,6 +96,7 @@ public class TestVectorModelClassifier extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testSoftClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     DistanceMeasure measure = new ManhattanDistanceMeasure();
@@ -87,6 +110,7 @@ public class TestVectorModelClassifier extends MahoutTestCase {
     assertEquals("[2,2]", "[0.735, 0.184, 0.082]", AbstractCluster.formatVector(pdf, null));
   }
 
+  @Test
   public void testGaussianClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     models.add(new GaussianCluster(new DenseVector(2).assign(1), new DenseVector(2).assign(1), 0));
@@ -99,6 +123,7 @@ public class TestVectorModelClassifier extends MahoutTestCase {
     assertEquals("[2,2]", "[0.806, 0.180, 0.015]", AbstractCluster.formatVector(pdf, null));
   }
 
+  @Test
   public void testASNClusterClassification() {
     List<Model<VectorWritable>> models = new ArrayList<Model<VectorWritable>>();
     models.add(new AsymmetricSampledNormalModel(0, new DenseVector(2).assign(1), new DenseVector(2).assign(1)));

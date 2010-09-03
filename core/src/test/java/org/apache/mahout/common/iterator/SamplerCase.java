@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.Arrays;
 
 import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Test;
 
 public abstract class SamplerCase extends MahoutTestCase {
   // these provide access to the underlying implementation
@@ -28,10 +29,12 @@ public abstract class SamplerCase extends MahoutTestCase {
 
   protected abstract boolean isSorted();
 
+  @Test
   public void testEmptyCase() {
     assertFalse(createSampler(100, Integers.iterator(0)).hasNext());
   }
 
+  @Test
   public void testSmallInput() {
     DelegatingIterator<Integer> t = createSampler(10, Integers.iterator(1));
     assertTrue(t.hasNext());
@@ -44,11 +47,13 @@ public abstract class SamplerCase extends MahoutTestCase {
     assertFalse(t.hasNext());
   }
 
+  @Test
   public void testAbsurdSize() {
     DelegatingIterator<Integer> t = createSampler(0, Integers.iterator(2));
     assertFalse(t.hasNext());
   }
 
+  @Test
   public void testExactSizeMatch() {
     DelegatingIterator<Integer> t = createSampler(10, Integers.iterator(10));
     for (int i = 0; i < 10; i++) {
@@ -58,6 +63,7 @@ public abstract class SamplerCase extends MahoutTestCase {
     assertFalse(t.hasNext());
   }
 
+  @Test
   public void testSample() {
     Iterator<Integer> source = Integers.iterator(100);
     DelegatingIterator<Integer> t = createSampler(15, source);

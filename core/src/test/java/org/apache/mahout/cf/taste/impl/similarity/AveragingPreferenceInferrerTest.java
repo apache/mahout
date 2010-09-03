@@ -21,15 +21,17 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
+import org.junit.Test;
 
 /** <p>Tests {@link AveragingPreferenceInferrer}.</p> */
 public final class AveragingPreferenceInferrerTest extends TasteTestCase {
 
+  @Test
   public void testInferrer() throws TasteException {
     DataModel model = getDataModel(new long[] {1}, new Double[][] {{3.0,-2.0,5.0}});
     PreferenceInferrer inferrer = new AveragingPreferenceInferrer(model);
     double inferred = inferrer.inferPreference(1, 3);
-    assertEquals(2.0, inferred);
+    assertEquals(2.0, inferred, EPSILON);
   }
 
 }

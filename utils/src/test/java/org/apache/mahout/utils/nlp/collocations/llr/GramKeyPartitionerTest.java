@@ -17,13 +17,12 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.mapreduce.Partitioner;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
+public final class GramKeyPartitionerTest extends MahoutTestCase {
 
-public class GramKeyPartitionerTest {
   @Test
   public void testPartition() {
     byte[] foo = new byte[1];
@@ -48,8 +47,8 @@ public class GramKeyPartitionerTest {
     int dp = p.getPartition(d, null, numPartitions);
     int ep = p.getPartition(e, null, numPartitions);
     
-    Assert.assertEquals(ap, bp);
-    Assert.assertEquals(ap, cp);
-    Assert.assertEquals(dp, ep);
+    assertEquals(ap, bp);
+    assertEquals(ap, cp);
+    assertEquals(dp, ep);
   }
 }

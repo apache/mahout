@@ -21,7 +21,7 @@ import org.apache.mahout.math.MahoutTestCase;
 
 import org.junit.Test;
 
-public class LogLikelihoodTest extends MahoutTestCase {
+public final class LogLikelihoodTest extends MahoutTestCase {
 
   @Test
   public void testEntropy() throws Exception {

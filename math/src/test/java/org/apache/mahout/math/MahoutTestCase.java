@@ -21,24 +21,30 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 
-public abstract class MahoutTestCase extends TestCase {
+/**
+ * Superclass of all Mahout test cases.
+ */
+public abstract class MahoutTestCase extends Assert {
 
+  /** "Close enough" value for floating-point comparisons. */
+  public static final double EPSILON = 0.0000001;
+  
   private File testTempDir;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     testTempDir = null;
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     if (testTempDir != null) {
       new DeletingVisitor().accept(testTempDir);
     }
-    super.tearDown();
   }
 
   protected final File getTestTempDir() throws IOException {

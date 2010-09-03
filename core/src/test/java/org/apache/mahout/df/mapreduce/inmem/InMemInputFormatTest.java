@@ -27,9 +27,11 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemRecordReader;
+import org.junit.Test;
 
-public class InMemInputFormatTest extends MahoutTestCase {
+public final class InMemInputFormatTest extends MahoutTestCase {
 
+  @Test
   public void testSplits() throws Exception {
     int n = 1;
     int maxNumSplits = 100;
@@ -72,6 +74,7 @@ public class InMemInputFormatTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testRecordReader() throws Exception {
     int n = 1;
     int maxNumSplits = 100;

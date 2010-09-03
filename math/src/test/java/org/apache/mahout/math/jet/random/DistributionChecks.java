@@ -26,15 +26,21 @@ import org.junit.Assert;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Provides a consistency check for continuous distributions that relates the pdf, cdf and
  * samples.  The pdf is checked against the cdf by quadrature.  The sampling is checked
  * against the cdf using a G^2 (similar to chi^2) test.
  */
-public class DistributionChecks {
-  public void checkDistribution(final AbstractContinousDistribution dist, double[] x, double offset, double scale, int n) throws ConvergenceException, FunctionEvaluationException {
+public final class DistributionChecks {
+
+  private DistributionChecks() {
+  }
+
+  public static void checkDistribution(final AbstractContinousDistribution dist,
+                                       double[] x,
+                                       double offset,
+                                       double scale,
+                                       int n) throws ConvergenceException, FunctionEvaluationException {
     double[] xs = Arrays.copyOf(x, x.length);
     for (int i = 0; i < xs.length; i++) {
       xs[i] = xs[i]*scale+ offset;
@@ -79,7 +85,7 @@ public class DistributionChecks {
           return dist.pdf(v);
         }
       }, xs[i], xs[i + 1]);
-      assertEquals(delta, p[i + 1], 1e-6);
+      Assert.assertEquals(delta, p[i + 1], 1.0e-6);
     }
 
     // finally compute G^2 of observed versus predicted.  See http://en.wikipedia.org/wiki/G-test
@@ -98,10 +104,15 @@ public class DistributionChecks {
     Assert.assertTrue(String.format("offset=%.3f scale=%.3f Z = %.1f", offset, scale, z), Math.abs(z) < 3);
   }
 
-  protected void checkCdf(double offset, double scale, AbstractContinousDistribution dist, double[] breaks, double[] quantiles) {
+  static void checkCdf(double offset,
+                       double scale,
+                       AbstractContinousDistribution dist,
+                       double[] breaks,
+                       double[] quantiles) {
     int i = 0;
     for (double x : breaks) {
-      assertEquals(String.format("m=%.3f sd=%.3f x=%.3f", offset, scale, x), quantiles[i], dist.cdf(x * scale + offset), 1e-6);
+      Assert.assertEquals(String.format("m=%.3f sd=%.3f x=%.3f", offset, scale, x),
+          quantiles[i], dist.cdf(x * scale + offset), 1.0e-6);
       i++;
     }
   }

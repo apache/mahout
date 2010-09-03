@@ -15,29 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.math.hadoop.similarity.vector;
-
-import org.junit.Test;
+package org.apache.mahout.utils;
 
 /**
- * tests {@link DistributedLoglikelihoodVectorSimilarity}
+ * This class should not exist. It's here to work around some bizarre problem in Maven
+ * dependency management wherein it can see methods in {@link org.apache.mahout.common.MahoutTestCase}
+ * but not constants. Duplicated here to make it jive.
  */
-public final class DistributedLoglikelihoodVectorSimilarityTest
-    extends DistributedVectorSimilarityTestCase {
+public abstract class MahoutTestCase extends org.apache.mahout.common.MahoutTestCase {
 
-  @Test
-  public void testLoglikelihood() throws Exception {
-    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
-        asVector(1, 1, 0, 1, 0),
-        asVector(1, 0, 0, 1, 1), 5, 0.12160727029227925);
-
-    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
-        asVector(1, 0, 0, 1, 1),
-        asVector(1, 1, 0, 1, 0), 5, 0.12160727029227925);
-
-    assertSimilar(new DistributedLoglikelihoodVectorSimilarity(),
-        asVector(1, 0, 0, 1, 1),
-        asVector(0, 1, 1, 1, 1), 5, 0.5423213660693733);
-  }
+  /** "Close enough" value for floating-point comparisons. */
+  public static final double EPSILON = 0.0000001;
 
 }

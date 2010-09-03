@@ -17,13 +17,12 @@
 
 package org.apache.mahout.math.hadoop.similarity.vector;
 
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.hadoop.MathHelper;
 import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
 import org.apache.mahout.math.hadoop.similarity.RowSimilarityJob;
 
@@ -42,12 +41,6 @@ public abstract class DistributedVectorSimilarityTestCase extends MahoutTestCase
   /**
    * @see DistributedVectorSimilarityTestCase#assertSimilar(DistributedVectorSimilarity, int, int, Vector, Vector,
    * int, double)
-   *
-   * @param similarity
-   * @param v1
-   * @param v2
-   * @param numberOfColumns
-   * @param expectedSimilarity
    */
   static void assertSimilar(DistributedVectorSimilarity similarity, Vector v1, Vector v2, int numberOfColumns,
       double expectedSimilarity) {
@@ -56,14 +49,6 @@ public abstract class DistributedVectorSimilarityTestCase extends MahoutTestCase
 
   /**
    * emulates the way similarities are computed by {@link RowSimilarityJob}
-   *
-   * @param similarity
-   * @param rowA
-   * @param rowB
-   * @param v1
-   * @param v2
-   * @param numberOfColumns
-   * @param expectedSimilarity
    */
   static void assertSimilar(DistributedVectorSimilarity similarity, int rowA, int rowB, Vector v1, Vector v2,
       int numberOfColumns, double expectedSimilarity) {
@@ -71,7 +56,7 @@ public abstract class DistributedVectorSimilarityTestCase extends MahoutTestCase
     double weightA = similarity.weight(v1);
     double weightB = similarity.weight(v2);
 
-    List<Cooccurrence> cooccurrences = new LinkedList<Cooccurrence>();
+    Collection<Cooccurrence> cooccurrences = new LinkedList<Cooccurrence>();
     for (int n = 0; n < numberOfColumns; n++) {
       double valueA = v1.get(n);
       double valueB = v2.get(n);
@@ -81,6 +66,6 @@ public abstract class DistributedVectorSimilarityTestCase extends MahoutTestCase
     }
 
     double result = similarity.similarity(rowA, rowB, cooccurrences, weightA, weightB, numberOfColumns);
-    assertEquals(expectedSimilarity, result, MathHelper.EPSILON);
+    assertEquals(expectedSimilarity, result, EPSILON);
   }
 }

@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math;
 
-public class TestRandomAccessSparseVector extends AbstractTestVector {
+public final class TestRandomAccessSparseVector extends AbstractTestVector {
 
   @Override
   Vector generateTestVector(int cardinality) {

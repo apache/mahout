@@ -18,21 +18,24 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 public final class InvertedRunningAverageTest extends TasteTestCase {
 
+  @Test
   public void testAverage() {
     RunningAverage avg = new FullRunningAverage();
     InvertedRunningAverage inverted = new InvertedRunningAverage(avg);
     assertEquals(0, inverted.getCount());
     avg.addDatum(1.0);
     assertEquals(1, inverted.getCount());
-    assertEquals(-1.0, inverted.getAverage());
+    assertEquals(-1.0, inverted.getAverage(), EPSILON);
     avg.addDatum(2.0);
     assertEquals(2, inverted.getCount());
-    assertEquals(-1.5, inverted.getAverage());
+    assertEquals(-1.5, inverted.getAverage(), EPSILON);
   }
 
+  @Test
   public void testUnsupported() {
     RunningAverage avg = new FullRunningAverage();
     InvertedRunningAverage inverted = new InvertedRunningAverage(avg);
@@ -56,22 +59,24 @@ public final class InvertedRunningAverageTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testAverageAndStdDev() {
     RunningAverageAndStdDev avg = new FullRunningAverageAndStdDev();
-    InvertedRunningAverageAndStdDev inverted = new InvertedRunningAverageAndStdDev(avg);
+    RunningAverageAndStdDev inverted = new InvertedRunningAverageAndStdDev(avg);
     assertEquals(0, inverted.getCount());
     avg.addDatum(1.0);
     assertEquals(1, inverted.getCount());
-    assertEquals(-1.0, inverted.getAverage());
+    assertEquals(-1.0, inverted.getAverage(), EPSILON);
     avg.addDatum(2.0);
     assertEquals(2, inverted.getCount());
-    assertEquals(-1.5, inverted.getAverage());
-    assertEquals(Math.sqrt(2.0)/2.0, inverted.getStandardDeviation());
+    assertEquals(-1.5, inverted.getAverage(), EPSILON);
+    assertEquals(Math.sqrt(2.0)/2.0, inverted.getStandardDeviation(), EPSILON);
   }
 
+  @Test
   public void testAndStdDevUnsupported() {
     RunningAverageAndStdDev avg = new FullRunningAverageAndStdDev();
-    InvertedRunningAverageAndStdDev inverted = new InvertedRunningAverageAndStdDev(avg);
+    RunningAverage inverted = new InvertedRunningAverageAndStdDev(avg);
     try {
       inverted.addDatum(1.0);
       fail("Should have thrown exception");

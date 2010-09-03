@@ -18,19 +18,22 @@
 package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.Functions;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class VectorTest extends MahoutTestCase {
+public final class VectorTest extends MahoutTestCase {
 
+  @Test
   public void testSparseVector()  {
     Vector vec1 = new RandomAccessSparseVector(3);
     Vector vec2 = new RandomAccessSparseVector(3);
     doTestVectors(vec1, vec2);
   }
 
+  @Test
   public void testEquivalent()  {
     //names are not used for equivalent
     RandomAccessSparseVector randomAccessLeft = new RandomAccessSparseVector(3);
@@ -113,7 +116,7 @@ public class VectorTest extends MahoutTestCase {
     right.setQuick(1, 5);
     right.setQuick(2, 6);
     double result = left.dot(right);
-    assertEquals(32.0, result);
+    assertEquals(32.0, result, EPSILON);
     String formattedString = left.asFormatString();
     //System.out.println("Vec: " + formattedString);
     Vector vec = AbstractVector.decodeVector(formattedString);
@@ -121,6 +124,7 @@ public class VectorTest extends MahoutTestCase {
     assertEquals(vec, left);
   }
 
+  @Test
   public void testGetDistanceSquared()  {
     Vector v = new DenseVector(5);
     Vector w = new DenseVector(5);
@@ -156,11 +160,12 @@ public class VectorTest extends MahoutTestCase {
     w.setQuick(4, 2.1);
   }
 
-  public void doTestGetDistanceSquared(Vector v, Vector w) {
+  private void doTestGetDistanceSquared(Vector v, Vector w) {
     double expected = v.minus(w).getLengthSquared();
     assertEquals(expected, v.getDistanceSquared(w), 1.0e-6);
   }
 
+  @Test
   public void testGetLengthSquared()  {
     Vector v = new DenseVector(5);
     setUpV(v);
@@ -182,17 +187,17 @@ public class VectorTest extends MahoutTestCase {
     return d;
   }
 
-  public void doTestGetLengthSquared(Vector v) {
+  private void doTestGetLengthSquared(Vector v) {
     double expected = lengthSquaredSlowly(v);
     assertEquals("v.getLengthSquared() != sum_of_squared_elements(v)", expected, v.getLengthSquared(), 0.0);
 
     v.set(v.size()/2, v.get(v.size()/2) + 1.0);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via set() fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via set() fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.setQuick(v.size()/5, v.get(v.size()/5) + 1.0);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via setQuick() fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via setQuick() fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     Iterator<Vector.Element> it = v.iterator();
     while(it.hasNext()) {
@@ -202,7 +207,7 @@ public class VectorTest extends MahoutTestCase {
       }
     }
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via dense iterator.set fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via dense iterator.set fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     it = v.iterateNonZero();
     int i = 0;
@@ -214,50 +219,51 @@ public class VectorTest extends MahoutTestCase {
       }
     }
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via sparse iterator.set fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via sparse iterator.set fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.assign(3.0);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via assign(double) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via assign(double) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.assign(Functions.SQUARE);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via assign(square) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via assign(square) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.assign(new double[v.size()]);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via assign(double[]) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via assign(double[]) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.getElement(v.size()/2).set(2.5);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via v.getElement().set() fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via v.getElement().set() fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.normalize();
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via normalize() fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via normalize() fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.set(0, 1.5);
     v.normalize(1.0);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via normalize(double) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via normalize(double) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.times(2.0);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via times(double) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via times(double) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.times(v);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via times(vector) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via times(vector) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.assign(Functions.POW, 3.0);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via assign(pow, 3.0) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via assign(pow, 3.0) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     v.assign(v, Functions.PLUS);
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via assign(v,plus) fails to change lengthSquared", expected, v.getLengthSquared());
+    assertEquals("mutation via assign(v,plus) fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
   }
 
+  @Test
   public void testIterator() {
 
     Collection<Integer> expectedIndices = new HashSet<Integer>();
@@ -294,9 +300,9 @@ public class VectorTest extends MahoutTestCase {
       Vector.Element element = allIterator.next();
       assertEquals(index, element.index());
       if (expectedIndices.contains(index)) {
-        assertEquals((double) index * 2, element.get());
+        assertEquals((double) index * 2, element.get(), EPSILON);
       } else {
-        assertEquals(0.0, element.get());
+        assertEquals(0.0, element.get(), EPSILON);
       }
       index++;
     }
@@ -306,12 +312,13 @@ public class VectorTest extends MahoutTestCase {
       Vector.Element element = nonZeroIterator.next();
       index = element.index();
       assertTrue(expectedIndices.contains(index));
-      assertEquals((double) index * 2, element.get());
+      assertEquals((double) index * 2, element.get(), EPSILON);
       expectedIndices.remove(index);
     }
     assertTrue(expectedIndices.isEmpty());
   }
 
+  @Test
   public void testNormalize()  {
     Vector vec1 = new RandomAccessSparseVector(3);
 
@@ -395,6 +402,7 @@ public class VectorTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testMax()  {
     Vector vec1 = new RandomAccessSparseVector(3);
 
@@ -443,30 +451,31 @@ public class VectorTest extends MahoutTestCase {
     
     vec1 = new RandomAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max);
+    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
 
     vec1 = new DenseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max);
+    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max);
+    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
 
     vec1 = new RandomAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new DenseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
 
   }
 
+  @Test
   public void testMin()  {
     Vector vec1 = new RandomAccessSparseVector(3);
 
@@ -515,36 +524,38 @@ public class VectorTest extends MahoutTestCase {
 
     vec1 = new RandomAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max);
+    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
 
     vec1 = new DenseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max);
+    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(3);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal 0", 0.0, max);
+    assertEquals(max + " does not equal 0", 0.0, max, EPSILON);
 
     vec1 = new RandomAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new DenseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
 
     vec1 = new SequentialAccessSparseVector(0);
     max = vec1.maxValue();
-    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max);
+    assertEquals(max + " does not equal -inf", Double.NEGATIVE_INFINITY, max, EPSILON);
 
   }
 
+  @Test
   public void testDenseVector()  {
     Vector vec1 = new DenseVector(3);
     Vector vec2 = new DenseVector(3);
     doTestVectors(vec1, vec2);
   }
 
+  @Test
   public void testVectorView()  {
     RandomAccessSparseVector vec1 = new RandomAccessSparseVector(3);
     RandomAccessSparseVector vec2 = new RandomAccessSparseVector(6);
@@ -568,10 +579,11 @@ public class VectorTest extends MahoutTestCase {
     }
 
     for (int i = 0; i < test.length; i++) {
-      assertEquals(apriori[i], test[i]);
+      assertEquals(apriori[i], test[i], EPSILON);
     }
   }
 
+  @Test
   public void testEnumeration()  {
     double[] apriori = {0, 1, 2, 3, 4};
 
@@ -598,6 +610,7 @@ public class VectorTest extends MahoutTestCase {
 
   }
 
+  @Test
   public void testAggregation()  {
     Vector v = new DenseVector(5);
     Vector w = new DenseVector(5);
@@ -621,28 +634,29 @@ public class VectorTest extends MahoutTestCase {
   private static void doTestAggregation(Vector v, Vector w) {
     assertEquals("aggregate(plus, pow(2)) not equal to " + v.getLengthSquared(),
         v.getLengthSquared(),
-        v.aggregate(Functions.PLUS, Functions.pow(2)));
+        v.aggregate(Functions.PLUS, Functions.pow(2)), EPSILON);
     assertEquals("aggregate(plus, abs) not equal to " + v.norm(1),
         v.norm(1),
-        v.aggregate(Functions.PLUS, Functions.ABS));
+        v.aggregate(Functions.PLUS, Functions.ABS), EPSILON);
     assertEquals("aggregate(max, abs) not equal to " + v.norm(Double.POSITIVE_INFINITY),
         v.norm(Double.POSITIVE_INFINITY),
-        v.aggregate(Functions.MAX, Functions.ABS));
+        v.aggregate(Functions.MAX, Functions.ABS), EPSILON);
 
     assertEquals("v.dot(w) != v.aggregate(w, plus, mult)",
         v.dot(w),
-        v.aggregate(w, Functions.PLUS, Functions.MULT));
+        v.aggregate(w, Functions.PLUS, Functions.MULT), EPSILON);
     assertEquals("|(v-w)|^2 != v.aggregate(w, plus, chain(pow(2), minus))",
         v.minus(w).dot(v.minus(w)),
-        v.aggregate(w, Functions.PLUS, Functions.chain(Functions.pow(2), Functions.MINUS)));
+        v.aggregate(w, Functions.PLUS, Functions.chain(Functions.pow(2), Functions.MINUS)), EPSILON);
   }
 
-  public static void testEmptyAggregate() {
-    assertEquals(1.0, new DenseVector(new double[]{1}).aggregate(Functions.MIN, Functions.IDENTITY));
-    assertEquals(1.0, new DenseVector(new double[]{2, 1}).aggregate(Functions.MIN, Functions.IDENTITY));
+  @Test
+  public void testEmptyAggregate() {
+    assertEquals(1.0, new DenseVector(new double[]{1}).aggregate(Functions.MIN, Functions.IDENTITY), EPSILON);
+    assertEquals(1.0, new DenseVector(new double[]{2, 1}).aggregate(Functions.MIN, Functions.IDENTITY), EPSILON);
 
     try {
-      new DenseVector(new double[]{}).aggregate(Functions.MIN, Functions.IDENTITY);
+      new DenseVector(new double[0]).aggregate(Functions.MIN, Functions.IDENTITY);
       fail("Should have thrown exception with empty vector");
     } catch (IllegalArgumentException e) {
       // as it should be
@@ -651,11 +665,11 @@ public class VectorTest extends MahoutTestCase {
     assertEquals(3.0,
             new DenseVector(new double[]{1}).aggregate(
                     new DenseVector(new double[]{2}),
-                    Functions.MIN, Functions.PLUS));
+                    Functions.MIN, Functions.PLUS), EPSILON);
 
     try {
-      new DenseVector(new double[]{}).aggregate(
-              new DenseVector(new double[]{}),
+      new DenseVector(new double[0]).aggregate(
+              new DenseVector(new double[0]),
               Functions.MIN, Functions.PLUS);
       
       fail("Should have thrown exception with empty vector");
@@ -677,6 +691,7 @@ public class VectorTest extends MahoutTestCase {
     v.setQuick(3, 2);
   }
 
+  @Test
   public void testNameSerialization()  {
     double[] values = {1.1, 2.2, 3.3};
     Vector test = new DenseVector(values);
@@ -692,6 +707,7 @@ public class VectorTest extends MahoutTestCase {
     assertEquals("noName and decode are not equal", noName, decode);
   }
 
+  @Test
   public void testHashCodeEquivalence() {
     // Hash codes must be equal if the vectors are considered equal
     Vector sparseLeft = new RandomAccessSparseVector(3);
@@ -735,6 +751,7 @@ public class VectorTest extends MahoutTestCase {
     assertEquals(emptyLeft.hashCode(), emptyRight.hashCode());
   }
 
+  @Test
   public void testHashCode() {
     // Make sure that hash([1,0,2]) != hash([1,2,0])
     Vector left = new SequentialAccessSparseVector(3);

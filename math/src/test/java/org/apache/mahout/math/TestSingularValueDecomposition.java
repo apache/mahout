@@ -17,10 +17,12 @@
 
 package org.apache.mahout.math;
 
+import org.junit.Test;
+
 import java.util.Random;
 
 //To launch this test only : mvn test -Dtest=org.apache.mahout.math.TestSingularValueDecomposition
-public class TestSingularValueDecomposition extends MahoutTestCase {
+public final class TestSingularValueDecomposition extends MahoutTestCase {
   
   private final double[][] testSquare = {
       { 24.0 / 25.0, 43.0 / 25.0 },
@@ -36,7 +38,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   
   private static final double normTolerance = 10.0e-14;
   
-  
+  @Test
   public void testMoreRows() {
     double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
     int rows    = singularValues.length + 2;
@@ -51,7 +53,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
     }
   }
   
-  
+  @Test
   public void testMoreColumns() {
     double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
     int rows    = singularValues.length;
@@ -67,6 +69,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   }
   
   /** test dimensions */
+  @Test
   public void testDimensions() {
     Matrix matrix = new DenseMatrix(testSquare);
     int m = matrix.numRows();
@@ -83,6 +86,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   
   /** Test based on a dimension 4 Hadamard matrix. */
   // getCovariance to be implemented
+  @Test
   public void testHadamard() {
     Matrix matrix = new DenseMatrix(new double[][] {
         {15.0 / 2.0,  5.0 / 2.0,  9.0 / 2.0,  3.0 / 2.0 },
@@ -117,6 +121,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   }
   
   /** test A = USVt */
+  @Test
   public void testAEqualUSVt() {
     checkAEqualUSVt(new DenseMatrix(testSquare));
     checkAEqualUSVt(new DenseMatrix(testNonSquare));
@@ -158,6 +163,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   }
   
   /** test that U is orthogonal */
+  @Test
   public void testUOrthogonal() {
     checkOrthogonal(new SingularValueDecomposition(new DenseMatrix(testSquare)).getU());
     checkOrthogonal(new SingularValueDecomposition(new DenseMatrix(testNonSquare)).getU());
@@ -165,6 +171,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   }
   
   /** test that V is orthogonal */
+  @Test
   public void testVOrthogonal() {
     checkOrthogonal(new SingularValueDecomposition(new DenseMatrix(testSquare)).getV());
     checkOrthogonal(new SingularValueDecomposition(new DenseMatrix(testNonSquare)).getV());
@@ -181,6 +188,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   }
   
   /** test matrices values */
+  @Test
   public void testMatricesValues1() {
     SingularValueDecomposition svd =
       new SingularValueDecomposition(new DenseMatrix(testSquare));
@@ -209,6 +217,7 @@ public class TestSingularValueDecomposition extends MahoutTestCase {
   
   
   /** test condition number */
+  @Test
   public void testConditionNumber() {
     SingularValueDecomposition svd =
       new SingularValueDecomposition(new DenseMatrix(testSquare));

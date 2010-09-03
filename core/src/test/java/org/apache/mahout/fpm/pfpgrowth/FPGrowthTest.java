@@ -17,7 +17,6 @@
 
 package org.apache.mahout.fpm.pfpgrowth;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,10 +36,12 @@ import org.apache.mahout.fpm.pfpgrowth.convertors.SequenceFileOutputCollector;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.StringOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
+import org.junit.Test;
 
-public class FPGrowthTest extends MahoutTestCase {
+public final class FPGrowthTest extends MahoutTestCase {
 
-  public void testMaxHeapFPGrowth() throws IOException {
+  @Test
+  public void testMaxHeapFPGrowth() throws Exception {
 
     FPGrowth<String> fp = new FPGrowth<String>();
 
@@ -84,14 +85,16 @@ public class FPGrowthTest extends MahoutTestCase {
   /**
    * Trivial test for MAHOUT-355
    */
-  public void testNoNullPointerExceptionWhenReturnableFeaturesIsNull() throws IOException {
+  @Test
+  public void testNoNullPointerExceptionWhenReturnableFeaturesIsNull() throws Exception {
 
     FPGrowth<String> fp = new FPGrowth<String>();
 
     Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
     transactions.add(new Pair<List<String>,Long>(Arrays.asList("E", "A", "D", "B"), 1L));
 
-    OutputCollector<String, List<Pair<List<String>, Long>>> noOutput = new OutputCollector<String,List<Pair<List<String>,Long>>>() {
+    OutputCollector<String, List<Pair<List<String>, Long>>> noOutput =
+        new OutputCollector<String,List<Pair<List<String>,Long>>>() {
       @Override
       public void collect(String arg0, List<Pair<List<String>, Long>> arg1) { 
       }

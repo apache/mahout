@@ -17,12 +17,15 @@
 
 package org.apache.mahout.math.hadoop.similarity.vector;
 
+import org.junit.Test;
+
 /**
  * tests {@link DistributedUncenteredZeroAssumingCosineVectorSimilarity}
  */
-public class DistributedUncenteredZeroAssumingCosineVectorSimilarityTest
+public final class DistributedUncenteredZeroAssumingCosineVectorSimilarityTest
     extends DistributedVectorSimilarityTestCase {
 
+  @Test
   public void testUncenteredZeroAssumingCosine() throws Exception {
     assertSimilar(new DistributedUncenteredZeroAssumingCosineVectorSimilarity(),
         asVector(0, 0, 0, 0, 1),

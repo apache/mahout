@@ -21,11 +21,13 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.junit.Test;
 
 public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
 
   protected abstract DistanceMeasure distanceMeasureFactory();
 
+  @Test
   public void testMeasure() {
 
     DistanceMeasure distanceMeasure = distanceMeasureFactory();
@@ -70,15 +72,15 @@ public abstract class DefaultDistanceMeasureTest extends MahoutTestCase {
       }
     }
 
-    assertEquals("Distance from first vector to itself is not zero", 0.0, distanceMatrix[0][0]);
+    assertEquals("Distance from first vector to itself is not zero", 0.0, distanceMatrix[0][0], EPSILON);
     assertTrue(distanceMatrix[0][0] < distanceMatrix[0][1]);
     assertTrue(distanceMatrix[0][1] < distanceMatrix[0][2]);
 
-    assertEquals("Distance from second vector to itself is not zero", 0.0, distanceMatrix[1][1]);
+    assertEquals("Distance from second vector to itself is not zero", 0.0, distanceMatrix[1][1], EPSILON);
     assertTrue(distanceMatrix[1][0] > distanceMatrix[1][1]);
     assertTrue(distanceMatrix[1][2] > distanceMatrix[1][0]);
 
-    assertEquals("Distance from third vector to itself is not zero", 0.0, distanceMatrix[2][2]);
+    assertEquals("Distance from third vector to itself is not zero", 0.0, distanceMatrix[2][2], EPSILON);
     assertTrue(distanceMatrix[2][0] > distanceMatrix[2][1]);
     assertTrue(distanceMatrix[2][1] > distanceMatrix[2][2]);
 

@@ -24,11 +24,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import junit.framework.Assert;
-
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.RAMDirectory;
@@ -37,10 +36,9 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
-import org.apache.mahout.common.MahoutTestCase;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.utils.vectors.Weight;
@@ -48,9 +46,9 @@ import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
 import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
 import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
 import org.apache.mahout.utils.vectors.lucene.VectorMapper;
-import org.junit.Before;
+import org.junit.Test;
 
-public class TestL1ModelClustering extends MahoutTestCase {
+public final class TestL1ModelClustering extends MahoutTestCase {
 
   private class MapElement implements Comparable<MapElement> {
 
@@ -88,8 +86,6 @@ public class TestL1ModelClustering extends MahoutTestCase {
       "Moby Dick is a story of a whale and a man obsessed.", "The robber wore a black fleece jacket and a baseball cap.",
       "The English Springer Spaniel is the best of all dogs." };
 
-  private List<VectorWritable> sampleData;
-
   private static final String[] DOCS2 = { "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
       "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
@@ -99,14 +95,8 @@ public class TestL1ModelClustering extends MahoutTestCase {
       "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
       "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    RandomUtils.useTestSeed();
-  }
+  private List<VectorWritable> sampleData;
 
-  @SuppressWarnings("deprecation")
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
@@ -116,10 +106,10 @@ public class TestL1ModelClustering extends MahoutTestCase {
                                          IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < docs2.length; i++) {
       Document doc = new Document();
-      Field id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+      Fieldable id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
       doc.add(id);
       // Store both position and offset information
-      Field text = new Field("content", docs2[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
+      Fieldable text = new Field("content", docs2[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
       doc.add(text);
       writer.addDocument(doc);
     }
@@ -128,11 +118,11 @@ public class TestL1ModelClustering extends MahoutTestCase {
     Weight weight = new TFIDF();
     TermInfo termInfo = new CachedTermInfo(reader, "content", 1, 100);
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
+    Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content", mapper);
 
     int i = 0;
     for (Vector vector : iterable) {
-      Assert.assertNotNull(vector);
+      assertNotNull(vector);
       System.out.println("Vector[" + i++ + "]=" + formatVector(vector));
       sampleData.add(new VectorWritable(vector));
     }
@@ -165,7 +155,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
     return buf.toString();
   }
 
-  private static void printSamples(List<Cluster[]> result, int significant) {
+  private static void printSamples(Iterable<Cluster[]> result, int significant) {
     int row = 0;
     for (Cluster[] r : result) {
       int sig = 0;
@@ -213,18 +203,18 @@ public class TestL1ModelClustering extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testDocs() throws Exception {
-    System.out.println("testDocs");
     getSampleData(DOCS);
     DirichletClusterer dc = new DirichletClusterer(sampleData, new L1ModelDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
-    Assert.assertNotNull(result);
+    assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS);
   }
 
+  @Test
   public void testDMDocs() throws Exception {
-    System.out.println("DM testDocs");
     getSampleData(DOCS);
     DirichletClusterer dc = new DirichletClusterer(sampleData,
                                                    new DistanceMeasureClusterDistribution(sampleData.get(0)),
@@ -233,23 +223,23 @@ public class TestL1ModelClustering extends MahoutTestCase {
                                                    1,
                                                    0);
     List<Cluster[]> result = dc.cluster(10);
-    Assert.assertNotNull(result);
+    assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS);
   }
 
+  @Test
   public void testDocs2() throws Exception {
-    System.out.println("testDocs2");
     getSampleData(DOCS2);
     DirichletClusterer dc = new DirichletClusterer(sampleData, new L1ModelDistribution(sampleData.get(0)), 1.0, 15, 1, 0);
     List<Cluster[]> result = dc.cluster(10);
-    Assert.assertNotNull(result);
+    assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS2);
   }
 
+  @Test
   public void testDMDocs2() throws Exception {
-    System.out.println("DM testDocs2");
     getSampleData(DOCS2);
     DirichletClusterer dc = new DirichletClusterer(sampleData,
                                                    new DistanceMeasureClusterDistribution(sampleData.get(0)),
@@ -258,7 +248,7 @@ public class TestL1ModelClustering extends MahoutTestCase {
                                                    1,
                                                    0);
     List<Cluster[]> result = dc.cluster(10);
-    Assert.assertNotNull(result);
+    assertNotNull(result);
     printSamples(result, 0);
     printClusters(result.get(result.size() - 1), sampleData, DOCS2);
   }

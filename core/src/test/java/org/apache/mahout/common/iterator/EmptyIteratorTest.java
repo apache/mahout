@@ -18,12 +18,14 @@
 package org.apache.mahout.common.iterator;
 
 import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public final class EmptyIteratorTest extends MahoutTestCase {
 
+  @Test
   public void testIterator() {
     Iterator<Object> mock = new EmptyIterator<Object>();
     assertFalse(mock.hasNext());
@@ -41,6 +43,7 @@ public final class EmptyIteratorTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testIterable() {
     Iterable<Object> mock = new EmptyIterable<Object>();
     assertNotNull(mock.iterator());

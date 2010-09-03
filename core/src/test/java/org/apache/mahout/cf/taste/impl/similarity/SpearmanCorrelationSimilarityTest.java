@@ -18,10 +18,12 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.junit.Test;
 
 /** <p>Tests {@link SpearmanCorrelationSimilarity}.</p> */
 public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase {
 
+  @Test
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -33,6 +35,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -44,6 +47,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testAnticorrelation() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -55,6 +59,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(-1.0, correlation);
   }
 
+  @Test
   public void testSimple() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -66,6 +71,7 @@ public final class SpearmanCorrelationSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(-0.5, correlation);
   }
 
+  @Test
   public void testRefresh() {
     // Make sure this doesn't throw an exception
     new SpearmanCorrelationSimilarity(getDataModel()).refresh(null);

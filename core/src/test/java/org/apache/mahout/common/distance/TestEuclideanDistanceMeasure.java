@@ -17,7 +17,7 @@
 
 package org.apache.mahout.common.distance;
 
-public class TestEuclideanDistanceMeasure extends DefaultDistanceMeasureTest {
+public final class TestEuclideanDistanceMeasure extends DefaultDistanceMeasureTest {
 
   @Override
   public DistanceMeasure distanceMeasureFactory() {

@@ -22,13 +22,15 @@ import java.util.Random;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Dataset.Attribute;
+import org.junit.Test;
 
-public class DescriptorUtilsTest extends MahoutTestCase {
+public final class DescriptorUtilsTest extends MahoutTestCase {
 
   /**
    * Test method for
    * {@link org.apache.mahout.df.data.DescriptorUtils#parseDescriptor(java.lang.String)}.
    */
+  @Test
   public void testParseDescriptor() throws Exception {
     int n = 10;
     int maxnbAttributes = 100;
@@ -63,6 +65,7 @@ public class DescriptorUtilsTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testGenerateDescription() throws Exception {
     validate("", "");
     validate("I L C C N N N C", "I L C C N N N C");

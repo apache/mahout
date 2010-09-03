@@ -20,7 +20,6 @@ package org.apache.mahout.classifier.bayes;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -35,18 +34,20 @@ import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
-import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesClassifierDriver;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.nlp.NGrams;
+import org.junit.Before;
+import org.junit.Test;
 
-public class BayesClassifierSelfTest extends MahoutTestCase {
+public final class BayesClassifierSelfTest extends MahoutTestCase {
   
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
 
     File tempInputFile = getTestTempFile("bayesinput");
@@ -62,8 +63,9 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
     FileSystem fs = input.getFileSystem(conf);
     fs.copyFromLocalFile(new Path(tempInputFile.getAbsolutePath()), input);
   }
-  
-  public void testSelfTestBayes() throws InvalidDatastoreException, IOException {
+
+  @Test
+  public void testSelfTestBayes() throws Exception {
     BayesParameters params = new BayesParameters(1);
     params.set("alpha_i", "1.0");
     params.set("dataSource", "hdfs");
@@ -113,8 +115,9 @@ public class BayesClassifierSelfTest extends MahoutTestCase {
       }
     }
   }
-  
-  public void testSelfTestCBayes() throws InvalidDatastoreException, IOException {
+
+  @Test
+  public void testSelfTestCBayes() throws Exception {
     BayesParameters params = new BayesParameters(1);
     params.set("alpha_i", "1.0");
     params.set("dataSource", "hdfs");

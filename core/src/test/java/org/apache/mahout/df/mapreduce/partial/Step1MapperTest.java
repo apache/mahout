@@ -32,8 +32,9 @@ import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
+import org.junit.Test;
 
-public class Step1MapperTest extends MahoutTestCase {
+public final class Step1MapperTest extends MahoutTestCase {
 
   /**
    * Make sure that the data used to build the trees is from the mapper's
@@ -71,17 +72,18 @@ public class Step1MapperTest extends MahoutTestCase {
   }
 
   /** nb attributes per generated data instance */
-  protected static final int NUM_ATTRIBUTES = 4;
+  static final int NUM_ATTRIBUTES = 4;
 
   /** nb generated data instances */
-  protected static final int NUM_INSTANCES = 100;
+  static final int NUM_INSTANCES = 100;
 
   /** nb trees to build */
-  protected static final int NUM_TREES = 10;
+  static final int NUM_TREES = 10;
 
   /** nb mappers to use */
-  protected static final int NUM_MAPPERS = 2;
-           
+  static final int NUM_MAPPERS = 2;
+
+  @Test
   public void testMapper() throws Exception {
     Long seed = null;
     Random rng = RandomUtils.getRandom();

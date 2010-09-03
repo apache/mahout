@@ -18,18 +18,20 @@
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataLine;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.easymock.classextension.EasyMock;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class CDMapperTest extends MahoutTestCase {
+public final class CDMapperTest extends MahoutTestCase {
 
   private DataLine dl;
   private Rule rule;
@@ -39,7 +41,8 @@ public class CDMapperTest extends MahoutTestCase {
   private final CDFitness FN = new CDFitness(0, 0, 0, 1);
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
 
     // we assume 2 classes 0 and 1
@@ -70,6 +73,7 @@ public class CDMapperTest extends MahoutTestCase {
     assertEquals(FN, CDMapper.evaluate(1, 0, 1));
   }
 
+  @Test
   public void testMap() throws Exception {
     EasyMock.replay(rule);
     EasyMock.replay(dl);

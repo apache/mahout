@@ -27,9 +27,11 @@ import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.MathHelper;
 import org.easymock.classextension.EasyMock;
+import org.junit.Test;
 
 public class MaybePruneRowsMapperTest extends TasteTestCase {
 
+  @Test
   public void testPruning() throws Exception {
     Vector v1 = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     v1.set(1, 1);

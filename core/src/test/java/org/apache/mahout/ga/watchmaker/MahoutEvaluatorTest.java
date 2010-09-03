@@ -26,15 +26,17 @@ import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.FileLineIterable;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
 
-public class MahoutEvaluatorTest extends MahoutTestCase {
-                                         
-  public <T> void testEvaluate() throws Exception {
+public final class MahoutEvaluatorTest extends MahoutTestCase {
+
+  @Test
+  public void testEvaluate() throws Exception {
     // candidate population
     int populationSize = 100;
     List<DummyCandidate> population = DummyCandidate
@@ -52,11 +54,12 @@ public class MahoutEvaluatorTest extends MahoutTestCase {
     assertEquals("Number of evaluations", populationSize, results.size());
     for (int index = 0; index < population.size(); index++) {
       DummyCandidate candidate = population.get(index);
-      assertEquals("Evaluation of the candidate " + index, DummyEvaluator
-          .getFitness(candidate.getIndex()), results.get(index));
+      assertEquals("Evaluation of the candidate " + index,
+                   DummyEvaluator.getFitness(candidate.getIndex()), results.get(index), EPSILON);
     }
   }
 
+  @Test
   public void testStoreLoadPopulation() throws Exception {
     int populationSize = 100;
 

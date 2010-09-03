@@ -36,7 +36,7 @@ public class DataTest extends MahoutTestCase {
   private Data data;
 
   @Override
-  protected void setUp() throws Exception {
+  public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
     data = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);

@@ -23,15 +23,20 @@ import java.lang.reflect.Field;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.junit.After;
+import org.junit.Before;
 
 public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCase {
 
-  private Path testTempDirPath;
+  /** "Close enough" value for floating-point comparisons. */
+  public static final double EPSILON = 0.0000001;
 
+  private Path testTempDirPath;
   private FileSystem fs;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     RandomUtils.useTestSeed();
     testTempDirPath = null;
@@ -39,7 +44,8 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
   }
 
   @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     if (testTempDirPath != null) {
       try {
         fs.delete(testTempDirPath, true);
@@ -56,7 +62,8 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
     if (testTempDirPath == null) {
       fs = FileSystem.get(new Configuration());
       long simpleRandomLong = (long) (Long.MAX_VALUE * Math.random());
-      testTempDirPath = fs.makeQualified(new Path("/tmp/mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong));
+      testTempDirPath = fs.makeQualified(
+          new Path("/tmp/mahout-" + getClass().getSimpleName() + '-' + simpleRandomLong));
       if (!fs.mkdirs(testTempDirPath)) {
         throw new IOException("Could not create " + testTempDirPath);
       }
@@ -84,22 +91,17 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
   }
 
   /**
-   * try to directly set a (possibly private) field on an Object 
-   * 
-   * @param target
-   * @param fieldname
-   * @param value
-   * @throws NoSuchFieldException
-   * @throws IllegalAccessException
+   * Try to directly set a (possibly private) field on an Object
    */
-  protected void setField(Object target, String fieldname, Object value) throws NoSuchFieldException, IllegalAccessException {
+  protected static void setField(Object target, String fieldname, Object value)
+    throws NoSuchFieldException, IllegalAccessException {
     Field field = findDeclaredField(target.getClass(), fieldname);
     field.setAccessible(true);
     field.set(target, value);
   }
 
   /**
-   * find a declared field in a class or one of it's super classes
+   * Find a declared field in a class or one of it's super classes
    */
   private static Field findDeclaredField(Class<?> inClass, String fieldname) throws NoSuchFieldException {
     if (Object.class.equals(inClass)) {
@@ -116,7 +118,7 @@ public abstract class MahoutTestCase extends org.apache.mahout.math.MahoutTestCa
   /**
    * @return a job option key string (--name) from the given option name
    */
-  protected String optKey(String optionName) {
+  protected static String optKey(String optionName) {
     return AbstractJob.keyFor(optionName);
   }
 }

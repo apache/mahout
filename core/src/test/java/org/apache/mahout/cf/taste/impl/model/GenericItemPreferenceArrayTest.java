@@ -17,10 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
-public final class GenericItemPreferenceArrayTest extends MahoutTestCase {
+public final class GenericItemPreferenceArrayTest extends TasteTestCase {
 
+  @Test
   public void testUserID() {
     GenericItemPreferenceArray prefs = new GenericItemPreferenceArray(3);
     assertEquals(3, prefs.length());
@@ -30,6 +32,7 @@ public final class GenericItemPreferenceArrayTest extends MahoutTestCase {
     assertEquals(1L, prefs.getItemID(2));
   }
 
+  @Test
   public void testItemID() {
     GenericItemPreferenceArray prefs = new GenericItemPreferenceArray(3);
     assertEquals(3, prefs.length());
@@ -41,17 +44,19 @@ public final class GenericItemPreferenceArrayTest extends MahoutTestCase {
     assertEquals(3L, prefs.getUserID(2));    
   }
 
+  @Test
   public void testSetValue() {
     GenericItemPreferenceArray prefs = new GenericItemPreferenceArray(3);
     assertEquals(3, prefs.length());
     prefs.setValue(0, 1.0f);
     prefs.setValue(1, 2.0f);
     prefs.setValue(2, 3.0f);
-    assertEquals(1.0f, prefs.getValue(0));
-    assertEquals(2.0f, prefs.getValue(1));
-    assertEquals(3.0f, prefs.getValue(2));
+    assertEquals(1.0f, prefs.getValue(0), EPSILON);
+    assertEquals(2.0f, prefs.getValue(1), EPSILON);
+    assertEquals(3.0f, prefs.getValue(2), EPSILON);
   }
 
+  @Test
   public void testHasPref() {
     GenericItemPreferenceArray prefs = new GenericItemPreferenceArray(3);
     prefs.set(0, new GenericPreference(1L, 3L, 5.0f));
@@ -61,6 +66,7 @@ public final class GenericItemPreferenceArrayTest extends MahoutTestCase {
     assertFalse(prefs.hasPrefWithUserID(2L));
   }
 
+  @Test
   public void testSort() {
     GenericItemPreferenceArray prefs = new GenericItemPreferenceArray(3);
     prefs.set(0, new GenericPreference(3L, 1L, 5.0f));
@@ -72,6 +78,7 @@ public final class GenericItemPreferenceArrayTest extends MahoutTestCase {
     assertEquals(3L, prefs.getUserID(2));
   }
 
+  @Test
   public void testSortValue() {
     GenericItemPreferenceArray prefs = new GenericItemPreferenceArray(3);
     prefs.set(0, new GenericPreference(3L, 1L, 5.0f));
@@ -87,6 +94,7 @@ public final class GenericItemPreferenceArrayTest extends MahoutTestCase {
     assertEquals(2L, prefs.getUserID(2));
   }
 
+  @Test
   public void testClone() {
     GenericItemPreferenceArray prefs = new GenericItemPreferenceArray(3);
     prefs.set(0, new GenericPreference(3L, 1L, 5.0f));
@@ -95,7 +103,7 @@ public final class GenericItemPreferenceArrayTest extends MahoutTestCase {
     prefs = prefs.clone();
     assertEquals(3L, prefs.getUserID(0));
     assertEquals(1L, prefs.getItemID(1));
-    assertEquals(3.0f, prefs.getValue(2));
+    assertEquals(3.0f, prefs.getValue(2), EPSILON);
   }
 
 }

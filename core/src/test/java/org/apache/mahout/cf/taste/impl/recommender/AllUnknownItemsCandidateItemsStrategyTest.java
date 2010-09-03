@@ -23,12 +23,14 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.easymock.classextension.EasyMock;
+import org.junit.Test;
 
 /**
  * Tests {@link AllUnknownItemsCandidateItemsStrategyTest}
  */
 public final class AllUnknownItemsCandidateItemsStrategyTest extends TasteTestCase {
 
+  @Test  
   public void testStrategy() throws TasteException {
     FastIDSet allItemIDs = new FastIDSet();
     allItemIDs.addAll(new long[] { 1L, 2L, 3L });

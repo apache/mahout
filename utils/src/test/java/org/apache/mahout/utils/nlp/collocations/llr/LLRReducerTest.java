@@ -30,6 +30,7 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.stats.LogLikelihood;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.nlp.collocations.llr.LLRReducer.LLCallback;
 import org.easymock.classextension.EasyMock;
 import org.junit.Before;
@@ -37,10 +38,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Test the LLRReducer
- *  FIXME: Add negative test cases.
+/**
+ * Test the LLRReducer
+ *  TODO Add negative test cases.
  */
-public class LLRReducerTest {
+public final class LLRReducerTest extends MahoutTestCase {
   
   private static final Logger log =
     LoggerFactory.getLogger(LLRReducerTest.class);
@@ -49,8 +51,10 @@ public class LLRReducerTest {
   private LLCallback ll;
   private LLCallback cl;
   
+  @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     context   = EasyMock.createMock(Reducer.Context.class);
     ll        = EasyMock.createMock(LLCallback.class);
     cl        = new LLCallback() {

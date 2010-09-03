@@ -48,36 +48,30 @@ import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.mapreduce.partial.Step0Job.Step0Mapper;
 import org.apache.mahout.df.mapreduce.partial.Step0Job.Step0Output;
+import org.junit.Test;
 
-public class Step0JobTest extends MahoutTestCase {
+public final class Step0JobTest extends MahoutTestCase {
 
-  // the generated data must be big enough to be splited by FileInputFormat
+  // the generated data must be big enough to be split by FileInputFormat
 
   private static final int NUM_ATTRIBUTES = 40;
-
   private static final int NUM_INSTANCES = 2000;
-
-  //int numTrees = 10;
-
   private static final int NUM_MAPS = 5;
 
   /**
    * Computes the "mapred.max.split.size" that will generate the desired number
    * of input splits
-   * 
-   * @param conf
-   * @param inputPath
+   *
    * @param numMaps desired number of input splits
-   * @throws Exception
    */
-  public static void setMaxSplitSize(Configuration conf, Path inputPath,
-      int numMaps) throws IOException {
+  public static void setMaxSplitSize(Configuration conf, Path inputPath, int numMaps) throws IOException {
     FileSystem fs = inputPath.getFileSystem(conf);
     FileStatus status = fs.getFileStatus(inputPath);
     long goalSize = status.getLen() / numMaps;
     conf.setLong("mapred.max.split.size", goalSize);
   }
 
+  @Test
   public void testStep0Mapper() throws Exception {
     Random rng = RandomUtils.getRandom();
 
@@ -142,6 +136,7 @@ public class Step0JobTest extends MahoutTestCase {
 
   }
 
+  @Test
   public void testProcessOutput() throws Exception {
     Random rng = RandomUtils.getRandom();
 
@@ -226,7 +221,7 @@ public class Step0JobTest extends MahoutTestCase {
 
     private final Step0Output[] values;
 
-    private int index = 0;
+    private int index;
 
     public Step0Context(Mapper<?,?,?,?> mapper, Configuration conf,
         TaskAttemptID taskid, int numMaps) throws IOException,

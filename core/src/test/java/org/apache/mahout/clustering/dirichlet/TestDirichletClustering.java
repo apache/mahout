@@ -29,13 +29,16 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestDirichletClustering extends MahoutTestCase {
+public final class TestDirichletClustering extends MahoutTestCase {
 
   private List<VectorWritable> sampleData;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     sampleData = new ArrayList<VectorWritable>();
   }
@@ -71,7 +74,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     generateSamples(num, mx, my, sd, 2);
   }
 
-  private static void printResults(List<Cluster[]> result, int significant) {
+  private static void printResults(Iterable<Cluster[]> result, int significant) {
     int row = 0;
     for (Cluster[] r : result) {
       System.out.print("sample[" + row++ + "]= ");
@@ -85,6 +88,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     System.out.println();
   }
 
+  @Test
   public void testDirichletCluster100() {
     System.out.println("testDirichletCluster100");
     generateSamples(40, 1, 1, 3);
@@ -102,6 +106,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     assertNotNull(result);
   }
 
+  @Test
   public void testDirichletCluster100s() {
     System.out.println("testDirichletCluster100s");
     generateSamples(40, 1, 1, 3);
@@ -119,6 +124,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     assertNotNull(result);
   }
 
+  @Test
   public void testDirichletCluster100as() {
     System.out.println("testDirichletCluster100as");
     generateSamples(40, 1, 1, 3);
@@ -136,6 +142,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     assertNotNull(result);
   }
 
+  @Test
   public void testDirichletCluster100C3() {
     System.out.println("testDirichletCluster100");
     generateSamples(40, 1, 1, 3, 3);
@@ -153,6 +160,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     assertNotNull(result);
   }
 
+  @Test
   public void testDirichletCluster100sC3() {
     System.out.println("testDirichletCluster100s");
     generateSamples(40, 1, 1, 3, 3);
@@ -170,6 +178,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     assertNotNull(result);
   }
 
+  @Test
   public void testDirichletCluster100asC3() {
     System.out.println("testDirichletCluster100as");
     generateSamples(40, 1, 1, 3, 3);
@@ -187,6 +196,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     assertNotNull(result);
   }
 
+  @Test
   public void testDirichletGaussianCluster100() {
     System.out.println("testDirichletGaussianCluster100");
     generateSamples(40, 1, 1, 3);
@@ -204,6 +214,7 @@ public class TestDirichletClustering extends MahoutTestCase {
     assertNotNull(result);
   }
 
+  @Test  
   public void testDirichletDMCluster100() {
     System.out.println("testDirichletDMCluster100");
     generateSamples(40, 1, 1, 3);

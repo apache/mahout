@@ -17,11 +17,14 @@
 
 package org.apache.mahout.math.jet.stat;
 
-import junit.framework.TestCase;
+import org.apache.mahout.math.MahoutTestCase;
+import org.junit.Test;
 
 import java.util.Locale;
 
-public class ProbabilityTest extends TestCase {
+public final class ProbabilityTest extends MahoutTestCase {
+
+  @Test
   public void testNormalCdf() {
     // computed by R
     // pnorm(seq(-5,5, length.out=100))
@@ -58,6 +61,7 @@ public class ProbabilityTest extends TestCase {
     }
   }
 
+  @Test
   public void testBetaCdf() {
     // values computed using:
     //> pbeta(seq(0, 1, length.out=100), 1, 1)
@@ -178,6 +182,7 @@ public class ProbabilityTest extends TestCase {
     }
   }
 
+  @Test
   public void testLogGamma() {
     double[] xValues = {1.1, 2.1, 3.1, 4.1, 5.1, 20.1, 100.1, -0.9};
     double[] ref = {

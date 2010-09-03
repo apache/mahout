@@ -17,12 +17,15 @@
 
 package org.apache.mahout.math.hadoop.similarity.vector;
 
+import org.junit.Test;
+
 /**
  * tests {@link DistributedPearsonCorrelationVectorSimilarity}
  */
-public class DistributedPearsonCorrelationVectorSimilarityTest
+public final class DistributedPearsonCorrelationVectorSimilarityTest
     extends DistributedVectorSimilarityTestCase {
 
+  @Test
   public void testPearsonCorrelation() throws Exception {
     assertSimilar(new DistributedPearsonCorrelationVectorSimilarity(),
         asVector(3, -2),

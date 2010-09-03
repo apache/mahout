@@ -25,10 +25,12 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.junit.Test;
 
 /** <p>Tests {@link PearsonCorrelationSimilarity}.</p> */
 public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
 
+  @Test
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -40,6 +42,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullCorrelation1Weighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -51,6 +54,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -63,6 +67,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertTrue(Double.isNaN(correlation));
   }
 
+  @Test
   public void testNoCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -74,6 +79,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(-1.0, correlation);
   }
 
+  @Test
   public void testNoCorrelation1Weighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -85,6 +91,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(-1.0, correlation);
   }
 
+  @Test
   public void testNoCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -96,6 +103,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertTrue(Double.isNaN(correlation));
   }
 
+  @Test
   public void testNoCorrelation3() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -107,6 +115,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(-1.0, correlation);
   }
 
+  @Test
   public void testSimple() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -118,6 +127,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.9607689228305227, correlation);
   }
 
+  @Test
   public void testSimpleWeighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -129,6 +139,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.9901922307076306, correlation);
   }
 
+  @Test
   public void testFullItemCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -141,6 +152,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullItemCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -154,6 +166,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertTrue(Double.isNaN(correlation));
   }
 
+  @Test
   public void testNoItemCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -166,6 +179,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(-1.0, correlation);
   }
 
+  @Test
   public void testNoItemCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -178,6 +192,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertTrue(Double.isNaN(correlation));
   }
 
+  @Test
   public void testNoItemCorrelation3() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -191,6 +206,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(-1.0, correlation);
   }
 
+  @Test
   public void testSimpleItem() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -204,6 +220,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.9607689228305227, correlation);
   }
 
+  @Test
   public void testSimpleItemWeighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -217,11 +234,13 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.9901922307076306, correlation);
   }
 
+  @Test
   public void testRefresh() throws Exception {
     // Make sure this doesn't throw an exception
     new PearsonCorrelationSimilarity(getDataModel()).refresh(null);
   }
 
+  @Test
   public void testInferrer() throws Exception {
     DataModel dataModel = getDataModel(
       new long[] {1, 2},
@@ -240,7 +259,7 @@ public final class PearsonCorrelationSimilarityTest extends SimilarityTestCase {
       }
     });
 
-    assertEquals(-0.435285750066007, similarity.userSimilarity(1L, 2L));
+    assertEquals(-0.435285750066007, similarity.userSimilarity(1L, 2L), EPSILON);
   }
 
 }

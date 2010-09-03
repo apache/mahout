@@ -20,7 +20,7 @@ package org.apache.mahout.clustering.lda;
 import java.util.Iterator;
 import java.util.Random;
 
-import org.apache.commons.math.distribution.PoissonDistribution;
+import org.apache.commons.math.distribution.IntegerDistribution;
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.commons.math.MathException;
 
@@ -30,15 +30,18 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestLDAInference extends MahoutTestCase {
+public final class TestLDAInference extends MahoutTestCase {
   
   private static final int NUM_TOPICS = 20;
   
   private Random random;
   
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     random = RandomUtils.getRandom();
   }
@@ -53,7 +56,7 @@ public class TestLDAInference extends MahoutTestCase {
    */
   private Vector generateRandomDoc(int numWords, double sparsity) throws MathException {
     Vector v = new DenseVector(numWords);
-    PoissonDistribution dist = new PoissonDistributionImpl(sparsity);
+    IntegerDistribution dist = new PoissonDistributionImpl(sparsity);
     for (int i = 0; i < numWords; i++) {
       // random integer
       v.setQuick(i, dist.inverseCumulativeProbability(random.nextDouble()) + 1);
@@ -101,16 +104,19 @@ public class TestLDAInference extends MahoutTestCase {
       assertTrue("log likelihood", doc.getLogLikelihood() <= 1.0E-10);
     }
   }
-  
-  public void testLDAEasy() throws MathException {
+
+  @Test
+  public void testLDAEasy() throws Exception {
     runTest(10, 1.0, 5); // 1 word per doc in expectation
   }
-  
-  public void testLDASparse() throws MathException {
+
+  @Test
+  public void testLDASparse() throws Exception {
     runTest(100, 0.4, 5); // 40 words per doc in expectation
   }
-  
-  public void testLDADense() throws MathException {
+
+  @Test
+  public void testLDADense() throws Exception {
     runTest(100, 3.0, 5); // 300 words per doc in expectation
   }
 }

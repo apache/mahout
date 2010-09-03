@@ -20,19 +20,23 @@ package org.apache.mahout.classifier.discriminative;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.junit.Before;
+import org.junit.Test;
 
-public class LinearModelTest extends MahoutTestCase {
+public final class LinearModelTest extends MahoutTestCase {
 
   private LinearModel model;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     double[] values = {0.0, 1.0, 0.0, 1.0, 0.0};
     Vector hyperplane = new DenseVector(values);
     this.model = new LinearModel(hyperplane, 0.1, 0.5);
   }
 
+  @Test
   public void testClassify() {
     double[] valuesFalse = {1.0, 0.0, 1.0, 0.0, 1.0};
     Vector dataPointFalse = new DenseVector(valuesFalse);
@@ -43,6 +47,7 @@ public class LinearModelTest extends MahoutTestCase {
     assertTrue(this.model.classify(dataPointTrue));
   }
 
+  @Test
   public void testAddDelta() {
     double[] values = {1.0, -1.0, 1.0, -1.0, 1.0};
     this.model.addDelta(new DenseVector(values));
@@ -56,6 +61,7 @@ public class LinearModelTest extends MahoutTestCase {
     assertFalse(this.model.classify(dataPointTrue));
   }
 
+  @Test
   public void testTimesDelta() {
     double[] values = {-1.0, -1.0, -1.0, -1.0, -1.0};
     this.model.addDelta(new DenseVector(values));

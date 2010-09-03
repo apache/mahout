@@ -17,7 +17,7 @@
 
 package org.apache.mahout.common.distance;
 
-public class TestTanimotoDistanceMeasure extends DefaultWeightedDistanceMeasureTest {
+public final class TestTanimotoDistanceMeasure extends DefaultWeightedDistanceMeasureTest {
   @Override
   public TanimotoDistanceMeasure distanceMeasureFactory() {
     return new TanimotoDistanceMeasure();

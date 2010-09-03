@@ -22,17 +22,21 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.junit.Before;
+import org.junit.Test;
 
-public class WinnowTrainerTest extends MahoutTestCase {
+public final class WinnowTrainerTest extends MahoutTestCase {
 
   private WinnowTrainer trainer;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     trainer = new WinnowTrainer(3);
   }
 
+  @Test
   public void testUpdate() throws Exception {
     double[] labels = { 0.0, 0.0, 0.0, 1.0 };
     Vector labelset = new DenseVector(labels);

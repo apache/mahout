@@ -17,7 +17,9 @@
 
 package org.apache.mahout.math;
 
-import static org.apache.mahout.math.function.Functions.*;
+import org.apache.mahout.math.function.Functions;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Iterator;
 
@@ -25,7 +27,6 @@ public abstract class AbstractTestVector extends MahoutTestCase {
 
   private static final double[] values = {1.1, 2.2, 3.3};
   private static final double[] gold = {0.0, 1.1, 0.0, 2.2, 0.0, 3.3, 0.0};
-  private static final double EPSILON = 0.0000000001;
 
   private Vector test;
 
@@ -36,7 +37,8 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     test = generateTestVector(2 * values.length + 1);
     for (int i = 0; i < values.length; i++) {
@@ -44,16 +46,19 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testAsFormatString() {
     String formatString = test.asFormatString();
     Vector vec = AbstractVector.decodeVector(formatString);
     assertEquals(vec, test);
   }
 
+  @Test
   public void testCardinality() {
     assertEquals("size", 7, test.size());
   }
 
+  @Test
   public void testIterator() throws Exception {
     Iterator<Vector.Element> iterator = test.iterateNonZero();
     checkIterator(iterator, gold);
@@ -91,7 +96,8 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     }
   }
 
-  public void testIteratorSet() throws CloneNotSupportedException {
+  @Test
+  public void testIteratorSet() throws Exception {
     Vector clone = test.clone();
     Iterator<Vector.Element> it = clone.iterateNonZero();
     while (it.hasNext()) {
@@ -101,7 +107,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     it = clone.iterateNonZero();
     while (it.hasNext()) {
       Vector.Element e = it.next();
-      assertEquals(test.get(e.index()) * 2.0, e.get());
+      assertEquals(test.get(e.index()) * 2.0, e.get(), EPSILON);
     }
     clone = test.clone();
     it = clone.iterator();
@@ -112,250 +118,244 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     it = clone.iterator();
     while (it.hasNext()) {
       Vector.Element e = it.next();
-      assertEquals(test.get(e.index()) * 2.0, e.get());
+      assertEquals(test.get(e.index()) * 2.0, e.get(), EPSILON);
     }
   }
 
+  @Test
   public void testCopy() throws Exception {
     Vector copy = test.clone();
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("copy [" + i + ']', test.get(i), copy.get(i));
+      assertEquals("copy [" + i + ']', test.get(i), copy.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testGet() throws Exception {
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, test.get(i));
+        assertEquals("get [" + i + ']', 0.0, test.get(i), EPSILON);
       } else {
-        assertEquals("get [" + i + ']', values[i/2], test.get(i));
+        assertEquals("get [" + i + ']', values[i/2], test.get(i), EPSILON);
       }
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testGetOver() {
-    try {
-      test.get(test.size());
-      fail("expected exception");
-    } catch (IndexException e) {
-    }
+    test.get(test.size());
   }
 
+  @Test(expected = IndexException.class)
   public void testGetUnder() {
-    try {
-      test.get(-1);
-      fail("expected exception");
-    } catch (IndexException e) {
-    }
+    test.get(-1);
   }
 
+  @Test
   public void testSet() throws Exception {
     test.set(3, 4.5);
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, test.get(i));
+        assertEquals("get [" + i + ']', 0.0, test.get(i), EPSILON);
       } else if (i == 3) {
-        assertEquals("set [" + i + ']', 4.5, test.get(i));
+        assertEquals("set [" + i + ']', 4.5, test.get(i), EPSILON);
       } else {
-        assertEquals("set [" + i + ']', values[i/2], test.get(i));
+        assertEquals("set [" + i + ']', values[i/2], test.get(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testSize() throws Exception {
     assertEquals("size", 3, test.getNumNondefaultElements());
   }
 
+  @Test
   public void testViewPart() throws Exception {
     Vector part = test.viewPart(1, 2);
     assertEquals("part size", 2, part.getNumNondefaultElements());
     for (int i = 0; i < part.size(); i++) {
-      assertEquals("part[" + i + ']', test.get(i+1), part.get(i));
+      assertEquals("part[" + i + ']', test.get(i+1), part.get(i), EPSILON);
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartUnder() {
-    try {
-      test.viewPart(-1, values.length);
-      fail("no exception");
-    } catch (IndexException e) {
-    }
+    test.viewPart(-1, values.length);
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartOver() {
-    try {
-      test.viewPart(2, 7);
-      fail("no exception");
-    } catch (IndexException e) {
-    }
+    test.viewPart(2, 7);
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartCardinality() {
-    try {
-      test.viewPart(1, 8);
-      fail("no exception");
-    } catch (IndexException e) {
-    }
+    test.viewPart(1, 8);
   }
 
+  @Test
   public void testDecodeVector() throws Exception {
     Vector val = AbstractVector.decodeVector(test.asFormatString());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', test.get(i), val.get(i));
+      assertEquals("get [" + i + ']', test.get(i), val.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testSparseDoubleVectorInt() throws Exception {
     Vector val = new RandomAccessSparseVector(4);
     assertEquals("size", 4, val.size());
     for (int i = 0; i < 4; i++) {
-      assertEquals("get [" + i + ']', 0.0, val.get(i));
+      assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testDot() throws Exception {
     double res = test.dot(test);
     double expected = 3.3 * 3.3 + 2.2 * 2.2 + 1.1 * 1.1;
     assertEquals("dot", expected, res, EPSILON);
   }
 
-  public void testDot2() throws CloneNotSupportedException {
+  @Test
+  public void testDot2() throws Exception {
     Vector test2 = test.clone();
     test2.set(1, 0.0);
     test2.set(3, 0.0);
     assertEquals(3.3 * 3.3, test2.dot(test), EPSILON);
   }
 
+  @Test(expected = CardinalityException.class)
   public void testDotCardinality() {
-    try {
-      test.dot(new DenseVector(test.size() + 1));
-      fail("expected exception");
-    } catch (CardinalityException e) {
-    }
+    test.dot(new DenseVector(test.size() + 1));
   }
 
+  @Test
   public void testNormalize() throws Exception {
     Vector val = test.normalize();
     double mag = Math.sqrt(1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3);
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, val.get(i));
+        assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
       } else {
-        assertEquals("dot", values[i/2] / mag, val.get(i));
+        assertEquals("dot", values[i/2] / mag, val.get(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testMinus() throws Exception {
     Vector val = test.minus(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', 0.0, val.get(i));
+      assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
     }
 
     val = test.minus(test).minus(test);
     assertEquals("cardinality", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', 0.0, val.get(i) + test.get(i));
+      assertEquals("get [" + i + ']', 0.0, val.get(i) + test.get(i), EPSILON);
     }
     
     Vector val1 = test.plus(1);
     val = val1.minus(test);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', 1.0, val.get(i));
+      assertEquals("get [" + i + ']', 1.0, val.get(i), EPSILON);
     }
 
     val1 = test.plus(-1);
     val = val1.minus(test);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', -1.0, val.get(i));
+      assertEquals("get [" + i + ']', -1.0, val.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testPlusDouble() throws Exception {
     Vector val = test.plus(1);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 1.0, val.get(i));
+        assertEquals("get [" + i + ']', 1.0, val.get(i), EPSILON);
       } else {
-        assertEquals("get [" + i + ']', values[i/2] + 1.0, val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] + 1.0, val.get(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testPlusVector() throws Exception {
     Vector val = test.plus(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, val.get(i));
+        assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
       } else {
-        assertEquals("get [" + i + ']', values[i/2] * 2.0, val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] * 2.0, val.get(i), EPSILON);
       }
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testPlusVectorCardinality() {
-    try {
-      test.plus(new DenseVector(test.size() + 1));
-      fail("expected exception");
-    } catch (CardinalityException e) {
-    }
+    test.plus(new DenseVector(test.size() + 1));
   }
 
+  @Test
   public void testTimesDouble() throws Exception {
     Vector val = test.times(3);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, val.get(i));
+        assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
       } else {
-        assertEquals("get [" + i + ']', values[i/2] * 3.0, val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] * 3.0, val.get(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testDivideDouble() throws Exception {
     Vector val = test.divide(3);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, val.get(i));
+        assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
       } else {
         assertEquals("get [" + i + ']', values[i/2] / 3.0, val.get(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testTimesVector() throws Exception {
     Vector val = test.times(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, val.get(i));
+        assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
       } else {
-        assertEquals("get [" + i + ']', values[i/2] * values[i/2], val.get(i));
+        assertEquals("get [" + i + ']', values[i/2] * values[i/2], val.get(i), EPSILON);
       }
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testTimesVectorCardinality() {
-    try {
-      test.times(new DenseVector(test.size() + 1));
-      fail("expected exception");
-    } catch (CardinalityException e) {
-    }
+    test.times(new DenseVector(test.size() + 1));
   }
 
+  @Test
   public void testZSum() {
     double expected = 0;
     for (double value : values) {
       expected += value;
     }
-    assertEquals("wrong zSum", expected, test.zSum());
+    assertEquals("wrong zSum", expected, test.zSum(), EPSILON);
   }
 
+  @Test
   public void testGetDistanceSquared() {
     Vector other = new RandomAccessSparseVector(test.size());
     other.set(1, -2);
@@ -367,93 +367,96 @@ public abstract class AbstractTestVector extends MahoutTestCase {
                Math.abs(expected - test.getDistanceSquared(other)) < 10.0E-7);
   }
 
+  @Test
   public void testAssignDouble() {
     test.assign(0);
     for (int i = 0; i < values.length; i++) {
-      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test
   public void testAssignDoubleArray() throws Exception {
     double[] array = new double[test.size()];
     test.assign(array);
     for (int i = 0; i < values.length; i++) {
-      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignDoubleArrayCardinality() {
     double[] array = new double[test.size() + 1];
-    try {
-      test.assign(array);
-      fail("cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.assign(array);
   }
 
+  @Test
   public void testAssignVector() throws Exception {
     Vector other = new DenseVector(test.size());
     test.assign(other);
     for (int i = 0; i < values.length; i++) {
-      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignVectorCardinality() {
     Vector other = new DenseVector(test.size() - 1);
-    try {
-      test.assign(other);
-      fail("cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.assign(other);
   }
 
+  @Test
   public void testAssignUnaryFunction() {
-    test.assign(NEGATE);
+    test.assign(Functions.NEGATE);
     for (int i = 1; i < values.length; i += 2) {
-      assertEquals("value[" + i + ']', -values[i], test.getQuick(i+2));
+      assertEquals("value[" + i + ']', -values[i], test.getQuick(i+2), EPSILON);
     }
   }
 
+  @Test
   public void testAssignBinaryFunction() throws Exception {
-    test.assign(test, PLUS);
+    test.assign(test, Functions.PLUS);
     for (int i = 0; i < values.length; i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, test.get(i));
+        assertEquals("get [" + i + ']', 0.0, test.get(i), EPSILON);
       } else {
-        assertEquals("value[" + i + ']', 2 * values[i - 1], test.getQuick(i));
+        assertEquals("value[" + i + ']', 2 * values[i - 1], test.getQuick(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testAssignBinaryFunction2() throws Exception {
-    test.assign(plus(4));
+    test.assign(Functions.plus(4));
     for (int i = 0; i < values.length; i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 4.0, test.get(i));
+        assertEquals("get [" + i + ']', 4.0, test.get(i), EPSILON);
       } else {
-        assertEquals("value[" + i + ']', values[i - 1] + 4, test.getQuick(i));
+        assertEquals("value[" + i + ']', values[i - 1] + 4, test.getQuick(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testAssignBinaryFunction3() throws Exception {
-    test.assign(mult(4));
+    test.assign(Functions.mult(4));
     for (int i = 0; i < values.length; i++) {
       if (i % 2 == 0) {
-        assertEquals("get [" + i + ']', 0.0, test.get(i));
+        assertEquals("get [" + i + ']', 0.0, test.get(i), EPSILON);
       } else {
-        assertEquals("value[" + i + ']', values[i - 1] * 4, test.getQuick(i));
+        assertEquals("value[" + i + ']', values[i - 1] * 4, test.getQuick(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testLike() {
     Vector other = test.like();
     assertTrue("not like", test.getClass().isAssignableFrom(other.getClass()));
     assertEquals("size", test.size(), other.size());
   }
 
+  @Test
   public void testCrossProduct() {
     Matrix result = test.cross(test);
     assertEquals("row size", test.size(), result.size()[0]);
@@ -461,7 +464,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
     for (int row = 0; row < result.size()[0]; row++) {
       for (int col = 0; col < result.size()[1]; col++) {
         assertEquals("cross[" + row + "][" + col + ']', test.getQuick(row)
-            * test.getQuick(col), result.getQuick(row, col));
+            * test.getQuick(col), result.getQuick(row, col), EPSILON);
       }
     }
   }

@@ -21,10 +21,12 @@ import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.junit.Test;
 
 /** <p>Tests {@link CachingRecommender}.</p> */
 public final class CachingRecommenderTest extends TasteTestCase {
 
+  @Test
   public void testRecommender() throws Exception {
     MutableInt recommendCount = new MutableInt();
     Recommender mockRecommender = new MockRecommender(recommendCount);

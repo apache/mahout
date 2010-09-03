@@ -28,9 +28,11 @@ import org.apache.mahout.math.VectorWritable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.junit.Test;
 
-public class TestModelDistributionSerialization extends MahoutTestCase {
+public final class TestModelDistributionSerialization extends MahoutTestCase {
 
+  @Test
   public void testGaussianClusterDistribution() {
     GaussianClusterDistribution dist = new GaussianClusterDistribution(new VectorWritable(new DenseVector(2)));
     String json = dist.asJsonString();
@@ -40,11 +42,13 @@ public class TestModelDistributionSerialization extends MahoutTestCase {
     Gson gson = builder.create();
     GaussianClusterDistribution dist1 = (GaussianClusterDistribution) gson
         .fromJson(json, AbstractVectorModelDistribution.MODEL_DISTRIBUTION_TYPE);
-    assertEquals("prototype", dist.getModelPrototype().getClass(), dist1.getModelPrototype().getClass());
+    assertSame("prototype", dist.getModelPrototype().getClass(), dist1.getModelPrototype().getClass());
   }
 
+  @Test
   public void testDMClusterDistribution() {
-    DistanceMeasureClusterDistribution dist = new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)));
+    DistanceMeasureClusterDistribution dist =
+        new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)));
     String json = dist.asJsonString();
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(ModelDistribution.class, new JsonModelDistributionAdapter());
@@ -52,13 +56,14 @@ public class TestModelDistributionSerialization extends MahoutTestCase {
     Gson gson = builder.create();
     DistanceMeasureClusterDistribution dist1 = (DistanceMeasureClusterDistribution) gson
         .fromJson(json, AbstractVectorModelDistribution.MODEL_DISTRIBUTION_TYPE);
-    assertEquals("prototype", dist.getModelPrototype().getClass(), dist1.getModelPrototype().getClass());
-    assertEquals("measure", dist.getMeasure().getClass(), dist1.getMeasure().getClass());
+    assertSame("prototype", dist.getModelPrototype().getClass(), dist1.getModelPrototype().getClass());
+    assertSame("measure", dist.getMeasure().getClass(), dist1.getMeasure().getClass());
   }
 
+  @Test
   public void testDMClusterDistribution2() {
-    DistanceMeasureClusterDistribution dist = new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)),
-                                                                                     new EuclideanDistanceMeasure());
+    DistanceMeasureClusterDistribution dist =
+        new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)), new EuclideanDistanceMeasure());
     String json = dist.asJsonString();
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(ModelDistribution.class, new JsonModelDistributionAdapter());
@@ -66,7 +71,7 @@ public class TestModelDistributionSerialization extends MahoutTestCase {
     Gson gson = builder.create();
     DistanceMeasureClusterDistribution dist1 = (DistanceMeasureClusterDistribution) gson
         .fromJson(json, AbstractVectorModelDistribution.MODEL_DISTRIBUTION_TYPE);
-    assertEquals("prototype", dist.getModelPrototype().getClass(), dist1.getModelPrototype().getClass());
-    assertEquals("measure", dist.getMeasure().getClass(), dist1.getMeasure().getClass());
+    assertSame("prototype", dist.getModelPrototype().getClass(), dist1.getModelPrototype().getClass());
+    assertSame("measure", dist.getMeasure().getClass(), dist1.getMeasure().getClass());
   }
 }

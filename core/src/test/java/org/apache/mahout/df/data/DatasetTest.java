@@ -28,8 +28,9 @@ import java.util.Random;
 
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
-public class DatasetTest extends MahoutTestCase {
+public final class DatasetTest extends MahoutTestCase {
 
   private static final int NUM_ATTRIBUTES = 10;
 
@@ -39,6 +40,7 @@ public class DatasetTest extends MahoutTestCase {
     return Dataset.read(in);
   }
 
+  @Test
   public void testWritable() throws Exception {
 
     Random rng = RandomUtils.getRandom();
@@ -46,7 +48,7 @@ public class DatasetTest extends MahoutTestCase {
     DataOutput out = new DataOutputStream(byteOutStream);
 
     int n = 10;
-    for (int nloop=0; nloop< n; nloop++) {
+    for (int nloop = 0; nloop < n; nloop++) {
       byteOutStream.reset();
       
       Dataset dataset = Utils.randomData(rng, NUM_ATTRIBUTES, 1).getDataset();

@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math;
 
-public class TestSparseRowMatrix extends MatrixTest {
+public final class TestSparseRowMatrix extends MatrixTest {
 
   @Override
   public Matrix matrixFactory(double[][] values) {

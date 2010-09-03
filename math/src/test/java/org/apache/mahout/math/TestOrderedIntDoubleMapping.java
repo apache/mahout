@@ -17,51 +17,55 @@
 
 package org.apache.mahout.math;
 
-public class TestOrderedIntDoubleMapping extends MahoutTestCase {
+import org.junit.Test;
 
+public final class TestOrderedIntDoubleMapping extends MahoutTestCase {
+
+  @Test
   public void testGetSet() {
 
     OrderedIntDoubleMapping mapping = new OrderedIntDoubleMapping(1);
 
     assertEquals(0, mapping.getNumMappings());
-    assertEquals(0.0, mapping.get(0));
-    assertEquals(0.0, mapping.get(1));
+    assertEquals(0.0, mapping.get(0), EPSILON);
+    assertEquals(0.0, mapping.get(1), EPSILON);
 
     mapping.set(0, 1.1);
     assertEquals(1, mapping.getNumMappings());
-    assertEquals(1.1, mapping.get(0));
-    assertEquals(0.0, mapping.get(1));
+    assertEquals(1.1, mapping.get(0), EPSILON);
+    assertEquals(0.0, mapping.get(1), EPSILON);
 
     mapping.set(5, 6.6);
     assertEquals(2, mapping.getNumMappings());
-    assertEquals(1.1, mapping.get(0));
-    assertEquals(0.0, mapping.get(1));
-    assertEquals(6.6, mapping.get(5));
-    assertEquals(0.0, mapping.get(6));
+    assertEquals(1.1, mapping.get(0), EPSILON);
+    assertEquals(0.0, mapping.get(1), EPSILON);
+    assertEquals(6.6, mapping.get(5), EPSILON);
+    assertEquals(0.0, mapping.get(6), EPSILON);
 
     mapping.set(0, 0.0);
     assertEquals(1, mapping.getNumMappings());
-    assertEquals(0.0, mapping.get(0));
-    assertEquals(0.0, mapping.get(1));
-    assertEquals(6.6, mapping.get(5));
+    assertEquals(0.0, mapping.get(0), EPSILON);
+    assertEquals(0.0, mapping.get(1), EPSILON);
+    assertEquals(6.6, mapping.get(5), EPSILON);
 
     mapping.set(5, 0.0);
     assertEquals(0, mapping.getNumMappings());
-    assertEquals(0.0, mapping.get(0));
-    assertEquals(0.0, mapping.get(1));
-    assertEquals(0.0, mapping.get(5));
+    assertEquals(0.0, mapping.get(0), EPSILON);
+    assertEquals(0.0, mapping.get(1), EPSILON);
+    assertEquals(0.0, mapping.get(5), EPSILON);
   }
 
+  @Test
   public void testClone() throws Exception {
     OrderedIntDoubleMapping mapping = new OrderedIntDoubleMapping(1);
     mapping.set(0, 1.1);
     mapping.set(5, 6.6);
     OrderedIntDoubleMapping clone = mapping.clone();
     assertEquals(2, clone.getNumMappings());
-    assertEquals(1.1, clone.get(0));
-    assertEquals(0.0, clone.get(1));
-    assertEquals(6.6, clone.get(5));
-    assertEquals(0.0, clone.get(6));
+    assertEquals(1.1, clone.get(0), EPSILON);
+    assertEquals(0.0, clone.get(1), EPSILON);
+    assertEquals(6.6, clone.get(5), EPSILON);
+    assertEquals(0.0, clone.get(6), EPSILON);
   }
 
 }

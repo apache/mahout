@@ -21,15 +21,15 @@ import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Map;
 
-import junit.framework.Assert;
-
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.utils.MahoutTestCase;
+import org.junit.Test;
 
-public class ARFFVectorIterableTest extends MahoutTestCase {
-  
+public final class ARFFVectorIterableTest extends MahoutTestCase {
+
+  @Test
   public void testValues() throws Exception {
     StringBuilder builder = new StringBuilder();
     builder.append("%comments").append('\n').append("@RELATION Mahout").append('\n')
@@ -44,124 +44,128 @@ public class ARFFVectorIterableTest extends MahoutTestCase {
     .append("{0 5,1 23}").append('\n');
     ARFFModel model = new MapBackedARFFModel();
     ARFFVectorIterable iterable = new ARFFVectorIterable(builder.toString(), model);
-    Assert.assertEquals("Mahout", iterable.getModel().getRelation());
+    assertEquals("Mahout", iterable.getModel().getRelation());
     Map<String, Integer> bindings = iterable.getModel().getLabelBindings();
-    Assert.assertNotNull(bindings);
-    Assert.assertEquals(5, bindings.size());
+    assertNotNull(bindings);
+    assertEquals(5, bindings.size());
     Iterator<Vector> iter = iterable.iterator();
-    Assert.assertTrue(iter.hasNext());
+    assertTrue(iter.hasNext());
     Vector next = iter.next();
-    Assert.assertNotNull(next);
-    Assert.assertTrue("Wrong instanceof", next instanceof DenseVector);
-    Assert.assertEquals(1.0, next.get(0));
-    Assert.assertEquals(2.0, next.get(1));
-    Assert.assertTrue(iter.hasNext());
+    assertNotNull(next);
+    assertTrue("Wrong instanceof", next instanceof DenseVector);
+    assertEquals(1.0, next.get(0), EPSILON);
+    assertEquals(2.0, next.get(1), EPSILON);
+    assertTrue(iter.hasNext());
     next = iter.next();
-    Assert.assertNotNull(next);
-    Assert.assertTrue("Wrong instanceof", next instanceof DenseVector);
-    Assert.assertEquals(2.0, next.get(0));
-    Assert.assertEquals(3.0, next.get(1));
+    assertNotNull(next);
+    assertTrue("Wrong instanceof", next instanceof DenseVector);
+    assertEquals(2.0, next.get(0), EPSILON);
+    assertEquals(3.0, next.get(1), EPSILON);
     
-    Assert.assertTrue(iter.hasNext());
+    assertTrue(iter.hasNext());
     next = iter.next();
-    Assert.assertNotNull(next);
-    Assert.assertTrue("Wrong instanceof", next instanceof RandomAccessSparseVector);
-    Assert.assertEquals(5.0, next.get(0));
-    Assert.assertEquals(23.0, next.get(1));
+    assertNotNull(next);
+    assertTrue("Wrong instanceof", next instanceof RandomAccessSparseVector);
+    assertEquals(5.0, next.get(0), EPSILON);
+    assertEquals(23.0, next.get(1), EPSILON);
     
-    Assert.assertFalse(iter.hasNext());
+    assertFalse(iter.hasNext());
   }
-  
+
+  @Test
   public void testDense() throws Exception {
     ARFFModel model = new MapBackedARFFModel();
     Iterable<Vector> iterable = new ARFFVectorIterable(SAMPLE_DENSE_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
-      Assert.assertTrue("Vector is not dense", vector instanceof DenseVector);
+      assertTrue("Vector is not dense", vector instanceof DenseVector);
       count++;
     }
-    Assert.assertEquals(10, count);
+    assertEquals(10, count);
   }
-  
+
+  @Test
   public void testSparse() throws Exception {
     ARFFModel model = new MapBackedARFFModel();
     Iterable<Vector> iterable = new ARFFVectorIterable(SAMPLE_SPARSE_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
-      Assert.assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
+      assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
       count++;
     }
-    Assert.assertEquals(10, count);
+    assertEquals(10, count);
   }
-  
+
+  @Test
   public void testNonNumeric() throws Exception {
     
     MapBackedARFFModel model = new MapBackedARFFModel();
     ARFFVectorIterable iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
-      Assert.assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
+      assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
       count++;
     }
-    Assert.assertEquals(10, count);
+    assertEquals(10, count);
     Map<String, Map<String, Integer>> nominalMap = iterable.getModel().getNominalMap();
-    Assert.assertNotNull(nominalMap);
-    Assert.assertEquals(1, nominalMap.size());
+    assertNotNull(nominalMap);
+    assertEquals(1, nominalMap.size());
     Map<String, Integer> noms = nominalMap.get("bar");
-    Assert.assertNotNull("nominals for bar are null", noms);
-    Assert.assertEquals(2, noms.size());
+    assertNotNull("nominals for bar are null", noms);
+    assertEquals(2, noms.size());
     Map<Integer, ARFFType> integerARFFTypeMap = model.getTypeMap();
-    Assert.assertNotNull("Type map null", integerARFFTypeMap);
-    Assert.assertEquals(5, integerARFFTypeMap.size());
+    assertNotNull("Type map null", integerARFFTypeMap);
+    assertEquals(5, integerARFFTypeMap.size());
     Map<String, Long> words = model.getWords();
-    Assert.assertNotNull("words null", words);
-    Assert.assertEquals(10, words.size());
+    assertNotNull("words null", words);
+    assertEquals(10, words.size());
     //System.out.println("Words: " + words);
     Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
-    Assert.assertNotNull("date format null", integerDateFormatMap);
-    Assert.assertEquals(1, integerDateFormatMap.size());
+    assertNotNull("date format null", integerDateFormatMap);
+    assertEquals(1, integerDateFormatMap.size());
     
   }
-  
+
+  @Test
   public void testMultipleNoms() throws Exception {
     MapBackedARFFModel model = new MapBackedARFFModel();
     ARFFVectorIterable iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF, model);
     int count = 0;
     for (Vector vector : iterable) {
-      Assert.assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
+      assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
       count++;
     }
-    Assert.assertEquals(10, count);
+    assertEquals(10, count);
     Map<String, Map<String, Integer>> nominalMap = iterable.getModel().getNominalMap();
-    Assert.assertNotNull(nominalMap);
-    Assert.assertEquals(1, nominalMap.size());
+    assertNotNull(nominalMap);
+    assertEquals(1, nominalMap.size());
     Map<String, Integer> noms = nominalMap.get("bar");
-    Assert.assertNotNull("nominals for bar are null", noms);
-    Assert.assertEquals(2, noms.size());
+    assertNotNull("nominals for bar are null", noms);
+    assertEquals(2, noms.size());
     Map<Integer, ARFFType> integerARFFTypeMap = model.getTypeMap();
-    Assert.assertNotNull("Type map null", integerARFFTypeMap);
-    Assert.assertEquals(5, integerARFFTypeMap.size());
+    assertNotNull("Type map null", integerARFFTypeMap);
+    assertEquals(5, integerARFFTypeMap.size());
     Map<String, Long> words = model.getWords();
-    Assert.assertNotNull("words null", words);
-    Assert.assertEquals(10, words.size());
+    assertNotNull("words null", words);
+    assertEquals(10, words.size());
     //System.out.println("Words: " + words);
     Map<Integer, DateFormat> integerDateFormatMap = model.getDateMap();
-    Assert.assertNotNull("date format null", integerDateFormatMap);
-    Assert.assertEquals(1, integerDateFormatMap.size());
+    assertNotNull("date format null", integerDateFormatMap);
+    assertEquals(1, integerDateFormatMap.size());
     model = new MapBackedARFFModel(model.getWords(), model.getWordCount(),
       model.getNominalMap());
     iterable = new ARFFVectorIterable(NON_NUMERIC_ARFF2, model);
     count = 0;
     for (Vector vector : iterable) {
-      Assert.assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
+      assertTrue("Vector is not dense", vector instanceof RandomAccessSparseVector);
       count++;
     }
     nominalMap = model.getNominalMap();
-    Assert.assertNotNull(nominalMap);
-    Assert.assertEquals(2, nominalMap.size());
+    assertNotNull(nominalMap);
+    assertEquals(2, nominalMap.size());
     noms = nominalMap.get("test");
-    Assert.assertNotNull("nominals for bar are null", noms);
-    Assert.assertEquals(2, noms.size());
+    assertNotNull("nominals for bar are null", noms);
+    assertEquals(2, noms.size());
   }
   
   

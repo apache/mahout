@@ -18,10 +18,12 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.junit.Test;
 
 /** <p>Tests {@link TanimotoCoefficientSimilarity}.</p> */
 public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase {
 
+  @Test
   public void testNoCorrelation() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -33,6 +35,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(Double.NaN, correlation);
   }
 
+  @Test
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -44,6 +47,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -55,6 +59,7 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
     assertCorrelationEquals(0.3333333333333333, correlation);
   }
 
+  @Test
   public void testCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -63,9 +68,10 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
                     {1.0, 1.0},
             });
     double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(1, 2);
-    assertEquals(0.3333333333333333, correlation);
+    assertEquals(0.3333333333333333, correlation, EPSILON);
   }
 
+  @Test
   public void testCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -74,9 +80,10 @@ public final class TanimotoCoefficientSimilarityTest extends SimilarityTestCase 
                     {1.0, 1.0, null, 0.0},
             });
     double correlation = new TanimotoCoefficientSimilarity(dataModel).userSimilarity(1, 2);
-    assertEquals(0.5, correlation);
+    assertEquals(0.5, correlation, EPSILON);
   }
 
+  @Test
   public void testRefresh() {
     // Make sure this doesn't throw an exception
     new TanimotoCoefficientSimilarity(getDataModel()).refresh(null);

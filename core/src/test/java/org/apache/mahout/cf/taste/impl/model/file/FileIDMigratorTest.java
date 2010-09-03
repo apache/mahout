@@ -20,11 +20,13 @@ package org.apache.mahout.cf.taste.impl.model.file;
 import java.io.File;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.IDMigrator;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Tests {@link FileIDMigrator}
  */
-public class FileIDMigratorTest extends TasteTestCase {
+public final class FileIDMigratorTest extends TasteTestCase {
 
   private static final String[] STRING_IDS = {
       "dog",
@@ -38,12 +40,14 @@ public class FileIDMigratorTest extends TasteTestCase {
   private File testFile;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     testFile = getTestTempFile("test.txt");
     writeLines(testFile, STRING_IDS);
   }
 
+  @Test
   public void testLoadFromFile() throws Exception {
     IDMigrator migrator = new FileIDMigrator(testFile);
     long dogAsLong = migrator.toLongID("dog");
@@ -54,6 +58,7 @@ public class FileIDMigratorTest extends TasteTestCase {
     assertNull(migrator.toStringID(donkeyAsLong));
   }
 
+  @Test
   public void testNoRefreshAfterFileUpdate() throws Exception {
     IDMigrator migrator = new FileIDMigrator(testFile, 0L);
 
@@ -74,6 +79,7 @@ public class FileIDMigratorTest extends TasteTestCase {
     assertNull(migrator.toStringID(donkeyAsLong));
   }
 
+  @Test
   public void testRefreshAfterFileUpdate() throws Exception {
     IDMigrator migrator = new FileIDMigrator(testFile, 0L);
 

@@ -17,23 +17,26 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.IDMigrator;
-import org.apache.mahout.common.MahoutTestCase;
 
 import java.util.Collections;
 import org.apache.mahout.cf.taste.model.UpdatableIDMigrator;
+import org.junit.Test;
 
-public final class MemoryIDMigratorTest extends MahoutTestCase {
+public final class MemoryIDMigratorTest extends TasteTestCase {
 
   private static final String DUMMY_STRING = "Mahout";
   private static final long DUMMY_ID = -6311185995763544451L;
 
+  @Test
   public void testToLong() {
     IDMigrator migrator = new MemoryIDMigrator();
     long id = migrator.toLongID(DUMMY_STRING);
     assertEquals(DUMMY_ID, id);
   }
 
+  @Test
   public void testStore() throws Exception {
     UpdatableIDMigrator migrator = new MemoryIDMigrator();
     long id = migrator.toLongID(DUMMY_STRING);
@@ -42,6 +45,7 @@ public final class MemoryIDMigratorTest extends MahoutTestCase {
     assertEquals(DUMMY_STRING, migrator.toStringID(id));
   }
 
+  @Test
   public void testInitialize() throws Exception {
     UpdatableIDMigrator migrator = new MemoryIDMigrator();
     long id = migrator.toLongID(DUMMY_STRING);

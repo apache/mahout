@@ -19,66 +19,65 @@ package org.apache.mahout.common;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 
-public class IntPairWritableTest {
+public final class IntPairWritableTest extends MahoutTestCase {
 
   @Test
   public void testGetSet() {
     IntPairWritable n = new IntPairWritable();
     
-    Assert.assertEquals(0, n.getFirst());
-    Assert.assertEquals(0, n.getSecond());
+    assertEquals(0, n.getFirst());
+    assertEquals(0, n.getSecond());
     
     n.setFirst(5);
     n.setSecond(10);
     
-    Assert.assertEquals(5, n.getFirst());
-    Assert.assertEquals(10, n.getSecond());
+    assertEquals(5, n.getFirst());
+    assertEquals(10, n.getSecond());
     
     n = new IntPairWritable(2,4);
     
-    Assert.assertEquals(2, n.getFirst());
-    Assert.assertEquals(4, n.getSecond());
+    assertEquals(2, n.getFirst());
+    assertEquals(4, n.getSecond());
   }
   
   @Test
-  public void testWritable() throws IOException {
+  public void testWritable() throws Exception {
     IntPairWritable one = new IntPairWritable(1,2);
     IntPairWritable two = new IntPairWritable(3,4);
     
-    Assert.assertEquals(1, one.getFirst());
-    Assert.assertEquals(2, one.getSecond());
+    assertEquals(1, one.getFirst());
+    assertEquals(2, one.getSecond());
     
-    Assert.assertEquals(3, two.getFirst());
-    Assert.assertEquals(4, two.getSecond());
+    assertEquals(3, two.getFirst());
+    assertEquals(4, two.getSecond());
     
     
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
-    DataOutputStream out = new DataOutputStream(bout);
+    DataOutput out = new DataOutputStream(bout);
     
     two.write(out);
     
     byte[] b = bout.toByteArray();
     
     ByteArrayInputStream bin = new ByteArrayInputStream(b);
-    DataInputStream din = new DataInputStream(bin);
+    DataInput din = new DataInputStream(bin);
     
     one.readFields(din);
     
-    Assert.assertEquals(two.getFirst(), one.getFirst());
-    Assert.assertEquals(two.getSecond(), one.getSecond());    
+    assertEquals(two.getFirst(), one.getFirst());
+    assertEquals(two.getSecond(), one.getSecond());    
   }
   
   @Test
-  public void testComparable() throws IOException {
+  public void testComparable() {
     IntPairWritable[] input = {
         new IntPairWritable(2,3),
         new IntPairWritable(2,2),
@@ -108,7 +107,7 @@ public class IntPairWritableTest {
     };
     
     for (int i=0; i < input.length; i++) {
-      Assert.assertSame(input[expected[i]], sorted[i]);
+      assertSame(input[expected[i]], sorted[i]);
     }
  
   }

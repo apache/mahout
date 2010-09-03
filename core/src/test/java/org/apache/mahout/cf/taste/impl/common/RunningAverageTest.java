@@ -18,14 +18,17 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 /** <p>Tests {@link FullRunningAverage}.</p> */
 public final class RunningAverageTest extends TasteTestCase {
 
+  @Test
   public void testFull() {
     doTestRunningAverage(new FullRunningAverage());
   }
 
+  @Test
   public void testCompact() {
     doTestRunningAverage(new CompactRunningAverage());
   }
@@ -36,30 +39,30 @@ public final class RunningAverageTest extends TasteTestCase {
     assertTrue(Double.isNaN(runningAverage.getAverage()));
     runningAverage.addDatum(1.0);
     assertEquals(1, runningAverage.getCount());
-    assertEquals(1.0, runningAverage.getAverage());
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
     runningAverage.addDatum(1.0);
     assertEquals(2, runningAverage.getCount());
-    assertEquals(1.0, runningAverage.getAverage());
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
     runningAverage.addDatum(4.0);
     assertEquals(3, runningAverage.getCount());
-    assertEquals(2.0, runningAverage.getAverage());
+    assertEquals(2.0, runningAverage.getAverage(), EPSILON);
     runningAverage.addDatum(-4.0);
     assertEquals(4, runningAverage.getCount());
-    assertEquals(0.5, runningAverage.getAverage());
+    assertEquals(0.5, runningAverage.getAverage(), EPSILON);
 
     runningAverage.removeDatum(-4.0);
     assertEquals(3, runningAverage.getCount());
-    assertEquals(2.0, runningAverage.getAverage());
+    assertEquals(2.0, runningAverage.getAverage(), EPSILON);
     runningAverage.removeDatum(4.0);
     assertEquals(2, runningAverage.getCount());
-    assertEquals(1.0, runningAverage.getAverage());
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
 
     runningAverage.changeDatum(0.0);
     assertEquals(2, runningAverage.getCount());
-    assertEquals(1.0, runningAverage.getAverage());
+    assertEquals(1.0, runningAverage.getAverage(), EPSILON);
     runningAverage.changeDatum(2.0);
     assertEquals(2, runningAverage.getCount());
-    assertEquals(2.0, runningAverage.getAverage());
+    assertEquals(2.0, runningAverage.getAverage(), EPSILON);
   }
 
 }

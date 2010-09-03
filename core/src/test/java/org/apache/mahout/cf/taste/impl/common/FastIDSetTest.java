@@ -19,15 +19,16 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 /** <p>Tests {@link FastIDSet}.</p> */
 public final class FastIDSetTest extends TasteTestCase {
 
+  @Test
   public void testContainsAndAdd() {
     FastIDSet set = new FastIDSet();
     assertFalse(set.contains(1));
@@ -35,6 +36,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertTrue(set.contains(1));
   }
 
+  @Test
   public void testRemove() {
     FastIDSet set = new FastIDSet();
     set.add(1);
@@ -44,7 +46,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertFalse(set.contains(1));
   }
 
-
+  @Test
   public void testClear() {
     FastIDSet set = new FastIDSet();
     set.add(1);
@@ -54,6 +56,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertFalse(set.contains(1));
   }
 
+  @Test
   public void testSizeEmpty() {
     FastIDSet set = new FastIDSet();
     assertEquals(0, set.size());
@@ -66,6 +69,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertTrue(set.isEmpty());
   }
 
+  @Test
   public void testContains() {
     FastIDSet set = buildTestFastSet();
     assertTrue(set.contains(1));
@@ -74,6 +78,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertFalse(set.contains(4));
   }
 
+  @Test
   public void testReservedValues() {
     FastIDSet set = new FastIDSet();
     try {
@@ -92,6 +97,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertFalse(set.contains(Long.MAX_VALUE));
   }
 
+  @Test
   public void testRehash() {
     FastIDSet set = buildTestFastSet();
     set.remove(1);
@@ -99,6 +105,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertFalse(set.contains(1));
   }
 
+  @Test
   public void testGrow() {
     FastIDSet set = new FastIDSet(1);
     set.add(1);
@@ -107,6 +114,7 @@ public final class FastIDSetTest extends TasteTestCase {
     assertTrue(set.contains(2));
   }
 
+  @Test
   public void testIterator() {
     FastIDSet set = buildTestFastSet();
     Collection<Long> expected = new HashSet<Long>(3);
@@ -120,9 +128,10 @@ public final class FastIDSetTest extends TasteTestCase {
     assertTrue(expected.isEmpty());
   }
 
+  @Test
   public void testVersusHashSet() {
     FastIDSet actual = new FastIDSet(1);
-    Set<Integer> expected = new HashSet<Integer>(1000000);
+    Collection<Integer> expected = new HashSet<Integer>(1000000);
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 1000000; i++) {
       double d = r.nextDouble();

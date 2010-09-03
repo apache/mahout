@@ -17,45 +17,22 @@
 
 package org.apache.mahout.utils.vectors;
 
-import java.io.File;
-
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
+import org.junit.Test;
 
-public class SequenceFileVectorIterableTest extends MahoutTestCase {
-  
-  private File tmpLoc;
-  private File tmpFile;
-  
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    tmpLoc = new File(tmpDir, "sfvit");
-    tmpLoc.deleteOnExit();
-    tmpLoc.mkdirs();
-    tmpFile = File.createTempFile("sfvit", ".dat", tmpLoc);
-    tmpFile.deleteOnExit();
-  }
-  
-  @Override
-  public void tearDown() throws Exception {
-    tmpFile.delete();
-    tmpLoc.delete();
-    super.tearDown();
-  }
-  
+public final class SequenceFileVectorIterableTest extends MahoutTestCase {
+
+  @Test
   public void testIterable() throws Exception {
-    Path path = new Path(tmpFile.getAbsolutePath());
+    Path path = getTestTempFilePath("sfvit.dat");
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, LongWritable.class, VectorWritable.class);
@@ -72,6 +49,6 @@ public class SequenceFileVectorIterableTest extends MahoutTestCase {
       count++;
     }
     seqReader.close();
-    Assert.assertEquals(50, count);
+    assertEquals(50, count);
   }
 }

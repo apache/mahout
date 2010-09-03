@@ -20,16 +20,19 @@ package org.apache.mahout.cf.taste.impl.transforms;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
+import org.junit.Test;
 
 /** <p>Tests {@link ZScore}.</p> */
 public final class ZScoreTest extends TransformTestCase {
 
+  @Test
   public void testOnePref() throws Exception {
     DataModel dataModel = getDataModel(new long[] {1}, new Double[][] {{1.0}});
     PreferenceTransform zScore = new ZScore(dataModel);
     assertEquals(0.0, zScore.getTransformedValue(new GenericPreference(1, 0, 1.0f)), EPSILON);
   }
 
+  @Test
   public void testAllSame() throws Exception {
     DataModel dataModel = getDataModel(new long[] {1}, new Double[][] {{1.0,1.0,1.0}});
     PreferenceTransform zScore = new ZScore(dataModel);
@@ -38,13 +41,15 @@ public final class ZScoreTest extends TransformTestCase {
     assertEquals(0.0, zScore.getTransformedValue(new GenericPreference(1, 2, 1.0f)), EPSILON);
   }
 
+  @Test
   public void testStdev() throws Exception {
     DataModel dataModel = getDataModel(new long[] {1}, new Double[][] {{-1.0,-2.0}});
     PreferenceTransform zScore = new ZScore(dataModel);
-    assertEquals(0.707107, zScore.getTransformedValue(new GenericPreference(1, 0, -1.0f)), EPSILON);
-    assertEquals(-0.707107, zScore.getTransformedValue(new GenericPreference(1, 1, -2.0f)), EPSILON);
+    assertEquals(Math.sqrt(2.0)/2.0, zScore.getTransformedValue(new GenericPreference(1, 0, -1.0f)), EPSILON);
+    assertEquals(-Math.sqrt(2.0)/2.0, zScore.getTransformedValue(new GenericPreference(1, 1, -2.0f)), EPSILON);
   }
 
+  @Test
   public void testExample() throws Exception {
     DataModel dataModel = getDataModel(new long[] {1}, new Double[][] {{5.0, 7.0, 9.0}});
     PreferenceTransform zScore = new ZScore(dataModel);

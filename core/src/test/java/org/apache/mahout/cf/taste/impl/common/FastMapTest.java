@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,13 +31,15 @@ import java.util.Set;
 /** <p>Tests {@link FastMap}.</p> */
 public final class FastMapTest extends TasteTestCase {
 
+  @Test
   public void testPutAndGet() {
-    FastMap<String, String> map = new FastMap<String, String>();
+    Map<String, String> map = new FastMap<String, String>();
     assertNull(map.get("foo"));
     map.put("foo", "bar");
     assertEquals("bar", map.get("foo"));
   }
 
+  @Test
   public void testRemove() {
     Map<String, String> map = new FastMap<String, String>();
     map.put("foo", "bar");
@@ -46,6 +49,7 @@ public final class FastMapTest extends TasteTestCase {
     assertNull(map.get("foo"));
   }
 
+  @Test
   public void testClear() {
     Map<String, String> map = new FastMap<String, String>();
     map.put("foo", "bar");
@@ -55,6 +59,7 @@ public final class FastMapTest extends TasteTestCase {
     assertNull(map.get("foo"));
   }
 
+  @Test
   public void testSizeEmpty() {
     Map<String, String> map = new FastMap<String, String>();
     assertEquals(0, map.size());
@@ -67,6 +72,7 @@ public final class FastMapTest extends TasteTestCase {
     assertTrue(map.isEmpty());
   }
 
+  @Test
   public void testContains() {
     FastMap<String, String> map = buildTestFastMap();
     assertTrue(map.containsKey("foo"));
@@ -79,6 +85,7 @@ public final class FastMapTest extends TasteTestCase {
     assertFalse(map.containsValue("something"));
   }
 
+  @Test
   public void testNull() {
     Map<String, String> map = new FastMap<String, String>();
     try {
@@ -96,6 +103,7 @@ public final class FastMapTest extends TasteTestCase {
     assertNull(map.get(null));
   }
 
+  @Test
   public void testRehash() {
     FastMap<String, String> map = buildTestFastMap();
     map.remove("foo");
@@ -104,14 +112,16 @@ public final class FastMapTest extends TasteTestCase {
     assertEquals("bang", map.get("baz"));
   }
 
+  @Test
   public void testGrow() {
-    FastMap<String, String> map = new FastMap<String, String>(1, FastMap.NO_MAX_SIZE);
+    Map<String, String> map = new FastMap<String, String>(1, FastMap.NO_MAX_SIZE);
     map.put("foo", "bar");
     map.put("baz", "bang");
     assertEquals("bar", map.get("foo"));
     assertEquals("bang", map.get("baz"));
   }
 
+  @Test
   public void testKeySet() {
     FastMap<String, String> map = buildTestFastMap();
     Collection<String> expected = new HashSet<String>(3);
@@ -123,6 +133,7 @@ public final class FastMapTest extends TasteTestCase {
     assertTrue(actual.containsAll(expected));
   }
 
+  @Test
   public void testValues() {
     FastMap<String, String> map = buildTestFastMap();
     Collection<String> expected = new HashSet<String>(3);
@@ -134,6 +145,7 @@ public final class FastMapTest extends TasteTestCase {
     assertTrue(actual.containsAll(expected));
   }
 
+  @Test
   public void testEntrySet() {
     FastMap<String, String> map = buildTestFastMap();
     Set<Map.Entry<String, String>> actual = map.entrySet();
@@ -154,6 +166,7 @@ public final class FastMapTest extends TasteTestCase {
     assertEquals(0, expectedValues.size());
   }
 
+  @Test
   public void testVersusHashMap() {
     Map<Integer, String> actual = new FastMap<Integer, String>(1, 1000000);
     Map<Integer, String> expected = new HashMap<Integer, String>(1000000);
@@ -175,6 +188,7 @@ public final class FastMapTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testMaxSize() {
     Map<String, String> map = new FastMap<String, String>(1, 1);
     map.put("foo", "bar");

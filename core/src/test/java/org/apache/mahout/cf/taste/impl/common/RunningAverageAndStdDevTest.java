@@ -18,13 +18,16 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 public final class RunningAverageAndStdDevTest extends TasteTestCase {
 
+  @Test
   public void testFull() {
     doTestAverageAndStdDev(new FullRunningAverageAndStdDev());
   }
 
+  @Test
   public void testCompact() {
     doTestAverageAndStdDev(new CompactRunningAverageAndStdDev());
   }

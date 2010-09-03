@@ -111,9 +111,7 @@ public final class PFPGrowth {
   /**
    * read the feature frequency List which is built at the end of the Parallel counting job
    * 
-   * @param params
    * @return Feature Frequency List
-   * @throws IOException
    */
   public static List<Pair<String,Long>> readFList(Parameters params) throws IOException {
     Writable key = new Text();
@@ -158,9 +156,7 @@ public final class PFPGrowth {
   /**
    * Read the Frequent Patterns generated from Text
    * 
-   * @param params
    * @return List of TopK patterns for each string frequent feature
-   * @throws IOException
    */
   public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(Parameters params) throws IOException {
     
@@ -183,9 +179,6 @@ public final class PFPGrowth {
    * @param params
    *          params should contain input and output locations as a string value, the additional parameters
    *          include minSupport(3), maxHeapSize(50), numGroups(1000)
-   * @throws IOException
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
    */
   public static void runPFPGrowth(Parameters params) throws IOException,
                                                     InterruptedException,
@@ -200,11 +193,6 @@ public final class PFPGrowth {
   /**
    * Run the aggregation Job to aggregate the different TopK patterns and group each Pattern by the features
    * present in it and thus calculate the final Top K frequent Patterns for each feature
-   * 
-   * @param params
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static void startAggregating(Parameters params) throws IOException,
                                                         InterruptedException,
@@ -276,11 +264,6 @@ public final class PFPGrowth {
   
   /**
    * Count the frequencies of various features in parallel using Map/Reduce
-   * 
-   * @param params
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static void startParallelCounting(Parameters params) throws IOException,
                                                              InterruptedException,
@@ -317,11 +300,6 @@ public final class PFPGrowth {
   
   /**
    * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of group dependent shards
-   * 
-   * @param params
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static void startTransactionSorting(Parameters params) throws IOException,
                                                                InterruptedException,
@@ -360,11 +338,6 @@ public final class PFPGrowth {
   
   /**
    * Run the Parallel FPGrowth Map/Reduce Job to calculate the Top K features of group dependent shards
-   * 
-   * @param params
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
   public static void startParallelFPGrowth(Parameters params) throws IOException,
                                                              InterruptedException,
@@ -401,11 +374,8 @@ public final class PFPGrowth {
   
   /**
    * Serializes the fList and returns the string representation of the List
-   * 
-   * @param list
-   * @param conf
+   *
    * @return Serialized String representation of List
-   * @throws IOException
    */
   private static String serializeList(List<Pair<String,Long>> list, Configuration conf) throws IOException {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
@@ -418,10 +388,7 @@ public final class PFPGrowth {
   /**
    * Converts a given Map in to a String using DefaultStringifier of Hadoop
    * 
-   * @param map
-   * @param conf
    * @return Serialized String representation of the GList Map
-   * @throws IOException
    */
   private static String serializeMap(Map<String,Long> map, Configuration conf) throws IOException {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"

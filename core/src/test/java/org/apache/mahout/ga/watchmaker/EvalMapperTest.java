@@ -27,18 +27,21 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.common.StringUtils;
+import org.junit.Test;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 import java.util.List;
 import java.util.Set;
 
-public class EvalMapperTest extends MahoutTestCase {
+public final class EvalMapperTest extends MahoutTestCase {
 
+  private static final int POPULATION_SIZE = 100;
+
+  @Test
   public void testMap() throws Exception {
     // population to evaluate
-    int populationSize = 100;
     List<DummyCandidate> population = DummyCandidate
-        .generatePopulation(populationSize);
+        .generatePopulation(POPULATION_SIZE);
 
     // fitness evaluator
     DummyEvaluator.clearEvaluations();
@@ -49,7 +52,8 @@ public class EvalMapperTest extends MahoutTestCase {
     Configuration conf = new Configuration();
     conf.set(EvalMapper.MAHOUT_GA_EVALUATOR, StringUtils.toString(evaluator));
     DummyRecordWriter<LongWritable,DoubleWritable> output = new DummyRecordWriter<LongWritable,DoubleWritable>();
-    Mapper<LongWritable,Text,LongWritable,DoubleWritable>.Context context = DummyRecordWriter.build(mapper, conf, output);
+    Mapper<LongWritable,Text,LongWritable,DoubleWritable>.Context context =
+        DummyRecordWriter.build(mapper, conf, output);
 
     mapper.setup(context);
 
@@ -61,13 +65,15 @@ public class EvalMapperTest extends MahoutTestCase {
 
     // check that the evaluations are correct
     Set<LongWritable> keys = output.getKeys();
-    assertEquals("Number of evaluations", populationSize, keys.size());
+    assertEquals("Number of evaluations", POPULATION_SIZE, keys.size());
     for (LongWritable key : keys) {
       DummyCandidate candidate = population.get((int) key.get());
       assertEquals("Values for key " + key, 1, output.getValue(key).size());
       double fitness = output.getValue(key).get(0).get();
-      assertEquals("Evaluation of the candidate " + key, DummyEvaluator
-          .getFitness(candidate.getIndex()), fitness);
+      assertEquals("Evaluation of the candidate " + key,
+                   DummyEvaluator.getFitness(candidate.getIndex()),
+                   fitness,
+                   EPSILON);
     }
   }
 

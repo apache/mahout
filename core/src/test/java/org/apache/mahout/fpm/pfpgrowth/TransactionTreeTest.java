@@ -25,37 +25,34 @@ import java.util.Random;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TransactionTreeTest extends MahoutTestCase {
+public final class TransactionTreeTest extends MahoutTestCase {
+
   private static final Logger log = LoggerFactory.getLogger(TransactionTreeTest.class);
 
   private static final int MAX_DUPLICATION = 50;
-
   private static final int MAX_FEATURES = 30;
-
   private static final int MAX_TRANSACTIONS = 500000;
-
   private static final int MEGABYTE = 1000000;
-
   private static final int NUM_OF_FPTREE_FIELDS = 4;
-
   private static final int SIZE_INT = 4;
-
   private static final int SIZE_LONG = 8;
-
   private static final int SKIP_RATE = 10;
 
   private Random gen;
 
   @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
     gen = RandomUtils.getRandom();
   }
 
-  public List<Integer> generateRandomArray() {
+  private List<Integer> generateRandomArray() {
     List<Integer> list = new ArrayList<Integer>();
     for (int i = 0; i < MAX_FEATURES; i++) {
       if (gen.nextInt() % SKIP_RATE == 0) {
@@ -65,6 +62,7 @@ public class TransactionTreeTest extends MahoutTestCase {
     return list;
   }
 
+  @Test
   public void testTransactionTree() {
     TransactionTree tree = new TransactionTree();
     int nodes = 0;

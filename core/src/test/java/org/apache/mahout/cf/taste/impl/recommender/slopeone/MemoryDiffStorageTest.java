@@ -21,10 +21,12 @@ import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.junit.Test;
 
 /** Tests {@link MemoryDiffStorage}. */
 public class MemoryDiffStorageTest extends TasteTestCase {
 
+  @Test
   public void testGetDiff() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
@@ -33,6 +35,7 @@ public class MemoryDiffStorageTest extends TasteTestCase {
     assertEquals(3, average.getCount());
   }
 
+  @Test
   public void testUpdate() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
@@ -42,6 +45,7 @@ public class MemoryDiffStorageTest extends TasteTestCase {
     assertEquals(3, average.getCount());
   }
 
+  @Test
   public void testRemove() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);

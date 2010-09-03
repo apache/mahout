@@ -41,17 +41,12 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
   private static final Logger log = LoggerFactory.getLogger(LLRReducer.class);
 
   public static final String NGRAM_TOTAL = "ngramTotal";
-
   public static final String MIN_LLR = "minLLR";
-
   public static final float DEFAULT_MIN_LLR = 1.0f;
 
   private long ngramTotal;
-
   private float minLLRValue;
-
   private boolean emitUnigrams;
-
   private final LLCallback ll;
 
   /**
@@ -74,7 +69,7 @@ public class LLRReducer extends Reducer<Gram, Gram, Text, DoubleWritable> {
       context.write(t, dd);
       return;
     }
-    // FIXME: better way to handle errors? Wouldn't an exception thrown here
+    // TODO better way to handle errors? Wouldn't an exception thrown here
     // cause hadoop to re-try the job?
     String[] gram = new String[2];
     for (Gram value : values) {

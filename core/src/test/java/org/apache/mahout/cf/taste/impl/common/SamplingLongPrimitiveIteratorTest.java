@@ -18,11 +18,13 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 import java.util.NoSuchElementException;
 
 public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
 
+  @Test
   public void testEmpty() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[0]);
     SamplingLongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
@@ -35,6 +37,7 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testNext() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[] {5,4,3,2,1});
     SamplingLongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
@@ -53,6 +56,7 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testPeekSkip() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[] {8,7,6,5,4,3,2,1});
     SamplingLongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);

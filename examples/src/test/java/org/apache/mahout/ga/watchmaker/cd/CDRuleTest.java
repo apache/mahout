@@ -17,19 +17,27 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import junit.framework.Assert;
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.apache.mahout.common.RandomUtils;
 import org.easymock.classextension.EasyMock;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Random;
 
-public class CDRuleTest extends MahoutTestCase {
+public final class CDRuleTest extends MahoutTestCase {
 
   private Random rng;
-
   private MockDataSet mock;
+
+  @Override
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    rng = RandomUtils.getRandom();
+    mock = new MockDataSet(rng, 50);
+  }
 
   /**
    * Test method for
@@ -47,13 +55,13 @@ public class CDRuleTest extends MahoutTestCase {
       for (int condInd = 0; condInd < rule.getNbConditions(); condInd++) {
         int attrInd = CDRule.attributeIndex(condInd);
         
-        assertInRange(rule.getW(condInd), 0, 1);
+        CDMutationTest.assertInRange(rule.getW(condInd), 0, 1);
         
         if (dataset.isNumerical(attrInd)) {
-          assertInRange(rule.getV(condInd), dataset.getMin(attrInd), dataset
+          CDMutationTest.assertInRange(rule.getV(condInd), dataset.getMin(attrInd), dataset
               .getMax(attrInd));
         } else {
-          assertInRange(rule.getV(condInd), 0, dataset.getNbValues(attrInd) - 1);
+          CDMutationTest.assertInRange(rule.getV(condInd), 0, dataset.getNbValues(attrInd) - 1);
         }
       }
 
@@ -61,22 +69,11 @@ public class CDRuleTest extends MahoutTestCase {
     }
   }
 
-  private static void assertInRange(double value, double min, double max) {
-    Assert.assertTrue("value < min", value >= min);
-    Assert.assertTrue("value > max", value <= max);
-  }
-
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    rng = RandomUtils.getRandom();
-    mock = new MockDataSet(rng, 50);
-  }
-
   /**
    * Test the Weight part of the condition.
    * 
    */
+  @Test
   public void testWCondition() {
 
     // the dataline has all its attributes set to 0d
@@ -113,6 +110,7 @@ public class CDRuleTest extends MahoutTestCase {
    * Test the Operator part of the condition, on numerical attributes
    * 
    */
+  @Test
   public void testOConditionNumerical() {
 
     // the dataline has all its attributes set to 1d
@@ -146,6 +144,7 @@ public class CDRuleTest extends MahoutTestCase {
    * Test the Operator part of the condition, on numerical attributes
    * 
    */
+  @Test
   public void testOConditionCategorical() {
 
     // the dataline has all its attributes set to 1d

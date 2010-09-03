@@ -23,42 +23,40 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import junit.framework.Assert;
-
+import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
-public class GramTest {
+public final class GramTest extends MahoutTestCase {
   
   @Test
   public void testConstructorsGetters() {
     Gram one = new Gram("foo", 2, Gram.Type.HEAD);
     
-    Assert.assertEquals("foo", one.getString());
-    Assert.assertEquals(2, one.getFrequency());
-    Assert.assertEquals(Gram.Type.HEAD, one.getType());
+    assertEquals("foo", one.getString());
+    assertEquals(2, one.getFrequency());
+    assertEquals(Gram.Type.HEAD, one.getType());
     
     Gram oneClone = new Gram(one);
     
-    Assert.assertEquals("foo", oneClone.getString());
-    Assert.assertEquals(2, oneClone.getFrequency());
-    Assert.assertEquals(Gram.Type.HEAD, oneClone.getType());
+    assertEquals("foo", oneClone.getString());
+    assertEquals(2, oneClone.getFrequency());
+    assertEquals(Gram.Type.HEAD, oneClone.getType());
     
     Gram two = new Gram("foo", 3, Gram.Type.TAIL);
-    Assert.assertEquals(Gram.Type.TAIL, two.getType());
+    assertEquals(Gram.Type.TAIL, two.getType());
     
     Gram three = new Gram("foo", 4, Gram.Type.UNIGRAM);
-    Assert.assertEquals(Gram.Type.UNIGRAM, three.getType());
+    assertEquals(Gram.Type.UNIGRAM, three.getType());
     
     Gram four = new Gram("foo", 5, Gram.Type.NGRAM);
-    Assert.assertEquals(Gram.Type.NGRAM, four.getType());
+    assertEquals(Gram.Type.NGRAM, four.getType());
    
     try {
       new Gram(null, 4, Gram.Type.UNIGRAM);
-      Assert.fail("expected exception");
+      fail("expected exception");
     } catch (NullPointerException ex) {
       /* ok */
     }
@@ -66,7 +64,7 @@ public class GramTest {
     
     try {
       new Gram("foo", 4, null);
-      Assert.fail("expected exception");
+      fail("expected exception");
     } catch (NullPointerException ex) {
       /* ok */
     }
@@ -77,32 +75,32 @@ public class GramTest {
     Gram one = new Gram("foo", 2, Gram.Type.HEAD);  
     Gram two = new Gram("foo", 3, Gram.Type.HEAD);
 
-    Assert.assertEquals(one, two);
-    Assert.assertEquals(two, one);
+    assertEquals(one, two);
+    assertEquals(two, one);
     
     Gram three = new Gram("foo", 4, Gram.Type.TAIL);
     Gram four = new Gram("foo", Gram.Type.UNIGRAM);
     
-    Assert.assertTrue(!three.equals(two));
-    Assert.assertTrue(!four.equals(one));
-    Assert.assertTrue(!one.equals(four));
+    assertTrue(!three.equals(two));
+    assertTrue(!four.equals(one));
+    assertTrue(!one.equals(four));
     
     Gram five = new Gram("foo", 5, Gram.Type.UNIGRAM);
 
-    Assert.assertEquals(four, five);
+    assertEquals(four, five);
     
     Gram six = new Gram("foo", 6, Gram.Type.NGRAM);
     Gram seven = new Gram("foo", 7, Gram.Type.NGRAM);
     
-    Assert.assertTrue(!five.equals(six));
-    Assert.assertEquals(six, seven);
+    assertTrue(!five.equals(six));
+    assertEquals(six, seven);
     
     Gram eight = new Gram("foobar", 4, Gram.Type.TAIL);
     
-    Assert.assertTrue(!eight.equals(four));
-    Assert.assertTrue(!eight.equals(three));
-    Assert.assertTrue(!eight.equals(two));
-    Assert.assertTrue(!eight.equals(one));
+    assertTrue(!eight.equals(four));
+    assertTrue(!eight.equals(three));
+    assertTrue(!eight.equals(two));
+    assertTrue(!eight.equals(one));
   }
   
   @Test
@@ -154,23 +152,23 @@ public class GramTest {
     };
     
     for (int i = 0; i < input.length; i++) {
-      Assert.assertEquals(freq[i], input[i].getFrequency());
-      Assert.assertEquals(memb[i], input[i] == map.get(input[i]));
+      assertEquals(freq[i], input[i].getFrequency());
+      assertEquals(memb[i], input[i] == map.get(input[i]));
     }
   }
   
  @Test
- public void testWritable() throws IOException {
+ public void testWritable() throws Exception {
    Gram one = new Gram("foo", 2, Gram.Type.HEAD);
    Gram two = new Gram("foobar", 3, Gram.Type.UNIGRAM);
 
-   Assert.assertEquals("foo", one.getString());
-   Assert.assertEquals(2, one.getFrequency());
-   Assert.assertEquals(Gram.Type.HEAD, one.getType());
+   assertEquals("foo", one.getString());
+   assertEquals(2, one.getFrequency());
+   assertEquals(Gram.Type.HEAD, one.getType());
 
-   Assert.assertEquals("foobar", two.getString());
-   Assert.assertEquals(3, two.getFrequency());
-   Assert.assertEquals(Gram.Type.UNIGRAM, two.getType());
+   assertEquals("foobar", two.getString());
+   assertEquals(3, two.getFrequency());
+   assertEquals(Gram.Type.UNIGRAM, two.getType());
    
    ByteArrayOutputStream bout = new ByteArrayOutputStream();
    DataOutput out = new DataOutputStream(bout);
@@ -184,14 +182,14 @@ public class GramTest {
    
    one.readFields(din);
 
-   Assert.assertEquals("foobar", one.getString());
-   Assert.assertEquals(3, one.getFrequency());
-   Assert.assertEquals(Gram.Type.UNIGRAM, one.getType());
+   assertEquals("foobar", one.getString());
+   assertEquals(3, one.getFrequency());
+   assertEquals(Gram.Type.UNIGRAM, one.getType());
    
  }
  
  @Test
- public void testSorting() throws IOException {
+ public void testSorting() {
    Gram[] input =
    {
     new Gram("foo", 2, Gram.Type.HEAD),
@@ -216,7 +214,7 @@ public class GramTest {
    Arrays.sort(sorted);
    
    for (int i=0; i < sorted.length; i++) {
-     Assert.assertSame(input[expectations[i]], sorted[i]);
+     assertSame(input[expectations[i]], sorted[i]);
    }
  }
 }

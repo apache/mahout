@@ -17,16 +17,17 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.jet.random.Exponential;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Random;
 
-public class AdaptiveLogisticRegressionTest {
+public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
+
   @Test
   public void testTrain() {
     // we make up data for a simple model
@@ -87,8 +88,6 @@ public class AdaptiveLogisticRegressionTest {
 
   @Test
   public void copyLearnsAsExpected() {
-    RandomUtils.useTestSeed();
-
     Random gen = RandomUtils.getRandom();
     Exponential exp = new Exponential(0.5, gen);
     Vector beta = new DenseVector(200);
@@ -118,24 +117,24 @@ public class AdaptiveLogisticRegressionTest {
     for (int i = 0; i < 5000; i++) {
       if (i % 1000 == 0) {
         if (i == 0) {
-          Assert.assertEquals("Should have started with no data", 0.5, w2.getLearner().auc(), 0.0001);
+          assertEquals("Should have started with no data", 0.5, w2.getLearner().auc(), 0.0001);
         }
         if (i == 1000) {
           double auc2 = w2.getLearner().auc();
-          Assert.assertTrue("Should have had head-start", Math.abs(auc2 - 0.5) > 0.1);
-          Assert.assertTrue("AUC should improve quickly on copy", auc1 < auc2);
+          assertTrue("Should have had head-start", Math.abs(auc2 - 0.5) > 0.1);
+          assertTrue("AUC should improve quickly on copy", auc1 < auc2);
         }
         System.out.printf("%10d %.3f\n", i, w2.getLearner().auc());
       }
       AdaptiveLogisticRegression.TrainingExample r = getExample(i, gen, beta);
       w2.train(r);
     }
-    Assert.assertEquals("Original should not change after copy is updated", auc1, w.getLearner().auc(), 1.0e-5);
+    assertEquals("Original should not change after copy is updated", auc1, w.getLearner().auc(), 1.0e-5);
 
     // this improvement is really quite lenient
-    Assert.assertTrue("AUC should improve significantly on copy", auc1 < w2.getLearner().auc() - 0.05);
+    assertTrue("AUC should improve significantly on copy", auc1 < w2.getLearner().auc() - 0.05);
 
     // make sure that the copy didn't lose anything
-    Assert.assertEquals(auc1, w.getLearner().auc(), 0);
+    assertEquals(auc1, w.getLearner().auc(), 0);
   }
 }

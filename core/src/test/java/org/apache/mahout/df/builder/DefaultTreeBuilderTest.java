@@ -23,15 +23,15 @@ import java.util.Arrays;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
-public class DefaultTreeBuilderTest extends MahoutTestCase {
+public final class DefaultTreeBuilderTest extends MahoutTestCase {
 
   /**
    * make sure that DefaultTreeBuilder.randomAttributes() returns the correct number of attributes, that have not been
    * selected yet
-   *
-   * @throws Exception
    */
+  @Test
   public void testRandomAttributes() throws Exception {
     Random rng = RandomUtils.getRandom();
     int nbAttributes = rng.nextInt(100) + 1;

@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.ep;
 
 import com.google.common.collect.Lists;
@@ -29,28 +46,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see State
  */
 public class State<T extends Payload<T>> implements Comparable<State<T>> {
+
   // object count is kept to break ties in comparison.
   private static final AtomicInteger objectCount = new AtomicInteger();
 
   private int id = objectCount.getAndIncrement();
-
   private Random gen = RandomUtils.getRandom();
-
   // current state
   private double[] params;
-
   // mappers to transform state
   private Mapping[] maps;
-
   // omni-directional mutation
   private double omni;
-
   // directional mutation
   private double[] step;
-
   // current fitness value
   private double value;
-
   private T payload;
 
   public State() {
@@ -167,10 +178,6 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
 
   public double getValue() {
     return value;
-  }
-
-  public void setRand(Random rand) {
-    this.gen = rand;
   }
 
   public void setOmni(double omni) {

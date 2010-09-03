@@ -17,8 +17,8 @@
 
 package org.apache.mahout.math;
 
-import junit.framework.TestCase;
 import org.apache.hadoop.io.Writable;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,8 +28,9 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class VectorWritableTest extends TestCase {
+public final class VectorWritableTest extends MahoutTestCase {
 
+  @Test
   public void testSequentialAccessSparseVectorWritable() throws Exception {
     Vector v = new SequentialAccessSparseVector(5);
     v.set(1, 3.0);
@@ -37,6 +38,7 @@ public class VectorWritableTest extends TestCase {
     doTestVectorWritableEquals(v);
   }
 
+  @Test
   public void testRandomAccessSparseVectorWritable() throws Exception {
     Vector v = new RandomAccessSparseVector(5);
     v.set(1, 3.0);
@@ -44,6 +46,7 @@ public class VectorWritableTest extends TestCase {
     doTestVectorWritableEquals(v);
   }
 
+  @Test
   public void testDenseVectorWritable() throws Exception {
     Vector v = new DenseVector(5);
     v.set(1, 3.0);

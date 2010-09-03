@@ -17,20 +17,13 @@
 
 package org.apache.mahout.ep;
 
-import org.apache.mahout.common.RandomUtils;
-import org.junit.Assert;
-import org.junit.Before;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-public class ThreadedEvolutionaryProcessTest {
-
-  @Before
-  public void setUp() {
-    RandomUtils.useTestSeed();
-  }
+public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
 
   @Test
   public void testOptimize() throws ExecutionException, InterruptedException {
@@ -63,7 +56,7 @@ public class ThreadedEvolutionaryProcessTest {
     double[] r = x.getMappedParams();
     int i = 0;
     for (double v : r) {
-      Assert.assertEquals(String.format(Locale.ENGLISH, "Coordinate %d", i), i, v, 0.02);
+      assertEquals(String.format(Locale.ENGLISH, "Coordinate %d", i), i, v, 0.02);
       i++;
     }
   }

@@ -20,7 +20,7 @@ package org.apache.mahout.df.mapreduce.partial;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Random;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -38,8 +38,9 @@ import org.apache.mahout.df.callback.PredictionCallback;
 import org.apache.mahout.df.mapreduce.MapredOutput;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
+import org.junit.Test;
 
-public class PartialBuilderTest extends MahoutTestCase {
+public final class PartialBuilderTest extends MahoutTestCase {
 
   private static final int NUM_MAPS = 5;
 
@@ -47,7 +48,8 @@ public class PartialBuilderTest extends MahoutTestCase {
 
   /** instances per partition */
   private static final int NUM_INSTANCES = 20;
-  
+
+  @Test
   public void testProcessOutput() throws Exception {
     Configuration conf = new Configuration();
     conf.setInt("mapred.map.tasks", NUM_MAPS);
@@ -92,6 +94,7 @@ public class PartialBuilderTest extends MahoutTestCase {
    * Make sure that the builder passes the good parameters to the job
    * 
    */
+  @Test
   public void testConfigure() {
     TreeBuilder treeBuilder = new DefaultTreeBuilder();
     Path dataPath = new Path("notUsedDataPath");
@@ -109,11 +112,10 @@ public class PartialBuilderTest extends MahoutTestCase {
    * @param values
    * @param firstIds partitions's first ids in hadoop's order
    */
-  private static void randomKeyValues(Random rng, TreeID[] keys,
-      MapredOutput[] values, int[] firstIds) {
+  private static void randomKeyValues(Random rng, TreeID[] keys, MapredOutput[] values, int[] firstIds) {
     int index = 0;
     int firstId = 0;
-    List<Integer> partitions = new ArrayList<Integer>();
+    Collection<Integer> partitions = new ArrayList<Integer>();
 
     for (int p = 0; p < NUM_MAPS; p++) {
       // select a random partition, not yet selected
@@ -216,8 +218,7 @@ public class PartialBuilderTest extends MahoutTestCase {
       int index = ArrayUtils.indexOf(keys, key);
       assertTrue("key not found", index >= 0);
 
-      assertEquals(values[index].getPredictions()[instanceId % NUM_INSTANCES],
-          prediction);
+      assertEquals(values[index].getPredictions()[instanceId % NUM_INSTANCES], prediction);
     }
 
   }

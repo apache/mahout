@@ -19,18 +19,16 @@ package org.apache.mahout.vectors;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.Locale;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+public final class WordLikeValueEncoderTest extends MahoutTestCase {
 
-public class WordLikeValueEncoderTest {
   @Test
   public void testAddToVector() {
     FeatureVectorEncoder enc = new StaticWordValueEncoder("word");
@@ -41,17 +39,17 @@ public class WordLikeValueEncoderTest {
     Iterator<Integer> j = ImmutableList.of(7, 118, 119, 199).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
-      Assert.assertEquals(j.next().intValue(), element.index());
-      Assert.assertEquals(1, element.get(), 0);
+      assertEquals(j.next().intValue(), element.index());
+      assertEquals(1, element.get(), 0);
     }
-    Assert.assertFalse(j.hasNext());
+    assertFalse(j.hasNext());
   }
 
   @Test
   public void testAsString() {
     Locale.setDefault(Locale.ENGLISH);
     FeatureVectorEncoder enc = new StaticWordValueEncoder("word");
-    Assert.assertEquals("word:w1:1.0000", enc.asString("w1"));
+    assertEquals("word:w1:1.0000", enc.asString("w1"));
   }
 
   @Test
@@ -67,10 +65,10 @@ public class WordLikeValueEncoderTest {
     Iterator<Double> k = ImmutableList.of(3.0, 0.75, 1.5, 1.5, 0.75, 3.0).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
-      Assert.assertEquals(j.next().intValue(), element.index());
-      Assert.assertEquals(k.next(), element.get(), 0);
+      assertEquals(j.next().intValue(), element.index());
+      assertEquals(k.next(), element.get(), 0);
     }
-    Assert.assertFalse(j.hasNext());
+    assertFalse(j.hasNext());
   }
 
   @Test
@@ -89,9 +87,9 @@ public class WordLikeValueEncoderTest {
                                           Math.log(2 / 1.5) + Math.log(4.5 / 2.5)).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
-      Assert.assertEquals(j.next().intValue(), element.index());
-      Assert.assertEquals(k.next(), element.get(), 1.0e-6);
+      assertEquals(j.next().intValue(), element.index());
+      assertEquals(k.next(), element.get(), 1.0e-6);
     }
-    Assert.assertFalse(j.hasNext());
+    assertFalse(j.hasNext());
   }
 }

@@ -17,14 +17,17 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.examples.MahoutTestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-public class DescriptionUtilsTest extends MahoutTestCase {
+public final class DescriptionUtilsTest extends MahoutTestCase {
 
+  @Test
   public void testCreateNominalDescription() {
     List<String> values = Arrays.asList("val1", "val2", "val3");
 
@@ -33,14 +36,16 @@ public class DescriptionUtilsTest extends MahoutTestCase {
     assertEquals("val1,val2,val3", description);
   }
 
+  @Test
   public void testCreateNumericalDescription() {
     String description = DescriptionUtils.createNumericalDescription(-5.1, 12.32);
     assertEquals("-5.1,12.32", description);
   }
 
+  @Test
   public void testExtractNominalValues() {
     String description = "val1,val2,val3";
-    List<String> target = new ArrayList<String>();
+    Collection<String> target = new ArrayList<String>();
 
     DescriptionUtils.extractNominalValues(description, target);
 
@@ -49,12 +54,13 @@ public class DescriptionUtilsTest extends MahoutTestCase {
     assertTrue("'val2 not found'", target.contains("val2"));
     assertTrue("'val3 not found'", target.contains("val3"));
   }
-  
+
+  @Test
   public void testExtractNumericalRange() {
     String description = "-2.06,12.32";
     double[] range = DescriptionUtils.extractNumericalRange(description);
-    assertEquals(-2.06, range[0]);
-    assertEquals(12.32, range[1]);
+    assertEquals(-2.06, range[0], EPSILON);
+    assertEquals(12.32, range[1], EPSILON);
   }
 
 }

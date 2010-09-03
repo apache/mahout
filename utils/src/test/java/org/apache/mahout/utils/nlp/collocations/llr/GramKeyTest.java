@@ -21,14 +21,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 
-import junit.framework.Assert;
-
+import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
-public class GramKeyTest {
+public final class GramKeyTest extends MahoutTestCase {
+
   @Test
   public void testGramKeySort() {
     byte[] foo = {1};
@@ -37,8 +36,7 @@ public class GramKeyTest {
     
     // byte argument in GramKey breaks tie between equal grams
     byte[] empty = new byte[0];
-    GramKey[] input =
-    {
+    GramKey[] input = {
       new GramKey(new Gram("bar", 1, Gram.Type.UNIGRAM), empty),
       new GramKey(new Gram("bar", 1, Gram.Type.UNIGRAM), empty),
       new GramKey(new Gram("bar", 1, Gram.Type.UNIGRAM), foo),
@@ -63,22 +61,22 @@ public class GramKeyTest {
     Arrays.sort(sorted);
 
     for (int i=0; i < input.length; i++) {
-      Assert.assertSame(input[expect[i]], sorted[i]);
+      assertSame(input[expect[i]], sorted[i]);
     }
   }
   
   @Test
-  public void testWritable() throws IOException {
+  public void testWritable() throws Exception {
     byte[] foo = new byte[0];
     byte[] bar = {2};
 
     GramKey one = new GramKey(new Gram("foo", 2, Gram.Type.HEAD), foo);
     GramKey two = new GramKey(new Gram("foobar", 3, Gram.Type.UNIGRAM), bar);
 
-    Assert.assertEquals("foo", one.getPrimaryString());
-    Assert.assertEquals("foobar", two.getPrimaryString());
+    assertEquals("foo", one.getPrimaryString());
+    assertEquals("foobar", two.getPrimaryString());
     
-    Assert.assertEquals(Gram.Type.UNIGRAM, two.getType());
+    assertEquals(Gram.Type.UNIGRAM, two.getType());
     
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     DataOutputStream out = new DataOutputStream(bout);
@@ -94,8 +92,8 @@ public class GramKeyTest {
     one.readFields(din);
     din.close();
 
-    Assert.assertTrue(Arrays.equals(two.getBytes(), one.getBytes()));
-    Assert.assertEquals(Gram.Type.UNIGRAM, one.getType());
+    assertTrue(Arrays.equals(two.getBytes(), one.getBytes()));
+    assertEquals(Gram.Type.UNIGRAM, one.getType());
     
   }
 }

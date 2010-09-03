@@ -18,15 +18,15 @@
 package org.apache.mahout.math;
 
 import org.apache.mahout.math.function.Functions;
-import org.junit.Assert;
 import org.junit.Test;
 
-public class QRDecompositionTest {
+public final class QRDecompositionTest extends MahoutTestCase {
+
   @Test
   public void fullRankTall() {
     Matrix x = matrix();
     QRDecomposition qr = new QRDecomposition(x);
-    Assert.assertTrue(qr.hasFullRank());
+    assertTrue(qr.hasFullRank());
     Matrix rRef = reshape(new double[]{
             -2.99129686445138, 0, 0, 0, 0,
             -0.0282260628674372, -2.38850244769059, 0, 0, 0,
@@ -35,7 +35,7 @@ public class QRDecompositionTest {
             0.923669647838536, 1.76679276072492, 0.637690104222683, -0.225890909498753, -1.35732293800944},
             5, 5);
     Matrix r = qr.getR();
-    assertEquals(rRef, r, 1e-8);
+    assertEquals(rRef, r, 1.0e-8);
 
     Matrix qRef = reshape(new double[]{
             -0.165178287646573, 0.0510035857637869, 0.13985915987379, -0.120173729496501,
@@ -55,7 +55,7 @@ public class QRDecompositionTest {
     Matrix q = qr.getQ();
     printMatrix("q", q);
 
-    assertEquals(qRef, q, 1e-8);
+    assertEquals(qRef, q, 1.0e-8);
 
     Matrix x1 = qr.solve(reshape(new double[]{
             -0.0178247686747641, 0.68631714634098, -0.335464858468858, 1.50249941751569,
@@ -69,14 +69,14 @@ public class QRDecompositionTest {
     printMatrix("x1", x1);
     printMatrix("xref", xref);
 
-    assertEquals(xref, x1, 1e-8);
+    assertEquals(xref, x1, 1.0e-8);
   }
 
   @Test
   public void fullRankWide() {
     Matrix x = matrix().transpose();
     QRDecomposition qr = new QRDecomposition(x);
-    Assert.assertFalse(qr.hasFullRank());
+    assertFalse(qr.hasFullRank());
     Matrix rActual = qr.getR();
 
     Matrix rRef = reshape(new double[]{
@@ -91,7 +91,7 @@ public class QRDecompositionTest {
     }, 5, 8);
     printMatrix("rRef", rRef);
     printMatrix("rActual", rActual);
-    assertEquals(rRef, rActual, 1e-8);
+    assertEquals(rRef, rActual, 1.0e-8);
 
     Matrix qRef = reshape(new double[]{
             -0.203489262374627, 0.316761677948356, -0.784155643293468, 0.394321494579, -0.29641971170211,
@@ -106,7 +106,7 @@ public class QRDecompositionTest {
     printMatrix("qRef", qRef);
     printMatrix("q", q);
 
-    assertEquals(qRef, q, 1e-8);
+    assertEquals(qRef, q, 1.0e-8);
 
     Matrix x1 = qr.solve(b());
     Matrix xRef = reshape(new double[]{
@@ -115,14 +115,14 @@ public class QRDecompositionTest {
 
     printMatrix("xRef", xRef);
     printMatrix("x", x1);
-    assertEquals(xRef, x1, 1e-8);
+    assertEquals(xRef, x1, 1.0e-8);
   }
 
-  private void assertEquals(Matrix ref, Matrix actual, double epsilon) {
-    Assert.assertEquals(0, ref.minus(actual).aggregate(Functions.MAX, Functions.ABS), epsilon);
+  private static void assertEquals(Matrix ref, Matrix actual, double epsilon) {
+    assertEquals(0, ref.minus(actual).aggregate(Functions.MAX, Functions.ABS), epsilon);
   }
 
-  private void printMatrix(String name, Matrix m) {
+  private static void printMatrix(String name, Matrix m) {
     int rows = m.numRows();
     int columns = m.numCols();
     System.out.printf("%s - %d x %d\n", name, rows, columns);
@@ -136,8 +136,8 @@ public class QRDecompositionTest {
     System.out.printf("\n");
   }
 
-  private Matrix matrix() {
-    double values[] = {
+  private static Matrix matrix() {
+    double[] values = {
             0.494097293912641, -0.152566866170993, -0.418360266395271, 0.359475300232312,
             1.35565069667582, -1.92759373242903, 1.50497526839076, -0.746889132087904,
             -0.769136838293565, 1.10984954080986, -0.664389974392489, 1.6464660350229,
@@ -153,7 +153,7 @@ public class QRDecompositionTest {
     return reshape(values, 8, 5);
   }
 
-  private Matrix reshape(double[] values, int rows, int columns) {
+  private static Matrix reshape(double[] values, int rows, int columns) {
     Matrix m = new DenseMatrix(rows, columns);
     int i = 0;
     for (double v : values) {
@@ -163,7 +163,8 @@ public class QRDecompositionTest {
     return m;
   }
 
-  private Matrix b() {
-    return reshape(new double[]{-0.0178247686747641, 0.68631714634098, -0.335464858468858, 1.50249941751569, -0.669901640772149}, 5, 1);
+  private static Matrix b() {
+    return reshape(new double[]
+        {-0.0178247686747641, 0.68631714634098, -0.335464858468858, 1.50249941751569, -0.669901640772149}, 5, 1);
   }
 }

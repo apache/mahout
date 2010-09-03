@@ -35,9 +35,11 @@ import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.data.Utils;
+import org.apache.mahout.df.mapreduce.Builder;
 import org.apache.mahout.df.node.Node;
+import org.junit.Test;
 
-public class PartitionBugTest extends MahoutTestCase {
+public final class PartitionBugTest extends MahoutTestCase {
   static final int NUM_ATTRIBUTES = 40;
 
   static final int NUM_INSTANCES = 200;
@@ -49,6 +51,7 @@ public class PartitionBugTest extends MahoutTestCase {
   /**
    * Make sure that the correct instance ids are being computed
    */
+  @Test
   public void testProcessOutput() throws Exception {
     Random rng = RandomUtils.getRandom();
     //long seed = rng.nextLong();
@@ -80,8 +83,7 @@ public class PartitionBugTest extends MahoutTestCase {
     // and we won't be able to serialize the MockNode
     PartialBuilder.setStep2(conf, false);
     long seed = 1L;
-    PartialSequentialBuilder builder = new PartialSequentialBuilder(
-        treeBuilder, dataPath, dataset, seed, conf);
+    Builder builder = new PartialSequentialBuilder(treeBuilder, dataPath, dataset, seed, conf);
 
     // remove the output path (its only used for testing)
     Path outputPath = builder.getOutputPath(conf);
@@ -160,7 +162,6 @@ public class PartitionBugTest extends MahoutTestCase {
 
     @Override
     public Node build(Random rng, Data data) {
-      // TODO Auto-generated method stub
       return new MockLeaf();
     }
 

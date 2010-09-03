@@ -17,12 +17,13 @@
 
 package org.apache.mahout.vectors;
 
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.junit.Assert;
 import org.junit.Test;
 
-public class InteractionValueEncoderTest {
+public final class InteractionValueEncoderTest extends MahoutTestCase {
+
   @Test
   public void testAddToVector() {
     WordValueEncoder wv = new StaticWordValueEncoder("word");
@@ -32,13 +33,13 @@ public class InteractionValueEncoderTest {
     enc.addInteractionToVector("a","1.0",1.0, v1);
     int k = enc.getProbes();
     // should set k distinct locations to 1
-    Assert.assertEquals((float) k, v1.norm(1), 0);
-    Assert.assertEquals(1.0, v1.maxValue(), 0);
+    assertEquals((float) k, v1.norm(1), 0);
+    assertEquals(1.0, v1.maxValue(), 0);
 
     // adding same interaction again should increment weights
     enc.addInteractionToVector("a","1.0",1.0,v1);
-    Assert.assertEquals((float) k*2, v1.norm(1), 0);
-    Assert.assertEquals(2.0, v1.maxValue(), 0);
+    assertEquals((float) k*2, v1.norm(1), 0);
+    assertEquals(2.0, v1.maxValue(), 0);
 
     Vector v2 = new DenseVector(20000);
     enc.addInteractionToVector("a","1.0",1.0,v2);
@@ -46,7 +47,7 @@ public class InteractionValueEncoderTest {
     cv.addToVector("1.0", v2);
     k = enc.getProbes();
     //this assumes no hash collision
-    Assert.assertEquals((float) (k + wv.getProbes()+cv.getProbes()), v2.norm(1), 1e-3);
+    assertEquals((float) (k + wv.getProbes()+cv.getProbes()), v2.norm(1), 1.0e-3);
   }
 
   @Test
@@ -58,8 +59,8 @@ public class InteractionValueEncoderTest {
     enc.addInteractionToVector("a","0.9",0.5, v1);
     int k = enc.getProbes();
     // should set k distinct locations to 0.9*0.5
-    Assert.assertEquals((float) k*0.5*0.9, v1.norm(1), 0);
-    Assert.assertEquals(0.5*0.9, v1.maxValue(), 0);
+    assertEquals((float) k*0.5*0.9, v1.norm(1), 0);
+    assertEquals(0.5*0.9, v1.maxValue(), 0);
   }
 
   @Test
@@ -71,7 +72,7 @@ public class InteractionValueEncoderTest {
     enc.addInteractionToVector("a","some text here",1.0, v1);
     int k = enc.getProbes();
     // should interact "a" with each of "some","text" and "here"
-    Assert.assertEquals((float) k*3, v1.norm(1), 0);    
+    assertEquals((float) k*3, v1.norm(1), 0);    
   }
 
 }

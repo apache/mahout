@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math;
 
-public class TestDenseVector extends AbstractTestVector {
+public final class TestDenseVector extends AbstractTestVector {
 
   @Override
   Vector generateTestVector(int cardinality) {

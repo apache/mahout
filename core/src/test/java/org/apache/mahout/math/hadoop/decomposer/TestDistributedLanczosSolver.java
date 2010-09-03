@@ -23,21 +23,19 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.decomposer.SolverTest;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.TestDistributedRowMatrix;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestDistributedLanczosSolver extends SolverTest {
+public final class TestDistributedLanczosSolver extends SolverTest {
 
-  private static void doTestDistributedLanczosSolver(boolean symmetric) throws IOException {
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
+  private void doTestDistributedLanczosSolver(boolean symmetric) throws IOException {
+    File testData = getTestTempDir("testdata");
     DistributedRowMatrix corpus = new TestDistributedRowMatrix().randomDistributedMatrix(500,
-        450, 400, 10, 10.0, symmetric, "testdata");
+        450, 400, 10, 10.0, symmetric, testData.getAbsolutePath());
     corpus.configure(new JobConf());
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     int desiredRank = 30;
@@ -48,9 +46,8 @@ public class TestDistributedLanczosSolver extends SolverTest {
     assertEigen(eigenVectors, corpus, eigenVectors.numRows() / 2, 0.01, symmetric);
   }
 
+  @Test
   public void testDistributedLanczosSolver() throws Exception {
-  //  doTestDistributedLanczosSolver(false);
-  //  TestCanopyCreation.rmr("testData");
     doTestDistributedLanczosSolver(true);
   }
 

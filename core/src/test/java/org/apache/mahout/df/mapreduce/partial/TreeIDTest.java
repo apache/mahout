@@ -21,14 +21,15 @@ import java.util.Random;
 
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
-public class TreeIDTest extends MahoutTestCase {
-                
+public final class TreeIDTest extends MahoutTestCase {
+
+  @Test
   public void testTreeID() {
-    int n = 1000000;
     Random rng = RandomUtils.getRandom();
     
-    for (int nloop = 0; nloop < n; nloop++) {
+    for (int nloop = 0; nloop < 1000000; nloop++) {
       int partition = Math.abs(rng.nextInt());
       int treeId = rng.nextInt(TreeID.MAX_TREEID);
       

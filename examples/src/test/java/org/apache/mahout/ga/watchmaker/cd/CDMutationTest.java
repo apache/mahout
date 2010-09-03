@@ -17,21 +17,22 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import junit.framework.Assert;
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.utils.MockDataSet;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Random;
 
-public class CDMutationTest extends MahoutTestCase {
+public final class CDMutationTest extends MahoutTestCase {
 
   private Random rng;
-
   private MockDataSet mock;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
     mock = new MockDataSet(rng, 100);
@@ -41,6 +42,7 @@ public class CDMutationTest extends MahoutTestCase {
    * Test method for
    * {@link org.apache.mahout.ga.watchmaker.cd.CDMutation#rndDouble(double, double, double, java.util.Random)}.
    */
+  @Test
   public void testMutate() {
     DataSet dataset = DataSet.getDataSet();
     boolean modified = false; // true if at least one attribute has mutated
@@ -83,8 +85,8 @@ public class CDMutationTest extends MahoutTestCase {
     assertTrue(modified);
   }
 
-  private static void assertInRange(double value, double min, double max) {
-    Assert.assertTrue("value < min", value >= min);
-    Assert.assertTrue("value > max", value <= max);
+  static void assertInRange(double value, double min, double max) {
+    assertTrue("value < min", value >= min);
+    assertTrue("value > max", value <= max);
   }
 }

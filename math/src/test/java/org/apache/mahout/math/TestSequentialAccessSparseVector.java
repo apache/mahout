@@ -17,13 +17,17 @@
 
 package org.apache.mahout.math;
 
-public class TestSequentialAccessSparseVector extends AbstractTestVector {
+import org.junit.Test;
+
+public final class TestSequentialAccessSparseVector extends AbstractTestVector {
 
   @Override
   Vector generateTestVector(int cardinality) {
     return new SequentialAccessSparseVector(cardinality);
   }
 
+  @Override
+  @Test
   public void testDot2() {
     Vector w = new SequentialAccessSparseVector(Integer.MAX_VALUE, 12);
     w.set(1, 0.4);
@@ -33,7 +37,7 @@ public class TestSequentialAccessSparseVector extends AbstractTestVector {
     Vector v = new SequentialAccessSparseVector(Integer.MAX_VALUE, 12);
     v.set(3, 1);
 
-    assertEquals("dot2", -0.666666667, v.dot(w));
+    assertEquals("dot2", -0.666666667, v.dot(w), EPSILON);
   }
 
 

@@ -26,7 +26,6 @@ import org.apache.mahout.math.VectorIterable;
 
 import java.util.Random;
 
-
 public abstract class SolverTest extends MahoutTestCase {
 
   public static void assertOrthonormal(Matrix eigens) {

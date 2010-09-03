@@ -17,15 +17,16 @@
 
 package org.apache.mahout.math;
 
-import static org.apache.mahout.math.function.Functions.*;
+import org.apache.mahout.math.function.Functions;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestMatrixView extends MahoutTestCase {
+public final class TestMatrixView extends MahoutTestCase {
 
   private static final int ROW = AbstractMatrix.ROW;
-
   private static final int COL = AbstractMatrix.COL;
 
   private final double[][] values = {{0.0, 1.1, 2.2}, {1.1, 2.2, 3.3},
@@ -34,13 +35,15 @@ public class TestMatrixView extends MahoutTestCase {
   private Matrix test;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     int[] offset = {1, 1};
     int[] card = {3, 2};
     test = new MatrixView(new DenseMatrix(values), offset, card);
   }
 
+  @Test
   public void testAsFormatString() {
     String string = test.asFormatString();
     Matrix m = AbstractMatrix.decodeMatrix(string);
@@ -49,12 +52,14 @@ public class TestMatrixView extends MahoutTestCase {
     assertEquals("col cardinality", values[0].length - 1, c[COL]);
   }
 
+  @Test
   public void testCardinality() {
     int[] c = test.size();
     assertEquals("row cardinality", values.length - 2, c[ROW]);
     assertEquals("col cardinality", values[0].length - 1, c[COL]);
   }
 
+  @Test
   public void testCopy() {
     int[] c = test.size();
     Matrix copy = test.clone();
@@ -62,21 +67,23 @@ public class TestMatrixView extends MahoutTestCase {
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            test.getQuick(row, col), copy.getQuick(row, col));
+            test.getQuick(row, col), copy.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testGetQuick() {
     int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1], test.getQuick(row, col));
+            values[row + 1][col + 1], test.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testLike() {
     Matrix like = test.like();
     assertTrue("type", like instanceof DenseMatrix);
@@ -84,6 +91,7 @@ public class TestMatrixView extends MahoutTestCase {
     assertEquals("columns", test.size()[COL], like.size()[COL]);
   }
 
+  @Test
   public void testLikeIntInt() {
     Matrix like = test.like(4, 4);
     assertTrue("type", like instanceof DenseMatrix);
@@ -91,23 +99,26 @@ public class TestMatrixView extends MahoutTestCase {
     assertEquals("columns", 4, like.size()[COL]);
   }
 
+  @Test
   public void testSetQuick() {
     int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         test.setQuick(row, col, 1.23);
         assertEquals("value[" + row + "][" + col + ']', 1.23, test.getQuick(
-            row, col));
+            row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testSize() {
     int[] c = test.getNumNondefaultElements();
     assertEquals("row size", values.length - 2, c[ROW]);
     assertEquals("col size", values[0].length - 1, c[COL]);
   }
 
+  @Test
   public void testViewPart() throws Exception {
     int[] offset = {1, 1};
     int[] size = {2, 1};
@@ -116,91 +127,80 @@ public class TestMatrixView extends MahoutTestCase {
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 2][col + 2], view.getQuick(row, col));
+            values[row + 2][col + 2], view.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartCardinality() {
     int[] offset = {1, 1};
     int[] size = {3, 3};
-    try {
-      test.viewPart(offset, size);
-      fail("exception expected");
-    } catch (IndexException e) {
-    }
+    test.viewPart(offset, size);
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartIndexOver() {
     int[] offset = {1, 1};
     int[] size = {2, 2};
-    try {
-      test.viewPart(offset, size);
-      fail("exception expected");
-    } catch (IndexException e) {
-    }
+    test.viewPart(offset, size);
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartIndexUnder() {
     int[] offset = {-1, -1};
     int[] size = {2, 2};
-    try {
-      test.viewPart(offset, size);
-      fail("exception expected");
-    } catch (IndexException e) {
-    }
+    test.viewPart(offset, size);
   }
 
+  @Test
   public void testAssignDouble() {
     int[] c = test.size();
     test.assign(4.53);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 4.53, test.getQuick(
-            row, col));
+            row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testAssignDoubleArrayArray() throws Exception {
     int[] c = test.size();
     test.assign(new double[3][2]);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']', 0.0, test.getQuick(row,
-            col));
+            col), EPSILON);
       }
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignDoubleArrayArrayCardinality() {
     int[] c = test.size();
-    try {
-      test.assign(new double[c[ROW] + 1][c[COL]]);
-      fail("exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.assign(new double[c[ROW] + 1][c[COL]]);
   }
 
+  @Test
   public void testAssignMatrixBinaryFunction() throws Exception {
     int[] c = test.size();
-    test.assign(test, PLUS);
+    test.assign(test, Functions.PLUS);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            2 * values[row + 1][col + 1], test.getQuick(row, col));
+            2 * values[row + 1][col + 1], test.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignMatrixBinaryFunctionCardinality() {
-    try {
-      test.assign(test.transpose(), PLUS);
-      fail("exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.assign(test.transpose(), Functions.PLUS);
   }
 
+  @Test
   public void testAssignMatrix() throws Exception {
     int[] c = test.size();
     Matrix value = test.like();
@@ -208,163 +208,149 @@ public class TestMatrixView extends MahoutTestCase {
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            test.getQuick(row, col), value.getQuick(row, col));
+            test.getQuick(row, col), value.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignMatrixCardinality() {
-    try {
-      test.assign(test.transpose());
-      fail("exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.assign(test.transpose());
   }
 
+  @Test
   public void testAssignUnaryFunction() {
     int[] c = test.size();
-    test.assign(NEGATE);
+    test.assign(Functions.NEGATE);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            -values[row + 1][col + 1], test.getQuick(row, col));
+            -values[row + 1][col + 1], test.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testDivide() {
     int[] c = test.size();
     Matrix value = test.divide(4.53);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1] / 4.53, value.getQuick(row, col));
+            values[row + 1][col + 1] / 4.53, value.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testGet() throws Exception {
     int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1], test.get(row, col));
+            values[row + 1][col + 1], test.get(row, col), EPSILON);
       }
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testGetIndexUnder() {
     int[] c = test.size();
-    try {
-      for (int row = -1; row < c[ROW]; row++) {
-        for (int col = 0; col < c[COL]; col++) {
-          test.get(row, col);
-        }
+    for (int row = -1; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
+        test.get(row, col);
       }
-      fail("index exception expected");
-    } catch (IndexException e) {
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testGetIndexOver() {
     int[] c = test.size();
-    try {
-      for (int row = 0; row < c[ROW] + 1; row++) {
-        for (int col = 0; col < c[COL]; col++) {
-          test.get(row, col);
-        }
+    for (int row = 0; row < c[ROW] + 1; row++) {
+      for (int col = 0; col < c[COL]; col++) {
+        test.get(row, col);
       }
-      fail("index exception expected");
-    } catch (IndexException e) {
     }
   }
 
+  @Test
   public void testMinus() throws Exception {
     int[] c = test.size();
     Matrix value = test.minus(test);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
-        assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(
-            row, col));
+        assertEquals("value[" + row + "][" + col + ']', 0.0, value.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testMinusCardinality() {
-    try {
-      test.minus(test.transpose());
-      fail("cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.minus(test.transpose());
   }
 
+  @Test
   public void testPlusDouble() {
     int[] c = test.size();
     Matrix value = test.plus(4.53);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1] + 4.53, value.getQuick(row, col));
+            values[row + 1][col + 1] + 4.53, value.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testPlusMatrix() throws Exception {
     int[] c = test.size();
     Matrix value = test.plus(test);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1] * 2, value.getQuick(row, col));
+            values[row + 1][col + 1] * 2, value.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testPlusMatrixCardinality() {
-    try {
-      test.plus(test.transpose());
-      fail("cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.plus(test.transpose());
   }
 
+  @Test(expected = IndexException.class)
   public void testSetUnder() {
     int[] c = test.size();
-    try {
-      for (int row = -1; row < c[ROW]; row++) {
-        for (int col = 0; col < c[COL]; col++) {
-          test.set(row, col, 1.23);
-        }
+    for (int row = -1; row < c[ROW]; row++) {
+      for (int col = 0; col < c[COL]; col++) {
+        test.set(row, col, 1.23);
       }
-      fail("index exception expected");
-    } catch (IndexException e) {
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testSetOver() {
     int[] c = test.size();
-    try {
-      for (int row = 0; row < c[ROW] + 1; row++) {
-        for (int col = 0; col < c[COL]; col++) {
-          test.set(row, col, 1.23);
-        }
+    for (int row = 0; row < c[ROW] + 1; row++) {
+      for (int col = 0; col < c[COL]; col++) {
+        test.set(row, col, 1.23);
       }
-      fail("index exception expected");
-    } catch (IndexException e) {
     }
   }
 
+  @Test
   public void testTimesDouble() {
     int[] c = test.size();
     Matrix value = test.times(4.53);
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            values[row + 1][col + 1] * 4.53, value.getQuick(row, col));
+            values[row + 1][col + 1] * 4.53, value.getQuick(row, col), EPSILON);
       }
     }
   }
 
+  @Test
   public void testTimesMatrix() throws Exception {
     int[] c = test.size();
     Matrix transpose = test.transpose();
@@ -375,15 +361,13 @@ public class TestMatrixView extends MahoutTestCase {
     // TODO: check the math too, lazy
   }
 
+  @Test(expected = CardinalityException.class)
   public void testTimesMatrixCardinality() {
     Matrix other = test.like(5, 8);
-    try {
-      test.times(other);
-      fail("cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.times(other);
   }
 
+  @Test
   public void testTranspose() {
     int[] c = test.size();
     Matrix transpose = test.transpose();
@@ -393,91 +377,79 @@ public class TestMatrixView extends MahoutTestCase {
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
         assertEquals("value[" + row + "][" + col + ']',
-            test.getQuick(row, col), transpose.getQuick(col, row));
+            test.getQuick(row, col), transpose.getQuick(col, row), EPSILON);
       }
     }
   }
 
+  @Test
   public void testZSum() {
     double sum = test.zSum();
-    assertEquals("zsum", 29.7, sum);
+    assertEquals("zsum", 29.7, sum, EPSILON);
   }
 
+  @Test
   public void testAssignRow() throws Exception {
     double[] data = {2.1, 3.2};
     test.assignRow(1, new DenseVector(data));
-    assertEquals("test[1][0]", 2.1, test.getQuick(1, 0));
-    assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
+    assertEquals("test[1][0]", 2.1, test.getQuick(1, 0), EPSILON);
+    assertEquals("test[1][1]", 3.2, test.getQuick(1, 1), EPSILON);
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignRowCardinality() {
     double[] data = {2.1, 3.2, 4.3};
-    try {
-      test.assignRow(1, new DenseVector(data));
-      fail("expecting cardinality exception");
-    } catch (CardinalityException e) {
-    }
+    test.assignRow(1, new DenseVector(data));
   }
 
+  @Test
   public void testAssignColumn() throws Exception {
     double[] data = {2.1, 3.2, 4.3};
     test.assignColumn(1, new DenseVector(data));
-    assertEquals("test[0][1]", 2.1, test.getQuick(0, 1));
-    assertEquals("test[1][1]", 3.2, test.getQuick(1, 1));
-    assertEquals("test[2][1]", 4.3, test.getQuick(2, 1));
+    assertEquals("test[0][1]", 2.1, test.getQuick(0, 1), EPSILON);
+    assertEquals("test[1][1]", 3.2, test.getQuick(1, 1), EPSILON);
+    assertEquals("test[2][1]", 4.3, test.getQuick(2, 1), EPSILON);
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignColumnCardinality() {
     double[] data = {2.1, 3.2};
-    try {
-      test.assignColumn(1, new DenseVector(data));
-      fail("expecting cardinality exception");
-    } catch (CardinalityException e) {
-    }
+    test.assignColumn(1, new DenseVector(data));
   }
 
+  @Test
   public void testGetRow() throws Exception {
     Vector row = test.getRow(1);
     assertEquals("row size", 2, row.getNumNondefaultElements());
   }
 
+  @Test(expected = IndexException.class)
   public void testGetRowIndexUnder() {
-    try {
-      test.getRow(-1);
-      fail("expecting index exception");
-    } catch (IndexException e) {
-    }
+    test.getRow(-1);
   }
 
+  @Test(expected = IndexException.class)
   public void testGetRowIndexOver() {
-    try {
-      test.getRow(5);
-      fail("expecting index exception");
-    } catch (IndexException e) {
-    }
+    test.getRow(5);
   }
 
+  @Test
   public void testGetColumn() throws Exception {
     Vector column = test.getColumn(1);
     assertEquals("row size", 3, column.getNumNondefaultElements());
   }
 
+  @Test(expected = IndexException.class)
   public void testGetColumnIndexUnder() {
-    try {
-      test.getColumn(-1);
-      fail("expecting index exception");
-    } catch (IndexException e) {
-    }
+    test.getColumn(-1);
   }
 
+  @Test(expected = IndexException.class)
   public void testGetColumnIndexOver() {
-    try {
-      test.getColumn(5);
-      fail("expecting index exception");
-    } catch (IndexException e) {
-    }
+    test.getColumn(5);
   }
 
+  @Test
   public void testLabelBindings() {
     assertNull("row bindings", test.getRowLabelBindings());
     assertNull("col bindings", test.getColumnLabelBindings());
@@ -491,13 +463,14 @@ public class TestMatrixView extends MahoutTestCase {
     colBindings.put("Bar", 1);
     test.setColumnLabelBindings(colBindings);
     assertEquals("row", rowBindings, test.getRowLabelBindings());
-    assertEquals("Fee", test.get(0, 1), test.get("Fee", "Bar"));
+    assertEquals("Fee", test.get(0, 1), test.get("Fee", "Bar"), EPSILON);
 
     double[] newrow = {9, 8};
     test.set("Fie", newrow);
-    assertEquals("FeeBar", test.get(0, 1), test.get("Fee", "Bar"));
+    assertEquals("FeeBar", test.get(0, 1), test.get("Fee", "Bar"), EPSILON);
   }
 
+  @Test(expected = UnboundLabelException.class)
   public void testSettingLabelBindings() {
     assertNull("row bindings", test.getRowLabelBindings());
     assertNull("col bindings", test.getColumnLabelBindings());
@@ -506,14 +479,11 @@ public class TestMatrixView extends MahoutTestCase {
     assertNotNull("row", test.getRowLabelBindings());
     assertEquals("Fee", 1, test.getRowLabelBindings().get("Fee").intValue());
     assertEquals("Foo", 1, test.getColumnLabelBindings().get("Foo").intValue());
-    assertEquals("FeeFoo", test.get(1, 1), test.get("Fee", "Foo"));
-    try {
-      test.get("Fie", "Foe");
-      fail("Expected UnboundLabelException");
-    } catch (UnboundLabelException e) {
-    }
+    assertEquals("FeeFoo", test.get(1, 1), test.get("Fee", "Foo"), EPSILON);
+    test.get("Fie", "Foe");
   }
 
+  @Test
   public void testLabelBindingSerialization() {
     assertNull("row bindings", test.getRowLabelBindings());
     assertNull("col bindings", test.getColumnLabelBindings());
@@ -530,7 +500,7 @@ public class TestMatrixView extends MahoutTestCase {
     test.setColumnLabelBindings(colBindings);
     String json = test.asFormatString();
     Matrix mm = AbstractMatrix.decodeMatrix(json);
-    assertEquals("Fee", test.get(0, 1), mm.get("Fee", "Bar"));
+    assertEquals("Fee", test.get(0, 1), mm.get("Fee", "Bar"), EPSILON);
   }
 
 }

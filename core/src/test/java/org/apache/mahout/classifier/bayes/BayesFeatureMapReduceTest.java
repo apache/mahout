@@ -20,6 +20,7 @@
 package org.apache.mahout.classifier.bayes;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -36,13 +37,11 @@ import org.apache.mahout.classifier.bayes.mapreduce.common.FeatureLabelComparato
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.StringTuple;
+import org.junit.Test;
 
-/**
- * 
- */
-public class BayesFeatureMapReduceTest extends MahoutTestCase {
+public final class BayesFeatureMapReduceTest extends MahoutTestCase {
 
-  public DummyOutputCollector<StringTuple,DoubleWritable> runMapReduce(BayesParameters bp) throws IOException {
+  private static DummyOutputCollector<StringTuple,DoubleWritable> runMapReduce(BayesParameters bp) throws IOException {
     
     BayesFeatureMapper mapper = new BayesFeatureMapper();
     JobConf conf = new JobConf();
@@ -73,7 +72,7 @@ public class BayesFeatureMapReduceTest extends MahoutTestCase {
     
     // put the mapper output in the expected order (emulate shuffle)
     FeatureLabelComparator cmp = new FeatureLabelComparator();
-    TreeSet<StringTuple> keySet = new TreeSet<StringTuple>(cmp);
+    Collection<StringTuple> keySet = new TreeSet<StringTuple>(cmp);
     keySet.addAll(mapperOutput.getKeys());
     
     for (StringTuple k: keySet) {
@@ -84,7 +83,8 @@ public class BayesFeatureMapReduceTest extends MahoutTestCase {
     return reducerOutput;
   }
 
-  public void testNoFilters() throws IOException {
+  @Test
+  public void testNoFilters() throws Exception {
     BayesParameters bp = new BayesParameters();
     bp.setGramSize(1);
     bp.setMinDF(1);
@@ -96,8 +96,9 @@ public class BayesFeatureMapReduceTest extends MahoutTestCase {
         3,  /* lc: 3 labels */
         17  /* wt: 13 unique term/label pairs */);
   }
-  
-  public void testMinSupport() throws IOException {
+
+  @Test
+  public void testMinSupport() throws Exception {
     BayesParameters bp = new BayesParameters();
     bp.setGramSize(1);
     bp.setMinSupport(2);
@@ -110,8 +111,9 @@ public class BayesFeatureMapReduceTest extends MahoutTestCase {
         5  /* wt: 5 unique term/label pairs */);
     
   }
-  
-  public void testMinDf() throws IOException {
+
+  @Test
+  public void testMinDf() throws Exception {
     BayesParameters bp = new BayesParameters();
     bp.setGramSize(1);
     bp.setMinDF(2);
@@ -126,8 +128,9 @@ public class BayesFeatureMapReduceTest extends MahoutTestCase {
         5  /* wt */);
     
   }
-  
-  public void testMinBoth() throws IOException {
+
+  @Test
+  public void testMinBoth() throws Exception {
     BayesParameters bp = new BayesParameters();
     bp.setGramSize(1);
     bp.setMinSupport(3);
@@ -143,8 +146,11 @@ public class BayesFeatureMapReduceTest extends MahoutTestCase {
         5  /* wt */);
   }
   
-  public void assertCounts(DummyOutputCollector<StringTuple,DoubleWritable> output, 
-      int dfExpected, int fcExpected, int lcExpected, int wtExpected) {
+  private static void assertCounts(DummyOutputCollector<StringTuple,DoubleWritable> output,
+                                   int dfExpected,
+                                   int fcExpected,
+                                   int lcExpected,
+                                   int wtExpected) {
     int dfCount = 0;
     int fcCount = 0;
     int lcCount = 0;
@@ -152,19 +158,17 @@ public class BayesFeatureMapReduceTest extends MahoutTestCase {
     
     Map<StringTuple, List<DoubleWritable>> outputData = output.getData();
     for (Map.Entry<StringTuple, List<DoubleWritable>> entry: outputData.entrySet()) {
-      //System.err.println(entry.getKey() + "\t" + entry.getValue());
       String type = entry.getKey().stringAt(0);
-      if (type.equals(BayesConstants.DOCUMENT_FREQUENCY)) 
+      if (type.equals(BayesConstants.DOCUMENT_FREQUENCY)) {
         dfCount++;
-      else if (type.equals(BayesConstants.FEATURE_COUNT))
+      } else if (type.equals(BayesConstants.FEATURE_COUNT)) {
         fcCount++;
-      else if (type.equals(BayesConstants.LABEL_COUNT))
+      } else if (type.equals(BayesConstants.LABEL_COUNT)) {
         lcCount++;
-      else if (type.equals(BayesConstants.WEIGHT))
+      } else if (type.equals(BayesConstants.WEIGHT)) {
         wtCount++;
-        
+      }
       assertEquals("value size", 1, entry.getValue().size());
-      
     }
     
     assertEquals("document frequency count", dfExpected, dfCount);

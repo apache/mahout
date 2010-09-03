@@ -17,16 +17,18 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.examples.MahoutTestCase;
+import org.junit.Test;
 
 import java.util.Random;
 
-public class CDFitnessTest extends MahoutTestCase {
+public final class CDFitnessTest extends MahoutTestCase {
 
   /**
    * Test method for {@link org.apache.mahout.ga.watchmaker.cd.CDFitness#get()}.
    */
+  @Test
   public void testGet() {
     int n = 100;
     Random rng = RandomUtils.getRandom();
@@ -40,7 +42,7 @@ public class CDFitnessTest extends MahoutTestCase {
       double se = ((double) tp) / (tp + fn);
       double sp = ((double) tn) / (tn + fp);
 
-      assertEquals(se * sp, fitness.get());
+      assertEquals(se * sp, fitness.get(), EPSILON);
     }
   }
 

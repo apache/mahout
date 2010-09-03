@@ -20,9 +20,11 @@ package org.apache.mahout.common.distance;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.junit.Test;
 
-public class CosineDistanceMeasureTest extends MahoutTestCase {
+public final class CosineDistanceMeasureTest extends MahoutTestCase {
 
+  @Test
   public void testMeasure() {
 
     DistanceMeasure distanceMeasure = new CosineDistanceMeasure();
@@ -41,15 +43,15 @@ public class CosineDistanceMeasureTest extends MahoutTestCase {
       }
     }
 
-    assertEquals(0.0, distanceMatrix[0][0]);
+    assertEquals(0.0, distanceMatrix[0][0], EPSILON);
     assertTrue(distanceMatrix[0][0] < distanceMatrix[0][1]);
     assertTrue(distanceMatrix[0][1] < distanceMatrix[0][2]);
 
-    assertEquals(0.0, distanceMatrix[1][1]);
+    assertEquals(0.0, distanceMatrix[1][1], EPSILON);
     assertTrue(distanceMatrix[1][0] > distanceMatrix[1][1]);
     assertTrue(distanceMatrix[1][2] < distanceMatrix[1][0]);
 
-    assertEquals(0.0, distanceMatrix[2][2]);
+    assertEquals(0.0, distanceMatrix[2][2], EPSILON);
     assertTrue(distanceMatrix[2][0] > distanceMatrix[2][1]);
     assertTrue(distanceMatrix[2][1] > distanceMatrix[2][2]);
 

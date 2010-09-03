@@ -20,12 +20,14 @@ package org.apache.mahout.math.decomposer.lanczos;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.decomposer.SolverTest;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestLanczosSolver extends SolverTest {
+public final class TestLanczosSolver extends SolverTest {
 
+  @Test
   public void testLanczosSolver() throws Exception {
     int numColumns = 800;
     Matrix corpus = randomSequentialAccessSparseMatrix(1000, 900, numColumns, 30, 1.0);
@@ -37,6 +39,7 @@ public class TestLanczosSolver extends SolverTest {
     assertEigen(eigens, corpus, 0.1, false);
   }
 
+  @Test
   public void testLanczosSolverSymmetric() throws Exception {
     int numColumns = 400;
     Matrix corpus = randomSequentialAccessSparseMatrix(500, 450, numColumns, 10, 1.0);

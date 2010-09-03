@@ -22,9 +22,11 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.HadoopUtil;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.mahout.examples.MahoutTestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -35,14 +37,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class CDInfosToolTest extends MahoutTestCase {
+public final class CDInfosToolTest extends MahoutTestCase {
 
   /** max number of distinct values for any nominal attribute */
   private static final int MAX_NOMINAL_VALUES = 50;
   private Random rng;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
   }
@@ -189,6 +192,7 @@ public class CDInfosToolTest extends MahoutTestCase {
     return nbattrs;
   }
 
+  @Test
   public void testGatherInfos() throws Exception {
     int n = 1; // put a greater value when you search for some nasty bug
     for (int nloop = 0; nloop < n; nloop++) {

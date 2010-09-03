@@ -23,12 +23,14 @@ import org.apache.mahout.cf.taste.impl.recommender.ReversingRescorer;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.junit.Test;
 
 import java.util.List;
 
 /** <p>Tests {@link SlopeOneRecommender}.</p> */
 public final class SlopeOneRecommenderTest extends TasteTestCase {
 
+  @Test
   public void testRecommender() throws Exception {
     Recommender recommender = buildRecommender();
     List<RecommendedItem> recommended = recommender.recommend(1, 1);
@@ -42,6 +44,7 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     assertEquals(0.34803885284992736, firstRecommended.getValue(), EPSILON);
   }
 
+  @Test
   public void testHowMany() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3, 4, 5},
@@ -65,6 +68,7 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testRescorer() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -86,11 +90,13 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     assertEquals(originalRecommended.get(1).getItemID(), rescoredRecommended.get(0).getItemID());
   }
 
+  @Test
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
     assertEquals(0.34803885284992736, recommender.estimatePreference(1, 2), EPSILON);
   }
 
+  @Test
   public void testBestRating() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -110,6 +116,7 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
     assertEquals(0.2400938676203033, firstRecommended.getValue(), EPSILON);
   }
 
+  @Test  
   public void testDiffStdevBehavior() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -120,7 +127,7 @@ public final class SlopeOneRecommenderTest extends TasteTestCase {
             });
 
     Recommender recommender = new SlopeOneRecommender(dataModel);
-    assertEquals(0.3257f, recommender.estimatePreference(1, 2), EPSILON);
+    assertEquals(0.3257085f, recommender.estimatePreference(1, 2), EPSILON);
   }
 
   private static Recommender buildRecommender() throws TasteException {

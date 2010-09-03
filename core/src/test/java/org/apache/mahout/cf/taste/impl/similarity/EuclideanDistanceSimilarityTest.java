@@ -21,10 +21,12 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.junit.Test;
 
 /** <p>Tests {@link EuclideanDistanceSimilarity}.</p> */
 public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
 
+  @Test
   public void testFullCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -36,6 +38,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullCorrelation1Weighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -47,6 +50,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -55,9 +59,10 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {3.0, 3.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertEquals(1.0, correlation);
+    assertEquals(1.0, correlation, EPSILON);
   }
 
+  @Test
   public void testNoCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -69,6 +74,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.24357264905599915, correlation);
   }
 
+  @Test
   public void testNoCorrelation1Weighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -80,6 +86,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.747857549685333, correlation);
   }
 
+  @Test
   public void testNoCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -88,9 +95,10 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {null, null, 1.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).userSimilarity(1, 2);
-    assertEquals(0.0, correlation);
+    assertEquals(0.0, correlation, EPSILON);
   }
 
+  @Test
   public void testNoCorrelation3() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -102,6 +110,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.10244407226831752, correlation);
   }
 
+  @Test
   public void testSimple() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -113,6 +122,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.5598164905901122, correlation);
   }
 
+  @Test
   public void testSimpleWeighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -124,6 +134,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.889954122647528, correlation);
   }
 
+  @Test
   public void testFullItemCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -136,6 +147,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(1.0, correlation);
   }
 
+  @Test
   public void testFullItemCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -145,9 +157,10 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
             });
     double correlation =
         new EuclideanDistanceSimilarity(dataModel).itemSimilarity(0, 1);
-    assertEquals(1.0, correlation);
+    assertEquals(1.0, correlation, EPSILON);
   }
 
+  @Test
   public void testNoItemCorrelation1() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -160,6 +173,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.24357264905599915, correlation);
   }
 
+  @Test
   public void testNoItemCorrelation2() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2},
@@ -168,9 +182,10 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
                     {null, null, 1.0},
             });
     double correlation = new EuclideanDistanceSimilarity(dataModel).itemSimilarity(1, 2);
-    assertEquals(0.0, correlation);
+    assertEquals(0.0, correlation, EPSILON);
   }
 
+  @Test
   public void testNoItemCorrelation3() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -184,6 +199,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.10244407226831752, correlation);
   }
 
+  @Test
   public void testSimpleItem() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -197,6 +213,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.5598164905901122, correlation);
   }
 
+  @Test
   public void testSimpleItemWeighted() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -210,6 +227,7 @@ public final class EuclideanDistanceSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.889954122647528, correlation);
   }
 
+  @Test
   public void testRefresh() throws TasteException {
     // Make sure this doesn't throw an exception
     new EuclideanDistanceSimilarity(getDataModel()).refresh(null);

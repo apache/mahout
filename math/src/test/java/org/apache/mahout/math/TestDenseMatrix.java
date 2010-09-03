@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math;
 
-public class TestDenseMatrix extends MatrixTest {
+public final class TestDenseMatrix extends MatrixTest {
 
   @Override
   public Matrix matrixFactory(double[][] values) {

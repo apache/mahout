@@ -19,12 +19,13 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.junit.Test;
 
 /** <p>Tests {@link NearestNUserNeighborhood}.</p> */
 public final class NearestNNeighborhoodTest extends TasteTestCase {
 
+  @Test
   public void testNeighborhood() throws Exception {
-
     DataModel dataModel = getDataModel();
 
     long[] neighborhood =

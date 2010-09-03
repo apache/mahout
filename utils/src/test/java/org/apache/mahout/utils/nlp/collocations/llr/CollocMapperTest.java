@@ -30,6 +30,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 import org.easymock.classextension.EasyMock;
 import org.junit.Before;
@@ -38,13 +39,15 @@ import org.junit.Test;
 /**
  * Test for CollocMapper 
  */
-public class CollocMapperTest {
+public final class CollocMapperTest extends MahoutTestCase {
   
   private Mapper<Text,StringTuple,GramKey,Gram>.Context context;
   private Counter counter;
 
+  @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     counter = EasyMock.createMock(Counter.class);
     context = EasyMock.createMock(Context.class);
   }

@@ -24,6 +24,7 @@ import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import java.util.List;
 /** <p>Tests {@link GenericItemBasedRecommender}.</p> */
 public final class GenericItemBasedRecommenderTest extends TasteTestCase {
 
+  @Test
   public void testRecommender() throws Exception {
     Recommender recommender = buildRecommender();
     List<RecommendedItem> recommended = recommender.recommend(1, 1);
@@ -47,6 +49,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
   }
 
+  @Test
   public void testHowMany() throws Exception {
 
     DataModel dataModel = getDataModel(
@@ -80,6 +83,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testRescorer() throws Exception {
 
     DataModel dataModel = getDataModel(
@@ -111,6 +115,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(originalRecommended.get(1).getItemID(), rescoredRecommended.get(0).getItemID());
   }
 
+  @Test
   public void testEstimatePref() throws Exception {
     Recommender recommender = buildRecommender();
     assertEquals(0.1f, recommender.estimatePreference(1, 2), EPSILON);
@@ -121,6 +126,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
    * <a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1396128&amp;group_id=138771&amp;atid=741665">
    * 1396128</a>.
    */
+  @Test
   public void testBestRating() throws Exception {
     Recommender recommender = buildRecommender();
     List<RecommendedItem> recommended = recommender.recommend(1, 1);
@@ -132,6 +138,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(0.1f, firstRecommended.getValue(), EPSILON);
   }
 
+  @Test
   public void testMostSimilar() throws Exception {
     ItemBasedRecommender recommender = buildRecommender();
     List<RecommendedItem> similar = recommender.mostSimilarItems(0, 2);
@@ -145,6 +152,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(0.5f, second.getValue(), EPSILON);
   }
 
+  @Test
   public void testMostSimilarToMultiple() throws Exception {
     ItemBasedRecommender recommender = buildRecommender2();
     List<RecommendedItem> similar = recommender.mostSimilarItems(new long[] {0, 1}, 2);
@@ -158,6 +166,7 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     assertEquals(-0.3f, second.getValue(), EPSILON);
   }
 
+  @Test
   public void testRecommendedBecause() throws Exception {
     ItemBasedRecommender recommender = buildRecommender2();
     List<RecommendedItem> recommendedBecause = recommender.recommendedBecause(1, 4, 3);

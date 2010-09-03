@@ -37,13 +37,15 @@ import org.apache.mahout.math.Vector;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import org.junit.Test;
 
-public class TestClusterInterface extends MahoutTestCase {
+public final class TestClusterInterface extends MahoutTestCase {
 
   private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
   private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster>() {}.getType();
   private static final DistanceMeasure measure = new ManhattanDistanceMeasure();
 
+  @Test
   public void testDirichletNormalModel() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -58,6 +60,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("Json", format, model2.asFormatString(null));
   }
 
+  @Test
   public void testDirichletSampledNormalModel() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -72,6 +75,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("Json", format, model2.asFormatString(null));
   }
 
+  @Test
   public void testDirichletASNormalModel() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -86,6 +90,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("Json", format, model2.asFormatString(null));
   }
 
+  @Test
   public void testDirichletL1Model() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -100,6 +105,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("Json", format, model2.asFormatString(null));
   }
 
+  @Test
   public void testDirichletNormalModelClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -109,6 +115,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "C-5: nm{n=0 m=[1.100, 2.200, 3.300] sd=0.75}", format);
   }
 
+  @Test
   public void testDirichletNormalModelClusterAsJsonString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -123,6 +130,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("model", cluster.asFormatString(null), result.asFormatString(null));
   }
 
+  @Test
   public void testDirichletAsymmetricSampledNormalModelClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -132,6 +140,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "C-5: asnm{n=0 m=[1.100, 2.200, 3.300] sd=[1.100, 2.200, 3.300]}", format);
   }
 
+  @Test
   public void testDirichletAsymmetricSampledNormalModelClusterAsJsonString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -147,6 +156,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("model", cluster.asFormatString(null), result.asFormatString(null));
   }
 
+  @Test
   public void testDirichletL1ModelClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -156,6 +166,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "C-5: l1m{n=0 c=[1.100, 2.200, 3.300]}", format);
   }
 
+  @Test
   public void testDirichletL1ModelClusterAsJsonString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -171,6 +182,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("model", cluster.asFormatString(null), result.asFormatString(null));
   }
 
+  @Test
   public void testCanopyAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -180,6 +192,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "C-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testCanopyAsFormatStringSparse() {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
@@ -190,6 +203,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testCanopyAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -200,6 +214,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "C-123{n=0 c=[fee:1.100, 1:2.200, 2:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testCanopyAsFormatStringSparseWithBindings() {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
@@ -210,6 +225,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "C-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -219,6 +235,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "CL-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testClusterAsFormatStringSparse() {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
@@ -229,6 +246,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testClusterAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -239,6 +257,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "CL-123{n=0 c=[fee:1.100, 1:2.200, foo:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testClusterAsFormatStringSparseWithBindings() {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
@@ -249,6 +268,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "CL-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testMSCanopyAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -258,6 +278,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "MSC-123{n=0 c=[1.100, 2.200, 3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testMSCanopyAsFormatStringSparse() {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);
@@ -268,6 +289,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "MSC-123{n=0 c=[0:1.100, 2:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testMSCanopyAsFormatStringWithBindings() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -278,6 +300,7 @@ public class TestClusterInterface extends MahoutTestCase {
     assertEquals("format", "MSC-123{n=0 c=[fee:1.100, 1:2.200, foo:3.300] r=[]}", formatString);
   }
 
+  @Test
   public void testMSCanopyAsFormatStringSparseWithBindings() {
     double[] d = { 1.1, 0.0, 3.3 };
     Vector m = new SequentialAccessSparseVector(3);

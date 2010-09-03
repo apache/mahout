@@ -17,12 +17,15 @@
 
 package org.apache.mahout.math.hadoop.similarity.vector;
 
+import org.junit.Test;
+
 /**
  * tests {@link DistributedTanimotoCoefficientVectorSimilarity}
  */
-public class DistributedTanimotoCoefficientVectorSimilarityTest extends
+public final class DistributedTanimotoCoefficientVectorSimilarityTest extends
     DistributedVectorSimilarityTestCase {
 
+  @Test
   public void testTanimoto() throws Exception {
 
     assertSimilar(new DistributedTanimotoCoefficientVectorSimilarity(),

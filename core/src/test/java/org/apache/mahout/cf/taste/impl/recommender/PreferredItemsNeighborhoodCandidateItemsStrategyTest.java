@@ -29,12 +29,14 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.easymock.EasyMock;
+import org.junit.Test;
 
 /**
  * Tests {@link PreferredItemsNeighborhoodCandidateItemsStrategy}
  */
 public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends TasteTestCase {
 
+  @Test
   public void testStrategy() throws TasteException {
     FastIDSet itemIDsFromUser123 = new FastIDSet();
     itemIDsFromUser123.add(1L);

@@ -46,6 +46,7 @@ import org.apache.mahout.math.hadoop.similarity.vector.DistributedUncenteredZero
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
+import org.junit.Test;
 
 /**
  * Unit tests for the mappers and reducers in org.apache.mahout.cf.taste.hadoop.similarity.item
@@ -54,8 +55,9 @@ import org.easymock.classextension.EasyMock;
 public final class ItemSimilarityTest extends TasteTestCase {
 
   /**
-   * tests {@link CountUsersMapper}
+   * Tests {@link CountUsersMapper}
    */
+  @Test
   public void testCountUsersMapper() throws Exception {
     Mapper<LongWritable,Text,CountUsersKeyWritable,VarLongWritable>.Context context =
         EasyMock.createMock(Mapper.Context.class);
@@ -71,8 +73,9 @@ public final class ItemSimilarityTest extends TasteTestCase {
   }
 
   /**
-   * applies an {@link IArgumentMatcher} to a {@link CountUsersKeyWritable} checking whether it matches the userID
+   * Applies an {@link IArgumentMatcher} to a {@link CountUsersKeyWritable} checking whether it matches the userID
    */
+  @Test
   static CountUsersKeyWritable keyForUserID(final long userID) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
@@ -92,8 +95,9 @@ public final class ItemSimilarityTest extends TasteTestCase {
   }
 
   /**
-   * tests {@link CountUsersReducer}
+   * Tests {@link CountUsersReducer}
    */
+  @Test
   public void testCountUsersReducer() throws Exception {
     Reducer<CountUsersKeyWritable,VarLongWritable,VarIntWritable,NullWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
@@ -109,8 +113,9 @@ public final class ItemSimilarityTest extends TasteTestCase {
   }
 
   /**
-   * tests {@link MostSimilarItemPairsMapper}
+   * Tests {@link MostSimilarItemPairsMapper}
    */
+  @Test
   public void testMostSimilarItemsPairsMapper() throws Exception {
 
     OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
@@ -140,8 +145,9 @@ public final class ItemSimilarityTest extends TasteTestCase {
   }
 
   /**
-   * tests {@link MostSimilarItemPairsReducer}
+   * Tests {@link MostSimilarItemPairsReducer}
    */
+  @Test
   public void testMostSimilarItemPairsReducer() throws Exception {
     Reducer<EntityEntityWritable,DoubleWritable,EntityEntityWritable,DoubleWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -157,7 +163,7 @@ public final class ItemSimilarityTest extends TasteTestCase {
   }
 
   /**
-   * integration test with a tiny data set
+   * Integration test with a tiny data set
    *
    * <pre>
    * user-item-matrix
@@ -168,6 +174,7 @@ public final class ItemSimilarityTest extends TasteTestCase {
    * Fred    -       -      -      1
    * </pre>
    */
+  @Test
   public void testCompleteJob() throws Exception {
 
     File inputFile = getTestTempFile("prefs.txt");
@@ -262,6 +269,7 @@ public final class ItemSimilarityTest extends TasteTestCase {
    *    i3 --> i1
    * </pre>
    */
+  @Test
   public void testMaxSimilaritiesPerItem() throws Exception {
 
     File inputFile = getTestTempFile("prefsForMaxSimilarities.txt");

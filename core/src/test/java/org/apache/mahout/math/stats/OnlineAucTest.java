@@ -17,12 +17,13 @@
 
 package org.apache.mahout.math.stats;
 
-import org.junit.Assert;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Random;
 
-public class OnlineAucTest {
+public final class OnlineAucTest extends MahoutTestCase {
+
   @Test
   public void testBinaryCase() {
     OnlineAuc a1 = new OnlineAuc();
@@ -53,8 +54,8 @@ public class OnlineAucTest {
     }
 
     // reference value computed using R: mean(rnorm(1000000) < rnorm(1000000,1))
-    Assert.assertEquals(1 - 0.76, a1.auc(), 0.05);
-    Assert.assertEquals(1 - 0.76, a2.auc(), 0.05);
-    Assert.assertEquals(1 - 0.76, a3.auc(), 0.05);
+    assertEquals(1 - 0.76, a1.auc(), 0.05);
+    assertEquals(1 - 0.76, a2.auc(), 0.05);
+    assertEquals(1 - 0.76, a3.auc(), 0.05);
   }
 }

@@ -25,11 +25,13 @@ import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.DataLoader;
 import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Utils;
+import org.junit.Test;
 
-public class DefaultIgSplitTest extends MahoutTestCase {
+public final class DefaultIgSplitTest extends MahoutTestCase {
 
   private static final int NUM_ATTRIBUTES = 10;
-   
+
+  @Test
   public void testEntropy() throws Exception {
     Random rng = RandomUtils.getRandom();
     String descriptor = Utils.randomDescriptor(rng, NUM_ATTRIBUTES);
@@ -43,7 +45,7 @@ public class DefaultIgSplitTest extends MahoutTestCase {
     DefaultIgSplit iG = new DefaultIgSplit();
 
     double expected = 0.0 - 1.0 * Math.log(1.0) / Math.log(2.0);
-    assertEquals(expected, iG.entropy(data));
+    assertEquals(expected, iG.entropy(data), EPSILON);
 
     // 50/100 of the vectors have the label (1)
     // 50/100 of the vectors have the label (0)
@@ -56,7 +58,7 @@ public class DefaultIgSplitTest extends MahoutTestCase {
     iG = new DefaultIgSplit();
     
     expected = 2.0 * -0.5 * Math.log(0.5) / Math.log(2.0);
-    assertEquals(expected, iG.entropy(data));
+    assertEquals(expected, iG.entropy(data), EPSILON);
 
     // 15/100 of the vectors have the label (2)
     // 35/100 of the vectors have the label (1)
@@ -71,6 +73,6 @@ public class DefaultIgSplitTest extends MahoutTestCase {
     
     expected = -0.15 * Math.log(0.15) / Math.log(2.0) - 0.35 * Math.log(0.35)
         / Math.log(2.0) - 0.5 * Math.log(0.5) / Math.log(2.0);
-    assertEquals(expected, iG.entropy(data));
+    assertEquals(expected, iG.entropy(data), EPSILON);
   }
 }

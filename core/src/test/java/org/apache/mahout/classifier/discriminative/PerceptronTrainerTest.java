@@ -22,18 +22,22 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.junit.Before;
+import org.junit.Test;
 
-public class PerceptronTrainerTest extends MahoutTestCase {
+public final class PerceptronTrainerTest extends MahoutTestCase {
 
   private PerceptronTrainer trainer;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     trainer = new PerceptronTrainer(3, 0.5, 0.1, 1.0, 1.0);
   }
 
-  public void testUpdate() throws TrainingException {
+  @Test
+  public void testUpdate() throws Exception {
     double[] labels = { 1.0, 1.0, 1.0, 0.0 };
     Vector labelset = new DenseVector(labels);
     double[][] values = new double[3][4];

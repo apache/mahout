@@ -27,11 +27,12 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.UnaryFunction;
 
-public class RandomVectorIterable implements Iterable<Vector>{
-  
-  private int numItems = 100;
+public final class RandomVectorIterable implements Iterable<Vector> {
+
   public enum VectorType {DENSE, SPARSE}
-  
+
+  private int numItems = 100;
+
   private VectorType type = VectorType.SPARSE;
   
   public RandomVectorIterable() {
@@ -52,7 +53,7 @@ public class RandomVectorIterable implements Iterable<Vector>{
   }
   
   private class VectIterator implements Iterator<Vector>{
-    private int count = 0;
+    private int count;
     private final Random random = RandomUtils.getRandom();
     @Override
     public boolean hasNext() {

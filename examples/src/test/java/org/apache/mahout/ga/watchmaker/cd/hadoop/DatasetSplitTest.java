@@ -18,8 +18,8 @@
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
@@ -27,12 +27,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.RandomWrapper;
+import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.hadoop.DatasetSplit.RndLineRecordReader;
+import org.junit.Test;
 
-public class DatasetSplitTest extends MahoutTestCase {
+public final class DatasetSplitTest extends MahoutTestCase {
 
   /**
    * Mock RecordReader that returns a sequence of keys in the range [0, size[
@@ -40,12 +41,9 @@ public class DatasetSplitTest extends MahoutTestCase {
   private static class MockReader extends RecordReader<LongWritable, Text> {
 
     private long current;
-
     private final long size;
-
-    private LongWritable currentKey = new LongWritable();
-
-    private Text currentValue = new Text();
+    private final LongWritable currentKey = new LongWritable();
+    private final Text currentValue = new Text();
 
     MockReader(long size) {
       if (size <= 0) {
@@ -88,7 +86,8 @@ public class DatasetSplitTest extends MahoutTestCase {
     }
   }
 
-  public void testTrainingTestingSets() throws IOException, InterruptedException {
+  @Test
+  public void testTrainingTestingSets() throws Exception {
     int n = 20;
 
     for (int nloop = 0; nloop < n; nloop++) {
@@ -96,7 +95,7 @@ public class DatasetSplitTest extends MahoutTestCase {
       double threshold = rng.nextDouble();
 
       Configuration conf = new Configuration();
-      Set<Long> dataset = new HashSet<Long>();
+      Collection<Long> dataset = new HashSet<Long>();
 
       DatasetSplit split = new DatasetSplit(rng.getSeed(), threshold);
 
@@ -120,6 +119,7 @@ public class DatasetSplitTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testStoreJobParameters() {
     int n = 20;
 
@@ -137,7 +137,7 @@ public class DatasetSplitTest extends MahoutTestCase {
       split.storeJobParameters(conf);
 
       assertEquals("bad seed", seed, DatasetSplit.getSeed(conf));
-      assertEquals("bad threshold", threshold, DatasetSplit.getThreshold(conf));
+      assertEquals("bad threshold", threshold, DatasetSplit.getThreshold(conf), EPSILON);
       assertEquals("bad training", training, DatasetSplit.isTraining(conf));
     }
   }

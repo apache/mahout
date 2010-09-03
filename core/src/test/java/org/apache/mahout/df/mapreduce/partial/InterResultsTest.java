@@ -27,8 +27,10 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Utils;
 import org.apache.mahout.df.node.Leaf;
 import org.apache.mahout.df.node.Node;
+import org.junit.Before;
+import org.junit.Test;
 
-public class InterResultsTest extends MahoutTestCase {
+public final class InterResultsTest extends MahoutTestCase {
 
   /** nb attributes per generated data instance */
   private static final int NUM_ATTRIBUTES = 4;
@@ -51,7 +53,8 @@ public class InterResultsTest extends MahoutTestCase {
   private int[] sizes;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     Random rng = RandomUtils.getRandom();
 
@@ -84,6 +87,7 @@ public class InterResultsTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testLoad() throws Exception {
     // store the intermediate results
     Path forestPath = new Path("testdata/InterResultsTest/test.forest");
@@ -123,6 +127,7 @@ public class InterResultsTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testStore() throws Exception {
     // store the intermediate results
     Path forestPath = new Path("testdata/InterResultsTest/test.forest");

@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -38,10 +39,7 @@ import org.easymock.classextension.EasyMock;
 /**
  * a collection of small helper methods useful for unit-testing mathematical operations
  */
-public class MathHelper {
-
-  /** the "close enough" value for floating point computations */
-  public static final double EPSILON = 0.00001;
+public final class MathHelper {
 
   private MathHelper() {
   }
@@ -55,7 +53,9 @@ public class MathHelper {
       public boolean matches(Object argument) {
         if (argument instanceof MatrixEntryWritable) {
           MatrixEntryWritable entry = (MatrixEntryWritable) argument;
-          return (row == entry.getRow() && col == entry.getCol() && Math.abs(value - entry.getVal()) <= EPSILON);
+          return (row == entry.getRow()
+              && col == entry.getCol()
+              && Math.abs(value - entry.getVal()) <= MahoutTestCase.EPSILON);
         }
         return false;
       }
@@ -64,7 +64,7 @@ public class MathHelper {
       public void appendTo(StringBuffer buffer) {
         buffer.append("MatrixEntry[row=").append(row)
             .append(",col=").append(col)
-            .append(",value=").append(value).append("]");
+            .append(",value=").append(value).append(']');
       }
     });
     return null;
@@ -141,7 +141,7 @@ public class MathHelper {
       return false;
     }
     for (Vector.Element element : elements) {
-      boolean matches = Math.abs(element.get() - vector.get(element.index())) <= EPSILON;
+      boolean matches = Math.abs(element.get() - vector.get(element.index())) <= MahoutTestCase.EPSILON;
       if (!matches) {
         return false;
       }

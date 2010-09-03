@@ -18,15 +18,17 @@
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import org.apache.hadoop.io.Text;
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.examples.MahoutTestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class ToolReducerTest extends MahoutTestCase {
+public final class ToolReducerTest extends MahoutTestCase {
 
+  @Test
   public void testCreateDescriptionNumerical() throws Exception {
     ToolReducer reducer = new ToolReducer();
 
@@ -40,6 +42,7 @@ public class ToolReducerTest extends MahoutTestCase {
     assertEquals("-32.0,25.0", descriptor);
   }
 
+  @Test
   public void testCreateDescriptionIgnored() throws Exception {
     ToolReducer reducer = new ToolReducer();
 
@@ -54,6 +57,7 @@ public class ToolReducerTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testCreateDescriptionNominal() throws Exception {
     ToolReducer reducer = new ToolReducer();
 

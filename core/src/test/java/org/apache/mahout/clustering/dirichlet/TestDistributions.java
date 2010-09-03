@@ -20,9 +20,11 @@ package org.apache.mahout.clustering.dirichlet;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.junit.Test;
 
-public class TestDistributions extends MahoutTestCase {
+public final class TestDistributions extends MahoutTestCase {
 
+  @Test
   public void testRbeta() {
     for (double i = 0.01; i < 20; i += 0.25) {
       System.out.println("rBeta(6,1," + i + ")="
@@ -30,6 +32,7 @@ public class TestDistributions extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testRchisq() {
     for (int i = 0; i < 50; i++) {
       System.out
@@ -37,6 +40,7 @@ public class TestDistributions extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testRnorm() {
     for (int i = 1; i < 50; i++) {
       System.out.println("rNorm(6,1," + i + ")="
@@ -44,6 +48,7 @@ public class TestDistributions extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testDnorm() {
     for (int i = -30; i < 30; i++) {
       double d = (i * 0.1);
@@ -57,6 +62,7 @@ public class TestDistributions extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testDnorm2() {
     for (int i = -30; i < 30; i++) {
       double d = (i * 0.1);
@@ -70,6 +76,7 @@ public class TestDistributions extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testDnorm1() {
     for (int i = -10; i < 10; i++) {
       double d = (i * 0.1);
@@ -83,6 +90,7 @@ public class TestDistributions extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testRmultinom1() {
     double[] b = {0.4, 0.6};
     Vector v = new DenseVector(b);
@@ -96,6 +104,7 @@ public class TestDistributions extends MahoutTestCase {
 
   }
 
+  @Test
   public void testRmultinom2() {
     double[] b = {0.1, 0.2, 0.7};
     Vector v = new DenseVector(b);
@@ -109,6 +118,7 @@ public class TestDistributions extends MahoutTestCase {
 
   }
 
+  @Test
   public void testRmultinom() {
     double[] b = {0.1, 0.2, 0.8};
     Vector v = new DenseVector(b);

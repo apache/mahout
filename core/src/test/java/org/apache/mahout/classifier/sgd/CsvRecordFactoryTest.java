@@ -18,13 +18,14 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.vectors.Dictionary;
-import org.junit.Assert;
 import org.junit.Test;
 
-public class CsvRecordFactoryTest {
+public final class CsvRecordFactoryTest extends MahoutTestCase {
+
   @Test
   public void testAddToVector() {
     RecordFactory csv = new CsvRecordFactory("y", ImmutableMap.of("x1", "n", "x2", "w", "x3", "t"));
@@ -33,41 +34,41 @@ public class CsvRecordFactoryTest {
 
     Vector v = new DenseVector(2000);
     int t = csv.processLine("ignore,3.1,yes,tiger, \"this is text\",ignore", v);
-    Assert.assertEquals(0, t);
+    assertEquals(0, t);
     // should have 9 values set
-    Assert.assertEquals(9.0, v.norm(0), 0);
+    assertEquals(9.0, v.norm(0), 0);
     // all should be = 1 except for the 3.1
-    Assert.assertEquals(3.1, v.maxValue(), 0);
+    assertEquals(3.1, v.maxValue(), 0);
     v.set(v.maxValueIndex(), 0);
-    Assert.assertEquals(8.0, v.norm(0), 0);
-    Assert.assertEquals(8.0, v.norm(1), 0);
-    Assert.assertEquals(1.0, v.maxValue(), 0);
+    assertEquals(8.0, v.norm(0), 0);
+    assertEquals(8.0, v.norm(1), 0);
+    assertEquals(1.0, v.maxValue(), 0);
 
     v.assign(0);
     t = csv.processLine("ignore,5.3,no,line, \"and more text and more\",ignore", v);
-    Assert.assertEquals(1, t);
+    assertEquals(1, t);
 
     // should have 9 values set
-    Assert.assertEquals(9.0, v.norm(0), 0);
+    assertEquals(9.0, v.norm(0), 0);
     // all should be = 1 except for the 3.1
-    Assert.assertEquals(5.3, v.maxValue(), 0);
+    assertEquals(5.3, v.maxValue(), 0);
     v.set(v.maxValueIndex(), 0);
-    Assert.assertEquals(8.0, v.norm(0), 0);
-    Assert.assertEquals(10.339850002884626, v.norm(1), 1.0e-6);
-    Assert.assertEquals(1.5849625007211563, v.maxValue(), 1.0e-6);
+    assertEquals(8.0, v.norm(0), 0);
+    assertEquals(10.339850002884626, v.norm(1), 1.0e-6);
+    assertEquals(1.5849625007211563, v.maxValue(), 1.0e-6);
 
     v.assign(0);
     t = csv.processLine("ignore,5.3,invalid,line, \"and more text and more\",ignore", v);
-    Assert.assertEquals(1, t);
+    assertEquals(1, t);
 
     // should have 9 values set
-    Assert.assertEquals(9.0, v.norm(0), 0);
+    assertEquals(9.0, v.norm(0), 0);
     // all should be = 1 except for the 3.1
-    Assert.assertEquals(5.3, v.maxValue(), 0);
+    assertEquals(5.3, v.maxValue(), 0);
     v.set(v.maxValueIndex(), 0);
-    Assert.assertEquals(8.0, v.norm(0), 0);
-    Assert.assertEquals(10.339850002884626, v.norm(1), 1.0e-6);
-    Assert.assertEquals(1.5849625007211563, v.maxValue(), 1.0e-6);
+    assertEquals(8.0, v.norm(0), 0);
+    assertEquals(10.339850002884626, v.norm(1), 1.0e-6);
+    assertEquals(1.5849625007211563, v.maxValue(), 1.0e-6);
   }
 
   @Test
@@ -80,10 +81,10 @@ public class CsvRecordFactoryTest {
     dict.intern("b");
     dict.intern("qrz");
 
-    Assert.assertEquals("[a, d, c, b, qrz]", dict.values().toString());
+    assertEquals("[a, d, c, b, qrz]", dict.values().toString());
 
     Dictionary dict2 = Dictionary.fromList(dict.values());
-    Assert.assertEquals("[a, d, c, b, qrz]", dict2.values().toString());
+    assertEquals("[a, d, c, b, qrz]", dict2.values().toString());
 
   }
 }

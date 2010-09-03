@@ -18,16 +18,15 @@
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
-import org.junit.Assert;
+import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 
-public class GammaTest {
+public final class GammaTest extends MahoutTestCase {
+
   @Test
   public void testNextDouble() {
     double[] z = new double[100000];
@@ -42,7 +41,7 @@ public class GammaTest {
       // verify that empirical CDF matches theoretical one pretty closely
       for (double q : seq(0.01, 1, 0.01)) {
         double p = z[(int) (q * z.length)];
-        Assert.assertEquals(q, g.cdf(p), 0.01);
+        assertEquals(q, g.cdf(p), 0.01);
       }
     }
   }
@@ -56,9 +55,9 @@ public class GammaTest {
       Gamma g1 = new Gamma(1, beta, gen);
       Gamma g2 = new Gamma(1, 1, gen);
       for (double x : seq(0, 0.99, 0.1)) {
-        Assert.assertEquals(String.format(Locale.ENGLISH, "Rate invariance: x = %.4f, alpha = 1, beta = %.1f", x, beta),
+        assertEquals(String.format(Locale.ENGLISH, "Rate invariance: x = %.4f, alpha = 1, beta = %.1f", x, beta),
           1 - Math.exp(-x * beta), g1.cdf(x), 1.0e-9);
-        Assert.assertEquals(String.format(Locale.ENGLISH, "Rate invariance: x = %.4f, alpha = 1, beta = %.1f", x, beta),
+        assertEquals(String.format(Locale.ENGLISH, "Rate invariance: x = %.4f, alpha = 1, beta = %.1f", x, beta),
           g2.cdf(beta * x), g1.cdf(x), 1.0e-9);
       }
     }
@@ -69,7 +68,7 @@ public class GammaTest {
       for (double beta : new double[]{0.1, 1, 2, 100}) {
         Gamma g1 = new Gamma(alpha, beta, gen);
         for (double x : seq(0, 0.9999, 0.001)) {
-          Assert.assertEquals(
+          assertEquals(
             String.format(Locale.ENGLISH, "Rate invariance: x = %.4f, alpha = %.2f, beta = %.1f", x, alpha, beta),
             g.cdf(x * beta), g1.cdf(x), 0);
         }
@@ -99,7 +98,7 @@ public class GammaTest {
     Gamma g = new Gamma(alpha, beta, RandomUtils.getRandom());
     int i = 0;
     for (double x : seq(0, 2 * alpha, 2 * alpha / 10)) {
-      Assert.assertEquals(String.format(Locale.ENGLISH, "alpha=%.2f, i=%d, x=%.2f", alpha, i, x),
+      assertEquals(String.format(Locale.ENGLISH, "alpha=%.2f, i=%d, x=%.2f", alpha, i, x),
                                         values[i], g.cdf(x), 1.0e-7);
       i++;
     }
@@ -123,7 +122,7 @@ public class GammaTest {
         for (double x : seq(0, 0.99, 0.1)) {
           double p = Math.pow(beta, alpha) * Math.pow(x, alpha - 1) *
             Math.exp(-beta * x - org.apache.mahout.math.jet.stat.Gamma.logGamma(alpha));
-          Assert.assertEquals(String.format(Locale.ENGLISH, "alpha=%.2f, beta=%.2f, x=%.2f\n", alpha, beta, x),
+          assertEquals(String.format(Locale.ENGLISH, "alpha=%.2f, beta=%.2f, x=%.2f\n", alpha, beta, x),
             p, g1.pdf(x), 1.0e-9);
         }
       }

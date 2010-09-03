@@ -17,21 +17,21 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import junit.framework.Assert;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.FileLineIterable;
-import org.apache.mahout.common.MahoutTestCase;
 
 import com.google.common.io.Resources;
+import org.apache.mahout.examples.MahoutTestCase;
+import org.junit.Test;
 
-import java.io.IOException;
 import java.io.File;
 
-public class FileInfosDatasetTest extends MahoutTestCase {
+public final class FileInfosDatasetTest extends MahoutTestCase {
 
-  public void testRanges() throws IOException {
+  @Test
+  public void testRanges() throws Exception {
     FileSystem fs = FileSystem.get(new Configuration());
     Path inpath = fs.makeQualified(new Path(Resources.getResource("wdbc").toString()));
     
@@ -43,18 +43,14 @@ public class FileInfosDatasetTest extends MahoutTestCase {
       dl.set(line);
       for (int index = 0; index < dataset.getNbAttributes(); index++) {
         if (dataset.isNumerical(index)) {
-          assertInRange(dl.getAttribute(index), dataset.getMin(index), dataset
+          CDMutationTest.assertInRange(dl.getAttribute(index), dataset.getMin(index), dataset
               .getMax(index));
         } else {
-          assertInRange(dl.getAttribute(index), 0, dataset.getNbValues(index));
+          CDMutationTest.assertInRange(dl.getAttribute(index), 0, dataset.getNbValues(index));
         }
       }
     }
   }
 
-  private static void assertInRange(double value, double min, double max) {
-    Assert.assertTrue("value" + value + ") < min", value >= min);
-    Assert.assertTrue("value(" + value + ") > max", value <= max);
-  }
 
 }

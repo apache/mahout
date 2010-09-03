@@ -23,31 +23,31 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.Data;
 import org.apache.mahout.df.data.Utils;
+import org.junit.Test;
 
-public class OptIgSplitTest extends MahoutTestCase {
+public final class OptIgSplitTest extends MahoutTestCase {
 
   private static final int NUM_ATTRIBUTES = 20;
 
   private static final int NUM_INSTANCES = 100;
- 
-  public void testComputeSplit() throws Exception {
-    int n = 100;
 
+  @Test
+  public void testComputeSplit() throws Exception {
     IgSplit ref = new DefaultIgSplit();
     IgSplit opt = new OptIgSplit();
 
     Random rng = RandomUtils.getRandom();
     Data data = Utils.randomData(rng, NUM_ATTRIBUTES, NUM_INSTANCES);
 
-    for (int nloop = 0; nloop < n; nloop++) {
+    for (int nloop = 0; nloop < 100; nloop++) {
       int attr = rng.nextInt(data.getDataset().nbAttributes());
       // System.out.println("IsNumerical: " + data.dataset.isNumerical(attr));
 
       Split expected = ref.computeSplit(data, attr);
       Split actual = opt.computeSplit(data, attr);
 
-      assertEquals(expected.getIg(), actual.getIg(), 0.0000001);
-      assertEquals(expected.getSplit(), actual.getSplit());
+      assertEquals(expected.getIg(), actual.getIg(), EPSILON);
+      assertEquals(expected.getSplit(), actual.getSplit(), EPSILON);
     }
   }
 

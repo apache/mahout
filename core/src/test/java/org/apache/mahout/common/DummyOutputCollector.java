@@ -21,21 +21,19 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.OutputCollector;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class DummyOutputCollector<K extends WritableComparable, V extends Writable>
+public final class DummyOutputCollector<K extends WritableComparable, V extends Writable>
     implements OutputCollector<K,V> {
 
   private final Map<K, List<V>> data = new TreeMap<K,List<V>>();
 
   @Override
-  public void collect(K key,V values)
-      throws IOException {
+  public void collect(K key,V values) {
     List<V> points = data.get(key);
     if (points == null) {
       points = new ArrayList<V>();

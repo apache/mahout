@@ -18,6 +18,7 @@
 package org.apache.mahout.common.iterator;
 
 import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,15 +38,18 @@ public final class IteratorUtilsTest extends MahoutTestCase {
     TEST_DATA = Collections.unmodifiableList(temp);
   }
 
+  @Test
   public void testArray() {
     String[] data = TEST_DATA.toArray(new String[3]);
     assertEquals(TEST_DATA, IteratorUtils.iterableToList(new ArrayIterator<String>(data)));
   }
 
+  @Test
   public void testList() {
     assertEquals(TEST_DATA, IteratorUtils.iterableToList(TEST_DATA));
   }
 
+  @Test
   public void testCollection() {
     Collection<String> data = new TreeSet<String>();
     data.add("foo");
@@ -54,6 +58,7 @@ public final class IteratorUtilsTest extends MahoutTestCase {
     assertEquals(TEST_DATA, IteratorUtils.iterableToList(data));
   }
 
+  @Test
   public void testComparator() {
     Collection<String> data = new ArrayList<String>(3);
     data.add("baz");
@@ -62,6 +67,7 @@ public final class IteratorUtilsTest extends MahoutTestCase {
     assertEquals(TEST_DATA, IteratorUtils.iterableToList(data, String.CASE_INSENSITIVE_ORDER));
   }
 
+  @Test
   public void testEmpty() {
     assertEquals(0, IteratorUtils.iterableToList(new ArrayList<Object>(0)).size());
   }

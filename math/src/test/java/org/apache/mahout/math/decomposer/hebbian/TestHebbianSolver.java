@@ -23,6 +23,7 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.decomposer.AsyncEigenVerifier;
 import org.apache.mahout.math.decomposer.SingularVectorVerifier;
 import org.apache.mahout.math.decomposer.SolverTest;
+import org.junit.Test;
 
 /**
  * This test is woefully inadequate, and also requires tons of memory, because it's part
@@ -30,7 +31,7 @@ import org.apache.mahout.math.decomposer.SolverTest;
  * approaches).
  * TODO: make better.
  */
-public class TestHebbianSolver extends SolverTest {
+public final class TestHebbianSolver extends SolverTest {
 
   public static long timeSolver(Matrix corpus,
                                 double convergence,
@@ -75,6 +76,7 @@ public class TestHebbianSolver extends SolverTest {
     return timeSolver(corpus, 0.01, 20, rank, state);
   }
 
+  @Test
   public void testHebbianSolver() {
     int numColumns = 800;
     Matrix corpus = randomSequentialAccessSparseMatrix(1000, 900, numColumns, 30, 1.0);

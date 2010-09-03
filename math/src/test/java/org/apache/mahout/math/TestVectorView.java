@@ -17,64 +17,65 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.TimesFunction;
-
-import static org.apache.mahout.math.function.Functions.*;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-public class TestVectorView extends MahoutTestCase {
+public final class TestVectorView extends MahoutTestCase {
 
-  private static final int cardinality = 3;
+  private static final int CARDINALITY = 3;
 
-  private static final int offset = 1;
+  private static final int OFFSET = 1;
 
   private final double[] values = {0.0, 1.1, 2.2, 3.3, 4.4, 5.5};
 
-  private final Vector test = new VectorView(new DenseVector(values), offset,
-      cardinality);
+  private final Vector test = new VectorView(new DenseVector(values), OFFSET, CARDINALITY);
 
+  @Test
   public void testAsFormatString() {
     String formatString = test.asFormatString();
     Vector v = AbstractVector.decodeVector(formatString);
     assertEquals("size", test.size(), v.size());
   }
 
+  @Test
   public void testCardinality() {
     assertEquals("size", 3, test.size());
   }
 
+  @Test
   public void testCopy() throws Exception {
     Vector copy = test.clone();
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("copy [" + i + ']', test.get(i), copy.get(i));
+      assertEquals("copy [" + i + ']', test.get(i), copy.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testGet() throws Exception {
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', values[i + offset], test.get(i));
+      assertEquals("get [" + i + ']', values[i + OFFSET], test.get(i), EPSILON);
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testGetOver() {
-    try {
-      test.get(test.size());
-      fail("expected exception");
-    } catch (IndexException e) {
-    }
+    test.get(test.size());
   }
 
+  @Test
   public void testIterator() throws Exception {
 
-    VectorView view = new VectorView(new DenseVector(values), offset, cardinality);
+    VectorView view = new VectorView(new DenseVector(values), OFFSET, CARDINALITY);
     double[] gold = {1.1, 2.2, 3.3};
     Iterator<Vector.Element> iter = view.iterator();
     checkIterator(iter, gold);
     iter = view.iterateNonZero();
     checkIterator(iter, gold);
 
-    view = new VectorView(new DenseVector(values), 0, cardinality);
+    view = new VectorView(new DenseVector(values), 0, CARDINALITY);
     gold = new double[]{0.0, 1.1, 2.2};
     iter = view.iterator();
     checkIterator(iter, gold);
@@ -94,228 +95,222 @@ public class TestVectorView extends MahoutTestCase {
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testGetUnder() {
-    try {
-      test.get(-1);
-      fail("expected exception");
-    } catch (IndexException e) {
-    }
+    test.get(-1);
   }
 
+  @Test
   public void testSet() throws Exception {
     test.set(2, 4.5);
     for (int i = 0; i < test.size(); i++) {
       if (i == 2) {
-        assertEquals("set [" + i + ']', 4.5, test.get(i));
+        assertEquals("set [" + i + ']', 4.5, test.get(i), EPSILON);
       } else {
-        assertEquals("set [" + i + ']', values[offset + i], test.get(i));
+        assertEquals("set [" + i + ']', values[OFFSET + i], test.get(i), EPSILON);
       }
     }
   }
 
+  @Test
   public void testSize() throws Exception {
     assertEquals("size", 3, test.getNumNondefaultElements());
   }
 
+  @Test
   public void testViewPart() throws Exception {
     Vector part = test.viewPart(1, 2);
     assertEquals("part size", 2, part.getNumNondefaultElements());
     for (int i = 0; i < part.size(); i++) {
-      assertEquals("part[" + i + ']', values[offset + i + 1], part.get(i));
+      assertEquals("part[" + i + ']', values[OFFSET + i + 1], part.get(i), EPSILON);
     }
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartUnder() {
-    try {
-      test.viewPart(-1, cardinality);
-      fail("no exception");
-    } catch (IndexException e) {
-    }
+    test.viewPart(-1, CARDINALITY);
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartOver() {
-    try {
-      test.viewPart(2, cardinality);
-      fail("no exception");
-    } catch (IndexException e) {
-    }
+    test.viewPart(2, CARDINALITY);
   }
 
+  @Test(expected = IndexException.class)
   public void testViewPartCardinality() {
-    try {
-      test.viewPart(1, values.length + 1);
-      fail("no exception");
-    } catch (IndexException e) {
-    }
+    test.viewPart(1, values.length + 1);
   }
 
+  @Test
   public void testDot() throws Exception {
     double res = test.dot(test);
-    assertEquals("dot", 1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3, res);
+    assertEquals("dot", 1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3, res, EPSILON);
   }
 
+  @Test(expected = CardinalityException.class)
   public void testDotCardinality() {
-    try {
-      test.dot(new DenseVector(test.size() + 1));
-      fail("expected exception");
-    } catch (CardinalityException e) {
-    }
+    test.dot(new DenseVector(test.size() + 1));
   }
 
+  @Test
   public void testNormalize() throws Exception {
     Vector res = test.normalize();
     double mag = Math.sqrt(1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("dot", values[offset + i] / mag, res.get(i));
+      assertEquals("dot", values[OFFSET + i] / mag, res.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testMinus() throws Exception {
     Vector val = test.minus(test);
     assertEquals("size", 3, val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', 0.0, val.get(i));
+      assertEquals("get [" + i + ']', 0.0, val.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testPlusDouble() throws Exception {
     Vector val = test.plus(1);
     assertEquals("size", 3, val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', values[offset + i] + 1, val.get(i));
+      assertEquals("get [" + i + ']', values[OFFSET + i] + 1, val.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testPlusVector() throws Exception {
     Vector val = test.plus(test);
     assertEquals("size", 3, val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', values[offset + i] * 2, val.get(i));
+      assertEquals("get [" + i + ']', values[OFFSET + i] * 2, val.get(i), EPSILON);
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testPlusVectorCardinality() {
-    try {
-      test.plus(new DenseVector(test.size() + 1));
-      fail("expected exception");
-    } catch (CardinalityException e) {
-    }
+    test.plus(new DenseVector(test.size() + 1));
   }
 
+  @Test
   public void testTimesDouble() throws Exception {
     Vector val = test.times(3);
     assertEquals("size", 3, val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', values[offset + i] * 3, val.get(i));
+      assertEquals("get [" + i + ']', values[OFFSET + i] * 3, val.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testDivideDouble() throws Exception {
     Vector val = test.divide(3);
     assertEquals("size", 3, val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', values[offset + i] / 3, val.get(i));
+      assertEquals("get [" + i + ']', values[OFFSET + i] / 3, val.get(i), EPSILON);
     }
   }
 
+  @Test
   public void testTimesVector() throws Exception {
     Vector val = test.times(test);
     assertEquals("size", 3, val.size());
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', values[offset + i] * values[offset + i],
-          val.get(i));
+      assertEquals("get [" + i + ']', values[OFFSET + i] * values[OFFSET + i],
+          val.get(i), EPSILON);
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testTimesVectorCardinality() {
-    try {
-      test.times(new DenseVector(test.size() + 1));
-      fail("expected exception");
-    } catch (CardinalityException e) {
-    }
+    test.times(new DenseVector(test.size() + 1));
   }
 
+  @Test
   public void testZSum() {
     double expected = 0;
-    for (int i = offset; i < offset + cardinality; i++) {
+    for (int i = OFFSET; i < OFFSET + CARDINALITY; i++) {
       expected += values[i];
     }
-    assertEquals("wrong zSum", expected, test.zSum());
+    assertEquals("wrong zSum", expected, test.zSum(), EPSILON);
   }
 
+  @Test
   public void testAssignDouble() {
     test.assign(0);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test
   public void testAssignDoubleArray() throws Exception {
     double[] array = new double[test.size()];
     test.assign(array);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignDoubleArrayCardinality() {
     double[] array = new double[test.size() + 1];
-    try {
-      test.assign(array);
-      fail("cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.assign(array);
   }
 
+  @Test
   public void testAssignVector() throws Exception {
     Vector other = new DenseVector(test.size());
     test.assign(other);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("value[" + i + ']', 0.0, test.getQuick(i));
+      assertEquals("value[" + i + ']', 0.0, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test(expected = CardinalityException.class)
   public void testAssignVectorCardinality() {
     Vector other = new DenseVector(test.size() - 1);
-    try {
-      test.assign(other);
-      fail("cardinality exception expected");
-    } catch (CardinalityException e) {
-    }
+    test.assign(other);
   }
 
+  @Test
   public void testAssignUnaryFunction() {
-    test.assign(NEGATE);
+    test.assign(Functions.NEGATE);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("value[" + i + ']', -values[i + 1], test.getQuick(i));
+      assertEquals("value[" + i + ']', -values[i + 1], test.getQuick(i), EPSILON);
     }
   }
 
+  @Test
   public void testAssignBinaryFunction() throws Exception {
-    test.assign(test, PLUS);
+    test.assign(test, Functions.PLUS);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("value[" + i + ']', 2 * values[i + 1], test.getQuick(i));
+      assertEquals("value[" + i + ']', 2 * values[i + 1], test.getQuick(i), EPSILON);
     }
   }
 
+  @Test
   public void testAssignBinaryFunction2() throws Exception {
-    test.assign(PLUS, 4);
+    test.assign(Functions.PLUS, 4);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("value[" + i + ']', values[i + 1] + 4, test.getQuick(i));
+      assertEquals("value[" + i + ']', values[i + 1] + 4, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test
   public void testAssignBinaryFunction3() throws Exception {
     test.assign(new TimesFunction(), 4);
     for (int i = 0; i < test.size(); i++) {
-      assertEquals("value[" + i + ']', values[i + 1] * 4, test.getQuick(i));
+      assertEquals("value[" + i + ']', values[i + 1] * 4, test.getQuick(i), EPSILON);
     }
   }
 
+  @Test
   public void testLike() {
     assertTrue("not like", test.like() instanceof VectorView);
   }
 
+  @Test
   public void testCrossProduct() {
     Matrix result = test.cross(test);
     assertEquals("row size", test.size(), result.size()[0]);
@@ -323,7 +318,7 @@ public class TestVectorView extends MahoutTestCase {
     for (int row = 0; row < result.size()[0]; row++) {
       for (int col = 0; col < result.size()[1]; col++) {
         assertEquals("cross[" + row + "][" + col + ']', test.getQuick(row)
-            * test.getQuick(col), result.getQuick(row, col));
+            * test.getQuick(col), result.getQuick(row, col), EPSILON);
       }
     }
   }

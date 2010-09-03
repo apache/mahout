@@ -30,6 +30,8 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.NoSuchElementException;
@@ -58,6 +60,7 @@ public final class FileDataModelTest extends TasteTestCase {
   private File testFile;
 
   @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
     testFile = getTestTempFile("test.txt");
@@ -65,6 +68,7 @@ public final class FileDataModelTest extends TasteTestCase {
     model = new FileDataModel(testFile);
   }
 
+  @Test
   public void testFile() throws Exception {
     UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(model);
     UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, model);
@@ -77,7 +81,7 @@ public final class FileDataModelTest extends TasteTestCase {
     model.refresh(null);
   }
 
-
+  @Test
   public void testTranspose() throws Exception {
     FileDataModel tModel = new FileDataModel(testFile, true, FileDataModel.DEFAULT_MIN_RELOAD_INTERVAL_MS);
     PreferenceArray userPrefs = tModel.getPreferencesFromUser(456);
@@ -87,6 +91,7 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals("pref Size: " + pref.length() + " is not: " + 3, 3, pref.length());
   }
 
+  @Test  
   public void testGetItems() throws Exception {
     LongPrimitiveIterator it = model.getItemIDs();
     assertNotNull(it);
@@ -111,6 +116,7 @@ public final class FileDataModelTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testPreferencesForItem() throws Exception {
     PreferenceArray prefs = model.getPreferencesForItem(456);
     assertNotNull(prefs);
@@ -123,10 +129,12 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(2, prefs.length());
   }
 
+  @Test
   public void testGetNumUsers() throws Exception {
     assertEquals(4, model.getNumUsers());
   }
 
+  @Test
   public void testNumUsersPreferring() throws Exception {
     assertEquals(2, model.getNumUsersWithPreferenceFor(456));
     assertEquals(0, model.getNumUsersWithPreferenceFor(111));
@@ -134,6 +142,7 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(2, model.getNumUsersWithPreferenceFor(123, 234));
   }
 
+  @Test
   public void testRefresh() throws Exception {
     final MutableBoolean initialized = new MutableBoolean(false);
     Runnable initializer = new Runnable() {
@@ -154,13 +163,14 @@ public final class FileDataModelTest extends TasteTestCase {
     assertEquals(4, model.getNumUsers());
   }
 
+  @Test
   public void testExplicitRefreshAfterCompleteFileUpdate() throws Exception {
     File file = getTestTempFile("refresh");
     writeLines(file, "123,456,3.0");
 
     /* create a FileDataModel that always reloads when the underlying file has changed */
     FileDataModel dataModel = new FileDataModel(file, false, 0L);
-    assertEquals(3.0f, dataModel.getPreferenceValue(123L, 456L));
+    assertEquals(3.0f, dataModel.getPreferenceValue(123L, 456L), EPSILON);
 
     /* change the underlying file,
      * we have to wait at least a second to see the change in the file's lastModified timestamp */
@@ -168,9 +178,10 @@ public final class FileDataModelTest extends TasteTestCase {
     writeLines(file, "123,456,5.0");
     dataModel.refresh(null);
 
-    assertEquals(5.0f, dataModel.getPreferenceValue(123L, 456L));
+    assertEquals(5.0f, dataModel.getPreferenceValue(123L, 456L), EPSILON);
   }
 
+  @Test
   public void testToString() {
     assertTrue(model.toString().length() > 0);
   }

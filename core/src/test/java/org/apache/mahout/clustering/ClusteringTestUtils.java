@@ -25,10 +25,10 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.math.VectorWritable;
 
-import java.io.File;
 import java.io.IOException;
 
-public class ClusteringTestUtils {
+public final class ClusteringTestUtils {
+
   private ClusteringTestUtils() {
   }
 
@@ -56,16 +56,4 @@ public class ClusteringTestUtils {
     writer.close();
   }
 
-  public static void rmr(String path) {
-    File f = new File(path);
-    if (f.exists()) {
-      if (f.isDirectory()) {
-        String[] contents = f.list();
-        for (String content : contents) {
-          rmr(f.toString() + File.separator + content);
-        }
-      }
-      f.delete();
-    }
-  }
 }

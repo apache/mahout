@@ -29,16 +29,18 @@ import java.util.Random;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.mapreduce.inmem.InMemInputFormat.InMemInputSplit;
+import org.junit.Before;
+import org.junit.Test;
 
-public class InMemInputSplitTest extends MahoutTestCase {
+public final class InMemInputSplitTest extends MahoutTestCase {
 
   private Random rng;
-
   private ByteArrayOutputStream byteOutStream;
   private DataOutput out;
   
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
     byteOutStream = new ByteArrayOutputStream();
@@ -46,11 +48,10 @@ public class InMemInputSplitTest extends MahoutTestCase {
   }
 
   /**
-   * Make sure that all the fields are processed correctly 
-   * @throws IOException 
-   *
+   * Make sure that all the fields are processed correctly
    */
-  public void testWritable() throws IOException {
+  @Test
+  public void testWritable() throws Exception {
     InMemInputSplit split = new InMemInputSplit(rng.nextInt(), rng.nextInt(1000), rng.nextLong());
     
     split.write(out);
@@ -59,17 +60,16 @@ public class InMemInputSplitTest extends MahoutTestCase {
 
   /**
    * test the case seed == null
-   * @throws IOException 
-   *
    */
-  public void testNullSeed() throws IOException {
+  @Test
+  public void testNullSeed() throws Exception {
     InMemInputSplit split = new InMemInputSplit(rng.nextInt(), rng.nextInt(1000), null);
     
     split.write(out);
     assertEquals(split, readSplit());
   }
   
-  protected InMemInputSplit readSplit() throws IOException {
+  private InMemInputSplit readSplit() throws IOException {
     ByteArrayInputStream byteInStream = new ByteArrayInputStream(byteOutStream.toByteArray());
     DataInput in = new DataInputStream(byteInStream);
     return InMemInputSplit.read(in);

@@ -19,6 +19,7 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 /** Tests {@link RefreshHelper} */
 public final class RefreshHelperTest extends TasteTestCase {
 
+  @Test
   public void testCallable() {
     MockRefreshable mock = new MockRefreshable();
     RefreshHelper helper = new RefreshHelper(mock);
@@ -33,11 +35,13 @@ public final class RefreshHelperTest extends TasteTestCase {
     assertEquals(1, mock.getCallCount());
   }
 
+  @Test
   public void testNoCallable() {
     RefreshHelper helper = new RefreshHelper(null);
     helper.refresh(null);
   }
 
+  @Test
   public void testDependencies() {
     RefreshHelper helper = new RefreshHelper(null);
     MockRefreshable mock1 = new MockRefreshable();
@@ -49,6 +53,7 @@ public final class RefreshHelperTest extends TasteTestCase {
     assertEquals(1, mock2.getCallCount());
   }
 
+  @Test
   public void testAlreadyRefreshed() {
     RefreshHelper helper = new RefreshHelper(null);
     MockRefreshable mock1 = new MockRefreshable();

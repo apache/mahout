@@ -27,7 +27,7 @@ abstract class TransformTestCase extends TasteTestCase {
   static void assertPrefsEquals(DataModel dataModel, long userID, double... expected) throws TasteException {
     int i = 0;
     for (Preference pref : dataModel.getPreferencesFromUser(userID)) {
-      assertEquals(expected[i], pref.getValue());
+      assertEquals(expected[i], pref.getValue(), EPSILON);
       i++;
     }
     assertEquals(expected.length, i);

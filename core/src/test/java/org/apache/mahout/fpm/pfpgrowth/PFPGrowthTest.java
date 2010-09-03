@@ -20,7 +20,6 @@ package org.apache.mahout.fpm.pfpgrowth;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,34 +31,29 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PFPGrowthTest extends MahoutTestCase {
+public final class PFPGrowthTest extends MahoutTestCase {
   
   private static final Logger log = LoggerFactory.getLogger(PFPGrowthTest.class);
   
   private final Parameters params = new Parameters();
   
   @Override
-  protected void setUp() throws Exception {
+  public void setUp() throws Exception {
     super.setUp();
     params.set("minSupport", "3");
     params.set("maxHeapSize", "4");
     params.set("numGroups", "2");
     params.set("encoding", "UTF-8");
     params.set("treeCacheSize", "5");
-    params.set("input", "testdata/transactions/test.txt");
+    File inputDir = getTestTempDir("testdata/transactions");
+    File input = new File(inputDir, "test.txt");
+    params.set("input", input.getAbsolutePath());
     params.set("output", "output/frequentpatterns");
-    File testData = new File("testdata");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    testData = new File("testdata/transactions");
-    if (!testData.exists()) {
-      testData.mkdir();
-    }
-    BufferedWriter writer = new BufferedWriter(new FileWriter("testdata/transactions/test.txt"));
+    BufferedWriter writer = new BufferedWriter(new FileWriter(input));
     try {
       Collection<List<String>> transactions = new ArrayList<List<String>>();
       transactions.add(Arrays.asList("E", "A", "D", "B"));
@@ -83,8 +77,9 @@ public class PFPGrowthTest extends MahoutTestCase {
     }
     
   }
-  
-  public void testStartParallelCounting() throws IOException, InterruptedException, ClassNotFoundException {
+
+  @Test
+  public void testStartParallelCounting() throws Exception {
     log.info("Starting Parallel Counting Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startParallelCounting(params);
     log.info("Reading fList Test: {}", params.get("maxHeapSize"));
@@ -92,16 +87,18 @@ public class PFPGrowthTest extends MahoutTestCase {
     log.info("{}", fList);
     assertEquals("[(B,6), (D,6), (A,5), (E,4), (C,3)]", fList.toString());
   }
-  
-  public void testStartGroupingItems() throws IOException {
+
+  @Test
+  public void testStartGroupingItems() throws Exception {
     log.info("Starting Grouping Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startGroupingItems(params);
     Map<String,Long> gList = PFPGrowth.deserializeMap(params, "gList", new Configuration());
     log.info("{}", gList);
     assertEquals("{D=0, E=1, A=0, B=0, C=1}", gList.toString());
   }
-  
-  public void testStartParallelFPGrowth() throws IOException, InterruptedException, ClassNotFoundException {
+
+  @Test
+  public void testStartParallelFPGrowth() throws Exception {
     log.info("Starting Parallel FPGrowth Test: {}", params.get("maxHeapSize"));
     PFPGrowth.startGroupingItems(params);
     PFPGrowth.startTransactionSorting(params);

@@ -18,11 +18,13 @@
 package org.apache.mahout.cf.taste.impl.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 public final class BitSetTest extends TasteTestCase {
 
   private static final int NUM_BITS = 100;
 
+  @Test
   public void testGetSet() {
     BitSet bitSet = new BitSet(NUM_BITS);
     for (int i = 0; i < NUM_BITS; i++) {
@@ -34,6 +36,7 @@ public final class BitSetTest extends TasteTestCase {
     assertTrue(bitSet.get(NUM_BITS-1));
   }
 
+  @Test
   public void testBounds() {
     BitSet bitSet = new BitSet(NUM_BITS);
     try {
@@ -50,6 +53,7 @@ public final class BitSetTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testClear() {
     BitSet bitSet = new BitSet(NUM_BITS);
     for (int i = 0; i < NUM_BITS; i++) {
@@ -64,6 +68,7 @@ public final class BitSetTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testClone() {
     BitSet bitSet = new BitSet(NUM_BITS);
     bitSet.set(NUM_BITS-1);

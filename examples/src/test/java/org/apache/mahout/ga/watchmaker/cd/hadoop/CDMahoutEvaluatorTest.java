@@ -24,17 +24,19 @@ import java.util.Random;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.Rule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRule;
 import org.apache.mahout.ga.watchmaker.cd.utils.RandomRuleResults;
 
 import com.google.common.io.Resources;
+import org.junit.Test;
 
-public class CDMahoutEvaluatorTest extends MahoutTestCase {
+public final class CDMahoutEvaluatorTest extends MahoutTestCase {
 
+  @Test
   public void testEvaluate() throws Exception {
     int nbrules = 100;
     Random rng = RandomUtils.getRandom();

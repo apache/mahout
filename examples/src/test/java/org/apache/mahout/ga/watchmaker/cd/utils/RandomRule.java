@@ -24,12 +24,10 @@ import org.apache.mahout.ga.watchmaker.cd.hadoop.CDMapper;
 
 import java.util.Random;
 
-public class RandomRule implements Rule {
+public final class RandomRule implements Rule {
 
   private final Random rng;
-
   private final int ruleid;
-  
   private final int target;
 
   public RandomRule(int ruleid, int target, Random rng) {

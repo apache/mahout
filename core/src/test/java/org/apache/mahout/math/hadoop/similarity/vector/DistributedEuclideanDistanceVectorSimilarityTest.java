@@ -17,12 +17,15 @@
 
 package org.apache.mahout.math.hadoop.similarity.vector;
 
+import org.junit.Test;
+
 /**
  * tests {@link DistributedEuclideanDistanceVectorSimilarity}
  */
-public class DistributedEuclideanDistanceVectorSimilarityTest extends
+public final class DistributedEuclideanDistanceVectorSimilarityTest extends
     DistributedVectorSimilarityTestCase {
 
+  @Test
   public void testEuclideanDistance() throws Exception {
 
     assertSimilar(new DistributedEuclideanDistanceVectorSimilarity(),

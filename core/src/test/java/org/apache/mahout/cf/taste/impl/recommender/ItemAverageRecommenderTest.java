@@ -20,11 +20,13 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.junit.Test;
 
 import java.util.List;
 
 public final class ItemAverageRecommenderTest extends TasteTestCase {
 
+  @Test
   public void testRecommender() throws Exception {
     Recommender recommender = new ItemAverageRecommender(getDataModel());
     List<RecommendedItem> recommended = recommender.recommend(1, 1);
@@ -32,10 +34,10 @@ public final class ItemAverageRecommenderTest extends TasteTestCase {
     assertEquals(1, recommended.size());
     RecommendedItem firstRecommended = recommended.get(0);
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.53333336f, firstRecommended.getValue());
+    assertEquals(0.53333336f, firstRecommended.getValue(), EPSILON);
     recommender.refresh(null);
     assertEquals(2, firstRecommended.getItemID());
-    assertEquals(0.53333336f, firstRecommended.getValue());
+    assertEquals(0.53333336f, firstRecommended.getValue(), EPSILON);
   }
 
 }

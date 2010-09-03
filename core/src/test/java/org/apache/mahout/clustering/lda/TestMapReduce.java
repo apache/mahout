@@ -16,13 +16,14 @@
  */
 package org.apache.mahout.clustering.lda;
 
+import org.apache.commons.math.distribution.IntegerDistribution;
 import org.easymock.classextension.EasyMock;
 
 import java.util.Iterator;
 import java.util.Random;
 
 import org.apache.commons.math.MathException;
-import org.apache.commons.math.distribution.PoissonDistribution;
+
 import org.apache.commons.math.distribution.PoissonDistributionImpl;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
@@ -34,8 +35,10 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestMapReduce extends MahoutTestCase {
+public final class TestMapReduce extends MahoutTestCase {
 
   private static final int NUM_TESTS = 10;
   private static final int NUM_TOPICS = 10;
@@ -49,7 +52,7 @@ public class TestMapReduce extends MahoutTestCase {
    */
   private RandomAccessSparseVector generateRandomDoc(int numWords, double sparsity) throws MathException {
     RandomAccessSparseVector v = new RandomAccessSparseVector(numWords,(int)(numWords * sparsity));
-    PoissonDistribution dist = new PoissonDistributionImpl(sparsity);
+    IntegerDistribution dist = new PoissonDistributionImpl(sparsity);
     for (int i = 0; i < numWords; i++) {
       // random integer
       v.set(i,dist.inverseCumulativeProbability(random.nextDouble()) + 1);
@@ -78,16 +81,16 @@ public class TestMapReduce extends MahoutTestCase {
   }
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     random = RandomUtils.getRandom();
   }
 
   /**
    * Test the basic Mapper
-   * 
-   * @throws Exception
    */
+  @Test
   public void testMapper() throws Exception {
     LDAState state = generateRandomState(100,NUM_TOPICS);
     LDAMapper mapper = new LDAMapper();

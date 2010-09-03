@@ -28,6 +28,7 @@ import java.util.LinkedList;
 
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.easymock.classextension.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,12 +36,14 @@ import org.junit.Test;
 /**
  * Test the CollocReducer
  */
-public class CollocReducerTest {
+public final class CollocReducerTest extends MahoutTestCase {
   
   private Reducer<GramKey,Gram,Gram,Gram>.Context context;
 
+  @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     context = EasyMock.createMock(Context.class);
   }
   

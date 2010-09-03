@@ -20,11 +20,13 @@ package org.apache.mahout.cf.taste.impl.common;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
 import java.util.Random;
 
 public final class CacheTest extends TasteTestCase {
-  
+
+  @Test
   public void testLotsOfGets() throws TasteException {
     Retriever<Object,Object> retriever = new IdentityRetriever();
     Cache<Object,Object> cache = new Cache<Object,Object>(retriever, 1000);
@@ -32,7 +34,8 @@ public final class CacheTest extends TasteTestCase {
       assertEquals(i, cache.get(i));
     }
   }
-  
+
+  @Test
   public void testMixedUsage() throws TasteException {
     Random random = RandomUtils.getRandom();
     Retriever<Object,Object> retriever = new IdentityRetriever();

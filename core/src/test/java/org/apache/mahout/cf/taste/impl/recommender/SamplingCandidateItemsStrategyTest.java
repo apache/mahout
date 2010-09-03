@@ -28,6 +28,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.List;
  */
 public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
 
+  @Test
   public void testStrategy() throws TasteException {
     List<Preference> prefsOfUser123 = new ArrayList<Preference>();
     prefsOfUser123.add(new GenericPreference(123L, 1L, 1.0f));

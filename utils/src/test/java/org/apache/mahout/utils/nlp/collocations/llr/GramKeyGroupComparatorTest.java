@@ -17,11 +17,10 @@
 
 package org.apache.mahout.utils.nlp.collocations.llr;
 
-import junit.framework.Assert;
-
+import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
-public class GramKeyGroupComparatorTest {
+public final class GramKeyGroupComparatorTest extends MahoutTestCase {
 
   @Test
   public void testComparator() {
@@ -37,10 +36,10 @@ public class GramKeyGroupComparatorTest {
     
     GramKeyGroupComparator cmp = new GramKeyGroupComparator();
 
-    Assert.assertEquals(0, cmp.compare(a, b));
-    Assert.assertEquals(0, cmp.compare(a, c));
-    Assert.assertTrue(0 > cmp.compare(a, d));
-    Assert.assertTrue(0 < cmp.compare(a, e));
-    Assert.assertTrue(0 < cmp.compare(d, e));
+    assertEquals(0, cmp.compare(a, b));
+    assertEquals(0, cmp.compare(a, c));
+    assertTrue(0 > cmp.compare(a, d));
+    assertTrue(0 < cmp.compare(a, e));
+    assertTrue(0 < cmp.compare(d, e));
   }
 }

@@ -25,13 +25,13 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Resources;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,7 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class OnlineLogisticRegressionTest {
+public final class OnlineLogisticRegressionTest extends MahoutTestCase {
+
   private Matrix input;
 
   /**
@@ -96,56 +97,56 @@ public class OnlineLogisticRegressionTest {
 
     // zero vector gives no information.  All classes are equal.
     Vector v = lr.classify(new DenseVector(new double[]{0, 0}));
-    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-8);
-    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-8);
+    assertEquals(1 / 3.0, v.get(0), 1.0e-8);
+    assertEquals(1 / 3.0, v.get(1), 1.0e-8);
 
     v = lr.classifyFull(new DenseVector(new double[]{0, 0}));
-    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
-    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-8);
-    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-8);
-    Assert.assertEquals(1 / 3.0, v.get(2), 1.0e-8);
+    assertEquals(1.0, v.zSum(), 1.0e-8);
+    assertEquals(1 / 3.0, v.get(0), 1.0e-8);
+    assertEquals(1 / 3.0, v.get(1), 1.0e-8);
+    assertEquals(1 / 3.0, v.get(2), 1.0e-8);
 
     // weights for second vector component are still zero so all classifications are equally likely
     v = lr.classify(new DenseVector(new double[]{0, 1}));
-    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-3);
-    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-3);
+    assertEquals(1 / 3.0, v.get(0), 1.0e-3);
+    assertEquals(1 / 3.0, v.get(1), 1.0e-3);
 
     v = lr.classifyFull(new DenseVector(new double[]{0, 1}));
-    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
-    Assert.assertEquals(1 / 3.0, v.get(0), 1.0e-3);
-    Assert.assertEquals(1 / 3.0, v.get(1), 1.0e-3);
-    Assert.assertEquals(1 / 3.0, v.get(2), 1.0e-3);
+    assertEquals(1.0, v.zSum(), 1.0e-8);
+    assertEquals(1 / 3.0, v.get(0), 1.0e-3);
+    assertEquals(1 / 3.0, v.get(1), 1.0e-3);
+    assertEquals(1 / 3.0, v.get(2), 1.0e-3);
 
     // but the weights on the first component are non-zero
     v = lr.classify(new DenseVector(new double[]{1, 0}));
-    Assert.assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1.0e-8);
-    Assert.assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1.0e-8);
+    assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1.0e-8);
+    assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1.0e-8);
 
     v = lr.classifyFull(new DenseVector(new double[]{1, 0}));
-    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
-    Assert.assertEquals(1 / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1.0e-8);
-    Assert.assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1.0e-8);
-    Assert.assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(2), 1.0e-8);
+    assertEquals(1.0, v.zSum(), 1.0e-8);
+    assertEquals(1 / (1 + Math.exp(-1) + Math.exp(-2)), v.get(0), 1.0e-8);
+    assertEquals(Math.exp(-1) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(1), 1.0e-8);
+    assertEquals(Math.exp(-2) / (1 + Math.exp(-1) + Math.exp(-2)), v.get(2), 1.0e-8);
 
     lr.setBeta(0, 1, 1);
 
     v = lr.classifyFull(new DenseVector(new double[]{1, 1}));
-    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
-    Assert.assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(-2)), v.get(1), 1.0e-3);
-    Assert.assertEquals(Math.exp(-2) / (1 + Math.exp(0) + Math.exp(-2)), v.get(2), 1.0e-3);
-    Assert.assertEquals(1 / (1 + Math.exp(0) + Math.exp(-2)), v.get(0), 1.0e-3);
+    assertEquals(1.0, v.zSum(), 1.0e-8);
+    assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(-2)), v.get(1), 1.0e-3);
+    assertEquals(Math.exp(-2) / (1 + Math.exp(0) + Math.exp(-2)), v.get(2), 1.0e-3);
+    assertEquals(1 / (1 + Math.exp(0) + Math.exp(-2)), v.get(0), 1.0e-3);
 
     lr.setBeta(1, 1, 3);
 
     v = lr.classifyFull(new DenseVector(new double[]{1, 1}));
-    Assert.assertEquals(1.0, v.zSum(), 1.0e-8);
-    Assert.assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(1)), v.get(1), 1.0e-8);
-    Assert.assertEquals(Math.exp(1) / (1 + Math.exp(0) + Math.exp(1)), v.get(2), 1.0e-8);
-    Assert.assertEquals(1 / (1 + Math.exp(0) + Math.exp(1)), v.get(0), 1.0e-8);
+    assertEquals(1.0, v.zSum(), 1.0e-8);
+    assertEquals(Math.exp(0) / (1 + Math.exp(0) + Math.exp(1)), v.get(1), 1.0e-8);
+    assertEquals(Math.exp(1) / (1 + Math.exp(0) + Math.exp(1)), v.get(2), 1.0e-8);
+    assertEquals(1 / (1 + Math.exp(0) + Math.exp(1)), v.get(0), 1.0e-8);
   }
 
   @Test
-  public void testTrain() throws IOException {
+  public void testTrain() throws Exception {
     Vector target = readStandardData();
 
 
@@ -196,14 +197,14 @@ public class OnlineLogisticRegressionTest {
     double maxAbsoluteError = tmp.getColumn(0).minus(target).aggregate(Functions.MAX, Functions.ABS);
 
     System.out.printf("mAE = %.4f, maxAE = %.4f\n", meanAbsoluteError, maxAbsoluteError);
-    Assert.assertEquals(0, meanAbsoluteError , 0.05);
-    Assert.assertEquals(0, maxAbsoluteError, 0.3);
+    assertEquals(0, meanAbsoluteError , 0.05);
+    assertEquals(0, maxAbsoluteError, 0.3);
 
     // convenience methods should give the same results
     Vector v = lr.classifyScalar(input);
-    Assert.assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-5);
+    assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-5);
     v = lr.classifyFull(input).getColumn(1);
-    Assert.assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-4);
+    assertEquals(0, v.minus(tmp.getColumn(0)).norm(1), 1.0e-4);
   }
 
   /**

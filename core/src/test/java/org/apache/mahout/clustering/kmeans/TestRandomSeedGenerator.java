@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.kmeans;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,46 +37,36 @@ import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestRandomSeedGenerator extends MahoutTestCase {
+public final class TestRandomSeedGenerator extends MahoutTestCase {
   
-  private static final double[][] raw = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
+  private static final double[][] RAW = {{1, 1}, {2, 1}, {1, 2}, {2, 2},
     {3, 3}, {4, 4}, {5, 4}, {4, 5}, {5, 5}};
   
   private FileSystem fs;
   
   private static List<VectorWritable> getPoints() {
     List<VectorWritable> points = new ArrayList<VectorWritable>();
-    for (double[] fr : raw) {
+    for (double[] fr : RAW) {
       Vector vec = new RandomAccessSparseVector(fr.length);
       vec.assign(fr);
       points.add(new VectorWritable(vec));
     }
     return points;
   }
-  
-  private static void rmr(String path) throws Exception {
-    File f = new File(path);
-    if (f.exists()) {
-      if (f.isDirectory()) {
-        String[] contents = f.list();
-        for (String content : contents) {
-          rmr(f.toString() + File.separator + content);
-        }
-      }
-      f.delete();
-    }
-  }
-  
+
   @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
-    rmr("testdata");
     Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
   }
   
   /** Story: test random seed generation generates 4 clusters with proper ids and data */
+  @Test
   public void testRandomSeedGenerator() throws Exception {
     List<VectorWritable> points = getPoints();
     Job job = new Job();
@@ -92,14 +83,14 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
     AbstractCluster value = (AbstractCluster) reader.getValueClass().newInstance();
     
     int clusterCount = 0;
-    Set<Integer> set = new HashSet<Integer>();
+    Collection<Integer> set = new HashSet<Integer>();
     while (reader.next(key, value)) {
       clusterCount++;
       int id = value.getId();
       assertTrue(set.add(id)); // validate unique id's
       
       Vector v = value.getCenter();
-      assertVectorEquals(raw[id], v); // validate values match
+      assertVectorEquals(RAW[id], v); // validate values match
     }
 
     assertEquals(4, clusterCount); // validate sample count
@@ -108,7 +99,7 @@ public class TestRandomSeedGenerator extends MahoutTestCase {
   private static void assertVectorEquals(double[] raw, Vector v) {
     assertEquals(raw.length, v.size());
     for (int i=0; i < raw.length; i++) {
-      assertEquals(raw[i], v.getQuick(i));
+      assertEquals(raw[i], v.getQuick(i), EPSILON);
     }
   }
 }

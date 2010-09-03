@@ -27,12 +27,10 @@ import java.util.Random;
  * of attributes. Each attribute can be numerical or categorical (choosen
  * randomly).
  */
-public class MockDataSet {
+public final class MockDataSet {
 
   private final Random rng;
-
   private final int maxnba;
-
   private final DataSet dataset;
 
   /**

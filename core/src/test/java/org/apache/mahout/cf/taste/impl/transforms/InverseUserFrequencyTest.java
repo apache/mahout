@@ -20,10 +20,12 @@ package org.apache.mahout.cf.taste.impl.transforms;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.junit.Test;
 
 /** <p>Tests {@link InverseUserFrequency}.</p> */
 public final class InverseUserFrequencyTest extends TransformTestCase {
 
+  @Test
   public void testIUF() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3, 4, 5},

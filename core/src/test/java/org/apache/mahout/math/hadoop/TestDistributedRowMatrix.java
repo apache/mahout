@@ -30,13 +30,14 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decomposer.SolverTest;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class TestDistributedRowMatrix extends MahoutTestCase {
+public final class TestDistributedRowMatrix extends MahoutTestCase {
 
   public static void assertEquals(VectorIterable m, VectorIterable mtt, double errorTolerance) {
     Iterator<MatrixSlice> mIt = m.iterateAll();
@@ -62,14 +63,16 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testTranspose() throws Exception {
     DistributedRowMatrix m = randomDistributedMatrix(10, 9, 5, 4, 1.0, false);
     DistributedRowMatrix mt = m.transpose();
     mt.setOutputTempPathString(new Path(m.getOutputTempPath().getParent(), "/tmpOutTranspose").toString());
     DistributedRowMatrix mtt = mt.transpose();
-    assertEquals(m, mtt, 1.0e-9);
+    assertEquals(m, mtt, EPSILON);
   }
 
+  @Test
   public void testMatrixTimesVector() throws Exception {
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
@@ -78,9 +81,10 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
 
     Vector expected = m.times(v);
     Vector actual = dm.times(v);
-    assertEquals(0.0, expected.getDistanceSquared(actual), 1.0e-9);
+    assertEquals(0.0, expected.getDistanceSquared(actual), EPSILON);
   }
 
+  @Test
   public void testMatrixTimesSquaredVector() throws Exception {
     Vector v = new RandomAccessSparseVector(50);
     v.assign(1.0);
@@ -92,6 +96,7 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
     assertEquals(0.0, expected.getDistanceSquared(actual), 1.0e-9);
   }
 
+  @Test
   public void testMatrixTimesMatrix() throws Exception {
     Matrix inputA = SolverTest.randomSequentialAccessSparseMatrix(20, 19, 15, 5, 10.0);
     Matrix inputB = SolverTest.randomSequentialAccessSparseMatrix(20, 13, 25, 10, 5.0);
@@ -101,7 +106,7 @@ public class TestDistributedRowMatrix extends MahoutTestCase {
     DistributedRowMatrix distB = randomDistributedMatrix(20, 13, 25, 10, 5.0, false, "distB");
     DistributedRowMatrix product = distA.times(distB);
 
-    assertEquals(expected, product, 1.0e-9);
+    assertEquals(expected, product, EPSILON);
   }
 
   public DistributedRowMatrix randomDistributedMatrix(int numRows,

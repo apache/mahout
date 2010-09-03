@@ -20,7 +20,7 @@ package org.apache.mahout.ga.watchmaker.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DummyCandidate {
+public final class DummyCandidate {
 
   private final int index;
 

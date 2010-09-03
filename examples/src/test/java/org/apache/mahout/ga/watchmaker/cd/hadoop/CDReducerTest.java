@@ -17,7 +17,6 @@
 
 package org.apache.mahout.ga.watchmaker.cd.hadoop;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -27,20 +26,22 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.DummyRecordWriter;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.examples.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
+import org.junit.Before;
+import org.junit.Test;
 
-public class CDReducerTest extends MahoutTestCase {
+public final class CDReducerTest extends MahoutTestCase {
 
   private static final int NUM_EVALS = 100;
 
   private List<CDFitness> evaluations;
-
   private CDFitness expected;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     // generate random evaluatons and calculate expectations
     evaluations = new ArrayList<CDFitness>();
@@ -61,15 +62,13 @@ public class CDReducerTest extends MahoutTestCase {
     expected = new CDFitness(tp, fp, tn, fn);
   }
 
-  public void testReduce() throws IOException, InterruptedException {
+  @Test
+  public void testReduce() throws Exception {
     CDReducer reducer = new CDReducer();
     Configuration conf = new Configuration();
     DummyRecordWriter<LongWritable, CDFitness> reduceWriter = new DummyRecordWriter<LongWritable, CDFitness>();
-    Reducer<LongWritable, CDFitness, LongWritable, CDFitness>.Context reduceContext = DummyRecordWriter.build(reducer,
-                                                                                                              conf,
-                                                                                                              reduceWriter,
-                                                                                                              LongWritable.class,
-                                                                                                              CDFitness.class);
+    Reducer<LongWritable, CDFitness, LongWritable, CDFitness>.Context reduceContext =
+        DummyRecordWriter.build(reducer, conf, reduceWriter, LongWritable.class, CDFitness.class);
 
     LongWritable zero = new LongWritable(0);
     reducer.reduce(zero, evaluations, reduceContext);

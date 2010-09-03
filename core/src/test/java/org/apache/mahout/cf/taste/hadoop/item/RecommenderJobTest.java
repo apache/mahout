@@ -52,12 +52,14 @@ import org.apache.mahout.math.hadoop.similarity.vector.DistributedTanimotoCoeffi
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 import org.easymock.IArgumentMatcher;
 import org.easymock.classextension.EasyMock;
+import org.junit.Test;
 
 public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link ItemIDIndexMapper}
    */
+  @Test
   public void testItemIDIndexMapper() throws Exception {
     Mapper<LongWritable,Text, VarIntWritable, VarLongWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
@@ -73,6 +75,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link ItemIDIndexReducer}
    */
+  @Test
   public void testItemIDIndexReducer() throws Exception {
     Reducer<VarIntWritable, VarLongWritable, VarIntWritable,VarLongWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -89,6 +92,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link ToItemPrefsMapper}
    */
+  @Test
   public void testToItemPrefsMapper() throws Exception {
     Mapper<LongWritable,Text, VarLongWritable,VarLongWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
@@ -107,6 +111,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link ToItemPrefsMapper} using boolean data
    */
+  @Test
   public void testToItemPrefsMapperBooleanData() throws Exception {
     Mapper<LongWritable,Text, VarLongWritable,VarLongWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
@@ -126,6 +131,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link ToUserVectorReducer}
    */
+  @Test
   public void testToUserVectorReducer() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -147,6 +153,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link ToUserVectorReducer} using boolean data
    */
+  @Test
   public void testToUserVectorReducerWithBooleanData() throws Exception {
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -165,6 +172,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link SimilarityMatrixRowWrapperMapper}
    */
+  @Test
   public void testSimilarityMatrixRowWrapperMapper() throws Exception {
     Mapper<IntWritable,VectorWritable,VarIntWritable,VectorOrPrefWritable>.Context context =
       EasyMock.createMock(Mapper.Context.class);
@@ -187,7 +195,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * verifies the {@link Vector} included in a {@link VectorOrPrefWritable}
    */
-  public static VectorOrPrefWritable vectorOfVectorOrPrefWritableMatches(final Vector.Element... elements) {
+  private static VectorOrPrefWritable vectorOfVectorOrPrefWritableMatches(final Vector.Element... elements) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
@@ -206,9 +214,8 @@ public class RecommenderJobTest extends TasteTestCase {
 
   /**
    * tests {@link UserVectorSplitterMapper}
-   *
-   * @throws Exception
    */
+  @Test
   public void testUserVectorSplitterMapper() throws Exception {
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable>.Context context =
         EasyMock.createMock(Mapper.Context.class);
@@ -233,7 +240,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * verifies a preference in a {@link VectorOrPrefWritable}
    */
-  public static VectorOrPrefWritable prefOfVectorOrPrefWritableMatches(final long userID, final float prefValue) {
+  private static VectorOrPrefWritable prefOfVectorOrPrefWritableMatches(final long userID, final float prefValue) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
@@ -253,6 +260,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link UserVectorSplitterMapper} in the special case that some userIDs shall be excluded
    */
+  @Test
   public void testUserVectorSplitterMapperUserExclusion() throws Exception {
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable>.Context context =
         EasyMock.createMock(Mapper.Context.class);
@@ -284,6 +292,7 @@ public class RecommenderJobTest extends TasteTestCase {
    * tests {@link UserVectorSplitterMapper} in the special case that the number of preferences to be considered
    * is less than the number of available preferences
    */
+  @Test
   public void testUserVectorSplitterMapperOnlySomePrefsConsidered() throws Exception {
     Mapper<VarLongWritable,VectorWritable, VarIntWritable,VectorOrPrefWritable>.Context context =
         EasyMock.createMock(Mapper.Context.class);
@@ -308,7 +317,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * verifies that a preference value is NaN in a {@link VectorOrPrefWritable}
    */
-  public static VectorOrPrefWritable prefOfVectorOrPrefWritableMatchesNaN(final long userID) {
+  private static VectorOrPrefWritable prefOfVectorOrPrefWritableMatchesNaN(final long userID) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
       public boolean matches(Object argument) {
@@ -328,6 +337,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link ToVectorAndPrefReducer}
    */
+  @Test
   public void testToVectorAndPrefReducer() throws Exception {
     Reducer<VarIntWritable,VectorOrPrefWritable,VarIntWritable,VectorAndPrefsWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -354,7 +364,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * verifies a {@link VectorAndPrefsWritable}
    */
-  public static VectorAndPrefsWritable vectorAndPrefsWritableMatches(final List<Long> userIDs,
+  private static VectorAndPrefsWritable vectorAndPrefsWritableMatches(final List<Long> userIDs,
       final List<Float> prefValues, final Vector.Element... elements) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override
@@ -383,6 +393,7 @@ public class RecommenderJobTest extends TasteTestCase {
    * tests {@link ToVectorAndPrefReducer} in the error case that two similarity column vectors a supplied for the same
    * item (which should never happen)
    */
+  @Test
   public void testToVectorAndPrefReducerExceptionOn2Vectors() throws Exception {
     Reducer<VarIntWritable,VectorOrPrefWritable,VarIntWritable,VectorAndPrefsWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -408,6 +419,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link PartialMultiplyMapper}
    */
+  @Test
   public void testPartialMultiplyMapper() throws Exception {
 
     Vector similarityColumn = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
@@ -439,6 +451,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link AggregateAndRecommendReducer}
    */
+  @Test
   public void testAggregateAndRecommendReducer() throws Exception {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
@@ -477,6 +490,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link AggregateAndRecommendReducer}
    */
+  @Test
   public void testAggregateAndRecommendReducerExcludeRecommendationsBasedOnOneItem() throws Exception {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
         EasyMock.createMock(Reducer.Context.class);
@@ -513,6 +527,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * tests {@link AggregateAndRecommendReducer} with a limit on the recommendations per user
    */
+  @Test
   public void testAggregateAndRecommendReducerLimitNumberOfRecommendations() throws Exception {
     Reducer<VarLongWritable,PrefAndSimilarityColumnWritable,VarLongWritable,RecommendedItemsWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
@@ -603,6 +618,7 @@ public class RecommenderJobTest extends TasteTestCase {
    *
    * </pre>
    */
+  @Test
   public void testCompleteJob() throws Exception {
 
     File inputFile = getTestTempFile("prefs.txt");
@@ -667,6 +683,7 @@ public class RecommenderJobTest extends TasteTestCase {
   /**
    * small integration test for boolean data
    */
+  @Test
   public void testCompleteJobBoolean() throws Exception {
 
     File inputFile = getTestTempFile("prefs.txt");

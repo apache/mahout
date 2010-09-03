@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.common;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -27,6 +28,7 @@ import java.io.PrintWriter;
 /** <p>Tests common classes.</p> */
 public final class CommonTest extends TasteTestCase {
 
+  @Test
   public void testTasteException() {
     // Just make sure this all doesn't, ah, throw an exception
     TasteException te1 = new TasteException();
@@ -37,6 +39,7 @@ public final class CommonTest extends TasteTestCase {
     te4.printStackTrace(new PrintWriter(new OutputStreamWriter(new ByteArrayOutputStream())));
   }
 
+  @Test
   public void testNSUException() {
     // Just make sure this all doesn't, ah, throw an exception
     TasteException te1 = new NoSuchUserException();
@@ -45,6 +48,7 @@ public final class CommonTest extends TasteTestCase {
     te4.printStackTrace(new PrintWriter(new OutputStreamWriter(new ByteArrayOutputStream())));
   }
 
+  @Test
   public void testNSIException() {
     // Just make sure this all doesn't, ah, throw an exception
     TasteException te1 = new NoSuchItemException();

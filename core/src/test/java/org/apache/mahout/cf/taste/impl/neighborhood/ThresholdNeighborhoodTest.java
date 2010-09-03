@@ -19,12 +19,13 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.junit.Test;
 
 /** <p>Tests {@link ThresholdUserNeighborhood}.</p> */
 public final class ThresholdNeighborhoodTest extends TasteTestCase {
 
+  @Test
   public void testNeighborhood() throws Exception {
-
     DataModel dataModel = getDataModel();
 
     long[] neighborhood =
@@ -45,8 +46,6 @@ public final class ThresholdNeighborhoodTest extends TasteTestCase {
     assertTrue(arrayContains(neighborhood3, 1));
     assertTrue(arrayContains(neighborhood3, 3));
     assertTrue(arrayContains(neighborhood3, 4));
-
-
   }
 
 }

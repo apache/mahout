@@ -22,14 +22,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.RAMDirectory;
@@ -43,13 +42,13 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermEntry;
@@ -59,10 +58,10 @@ import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
 import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
 import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
 import org.apache.mahout.utils.vectors.lucene.VectorMapper;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TestClusterDumper extends MahoutTestCase {
-
-  private List<VectorWritable> sampleData;
+public final class TestClusterDumper extends MahoutTestCase {
 
   private static final String[] DOCS = { "The quick red fox jumped over the lazy brown dogs.",
       "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
@@ -73,10 +72,12 @@ public class TestClusterDumper extends MahoutTestCase {
       "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
       "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
 
-  private String[] termDictionary = null;
+  private List<VectorWritable> sampleData;
+  private String[] termDictionary;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
@@ -85,7 +86,6 @@ public class TestClusterDumper extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
   }
 
-  @SuppressWarnings("deprecation")
   private void getSampleData(String[] docs2) throws IOException {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
@@ -95,10 +95,10 @@ public class TestClusterDumper extends MahoutTestCase {
                                          IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < docs2.length; i++) {
       Document doc = new Document();
-      Field id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+      Fieldable id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
       doc.add(id);
       // Store both position and offset information
-      Field text = new Field("content", docs2[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
+      Fieldable text = new Field("content", docs2[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
       doc.add(text);
       writer.addDocument(doc);
     }
@@ -121,11 +121,11 @@ public class TestClusterDumper extends MahoutTestCase {
       i++;
     }
     VectorMapper mapper = new TFDFMapper(reader, weight, termInfo);
-    LuceneIterable iterable = new LuceneIterable(reader, "id", "content", mapper);
+    Iterable<Vector> iterable = new LuceneIterable(reader, "id", "content", mapper);
 
     i = 0;
     for (Vector vector : iterable) {
-      Assert.assertNotNull(vector);
+      assertNotNull(vector);
       NamedVector namedVector;
       if (vector instanceof NamedVector) {
         //rename it for testing purposes
@@ -140,6 +140,7 @@ public class TestClusterDumper extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testCanopy() throws Exception { // now run the Job
     DistanceMeasure measure = new EuclideanDistanceMeasure();
 
@@ -150,6 +151,7 @@ public class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
 
+  @Test
   public void testKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
@@ -162,6 +164,7 @@ public class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
 
+  @Test
   public void testFuzzyKmeans() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     // now run the Canopy job to prime kMeans canopies
@@ -185,6 +188,7 @@ public class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
 
+  @Test
   public void testMeanShift() throws Exception {
     DistanceMeasure measure = new CosineDistanceMeasure();
     Path output = getTestTempDirPath("output");
@@ -194,6 +198,7 @@ public class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
 
+  @Test
   public void testDirichlet() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
@@ -204,6 +209,7 @@ public class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
 
+  @Test
   public void testDirichlet2() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
@@ -214,6 +220,7 @@ public class TestClusterDumper extends MahoutTestCase {
     clusterDumper.printClusters(termDictionary);
   }
 
+  @Test
   public void testDirichlet3() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();

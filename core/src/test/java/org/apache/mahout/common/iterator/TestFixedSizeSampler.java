@@ -19,7 +19,8 @@ package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
 
-public class TestFixedSizeSampler extends SamplerCase {
+public final class TestFixedSizeSampler extends SamplerCase {
+
   @Override
   protected DelegatingIterator<Integer> createSampler(int n, Iterator<Integer> source) {
     return new FixedSizeSamplingIterator<Integer>(n, source);

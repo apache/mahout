@@ -21,18 +21,20 @@ import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
-import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class CBayesClassifierTest extends MahoutTestCase {
+public final class CBayesClassifierTest extends MahoutTestCase {
   
   private Algorithm algorithm;
   private InMemoryBayesDatastore store;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     algorithm = new CBayesAlgorithm();
     store = new InMemoryBayesDatastore(new BayesParameters(1));
@@ -76,8 +78,9 @@ public class CBayesClassifierTest extends MahoutTestCase {
     store.loadFeatureWeight("dd", "e", 50);
     
   }
-  
-  public void test() throws InvalidDatastoreException {
+
+  @Test
+  public void test() throws Exception {
     ClassifierContext classifier = new ClassifierContext(algorithm, store);
     String[] document = {"aa", "ff"};
     ClassifierResult result = classifier.classifyDocument(document, "unknown");
@@ -94,12 +97,13 @@ public class CBayesClassifierTest extends MahoutTestCase {
     assertNotNull("category is null and it shouldn't be", result);
     assertEquals(result + " is not equal to d", "d", result.getLabel());
   }
-  
+
+  @Test
   public void testResults() throws Exception {
     ClassifierContext classifier = new ClassifierContext(algorithm, store);
     String[] document = {"aa", "ff"};
     ClassifierResult result = classifier.classifyDocument(document, "unknown");
     assertNotNull("category is null and it shouldn't be", result);
-    System.out.println("Result: " + result);
   }
+
 }

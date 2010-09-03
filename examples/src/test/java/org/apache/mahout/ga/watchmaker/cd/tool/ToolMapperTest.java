@@ -24,10 +24,12 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.DummyRecordWriter;
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.examples.MahoutTestCase;
+import org.junit.Test;
 
-public class ToolMapperTest extends MahoutTestCase {
+public final class ToolMapperTest extends MahoutTestCase {
 
+  @Test
   public void testExtractAttributes() throws Exception {
     LongWritable key = new LongWritable();
     Text value = new Text();
@@ -51,6 +53,7 @@ public class ToolMapperTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testExtractIgnoredAttributes() throws Exception {
     LongWritable key = new LongWritable();
     Text value = new Text();

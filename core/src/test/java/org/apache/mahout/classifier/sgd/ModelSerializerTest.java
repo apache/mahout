@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.mahout.classifier.OnlineLearner;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ep.Mapping;
 import org.apache.mahout.math.DenseVector;
@@ -28,7 +29,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.UnaryFunction;
 import org.apache.mahout.math.stats.OnlineAuc;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.StringReader;
@@ -37,15 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-public class ModelSerializerTest {
-
-  @Before
-  public void setUp() {
-    RandomUtils.useTestSeed();
-  }
+public final class ModelSerializerTest extends MahoutTestCase {
 
   @Test
   public void testSoftLimitDeserialization() {
@@ -179,7 +171,7 @@ public class ModelSerializerTest {
 
   private static void train(OnlineLearner olr, int n) {
     Vector beta = new DenseVector(new double[]{1, -1, 0, 0.5, -0.5});
-    final Random gen = new Random(1);
+    Random gen = new Random(1);
     for (int i = 0; i < n; i++) {
       Vector x = randomVector(gen, 5);
 

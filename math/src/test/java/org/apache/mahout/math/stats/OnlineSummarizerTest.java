@@ -17,22 +17,23 @@
 
 package org.apache.mahout.math.stats;
 
-import org.junit.Assert;
+import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Random;
 
-public class OnlineSummarizerTest {
+public final class OnlineSummarizerTest extends MahoutTestCase {
+
   @Test
   public void testCount() {
     OnlineSummarizer x = new OnlineSummarizer();
-    Assert.assertEquals(0, x.getCount());
+    assertEquals(0, x.getCount());
     x.add(1);
-    Assert.assertEquals(1, x.getCount());
+    assertEquals(1, x.getCount());
 
     for (int i = 2; i < 110; i++) {
       x.add(i);
-      Assert.assertEquals(i, x.getCount());
+      assertEquals(i, x.getCount());
     }
   }
 
@@ -80,7 +81,7 @@ public class OnlineSummarizerTest {
     for (int i = 0; i < 5; i++) {
       checkRange("quartile " + i, x.getQuartile(i), values[2 * i], values[2 * i + 1]);
     }
-    Assert.assertEquals(x.getQuartile(2), x.getMedian(), 0);
+    assertEquals(x.getQuartile(2), x.getMedian(), 0);
 
     checkRange("mean", x.getMean(), values[10], values[11]);
     checkRange("sd", x.getSD(), values[12], values[13]);
@@ -88,7 +89,7 @@ public class OnlineSummarizerTest {
 
   private static void checkRange(String msg, double v, double low, double high) {
     if (v < low || v > high) {
-      Assert.fail("Wanted " + msg + " to be in range [" + low + ',' + high + "] but got " + v);
+      fail("Wanted " + msg + " to be in range [" + low + ',' + high + "] but got " + v);
     }
   }
 

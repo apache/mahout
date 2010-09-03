@@ -27,13 +27,11 @@ import org.apache.mahout.df.mapreduce.MapredOutput;
 /**
  * Special implementation that collects the output of the mappers
  */
-class MockContext extends Context {
+final class MockContext extends Context {
 
   private final TreeID[] keys;
-
   private final MapredOutput[] values;
-
-  private int index = 0;
+  private int index ;
 
   MockContext(Mapper<?,?,?,?> mapper, Configuration conf, TaskAttemptID taskid,
       int nbTrees) throws IOException, InterruptedException {
@@ -44,8 +42,7 @@ class MockContext extends Context {
   }
 
   @Override
-  public void write(Object key, Object value) throws IOException,
-      InterruptedException {
+  public void write(Object key, Object value) throws IOException {
     if (index == keys.length) {
       throw new IOException("Received more output than expected : " + index);
     }

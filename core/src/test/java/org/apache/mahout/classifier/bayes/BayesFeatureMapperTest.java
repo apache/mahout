@@ -30,9 +30,11 @@ import org.apache.mahout.classifier.bayes.mapreduce.common.BayesFeatureMapper;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.StringTuple;
+import org.junit.Test;
 
-public class BayesFeatureMapperTest extends MahoutTestCase {
-  
+public final class BayesFeatureMapperTest extends MahoutTestCase {
+
+  @Test
   public void test() throws Exception {
     BayesFeatureMapper mapper = new BayesFeatureMapper();
     JobConf conf = new JobConf();
@@ -46,7 +48,6 @@ public class BayesFeatureMapperTest extends MahoutTestCase {
     mapper.map(new Text("foo"), new Text("big brown shoe"), output,
       Reporter.NULL);
     Map<StringTuple, List<DoubleWritable>> outMap = output.getData();
-    System.out.println("Map: " + outMap);
     assertNotNull("outMap is null and it shouldn't be", outMap);
     // TODO: How about not such a lame test here?
     for (Entry<StringTuple, List<DoubleWritable>> entry : outMap.entrySet()) {

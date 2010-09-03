@@ -19,12 +19,13 @@ package org.apache.mahout.ga.watchmaker;
 
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class STFitnessEvaluatorTest extends MahoutTestCase {
+public final class STFitnessEvaluatorTest extends MahoutTestCase {
 
   private static class STFitnessEvaluatorMock<T> extends STFitnessEvaluator<T> {
     private int nbcalls;
@@ -55,9 +56,10 @@ public class STFitnessEvaluatorTest extends MahoutTestCase {
   }
 
   /**
-   * Test method for {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(java.util.List,
-   * java.util.List)}.<br> <br> Make sure that evaluate() is not called twice for the same population.
+   * Test method for {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(List,
+   * List)}.<br> <br> Make sure that evaluate() is not called twice for the same population.
    */
+  @Test
   public void testEvaluateSamePopulation() {
     STFitnessEvaluatorMock<Integer> mock = new STFitnessEvaluatorMock<Integer>();
     RandomUtils.useTestSeed();
@@ -71,7 +73,7 @@ public class STFitnessEvaluatorTest extends MahoutTestCase {
 
     for (int index = 0; index < size; index++) {
       Integer candidate = population.get(index);
-      assertEquals(evaluations.get(index), mock.getFitness(candidate, population));
+      assertEquals(evaluations.get(index), mock.getFitness(candidate, population), EPSILON);
     }
 
     // getFitness() should be called once
@@ -79,10 +81,11 @@ public class STFitnessEvaluatorTest extends MahoutTestCase {
   }
 
   /**
-   * Test method for {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(java.util.List,
-   * java.util.List)}.<br> <br> Make sure that evaluate() is called as many different populations are passed to
+   * Test method for {@link org.apache.mahout.ga.watchmaker.STFitnessEvaluator#evaluate(List,
+   * List)}.<br> <br> Make sure that evaluate() is called as many different populations are passed to
    * getFitness().
    */
+  @Test
   public void testEvaluateDifferentPopulations() {
     STFitnessEvaluatorMock<Integer> mock = new STFitnessEvaluatorMock<Integer>();
     RandomUtils.useTestSeed();

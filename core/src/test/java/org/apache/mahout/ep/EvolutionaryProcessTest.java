@@ -17,26 +17,15 @@
 
 package org.apache.mahout.ep;
 
-import org.apache.mahout.common.RandomUtils;
-import org.junit.Assert;
-import org.junit.Before;
+import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-
-public class EvolutionaryProcessTest {
-
-  @Before
-  public void setUp() {
-    RandomUtils.useTestSeed();
-  }
+public final class EvolutionaryProcessTest extends MahoutTestCase {
 
   @Test
-  public void converges() throws ExecutionException, InterruptedException {
+  public void testConverges() throws Exception {
     State<Foo> s0 = new State<Foo>(new double[5], 1);
     s0.setPayload(new Foo());
-    s0.setRand(new Random(1));
     EvolutionaryProcess<Foo> ep = new EvolutionaryProcess<Foo>(10, 100, s0);
 
     State<Foo> best = null;
@@ -59,8 +48,8 @@ public class EvolutionaryProcessTest {
       System.out.printf("%10.3f %.3f\n", best.getValue(), best.getOmni());
     }
 
-    Assert.assertNotNull(best);
-    Assert.assertEquals(0, best.getValue(), 0.02);
+    assertNotNull(best);
+    assertEquals(0.0, best.getValue(), 0.02);
   }
 
   private static class Foo implements Payload<Foo> {

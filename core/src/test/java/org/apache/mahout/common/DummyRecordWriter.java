@@ -63,8 +63,8 @@ public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
 
   public static <K1, V1, K2, V2> Mapper<K1, V1, K2, V2>.Context build(Mapper<K1, V1, K2, V2> mapper,
                                                                       Configuration configuration,
-                                                                      RecordWriter<K2, V2> output) throws IOException,
-      InterruptedException {
+                                                                      RecordWriter<K2, V2> output)
+    throws IOException, InterruptedException {
     return mapper.new Context(configuration, new TaskAttemptID(), null, output, null, new DummyStatusReporter(), null);
   }
 
@@ -72,8 +72,8 @@ public final class DummyRecordWriter<K, V> extends RecordWriter<K, V> {
                                                                        Configuration configuration,
                                                                        RecordWriter<K2, V2> output,
                                                                        Class<K1> keyClass,
-                                                                       Class<V1> valueClass) throws IOException,
-      InterruptedException {
+                                                                       Class<V1> valueClass)
+    throws IOException, InterruptedException {
     return reducer.new Context(configuration,
                                new TaskAttemptID(),
                                new MockIterator(),

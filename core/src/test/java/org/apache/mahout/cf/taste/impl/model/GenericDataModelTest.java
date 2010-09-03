@@ -23,12 +23,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
 /**
  * Tests {@link GenericDataModel}.
  */
 public final class GenericDataModelTest extends TasteTestCase {
 
+  @Test  
   public void testSerialization() throws Exception {
     GenericDataModel model = (GenericDataModel) getDataModel();
     ByteArrayOutputStream baos = new ByteArrayOutputStream();

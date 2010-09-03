@@ -17,14 +17,18 @@
 
 package org.apache.mahout.cf.taste.impl.transforms;
 
+import org.junit.Test;
+
 /** <p>Tests {@link CaseAmplification}.</p> */
 public final class CaseAmplificationTest extends TransformTestCase {
 
+  @Test
   public void testOneValue() {
     assertEquals(2.0, new CaseAmplification(0.5).transformSimilarity(0, 0, 4.0), EPSILON);
     assertEquals(-2.0, new CaseAmplification(0.5).transformSimilarity(0, 0, -4.0), EPSILON);
   }
 
+  @Test
   public void testRefresh() {
     // Make sure this doesn't throw an exception
     new CaseAmplification(1.0).refresh(null);

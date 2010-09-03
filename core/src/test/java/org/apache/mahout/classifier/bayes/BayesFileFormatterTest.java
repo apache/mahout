@@ -19,10 +19,10 @@ package org.apache.mahout.classifier.bayes;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Iterator;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
@@ -30,29 +30,23 @@ import org.apache.mahout.classifier.BayesFileFormatter;
 import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.FileLineIterator;
 import org.apache.mahout.common.MahoutTestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class BayesFileFormatterTest extends MahoutTestCase {
+public final class BayesFileFormatterTest extends MahoutTestCase {
+
+  private static final String[] WORDS = {"dog", "cat", "fish", "snake", "zebra"};
 
   private File input;
   private File out;
-  private String[] words;
 
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    input = new File(tmpDir, "bayes/input");
-    out = new File(tmpDir, "bayes/out");
-    input.deleteOnExit();
-    out.deleteOnExit();
-    input.mkdirs();
-    out.mkdirs();
-    File[] files = out.listFiles();
-    for (File file : files) {
-      file.delete();
-    }
-    words = new String[]{"dog", "cat", "fish", "snake", "zebra"};
-    for (String word : words) {
+    input = getTestTempDir("bayes/in");
+    out = getTestTempDir("bayes/out");
+    for (String word : WORDS) {
       File file = new File(input, word);
       Writer writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8"));
       writer.write(word);
@@ -60,14 +54,8 @@ public class BayesFileFormatterTest extends MahoutTestCase {
     }
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    input.delete();
-    out.delete();
-    super.tearDown();
-  }
-
-  public void test() throws IOException {
+  @Test
+  public void test() throws Exception {
     Analyzer analyzer = new WhitespaceAnalyzer();
     File[] files = out.listFiles();
     assertEquals("files Size: " + files.length + " is not: " + 0, 0, files.length);
@@ -75,10 +63,10 @@ public class BayesFileFormatterTest extends MahoutTestCase {
     BayesFileFormatter.format("animal", analyzer, input, charset, out);
 
     files = out.listFiles();
-    assertEquals("files Size: " + files.length + " is not: " + words.length, files.length, words.length);
+    assertEquals("files Size: " + files.length + " is not: " + WORDS.length, files.length, WORDS.length);
     for (File file : files) {
       //should only be one line in the file, and it should be label label
-      FileLineIterator it = new FileLineIterator(file);
+      Iterator<String> it = new FileLineIterator(file);
       String line = it.next().trim();
       assertFalse(it.hasNext());
       String label = "animal" + '\t' + file.getName();
@@ -86,6 +74,7 @@ public class BayesFileFormatterTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testCollapse() throws Exception {
     Analyzer analyzer = new WhitespaceAnalyzer();
     File[] files = out.listFiles();
@@ -97,10 +86,9 @@ public class BayesFileFormatterTest extends MahoutTestCase {
     int count = 0;
     for (String line : new FileLineIterable(files[0])) {
       assertTrue("line does not start with label", line.startsWith("animal"));
-      System.out.println("Line: " + line);
       count++;
     }
-    assertEquals(count + " does not equal: " + words.length, count, words.length);
-
+    assertEquals(count + " does not equal: " + WORDS.length, count, WORDS.length);
   }
+
 }

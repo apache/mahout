@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.jet.random.engine;
 
-import org.junit.Assert;
+import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.util.Date;
@@ -34,7 +34,7 @@ import java.util.Date;
  * was modified in Colt at some point.  Rather than argue with the new implementation, this test
  * uses a legacy method to initialize the PRNG state. <ul>
  */
-public class MersenneTwisterTest {
+public final class MersenneTwisterTest extends MahoutTestCase {
 
   /**
    * Convert an unsigned int stored in a long to a double in a fashion compatible with the C
@@ -56,14 +56,14 @@ public class MersenneTwisterTest {
     int i = 0;
     for (long x : reference1) {
       int y = r.nextInt();
-      Assert.assertEquals("t-ref-int-" + i, x, y);
+      assertEquals("t-ref-int-" + i, x, y);
       i++;
     }
 
     r.setReferenceSeed(4357);
     i = 0;
     for (Double x : ref1) {
-      Assert.assertEquals("t-ref-double-" + i, x, toDouble(r.nextInt()), 1.0e-7);
+      assertEquals("t-ref-double-" + i, x, toDouble(r.nextInt()), 1.0e-7);
       i++;
     }
   }
@@ -73,7 +73,7 @@ public class MersenneTwisterTest {
     MersenneTwister r = new MersenneTwister(42);
     int i = 0;
     for (double x : reference3) {
-      Assert.assertEquals("t-regression-"+i, x, r.nextDouble(), 1.0e-7);
+      assertEquals("t-regression-"+i, x, r.nextDouble(), 1.0e-7);
       i++;
     }
 
@@ -84,7 +84,7 @@ public class MersenneTwisterTest {
     MersenneTwister r1 = new MersenneTwister(1275264362);
     MersenneTwister r2 = new MersenneTwister(new Date(1275264362));
     for (int i = 0; i < 100; i++) {
-      Assert.assertEquals("date-"+i, r1.nextInt(), r2.nextInt());
+      assertEquals("date-"+i, r1.nextInt(), r2.nextInt());
     }
   }
 
@@ -96,14 +96,14 @@ public class MersenneTwisterTest {
     // the two generators should produce the same sequence, but still be independent
     int x = r1.nextInt();
     int y = r2.nextInt();
-    Assert.assertEquals(x, y);
+    assertEquals(x, y);
     // r1 is one ahead in these tests
-    Assert.assertFalse(r1.nextInt() == y);
-    Assert.assertFalse(r1.nextInt() == r2.nextInt());
+    assertFalse(r1.nextInt() == y);
+    assertFalse(r1.nextInt() == r2.nextInt());
     // if r2 catches up, all is identical
     r2.nextInt();
     for (int i = 0; i < 100; i++) {
-      Assert.assertEquals("date-"+i, r1.nextInt(), r2.nextInt());
+      assertEquals("date-"+i, r1.nextInt(), r2.nextInt());
     }
   }
 

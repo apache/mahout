@@ -17,25 +17,24 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import junit.framework.Assert;
-
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
 import org.apache.mahout.utils.vectors.Weight;
+import org.junit.Test;
 
-public class LuceneIterableTest extends MahoutTestCase {
-  private RAMDirectory directory;
-  
+public final class LuceneIterableTest extends MahoutTestCase {
+
   private static final String [] DOCS = {
                                          "The quick red fox jumped over the lazy brown dogs.",
                                          "Mary had a little lamb whose fleece was white as snow.",
@@ -43,25 +42,31 @@ public class LuceneIterableTest extends MahoutTestCase {
                                          "The robber wore a black fleece jacket and a baseball cap.",
                                          "The English Springer Spaniel is the best of all dogs."
   };
-  
+
+  private RAMDirectory directory;
   
   @Override
-  protected void setUp() throws Exception {
+  public void setUp() throws Exception {
     super.setUp();
     directory = new RAMDirectory();
-    IndexWriter writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_CURRENT), true, IndexWriter.MaxFieldLength.UNLIMITED);
+    IndexWriter writer = new IndexWriter(
+        directory,
+        new StandardAnalyzer(Version.LUCENE_CURRENT),
+        true,
+        IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < LuceneIterableTest.DOCS.length; i++){
       Document doc = new Document();
-      Field id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+      Fieldable id = new Field("id", "doc_" + i, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
       doc.add(id);
       //Store both position and offset information
-      Field text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
+      Fieldable text = new Field("content", DOCS[i], Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.YES);
       doc.add(text);
       writer.addDocument(doc);
     }
     writer.close();
   }
-  
+
+  @Test
   public void testIterable() throws Exception {
     IndexReader reader = IndexReader.open(directory, true);
     Weight weight = new TFIDF();
@@ -71,9 +76,9 @@ public class LuceneIterableTest extends MahoutTestCase {
 
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
-      Assert.assertNotNull(vector);
-      Assert.assertTrue("vector is not an instanceof " + NamedVector.class, vector instanceof NamedVector);
-      Assert.assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
+      assertNotNull(vector);
+      assertTrue("vector is not an instanceof " + NamedVector.class, vector instanceof NamedVector);
+      assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
       assertTrue(((NamedVector)vector).getName().startsWith("doc_"));
     }
 
@@ -81,9 +86,9 @@ public class LuceneIterableTest extends MahoutTestCase {
 
     //TODO: do something more meaningful here
     for (Vector vector : iterable) {
-      Assert.assertNotNull(vector);
-      Assert.assertTrue("vector is not an instanceof " + NamedVector.class, vector instanceof NamedVector);
-      Assert.assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
+      assertNotNull(vector);
+      assertTrue("vector is not an instanceof " + NamedVector.class, vector instanceof NamedVector);
+      assertTrue("vector Size: " + vector.size() + " is not greater than: " + 0, vector.size() > 0);
       assertTrue(((NamedVector)vector).getName().startsWith("doc_"));
     }
 

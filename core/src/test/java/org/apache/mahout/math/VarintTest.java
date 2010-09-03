@@ -17,20 +17,22 @@
 
 package org.apache.mahout.math;
 
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.io.IOException;
 
 /**
  * Tests {@link Varint}.
  */
 public final class VarintTest extends MahoutTestCase {
 
-  public void testUnsignedLong() throws IOException {
+  @Test
+  public void testUnsignedLong() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     Varint.writeUnsignedVarLong(0L, out);
@@ -49,7 +51,8 @@ public final class VarintTest extends MahoutTestCase {
     assertEquals(Long.MAX_VALUE, Varint.readUnsignedVarLong(in));
   }
 
-  public void testSignedPositiveLong() throws IOException {
+  @Test
+  public void testSignedPositiveLong() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     Varint.writeSignedVarLong(0L, out);
@@ -72,7 +75,8 @@ public final class VarintTest extends MahoutTestCase {
     assertEquals(Long.MAX_VALUE, Varint.readSignedVarLong(in));
   }
 
-  public void testSignedNegativeLong() throws IOException {
+  @Test
+  public void testSignedNegativeLong() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     for (long i = -1L; i >= -(1L << 62); i <<= 1) {
@@ -90,7 +94,8 @@ public final class VarintTest extends MahoutTestCase {
     assertEquals(Long.MIN_VALUE+1, Varint.readSignedVarLong(in));
   }
 
-  public void testUnsignedInt() throws IOException {
+  @Test
+  public void testUnsignedInt() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     Varint.writeUnsignedVarInt(0, out);
@@ -109,7 +114,8 @@ public final class VarintTest extends MahoutTestCase {
     assertEquals(Integer.MAX_VALUE, Varint.readUnsignedVarInt(in));
   }
 
-  public void testSignedPositiveInt() throws IOException {
+  @Test
+  public void testSignedPositiveInt() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     Varint.writeSignedVarInt(0, out);
@@ -132,7 +138,8 @@ public final class VarintTest extends MahoutTestCase {
     assertEquals(Integer.MAX_VALUE, Varint.readSignedVarInt(in));
   }
 
-  public void testSignedNegativeInt() throws IOException {
+  @Test
+  public void testSignedNegativeInt() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     for (int i = -1; i >= -(1 << 30); i <<= 1) {
@@ -150,7 +157,8 @@ public final class VarintTest extends MahoutTestCase {
     assertEquals(Integer.MIN_VALUE+1, Varint.readSignedVarInt(in));
   }
 
-  public void testUnsignedSize() throws IOException {
+  @Test
+  public void testUnsignedSize() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     int expectedSize = 0;
@@ -161,7 +169,8 @@ public final class VarintTest extends MahoutTestCase {
     }
   }
 
-  public void testSignedSize() throws IOException {
+  @Test
+  public void testSignedSize() throws Exception {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(baos);
     int expectedSize = 0;

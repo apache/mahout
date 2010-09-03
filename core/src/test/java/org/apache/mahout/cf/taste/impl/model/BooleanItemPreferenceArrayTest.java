@@ -17,10 +17,12 @@
 
 package org.apache.mahout.cf.taste.impl.model;
 
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.junit.Test;
 
-public final class BooleanItemPreferenceArrayTest extends MahoutTestCase {
+public final class BooleanItemPreferenceArrayTest extends TasteTestCase {
 
+  @Test
   public void testUserID() {
     BooleanItemPreferenceArray prefs = new BooleanItemPreferenceArray(3);
     assertEquals(3, prefs.length());
@@ -30,6 +32,7 @@ public final class BooleanItemPreferenceArrayTest extends MahoutTestCase {
     assertEquals(1L, prefs.getItemID(2));
   }
 
+  @Test
   public void testItemID() {
     BooleanItemPreferenceArray prefs = new BooleanItemPreferenceArray(3);
     assertEquals(3, prefs.length());
@@ -41,6 +44,7 @@ public final class BooleanItemPreferenceArrayTest extends MahoutTestCase {
     assertEquals(3L, prefs.getUserID(2));
   }
 
+  @Test
   public void testSetValue() {
     BooleanItemPreferenceArray prefs = new BooleanItemPreferenceArray(3);
     assertEquals(3, prefs.length());
@@ -50,9 +54,10 @@ public final class BooleanItemPreferenceArrayTest extends MahoutTestCase {
     } catch (UnsupportedOperationException uoe) {
       // good
     }
-    assertEquals(1.0f, prefs.getValue(2));
+    assertEquals(1.0f, prefs.getValue(2), EPSILON);
   }
 
+  @Test
   public void testHasPref() {
     BooleanItemPreferenceArray prefs = new BooleanItemPreferenceArray(3);
     prefs.set(0, new GenericPreference(1L, 3L, 5.0f));
@@ -62,6 +67,7 @@ public final class BooleanItemPreferenceArrayTest extends MahoutTestCase {
     assertFalse(prefs.hasPrefWithUserID(2L));
   }
 
+  @Test
   public void testSort() {
     BooleanItemPreferenceArray prefs = new BooleanItemPreferenceArray(3);
     prefs.set(0, new GenericPreference(3L, 1L, 5.0f));
@@ -73,6 +79,7 @@ public final class BooleanItemPreferenceArrayTest extends MahoutTestCase {
     assertEquals(3L, prefs.getUserID(2));
   }
 
+  @Test
   public void testClone() {
     BooleanItemPreferenceArray prefs = new BooleanItemPreferenceArray(3);
     prefs.set(0, new BooleanPreference(3L, 1L));

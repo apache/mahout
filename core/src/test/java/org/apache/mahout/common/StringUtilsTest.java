@@ -17,10 +17,12 @@
 
 package org.apache.mahout.common;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.List;
 
-public class StringUtilsTest extends MahoutTestCase {
+public final class StringUtilsTest extends MahoutTestCase {
 
   private static class DummyTest {
     private int field;
@@ -48,6 +50,7 @@ public class StringUtilsTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testStringConversion() throws Exception {
 
     List<String> expected = Arrays.asList("A", "B", "C");

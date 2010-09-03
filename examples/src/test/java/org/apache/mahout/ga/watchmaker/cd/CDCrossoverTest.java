@@ -17,19 +17,21 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
-import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.examples.MahoutTestCase;
 import org.easymock.classextension.EasyMock;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Random;
 
-public class CDCrossoverTest extends MahoutTestCase {
+public final class CDCrossoverTest extends MahoutTestCase {
 
   /**
    * if the parents have different values for all their genes, then the
    * offsprings will not any common gene.
    */
+  @Test
   public void testMate1() {
     Random rng = RandomUtils.getRandom();
 
@@ -77,6 +79,7 @@ public class CDCrossoverTest extends MahoutTestCase {
    * Ensure that for a crossover of N points, the offsprings got N+1 different
    * areas.
    */
+  @Test
   public void testMate2() {
     Random rng = RandomUtils.getRandom();
 

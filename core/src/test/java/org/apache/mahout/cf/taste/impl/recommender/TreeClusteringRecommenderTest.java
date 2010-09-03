@@ -23,12 +23,14 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.junit.Test;
 
 import java.util.List;
 
 /** <p>Tests {@link TreeClusteringRecommender}.</p> */
 public final class TreeClusteringRecommenderTest extends TasteTestCase {
 
+  @Test
   public void testNoRecommendations() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -48,6 +50,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     assertEquals(0, recommended.size());
   }
 
+  @Test
   public void testHowMany() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3, 4, 5},
@@ -73,6 +76,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     }
   }
 
+  @Test
   public void testRescorer() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3},
@@ -96,6 +100,7 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     assertEquals(originalRecommended.get(1).getItemID(), rescoredRecommended.get(0).getItemID());
   }
 
+  @Test
   public void testEstimatePref() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3, 4},
@@ -109,9 +114,10 @@ public final class TreeClusteringRecommenderTest extends TasteTestCase {
     UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
     ClusterSimilarity clusterSimilarity = new FarthestNeighborClusterSimilarity(similarity);
     Recommender recommender = new TreeClusteringRecommender(dataModel, clusterSimilarity, 2);
-    assertEquals(0.9f, recommender.estimatePreference(3, 3));
+    assertEquals(0.9f, recommender.estimatePreference(3, 3), EPSILON);
   }
 
+  @Test
   public void testBestRating() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3, 4},

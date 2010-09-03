@@ -26,7 +26,7 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.Counters.Counter;
 
-public class DummyReporter implements Reporter {
+public final class DummyReporter implements Reporter {
 
   //private String status = "";
   private final Map<Enum<?>,MutableLong> count1 = new HashMap<Enum<?>,MutableLong>();

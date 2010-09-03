@@ -17,7 +17,6 @@
 
 package org.apache.mahout.utils.vectors.text;
 
-import java.io.IOException;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
@@ -26,30 +25,25 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.text.DefaultAnalyzer;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.tfidf.TFIDFConverter;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test the dictionary Vector
  */
-public class DictionaryVectorizerTest extends MahoutTestCase {
+public final class DictionaryVectorizerTest extends MahoutTestCase {
 
   private static final int AVG_DOCUMENT_LENGTH = 20;
-
   private static final int AVG_SENTENCE_LENGTH = 8;
-
   private static final int AVG_WORD_LENGTH = 6;
-
   private static final int NUM_DOCS = 100;
-
   private static final String CHARSET = "abcdef";
-
   private static final String DELIM = " .,?;:!\t\n\r";
-
   private static final String ERRORSET = "`1234567890" + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
-
   private static final Random random = RandomUtils.getRandom();
 
   private FileSystem fs;
@@ -81,24 +75,26 @@ public class DictionaryVectorizerTest extends MahoutTestCase {
     int length = (AVG_WORD_LENGTH >> 1) + DictionaryVectorizerTest.random.nextInt(AVG_WORD_LENGTH);
     StringBuilder sb = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
-      sb.append(DictionaryVectorizerTest.CHARSET.charAt(DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.CHARSET
-          .length())));
+      sb.append(DictionaryVectorizerTest.CHARSET.charAt(
+          DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.CHARSET.length())));
     }
     if (DictionaryVectorizerTest.random.nextInt(10) == 0) {
-      sb.append(DictionaryVectorizerTest.ERRORSET.charAt(DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.ERRORSET
-          .length())));
+      sb.append(DictionaryVectorizerTest.ERRORSET.charAt(
+          DictionaryVectorizerTest.random.nextInt(DictionaryVectorizerTest.ERRORSET.length())));
     }
     return sb.toString();
   }
 
   @Override
+  @Before
   public void setUp() throws Exception {
     super.setUp();
     Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
   }
 
-  public void testCreateTermFrequencyVectors() throws IOException, InterruptedException, ClassNotFoundException {
+  @Test
+  public void testCreateTermFrequencyVectors() throws Exception {
     Configuration conf = new Configuration();
     Path path = getTestTempFilePath("documents/docs.file");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Text.class);

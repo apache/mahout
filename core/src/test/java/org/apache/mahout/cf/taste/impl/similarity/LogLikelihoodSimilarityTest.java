@@ -18,10 +18,12 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.junit.Test;
 
 /** <p>Tests {@link LogLikelihoodSimilarity}.</p> */
 public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
 
+  @Test
   public void testCorrelation() throws Exception {
     DataModel dataModel = getDataModel(
             new long[] {1, 2, 3, 4, 5},
@@ -52,6 +54,7 @@ public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
     assertCorrelationEquals(0.8706358464330881, correlation);
   }
 
+  @Test
   public void testRefresh() {
     // Make sure this doesn't throw an exception
     new LogLikelihoodSimilarity(getDataModel()).refresh(null);

@@ -29,7 +29,7 @@ import java.util.Random;
  * Dummy FitnessEvaluator that stores the evaluations it calculates. Uses a static storage to handle the evaluator
  * duplication when passed as a Job parameter.
  */
-public class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
+public final class DummyEvaluator implements FitnessEvaluator<DummyCandidate> {
 
   private final Random rng = RandomUtils.getRandom();
 

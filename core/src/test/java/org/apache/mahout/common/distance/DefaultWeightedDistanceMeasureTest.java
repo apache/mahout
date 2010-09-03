@@ -19,12 +19,14 @@ package org.apache.mahout.common.distance;
 
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
+import org.junit.Test;
 
 public abstract class DefaultWeightedDistanceMeasureTest extends DefaultDistanceMeasureTest {
 
   @Override
   public abstract WeightedDistanceMeasure distanceMeasureFactory();
 
+  @Test
   public void testMeasureWeighted() {
 
     WeightedDistanceMeasure distanceMeasure = distanceMeasureFactory();
@@ -44,7 +46,7 @@ public abstract class DefaultWeightedDistanceMeasureTest extends DefaultDistance
       }
     }
 
-    assertEquals(0.0, distanceMatrix[0][0]);
+    assertEquals(0.0, distanceMatrix[0][0], EPSILON);
     assertTrue(distanceMatrix[0][1] < distanceMatrix[0][2]);
 
 

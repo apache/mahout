@@ -21,22 +21,22 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
+import org.junit.Test;
 
-public class VectorWriterTest extends MahoutTestCase {
+public final class VectorWriterTest extends MahoutTestCase {
 
+  @Test
   public void testSFVW() throws Exception {
     Path path = getTestTempFilePath("sfvw");
     Configuration conf = new Configuration();
@@ -54,9 +54,10 @@ public class VectorWriterTest extends MahoutTestCase {
     while (seqReader.next(key, value)){
       count++;
     }
-    Assert.assertEquals(count + " does not equal: " + 50, 50, count);
+    assertEquals(count + " does not equal: " + 50, 50, count);
   }
-  
+
+  @Test
   public void test() throws Exception {
     StringWriter strWriter = new StringWriter();
     VectorWriter writer = new JWriterVectorWriter(strWriter);
@@ -66,8 +67,8 @@ public class VectorWriterTest extends MahoutTestCase {
     writer.write(vectors);
     writer.close();
     String buffer = strWriter.toString();
-    Assert.assertNotNull(buffer);
-    Assert.assertTrue(buffer.length() > 0);
+    assertNotNull(buffer);
+    assertTrue(buffer.length() > 0);
     
   }
 }

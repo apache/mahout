@@ -20,11 +20,13 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.junit.Test;
 
 import java.util.List;
 
 public final class RandomRecommenderTest extends TasteTestCase {
 
+  @Test
   public void testRecommender() throws Exception {
     Recommender recommender = new RandomRecommender(getDataModel());
     List<RecommendedItem> recommended = recommender.recommend(1, 1);

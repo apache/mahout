@@ -28,8 +28,10 @@ import java.util.Random;
 
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.junit.Before;
+import org.junit.Test;
 
-public class NodeTest extends MahoutTestCase {
+public final class NodeTest extends MahoutTestCase {
 
   private Random rng;
 
@@ -37,7 +39,8 @@ public class NodeTest extends MahoutTestCase {
   private DataOutput out;
   
   @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     super.setUp();
     rng = RandomUtils.getRandom();
 
@@ -49,6 +52,7 @@ public class NodeTest extends MahoutTestCase {
    * Test method for
    * {@link org.apache.mahout.df.node.Node#read(java.io.DataInput)}.
    */
+  @Test
   public void testReadTree() throws Exception {
     Node node1 = new CategoricalNode(rng.nextInt(), 
         new double[] { rng.nextDouble(), rng.nextDouble() }, 
@@ -72,17 +76,19 @@ public class NodeTest extends MahoutTestCase {
     DataInput in = new DataInputStream(byteInStream);
     return Node.read(in);
   }
-  
+
+  @Test
   public void testReadLeaf() throws Exception {
 
-    Leaf leaf = new Leaf(rng.nextInt());
+    Node leaf = new Leaf(rng.nextInt());
     leaf.write(out);
     assertEquals(leaf, readNode());
   }
 
+  @Test
   public void testParseNumerical() throws Exception {
 
-    NumericalNode node = new NumericalNode(rng.nextInt(), rng.nextDouble(), new Leaf(rng
+    Node node = new NumericalNode(rng.nextInt(), rng.nextDouble(), new Leaf(rng
         .nextInt()), new Leaf(rng.nextInt()));
     node.write(out);
     assertEquals(node, readNode());
@@ -90,7 +96,7 @@ public class NodeTest extends MahoutTestCase {
 
   public void testCategoricalNode() throws Exception {
 
-    CategoricalNode node = new CategoricalNode(rng.nextInt(), new double[]{rng.nextDouble(),
+    Node node = new CategoricalNode(rng.nextInt(), new double[]{rng.nextDouble(),
         rng.nextDouble(), rng.nextDouble()}, new Node[]{
         new Leaf(rng.nextInt()), new Leaf(rng.nextInt()),
         new Leaf(rng.nextInt())});
