@@ -75,7 +75,6 @@ public final class ItemSimilarityTest extends TasteTestCase {
   /**
    * Applies an {@link IArgumentMatcher} to a {@link CountUsersKeyWritable} checking whether it matches the userID
    */
-  @Test
   static CountUsersKeyWritable keyForUserID(final long userID) {
     EasyMock.reportMatcher(new IArgumentMatcher() {
       @Override

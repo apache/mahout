@@ -24,6 +24,7 @@ import java.util.Random;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.df.data.conditions.Condition;
+import org.junit.Test;
 
 public class DataTest extends MahoutTestCase {
 
@@ -46,6 +47,7 @@ public class DataTest extends MahoutTestCase {
    * Test method for
    * {@link org.apache.mahout.df.data.Data#subset(org.apache.mahout.df.data.conditions.Condition)}.
    */
+  @Test
   public void testSubset() {
     int n = 10;
 
@@ -79,7 +81,7 @@ public class DataTest extends MahoutTestCase {
     }
   }
 
-
+  @Test
   public void testValues() throws Exception {
     Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);
 
@@ -104,6 +106,7 @@ public class DataTest extends MahoutTestCase {
     return count;
   }
 
+  @Test
   public void testIdenticalTrue() throws Exception {
     // generate a small data, only to get the dataset
     Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, 1).getDataset();
@@ -124,6 +127,7 @@ public class DataTest extends MahoutTestCase {
     assertTrue(identical.isIdentical());
   }
 
+  @Test
   public void testIdenticalFalse() throws Exception {
     int n = 10;
 
@@ -142,6 +146,7 @@ public class DataTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testIdenticalLabelTrue() throws Exception {
     // generate a small data, only to get a dataset
     Dataset dataset = Utils.randomData(rng, ATTRIBUTE_COUNT, 1).getDataset();
@@ -162,6 +167,7 @@ public class DataTest extends MahoutTestCase {
     assertTrue(data.identicalLabel());
   }
 
+  @Test
   public void testIdenticalLabelFalse() throws Exception {
     int n = 10;
 
@@ -187,6 +193,7 @@ public class DataTest extends MahoutTestCase {
    * Test method for
    * {@link org.apache.mahout.df.data.Data#bagging(java.util.Random)}.
    */
+  @Test
   public void testBagging() {
     Data bag = data.bagging(rng);
 
@@ -206,6 +213,7 @@ public class DataTest extends MahoutTestCase {
    * Test method for
    * {@link org.apache.mahout.df.data.Data#rsplit(java.util.Random, int)}.
    */
+  @Test
   public void testRsplit() {
 
     // rsplit should handle empty subsets
@@ -228,6 +236,7 @@ public class DataTest extends MahoutTestCase {
     assertEquals("source.size is incorrect", DATA_SIZE - subsize, source.size());
   }
 
+  @Test
   public void testCountLabel() throws Exception {
     Data data = Utils.randomData(rng, ATTRIBUTE_COUNT, DATA_SIZE);
     int[] counts = new int[data.getDataset().nblabels()];
@@ -248,6 +257,7 @@ public class DataTest extends MahoutTestCase {
     }
   }
 
+  @Test
   public void testMajorityLabel() throws Exception {
 
     // all instances have the same label
