@@ -135,6 +135,12 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     return numCols;
   }
 
+  /**
+   * This implements matrix this.transpose().times(other)
+   * @param other   a DistributedRowMatrix
+   * @return    a DistributedRowMatrix containing the product
+   * @throws IOException
+   */
   public DistributedRowMatrix times(DistributedRowMatrix other) throws IOException {
     if (numRows != other.numRows()) {
       throw new CardinalityException(numRows, other.numRows());
