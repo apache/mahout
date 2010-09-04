@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.jet.random;
 
+import org.apache.commons.math.ConvergenceException;
+import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
@@ -24,7 +26,16 @@ import org.junit.Test;
 import java.util.Arrays;
 
 public final class ExponentialTest extends MahoutTestCase {
-
+  @Test
+  public void consistency() throws ConvergenceException, FunctionEvaluationException {
+    Exponential dist = new Exponential(1, RandomUtils.getRandom());
+    // deciles computed using R
+    double[] breaks = {0.1053605, 0.2231436, 0.3566749, 0.5108256, 0.6931472, 0.9162907, 1.2039728, 1.6094379, 2.3025851};
+    for (double lambda : new double[]{0.01, 0.1, 1, 2, 5, 100}) {
+      dist.setState(lambda);
+      DistributionChecks.checkDistribution(dist, breaks, 0, 1 / lambda, 10000);
+    }
+  }
   @Test
   public void testCdf() {
     Exponential dist = new Exponential(5.0, RandomUtils.getRandom());
