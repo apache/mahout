@@ -44,7 +44,7 @@ public abstract class MatrixTest extends MahoutTestCase {
 
   @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     test = matrixFactory(values);
   }

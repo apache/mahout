@@ -36,7 +36,7 @@ public final class TestMatrixView extends MahoutTestCase {
 
   @Override
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     super.setUp();
     int[] offset = {1, 1};
     int[] card = {3, 2};

@@ -37,13 +37,13 @@ public abstract class MahoutTestCase extends Assert {
   private File testTempDir;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     testTempDir = null;
     RandomUtils.useTestSeed();
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws Exception {
     if (testTempDir != null) {
       new DeletingVisitor().accept(testTempDir);
     }
