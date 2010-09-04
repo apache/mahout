@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.jet.random;
 
+import org.apache.commons.math.ConvergenceException;
+import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
@@ -43,12 +45,13 @@ public final class NormalTest extends MahoutTestCase {
   }
 
   @Test
-  public void consistency() throws Exception {
+  public void consistency() throws ConvergenceException, FunctionEvaluationException {
     Random gen = new Random(1);
     double offset = 0;
     double scale = 1;
+    Normal dist = new Normal(offset, scale, RandomUtils.getRandom());
     for (int k = 0; k < 20; k++) {
-      Normal dist = new Normal(offset, scale, RandomUtils.getRandom());
+      dist.setState(offset, scale);
       DistributionChecks.checkDistribution(dist, breaks, offset, scale, 10000);
       offset = gen.nextGaussian();
       scale = Math.exp(3 * gen.nextGaussian());

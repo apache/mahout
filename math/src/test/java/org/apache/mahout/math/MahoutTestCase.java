@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
+import org.apache.mahout.common.RandomUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,12 +37,13 @@ public abstract class MahoutTestCase extends Assert {
   private File testTempDir;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     testTempDir = null;
+    RandomUtils.useTestSeed();
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
     if (testTempDir != null) {
       new DeletingVisitor().accept(testTempDir);
     }

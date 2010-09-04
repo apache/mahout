@@ -36,7 +36,7 @@ public final class TestMatrixView extends MahoutTestCase {
 
   @Override
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     super.setUp();
     int[] offset = {1, 1};
     int[] card = {3, 2};
@@ -119,7 +119,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testViewPart() throws Exception {
+  public void testViewPart() {
     int[] offset = {1, 1};
     int[] size = {2, 1};
     Matrix view = test.viewPart(offset, size);
@@ -166,7 +166,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignDoubleArrayArray() throws Exception {
+  public void testAssignDoubleArrayArray() {
     int[] c = test.size();
     test.assign(new double[3][2]);
     for (int row = 0; row < c[ROW]; row++) {
@@ -184,7 +184,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignMatrixBinaryFunction() throws Exception {
+  public void testAssignMatrixBinaryFunction() {
     int[] c = test.size();
     test.assign(test, Functions.PLUS);
     for (int row = 0; row < c[ROW]; row++) {
@@ -201,7 +201,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignMatrix() throws Exception {
+  public void testAssignMatrix() {
     int[] c = test.size();
     Matrix value = test.like();
     value.assign(test);
@@ -243,7 +243,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testGet() throws Exception {
+  public void testGet() {
     int[] c = test.size();
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
@@ -274,7 +274,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testMinus() throws Exception {
+  public void testMinus() {
     int[] c = test.size();
     Matrix value = test.minus(test);
     for (int row = 0; row < c[ROW]; row++) {
@@ -302,7 +302,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testPlusMatrix() throws Exception {
+  public void testPlusMatrix() {
     int[] c = test.size();
     Matrix value = test.plus(test);
     for (int row = 0; row < c[ROW]; row++) {
@@ -351,7 +351,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testTimesMatrix() throws Exception {
+  public void testTimesMatrix() {
     int[] c = test.size();
     Matrix transpose = test.transpose();
     Matrix value = test.times(transpose);
@@ -389,7 +389,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignRow() throws Exception {
+  public void testAssignRow() {
     double[] data = {2.1, 3.2};
     test.assignRow(1, new DenseVector(data));
     assertEquals("test[1][0]", 2.1, test.getQuick(1, 0), EPSILON);
@@ -403,7 +403,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignColumn() throws Exception {
+  public void testAssignColumn() {
     double[] data = {2.1, 3.2, 4.3};
     test.assignColumn(1, new DenseVector(data));
     assertEquals("test[0][1]", 2.1, test.getQuick(0, 1), EPSILON);
@@ -418,7 +418,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testGetRow() throws Exception {
+  public void testGetRow() {
     Vector row = test.getRow(1);
     assertEquals("row size", 2, row.getNumNondefaultElements());
   }
@@ -434,7 +434,7 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testGetColumn() throws Exception {
+  public void testGetColumn() {
     Vector column = test.getColumn(1);
     assertEquals("row size", 3, column.getNumNondefaultElements());
   }
