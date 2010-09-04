@@ -126,10 +126,10 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         "SELECT " + timestampColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND "
             + itemIDColumn + "=?",
         // getUserSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
+        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
             + userIDColumn + "=?",
         // getAllUsersSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY "
+        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY "
             + userIDColumn,
         // getNumItemsSQL
         "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
@@ -144,7 +144,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         // getItemsSQL
         "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
         // getPrefsForItemSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
+        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + " FROM " + preferenceTable + " WHERE "
             + itemIDColumn + "=? ORDER BY " + userIDColumn,
         // getNumPreferenceForItemSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",

@@ -33,13 +33,24 @@ public final class CachingItemSimilarity implements ItemSimilarity {
   
   private final ItemSimilarity similarity;
   private final Cache<LongPair,Double> similarityCache;
-  
+
+  /**
+   * Creates a {@link CachingItemSimilarity} on top of the given {@link ItemSimilarity}.
+   * The cache is sized according to properties of the given {@link DataModel}.
+   */
   public CachingItemSimilarity(ItemSimilarity similarity, DataModel dataModel) throws TasteException {
+    this(similarity, dataModel.getNumItems());
+  }
+
+  /**
+   * Creates a {@link CachingItemSimilarity} on top of the given {@link ItemSimilarity}.
+   * The cache size is capped by the given size.
+   */
+  public CachingItemSimilarity(ItemSimilarity similarity, int maxCacheSize) {
     if (similarity == null) {
       throw new IllegalArgumentException("similarity is null");
     }
     this.similarity = similarity;
-    int maxCacheSize = dataModel.getNumItems(); // just a dumb heuristic for sizing
     this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
   

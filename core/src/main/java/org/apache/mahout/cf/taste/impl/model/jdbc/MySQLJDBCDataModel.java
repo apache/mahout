@@ -211,10 +211,10 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
         "SELECT " + timestampColumn + " FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND "
             + itemIDColumn + "=?",
         // getUserSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable
+        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable
             + " WHERE " + userIDColumn + "=? ORDER BY " + itemIDColumn,
         // getAllUsersSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable
+        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable
             + " ORDER BY " + userIDColumn + ", " + itemIDColumn,
         // getNumItemsSQL
         "SELECT COUNT(DISTINCT " + itemIDColumn + ") FROM " + preferenceTable,
@@ -230,7 +230,7 @@ public class MySQLJDBCDataModel extends AbstractJDBCDataModel {
         // getItemsSQL
         "SELECT DISTINCT " + itemIDColumn + " FROM " + preferenceTable + " ORDER BY " + itemIDColumn,
         // getPrefsForItemSQL
-        "SELECT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable
+        "SELECT DISTINCT " + userIDColumn + ", " + itemIDColumn + ", " + preferenceColumn + " FROM " + preferenceTable
             + " WHERE " + itemIDColumn + "=? ORDER BY " + userIDColumn,
         // getNumPreferenceForItemSQL
         "SELECT COUNT(1) FROM " + preferenceTable + " WHERE " + itemIDColumn + "=?",

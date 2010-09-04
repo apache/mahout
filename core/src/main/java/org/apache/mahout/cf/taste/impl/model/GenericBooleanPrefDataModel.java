@@ -124,8 +124,14 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   public GenericBooleanPrefDataModel(DataModel dataModel) throws TasteException {
     this(toDataMap(dataModel));
   }
-  
-  private static FastByIDMap<FastIDSet> toDataMap(DataModel dataModel) throws TasteException {
+
+  /**
+   * Exports the simple user IDs and associated item IDs in the data model.
+   *
+   * @return a {@link FastByIDMap} mapping user IDs to {@link FastIDSet}s representing
+   *  that user's associated items
+   */
+  public static FastByIDMap<FastIDSet> toDataMap(DataModel dataModel) throws TasteException {
     FastByIDMap<FastIDSet> data = new FastByIDMap<FastIDSet>(dataModel.getNumUsers());
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
@@ -134,7 +140,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     }
     return data;
   }
-  
+
   public static FastByIDMap<FastIDSet> toDataMap(FastByIDMap<PreferenceArray> data) {
     for (Map.Entry<Long,Object> entry : ((FastByIDMap<Object>) (FastByIDMap<?>) data).entrySet()) {
       PreferenceArray prefArray = (PreferenceArray) entry.getValue();

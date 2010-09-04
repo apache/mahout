@@ -37,13 +37,24 @@ public final class CachingUserSimilarity implements UserSimilarity {
   
   private final UserSimilarity similarity;
   private final Cache<LongPair,Double> similarityCache;
-  
+
+  /**
+   * Creates a {@link CachingUserSimilarity} on top of the given {@link UserSimilarity}.
+   * The cache is sized according to properties of the given {@link DataModel}.
+   */
   public CachingUserSimilarity(UserSimilarity similarity, DataModel dataModel) throws TasteException {
+    this(similarity, dataModel.getNumUsers());
+  }
+
+  /**
+   * Creates a {@link CachingUserSimilarity} on top of the given {@link UserSimilarity}.
+   * The cache size is capped by the given size.
+   */
+  public CachingUserSimilarity(UserSimilarity similarity, int maxCacheSize) {
     if (similarity == null) {
       throw new IllegalArgumentException("similarity is null");
     }
     this.similarity = similarity;
-    int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
     this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }
   

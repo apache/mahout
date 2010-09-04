@@ -166,8 +166,14 @@ public final class GenericDataModel extends AbstractDataModel {
     }
     return (FastByIDMap<PreferenceArray>) (FastByIDMap<?>) data;
   }
-  
-  private static FastByIDMap<PreferenceArray> toDataMap(DataModel dataModel) throws TasteException {
+
+  /**
+   * Exports the simple user IDs and preferences in the data model.
+   *
+   * @return a {@link FastByIDMap} mapping user IDs to {@link PreferenceArray}s representing
+   *  that user's preferences
+   */
+  public static FastByIDMap<PreferenceArray> toDataMap(DataModel dataModel) throws TasteException {
     FastByIDMap<PreferenceArray> data = new FastByIDMap<PreferenceArray>(dataModel.getNumUsers());
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {

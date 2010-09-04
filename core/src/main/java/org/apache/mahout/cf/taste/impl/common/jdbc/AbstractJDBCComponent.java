@@ -67,7 +67,7 @@ public abstract class AbstractJDBCComponent {
    * @throws TasteException
    *           if a JNDI error occurs
    */
-  protected static DataSource lookupDataSource(String dataSourceName) throws TasteException {
+  public static DataSource lookupDataSource(String dataSourceName) throws TasteException {
     Context context = null;
     try {
       context = new InitialContext();
