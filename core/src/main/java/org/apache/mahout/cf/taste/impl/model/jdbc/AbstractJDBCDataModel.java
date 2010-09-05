@@ -317,14 +317,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       List<Preference> currentPrefs = new ArrayList<Preference>();
       while (rs.next()) {
         long nextUserID = getLongColumn(rs, 1);
-        if ((currentUserID != null) && !currentUserID.equals(nextUserID)) {
-          if (!currentPrefs.isEmpty()) {
-            result.put(currentUserID, new GenericUserPreferenceArray(currentPrefs));
-            currentPrefs.clear();
-          }
-        } else {
-          currentPrefs.add(buildPreference(rs));
+        if ((currentUserID != null) && !currentUserID.equals(nextUserID) && !currentPrefs.isEmpty()) {
+          result.put(currentUserID, new GenericUserPreferenceArray(currentPrefs));
+          currentPrefs.clear();
         }
+        currentPrefs.add(buildPreference(rs));
         currentUserID = nextUserID;
       }
       if (!currentPrefs.isEmpty()) {
@@ -366,14 +363,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       FastIDSet currentItemIDs = new FastIDSet(2);
       while (rs.next()) {
         long nextUserID = getLongColumn(rs, 1);
-        if (currentUserIDSet && (currentUserID != nextUserID)) {
-          if (!currentItemIDs.isEmpty()) {
-            result.put(currentUserID, currentItemIDs);
-            currentItemIDs = new FastIDSet(2);
-          }
-        } else {
-          currentItemIDs.add(getLongColumn(rs, 2));
+        if (currentUserIDSet && (currentUserID != nextUserID) && !currentItemIDs.isEmpty()) {
+          result.put(currentUserID, currentItemIDs);
+          currentItemIDs = new FastIDSet(2);
         }
+        currentItemIDs.add(getLongColumn(rs, 2));
         currentUserID = nextUserID;
         currentUserIDSet = true;
       }
