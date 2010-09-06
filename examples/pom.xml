@@ -72,13 +72,13 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <ant antfile="../maven/build.xml" target="example-job">
+                <ant antfile="../etc/build.xml" target="example-job">
                   <property name="dest" value="${project.build.directory}" />
                   <property name="fullnamever" value="${project.artifactId}-${project.version}" />
 
                   <property name="version" value="${project.version}" />
                 </ant>
-                <ant antfile="../maven/build.xml" target="build-grouplens-jar">
+                <ant antfile="../etc/build.xml" target="build-grouplens-jar">
                   <property name="dest" value="${project.build.directory}" />
                   <property name="examples-base" value="src/main/java" />
                 </ant>

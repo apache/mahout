@@ -89,7 +89,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <ant antfile="../maven/build.xml" target="core-job">
+                <ant antfile="../etc/build.xml" target="core-job">
                   <property name="dest" value="${project.build.directory}" />
                   <property name="fullnamever" value="${project.artifactId}-${project.version}" />
                 </ant>
