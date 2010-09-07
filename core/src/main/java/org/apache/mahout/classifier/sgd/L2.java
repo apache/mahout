@@ -17,15 +17,13 @@
 
 package org.apache.mahout.classifier.sgd;
 
-import static java.lang.Math.log;
-
 /**
  * Implements the Gaussian prior.  This prior has a tendency to decrease large coefficients toward zero, but
  * doesn't tend to set them to exactly zero.
  */
 public class L2 extends PriorFunction {
-  private double s2;
-  private double s;
+  private final double s2;
+  private final double s;
 
   public L2(double scale) {
     this.s = scale;
@@ -34,11 +32,11 @@ public class L2 extends PriorFunction {
 
   @Override
   public double age(double oldValue, double generations, double learningRate) {
-    return oldValue * Math.pow(1 - learningRate / s2, generations);
+    return oldValue * Math.pow(1.0 - learningRate / s2, generations);
   }
 
   @Override
   public double logP(double betaIJ) {
-    return -betaIJ * betaIJ / s2 / 2 - log(s) - log(2 * Math.PI) / 2;
+    return -betaIJ * betaIJ / s2 / 2.0 - Math.log(s) - Math.log(2.0 * Math.PI) / 2.0;
   }
 }

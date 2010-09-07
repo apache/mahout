@@ -48,7 +48,7 @@ public final class Job extends MeanShiftCanopyDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
+      job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
     }
   }
 
@@ -114,14 +114,14 @@ public final class Job extends MeanShiftCanopyDriver {
    * @param maxIterations
    *          the int maximum number of iterations
    */
-  private void job(Path input,
-                   Path output,
-                   DistanceMeasure measure,
-                   double t1,
-                   double t2,
-                   double convergenceDelta,
-                   int maxIterations) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException {
+  private static void job(Path input,
+                          Path output,
+                          DistanceMeasure measure,
+                          double t1,
+                          double t2,
+                          double convergenceDelta,
+                          int maxIterations)
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
     MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput,
@@ -135,8 +135,8 @@ public final class Job extends MeanShiftCanopyDriver {
                                  true,
                                  false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 

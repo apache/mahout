@@ -121,17 +121,21 @@ public final class TrainClassifier {
       String dataSourceType = (String) cmdLine.getValue(dataSourceOpt);
       
       BayesParameters params = new BayesParameters();
-      if (cmdLine.hasOption(gramSizeOpt)) 
+      if (cmdLine.hasOption(gramSizeOpt)) {
         params.setGramSize(Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
+      }
       
-      if (cmdLine.hasOption(minDfOpt))
+      if (cmdLine.hasOption(minDfOpt)) {
         params.setMinDF(Integer.parseInt((String) cmdLine.getValue(minDfOpt)));
+      }
       
-      if (cmdLine.hasOption(minSupportOpt))
+      if (cmdLine.hasOption(minSupportOpt)) {
         params.setMinSupport(Integer.parseInt((String) cmdLine.getValue(minSupportOpt)));
+      }
       
-      if (cmdLine.hasOption(skipCleanupOpt))
+      if (cmdLine.hasOption(skipCleanupOpt)) {
         params.setSkipCleanup(true);
+      }
       
       String alphaI = "1.0";
       if (cmdLine.hasOption(alphaOpt)) {
@@ -140,7 +144,7 @@ public final class TrainClassifier {
       
       params.set("alpha_i", alphaI);
       
-      if (dataSourceType.equals("hbase")) {
+      if ("hbase".equals(dataSourceType)) {
         params.set("dataSource", "hbase");
       } else {
         params.set("dataSource", "hdfs");
@@ -148,11 +152,11 @@ public final class TrainClassifier {
 
       Path inputPath = new Path((String) cmdLine.getValue(inputDirOpt));
       Path outputPath = new Path((String) cmdLine.getValue(outputOpt));
-      if (classifierType.equalsIgnoreCase("bayes")) {
+      if ("bayes".equalsIgnoreCase(classifierType)) {
         log.info("Training Bayes Classifier");
         trainNaiveBayes(inputPath, outputPath, params);
         
-      } else if (classifierType.equalsIgnoreCase("cbayes")) {
+      } else if ("cbayes".equalsIgnoreCase(classifierType)) {
         log.info("Training Complementary Bayes Classifier");
         // setup the HDFS and copy the files there, then run the trainer
         trainCNaiveBayes(inputPath, outputPath, params);

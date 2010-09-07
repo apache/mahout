@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -226,7 +227,7 @@ public final class LDADriver extends AbstractJob {
     }
   }
 
-  private void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {
+  private static void writeInitialState(Path statePath, int numTopics, int numWords) throws IOException {
     Configuration job = new Configuration();
     FileSystem fs = statePath.getFileSystem(job);
 
@@ -240,14 +241,14 @@ public final class LDADriver extends AbstractJob {
 
       double total = 0.0; // total number of pseudo counts we made
       for (int w = 0; w < numWords; ++w) {
-        IntPairWritable kw = new IntPairWritable(k, w);
+        Writable kw = new IntPairWritable(k, w);
         // A small amount of random noise, minimized by having a floor.
         double pseudocount = random.nextDouble() + 1.0E-8;
         total += pseudocount;
         v.set(Math.log(pseudocount));
         writer.append(kw, v);
       }
-      IntPairWritable kTsk = new IntPairWritable(k, TOPIC_SUM_KEY);
+      Writable kTsk = new IntPairWritable(k, TOPIC_SUM_KEY);
       v.set(Math.log(total));
       writer.append(kTsk, v);
 
@@ -255,7 +256,7 @@ public final class LDADriver extends AbstractJob {
     }
   }
 
-  private double findLL(Path statePath, Configuration job) throws IOException {
+  private static double findLL(Path statePath, Configuration job) throws IOException {
     FileSystem fs = statePath.getFileSystem(job);
 
     double ll = 0.0;

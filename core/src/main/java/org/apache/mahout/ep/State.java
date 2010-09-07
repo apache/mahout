@@ -219,7 +219,15 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
   @Override
   public int compareTo(State<T> other) {
     int r = Double.compare(other.value, this.value);
-    return r == 0 ? this.id - other.id : r;
+    if (r != 0) {
+      return r;
+    }
+    if (this.id < other.id) {
+      return -1;
+    } else if (this.id > other.id) {
+      return 1;
+    }
+    return 0;
   }
 
   public String toString() {

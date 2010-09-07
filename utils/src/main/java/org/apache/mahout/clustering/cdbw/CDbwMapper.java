@@ -73,8 +73,8 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
     Configuration conf = context.getConfiguration();
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(conf.get(CDbwDriver.DISTANCE_MEASURE_KEY));
-      measure = (DistanceMeasure) cl.newInstance();
+      measure = ccl.loadClass(conf.get(CDbwDriver.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
       representativePoints = getRepresentativePoints(conf);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);

@@ -76,7 +76,7 @@ public final class CDbwDriver extends AbstractJob {
     int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(distanceMeasureClass)).newInstance();
+    DistanceMeasure measure = ccl.loadClass(distanceMeasureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     job(input, null, output, measure, maxIterations, numReducers);
     return 0;
@@ -147,8 +147,8 @@ public final class CDbwDriver extends AbstractJob {
       if (!part.getPath().getName().startsWith(".")) {
         Path inPart = part.getPath();
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, conf);
-        Writable key = (Writable) reader.getKeyClass().newInstance();
-        Writable value = (Writable) reader.getValueClass().newInstance();
+        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+        Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
         Path path = new Path(output, inPart.getName());
         SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
         while (reader.next(key, value)) {

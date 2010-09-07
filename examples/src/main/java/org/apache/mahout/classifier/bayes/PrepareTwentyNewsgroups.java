@@ -88,7 +88,7 @@ public final class PrepareTwentyNewsgroups {
       Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
       Analyzer analyzer;
       try {
-        analyzer = (Analyzer) Class.forName(analyzerName).newInstance();
+        analyzer = Class.forName(analyzerName).asSubclass(Analyzer.class).newInstance();
       } catch (InstantiationException e) {
         analyzer = (Analyzer) Class.forName(analyzerName).getConstructor(Version.class).newInstance(Version.LUCENE_30);
       }

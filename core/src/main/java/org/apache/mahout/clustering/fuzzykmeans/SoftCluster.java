@@ -49,9 +49,6 @@ public class SoftCluster extends Cluster {
     return (isConverged() ? "SV-" : "SC-") + getId();
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.DistanceMeasureCluster#pdf(org.apache.mahout.math.VectorWritable)
-   */
   @Override
   public double pdf(VectorWritable vw) {
     // SoftCluster pdf cannot be calculated out of context. See FuzzyKMeansClusterer

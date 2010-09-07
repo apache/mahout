@@ -367,17 +367,15 @@ public class FPGrowth<A extends Comparable<? super A>> {
           treeCache, level + 1, true, currentAttribute, updater);
 
         frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-          attribute, count, true, true);
+          attribute, count, true);
       } else {
         returnedPatterns = growthTopDown(conditionalTree, minSupportMutable, k,
           treeCache, level + 1, false, currentAttribute, updater);
         frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-          attribute, count, false, true);
+          attribute, count, false);
       }
-      if (frequentPatterns.isFull()) {
-        if (minSupportMutable.intValue() < frequentPatterns.leastSupport()) {
-          minSupportMutable.setValue(frequentPatterns.leastSupport());
-        }
+      if (frequentPatterns.isFull() && minSupportMutable.intValue() < frequentPatterns.leastSupport()) {
+        minSupportMutable.setValue(frequentPatterns.leastSupport());
       }
       i++;
     }
@@ -432,7 +430,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
           k, treeCache, level + 1, true, currentAttribute, updater);
 
         frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-          attribute, count, true, false);
+          attribute, count, true);
       } else {
         if (attribute == currentAttribute) {
           traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
@@ -441,21 +439,19 @@ public class FPGrowth<A extends Comparable<? super A>> {
             k, treeCache, level + 1, true, currentAttribute, updater);
 
           frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-            attribute, count, true, false);
+            attribute, count, true);
         } else if (attribute > currentAttribute) {
           traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
             minSupportMutable, conditionalTree, tree);
           returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, false, currentAttribute, updater);
           frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-            attribute, count, false, false);
+            attribute, count, false);
         }
       }
 
-      if (frequentPatterns.isFull()) {
-        if (minSupportMutable.intValue() < frequentPatterns.leastSupport()) {
-          minSupportMutable.setValue(frequentPatterns.leastSupport());
-        }
+      if (frequentPatterns.isFull() && minSupportMutable.intValue() < frequentPatterns.leastSupport()) {
+        minSupportMutable.setValue(frequentPatterns.leastSupport());
       }
     }
 
@@ -511,7 +507,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
         returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
           k, treeCache, level + 1, true, currentAttribute, updater);
         frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-          attribute, count, true, true);
+          attribute, count, true);
 
       } else {
         if (attribute == currentAttribute) {
@@ -520,7 +516,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
           returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, true, currentAttribute, updater);
           frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-            attribute, count, true, false);
+            attribute, count, true);
 
         } else if (attribute > currentAttribute) {
           traverseAndBuildConditionalFPTreeData(tree.getHeaderNext(attribute),
@@ -528,14 +524,12 @@ public class FPGrowth<A extends Comparable<? super A>> {
           returnedPatterns = growthBottomUp(conditionalTree, minSupportMutable,
             k, treeCache, level + 1, false, currentAttribute, updater);
           frequentPatterns = mergeHeap(frequentPatterns, returnedPatterns,
-            attribute, count, false, true);
+            attribute, count, false);
 
         }
       }
-      if (frequentPatterns.isFull()) {
-        if (minSupportMutable.intValue() < frequentPatterns.leastSupport()) {
-          minSupportMutable.setValue(frequentPatterns.leastSupport());
-        }
+      if (frequentPatterns.isFull() && minSupportMutable.intValue() < frequentPatterns.leastSupport()) {
+        minSupportMutable.setValue(frequentPatterns.leastSupport());
       }
     }
 
@@ -546,8 +540,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
                                                   FrequentPatternMaxHeap returnedPatterns,
                                                   int attribute,
                                                   long count,
-                                                  boolean addAttribute,
-                                                  boolean subPatternCheck) {
+                                                  boolean addAttribute) {
     frequentPatterns.addAll(returnedPatterns, attribute, count);
     if (frequentPatterns.addable(count) && addAttribute) {
       Pattern p = new Pattern();

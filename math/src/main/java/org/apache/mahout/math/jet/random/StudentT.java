@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
 import java.util.Random;
@@ -18,11 +17,11 @@ import java.util.Random;
 @Deprecated
 public class StudentT extends AbstractContinousDistribution {
 
-  private double freedom;
-
-  private double TERM; // performance cache for pdf()
   // The uniform random number generated shared by all <b>static</b> methods.
-  private static final StudentT shared = new StudentT(1.0, RandomUtils.getRandom());
+  private static final StudentT SHARED = new StudentT(1.0, RandomUtils.getRandom());
+
+  private double freedom;
+  private double term; // performance cache for pdf()
 
   /**
    * Constructs a StudentT distribution. Example: freedom=1.0.
@@ -36,6 +35,7 @@ public class StudentT extends AbstractContinousDistribution {
   }
 
   /** Returns the cumulative distribution function. */
+  @Override
   public double cdf(double x) {
     return Probability.studentT(freedom, x);
   }
@@ -76,12 +76,13 @@ public class StudentT extends AbstractContinousDistribution {
     }
     while ((w = u * u + v * v) > 1.0);
 
-    return (u * Math.sqrt(degreesOfFreedom * (Math.exp(-2.0 / degreesOfFreedom * Math.log(w)) - 1.0) / w));
+    return u * Math.sqrt(degreesOfFreedom * (Math.exp(-2.0 / degreesOfFreedom * Math.log(w)) - 1.0) / w);
   }
 
   /** Returns the probability distribution function. */
+  @Override
   public double pdf(double x) {
-    return this.TERM * Math.pow((1 + x * x / freedom), -(freedom + 1) * 0.5);
+    return this.term * Math.pow((1 + x * x / freedom), -(freedom + 1) * 0.5);
   }
 
   /**
@@ -97,7 +98,7 @@ public class StudentT extends AbstractContinousDistribution {
     this.freedom = freedom;
 
     double val = Fun.logGamma((freedom + 1) / 2) - Fun.logGamma(freedom / 2);
-    this.TERM = Math.exp(val) / Math.sqrt(Math.PI * freedom);
+    this.term = Math.exp(val) / Math.sqrt(Math.PI * freedom);
   }
 
   /**
@@ -107,8 +108,8 @@ public class StudentT extends AbstractContinousDistribution {
    * @throws IllegalArgumentException if <tt>freedom &lt;= 0.0</tt>.
    */
   public static double staticNextDouble(double freedom) {
-    synchronized (shared) {
-      return shared.nextDouble(freedom);
+    synchronized (SHARED) {
+      return SHARED.nextDouble(freedom);
     }
   }
 

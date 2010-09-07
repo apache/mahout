@@ -90,12 +90,6 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
 
     try {
       return loadState(conf, statePath, modelDistribution, Double.parseDouble(alpha0), Integer.parseInt(numClusters));
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
@@ -105,8 +99,7 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
                                             String statePath,
                                             ModelDistribution<VectorWritable> modelDistribution,
                                             double alpha,
-                                            int k) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, InvocationTargetException, IOException {
+                                            int k) throws IOException {
     DirichletState state = DirichletDriver.createState(modelDistribution, k, alpha);
     Path path = new Path(statePath);
     FileSystem fs = FileSystem.get(path.toUri(), conf);

@@ -29,10 +29,13 @@ import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.List;
 
@@ -40,15 +43,17 @@ import java.util.List;
 /**
  * Train a logistic regression for the examples from Chapter 13 of Mahout in Action
  */
-public class TrainLogistic {
-  private static final Logger log = LoggerFactory.getLogger(TrainLogistic.class);
+public final class TrainLogistic {
+
   private static String inputFile;
   private static String outputFile;
   private static LogisticModelParameters lmp;
 
   private static int passes;
-  private static boolean scores = false;
+  private static boolean scores;
 
+  private TrainLogistic() {
+  }
 
   public static void main(String[] args) throws IOException {
     if (parseArgs(args)) {
@@ -92,9 +97,12 @@ public class TrainLogistic {
         in.close();
       }
 
-      FileWriter modelOutput = new FileWriter(outputFile);
-      lmp.saveTo(modelOutput);
-      modelOutput.close();
+      OutputStreamWriter modelOutput = new FileWriter(outputFile);
+      try {
+        lmp.saveTo(modelOutput);
+      } finally {
+        modelOutput.close();
+      }
       
       System.out.printf("%d\n", lmp.getNumFeatures());
       System.out.printf("%s ~ ", lmp.getTargetVariable());
@@ -278,6 +286,9 @@ public class TrainLogistic {
   }
 
   public static class InputOpener {
+    private InputOpener() {
+    }
+
     public static BufferedReader open(String inputFile) throws IOException {
       InputStreamReader s;
       try {

@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.jet.stat.Probability;
 
 import java.util.Random;
@@ -18,16 +17,16 @@ import java.util.Random;
 @Deprecated
 public class ChiSquare extends AbstractContinousDistribution {
 
+  // The uniform random number generated shared by all <b>static</b> methods.
+  private static final ChiSquare SHARED = new ChiSquare(1.0, RandomUtils.getRandom());
+
   private double freedom;
 
   // cached vars for method nextDouble(a) (for performance only)
-  private double freedom_in = -1.0;
+  private double freedomIn = -1.0;
   private double b;
   private double vm;
   private double vd;
-
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final ChiSquare shared = new ChiSquare(1.0, RandomUtils.getRandom());
 
   /**
    * Constructs a ChiSquare distribution. Example: freedom=1.0.
@@ -41,6 +40,7 @@ public class ChiSquare extends AbstractContinousDistribution {
   }
 
   /** Returns the cumulative distribution function. */
+  @Override
   public double cdf(double x) {
     return Probability.chiSquare(freedom, x);
   }
@@ -96,23 +96,23 @@ public class ChiSquare extends AbstractContinousDistribution {
           r += zz * z / (3.0 * z);
         }
         if (u < r * 0.3894003915) {
-          return (z * z);
+          return z * z;
         }
         if (zz > (1.036961043 / u + 1.4)) {
           continue;
         }
         if (2.0 * Math.log(u) < (-zz * 0.5)) {
-          return (z * z);
+          return z * z;
         }
       }
     } else {
-      if (freedom != freedom_in) {
+      if (freedom != freedomIn) {
         b = Math.sqrt(freedom - 1.0);
         vm = -0.6065306597 * (1.0 - 0.25 / (b * b + 1.0));
         vm = (-b > vm) ? -b : vm;
         double vp = 0.6065306597 * (0.7071067812 + b) / (0.5 + b);
         vd = vp - vm;
-        freedom_in = freedom;
+        freedomIn = freedom;
       }
       while (true) {
         u = randomGenerator.nextDouble();
@@ -127,19 +127,20 @@ public class ChiSquare extends AbstractContinousDistribution {
           r += zz * z / (3.0 * (z + b));
         }
         if (u < r * 0.3894003915) {
-          return ((z + b) * (z + b));
+          return (z + b) * (z + b);
         }
         if (zz > (1.036961043 / u + 1.4)) {
           continue;
         }
         if (2.0 * Math.log(u) < (Math.log(1.0 + z / b) * b * b - zz * 0.5 - z * b)) {
-          return ((z + b) * (z + b));
+          return (z + b) * (z + b);
         }
       }
     }
   }
 
   /** Returns the probability distribution function. */
+  @Override
   public double pdf(double x) {
     if (x <= 0.0) {
       throw new IllegalArgumentException();
@@ -168,8 +169,8 @@ public class ChiSquare extends AbstractContinousDistribution {
    * @throws IllegalArgumentException if <tt>freedom &lt; 1.0</tt>.
    */
   public static double staticNextDouble(double freedom) {
-    synchronized (shared) {
-      return shared.nextDouble(freedom);
+    synchronized (SHARED) {
+      return SHARED.nextDouble(freedom);
     }
   }
 

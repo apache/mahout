@@ -20,6 +20,7 @@ package org.apache.mahout.math.hadoop.similarity;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
@@ -85,7 +86,7 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
     return other instanceof SimilarityMatrixEntryKey && row == ((SimilarityMatrixEntryKey) other).row;
   }
 
-  public static class SimilarityMatrixEntryKeyComparator extends WritableComparator {
+  public static class SimilarityMatrixEntryKeyComparator extends WritableComparator implements Serializable {
 
     protected SimilarityMatrixEntryKeyComparator() {
       super(SimilarityMatrixEntryKey.class, true);
@@ -112,7 +113,7 @@ public class SimilarityMatrixEntryKey implements WritableComparable<SimilarityMa
     }
   }
 
-  public static class SimilarityMatrixEntryKeyGroupingComparator extends WritableComparator {
+  public static class SimilarityMatrixEntryKeyGroupingComparator extends WritableComparator implements Serializable {
 
     protected SimilarityMatrixEntryKeyGroupingComparator() {
       super(SimilarityMatrixEntryKey.class, true);

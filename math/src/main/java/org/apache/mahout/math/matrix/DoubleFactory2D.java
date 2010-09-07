@@ -11,7 +11,6 @@ package org.apache.mahout.math.matrix;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.apache.mahout.math.jet.random.sampling.RandomSamplingAssistant;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.SparseDoubleMatrix2D;

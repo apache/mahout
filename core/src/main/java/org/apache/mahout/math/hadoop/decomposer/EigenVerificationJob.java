@@ -110,7 +110,8 @@ public class EigenVerificationJob extends AbstractJob {
 
     eigenVerifier = new SimpleEigenVerifier();
 
-    VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
+    //VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
+    computePairwiseInnerProducts();
 
     Map<MatrixSlice,EigenStatus> eigenMetaData = verifyEigens();
 

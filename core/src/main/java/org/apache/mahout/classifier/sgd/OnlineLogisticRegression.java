@@ -19,10 +19,6 @@ package org.apache.mahout.classifier.sgd;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.UnaryFunction;
 
 /**
  * Extends the basic on-line logistic regression learner with a specific set of learning

@@ -62,8 +62,8 @@ public class KMeansClusterer {
   public KMeansClusterer(Configuration conf)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
-    this.measure = (DistanceMeasure) cl.newInstance();
+    this.measure = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY))
+        .asSubclass(DistanceMeasure.class).newInstance();
     this.measure.configure(conf);
 
     this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));

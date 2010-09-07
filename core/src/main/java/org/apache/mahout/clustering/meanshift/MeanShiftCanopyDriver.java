@@ -144,7 +144,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD));
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     job(input,
         output,
@@ -292,10 +292,10 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                                                            MeanShiftCanopy.class);
       try {
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable vw = (VectorWritable) reader.getValueClass().newInstance();
+        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, vw)) {
           writer.append(new Text(), new MeanShiftCanopy(vw.get(), id++, measure));
-          vw = (VectorWritable) reader.getValueClass().newInstance();
+          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         }
       } finally {
         reader.close();
@@ -375,10 +375,10 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       try {
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        MeanShiftCanopy canopy = (MeanShiftCanopy) reader.getValueClass().newInstance();
+        MeanShiftCanopy canopy = reader.getValueClass().asSubclass(MeanShiftCanopy.class).newInstance();
         while (reader.next(key, canopy)) {
           clusterer.mergeCanopy(canopy, clusters);
-          canopy = (MeanShiftCanopy) reader.getValueClass().newInstance();
+          canopy = reader.getValueClass().asSubclass(MeanShiftCanopy.class).newInstance();
         }
       } finally {
         reader.close();
@@ -414,7 +414,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     return clustersIn;
   }
 
-  private Path buildClustersMR(Path clustersIn,
+  private static Path buildClustersMR(Path clustersIn,
                                       Path output,
                                       DistanceMeasure measure,
                                       double t1,
@@ -472,10 +472,10 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       try {
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        MeanShiftCanopy value = (MeanShiftCanopy) reader.getValueClass().newInstance();
+        MeanShiftCanopy value = reader.getValueClass().asSubclass(MeanShiftCanopy.class).newInstance();
         while (reader.next(key, value)) {
           clusters.add(value);
-          value = (MeanShiftCanopy) reader.getValueClass().newInstance();
+          value = reader.getValueClass().asSubclass(MeanShiftCanopy.class).newInstance();
         }
       } finally {
         reader.close();
@@ -495,12 +495,12 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                                                            WeightedVectorWritable.class);
       try {
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        MeanShiftCanopy canopy = (MeanShiftCanopy) reader.getValueClass().newInstance();
+        MeanShiftCanopy canopy = reader.getValueClass().asSubclass(MeanShiftCanopy.class).newInstance();
         while (reader.next(key, canopy)) {
           MeanShiftCanopy closest = MeanShiftCanopyClusterer.findCoveringCanopy(canopy, clusters);
           writer.append(new IntWritable(closest.getId()),
                         new WeightedVectorWritable(1, new VectorWritable(canopy.getCenter())));
-          canopy = (MeanShiftCanopy) reader.getValueClass().newInstance();
+          canopy = reader.getValueClass().asSubclass(MeanShiftCanopy.class).newInstance();
         }
       } finally {
         reader.close();

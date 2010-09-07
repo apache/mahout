@@ -82,8 +82,8 @@ public final class RandomSeedGenerator {
           continue; // select only the top level files
         }
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, fileStatus.getPath(), conf);
-        Writable key = (Writable) reader.getKeyClass().newInstance();
-        VectorWritable value = (VectorWritable) reader.getValueClass().newInstance();
+        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+        VectorWritable value = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, value)) {
           Cluster newCluster = new Cluster(value.get(), nextClusterId++, measure);
           newCluster.observe(value.get(), 1);

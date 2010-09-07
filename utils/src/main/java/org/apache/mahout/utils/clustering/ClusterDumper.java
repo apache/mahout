@@ -164,8 +164,8 @@ public final class ClusterDumper extends AbstractJob {
         //System.out.println("Input Path: " + path); doesn't this interfere with output?
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
         try {
-          Writable key = (Writable) reader.getKeyClass().newInstance();
-          Writable value = (Writable) reader.getValueClass().newInstance();
+          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+          Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
           while (reader.next(key, value)) {
             Cluster cluster = (Cluster) value;
             String fmtStr = useJSON ? cluster.asJsonString() : cluster.asFormatString(dictionary);
@@ -267,7 +267,7 @@ public final class ClusterDumper extends AbstractJob {
     FileStatus[] children = fs.listStatus(pointsPathDir, new PathFilter() {
       @Override
       public boolean accept(Path path) {
-        return !(path.getName().endsWith(".crc") || path.getName().equals("_logs"));
+        return !(path.getName().endsWith(".crc") || "_logs".equals(path.getName()));
       }
     });
 
@@ -275,8 +275,8 @@ public final class ClusterDumper extends AbstractJob {
       Path path = file.getPath();
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
       try {
-        IntWritable key = (IntWritable) reader.getKeyClass().newInstance();
-        WeightedVectorWritable value = (WeightedVectorWritable) reader.getValueClass().newInstance();
+        IntWritable key = reader.getKeyClass().asSubclass(IntWritable.class).newInstance();
+        WeightedVectorWritable value = reader.getValueClass().asSubclass(WeightedVectorWritable.class).newInstance();
         while (reader.next(key, value)) {
           // value is the cluster id as an int, key is the name/id of the
           // vector, but that doesn't matter because we only care about printing
@@ -288,7 +288,7 @@ public final class ClusterDumper extends AbstractJob {
             result.put(key.get(), pointList);
           }
           pointList.add(value);
-          value = (WeightedVectorWritable) reader.getValueClass().newInstance();
+          value = reader.getValueClass().asSubclass(WeightedVectorWritable.class).newInstance();
         }
       } catch (InstantiationException e) {
         log.error("Exception", e);

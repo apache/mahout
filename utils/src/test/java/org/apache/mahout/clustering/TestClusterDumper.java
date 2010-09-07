@@ -263,14 +263,14 @@ public final class TestClusterDumper extends MahoutTestCase {
     FileSystem fs = FileSystem.get(eigenvectors.toUri(), conf);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, eigenvectors, conf);
     try {
-      Writable key = (Writable) reader.getKeyClass().newInstance();
-      Writable value = (Writable) reader.getValueClass().newInstance();
+      Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+      Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
       i = 0;
       while (reader.next(key, value)) {
         Vector v = ((VectorWritable) value).get();
         p.assignColumn(i, v);
         System.out.println("k=" + key.toString() + " V=" + AbstractCluster.formatVector(v, termDictionary));
-        value = (Writable) reader.getValueClass().newInstance();
+        value = reader.getValueClass().asSubclass(Writable.class).newInstance();
         i++;
       }
     } finally {

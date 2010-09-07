@@ -13,10 +13,9 @@ import org.apache.mahout.math.function.TimesFunction;
 
 public class VectorModelClassifier extends AbstractVectorClassifier {
 
-  List<Model<VectorWritable>> models;
+  private final List<Model<VectorWritable>> models;
 
   public VectorModelClassifier(List<Model<VectorWritable>> models) {
-    super();
     this.models = models;
   }
 

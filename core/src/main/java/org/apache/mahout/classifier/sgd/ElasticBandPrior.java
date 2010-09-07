@@ -22,9 +22,9 @@ package org.apache.mahout.classifier.sgd;
  * interesting mixture of sparsity and load-sharing between redundant predictors.
  */
 public class ElasticBandPrior extends PriorFunction {
-  private double alphaByLambda;
-  private L1 l1;
-  private L2 l2;
+  private final double alphaByLambda;
+  private final L1 l1;
+  private final L2 l2;
 
   public ElasticBandPrior(double alphaByLambda) {
     this.alphaByLambda = alphaByLambda;
@@ -34,11 +34,11 @@ public class ElasticBandPrior extends PriorFunction {
 
   @Override
   public double age(double oldValue, double generations, double learningRate) {
-    oldValue = oldValue * Math.pow(1 - alphaByLambda * learningRate , generations);
+    oldValue *= Math.pow(1 - alphaByLambda * learningRate, generations);
     double newValue = oldValue - Math.signum(oldValue) * learningRate * generations;
-    if (newValue * oldValue < 0) {
+    if (newValue * oldValue < 0.0) {
       // don't allow the value to change sign
-      return 0;
+      return 0.0;
     } else {
       return newValue;
     }

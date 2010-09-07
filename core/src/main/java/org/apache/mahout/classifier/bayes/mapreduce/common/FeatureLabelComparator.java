@@ -23,7 +23,9 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.mahout.common.StringTuple;
 
-public class FeatureLabelComparator extends WritableComparator {
+import java.io.Serializable;
+
+public class FeatureLabelComparator extends WritableComparator implements Serializable {
 
   public FeatureLabelComparator() {
     super(StringTuple.class, true);

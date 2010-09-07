@@ -8,8 +8,6 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
-
 import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
@@ -134,7 +132,8 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
    * 0&lt;=i&lt;=pdf.length-1</tt> <li><tt>0.0 &lt; Sum(pdf[i]) : 0&lt;=i&lt;=pdf.length-1</tt> </ul>
    *
    * @param pdf               the probability distribution function.
-   * @param interpolationType can be either <tt>Empirical.NO_INTERPOLATION</tt> or <tt>Empirical.LINEAR_INTERPOLATION</tt>.
+   * @param interpolationType can be either
+   *  <tt>Empirical.NO_INTERPOLATION</tt> or <tt>Empirical.LINEAR_INTERPOLATION</tt>.
    * @param randomGenerator   a uniform random number generator.
    * @throws IllegalArgumentException if at least one of the three conditions above is violated.
    */
@@ -280,26 +279,26 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
         ++nBigs;
       }
     }
-    Stack Bigs = new Stack(nBigs);
-    Stack Smalls = new Stack(nSmalls);
+    Stack bigs = new Stack(nBigs);
+    Stack smalls = new Stack(nSmalls);
     for (k = 0; k < size; ++k) {
       if (E[k] < mean) {
-        Smalls.push(k);
+        smalls.push(k);
       } else {
-        Bigs.push(k);
+        bigs.push(k);
       }
     }
     /* Now work through the smalls */
     int b;
-    while (Smalls.size() > 0) {
-      int s = Smalls.pop();
-      if (Bigs.size() == 0) {
+    while (smalls.size() > 0) {
+      int s = smalls.pop();
+      if (bigs.size() == 0) {
         /* Then we are on our last value */
         this.A[s] = s;
         this.F[s] = 1.0;
         break;
       }
-      b = Bigs.pop();
+      b = bigs.pop();
       this.A[s] = b;
       this.F[s] = size * E[s];
 
@@ -307,17 +306,17 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
       E[s] += d;              /* now E[s] == mean */
       E[b] -= d;
       if (E[b] < mean) {
-        Smalls.push(b); /* no longer big, join ranks of the small */
+        smalls.push(b); /* no longer big, join ranks of the small */
       } else if (E[b] > mean) {
-        Bigs.push(b); /* still big, put it back where you found it */
+        bigs.push(b); /* still big, put it back where you found it */
       } else {
         /* E[b]==mean implies it is finished too */
         this.A[b] = b;
         this.F[b] = 1.0;
       }
     }
-    while (Bigs.size() > 0) {
-      b = Bigs.pop();
+    while (bigs.size() > 0) {
+      b = bigs.pop();
       this.A[b] = b;
       this.F[b] = 1.0;
     }

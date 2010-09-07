@@ -46,8 +46,8 @@ public class KMeansClusterMapper extends Mapper<WritableComparable<?>,VectorWrit
     Configuration conf = context.getConfiguration();
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
-      DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
+      DistanceMeasure measure = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(conf);
       
       String clusterPath = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);

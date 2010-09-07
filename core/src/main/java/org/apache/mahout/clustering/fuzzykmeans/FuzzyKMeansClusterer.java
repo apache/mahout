@@ -135,8 +135,8 @@ public class FuzzyKMeansClusterer {
   private void configure(Configuration job) {
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(job.get(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY));
-      measure = (DistanceMeasure) cl.newInstance();
+      measure = ccl.loadClass(job.get(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(job);
       convergenceDelta = Double.parseDouble(job.get(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
       // nextClusterId = 0;

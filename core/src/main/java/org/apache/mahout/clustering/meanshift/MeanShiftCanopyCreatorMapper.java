@@ -47,19 +47,19 @@ public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, 
     String measureClass = context.getConfiguration().get(KMeansConfigKeys.DISTANCE_MEASURE_KEY);
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     try {
-      measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+      measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
     } catch (InstantiationException e) {
-      new IllegalStateException(e);
+      throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
-      new IllegalStateException(e);
+      throw new IllegalStateException(e);
     } catch (ClassNotFoundException e) {
-      new IllegalStateException(e);
+      throw new IllegalStateException(e);
     }
 
     if (nextCanopyId == -1) {
       String taskId = context.getConfiguration().get("mapred.task.id");
       String[] parts = UNDERSCORE_PATTERN.split(taskId);
-      if (parts.length != 6 || !parts[0].equals("attempt") || (!"m".equals(parts[3]) && !"r".equals(parts[3]))) {
+      if (parts.length != 6 || !"attempt".equals(parts[0]) || (!"m".equals(parts[3]) && !"r".equals(parts[3]))) {
         throw new IllegalArgumentException("TaskAttemptId string : " + taskId + " is not properly formed");
       }
       nextCanopyId = ((1 << 31) / 50000) * (Integer.parseInt(parts[4]));

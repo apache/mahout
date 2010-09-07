@@ -28,12 +28,11 @@ import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
 import java.io.InputStreamReader;
-import java.util.Locale;
 
 public final class NegativeBinomialTest extends MahoutTestCase {
 
   private static final Splitter onComma = Splitter.on(",").trimResults();
-  private static final int N = 10000;
+  //private static final int N = 10000;
 
   @Test
   public void testDistributionFunctions() throws Exception {

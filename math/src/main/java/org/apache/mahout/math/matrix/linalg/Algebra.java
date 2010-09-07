@@ -11,8 +11,6 @@ package org.apache.mahout.math.matrix.linalg;
 import org.apache.mahout.math.GenericPermuting;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.Swapper;
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 

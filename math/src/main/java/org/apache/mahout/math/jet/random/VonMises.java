@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Random;
 
@@ -17,14 +16,14 @@ import java.util.Random;
 @Deprecated
 public class VonMises extends AbstractContinousDistribution {
 
-  private double my_k;
+  // The uniform random number generated shared by all <b>static</b> methods.
+  private static final VonMises SHARED = new VonMises(1.0, RandomUtils.getRandom());
+
+  private double myK;
 
   // cached vars for method nextDouble(a) (for performance only)
-  private double k_set = -1.0;
+  private double kSet = -1.0;
   private double r;
-
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final VonMises shared = new VonMises(1.0, RandomUtils.getRandom());
 
   /**
    * Constructs a Von Mises distribution. Example: k=1.0.
@@ -39,7 +38,7 @@ public class VonMises extends AbstractContinousDistribution {
   /** Returns a random number from the distribution. */
   @Override
   public double nextDouble() {
-    return nextDouble(this.my_k);
+    return nextDouble(this.myK);
   }
 
   /**
@@ -71,11 +70,11 @@ public class VonMises extends AbstractContinousDistribution {
       throw new IllegalArgumentException();
     }
 
-    if (k_set != k) {                                               // SET-UP
+    if (kSet != k) {                                               // SET-UP
       double tau = 1.0 + Math.sqrt(1.0 + 4.0 * k * k);
       double rho = (tau - Math.sqrt(2.0 * tau)) / (2.0 * k);
       r = (1.0 + rho * rho) / (2.0 * rho);
-      k_set = k;
+      kSet = k;
     }
 
     // GENERATOR
@@ -103,7 +102,7 @@ public class VonMises extends AbstractContinousDistribution {
     if (k <= 0.0) {
       throw new IllegalArgumentException();
     }
-    this.my_k = k;
+    this.myK = k;
   }
 
   /**
@@ -112,14 +111,14 @@ public class VonMises extends AbstractContinousDistribution {
    * @throws IllegalArgumentException if <tt>k &lt;= 0.0</tt>.
    */
   public static double staticNextDouble(double freedom) {
-    synchronized (shared) {
-      return shared.nextDouble(freedom);
+    synchronized (SHARED) {
+      return SHARED.nextDouble(freedom);
     }
   }
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + '(' + my_k + ')';
+    return this.getClass().getName() + '(' + myK + ')';
   }
 
 }

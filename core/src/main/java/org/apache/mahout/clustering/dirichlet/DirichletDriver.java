@@ -368,17 +368,17 @@ public class DirichletDriver extends AbstractJob {
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential execute sequentially if true
    */
-  public void job(Path input,
-                  Path output,
-                  ModelDistribution<VectorWritable> modelDistribution,
-                  int numClusters,
-                  int maxIterations,
-                  double alpha0,
-                  int numReducers,
-                  boolean runClustering,
-                  boolean emitMostLikely,
-                  double threshold,
-                  boolean runSequential)
+  public static void job(Path input,
+                         Path output,
+                         ModelDistribution<VectorWritable> modelDistribution,
+                         int numClusters,
+                         int maxIterations,
+                         double alpha0,
+                         int numReducers,
+                         boolean runClustering,
+                         boolean emitMostLikely,
+                         double threshold,
+                         boolean runSequential)
     throws IOException, InstantiationException, IllegalAccessException,
       ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InterruptedException {
     Path clustersOut = buildClusters(input,
@@ -474,10 +474,10 @@ public class DirichletDriver extends AbstractJob {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          VectorWritable vw = (VectorWritable) reader.getValueClass().newInstance();
+          VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
           while (reader.next(key, vw)) {
             clusterer.observe(newModels, vw);
-            vw = (VectorWritable) reader.getValueClass().newInstance();
+            vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
           }
         } finally {
           reader.close();
@@ -527,12 +527,12 @@ public class DirichletDriver extends AbstractJob {
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential execute sequentially if true
    */
-  public void clusterData(Path input,
-                          Path stateIn,
-                          Path output,
-                          boolean emitMostLikely,
-                          double threshold,
-                          boolean runSequential)
+  public static void clusterData(Path input,
+                                 Path stateIn,
+                                 Path output,
+                                 boolean emitMostLikely,
+                                 double threshold,
+                                 boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     if (runSequential) {
       clusterDataSeq(input, stateIn, output, emitMostLikely, threshold);
@@ -559,10 +559,10 @@ public class DirichletDriver extends AbstractJob {
                                                            WeightedVectorWritable.class);
       try {
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable vw = (VectorWritable) reader.getValueClass().newInstance();
+        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, vw)) {
           clusterer.emitPointToClusters(vw, clusters, writer);
-          vw = (VectorWritable) reader.getValueClass().newInstance();
+          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         }
       } finally {
         reader.close();

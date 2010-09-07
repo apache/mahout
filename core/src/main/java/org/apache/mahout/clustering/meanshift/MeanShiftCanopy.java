@@ -158,9 +158,6 @@ public class MeanShiftCanopy extends Cluster {
     return (isConverged() ? "MSV-" : "MSC-") + getId();
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.DistanceMeasureCluster#pdf(org.apache.mahout.math.VectorWritable)
-   */
   @Override
   public double pdf(VectorWritable vw) {
     // MSCanopy membership is explicit via membership in boundPoints. Can't compute pdf for Arbitrary point

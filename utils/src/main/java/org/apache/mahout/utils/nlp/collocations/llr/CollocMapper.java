@@ -94,7 +94,8 @@ public class CollocMapper extends Mapper<Text, StringTuple, GramKey, Gram> {
     ShingleFilter sf = new ShingleFilter(new IteratorTokenStream(value.getEntries().iterator()), maxShingleSize);
     int count = 0; // ngram count
 
-    OpenObjectIntHashMap<String> ngrams = new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
+    OpenObjectIntHashMap<String> ngrams =
+        new OpenObjectIntHashMap<String>(value.getEntries().size() * (maxShingleSize - 1));
     OpenObjectIntHashMap<String> unigrams = new OpenObjectIntHashMap<String>(value.getEntries().size());
 
     do {

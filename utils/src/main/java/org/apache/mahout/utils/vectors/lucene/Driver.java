@@ -159,9 +159,9 @@ public final class Driver {
         Weight weight;
         if (cmdLine.hasOption(weightOpt)) {
           String wString = cmdLine.getValue(weightOpt).toString();
-          if (wString.equalsIgnoreCase("tf")) {
+          if ("tf".equalsIgnoreCase(wString)) {
             weight = new TF();
-          } else if (wString.equalsIgnoreCase("tfidf")) {
+          } else if ("tfidf".equalsIgnoreCase(wString)) {
             weight = new TFIDF();
           } else {
             throw new OptionException(weightOpt);
@@ -188,7 +188,7 @@ public final class Driver {
         double norm = LuceneIterable.NO_NORMALIZING;
         if (cmdLine.hasOption(powerOpt)) {
           String power = cmdLine.getValue(powerOpt).toString();
-          if (power.equals("INF")) {
+          if ("INF".equals(power)) {
             norm = Double.POSITIVE_INFINITY;
           } else {
             norm = Double.parseDouble(power);
@@ -213,7 +213,7 @@ public final class Driver {
         VectorWriter vectorWriter;
         if (cmdLine.hasOption(outWriterOpt)) {
           String outWriter = cmdLine.getValue(outWriterOpt).toString();
-          if (outWriter.equals("file")) {
+          if ("file".equals(outWriter)) {
             BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
             vectorWriter = new JWriterVectorWriter(writer);
           } else {

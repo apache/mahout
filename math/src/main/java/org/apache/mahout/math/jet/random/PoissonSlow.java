@@ -8,32 +8,28 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
-import org.apache.mahout.common.RandomUtils;
-
 import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class PoissonSlow extends AbstractDiscreteDistribution {
 
-  private double mean;
-
-  // precomputed and cached values (for performance only)
-  private double cached_sq;
-  private double cached_alxm;
-  private double cached_g;
-
   private static final double MEAN_MAX = Integer.MAX_VALUE;
   // for all means larger than that, we don't try to compute a poisson deviation, but return the mean.
   private static final double SWITCH_MEAN = 12.0; // switch from method A to method B
 
-  private static final double[] cof = { // for method logGamma()
-      76.18009172947146, -86.50532032941677,
-      24.01409824083091, -1.231739572450155,
-      0.1208650973866179e-2, -0.5395239384953e-5};
+  // for method logGamma()
+  private static final double[] COF = {
+    76.18009172947146, -86.50532032941677,
+    24.01409824083091, -1.231739572450155,
+    0.1208650973866179e-2, -0.5395239384953e-5};
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final PoissonSlow shared = new PoissonSlow(0.0, RandomUtils.getRandom());
+  private double mean;
+
+  // precomputed and cached values (for performance only)
+  private double cachedSq;
+  private double cachedAlxm;
+  private double cachedG;
 
   /** Constructs a poisson distribution. Example: mean=1.0. */
   public PoissonSlow(double mean, Random randomGenerator) {
@@ -51,7 +47,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
     tmp -= (x + 0.5) * Math.log(tmp);
     double ser = 1.000000000190015;
 
-    double[] coeff = cof;
+    double[] coeff = COF;
     for (int j = 0; j <= 5; j++) {
       x++;
       ser += coeff[j] / x;
@@ -64,7 +60,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
     /*
     * Adapted from "Numerical Recipes in C".
     */
-    double g = this.cached_g;
+    double g = this.cachedG;
 
     if (mean == -1.0) {
       return 0;
@@ -81,8 +77,8 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
     } else if (mean < MEAN_MAX) {
       double t;
       double em;
-      double sq = this.cached_sq;
-      double alxm = this.cached_alxm;
+      double sq = this.cachedSq;
+      double alxm = this.cachedAlxm;
 
       Random rand = this.randomGenerator;
       do {
@@ -91,7 +87,7 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
           y = Math.tan(Math.PI * rand.nextDouble());
           em = sq * y + mean;
         } while (em < 0.0);
-        em = (double) (int) (em); // faster than em = Math.floor(em); (em>=0.0)
+        em = (double) (int) em; // faster than em = Math.floor(em); (em>=0.0)
         t = 0.9 * (1.0 + y * y) * Math.exp(em * alxm - logGamma(em + 1.0) - g);
       } while (rand.nextDouble() > t);
       return (int) em;
@@ -122,11 +118,11 @@ public class PoissonSlow extends AbstractDiscreteDistribution {
         return;
       } // not defined
       if (mean < SWITCH_MEAN) {
-        this.cached_g = Math.exp(-mean);
+        this.cachedG = Math.exp(-mean);
       } else {
-        this.cached_sq = Math.sqrt(2.0 * mean);
-        this.cached_alxm = Math.log(mean);
-        this.cached_g = mean * cached_alxm - logGamma(mean + 1.0);
+        this.cachedSq = Math.sqrt(2.0 * mean);
+        this.cachedAlxm = Math.log(mean);
+        this.cachedG = mean * cachedAlxm - logGamma(mean + 1.0);
       }
     }
   }

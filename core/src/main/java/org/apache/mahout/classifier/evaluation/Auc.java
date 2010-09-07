@@ -35,11 +35,11 @@ import java.util.Random;
 public class Auc {
   private int maxBufferSize = 10000;
   private final DoubleArrayList[] scores = {new DoubleArrayList(), new DoubleArrayList()};
-  private Random rand;
-  private int samples = 0;
+  private final Random rand;
+  private int samples;
   private double threshold;
-  private Matrix confusion;
-  private DenseMatrix entropy;
+  private final Matrix confusion;
+  private final DenseMatrix entropy;
 
   private boolean probabilityScore = true;
 

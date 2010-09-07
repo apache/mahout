@@ -9,7 +9,6 @@ import org.apache.mahout.math.VectorWritable;
 public class GaussianCluster extends AbstractCluster {
 
   public GaussianCluster() {
-    super();
   }
 
   public GaussianCluster(Vector point, int id2) {
@@ -30,9 +29,6 @@ public class GaussianCluster extends AbstractCluster {
     return new GaussianCluster(getCenter(), getRadius(), getId());
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.models.Model#pdf(java.lang.Object)
-   */
   @Override
   public double pdf(VectorWritable vw) {
     Vector x = vw.get();

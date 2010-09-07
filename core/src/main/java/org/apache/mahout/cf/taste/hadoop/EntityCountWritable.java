@@ -25,7 +25,7 @@ import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Varint;
 
 /** A {@link org.apache.hadoop.io.Writable} encapsulating an item ID and a count . */
-public final class EntityCountWritable extends VarLongWritable implements Cloneable {
+public final class EntityCountWritable extends VarLongWritable {
 
   private int count;
 

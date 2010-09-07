@@ -18,7 +18,6 @@
 package org.apache.mahout.df.data;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;

@@ -30,21 +30,21 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.utils.vectors.SequenceFileVectorIterable.SeqFileIterator;
+import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 /**
- * Can read in a {@link org.apache.hadoop.io.SequenceFile} of {@link org.apache.mahout.math.Vector}s and dump
- * out the results using {@link org.apache.mahout.math.Vector#asFormatString()} to either the console or to a
+ * Can read in a {@link SequenceFile} of {@link Vector}s and dump
+ * out the results using {@link Vector#asFormatString()} to either the console or to a
  * file.
  */
 public final class VectorDumper {
@@ -54,7 +54,7 @@ public final class VectorDumper {
   private VectorDumper() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -124,21 +124,25 @@ public final class VectorDumper {
         boolean useJSON = cmdLine.hasOption(centroidJSonOpt);
         boolean sizeOnly = cmdLine.hasOption(sizeOpt);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+
+        Writable keyWritable = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+        Writable valueWritable = reader.getValueClass().asSubclass(Writable.class).newInstance();
+        boolean transposeKeyValue = cmdLine.hasOption(vectorAsKeyOpt);
         try {
-          Iterable<Vector> vectorIterable = new SequenceFileVectorIterable(reader, cmdLine.hasOption(vectorAsKeyOpt));
           Writer writer = cmdLine.hasOption(outputOpt)
                   ? new FileWriter(cmdLine.getValue(outputOpt).toString())
                   : new OutputStreamWriter(System.out);
           try {
             boolean printKey = cmdLine.hasOption(printKeyOpt);
-            SeqFileIterator iterator = (SeqFileIterator) vectorIterable.iterator();
             long i = 0;
-            while (iterator.hasNext()) {
-              Vector vector = iterator.next();
+            while (reader.next(keyWritable, valueWritable)) {
               if (printKey) {
-                writer.write(iterator.key().toString());
-                writer.write("\t");
+                Writable notTheVectorWritable = transposeKeyValue ? valueWritable : keyWritable;
+                writer.write(notTheVectorWritable.toString());
+                writer.write('\t');
               }
+              VectorWritable vectorWritable = (VectorWritable) (transposeKeyValue ? keyWritable : valueWritable);
+              Vector vector = vectorWritable.get();
               if (sizeOnly) {
                 if (vector instanceof NamedVector) {
                   writer.write(((NamedVector) vector).getName());
@@ -154,9 +158,7 @@ public final class VectorDumper {
                 writer.write(fmtStr);
                 writer.write('\n');
               }
-              //i++;
             }
-            //System.out.println("Dumped " + i + " Vectors");
           } finally {
             writer.close();
           }

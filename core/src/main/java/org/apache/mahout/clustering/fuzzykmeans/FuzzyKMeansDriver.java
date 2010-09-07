@@ -167,7 +167,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
     double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(parseArguments(args)
@@ -388,10 +388,10 @@ public class FuzzyKMeansDriver extends AbstractJob {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          VectorWritable vw = (VectorWritable) reader.getValueClass().newInstance();
+          VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
           while (reader.next(key, vw)) {
             clusterer.addPointToClusters(clusters, vw.get());
-            vw = (VectorWritable) reader.getValueClass().newInstance();
+            vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
           }
         } finally {
           reader.close();
@@ -517,10 +517,10 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                                            WeightedVectorWritable.class);
       try {
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable vw = (VectorWritable) reader.getValueClass().newInstance();
+        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, vw)) {
           clusterer.emitPointToClusters(vw, clusters, writer);
-          vw = (VectorWritable) reader.getValueClass().newInstance();
+          vw = (VectorWritable) reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         }
       } finally {
         reader.close();

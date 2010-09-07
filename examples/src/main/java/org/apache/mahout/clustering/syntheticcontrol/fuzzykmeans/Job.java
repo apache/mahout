@@ -103,13 +103,16 @@ public final class Job extends FuzzyKMeansDriver {
       HadoopUtil.overwriteOutput(output);
     }
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
-      clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(argMap
-          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
+      clusters = RandomSeedGenerator.buildRandom(
+          input,
+          clusters,
+          Integer.parseInt(argMap.get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)),
+          measure);
     }
-    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
+    //boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
     job(input, output, measure, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta);

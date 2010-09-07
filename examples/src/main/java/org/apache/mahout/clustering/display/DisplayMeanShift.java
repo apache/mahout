@@ -115,8 +115,7 @@ final class DisplayMeanShift extends DisplayClustering {
       for (VectorWritable sample : SAMPLE_DATA) {
         points.add(sample.get());
       }
-      List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-      canopies = MeanShiftCanopyClusterer.clusterPoints(points, measure, 0.005, t1, t2, 20);
+      List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, measure, 0.005, t1, t2, 20);
       for (MeanShiftCanopy canopy : canopies) {
         log.info(canopy.toString());
       }

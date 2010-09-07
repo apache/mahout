@@ -70,8 +70,8 @@ public class CanopyClusterer {
   public void configure(Configuration configuration) {
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(configuration.get(CanopyConfigKeys.DISTANCE_MEASURE_KEY));
-      measure = (DistanceMeasure) cl.newInstance();
+      measure = ccl.loadClass(configuration.get(CanopyConfigKeys.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(configuration);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);

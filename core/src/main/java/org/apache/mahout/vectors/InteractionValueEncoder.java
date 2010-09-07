@@ -22,8 +22,8 @@ import org.apache.mahout.math.Vector;
 import java.util.Locale;
 
 public class InteractionValueEncoder extends FeatureVectorEncoder {
-  private FeatureVectorEncoder firstEncoder;
-  private FeatureVectorEncoder secondEncoder;
+  private final FeatureVectorEncoder firstEncoder;
+  private final FeatureVectorEncoder secondEncoder;
 
   public InteractionValueEncoder(String name, FeatureVectorEncoder encoderOne, FeatureVectorEncoder encoderTwo) {
     super(name, 2);

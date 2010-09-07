@@ -13,7 +13,7 @@ import org.apache.mahout.math.list.IntArrayList;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Descriptive {
+public final class Descriptive {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   private Descriptive() {
@@ -21,18 +21,18 @@ public class Descriptive {
 
   /** Returns the auto-correlation of a data sequence. */
   public static double autoCorrelation(DoubleArrayList data, int lag, double mean, double variance) {
-    int N = data.size();
-    if (lag >= N) {
+    int n = data.size();
+    if (lag >= n) {
       throw new IllegalArgumentException("Lag is too large");
     }
 
     double[] elements = data.elements();
     double run = 0;
-    for (int i = lag; i < N; ++i) {
+    for (int i = lag; i < n; ++i) {
       run += (elements[i] - mean) * (elements[i - lag] - mean);
     }
 
-    return (run / (N - lag)) / variance;
+    return (run / (n - lag)) / variance;
   }
 
   /**
@@ -40,7 +40,7 @@ public class Descriptive {
    *
    * @throws IndexOutOfBoundsException if <tt>to!=from-1 || from&lt;0 || from&gt;to || to&gt;=size()</tt>.
    */
-  protected static void checkRangeFromTo(int from, int to, int theSize) {
+  static void checkRangeFromTo(int from, int to, int theSize) {
     if (to == from - 1) {
       return;
     }
@@ -49,7 +49,10 @@ public class Descriptive {
     }
   }
 
-  /** Returns the correlation of two data sequences. That is <tt>covariance(data1,data2)/(standardDev1*standardDev2)</tt>. */
+  /**
+   * Returns the correlation of two data sequences.
+   * That is <tt>covariance(data1,data2)/(standardDev1*standardDev2)</tt>.
+   */
   public static double correlation(DoubleArrayList data1, double standardDev1, DoubleArrayList data2,
                                    double standardDev2) {
     return covariance(data1, data2) / (standardDev1 * standardDev2);
@@ -70,16 +73,16 @@ public class Descriptive {
 
     double sumx = elements1[0];
     double sumy = elements2[0];
-    double Sxy = 0;
+    double sxy = 0;
     for (int i = 1; i < size; ++i) {
       double x = elements1[i];
       double y = elements2[i];
       sumx += x;
-      Sxy += (x - sumx / (i + 1)) * (y - sumy / i);
+      sxy += (x - sumx / (i + 1)) * (y - sumy / i);
       sumy += y;
       // Exercise for the reader: Why does this give us the right answer?
     }
-    return Sxy / (size - 1);
+    return sxy / (size - 1);
   }
 
   /*
@@ -110,15 +113,15 @@ public class Descriptive {
     }
 
     double[] elements = data.elements();
-    double run_sq = elements[0] * elements[0];
+    double runSq = elements[0] * elements[0];
     double run = 0;
     for (int i = 1; i < size; ++i) {
       double x = elements[i] - elements[i - 1];
       run += x * x;
-      run_sq += elements[i] * elements[i];
+      runSq += elements[i] * elements[i];
     }
 
-    return run / run_sq;
+    return run / runSq;
   }
 
   /**
@@ -152,8 +155,9 @@ public class Descriptive {
       int cursor = i;
 
       // determine run length (number of equal elements)
-      while (++i < size && sortedElements[i] == element) {
-      }
+      do {
+        i++;
+      } while (i < size && sortedElements[i] == element);
 
       int runLength = i - cursor;
       distinctValues.add(element);
@@ -285,7 +289,8 @@ public class Descriptive {
    *                    <tt>data[from], ..., data[to]</tt>.
    * @param sumOfPowers the old values of the sums in the following format: <ul> <li><tt>sumOfPowers[0]</tt> is the old
    *                    <tt>Sum(data[i]<sup>fromSumIndex</sup>)</tt>. <li><tt>sumOfPowers[1]</tt> is the old
-   *                    <tt>Sum(data[i]<sup>fromSumIndex+1</sup>)</tt>. <li>... <li><tt>sumOfPowers[toSumIndex-fromSumIndex]</tt>
+   *                    <tt>Sum(data[i]<sup>fromSumIndex+1</sup>)</tt>. <li>...
+   *                    <li><tt>sumOfPowers[toSumIndex-fromSumIndex]</tt>
    *                    is the old <tt>Sum(data[i]<sup>toSumIndex</sup>)</tt>. </ul> If no data sequence elements have
    *                    so far been recorded set all old values of the sums to <tt>0.0</tt>.
    */
@@ -317,38 +322,38 @@ public class Descriptive {
         double[] elements = data.elements();
         double sum = sumOfPowers[0];
         double sumSquares = sumOfPowers[1];
-        double sum_xxx = sumOfPowers[2];
+        double sumXxx = sumOfPowers[2];
         for (int i = from - 1; ++i <= to;) {
           double element = elements[i];
           sum += element;
           sumSquares += element * element;
-          sum_xxx += element * element * element;
+          sumXxx += element * element * element;
           //if (element < min) min = element;
           //else if (element > max) max = element;
         }
         sumOfPowers[0] += sum;
         sumOfPowers[1] += sumSquares;
-        sumOfPowers[2] += sum_xxx;
+        sumOfPowers[2] += sumXxx;
         return;
       } else if (toSumIndex == 4) { // handle quicker
         double[] elements = data.elements();
         double sum = sumOfPowers[0];
         double sumSquares = sumOfPowers[1];
-        double sum_xxx = sumOfPowers[2];
-        double sum_xxxx = sumOfPowers[3];
+        double sumXxx = sumOfPowers[2];
+        double sumXxxx = sumOfPowers[3];
         for (int i = from - 1; ++i <= to;) {
           double element = elements[i];
           sum += element;
           sumSquares += element * element;
-          sum_xxx += element * element * element;
-          sum_xxxx += element * element * element * element;
+          sumXxx += element * element * element;
+          sumXxxx += element * element * element * element;
           //if (element < min) min = element;
           //else if (element > max) max = element;
         }
         sumOfPowers[0] += sum;
         sumOfPowers[1] += sumSquares;
-        sumOfPowers[2] += sum_xxx;
-        sumOfPowers[3] += sum_xxxx;
+        sumOfPowers[2] += sumXxx;
+        sumOfPowers[3] += sumXxxx;
         return;
       }
     }
@@ -463,8 +468,8 @@ public class Descriptive {
     double v = (elements[0] - mean) * (elements[0] - mean);
 
     for (int i = 1; i < size; i++) {
-      double delta0 = (elements[i - 1] - mean);
-      double delta1 = (elements[i] - mean);
+      double delta0 = elements[i - 1] - mean;
+      double delta1 = elements[i] - mean;
       q += (delta0 * delta1 - q) / (i + 1);
       v += (delta1 * delta1 - v) / (i + 1);
     }
@@ -619,7 +624,8 @@ public class Descriptive {
   }
 
   /**
-   * Returns the product, which is <tt>Prod( data[i] )</tt>. In other words: <tt>data[0]*data[1]*...*data[data.size()-1]</tt>.
+   * Returns the product, which is <tt>Prod( data[i] )</tt>.
+   * In other words: <tt>data[0]*data[1]*...*data[data.size()-1]</tt>.
    * This method uses the equivalent definition: <tt>prod = pow( exp( Sum( Log(x[i]) ) / size(), size())</tt>.
    */
   public static double product(int size, double sumOfLogarithms) {
@@ -830,13 +836,13 @@ public class Descriptive {
     // the unbiased standard deviation.
     double s = Math.sqrt(sampleVariance);
     // It needs to be multiplied by this correction factor.
-    double Cn;
+    double cn;
     if (n > 30) {
-      Cn = 1 + 1.0 / (4 * (n - 1)); // Cn = 1+1/(4*(n-1));
+      cn = 1 + 1.0 / (4 * (n - 1)); // Cn = 1+1/(4*(n-1));
     } else {
-      Cn = Math.sqrt((n - 1) * 0.5) * Gamma.gamma((n - 1) * 0.5) / Gamma.gamma(n * 0.5);
+      cn = Math.sqrt((n - 1) * 0.5) * Gamma.gamma((n - 1) * 0.5) / Gamma.gamma(n * 0.5);
     }
-    return Cn * s;
+    return cn * s;
   }
 
   /**
@@ -927,7 +933,8 @@ public class Descriptive {
         bins[i].addAllOfFromTo(sortedList, nextStart, insertionPosition - 1);
         nextStart = insertionPosition;
       } else { // splitValue found
-        // For multiple identical elements ("runs"), binarySearch does not define which of all valid indexes is returned.
+        // For multiple identical elements ("runs"),
+        // binarySearch does not define which of all valid indexes is returned.
         // Thus, skip over to the first element of a run.
         do {
           index--;
@@ -1148,21 +1155,21 @@ public class Descriptive {
    * @param mean       the mean of the (full) sorted data sequence.
    */
   public static double trimmedMean(DoubleArrayList sortedData, double mean, int left, int right) {
-    int N = sortedData.size();
-    if (N == 0) {
+    int n = sortedData.size();
+    if (n == 0) {
       throw new IllegalArgumentException("Empty data.");
     }
-    if (left + right >= N) {
+    if (left + right >= n) {
       throw new IllegalArgumentException("Not enough data.");
     }
 
     double[] sortedElements = sortedData.elements();
-    int N0 = N;
+    int n0 = n;
     for (int i = 0; i < left; ++i) {
-      mean += (mean - sortedElements[i]) / (--N);
+      mean += (mean - sortedElements[i]) / (--n);
     }
     for (int i = 0; i < right; ++i) {
-      mean += (mean - sortedElements[N0 - 1 - i]) / (--N);
+      mean += (mean - sortedElements[n0 - 1 - i]) / (--n);
     }
     return mean;
   }
@@ -1185,7 +1192,9 @@ public class Descriptive {
     return (sumOfSquares - mean * sum) / size;
   }
 
-  /** Returns the weighted mean of a data sequence. That is <tt> Sum (data[i] * weights[i]) / Sum ( weights[i] )</tt>. */
+  /**
+   * Returns the weighted mean of a data sequence. That is <tt> Sum (data[i] * weights[i]) / Sum ( weights[i] )</tt>. 
+   */
   public static double weightedMean(DoubleArrayList data, DoubleArrayList weights) {
     int size = data.size();
     if (size != weights.size() || size == 0) {
@@ -1223,11 +1232,11 @@ public class Descriptive {
    * @param mean       the mean of the (full) sorted data sequence.
    */
   public static double winsorizedMean(DoubleArrayList sortedData, double mean, int left, int right) {
-    int N = sortedData.size();
-    if (N == 0) {
+    int n = sortedData.size();
+    if (n == 0) {
       throw new IllegalArgumentException("Empty data.");
     }
-    if (left + right >= N) {
+    if (left + right >= n) {
       throw new IllegalArgumentException("Not enough data.");
     }
 
@@ -1235,12 +1244,12 @@ public class Descriptive {
 
     double leftElement = sortedElements[left];
     for (int i = 0; i < left; ++i) {
-      mean += (leftElement - sortedElements[i]) / N;
+      mean += (leftElement - sortedElements[i]) / n;
     }
 
-    double rightElement = sortedElements[N - 1 - right];
+    double rightElement = sortedElements[n - 1 - right];
     for (int i = 0; i < right; ++i) {
-      mean += (rightElement - sortedElements[N - 1 - i]) / N;
+      mean += (rightElement - sortedElements[n - 1 - i]) / n;
     }
 
     return mean;

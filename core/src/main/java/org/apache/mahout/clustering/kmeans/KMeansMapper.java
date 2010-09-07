@@ -18,6 +18,7 @@ package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -47,8 +48,8 @@ public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, 
     Configuration conf = context.getConfiguration();
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      Class<?> cl = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY));
-      DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
+      DistanceMeasure measure = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
       measure.configure(conf);
 
       this.clusterer = new KMeansClusterer(measure);
@@ -76,7 +77,7 @@ public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, 
    *          a List<Cluster>
    * @param measure TODO
    */
-  void setup(List<Cluster> clusters, DistanceMeasure measure) {
+  void setup(Collection<Cluster> clusters, DistanceMeasure measure) {
     this.clusters.clear();
     this.clusters.addAll(clusters);
     this.clusterer = new KMeansClusterer(measure);

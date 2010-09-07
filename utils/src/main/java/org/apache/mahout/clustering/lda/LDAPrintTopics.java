@@ -144,9 +144,9 @@ public final class LDAPrintTopics {
       }
       
       List<String> wordList;
-      if (dictionaryType.equals("text")) {
+      if ("text".equals(dictionaryType)) {
         wordList = Arrays.asList(VectorHelper.loadTermDictionary(new File(dictFile)));
-      } else if (dictionaryType.equals("sequencefile")) {
+      } else if ("sequencefile".equals(dictionaryType)) {
         FileSystem fs = FileSystem.get(new Path(dictFile).toUri(), config);
         wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, fs, dictFile));
       } else {
@@ -157,10 +157,8 @@ public final class LDAPrintTopics {
       
       if (cmdLine.hasOption(outOpt)) {
         File output = new File(cmdLine.getValue(outOpt).toString());
-        if (!output.exists()) {
-          if (!output.mkdirs()) {
-            throw new IOException("Could not create directory: " + output);
-          }
+        if (!output.exists() && !output.mkdirs()) {
+          throw new IOException("Could not create directory: " + output);
         }
         writeTopWords(topWords, output);
       } else {

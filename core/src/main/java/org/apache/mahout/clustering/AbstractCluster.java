@@ -32,17 +32,17 @@ public abstract class AbstractCluster implements Cluster {
 
   private Vector radius;
 
-  public AbstractCluster() {
+  protected AbstractCluster() {
   }
 
-  public AbstractCluster(Vector point, int id2) {
+  protected AbstractCluster(Vector point, int id2) {
     this.numPoints = 0;
     this.center = new RandomAccessSparseVector(point);
     this.radius = point.like();
     this.id = id2;
   }
 
-  public AbstractCluster(Vector center2, Vector radius2, int id2) {
+  protected AbstractCluster(Vector center2, Vector radius2, int id2) {
     this.numPoints = 0;
     this.center = new RandomAccessSparseVector(center2);
     this.radius = new RandomAccessSparseVector(radius2);
@@ -121,9 +121,6 @@ public abstract class AbstractCluster implements Cluster {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.models.Model#observe(java.lang.Object)
-   */
   @Override
   public void observe(VectorWritable x) {
     observe(x.get());
@@ -158,6 +155,7 @@ public abstract class AbstractCluster implements Cluster {
     return new ClusterObservations(s0, s1, s2);
   }
 
+  @Override
   public void computeParameters() {
     if (s0 == 0) {
       return;
@@ -197,13 +195,13 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
-    buf.append(getIdentifier() + "{n=").append(numPoints).append(" c=");
+    buf.append(getIdentifier()).append("{n=").append(numPoints).append(" c=");
     if (center != null) {
-      buf.append(AbstractCluster.formatVector(center, bindings));
+      buf.append(formatVector(center, bindings));
     }
     buf.append(" r=");
     if (radius != null) {
-      buf.append(AbstractCluster.formatVector(radius, bindings));
+      buf.append(formatVector(radius, bindings));
     }
     buf.append('}');
     return buf.toString();
@@ -292,9 +290,6 @@ public abstract class AbstractCluster implements Cluster {
     return buf.toString();
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.models.Model#count()
-   */
   @Override
   public int count() {
     return getNumPoints();

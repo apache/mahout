@@ -27,7 +27,7 @@ import java.util.Map;
 * Assigns integer codes to strings as they appear.
 */
 public class Dictionary {
-  private Map<String, Integer> dict = Maps.newLinkedHashMap();
+  private final Map<String, Integer> dict = Maps.newLinkedHashMap();
 
   public int intern(String s) {
     if (!dict.containsKey(s)) {

@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Random;
 
@@ -17,12 +16,15 @@ import java.util.Random;
 @Deprecated
 public class Hyperbolic extends AbstractContinousDistribution {
 
+  // The uniform random number generated shared by all <b>static</b> methods.
+  private static final Hyperbolic SHARED = new Hyperbolic(10.0, 10.0, RandomUtils.getRandom());
+
   private double alpha;
   private double beta;
 
   // cached values shared for generateHyperbolic(...)
-  private double a_setup = 0.0;
-  private double b_setup = -1.0;
+  private double aSetup;
+  private double bSetup = -1.0;
   private double hr;
   private double hl;
   private double s;
@@ -30,12 +32,8 @@ public class Hyperbolic extends AbstractContinousDistribution {
   private double pr;
   private double samb;
   private double pmr;
-  private double mpa_1;
-  private double mmb_1;
-
-
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Hyperbolic shared = new Hyperbolic(10.0, 10.0, RandomUtils.getRandom());
+  private double mpa1;
+  private double mmb1;
 
   /** Constructs a Beta distribution. */
   public Hyperbolic(double alpha, double beta, Random randomGenerator) {
@@ -69,31 +67,31 @@ public class Hyperbolic extends AbstractContinousDistribution {
  *                                                                *
  ******************************************************************/
 
-    if ((a_setup != alpha) || (b_setup != beta)) { // SET-UP
+    if (aSetup != alpha || bSetup != beta) { // SET-UP
       //double pl;
       double amb = alpha * alpha - beta * beta;
       samb = Math.sqrt(amb);                                  // -log(f(mode))
       double mode = beta / samb;
-      double help_1 = alpha * Math.sqrt(2.0 * samb + 1.0);
-      double help_2 = beta * (samb + 1.0);
-      double mpa = (help_2 + help_1) / amb;
-      double mmb = (help_2 - help_1) / amb;
-      double a_ = mpa - mode;
-      double b_ = -mmb + mode;
+      double help1 = alpha * Math.sqrt(2.0 * samb + 1.0);
+      double help2 = beta * (samb + 1.0);
+      double mpa = (help2 + help1) / amb;
+      double mmb = (help2 - help1) / amb;
+      double a = mpa - mode;
+      double b = -mmb + mode;
       hr = -1.0 / (-alpha * mpa / Math.sqrt(1.0 + mpa * mpa) + beta);
       hl = 1.0 / (-alpha * mmb / Math.sqrt(1.0 + mmb * mmb) + beta);
-      double a_1 = a_ - hr;
-      double b_1 = b_ - hl;
-      mmb_1 = mode - b_1;                                     // lower border
-      mpa_1 = mode + a_1;                                     // upper border
+      double a1 = a - hr;
+      double b1 = b - hl;
+      mmb1 = mode - b1;                                     // lower border
+      mpa1 = mode + a1;                                     // upper border
 
-      s = (a_ + b_);
-      pm = (a_1 + b_1) / s;
+      s = a + b;
+      pm = (a1 + b1) / s;
       pr = hr / s;
       pmr = pm + pr;
 
-      a_setup = alpha;
-      b_setup = beta;
+      aSetup = alpha;
+      bSetup = beta;
     }
 
     // GENERATOR
@@ -103,7 +101,7 @@ public class Hyperbolic extends AbstractContinousDistribution {
       double v = randomGenerator.nextDouble();
       if (u <= pm) { // Rejection with a uniform majorizing function
         // over the body of the distribution
-        x = mmb_1 + u * s;
+        x = mmb1 + u * s;
         if (Math.log(v) <= (-alpha * Math.sqrt(1.0 + x * x) + beta * x + samb)) {
           break;
         }
@@ -112,14 +110,14 @@ public class Hyperbolic extends AbstractContinousDistribution {
         if (u <= pmr) {  // Rejection with an exponential envelope on the
           // right side of the mode
           e = -Math.log((u - pm) / pr);
-          x = mpa_1 + hr * e;
+          x = mpa1 + hr * e;
           if ((Math.log(v) - e) <= (-alpha * Math.sqrt(1.0 + x * x) + beta * x + samb)) {
             break;
           }
         } else {           // Rejection with an exponential envelope on the
           // left side of the mode
           e = Math.log((u - pmr) / (1.0 - pmr));
-          x = mmb_1 + hl * e;
+          x = mmb1 + hl * e;
           if ((Math.log(v) + e) <= (-alpha * Math.sqrt(1.0 + x * x) + beta * x + samb)) {
             break;
           }
@@ -127,7 +125,7 @@ public class Hyperbolic extends AbstractContinousDistribution {
       }
     }
 
-    return (x);
+    return x;
   }
 
   /** Sets the parameters. */
@@ -138,8 +136,8 @@ public class Hyperbolic extends AbstractContinousDistribution {
 
   /** Returns a random number from the distribution. */
   public static double staticNextDouble(double alpha, double beta) {
-    synchronized (shared) {
-      return shared.nextDouble(alpha, beta);
+    synchronized (SHARED) {
+      return SHARED.nextDouble(alpha, beta);
     }
   }
 

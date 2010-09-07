@@ -1,6 +1,33 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.classifier.sgd;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import org.apache.mahout.ep.EvolutionaryProcess;
 import org.apache.mahout.ep.Mapping;
@@ -13,6 +40,7 @@ import org.apache.mahout.math.stats.OnlineAuc;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -20,7 +48,8 @@ import java.util.List;
 /**
  * Provides the ability to store SGD model-related objects as JSON.
  */
-public class ModelSerializer {
+public final class ModelSerializer {
+
   // thread-local singleton json (de)serializer
   private static final ThreadLocal<Gson> GSON;
   static {
@@ -50,9 +79,12 @@ public class ModelSerializer {
   }
 
   public static void writeJson(String path, AdaptiveLogisticRegression model) throws IOException {
-    FileWriter out = new FileWriter(path);
-    out.write(gson().toJson(model));
-    out.close();
+    OutputStreamWriter out = new FileWriter(path);
+    try {
+      out.write(gson().toJson(model));
+    } finally {
+      out.close();
+    }
   }
 
   /**
@@ -68,12 +100,15 @@ public class ModelSerializer {
 
   private static class MappingTypeAdapter implements JsonDeserializer<Mapping>, JsonSerializer<Mapping> {
     @Override
-    public Mapping deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public Mapping deserialize(JsonElement jsonElement,
+                               Type type,
+                               JsonDeserializationContext jsonDeserializationContext) {
       JsonObject x = jsonElement.getAsJsonObject();
       try {
-        return jsonDeserializationContext.deserialize(x.get("value"), (Class) Class.forName(x.get("class").getAsString()));
+        return jsonDeserializationContext.deserialize(x.get("value"), Class.forName(x.get("class").getAsString()));
       } catch (ClassNotFoundException e) {
-        throw new IllegalStateException("Can't understand serialized data, found bad type: " + x.get("class").getAsString());
+        throw new IllegalStateException("Can't understand serialized data, found bad type: "
+            + x.get("class").getAsString());
       }
     }
 
@@ -88,17 +123,22 @@ public class ModelSerializer {
 
   private static class PriorTypeAdapter implements JsonDeserializer<PriorFunction>, JsonSerializer<PriorFunction> {
     @Override
-    public PriorFunction deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public PriorFunction deserialize(JsonElement jsonElement,
+                                     Type type,
+                                     JsonDeserializationContext jsonDeserializationContext) {
       JsonObject x = jsonElement.getAsJsonObject();
       try {
-        return jsonDeserializationContext.deserialize(x.get("value"), (Class) Class.forName(x.get("class").getAsString()));
+        return jsonDeserializationContext.deserialize(x.get("value"), Class.forName(x.get("class").getAsString()));
       } catch (ClassNotFoundException e) {
-        throw new IllegalStateException("Can't understand serialized data, found bad type: " + x.get("class").getAsString());
+        throw new IllegalStateException("Can't understand serialized data, found bad type: "
+            + x.get("class").getAsString());
       }
     }
 
     @Override
-    public JsonElement serialize(PriorFunction priorFunction, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(PriorFunction priorFunction,
+                                 Type type,
+                                 JsonSerializationContext jsonSerializationContext) {
       JsonObject r = new JsonObject();
       r.add("class", new JsonPrimitive(priorFunction.getClass().getName()));
       r.add("value", jsonSerializationContext.serialize(priorFunction));
@@ -108,7 +148,9 @@ public class ModelSerializer {
 
   private static class CrossFoldLearnerTypeAdapter implements JsonDeserializer<CrossFoldLearner> {
     @Override
-    public CrossFoldLearner deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public CrossFoldLearner deserialize(JsonElement jsonElement,
+                                        Type type,
+                                        JsonDeserializationContext jsonDeserializationContext) {
       CrossFoldLearner r = new CrossFoldLearner();
       JsonObject x = jsonElement.getAsJsonObject();
       r.setRecord(x.get("record").getAsInt());
@@ -117,7 +159,8 @@ public class ModelSerializer {
 
       JsonArray models = x.get("models").getAsJsonArray();
       for (JsonElement model : models) {
-        r.addModel(jsonDeserializationContext.<OnlineLogisticRegression>deserialize(model, OnlineLogisticRegression.class));
+        r.addModel(
+            jsonDeserializationContext.<OnlineLogisticRegression>deserialize(model, OnlineLogisticRegression.class));
       }
 
       r.setParameters(asArray(x, "parameters"));
@@ -211,7 +254,9 @@ public class ModelSerializer {
   private static class StateTypeAdapter implements JsonSerializer<State<AdaptiveLogisticRegression.Wrapper>>,
     JsonDeserializer<State<AdaptiveLogisticRegression.Wrapper>> {
     @Override
-    public State<AdaptiveLogisticRegression.Wrapper> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public State<AdaptiveLogisticRegression.Wrapper> deserialize(
+      JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
+
       JsonObject v = (JsonObject) jsonElement;
       double[] params = asArray(v, "params");
       double omni = v.get("omni").getAsDouble();
@@ -226,12 +271,17 @@ public class ModelSerializer {
       }.getType();
       r.setMaps(jsonDeserializationContext.<List<Mapping>>deserialize(v.get("maps"), mapListType));
 
-      r.setPayload(jsonDeserializationContext.<AdaptiveLogisticRegression.Wrapper>deserialize(v.get("payload"), AdaptiveLogisticRegression.Wrapper.class));
+      r.setPayload(
+          jsonDeserializationContext.<AdaptiveLogisticRegression.Wrapper>deserialize(
+              v.get("payload"),
+              AdaptiveLogisticRegression.Wrapper.class));
       return r;
     }
 
     @Override
-    public JsonElement serialize(State<AdaptiveLogisticRegression.Wrapper> state, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(State<AdaptiveLogisticRegression.Wrapper> state,
+                                 Type type,
+                                 JsonSerializationContext jsonSerializationContext) {
       JsonObject r = new JsonObject();
       r.add("id", new JsonPrimitive(state.getId()));
       JsonArray v = new JsonArray();
@@ -258,9 +308,12 @@ public class ModelSerializer {
     JsonDeserializer<AdaptiveLogisticRegression> {
 
     @Override
-    public AdaptiveLogisticRegression deserialize(JsonElement element, Type type, JsonDeserializationContext jdc) throws JsonParseException {
+    public AdaptiveLogisticRegression deserialize(JsonElement element, Type type, JsonDeserializationContext jdc) {
       JsonObject x = element.getAsJsonObject();
-      AdaptiveLogisticRegression r = new AdaptiveLogisticRegression(x.get("numCategories").getAsInt(), x.get("numFeatures").getAsInt(), jdc.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
+      AdaptiveLogisticRegression r =
+          new AdaptiveLogisticRegression(x.get("numCategories").getAsInt(),
+                                         x.get("numFeatures").getAsInt(),
+                                         jdc.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
       Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {
       }.getType();
       r.setEvaluationInterval(x.get("evaluationInterval").getAsInt());
@@ -272,8 +325,8 @@ public class ModelSerializer {
       r.setSeed(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("seed"), stateType));
       r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("best"), stateType));
 
-      r.setBuffer(jdc.<List<AdaptiveLogisticRegression.TrainingExample>>deserialize(x.get("buffer"), new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {
-      }.getType()));
+      r.setBuffer(jdc.<List<AdaptiveLogisticRegression.TrainingExample>>deserialize(x.get("buffer"),
+                  new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {}.getType()));
       return r;
     }
 
@@ -299,11 +352,11 @@ public class ModelSerializer {
     }
   }
 
-  private static class EvolutionaryProcessTypeAdapter implements InstanceCreator<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>,
+  private static class EvolutionaryProcessTypeAdapter implements
+    InstanceCreator<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>,
     JsonDeserializer<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>,
     JsonSerializer<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>> {
-    private static final Type STATE_TYPE = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {
-    }.getType();
+    private static final Type STATE_TYPE = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
 
     @Override
     public EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> createInstance(Type type) {
@@ -311,11 +364,13 @@ public class ModelSerializer {
     }
 
     @Override
-    public EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> deserialize(
+        JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
       JsonObject x = (JsonObject) jsonElement;
       int threadCount = x.get("threadCount").getAsInt();
 
-      EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> r = new EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>();
+      EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> r =
+          new EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>();
       r.setThreadCount(threadCount);
 
       for (JsonElement element : x.get("population").getAsJsonArray()) {
@@ -326,7 +381,9 @@ public class ModelSerializer {
     }
 
     @Override
-    public JsonElement serialize(EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> x, Type type, JsonSerializationContext jsc) {
+    public JsonElement serialize(EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> x,
+                                 Type type,
+                                 JsonSerializationContext jsc) {
       JsonObject r = new JsonObject();
       r.add("threadCount", new JsonPrimitive(x.getThreadCount()));
       JsonArray v = new JsonArray();

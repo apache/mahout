@@ -59,7 +59,9 @@ public class CBayesDriver implements BayesJob {
     CBayesThetaNormalizerDriver normalizer = new CBayesThetaNormalizerDriver();
     normalizer.runJob(input, output, params);
     
-    if (Boolean.getBoolean(params.get("skipCleanup"))) return;
+    if (Boolean.parseBoolean(params.get("skipCleanup"))) {
+      return;
+    }
     
     Path docCountOutPath = new Path(output, "trainer-docCount");
     HadoopUtil.overwriteOutput(docCountOutPath);

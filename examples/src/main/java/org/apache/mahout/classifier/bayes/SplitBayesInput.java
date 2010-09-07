@@ -27,7 +27,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.BitSet;
-import java.util.Date;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -41,7 +40,6 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
-import org.apache.mahout.math.jet.random.engine.MersenneTwister;
 import org.apache.mahout.math.jet.random.sampling.RandomSampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,8 +204,7 @@ public class SplitBayesInput {
 
       if (cmdLine.hasOption(testSplitSizeOpt) && cmdLine.hasOption(testSplitPctOpt)) {
         throw new OptionException(testSplitSizeOpt, "must have either split size or split percentage option, not BOTH");
-      }
-      else if (!cmdLine.hasOption(testSplitSizeOpt) && !cmdLine.hasOption(testSplitPctOpt)) {
+      } else if (!cmdLine.hasOption(testSplitSizeOpt) && !cmdLine.hasOption(testSplitPctOpt)) {
         throw new OptionException(testSplitSizeOpt, "must have either split size or split percentage option");
       }
 
@@ -298,18 +295,17 @@ public class SplitBayesInput {
       testSplitSize = this.testRandomSelectionSize;
       
       if (testRandomSelectionPct > 0) {
-        testSplitSize = Math.round(lineCount * ( testRandomSelectionPct / 100.0f ));
+        testSplitSize = Math.round(lineCount * (testRandomSelectionPct / 100.0f));
       }
       log.info("{} test split size is {} based on random selection percentage {}",
                new Object[] {inputFile.getName(), testSplitSize, testRandomSelectionPct});
       long[] ridx = new long[testSplitSize];
-      RandomSampler.sample(testSplitSize, lineCount-1, testSplitSize, 0, ridx, 0, RandomUtils.getRandom());
+      RandomSampler.sample(testSplitSize, lineCount - 1, testSplitSize, 0, ridx, 0, RandomUtils.getRandom());
       randomSel = new BitSet(lineCount);
       for (long idx : ridx) {
         randomSel.set((int) idx + 1);
       }
-    }
-    else {
+    } else {
       if (testSplitPct > 0) { // calculate split size based on percentage
         testSplitSize = Math.round(lineCount * (testSplitPct / 100.0f));
         log.info("{} test split size is {} based on percentage {}",
@@ -331,11 +327,10 @@ public class SplitBayesInput {
       if (testSplitStart < 0) {
         throw new IllegalArgumentException("test split size for " + inputFile + " is too large, it would produce an "
             + "empty training set from the initial set of " + lineCount + " examples");
-      }
-      else if ((lineCount - testSplitSize) < testSplitSize) {
+      } else if ((lineCount - testSplitSize) < testSplitSize) {
         log.warn("Test set size for {} may be too large, {} is larger than the number of "
                  + "lines remaining in the training set: {}",
-                 new Object[] {inputFile, testSplitSize, (lineCount - testSplitSize)});
+                 new Object[] {inputFile, testSplitSize, lineCount - testSplitSize});
       }
     }
     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), charset));
@@ -542,12 +537,11 @@ public class SplitBayesInput {
     }
 
     if (count == 0) {
-      throw new IllegalArgumentException("either test split size, test split pct, " +
-        "random selection size or random selection pct must be specified and a positive integer");
-    }
-    else if (count > 1) {
-      throw new IllegalArgumentException("only test split size, test split pct, " +
-        "random selection size or random selection pct may be specified");
+      throw new IllegalArgumentException("either test split size, test split pct, "
+          + "random selection size or random selection pct must be specified and a positive integer");
+    } else if (count > 1) {
+      throw new IllegalArgumentException("only test split size, test split pct, "
+          + "random selection size or random selection pct may be specified");
     }
 
     if (trainingOutputDirectory == null) {

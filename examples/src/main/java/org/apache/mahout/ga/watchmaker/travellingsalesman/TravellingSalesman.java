@@ -121,7 +121,7 @@ public final class TravellingSalesman extends JApplet {
     dialog.setVisible(true);
   }
 
-  private class TSSwingBackgroundTask extends SwingBackgroundTask<List<String>> {
+  private final class TSSwingBackgroundTask extends SwingBackgroundTask<List<String>> {
 
     private long elapsedTime;
     private final TravellingSalesmanStrategy strategy;

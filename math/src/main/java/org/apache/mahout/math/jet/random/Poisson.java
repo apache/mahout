@@ -250,7 +250,7 @@ public class Poisson extends AbstractDiscreteDistribution {
 
           // computation of candidate X < k2, and its counterpart Y > k2
           // either squeeze-acceptance of X or acceptance-rejection of Y
-          Dk = (int) (dl * gen.nextDouble()) + 1;
+          Dk = gen.nextInt((int) dl) + 1;
           if (W <= f2 - Dk * (f2 - f2 / r2)) {            // quick accept of
             return (k2 - Dk);                          // X = k2 - Dk
           }
@@ -276,7 +276,7 @@ public class Poisson extends AbstractDiscreteDistribution {
 
           // computation of candidate X > k4, and its counterpart Y < k4
           // either squeeze-acceptance of X or acceptance-rejection of Y
-          Dk = (int) (dr * gen.nextDouble()) + 1;
+          Dk = gen.nextInt((int) dr) + 1;
           if (W <= f4 - Dk * (f4 - f4 * r4)) {             // quick accept of
             return (k4 + Dk);                           // X = k4 + Dk
           }

@@ -74,7 +74,7 @@ final class KMeansUtil {
           Class<?> valueClass = reader.getValueClass();
           Writable key;
           try {
-            key = (Writable) reader.getKeyClass().newInstance();
+            key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
           } catch (InstantiationException e) { // Should not be possible
             log.error("Exception", e);
             throw new IllegalStateException(e);

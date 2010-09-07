@@ -17,12 +17,10 @@
 
 package org.apache.mahout.clustering.kmeans;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -79,7 +77,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
     RandomSeedGenerator.buildRandom(input, output, 4, new ManhattanDistanceMeasure());
     
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "part-randomSeed"), conf);
-    Writable key = (Writable) reader.getKeyClass().newInstance();
+    Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
     AbstractCluster value = (AbstractCluster) reader.getValueClass().newInstance();
     
     int clusterCount = 0;

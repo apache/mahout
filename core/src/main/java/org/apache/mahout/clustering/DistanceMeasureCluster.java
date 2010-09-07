@@ -18,18 +18,14 @@ public class DistanceMeasureCluster extends AbstractCluster {
   }
 
   public DistanceMeasureCluster() {
-    super();
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.AbstractCluster#readFields(java.io.DataInput)
-   */
   @Override
   public void readFields(DataInput in) throws IOException {
     String dm = in.readUTF();
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      this.measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(dm)).newInstance();
+      this.measure = ccl.loadClass(dm).asSubclass(DistanceMeasure.class).newInstance();
     } catch (InstantiationException e) {
       throw new IllegalStateException(e);
     } catch (IllegalAccessException e) {
@@ -40,26 +36,17 @@ public class DistanceMeasureCluster extends AbstractCluster {
     super.readFields(in);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.AbstractCluster#write(java.io.DataOutput)
-   */
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeUTF(measure.getClass().getName());
     super.write(out);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.AbstractCluster#pdf(org.apache.mahout.math.VectorWritable)
-   */
   @Override
   public double pdf(VectorWritable vw) {
     return Math.exp(-measure.distance(vw.get(), getCenter()));
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.dirichlet.models.Model#sampleFromPosterior()
-   */
   @Override
   public Model<VectorWritable> sampleFromPosterior() {
     return new DistanceMeasureCluster(getCenter(), getId(), measure);

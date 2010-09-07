@@ -19,7 +19,7 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 public class LUDecompositionQuick implements java.io.Serializable {
 
   /** Array for internal storage of decomposition. */
-  private DoubleMatrix2D LU;
+  private DoubleMatrix2D lu;
 
   /** pivot sign. */
   private int pivsign;
@@ -55,7 +55,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    */
   public void decompose(DoubleMatrix2D A) {
     // setup
-    LU = A;
+    lu = A;
     int m = A.rows();
     int n = A.columns();
 
@@ -69,46 +69,46 @@ public class LUDecompositionQuick implements java.io.Serializable {
     pivsign = 1;
 
     if (m * n == 0) {
-      setLU(LU);
+      setLU(lu);
       return; // nothing to do
     }
 
     //precompute and cache some views to avoid regenerating them time and again
-    DoubleMatrix1D[] LUrows = new DoubleMatrix1D[m];
+    DoubleMatrix1D[] luRows = new DoubleMatrix1D[m];
     for (int i = 0; i < m; i++) {
-      LUrows[i] = LU.viewRow(i);
+      luRows[i] = lu.viewRow(i);
     }
 
     IntArrayList nonZeroIndexes =
         new IntArrayList(); // sparsity
-    DoubleMatrix1D LUcolj = LU.viewColumn(0).like();  // blocked column j
+    DoubleMatrix1D luColj = lu.viewColumn(0).like();  // blocked column j
     Mult multFunction = Mult.mult(0);
 
     // Outer loop.
-    int CUT_OFF = 10;
+    int cutOff = 10;
     for (int j = 0; j < n; j++) {
       // blocking (make copy of j-th column to localize references)
-      LUcolj.assign(LU.viewColumn(j));
+      luColj.assign(lu.viewColumn(j));
 
       // sparsity detection
-      int maxCardinality = m / CUT_OFF; // == heuristic depending on speedup
-      LUcolj.getNonZeros(nonZeroIndexes, null, maxCardinality);
+      int maxCardinality = m / cutOff; // == heuristic depending on speedup
+      luColj.getNonZeros(nonZeroIndexes, null, maxCardinality);
       int cardinality = nonZeroIndexes.size();
-      boolean sparse = (cardinality < maxCardinality);
+      boolean sparse = cardinality < maxCardinality;
 
       // Apply previous transformations.
       for (int i = 0; i < m; i++) {
         int kmax = Math.min(i, j);
         double s;
         if (sparse) {
-          s = LUrows[i].zDotProduct(LUcolj, 0, kmax, nonZeroIndexes);
+          s = luRows[i].zDotProduct(luColj, 0, kmax, nonZeroIndexes);
         } else {
-          s = LUrows[i].zDotProduct(LUcolj, 0, kmax);
+          s = luRows[i].zDotProduct(luColj, 0, kmax);
         }
-        double before = LUcolj.getQuick(i);
+        double before = luColj.getQuick(i);
         double after = before - s;
-        LUcolj.setQuick(i, after); // LUcolj is a copy
-        LU.setQuick(i, j, after);   // this is the original
+        luColj.setQuick(i, after); // LUcolj is a copy
+        lu.setQuick(i, j, after);   // this is the original
         if (sparse) {
           if (before == 0 && after != 0) { // nasty bug fixed!
             int pos = nonZeroIndexes.binarySearch(i);
@@ -124,9 +124,9 @@ public class LUDecompositionQuick implements java.io.Serializable {
       // Find pivot and exchange if necessary.
       int p = j;
       if (p < m) {
-        double max = Math.abs(LUcolj.getQuick(p));
+        double max = Math.abs(luColj.getQuick(p));
         for (int i = j + 1; i < m; i++) {
-          double v = Math.abs(LUcolj.getQuick(i));
+          double v = Math.abs(luColj.getQuick(i));
           if (v > max) {
             p = i;
             max = v;
@@ -134,7 +134,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
         }
       }
       if (p != j) {
-        LUrows[p].swap(LUrows[j]);
+        luRows[p].swap(luRows[j]);
         int k = piv[p];
         piv[p] = piv[j];
         piv[j] = k;
@@ -143,13 +143,13 @@ public class LUDecompositionQuick implements java.io.Serializable {
 
       // Compute multipliers.
       double jj;
-      if (j < m && (jj = LU.getQuick(j, j)) != 0.0) {
+      if (j < m && (jj = lu.getQuick(j, j)) != 0.0) {
         multFunction.setMultiplicator(1 / jj);
-        LU.viewColumn(j).viewPart(j + 1, m - (j + 1)).assign(multFunction);
+        lu.viewColumn(j).viewPart(j + 1, m - (j + 1)).assign(multFunction);
       }
 
     }
-    setLU(LU);
+    setLU(lu);
   }
 
   /**
@@ -166,7 +166,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
       return;
     }
     // setup
-    LU = A;
+    lu = A;
     int m = A.rows();
     int n = A.columns();
 
@@ -220,7 +220,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
 
     double det = (double) pivsign;
     for (int j = 0; j < n; j++) {
-      det *= LU.getQuick(j, j);
+      det *= lu.getQuick(j, j);
     }
     return det;
   }
@@ -245,7 +245,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @return <tt>L</tt>
    */
   public DoubleMatrix2D getL() {
-    return lowerTriangular(LU.copy());
+    return lowerTriangular(lu.copy());
   }
 
   /**
@@ -254,7 +254,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @return <tt>LU</tt>
    */
   public DoubleMatrix2D getLU() {
-    return LU.copy();
+    return lu.copy();
   }
 
   /**
@@ -272,7 +272,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @return <tt>U</tt>
    */
   public DoubleMatrix2D getU() {
-    return upperTriangular(LU.copy());
+    return upperTriangular(lu.copy());
   }
 
   /**
@@ -338,11 +338,11 @@ public class LUDecompositionQuick implements java.io.Serializable {
   }
 
   protected int m() {
-    return LU.rows();
+    return lu.rows();
   }
 
   protected int n() {
-    return LU.columns();
+    return lu.columns();
   }
 
   /**
@@ -350,7 +350,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * indeed a proper LU decomposition.
    */
   public void setLU(DoubleMatrix2D LU) {
-    this.LU = LU;
+    this.lu = LU;
     this.isNonSingular = isNonsingular(LU);
   }
 
@@ -364,7 +364,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
   public void solve(DoubleMatrix1D B) {
-    Property.checkRectangular(LU);
+    Property.checkRectangular(lu);
     int m = m();
     int n = n();
     if (B.size() != m) {
@@ -392,7 +392,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
       if (f != 0) {
         for (int i = k + 1; i < n; i++) {
           // B[i] -= B[k]*LU[i][k];
-          double v = LU.getQuick(i, k);
+          double v = lu.getQuick(i, k);
           if (v != 0) {
             B.setQuick(i, B.getQuick(i) - f * v);
           }
@@ -403,12 +403,12 @@ public class LUDecompositionQuick implements java.io.Serializable {
     // Solve U*B = Y;
     for (int k = n - 1; k >= 0; k--) {
       // B[k] /= LU[k,k]
-      B.setQuick(k, B.getQuick(k) / LU.getQuick(k, k));
+      B.setQuick(k, B.getQuick(k) / lu.getQuick(k, k));
       double f = B.getQuick(k);
       if (f != 0) {
         for (int i = 0; i < k; i++) {
           // B[i] -= B[k]*LU[i][k];
-          double v = LU.getQuick(i, k);
+          double v = lu.getQuick(i, k);
           if (v != 0) {
             B.setQuick(i, B.getQuick(i) - f * v);
           }
@@ -427,7 +427,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
    * @throws IllegalArgumentException if <tt>A.rows() < A.columns()</tt>.
    */
   public void solve(DoubleMatrix2D B) {
-    Property.checkRectangular(LU);
+    Property.checkRectangular(lu);
     int m = m();
     int n = n();
     if (B.rows() != m) {
@@ -452,9 +452,9 @@ public class LUDecompositionQuick implements java.io.Serializable {
     int nx = B.columns();
 
     //precompute and cache some views to avoid regenerating them time and again
-    DoubleMatrix1D[] Brows = new DoubleMatrix1D[n];
+    DoubleMatrix1D[] brows = new DoubleMatrix1D[n];
     for (int k = 0; k < n; k++) {
-      Brows[k] = B.viewRow(k);
+      brows[k] = B.viewRow(k);
     }
 
     // transformations
@@ -463,30 +463,30 @@ public class LUDecompositionQuick implements java.io.Serializable {
 
     IntArrayList nonZeroIndexes =
         new IntArrayList(); // sparsity
-    DoubleMatrix1D Browk = org.apache.mahout.math.matrix.DoubleFactory1D.dense.make(nx); // blocked row k
+    DoubleMatrix1D bRowk = org.apache.mahout.math.matrix.DoubleFactory1D.dense.make(nx); // blocked row k
 
     // Solve L*Y = B(piv,:)
-    int CUT_OFF = 10;
+    int cutOff = 10;
     for (int k = 0; k < n; k++) {
       // blocking (make copy of k-th row to localize references)
-      Browk.assign(Brows[k]);
+      bRowk.assign(brows[k]);
 
       // sparsity detection
-      int maxCardinality = nx / CUT_OFF; // == heuristic depending on speedup
-      Browk.getNonZeros(nonZeroIndexes, null, maxCardinality);
+      int maxCardinality = nx / cutOff; // == heuristic depending on speedup
+      bRowk.getNonZeros(nonZeroIndexes, null, maxCardinality);
       int cardinality = nonZeroIndexes.size();
-      boolean sparse = (cardinality < maxCardinality);
+      boolean sparse = cardinality < maxCardinality;
 
       for (int i = k + 1; i < n; i++) {
         //for (int j = 0; j < nx; j++) B[i][j] -= B[k][j]*LU[i][k];
         //for (int j = 0; j < nx; j++) B.set(i,j, B.get(i,j) - B.get(k,j)*LU.get(i,k));
 
-        minusMult.setMultiplicator(-LU.getQuick(i, k));
+        minusMult.setMultiplicator(-lu.getQuick(i, k));
         if (minusMult.getMultiplicator() != 0) {
           if (sparse) {
-            Brows[i].assign(Browk, minusMult, nonZeroIndexes);
+            brows[i].assign(bRowk, minusMult, nonZeroIndexes);
           } else {
-            Brows[i].assign(Browk, minusMult);
+            brows[i].assign(bRowk, minusMult);
           }
         }
       }
@@ -496,20 +496,20 @@ public class LUDecompositionQuick implements java.io.Serializable {
     for (int k = n - 1; k >= 0; k--) {
       // for (int j = 0; j < nx; j++) B[k][j] /= LU[k][k];
       // for (int j = 0; j < nx; j++) B.set(k,j, B.get(k,j) / LU.get(k,k));
-      div.setMultiplicator(1 / LU.getQuick(k, k));
-      Brows[k].assign(div);
+      div.setMultiplicator(1 / lu.getQuick(k, k));
+      brows[k].assign(div);
 
       // blocking
-      if (Browk == null) {
-        Browk = org.apache.mahout.math.matrix.DoubleFactory1D.dense.make(B.columns());
-      }
-      Browk.assign(Brows[k]);
+      //if (bRowk == null) {
+      //  bRowk = org.apache.mahout.math.matrix.DoubleFactory1D.dense.make(B.columns());
+      //}
+      bRowk.assign(brows[k]);
 
       // sparsity detection
-      int maxCardinality = nx / CUT_OFF; // == heuristic depending on speedup
-      Browk.getNonZeros(nonZeroIndexes, null, maxCardinality);
+      int maxCardinality = nx / cutOff; // == heuristic depending on speedup
+      bRowk.getNonZeros(nonZeroIndexes, null, maxCardinality);
       int cardinality = nonZeroIndexes.size();
-      boolean sparse = (cardinality < maxCardinality);
+      boolean sparse = cardinality < maxCardinality;
 
       //Browk.getNonZeros(nonZeroIndexes,null);
       //boolean sparse = nonZeroIndexes.size() < nx/10;
@@ -518,12 +518,12 @@ public class LUDecompositionQuick implements java.io.Serializable {
         // for (int j = 0; j < nx; j++) B[i][j] -= B[k][j]*LU[i][k];
         // for (int j = 0; j < nx; j++) B.set(i,j, B.get(i,j) - B.get(k,j)*LU.get(i,k));
 
-        minusMult.setMultiplicator(-LU.getQuick(i, k));
+        minusMult.setMultiplicator(-lu.getQuick(i, k));
         if (minusMult.getMultiplicator() != 0) {
           if (sparse) {
-            Brows[i].assign(Browk, minusMult, nonZeroIndexes);
+            brows[i].assign(bRowk, minusMult, nonZeroIndexes);
           } else {
-            Brows[i].assign(Browk, minusMult);
+            brows[i].assign(bRowk, minusMult);
           }
         }
       }
@@ -646,7 +646,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     }
 
     buf.append("\n\ninverse(A) = ");
-    DoubleMatrix2D identity = org.apache.mahout.math.matrix.DoubleFactory2D.dense.identity(LU.rows());
+    DoubleMatrix2D identity = org.apache.mahout.math.matrix.DoubleFactory2D.dense.identity(lu.rows());
     try {
       this.solve(identity);
       buf.append(String.valueOf(identity));

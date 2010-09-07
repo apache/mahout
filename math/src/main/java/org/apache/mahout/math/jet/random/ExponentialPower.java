@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Random;
 
@@ -17,15 +16,15 @@ import java.util.Random;
 @Deprecated
 public class ExponentialPower extends AbstractContinousDistribution {
 
+  // The uniform random number generated shared by all <b>static</b> methods.
+  private static final ExponentialPower SHARED = new ExponentialPower(1.0, RandomUtils.getRandom());
+
   private double tau;
 
   // cached vars for method nextDouble(tau) (for performance only)
   private double s;
   private double sm1;
-  private double tau_set = -1.0;
-
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final ExponentialPower shared = new ExponentialPower(1.0, RandomUtils.getRandom());
+  private double tauSet = -1.0;
 
   /**
    * Constructs an Exponential Power distribution. Example: tau=1.0.
@@ -50,11 +49,11 @@ public class ExponentialPower extends AbstractContinousDistribution {
    */
   public double nextDouble(double tau) {
 
-    if (tau != tau_set) { // SET-UP
+    if (tau != tauSet) { // SET-UP
       s = 1.0 / tau;
       sm1 = 1.0 - s;
 
-      tau_set = tau;
+      tauSet = tau;
     }
 
     // GENERATOR
@@ -101,8 +100,8 @@ public class ExponentialPower extends AbstractContinousDistribution {
    * @throws IllegalArgumentException if <tt>tau &lt; 1.0</tt>.
    */
   public static double staticNextDouble(double tau) {
-    synchronized (shared) {
-      return shared.nextDouble(tau);
+    synchronized (SHARED) {
+      return SHARED.nextDouble(tau);
     }
   }
 

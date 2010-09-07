@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Random;
 
@@ -17,15 +16,15 @@ import java.util.Random;
 @Deprecated
 public class Logarithmic extends AbstractContinousDistribution {
 
-  private double my_p;
+  // The uniform random number generated shared by all <b>static</b> methods.
+  private static final Logarithmic SHARED = new Logarithmic(0.5, RandomUtils.getRandom());
+
+  private double myP;
 
   // cached vars for method nextDouble(a) (for performance only)
   private double t;
   private double h;
-  private double a_prev = -1.0;
-
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Logarithmic shared = new Logarithmic(0.5, RandomUtils.getRandom());
+  private double aPrev = -1.0;
 
   /** Constructs a Logarithmic distribution. */
   public Logarithmic(double p, Random randomGenerator) {
@@ -36,7 +35,7 @@ public class Logarithmic extends AbstractContinousDistribution {
   /** Returns a random number from the distribution. */
   @Override
   public double nextDouble() {
-    return nextDouble(this.my_p);
+    return nextDouble(this.myP);
   }
 
   /** Returns a random number from the distribution; bypasses the internal state. */
@@ -75,8 +74,8 @@ public class Logarithmic extends AbstractContinousDistribution {
  *                                                                *
  ******************************************************************/
 
-    if (a != a_prev) {                   // Set-up
-      a_prev = a;
+    if (a != aPrev) {                   // Set-up
+      aPrev = a;
       if (a < 0.97) {
         t = -a / Math.log(1.0 - a);
       } else {
@@ -115,19 +114,19 @@ public class Logarithmic extends AbstractContinousDistribution {
 
   /** Sets the distribution parameter. */
   public void setState(double p) {
-    this.my_p = p;
+    this.myP = p;
   }
 
   /** Returns a random number from the distribution. */
   public static double staticNextDouble(double p) {
-    synchronized (shared) {
-      return shared.nextDouble(p);
+    synchronized (SHARED) {
+      return SHARED.nextDouble(p);
     }
   }
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + '(' + my_p + ')';
+    return this.getClass().getName() + '(' + myP + ')';
   }
 
 }

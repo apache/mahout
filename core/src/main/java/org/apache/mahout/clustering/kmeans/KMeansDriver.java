@@ -28,7 +28,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -134,7 +133,7 @@ public class KMeansDriver extends AbstractJob {
       HadoopUtil.overwriteOutput(output);
     }
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+    DistanceMeasure measure = ((Class<?>) ccl.loadClass(measureClass)).asSubclass(DistanceMeasure.class).newInstance();
 
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer
@@ -264,10 +263,10 @@ public class KMeansDriver extends AbstractJob {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
           Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          VectorWritable vw = (VectorWritable) reader.getValueClass().newInstance();
+          VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
           while (reader.next(key, vw)) {
             clusterer.addPointToNearestCluster(vw.get(), clusters);
-            vw = (VectorWritable) reader.getValueClass().newInstance();
+            vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
           }
         } finally {
           reader.close();
@@ -394,7 +393,7 @@ public class KMeansDriver extends AbstractJob {
       if (name.startsWith("part") && !name.endsWith(".crc")) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, part.getPath(), conf);
         try {
-          Writable key = (Writable) reader.getKeyClass().newInstance();
+          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
           Cluster value = new Cluster();
           while (reader.next(key, value)) {
             if (!value.isConverged()) {
@@ -478,7 +477,7 @@ public class KMeansDriver extends AbstractJob {
         VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, vw)) {
           clusterer.emitPointToNearestCluster(vw.get(), clusters, writer);
-          vw = (VectorWritable) reader.getValueClass().newInstance();
+          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         }
       } finally {
         reader.close();

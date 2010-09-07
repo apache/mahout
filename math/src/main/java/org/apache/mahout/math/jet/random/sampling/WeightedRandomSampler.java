@@ -11,7 +11,6 @@ package org.apache.mahout.math.jet.random.sampling;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.jet.random.Uniform;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 import org.apache.mahout.math.list.IntArrayList;
 
 import java.util.Random;

@@ -239,7 +239,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     
     for (int i = 0; i < size; ++i) {
       double[] dataI = data[i];
-      double norm2 = 0;
+      double norm2;
       do {
         
         // generate randomly row I

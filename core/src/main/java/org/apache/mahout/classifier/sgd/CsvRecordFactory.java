@@ -69,9 +69,9 @@ public class CsvRecordFactory implements RecordFactory {
 
   // crude CSV value splitter.  This will fail if any double quoted strings have
   // commas inside.  Also, escaped quotes will not be unescaped.  Good enough for now.
-  private Splitter onComma = Splitter.on(",").trimResults(CharMatcher.is('"'));
+  private final Splitter onComma = Splitter.on(",").trimResults(CharMatcher.is('"'));
 
-  private static Map<String, Class<? extends FeatureVectorEncoder>> typeDictionary =
+  private static final Map<String, Class<? extends FeatureVectorEncoder>> typeDictionary =
           ImmutableMap.<String, Class<? extends FeatureVectorEncoder>>builder()
                   .put("continuous", ContinuousValueEncoder.class)
                   .put("numeric", ContinuousValueEncoder.class)
@@ -82,16 +82,16 @@ public class CsvRecordFactory implements RecordFactory {
                   .put("t", TextValueEncoder.class)
                   .build();
 
-  private Map<String, Set<Integer>> traceDictionary = Maps.newTreeMap();
+  private final Map<String, Set<Integer>> traceDictionary = Maps.newTreeMap();
 
   private int target;
-  private Dictionary targetDictionary;
+  private final Dictionary targetDictionary;
 
   private List<Integer> predictors;
   private Map<Integer, FeatureVectorEncoder> predictorEncoders;
   private int maxTargetValue = Integer.MAX_VALUE;
-  private String targetName;
-  private Map<String, String> typeMap;
+  private final String targetName;
+  private final Map<String, String> typeMap;
   private List<String> variableNames;
   private boolean includeBiasTerm;
   private static final String CANNOT_CONSTRUCT_CONVERTER = "Unable to construct type converter... shouldn't be possible";

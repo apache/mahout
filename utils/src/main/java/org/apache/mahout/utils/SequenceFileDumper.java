@@ -98,8 +98,8 @@ public final class SequenceFileDumper {
           sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
         }
         boolean countOnly = cmdLine.hasOption(countOpt);
-        Writable key = (Writable) reader.getKeyClass().newInstance();
-        Writable value = (Writable) reader.getValueClass().newInstance();
+        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+        Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
         writer.append("Key class: ").append(String.valueOf(reader.getKeyClass())).append(" Value Class: ")
         .append(String.valueOf(value.getClass())).append('\n');
         writer.flush();

@@ -44,9 +44,6 @@ public abstract class AbstractVectorModelDistribution implements ModelDistributi
     this.modelPrototype = modelPrototype;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.ModelDistribution#asJsonString()
-   */
   @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();

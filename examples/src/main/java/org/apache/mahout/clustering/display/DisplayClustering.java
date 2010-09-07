@@ -66,7 +66,7 @@ public class DisplayClustering extends Frame {
   protected static final List<List<Cluster>> CLUSTERS = new ArrayList<List<Cluster>>();
 
   static final Color[] COLORS = {
-      Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta, Color.lightGray
+    Color.red, Color.orange, Color.yellow, Color.green, Color.blue, Color.magenta, Color.lightGray
   };
 
   protected static final double T1 = 3.0;
@@ -254,7 +254,7 @@ public class DisplayClustering extends Frame {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       try {
         Writable key = new Text();
-        Writable value = (Writable) reader.getValueClass().newInstance();
+        Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
           log.info("Reading Cluster:{} center:{} numPoints:{} radius:{}", new Object[] {
@@ -264,7 +264,7 @@ public class DisplayClustering extends Frame {
               AbstractCluster.formatVector(cluster.getRadius(), null)
           });
           clusters.add(cluster);
-          value = (Writable) reader.getValueClass().newInstance();
+          value = reader.getValueClass().asSubclass(Writable.class).newInstance();
         }
       } finally {
         reader.close();

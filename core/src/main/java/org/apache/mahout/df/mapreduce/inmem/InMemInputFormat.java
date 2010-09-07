@@ -226,7 +226,7 @@ public class InMemInputFormat extends InputFormat<IntWritable,NullWritable> {
       if (this == obj) {
         return true;
       }
-      if ((obj == null) || !(obj instanceof InMemInputSplit)) {
+      if (!(obj instanceof InMemInputSplit)) {
         return false;
       }
       

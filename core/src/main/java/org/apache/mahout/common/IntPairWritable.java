@@ -146,7 +146,7 @@ public final class IntPairWritable
     WritableComparator.define(IntPairWritable.class, new Comparator());
   }
 
-  public static final class Comparator extends WritableComparator {
+  public static final class Comparator extends WritableComparator implements Serializable {
     public Comparator() {
       super(IntPairWritable.class);
     }
@@ -185,7 +185,7 @@ public final class IntPairWritable
   /**
    * Compare only the first part of the pair, so that reduce is called once for each value of the first part.
    */
-  public static class FirstGroupingComparator extends WritableComparator {
+  public static class FirstGroupingComparator extends WritableComparator implements Serializable {
     
     public FirstGroupingComparator() {
       super(IntPairWritable.class);

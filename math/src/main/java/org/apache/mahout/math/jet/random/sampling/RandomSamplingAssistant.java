@@ -9,13 +9,15 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random.sampling;
 
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public class RandomSamplingAssistant extends PersistentObject {
+
+  private static final int MAX_BUFFER_SIZE = 200;
+
   //public class RandomSamplingAssistant extends Object implements java.io.Serializable {
   private RandomSampler sampler;
   private final long[] buffer;
@@ -23,8 +25,6 @@ public class RandomSamplingAssistant extends PersistentObject {
 
   private long skip;
   private long n;
-
-  private static final int MAX_BUFFER_SIZE = 200;
 
   /**
    * Constructs a random sampler that samples <tt>n</tt> random elements from an input sequence of <tt>N</tt> elements.

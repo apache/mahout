@@ -178,7 +178,7 @@ public class RowSimilarityJob extends AbstractJob {
 
   static DistributedVectorSimilarity instantiateSimilarity(String classname) {
     try {
-      return (DistributedVectorSimilarity) Class.forName(classname).newInstance();
+      return Class.forName(classname).asSubclass(DistributedVectorSimilarity.class).newInstance();
     } catch (ClassNotFoundException cnfe) {
       throw new IllegalStateException(cnfe);
     } catch (InstantiationException ie) {

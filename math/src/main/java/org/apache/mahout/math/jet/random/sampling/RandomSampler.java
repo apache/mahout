@@ -10,13 +10,14 @@ package org.apache.mahout.math.jet.random.sampling;
 
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 import java.util.Random;
 
 /**
- * Space and time efficiently computes a sorted <i>Simple Random Sample Without Replacement (SRSWOR)</i>, that is, a sorted set of <tt>n</tt> random numbers from an interval of <tt>N</tt> numbers;
- * Example: Computing <tt>n=3</tt> random numbers from the interval <tt>[1,50]</tt> may yield the sorted random set <tt>(7,13,47)</tt>.
+ * Space and time efficiently computes a sorted <i>Simple Random Sample Without Replacement
+ * (SRSWOR)</i>, that is, a sorted set of <tt>n</tt> random numbers from an interval of <tt>N</tt> numbers;
+ * Example: Computing <tt>n=3</tt> random numbers from the interval <tt>[1,50]</tt> may yield
+ * the sorted random set <tt>(7,13,47)</tt>.
  * Since we are talking about a set (sampling without replacement), no element will occur more than once.
  * Each number from the <tt>N</tt> numbers has the same probability to be included in the <tt>n</tt> chosen numbers.
  *
@@ -24,20 +25,26 @@ import java.util.Random;
  * Suppose we have a file containing 10^12 objects.
  * We would like to take a truly random subset of 10^6 objects and do something with it, 
  * for example, compute the sum over some instance field, or whatever.
- * How do we choose the subset? In particular, how do we avoid multiple equal elements? How do we do this quick and without consuming excessive memory? How do we avoid slowly jumping back and forth within the file? </i>
+ * How do we choose the subset? In particular, how do we avoid multiple equal elements?
+ * How do we do this quick and without consuming excessive memory?
+ * How do we avoid slowly jumping back and forth within the file? </i>
  *
  * <p><b>Sorted Simple Random Sample Without Replacement (SRSWOR):</b>
  * What are the exact semantics of this class? What is a SRSWOR? In which sense exactly is a returned set "random"?
- * It is random in the sense, that each number from the <tt>N</tt> numbers has the same probability to be included in the <tt>n</tt> chosen numbers.
+ * It is random in the sense, that each number from the <tt>N</tt> numbers has the
+ * same probability to be included in the <tt>n</tt> chosen numbers.
  * For those who think in implementations rather than abstract interfaces:
  * <i>Suppose, we have an empty list.
- * We pick a random number between 1 and 10^12 and add it to the list only if it was not already picked before, i.e. if it is not already contained in the list.
+ * We pick a random number between 1 and 10^12 and add it to the list only if it was not
+ * already picked before, i.e. if it is not already contained in the list.
  * We then do the same thing again and again until we have eventually collected 10^6 distinct numbers.
  * Now we sort the set ascending and return it.</i>
  * <dt>It is exactly in this sense that this class returns "random" sets.
- * <b>Note, however, that the implementation of this class uses a technique orders of magnitudes better (both in time and space) than the one outlined above.</b> 
+ * <b>Note, however, that the implementation of this class uses a technique orders of magnitudes
+ * better (both in time and space) than the one outlined above.</b>
  *
- * <p><b>Performance:</b> Space requirements are zero. Running time is <tt>O(n)</tt> on average, <tt>O(N)</tt> in the worst case.
+ * <p><b>Performance:</b> Space requirements are zero. Running time is <tt>O(n)</tt> on average,
+ * <tt>O(N)</tt> in the worst case.
  * <h2 align=center>Performance (200Mhz Pentium Pro, JDK 1.2, NT)</h2>
  * <center>
  *   <table border="1">
@@ -84,24 +91,33 @@ import java.util.Random;
  *   </table>
  * </center>
  *
- * <p><b>Scalability:</b> This random sampler is designed to be scalable. In iterator style, it is able to compute and deliver sorted random sets stepwise in units called <i>blocks</i>.
- * Example: Computing <tt>n=9</tt> random numbers from the interval <tt>[1,50]</tt> in 3 blocks may yield the blocks <tt>(7,13,14), (27,37,42), (45,46,49)</tt>.
- * (The maximum of a block is guaranteed to be less than the minimum of its successor block. Every block is sorted ascending. No element will ever occur twice, both within a block and among blocks.)
+ * <p><b>Scalability:</b> This random sampler is designed to be scalable. In iterator style,
+ * it is able to compute and deliver sorted random sets stepwise in units called <i>blocks</i>.
+ * Example: Computing <tt>n=9</tt> random numbers from the interval <tt>[1,50]</tt> in
+ * 3 blocks may yield the blocks <tt>(7,13,14), (27,37,42), (45,46,49)</tt>.
+ * (The maximum of a block is guaranteed to be less than the minimum of its successor block.
+ * Every block is sorted ascending. No element will ever occur twice, both within a block and among blocks.)
  * A block can be computed and retrieved with method <tt>nextBlock</tt>.
  * Successive calls to method <tt>nextBlock</tt> will deliver as many random numbers as required.
  *
- * <p>Computing and retrieving samples in blocks is useful if you need very many random numbers that cannot be stored in main memory at the same time.
- * For example, if you want to compute 10^10 such numbers you can do this by computing them in blocks of, say, 500 elements each.
+ * <p>Computing and retrieving samples in blocks is useful if you need very many random
+ * numbers that cannot be stored in main memory at the same time.
+ * For example, if you want to compute 10^10 such numbers you can do this by computing
+ * them in blocks of, say, 500 elements each.
  * You then need only space to keep one block of 500 elements (i.e. 4 KB).
- * When you are finished processing the first 500 elements you call <tt>nextBlock</tt> to fill the next 500 elements into the block, process them, and so on.
- * If you have the time and need, by using such blocks you can compute random sets up to <tt>n=10^19</tt> random numbers.
+ * When you are finished processing the first 500 elements you call <tt>nextBlock</tt> to
+ * fill the next 500 elements into the block, process them, and so on.
+ * If you have the time and need, by using such blocks you can compute random sets
+ * up to <tt>n=10^19</tt> random numbers.
  *
  * <p>If you do not need the block feature, you can also directly call 
  * the static methods of this class without needing to construct a <tt>RandomSampler</tt> instance first.
  *
- * <p><b>Random number generation:</b> By default uses <tt>MersenneTwister</tt>, a very strong random number generator, much better than <tt>java.util.Random</tt>.
+ * <p><b>Random number generation:</b> By default uses <tt>MersenneTwister</tt>, a very
+ * strong random number generator, much better than <tt>java.util.Random</tt>.
  * You can also use other strong random number generators of Paul Houle's RngPack package.
- * For example, <tt>Ranecu</tt>, <tt>Ranmar</tt> and <tt>Ranlux</tt> are strong well analyzed research grade pseudo-random number generators with known periods.
+ * For example, <tt>Ranecu</tt>, <tt>Ranmar</tt> and <tt>Ranlux</tt> are strong well
+ * analyzed research grade pseudo-random number generators with known periods.
  *
  * <p><b>Implementation:</b> after J.S. Vitter, An Efficient Algorithm for Sequential Random Sampling,
  * ACM Transactions on Mathematical Software, Vol 13, 1987.
@@ -214,7 +230,8 @@ public class RandomSampler extends PersistentObject {
        and then invert the result.
       For example, sampling 99% turns into sampling 1% plus inversion.
 
-      This algorithm is the same as method sampleMethodD(...) with the exception that sampled elements are rejected, and not sampled elements included in the result set.
+      This algorithm is the same as method sampleMethodD(...) with the exception that sampled elements are rejected,
+      and not sampled elements included in the result set.
     */
     n = N - n; // IMPORTANT !!!
 
@@ -222,7 +239,8 @@ public class RandomSampler extends PersistentObject {
     long chosen = -1 + low;
 
     //long negalphainv =
-    //    -13;  //tuning paramter, determines when to switch from method D to method A. Dependent on programming language, platform, etc.
+    //    -13;  //tuning paramter, determines when to switch from method D to method A. Dependent on programming
+    // language, platform, etc.
 
     double nreal = n;
     double ninv = 1.0 / nreal;
@@ -462,11 +480,12 @@ public class RandomSampler extends PersistentObject {
     double nreal = n;
     double ninv = 1.0 / nreal;
     double Nreal = N;
-    double Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
+    double vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
     long qu1 = -n + 1 + N;
     double qu1real = -nreal + 1.0 + Nreal;
-    long negalphainv =
-        -13;  //tuning paramter, determines when to switch from method D to method A. Dependent on programming language, platform, etc.
+    long negalphainv = -13;
+    //tuning paramter, determines when to switch from method D to method A. Dependent on programming
+    // language, platform, etc.
     long threshold = -negalphainv * n;
 
     long S;
@@ -476,20 +495,20 @@ public class RandomSampler extends PersistentObject {
       while (true) {
         double X;
         while (true) { // step D2: generate U and X
-          X = Nreal * (-Vprime + 1.0);
+          X = Nreal * (-vprime + 1.0);
           S = (long) X;
           if (S < qu1) {
             break;
           }
-          Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
+          vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
         }
         double U = randomGenerator.nextDouble();
         negSreal = -S;
 
         //step D3: Accept?
         double y1 = Math.exp(Math.log(U * Nreal / qu1real) * nmin1inv);
-        Vprime = y1 * (-X / Nreal + 1.0) * (qu1real / (negSreal + qu1real));
-        if (Vprime <= 1.0) {
+        vprime = y1 * (-X / Nreal + 1.0) * (qu1real / (negSreal + qu1real));
+        if (vprime <= 1.0) {
           break;
         } //break inner loop
 
@@ -512,10 +531,10 @@ public class RandomSampler extends PersistentObject {
         }
         if (Nreal / (-X + Nreal) >= y1 * Math.exp(Math.log(y2) * nmin1inv)) {
           // accept !
-          Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * nmin1inv);
+          vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * nmin1inv);
           break; //break inner loop
         }
-        Vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
+        vprime = Math.exp(Math.log(randomGenerator.nextDouble()) * ninv);
       }
 
       //step D5: select the (S+1)st record !
@@ -547,7 +566,7 @@ public class RandomSampler extends PersistentObject {
         sampleMethodA(n, N, count, chosen + 1, values, fromIndex, randomGenerator);
       } else {
         //special case n==1
-        S = (long) (N * Vprime);
+        S = (long) (N * vprime);
         chosen += S + 1;
         values[fromIndex++] = chosen;
       }

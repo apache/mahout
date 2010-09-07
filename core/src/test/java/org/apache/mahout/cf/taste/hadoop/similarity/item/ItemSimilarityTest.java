@@ -81,7 +81,7 @@ public final class ItemSimilarityTest extends TasteTestCase {
       public boolean matches(Object argument) {
         if (argument instanceof CountUsersKeyWritable) {
           CountUsersKeyWritable key = (CountUsersKeyWritable) argument;
-          return (userID == key.getUserID());
+          return userID == key.getUserID();
         }
         return false;
       }
