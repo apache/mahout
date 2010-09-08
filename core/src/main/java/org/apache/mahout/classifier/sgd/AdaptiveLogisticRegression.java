@@ -44,11 +44,18 @@ import java.util.concurrent.ExecutionException;
  * of performance on the fly even if we make many passes through the data.  This does, however,
  * increase the cost of training since if we are using 5-fold cross-validation, each vector is used
  * 4 times for training and once for classification.  If this becomes a problem, then we should
- * probably use a 2-way unbalanced train/test split rather than full cross validation.
- *
+ * probably use a 2-way unbalanced train/test split rather than full cross validation.  With the
+ * current default settings, we have 100 learners running.  This is better than the alternative
+ * of running hundreds of training passes to find good hyper-parameters because we only have to
+ * parse and feature-ize our inputs once.  If you already have good hyper-parameters, then you
+ * might prefer to just run one CrossFoldLearner with those settings.
+ * <p/>
  * The fitness used here is AUC.  Another alternative would be to try log-likelihood, but it is
  * much easier to get bogus values of log-likelihood than with AUC and the results seem to
- * accord pretty well.  It would be nice to allow the fitness function to be pluggable.
+ * accord pretty well.  It would be nice to allow the fitness function to be pluggable. This
+ * use of AUC means that AdaptiveLogisticRegression is mostly suited for binary target variables.
+ * This will be fixed before long by extending OnlineAuc to handle non-binary cases or by using
+ * a different fitness value in non-binary cases.
  */
 public class AdaptiveLogisticRegression implements OnlineLearner {
   private int record = 0;
@@ -100,7 +107,11 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
             x.train(example);
           }
           if (x.getLearner().validModel()) {
-            return x.wrapped.auc();
+            if (x.getLearner().numCategories() == 2) {
+              return x.wrapped.auc();
+            } else {
+              return x.wrapped.logLikelihood();
+            }
           } else {
             return Double.NaN;
           }
