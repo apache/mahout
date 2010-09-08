@@ -30,7 +30,6 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
 
   @Test
   public void testTrain() {
-    // we make up data for a simple model
 
     Random gen = RandomUtils.getRandom();
     Exponential exp = new Exponential(0.5, gen);
@@ -54,6 +53,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
         System.out.printf("%10d %10.3f\n", i, cl.getLearner().auc());
       }
     }
+    assertEquals(1, cl.getLearner().auc(), 0.1);
 
     AdaptiveLogisticRegression x = new AdaptiveLogisticRegression(2, 200, new L1());
     x.setInterval(1000);
@@ -69,6 +69,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
         }
       }
     }
+    assertEquals(1, x.auc(), 0.1);
   }
 
   private static AdaptiveLogisticRegression.TrainingExample getExample(int i, Random gen, Vector beta) {

@@ -82,7 +82,9 @@ public final class OnlineLogisticRegressionTest extends MahoutTestCase {
         lr.train(row, (int) data.get(row, 9), data.viewRow(row));
         System.out.printf("%d,%d,%.3f\n", epoch, k++, lr.auc());
       }
+      assertEquals(1, lr.auc(), 0.2);
     }
+    assertEquals(1, lr.auc(), 0.1);
   }
 
   /**
