@@ -355,7 +355,7 @@
                   <configuration>
                     <rulesets>
                       <!-- classpath -->
-                      <ruleset>../maven/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+                      <ruleset>../eclipse/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <targetJdk>1.5</targetJdk>
@@ -587,7 +587,7 @@
             <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
-                    <configLocation>${project.build.directory}/../../maven/src/main/resources/mahout-checkstyle.xml</configLocation>
+                    <configLocation>${project.build.directory}/../../eclipse/src/main/resources/mahout-checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                 </configuration>
             </plugin>
@@ -615,7 +615,7 @@
                 <artifactId>maven-pmd-plugin</artifactId>
                 <configuration>
                     <rulesets>
-                        <ruleset>../maven/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
+                        <ruleset>../eclipse/src/main/resources/mahout-pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <targetJdk>1.5</targetJdk>
@@ -650,7 +650,7 @@
                     <!--omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors-->
                     <debug>true</debug>
                     <relaxed>true</relaxed>
-                    <excludeFilterFile>../maven/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
+                    <excludeFilterFile>../eclipse/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
                 </configuration>
             </plugin>
             <plugin>
