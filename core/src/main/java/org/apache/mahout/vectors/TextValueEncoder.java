@@ -30,16 +30,19 @@ import java.util.regex.Pattern;
  * Encodes text that is tokenized on non-alphanum separators.  Each word is encoded using a
  * settable encoder which is by default an StaticWordValueEncoder which gives all
  * words the same weight.
+ * @see LuceneTextValueEncoder
  */
 public class TextValueEncoder extends FeatureVectorEncoder {
 
   private final Splitter onNonWord = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
   private FeatureVectorEncoder wordEncoder;
   private static final double LOG_2 = Math.log(2);
+  private Multiset<String> counts;
 
   public TextValueEncoder(String name) {
     super(name, 2);
     wordEncoder = new StaticWordValueEncoder(name);
+    counts = HashMultiset.create();
   }
 
   /**
@@ -50,13 +53,31 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(String originalForm, double weight, Vector data) {
-    Multiset<String> counts = HashMultiset.create();
+    add(originalForm);
+    flush(weight, data);
+  }
+
+  /**
+   * Counts up lokens in a char sequence for later addition to a vector.
+   * @param originalForm  The string to tokenize.
+   */
+  public void add(CharSequence originalForm) {
     for (String word : tokenize(originalForm)) {
       counts.add(word);
     }
+  }
+
+  /**
+   * Adds all of the tokens that we counted up to a vector.
+   * @param weight
+   * @param data
+   */
+  public void flush(double weight, Vector data) {
     for (String word : counts.elementSet()) {
-      wordEncoder.addToVector(word, weight * Math.log(1 + counts.count(word))/LOG_2, data);
+      // weight words by log_2(tf) times whatever other weight we are given
+      wordEncoder.addToVector(word, weight * Math.log(1 + counts.count(word)) / LOG_2, data);
     }
+    counts.clear();
   }
 
   @Override
@@ -65,16 +86,22 @@ public class TextValueEncoder extends FeatureVectorEncoder {
   }
 
   @Override
-  protected Iterable<Integer> hashesForProbe(String originalForm, int dataSize, String name, int probe){
+  protected Iterable<Integer> hashesForProbe(String originalForm, int dataSize, String name, int probe) {
     List<Integer> hashes = new ArrayList<Integer>();
-    for (String word : tokenize(originalForm)){
+    for (String word : tokenize(originalForm)) {
       hashes.add(hashForProbe(word, dataSize, name, probe));
     }
     return hashes;
   }
 
-
-  private Iterable<String> tokenize(CharSequence originalForm) {
+  /**
+   * Tokenizes a string using the simplest method.  This should be over-ridden for more subtle
+   * tokenization.
+   * @see LuceneTextValueEncoder
+   * @param originalForm
+   * @return
+   */
+  protected Iterable<String> tokenize(CharSequence originalForm) {
     return onNonWord.split(originalForm);
   }
 
