@@ -22,9 +22,6 @@ package org.apache.mahout.math;
  * SparseVectors.
  */
 public class SparseColumnMatrix extends AbstractMatrix {
-
-  private int[] cardinality;
-
   private Vector[] columns;
 
   public SparseColumnMatrix() {
@@ -55,10 +52,6 @@ public class SparseColumnMatrix extends AbstractMatrix {
     for (int col = 0; col < cardinality[COL]; col++) {
       this.columns[col] = new RandomAccessSparseVector(cardinality[ROW]);
     }
-  }
-
-  public int[] size() {
-    return cardinality;
   }
 
   @Override

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.mahout.math.function.BinaryFunction;
@@ -36,6 +37,20 @@ public abstract class AbstractMatrix implements Matrix {
   protected Map<String, Integer> columnLabelBindings;
 
   protected Map<String, Integer> rowLabelBindings;
+
+  protected int[] cardinality = new int[2];
+
+  public int columnSize() {
+    return cardinality[COL];
+  }
+
+  public int rowSize() {
+    return cardinality[ROW];
+  }
+
+  public int[] size() {
+    return cardinality;
+  }
 
   public Iterator<MatrixSlice> iterator() {
     return iterateAll();
@@ -363,10 +378,10 @@ public abstract class AbstractMatrix implements Matrix {
       throw new IllegalStateException(cnse); // can't happen
     }
     if (rowLabelBindings != null) {
-      clone.rowLabelBindings = (Map<String, Integer>) ((HashMap<String, Integer>) rowLabelBindings).clone();
+      clone.rowLabelBindings = Maps.newHashMap(rowLabelBindings);
     }
     if (columnLabelBindings != null) {
-      clone.columnLabelBindings = (Map<String, Integer>) ((HashMap<String, Integer>) columnLabelBindings).clone();
+      clone.columnLabelBindings = Maps.newHashMap(columnLabelBindings);
     }
     return clone;
   }

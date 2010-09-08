@@ -25,10 +25,7 @@ public class MatrixView extends AbstractMatrix {
   // the offset into the Matrix
   private int[] offset;
 
-  // the cardinality of the view
-  private int[] cardinality;
-
-  public MatrixView() {
+  private MatrixView() {
   }
 
   /**
@@ -41,11 +38,7 @@ public class MatrixView extends AbstractMatrix {
   public MatrixView(Matrix matrix, int[] offset, int[] cardinality) {
     this.matrix = matrix;
     this.offset = offset;
-    this.cardinality = cardinality;
-  }
-
-  public int[] size() {
-    return cardinality;
+    this.cardinality = Arrays.copyOf(cardinality, 2);
   }
 
   @Override
@@ -62,11 +55,10 @@ public class MatrixView extends AbstractMatrix {
   }
 
   public Matrix like() {
-    return matrix.like(cardinality[ROW], cardinality[COL]);
+    return matrix.like(rowSize(), columnSize());
   }
 
   public Matrix like(int rows, int columns) {
-
     return matrix.like(rows, columns);
   }
 
@@ -82,14 +74,14 @@ public class MatrixView extends AbstractMatrix {
     if (offset[ROW] < ROW) {
       throw new IndexException(offset[ROW], ROW);
     }
-    if (offset[ROW] + size[ROW] > cardinality[ROW]) {
-      throw new IndexException(offset[ROW] + size[ROW], cardinality[ROW]);
+    if (offset[ROW] + size[ROW] > rowSize()) {
+      throw new IndexException(offset[ROW] + size[ROW], rowSize());
     }
     if (offset[COL] < ROW) {
       throw new IndexException(offset[COL], ROW);
     }
-    if (offset[COL] + size[COL] > cardinality[COL]) {
-      throw new IndexException(offset[COL] + size[COL], cardinality[COL]);
+    if (offset[COL] + size[COL] > columnSize()) {
+      throw new IndexException(offset[COL] + size[COL], columnSize());
     }
     int[] origin = offset.clone();
     origin[ROW] += offset[ROW];
@@ -98,10 +90,10 @@ public class MatrixView extends AbstractMatrix {
   }
 
   public Matrix assignColumn(int column, Vector other) {
-    if (cardinality[ROW] != other.size()) {
-      throw new CardinalityException(cardinality[ROW], other.size());
+    if (rowSize() != other.size()) {
+      throw new CardinalityException(rowSize(), other.size());
     }
-    for (int row = 0; row < cardinality[ROW]; row++) {
+    for (int row = 0; row < rowSize(); row++) {
       matrix.setQuick(row + offset[ROW], column + offset[COL], other
           .getQuick(row));
     }
@@ -109,10 +101,10 @@ public class MatrixView extends AbstractMatrix {
   }
 
   public Matrix assignRow(int row, Vector other) {
-    if (cardinality[COL] != other.size()) {
-      throw new CardinalityException(cardinality[COL], other.size());
+    if (columnSize() != other.size()) {
+      throw new CardinalityException(columnSize(), other.size());
     }
-    for (int col = 0; col < cardinality[COL]; col++) {
+    for (int col = 0; col < columnSize(); col++) {
       matrix
           .setQuick(row + offset[ROW], col + offset[COL], other.getQuick(col));
     }
@@ -120,19 +112,18 @@ public class MatrixView extends AbstractMatrix {
   }
 
   public Vector getColumn(int column) {
-    if (column < 0 || column >= cardinality[COL]) {
-      throw new IndexException(column, cardinality[COL]);
+    if (column < 0 || column >= columnSize()) {
+      throw new IndexException(column, columnSize());
     }
-    return new VectorView(matrix.getColumn(column + offset[COL]), offset[ROW],
-        cardinality[ROW]);
+    return new VectorView(matrix.getColumn(column + offset[COL]), offset[ROW], rowSize());
   }
 
   public Vector getRow(int row) {
-    if (row < 0 || row >= cardinality[ROW]) {
-      throw new IndexException(row, cardinality[ROW]);
+    if (row < 0 || row >= rowSize()) {
+      throw new IndexException(row, rowSize());
     }
     return new VectorView(matrix.getRow(row + offset[ROW]), offset[COL],
-        cardinality[COL]);
+        columnSize());
   }
 
 }

@@ -21,18 +21,9 @@ import java.util.Arrays;
 
 /** Matrix of doubles implemented using a 2-d array */
 public class DenseMatrix extends AbstractMatrix {
-  
   protected double[][] values;
-  
+
   public DenseMatrix() {
-  }
-  
-  protected int columnSize() {
-    return values[0].length;
-  }
-  
-  protected int rowSize() {
-    return values.length;
   }
   
   /**
@@ -48,18 +39,22 @@ public class DenseMatrix extends AbstractMatrix {
     for (int i = 0; i < values.length; i++) {
       this.values[i] = values[i].clone();
     }
+    initSize();
   }
   
-  /** Construct an empty matrix of the given size */
+  /**
+   * Constructs an empty matrix of the given size.
+   * @param rows  The number of rows in the result.
+   * @param columns The number of columns in the result.
+   */
   public DenseMatrix(int rows, int columns) {
     this.values = new double[rows][columns];
+    initSize();
   }
-  
-  public int[] size() {
-    int[] result = new int[2];
-    result[ROW] = rowSize();
-    result[COL] = columnSize();
-    return result;
+
+  private void initSize() {
+    cardinality[ROW] = values.length;
+    cardinality[COL] = values[0].length;
   }
   
   @Override

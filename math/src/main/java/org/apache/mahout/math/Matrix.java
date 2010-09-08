@@ -124,6 +124,16 @@ public interface Matrix extends Cloneable, VectorIterable {
   int[] size();
 
   /**
+   * @return The number of rows in the matrix.
+   */
+  int columnSize();
+
+  /**
+   * @return Returns the number of rows in the matrix.
+   */
+  int rowSize();
+
+  /**
    * Return a copy of the recipient
    *
    * @return a new Matrix
@@ -190,7 +200,7 @@ public interface Matrix extends Cloneable, VectorIterable {
   Matrix like();
 
   /**
-   * Return an empty matrix of the same underlying class as the receiver and of the given cardinality
+   * Returns an empty matrix of the same underlying class as the receiver and of the specified size.
    *
    * @param rows    the int number of rows
    * @param columns the int number of columns

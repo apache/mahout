@@ -437,6 +437,10 @@ public final class TestMatrixView extends MahoutTestCase {
   public void testGetColumn() {
     Vector column = test.getColumn(1);
     assertEquals("row size", 3, column.getNumNondefaultElements());
+    int i = 0;
+    for (double x : new double[]{3.3, 5.5, 7.7}) {
+      assertEquals(x, column.get(i++), 0);
+    }
   }
 
   @Test(expected = IndexException.class)

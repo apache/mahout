@@ -23,9 +23,6 @@ import org.apache.mahout.math.map.OpenIntObjectHashMap;
 
 /** Doubly sparse matrix. Implemented as a Map of RandomAccessSparseVector rows */
 public class SparseMatrix extends AbstractMatrix {
-  
-  private int[] cardinality;
-  
   private OpenIntObjectHashMap<Vector> rows;
   
   public SparseMatrix() {
@@ -57,10 +54,6 @@ public class SparseMatrix extends AbstractMatrix {
   public SparseMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
     this.rows = new OpenIntObjectHashMap<Vector>();
-  }
-  
-  public int[] size() {
-    return cardinality;
   }
   
   @Override

@@ -22,9 +22,6 @@ package org.apache.mahout.math;
  * either SequentialAccessSparseVectors or RandomAccessSparseVectors.
  */
 public class SparseRowMatrix extends AbstractMatrix {
-
-  private int[] cardinality;
-
   private Vector[] rows;
 
   private boolean randomAccessRows;
@@ -71,10 +68,6 @@ public class SparseRowMatrix extends AbstractMatrix {
    */
   public SparseRowMatrix(int[] cardinality) {
     this(cardinality, true);
-  }
-
-  public int[] size() {
-    return cardinality;
   }
 
   @Override
