@@ -18,14 +18,12 @@
 package org.apache.mahout.ep;
 
 import org.apache.mahout.common.MahoutTestCase;
-import org.junit.Test;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
 
-  @Test
   public void testOptimize() throws ExecutionException, InterruptedException {
     ThreadedEvolutionaryProcess ep = new ThreadedEvolutionaryProcess(50);
     State<?> x = ep.optimize(new ThreadedEvolutionaryProcess.Function() {
