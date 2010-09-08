@@ -153,8 +153,8 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
         Vector.Element updateLocation = nonZeros.next();
         int j = updateLocation.index();
 
-        double newValue = beta.get(i, j) + learningRate * gradientBase * instance.get(j) * perTermLearningRate(j);
-        beta.set(i, j, newValue);
+        double newValue = beta.getQuick(i, j) + learningRate * gradientBase * instance.get(j) * perTermLearningRate(j);
+        beta.setQuick(i, j, newValue);
       }
     }
 
