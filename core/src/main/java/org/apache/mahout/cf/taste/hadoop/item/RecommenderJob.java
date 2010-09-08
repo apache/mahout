@@ -66,6 +66,8 @@ import java.util.regex.Pattern;
  * <li>--similarityClassname (classname): Name of distributed similarity class to instantiate</li>
  * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
  * <li>--itemsFile (path): file containing item IDs to recommend for (optional)</li>
+ * <li>--filterFile (path): file containing comma-separated userID,itemID pairs. Used to exclude the item from the
+ * recommendations for that user(optional)</li>
  * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
  * <li>--booleanData (boolean): Treat input data as having to pref values (false)</li>
  * <li>--maxPrefsPerUser(integer): Maximum number of preferences considered per user in
@@ -97,6 +99,8 @@ public final class RecommenderJob extends AbstractJob {
         String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
     addOption("usersFile", "u", "File of users to recommend for", null);
     addOption("itemsFile", "i", "File of items to recommend for", null);
+    addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from " +
+        "the recommendations for that user(optional)", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("maxPrefsPerUser", null,
         "Maximum number of preferences considered per user in final recommendation phase",
@@ -121,6 +125,7 @@ public final class RecommenderJob extends AbstractJob {
     int numRecommendations = Integer.parseInt(parsedArgs.get("--numRecommendations"));
     String usersFile = parsedArgs.get("--usersFile");
     String itemsFile = parsedArgs.get("--itemsFile");
+    String filterFile = parsedArgs.get("--filterFile");
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
     int maxPrefsPerUser = Integer.parseInt(parsedArgs.get("--maxPrefsPerUser"));
     int maxSimilaritiesPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
@@ -134,6 +139,7 @@ public final class RecommenderJob extends AbstractJob {
     Path similarityMatrixPath = new Path(tempDirPath, "similarityMatrix");
     Path prePartialMultiplyPath1 = new Path(tempDirPath, "prePartialMultiply1");
     Path prePartialMultiplyPath2 = new Path(tempDirPath, "prePartialMultiply2");
+    Path explicitFilterPath = new Path(tempDirPath, "explicitFilterPath");
     Path partialMultiplyPath = new Path(tempDirPath, "partialMultiply");
 
     AtomicInteger currentPhase = new AtomicInteger();
@@ -229,11 +235,10 @@ public final class RecommenderJob extends AbstractJob {
       prePartialMultiply2.waitForCompletion(true);
 
       Job partialMultiply = prepareJob(
-        new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath,
-        SequenceFileInputFormat.class,
-        Mapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
-        ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
-        SequenceFileOutputFormat.class);
+          new Path(prePartialMultiplyPath1 + "," + prePartialMultiplyPath2), partialMultiplyPath,
+          SequenceFileInputFormat.class, Mapper.class, VarIntWritable.class, VectorOrPrefWritable.class,
+          ToVectorAndPrefReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
+          SequenceFileOutputFormat.class);
 
       /* necessary to make this job (having a combined input path) work on Amazon S3 */
       Configuration partialMultiplyConf = partialMultiply.getConfiguration();
@@ -245,19 +250,42 @@ public final class RecommenderJob extends AbstractJob {
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+
+      /* convert the user/item pairs to filter if a filterfile has been specified */
+      if (filterFile != null) {
+        Job itemFiltering = prepareJob(new Path(filterFile), explicitFilterPath, TextInputFormat.class,
+            ItemFilterMapper.class, VarLongWritable.class, VarLongWritable.class,
+            ItemFilterAsVectorAndPrefsReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
+            SequenceFileOutputFormat.class);
+          itemFiltering.waitForCompletion(true);
+      }
+
+      String aggregateAndRecommendInput = partialMultiplyPath.toString();
+      if (filterFile != null) {
+        aggregateAndRecommendInput += "," + explicitFilterPath;
+      }
+
       Job aggregateAndRecommend = prepareJob(
-          partialMultiplyPath, outputPath, SequenceFileInputFormat.class,
+          new Path(aggregateAndRecommendInput), outputPath, SequenceFileInputFormat.class,
           PartialMultiplyMapper.class, VarLongWritable.class, PrefAndSimilarityColumnWritable.class,
           AggregateAndRecommendReducer.class, VarLongWritable.class, RecommendedItemsWritable.class,
           TextOutputFormat.class);
-      Configuration jobConf = aggregateAndRecommend.getConfiguration();
+      Configuration aggregateAndRecommendConf = aggregateAndRecommend.getConfiguration();
       if (itemsFile != null) {
-    	  jobConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
+    	  aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
+      }
+
+      if (filterFile != null) {
+        /* necessary to make this job (having a combined input path) work on Amazon S3 */
+        FileSystem fs = FileSystem.get(tempDirPath.toUri(), aggregateAndRecommendConf);
+        partialMultiplyPath = partialMultiplyPath.makeQualified(fs);
+        explicitFilterPath = explicitFilterPath.makeQualified(fs);
+        SequenceFileInputFormat.setInputPaths(aggregateAndRecommend, partialMultiplyPath, explicitFilterPath);
       }
       setIOSort(aggregateAndRecommend);
-      jobConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath.toString());
-      jobConf.setInt(AggregateAndRecommendReducer.NUM_RECOMMENDATIONS, numRecommendations);
-      jobConf.setBoolean(BOOLEAN_DATA, booleanData);
+      aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath.toString());
+      aggregateAndRecommendConf.setInt(AggregateAndRecommendReducer.NUM_RECOMMENDATIONS, numRecommendations);
+      aggregateAndRecommendConf.setBoolean(BOOLEAN_DATA, booleanData);
       aggregateAndRecommend.waitForCompletion(true);
     }
 

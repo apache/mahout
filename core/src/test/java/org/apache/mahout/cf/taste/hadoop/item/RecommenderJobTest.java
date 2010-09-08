@@ -417,6 +417,78 @@ public class RecommenderJobTest extends TasteTestCase {
   }
 
   /**
+   * tests {@link org.apache.mahout.cf.taste.hadoop.item.ItemFilterMapper}
+   */
+  @Test
+  public void testItemFilterMapper() throws Exception {
+
+    Mapper<LongWritable,Text,VarLongWritable,VarLongWritable>.Context context =
+      EasyMock.createMock(Mapper.Context.class);
+
+    context.write(new VarLongWritable(34L), new VarLongWritable(12L));
+    context.write(new VarLongWritable(78L), new VarLongWritable(56L));
+
+    EasyMock.replay(context);
+
+    ItemFilterMapper mapper = new ItemFilterMapper();
+    mapper.map(null, new Text("12,34"), context);
+    mapper.map(null, new Text("56,78"), context);
+
+    EasyMock.verify(context);
+  }
+
+  /**
+   * tests {@link org.apache.mahout.cf.taste.hadoop.item.ItemFilterAsVectorAndPrefsReducer}
+   */
+  @Test
+  public void testItemFilterAsVectorAndPrefsReducer() throws Exception {
+    Reducer<VarLongWritable,VarLongWritable,VarIntWritable,VectorAndPrefsWritable>.Context context =
+        EasyMock.createMock(Reducer.Context.class);
+
+    int itemIDIndex = TasteHadoopUtils.idToIndex(123L);
+    context.write(EasyMock.eq(new VarIntWritable(itemIDIndex)), vectorAndPrefsForFilteringMatches(123L, 456L, 789L));
+
+    EasyMock.replay(context);
+
+    new ItemFilterAsVectorAndPrefsReducer().reduce(new VarLongWritable(123L), Arrays.asList(new VarLongWritable(456L),
+        new VarLongWritable(789L)), context);
+
+    EasyMock.verify(context);
+  }
+
+  static VectorAndPrefsWritable vectorAndPrefsForFilteringMatches(final long itemID, final long... userIDs) {
+    EasyMock.reportMatcher(new IArgumentMatcher() {
+      @Override
+      public boolean matches(Object argument) {
+        if (argument instanceof VectorAndPrefsWritable) {
+          VectorAndPrefsWritable vectorAndPrefs = (VectorAndPrefsWritable) argument;
+          Vector vector = vectorAndPrefs.getVector();
+          if (vector.getNumNondefaultElements() != 1) {
+            return false;
+          }
+          if (!Double.isNaN(vector.get(TasteHadoopUtils.idToIndex(itemID)))) {
+            return false;
+          }
+          if (userIDs.length != vectorAndPrefs.getUserIDs().size()) {
+            return false;
+          }
+          for (long userID : userIDs) {
+            if (!vectorAndPrefs.getUserIDs().contains(userID)) {
+              return false;
+            }
+          }
+          return true;
+        }
+        return false;
+      }
+
+      @Override
+      public void appendTo(StringBuffer buffer) {}
+    });
+    return null;
+  }
+
+  /**
    * tests {@link PartialMultiplyMapper}
    */
   @Test
@@ -728,6 +800,62 @@ public class RecommenderJobTest extends TasteTestCase {
 
     assertTrue((itemID1 == 1L && itemID2 == 3L) || (itemID1 == 3L && itemID2 == 1L));
   }
+
+  /**
+   * check whether the explicit user/item filter works
+   */
+  @Test
+   public void testCompleteJobWithFiltering() throws Exception {
+
+     File inputFile = getTestTempFile("prefs.txt");
+     File userFile = getTestTempFile("users.txt");
+     File filterFile = getTestTempFile("filter.txt");
+     File outputDir = getTestTempDir("output");
+     outputDir.delete();
+     File tmpDir = getTestTempDir("tmp");
+
+     writeLines(inputFile,
+         "1,1,5",
+         "1,2,5",
+         "1,3,2",
+         "2,1,2",
+         "2,3,3",
+         "2,4,5",
+         "3,2,5",
+         "3,4,3",
+         "4,1,3",
+         "4,4,5");
+
+     /* only compute recommendations for the donkey */
+     writeLines(userFile, "4");
+     /* do not recommend the hotdog for the donkey */
+     writeLines(filterFile, "4,2");
+
+     RecommenderJob recommenderJob = new RecommenderJob();
+
+     Configuration conf = new Configuration();
+     conf.set("mapred.input.dir", inputFile.getAbsolutePath());
+     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
+     conf.setBoolean("mapred.output.compress", false);
+
+     recommenderJob.setConf(conf);
+
+     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
+        DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--numRecommendations", "1",
+        "--usersFile", userFile.getAbsolutePath(), "--filterFile", filterFile.getAbsolutePath() });
+
+     Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));
+
+     assertEquals(1, recommendations.size());
+     assertTrue(recommendations.containsKey(4L));
+     assertEquals(1, recommendations.get(4L).size());
+
+     /* berries should have been recommended to the donkey */
+     RecommendedItem recommendedItem = recommendations.get(4L).get(0);
+     assertEquals(3L, recommendedItem.getItemID());
+     assertEquals(3.5, recommendedItem.getValue(), 0.05);
+   }
+
 
   static Map<Long,List<RecommendedItem>> readRecommendations(File file) throws IOException {
     Map<Long,List<RecommendedItem>> recommendations = new HashMap<Long,List<RecommendedItem>>();
