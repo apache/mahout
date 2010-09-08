@@ -17,17 +17,14 @@ import java.util.Random;
 @Deprecated
 public class HyperGeometric extends AbstractDiscreteDistribution {
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final HyperGeometric SHARED = new HyperGeometric(1, 1, 1, RandomUtils.getRandom());
-
   private int myN;
-  private int myS;
+  private int mys;
   private int myn;
 
   // cached vars shared by hmdu(...) and hprs(...)
-  private int NLast = -1;
-  private int MLast = -1;
-  private int nLast = -1;
+  private int lastN = -1;
+  private int lastM = -1;
+  private int lastn = -1;
   private int NMn;
   private int m;
 
@@ -79,10 +76,10 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
   /** Returns a random number from the distribution. */
   protected int hmdu(int N, int M, int n, Random randomGenerator) {
 
-    if (N != NLast || M != MLast || n != nLast) {   // set-up           */
-      NLast = N;
-      MLast = M;
-      nLast = n;
+    if (N != lastN || M != lastM || n != lastn) {   // set-up           */
+      lastN = N;
+      lastM = M;
+      lastn = n;
 
       Mp = (double) (M + 1);
       np = (double) (n + 1);
@@ -123,13 +120,13 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
         K = mp - I;                                   /* downward search  */
         c *= (double) K / (np - K) * ((double) (NMn + K) / (Mp - K));
         if ((U -= c) <= 0.0) {
-          return (K - 1);
+          return K - 1;
         }
 
         K = m + I;                                    /* upward search    */
         d *= (np - K) / (double) K * ((Mp - K) / (double) (NMn + K));
         if ((U -= d) <= 0.0) {
-          return (K);
+          return K;
         }
       }
 
@@ -137,7 +134,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
       for (K = mp + m; K <= b; K++) {
         d *= (np - K) / (double) K * ((Mp - K) / (double) (NMn + K));
         if ((U -= d) <= 0.0) {
-          return (K);
+          return K;
         }
       }
     }
@@ -147,10 +144,10 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
   protected int hprs(int N, int M, int n, Random randomGenerator) {
     double U;         /* (X, Y) <-> (V, W) */
 
-    if (N != NLast || M != MLast || n != nLast) {  /* set-up            */
-      NLast = N;
-      MLast = M;
-      nLast = n;
+    if (N != lastN || M != lastM || n != lastn) {  /* set-up            */
+      lastN = N;
+      lastM = M;
+      lastn = n;
 
       double Mp = (double) (M + 1);
       double np = (double) (n + 1);
@@ -312,7 +309,7 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
    */
   @Override
   public int nextInt() {
-    return nextInt(this.myN, this.myS, this.myn, this.randomGenerator);
+    return nextInt(this.myN, this.mys, this.myn, this.randomGenerator);
   }
 
   /** Returns a random number from the distribution; bypasses the internal state. */
@@ -389,27 +386,20 @@ public class HyperGeometric extends AbstractDiscreteDistribution {
 
   /** Returns the probability distribution function. */
   public double pdf(int k) {
-    return Arithmetic.binomial(myS, k) * Arithmetic.binomial(myN - myS, myn - k)
-        / Arithmetic.binomial(myN, myn);  
+    return Arithmetic.binomial(mys, k) * Arithmetic.binomial(myN - mys, myn - k)
+        / Arithmetic.binomial(myN, myn);
   }
 
   /** Sets the parameters. */
   public void setState(int N, int s, int n) {
     this.myN = N;
-    this.myS = s;
+    this.mys = s;
     this.myn = n;
-  }
-
-  /** Returns a random number from the distribution. */
-  public static double staticNextInt(int N, int M, int n) {
-    synchronized (SHARED) {
-      return SHARED.nextInt(N, M, n);
-    }
   }
 
   /** Returns a String representation of the receiver. */
   public String toString() {
-    return this.getClass().getName() + '(' + myN + ',' + myS + ',' + myn + ')';
+    return this.getClass().getName() + '(' + myN + ',' + mys + ',' + myn + ')';
   }
 
 }
