@@ -295,7 +295,9 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
     public void setMappings(State<Wrapper> x) {
       int i = 0;
+      // set the range for regularization (lambda)
       x.setMap(i++, Mapping.logLimit(1.0e-8, 0.1));
+      // set the range for learning rate (mu)
       x.setMap(i, Mapping.softLimit(0.001, 10));
     }
 
