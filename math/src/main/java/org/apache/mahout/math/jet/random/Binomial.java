@@ -20,6 +20,9 @@ public class Binomial extends AbstractDiscreteDistribution {
 
   private static final int DMAX_KM = 20;
 
+  // The uniform random number generated shared by all <b>static</b> methods.
+  private static final Binomial SHARED = new Binomial(1, 0.5, RandomUtils.getRandom());
+
   private int n;
   private double p;
 
@@ -55,8 +58,6 @@ public class Binomial extends AbstractDiscreteDistribution {
   private double logQ;
   private double logN;
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  private static final Binomial shared = new Binomial(1, 0.5, RandomUtils.getRandom());
   /**
    * Constructs a binomial distribution. Example: n=1, p=0.5.
    *
@@ -95,14 +96,25 @@ public class Binomial extends AbstractDiscreteDistribution {
   }
 
   /**
-   * *************************************************************** * Binomial-Distribution - Acceptance
-   * Rejection/Inversion     * * ***************************************************************** * Acceptance
-   * Rejection method combined with Inversion for        * generating Binomial random numbers with parameters * n
-   * (number of trials) and p (probability of success).           * For  min(n*p,n*(1-p)) < 10  the Inversion method is
-   * applied:   * The random numbers are generated via sequential search,        * starting at the lowest index k=0. The
-   * cumulative probabilities * are avoided by using the technique of chop-down.               * For min(n*p,n*(1-p)) >=
-   * 10  Acceptance Rejection is used:     * The algorithm is based on a hat-function which is uniform in   * the centre
-   * region and exponential in the tails.                * A triangular immediate acceptance region in the centre speeds
+   * ***************************************************************
+   * Binomial-Distribution - Acceptance
+   * Rejection/Inversion
+   * * *****************************************************************
+   * Acceptance
+   * Rejection method combined with Inversion for
+   * generating Binomial random numbers with parameters * n
+   * (number of trials) and p (probability of success).
+   * For  min(n*p,n*(1-p)) < 10  the Inversion method is
+   * applied:   * The random numbers are generated via sequential search,
+   * starting at the lowest index k=0. The
+   * cumulative probabilities
+   * are avoided by using the technique of chop-down.
+   * For min(n*p,n*(1-p)) >=
+   * 10  Acceptance Rejection is used:
+   * The algorithm is based on a hat-function which is uniform in
+   * the centre
+   * region and exponential in the tails.
+   * A triangular immediate acceptance region in the centre speeds
    * * up the generation of binomial variates.                        * If candidate k is near the mode, f(k) is
    * computed recursively  * starting at the mode m.                                        * The acceptance test by
    * Stirling's formula is modified          * according to W. Hoermann (1992): The generation of binomial    * random
@@ -177,7 +189,7 @@ public class Binomial extends AbstractDiscreteDistribution {
           pk = ((n - K + 1) * par * pk) / (K * q);
         }
       }
-      return ((p > 0.5) ? (n - K) : K);
+      return (p > 0.5) ? (n - K) : K;
     }
 
     while (true) {
@@ -243,16 +255,16 @@ public class Binomial extends AbstractDiscreteDistribution {
             pPrev = par;
 
             nm = n - m + 1;
-            ch = xm * Math.log((m + 1.0) / (pq * nm)) +
-                Arithmetic.stirlingCorrection(m + 1) + Arithmetic.stirlingCorrection(nm);
+            ch = xm * Math.log((m + 1.0) / (pq * nm))
+                + Arithmetic.stirlingCorrection(m + 1) + Arithmetic.stirlingCorrection(nm);
           }
           int nK = n - K + 1;
 
           // computation of log f(K) via Stirling's formula
           // final acceptance-rejection test
-          if (V <= ch + (n + 1.0) * Math.log((double) nm / (double) nK) +
-              (K + 0.5) * Math.log(nK * pq / (K + 1.0)) -
-              Arithmetic.stirlingCorrection(K + 1) - Arithmetic.stirlingCorrection(nK)) {
+          if (V <= ch + (n + 1.0) * Math.log((double) nm / (double) nK)
+              + (K + 0.5) * Math.log(nK * pq / (K + 1.0))
+              - Arithmetic.stirlingCorrection(K + 1) - Arithmetic.stirlingCorrection(nK)) {
             break;
           }
         }
@@ -312,8 +324,8 @@ public class Binomial extends AbstractDiscreteDistribution {
    * @throws IllegalArgumentException if <tt>n*Math.min(p,1-p) &lt;= 0.0</tt>
    */
   public static int staticNextInt(int n, double p) {
-    synchronized (shared) {
-      return shared.nextInt(n, p);
+    synchronized (SHARED) {
+      return SHARED.nextInt(n, p);
     }
   }
 

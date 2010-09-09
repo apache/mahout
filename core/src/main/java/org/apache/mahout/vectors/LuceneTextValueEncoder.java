@@ -45,10 +45,6 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
   /**
    * Tokenizes a string using the simplest method.  This should be over-ridden for more subtle
    * tokenization.
-   *
-   * @param originalForm
-   * @return
-   * @see org.apache.mahout.vectors.LuceneTextValueEncoder
    */
   @Override
   protected Iterable<String> tokenize(CharSequence originalForm) {
@@ -57,8 +53,8 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     return new LuceneTokenIterable(ts);
   }
 
-  private static class CharSequenceReader extends Reader {
-    private CharBuffer buf;
+  private static final class CharSequenceReader extends Reader {
+    private final CharBuffer buf;
 
     /**
      * Creates a new character-stream reader whose critical sections will synchronize on the reader
@@ -80,32 +76,24 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
      * @param off  Offset at which to start storing characters
      * @param len  Maximum number of characters to read
      * @return The number of characters read, or -1 if the end of the stream has been reached
-     * @throws java.io.IOException If an I/O error occurs
      */
     @Override
-    public int read(char[] cbuf, int off, int len) throws IOException {
+    public int read(char[] cbuf, int off, int len) {
       buf.get(cbuf, off, len);
       return len;
     }
 
-    /**
-     * Closes the stream and releases any system resources associated with it.  Once the stream has
-     * been closed, further read(), ready(), mark(), reset(), or skip() invocations will throw an
-     * IOException. Closing a previously closed stream has no effect.
-     *
-     * @throws java.io.IOException If an I/O error occurs
-     */
     @Override
-    public void close() throws IOException {
+    public void close()  {
       // do nothing
     }
   }
 
-  private class LuceneTokenIterable implements Iterable<String> {
+  private static class LuceneTokenIterable implements Iterable<String> {
     private boolean firstTime = true;
-    private TokenStream tokenStream;
+    private final TokenStream tokenStream;
 
-    public LuceneTokenIterable(TokenStream ts) {
+    private LuceneTokenIterable(TokenStream ts) {
       this.tokenStream = ts;
     }
 
@@ -116,25 +104,25 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
      */
     @Override
     public Iterator<String> iterator() {
-      if (!firstTime) {
+      if (firstTime) {
+        firstTime = false;
+      } else {
         try {
           tokenStream.reset();
         } catch (IOException e) {
           throw new IllegalStateException("This token stream can't be reset");
         }
-      } else {
-        firstTime = false;
       }
 
       return new TokenStreamIterator(tokenStream);
     }
   }
 
-  private class TokenStreamIterator implements Iterator<String> {
-    private TokenStream tokenStream;
-    private String bufferedToken = null;
+  private static class TokenStreamIterator implements Iterator<String> {
+    private final TokenStream tokenStream;
+    private String bufferedToken;
 
-    public TokenStreamIterator(TokenStream tokenStream) {
+    private TokenStreamIterator(TokenStream tokenStream) {
       this.tokenStream = tokenStream;
     }
 
@@ -147,7 +135,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     @Override
     public boolean hasNext() {
       if (bufferedToken == null) {
-        boolean r = false;
+        boolean r;
         try {
           r = tokenStream.incrementToken();
         } catch (IOException e) {
@@ -166,8 +154,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
      * Returns the next element in the iteration.
      *
      * @return the next element in the iteration.
-     * @throws java.util.NoSuchElementException
-     *          iteration has no more elements.
+     * @throws NoSuchElementException iteration has no more elements.
      */
     @Override
     public String next() {
@@ -188,8 +175,8 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     }
   }
 
-  private class TokenizationException extends RuntimeException {
-    public TokenizationException(String msg, Throwable cause) {
+  private static class TokenizationException extends RuntimeException {
+    private TokenizationException(String msg, Throwable cause) {
       super(msg, cause);
     }
   }

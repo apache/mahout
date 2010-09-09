@@ -66,7 +66,7 @@ public class BayesFeatureReducer extends MapReduceBase implements
     }
     reporter.setStatus("Bayes Feature Reducer: " + key + " => " + sum);
 
-    if (2 > key.length() || key.length() > 3) {
+    if (key.length() < 2 || key.length() > 3) {
       throw new IllegalArgumentException("StringTuple length out of bounds, not (2 < length < 3)");
     }
     
@@ -84,25 +84,25 @@ public class BayesFeatureReducer extends MapReduceBase implements
       currentCorpusTf = sum;
       currentCorpusDf = -1;
       
-      if (0 < minSupport && currentCorpusTf < minSupport) {
+      if (minSupport > 0 && currentCorpusTf < minSupport) {
         reporter.incrCounter("skipped", "less_than_minSupport", 1);
       }
       return; // never emit FEATURE_TF tuples.
     } else if (!key.stringAt(featureIndex).equals(currentDfFeature)) {
       throw new IllegalStateException("Found feature data " + key + " prior to feature tf");
-    } else if (0 < minSupport && currentCorpusTf < minSupport) {
+    } else if (minSupport > 0 && currentCorpusTf < minSupport) {
       reporter.incrCounter("skipped", "less_than_minSupport_label-term", 1);
       return; // skip items that have less than a specified frequency.
     } else if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
       currentCorpusDf = sum;
       
-      if (0 < minDf && currentCorpusDf < minDf) {
+      if (minDf > 0 && currentCorpusDf < minDf) {
         reporter.incrCounter("skipped", "less_than_minDf", 1);
         return; // skip items that have less than the specified minSupport.
       }
     } else if (currentCorpusDf == -1) {
       throw new IllegalStateException("Found feature data " + key + " prior to feature count");
-    } else if (0 < minDf && currentCorpusDf < minDf) {
+    } else if (minDf > 0 && currentCorpusDf < minDf) {
       reporter.incrCounter("skipped", "less_than_minDf_label-term", 1);
       return; // skip items that have less than a specified frequency.
     } 
@@ -118,6 +118,6 @@ public class BayesFeatureReducer extends MapReduceBase implements
       minDf      = Integer.valueOf(params.get("minDf", DEFAULT_MIN_DF));
     } catch (IOException ex) {
       log.warn(ex.toString(), ex);
-    };
+    }
   }
 }

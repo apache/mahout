@@ -115,7 +115,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
   public void createParameters(String prefix, Configuration jobConf) {
     parameters = new ArrayList<Parameter<?>>();
     inverseCovarianceFile = new PathParameter(prefix, "inverseCovarianceFile", jobConf, null,
-    "Path on DFS to a file containing the inverse covariance matrix.");
+                                              "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);
 
     ClassParameter matrixClass =
@@ -124,20 +124,18 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     parameters.add(matrixClass);      
     
     meanVectorFile = new PathParameter(prefix, "meanVectorFile", jobConf, null,
-    "Path on DFS to a file containing the mean Vector.");
+                                       "Path on DFS to a file containing the mean Vector.");
     parameters.add(meanVectorFile);
     
     vectorClass = new ClassParameter(prefix, "vectorClass", jobConf, DenseVector.class, 
-    "Class<Vector> file specified in parameter meanVectorFile has been serialized with.");
+                                     "Class file specified in parameter meanVectorFile has been serialized with.");
     parameters.add(vectorClass);     
   }
   
   /**   
-   * @param v
    * @return Mahalanobis distance of a multivariate vector
    */
-  public double distance(Vector v)
-  {
+  public double distance(Vector v) {
     if (meanVector == null || inverseCovarianceMatrix == null) {
       throw new IllegalArgumentException("meanVector or inverseCovarianceMatrix not initialized");
     }
@@ -179,20 +177,21 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     if (m.numRows() != m.numCols()) {
       throw new CardinalityException(m.numRows(), m.numCols());
     }
-    //see http://www.mlahanas.de/Math/svd.htm for details, which specifically details the case of covariance matrix inversion
-    //Complexity: O(min(nm2,mn2))
+    // See http://www.mlahanas.de/Math/svd.htm for details,
+    // which specifically details the case of covariance matrix inversion
+    // Complexity: O(min(nm2,mn2))
     SingularValueDecomposition svd = new SingularValueDecomposition(m);
-    Matrix SInv = svd.getS();
-    //Inverse Diagonal Elems
-    for(int i = 0; i < SInv.numRows(); i++) {
-      double diagElem = SInv.get(i,i);
+    Matrix sInv = svd.getS();
+    // Inverse Diagonal Elems
+    for (int i = 0; i < sInv.numRows(); i++) {
+      double diagElem = sInv.get(i,i);
       if (diagElem > 0.0) {
-        SInv.set(i, i, 1 / diagElem);
+        sInv.set(i, i, 1 / diagElem);
       } else {
         throw new IllegalArgumentException("Eigen Value equals to 0 found.");
       }
     }
-    inverseCovarianceMatrix=svd.getU().times(SInv.times(svd.getU().transpose()));    
+    inverseCovarianceMatrix = svd.getU().times(sInv.times(svd.getU().transpose()));
   }
   
   public Matrix getInverseCovarianceMatrix() {

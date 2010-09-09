@@ -12,7 +12,7 @@ import org.apache.mahout.math.jet.random.engine.RandomEngine;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Distributions {
+public final class Distributions {
 
   private Distributions() {
   }
@@ -63,21 +63,22 @@ public class Distributions {
     switch (nr) {
       // BURR II
       case 2:
-        return (-Math.log(1 / y - 1));
+        return -Math.log(1 / y - 1);
 
       // BURR VII
       case 7:
-        return (Math.log(2 * y / (2 - 2 * y)) / 2);
+        return Math.log(2 * y / (2 - 2 * y)) / 2;
 
       // BURR VIII
       case 8:
-        return (Math.log(Math.tan(y * Math.PI / 2.0)));
+        return Math.log(Math.tan(y * Math.PI / 2.0));
 
       // BURR X
       case 10:
-        return (Math.sqrt(-Math.log(1 - y)));
+        return Math.sqrt(-Math.log(1 - y));
+      default:
+        return 0;
     }
-    return 0;
   }
 
   /**
@@ -117,16 +118,16 @@ public class Distributions {
       case 4:               // BURR IV
         y = Math.exp(k * Math.log(y)) + 1.0;         // y^k + 1
         y = k / y;
-        return (y);
+        return y;
 
       case 5:               // BURR V
         y = Math.atan(-Math.log(y / k));           // arctan[log(y/k)]
-        return (y);
+        return y;
 
       case 6:               // BURR VI
         y = -Math.log(y / k) / r;
         y = Math.log(y + Math.sqrt(y * y + 1.0));
-        return (y);
+        return y;
 
       case 9:               // BURR IX
         y = 1.0 + 2.0 * u / (k * (1.0 - u));
@@ -135,8 +136,9 @@ public class Distributions {
 
       case 12:               // BURR XII
         return Math.exp(Math.log(y) / k);        // y^(1/k)
+      default:
+        return 0;
     }
-    return 0;
   }
 
   /**
@@ -164,9 +166,12 @@ public class Distributions {
   }
 
   /**
-   * Returns a discrete geometric distributed random number; <A HREF="http://www.statsoft.com/textbook/glosf.html#Geometric
-   * Distribution">Definition</A>. <p> <tt>p(k) = p * (1-p)^k</tt> for <tt> k &gt;= 0</tt>. <p> <b>Implementation:</b>
-   * Inversion method. This is a port of <tt>geo.c</tt> from the <A HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND
+   * Returns a discrete geometric distributed random number;
+   * <A HREF="http://www.statsoft.com/textbook/glosf.html#Geometric
+   * Distribution">Definition</A>. <p> <tt>p(k) = p * (1-p)^k</tt> for <tt> k &gt;= 0</tt>.
+   * <p> <b>Implementation:</b>
+   * Inversion method. This is a port of <tt>geo.c</tt> from the
+   * <A HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND
    * / WIN-RAND</A> library.
    *
    * @param p must satisfy <tt>0 &lt; p &lt; 1</tt>. <p>
@@ -209,10 +214,10 @@ public class Distributions {
    * approximate method for generating asymmetric variables, Communications ACM 17, 78-82. <p>
    */
   public static double nextLambda(double l3, double l4, RandomEngine randomGenerator) {
-    double l_sign = (l3 < 0) || (l4 < 0) ? -1.0 : 1.0;
+    double lSign = (l3 < 0) || (l4 < 0) ? -1.0 : 1.0;
 
     double u = randomGenerator.raw();                           // U(0/1)
-    return l_sign * (Math.exp(Math.log(u) * l3) - Math.exp(Math.log(1.0 - u) * l4));
+    return lSign * (Math.exp(Math.log(u) * l3) - Math.exp(Math.log(1.0 - u) * l4));
   }
 
   /**
@@ -228,12 +233,13 @@ public class Distributions {
 
   /**
    * Returns a random number from the standard Logistic distribution Log(0,1). <p> <b>Implementation:</b> Inversion
-   * method. This is a port of <tt>login.c</tt> from the <A HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND
+   * method. This is a port of <tt>login.c</tt> from the
+   * <A HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND
    * / WIN-RAND</A> library.
    */
   public static double nextLogistic(RandomEngine randomGenerator) {
     double u = randomGenerator.raw();
-    return (-Math.log(1.0 / u - 1.0));
+    return -Math.log(1.0 / u - 1.0);
   }
 
   /**
@@ -248,7 +254,8 @@ public class Distributions {
 
   /**
    * Returns a random number from the standard Triangular distribution in (-1,1). <p> <b>Implementation:</b> Inversion
-   * method. This is a port of <tt>tra.c</tt> from the <A HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND
+   * method. This is a port of <tt>tra.c</tt> from the
+   * <A HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND
    * / WIN-RAND</A> library. <p>
    */
   public static double nextTriangular(RandomEngine randomGenerator) {

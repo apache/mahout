@@ -27,6 +27,7 @@ import org.apache.mahout.math.Varint;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * a writable key that is used by {@link CountUsersMapper} and {@link CountUsersReducer} to
@@ -88,7 +89,7 @@ public class CountUsersKeyWritable implements WritableComparable<CountUsersKeyWr
   /**
    * all userIDs go to the same reducer
    */
-  public static class CountUsersGroupComparator extends WritableComparator {
+  public static class CountUsersGroupComparator extends WritableComparator implements Serializable {
 
     public CountUsersGroupComparator() {
       super(CountUsersKeyWritable.class, true);

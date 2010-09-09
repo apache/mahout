@@ -646,7 +646,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     }
 
     buf.append("\n\ninverse(A) = ");
-    DoubleMatrix2D identity = org.apache.mahout.math.matrix.DoubleFactory2D.dense.identity(lu.rows());
+    DoubleMatrix2D identity = org.apache.mahout.math.matrix.DoubleFactory2D.DENSE.identity(lu.rows());
     try {
       this.solve(identity);
       buf.append(String.valueOf(identity));

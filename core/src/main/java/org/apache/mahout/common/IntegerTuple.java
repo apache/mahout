@@ -21,7 +21,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +31,7 @@ import org.apache.hadoop.io.WritableComparable;
  * 
  * 
  */
-public class IntegerTuple implements WritableComparable<IntegerTuple> {
+public final class IntegerTuple implements WritableComparable<IntegerTuple> {
   
   private List<Integer> tuple = new ArrayList<Integer>();
   
@@ -42,7 +41,7 @@ public class IntegerTuple implements WritableComparable<IntegerTuple> {
     add(firstEntry);
   }
   
-  public IntegerTuple(Collection<Integer> entries) {
+  public IntegerTuple(Iterable<Integer> entries) {
     for (Integer entry : entries) {
       add(entry);
     }

@@ -62,8 +62,7 @@ public final class SequenceFileDumper {
       withDescription("The number of chars of the asFormatString() to print").withShortName("b").create();
     Option countOpt = obuilder.withLongName("count").withRequired(false).
     withDescription("Report the count only").withShortName("c").create();
-    Option helpOpt = obuilder.withLongName("help").
-    withDescription("Print out help").withShortName("h").create();
+    Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h").create();
     
     Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt)
       .withOption(substringOpt).withOption(countOpt).withOption(helpOpt).create();
@@ -100,8 +99,8 @@ public final class SequenceFileDumper {
         boolean countOnly = cmdLine.hasOption(countOpt);
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
         Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        writer.append("Key class: ").append(String.valueOf(reader.getKeyClass())).append(" Value Class: ")
-        .append(String.valueOf(value.getClass())).append('\n');
+        writer.append("Key class: ").append(String.valueOf(reader.getKeyClass()));
+        writer.append(" Value Class: ").append(String.valueOf(value.getClass())).append('\n');
         writer.flush();
         long count = 0;
         if (countOnly) {

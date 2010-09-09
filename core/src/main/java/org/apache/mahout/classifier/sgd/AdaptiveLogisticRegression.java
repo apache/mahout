@@ -70,7 +70,6 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int numFeatures;
 
   // for GSON
-  @SuppressWarnings({"UnusedDeclaration"})
   private AdaptiveLogisticRegression() {
   }
 
@@ -321,7 +320,6 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     private Vector instance;
 
     // for GSON
-    @SuppressWarnings({"UnusedDeclaration"})
     private TrainingExample() {
     }
 

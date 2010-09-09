@@ -8,7 +8,6 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.math.Arithmetic;
 
 import java.util.Random;

@@ -99,19 +99,19 @@ public final class RecommenderJob extends AbstractJob {
         String.valueOf(AggregateAndRecommendReducer.DEFAULT_NUM_RECOMMENDATIONS));
     addOption("usersFile", "u", "File of users to recommend for", null);
     addOption("itemsFile", "i", "File of items to recommend for", null);
-    addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from " +
-        "the recommendations for that user(optional)", null);
+    addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from "
+        + "the recommendations for that user(optional)", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("maxPrefsPerUser", null,
         "Maximum number of preferences considered per user in final recommendation phase",
         String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
     addOption("maxSimilaritiesPerItem", null, "Maximum number of similarities considered per item ",
         String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM));
-    addOption("maxCooccurrencesPerItem", "o", "try to cap the number of cooccurrences per item to this " +
-        "number (default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')',
+    addOption("maxCooccurrencesPerItem", "o", "try to cap the number of cooccurrences per item to this "
+        + "number (default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')',
         String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
-    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use " +
-        "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')',
+    addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use "
+        + "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')',
         String.valueOf(SimilarityType.SIMILARITY_COOCCURRENCE));    
 
     Map<String,String> parsedArgs = parseArguments(args);
@@ -175,9 +175,9 @@ public final class RecommenderJob extends AbstractJob {
                                   VarIntWritable.class,
                                   NullWritable.class,
                                   TextOutputFormat.class);
-        countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
-        countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
-        countUsers.waitForCompletion(true);
+      countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
+      countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
+      countUsers.waitForCompletion(true);
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
@@ -203,12 +203,12 @@ public final class RecommenderJob extends AbstractJob {
        * new DistributedRowMatrix(...).rowSimilarity(...) */
       try {
         ToolRunner.run(getConf(), new RowSimilarityJob(), new String[] {
-            "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
-            "-Dmapred.output.dir=" + similarityMatrixPath.toString(),
-            "--numberOfColumns", String.valueOf(numberOfUsers),
-            "--similarityClassname", similarityClassname,
-            "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem + 1),
-            "--tempDir", tempDirPath.toString() });
+          "-Dmapred.input.dir=" + itemUserMatrixPath.toString(),
+          "-Dmapred.output.dir=" + similarityMatrixPath.toString(),
+          "--numberOfColumns", String.valueOf(numberOfUsers),
+          "--similarityClassname", similarityClassname,
+          "--maxSimilaritiesPerRow", String.valueOf(maxSimilaritiesPerItem + 1),
+          "--tempDir", tempDirPath.toString() });
       } catch (Exception e) {
         throw new IllegalStateException("item-item-similarity computation failed", e);
       }
@@ -257,7 +257,7 @@ public final class RecommenderJob extends AbstractJob {
             ItemFilterMapper.class, VarLongWritable.class, VarLongWritable.class,
             ItemFilterAsVectorAndPrefsReducer.class, VarIntWritable.class, VectorAndPrefsWritable.class,
             SequenceFileOutputFormat.class);
-          itemFiltering.waitForCompletion(true);
+        itemFiltering.waitForCompletion(true);
       }
 
       String aggregateAndRecommendInput = partialMultiplyPath.toString();
@@ -272,7 +272,7 @@ public final class RecommenderJob extends AbstractJob {
           TextOutputFormat.class);
       Configuration aggregateAndRecommendConf = aggregateAndRecommend.getConfiguration();
       if (itemsFile != null) {
-    	  aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
+        aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMS_FILE, itemsFile);
       }
 
       if (filterFile != null) {

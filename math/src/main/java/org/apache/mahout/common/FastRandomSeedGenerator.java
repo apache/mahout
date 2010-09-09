@@ -26,7 +26,8 @@ import org.uncommons.maths.random.SeedGenerator;
  * due to entropy underflow.
  */
 public class FastRandomSeedGenerator implements SeedGenerator {
-  SeedGenerator[] generators = {new DevURandomSeedGenerator(), new SecureRandomSeedGenerator()};
+
+  private final SeedGenerator[] generators = {new DevURandomSeedGenerator(), new SecureRandomSeedGenerator()};
 
   /**
    * Generate a seed value for a random number generator.  Try the /dev/urandom generator

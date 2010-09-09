@@ -43,14 +43,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * http://arxiv.org/abs/0803.3838
  *
  * @see Mapping
- * @see State
  */
 public class State<T extends Payload<T>> implements Comparable<State<T>> {
 
   // object count is kept to break ties in comparison.
-  private static final AtomicInteger objectCount = new AtomicInteger();
+  private static final AtomicInteger OBJECT_COUNT = new AtomicInteger();
 
-  private int id = objectCount.getAndIncrement();
+  private int id = OBJECT_COUNT.getAndIncrement();
   private Random gen = RandomUtils.getRandom();
   // current state
   private double[] params;
@@ -207,6 +206,19 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
 
   public void setPayload(T payload) {
     this.payload = payload;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof State)) {
+      return false;
+    }
+    State<?> other = (State<?>) o;
+    return id == other.id && value == other.value;
+  }
+
+  public int hashCode() {
+    return RandomUtils.hashDouble(value) ^ id;
   }
 
   /**

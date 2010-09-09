@@ -252,40 +252,35 @@ public class QRDecomposition implements java.io.Serializable {
     String unknown = "Illegal operation or error: ";
     try {
       buf.append(String.valueOf(this.hasFullRank()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nH = ");
     try {
       buf.append(String.valueOf(this.getH()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nQ = ");
     try {
       buf.append(String.valueOf(this.getQ()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nR = ");
     try {
       buf.append(String.valueOf(this.getR()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\npseudo inverse(A) = ");
     try {
-      buf.append(String.valueOf(this.solve(DoubleFactory2D.dense.identity(QR.rows()))));
-    }
-    catch (IllegalArgumentException exc) {
+      buf.append(String.valueOf(this.solve(DoubleFactory2D.DENSE.identity(QR.rows()))));
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 

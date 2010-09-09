@@ -137,7 +137,8 @@ public class Algebra extends PersistentObject {
     /*
     int i=size;
     int a;
-    while (--i >= 0 && (a=indexes[i])==i) if (a < 0 || a >= size) throw new IndexOutOfBoundsException("invalid permutation");
+    while (--i >= 0 && (a=indexes[i])==i) if (a < 0 || a >= size)
+    throw new IndexOutOfBoundsException("invalid permutation");
     if (i<0) return; // nothing to permute
     */
 
@@ -214,7 +215,8 @@ public class Algebra extends PersistentObject {
     /*
     int i=size;
     int a;
-    while (--i >= 0 && (a=indexes[i])==i) if (a < 0 || a >= size) throw new IndexOutOfBoundsException("invalid permutation");
+    while (--i >= 0 && (a=indexes[i])==i) if (a < 0 || a >= size)
+      throw new IndexOutOfBoundsException("invalid permutation");
     if (i<0) return; // nothing to permute
     */
 

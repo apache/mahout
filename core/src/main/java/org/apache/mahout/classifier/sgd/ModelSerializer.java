@@ -267,8 +267,7 @@ public final class ModelSerializer {
       r.setStep(step);
       r.setValue(v.get("value").getAsDouble());
 
-      Type mapListType = new TypeToken<List<Mapping>>() {
-      }.getType();
+      Type mapListType = new TypeToken<List<Mapping>>() {}.getType();
       r.setMaps(jsonDeserializationContext.<List<Mapping>>deserialize(v.get("maps"), mapListType));
 
       r.setPayload(
@@ -314,13 +313,11 @@ public final class ModelSerializer {
           new AdaptiveLogisticRegression(x.get("numCategories").getAsInt(),
                                          x.get("numFeatures").getAsInt(),
                                          jdc.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
-      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {
-      }.getType();
+      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
       r.setEvaluationInterval(x.get("evaluationInterval").getAsInt());
       r.setRecord(x.get("record").getAsInt());
 
-      Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {
-      }.getType();
+      Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
       r.setEp(jdc.<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("ep"), epType));
       r.setSeed(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("seed"), stateType));
       r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("best"), stateType));
@@ -333,13 +330,12 @@ public final class ModelSerializer {
     @Override
     public JsonElement serialize(AdaptiveLogisticRegression x, Type type, JsonSerializationContext jsc) {
       JsonObject r = new JsonObject();
-      r.add("ep", jsc.serialize(x.getEp(), new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {
-      }.getType()));
-      r.add("buffer", jsc.serialize(x.getBuffer(), new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {
-      }.getType()));
+      r.add("ep", jsc.serialize(x.getEp(),
+          new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType()));
+      r.add("buffer", jsc.serialize(x.getBuffer(),
+          new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {}.getType()));
       r.add("evaluationInterval", jsc.serialize(x.getEvaluationInterval()));
-      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {
-      }.getType();
+      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
       r.add("best", jsc.serialize(x.getBest(), stateType));
       r.add("numFeatures", jsc.serialize(x.getNumFeatures()));
       r.add("numCategories", jsc.serialize(x.getNumCategories()));

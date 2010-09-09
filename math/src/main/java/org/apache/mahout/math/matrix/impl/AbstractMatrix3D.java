@@ -23,28 +23,28 @@ package org.apache.mahout.math.matrix.impl;
 public abstract class AbstractMatrix3D extends AbstractMatrix {
 
   /** the number of slices this matrix (view) has */
-  protected int slices;
+  private int slices;
 
   /** the number of rows this matrix (view) has */
-  protected int rows;
+  private int rows;
 
   /** the number of columns this matrix (view) has */
-  protected int columns;
+  private int columns;
 
 
   /** the number of elements between two slices, i.e. <tt>index(k+1,i,j) - index(k,i,j)</tt>. */
-  protected int sliceStride;
+  private int sliceStride;
 
   /** the number of elements between two rows, i.e. <tt>index(k,i+1,j) - index(k,i,j)</tt>. */
-  protected int rowStride;
+  private int rowStride;
 
   /** the number of elements between two columns, i.e. <tt>index(k,i,j+1) - index(k,i,j)</tt>. */
-  protected int columnStride;
+  private int columnStride;
 
   /** the index of the first element */
-  protected int sliceZero;
-  protected int rowZero;
-  protected int columnZero;
+  private int sliceZero;
+  private int rowZero;
+  private int columnZero;
 
   // this.isNoView implies: offset==0, sliceStride==rows*slices, rowStride==columns, columnStride==1
 
@@ -59,7 +59,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param absRank the absolute rank of the element.
    * @return the position.
    */
-  protected int _columnOffset(int absRank) {
+  protected int columnOffset(int absRank) {
     return absRank;
   }
 
@@ -69,7 +69,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param rank the relative rank of the element.
    * @return the absolute rank of the element.
    */
-  protected int _columnRank(int rank) {
+  protected int columnRank(int rank) {
     return columnZero + rank * columnStride;
   }
 
@@ -80,7 +80,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param absRank the absolute rank of the element.
    * @return the position.
    */
-  protected int _rowOffset(int absRank) {
+  protected int rowOffset(int absRank) {
     return absRank;
   }
 
@@ -90,7 +90,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param rank the relative rank of the element.
    * @return the absolute rank of the element.
    */
-  protected int _rowRank(int rank) {
+  protected int rowRank(int rank) {
     return rowZero + rank * rowStride;
   }
 
@@ -101,7 +101,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param absRank the absolute rank of the element.
    * @return the position.
    */
-  protected int _sliceOffset(int absRank) {
+  protected int sliceOffset(int absRank) {
     return absRank;
   }
 
@@ -111,7 +111,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param rank the relative rank of the element.
    * @return the absolute rank of the element.
    */
-  protected int _sliceRank(int rank) {
+  protected int sliceRank(int rank) {
     return sliceZero + rank * sliceStride;
   }
 
@@ -122,10 +122,10 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    *                                   slice+depth>slices  || column<0 || width<0 || column+width>columns</tt>
    */
   protected void checkBox(int slice, int row, int column, int depth, int height, int width) {
-    if (slice < 0 || depth < 0 || slice + depth > slices || row < 0 || height < 0 || row + height > rows ||
-        column < 0 || width < 0 || column + width > columns) {
-      throw new IndexOutOfBoundsException("Slice:" + slice + ", row:" + row + " ,column:" + column + ", depth:" + depth +
-              " ,height:" + height + ", width:" + width);
+    if (slice < 0 || depth < 0 || slice + depth > slices || row < 0 || height < 0 || row + height > rows
+        || column < 0 || width < 0 || column + width > columns) {
+      throw new IndexOutOfBoundsException("Slice:" + slice + ", row:" + row + " ,column:" + column + ", depth:"
+          + depth + " ,height:" + height + ", width:" + width);
     }
   }
 
@@ -198,8 +198,8 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    *                                  slices() != C.slices() || rows() != C.rows() || columns() != C.columns()</tt>.
    */
   public void checkShape(AbstractMatrix3D B, AbstractMatrix3D C) {
-    if (slices != B.slices || rows != B.rows || columns != B.columns || slices != C.slices || rows != C.rows ||
-        columns != C.columns) {
+    if (slices != B.slices || rows != B.rows || columns != B.columns || slices != C.slices || rows != C.rows
+        || columns != C.columns) {
       throw new IllegalArgumentException("Incompatible dimensions");
     }
   }
@@ -242,7 +242,7 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    * @param column the index of the third-coordinate.
    */
   protected int index(int slice, int row, int column) {
-    return _sliceOffset(_sliceRank(slice)) + _rowOffset(_rowRank(row)) + _columnOffset(_columnRank(column));
+    return sliceOffset(sliceRank(slice)) + rowOffset(rowRank(row)) + columnOffset(columnRank(column));
   }
 
   /** Returns the number of rows. */
@@ -338,8 +338,8 @@ public abstract class AbstractMatrix3D extends AbstractMatrix {
    */
   protected AbstractMatrix3D vDice(int axis0, int axis1, int axis2) {
     int d = 3;
-    if (axis0 < 0 || axis0 >= d || axis1 < 0 || axis1 >= d || axis2 < 0 || axis2 >= d ||
-        axis0 == axis1 || axis0 == axis2 || axis1 == axis2) {
+    if (axis0 < 0 || axis0 >= d || axis1 < 0 || axis1 >= d || axis2 < 0 || axis2 >= d
+        || axis0 == axis1 || axis0 == axis2 || axis1 == axis2) {
       throw new IllegalArgumentException("Illegal Axes: " + axis0 + ", " + axis1 + ", " + axis2);
     }
 

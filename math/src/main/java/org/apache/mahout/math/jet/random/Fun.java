@@ -16,7 +16,7 @@ import org.apache.mahout.math.jet.math.Arithmetic;
  * <b>Implementation:</b> High performance implementation. <dt>This is a port of <tt>gen_fun.cpp</tt> from the <A
  * HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND / WIN-RAND</A> library.
  */
-public class Fun {
+public final class Fun {
   private static final double[] B_0 = new double[]{-1.5787132, -0.6130827, 0.1735823, 1.4793411,
     2.6667307, 4.9086836, 8.1355339,
   };
@@ -248,8 +248,8 @@ public class Fun {
         erg = -Math.log(gamma(lambda)) - lambda * Math.log(2.0) + lambda * Math.log(beta);
         return erg;
       } else {
-        erg = -(lambda + 1.0) * Math.log(2.0) - (lambda - 0.5) * Math.log(lambda) + lambda + lambda * Math.log(beta) -
-            0.5 * Math.log(0.5 * pi);
+        erg = -(lambda + 1.0) * Math.log(2.0) - (lambda - 0.5) * Math.log(lambda) + lambda
+            + lambda * Math.log(beta) - 0.5 * Math.log(0.5 * pi);
         return erg;
       }
     }
@@ -293,7 +293,7 @@ public class Fun {
       double period = pi / z1;
       step = 0.1 * period;
       double border = 100.0 / ((lambda + 0.1) * (lambda + 0.1));
-      int nrPer = (int) Math.ceil((border / period)) + 20;
+      int nrPer = (int) Math.ceil(border / period) + 20;
       x1 = step;
       int j;
       double z2 = 1.57;
@@ -320,7 +320,7 @@ public class Fun {
       }
       double secondSum = sum;
       sum = 0.5 * (firstSum + secondSum);
-      erg = gamma(lambda + 0.5) * Math.pow((2.0 * z2), lambda) / (Math.sqrt(pi) * Math.pow(z1, lambda)) * sum;
+      erg = gamma(lambda + 0.5) * Math.pow(2.0 * z2, lambda) / (Math.sqrt(pi) * Math.pow(z1, lambda)) * sum;
       erg = -Math.log(2.0 * erg);
       return erg;
     }
@@ -364,7 +364,7 @@ public class Fun {
           - y * 0.420059e-2));
       ans = 0.39894228 + y * (-0.3988024e-1 + y * (-0.362018e-2
           + y * (0.163801e-2 + y * (-0.1031555e-1 + y * ans))));
-      ans *= (Math.exp(ax) / Math.sqrt(ax));
+      ans *= Math.exp(ax) / Math.sqrt(ax);
     }
     return x < 0.0 ? -ans : ans;
   }

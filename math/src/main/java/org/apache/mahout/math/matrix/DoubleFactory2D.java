@@ -84,10 +84,10 @@ sample} to construct random matrices. </td>
 public class DoubleFactory2D extends PersistentObject {
 
   /** A factory producing dense matrices. */
-  public static final DoubleFactory2D dense = new DoubleFactory2D();
+  public static final DoubleFactory2D DENSE = new DoubleFactory2D();
 
   /** A factory producing sparse hash matrices. */
-  private static final DoubleFactory2D sparse = new DoubleFactory2D();
+  private static final DoubleFactory2D SPARSE = new DoubleFactory2D();
 
   /*
   * A factory producing sparse row compressed modified matrices.
@@ -231,9 +231,12 @@ public class DoubleFactory2D extends PersistentObject {
    * log.info(compose(parts1));
    * </pre>
    * </td> <td><tt>8&nbsp;x&nbsp;9&nbsp;matrix<br> 0&nbsp;0&nbsp;0&nbsp;0&nbsp;1&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br>
-   * 0&nbsp;0&nbsp;0&nbsp;0&nbsp;1&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br>
-   * 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br>
-   * 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br> 0&nbsp;0&nbsp;0&nbsp;0&nbsp;4&nbsp;4&nbsp;0&nbsp;0&nbsp;0<br>
+   * 0&nbsp;0&nbsp;0&nbsp;0&nbsp;1&nbsp;1&nbsp;0&nbsp;0&nbsp;0<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3
+   * &nbsp;3&nbsp;3<br>
+   * 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br> 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3
+   * &nbsp;3&nbsp;3<br>
+   * 2&nbsp;2&nbsp;2&nbsp;2&nbsp;0&nbsp;0&nbsp;3&nbsp;3&nbsp;3<br> 0&nbsp;0&nbsp;0&nbsp;0&nbsp;4&nbsp;4&nbsp;0
+   * &nbsp;0&nbsp;0<br>
    * 0&nbsp;0&nbsp;0&nbsp;0&nbsp;4&nbsp;4&nbsp;0&nbsp;0&nbsp;0</tt></td> </tr> <tr align="left" valign="top"> <td>
    * <pre>
    * DoubleMatrix2D[][] parts3 =
@@ -583,7 +586,7 @@ public class DoubleFactory2D extends PersistentObject {
    *                                  values[row-1].length</tt>.
    */
   public DoubleMatrix2D make(double[][] values) {
-    if (this == sparse) {
+    if (this == SPARSE) {
       return new SparseDoubleMatrix2D(values);
     } else {
       return new DenseDoubleMatrix2D(values);
@@ -615,11 +618,9 @@ public class DoubleFactory2D extends PersistentObject {
 
   /** Constructs a matrix with the given shape, each cell initialized with zero. */
   public DoubleMatrix2D make(int rows, int columns) {
-    if (this == sparse) {
+    if (this == SPARSE) {
       return new SparseDoubleMatrix2D(rows, columns);
-    }
-    //if (this==rowCompressedModified) return new RCMDoubleMatrix2D(rows,columns);
-    else {
+    } else {
       return new DenseDoubleMatrix2D(rows, columns);
     }
   }

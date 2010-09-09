@@ -13,11 +13,13 @@ import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
+import java.io.Serializable;
+
 import static org.apache.mahout.math.matrix.linalg.Property.*;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class EigenvalueDecomposition implements java.io.Serializable {
+public class EigenvalueDecomposition implements Serializable {
 
   /** Row and column dimension (square matrix). */
   private final int n;
@@ -122,7 +124,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
         D[i][i - 1] = e[i];
       }
     }
-    return DoubleFactory2D.dense.make(D);
+    return DoubleFactory2D.DENSE.make(D);
   }
 
   /**
@@ -149,7 +151,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
    * @return <tt>V</tt>
    */
   public DoubleMatrix2D getV() {
-    return DoubleFactory2D.dense.make(V);
+    return DoubleFactory2D.DENSE.make(V);
   }
 
   /** Nonsymmetric reduction from Hessenberg to real Schur form. */
@@ -351,9 +353,8 @@ public class EigenvalueDecomposition implements java.io.Serializable {
           if (m == l) {
             break;
           }
-          if (Math.abs(H[m][m - 1]) * (Math.abs(q) + Math.abs(r)) <
-              eps * (Math.abs(p) * (Math.abs(H[m - 1][m - 1]) + Math.abs(z) +
-                  Math.abs(H[m + 1][m + 1])))) {
+          if (Math.abs(H[m][m - 1]) * (Math.abs(q) + Math.abs(r))
+              < eps * (Math.abs(p) * (Math.abs(H[m - 1][m - 1]) + Math.abs(z) + Math.abs(H[m + 1][m + 1])))) {
             break;
           }
           m--;
@@ -369,11 +370,11 @@ public class EigenvalueDecomposition implements java.io.Serializable {
         // Double QR step involving rows l:n and columns m:n
 
         for (int k = m; k <= n - 1; k++) {
-          boolean notlast = (k != n - 1);
+          boolean notlast = k != n - 1;
           if (k != m) {
             p = H[k][k - 1];
             q = H[k + 1][k - 1];
-            r = (notlast ? H[k + 2][k - 1] : 0.0);
+            r = notlast ? H[k + 2][k - 1] : 0.0;
             x = Math.abs(p) + Math.abs(q) + Math.abs(r);
             if (x != 0.0) {
               p /= x;
@@ -546,8 +547,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
               double vr = (d[i] - p) * (d[i] - p) + e[i] * e[i] - q * q;
               double vi = (d[i] - p) * 2.0 * q;
               if (vr == 0.0 && vi == 0.0) {
-                vr = eps * norm * (Math.abs(w) + Math.abs(q) +
-                    Math.abs(x) + Math.abs(y) + Math.abs(z));
+                vr = eps * norm * (Math.abs(w) + Math.abs(q) + Math.abs(x) + Math.abs(y) + Math.abs(z));
               }
               cdiv(x * r - z * ra + q * sa, x * s - z * sa - q * ra, vr, vi);
               H[i][n - 1] = cdivr;
@@ -664,7 +664,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
 
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < n; j++) {
-        V[i][j] = (i == j ? 1.0 : 0.0);
+        V[i][j] = i == j ? 1.0 : 0.0;
       }
     }
 
@@ -707,32 +707,28 @@ public class EigenvalueDecomposition implements java.io.Serializable {
     String unknown = "Illegal operation or error: ";
     try {
       buf.append(String.valueOf(this.getRealEigenvalues()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\nimagEigenvalues = ");
     try {
       buf.append(String.valueOf(this.getImagEigenvalues()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nD = ");
     try {
       buf.append(String.valueOf(this.getD()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
     buf.append("\n\nV = ");
     try {
       buf.append(String.valueOf(this.getV()));
-    }
-    catch (IllegalArgumentException exc) {
+    } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
 
@@ -930,7 +926,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
           f = d[j];
           g = e[j];
           for (int k = j; k <= i - 1; k++) {
-            V[k][j] -= (f * e[k] + g * d[k]);
+            V[k][j] -= f * e[k] + g * d[k];
           }
           d[j] = V[i - 1][j];
           V[i][j] = 0.0;

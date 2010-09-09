@@ -85,26 +85,6 @@ public final class Descriptive {
     return sxy / (size - 1);
   }
 
-  /*
-  * Both covariance versions yield the same results but the one above is faster
-  */
-
-  private static double covariance2(DoubleArrayList data1, DoubleArrayList data2) {
-    int size = data1.size();
-    double mean1 = mean(data1);
-    double mean2 = mean(data2);
-    double covariance = 0.0D;
-    for (int i = 0; i < size; i++) {
-      double x = data1.get(i);
-      double y = data2.get(i);
-
-      covariance += (x - mean1) * (y - mean2);
-    }
-
-    return covariance / (double) (size - 1);
-  }
-
-
   /** Durbin-Watson computation. */
   public static double durbinWatson(DoubleArrayList data) {
     int size = data.size();

@@ -49,7 +49,8 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for help. Used by all clustering jobs and many others
    * */
   public static Option helpOption() {
-    return new DefaultOptionBuilder().withLongName("help").withDescription("Print out help").withShortName("h").create();
+    return new DefaultOptionBuilder().withLongName("help").withDescription("Print out help")
+        .withShortName("h").create();
   }
 
   /**
@@ -65,8 +66,8 @@ public final class DefaultOptionCreator {
    * Returns a default command line option for clusters input directory specification. Used by FuzzyKmeans, Kmeans
    */
   public static DefaultOptionBuilder clustersInOption() {
-    return new DefaultOptionBuilder().withLongName(CLUSTERS_IN_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
-        .withName(CLUSTERS_IN_OPTION).withMinimum(1).withMaximum(1).create())
+    return new DefaultOptionBuilder().withLongName(CLUSTERS_IN_OPTION).withRequired(true)
+        .withArgument(new ArgumentBuilder().withName(CLUSTERS_IN_OPTION).withMinimum(1).withMaximum(1).create())
         .withDescription("The path to the initial clusters directory. Must be a SequenceFile of some type of Cluster")
         .withShortName("c");
   }
@@ -94,8 +95,8 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder distanceMeasureOption() {
     return new DefaultOptionBuilder().withLongName(DISTANCE_MEASURE_OPTION).withRequired(false).withShortName("dm")
-        .withArgument(new ArgumentBuilder().withName(DISTANCE_MEASURE_OPTION).withDefault(SquaredEuclideanDistanceMeasure.class
-            .getName()).withMinimum(1).withMaximum(1).create())
+        .withArgument(new ArgumentBuilder().withName(DISTANCE_MEASURE_OPTION)
+            .withDefault(SquaredEuclideanDistanceMeasure.class.getName()).withMinimum(1).withMaximum(1).create())
         .withDescription("The classname of the DistanceMeasure. Default is SquaredEuclidean");
   }
 
@@ -105,7 +106,8 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder methodOption() {
     return new DefaultOptionBuilder().withLongName(METHOD_OPTION).withRequired(false).withShortName("xm")
-        .withArgument(new ArgumentBuilder().withName(METHOD_OPTION).withDefault(MAPREDUCE_METHOD).withMinimum(1).withMaximum(1).create())
+        .withArgument(new ArgumentBuilder().withName(METHOD_OPTION).withDefault(MAPREDUCE_METHOD)
+            .withMinimum(1).withMaximum(1).create())
         .withDescription("The execution method to use: sequential or mapreduce. Default is mapreduce");
   }
 
@@ -114,7 +116,8 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder t1Option() {
     return new DefaultOptionBuilder().withLongName(T1_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
-        .withName(T1_OPTION).withMinimum(1).withMaximum(1).create()).withDescription("T1 threshold value").withShortName(T1_OPTION);
+        .withName(T1_OPTION).withMinimum(1).withMaximum(1).create()).withDescription("T1 threshold value")
+        .withShortName(T1_OPTION);
   }
 
   /**
@@ -122,7 +125,8 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder t2Option() {
     return new DefaultOptionBuilder().withLongName(T2_OPTION).withRequired(true).withArgument(new ArgumentBuilder()
-        .withName(T2_OPTION).withMinimum(1).withMaximum(1).create()).withDescription("T2 threshold value").withShortName(T2_OPTION);
+        .withName(T2_OPTION).withMinimum(1).withMaximum(1).create()).withDescription("T2 threshold value")
+        .withShortName(T2_OPTION);
   }
 
   /**
@@ -132,7 +136,8 @@ public final class DefaultOptionCreator {
   public static DefaultOptionBuilder maxIterationsOption() {
     // default value used by LDA which overrides withRequired(false)
     return new DefaultOptionBuilder().withLongName(MAX_ITERATIONS_OPTION).withRequired(true).withShortName("x")
-        .withArgument(new ArgumentBuilder().withName(MAX_ITERATIONS_OPTION).withDefault("-1").withMinimum(1).withMaximum(1)
+        .withArgument(new ArgumentBuilder().withName(MAX_ITERATIONS_OPTION).withDefault("-1")
+            .withMinimum(1).withMaximum(1)
             .create()).withDescription("The maximum number of iterations.");
   }
 
@@ -141,9 +146,9 @@ public final class DefaultOptionCreator {
    * Used by Dirichlet, FuzzyKmeans, Kmeans
    */
   public static DefaultOptionBuilder numClustersOption() {
-    return new DefaultOptionBuilder().withLongName(NUM_CLUSTERS_OPTION).withRequired(false).withArgument(new ArgumentBuilder()
-        .withName("k").withMinimum(1).withMaximum(1).create()).withDescription("The number of clusters to create")
-        .withShortName("k");
+    return new DefaultOptionBuilder().withLongName(NUM_CLUSTERS_OPTION).withRequired(false)
+        .withArgument(new ArgumentBuilder().withName("k").withMinimum(1).withMaximum(1).create())
+        .withDescription("The number of clusters to create").withShortName("k");
   }
 
   /**
@@ -152,8 +157,8 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder convergenceOption() {
     return new DefaultOptionBuilder().withLongName(CONVERGENCE_DELTA_OPTION).withRequired(false).withShortName("cd")
-        .withArgument(new ArgumentBuilder().withName(CONVERGENCE_DELTA_OPTION).withDefault("0.5").withMinimum(1).withMaximum(1)
-            .create()).withDescription("The convergence delta value. Default is 0.5");
+        .withArgument(new ArgumentBuilder().withName(CONVERGENCE_DELTA_OPTION).withDefault("0.5")
+            .withMinimum(1).withMaximum(1).create()).withDescription("The convergence delta value. Default is 0.5");
   }
 
   /**
@@ -162,7 +167,8 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder numReducersOption() {
     return new DefaultOptionBuilder().withLongName(MAX_REDUCERS_OPTION).withRequired(false).withShortName("r")
-        .withArgument(new ArgumentBuilder().withName(MAX_REDUCERS_OPTION).withDefault("2").withMinimum(1).withMaximum(1).create())
+        .withArgument(new ArgumentBuilder().withName(MAX_REDUCERS_OPTION).withDefault("2")
+            .withMinimum(1).withMaximum(1).create())
         .withDescription("The number of reduce tasks. Defaults to 2");
   }
 
@@ -179,8 +185,9 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder emitMostLikelyOption() {
     return new DefaultOptionBuilder().withLongName(EMIT_MOST_LIKELY_OPTION).withRequired(false).withShortName("e")
-        .withArgument(new ArgumentBuilder().withName(EMIT_MOST_LIKELY_OPTION).withDefault("true").withMinimum(1).withMaximum(1)
-            .create()).withDescription("True if clustering should emit the most likely point only, "
+        .withArgument(new ArgumentBuilder().withName(EMIT_MOST_LIKELY_OPTION).withDefault("true")
+            .withMinimum(1).withMaximum(1).create())
+        .withDescription("True if clustering should emit the most likely point only, "
             + "false for threshold clustering. Default is true");
   }
 
@@ -190,7 +197,8 @@ public final class DefaultOptionCreator {
    */
   public static DefaultOptionBuilder thresholdOption() {
     return new DefaultOptionBuilder().withLongName(THRESHOLD_OPTION).withRequired(false).withShortName("t")
-        .withArgument(new ArgumentBuilder().withName(THRESHOLD_OPTION).withDefault("0").withMinimum(1).withMaximum(1).create())
+        .withArgument(new ArgumentBuilder().withName(THRESHOLD_OPTION).withDefault("0")
+            .withMinimum(1).withMaximum(1).create())
         .withDescription("The pdf threshold used for cluster determination. Default is 0");
   }
 

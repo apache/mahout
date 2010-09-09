@@ -377,7 +377,8 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    */
   @Override
   public double getQuick(int row, int column) {
-    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows)
+    // throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
     //return elements[index(row,column)];
     //manually inlined:
     return elements[rowZero + row * rowStride + columnZero + column * columnStride];
@@ -472,7 +473,8 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    */
   @Override
   public void setQuick(int row, int column, double value) {
-    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows)
+    // throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
     //elements[index(row,column)] = value;
     //manually inlined:
     elements[rowZero + row * rowStride + columnZero + column * columnStride] = value;
@@ -511,13 +513,15 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
    *
    * // 8 neighbors org.apache.mahout.math.function.Double9Function f = new Double9Function() {
    * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
+   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
+   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 +
    * alpha*(a00+a01+a02 + a10+a12 + a20+a21+a22); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} }; A.zAssign8Neighbors(B,f);
    *
    * // 4 neighbors org.apache.mahout.math.function.Double9Function g = new Double9Function() {
    * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
+   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
+   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 + alpha*(a01+a10+a12+a21);
    * &nbsp;&nbsp;&nbsp;} C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it }; </pre>
    *
@@ -647,10 +651,10 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
         sum += AElems[i += As] * yElems[j += ys];
       }
       for (int k = cols / 4; --k >= 0;) {
-        sum += AElems[i += As] * yElems[j += ys] +
-            AElems[i += As] * yElems[j += ys] +
-            AElems[i += As] * yElems[j += ys] +
-            AElems[i += As] * yElems[j += ys];
+        sum += AElems[i += As] * yElems[j += ys]
+            + AElems[i += As] * yElems[j += ys] 
+            + AElems[i += As] * yElems[j += ys]
+            + AElems[i += As] * yElems[j += ys];
       }
 
       zElems[indexZ] = alpha * sum + beta * zElems[indexZ];
@@ -734,15 +738,15 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     ---     -------
     xxx     xxxxxxx
     */
-    int BLOCK_SIZE = 30000; // * 8 == Level 2 cache in bytes
+    int blockSize = 30000; // * 8 == Level 2 cache in bytes
     //if (n+p == 0) return C;
     //int m_optimal = (BLOCK_SIZE - n*p) / (n+p);
-    int m_optimal = (BLOCK_SIZE - n) / (n + 1);
-    if (m_optimal <= 0) {
-      m_optimal = 1;
+    int mOptimal = (blockSize - n) / (n + 1);
+    if (mOptimal <= 0) {
+      mOptimal = 1;
     }
-    int blocks = m / m_optimal;
-    if (m % m_optimal != 0) {
+    int blocks = m / mOptimal;
+    if (m % mOptimal != 0) {
       blocks++;
     }
     int rr = 0;
@@ -750,15 +754,15 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
       int jB = BB.index(0, 0);
       int indexA = index(rr, 0);
       int jC = CC.index(rr, 0);
-      rr += m_optimal;
+      rr += mOptimal;
       if (blocks == 0) {
-        m_optimal += m - rr;
+        mOptimal += m - rr;
       }
 
       for (int j = p; --j >= 0;) {
         int iA = indexA;
         int iC = jC;
-        for (int i = m_optimal; --i >= 0;) {
+        for (int i = mOptimal; --i >= 0;) {
           int kA = iA;
           int kB = jB;
 
@@ -781,10 +785,10 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
             s += AElems[kA += cA] * BElems[kB += rB];
           }
           for (int k = n / 4; --k >= 0;) {
-            s += AElems[kA += cA] * BElems[kB += rB] +
-                AElems[kA += cA] * BElems[kB += rB] +
-                AElems[kA += cA] * BElems[kB += rB] +
-                AElems[kA += cA] * BElems[kB += rB];
+            s += AElems[kA += cA] * BElems[kB += rB]
+                + AElems[kA += cA] * BElems[kB += rB] 
+                + AElems[kA += cA] * BElems[kB += rB]
+                + AElems[kA += cA] * BElems[kB += rB];
           }
 
           CElems[iC] = alpha * s + beta * CElems[iC];

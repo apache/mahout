@@ -37,22 +37,25 @@ import org.apache.mahout.math.function.IntFunction;
  * followed by a transformation to the desired distribution.
  * Thus, subclasses of this class are at the core of computational statistics, simulations, Monte Carlo methods, etc.
  * <p>
- * Subclasses produce uniformly distributed <tt>int</tt>'s and <tt>long</tt>'s in the closed intervals <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt> and <tt>[Long.MIN_VALUE,Long.MAX_VALUE]</tt>, respectively, 
- * as well as <tt>float</tt>'s and <tt>double</tt>'s in the open unit intervals <tt>(0.0f,1.0f)</tt> and <tt>(0.0,1.0)</tt>, respectively.
+ * Subclasses produce uniformly distributed <tt>int</tt>'s and <tt>long</tt>'s in the closed intervals
+ * <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt> and <tt>[Long.MIN_VALUE,Long.MAX_VALUE]</tt>, respectively,
+ * as well as <tt>float</tt>'s and <tt>double</tt>'s in the open unit intervals <tt>(0.0f,1.0f)</tt> and
+ * <tt>(0.0,1.0)</tt>, respectively.
  * <p>
  * Subclasses need to override one single method only: <tt>nextInt()</tt>.
  * All other methods generating different data types or ranges are usually layered upon <tt>nextInt()</tt>.
  * <tt>long</tt>'s are formed by concatenating two 32 bit <tt>int</tt>'s.
- * <tt>float</tt>'s are formed by dividing the interval <tt>[0.0f,1.0f]</tt> into 2<sup>32</sup> sub intervals, then randomly choosing one subinterval.
- * <tt>double</tt>'s are formed by dividing the interval <tt>[0.0,1.0]</tt> into 2<sup>64</sup> sub intervals, then randomly choosing one subinterval.
+ * <tt>float</tt>'s are formed by dividing the interval <tt>[0.0f,1.0f]</tt> into 2<sup>32</sup> sub intervals,
+ * then randomly choosing one subinterval.
+ * <tt>double</tt>'s are formed by dividing the interval <tt>[0.0,1.0]</tt> into 2<sup>64</sup> sub intervals,
+ * then randomly choosing one subinterval.
  * <p>
  * Note that this implementation is <b>not synchronized</b>.
  *
  * @see MersenneTwister
  * @see java.util.Random
  */
-public abstract class RandomEngine extends PersistentObject
-    implements UnaryFunction, IntFunction {
+public abstract class RandomEngine extends PersistentObject implements UnaryFunction, IntFunction {
 
   /**
    * Equivalent to <tt>raw()</tt>. This has the effect that random engines can now be used as function objects,
@@ -129,13 +132,15 @@ public abstract class RandomEngine extends PersistentObject
   }
 
   /**
-   * @return a 32 bit uniformly distributed random number in the closed interval <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt>
+   * @return a 32 bit uniformly distributed random number in the closed interval
+   * <tt>[Integer.MIN_VALUE,Integer.MAX_VALUE]</tt>
    * (including <tt>Integer.MIN_VALUE</tt> and <tt>Integer.MAX_VALUE</tt>);
    */
   public abstract int nextInt();
 
   /**
-   * @return a 64 bit uniformly distributed random number in the closed interval <tt>[Long.MIN_VALUE,Long.MAX_VALUE]</tt>
+   * @return a 64 bit uniformly distributed random number in the closed interval
+   * <tt>[Long.MIN_VALUE,Long.MAX_VALUE]</tt>
    * (including <tt>Long.MIN_VALUE</tt> and <tt>Long.MAX_VALUE</tt>).
    */
   public long nextLong() {

@@ -54,7 +54,7 @@ public final class MostSimilarItemPairsMapper
 
   @Override
   protected void map(IntWritable itemIDIndexWritable, VectorWritable similarityVector, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
 
     int itemIDIndex = itemIDIndexWritable.get();
 
@@ -85,12 +85,12 @@ public final class MostSimilarItemPairsMapper
 
       long itemID = indexItemIDMap.get(itemIDIndex);
       for (SimilarItem similarItem : mostSimilarItems) {
-       long otherItemID = similarItem.getItemID();
-       if (itemID < otherItemID) {
-         ctx.write(new EntityEntityWritable(itemID, otherItemID), new DoubleWritable(similarItem.getSimilarity()));
-       } else {
-         ctx.write(new EntityEntityWritable(otherItemID, itemID), new DoubleWritable(similarItem.getSimilarity()));
-       }
+        long otherItemID = similarItem.getItemID();
+        if (itemID < otherItemID) {
+          ctx.write(new EntityEntityWritable(itemID, otherItemID), new DoubleWritable(similarItem.getSimilarity()));
+        } else {
+          ctx.write(new EntityEntityWritable(otherItemID, itemID), new DoubleWritable(similarItem.getSimilarity()));
+        }
       }
     }
   }

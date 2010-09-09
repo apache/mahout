@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.ep;
 
 import org.apache.mahout.math.function.UnaryFunction;
@@ -7,12 +24,12 @@ import org.apache.mahout.math.function.UnaryFunction;
  * reals but have the output limited and squished in convenient (and safe) ways.
  */
 public abstract class Mapping implements UnaryFunction {
-  public static class SoftLimit extends Mapping {
+
+  public static final class SoftLimit extends Mapping {
     private double min;
     private double max;
     private double scale;
 
-    @SuppressWarnings({"UnusedDeclaration"})
     private SoftLimit() {
     }
 
@@ -22,16 +39,16 @@ public abstract class Mapping implements UnaryFunction {
       this.scale = scale;
     }
 
+    @Override
     public double apply(double v) {
       return min + (max - min) * 1 / (1 + Math.exp(-v * scale));
     }
 
   }
 
-  public static class LogLimit extends Mapping {
+  public static final class LogLimit extends Mapping {
     private Mapping wrapped;
 
-    @SuppressWarnings({"UnusedDeclaration"})
     private LogLimit() {
     }
 
@@ -45,10 +62,9 @@ public abstract class Mapping implements UnaryFunction {
     }
   }
 
-  public static class Exponential extends Mapping {
+  public static final class Exponential extends Mapping {
     private double scale;
 
-    @SuppressWarnings({"UnusedDeclaration"})
     private Exponential() {
     }
 
@@ -62,7 +78,7 @@ public abstract class Mapping implements UnaryFunction {
     }
   }
 
-  public static class Identity extends Mapping {
+  public static final class Identity extends Mapping {
     private Identity() {
     }
 
@@ -82,7 +98,7 @@ public abstract class Mapping implements UnaryFunction {
    * @param scale  Defines how sharp the boundaries are.
    * @return A mapping that satisfies the desired constraint.
    */
-  public static Mapping softLimit(final double min, final double max, final double scale) {
+  public static Mapping softLimit(double min, double max, final double scale) {
     return new SoftLimit(min, max, scale);
   }
 
@@ -107,7 +123,7 @@ public abstract class Mapping implements UnaryFunction {
    * @param high  The least upper bound for output results.  Must be >0.
    * @return A mapped value.
    */
-  public static Mapping logLimit(final double low, final double high) {
+  public static Mapping logLimit(double low, double high) {
     if (low <= 0) {
       throw new IllegalArgumentException("Lower bound for log limit must be > 0 but was " + low);
     }
@@ -130,7 +146,7 @@ public abstract class Mapping implements UnaryFunction {
    * @param scale  If large, then large values are more likely.
    * @return A positive value.
    */
-  public static Mapping exponential(final double scale) {
+  public static Mapping exponential(double scale) {
     return new Exponential(scale);
   }
 

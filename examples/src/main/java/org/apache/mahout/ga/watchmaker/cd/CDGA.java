@@ -81,11 +81,12 @@ public final class CDGA {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription("The Path for input data directory.")
-        .create();
+        abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+        .withDescription("The Path for input data directory.").create();
 
-    Option labelOpt = obuilder.withLongName("label").withRequired(true).withShortName("l").withArgument(
-        abuilder.withName("index").withMinimum(1).withMaximum(1).create()).withDescription("label's index.").create();
+    Option labelOpt = obuilder.withLongName("label").withRequired(true).withShortName("l")
+        .withArgument(abuilder.withName("index").withMinimum(1).withMaximum(1).create())
+        .withDescription("label's index.").create();
 
     Option thresholdOpt = obuilder.withLongName("threshold").withRequired(false).withShortName("t").withArgument(
         abuilder.withName("threshold").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -96,27 +97,29 @@ public final class CDGA {
         "Number of crossover points to use, default = 1.").create();
 
     Option mutrateOpt = obuilder.withLongName("mutrate").withRequired(true).withShortName("m").withArgument(
-        abuilder.withName("true").withMinimum(1).withMaximum(1).create()).withDescription("Mutation rate (float).").create();
+        abuilder.withName("true").withMinimum(1).withMaximum(1).create())
+        .withDescription("Mutation rate (float).").create();
 
     Option mutrangeOpt = obuilder.withLongName("mutrange").withRequired(false).withShortName("mr").withArgument(
-        abuilder.withName("range").withMinimum(1).withMaximum(1).create()).withDescription("Mutation range, default = 0.1 (10%).")
-        .create();
+        abuilder.withName("range").withMinimum(1).withMaximum(1).create())
+        .withDescription("Mutation range, default = 0.1 (10%).").create();
 
     Option mutprecOpt = obuilder.withLongName("mutprec").withRequired(false).withShortName("mp").withArgument(
-        abuilder.withName("precision").withMinimum(1).withMaximum(1).create()).withDescription("Mutation precision, default = 2.")
-        .create();
+        abuilder.withName("precision").withMinimum(1).withMaximum(1).create())
+        .withDescription("Mutation precision, default = 2.").create();
 
     Option popsizeOpt = obuilder.withLongName("popsize").withRequired(true).withShortName("p").withArgument(
         abuilder.withName("size").withMinimum(1).withMaximum(1).create()).withDescription("Population size.").create();
 
     Option gencntOpt = obuilder.withLongName("gencnt").withRequired(true).withShortName("g").withArgument(
-        abuilder.withName("count").withMinimum(1).withMaximum(1).create()).withDescription("Generations count.").create();
+        abuilder.withName("count").withMinimum(1).withMaximum(1).create())
+        .withDescription("Generations count.").create();
 
     Option helpOpt = DefaultOptionCreator.helpOption();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(helpOpt).withOption(labelOpt).withOption(
-        thresholdOpt).withOption(crosspntsOpt).withOption(mutrateOpt).withOption(mutrangeOpt).withOption(mutprecOpt).withOption(
-        popsizeOpt).withOption(gencntOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(helpOpt).withOption(labelOpt)
+        .withOption(thresholdOpt).withOption(crosspntsOpt).withOption(mutrateOpt).withOption(mutrangeOpt)
+        .withOption(mutprecOpt).withOption(popsizeOpt).withOption(gencntOpt).create();
 
     Parser parser = new Parser();
     parser.setGroup(group);
@@ -131,10 +134,13 @@ public final class CDGA {
 
       String dataset = cmdLine.getValue(inputOpt).toString();
       int target = Integer.parseInt(cmdLine.getValue(labelOpt).toString());
-      double threshold = cmdLine.hasOption(thresholdOpt) ? Double.parseDouble(cmdLine.getValue(thresholdOpt).toString()) : 0.5;
-      int crosspnts = cmdLine.hasOption(crosspntsOpt) ? Integer.parseInt(cmdLine.getValue(crosspntsOpt).toString()) : 1;
+      double threshold =
+          cmdLine.hasOption(thresholdOpt) ? Double.parseDouble(cmdLine.getValue(thresholdOpt).toString()) : 0.5;
+      int crosspnts =
+          cmdLine.hasOption(crosspntsOpt) ? Integer.parseInt(cmdLine.getValue(crosspntsOpt).toString()) : 1;
       double mutrate = Double.parseDouble(cmdLine.getValue(mutrateOpt).toString());
-      double mutrange = cmdLine.hasOption(mutrangeOpt) ? Double.parseDouble(cmdLine.getValue(mutrangeOpt).toString()) : 0.1;
+      double mutrange =
+          cmdLine.hasOption(mutrangeOpt) ? Double.parseDouble(cmdLine.getValue(mutrangeOpt).toString()) : 0.1;
       int mutprec = cmdLine.hasOption(mutprecOpt) ? Integer.parseInt(cmdLine.getValue(mutprecOpt).toString()) : 2;
       int popSize = Integer.parseInt(cmdLine.getValue(popsizeOpt).toString());
       int genCount = Integer.parseInt(cmdLine.getValue(gencntOpt).toString());
@@ -182,8 +188,8 @@ public final class CDGA {
     // Selection Strategy
     SelectionStrategy<? super CDRule> selection = new RouletteWheelSelection();
 
-    EvolutionEngine<CDRule> engine = new SequentialEvolutionEngine<CDRule>(factory, pipeline, evaluator, selection, RandomUtils
-        .getRandom());
+    EvolutionEngine<CDRule> engine =
+        new SequentialEvolutionEngine<CDRule>(factory, pipeline, evaluator, selection, RandomUtils.getRandom());
 
     engine.addEvolutionObserver(new EvolutionObserver<CDRule>() {
       @Override
@@ -219,6 +225,6 @@ public final class CDGA {
     long hours = minutes / 60;
     minutes %= 60;
 
-    log.info("Elapsed time (Hours:minutes:seconds:milli) : {}:{}:{}:{}", new Object[] { hours, minutes, seconds, milli });
+    log.info("Elapsed time (Hours:minutes:seconds:milli) : {}:{}:{}:{}", new Object[] {hours, minutes, seconds, milli});
   }
 }

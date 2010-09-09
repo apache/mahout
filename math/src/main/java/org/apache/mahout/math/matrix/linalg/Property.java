@@ -396,7 +396,7 @@ public class Property extends PersistentObject {
   public boolean isOrthogonal(DoubleMatrix2D a) {
     checkSquare(a);
     return equals(a.zMult(a, null, 1, 0, false, true),
-        DoubleFactory2D.dense.identity(a.rows()));
+        DoubleFactory2D.DENSE.identity(a.rows()));
   }
 
   /** A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells.

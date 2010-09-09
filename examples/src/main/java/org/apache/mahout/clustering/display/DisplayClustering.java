@@ -273,7 +273,7 @@ public class DisplayClustering extends Frame {
     return clusters;
   }
   
-  protected static void loadClusters(Path output) throws IOException, InstantiationException, IllegalAccessException{
+  protected static void loadClusters(Path output) throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     FileStatus[] status = fs.listStatus(output, new ClustersFilter());

@@ -90,8 +90,8 @@ public class Poisson extends AbstractDiscreteDistribution {
     return copy;
   }
 
-  private static double f(int k, double l_nu, double c_pm) {
-    return Math.exp(k * l_nu - Arithmetic.logFactorial(k) - c_pm);
+  private static double f(int k, double lNu, double cPm) {
+    return Math.exp(k * lNu - Arithmetic.logFactorial(k) - cPm);
   }
 
   @Override
@@ -149,13 +149,13 @@ public class Poisson extends AbstractDiscreteDistribution {
         double u = gen.nextDouble();
         int k = 0;
         if (u <= p0) {
-          return (k);
+          return k;
         }
         if (llll != 0) {              // Step T. Table comparison
           int i = (u > 0.458) ? Math.min(llll, m) : 1;
           for (k = i; k <= llll; k++) {
             if (u <= pp[k]) {
-              return (k);
+              return k;
             }
           }
           if (llll == 35) {
@@ -168,13 +168,13 @@ public class Poisson extends AbstractDiscreteDistribution {
           pp[k] = q;
           if (u <= q) {
             llll = k;
-            return (k);
+            return k;
           }
         }
         llll = 35;
       }
-    }     // end my < SWITCH_MEAN
-    else if (theMean < MEAN_MAX) { // CASE A: acceptance complement
+      // end my < SWITCH_MEAN
+    } else if (theMean < MEAN_MAX) { // CASE A: acceptance complement
       //static double        my_last = -1.0;
       //static long int      m,  k2, k4, k1, k5;
       //static double        dl, dr, r1, r2, r4, r5, ll, lr, l_my, c_pm,
@@ -241,52 +241,52 @@ public class Poisson extends AbstractDiscreteDistribution {
 
           // immediate acceptance region R2 = [k2, m) *[0, f2),  X = k2, ... m -1
           if ((V = U - p1) < 0.0) {
-            return (k2 + (int) (U / f2));
+            return k2 + (int) (U / f2);
           }
           // immediate acceptance region R1 = [k1, k2)*[0, f1),  X = k1, ... k2-1
           if ((W = V / dl) < f1) {
-            return (k1 + (int) (V / f1));
+            return k1 + (int) (V / f1);
           }
 
           // computation of candidate X < k2, and its counterpart Y > k2
           // either squeeze-acceptance of X or acceptance-rejection of Y
           Dk = gen.nextInt((int) dl) + 1;
           if (W <= f2 - Dk * (f2 - f2 / r2)) {            // quick accept of
-            return (k2 - Dk);                          // X = k2 - Dk
+            return k2 - Dk;                          // X = k2 - Dk
           }
           if ((V = f2 + f2 - W) < 1.0) {                // quick reject of Y
             Y = k2 + Dk;
-            if (V <= f2 + Dk * (1.0 - f2) / (dl + 1.0)) {// quick accept of
-              return (Y);                             // Y = k2 + Dk
+            if (V <= f2 + Dk * (1.0 - f2) / (dl + 1.0)) { // quick accept of
+              return Y;                             // Y = k2 + Dk
             }
             if (V <= f(Y, lMy, cPm)) {
-              return (Y);
+              return Y;
             }    // final accept of Y
           }
           X = k2 - Dk;
         } else if (U < p4) {                                 // centre right
           // immediate acceptance region R3 = [m, k4+1)*[0, f4), X = m, ... k4
           if ((V = U - p3) < 0.0) {
-            return (k4 - (int) ((U - p2) / f4));
+            return k4 - (int) ((U - p2) / f4);
           }
           // immediate acceptance region R4 = [k4+1, k5+1)*[0, f5)
           if ((W = V / dr) < f5) {
-            return (k5 - (int) (V / f5));
+            return k5 - (int) (V / f5);
           }
 
           // computation of candidate X > k4, and its counterpart Y < k4
           // either squeeze-acceptance of X or acceptance-rejection of Y
           Dk = gen.nextInt((int) dr) + 1;
           if (W <= f4 - Dk * (f4 - f4 * r4)) {             // quick accept of
-            return (k4 + Dk);                           // X = k4 + Dk
+            return k4 + Dk;                           // X = k4 + Dk
           }
           if ((V = f4 + f4 - W) < 1.0) {                 // quick reject of Y
             Y = k4 - Dk;
             if (V <= f4 + Dk * (1.0 - f4) / dr) {       // quick accept of
-              return (Y);                             // Y = k4 - Dk
+              return Y;                             // Y = k4 - Dk
             }
             if (V <= f(Y, lMy, cPm)) {
-              return (Y);
+              return Y;
             }    // final accept of Y
           }
           X = k4 + Dk;
@@ -299,14 +299,14 @@ public class Poisson extends AbstractDiscreteDistribution {
             }          // 0 <= X <= k1 - 1
             W *= (U - p4) * ll;                        // W -- U(0, h(x))
             if (W <= f1 - Dk * (f1 - f1 / r1)) {
-              return (X);
+              return X;
             } // quick accept of X
           } else {                                         // expon. tail right
             Dk = (int) (1.0 - Math.log(W) / lr);
             X = k5 + Dk;                              // X >= k5 + 1
             W *= (U - p5) * lr;                        // W -- U(0, h(x))
             if (W <= f5 - Dk * (f5 - f5 * r5)) {
-              return (X);
+              return X;
             } // quick accept of X
           }
         }
@@ -315,7 +315,7 @@ public class Poisson extends AbstractDiscreteDistribution {
         // test, whether  W <= f(k),    with  W = U*h(x)  and  U -- U(0, 1)
         // log f(X) = (X - m)*log(my) - log X! + log m!
         if (Math.log(W) <= X * lMy - Arithmetic.logFactorial(X) - cPm) {
-          return (X);
+          return X;
         }
       }
     } else { // mean is too large
