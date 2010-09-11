@@ -26,7 +26,16 @@ public final class LogLikelihood {
   }
 
   /**
-   * Calculate the Shannon entropy.
+   * Calculate the unnormalized Shannon entropy.  This is
+   *
+   * -sum x_i log x_i / N = -N sum x_i/N log x_i/N
+   *
+   * where N = sum x_i
+   *
+   * If the x's sum to 1, then this is the same as the normal
+   * expression.  Leaving this un-normalized makes working with
+   * counts and computing the LLR easier.
+   *
    * @return The entropy value for the elements
    */
   public static double entropy(int... elements) {
@@ -64,6 +73,7 @@ public final class LogLikelihood {
    * Credit to http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html for the table and the descriptions.
    */
   public static double logLikelihoodRatio(int k11, int k12, int k21, int k22) {
+    // note that we have counts here, not probabilities, and that the entropy is not normalized.
     double rowEntropy = entropy(k11, k12) + entropy(k21, k22);
     double columnEntropy = entropy(k11, k21) + entropy(k12, k22);
     double matrixEntropy = entropy(k11, k12, k21, k22);
@@ -75,7 +85,7 @@ public final class LogLikelihood {
   }
   
   /** 
-   * Calculate the Root Log-likelihood ratio for two events.
+   * Calculate the root log-likelihood ratio for two events.
    * See {@link #logLikelihoodRatio(int, int, int, int)}.
 
    * @param k11 The number of times the two events occurred together
