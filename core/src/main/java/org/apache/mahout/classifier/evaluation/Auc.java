@@ -83,10 +83,15 @@ public class Auc {
 
     int predictedClass = (score > threshold) ? 1 : 0;
     confusion.set(trueValue, predictedClass, confusion.get(trueValue, predictedClass) + 1);
+
+    samples++;
     if (isProbabilityScore()) {
       double limited = Math.max(1.0e-20, Math.min(score, 1 - 1.0e-20));
-      entropy.set(trueValue, 0, Math.log(1 - limited));
-      entropy.set(trueValue, 1, Math.log(limited));
+      double v0 = entropy.get(trueValue, 0);
+      entropy.set(trueValue, 0, (Math.log(1 - limited) - v0) / samples + v0);
+
+      double v1 = entropy.get(trueValue, 1);
+      entropy.set(trueValue, 1, (Math.log(limited) - v1) / samples + v1);
     }
 
     // add to buffers
@@ -95,7 +100,6 @@ public class Auc {
       // but if too many points are seen, we insert into a random
       // place and discard the predecessor.  The random place could
       // be anywhere, possibly not even in the buffer.
-      samples++;
       // this is a special case of Knuth's permutation algorithm
       // but since we don't ever shuffle the first maxBufferSize
       // samples, the result isn't just a fair sample of the prefixes
