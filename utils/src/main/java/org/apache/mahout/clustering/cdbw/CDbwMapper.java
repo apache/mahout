@@ -60,10 +60,10 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
     List<VectorWritable> refPoints = representativePoints.get(key);
     double totalDistance = 0.0;
     for (VectorWritable refPoint : refPoints) {
-      totalDistance += measure.distance(refPoint.get(), point.getVector().get());
+      totalDistance += measure.distance(refPoint.get(), point.getVector());
     }
     if (currentMDP == null || currentMDP.getWeight() < totalDistance) {
-      mostDistantPoints.put(key, new WeightedVectorWritable(totalDistance, new VectorWritable(point.getVector().get().clone())));
+      mostDistantPoints.put(key, new WeightedVectorWritable(totalDistance, point.getVector().clone()));
     }
   }
 

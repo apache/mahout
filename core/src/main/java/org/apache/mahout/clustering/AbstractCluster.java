@@ -195,13 +195,12 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder(50);
-    buf.append(getIdentifier()).append("{n=").append(numPoints).append(" c=");
+    buf.append(getIdentifier()).append("{n=").append(numPoints);
     if (center != null) {
-      buf.append(formatVector(center, bindings));
+      buf.append(" c=").append(formatVector(center, bindings));
     }
-    buf.append(" r=");
     if (radius != null) {
-      buf.append(formatVector(radius, bindings));
+      buf.append(" r=").append(formatVector(radius, bindings));
     }
     buf.append('}');
     return buf.toString();

@@ -196,7 +196,7 @@ public class ClusterLabels {
 
     Set<String> idSet = new HashSet<String>();
     for (WeightedVectorWritable wvw : wvws) {
-      Vector vector = wvw.getVector().get();
+      Vector vector = wvw.getVector();
       if (vector instanceof NamedVector) {
         idSet.add(((NamedVector) vector).getName());
       }

@@ -322,7 +322,7 @@ public class DirichletClusterer {
       }
     }
     //System.out.println(clusterId + ": " + ClusterBase.formatVector(vector.get(), null));
-    context.write(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
+    context.write(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point.get()));
   }
 
   /**
@@ -341,7 +341,7 @@ public class DirichletClusterer {
       double pdf = pi.get(i);
       if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
         //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-        context.write(new IntWritable(i), new WeightedVectorWritable(pdf, point));
+        context.write(new IntWritable(i), new WeightedVectorWritable(pdf, point.get()));
       }
     }
   }
@@ -381,7 +381,7 @@ public class DirichletClusterer {
       double pdf = pi.get(i);
       if (pdf > threshold && clusters.get(i).getTotalCount() > 0) {
         //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-        writer.append(new IntWritable(i), new WeightedVectorWritable(pdf, vector));
+        writer.append(new IntWritable(i), new WeightedVectorWritable(pdf, vector.get()));
       }
     }
   }
@@ -408,6 +408,6 @@ public class DirichletClusterer {
       }
     }
     //System.out.println(i + ": " + ClusterBase.formatVector(vector.get(), null));
-    writer.append(new IntWritable(clusterId), new WeightedVectorWritable(maxPdf, vector));
+    writer.append(new IntWritable(clusterId), new WeightedVectorWritable(maxPdf, vector.get()));
   }
 }

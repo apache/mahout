@@ -52,7 +52,7 @@ public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, In
         mdp = new WeightedVectorWritable(dpw.getWeight(), dpw.getVector());
       }
     }
-    context.write(new IntWritable(key.get()), mdp.getVector());
+    context.write(new IntWritable(key.get()), new VectorWritable(mdp.getVector()));
   }
 
   @Override

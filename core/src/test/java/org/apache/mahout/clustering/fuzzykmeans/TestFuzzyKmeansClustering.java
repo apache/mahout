@@ -116,7 +116,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
         list = new ArrayList<WeightedVectorWritable>();
         pointClusterInfo.put(clusterId, list);
       }
-      list.add(new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
+      list.add(new WeightedVectorWritable(clusterPdf, point));
       double totalProb = 0;
       for (int i = 0; i < clusterList.size(); i++) {
         //SoftCluster cluster = clusterList.get(i);

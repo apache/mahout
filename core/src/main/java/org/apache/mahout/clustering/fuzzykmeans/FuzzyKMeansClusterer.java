@@ -262,7 +262,7 @@ public class FuzzyKMeansClusterer {
       }
     }
     // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-    context.write(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
+    context.write(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
   }
 
   /**
@@ -277,7 +277,7 @@ public class FuzzyKMeansClusterer {
       double pdf = pi.get(i);
       if (pdf > threshold) {
         // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-        context.write(new IntWritable(i), new WeightedVectorWritable(pdf, new VectorWritable(point)));
+        context.write(new IntWritable(i), new WeightedVectorWritable(pdf, point));
       }
     }
   }
@@ -325,7 +325,7 @@ public class FuzzyKMeansClusterer {
       double pdf = pi.get(i);
       if (pdf > threshold) {
         // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-        writer.append(new IntWritable(i), new WeightedVectorWritable(pdf, new VectorWritable(point)));
+        writer.append(new IntWritable(i), new WeightedVectorWritable(pdf, point));
       }
     }
   }
@@ -343,6 +343,6 @@ public class FuzzyKMeansClusterer {
       }
     }
     // System.out.println("cluster-" + clusterId + ": " + ClusterBase.formatVector(point, null));
-    writer.append(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, new VectorWritable(point)));
+    writer.append(new IntWritable(clusterId), new WeightedVectorWritable(clusterPdf, point));
   }
 }

@@ -48,7 +48,7 @@ public class MeanShiftCanopyClusterMapper
       for (int containedId : msc.getBoundPoints().toList()) {
         if (vectorId == containedId) {
           context.write(new IntWritable(msc.getId()),
-                         new WeightedVectorWritable(1, new VectorWritable(canopy.getCenter())));
+                         new WeightedVectorWritable(1, canopy.getCenter()));
         }
       }
     }

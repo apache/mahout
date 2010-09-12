@@ -33,7 +33,7 @@ public class VectorWritable extends Configured implements Writable {
   public static final int FLAG_LAX_PRECISION = 0x08;
   public static final int NUM_FLAGS = 4;
 
-  private Vector vector;
+  protected Vector vector;
   private boolean writesLaxPrecision;
 
   public VectorWritable() {

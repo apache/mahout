@@ -192,7 +192,7 @@ public final class ClusterDumper extends AbstractJob {
                 WeightedVectorWritable point = iterator.next();
                 writer.write(String.valueOf(point.getWeight()));
                 writer.write(": ");
-                writer.write(AbstractCluster.formatVector(point.getVector().get(), dictionary));
+                writer.write(AbstractCluster.formatVector(point.getVector(), dictionary));
                 if (iterator.hasNext()) {
                   writer.write("\n\t");
                 }

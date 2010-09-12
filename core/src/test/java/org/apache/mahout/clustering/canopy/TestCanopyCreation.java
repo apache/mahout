@@ -380,7 +380,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
       Canopy canopy = findCanopy(key.get(), canopies);
       List<WeightedVectorWritable> pts = stringListEntry.getValue();
       for (WeightedVectorWritable ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.getVector().get()));
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.getVector()));
       }
     }
   }
@@ -416,7 +416,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
       Canopy canopy = findCanopy(key.get(), canopies);
       List<WeightedVectorWritable> pts = stringListEntry.getValue();
       for (WeightedVectorWritable ptDef : pts) {
-        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.getVector().get()));
+        assertTrue("Point not in canopy", mapper.canopyCovers(canopy, ptDef.getVector()));
       }
     }
   }
@@ -450,7 +450,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     WeightedVectorWritable vector = new WeightedVectorWritable();
     while (reader.next(clusterId, vector)) {
       count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector().get(), null));
+      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();
@@ -491,7 +491,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     WeightedVectorWritable vector = new WeightedVectorWritable();
     while (reader.next(clusterId, vector)) {
       count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector().get(), null));
+      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();
@@ -517,7 +517,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     WeightedVectorWritable vector = new WeightedVectorWritable();
     while (reader.next(clusterId, vector)) {
       count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector().get(), null));
+      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();
@@ -550,7 +550,7 @@ public final class TestCanopyCreation extends MahoutTestCase {
     while (reader.next(canopyId, vw)) {
       count++;
       System.out.println("Txt: " + canopyId.toString() + " Vec: "
-          + AbstractCluster.formatVector(vw.getVector().get(), null));
+          + AbstractCluster.formatVector(vw.getVector(), null));
     }
     assertEquals("number of points", points.size(), count);
     reader.close();

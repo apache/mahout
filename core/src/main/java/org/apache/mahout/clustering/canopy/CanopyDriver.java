@@ -325,7 +325,7 @@ public class CanopyDriver extends AbstractJob {
         VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, vw)) {
           Canopy closest = clusterer.findClosestCanopy(vw.get(), clusters);
-          writer.append(new IntWritable(closest.getId()), new WeightedVectorWritable(1, vw));
+          writer.append(new IntWritable(closest.getId()), new WeightedVectorWritable(1, vw.get()));
           vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         }
       } finally {

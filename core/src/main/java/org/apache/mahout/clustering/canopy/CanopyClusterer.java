@@ -134,7 +134,7 @@ public class CanopyClusterer {
                                        Mapper<?, ?, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
       InterruptedException {
     Canopy closest = findClosestCanopy(point, canopies);
-    context.write(new IntWritable(closest.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
+    context.write(new IntWritable(closest.getId()), new WeightedVectorWritable(1, point));
     context.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
   }
 

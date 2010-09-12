@@ -21,19 +21,17 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class WeightedVectorWritable implements Writable {
+public class WeightedVectorWritable extends VectorWritable {
 
   private double weight;
-
-  private VectorWritable vector;
 
   public WeightedVectorWritable() {
   }
 
-  public WeightedVectorWritable(double weight, VectorWritable vector) {
+  public WeightedVectorWritable(double weight, Vector vector) {
     this.weight = weight;
     this.vector = vector;
   }
@@ -48,25 +46,24 @@ public class WeightedVectorWritable implements Writable {
   /**
    * @return the point
    */
-  public VectorWritable getVector() {
+  public Vector getVector() {
     return vector;
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
+    super.readFields(in);
     weight = in.readDouble();
-    vector = new VectorWritable();
-    vector.readFields(in);
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
+    super.write(out);
     out.writeDouble(weight);
-    vector.write(out);
   }
 
   public String toString() {
-    return weight + ": " + (vector == null ? "null" : AbstractCluster.formatVector(vector.get(), null));
+    return weight + ": " + (vector == null ? "null" : AbstractCluster.formatVector(vector, null));
   }
 
 }

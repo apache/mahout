@@ -144,7 +144,7 @@ public class KMeansClusterer {
         nearestDistance = distance;
       }
     }
-    context.write(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, new VectorWritable(vector)));
+    context.write(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, vector));
   }
 
   /**
@@ -171,7 +171,7 @@ public class KMeansClusterer {
         nearestDistance = distance;
       }
     }
-    writer.append(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, new VectorWritable(point)));
+    writer.append(new IntWritable(nearestCluster.getId()), new WeightedVectorWritable(1, point));
   }
 
   /**

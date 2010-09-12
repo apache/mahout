@@ -499,7 +499,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         while (reader.next(key, canopy)) {
           MeanShiftCanopy closest = MeanShiftCanopyClusterer.findCoveringCanopy(canopy, clusters);
           writer.append(new IntWritable(closest.getId()),
-                        new WeightedVectorWritable(1, new VectorWritable(canopy.getCenter())));
+                        new WeightedVectorWritable(1, canopy.getCenter()));
           canopy = reader.getValueClass().asSubclass(MeanShiftCanopy.class).newInstance();
         }
       } finally {
