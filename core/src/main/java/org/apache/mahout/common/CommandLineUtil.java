@@ -20,6 +20,7 @@ package org.apache.mahout.common;
 import java.io.PrintWriter;
 
 import org.apache.commons.cli2.Group;
+import org.apache.commons.cli2.OptionException;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.GenericOptionsParser;
@@ -52,6 +53,22 @@ public final class CommandLineUtil {
     HelpFormatter formatter = new HelpFormatter();
     formatter.setGroup(group);
     formatter.setPrintWriter(pw);
+    formatter.printHelp();
+    pw.flush();
+  }
+
+  public static void printHelpWithGenericOptions(Group group, OptionException oe) {
+    org.apache.commons.cli.Options ops = new org.apache.commons.cli.Options();
+    new GenericOptionsParser(new Configuration(), ops, new String[0]);
+    org.apache.commons.cli.HelpFormatter fmt = new org.apache.commons.cli.HelpFormatter();
+    fmt.printHelp("<command> [Generic Options] [Job-Specific Options]",
+        "Generic Options:", ops, "");
+
+    PrintWriter pw = new PrintWriter(System.out);
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.setGroup(group);
+    formatter.setPrintWriter(pw);
+    formatter.setException(oe);
     formatter.printHelp();
     pw.flush();
   }

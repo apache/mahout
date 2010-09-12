@@ -263,7 +263,7 @@ public abstract class AbstractJob extends Configured implements Tool {
 
     } catch (OptionException e) {
       log.error(e.getMessage());
-      CommandLineUtil.printHelpWithGenericOptions(group);
+      CommandLineUtil.printHelpWithGenericOptions(group, e);
       return null;
     }
 
