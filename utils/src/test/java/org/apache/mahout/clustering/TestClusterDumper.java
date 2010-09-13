@@ -56,6 +56,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver;
+import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.apache.mahout.utils.vectors.TFIDF;
@@ -252,6 +253,10 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path testData = getTestTempDirPath("testdata");
     int sampleDimension = sampleData.get(0).get().size();
     solver.run(testData, tmp, eigenvectors, sampleData.size(), sampleDimension, false, desiredRank);
+    
+    new EigenVerificationJob().run(testData, eigenvectors, output, tmp, 0.5, 0.0, true, null);
+    Path cleanEigenvectors = new Path(output, EigenVerificationJob.LARGEST_CLEAN_EIGENS);
+
     // build in-memory data matrix A
     Matrix a = new DenseMatrix(sampleData.size(), sampleDimension);
     int i = 0;
@@ -260,8 +265,8 @@ public final class TestClusterDumper extends MahoutTestCase {
     }
     // extract the eigenvectors into P
     Matrix p = new DenseMatrix(39, desiredRank - 1);
-    FileSystem fs = FileSystem.get(eigenvectors.toUri(), conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, eigenvectors, conf);
+    FileSystem fs = FileSystem.get(cleanEigenvectors.toUri(), conf);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, cleanEigenvectors, conf);
     try {
       Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
       Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
@@ -317,8 +322,11 @@ public final class TestClusterDumper extends MahoutTestCase {
     int sampleDimension = sampleData.get(0).get().size();
     solver.run(testData, tmp, eigenvectors, sampleData.size(), sampleDimension, false, desiredRank);
     
+    new EigenVerificationJob().run(testData, eigenvectors, output, tmp, 0.5, 0.0, false, null);
+    Path cleanEigenvectors = new Path(output, EigenVerificationJob.LARGEST_CLEAN_EIGENS);
+  
     // now multiply the testdata matrix and the eigenvector matrix
-    DistributedRowMatrix svdT = new DistributedRowMatrix(eigenvectors, tmp, desiredRank - 1, sampleDimension);
+    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank - 1, sampleDimension);
     JobConf conf = new JobConf(config);
     svdT.configure(conf);
     DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(), sampleDimension);
