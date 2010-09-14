@@ -17,6 +17,11 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -37,19 +42,15 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {
+
+  public static final String RAW_EIGENVECTORS = "rawEigenvectors";
 
   private static final Logger log = LoggerFactory.getLogger(DistributedLanczosSolver.class);
 
   private Configuration conf;
 
-  private Map<String,String> parsedArgs;
+  private Map<String, String> parsedArgs;
 
   /**
    * For the distributed case, the best guess at a useful initialization state for Lanczos we'll chose to be
@@ -65,33 +66,96 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   @Override
   public int run(String[] strings) throws Exception {
     Path inputPath = new Path(parsedArgs.get("--input"));
-    Path outputEigenVectorPath =  new Path(parsedArgs.get("--output"));
+    Path outputPath = new Path(parsedArgs.get("--output"));
     Path outputTmpPath = new Path(parsedArgs.get("--tempDir"));
     int numRows = Integer.parseInt(parsedArgs.get("--numRows"));
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
     boolean isSymmetric = Boolean.parseBoolean(parsedArgs.get("--symmetric"));
     int desiredRank = Integer.parseInt(parsedArgs.get("--rank"));
-    return run(inputPath, outputTmpPath, outputEigenVectorPath, numRows, numCols, isSymmetric, desiredRank);
+
+    boolean cleansvd = Boolean.parseBoolean(parsedArgs.get("--cleansvd"));
+    if (cleansvd) {
+      double maxError = Double.parseDouble(parsedArgs.get("--maxError"));
+      double minEigenvalue = Double.parseDouble(parsedArgs.get("--minEigenvalue"));
+      boolean inMemory = Boolean.parseBoolean(parsedArgs.get("--inMemory"));
+      return run(inputPath,
+                 outputPath,
+                 outputTmpPath,
+                 numRows,
+                 numCols,
+                 isSymmetric,
+                 desiredRank,
+                 maxError,
+                 minEigenvalue,
+                 inMemory);
+    }
+    return run(inputPath, outputPath, outputTmpPath, numRows, numCols, isSymmetric, desiredRank);
   }
 
+  /**
+   * Run the solver to produce raw eigenvectors, then run the EigenVerificationJob to clean them
+   * 
+   * @param inputPath the Path to the input corpus
+   * @param outputPath the Path to the output
+   * @param outputTmpPath a Path to a temporary working directory
+   * @param numRows the int number of rows 
+   * @param numCols the int number of columns
+   * @param isSymmetric true if the input matrix is symmetric
+   * @param desiredRank the int desired rank of eigenvectors to produce
+   * @param maxError the maximum allowable error
+   * @param minEigenvalue the minimum usable eigenvalue
+   * @param inMemory true if the verification can be done in memory
+   * @return an int indicating success (0) or otherwise
+   * @throws Exception
+   */
   public int run(Path inputPath,
+                 Path outputPath,
                  Path outputTmpPath,
-                 Path outputEigenVectorPath, int numRows,
+                 int numRows,
                  int numCols,
                  boolean isSymmetric,
-                 int desiredRank) throws Exception {
-    Configuration originalConfig = getConf();
+                 int desiredRank,
+                 double maxError,
+                 double minEigenvalue,
+                 boolean inMemory) throws Exception {
+    int result = run(inputPath, outputPath, outputTmpPath, numRows, numCols, isSymmetric, desiredRank);
+    if (result != 0) {
+      return result;
+    }
+    Path rawEigenVectorPath = new Path(outputPath, RAW_EIGENVECTORS);
+    return new EigenVerificationJob().run(inputPath,
+                                          rawEigenVectorPath,
+                                          outputPath,
+                                          outputTmpPath,
+                                          maxError,
+                                          minEigenvalue,
+                                          inMemory,
+                                          getConf() != null ? new JobConf(getConf()) : new JobConf());
+  }
+
+  /**
+   * Run the solver to produce the raw eigenvectors
+   * 
+   * @param inputPath the Path to the input corpus
+   * @param outputPath the Path to the output
+   * @param outputTmpPath a Path to a temporary working directory
+   * @param numRows the int number of rows 
+   * @param numCols the int number of columns
+   * @param isSymmetric true if the input matrix is symmetric
+   * @param desiredRank the int desired rank of eigenvectors to produce
+   * @return  an int indicating success (0) or otherwise
+   * @throws Exception
+   */
+  public int run(Path inputPath, Path outputPath, Path outputTmpPath, int numRows, int numCols, boolean isSymmetric, int desiredRank)
+      throws Exception {
     Matrix eigenVectors = new DenseMatrix(desiredRank, numCols);
     List<Double> eigenValues = new ArrayList<Double>();
 
-
-    DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath,
-                                                           outputTmpPath,
-                                                           numRows,
-                                                           numCols);
-    matrix.configure(new JobConf(originalConfig));
+    DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
+    matrix.configure(new JobConf(getConf() != null ? getConf() : new Configuration()));
     solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
 
+    Path outputEigenVectorPath = new Path(outputPath, RAW_EIGENVECTORS);
     serializeOutput(eigenVectors, eigenValues, outputEigenVectorPath);
     return 0;
   }
@@ -105,7 +169,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    */
   public void serializeOutput(Matrix eigenVectors, List<Double> eigenValues, Path outputPath) throws IOException {
     log.info("Persisting {} eigenVectors and eigenValues to: {}", eigenVectors.numRows(), outputPath);
-    Configuration conf = getConf();
+    Configuration conf = getConf() != null ? getConf() : new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
@@ -154,8 +218,13 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
       addOption("numRows", "nr", "Number of rows of the input matrix");
       addOption("numCols", "nc", "Number of columns of the input matrix");
       addOption("rank", "r", "Desired decomposition rank (note: only roughly 1/4 to 1/3 "
-                           + "of these will have the top portion of the spectrum)");
+          + "of these will have the top portion of the spectrum)");
       addOption("symmetric", "sym", "Is the input matrix square and symmetric?");
+      // options required to run cleansvd job
+      addOption("cleansvd", "cl", "Run the EigenVerificationJob to clean the eigenvectors after SVD", false);
+      addOption("maxError", "err", "Maximum acceptable error", "0.05");
+      addOption("minEigenvalue", "mev", "Minimum eigenvalue to keep the vector for", "0.0");
+      addOption("inMemory", "mem", "Buffer eigen matrix into memory (if you have enough!)", "false");
 
       DistributedLanczosSolver.this.parsedArgs = parseArguments(args);
       if (DistributedLanczosSolver.this.parsedArgs == null) {

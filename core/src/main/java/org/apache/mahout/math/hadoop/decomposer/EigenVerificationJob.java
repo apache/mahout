@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EigenVerificationJob extends AbstractJob {
 
-  public static final String LARGEST_CLEAN_EIGENS = "largestCleanEigens";
+  public static final String CLEAN_EIGENVECTORS = "cleanEigenvectors";
 
   private static final Logger log = LoggerFactory.getLogger(EigenVerificationJob.class);
 
@@ -131,7 +131,7 @@ public class EigenVerificationJob extends AbstractJob {
    * @param config the JobConf to use, or null if a default is ok (saves referencing JobConf in calling classes unless needed)
    * @throws IOException
    */
-  public void run(Path corpusInput,
+  public int run(Path corpusInput,
                   Path eigenInput,
                   Path output,
                   Path tempOut,
@@ -164,6 +164,7 @@ public class EigenVerificationJob extends AbstractJob {
     List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta = pruneEigens(eigenMetaData);
 
     saveCleanEigens(prunedEigenMeta);
+    return 0;
   }
 
   private Map<String, String> handleArgs(String[] args) {
@@ -187,7 +188,7 @@ public class EigenVerificationJob extends AbstractJob {
   }
 
   private void saveCleanEigens(List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta) throws IOException {
-    Path path = new Path(outPath, LARGEST_CLEAN_EIGENS);
+    Path path = new Path(outPath, CLEAN_EIGENVECTORS);
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
