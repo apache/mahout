@@ -72,7 +72,7 @@ public final class PartialVectorMerger {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  public static void mergePartialVectors(List<Path> partialVectorPaths,
+  public static void mergePartialVectors(Iterable<Path> partialVectorPaths,
                                          Path output,
                                          float normPower,
                                          int dimension,

@@ -38,7 +38,8 @@ import java.util.Date;
  * value. Function objects are comparable to function pointers in C used for call-backs. <p>Unary functions are of type
  * {@link org.apache.mahout.math.function.UnaryFunction}, binary functions of type {@link
  * org.apache.mahout.math.function.BinaryFunction}. All can be retrieved via <tt>public static final</tt>
- * variables named after the function. Unary predicates are of type {@link org.apache.mahout.math.function.DoubleProcedure},
+ * variables named after the function. Unary predicates are of type
+ * {@link org.apache.mahout.math.function.DoubleProcedure},
  * binary predicates of type {@link org.apache.mahout.math.function.DoubleDoubleProcedure}. All can be retrieved via
  * <tt>public static final</tt> variables named <tt>isXXX</tt>.
  *
@@ -48,17 +49,23 @@ import java.util.Date;
  * <li><tt>Functions.pow(3)</tt> gives the function <tt>a<sup>3</sup></tt>. <li><tt>Functions.pow(3).apply(2)==8</tt>.
  * </ul> More general, any binary function can be made an unary functions by fixing either the first or the second
  * argument. See methods {@link #bindArg1(org.apache.mahout.math.function.BinaryFunction ,double)} and {@link
- * #bindArg2(org.apache.mahout.math.function.BinaryFunction ,double)}. The order of arguments can be swapped so that the first argument becomes the
- * second and vice-versa. See method {@link #swapArgs(org.apache.mahout.math.function.BinaryFunction)}. Example: <ul> <li><tt>Functions.pow</tt>
+ * #bindArg2(org.apache.mahout.math.function.BinaryFunction ,double)}. The order of arguments can
+ * be swapped so that the first argument becomes the
+ * second and vice-versa. See method {@link #swapArgs(org.apache.mahout.math.function.BinaryFunction)}.
+ * Example: <ul> <li><tt>Functions.pow</tt>
  * gives the function <tt>a<sup>b</sup></tt>. <li><tt>Functions.bindArg2(Functions.pow,3)</tt> gives the function
  * <tt>x<sup>3</sup></tt>. <li><tt>Functions.bindArg1(Functions.pow,3)</tt> gives the function <tt>3<sup>x</sup></tt>.
  * <li><tt>Functions.swapArgs(Functions.pow)</tt> gives the function <tt>b<sup>a</sup></tt>. </ul> <p> Even more
  * general, functions can be chained (composed, assembled). Assume we have two unary functions <tt>g</tt> and
  * <tt>h</tt>. The unary function <tt>g(h(a))</tt> applying both in sequence can be generated via {@link
- * #chain(org.apache.mahout.math.function.UnaryFunction , org.apache.mahout.math.function.UnaryFunction)}: <ul> <li><tt>Functions.chain(g,h);</tt> </ul> Assume further we have a binary
+ * #chain(org.apache.mahout.math.function.UnaryFunction , org.apache.mahout.math.function.UnaryFunction)}:
+ * <ul> <li><tt>Functions.chain(g,h);</tt> </ul> Assume further we have a binary
  * function <tt>f</tt>. The binary function <tt>g(f(a,b))</tt> can be generated via {@link
- * #chain(org.apache.mahout.math.function.UnaryFunction , org.apache.mahout.math.function.BinaryFunction)}: <ul> <li><tt>Functions.chain(g,f);</tt> </ul> The binary function
- * <tt>f(g(a),h(b))</tt> can be generated via {@link #chain(org.apache.mahout.math.function.BinaryFunction , org.apache.mahout.math.function.UnaryFunction , org.apache.mahout.math.function.UnaryFunction)}: <ul>
+ * #chain(org.apache.mahout.math.function.UnaryFunction , org.apache.mahout.math.function.BinaryFunction)}:
+ * <ul> <li><tt>Functions.chain(g,f);</tt> </ul> The binary function
+ * <tt>f(g(a),h(b))</tt> can be generated via
+ * {@link #chain(org.apache.mahout.math.function.BinaryFunction , org.apache.mahout.math.function.UnaryFunction ,
+ * org.apache.mahout.math.function.UnaryFunction)}: <ul>
  * <li><tt>Functions.chain(f,g,h);</tt> </ul> Arbitrarily complex functions can be composed from these building blocks.
  * For example <tt>sin(a) + cos<sup>2</sup>(b)</tt> can be specified as follows: <ul>
  * <li><tt>chain(plus,sin,chain(square,cos));</tt> </ul> or, of course, as
@@ -103,7 +110,7 @@ import java.util.Date;
  * bgcolor="#FF9966">&nbsp;</td> <td nowrap>10.8</td> <td nowrap>29.6</td> <td nowrap>0.43</td> <td nowrap>0.35</td> <td
  * nowrap>&nbsp;</td> <td nowrap>&nbsp;</td> </tr> </table></center>
  */
-public class Functions {
+public final class Functions {
 
   /*
    * <H3>Unary functions</H3>

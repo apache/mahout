@@ -59,8 +59,8 @@ public final class CDbwDriver extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
-      InterruptedException {
+  public int run(String[] args)
+    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -104,8 +104,8 @@ public final class CDbwDriver extends AbstractJob {
                             Path output,
                             DistanceMeasure measure,
                             int numIterations,
-                            int numReducers) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-      IOException, InterruptedException {
+                            int numReducers)
+    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, InterruptedException {
     job(clustersIn, clusteredPointsIn, output, measure, numIterations, numReducers);
   }
 
@@ -114,8 +114,8 @@ public final class CDbwDriver extends AbstractJob {
                           Path output,
                           DistanceMeasure measure,
                           int numIterations,
-                          int numReducers) throws InstantiationException, IllegalAccessException, IOException,
-      InterruptedException, ClassNotFoundException {
+                          int numReducers)
+    throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
 
@@ -139,8 +139,8 @@ public final class CDbwDriver extends AbstractJob {
     System.out.println("Separation = " + evaluator.separation());
   }
 
-  private static void writeInitialState(Path output, Path clustersIn) throws InstantiationException, IllegalAccessException,
-      IOException, SecurityException {
+  private static void writeInitialState(Path output, Path clustersIn)
+    throws InstantiationException, IllegalAccessException, IOException, SecurityException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {
@@ -178,7 +178,7 @@ public final class CDbwDriver extends AbstractJob {
    *          the number of Reducers desired
    */
   private static void runIteration(Path input, Path stateIn, Path stateOut, DistanceMeasure measure, int numReducers)
-      throws IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());

@@ -9,17 +9,15 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-public class PrefAndSimilarityColumnWritable implements Writable {
+public final class PrefAndSimilarityColumnWritable implements Writable {
 
   private float prefValue;
   private Vector similarityColumn;
 
   public PrefAndSimilarityColumnWritable() {
-    super();
   }
 
   public PrefAndSimilarityColumnWritable(float prefValue, Vector similarityColumn) {
-    super();
     set(prefValue, similarityColumn);
   }
 

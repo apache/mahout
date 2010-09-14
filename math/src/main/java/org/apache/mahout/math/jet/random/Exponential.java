@@ -24,7 +24,7 @@ public class Exponential extends AbstractContinousDistribution {
    */
   public Exponential(double lambda, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
-    setState(lambda);
+    this.lambda = lambda;
   }
 
   /**
@@ -33,6 +33,7 @@ public class Exponential extends AbstractContinousDistribution {
    * @return Returns the integral from -infinity to x of the PDF, also known as the cumulative distribution
    * function.
    */
+  @Override
   public double cdf(double x) {
     if (x <= 0.0) {
       return 0.0;
@@ -53,6 +54,7 @@ public class Exponential extends AbstractContinousDistribution {
    * @param x   The point at which the probability density function is to be evaluated.
    * @return  The value of the probability density function at the specified point.
    */
+  @Override
   public double pdf(double x) {
     if (x < 0.0) {
       return 0.0;

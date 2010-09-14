@@ -31,17 +31,17 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 09/24/99
  */
-class SelectedSparseDoubleMatrix1D extends DoubleMatrix1D {
+final class SelectedSparseDoubleMatrix1D extends DoubleMatrix1D {
   /*
    * The elements of the matrix.
    */
-  protected final AbstractIntDoubleMap elements;
+  final AbstractIntDoubleMap elements;
 
   /** The offsets of visible indexes of this matrix. */
-  protected final int[] offsets;
+  private final int[] offsets;
 
   /** The offset. */
-  protected int offset;
+  private int offset;
 
   /**
    * Constructs a matrix view with the given parameters.
@@ -52,7 +52,7 @@ class SelectedSparseDoubleMatrix1D extends DoubleMatrix1D {
    * @param stride   the number of indexes between any two elements, i.e. <tt>index(i+1)-index(i)</tt>.
    * @param offsets  the offsets of the cells that shall be visible.
    */
-  protected SelectedSparseDoubleMatrix1D(int size, AbstractIntDoubleMap elements, int zero, int stride, int[] offsets,
+  SelectedSparseDoubleMatrix1D(int size, AbstractIntDoubleMap elements, int zero, int stride, int[] offsets,
                                          int offset) {
     setUp(size, zero, stride);
 
@@ -68,7 +68,7 @@ class SelectedSparseDoubleMatrix1D extends DoubleMatrix1D {
    * @param elements the cells.
    * @param offsets  The indexes of the cells that shall be visible.
    */
-  protected SelectedSparseDoubleMatrix1D(AbstractIntDoubleMap elements, int[] offsets) {
+  SelectedSparseDoubleMatrix1D(AbstractIntDoubleMap elements, int[] offsets) {
     this(offsets.length, elements, 0, 1, offsets, 0);
   }
 

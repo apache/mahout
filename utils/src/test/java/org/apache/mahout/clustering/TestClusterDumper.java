@@ -39,7 +39,6 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
@@ -72,14 +71,23 @@ import org.junit.Test;
 
 public final class TestClusterDumper extends MahoutTestCase {
 
-  private static final String[] DOCS = { "The quick red fox jumped over the lazy brown dogs.",
-      "The quick brown fox jumped over the lazy red dogs.", "The quick red cat jumped over the lazy brown dogs.",
-      "The quick brown cat jumped over the lazy red dogs.", "Mary had a little lamb whose fleece was white as snow.",
-      "Mary had a little goat whose fleece was white as snow.", "Mary had a little lamb whose fleece was black as tar.",
-      "Dick had a little goat whose fleece was white as snow.", "Moby Dick is a story of a whale and a man obsessed.",
-      "Moby Bob is a story of a walrus and a man obsessed.", "Moby Dick is a story of a whale and a crazy man.",
-      "The robber wore a black fleece jacket and a baseball cap.", "The robber wore a red fleece jacket and a baseball cap.",
-      "The robber wore a white fleece jacket and a baseball cap.", "The English Springer Spaniel is the best of all dogs." };
+  private static final String[] DOCS = {
+      "The quick red fox jumped over the lazy brown dogs.",
+      "The quick brown fox jumped over the lazy red dogs.",
+      "The quick red cat jumped over the lazy brown dogs.",
+      "The quick brown cat jumped over the lazy red dogs.",
+      "Mary had a little lamb whose fleece was white as snow.",
+      "Mary had a little goat whose fleece was white as snow.",
+      "Mary had a little lamb whose fleece was black as tar.",
+      "Dick had a little goat whose fleece was white as snow.",
+      "Moby Dick is a story of a whale and a man obsessed.",
+      "Moby Bob is a story of a walrus and a man obsessed.",
+      "Moby Dick is a story of a whale and a crazy man.",
+      "The robber wore a black fleece jacket and a baseball cap.",
+      "The robber wore a red fleece jacket and a baseball cap.",
+      "The robber wore a white fleece jacket and a baseball cap.",
+      "The English Springer Spaniel is the best of all dogs."
+  };
 
   private List<VectorWritable> sampleData;
   private String[] termDictionary;
@@ -99,7 +107,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory,
-                                         new StandardAnalyzer(Version.LUCENE_CURRENT),
+                                         new StandardAnalyzer(Version.LUCENE_30),
                                          true,
                                          IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < docs2.length; i++) {
@@ -156,7 +164,8 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     CanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 8, 4, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -167,9 +176,11 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     CanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 8, 4, false, false);
     // now run the KMeans job
-    KMeansDriver.runJob(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output, measure, 0.001, 10, 1, true, false);
+    KMeansDriver.runJob(getTestTempDirPath("testdata"),
+                        new Path(output, "clusters-0"), output, measure, 0.001, 10, 1, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -193,7 +204,8 @@ public final class TestClusterDumper extends MahoutTestCase {
                              0,
                              false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -201,9 +213,11 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testMeanShift() throws Exception {
     DistanceMeasure measure = new CosineDistanceMeasure();
     Path output = getTestTempDirPath("output");
-    MeanShiftCanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 0.5, 0.01, 0.05, 10, false, true, false);
+    MeanShiftCanopyDriver.runJob(
+        getTestTempDirPath("testdata"), output, measure, 0.5, 0.01, 0.05, 10, false, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-1"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-1"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -211,10 +225,13 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    AbstractVectorModelDistribution modelDistribution = new SampledNormalDistribution(new VectorWritable(prototype));
-    DirichletDriver.runJob(getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, false);
+    ModelDistribution<VectorWritable> modelDistribution =
+        new SampledNormalDistribution(new VectorWritable(prototype));
+    DirichletDriver.runJob(
+        getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -222,10 +239,13 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet2() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(prototype));
-    DirichletDriver.runJob(getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, true);
+    ModelDistribution<VectorWritable> modelDistribution =
+        new GaussianClusterDistribution(new VectorWritable(prototype));
+    DirichletDriver.runJob(
+        getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -233,10 +253,13 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet3() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(prototype));
-    DirichletDriver.runJob(getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, true);
+    ModelDistribution<VectorWritable> modelDistribution =
+        new DistanceMeasureClusterDistribution(new VectorWritable(prototype));
+    DirichletDriver.runJob(
+        getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, 1, true, true, 0, true);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-10"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -246,12 +269,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
     Path eigenvectors = new Path(output, "eigenvectors");
-    int desiredRank = 15;
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Configuration conf = new Configuration();
     solver.setConf(conf);
     Path testData = getTestTempDirPath("testdata");
     int sampleDimension = sampleData.get(0).get().size();
+    int desiredRank = 15;
     solver.run(testData, tmp, eigenvectors, sampleData.size(), sampleDimension, false, desiredRank);
     
     new EigenVerificationJob().run(testData, eigenvectors, output, tmp, 0.5, 0.0, true, null);
@@ -304,7 +327,8 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the KMeans job
     KMeansDriver.runJob(svdData, new Path(output, "clusters-0"), output, measure, 0.001, 10, 1, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 
@@ -314,12 +338,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
     Path eigenvectors = new Path(output, "eigenvectors");
-    int desiredRank = 13;
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Configuration config = new Configuration();
     solver.setConf(config);
     Path testData = getTestTempDirPath("testdata");
     int sampleDimension = sampleData.get(0).get().size();
+    int desiredRank = 13;
     solver.run(testData, tmp, eigenvectors, sampleData.size(), sampleDimension, false, desiredRank);
     
     new EigenVerificationJob().run(testData, eigenvectors, output, tmp, 0.5, 0.0, false, null);
@@ -339,7 +363,8 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the KMeans job
     KMeansDriver.runJob(sData.getRowPath(), new Path(output, "clusters-0"), output, measure, 0.001, 10, 1, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-2"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
   }
 }

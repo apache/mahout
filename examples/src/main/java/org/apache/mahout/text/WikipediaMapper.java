@@ -97,8 +97,7 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
         DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
             .getClass(newCategories));
 
-        String categoriesStr = setStringifier.toString(newCategories);
-        categoriesStr = conf.get("wikipedia.categories", categoriesStr);
+        String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
         inputCategories = setStringifier.fromString(categoriesStr);
       }
       exactMatchOnly = conf.getBoolean("exact.match.only", false);

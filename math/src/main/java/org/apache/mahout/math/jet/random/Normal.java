@@ -80,6 +80,7 @@ public class Normal extends AbstractContinousDistribution {
   }
 
   /** Sets the uniform random generator internally used. */
+  @Override
   public final void setRandomGenerator(Random randomGenerator) {
     super.setRandomGenerator(randomGenerator);
     this.cacheFilled = false;

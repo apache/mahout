@@ -141,8 +141,8 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     boolean inputIsCanopies = hasOption(INPUT_IS_CANOPIES_OPTION);
-    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
-        DefaultOptionCreator.SEQUENTIAL_METHOD));
+    boolean runSequential =
+        getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
@@ -184,7 +184,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                                    double t1,
                                    double t2,
                                    double convergenceDelta)
-      throws IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     Configuration conf = new Configuration();
     conf.set(MeanShiftCanopyConfigKeys.DISTANCE_MEASURE_KEY, measureClassName);
@@ -350,7 +350,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                                    double convergenceDelta,
                                    int maxIterations,
                                    boolean runSequential)
-      throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     if (runSequential) {
       return buildClustersSeq(clustersIn, output, measure, t1, t2, convergenceDelta, maxIterations);
     } else {
@@ -384,7 +384,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
         reader.close();
       }
     }
-    boolean[] converged = { false };
+    boolean[] converged = {false};
     int iteration = 1;
     while (!converged[0] && iteration <= maxIterations) {
       log.info("Iteration: {}", iteration);

@@ -307,7 +307,7 @@ public final class BayesFileFormatter {
       if (cmdLine.hasOption(analyzerOpt)) {
         analyzer = Class.forName((String) cmdLine.getValue(analyzerOpt)).asSubclass(Analyzer.class).newInstance();
       } else {
-        analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        analyzer = new StandardAnalyzer(Version.LUCENE_30);
       }
       Charset charset = Charset.forName("UTF-8");
       if (cmdLine.hasOption(charsetOpt)) {

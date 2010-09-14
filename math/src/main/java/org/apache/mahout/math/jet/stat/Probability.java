@@ -341,8 +341,6 @@ public class Probability extends Constants {
    */
   @Deprecated
   public static double errorFunctionComplemented(double a) {
-    double x;
-
     double[] p = {
       2.46196981473530512524E-10,
       5.64189564831068821977E-1,
@@ -384,7 +382,7 @@ public class Probability extends Constants {
       3.36907645100081516050E0
     };
 
-    x = a < 0.0 ? -a : a;
+    double x = a < 0.0 ? -a : a;
 
     if (x < 1.0) {
       return 1.0 - errorFunction(a);

@@ -194,7 +194,7 @@ public class ClusterLabels {
 
     log.info("# of documents in the index {}", reader.numDocs());
 
-    Set<String> idSet = new HashSet<String>();
+    Collection<String> idSet = new HashSet<String>();
     for (WeightedVectorWritable wvw : wvws) {
       Vector vector = wvw.getVector();
       if (vector instanceof NamedVector) {

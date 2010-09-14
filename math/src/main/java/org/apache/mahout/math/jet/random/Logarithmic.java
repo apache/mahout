@@ -29,7 +29,7 @@ public class Logarithmic extends AbstractContinousDistribution {
   /** Constructs a Logarithmic distribution. */
   public Logarithmic(double p, Random randomGenerator) {
     setRandomGenerator(randomGenerator);
-    setState(p);
+    myP = p;
   }
 
   /** Returns a random number from the distribution. */

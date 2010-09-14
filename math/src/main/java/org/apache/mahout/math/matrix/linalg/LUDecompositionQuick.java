@@ -214,7 +214,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
       throw new IllegalArgumentException("Matrix must be square.");
     }
 
-    if (!isNonsingular()) {
+    if (!isNonSingular) {
       return 0;
     } // avoid rounding errors
 
@@ -370,7 +370,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     if (B.size() != m) {
       throw new IllegalArgumentException("Matrix dimensions must agree.");
     }
-    if (!this.isNonsingular()) {
+    if (!this.isNonSingular) {
       throw new IllegalArgumentException("Matrix is singular.");
     }
 
@@ -433,7 +433,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     if (B.rows() != m) {
       throw new IllegalArgumentException("Matrix row dimensions must agree.");
     }
-    if (!this.isNonsingular()) {
+    if (!this.isNonSingular) {
       throw new IllegalArgumentException("Matrix is singular.");
     }
 
@@ -612,7 +612,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
     buf.append("isNonSingular = ");
     String unknown = "Illegal operation or error: ";
     try {
-      buf.append(String.valueOf(this.isNonsingular()));
+      buf.append(String.valueOf(this.isNonSingular));
     } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }
@@ -626,7 +626,7 @@ public class LUDecompositionQuick implements java.io.Serializable {
 
     buf.append("\npivot = ");
     try {
-      buf.append(String.valueOf(new IntArrayList(this.getPivot())));
+      buf.append(String.valueOf(new IntArrayList(this.piv)));
     } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }

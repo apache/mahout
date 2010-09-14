@@ -208,7 +208,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
    *          the fuzzification factor - see
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
    * @return true if the iteration successfully runs
-   * @throws IOException 
    */
   private static boolean runIteration(Path input,
                                       Path clustersIn,
@@ -496,8 +495,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                               Path output,
                               DistanceMeasure measure,
                               double convergenceDelta,
-                              float m) throws IOException, InstantiationException,
-      IllegalAccessException {
+                              float m) throws IOException, InstantiationException, IllegalAccessException {
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
@@ -520,7 +518,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
         VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         while (reader.next(key, vw)) {
           clusterer.emitPointToClusters(vw, clusters, writer);
-          vw = (VectorWritable) reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
+          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
         }
       } finally {
         reader.close();

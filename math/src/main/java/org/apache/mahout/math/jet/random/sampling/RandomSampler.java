@@ -134,7 +134,7 @@ public class RandomSampler extends PersistentObject {
   private long n;
   private long N;
   private long low;
-  private Random randomGenerator;
+  private final Random randomGenerator;
 
   /**
    * Constructs a random sampler that computes and delivers sorted random sets in blocks. A set block can be retrieved

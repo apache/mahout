@@ -81,7 +81,7 @@ public final class DistributionChecks {
     UnivariateRealIntegrator integrator = new RombergIntegrator();
     for (int i = 0; i < xs.length - 1; i++) {
       double delta = integrator.integrate(new UnivariateRealFunction() {
-        public double value(double v) throws FunctionEvaluationException {
+        public double value(double v) {
           return dist.pdf(v);
         }
       }, xs[i], xs[i + 1]);

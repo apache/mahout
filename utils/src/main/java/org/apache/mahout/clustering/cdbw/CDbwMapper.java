@@ -53,7 +53,8 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
   }
 
   @Override
-  protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context) throws IOException, InterruptedException {
+  protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context)
+    throws IOException, InterruptedException {
     int key = clusterId.get();
     WeightedVectorWritable currentMDP = mostDistantPoints.get(key);
 

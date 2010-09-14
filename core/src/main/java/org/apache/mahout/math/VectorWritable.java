@@ -25,7 +25,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class VectorWritable extends Configured implements Writable {
+public final class VectorWritable extends Configured implements Writable {
 
   public static final int FLAG_DENSE = 0x01;
   public static final int FLAG_SEQUENTIAL = 0x02;
@@ -33,7 +33,7 @@ public class VectorWritable extends Configured implements Writable {
   public static final int FLAG_LAX_PRECISION = 0x08;
   public static final int NUM_FLAGS = 4;
 
-  protected Vector vector;
+  private Vector vector;
   private boolean writesLaxPrecision;
 
   public VectorWritable() {

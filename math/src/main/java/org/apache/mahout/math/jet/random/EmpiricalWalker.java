@@ -12,11 +12,11 @@ import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class EmpiricalWalker extends AbstractDiscreteDistribution {
+public final class EmpiricalWalker extends AbstractDiscreteDistribution {
 
-  private int K;
-  private int[] A;
-  private double[] F;
+  private int k;
+  private int[] a;
+  private double[] f;
 
   private double[] cdf; // cumulative distribution function
 
@@ -166,11 +166,11 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
     if (this.cdf != null) {
       copy.cdf = this.cdf.clone();
     }
-    if (this.A != null) {
-      copy.A = this.A.clone();
+    if (this.a != null) {
+      copy.a = this.a.clone();
     }
-    if (this.F != null) {
-      copy.F = this.F.clone();
+    if (this.f != null) {
+      copy.f = this.f.clone();
     }
     return copy;
   }
@@ -179,14 +179,14 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
   @Override
   public int nextInt() {
     double u = this.randomGenerator.nextDouble();
-    u *= this.K;
+    u *= this.k;
     int c = (int) u;
     u -= c;
-    double f = this.F[c];
+    double f = this.f[c];
     if (f == 1.0) {
       return c;
     }
-    return u < f ? c : this.A[c];
+    return u < f ? c : this.a[c];
   }
 
   /** Returns the probability distribution function. */
@@ -258,9 +258,9 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
     }
 
     /* Begin setting up the internal state */
-    this.K = size;
-    this.F = new double[size];
-    this.A = new int[size];
+    this.k = size;
+    this.f = new double[size];
+    this.a = new int[size];
 
     // normalize to relative probability
     double[] E = new double[size];
@@ -294,13 +294,13 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
       int s = smalls.pop();
       if (bigs.size() == 0) {
         /* Then we are on our last value */
-        this.A[s] = s;
-        this.F[s] = 1.0;
+        this.a[s] = s;
+        this.f[s] = 1.0;
         break;
       }
       b = bigs.pop();
-      this.A[s] = b;
-      this.F[s] = size * E[s];
+      this.a[s] = b;
+      this.f[s] = size * E[s];
 
       double d = mean - E[s];
       E[s] += d;              /* now E[s] == mean */
@@ -311,14 +311,14 @@ public class EmpiricalWalker extends AbstractDiscreteDistribution {
         bigs.push(b); /* still big, put it back where you found it */
       } else {
         /* E[b]==mean implies it is finished too */
-        this.A[b] = b;
-        this.F[b] = 1.0;
+        this.a[b] = b;
+        this.f[b] = 1.0;
       }
     }
     while (bigs.size() > 0) {
       b = bigs.pop();
-      this.A[b] = b;
-      this.F[b] = 1.0;
+      this.a[b] = b;
+      this.f[b] = 1.0;
     }
   }
 

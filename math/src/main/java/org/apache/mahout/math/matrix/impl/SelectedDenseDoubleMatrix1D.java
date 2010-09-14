@@ -30,10 +30,10 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
  * @author wolfgang.hoschek@cern.ch
  * @version 1.0, 09/24/99
  */
-class SelectedDenseDoubleMatrix1D extends DoubleMatrix1D {
+final class SelectedDenseDoubleMatrix1D extends DoubleMatrix1D {
 
   /** The elements of this matrix. */
-  protected final double[] elements;
+  final double[] elements;
 
   /** The offsets of visible indexes of this matrix. */
   private final int[] offsets;
@@ -47,7 +47,7 @@ class SelectedDenseDoubleMatrix1D extends DoubleMatrix1D {
    * @param elements the cells.
    * @param offsets  The indexes of the cells that shall be visible.
    */
-  protected SelectedDenseDoubleMatrix1D(double[] elements, int[] offsets) {
+  SelectedDenseDoubleMatrix1D(double[] elements, int[] offsets) {
     this(offsets.length, elements, 0, 1, offsets, 0);
   }
 
@@ -60,7 +60,7 @@ class SelectedDenseDoubleMatrix1D extends DoubleMatrix1D {
    * @param stride   the number of indexes between any two elements, i.e. <tt>index(i+1)-index(i)</tt>.
    * @param offsets  the offsets of the cells that shall be visible.
    */
-  protected SelectedDenseDoubleMatrix1D(int size, double[] elements, int zero, int stride, int[] offsets, int offset) {
+  SelectedDenseDoubleMatrix1D(int size, double[] elements, int zero, int stride, int[] offsets, int offset) {
     setUp(size, zero, stride);
 
     this.elements = elements;

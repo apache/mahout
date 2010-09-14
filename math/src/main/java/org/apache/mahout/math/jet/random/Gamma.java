@@ -54,6 +54,7 @@ public class Gamma extends AbstractContinousDistribution {
    * Returns the cumulative distribution function.
    * @param x The end-point where the cumulation should end.
    */
+  @Override
   public double cdf(double x) {
     return Probability.gamma(alpha, rate, x);
   }
@@ -247,6 +248,7 @@ public class Gamma extends AbstractContinousDistribution {
    *
    * @return The value of the gamma density at x.
    */
+  @Override
   public double pdf(double x) {
     if (x < 0) {
       throw new IllegalArgumentException();

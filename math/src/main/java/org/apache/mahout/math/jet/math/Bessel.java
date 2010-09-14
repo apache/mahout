@@ -504,13 +504,12 @@ public class Bessel extends Constants {
     if (x <= 0.0) {
       throw new ArithmeticException();
     }
-    double y;
     if (x <= 2.0) {
       return Arithmetic.chbevl(x * x - 2.0, aSubK0, 10) - Math.log(0.5 * x) * i0(x);
     }
 
     double z = 8.0 / x - 2.0;
-    y = Math.exp(-x) * Arithmetic.chbevl(z, bSubK0, 25) / Math.sqrt(x);
+    double y = Math.exp(-x) * Arithmetic.chbevl(z, bSubK0, 25) / Math.sqrt(x);
     return y;
   }
 

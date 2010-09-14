@@ -18,14 +18,14 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class DenseDoubleMatrix2D extends DoubleMatrix2D {
+public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
 
   /**
    * The elements of this matrix. elements are stored in row major, i.e. index==row*columns + column
    * columnOf(index)==index%columns rowOf(index)==index/columns i.e. {row0 column0..m}, {row1 column0..m}, ..., {rown
    * column0..m}
    */
-  protected final double[] elements;
+  final double[] elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form
@@ -151,7 +151,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
   public DoubleMatrix2D assign(UnaryFunction function) {
     double[] elems = this.elements;
     if (elems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int index = index(0, 0);
     int cs = this.columnStride;
@@ -223,7 +223,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     double[] elems = this.elements;
     double[] otherElems = other.elements;
     if (elems == null || otherElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int cs = this.columnStride;
     int ocs = other.columnStride;
@@ -284,7 +284,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     double[] elems = this.elements;
     double[] otherElems = other.elements;
     if (elems == null || otherElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int cs = this.columnStride;
     int ocs = other.columnStride;
@@ -559,7 +559,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     double[] elems = this.elements;
     double[] B_elems = BB.elements;
     if (elems == null || B_elems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
 
     int A_index = index(1, 1);
@@ -631,7 +631,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     double[] yElems = yy.elements;
     double[] zElems = zz.elements;
     if (AElems == null || yElems == null || zElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int As = this.columnStride;
     int ys = yy.stride;
@@ -713,7 +713,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
     double[] BElems = BB.elements;
     double[] CElems = CC.elements;
     if (AElems == null || BElems == null || CElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
 
     int cA = this.columnStride;
@@ -811,7 +811,7 @@ public class DenseDoubleMatrix2D extends DoubleMatrix2D {
   public double zSum() {
     double[] elems = this.elements;
     if (elems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int index = index(0, 0);
     int cs = this.columnStride;

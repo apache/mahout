@@ -29,7 +29,7 @@ package org.apache.mahout.ga.watchmaker.cd.tool;
  * </ul>
  * 
  */
-public class Descriptors {
+public final class Descriptors {
   
   private final char[] descriptors;
   

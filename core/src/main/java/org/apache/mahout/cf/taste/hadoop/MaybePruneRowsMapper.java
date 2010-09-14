@@ -53,7 +53,7 @@ public class MaybePruneRowsMapper
 
   @Override
   protected void map(VarLongWritable rowIndex, VectorWritable vectorWritable, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Vector vector = vectorWritable.get();
     countSeen(vector);
     vector = maybePruneVector(vector);

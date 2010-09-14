@@ -123,7 +123,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     int i = index(0);
     double[] elems = this.elements;
     if (elems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
 
     // specialization for speed
@@ -180,7 +180,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     double[] elems = this.elements;
     double[] otherElems = other.elements;
     if (elements == null || otherElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int s = this.stride;
     int ys = other.stride;
@@ -233,7 +233,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     double[] elems = this.elements;
     double[] otherElems = other.elements;
     if (elems == null || otherElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int s = this.stride;
     int ys = other.stride;
@@ -416,7 +416,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     double[] elems = this.elements;
     double[] otherElems = y.elements;
     if (elements == null || otherElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     int s = this.stride;
     int ys = y.stride;
@@ -497,7 +497,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     double[] elems = this.elements;
     double[] yElems = yy.elements;
     if (elems == null || yElems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
 
     /*
@@ -515,10 +515,10 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     j -= ys;
     double sum = 0;
     for (int k = min / 4; --k >= 0;) {
-      sum += elems[i += s] * yElems[j += ys] +
-          elems[i += s] * yElems[j += ys] +
-          elems[i += s] * yElems[j += ys] +
-          elems[i += s] * yElems[j += ys];
+      sum += elems[i += s] * yElems[j += ys]
+          + elems[i += s] * yElems[j += ys]
+          + elems[i += s] * yElems[j += ys]
+          + elems[i += s] * yElems[j += ys];
     }
     for (int k = min % 4; --k >= 0;) {
       sum += elems[i += s] * yElems[j += ys];
@@ -537,7 +537,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     int i = index(0);
     double[] elems = this.elements;
     if (elems == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
     double sum = 0;
     for (int k = size; --k >= 0;) {

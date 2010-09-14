@@ -696,10 +696,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
     int[] rowOffsets = new int[rowIndexes.length];
     int[] columnOffsets = new int[columnIndexes.length];
     for (int i = rowIndexes.length; --i >= 0;) {
-      rowOffsets[i] = _rowOffset(_rowRank(rowIndexes[i]));
+      rowOffsets[i] = rowOffset(rowRank(rowIndexes[i]));
     }
     for (int i = columnIndexes.length; --i >= 0;) {
-      columnOffsets[i] = _columnOffset(_columnRank(columnIndexes[i]));
+      columnOffsets[i] = columnOffset(columnRank(columnIndexes[i]));
     }
     return viewSelectionLike(rowOffsets, columnOffsets);
   }

@@ -19,7 +19,7 @@ package org.apache.mahout.clustering.canopy;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -28,12 +28,12 @@ import org.apache.mahout.math.VectorWritable;
 
 class CanopyMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
-  private final List<Canopy> canopies = new ArrayList<Canopy>();
-
+  private final Collection<Canopy> canopies = new ArrayList<Canopy>();
   private CanopyClusterer canopyClusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context)
+    throws IOException, InterruptedException {
     canopyClusterer.addPointToCanopies(point.get(), canopies);
   }
 

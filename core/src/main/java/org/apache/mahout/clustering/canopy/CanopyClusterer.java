@@ -30,7 +30,6 @@ import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,23 +121,17 @@ public class CanopyClusterer {
 
   /**
    * Emit the point to the closest Canopy
-   * 
-   * @param point
-   * @param canopies
-   * @param context
-   * @throws IOException
-   * @throws InterruptedException
    */
   public void emitPointToClosestCanopy(Vector point,
-                                       List<Canopy> canopies,
-                                       Mapper<?, ?, IntWritable, WeightedVectorWritable>.Context context) throws IOException,
-      InterruptedException {
+                                       Iterable<Canopy> canopies,
+                                       Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
+    throws IOException, InterruptedException {
     Canopy closest = findClosestCanopy(point, canopies);
     context.write(new IntWritable(closest.getId()), new WeightedVectorWritable(1, point));
     context.setStatus("Emit Closest Canopy ID:" + closest.getIdentifier());
   }
 
-  protected Canopy findClosestCanopy(Vector point, List<Canopy> canopies) {
+  protected Canopy findClosestCanopy(Vector point, Iterable<Canopy> canopies) {
     double minDist = Double.MAX_VALUE;
     Canopy closest = null;
     // find closest canopy
@@ -219,7 +212,7 @@ public class CanopyClusterer {
    *          a List<Canopy>
    * @return the List<Vector>
    */
-  public static List<Vector> getCenters(List<Canopy> canopies) {
+  public static List<Vector> getCenters(Iterable<Canopy> canopies) {
     List<Vector> result = new ArrayList<Vector>();
     for (Canopy canopy : canopies) {
       result.add(canopy.getCenter());
@@ -233,7 +226,7 @@ public class CanopyClusterer {
    * @param canopies
    *          a List<Canopy>
    */
-  public static void updateCentroids(List<Canopy> canopies) {
+  public static void updateCentroids(Iterable<Canopy> canopies) {
     for (Canopy canopy : canopies) {
       canopy.computeParameters();
     }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -64,6 +65,7 @@ import org.slf4j.LoggerFactory;
 public class VectorBenchmarks implements Summarizable {
 
   private static final Logger log = LoggerFactory.getLogger(VectorBenchmarks.class);
+  private static final Pattern TAB_PATTERN = Pattern.compile("\t");
 
   private final Vector[][] vectors;
   private final List<Vector> randomVectors = new ArrayList<Vector>();
@@ -139,7 +141,7 @@ public class VectorBenchmarks implements Summarizable {
     while (implStats.size() < implId + 1) {
       implStats.add(new String[] {});
     }
-    implStats.set(implId, info.split("\t"));
+    implStats.set(implId, TAB_PATTERN.split(info));
   }
   
   public void createBenchmark() {

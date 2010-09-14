@@ -25,7 +25,7 @@ class Stack {
   /** Returns the topmost element. */
   public int pop() {
     if (this.i < 0) {
-      throw new InternalError("Cannot pop stack!");
+      throw new IllegalStateException("Cannot pop stack!");
     }
     this.i--;
     return this.v[this.i + 1];
@@ -35,7 +35,7 @@ class Stack {
   public void push(int value) {
     this.i++;
     if (this.i >= this.N) {
-      throw new InternalError("Cannot push stack!");
+      throw new IllegalStateException("Cannot push stack!");
     }
     this.v[this.i] = value;
   }

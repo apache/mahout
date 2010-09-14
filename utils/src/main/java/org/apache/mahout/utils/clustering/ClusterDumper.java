@@ -126,16 +126,16 @@ public final class ClusterDumper extends AbstractJob {
     if (hasOption(SUBSTRING_OPTION)) {
       int sub = Integer.parseInt(getOption(SUBSTRING_OPTION));
       if (sub >= 0) {
-        setSubString(sub);
+        subString = sub;
       }
     }
     if (hasOption(JSON_OPTION)) {
-      setUseJSON(true);
+      useJSON = true;
     }
     termDictionary = getOption(DICTIONARY_OPTION);
     dictionaryFormat = getOption(DICTIONARY_TYPE_OPTION);
     if (hasOption(NUM_WORDS_OPTION)) {
-      setNumTopFeatures(Integer.parseInt(getOption(NUM_WORDS_OPTION)));
+      numTopFeatures = Integer.parseInt(getOption(NUM_WORDS_OPTION));
     }
     init();
     printClusters(null);

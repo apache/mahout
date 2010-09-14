@@ -27,7 +27,7 @@ import org.apache.lucene.util.Version;
 public class DefaultAnalyzer extends StandardAnalyzer {
 
   public DefaultAnalyzer() {
-    super(Version.LUCENE_CURRENT);
+    super(Version.LUCENE_30);
   }
 
 }

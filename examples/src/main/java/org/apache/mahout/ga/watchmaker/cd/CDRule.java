@@ -41,16 +41,12 @@ import org.uncommons.maths.binary.BitString;
  * <li>oi is an operator ('&lt;' or '&gt;=')</li>
  * </ul>
  */
-public class CDRule implements Rule {
+public final class CDRule implements Rule {
   
   private final double threshold;
-  
   private final int nbConditions;
-  
   private final double[] weights;
-  
   private final BitString operators;
-  
   private final double[] values;
   
   /**
@@ -93,32 +89,30 @@ public class CDRule implements Rule {
       }
     }
   }
-  
-  protected static double randomNumerical(DataSet dataset, int attrInd, Random rng) {
-    double max = dataset.getMax(attrInd);
-    double min = dataset.getMin(attrInd);
-    return rng.nextDouble() * (max - min) + min;
-  }
-  
-  protected static double randomCategorical(DataSet dataset, int attrInd, Random rng) {
-    int nbcategories = dataset.getNbValues(attrInd);
-    return rng.nextInt(nbcategories);
-  }
-  
+
   /**
    * Copy Constructor
-   * 
-   * @param ind
    */
   public CDRule(CDRule ind) {
     threshold = ind.threshold;
     nbConditions = ind.nbConditions;
-    
+
     weights = ind.weights.clone();
     operators = ind.operators.clone();
     values = ind.values.clone();
   }
   
+  private static double randomNumerical(DataSet dataset, int attrInd, Random rng) {
+    double max = dataset.getMax(attrInd);
+    double min = dataset.getMin(attrInd);
+    return rng.nextDouble() * (max - min) + min;
+  }
+  
+  private static double randomCategorical(DataSet dataset, int attrInd, Random rng) {
+    int nbcategories = dataset.getNbValues(attrInd);
+    return rng.nextInt(nbcategories);
+  }
+
   /**
    * if all the active conditions are met returns 1, else returns 0.
    */

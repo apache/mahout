@@ -9,8 +9,10 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix.impl;
 
 /**
- Abstract base class for 2-d matrices holding objects or primitive data types such as <code>int</code>, <code>double</code>, etc.
- First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
+ Abstract base class for 2-d matrices holding objects or primitive data types such as
+ <code>int</code>, <code>double</code>, etc.
+ First see the <a href="package-summary.html">package summary</a> and javadoc
+ <a href="package-tree.html">tree view</a> to get the broad picture.
  <p>
  <b>Note that this implementation is not synchronized.</b>
 
@@ -47,7 +49,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    * @param absRank the absolute rank of the element.
    * @return the position.
    */
-  protected int _columnOffset(int absRank) {
+  protected int columnOffset(int absRank) {
     return absRank;
   }
 
@@ -57,7 +59,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    * @param rank the relative rank of the element.
    * @return the absolute rank of the element.
    */
-  protected int _columnRank(int rank) {
+  protected int columnRank(int rank) {
     return columnZero + rank * columnStride;
     //return columnZero + ((rank+columnFlipMask)^columnFlipMask);
     //return columnZero + rank*columnFlip; // slower
@@ -70,7 +72,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    * @param absRank the absolute rank of the element.
    * @return the position.
    */
-  protected int _rowOffset(int absRank) {
+  protected int rowOffset(int absRank) {
     return absRank;
   }
 
@@ -80,7 +82,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    * @param rank the relative rank of the element.
    * @return the absolute rank of the element.
    */
-  protected int _rowRank(int rank) {
+  protected int rowRank(int rank) {
     return rowZero + rank * rowStride;
     //return rowZero + ((rank+rowFlipMask)^rowFlipMask);
     //return rowZero + rank*rowFlip; // slower
@@ -94,7 +96,8 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    */
   protected void checkBox(int row, int column, int height, int width) {
     if (column < 0 || width < 0 || column + width > columns || row < 0 || height < 0 || row + height > rows) {
-      throw new IndexOutOfBoundsException("Column:" + column + ", row:" + row + " ,width:" + width + ", height:" + height);
+      throw new IndexOutOfBoundsException(
+          "Column:" + column + ", row:" + row + " ,width:" + width + ", height:" + height);
     }
   }
 
@@ -183,7 +186,7 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
    * @param column the index of the column-coordinate.
    */
   protected int index(int row, int column) {
-    return _rowOffset(_rowRank(row)) + _columnOffset(_columnRank(column));
+    return rowOffset(rowRank(row)) + columnOffset(columnRank(column));
   }
 
   /** Returns the number of rows. */

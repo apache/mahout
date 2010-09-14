@@ -40,6 +40,7 @@ public class Uniform extends AbstractContinousDistribution {
   }
 
   /** Returns the cumulative distribution function (assuming a continous uniform distribution). */
+  @Override
   public double cdf(double x) {
     if (x <= min) {
       return 0.0;
@@ -139,6 +140,7 @@ public class Uniform extends AbstractContinousDistribution {
   }
 
   /** Returns the probability distribution function (assuming a continous uniform distribution). */
+  @Override
   public double pdf(double x) {
     if (x <= min || x >= max) {
       return 0.0;

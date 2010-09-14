@@ -22,7 +22,7 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
   /*
    * The elements of the matrix.
    */
-  protected final DoubleMatrix1D content;
+  private final DoubleMatrix1D content;
 
   WrapperDoubleMatrix1D(DoubleMatrix1D newContent) {
     if (newContent != null) {
@@ -210,7 +210,7 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
    */
   @Override
   protected DoubleMatrix1D viewSelectionLike(int[] offsets) {
-    throw new InternalError(); // should never get called
+    throw new UnsupportedOperationException(); // should never get called
   }
 
   /**

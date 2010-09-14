@@ -17,25 +17,25 @@ import org.apache.mahout.math.jet.math.Arithmetic;
  * HREF="http://www.cis.tu-graz.ac.at/stat/stadl/random.html">C-RAND / WIN-RAND</A> library.
  */
 public final class Fun {
-  private static final double[] B_0 = new double[]{-1.5787132, -0.6130827, 0.1735823, 1.4793411,
+  private static final double[] B_0 = {-1.5787132, -0.6130827, 0.1735823, 1.4793411,
     2.6667307, 4.9086836, 8.1355339,
   };
-  private static final double[] B_05 = new double[]{-1.9694802, -0.7642538, 0.0826017, 1.4276355,
+  private static final double[] B_05 = {-1.9694802, -0.7642538, 0.0826017, 1.4276355,
     2.6303682, 4.8857787, 8.1207968,
   };
-  private static final double[] B_1 = new double[]{-2.9807345, -1.1969943, -0.1843161, 1.2739241,
+  private static final double[] B_1 = {-2.9807345, -1.1969943, -0.1843161, 1.2739241,
     2.5218256, 4.8172216, 8.0765633,
   };
-  private static final double[] B_2 = new double[]{-5.9889676, -2.7145389, -1.1781269, 0.6782201,
+  private static final double[] B_2 = {-5.9889676, -2.7145389, -1.1781269, 0.6782201,
     2.0954009, 4.5452152, 7.9003173,
   };
-  private static final double[] B_3 = new double[]{-9.6803440, -4.8211925, -2.6533185, -0.2583337,
+  private static final double[] B_3 = {-9.6803440, -4.8211925, -2.6533185, -0.2583337,
     1.4091915, 4.0993448, 7.6088310,
   };
-  private static final double[] B_5 = new double[]{-18.1567152, -10.0939408, -6.5819139, -2.9371545,
+  private static final double[] B_5 = {-18.1567152, -10.0939408, -6.5819139, -2.9371545,
     -0.6289005, 2.7270412, 6.6936799,
   };
-  private static final double[] B_8 = new double[]{-32.4910195, -19.6065943, -14.0347298, -8.3839439,
+  private static final double[] B_8 = {-32.4910195, -19.6065943, -14.0347298, -8.3839439,
     -4.9679730, -0.3567823, 4.5589697,
   };
 

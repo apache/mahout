@@ -160,7 +160,7 @@ public final class VectorTest extends MahoutTestCase {
     w.setQuick(4, 2.1);
   }
 
-  private void doTestGetDistanceSquared(Vector v, Vector w) {
+  private static void doTestGetDistanceSquared(Vector v, Vector w) {
     double expected = v.minus(w).getLengthSquared();
     assertEquals(expected, v.getDistanceSquared(w), 1.0e-6);
   }
@@ -187,7 +187,7 @@ public final class VectorTest extends MahoutTestCase {
     return d;
   }
 
-  private void doTestGetLengthSquared(Vector v) {
+  private static void doTestGetLengthSquared(Vector v) {
     double expected = lengthSquaredSlowly(v);
     assertEquals("v.getLengthSquared() != sum_of_squared_elements(v)", expected, v.getLengthSquared(), 0.0);
 
@@ -207,7 +207,8 @@ public final class VectorTest extends MahoutTestCase {
       }
     }
     expected = lengthSquaredSlowly(v);
-    assertEquals("mutation via dense iterator.set fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
+    assertEquals("mutation via dense iterator.set fails to change lengthSquared",
+                 expected, v.getLengthSquared(), EPSILON);
 
     it = v.iterateNonZero();
     int i = 0;

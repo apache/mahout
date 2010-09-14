@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math;
 
+import org.apache.hadoop.io.Writable;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -25,16 +27,25 @@ import java.io.IOException;
  * Writable to handle serialization of a vector and a variable list of
  * associated label indexes.
  */
-public class MultiLabelVectorWritable extends VectorWritable {
+public final class MultiLabelVectorWritable implements Writable {
 
+  private final VectorWritable vectorWritable = new VectorWritable();
   private int[] labels;
 
   public MultiLabelVectorWritable() {
   }
 
-  public MultiLabelVectorWritable(Vector v, int[] labels) {
-    super(v);
-    setLabels(labels);
+  public MultiLabelVectorWritable(Vector vector, int[] labels) {
+    this.vectorWritable.set(vector);
+    this.labels = labels;
+  }
+
+  public Vector getVector() {
+    return vectorWritable.get();
+  }
+
+  public void setVector(Vector vector) {
+    vectorWritable.set(vector);
   }
 
   public void setLabels(int[] labels) {
@@ -47,37 +58,30 @@ public class MultiLabelVectorWritable extends VectorWritable {
 
   @Override
   public void readFields(DataInput in) throws IOException {
+    vectorWritable.readFields(in);
     int labelSize = in.readInt();
     labels = new int[labelSize];
     for (int i = 0; i < labelSize; i++) {
       labels[i] = in.readInt();
     }
-    super.readFields(in);
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
+    vectorWritable.write(out);
     out.writeInt(labels.length);
     for (int label : labels) {
       out.writeInt(label);
     }
-    super.write(out);
   }
 
   public static MultiLabelVectorWritable read(DataInput in) throws IOException {
-    int labelSize = in.readInt();
-    int[] labels = new int[labelSize];
-    for (int i = 0; i < labelSize; i++) {
-      labels[i] = in.readInt();
-    }
-    VectorWritable temp = new VectorWritable();
-    temp.readFields(in);
-    Vector vector = temp.get();
-    return new MultiLabelVectorWritable(vector, labels);
+    MultiLabelVectorWritable writable = new MultiLabelVectorWritable();
+    writable.readFields(in);
+    return writable;
   }
 
-  public static void write(DataOutput out, SequentialAccessSparseVector ssv,
-      int[] labels) throws IOException {
+  public static void write(DataOutput out, SequentialAccessSparseVector ssv, int[] labels) throws IOException {
     (new MultiLabelVectorWritable(ssv, labels)).write(out);
   }
 

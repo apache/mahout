@@ -341,11 +341,8 @@ public class Property extends PersistentObject {
     int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
-        if (!(row == column || row == column + 1)) {
-          //if (A.getQuick(row,column) != 0) return false;
-          if (Math.abs(a.getQuick(row, column)) > epsilon) {
-            return false;
-          }
+        if (!(row == column || row == column + 1) && Math.abs(a.getQuick(row, column)) > epsilon) {
+          return false;
         }
       }
     }
@@ -532,11 +529,8 @@ public class Property extends PersistentObject {
     int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
-        if (Math.abs(row - column) > 1) {
-          //if (A.getQuick(row,column) != 0) return false;
-          if (Math.abs(a.getQuick(row, column)) > epsilon) {
-            return false;
-          }
+        if (Math.abs(row - column) > 1 && Math.abs(a.getQuick(row, column)) > epsilon) {
+          return false;
         }
       }
     }
@@ -572,11 +566,8 @@ public class Property extends PersistentObject {
     int columns = a.columns();
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
-        if (!(row == column || row == column - 1)) {
-          //if (A.getQuick(row,column) != 0) return false;
-          if (Math.abs(a.getQuick(row, column)) > epsilon) {
-            return false;
-          }
+        if (!(row == column || row == column - 1) && Math.abs(a.getQuick(row, column)) > epsilon) {
+          return false;
         }
       }
     }

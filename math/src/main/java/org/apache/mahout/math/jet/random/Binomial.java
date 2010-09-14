@@ -115,16 +115,28 @@ public class Binomial extends AbstractDiscreteDistribution {
    * the centre
    * region and exponential in the tails.
    * A triangular immediate acceptance region in the centre speeds
-   * * up the generation of binomial variates.                        * If candidate k is near the mode, f(k) is
-   * computed recursively  * starting at the mode m.                                        * The acceptance test by
-   * Stirling's formula is modified          * according to W. Hoermann (1992): The generation of binomial    * random
-   * variates, to appear in J. Statist. Comput. Simul.       * If  p < .5  the algorithm is applied to parameters n, p.
-   * * Otherwise p is replaced by 1-p, and k is replaced by n - k.    * * *****************************************************************
-   * * FUNCTION:    - samples a random number from the binomial       * distribution with parameters n and p  and is *
-   * valid for  n*min(p,1-p)  >  0. * REFERENCE:   - V. Kachitvichyanukul, B.W. Schmeiser (1988):    * Binomial random
-   * variate generation, * Communications of the ACM 31, 216-222.          * SUBPROGRAMS: - StirlingCorrection() * ...
-   * Correction term of the Stirling * approximation for log(k!) * (series in 1/k or table values  * for small k) with
-   * long int k    * - randomGenerator    ... (0,1)-Uniform engine * * ****************************************************************
+   * up the generation of binomial variates.
+   * If candidate k is near the mode, f(k) is
+   * computed recursively  * starting at the mode m.
+   * The acceptance test by
+   * Stirling's formula is modified
+   * according to W. Hoermann (1992): The generation of binomial
+   * random
+   * variates, to appear in J. Statist. Comput. Simul.
+   * If  p < .5  the algorithm is applied to parameters n, p.
+   * Otherwise p is replaced by 1-p, and k is replaced by n - k.
+   * *****************************************************************
+   * FUNCTION:    - samples a random number from the binomial
+   * distribution with parameters n and p  and is
+   * valid for  n*min(p,1-p)  >  0. * REFERENCE:   - V. Kachitvichyanukul, B.W. Schmeiser (1988):
+   * Binomial random
+   * variate generation, * Communications of the ACM 31, 216-222.
+   * SUBPROGRAMS: - StirlingCorrection() * ...
+   * Correction term of the Stirling
+   * approximation for log(k!) * (series in 1/k or table values
+   * for small k) with
+   * long int k    * - randomGenerator    ... (0,1)-Uniform engine *
+   * ****************************************************************
    */
   protected int generateBinomial(int n, double p) {
 

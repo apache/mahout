@@ -51,12 +51,11 @@ import java.io.IOException;
  * is that /dev/random will block if it doesn't think it has enough entropy.  In most production
  * applications of Mahout, that really isn't necessary.
  */
-public class DevURandomSeedGenerator implements SeedGenerator {
+public final class DevURandomSeedGenerator implements SeedGenerator {
+
   private static final File DEV_URANDOM = new File("/dev/urandom");
 
   /**
-   * {@inheritDoc}
-   *
    * @return The requested number of random bytes, read directly from {@literal /dev/urandom}.
    * @throws SeedException If {@literal /dev/urandom} does not exist or is not accessible
    */
@@ -74,30 +73,25 @@ public class DevURandomSeedGenerator implements SeedGenerator {
         count += bytesRead;
       }
       return randomSeed;
-    }
-    catch (IOException ex) {
+    } catch (IOException ex) {
       throw new SeedException("Failed reading from " + DEV_URANDOM.getName(), ex);
-    }
-    catch (SecurityException ex) {
+    } catch (SecurityException ex) {
       // Might be thrown if resource access is restricted (such as in
       // an applet sandbox).
       throw new SeedException("SecurityManager prevented access to " + DEV_URANDOM.getName(), ex);
-    }
-    finally {
+    } finally {
       if (file != null) {
         try {
           file.close();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
           // Ignore.
         }
       }
     }
   }
 
-
   @Override
   public String toString() {
-    return "/dev/random";
+    return "/dev/urandom";
   }
 }

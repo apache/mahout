@@ -101,7 +101,7 @@ public final class TestL1ModelClustering extends MahoutTestCase {
     sampleData = new ArrayList<VectorWritable>();
     RAMDirectory directory = new RAMDirectory();
     IndexWriter writer = new IndexWriter(directory,
-                                         new StandardAnalyzer(Version.LUCENE_CURRENT),
+                                         new StandardAnalyzer(Version.LUCENE_30),
                                          true,
                                          IndexWriter.MaxFieldLength.UNLIMITED);
     for (int i = 0; i < docs2.length; i++) {

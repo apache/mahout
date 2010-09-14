@@ -22,7 +22,7 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
   /*
    * The elements of the matrix.
    */
-  protected final DoubleMatrix2D content;
+  private final DoubleMatrix2D content;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form
@@ -108,7 +108,7 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
    */
   @Override
   protected DoubleMatrix1D like1D(int size, int offset, int stride) {
-    throw new InternalError(); // should never get called
+    throw new UnsupportedOperationException(); // should never get called
   }
 
   /**
@@ -368,7 +368,7 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
    */
   @Override
   protected DoubleMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
-    throw new InternalError(); // should never be called
+    throw new UnsupportedOperationException(); // should never be called
   }
 
   /**

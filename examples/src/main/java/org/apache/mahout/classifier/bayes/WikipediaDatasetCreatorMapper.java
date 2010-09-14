@@ -90,8 +90,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
         DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
             .getClass(newCategories));
 
-        String categoriesStr = setStringifier.toString(newCategories);
-        categoriesStr = conf.get("wikipedia.categories", categoriesStr);
+        String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
         inputCategories = setStringifier.fromString(categoriesStr);
 
       }
@@ -111,7 +110,7 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       throw new IllegalStateException(e);
     }
     log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}",
-             new Object[] { inputCategories.size(), exactMatchOnly, analyzer.getClass().getName()});
+             new Object[] {inputCategories.size(), exactMatchOnly, analyzer.getClass().getName()});
   }
 
   private String findMatchingCategory(String document) {

@@ -15,11 +15,11 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class SparseDoubleMatrix1D extends DoubleMatrix1D {
+public final class SparseDoubleMatrix1D extends DoubleMatrix1D {
   /*
    * The elements of the matrix.
    */
-  protected final AbstractIntDoubleMap elements;
+  final AbstractIntDoubleMap elements;
 
   /**
    * Constructs a matrix with a copy of the given values. The values are copied. So subsequent changes in
@@ -70,7 +70,7 @@ public class SparseDoubleMatrix1D extends DoubleMatrix1D {
    * @param stride   the number of indexes between any two elements, i.e. <tt>index(i+1)-index(i)</tt>.
    * @throws IllegalArgumentException if <tt>size<0</tt>.
    */
-  protected SparseDoubleMatrix1D(int size, AbstractIntDoubleMap elements, int offset, int stride) {
+  SparseDoubleMatrix1D(int size, AbstractIntDoubleMap elements, int offset, int stride) {
     setUp(size, offset, stride);
     this.elements = elements;
     this.isNoView = false;

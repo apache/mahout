@@ -33,10 +33,10 @@ import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
+import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
@@ -216,7 +216,8 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
 
   @Test
   public void testDirichlet() throws Exception {
-    AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(new DenseVector(2)));
+    ModelDistribution<VectorWritable> modelDistribution =
+        new GaussianClusterDistribution(new VectorWritable(new DenseVector(2)));
     DirichletDriver.runJob(getTestTempDirPath("testdata"),
                            getTestTempDirPath("output"),
                            modelDistribution,

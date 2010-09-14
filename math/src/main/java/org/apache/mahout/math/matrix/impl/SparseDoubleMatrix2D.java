@@ -22,12 +22,11 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class SparseDoubleMatrix2D extends DoubleMatrix2D {
+public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
   /*
    * The elements of the matrix.
    */
-  protected final AbstractIntDoubleMap elements;
-  protected int dummy;
+  final AbstractIntDoubleMap elements;
 
   /**
    * Constructs a matrix with a copy of the given values. <tt>values</tt> is required to have the form
@@ -88,7 +87,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
    * @throws IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or
    *                                  flip's are illegal.
    */
-  protected SparseDoubleMatrix2D(int rows, int columns, AbstractIntDoubleMap elements, int rowZero, int columnZero,
+  SparseDoubleMatrix2D(int rows, int columns, AbstractIntDoubleMap elements, int rowZero, int columnZero,
                                  int rowStride, int columnStride) {
     setUp(rows, columns, rowZero, columnZero, rowStride, columnStride);
     this.elements = elements;
@@ -286,7 +285,8 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
    */
   @Override
   public double getQuick(int row, int column) {
-    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows)
+    // throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
     //return this.elements.get(index(row,column));
     //manually inlined:
     return this.elements.get(rowZero + row * rowStride + columnZero + column * columnStride);
@@ -381,7 +381,8 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
    */
   @Override
   public void setQuick(int row, int column, double value) {
-    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows) throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
+    //if (debug) if (column<0 || column>=columns || row<0 || row>=rows)
+    // throw new IndexOutOfBoundsException("row:"+row+", column:"+column);
     //int index =  index(row,column);
     //manually inlined:
     int index = rowZero + row * rowStride + columnZero + column * columnStride;
@@ -431,8 +432,8 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
       n = rows;
     }
 
-    boolean ignore = (z == null);
-    if (z == null) {
+    boolean ignore = z == null;
+    if (ignore) {
       z = new DenseDoubleMatrix1D(m);
     }
 
@@ -459,7 +460,7 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D {
     final int yi = y.index(0);
 
     if (yElements == null || zElements == null) {
-      throw new InternalError();
+      throw new IllegalStateException();
     }
 
     this.elements.forEachPair(

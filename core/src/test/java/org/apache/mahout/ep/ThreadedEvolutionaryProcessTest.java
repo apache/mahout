@@ -20,7 +20,6 @@ package org.apache.mahout.ep;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
@@ -52,12 +51,14 @@ public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
     }, 5, 200, 2);
 
     System.out.println(ep);
+    // disabled due to non-repeatability
+    /*
     double[] r = x.getMappedParams();
     int i = 0;
     for (double v : r) {
-      // disabled due to non-repeatability
-//      assertEquals(String.format(Locale.ENGLISH, "Coordinate %d", i), i, v, 0.02);
+      assertEquals(String.format(Locale.ENGLISH, "Coordinate %d", i), i, v, 0.02);
       i++;
     }
+     */
   }
 }

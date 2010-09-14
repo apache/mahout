@@ -165,7 +165,7 @@ public final class Classify {
       analyzer = Class.forName(className).asSubclass(Analyzer.class).newInstance();
     }
     if (analyzer == null) {
-      analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+      analyzer = new StandardAnalyzer(Version.LUCENE_30);
     }
     
     log.info("Converting input document to proper format");

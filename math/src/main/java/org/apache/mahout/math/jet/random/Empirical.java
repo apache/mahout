@@ -102,11 +102,12 @@ public class Empirical extends AbstractContinousDistribution {
       double binFraction = (rand - cdf[nbelow]) / binMeasure;
       return (nbelow + binFraction) / nBins;
     } else {
-      throw new InternalError();
+      throw new IllegalStateException();
     } // illegal interpolation type
   }
 
   /** Returns the probability distribution function. */
+  @Override
   public double pdf(double x) {
     throw new UnsupportedOperationException("not implemented");
     //if (x < 0 || x > cdf.length-2) return 0.0;
