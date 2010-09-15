@@ -22,6 +22,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.Functions;
 
 import java.util.Collections;
 import java.util.List;
@@ -78,18 +80,29 @@ public class ModelDissector {
     private String feature;
     private double value;
     private int maxIndex;
-    private Vector weights;
 
     public Weight(String feature, Vector weights) {
-      this.weights = weights;
       this.feature = feature;
-      value = weights.norm(1);
+      // pick out the weight with the largest abs value, but don't forget the sign
+      value = weights.aggregate(new BinaryFunction() {
+        @Override
+        public double apply(double arg1, double arg2) {
+          int r = Double.compare(Math.abs(arg1), Math.abs(arg2));
+          if (r < 0) {
+            return arg2;
+          } else if (r > 0) {
+            return arg1;
+          } else {
+            return Math.max(arg1, arg2);
+          }
+        }
+      }, Functions.IDENTITY);
       maxIndex = weights.maxValueIndex();
     }
 
     @Override
     public int compareTo(Weight other) {
-      int r = Double.compare(this.value, other.value);
+      int r = Double.compare(Math.abs(this.value), Math.abs(other.value));
       if (r != 0) {
         return r;
       } else {
