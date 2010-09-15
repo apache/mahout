@@ -21,21 +21,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.QRDecomposition;
-import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.SparseMatrix;
-import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.UnaryFunction;
-import org.apache.mahout.math.matrix.GaussSeidel;
-import org.apache.mahout.vectors.Dictionary;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -56,9 +44,7 @@ public class ModelDissector {
 
   public void update(Vector features, Map<String, Set<Integer>> traceDictionary, AbstractVectorClassifier learner) {
     features.assign(0);
-    final int numCategories = learner.numCategories();
     for (String feature : traceDictionary.keySet()) {
-      weightMap = weightMap;
       if (!weightMap.containsKey(feature)) {
         for (Integer where : traceDictionary.get(feature)) {
           features.set(where, 1);
