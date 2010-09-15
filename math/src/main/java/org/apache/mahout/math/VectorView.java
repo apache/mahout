@@ -107,7 +107,7 @@ public class VectorView extends AbstractVector {
     private Element el;
 
     private NonZeroIterator() {
-      it = vector.iterator();
+      it = vector.iterateNonZero();
       buffer();
     }
 
