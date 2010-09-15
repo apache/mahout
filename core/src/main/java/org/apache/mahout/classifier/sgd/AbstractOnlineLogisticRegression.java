@@ -86,6 +86,12 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     }
   }
 
+  public Vector classifyNoLink(Vector instance) {
+    // apply pending regularization to whichever coefficients matter
+    regularize(instance);
+    return beta.times(instance);
+  }
+
   /**
    * Returns n-1 probabilities, one for each category but the 0-th.  The probability of the 0-th
    * category is 1 - sum(this result).
@@ -94,11 +100,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    * @return A vector of probabilities, one for each of the first n-1 categories.
    */
   public Vector classify(Vector instance) {
-    // apply pending regularization to whichever coefficients matter
-    regularize(instance);
-
-    Vector v = beta.times(instance);
-    return logisticLink(v);
+    return logisticLink(classifyNoLink(instance));
   }
 
   /**

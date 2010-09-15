@@ -41,6 +41,10 @@ public class Dictionary {
     return new ArrayList<String>(dict.keySet());
   }
 
+  public int size() {
+    return dict.size();
+  }
+
   public static Dictionary fromList(List<String> values) {
     Dictionary dict = new Dictionary();
     for (String value : values) {

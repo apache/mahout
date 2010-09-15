@@ -31,6 +31,17 @@ public abstract class AbstractVectorClassifier {
   public abstract Vector classify(Vector instance);
 
   /**
+   * Classify a vector, but don't apply the inverse link function.  For logistic regression
+   * and other generalized linear models, this is just the linear part of the classification.
+   * @param features  A feature vector to be classified.
+   * @return  A vector of scores.  If transformed by the link function, these will become probabilities.
+   */
+  public Vector classifyNoLink(Vector features) {
+    throw new UnsupportedOperationException("Classifier " + this.getClass().getName() +
+      " doesn't support classification without a link");
+  }
+
+  /**
    * Classifies a vector in the special case of a binary classifier where
    * <code>classify(Vector)</code> would return a vector with only one element.  As such,
    * using this method can void the allocation of a vector.
