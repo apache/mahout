@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.eval;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
@@ -45,7 +46,7 @@ public final class LoadEvaluator {
     while (userSampler.hasNext()) {
       callables.add(new LoadCallable(recommender, userSampler.next()));
     }
-    AbstractDifferenceRecommenderEvaluator.execute(callables);
+    AbstractDifferenceRecommenderEvaluator.execute(callables, new AtomicInteger());
   }
   
   private static final class LoadCallable implements Callable<Void> {
