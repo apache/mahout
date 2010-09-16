@@ -63,7 +63,6 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   
   private static final Logger log = LoggerFactory.getLogger(TreeClusteringRecommender.class);
   
-  private static final int NUM_CLUSTER_RECS = 100;
   private static final FastIDSet[] NO_CLUSTERS = new FastIDSet[0];
   private static final Random RANDOM = RandomUtils.getRandom();
   
@@ -363,7 +362,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     return nearestPair;
   }
   
-  private FastByIDMap<List<RecommendedItem>> computeTopRecsPerUserID(List<FastIDSet> clusters) throws TasteException {
+  private FastByIDMap<List<RecommendedItem>> computeTopRecsPerUserID(Iterable<FastIDSet> clusters)
+    throws TasteException {
     FastByIDMap<List<RecommendedItem>> recsPerUser = new FastByIDMap<List<RecommendedItem>>();
     for (FastIDSet cluster : clusters) {
       List<RecommendedItem> recs = computeTopRecsForCluster(cluster);
@@ -385,8 +385,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     
     TopItems.Estimator<Long> estimator = new Estimator(cluster);
     
-    List<RecommendedItem> topItems = TopItems.getTopItems(NUM_CLUSTER_RECS,
-      possibleItemIDs.iterator(), null, estimator);
+    List<RecommendedItem> topItems =
+        TopItems.getTopItems(possibleItemIDs.size(), possibleItemIDs.iterator(), null, estimator);
     
     log.debug("Recommendations are: {}", topItems);
     return Collections.unmodifiableList(topItems);
