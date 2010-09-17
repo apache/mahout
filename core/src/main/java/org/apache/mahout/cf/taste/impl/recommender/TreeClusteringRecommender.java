@@ -205,7 +205,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     if (howMany < 1) {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
-    checkClustersBuilt();
+    buildClusters();
     
     log.debug("Recommending items for user ID '{}'", userID);
     
@@ -240,7 +240,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     if (actualPref != null) {
       return actualPref;
     }
-    checkClustersBuilt();
+    buildClusters();
     List<RecommendedItem> topRecsForUser = topRecsByUserID.get(userID);
     if (topRecsForUser != null) {
       for (RecommendedItem item : topRecsForUser) {
@@ -255,26 +255,26 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   
   @Override
   public FastIDSet getCluster(long userID) throws TasteException {
-    checkClustersBuilt();
+    buildClusters();
     FastIDSet cluster = clustersByUserID.get(userID);
     return cluster == null ? new FastIDSet() : cluster;
   }
   
   @Override
   public FastIDSet[] getClusters() throws TasteException {
-    checkClustersBuilt();
+    buildClusters();
     return allClusters;
   }
-  
-  private void checkClustersBuilt() throws TasteException {
-    if (!clustersBuilt) {
-      buildClusters();
-    }
-  }
-  
+
   private void buildClusters() throws TasteException {
+    if (clustersBuilt) {
+      return;
+    }
     buildClustersLock.lock();
     try {
+      if (clustersBuilt) {
+        return;
+      }
       DataModel model = getDataModel();
       int numUsers = model.getNumUsers();
       if (numUsers > 0) {
