@@ -45,22 +45,15 @@ public class Auc {
 
   private boolean hasScore;
 
-  // exposed for testing only
-
-  public Auc(Random rand) {
-    confusion = new DenseMatrix(2, 2);
-    entropy = new DenseMatrix(2, 2);
-
-    this.rand = rand;
-  }
-
   /**
    * Allocates a new data-structure for accumulating information about AUC and a few other accuracy
    * measures.
    * @param threshold The threshold to use in computing the confusion matrix.
    */
   public Auc(double threshold) {
-    this(RandomUtils.getRandom());
+    confusion = new DenseMatrix(2, 2);
+    entropy = new DenseMatrix(2, 2);
+    this.rand = RandomUtils.getRandom();
     this.threshold = threshold;
   }
 
