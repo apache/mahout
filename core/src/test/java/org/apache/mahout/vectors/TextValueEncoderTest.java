@@ -40,7 +40,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
 
     // now some fancy weighting
     StaticWordValueEncoder w = new StaticWordValueEncoder("text");
-    w.setDictionary(ImmutableMap.<byte[], Double>of("word1".getBytes(Charsets.UTF_8), 3.0, "word2".getBytes(Charsets.UTF_8), 1.5));
+    w.setDictionary(ImmutableMap.<String, Double>of("word1", 3.0, "word2", 1.5));
     enc.setWordEncoder(w);
 
     // should set 6 locations to something

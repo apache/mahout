@@ -21,7 +21,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.mahout.math.Vector;
 
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -275,9 +274,5 @@ public abstract class FeatureVectorEncoder {
 
   protected byte[] bytesForString(String x){
     return x.getBytes(Charsets.UTF_8);
-  }
-
-  public void flush(double weight, Vector data) {
-    // default is to do nothing
   }
 }

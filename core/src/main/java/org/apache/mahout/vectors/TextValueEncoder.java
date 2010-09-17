@@ -54,17 +54,36 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(byte[] originalForm, double weight, Vector data) {
-    for (String word : tokenize(new String(originalForm))) {
+    addText(originalForm);
+    flush(weight, data);
+  }
+
+  /**
+   * Adds text to the internal word counter, but delays converting it to vector
+   * form until flush is called.
+   * @param originalForm  The original text encoded as UTF-8
+   */
+  public void addText(byte[] originalForm) {
+    String text = new String(originalForm, Charsets.UTF_8);
+    addText(text);
+  }
+
+  /**
+   * Adds text to the internal word counter, but delays converting it to vector
+   * form until flush is called.
+   * @param text  The original text encoded as UTF-8
+   */
+  public void addText(String text) {
+    for (String word : tokenize(text)) {
       counts.add(word);
     }
   }
 
   /**
    * Adds all of the tokens that we counted up to a vector.
-   * @param weight
+   * @param weight  The weight
    * @param data
    */
-  @Override
   public void flush(double weight, Vector data) {
     for (String word : counts.elementSet()) {
       // weight words by log_2(tf) times whatever other weight we are given
