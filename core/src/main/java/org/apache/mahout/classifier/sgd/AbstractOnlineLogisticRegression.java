@@ -74,15 +74,38 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     return this;
   }
 
-  private Vector logisticLink(Vector v) {
+  /**
+   * Computes the inverse link function, by default the logistic link function.
+   *
+   * @param v  The output of the linear combination in a GLM.  Note that the value
+   * of v is disturbed.
+   * @return A version of v with the link function applied.
+   */
+  public Vector link(Vector v) {
     double max = v.maxValue();
-    if (max < 40) {
-      v.assign(Functions.EXP);
-      double sum = 1 + v.norm(1);
-      return v.divide(sum);
-    } else {
+    if (max >= 40) {
+      // if max > 40, we subtract the large offset first
+      // the size of the max means that 1+sum(exp(v)) = sum(exp(v)) to within round-off
       v.assign(Functions.minus(max)).assign(Functions.EXP);
-      return v;
+      return v.divide(v.norm(1));
+    } else {
+      v.assign(Functions.EXP);
+      return v.divide(1 + v.norm(1));
+    }
+  }
+
+  /**
+   * Computes the binomial logistic inverse link function.
+   * @param r  The value to transform.
+   * @return   The logit of r.
+   */
+  public double link(double r){
+    if (r < 0) {
+      double s = Math.exp(r);
+      return s / (1 + s);
+    } else {
+      double s = Math.exp(-r);
+      return 1 / (1 + s);
     }
   }
 
@@ -90,6 +113,10 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     // apply pending regularization to whichever coefficients matter
     regularize(instance);
     return beta.times(instance);
+  }
+
+  public double classifyScalarNoLink(Vector instance) {
+    return beta.getRow(0).dot(instance);
   }
 
   /**
@@ -100,7 +127,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    * @return A vector of probabilities, one for each of the first n-1 categories.
    */
   public Vector classify(Vector instance) {
-    return logisticLink(classifyNoLink(instance));
+    return link(classifyNoLink(instance));
   }
 
   /**
@@ -121,8 +148,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     regularize(instance);
 
     // result is a vector with one element so we can just use dot product
-    double r = Math.exp(beta.getRow(0).dot(instance));
-    return r / (1 + r);
+    return link(classifyScalarNoLink(instance));
   }
 
   @Override
