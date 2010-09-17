@@ -38,7 +38,7 @@ public class OnlineAuc {
     FIFO, FAIR, RANDOM
   }
 
-  public static final int HISTORY = 10;
+  public static final int HISTORY = 100;
 
   private ReplacementPolicy policy = ReplacementPolicy.FAIR;
   private transient Random random = org.apache.mahout.common.RandomUtils.getRandom();
@@ -90,7 +90,7 @@ public class OnlineAuc {
           break;
         }
         count++;
-        double z = 0.5;
+        double z = 0;
         if (score > v) {
           z = 1.0;
         } else if (score < v) {
