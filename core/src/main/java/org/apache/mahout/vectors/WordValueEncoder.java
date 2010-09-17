@@ -43,7 +43,7 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
   public void addToVector(byte[] originalForm, double w, Vector data) {
     int probes = getProbes();
     String name = getName();
-    double weight = getWeight(originalForm,w);
+    double weight = getWeight(originalForm, w);
     for (int i = 0; i < probes; i++) {
       int n = hashForProbe(originalForm, data.size(), name, i);
       if(isTraceEnabled()){

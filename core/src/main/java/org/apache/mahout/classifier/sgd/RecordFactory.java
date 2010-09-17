@@ -24,8 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by IntelliJ IDEA. User: tdunning Date: Jun 14, 2010 Time: 8:35:09 AM To change this
- * template use File | Settings | File Templates.
+ * A record factor understands how to convert a line of data into fields and then into a vector.
  */
 public interface RecordFactory {
   void defineTargetCategories(List<String> values);
