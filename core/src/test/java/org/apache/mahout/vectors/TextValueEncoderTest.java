@@ -33,6 +33,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
     TextValueEncoder enc = new TextValueEncoder("text");
     Vector v1 = new DenseVector(200);
     enc.addToVector("test1 and more", v1);
+    enc.flush(1, v1);
     // should set 6 distinct locations to 1
     assertEquals(6.0, v1.norm(1), 0);
     assertEquals(1.0, v1.maxValue(), 0);
@@ -45,13 +46,13 @@ public final class TextValueEncoderTest extends MahoutTestCase {
     // should set 6 locations to something
     Vector v2 = new DenseVector(200);
     enc.addToVector("test1 and more", v2);
+    enc.flush(1, v2);
 
     // this should set the same 6 locations to the same values
     Vector v3 = new DenseVector(200);
     w.addToVector("test1", v3);
     w.addToVector("and", v3);
     w.addToVector("more", v3);
-
     assertEquals(0, v3.minus(v2).norm(1), 0);
 
     // moreover, the locations set in the unweighted case should be the same as in the weighted case
