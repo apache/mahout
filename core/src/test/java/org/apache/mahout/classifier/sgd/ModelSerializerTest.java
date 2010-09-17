@@ -126,7 +126,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
   public void adaptiveLogisticRegressionRoundTrip() {
     AdaptiveLogisticRegression learner = new AdaptiveLogisticRegression(2, 5, new L1());
     learner.setInterval(200);
-    train(learner, 1000);
+    train(learner, 400);
     Gson gson = ModelSerializer.gson();
     String s = gson.toJson(learner);
     AdaptiveLogisticRegression olr2 = gson.fromJson(new StringReader(s), AdaptiveLogisticRegression.class);
@@ -137,9 +137,9 @@ public final class ModelSerializerTest extends MahoutTestCase {
     train(learner, 1000);
     train(olr2, 1000);
 
-    assertEquals(learner.auc(), olr2.auc(), 0.02);
+    assertEquals(learner.auc(), olr2.auc(), 0.005);
     double auc2 = learner.auc();
-    assertTrue(auc2 > auc1);
+    assertTrue(String.format("%.3f > %.3f", auc2, auc1), auc2 > auc1);
   }
 
   @Test
