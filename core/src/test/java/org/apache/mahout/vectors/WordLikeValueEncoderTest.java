@@ -56,12 +56,11 @@ public final class WordLikeValueEncoderTest extends MahoutTestCase {
   @Test
   public void testStaticWeights() {
     StaticWordValueEncoder enc = new StaticWordValueEncoder("word");
-    enc.setDictionary(ImmutableMap.<byte[], Double>of("word1".getBytes(Charsets.UTF_8), 3.0, "word2".getBytes(Charsets.UTF_8), 1.5));
+    enc.setDictionary(ImmutableMap.<String, Double>of("word1", 3.0, "word2", 1.5));
     Vector v = new DenseVector(200);
     enc.addToVector("word1", v);
     enc.addToVector("word2", v);
     enc.addToVector("word3", v);
-    enc.flush(1, v);
     Iterator<Vector.Element> i = v.iterateNonZero();
     Iterator<Integer> j = ImmutableList.of(7, 101, 118, 119, 152, 199).iterator();
     Iterator<Double> k = ImmutableList.of(3.0, 0.75, 1.5, 1.5, 0.75, 3.0).iterator();
@@ -72,7 +71,7 @@ public final class WordLikeValueEncoderTest extends MahoutTestCase {
     i = v.iterateNonZero();
     while (i.hasNext()) {
       Vector.Element element = i.next();
-      assertEquals(k.next(), element.get(), 0);
+      assertEquals(String.format("checking v[%d]", element.index()), k.next(), element.get(), 0);
     }
     assertFalse(j.hasNext());
   }
