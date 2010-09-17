@@ -61,12 +61,17 @@ public final class WordLikeValueEncoderTest extends MahoutTestCase {
     enc.addToVector("word1", v);
     enc.addToVector("word2", v);
     enc.addToVector("word3", v);
+    enc.flush(1, v);
     Iterator<Vector.Element> i = v.iterateNonZero();
     Iterator<Integer> j = ImmutableList.of(7, 101, 118, 119, 152, 199).iterator();
     Iterator<Double> k = ImmutableList.of(3.0, 0.75, 1.5, 1.5, 0.75, 3.0).iterator();
     while (i.hasNext()) {
       Vector.Element element = i.next();
       assertEquals(j.next().intValue(), element.index());
+    }
+    i = v.iterateNonZero();
+    while (i.hasNext()) {
+      Vector.Element element = i.next();
       assertEquals(k.next(), element.get(), 0);
     }
     assertFalse(j.hasNext());
