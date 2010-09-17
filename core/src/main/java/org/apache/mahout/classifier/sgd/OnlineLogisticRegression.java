@@ -120,5 +120,4 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
     r.copyFrom(this);
     return r;
   }
-
 }
