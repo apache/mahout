@@ -39,25 +39,53 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(String originalForm, double w, Vector data) {
+    throw new IllegalArgumentException("addToVector is not supported for InteractionVectorEncoder");
+  }
+
+  /**
+   * Adds a value to a vector. (Unsupported)
+   *
+   * @param originalForm The original form of the first value as a byte array.
+   * @param data          The vector to which the value should be added.
+   */
+  @Override
+  public void addToVector(byte[] originalForm, double w, Vector data) {
+    throw new IllegalArgumentException("addToVector is not supported for InteractionVectorEncoder");
   }
 
   /**
    * Adds a value to a vector.
    *
-   * @param originalForm1 The original form of the first value as a string.
-   * @param originalForm2 The original form of the second value as a string.
+   * @param original1 The original form of the first value as a string.
+   * @param original2 The original form of the second value as a string.
    * @param weight        How much to weight this interaction
    * @param data          The vector to which the value should be added.
    */
-  public void addInteractionToVector(String originalForm1, String originalForm2, double weight, Vector data) {
+  public void addInteractionToVector(String original1, String original2, double weight, Vector data) {
+    byte[] originalForm1 = bytesForString(original1);
+    byte[] originalForm2 = bytesForString(original2);
+    addInteractionToVector(originalForm1, originalForm2, weight, data);
+  }
+
+  /**
+   * Adds a value to a vector.
+   *
+   * @param originalForm1 The original form of the first value as a byte array.
+   * @param originalForm2 The original form of the second value as a byte array.
+   * @param weight        How much to weight this interaction
+   * @param data          The vector to which the value should be added.
+   */
+  public void addInteractionToVector(byte[] originalForm1, byte[] originalForm2, double weight, Vector data) {
     String name = getName();
     double w = getWeight(originalForm1, originalForm2, weight);
     for (int i = 0; i < probes(); i++) {
-      Iterable<Integer> jValues = secondEncoder.hashesForProbe(originalForm2, data.size(), name, i);
-      for(Integer k : firstEncoder.hashesForProbe(originalForm1, data.size(), name, i)){
+      Iterable<Integer> jValues = secondEncoder.hashesForProbe(originalForm2, data.size(), name, i % secondEncoder.getProbes());
+      for(Integer k : firstEncoder.hashesForProbe(originalForm1, data.size(), name, i % firstEncoder.getProbes())){
         for(Integer j : jValues) {
           int n = (k + j) % data.size();
-          trace(String.format("%s:%s", originalForm1, originalForm2), n);
+          if(isTraceEnabled()){
+            trace(String.format("%s:%s", originalForm1, originalForm2), n);            
+          }
           data.set(n, data.get(n) + w);
         }
       }
@@ -68,7 +96,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
     return getProbes();
   }
 
-  protected double getWeight(String originalForm1, String originalForm2, double w) {
+  protected double getWeight(byte[] originalForm1, byte[] originalForm2, double w) {
     return firstEncoder.getWeight(originalForm1, 1.0) * secondEncoder.getWeight(originalForm2, 1.0) * w;
   }
 
@@ -86,7 +114,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
   }
 
   @Override
-  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
+  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     return hash(name, probe, dataSize);
   }
 }

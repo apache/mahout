@@ -47,22 +47,33 @@ public class AdaptiveWordValueEncoder extends WordValueEncoder {
     super.addToVector(originalForm, weight, data);
   }
 
+  /**
+   * Adds a value to a vector.
+   *
+   * @param originalForm The original form of the value as a byte array.
+   * @param data         The vector to which the value should be added.
+   */
   @Override
-  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
+  public void addToVector(byte[] originalForm, double weight, Vector data) {
+    super.addToVector(originalForm, weight, data);
+  }
+
+  @Override
+  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     return super.hashForProbe(originalForm, dataSize, name, probe);
   }
 
   @Override
-  protected double getWeight(String originalForm, double w) {
+  protected double getWeight(byte[] originalForm, double w) {
     return w * weight(originalForm);
   }
 
   @Override
-  protected double weight(String originalForm) {
+  protected double weight(byte[] originalForm) {
     // the counts here are adjusted so that every observed value has an extra 0.5 count
     // as does a hypothetical unobserved value.  This smooths our estimates a bit and
     // allows the first word seen to have a non-zero weight of -log(1.5 / 2)
-    double thisWord = dictionary.count(originalForm) + 0.5;
+    double thisWord = dictionary.count(new String(originalForm)) + 0.5;
     double allWords = dictionary.size() + dictionary.elementSet().size() * 0.5 + 0.5;
     return -Math.log(thisWord / allWords);
   }

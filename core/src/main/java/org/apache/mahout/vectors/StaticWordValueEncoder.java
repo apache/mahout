@@ -30,16 +30,18 @@ import java.util.Map;
  * of probes should probably be increased to 3.
  */
 public class StaticWordValueEncoder extends WordValueEncoder {
-  private Map<String, Double> dictionary;
+  private Map<byte[], Double> dictionary;
   private double missingValueWeight = 1;
+  private byte[] nameBytes;
 
   public StaticWordValueEncoder(String name) {
     super(name);
+    nameBytes = bytesForString(name);
   }
 
   @Override
-  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
-    return hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + probe, dataSize);
+  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
+    return hash(nameBytes, originalForm, WORD_LIKE_VALUE_HASH_SEED + probe, dataSize);
   }
 
    /**
@@ -47,7 +49,7 @@ public class StaticWordValueEncoder extends WordValueEncoder {
    * the missing value weight to be half the smallest weight in the dictionary.
    * @param dictionary  The dictionary to use to look up weights.
    */
-  public void setDictionary(Map<String, Double> dictionary) {
+  public void setDictionary(Map<byte[], Double> dictionary) {
     this.dictionary = dictionary;
     missingValueWeight = Collections.min(dictionary.values()) / 2;
   }
@@ -61,7 +63,7 @@ public class StaticWordValueEncoder extends WordValueEncoder {
   }
 
   @Override
-  protected double weight(String originalForm) {
+  protected double weight(byte[] originalForm) {
     double weight = missingValueWeight;
     if (dictionary != null && dictionary.containsKey(originalForm)) {
       weight = dictionary.get(originalForm);

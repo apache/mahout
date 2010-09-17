@@ -28,18 +28,20 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
   }
 
   @Override
-  public void addToVector(String originalForm, double weight, Vector data) {
+  public void addToVector(byte[] originalForm, double weight, Vector data) {
     int probes = getProbes();
     String name = getName();
     for (int i = 0; i < probes; i++) {
-        int n = hashForProbe(originalForm, data.size(), name, i);
-        trace(null, n);
+      int n = hashForProbe(originalForm, data.size(), name, i);
+      if(isTraceEnabled()){
+        trace((byte[]) null, n);                
+      }
       data.set(n, data.get(n) + getWeight(originalForm,weight));
     }
   }
 
   @Override
-  protected double getWeight(String originalForm, double w) {
+  protected double getWeight(byte[] originalForm, double w) {
     return w;
   }
 
@@ -49,7 +51,7 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
   }
 
   @Override
-  protected int hashForProbe(String originalForm, int dataSize, String name, int probe){
+  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe){
     return hash(name, probe, dataSize);
   }
 

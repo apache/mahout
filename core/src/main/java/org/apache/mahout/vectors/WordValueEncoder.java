@@ -26,9 +26,11 @@ import java.util.Locale;
  * sub-class.
  */
 public abstract class WordValueEncoder extends FeatureVectorEncoder {
+  private byte[] nameBytes;
 
   protected WordValueEncoder(String name) {
     super(name, 2);
+    nameBytes = bytesForString(name);
   }
 
   /**
@@ -38,26 +40,28 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
    * @param data         The vector to which the value should be added.
    */
   @Override
-  public void addToVector(String originalForm, double w, Vector data) {
+  public void addToVector(byte[] originalForm, double w, Vector data) {
     int probes = getProbes();
     String name = getName();
     double weight = getWeight(originalForm,w);
     for (int i = 0; i < probes; i++) {
       int n = hashForProbe(originalForm, data.size(), name, i);
-      trace(originalForm, n);
+      if(isTraceEnabled()){
+        trace(originalForm, n);        
+      }
       data.set(n, data.get(n) + weight);
     }
   }
 
 
   @Override
-  protected double getWeight(String originalForm, double w) {
+  protected double getWeight(byte[] originalForm, double w) {
     return w * weight(originalForm);
   }
 
   @Override
-  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
-    return hash(name, originalForm, WORD_LIKE_VALUE_HASH_SEED + probe, dataSize);
+  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
+    return hash(nameBytes, originalForm, WORD_LIKE_VALUE_HASH_SEED + probe, dataSize);
   }
 
     /**
@@ -70,8 +74,8 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public String asString(String originalForm) {
-    return String.format(Locale.ENGLISH, "%s:%s:%.4f", getName(), originalForm, weight(originalForm));
+    return String.format(Locale.ENGLISH, "%s:%s:%.4f", getName(), originalForm, weight(bytesForString(originalForm)));
   }
 
-  protected abstract double weight(String originalForm);
+  protected abstract double weight(byte[] originalForm);
 }

@@ -142,7 +142,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
           throw new TokenizationException("IO error while tokenizing", e);
         }
         if (r) {
-          bufferedToken = tokenStream.getAttribute(TermAttribute.class).toString();
+          bufferedToken = tokenStream.getAttribute(TermAttribute.class).term();
         }
         return r;
       } else {

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectors;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.common.MahoutTestCase;
@@ -55,7 +56,7 @@ public final class WordLikeValueEncoderTest extends MahoutTestCase {
   @Test
   public void testStaticWeights() {
     StaticWordValueEncoder enc = new StaticWordValueEncoder("word");
-    enc.setDictionary(ImmutableMap.<String, Double>of("word1", 3.0, "word2", 1.5));
+    enc.setDictionary(ImmutableMap.<byte[], Double>of("word1".getBytes(Charsets.UTF_8), 3.0, "word2".getBytes(Charsets.UTF_8), 1.5));
     Vector v = new DenseVector(200);
     enc.addToVector("word1", v);
     enc.addToVector("word2", v);

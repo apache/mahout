@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectors;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.mahout.math.Vector;
 
@@ -62,6 +63,16 @@ public abstract class FeatureVectorEncoder {
   }
 
   /**
+   * Adds a value expressed in byte array form to a vector.
+   *
+   * @param originalForm The original form of the value as a byte array.
+   * @param data         The vector to which the value should be added.
+   */
+  public void addToVector(byte[] originalForm, Vector data) {
+    addToVector(originalForm, 1.0, data);
+  }
+
+  /**
    * Adds a weighted value expressed in string form to a vector.  In some cases it is convenient to
    * use this method to encode continuous values using the weight as the value.  In such cases, the
    * string value should typically be set to null.
@@ -70,7 +81,11 @@ public abstract class FeatureVectorEncoder {
    * @param weight       The weight to be applied to this feature.
    * @param data         The vector to which the value should be added.
    */
-  public abstract void addToVector(String originalForm, double weight, Vector data);
+  public void addToVector(String originalForm, double weight, Vector data){
+    addToVector(bytesForString(originalForm), weight, data);        
+  }
+
+  public abstract void addToVector(byte[] originalForm, double weight, Vector data);
 
   /**
    * Provides the unique hash for a particular probe.  For all encoders except text, this
@@ -78,30 +93,30 @@ public abstract class FeatureVectorEncoder {
    * thing.  For text and similar values, hashesForProbe should be over-ridden and this method
    * should not be used.
    *
-   * @param originalForm  The original string value
+   * @param originalForm  The original byte array value
    * @param dataSize      The length of hte vector being encoded
    * @param name          The name of the variable being encoded
    * @param probe             The probe number
    * @return              The hash of the current probe
    */
-  protected abstract int hashForProbe(String originalForm, int dataSize, String name, int probe);
+  protected abstract int hashForProbe(byte[] originalForm, int dataSize, String name, int probe);
 
   /**
    * Returns all of the hashes for this probe.  For most encoders, this is a singleton, but
    * for text, many hashes are returned, one for each word (unique or not).  Most implementations
    * should only implement hashForProbe for simplicity.
    *
-   * @param originalForm The original string value.
+   * @param originalForm The original byte array value.
    * @param dataSize     The length of the vector being encoded
    * @param name         The name of the variable being encoded
    * @param probe        The probe number
    * @return an Iterable of the hashes
    */
-  protected Iterable<Integer> hashesForProbe(String originalForm, int dataSize, String name, int probe) {
+  protected Iterable<Integer> hashesForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     return Collections.singletonList(hashForProbe(originalForm, dataSize, name, probe));
   }
 
-  protected double getWeight(String originalForm, double w){
+  protected double getWeight(byte[] originalForm, double w){
     return 1.0;
   }
 
@@ -117,12 +132,30 @@ public abstract class FeatureVectorEncoder {
    *         term and probe.
    */
   protected int hash(String term, int probe, int numFeatures) {
-    long r = MurmurHash.hash64A(term.getBytes(Charset.forName("UTF-8")), probe) % numFeatures;
+    long r = MurmurHash.hash64A(bytesForString(term), probe) % numFeatures;
     if (r < 0) {
       r += numFeatures;
     }
     return (int) r;
   }
+
+  /**
+    * Hash a byte array and an integer into the range [0..numFeatures-1].
+    *
+    * @param term        The bytes.
+    * @param probe       An integer that modifies the resulting hash.
+    * @param numFeatures The range into which the resulting hash must fit.
+    * @return An integer in the range [0..numFeatures-1] that has good spread for small changes in
+    *         term and probe.
+    */
+   protected int hash(byte[] term, int probe, int numFeatures) {
+     long r = MurmurHash.hash64A(term, probe) % numFeatures;
+     if (r < 0) {
+       r += numFeatures;
+     }
+     return (int) r;
+   }
+
 
   /**
    * Hash two strings and an integer into the range [0..numFeatures-1].
@@ -135,8 +168,27 @@ public abstract class FeatureVectorEncoder {
    *         term and probe.
    */
   protected int hash(String term1, String term2, int probe, int numFeatures) {
-    long r = MurmurHash.hash64A(term1.getBytes(Charset.forName("UTF-8")), probe);
-    r = MurmurHash.hash64A(term2.getBytes(Charset.forName("UTF-8")), (int) r) % numFeatures;
+    long r = MurmurHash.hash64A(bytesForString(term1), probe);
+    r = MurmurHash.hash64A(bytesForString(term2), (int) r) % numFeatures;
+    if (r < 0) {
+      r += numFeatures;
+    }
+    return (int) r;
+  }
+
+  /**
+   * Hash two byte arrays and an integer into the range [0..numFeatures-1].
+   *
+   * @param term1       The first string.
+   * @param term2       The second string.
+   * @param probe       An integer that modifies the resulting hash.
+   * @param numFeatures The range into which the resulting hash must fit.
+   * @return An integer in the range [0..numFeatures-1] that has good spread for small changes in
+   *         term and probe.
+   */
+  protected int hash(byte[] term1, byte[] term2, int probe, int numFeatures) {
+    long r = MurmurHash.hash64A(term1, probe);
+    r = MurmurHash.hash64A(term2, (int) r) % numFeatures;
     if (r < 0) {
       r += numFeatures;
     }
@@ -156,10 +208,10 @@ public abstract class FeatureVectorEncoder {
    *         term and probe.
    */
   protected int hash(String term1, String term2, String term3, String term4, int probe, int numFeatures) {
-    long r = MurmurHash.hash64A(term1.getBytes(Charset.forName("UTF-8")), probe);
-    r = MurmurHash.hash64A(term2.getBytes(Charset.forName("UTF-8")), (int) r) % numFeatures;
-    r = MurmurHash.hash64A(term3.getBytes(Charset.forName("UTF-8")), (int) r) % numFeatures;
-    r = MurmurHash.hash64A(term4.getBytes(Charset.forName("UTF-8")), (int) r) % numFeatures;
+    long r = MurmurHash.hash64A(bytesForString(term1), probe);
+    r = MurmurHash.hash64A(bytesForString(term2), (int) r) % numFeatures;
+    r = MurmurHash.hash64A(bytesForString(term3), (int) r) % numFeatures;
+    r = MurmurHash.hash64A(bytesForString(term4), (int) r) % numFeatures;
     if (r < 0) {
       r += numFeatures;
     }
@@ -193,6 +245,10 @@ public abstract class FeatureVectorEncoder {
     return name;
   }
 
+  protected boolean isTraceEnabled(){
+    return traceDictionary != null;
+  }
+
   protected void trace(String subName, int n) {
     if (traceDictionary != null) {
       String key = name;
@@ -209,7 +265,15 @@ public abstract class FeatureVectorEncoder {
     }
   }
 
+  protected void trace(byte[] subName, int n) {
+    trace(new String(subName), n);
+  }
+
   public void setTraceDictionary(Map<String, Set<Integer>> traceDictionary) {
     this.traceDictionary = traceDictionary;
+  }
+
+  protected byte[] bytesForString(String x){
+    return x.getBytes(Charsets.UTF_8);
   }
 }

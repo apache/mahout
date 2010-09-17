@@ -22,8 +22,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
-public final class InteractionValueEncoderTest extends MahoutTestCase {
-
+public class InteractionValueEncoderTest extends MahoutTestCase {
   @Test
   public void testAddToVector() {
     WordValueEncoder wv = new StaticWordValueEncoder("word");
@@ -72,7 +71,7 @@ public final class InteractionValueEncoderTest extends MahoutTestCase {
     enc.addInteractionToVector("a","some text here",1.0, v1);
     int k = enc.getProbes();
     // should interact "a" with each of "some","text" and "here"
-    assertEquals((float) k*3, v1.norm(1), 0);    
+    assertEquals((float) k*3, v1.norm(1), 0);
   }
 
 }

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.vectors;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -33,10 +34,10 @@ import java.util.regex.Pattern;
  * @see LuceneTextValueEncoder
  */
 public class TextValueEncoder extends FeatureVectorEncoder {
-
   private final Splitter onNonWord = Splitter.on(Pattern.compile("\\W+")).omitEmptyStrings();
-  private FeatureVectorEncoder wordEncoder;
   private static final double LOG_2 = Math.log(2);
+
+  private FeatureVectorEncoder wordEncoder;
   private Multiset<String> counts;
 
   public TextValueEncoder(String name) {
@@ -52,17 +53,9 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    * @param data         The vector to which the value should be added.
    */
   @Override
-  public void addToVector(String originalForm, double weight, Vector data) {
-    add(originalForm);
-    flush(weight, data);
-  }
-
-  /**
-   * Counts up lokens in a char sequence for later addition to a vector.
-   * @param originalForm  The string to tokenize.
-   */
-  public void add(CharSequence originalForm) {
-    for (String word : tokenize(originalForm)) {
+  public void addToVector(byte[] originalForm, double weight, Vector data) {
+    Multiset<String> counts = HashMultiset.create();
+    for (String word : tokenize(new String(originalForm))) {
       counts.add(word);
     }
   }
@@ -81,15 +74,15 @@ public class TextValueEncoder extends FeatureVectorEncoder {
   }
 
   @Override
-  protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
+  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     return 0;
   }
 
   @Override
-  protected Iterable<Integer> hashesForProbe(String originalForm, int dataSize, String name, int probe) {
+  protected Iterable<Integer> hashesForProbe(byte[] originalForm, int dataSize, String name, int probe){
     List<Integer> hashes = new ArrayList<Integer>();
-    for (String word : tokenize(originalForm)) {
-      hashes.add(hashForProbe(word, dataSize, name, probe));
+    for (String word : tokenize(new String(originalForm, Charsets.UTF_8))){
+      hashes.add(hashForProbe(bytesForString(word), dataSize, name, probe));
     }
     return hashes;
   }
@@ -127,7 +120,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
     return r.toString();
   }
 
-  public void setWordEncoder(FeatureVectorEncoder wordEncoder) {
+  public final void setWordEncoder(FeatureVectorEncoder wordEncoder) {
     this.wordEncoder = wordEncoder;
   }
 }
