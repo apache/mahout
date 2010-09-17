@@ -276,4 +276,8 @@ public abstract class FeatureVectorEncoder {
   protected byte[] bytesForString(String x){
     return x.getBytes(Charsets.UTF_8);
   }
+
+  public void flush(double weight, Vector data) {
+    // default is to do nothing
+  }
 }

@@ -54,7 +54,6 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(byte[] originalForm, double weight, Vector data) {
-    Multiset<String> counts = HashMultiset.create();
     for (String word : tokenize(new String(originalForm))) {
       counts.add(word);
     }
@@ -65,6 +64,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
    * @param weight
    * @param data
    */
+  @Override
   public void flush(double weight, Vector data) {
     for (String word : counts.elementSet()) {
       // weight words by log_2(tf) times whatever other weight we are given
