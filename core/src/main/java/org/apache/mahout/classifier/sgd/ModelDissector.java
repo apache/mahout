@@ -36,6 +36,20 @@ import java.util.Set;
  *
  * The result gives approximate weights for features and interactions
  * in the original space.
+ *
+ * The idea is that the hashed encoders have the option of having a trace dictionary.  This
+ * tells us where each feature is hashed to, or each feature/value combination in the case
+ * of word-like values.  Using this dictionary, we can put values into a synthetic feature
+ * vector in just the locations specified by a single feature or interaction.  Then we can
+ * push this through a linear part of a model to see the contribution of that input. For
+ * any generalized linear model like logistic regression, there is a linear part of the
+ * model that allows this.
+ *
+ * What the ModelDissector does is to accept a trace dictionary and a model in an update
+ * method.  It figures out the weights for the elements in the trace dictionary and stashes
+ * them.  Then in a summary method, the biggest weights are returned.  This update/flush
+ * style is used so that the trace dictionary doesn't have to grow to enormous levels,
+ * but instead can be cleared between updates.
  */
 public class ModelDissector {
   private Map<String,Vector> weightMap;
