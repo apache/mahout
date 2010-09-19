@@ -175,17 +175,17 @@ public class TestForest extends Configured implements Tool {
   }
 
   private void mapreduce() throws ClassNotFoundException, IOException, InterruptedException {
-    if (analyze) {
-      log.warn("IMPORTANT: The current mapreduce implementation of TestForest does not support result analysis");
-    }
-
     if (outputPath == null) {
       throw new IllegalArgumentException("You must specify the ouputPath when using the mapreduce implementation");
     }
-    
-    Classifier classifier = new Classifier(modelPath, dataPath, datasetPath, outputPath, getConf());
+
+    Classifier classifier = new Classifier(modelPath, dataPath, datasetPath, outputPath, getConf(), analyze);
 
     classifier.run();
+
+    if (analyze) {
+      log.info(classifier.getAnalyzer().summarize());
+    }
   }
 
   private void sequential() throws IOException {
@@ -219,7 +219,7 @@ public class TestForest extends Configured implements Tool {
     time = System.currentTimeMillis() - time;
     log.info("Classification Time: {}", DFUtils.elapsedTime(time));
 
-    if (analyze) {
+    if (analyzer != null) {
       log.info(analyzer.summarize());
     }
   }
@@ -261,7 +261,7 @@ public class TestForest extends Configured implements Tool {
         ofile.writeChar('\n');
       }
 
-      if (analyze) {
+      if (analyzer != null) {
         analyzer.addInstance(dataset.getLabel(instance.getLabel()),
                              new ClassifierResult(dataset.getLabel(prediction), 1.0));
       }

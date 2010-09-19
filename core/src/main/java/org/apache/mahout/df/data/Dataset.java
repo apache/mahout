@@ -165,6 +165,7 @@ public class Dataset implements Writable {
   }
   
   public String getLabel(int code) {
+    // TODO should handle the case (prediction == -1)
     return labels[code];
   }
   

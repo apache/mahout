@@ -44,8 +44,11 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 import java.net.URI;
+import org.apache.mahout.classifier.ClassifierResult;
+import org.apache.mahout.classifier.ResultAnalyzer;
 
 /**
  * Mapreduce implementation that classifies the Input data using a previousely built decision forest
@@ -62,15 +65,35 @@ public class Classifier {
 
   private final Configuration conf;
 
+  /**
+   * If not null, the Job will build the confusionMatrix.
+   */
+  private final ResultAnalyzer analyzer;
+  private final Dataset dataset;
+
   private final Path outputPath; // path that will containt the final output of the classifier
   private final Path mappersOutputPath; // mappers will output here
 
-  public Classifier(Path forestPath, Path inputPath, Path datasetPath, Path outputPath, Configuration conf) {
+  public ResultAnalyzer getAnalyzer() {
+    return analyzer;
+  }
+
+  public Classifier(Path forestPath, Path inputPath, Path datasetPath, Path outputPath, Configuration conf, boolean analyze) throws IOException {
     this.forestPath = forestPath;
     this.inputPath = inputPath;
     this.datasetPath = datasetPath;
     this.outputPath = outputPath;
     this.conf = conf;
+
+    if (analyze) {
+      dataset = Dataset.load(conf, datasetPath);
+      analyzer = new ResultAnalyzer(Arrays.asList(dataset.labels()), "unknown");
+
+    } else {
+      dataset = null;
+      analyzer = null;
+    }
+
     mappersOutputPath = new Path(outputPath, "mappers");
   }
 
@@ -115,7 +138,6 @@ public class Classifier {
     log.info("Running the job...");
     if (!job.waitForCompletion(true)) {
       log.error("Job failed!");
-      log.error("Job failed!");
       return;
     }
 
@@ -125,8 +147,9 @@ public class Classifier {
   }
 
   /**
-   * Extract the prediction for each mapper and write them in the corresponding output file. The name of the output file
-   * is based on the name of the corresponding input file
+   * Extract the prediction for each mapper and write them in the corresponding output file. 
+   * The name of the output file is based on the name of the corresponding input file.
+   * Will compute the ConfusionMatrix if necessary.
    * @param job
    */
   private void parseOutput(Job job) throws IOException {
@@ -148,9 +171,15 @@ public class Classifier {
             // this is the first value, it contains the name of the input file
             ofile = fs.create(new Path(outputPath, value.toString()).suffix(".out"));
           } else {
-            // the value contains a prediction
+            // The key contains the correct label of the data. The value contains a prediction
             ofile.writeChars(value.toString()); // write the prediction
             ofile.writeChar('\n');
+
+            if (analyzer != null) {
+                analyzer.addInstance(
+                        dataset.getLabel((int)key.get()),
+                        new ClassifierResult(dataset.getLabel(Integer.parseInt(value.toString())), 1.0));
+            }
           }
         }
       } finally {
@@ -215,7 +244,7 @@ public class Classifier {
         FileSplit split = (FileSplit) context.getInputSplit();
         Path path = split.getPath(); // current split path
         lvalue.set(path.getName());
-        context.write(key, new Text(path.getName()));
+        context.write(key, lvalue);
 
         first = false;
       }
@@ -224,6 +253,7 @@ public class Classifier {
       if (!line.isEmpty()) {
         Instance instance = converter.convert(0, line);
         int prediction = forest.classify(rng, instance);
+        key.set(instance.getLabel());
         lvalue.set(Integer.toString(prediction));
         context.write(key, lvalue);
       }
