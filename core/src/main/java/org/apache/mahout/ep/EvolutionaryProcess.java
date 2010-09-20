@@ -115,7 +115,7 @@ public class EvolutionaryProcess<T extends Payload<T>> {
    * @throws ExecutionException        If fn throws an exception, that exception will be collected
    * and rethrown nested in an ExecutionException.
    */
-  public State<T> parallelDo(final Function fn) throws InterruptedException, ExecutionException {
+  public State<T> parallelDo(final Function<T> fn) throws InterruptedException, ExecutionException {
     Collection<Callable<State<T>>> tasks = Lists.newArrayList();
     for (final State<T> state : population) {
       tasks.add(new Callable<State<T>>() {
