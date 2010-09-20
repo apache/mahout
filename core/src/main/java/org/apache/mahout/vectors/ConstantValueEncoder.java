@@ -34,7 +34,7 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
     for (int i = 0; i < probes; i++) {
       int n = hashForProbe(originalForm, data.size(), name, i);
       if(isTraceEnabled()){
-        trace((byte[]) null, n);                
+        trace(name, n);                
       }
       data.set(n, data.get(n) + getWeight(originalForm,weight));
     }
