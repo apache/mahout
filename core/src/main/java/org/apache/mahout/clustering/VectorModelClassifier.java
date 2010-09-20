@@ -1,3 +1,18 @@
+/* Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.mahout.clustering;
 
 import java.util.ArrayList;
@@ -11,6 +26,11 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.TimesFunction;
 
+/**
+ * This classifier works with any of the clustering Models. It is initialized with 
+ * a list of compatible Models and thereafter it can classify any new Vector into
+ * one or more of the Models based upon the pdf() function which each Model supports.
+ */
 public class VectorModelClassifier extends AbstractVectorClassifier {
 
   private final List<Model<VectorWritable>> models;
@@ -19,6 +39,9 @@ public class VectorModelClassifier extends AbstractVectorClassifier {
     this.models = models;
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.classifier.AbstractVectorClassifier#classify(org.apache.mahout.math.Vector)
+   */
   @Override
   public Vector classify(Vector instance) {
     Vector pdfs = new DenseVector(models.size());
@@ -40,6 +63,9 @@ public class VectorModelClassifier extends AbstractVectorClassifier {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.classifier.AbstractVectorClassifier#classifyScalar(org.apache.mahout.math.Vector)
+   */
   @Override
   public double classifyScalar(Vector instance) {
     if (models.size() == 2) {
@@ -50,6 +76,9 @@ public class VectorModelClassifier extends AbstractVectorClassifier {
     throw new IllegalStateException();
   }
 
+  /* (non-Javadoc)
+   * @see org.apache.mahout.classifier.AbstractVectorClassifier#numCategories()
+   */
   @Override
   public int numCategories() {
     return models.size();
