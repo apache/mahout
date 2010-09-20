@@ -305,13 +305,13 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
     public void freeze(State<Wrapper> s) {
       // radically decrease learning rate
-      s.getParams()[1] -= 5;
+      s.getParams()[1] -= 10;
 
       // and cause evolution to hold (almost)
-      s.setOmni(s.getOmni() / 10);
+      s.setOmni(s.getOmni() / 20);
       double[] step = s.getStep();
       for (int i = 0; i < step.length; i++) {
-        step[i] /= 10;
+        step[i] /= 20;
       }
     }
 

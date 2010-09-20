@@ -31,6 +31,9 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   private double[] parameters = new double[4];
   private int numFeatures;
   private PriorFunction prior;
+  private double percentCorrect;
+
+  private int windowSize = Integer.MAX_VALUE;
 
   // pretty much just for GSON
   public CrossFoldLearner() {
@@ -97,7 +100,10 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
       if (k == trackingKey % models.size()) {
         Vector v = model.classifyFull(instance);
         double score = Math.max(v.get(actual), MIN_SCORE);
-        logLikelihood += (Math.log(score) - logLikelihood) / record;
+        logLikelihood += (Math.log(score) - logLikelihood) / Math.min(record, windowSize);
+
+        int correct = v.maxValueIndex() == actual ? 1 : 0;
+        percentCorrect += (correct - percentCorrect) / Math.min(record, windowSize);
         if (numCategories() == 2) {
           auc.addSample(actual, v.get(1));
         }
@@ -174,6 +180,10 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     return logLikelihood;
   }
 
+  public double percentCorrect() {
+    return percentCorrect;
+  }
+
   // -------- evolutionary optimization
 
   public CrossFoldLearner copy() {
@@ -234,6 +244,10 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
 
   public void setNumFeatures(int numFeatures) {
     this.numFeatures = numFeatures;
+  }
+
+  public void setWindowSize(int windowSize) {
+    this.windowSize = windowSize;
   }
 
   public PriorFunction getPrior() {
