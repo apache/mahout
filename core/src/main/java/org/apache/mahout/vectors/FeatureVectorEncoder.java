@@ -265,7 +265,7 @@ public abstract class FeatureVectorEncoder {
   }
 
   protected void trace(byte[] subName, int n) {
-    trace(new String(subName), n);
+    trace(new String(subName, Charsets.UTF_8), n);
   }
 
   public void setTraceDictionary(Map<String, Set<Integer>> traceDictionary) {
