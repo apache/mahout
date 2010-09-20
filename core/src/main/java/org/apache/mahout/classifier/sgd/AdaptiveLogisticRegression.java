@@ -134,9 +134,10 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
         @Override
         public double apply(Wrapper payload, double[] params) {
           payload.getLearner().close();
-          return payload.getLearner().auc();
+          return payload.getLearner().logLikelihood();
         }
       });
+      ep.close();
     } catch (InterruptedException e) {
       // ignore
     } catch (ExecutionException e) {

@@ -165,8 +165,20 @@ public class EvolutionaryProcess<T extends Payload<T>> {
     return population;
   }
 
+  public void close() throws EarlyTerminationException {
+    List<Runnable> remainingTasks = pool.shutdownNow();
+    if (remainingTasks.size() > 0) {
+      throw new EarlyTerminationException("Had to forcefully shut down " + remainingTasks.size() + " tasks");
+    }
+  }
+
   public interface Function<T> {
     double apply(T payload, double[] params);
   }
 
+  public static class EarlyTerminationException extends RuntimeException {
+    public EarlyTerminationException(String message) {
+      super(message);
+    }
+  }
 }
