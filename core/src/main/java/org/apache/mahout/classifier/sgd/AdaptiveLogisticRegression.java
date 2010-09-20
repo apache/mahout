@@ -58,6 +58,8 @@ import java.util.concurrent.ExecutionException;
  * a different fitness value in non-binary cases.
  */
 public class AdaptiveLogisticRegression implements OnlineLearner {
+  private static final int SURVIVORS = 2;
+
   private int record = 0;
   private int evaluationInterval = 1000;
 
@@ -122,7 +124,15 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
       throw new IllegalStateException(e);
     }
 
-    ep.mutatePopulation(2);
+    // evolve based on new fitness
+    ep.mutatePopulation(SURVIVORS);
+
+    // now grossly hack the top survivors so they stick around.  Set their
+    // mutation rates small and also hack their learning rate to be small
+    // as well.
+    for (State<Wrapper> state : ep.getPopulation().subList(0, SURVIVORS)) {
+      state.getPayload().freeze(state);
+    }
     buffer.clear();
   }
 
@@ -291,6 +301,18 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
       wrapped.stepOffset(1);
       wrapped.alpha(1);
       wrapped.decayExponent(0);
+    }
+
+    public void freeze(State<Wrapper> s) {
+      // radically decrease learning rate
+      s.getParams()[1] -= 5;
+
+      // and cause evolution to hold (almost)
+      s.setOmni(s.getOmni() / 10);
+      double[] step = s.getStep();
+      for (int i = 0; i < step.length; i++) {
+        step[i] /= 10;
+      }
     }
 
     public void setMappings(State<Wrapper> x) {
