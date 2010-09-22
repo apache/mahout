@@ -33,9 +33,10 @@ import java.util.Set;
  * dictionary.
  */
 public abstract class FeatureVectorEncoder {
-
   protected static final int CONTINUOUS_VALUE_HASH_SEED = 1;
   protected static final int WORD_LIKE_VALUE_HASH_SEED = 100;
+
+  private static final byte[] EMPTY_ARRAY = new byte[0];;
 
   private final String name;
   private int probes;
@@ -272,7 +273,11 @@ public abstract class FeatureVectorEncoder {
     this.traceDictionary = traceDictionary;
   }
 
-  protected byte[] bytesForString(String x){
-    return x.getBytes(Charsets.UTF_8);
+  protected byte[] bytesForString(String x) {
+    if (x != null) {
+      return x.getBytes(Charsets.UTF_8);
+    } else {
+      return EMPTY_ARRAY;
+    }
   }
 }

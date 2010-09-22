@@ -42,7 +42,7 @@ public class ContinuousValueEncoder extends FeatureVectorEncoder {
     for (int i = 0; i < probes; i++) {
       int n = hashForProbe(originalForm, data.size(), name, i);
       if(isTraceEnabled()){
-        trace(name.getBytes(Charsets.UTF_8), n);        
+        trace((String) null, n);        
       }
       data.set(n, data.get(n) + getWeight(originalForm,weight));
     }
