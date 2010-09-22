@@ -222,9 +222,10 @@ public class TrainNewsGroups {
       traceDictionary.clear();
       Vector v = encodeFeatureVector(file, actual, leakType);
       md.update(v, traceDictionary, learningAlgorithm.getBest().getPayload().getLearner());
-      if (k % 50 == 0) {
+      if (k % 100 == 0) {
         System.out.printf("%d\t%d\n", k, traceDictionary.size());
       }
+      k++;
     }
 
     List<String> ngNames = Lists.newArrayList(newsGroups.values());
