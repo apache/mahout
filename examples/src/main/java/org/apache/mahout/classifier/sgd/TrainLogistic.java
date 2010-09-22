@@ -51,6 +51,7 @@ public final class TrainLogistic {
 
   private static int passes;
   private static boolean scores;
+  private static OnlineLogisticRegression model;
 
   private TrainLogistic() {
   }
@@ -115,6 +116,7 @@ public final class TrainLogistic {
         }
       }
       System.out.printf("\n");
+      model = lr;
       for (int row = 0; row < lr.getBeta().numRows(); row++) {
         for (String key : csv.getTraceDictionary().keySet()) {
           double weight = predictorWeight(lr, row, csv, key);
@@ -283,6 +285,14 @@ public final class TrainLogistic {
 
   private static double getDoubleArgument(CommandLine cmdLine, Option op) {
     return Double.parseDouble((String) cmdLine.getValue(op));
+  }
+
+  public static OnlineLogisticRegression getModel() {
+    return model;
+  }
+
+  public static LogisticModelParameters getParameters() {
+    return lmp;
   }
 
   public static class InputOpener {
