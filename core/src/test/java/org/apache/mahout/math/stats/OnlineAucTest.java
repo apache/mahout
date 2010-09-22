@@ -81,8 +81,8 @@ public final class OnlineAucTest extends MahoutTestCase {
 
     // FAIR policy isn't so accurate
     assertEquals(0.7603, stats[0].getMean(), 0.03);
-    assertEquals(0.7603, stats[0].getQuartile(1), 0.025);
-    assertEquals(0.7603, stats[0].getQuartile(3), 0.025);
+    assertEquals(0.7603, stats[0].getQuartile(1), 0.03);
+    assertEquals(0.7603, stats[0].getQuartile(3), 0.03);
 
     // FIFO policy seems best
     assertEquals(0.7603, stats[1].getMean(), 0.001);

@@ -33,7 +33,6 @@ import java.util.Random;
  * on-line.
  */
 public class OnlineAuc {
-
   enum ReplacementPolicy {
     FIFO, FAIR, RANDOM
   }
@@ -42,6 +41,9 @@ public class OnlineAuc {
   // causes substantial degradation for the FAIR and RANDOM policies, but almost no change
   // for the FIFO policy
   public static final int HISTORY = 10;
+
+  // defines the exponential averaging window for results
+  private int windowSize=Integer.MAX_VALUE;
 
   // FIFO has distinctly the best properties as a policy.  See OnlineAucTest for details
   private ReplacementPolicy policy = ReplacementPolicy.FIFO;
@@ -102,7 +104,7 @@ public class OnlineAuc {
           m += 0.5;
         }
       }
-      averages.set(category, averages.get(category) + (m / count - averages.get(category)) / samples.get(category));
+      averages.set(category, averages.get(category) + (m / count - averages.get(category)) / Math.min(windowSize, samples.get(category)));
     }
     return auc();
   }
@@ -114,5 +116,9 @@ public class OnlineAuc {
 
   public void setPolicy(ReplacementPolicy policy) {
     this.policy = policy;
+  }
+
+  public void setWindowSize(int windowSize) {
+    this.windowSize = windowSize;
   }
 }
