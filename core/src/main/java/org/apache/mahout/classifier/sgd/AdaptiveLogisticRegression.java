@@ -70,6 +70,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int poolSize = 20;
   private State<Wrapper> seed;
   private int numFeatures;
+  private double averagingWindow;
 
   // for GSON
   private AdaptiveLogisticRegression() {
@@ -262,6 +263,10 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   public void setNumFeatures(int numFeatures) {
     this.numFeatures = numFeatures;
+  }
+
+  public void setAveragingWindow(int averagingWindow) {
+    seed.getPayload().getLearner().setWindowSize(averagingWindow);
   }
 
   /**
