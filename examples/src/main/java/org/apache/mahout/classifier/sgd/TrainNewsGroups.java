@@ -196,7 +196,7 @@ public class TrainNewsGroups {
       }
       if (k % (bump * scale) == 0) {
         step += 0.25;
-        System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t", maxBeta, nonZeros, positive, norm, lambda, mu);
+        System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.8f\t%.8f\t", maxBeta, nonZeros, positive, norm, lambda, mu);
         System.out.printf("%d\t%.3f\t%.2f\t%s\t%s\n",
           k, averageLL, averageCorrect * 100, ng, leakLabels[leakType % 3]);
       }

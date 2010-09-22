@@ -72,6 +72,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int numFeatures;
   private double averagingWindow;
 
+  private boolean freezeSurvivors = true;
+
   // for GSON
   private AdaptiveLogisticRegression() {
   }
@@ -128,11 +130,13 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     // evolve based on new fitness
     ep.mutatePopulation(SURVIVORS);
 
-    // now grossly hack the top survivors so they stick around.  Set their
-    // mutation rates small and also hack their learning rate to be small
-    // as well.
-    for (State<Wrapper> state : ep.getPopulation().subList(0, SURVIVORS)) {
-      state.getPayload().freeze(state);
+    if (freezeSurvivors) {
+      // now grossly hack the top survivors so they stick around.  Set their
+      // mutation rates small and also hack their learning rate to be small
+      // as well.
+      for (State<Wrapper> state : ep.getPopulation().subList(0, SURVIVORS)) {
+        state.getPayload().freeze(state);
+      }
     }
     buffer.clear();
   }
@@ -267,6 +271,10 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   public void setAveragingWindow(int averagingWindow) {
     seed.getPayload().getLearner().setWindowSize(averagingWindow);
+  }
+
+  public void setFreezeSurvivors(boolean freezeSurvivors) {
+    this.freezeSurvivors = freezeSurvivors;
   }
 
   /**
