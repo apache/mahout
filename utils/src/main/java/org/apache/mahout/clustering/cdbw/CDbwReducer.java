@@ -29,11 +29,11 @@ import org.apache.mahout.math.VectorWritable;
 
 public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
 
-  private Map<Integer, List<VectorWritable>> referencePoints;
+  private Map<Integer, List<VectorWritable>> representativePoints;
 
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
-    for (Map.Entry<Integer, List<VectorWritable>> entry : referencePoints.entrySet()) {
+    for (Map.Entry<Integer, List<VectorWritable>> entry : representativePoints.entrySet()) {
       IntWritable iw = new IntWritable(entry.getKey());
       for (VectorWritable vw : entry.getValue()) {
         context.write(iw, vw);
@@ -60,7 +60,7 @@ public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, In
     super.setup(context);
     Configuration conf = context.getConfiguration();
     try {
-      referencePoints = CDbwMapper.getRepresentativePoints(conf);
+      representativePoints = CDbwMapper.getRepresentativePoints(conf);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -70,8 +70,8 @@ public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, In
     }
   }
 
-  public void configure(Map<Integer, List<VectorWritable>> referencePoints) {
-    this.referencePoints = referencePoints;
+  public void configure(Map<Integer, List<VectorWritable>> representativePoints) {
+    this.representativePoints = representativePoints;
   }
 
 }

@@ -95,7 +95,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    * Initialize synthetic data using 4 clusters dC units from origin having 4 representative points dP from each center
    * @param dC a double cluster center offset
    * @param dP a double representative point offset
-   * @param measure TODO
+   * @param measure the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
     clusters = new HashMap<Integer, Cluster>();
@@ -238,6 +238,37 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                       numIterations,
                       1);
     checkRefPoints(numIterations);
+  }
+  
+  @Test
+  public void testEmptyCluster() {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
+    initData(1, 0.25, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] { 10, 10 }), 19, measure);
+    clusters.put(cluster.getId(), cluster);
+    List<VectorWritable> points = new ArrayList<VectorWritable>();
+    representativePoints.put(cluster.getId(), points);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
+    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("separation", 1.5, evaluator.separation(), EPSILON);
+    assertEquals("intra cluster density", 0.7155417527999326, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 1.073312629199899, evaluator.getCDbw(), EPSILON);
+  }
+
+  @Test
+  public void testSingleValueCluster() {
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
+    initData(1, 0.25, measure);
+    Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
+    clusters.put(cluster.getId(), cluster);
+    List<VectorWritable> points = new ArrayList<VectorWritable>();
+    points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { 1, 1 }))));
+    representativePoints.put(cluster.getId(), points);
+    CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
+    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("separation", 0.0, evaluator.separation(), EPSILON);
+    assertEquals("intra cluster density", 0.7155417527999326, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 0.0, evaluator.getCDbw(), EPSILON);
   }
 
 }

@@ -33,8 +33,12 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.SquareRootFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CDbwEvaluator {
+
+  private static final Logger log = LoggerFactory.getLogger(CDbwEvaluator.class);
 
   private final Map<Integer, List<VectorWritable>> representativePoints;
 
@@ -73,11 +77,10 @@ public class CDbwEvaluator {
    * @param clustersIn
    *            a String path to the input clusters directory
    */
-  public CDbwEvaluator(Configuration conf, Path clustersIn)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+  public CDbwEvaluator(Configuration conf, Path clustersIn) throws ClassNotFoundException, InstantiationException,
+      IllegalAccessException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    measure = ccl.loadClass(conf.get(CDbwDriver.DISTANCE_MEASURE_KEY))
-        .asSubclass(DistanceMeasure.class).newInstance();
+    measure = ccl.loadClass(conf.get(CDbwDriver.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class).newInstance();
     representativePoints = CDbwMapper.getRepresentativePoints(conf);
     clusters = loadClusters(conf, clustersIn);
     for (Integer cId : representativePoints.keySet()) {
@@ -92,10 +95,10 @@ public class CDbwEvaluator {
   public double intraClusterDensity() {
     double avgStd = 0.0;
     for (Integer cId : representativePoints.keySet()) {
-      avgStd += stDevs.get(cId);
+      avgStd += getStdev(cId);
     }
     avgStd /= representativePoints.size();
-  
+
     double sum = 0.0;
     for (Map.Entry<Integer, List<VectorWritable>> entry : representativePoints.entrySet()) {
       Integer cId = entry.getKey();
@@ -103,12 +106,14 @@ public class CDbwEvaluator {
       double cSum = 0.0;
       for (VectorWritable aRepI : repI) {
         double inDensity = intraDensity(clusters.get(cId).getCenter(), aRepI.get(), avgStd);
-        double std = stDevs.get(cId);
+        double std = getStdev(cId);
         if (std > 0.0) {
           cSum += inDensity / std;
         }
       }
-      sum += cSum / repI.size();
+      if (repI.size() > 0) {
+        sum += cSum / repI.size();
+      }
     }
     return sum / representativePoints.size();
   }
@@ -118,7 +123,7 @@ public class CDbwEvaluator {
     for (Map.Entry<Integer, List<VectorWritable>> entry1 : representativePoints.entrySet()) {
       Integer cI = entry1.getKey();
       List<VectorWritable> repI = entry1.getValue();
-      double stDevI = stDevs.get(cI);      
+      double stDevI = getStdev(cI);
       for (Map.Entry<Integer, List<VectorWritable>> entry2 : representativePoints.entrySet()) {
         Integer cJ = entry2.getKey();
         if (cI.equals(cJ)) {
@@ -138,28 +143,39 @@ public class CDbwEvaluator {
             }
           }
         }
-        double stDevJ = stDevs.get(cJ);
-        double interDensity = interDensity(uIJ, cI, cJ);
+        double stDevJ = getStdev(cJ);
+        double interDensity = uIJ == null ? 0 : interDensity(uIJ, cI, cJ);
         double stdSum = stDevI + stDevJ;
         double density = 0.0;
         if (stdSum > 0.0) {
           density = minDistance * interDensity / stdSum;
         }
-  
-        // Use a logger
-        //if (false) {
-        //  System.out.println("minDistance[" + cI + "," + cJ + "]=" + minDistance);
-        //  System.out.println("stDev[" + cI + "]=" + stDevI);
-        //  System.out.println("stDev[" + cJ + "]=" + stDevJ);
-        //  System.out.println("interDensity[" + cI + "," + cJ + "]=" + interDensity);
-        //  System.out.println("density[" + cI + "," + cJ + "]=" + density);
-        //  System.out.println();
-        //}
+
+        log.debug("minDistance[" + cI + "," + cJ + "]=" + minDistance);
+        log.debug("stDev[" + cI + "]=" + stDevI);
+        log.debug("stDev[" + cJ + "]=" + stDevJ);
+        log.debug("interDensity[" + cI + "," + cJ + "]=" + interDensity);
+        log.debug("density[" + cI + "," + cJ + "]=" + density);
+
         sum += density;
       }
     }
     //System.out.println("interClusterDensity=" + sum);
     return sum;
+  }
+
+  /**
+   * Handle missing stDevs when clusters are empty by returning 0
+   * @param cI
+   * @return
+   */
+  private Double getStdev(Integer cI) {
+    Double result = stDevs.get(cI);
+    if (result == null) {
+      return new Double(0);
+    } else {
+      return result;
+    }
   }
 
   public double separation() {
@@ -192,8 +208,8 @@ public class CDbwEvaluator {
    *            a String pathname to the directory containing input cluster files
    * @return a List<Cluster> of the clusters
    */
-  private static Map<Integer, Cluster> loadClusters(Configuration conf, Path clustersIn)
-      throws InstantiationException, IllegalAccessException, IOException {
+  private static Map<Integer, Cluster> loadClusters(Configuration conf, Path clustersIn) throws InstantiationException,
+      IllegalAccessException, IOException {
     Map<Integer, Cluster> clusters = new HashMap<Integer, Cluster>();
     FileSystem fs = clustersIn.getFileSystem(conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {
@@ -217,7 +233,7 @@ public class CDbwEvaluator {
     List<VectorWritable> repI = representativePoints.get(cI);
     List<VectorWritable> repJ = representativePoints.get(cJ);
     double density = 0.0;
-    double std = (stDevs.get(cI) + stDevs.get(cJ)) / 2.0;
+    double std = (getStdev(cI) + getStdev(cJ)) / 2.0;
     for (VectorWritable vwI : repI) {
       if (measure.distance(uIJ, vwI.get()) <= std) {
         density++;
@@ -245,10 +261,12 @@ public class CDbwEvaluator {
       s1 = s1 == null ? v.clone() : s1.plus(v);
       s2 = s2 == null ? v.times(v) : s2.plus(v.times(v));
     }
-    Vector std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
-    double d = std.zSum() / std.size();
-    //System.out.println("stDev[" + cI + "]=" + d);
-    stDevs.put(cI, d);
+    if (s0 > 1) {
+      Vector std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
+      double d = std.zSum() / std.size();
+      //System.out.println("stDev[" + cI + "]=" + d);
+      stDevs.put(cI, d);
+    }
   }
 
   /*
