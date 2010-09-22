@@ -38,9 +38,13 @@ public class OnlineAuc {
     FIFO, FAIR, RANDOM
   }
 
-  public static final int HISTORY = 100;
+  // increasing this to 100 causes very small improvements in accuracy.  Decreasing it to 2
+  // causes substantial degradation for the FAIR and RANDOM policies, but almost no change
+  // for the FIFO policy
+  public static final int HISTORY = 10;
 
-  private ReplacementPolicy policy = ReplacementPolicy.FAIR;
+  // FIFO has distinctly the best properties as a policy.  See OnlineAucTest for details
+  private ReplacementPolicy policy = ReplacementPolicy.FIFO;
   private transient Random random = org.apache.mahout.common.RandomUtils.getRandom();
   private final Matrix scores;
   private final Vector averages;
@@ -83,36 +87,32 @@ public class OnlineAuc {
       // compare to previous scores for other category
       Vector row = scores.viewRow(1 - category);
       double m = 0.0;
-      int count = 0;
+      double count = 0.0;
       for (Vector.Element element : row) {
         double v = element.get();
         if (Double.isNaN(v)) {
-          break;
+          continue;
         }
         count++;
-        double z = 0;
         if (score > v) {
-          z = 1.0;
+          m++;
         } else if (score < v) {
-          z = 0.0;
+          // m += 0
+        } else if (score == v) {
+          m += 0.5;
         }
-        m += (z - m) / count;
       }
-      averages.set(category, averages.get(category) + (m - averages.get(category)) / samples.get(category));
+      averages.set(category, averages.get(category) + (m / count - averages.get(category)) / samples.get(category));
     }
     return auc();
   }
 
   public double auc() {
     // return an unweighted average of all averages.
-    return 0.5 - averages.get(0) / 2 + averages.get(1) / 2;
+    return (1 - averages.get(0) + averages.get(1)) / 2;
   }
 
   public void setPolicy(ReplacementPolicy policy) {
     this.policy = policy;
-  }
-
-  public void setRandom(Random random) {
-    this.random = random;
   }
 }
