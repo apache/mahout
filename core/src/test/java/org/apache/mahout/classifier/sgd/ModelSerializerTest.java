@@ -69,7 +69,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
       auc1.addSample(0, gen.nextGaussian());
       auc1.addSample(1, gen.nextGaussian() + 1);
     }
-    assertEquals(0.76, auc1.auc(), 0.04);
+    assertEquals(0.76, auc1.auc(), 0.01);
 
     Gson gson = ModelSerializer.gson();
     String s = gson.toJson(auc1);
@@ -87,6 +87,23 @@ public final class ModelSerializerTest extends MahoutTestCase {
     }
 
     assertEquals(auc1.auc(), auc2.auc(), 0.01);
+
+    Foo x = new Foo();
+    x.foo = auc1;
+    x.pig = 3.13;
+    x.dog = 42;
+
+    s = gson.toJson(x);
+
+    Foo y = gson.fromJson(s, Foo.class);
+
+    assertEquals(auc1.auc(), y.foo.auc(), 0.01);
+  }
+
+  public static class Foo {
+    OnlineAuc foo;
+    double pig;
+    int dog;
   }
 
   @Test

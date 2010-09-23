@@ -37,6 +37,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.stats.GlobalOnlineAuc;
+import org.apache.mahout.math.stats.OnlineAuc;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -57,6 +58,7 @@ public final class ModelSerializer {
     gb.registerTypeAdapter(AdaptiveLogisticRegression.class, new AdaptiveLogisticRegressionTypeAdapter());
     gb.registerTypeAdapter(Mapping.class, new MappingTypeAdapter());
     gb.registerTypeAdapter(PriorFunction.class, new PriorTypeAdapter());
+    gb.registerTypeAdapter(OnlineAuc.class, new AucTypeAdapter());
     gb.registerTypeAdapter(CrossFoldLearner.class, new CrossFoldLearnerTypeAdapter());
     gb.registerTypeAdapter(Vector.class, new VectorTypeAdapter());
     gb.registerTypeAdapter(Matrix.class, new MatrixTypeAdapter());
@@ -146,6 +148,31 @@ public final class ModelSerializer {
     }
   }
 
+  private static class AucTypeAdapter implements JsonDeserializer<OnlineAuc>, JsonSerializer<OnlineAuc> {
+    @Override
+    public OnlineAuc deserialize(JsonElement jsonElement,
+                                     Type type,
+                                     JsonDeserializationContext jsonDeserializationContext) {
+      JsonObject x = jsonElement.getAsJsonObject();
+      try {
+        return jsonDeserializationContext.deserialize(x.get("value"), Class.forName(x.get("class").getAsString()));
+      } catch (ClassNotFoundException e) {
+        throw new IllegalStateException("Can't understand serialized data, found bad type: "
+            + x.get("class").getAsString());
+      }
+    }
+
+    @Override
+    public JsonElement serialize(OnlineAuc auc,
+                                 Type type,
+                                 JsonSerializationContext jsonSerializationContext) {
+      JsonObject r = new JsonObject();
+      r.add("class", new JsonPrimitive(auc.getClass().getName()));
+      r.add("value", jsonSerializationContext.serialize(auc));
+      return r;
+    }
+  }
+
   private static class CrossFoldLearnerTypeAdapter implements JsonDeserializer<CrossFoldLearner> {
     @Override
     public CrossFoldLearner deserialize(JsonElement jsonElement,
@@ -154,7 +181,7 @@ public final class ModelSerializer {
       CrossFoldLearner r = new CrossFoldLearner();
       JsonObject x = jsonElement.getAsJsonObject();
       r.setRecord(x.get("record").getAsInt());
-      r.setAucEvaluator(jsonDeserializationContext.<GlobalOnlineAuc>deserialize(x.get("auc"), GlobalOnlineAuc.class));
+      r.setAucEvaluator(jsonDeserializationContext.<OnlineAuc>deserialize(x.get("auc"), OnlineAuc.class));
       r.setLogLikelihood(x.get("logLikelihood").getAsDouble());
 
       JsonArray models = x.get("models").getAsJsonArray();
