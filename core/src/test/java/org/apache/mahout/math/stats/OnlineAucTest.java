@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import java.util.Random;
 
-import static org.apache.mahout.math.stats.OnlineAuc.ReplacementPolicy.*;
+import static org.apache.mahout.math.stats.GlobalOnlineAuc.ReplacementPolicy.*;
 
 public final class OnlineAucTest extends MahoutTestCase {
 
@@ -37,14 +37,14 @@ public final class OnlineAucTest extends MahoutTestCase {
       stats[i] = new OnlineSummarizer();
     }
 
-    for (int i = 0; i < 500; i++) {
-      OnlineAuc a1 = new OnlineAuc();
+    for (int i = 0; i < 100; i++) {
+      OnlineAuc a1 = new GlobalOnlineAuc();
       a1.setPolicy(FAIR);
 
-      OnlineAuc a2 = new OnlineAuc();
+      OnlineAuc a2 = new GlobalOnlineAuc();
       a2.setPolicy(FIFO);
 
-      OnlineAuc a3 = new OnlineAuc();
+      OnlineAuc a3 = new GlobalOnlineAuc();
       a3.setPolicy(RANDOM);
 
       Auc a4 = new Auc();
@@ -72,7 +72,7 @@ public final class OnlineAucTest extends MahoutTestCase {
     }
     
     int i = 0;
-    for (OnlineAuc.ReplacementPolicy policy : new OnlineAuc.ReplacementPolicy[]{FAIR, FIFO, RANDOM, null}) {
+    for (GlobalOnlineAuc.ReplacementPolicy policy : new GlobalOnlineAuc.ReplacementPolicy[]{FAIR, FIFO, RANDOM, null}) {
       OnlineSummarizer summary = stats[i++];
       System.out.printf("%s,%.4f (min = %.4f, 25%%-ile=%.4f, 75%%-ile=%.4f, max=%.4f)\n", policy, summary.getMean(),
         summary.getQuartile(0), summary.getQuartile(1), summary.getQuartile(2), summary.getQuartile(3));
@@ -93,5 +93,33 @@ public final class OnlineAucTest extends MahoutTestCase {
     assertEquals(0.7603, stats[2].getMean(), 0.001);
     assertEquals(0.7603, stats[2].getQuartile(1), 0.006);
     assertEquals(0.7603, stats[2].getQuartile(1), 0.006);
+  }
+
+  @Test(expected=UnsupportedOperationException.class)
+  public void mustNotOmitGroup() {
+    OnlineAuc x = new GroupedOnlineAuc();
+    x.addSample(0, 3.14);
+  }
+
+  @Test
+  public void groupedAuc() {
+    Random gen = RandomUtils.getRandom();
+    OnlineAuc x = new GroupedOnlineAuc();
+    OnlineAuc y = new GlobalOnlineAuc();
+
+    for (int i = 0; i < 10000; i++) {
+      x.addSample(0, "a", gen.nextGaussian());
+      x.addSample(1, "a", gen.nextGaussian() + 1);
+      x.addSample(0, "b", gen.nextGaussian() + 10);
+      x.addSample(1, "b", gen.nextGaussian() + 11);
+
+      y.addSample(0, "a", gen.nextGaussian());
+      y.addSample(1, "a", gen.nextGaussian() + 1);
+      y.addSample(0, "b", gen.nextGaussian() + 10);
+      y.addSample(1, "b", gen.nextGaussian() + 11);
+    }
+
+    assertEquals(0.7603, x.auc(), 0.01);
+    assertEquals((0.7603 + 0.5) / 2, y.auc(), 0.02);
   }
 }

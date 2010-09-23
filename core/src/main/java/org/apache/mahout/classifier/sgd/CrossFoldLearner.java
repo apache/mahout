@@ -8,6 +8,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.stats.OnlineAuc;
+import org.apache.mahout.math.stats.GlobalOnlineAuc;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   private int record;
   // minimum score to be used for computing log likelihood
   private static final double MIN_SCORE = 1e-50;
-  private OnlineAuc auc = new OnlineAuc();
+  private OnlineAuc auc = new GlobalOnlineAuc();
   private double logLikelihood;
   private final List<OnlineLogisticRegression> models = Lists.newArrayList();
 
@@ -94,6 +95,10 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
 
   @Override
   public void train(long trackingKey, int actual, Vector instance) {
+    train(trackingKey, null, actual, instance);
+  }
+
+  public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     record++;
     int k = 0;
     for (OnlineLogisticRegression model : models) {
@@ -105,7 +110,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
         int correct = v.maxValueIndex() == actual ? 1 : 0;
         percentCorrect += (correct - percentCorrect) / Math.min(record, windowSize);
         if (numCategories() == 2) {
-          auc.addSample(actual, v.get(1));
+          auc.addSample(actual, groupKey, v.get(1));
         }
       } else {
         model.train(trackingKey, actual, instance);
@@ -206,11 +211,11 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     this.record = record;
   }
 
-  public OnlineAuc getAuc() {
+  public OnlineAuc getAucEvaluator() {
     return auc;
   }
 
-  public void setAuc(OnlineAuc auc) {
+  public void setAucEvaluator(OnlineAuc auc) {
     this.auc = auc;
   }
 
@@ -248,6 +253,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
 
   public void setWindowSize(int windowSize) {
     this.windowSize = windowSize;
+    auc.setWindowSize(windowSize);
   }
 
   public PriorFunction getPrior() {

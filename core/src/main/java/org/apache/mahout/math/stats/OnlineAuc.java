@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,108 +17,21 @@
 
 package org.apache.mahout.math.stats;
 
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.Vector;
-
-import java.util.Random;
-
 /**
- * Computes a running estimate of AUC (see http://en.wikipedia.org/wiki/Receiver_operating_characteristic).
- * <p/>
- * Since AUC is normally a global property of labeled scores, it is almost always computed in a
- * batch fashion.  The probabilistic definition (the probability that a random element of one set
- * has a higher score than a random element of another set) gives us a way to estimate this
- * on-line.
+ * Describes the generic outline of how to compute AUC.  Currently there are two
+ * implementations of this, one for computing a global estimate of AUC and the other
+ * for computing average grouped AUC.  Grouped AUC is useful when misusing a classifier
+ * as a recommendation system.
  */
-public class OnlineAuc {
-  enum ReplacementPolicy {
-    FIFO, FAIR, RANDOM
-  }
+public interface OnlineAuc {
+  @SuppressWarnings({"UnusedDeclaration"})
+  double addSample(int category, String groupKey, double score);
 
-  // increasing this to 100 causes very small improvements in accuracy.  Decreasing it to 2
-  // causes substantial degradation for the FAIR and RANDOM policies, but almost no change
-  // for the FIFO policy
-  public static final int HISTORY = 10;
+  double addSample(int category, double score);
 
-  // defines the exponential averaging window for results
-  private int windowSize=Integer.MAX_VALUE;
+  double auc();
 
-  // FIFO has distinctly the best properties as a policy.  See OnlineAucTest for details
-  private ReplacementPolicy policy = ReplacementPolicy.FIFO;
-  private transient Random random = org.apache.mahout.common.RandomUtils.getRandom();
-  private final Matrix scores;
-  private final Vector averages;
-  private final Vector samples;
+  void setPolicy(GlobalOnlineAuc.ReplacementPolicy policy);
 
-  public OnlineAuc() {
-    int numCategories = 2;
-    scores = new DenseMatrix(numCategories, HISTORY);
-    scores.assign(Double.NaN);
-    averages = new DenseVector(numCategories);
-    averages.assign(0.5);
-    samples = new DenseVector(numCategories);
-  }
-
-  public double addSample(int category, double score) {
-    int n = (int) samples.get(category);
-    if (n < HISTORY) {
-      scores.set(category, n, score);
-    } else {
-      switch (policy) {
-        case FIFO:
-          scores.set(category, n % HISTORY, score);
-          break;
-        case FAIR:
-          int j1 = random.nextInt(n + 1);
-          if (j1 < HISTORY) {
-            scores.set(category, j1, score);
-          }
-          break;
-        case RANDOM:
-          int j2 = random.nextInt(HISTORY);
-          scores.set(category, j2, score);
-          break;
-      }
-    }
-
-    samples.set(category, n + 1);
-
-    if (samples.minValue() >= 1) {
-      // compare to previous scores for other category
-      Vector row = scores.viewRow(1 - category);
-      double m = 0.0;
-      double count = 0.0;
-      for (Vector.Element element : row) {
-        double v = element.get();
-        if (Double.isNaN(v)) {
-          continue;
-        }
-        count++;
-        if (score > v) {
-          m++;
-        } else if (score < v) {
-          // m += 0
-        } else if (score == v) {
-          m += 0.5;
-        }
-      }
-      averages.set(category, averages.get(category) + (m / count - averages.get(category)) / Math.min(windowSize, samples.get(category)));
-    }
-    return auc();
-  }
-
-  public double auc() {
-    // return an unweighted average of all averages.
-    return (1 - averages.get(0) + averages.get(1)) / 2;
-  }
-
-  public void setPolicy(ReplacementPolicy policy) {
-    this.policy = policy;
-  }
-
-  public void setWindowSize(int windowSize) {
-    this.windowSize = windowSize;
-  }
+  void setWindowSize(int windowSize);
 }

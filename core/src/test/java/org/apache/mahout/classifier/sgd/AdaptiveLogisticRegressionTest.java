@@ -84,7 +84,7 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     if (gen.nextDouble() < p) {
       target = 1;
     }
-    return new AdaptiveLogisticRegression.TrainingExample(i, target, data);
+    return new AdaptiveLogisticRegression.TrainingExample(i, null, target, data);
   }
 
   @Test

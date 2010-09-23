@@ -66,15 +66,17 @@ public class OnlineSummarizer {
 
     if (n < 100) {
       starter.add(sample);
-    } else if (n == 100) {
+    } else if (n == 100 && starter != null) {
+      // when we first reach 100 elements, we switch to incremental operation
       starter.add(sample);
-      q[0] = getMin();
-      q[1] = getQuartile(1);
-      q[2] = getQuartile(2);
-      q[3] = getQuartile(3);
-      q[4] = getMax();
+      for (int i = 0; i <= 4; i++) {
+        q[i] = getQuartile(i);
+      }
+      // this signals any invocations of getQuartile at exactly 100 elements that we have
+      // already switched to incremental operation
       starter = null;
     } else {
+      // n >= 100 && starter == null
       q[0] = Math.min(sample, q[0]);
       q[4] = Math.max(sample, q[4]);
 
@@ -106,11 +108,7 @@ public class OnlineSummarizer {
   }
 
   public double getMin() {
-    sort();
-    if (n == 0) {
-      throw new IllegalArgumentException("Must have at least one sample to estimate minimum value");
-    }
-    return n <= 100 ? starter.get(0) : q[0];
+    return getQuartile(0);
   }
 
   private void sort() {
@@ -121,35 +119,39 @@ public class OnlineSummarizer {
   }
 
   public double getMax() {
-    sort();
-    if (n == 0) {
-      throw new IllegalArgumentException("Must have at least one sample to estimate maximum value");
-    }
-    return n <= 100 ? starter.get(99) : q[4];
+    return getQuartile(4);
   }
 
   public double getQuartile(int i) {
-    sort();
-    switch (i) {
-      case 0:
-        return getMin();
-      case 1:
-      case 2:
-      case 3:
-        if (n > 100) {
-          return q[i];
-        } else if (n < 2) {
-          throw new IllegalArgumentException("Must have at least two samples to estimate quartiles");
-        } else {
-          double x = i * (n - 1) / 4.0;
-          int k = (int) Math.floor(x);
-          double u = x - k;
-          return starter.get(k) * (1 - u) + starter.get(k + 1) * u;
-        }
-      case 4:
-        return getMax();
-      default:
-        throw new IllegalArgumentException("Quartile number must be in the range [0..4] not " + i);
+    if (n > 100 || starter == null) {
+      return q[i];
+    } else {
+      sort();
+      switch (i) {
+        case 0:
+          if (n == 0) {
+            throw new IllegalArgumentException("Must have at least one sample to estimate minimum value");
+          }
+          return starter.get(0);
+        case 1:
+        case 2:
+        case 3:
+          if (n >= 2) {
+            double x = i * (n - 1) / 4.0;
+            int k = (int) Math.floor(x);
+            double u = x - k;
+            return starter.get(k) * (1 - u) + starter.get(k + 1) * u;
+          } else {
+            throw new IllegalArgumentException("Must have at least two samples to estimate quartiles");
+          }
+        case 4:
+          if (n == 0) {
+            throw new IllegalArgumentException("Must have at least one sample to estimate maximum value");
+          }
+          return starter.get(starter.size() - 1);
+        default:
+          throw new IllegalArgumentException("Quartile number must be in the range [0..4] not " + i);
+      }
     }
   }
 

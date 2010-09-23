@@ -28,6 +28,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.stats.GlobalOnlineAuc;
 import org.apache.mahout.math.stats.OnlineAuc;
 import org.junit.Test;
 
@@ -62,7 +63,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
   @Test
   public void onlineAucRoundtrip() {
     RandomUtils.useTestSeed();
-    OnlineAuc auc1 = new OnlineAuc();
+    OnlineAuc auc1 = new GlobalOnlineAuc();
     Random gen = new Random(2);
     for (int i = 0; i < 10000; i++) {
       auc1.addSample(0, gen.nextGaussian());
@@ -73,7 +74,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     Gson gson = ModelSerializer.gson();
     String s = gson.toJson(auc1);
 
-    OnlineAuc auc2 = gson.fromJson(s, OnlineAuc.class);
+    OnlineAuc auc2 = gson.fromJson(s, GlobalOnlineAuc.class);
 
     assertEquals(auc1.auc(), auc2.auc(), 0);
 
@@ -148,7 +149,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     List<AdaptiveLogisticRegression.TrainingExample> x1 = Lists.newArrayList();
     for (int i = 0; i < 10; i++) {
       AdaptiveLogisticRegression.TrainingExample t =
-          new AdaptiveLogisticRegression.TrainingExample(i, i % 3, randomVector(gen, 5));
+          new AdaptiveLogisticRegression.TrainingExample(i, null, i % 3, randomVector(gen, 5));
       x1.add(t);
     }
 

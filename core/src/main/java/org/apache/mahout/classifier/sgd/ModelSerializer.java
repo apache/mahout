@@ -36,7 +36,7 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.stats.OnlineAuc;
+import org.apache.mahout.math.stats.GlobalOnlineAuc;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -154,7 +154,7 @@ public final class ModelSerializer {
       CrossFoldLearner r = new CrossFoldLearner();
       JsonObject x = jsonElement.getAsJsonObject();
       r.setRecord(x.get("record").getAsInt());
-      r.setAuc(jsonDeserializationContext.<OnlineAuc>deserialize(x.get("auc"), OnlineAuc.class));
+      r.setAucEvaluator(jsonDeserializationContext.<GlobalOnlineAuc>deserialize(x.get("auc"), GlobalOnlineAuc.class));
       r.setLogLikelihood(x.get("logLikelihood").getAsDouble());
 
       JsonArray models = x.get("models").getAsJsonArray();

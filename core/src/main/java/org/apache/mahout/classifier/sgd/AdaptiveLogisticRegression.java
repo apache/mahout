@@ -24,6 +24,7 @@ import org.apache.mahout.ep.EvolutionaryProcess;
 import org.apache.mahout.ep.Mapping;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.stats.OnlineAuc;
 
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +64,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int record = 0;
   private int evaluationInterval = 1000;
 
-  private List<TrainingExample> buffer = Lists.newArrayList();
+  // transient here is a signal to GSON not to serialize pending records
+  private transient List<TrainingExample> buffer = Lists.newArrayList();
   private EvolutionaryProcess<Wrapper> ep;
   private State<Wrapper> best;
   private int threadCount = 20;
@@ -94,9 +96,14 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   @Override
   public void train(long trackingKey, int actual, Vector instance) {
+    train(trackingKey, null, actual, instance);
+  }
+
+
+  public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     record++;
 
-    buffer.add(new TrainingExample(trackingKey, actual, instance));
+    buffer.add(new TrainingExample(trackingKey, groupKey, actual, instance));
     if (buffer.size() > evaluationInterval) {
       trainWithBufferedExamples();
     }
@@ -175,6 +182,11 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   public void setThreadCount(int threadCount) {
     this.threadCount = threadCount;
+    setupOptimizer(poolSize);
+  }
+
+  public void setAucEvaluator(OnlineAuc auc) {
+    seed.getPayload().setAucEvaluator(auc);
     setupOptimizer(poolSize);
   }
 
@@ -265,12 +277,9 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     return numFeatures;
   }
 
-  public void setNumFeatures(int numFeatures) {
-    this.numFeatures = numFeatures;
-  }
-
   public void setAveragingWindow(int averagingWindow) {
     seed.getPayload().getLearner().setWindowSize(averagingWindow);
+    setupOptimizer(poolSize);
   }
 
   public void setFreezeSurvivors(boolean freezeSurvivors) {
@@ -333,11 +342,11 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
       // set the range for regularization (lambda)
       x.setMap(i++, Mapping.logLimit(1.0e-8, 0.1));
       // set the range for learning rate (mu)
-      x.setMap(i, Mapping.softLimit(0.001, 10));
+      x.setMap(i, Mapping.logLimit(1e-8, 1));
     }
 
     public void train(TrainingExample example) {
-      wrapped.train(example.getKey(), example.getActual(), example.getInstance());
+      wrapped.train(example.getKey(), example.getGroupKey(), example.getActual(), example.getInstance());
     }
 
     public CrossFoldLearner getLearner() {
@@ -348,10 +357,15 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     public String toString() {
       return String.format(Locale.ENGLISH, "auc=%.2f", wrapped.auc());
     }
+
+    public void setAucEvaluator(OnlineAuc auc) {
+      wrapped.setAucEvaluator(auc);
+    }
   }
 
   public static class TrainingExample {
     private long key;
+    private String groupKey;
     private int actual;
     private Vector instance;
 
@@ -359,8 +373,9 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     private TrainingExample() {
     }
 
-    public TrainingExample(long key, int actual, Vector instance) {
+    public TrainingExample(long key, String groupKey, int actual, Vector instance) {
       this.key = key;
+      this.groupKey = groupKey;
       this.actual = actual;
       this.instance = instance;
     }
@@ -375,6 +390,10 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
     public Vector getInstance() {
       return instance;
+    }
+
+    public String getGroupKey() {
+      return groupKey;
     }
   }
 }
