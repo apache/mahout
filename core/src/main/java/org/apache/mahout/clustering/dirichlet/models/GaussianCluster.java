@@ -38,7 +38,8 @@ public class GaussianCluster extends AbstractCluster {
     for (int i = 0; i < x.size(); i++) {
       double x2 = x.get(i);
       double m = getCenter().get(i);
-      double s = getRadius().get(i);
+      // small prior on s to avoid numeric instability when s==0
+      double s = getRadius().get(i) + 0.000001;
       double dNorm = UncommonDistributions.dNorm(x2, m, s);
       pdf += dNorm;
     }

@@ -120,7 +120,8 @@ public class AsymmetricSampledNormalModel implements Cluster {
     // TODO: is this reasonable? correct? It seems to work in some cases.
     double pdf = 1;
     for (int i = 0; i < x.size(); i++) {
-      pdf *= UncommonDistributions.dNorm(x.getQuick(i), getCenter().getQuick(i), getRadius().getQuick(i));
+      // small prior on stdDev to avoid numeric instability when stdDev==0
+      pdf *= UncommonDistributions.dNorm(x.getQuick(i), mean.getQuick(i), stdDev.getQuick(i) + 0.000001);
     }
     return pdf;
   }

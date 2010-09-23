@@ -357,7 +357,8 @@ public class DirichletClusterer {
     throws IOException {
     Vector pi = new DenseVector(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
-      pi.set(i, clusters.get(i).getModel().pdf(vector));
+      double pdf = clusters.get(i).getModel().pdf(vector);
+      pi.set(i, pdf);
     }
     pi = pi.divide(pi.zSum());
     if (emitMostLikely) {

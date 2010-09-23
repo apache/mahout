@@ -36,27 +36,29 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class NormalModel implements Cluster {
-  
+
   private static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
 
-  private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
+  private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {
+  }.getType();
 
   private int id;
-  
+
   // the parameters
   private Vector mean;
-  
+
   private double stdDev;
-  
+
   // the observation statistics, initialized by the first observation
   private int s0;
-  
+
   private Vector s1;
-  
+
   private Vector s2;
 
-  public NormalModel() { }
-  
+  public NormalModel() {
+  }
+
   public NormalModel(int id, Vector mean, double stdDev) {
     this.id = id;
     this.mean = mean;
@@ -65,19 +67,19 @@ public class NormalModel implements Cluster {
     this.s1 = mean.like();
     this.s2 = mean.like();
   }
-  
+
   int getS0() {
     return s0;
   }
-  
+
   public Vector getMean() {
     return mean;
   }
-  
+
   public double getStdDev() {
     return stdDev;
   }
-  
+
   /**
    * TODO: Return a proper sample from the posterior. For now, return an instance with the same parameters
    * 
@@ -86,7 +88,7 @@ public class NormalModel implements Cluster {
   public NormalModel sampleFromPosterior() {
     return new NormalModel(id, mean, stdDev);
   }
-  
+
   @Override
   public void observe(VectorWritable x) {
     s0++;
@@ -102,7 +104,7 @@ public class NormalModel implements Cluster {
       s2 = s2.plus(v.times(v));
     }
   }
-  
+
   @Override
   public void computeParameters() {
     if (s0 == 0) {
@@ -117,26 +119,28 @@ public class NormalModel implements Cluster {
       stdDev = Double.MIN_VALUE;
     }
   }
-  
+
   @Override
   public double pdf(VectorWritable v) {
     Vector x = v.get();
-    double sd2 = stdDev * stdDev;
+    // small prior on std to avoid numeric instability when std==0
+    double std = stdDev + 0.000001;
+    double sd2 = std * std;
     double exp = -(x.dot(x) - 2 * x.dot(mean) + mean.dot(mean)) / (2 * sd2);
     double ex = Math.exp(exp);
-    return ex / (stdDev * SQRT2PI);
+    return ex / (std * SQRT2PI);
   }
-  
+
   @Override
   public int count() {
     return s0;
   }
-  
+
   @Override
   public String toString() {
     return asFormatString(null);
   }
-  
+
   @Override
   public String asFormatString(String[] bindings) {
     StringBuilder buf = new StringBuilder();
@@ -147,7 +151,7 @@ public class NormalModel implements Cluster {
     buf.append(" sd=").append(String.format(Locale.ENGLISH, "%.2f", stdDev)).append('}');
     return buf.toString();
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     this.id = in.readInt();
@@ -161,7 +165,7 @@ public class NormalModel implements Cluster {
     temp.readFields(in);
     this.s2 = temp.get();
   }
-  
+
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(id);
@@ -171,7 +175,7 @@ public class NormalModel implements Cluster {
     VectorWritable.writeVector(out, s1);
     VectorWritable.writeVector(out, s2);
   }
-  
+
   @Override
   public String asJsonString() {
     GsonBuilder builder = new GsonBuilder();
