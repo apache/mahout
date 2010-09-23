@@ -32,6 +32,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
@@ -54,11 +55,10 @@ import org.junit.Test;
 
 public final class TestKmeansClustering extends MahoutTestCase {
 
-  public static final double[][] REFERENCE = {
-      { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 }, { 5, 5 } };
+  public static final double[][] REFERENCE = { { 1, 1 }, { 2, 1 }, { 1, 2 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 4 }, { 4, 5 },
+      { 5, 5 } };
 
-  private static final int[][] EXPECTED_NUM_POINTS =
-      { { 9 }, { 4, 5 }, { 4, 4, 1 }, { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 },
+  private static final int[][] EXPECTED_NUM_POINTS = { { 9 }, { 4, 5 }, { 4, 4, 1 }, { 1, 2, 1, 5 }, { 1, 1, 1, 2, 4 },
       { 1, 1, 1, 1, 1, 4 }, { 1, 1, 1, 1, 1, 2, 2 }, { 1, 1, 1, 1, 1, 1, 2, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
 
   private FileSystem fs;
@@ -274,8 +274,11 @@ public final class TestKmeansClustering extends MahoutTestCase {
       KMeansReducer reducer = new KMeansReducer();
       reducer.setup(clusters, measure);
       DummyRecordWriter<Text, Cluster> reducerWriter = new DummyRecordWriter<Text, Cluster>();
-      Reducer<Text, ClusterObservations, Text, Cluster>.Context reducerContext =
-          DummyRecordWriter.build(reducer, conf, reducerWriter, Text.class, ClusterObservations.class);
+      Reducer<Text, ClusterObservations, Text, Cluster>.Context reducerContext = DummyRecordWriter.build(reducer,
+                                                                                                         conf,
+                                                                                                         reducerWriter,
+                                                                                                         Text.class,
+                                                                                                         ClusterObservations.class);
       for (Text key : combinerWriter.getKeys()) {
         reducer.reduce(new Text(key), combinerWriter.getValue(key), reducerContext);
       }
@@ -411,7 +414,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
           outputPath.toString(), optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), EuclideanDistanceMeasure.class.getName(),
           optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.001", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "2",
           optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
-      new KMeansDriver().run(args);
+      ToolRunner.run(new Configuration(), new KMeansDriver(), args);
 
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
@@ -450,18 +453,17 @@ public final class TestKmeansClustering extends MahoutTestCase {
 
     Path outputPath = getTestTempDirPath("output");
     // now run the Canopy job
-    CanopyDriver.runJob(pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, false);
+    CanopyDriver.run(conf, pointsPath, outputPath, new ManhattanDistanceMeasure(), 3.1, 2.1, false, false);
 
     // now run the KMeans job
-    KMeansDriver.runJob(pointsPath,
-                        new Path(outputPath, "clusters-0"),
-                        outputPath,
-                        new EuclideanDistanceMeasure(),
-                        0.001,
-                        10,
-                        1,
-                        true,
-                        false);
+    KMeansDriver.run(pointsPath,
+                     new Path(outputPath, "clusters-0"),
+                     outputPath,
+                     new EuclideanDistanceMeasure(),
+                     0.001,
+                     10,
+                     true,
+                     false);
 
     // now compare the expected clusters with actual
     Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");

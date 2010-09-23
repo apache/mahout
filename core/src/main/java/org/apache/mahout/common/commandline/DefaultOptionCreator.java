@@ -164,6 +164,7 @@ public final class DefaultOptionCreator {
   /**
    * Returns a default command line option for specifying the max number of reducers.
    * Used by Dirichlet, FuzzyKmeans, Kmeans and LDA
+   * @deprecated 
    */
   public static DefaultOptionBuilder numReducersOption() {
     return new DefaultOptionBuilder().withLongName(MAX_REDUCERS_OPTION).withRequired(false).withShortName("r")

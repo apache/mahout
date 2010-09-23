@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.WeightedVectorWritable;
@@ -79,12 +80,11 @@ public class DirichletDriver extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(DirichletDriver.class);
 
   public static void main(String[] args) throws Exception {
-    new DirichletDriver().run(args);
+    ToolRunner.run(new Configuration(), new DirichletDriver(), args);
   }
 
   @Override
-  public int run(String[] args)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+  public int run(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, InterruptedException {
     addInputOption();
     addOutputOption();
@@ -104,7 +104,6 @@ public class DirichletDriver extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().withRequired(false).create());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
-    addOption(DefaultOptionCreator.numReducersOption().create());
     addOption(DefaultOptionCreator.methodOption().create());
 
     if (parseArguments(args) == null) {
@@ -120,14 +119,12 @@ public class DirichletDriver extends AbstractJob {
     String modelPrototype = getOption(MODEL_PROTOTYPE_CLASS_OPTION);
     String distanceMeasure = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     int numModels = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
-    int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
     double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
     double alpha0 = Double.parseDouble(getOption(ALPHA_OPTION));
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION)
-        .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD));
+    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD));
     int prototypeSize = readPrototypeSize(input);
 
     AbstractVectorModelDistribution modelDistribution = createModelDistribution(modelFactory,
@@ -135,13 +132,13 @@ public class DirichletDriver extends AbstractJob {
                                                                                 distanceMeasure,
                                                                                 prototypeSize);
 
-    job(input,
+    run(getConf(),
+        input,
         output,
         modelDistribution,
         numModels,
         maxIterations,
         alpha0,
-        numReducers,
         runClustering,
         emitMostLikely,
         threshold,
@@ -150,14 +147,117 @@ public class DirichletDriver extends AbstractJob {
   }
 
   /**
+   * Iterate over the input vectors to produce clusters and, if requested, use the
+   * results of the final iteration to cluster the input vectors.
+   * 
+   * @param conf
+   *          the Configuration to use
+   * @param input
+   *          the directory Path for input points
+   * @param output
+   *          the directory Path for output points
+   * @param modelDistribution
+   *          the String class name of the model's prototype vector
+   * @param maxIterations
+   *          the maximum number of iterations
+   * @param alpha0
+   *          the alpha_0 value for the DirichletDistribution
+   * @param runClustering 
+   *          true if clustering of points to be done after iterations
+   * @param emitMostLikely
+   *          a boolean if true emit only most likely cluster for each point
+   * @param threshold 
+   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @param runSequential execute sequentially if true
+   * @param numClusters
+   *          the number of models to iterate over
+   * @throws IllegalAccessException 
+   * @throws InterruptedException 
+   * @throws ClassNotFoundException 
+   * @throws InstantiationException 
+   * @throws IOException 
+   */
+  public static void run(Configuration conf,
+                         Path input,
+                         Path output,
+                         ModelDistribution<VectorWritable> modelDistribution,
+                         int numModels,
+                         int maxIterations,
+                         double alpha0,
+                         boolean runClustering,
+                         boolean emitMostLikely,
+                         double threshold,
+                         boolean runSequential) throws IOException, InstantiationException, ClassNotFoundException,
+      InterruptedException, IllegalAccessException {
+    Path clustersOut = buildClusters(conf, input, output, modelDistribution, numModels, maxIterations, alpha0, runSequential);
+    if (runClustering) {
+      clusterData(conf,
+                  input,
+                  clustersOut,
+                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
+                  emitMostLikely,
+                  threshold,
+                  runSequential);
+    }
+  }
+
+  /**
+   * Convenience method provides default Configuration
+   * Iterate over the input vectors to produce clusters and, if requested, use the
+   * results of the final iteration to cluster the input vectors.
+   * 
+   * @param input
+   *          the directory Path for input points
+   * @param output
+   *          the directory Path for output points
+   * @param modelDistribution
+   *          the String class name of the model's prototype vector
+   * @param numClusters
+   *          the number of models to iterate over
+   * @param maxIterations
+   *          the maximum number of iterations
+   * @param alpha0
+   *          the alpha_0 value for the DirichletDistribution
+   * @param runClustering 
+   *          true if clustering of points to be done after iterations
+   * @param emitMostLikely
+   *          a boolean if true emit only most likely cluster for each point
+   * @param threshold 
+   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @param runSequential execute sequentially if true
+   */
+  public static void run(Path input,
+                         Path output,
+                         ModelDistribution<VectorWritable> modelDistribution,
+                         int numClusters,
+                         int maxIterations,
+                         double alpha0,
+                         boolean runClustering,
+                         boolean emitMostLikely,
+                         double threshold,
+                         boolean runSequential) throws IOException, InstantiationException, IllegalAccessException,
+      ClassNotFoundException, InterruptedException {
+    run(new Configuration(),
+        input,
+        output,
+        modelDistribution,
+        numClusters,
+        maxIterations,
+        alpha0,
+        runClustering,
+        emitMostLikely,
+        threshold,
+        runSequential);
+  }
+
+  /**
    * Create an instance of AbstractVectorModelDistribution from the given command line arguments
    */
   public static AbstractVectorModelDistribution createModelDistribution(String modelFactory,
                                                                         String modelPrototype,
                                                                         String distanceMeasure,
-                                                                        int prototypeSize)
-    throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, InvocationTargetException {
+                                                                        int prototypeSize) throws ClassNotFoundException,
+      InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<? extends AbstractVectorModelDistribution> cl = ccl.loadClass(modelFactory)
         .asSubclass(AbstractVectorModelDistribution.class);
@@ -173,56 +273,6 @@ public class DirichletDriver extends AbstractJob {
       ((DistanceMeasureClusterDistribution) modelDistribution).setMeasure(measure);
     }
     return modelDistribution;
-  }
-
-  /**
-   * Run the job using supplied arguments on a new driver instance (convenience)
-   * 
-   * @param input
-   *          the directory pathname for input points
-   * @param output
-   *          the directory pathname for output points
-   * @param modelDistribution
-   *          the String class name of the model prototype
-   * @param numClusters
-   *          the number of models
-   * @param maxIterations
-   *          the maximum number of iterations
-   * @param alpha0
-   *          the alpha_0 value for the DirichletDistribution
-   * @param numReducers
-   *          the number of Reducers desired
-   * @param runClustering 
-   *          true if clustering of points to be done after iterations
-   * @param emitMostLikely
-   *          a boolean if true emit only most likely cluster for each point
-   * @param threshold 
-   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
-   * @param runSequential execute sequentially if true
-   */
-  public static void runJob(Path input,
-                            Path output,
-                            ModelDistribution<VectorWritable> modelDistribution,
-                            int numClusters,
-                            int maxIterations,
-                            double alpha0,
-                            int numReducers,
-                            boolean runClustering,
-                            boolean emitMostLikely,
-                            double threshold,
-                            boolean runSequential)
-    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, InterruptedException {
-    job(input,
-        output,
-        modelDistribution,
-        numClusters,
-        maxIterations,
-        alpha0,
-        numReducers,
-        runClustering,
-        emitMostLikely,
-        threshold,
-        runSequential);
   }
 
   /**
@@ -290,23 +340,21 @@ public class DirichletDriver extends AbstractJob {
 
   /**
    * Run an iteration using supplied arguments
-   * 
+   * @param conf 
    * @param input the directory pathname for input points
    * @param stateIn the directory pathname for input state
    * @param stateOut the directory pathname for output state
    * @param modelDistribution the ModelDistribution
    * @param numClusters the number of clusters
    * @param alpha0 alpha_0
-   * @param numReducers the number of Reducers desired
    */
-  private static void runIteration(Path input,
+  private static void runIteration(Configuration conf,
+                                   Path input,
                                    Path stateIn,
                                    Path stateOut,
                                    ModelDistribution<VectorWritable> modelDistribution,
                                    int numClusters,
-                                   double alpha0,
-                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
+                                   double alpha0) throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());
     conf.set(NUM_CLUSTERS_KEY, Integer.toString(numClusters));
@@ -322,7 +370,6 @@ public class DirichletDriver extends AbstractJob {
     job.setMapOutputValueClass(VectorWritable.class);
     job.setMapperClass(DirichletMapper.class);
     job.setReducerClass(DirichletReducer.class);
-    job.setNumReduceTasks(numReducers);
     job.setJarByClass(DirichletDriver.class);
 
     FileInputFormat.addInputPath(job, input);
@@ -332,64 +379,8 @@ public class DirichletDriver extends AbstractJob {
   }
 
   /**
-   * Iterate over the input vectors to produce clusters and, if requested, use the
-   * results of the final iteration to cluster the input vectors.
-   * 
-   * @param input
-   *          the directory Path for input points
-   * @param output
-   *          the directory Path for output points
-   * @param modelDistribution
-   *          the String class name of the model's prototype vector
-   * @param numClusters
-   *          the number of models to iterate over
-   * @param maxIterations
-   *          the maximum number of iterations
-   * @param alpha0
-   *          the alpha_0 value for the DirichletDistribution
-   * @param numReducers
-   *          the number of Reducers desired
-   * @param runClustering 
-   *          true if clustering of points to be done after iterations
-   * @param emitMostLikely
-   *          a boolean if true emit only most likely cluster for each point
-   * @param threshold 
-   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
-   * @param runSequential execute sequentially if true
-   */
-  public static void job(Path input,
-                         Path output,
-                         ModelDistribution<VectorWritable> modelDistribution,
-                         int numClusters,
-                         int maxIterations,
-                         double alpha0,
-                         int numReducers,
-                         boolean runClustering,
-                         boolean emitMostLikely,
-                         double threshold,
-                         boolean runSequential)
-    throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException, InterruptedException {
-    Path clustersOut = buildClusters(input,
-                                     output,
-                                     modelDistribution,
-                                     numClusters,
-                                     maxIterations,
-                                     alpha0,
-                                     numReducers,
-                                     runSequential);
-    if (runClustering) {
-      clusterData(input,
-                  clustersOut,
-                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
-                  emitMostLikely,
-                  threshold,
-                  runSequential);
-    }
-  }
-
-  /**
    * Iterate over the input vectors to produce cluster directories for each iteration
-   * 
+   * @param conf 
    * @param input
    *          the directory Path for input points
    * @param output
@@ -402,34 +393,26 @@ public class DirichletDriver extends AbstractJob {
    *          the maximum number of iterations
    * @param alpha0
    *          the alpha_0 value for the DirichletDistribution
-   * @param numReducers
-   *          the number of Reducers desired
    * @param runSequential execute sequentially if true
+   * 
    * @return the Path of the final clusters directory
    */
-  public static Path buildClusters(Path input,
+  public static Path buildClusters(Configuration conf,
+                                   Path input,
                                    Path output,
                                    ModelDistribution<VectorWritable> modelDistribution,
                                    int numClusters,
                                    int maxIterations,
                                    double alpha0,
-                                   int numReducers,
-                                   boolean runSequential)
-    throws IOException, InstantiationException, ClassNotFoundException, InterruptedException, IllegalAccessException {
+                                   boolean runSequential) throws IOException, InstantiationException, ClassNotFoundException,
+      InterruptedException, IllegalAccessException {
     Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     writeInitialState(output, clustersIn, modelDistribution, numClusters, alpha0);
 
     if (runSequential) {
       clustersIn = buildClustersSeq(input, output, modelDistribution, numClusters, maxIterations, alpha0, clustersIn);
     } else {
-      clustersIn = buildClustersMR(input,
-                                   output,
-                                   modelDistribution,
-                                   numClusters,
-                                   maxIterations,
-                                   alpha0,
-                                   numReducers,
-                                   clustersIn);
+      clustersIn = buildClustersMR(conf, input, output, modelDistribution, numClusters, maxIterations, alpha0, clustersIn);
     }
     return clustersIn;
   }
@@ -440,8 +423,7 @@ public class DirichletDriver extends AbstractJob {
                                        int numClusters,
                                        int maxIterations,
                                        double alpha0,
-                                       Path clustersIn)
-    throws IOException, InstantiationException, IllegalAccessException {
+                                       Path clustersIn) throws IOException, InstantiationException, IllegalAccessException {
     for (int iteration = 1; iteration <= maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
@@ -478,20 +460,19 @@ public class DirichletDriver extends AbstractJob {
     return clustersIn;
   }
 
-  private static Path buildClustersMR(Path input,
+  private static Path buildClustersMR(Configuration conf,
+                                      Path input,
                                       Path output,
                                       ModelDistribution<VectorWritable> modelDistribution,
                                       int numClusters,
                                       int maxIterations,
                                       double alpha0,
-                                      int numReducers,
-                                      Path clustersIn)
-    throws IOException, InterruptedException, ClassNotFoundException {
+                                      Path clustersIn) throws IOException, InterruptedException, ClassNotFoundException {
     for (int iteration = 1; iteration <= maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      runIteration(input, clustersIn, clustersOut, modelDistribution, numClusters, alpha0, numReducers);
+      runIteration(conf, input, clustersIn, clustersOut, modelDistribution, numClusters, alpha0);
       // now point the input to the old output directory
       clustersIn = clustersOut;
     }
@@ -500,6 +481,7 @@ public class DirichletDriver extends AbstractJob {
 
   /**
    * Run the job using supplied arguments
+   * @param conf 
    * 
    * @param input
    *          the directory pathname for input points
@@ -513,22 +495,23 @@ public class DirichletDriver extends AbstractJob {
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential execute sequentially if true
    */
-  public static void clusterData(Path input,
+  public static void clusterData(Configuration conf,
+                                 Path input,
                                  Path stateIn,
                                  Path output,
                                  boolean emitMostLikely,
                                  double threshold,
-                                 boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+                                 boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException {
     if (runSequential) {
       clusterDataSeq(input, stateIn, output, emitMostLikely, threshold);
     } else {
-      clusterDataMR(input, stateIn, output, emitMostLikely, threshold);
+      clusterDataMR(conf, input, stateIn, output, emitMostLikely, threshold);
     }
   }
 
   private static void clusterDataSeq(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
-    throws IOException, InstantiationException, IllegalAccessException {
+      throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
     List<DirichletCluster> clusters = DirichletClusterMapper.loadClusters(conf, stateIn);
     DirichletClusterer clusterer = new DirichletClusterer(emitMostLikely, threshold);
@@ -558,9 +541,12 @@ public class DirichletDriver extends AbstractJob {
 
   }
 
-  private static void clusterDataMR(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
+  private static void clusterDataMR(Configuration conf,
+                                    Path input,
+                                    Path stateIn,
+                                    Path output,
+                                    boolean emitMostLikely,
+                                    double threshold) throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
     conf.set(THRESHOLD_KEY, Double.toString(threshold));

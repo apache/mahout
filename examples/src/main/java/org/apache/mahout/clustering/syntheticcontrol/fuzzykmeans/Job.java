@@ -22,7 +22,9 @@ import java.util.Map;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
@@ -48,12 +50,12 @@ public final class Job extends FuzzyKMeansDriver {
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
       log.info("Running with only user-supplied arguments");
-      new Job().run(args);
+      ToolRunner.run(new Configuration(), new Job(), args);
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 10, 1, (float) 2, 0.5);
+      run(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 10, 1, (float) 2, 0.5);
     }
   }
 
@@ -65,8 +67,7 @@ public final class Job extends FuzzyKMeansDriver {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected"
-            + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
         .create());
     addOption(DefaultOptionCreator.numClustersOption()
         .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -106,16 +107,13 @@ public final class Job extends FuzzyKMeansDriver {
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
-      clusters = RandomSeedGenerator.buildRandom(
-          input,
-          clusters,
-          Integer.parseInt(argMap.get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)),
-          measure);
+      clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer.parseInt(argMap
+          .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
     }
     //boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    job(input, output, measure, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta);
+    run(input, output, measure, t1, t2, maxIterations, numReduceTasks, fuzziness, convergenceDelta);
     return 0;
   }
 
@@ -144,7 +142,7 @@ public final class Job extends FuzzyKMeansDriver {
    * @param convergenceDelta
    *          the double convergence criteria for iterations
    */
-  private static void job(Path input,
+  private static void run(Path input,
                           Path output,
                           DistanceMeasure measure,
                           double t1,
@@ -152,27 +150,26 @@ public final class Job extends FuzzyKMeansDriver {
                           int maxIterations,
                           int numReducerTasks,
                           float fuzziness,
-                          double convergenceDelta)
-    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+                          double convergenceDelta) throws IOException, InstantiationException, IllegalAccessException,
+      InterruptedException, ClassNotFoundException {
 
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
-    CanopyDriver.runJob(directoryContainingConvertedInput, output, measure, t1, t2, false, false);
+    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, output, measure, t1, t2, false, false);
     log.info("Running FuzzyKMeans");
-    FuzzyKMeansDriver.runJob(directoryContainingConvertedInput,
-                             new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
-                             output,
-                             measure,
-                             convergenceDelta,
-                             maxIterations,
-                             numReducerTasks,
-                             fuzziness,
-                             true,
-                             true,
-                             0.0,
-                             false);
+    FuzzyKMeansDriver.run(directoryContainingConvertedInput,
+    new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
+    output,
+    measure,
+    convergenceDelta,
+    maxIterations,
+    fuzziness,
+    true,
+    true,
+    0.0,
+    false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-3"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);

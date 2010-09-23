@@ -28,6 +28,7 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
@@ -56,13 +57,13 @@ public final class Job extends DirichletDriver {
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
       log.info("Running with only user-supplied arguments");
-      new Job().run(args);
+      ToolRunner.run(new Configuration(), new Job(), args);
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
       AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
-      new Job().job(new Path("testdata"), output, modelDistribution, 10, 5, 1.0, 1, true, 0);
+      new Job().run(new Path("testdata"), output, modelDistribution, 10, 5, 1.0, true, 0);
     }
   }
 
@@ -88,7 +89,6 @@ public final class Job extends DirichletDriver {
     addOption(DefaultOptionCreator.distanceMeasureOption().withRequired(false).create());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
-    addOption(DefaultOptionCreator.numReducersOption().create());
 
     Map<String, String> argMap = parseArguments(args);
     if (argMap == null) {
@@ -104,7 +104,6 @@ public final class Job extends DirichletDriver {
     String modelPrototype = getOption(MODEL_PROTOTYPE_CLASS_OPTION);
     String distanceMeasure = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     int numModels = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
-    int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
     double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
@@ -115,7 +114,7 @@ public final class Job extends DirichletDriver {
                                                                                                 distanceMeasure,
                                                                                                 prototypeSize);
 
-    job(input, output, modelDistribution, numModels, maxIterations, alpha0, numReducers, emitMostLikely, threshold);
+    run(input, output, modelDistribution, numModels, maxIterations, alpha0, emitMostLikely, threshold);
     return 0;
   }
 
@@ -134,32 +133,28 @@ public final class Job extends DirichletDriver {
    *          the maximum number of iterations
    * @param alpha0
    *          the alpha0 value for the DirichletDistribution
-   * @param numReducers
-   *          the desired number of reducers
    */
-  private void job(Path input,
+  private void run(Path input,
                    Path output,
                    ModelDistribution<VectorWritable> modelDistribution,
                    int numModels,
                    int maxIterations,
                    double alpha0,
-                   int numReducers,
                    boolean emitMostLikely,
                    double threshold) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
-    DirichletDriver.runJob(directoryContainingConvertedInput,
-                           output,
-                           modelDistribution,
-                           numModels,
-                           maxIterations,
-                           alpha0,
-                           numReducers,
-                           true,
-                           emitMostLikely,
-                           threshold,
-                           false);
+    DirichletDriver.run(directoryContainingConvertedInput,
+                        output,
+                        modelDistribution,
+                        numModels,
+                        maxIterations,
+                        alpha0,
+                        true,
+                        emitMostLikely,
+                        threshold,
+                        false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
                                                                                                             "clusteredPoints"));

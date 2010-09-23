@@ -20,7 +20,9 @@ package org.apache.mahout.clustering.syntheticcontrol.kmeans;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
@@ -46,12 +48,12 @@ public final class Job extends KMeansDriver {
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
       log.info("Running with only user-supplied arguments");
-      new Job().run(args);
+      ToolRunner.run(new Configuration(), new Job(), args);
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 0.5, 10);
+      new Job().run(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 0.5, 10);
     }
   }
 
@@ -71,7 +73,6 @@ public final class Job extends KMeansDriver {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(DefaultOptionCreator.numReducersOption().create());
     addOption(DefaultOptionCreator.clusteringOption().create());
 
     Map<String, String> argMap = parseArguments(args);
@@ -87,7 +88,6 @@ public final class Job extends KMeansDriver {
       measureClass = SquaredEuclideanDistanceMeasure.class.getName();
     }
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
-    int numReduceTasks = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
@@ -100,7 +100,14 @@ public final class Job extends KMeansDriver {
           .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    runJob(input, clusters, output, measure, convergenceDelta, maxIterations, numReduceTasks, runClustering, false);
+    run(input,
+    clusters,
+    output,
+    measure,
+    convergenceDelta,
+    maxIterations,
+    runClustering,
+    false);
     return 0;
   }
 
@@ -131,7 +138,7 @@ public final class Job extends KMeansDriver {
    * @throws ClassNotFoundException 
    * @throws InterruptedException 
    */
-  private void job(Path input,
+  private void run(Path input,
                    Path output,
                    DistanceMeasure measure,
                    double t1,
@@ -145,17 +152,16 @@ public final class Job extends KMeansDriver {
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
-    CanopyDriver.runJob(directoryContainingConvertedInput, output, measure, t1, t2, false, false);
+    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, output, measure, t1, t2, false, false);
     log.info("Running KMeans");
-    KMeansDriver.runJob(directoryContainingConvertedInput,
-                        new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
-                        output,
-                        measure,
-                        convergenceDelta,
-                        maxIterations,
-                        1,
-                        true,
-                        false);
+    KMeansDriver.run(directoryContainingConvertedInput,
+    new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
+    output,
+    measure,
+    convergenceDelta,
+    maxIterations,
+    true,
+    false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
                                                                                                             "clusteredPoints"));

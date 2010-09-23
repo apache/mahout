@@ -23,6 +23,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
@@ -48,22 +49,23 @@ class DisplayCanopy extends DisplayClustering {
     int cx = CLUSTERS.size() - 1;
     for (List<Cluster> clusters : CLUSTERS) {
       for (Cluster cluster : clusters) {
-        g2.setStroke(new BasicStroke(1));
-        g2.setColor(Color.BLUE);
-        double[] t1 = { T1, T1 };
-        plotEllipse(g2, cluster.getCenter(), new DenseVector(t1));
-        double[] t2 = { T2, T2 };
-        plotEllipse(g2, cluster.getCenter(), new DenseVector(t2));
-        g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, cx)]);
-        g2.setStroke(new BasicStroke(cx == 0 ? 3 : 1));
-        plotEllipse(g2, cluster.getCenter(), cluster.getRadius().times(3));
+        if (isSignificant(cluster)) {
+          g2.setStroke(new BasicStroke(1));
+          g2.setColor(Color.BLUE);
+          double[] t1 = { T1, T1 };
+          plotEllipse(g2, cluster.getCenter(), new DenseVector(t1));
+          double[] t2 = { T2, T2 };
+          plotEllipse(g2, cluster.getCenter(), new DenseVector(t2));
+          g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, cx)]);
+          g2.setStroke(new BasicStroke(cx == 0 ? 3 : 1));
+          plotEllipse(g2, cluster.getCenter(), cluster.getRadius().times(3));
+        }
       }
       cx--;
     }
   }
 
   public static void main(String[] args) throws Exception {
-    //SIGNIFICANCE = 0.05;
     Path samples = new Path("samples");
     Path output = new Path("output");
     HadoopUtil.overwriteOutput(samples);
@@ -73,7 +75,7 @@ class DisplayCanopy extends DisplayClustering {
     writeSampleData(samples);
     //boolean b = true;
     //if (b) {
-    new CanopyDriver().buildClusters(samples, output, new ManhattanDistanceMeasure(), T1, T2, true);
+    CanopyDriver.buildClusters(new Configuration(), samples, output, new ManhattanDistanceMeasure(), T1, T2, true);
     loadClusters(output);
     //} else {
     //  List<Vector> points = new ArrayList<Vector>();

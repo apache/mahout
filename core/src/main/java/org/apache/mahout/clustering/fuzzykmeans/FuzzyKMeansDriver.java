@@ -37,6 +37,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusterObservations;
@@ -61,63 +62,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansDriver.class);
 
   public static void main(String[] args) throws Exception {
-    new FuzzyKMeansDriver().run(args);
-  }
-
-  /**
-   * Run the job using supplied arguments on a new driver instance (convenience)
-   * 
-   * @param input
-   *          the directory pathname for input points
-   * @param clustersIn
-   *          the directory pathname for initial & computed clusters
-   * @param output
-   *          the directory pathname for output points
-   * @param measure
-   *          the DistanceMeasure
-   * @param convergenceDelta
-   *          the convergence delta value
-   * @param maxIterations
-   *          the maximum number of iterations
-   * @param numReduceTasks
-   *          the number of reduce tasks
-   * @param m
-   *          the fuzzification factor, see
-   *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
-   * @param runClustering 
-   *          true if points are to be clustered after iterations complete
-   * @param emitMostLikely
-   *          a boolean if true emit only most likely cluster for each point
-   * @param threshold 
-   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
-   * @param runSequential if true run in sequential execution mode
-   */
-  public static void runJob(Path input,
-                            Path clustersIn,
-                            Path output,
-                            DistanceMeasure measure,
-                            double convergenceDelta,
-                            int maxIterations,
-                            int numReduceTasks,
-                            float m,
-                            boolean runClustering,
-                            boolean emitMostLikely,
-                            double threshold,
-                            boolean runSequential)
-    throws IOException, ClassNotFoundException, InterruptedException, InstantiationException, IllegalAccessException {
-
-    job(input,
-        clustersIn,
-        output,
-        measure,
-        convergenceDelta,
-        maxIterations,
-        numReduceTasks,
-        m,
-        runClustering,
-        emitMostLikely,
-        threshold,
-        runSequential);
+    ToolRunner.run(new Configuration(), new FuzzyKMeansDriver(), args);
   }
 
   @Override
@@ -128,8 +73,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected"
-            + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
         .create());
     addOption(DefaultOptionCreator.numClustersOption()
         .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -138,8 +82,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
     addOption(M_OPTION, M_OPTION, "coefficient normalization factor, must be greater than 1", true);
-    addOption(DefaultOptionCreator.numReducersOption().create());
-    //TODO: addOption(DefaultOptionCreator.numMappersOption().create()); but how to set in new Job?
     addOption(DefaultOptionCreator.clusteringOption().create());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
@@ -159,7 +101,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     float fuzziness = Float.parseFloat(getOption(M_OPTION));
 
-    int numReduceTasks = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.overwriteOutput(output);
@@ -174,15 +115,14 @@ public class FuzzyKMeansDriver extends AbstractJob {
           .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
-        DefaultOptionCreator.SEQUENTIAL_METHOD));
-    job(input,
+    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD));
+    run(getConf(),
+        input,
         clusters,
         output,
         measure,
         convergenceDelta,
         maxIterations,
-        numReduceTasks,
         fuzziness,
         runClustering,
         emitMostLikely,
@@ -192,8 +132,68 @@ public class FuzzyKMeansDriver extends AbstractJob {
   }
 
   /**
-   * Run the iteration using supplied arguments
+   * Iterate over the input vectors to produce clusters and, if requested, use the
+   * results of the final iteration to cluster the input vectors.
    * 
+   * @param input
+   *          the directory pathname for input points
+   * @param clustersIn
+   *          the directory pathname for initial & computed clusters
+   * @param output
+   *          the directory pathname for output points
+   * @param convergenceDelta
+   *          the convergence delta value
+   * @param maxIterations
+   *          the maximum number of iterations
+   * @param m
+   *          the fuzzification factor, see
+   *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
+   * @param runClustering 
+   *          true if points are to be clustered after iterations complete
+   * @param emitMostLikely
+   *          a boolean if true emit only most likely cluster for each point
+   * @param threshold 
+   *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
+   * @param runSequential if true run in sequential execution mode
+   */
+  public static void run(Path input,
+                         Path clustersIn,
+                         Path output,
+                         DistanceMeasure measure,
+                         double convergenceDelta,
+                         int maxIterations,
+                         float m,
+                         boolean runClustering,
+                         boolean emitMostLikely,
+                         double threshold,
+                         boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException,
+      InstantiationException, IllegalAccessException {
+    Path clustersOut = buildClusters(new Configuration(),
+                                     input,
+                                     clustersIn,
+                                     output,
+                                     measure,
+                                     convergenceDelta,
+                                     maxIterations,
+                                     m,
+                                     runSequential);
+    if (runClustering) {
+      log.info("Clustering ");
+      clusterData(input,
+                  clustersOut,
+                  new Path(output, Cluster.CLUSTERED_POINTS_DIR),
+                  measure,
+                  convergenceDelta,
+                  m,
+                  emitMostLikely,
+                  threshold,
+                  runSequential);
+    }
+  }
+
+  /**
+   * Run the iteration using supplied arguments
+   * @param conf TODO
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
@@ -207,17 +207,17 @@ public class FuzzyKMeansDriver extends AbstractJob {
    * @param m
    *          the fuzzification factor - see
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
+   * 
    * @return true if the iteration successfully runs
    */
-  private static boolean runIteration(Path input,
+  private static boolean runIteration(Configuration conf,
+                                      Path input,
                                       Path clustersIn,
                                       Path clustersOut,
                                       String measureClass,
                                       double convergenceDelta,
-                                      int numReduceTasks,
                                       float m) throws IOException {
 
-    Configuration conf = new Configuration();
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, String.valueOf(convergenceDelta));
@@ -237,7 +237,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
     job.setMapperClass(FuzzyKMeansMapper.class);
     job.setCombinerClass(FuzzyKMeansCombiner.class);
     job.setReducerClass(FuzzyKMeansReducer.class);
-    job.setNumReduceTasks(numReduceTasks);
     job.setJarByClass(FuzzyKMeansDriver.class);
 
     FileInputFormat.addInputPath(job, input);
@@ -262,7 +261,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
   /**
    * Iterate over the input vectors to produce clusters and, if requested, use the
    * results of the final iteration to cluster the input vectors.
-   * 
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
@@ -273,8 +271,6 @@ public class FuzzyKMeansDriver extends AbstractJob {
    *          the convergence delta value
    * @param maxIterations
    *          the maximum number of iterations
-   * @param numReduceTasks
-   *          the number of reduce tasks
    * @param m
    *          the fuzzification factor, see
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
@@ -286,28 +282,20 @@ public class FuzzyKMeansDriver extends AbstractJob {
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential if true run in sequential execution mode
    */
-  public static void job(Path input,
+  public static void run(Configuration conf,
+                         Path input,
                          Path clustersIn,
                          Path output,
                          DistanceMeasure measure,
                          double convergenceDelta,
                          int maxIterations,
-                         int numReduceTasks,
                          float m,
                          boolean runClustering,
                          boolean emitMostLikely,
                          double threshold,
-                         boolean runSequential)
-    throws IOException, ClassNotFoundException, InterruptedException, InstantiationException, IllegalAccessException {
-    Path clustersOut = buildClusters(input,
-                                     clustersIn,
-                                     output,
-                                     measure,
-                                     convergenceDelta,
-                                     maxIterations,
-                                     numReduceTasks,
-                                     m,
-                                     runSequential);
+                         boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException,
+      InstantiationException, IllegalAccessException {
+    Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, convergenceDelta, maxIterations, m, runSequential);
     if (runClustering) {
       log.info("Clustering ");
       clusterData(input,
@@ -324,7 +312,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
   /**
    * Iterate over the input vectors to produce cluster directories for each iteration
-   * 
+   * @param conf TODO
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
@@ -337,38 +325,36 @@ public class FuzzyKMeansDriver extends AbstractJob {
    *          the convergence delta value
    * @param maxIterations
    *          the maximum number of iterations
-   * @param numReduceTasks
-   *          the number of reduce tasks
    * @param m
    *          the fuzzification factor, see
    *          http://en.wikipedia.org/wiki/Data_clustering#Fuzzy_c-means_clustering
    * @param runSequential if true run in sequential execution mode
+   * 
    * @return the Path of the final clusters directory
    */
-  public static Path buildClusters(Path input,
+  public static Path buildClusters(Configuration conf,
+                                   Path input,
                                    Path clustersIn,
                                    Path output,
                                    DistanceMeasure measure,
                                    double convergenceDelta,
                                    int maxIterations,
-                                   int numReduceTasks,
                                    float m,
-                                   boolean runSequential)
-    throws IOException, InstantiationException, IllegalAccessException {
+                                   boolean runSequential) throws IOException, InstantiationException, IllegalAccessException {
     if (runSequential) {
       return buildClustersSeq(input, clustersIn, output, measure, convergenceDelta, maxIterations, m);
     } else {
-      return buildClustersMR(input, clustersIn, output, measure, convergenceDelta, maxIterations, numReduceTasks, m);
+      return buildClustersMR(conf, input, clustersIn, output, measure, convergenceDelta, maxIterations, m);
     }
   }
 
   private static Path buildClustersSeq(Path input,
-                                      Path clustersIn,
-                                      Path output,
-                                      DistanceMeasure measure,
-                                      double convergenceDelta,
-                                      int maxIterations,
-                                      float m) throws IOException, InstantiationException, IllegalAccessException {
+                                       Path clustersIn,
+                                       Path output,
+                                       DistanceMeasure measure,
+                                       double convergenceDelta,
+                                       int maxIterations,
+                                       float m) throws IOException, InstantiationException, IllegalAccessException {
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
 
@@ -405,12 +391,9 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                                            SoftCluster.class);
       try {
         for (SoftCluster cluster : clusters) {
-          log.info("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}",
-                   new Object[] {cluster.getId(),
-                                 AbstractCluster.formatVector(cluster.getCenter(), null),
-                                 cluster.getNumPoints(),
-                                 AbstractCluster.formatVector(cluster.getRadius(), null),
-                                 clustersOut.getName()});
+          log.info("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}", new Object[] { cluster.getId(),
+              AbstractCluster.formatVector(cluster.getCenter(), null), cluster.getNumPoints(),
+              AbstractCluster.formatVector(cluster.getRadius(), null), clustersOut.getName() });
           writer.append(new Text(cluster.getIdentifier()), cluster);
         }
       } finally {
@@ -422,13 +405,13 @@ public class FuzzyKMeansDriver extends AbstractJob {
     return clustersIn;
   }
 
-  private static Path buildClustersMR(Path input,
+  private static Path buildClustersMR(Configuration conf,
+                                      Path input,
                                       Path clustersIn,
                                       Path output,
                                       DistanceMeasure measure,
                                       double convergenceDelta,
                                       int maxIterations,
-                                      int numReduceTasks,
                                       float m) throws IOException {
     boolean converged = false;
     int iteration = 1;
@@ -439,13 +422,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      converged = runIteration(input,
-                               clustersIn,
-                               clustersOut,
-                               measure.getClass().getName(),
-                               convergenceDelta,
-                               numReduceTasks,
-                               m);
+      converged = runIteration(conf, input, clustersIn, clustersOut, measure.getClass().getName(), convergenceDelta, m);
 
       // now point the input to the old output directory
       clustersIn = clustersOut;
@@ -481,8 +458,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                  float m,
                                  boolean emitMostLikely,
                                  double threshold,
-                                 boolean runSequential) 
-    throws IOException, ClassNotFoundException, InterruptedException, InstantiationException, IllegalAccessException {
+                                 boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException,
+      InstantiationException, IllegalAccessException {
     if (runSequential) {
       clusterDataSeq(input, clustersIn, output, measure, convergenceDelta, m);
     } else {
@@ -491,11 +468,11 @@ public class FuzzyKMeansDriver extends AbstractJob {
   }
 
   private static void clusterDataSeq(Path input,
-                              Path clustersIn,
-                              Path output,
-                              DistanceMeasure measure,
-                              double convergenceDelta,
-                              float m) throws IOException, InstantiationException, IllegalAccessException {
+                                     Path clustersIn,
+                                     Path output,
+                                     DistanceMeasure measure,
+                                     double convergenceDelta,
+                                     float m) throws IOException, InstantiationException, IllegalAccessException {
     FuzzyKMeansClusterer clusterer = new FuzzyKMeansClusterer(measure, convergenceDelta, m);
     List<SoftCluster> clusters = new ArrayList<SoftCluster>();
     FuzzyKMeansUtil.configureWithClusterInfo(clustersIn, clusters);
@@ -535,8 +512,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                     double convergenceDelta,
                                     float m,
                                     boolean emitMostLikely,
-                                    double threshold)
-    throws IOException, InterruptedException, ClassNotFoundException {
+                                    double threshold) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(FuzzyKMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(FuzzyKMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
@@ -590,8 +566,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
       }
     };
 
-    FileStatus[] matches =
-        fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
+    FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
 
     for (FileStatus match : matches) {
       result.add(fs.makeQualified(match.getPath()));

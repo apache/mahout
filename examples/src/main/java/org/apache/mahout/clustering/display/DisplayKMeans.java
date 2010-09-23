@@ -52,7 +52,14 @@ class DisplayKMeans extends DisplayClustering {
     double distanceThreshold = 0.001;
     //if (b) {
     Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3, measure);
-    KMeansDriver.runJob(samples, clusters, output, measure, distanceThreshold, maxIter, 1, true, true);
+    KMeansDriver.run(samples,
+    clusters,
+    output,
+    measure,
+    distanceThreshold,
+    maxIter,
+    true,
+    true);
     loadClusters(output);
     //} else {
     //  List<Vector> points = new ArrayList<Vector>();

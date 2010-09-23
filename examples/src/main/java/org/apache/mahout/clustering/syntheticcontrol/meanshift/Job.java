@@ -22,7 +22,9 @@ import java.util.Map;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.HadoopUtil;
@@ -43,12 +45,12 @@ public final class Job extends MeanShiftCanopyDriver {
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
       log.info("Running with only user-supplied arguments");
-      new Job().run(args);
+      ToolRunner.run(new Configuration(), new Job(), args);
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
+      run(new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
     }
   }
 
@@ -114,7 +116,7 @@ public final class Job extends MeanShiftCanopyDriver {
    * @param maxIterations
    *          the int maximum number of iterations
    */
-  private static void job(Path input,
+  private static void run(Path input,
                           Path output,
                           DistanceMeasure measure,
                           double t1,

@@ -35,6 +35,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusterObservations;
 import org.apache.mahout.clustering.ClusteringTestUtils;
@@ -316,7 +317,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION),
           optKey(DefaultOptionCreator.OVERWRITE_OPTION)
       };
-      new FuzzyKMeansDriver().run(args);
+      ToolRunner.run(new Configuration(), new FuzzyKMeansDriver(), args);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-00000"), conf);
       Writable key = new IntWritable();
       Writable out = new WeightedVectorWritable();

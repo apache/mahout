@@ -31,9 +31,10 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -55,16 +56,15 @@ public final class CDbwDriver extends AbstractJob {
   }
 
   public static void main(String[] args) throws Exception {
-    new CDbwDriver().run(args);
+    ToolRunner.run(new Configuration(), new CDbwDriver(), args);
   }
 
   @Override
-  public int run(String[] args)
-    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, InterruptedException {
+  public int run(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException,
+      InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
-    addOption(DefaultOptionCreator.numReducersOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     if (parseArguments(args) == null) {
       return -1;
@@ -73,49 +73,16 @@ public final class CDbwDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
-    int numReducers = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = ccl.loadClass(distanceMeasureClass).asSubclass(DistanceMeasure.class).newInstance();
 
-    job(input, null, output, measure, maxIterations, numReducers);
+    run(getConf(), input, null, output, measure, maxIterations);
     return 0;
   }
 
-  /**
-   * Run the job using supplied arguments
-   * 
-   * @param clustersIn
-   *          the directory pathname for input [n/a :: Cluster]
-   * @param clusteredPointsIn 
-              the directory pathname for input clustered points [clusterId :: VectorWritable]
-   * @param output
-   *          the directory pathname for output reference points [clusterId :: VectorWritable]
-   * @param measure
-   *          the DistanceMeasure to use
-   * @param numIterations
-   *          the number of iterations
-   * @param numReducers
-   *          the number of Reducers desired
-   * @throws InterruptedException 
-   */
-  public static void runJob(Path clustersIn,
-                            Path clusteredPointsIn,
-                            Path output,
-                            DistanceMeasure measure,
-                            int numIterations,
-                            int numReducers)
-    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, InterruptedException {
-    job(clustersIn, clusteredPointsIn, output, measure, numIterations, numReducers);
-  }
-
-  private static void job(Path clustersIn,
-                          Path clusteredPointsIn,
-                          Path output,
-                          DistanceMeasure measure,
-                          int numIterations,
-                          int numReducers)
-    throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
+  public static void run(Configuration conf, Path clustersIn, Path clusteredPointsIn, Path output, DistanceMeasure measure, int numIterations)
+      throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
 
@@ -123,12 +90,11 @@ public final class CDbwDriver extends AbstractJob {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "representativePoints-" + (iteration + 1));
-      runIteration(clusteredPointsIn, stateIn, stateOut, measure, numReducers);
+      runIteration(clusteredPointsIn, stateIn, stateOut, measure);
       // now point the input to the old output directory
       stateIn = stateOut;
     }
 
-    Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
@@ -139,8 +105,8 @@ public final class CDbwDriver extends AbstractJob {
     System.out.println("Separation = " + evaluator.separation());
   }
 
-  private static void writeInitialState(Path output, Path clustersIn)
-    throws InstantiationException, IllegalAccessException, IOException, SecurityException {
+  private static void writeInitialState(Path output, Path clustersIn) throws InstantiationException, IllegalAccessException,
+      IOException, SecurityException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {
@@ -153,10 +119,8 @@ public final class CDbwDriver extends AbstractJob {
         SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
-          if (!(cluster instanceof DirichletCluster) || ((DirichletCluster) cluster).getTotalCount() > 0) {
-            //System.out.println("C-" + cluster.getId() + ": " + ClusterBase.formatVector(cluster.getCenter(), null));
-            writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
-          }
+          log.debug("C-" + cluster.getId() + ": " + AbstractCluster.formatVector(cluster.getCenter(), null));
+          writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
         }
         writer.close();
       }
@@ -174,11 +138,9 @@ public final class CDbwDriver extends AbstractJob {
    *          the directory pathname for output state
    * @param measure
    *          the DistanceMeasure
-   * @param numReducers
-   *          the number of Reducers desired
    */
-  private static void runIteration(Path input, Path stateIn, Path stateOut, DistanceMeasure measure, int numReducers)
-    throws IOException, InterruptedException, ClassNotFoundException {
+  private static void runIteration(Path input, Path stateIn, Path stateOut, DistanceMeasure measure) throws IOException,
+      InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
@@ -194,7 +156,6 @@ public final class CDbwDriver extends AbstractJob {
 
     job.setMapperClass(CDbwMapper.class);
     job.setReducerClass(CDbwReducer.class);
-    job.setNumReduceTasks(numReducers);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
 

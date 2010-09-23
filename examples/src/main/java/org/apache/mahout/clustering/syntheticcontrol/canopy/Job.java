@@ -20,7 +20,9 @@ package org.apache.mahout.clustering.syntheticcontrol.canopy;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.HadoopUtil;
@@ -41,12 +43,12 @@ public final class Job extends CanopyDriver {
   public static void main(String[] args) throws Exception {
     if (args.length > 0) {
       log.info("Running with only user-supplied arguments");
-      new Job().run(args);
+      ToolRunner.run(new Configuration(), new Job(), args);
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      job(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55);
+      run(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55);
     }
   }
 
@@ -69,11 +71,11 @@ public final class Job extends CanopyDriver {
    * @param t2
    *          the canopy T2 threshold
    */
-  private static void job(Path input, Path output, DistanceMeasure measure, double t1, double t2) throws IOException,
+  private static void run(Path input, Path output, DistanceMeasure measure, double t1, double t2) throws IOException,
       InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
-    CanopyDriver.runJob(directoryContainingConvertedInput, output, measure, t1, t2, true, false);
+    CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, output, measure, t1, t2, true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
@@ -105,7 +107,7 @@ public final class Job extends CanopyDriver {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
 
-    job(input, output, measure, t1, t2);
+    run(input, output, measure, t1, t2);
     return 0;
   }
 
