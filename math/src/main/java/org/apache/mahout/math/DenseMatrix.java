@@ -88,21 +88,30 @@ public class DenseMatrix extends AbstractMatrix {
   }
   
   public Matrix viewPart(int[] offset, int[] size) {
-    if (offset[ROW] < 0) {
-      throw new IndexException(offset[ROW], rowSize());
-    }
-    if (offset[ROW] + size[ROW] > rowSize()) {
-      throw new IndexException(offset[ROW] + size[ROW], rowSize());
-    }
-    if (offset[COL] < 0) {
-      throw new IndexException(offset[COL], columnSize());
-    }
-    if (offset[COL] + size[COL] > columnSize()) {
-      throw new IndexException(offset[COL] + size[COL], columnSize());
-    }
-    return new MatrixView(this, offset, size);
+    int rowOffset = offset[ROW];
+    int rowsRequested = size[ROW];
+    int columnOffset = offset[COL];
+    int columnsRequested = size[COL];
+
+    return viewPart(rowOffset, rowsRequested, columnOffset, columnsRequested);
   }
-  
+
+  public Matrix viewPart(int rowOffset, int rowsRequested, int columnOffset, int columnsRequested) {
+    if (rowOffset < 0) {
+      throw new IndexException(rowOffset, rowSize());
+    }
+    if (rowOffset + rowsRequested > rowSize()) {
+      throw new IndexException(rowOffset + rowsRequested, rowSize());
+    }
+    if (columnOffset < 0) {
+      throw new IndexException(columnOffset, columnSize());
+    }
+    if (columnOffset + columnsRequested > columnSize()) {
+      throw new IndexException(columnOffset + columnsRequested, columnSize());
+    }
+    return new MatrixView(this, new int[]{rowOffset, columnOffset}, new int[]{rowsRequested, columnsRequested});
+  }
+
   @Override
   public Matrix assign(double value) {
     for (int row = 0; row < rowSize(); row++) {

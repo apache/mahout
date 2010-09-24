@@ -290,11 +290,25 @@ public interface Matrix extends Cloneable, VectorIterable {
    *
    * @param offset an int[2] offset into the receiver
    * @param size   the int[2] size of the desired result
-   * @return a new Matrix
+   * @return a new Matrix that is a view of the original
    * @throws CardinalityException if the length is greater than the cardinality of the receiver
    * @throws IndexException       if the offset is negative or the offset+length is outside of the receiver
    */
   Matrix viewPart(int[] offset, int[] size);
+
+  /**
+   * Return a new matrix containing the subset of the recipient
+   *
+   * @param rowOffset           The first row of the view
+   * @param rowsRequested       The number of rows in the view
+   * @param columnOffset        The first column in the view
+   * @param columnsRequested    The number of columns in the view
+   * @return a new Matrix that is a view of the original
+   * @throws CardinalityException if the length is greater than the cardinality of the receiver
+   * @throws IndexException       if the offset is negative or the offset+length is outside of the
+   *                              receiver
+   */
+  Matrix viewPart(int rowOffset, int rowsRequested, int columnOffset, int columnsRequested);
 
   /**
    * Return the sum of all the elements of the receiver

@@ -552,6 +552,10 @@ public abstract class AbstractMatrix implements Matrix {
     return result;
   }
 
+  public Matrix viewPart(int rowOffset, int rowsRequested, int columnOffset, int columnsRequested) {
+    return viewPart(new int[]{rowOffset, columnOffset}, new int[]{rowsRequested, columnsRequested});
+  }
+
   public double zSum() {
     double result = 0;
     int[] c = size();
