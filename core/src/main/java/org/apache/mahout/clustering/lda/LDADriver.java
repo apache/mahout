@@ -76,36 +76,6 @@ public final class LDADriver extends AbstractJob {
     new LDADriver().run(args);
   }
 
-  /**
-   * Run the job using supplied arguments
-   * 
-   * @param input
-   *          the directory pathname for input points
-   * @param output
-   *          the directory pathname for output points
-   * @param numTopics
-   *          the number of topics
-   * @param numWords
-   *          the number of words
-   * @param topicSmoothing
-   *          pseudocounts for each topic, typically small &lt; .5
-   * @param maxIterations
-   *          the maximum number of iterations
-   * @param numReducers
-   *          the number of Reducers desired
-   * @throws IOException
-   */
-  public static void runJob(Path input,
-                            Path output,
-                            int numTopics,
-                            int numWords,
-                            double topicSmoothing,
-                            int maxIterations,
-                            int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
-
-    new LDADriver().job(input, output, numTopics, numWords, topicSmoothing, maxIterations, numReducers);
-  }
-
   static LDAState createState(Configuration job) throws IOException {
     String statePath = job.get(STATE_IN_KEY);
     int numTopics = Integer.parseInt(job.get(NUM_TOPICS_KEY));
@@ -165,7 +135,6 @@ public final class LDADriver extends AbstractJob {
               "The total number of words in the corpus (can be approximate, needs to exceed the actual value)");
     addOption(TOPIC_SMOOTHING_OPTION, "a", "Topic smoothing parameter. Default is 50/numTopics.", "-1.0");
     addOption(DefaultOptionCreator.maxIterationsOption().withRequired(false).create());
-    addOption(DefaultOptionCreator.numReducersOption().create());
 
     if (parseArguments(args) == null) {
       return -1;
@@ -177,7 +146,6 @@ public final class LDADriver extends AbstractJob {
       HadoopUtil.overwriteOutput(output);
     }
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
-    int numReduceTasks = Integer.parseInt(getOption(DefaultOptionCreator.MAX_REDUCERS_OPTION));
     int numTopics = Integer.parseInt(getOption(NUM_TOPICS_OPTION));
     int numWords = Integer.parseInt(getOption(NUM_WORDS_OPTION));
     double topicSmoothing = Double.parseDouble(getOption(TOPIC_SMOOTHING_OPTION));
@@ -185,25 +153,30 @@ public final class LDADriver extends AbstractJob {
       topicSmoothing = 50.0 / numTopics;
     }
 
-    job(input, output, numTopics, numWords, topicSmoothing, maxIterations, numReduceTasks);
+    run(getConf(), input, output, numTopics, numWords, topicSmoothing, maxIterations);
 
     return 0;
   }
 
   /**
+   * @param conf 
    * @param input
    * @param output
    * @param numTopics
    * @param numWords
    * @param topicSmoothing
    * @param maxIterations
-   * @param numReducers
    * @throws IOException
    * @throws InterruptedException
    * @throws ClassNotFoundException
    */
-  private void job(Path input, Path output, int numTopics, int numWords, double topicSmoothing, int maxIterations, int numReducers)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  private void run(Configuration conf,
+                   Path input,
+                   Path output,
+                   int numTopics,
+                   int numWords,
+                   double topicSmoothing,
+                   int maxIterations) throws IOException, InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "state-0");
     writeInitialState(stateIn, numTopics, numWords);
     double oldLL = Double.NEGATIVE_INFINITY;
@@ -213,7 +186,7 @@ public final class LDADriver extends AbstractJob {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "state-" + iteration);
-      double ll = runIteration(input, stateIn, stateOut, numTopics, numWords, topicSmoothing, numReducers);
+      double ll = runIteration(conf, input, stateIn, stateOut, numTopics, numWords, topicSmoothing);
       double relChange = (oldLL - ll) / oldLL;
 
       // now point the input to the old output directory
@@ -280,7 +253,7 @@ public final class LDADriver extends AbstractJob {
 
   /**
    * Run the job using supplied arguments
-   * 
+   * @param conf TODO
    * @param input
    *          the directory pathname for input points
    * @param stateIn
@@ -289,17 +262,14 @@ public final class LDADriver extends AbstractJob {
    *          the directory pathname for output state
    * @param numTopics
    *          the number of clusters
-   * @param numReducers
-   *          the number of Reducers desired
    */
-  private double runIteration(Path input,
+  private double runIteration(Configuration conf,
+                              Path input,
                               Path stateIn,
                               Path stateOut,
                               int numTopics,
                               int numWords,
-                              double topicSmoothing,
-                              int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
+                              double topicSmoothing) throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));
     conf.set(NUM_WORDS_KEY, Integer.toString(numWords));
@@ -315,7 +285,6 @@ public final class LDADriver extends AbstractJob {
     job.setMapperClass(LDAMapper.class);
     job.setReducerClass(LDAReducer.class);
     job.setCombinerClass(LDAReducer.class);
-    job.setNumReduceTasks(numReducers);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setJarByClass(LDADriver.class);

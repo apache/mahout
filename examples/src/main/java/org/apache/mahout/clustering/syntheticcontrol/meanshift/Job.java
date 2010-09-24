@@ -127,7 +127,8 @@ public final class Job extends AbstractJob {
       IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
-    new MeanShiftCanopyDriver().run(directoryContainingConvertedInput,
+    new MeanShiftCanopyDriver().run(conf,
+                                    directoryContainingConvertedInput,
                                     output,
                                     measure,
                                     t1,
@@ -135,8 +136,7 @@ public final class Job extends AbstractJob {
                                     convergenceDelta,
                                     maxIterations,
                                     true,
-                                    true,
-                                    false);
+                                    true, false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
                                                                                                             "clusteredPoints"));

@@ -297,7 +297,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   @Test
   public void testMeanShift() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
-    new MeanShiftCanopyDriver().run(getTestTempDirPath("testdata"),
+    Configuration conf = new Configuration();
+    new MeanShiftCanopyDriver().run(conf,
+                                    getTestTempDirPath("testdata"),
                                     getTestTempDirPath("output"),
                                     measure,
                                     2.1,
@@ -305,11 +307,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                                     0.001,
                                     10,
                                     false,
-                                    true,
-                                    false);
+                                    true, false);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
-    Configuration conf = new Configuration();
     Path clustersIn = new Path(output, "clusters-2");
     RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);

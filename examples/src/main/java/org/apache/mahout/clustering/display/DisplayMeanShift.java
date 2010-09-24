@@ -24,6 +24,7 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
@@ -108,7 +109,7 @@ final class DisplayMeanShift extends DisplayClustering {
     writeSampleData(samples);
     boolean b = true;
     if (b) {
-      new MeanShiftCanopyDriver().run(samples, output, measure, t1, t2, 0.005, 20, false, true, true);
+      new MeanShiftCanopyDriver().run(new Configuration(), samples, output, measure, t1, t2, 0.005, 20, false, true, true);
       loadClusters(output);
     } else {
       List<Vector> points = new ArrayList<Vector>();
