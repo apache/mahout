@@ -246,16 +246,16 @@ public class SequentialAccessSparseVector extends AbstractVector {
     private final NonDefaultElement element = new NonDefaultElement();
 
     public boolean hasNext() {
-      return element.getNextOffset() < values.getNumMappings();
+      int numMappings = values.getNumMappings();
+      return numMappings > 0 && element.getNextOffset() < numMappings;
     }
 
     public Element next() {
-      if (element.getNextOffset() >= values.getNumMappings()) {
+      if (!hasNext()) {
         throw new NoSuchElementException();
-      } else {
-        element.advanceOffset();
-        return element;
       }
+      element.advanceOffset();
+      return element;
     }
 
     public void remove() {
@@ -268,16 +268,16 @@ public class SequentialAccessSparseVector extends AbstractVector {
     private final AllElement element = new AllElement();
 
     public boolean hasNext() {
-      return element.getNextIndex() < values.getIndices()[values.getNumMappings() - 1];
+      int numMappings = values.getNumMappings();
+      return numMappings > 0 && element.getNextIndex() <= values.getIndices()[numMappings - 1];
     }
 
     public Element next() {
-      if (element.getNextIndex() >= values.getIndices()[values.getNumMappings() - 1]) {
+      if (!hasNext()) {
         throw new NoSuchElementException();
-      } else {
-        element.advanceIndex();
-        return element;
       }
+      element.advanceIndex();
+      return element;
     }
 
     public void remove() {
@@ -339,6 +339,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
     }
 
     public void set(double value) {
+      lengthSquared = -1;      
       if (index == values.getIndices()[nextOffset]) {
         values.getValues()[nextOffset] = value;
       } else {

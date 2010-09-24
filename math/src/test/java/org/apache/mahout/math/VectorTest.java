@@ -34,6 +34,64 @@ public final class VectorTest extends MahoutTestCase {
   }
 
   @Test
+  public void testSparseVectorFullIteration() {
+    int[] index = {0, 1, 2, 3, 4, 5};
+    double[] values = {1, 2, 3, 4, 5, 6};
+
+    assertEquals(index.length, values.length);
+
+    int n = index.length;
+
+    Vector vector = new SequentialAccessSparseVector(n);
+    for (int i = 0; i < n; i++) {
+      vector.set(index[i], values[i]);
+    }
+
+    for (int i = 0; i < n; i++) {
+      assertEquals(vector.get(i), values[i], EPSILON);
+    }
+
+    int elements = 0;
+    for (Vector.Element e : vector) {
+      elements++;
+    }
+    assertEquals(n, elements);
+
+    Vector empty = new SequentialAccessSparseVector(0);
+    assertFalse(empty.iterator().hasNext());
+  }
+
+  @Test
+  public void testSparseVectorSparseIteration() {
+    int[] index = {0, 1, 2, 3, 4, 5};
+    double[] values = {1, 2, 3, 4, 5, 6};
+
+    assertEquals(index.length, values.length);
+
+    int n = index.length;
+
+    Vector vector = new SequentialAccessSparseVector(n);
+    for (int i = 0; i < n; i++) {
+      vector.set(index[i], values[i]);
+    }
+
+    for (int i = 0; i < n; i++) {
+      assertEquals(vector.get(i), values[i], EPSILON);
+    }
+
+    int elements = 0;
+    Iterator<Vector.Element> it = vector.iterateNonZero();
+    while (it.hasNext()) {
+      it.next();
+      elements++;
+    }
+    assertEquals(n, elements);
+
+    Vector empty = new SequentialAccessSparseVector(0);
+    assertFalse(empty.iterateNonZero().hasNext());
+  }
+
+  @Test
   public void testEquivalent()  {
     //names are not used for equivalent
     RandomAccessSparseVector randomAccessLeft = new RandomAccessSparseVector(3);
@@ -200,9 +258,9 @@ public final class VectorTest extends MahoutTestCase {
     assertEquals("mutation via setQuick() fails to change lengthSquared", expected, v.getLengthSquared(), EPSILON);
 
     Iterator<Vector.Element> it = v.iterator();
-    while(it.hasNext()) {
+    while (it.hasNext()) {
       Vector.Element e = it.next();
-      if(e.index() == v.size() - 2) {
+      if (e.index() == v.size() - 2) {
         e.set(e.get() - 5.0);
       }
     }
