@@ -58,7 +58,11 @@ public final class GroupLensDataModel extends FileDataModel {
     try {
       writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(resultFile), Charset.forName("UTF-8")));
       for (String line : new FileLineIterable(originalFile, false)) {
-        String subLine = line.substring(0, line.lastIndexOf(COLON_DELIMTER));
+        int lastDelimiterStart = line.lastIndexOf(COLON_DELIMTER);
+        if (lastDelimiterStart < 0) {
+          throw new IOException("Unexpected input format on line: " + line);
+        }
+        String subLine = line.substring(0, lastDelimiterStart);
         String convertedLine = COLON_DELIMITER_PATTERN.matcher(subLine).replaceAll(",");
         writer.println(convertedLine);
       }
