@@ -193,15 +193,12 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     callables = wrapWithStatsCallables(callables, noEstimateCounter);
     int numProcessors = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-    log.info("Starting timing of {} tasks in {} threads", callables
-        .size(), numProcessors);
+    log.info("Starting timing of {} tasks in {} threads", callables.size(), numProcessors);
     try {
       List<Future<Void>> futures = executor.invokeAll(callables);
       // Go look for exceptions here, really
       for (Future<Void> future : futures) {
-        if (!future.isDone()) {
-          future.get();
-        }
+        future.get();
       }
     } catch (InterruptedException ie) {
       throw new TasteException(ie);
