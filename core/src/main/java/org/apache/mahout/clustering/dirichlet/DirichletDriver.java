@@ -71,11 +71,11 @@ public class DirichletDriver extends AbstractJob {
 
   public static final String THRESHOLD_KEY = "org.apache.mahout.clustering.dirichlet.threshold";
 
-  protected static final String MODEL_PROTOTYPE_CLASS_OPTION = "modelPrototype";
+  public static final String MODEL_PROTOTYPE_CLASS_OPTION = "modelPrototype";
 
-  protected static final String MODEL_DISTRIBUTION_CLASS_OPTION = "modelDist";
+  public static final String MODEL_DISTRIBUTION_CLASS_OPTION = "modelDist";
 
-  protected static final String ALPHA_OPTION = "alpha";
+  public static final String ALPHA_OPTION = "alpha";
 
   private static final Logger log = LoggerFactory.getLogger(DirichletDriver.class);
 

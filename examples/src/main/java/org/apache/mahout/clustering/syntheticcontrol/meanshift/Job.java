@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.clustering.syntheticcontrol.Constants;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -35,7 +36,7 @@ import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Job extends MeanShiftCanopyDriver {
+public final class Job extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
@@ -50,7 +51,7 @@ public final class Job extends MeanShiftCanopyDriver {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      run(new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
+      new Job().run(new Configuration(), new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
     }
   }
 
@@ -61,8 +62,9 @@ public final class Job extends MeanShiftCanopyDriver {
     addOption(DefaultOptionCreator.convergenceOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(new DefaultOptionBuilder().withLongName(INPUT_IS_CANOPIES_OPTION).withRequired(false).withShortName("ic")
-        .withArgument(new ArgumentBuilder().withName(INPUT_IS_CANOPIES_OPTION).withMinimum(1).withMaximum(1).create())
+    addOption(new DefaultOptionBuilder().withLongName(MeanShiftCanopyDriver.INPUT_IS_CANOPIES_OPTION).withRequired(false)
+        .withShortName("ic").withArgument(new ArgumentBuilder().withName(MeanShiftCanopyDriver.INPUT_IS_CANOPIES_OPTION)
+            .withMinimum(1).withMaximum(1).create())
         .withDescription("If present, the input directory already contains MeanShiftCanopies").create());
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.t1Option().create());
@@ -82,14 +84,12 @@ public final class Job extends MeanShiftCanopyDriver {
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
-    boolean inputIsCanopies = hasOption(INPUT_IS_CANOPIES_OPTION);
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
 
-    runJob(input, output, measure, t1, t2, convergenceDelta, maxIterations, inputIsCanopies, runClustering, false);
+    run(getConf(), input, output, measure, t1, t2, convergenceDelta, maxIterations);
     return 0;
   }
 
@@ -100,7 +100,7 @@ public final class Job extends MeanShiftCanopyDriver {
    * the job expects the a file containing synthetic_control.data as obtained from
    * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series resides in a directory named
    * "testdata", and writes output to a directory named "output".
-   * 
+   * @param conf TODO
    * @param input
    *          the String denoting the input directory path
    * @param output
@@ -116,29 +116,30 @@ public final class Job extends MeanShiftCanopyDriver {
    * @param maxIterations
    *          the int maximum number of iterations
    */
-  private static void run(Path input,
-                          Path output,
-                          DistanceMeasure measure,
-                          double t1,
-                          double t2,
-                          double convergenceDelta,
-                          int maxIterations)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+  public void run(Configuration conf,
+                  Path input,
+                  Path output,
+                  DistanceMeasure measure,
+                  double t1,
+                  double t2,
+                  double convergenceDelta,
+                  int maxIterations) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException,
+      IllegalAccessException {
     Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
-    MeanShiftCanopyDriver.runJob(directoryContainingConvertedInput,
-                                 output,
-                                 measure,
-                                 t1,
-                                 t2,
-                                 convergenceDelta,
-                                 maxIterations,
-                                 true,
-                                 true,
-                                 false);
+    new MeanShiftCanopyDriver().run(directoryContainingConvertedInput,
+                                    output,
+                                    measure,
+                                    t1,
+                                    t2,
+                                    convergenceDelta,
+                                    maxIterations,
+                                    true,
+                                    true,
+                                    false);
     // run ClusterDumper
-    ClusterDumper clusterDumper =
-        new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
+                                                                                                            "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 

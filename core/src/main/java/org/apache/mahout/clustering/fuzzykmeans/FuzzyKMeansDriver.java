@@ -55,9 +55,7 @@ import org.slf4j.LoggerFactory;
 
 public class FuzzyKMeansDriver extends AbstractJob {
 
-  protected static final String M_OPTION = "m";
-
-  public static final String M_OPTION_KEY = "--" + M_OPTION;
+  public static final String M_OPTION = "m";
 
   private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansDriver.class);
 

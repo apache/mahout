@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 public class MeanShiftCanopyDriver extends AbstractJob {
 
-  protected static final String INPUT_IS_CANOPIES_OPTION = "inputIsCanopies";
+  public static final String INPUT_IS_CANOPIES_OPTION = "inputIsCanopies";
 
   private static final Logger log = LoggerFactory.getLogger(MeanShiftCanopyDriver.class);
 
@@ -61,52 +61,6 @@ public class MeanShiftCanopyDriver extends AbstractJob {
 
   public static void main(String[] args) throws Exception {
     new MeanShiftCanopyDriver().run(args);
-  }
-
-  /**
-   * Run the job on a new driver instance (convenience)
-   * 
-   * @param input
-   *          the input pathname String
-   * @param output
-   *          the output pathname String
-   * @param measure
-   *          the DistanceMeasure
-   * @param t1
-   *          the T1 distance threshold
-   * @param t2
-   *          the T2 distance threshold
-   * @param convergenceDelta
-   *          the double convergence criteria
-   * @param maxIterations
-   *          an int number of iterations
-   * @param inputIsCanopies 
-              true if the input path already contains MeanShiftCanopies and does not need to be converted from Vectors
-   * @param runClustering 
-   *          true if the input points are to be clustered once the iterations complete
-   * @param runSequential if true run in sequential execution mode
-   */
-  public static void runJob(Path input,
-                            Path output,
-                            DistanceMeasure measure,
-                            double t1,
-                            double t2,
-                            double convergenceDelta,
-                            int maxIterations,
-                            boolean inputIsCanopies,
-                            boolean runClustering,
-                            boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-    new MeanShiftCanopyDriver().job(input,
-                                    output,
-                                    measure,
-                                    t1,
-                                    t2,
-                                    convergenceDelta,
-                                    maxIterations,
-                                    inputIsCanopies,
-                                    runClustering,
-                                    runSequential);
   }
 
   @Override
@@ -146,7 +100,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
-    job(input,
+    run(input,
         output,
         measure,
         t1,
@@ -234,7 +188,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
    *          true if the input points are to be clustered once the iterations complete
    * @param runSequential if true run in sequential execution mode
    */
-  public void job(Path input,
+  public void run(Path input,
                   Path output,
                   DistanceMeasure measure,
                   double t1,
