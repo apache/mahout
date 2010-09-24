@@ -208,7 +208,16 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testMeanShift() throws Exception {
     DistanceMeasure measure = new CosineDistanceMeasure();
     Path output = getTestTempDirPath("output");
-    MeanShiftCanopyDriver.runJob(getTestTempDirPath("testdata"), output, measure, 0.5, 0.01, 0.05, 10, false, true, false);
+    new MeanShiftCanopyDriver().run(getTestTempDirPath("testdata"),
+    output,
+    measure,
+    0.5,
+    0.01,
+    0.05,
+    10,
+    false,
+    true,
+    false);
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-1"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);

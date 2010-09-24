@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.cdbw;
+package org.apache.mahout.clustering.evaluation;
 
 import java.io.IOException;
 
@@ -42,21 +42,19 @@ import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class CDbwDriver extends AbstractJob {
+public final class RepresentativePointsDriver extends AbstractJob {
 
-  public static final String STATE_IN_KEY = "org.apache.mahout.clustering.dirichlet.stateIn";
+  public static final String STATE_IN_KEY = "org.apache.mahout.clustering.stateIn";
 
-  public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.dirichlet.modelFactory";
+  public static final String DISTANCE_MEASURE_KEY = "org.apache.mahout.clustering.measure";
 
-  //public static final String NUM_CLUSTERS_KEY = "org.apache.mahout.clustering.dirichlet.numClusters";
+  private static final Logger log = LoggerFactory.getLogger(RepresentativePointsDriver.class);
 
-  private static final Logger log = LoggerFactory.getLogger(CDbwDriver.class);
-
-  private CDbwDriver() {
+  private RepresentativePointsDriver() {
   }
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(), new CDbwDriver(), args);
+    ToolRunner.run(new Configuration(), new RepresentativePointsDriver(), args);
   }
 
   @Override
@@ -81,8 +79,13 @@ public final class CDbwDriver extends AbstractJob {
     return 0;
   }
 
-  public static void run(Configuration conf, Path clustersIn, Path clusteredPointsIn, Path output, DistanceMeasure measure, int numIterations)
-      throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
+  public static void run(Configuration conf,
+                         Path clustersIn,
+                         Path clusteredPointsIn,
+                         Path output,
+                         DistanceMeasure measure,
+                         int numIterations) throws InstantiationException, IllegalAccessException, IOException,
+      InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
 
@@ -97,12 +100,6 @@ public final class CDbwDriver extends AbstractJob {
 
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
-    CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    // now print out the Results
-    System.out.println("CDbw = " + evaluator.getCDbw());
-    System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
-    System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-    System.out.println("Separation = " + evaluator.separation());
   }
 
   private static void writeInitialState(Path output, Path clustersIn) throws InstantiationException, IllegalAccessException,
@@ -145,7 +142,7 @@ public final class CDbwDriver extends AbstractJob {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     Job job = new Job(conf);
-    job.setJarByClass(CDbwDriver.class);
+    job.setJarByClass(RepresentativePointsDriver.class);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
     job.setMapOutputKeyClass(IntWritable.class);
@@ -154,8 +151,8 @@ public final class CDbwDriver extends AbstractJob {
     FileInputFormat.setInputPaths(job, input);
     FileOutputFormat.setOutputPath(job, stateOut);
 
-    job.setMapperClass(CDbwMapper.class);
-    job.setReducerClass(CDbwReducer.class);
+    job.setMapperClass(RepresentativePointsMapper.class);
+    job.setReducerClass(RepresentativePointsReducer.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
 

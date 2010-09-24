@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.cdbw;
+package org.apache.mahout.clustering.evaluation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
+public class RepresentativePointsMapper extends Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
@@ -53,8 +53,7 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
   }
 
   @Override
-  protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context)
-    throws IOException, InterruptedException {
+  protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context) throws IOException, InterruptedException {
     int key = clusterId.get();
     WeightedVectorWritable currentMDP = mostDistantPoints.get(key);
 
@@ -74,8 +73,8 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
     Configuration conf = context.getConfiguration();
     try {
       ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-      measure = ccl.loadClass(conf.get(CDbwDriver.DISTANCE_MEASURE_KEY))
-          .asSubclass(DistanceMeasure.class).newInstance();
+      measure = ccl.loadClass(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
+          .newInstance();
       representativePoints = getRepresentativePoints(conf);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
@@ -98,7 +97,7 @@ public class CDbwMapper extends Mapper<IntWritable, WeightedVectorWritable, IntW
   }
 
   public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf) {
-    String statePath = conf.get(CDbwDriver.STATE_IN_KEY);
+    String statePath = conf.get(RepresentativePointsDriver.STATE_IN_KEY);
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
     try {
       Path path = new Path(statePath);

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.cdbw;
+package org.apache.mahout.clustering.evaluation;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,7 +27,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
+public class RepresentativePointsReducer extends Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
@@ -60,7 +60,7 @@ public class CDbwReducer extends Reducer<IntWritable, WeightedVectorWritable, In
     super.setup(context);
     Configuration conf = context.getConfiguration();
     try {
-      representativePoints = CDbwMapper.getRepresentativePoints(conf);
+      representativePoints = RepresentativePointsMapper.getRepresentativePoints(conf);
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
