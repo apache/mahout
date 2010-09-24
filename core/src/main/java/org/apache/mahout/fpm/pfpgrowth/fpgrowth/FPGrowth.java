@@ -102,7 +102,10 @@ public class FPGrowth<A extends Comparable<? super A>> {
     }
     List<Pair<A,Long>> fList = new ArrayList<Pair<A,Long>>();
     for (Entry<A,MutableLong> e : attributeSupport.entrySet()) {
-      fList.add(new Pair<A,Long>(e.getKey(), e.getValue().longValue()));
+      long value = e.getValue().longValue();
+      if (value >= minSupport) {
+        fList.add(new Pair<A,Long>(e.getKey(), value));
+      }
     }
 
     Collections.sort(fList, new Comparator<Pair<A,Long>>() {
