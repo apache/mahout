@@ -51,11 +51,10 @@ public final class ItemAverageRecommender extends AbstractRecommender {
   private static final Logger log = LoggerFactory.getLogger(ItemAverageRecommender.class);
   
   private final FastByIDMap<RunningAverage> itemAverages;
-  private boolean averagesBuilt;
   private final ReadWriteLock buildAveragesLock;
   private final RefreshHelper refreshHelper;
   
-  public ItemAverageRecommender(DataModel dataModel) {
+  public ItemAverageRecommender(DataModel dataModel) throws TasteException {
     super(dataModel);
     this.itemAverages = new FastByIDMap<RunningAverage>();
     this.buildAveragesLock = new ReentrantReadWriteLock();
@@ -67,6 +66,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
       }
     });
     refreshHelper.addDependency(dataModel);
+    buildAverageDiffs();
   }
   
   @Override
@@ -75,8 +75,7 @@ public final class ItemAverageRecommender extends AbstractRecommender {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
     log.debug("Recommending items for user ID '{}'", userID);
-    checkAverageDiffsBuilt();
-    
+
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
     
     TopItems.Estimator<Long> estimator = new Estimator();
@@ -95,7 +94,6 @@ public final class ItemAverageRecommender extends AbstractRecommender {
     if (actualPref != null) {
       return actualPref;
     }
-    checkAverageDiffsBuilt();
     return doEstimatePreference(itemID);
   }
   
@@ -106,12 +104,6 @@ public final class ItemAverageRecommender extends AbstractRecommender {
       return average == null ? Float.NaN : (float) average.getAverage();
     } finally {
       buildAveragesLock.readLock().unlock();
-    }
-  }
-  
-  private void checkAverageDiffsBuilt() throws TasteException {
-    if (!averagesBuilt) {
-      buildAverageDiffs();
     }
   }
   
@@ -133,7 +125,6 @@ public final class ItemAverageRecommender extends AbstractRecommender {
           average.addDatum(prefs.getValue(i));
         }
       }
-      averagesBuilt = true;
     } finally {
       buildAveragesLock.writeLock().unlock();
     }

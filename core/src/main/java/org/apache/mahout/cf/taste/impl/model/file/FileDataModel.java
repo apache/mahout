@@ -125,7 +125,6 @@ public class FileDataModel extends AbstractDataModel {
   private final char delimiter;
   private final Pattern delimiterPattern;
   private final boolean hasPrefValues;
-  private boolean loaded;
   private DataModel delegate;
   private final ReentrantLock reloadLock;
   private final boolean transpose;
@@ -186,6 +185,8 @@ public class FileDataModel extends AbstractDataModel {
     this.reloadLock = new ReentrantLock();
     this.transpose = transpose;
     this.minReloadIntervalMS = minReloadIntervalMS;
+
+    reload();
   }
 
   public File getDataFile() {
@@ -197,11 +198,9 @@ public class FileDataModel extends AbstractDataModel {
   }
 
   protected void reload() {
-    if (!reloadLock.isLocked()) {
-      reloadLock.lock();
+    if (reloadLock.tryLock()) {
       try {
         delegate = buildModel();
-        loaded = true;
       } catch (IOException ioe) {
         log.warn("Exception while reloading", ioe);
       } finally {
@@ -598,11 +597,6 @@ public class FileDataModel extends AbstractDataModel {
       itemTimestamps.remove(itemID);
     }
   }
-  private void checkLoaded() {
-    if (!loaded) {
-      reload();
-    }
-  }
 
   /**
    * Subclasses may wish to override this if ID values in the file are not numeric. This provides a hook by
@@ -632,61 +626,51 @@ public class FileDataModel extends AbstractDataModel {
 
   @Override
   public LongPrimitiveIterator getUserIDs() throws TasteException {
-    checkLoaded();
     return delegate.getUserIDs();
   }
 
   @Override
   public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
-    checkLoaded();
     return delegate.getPreferencesFromUser(userID);
   }
 
   @Override
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
-    checkLoaded();
     return delegate.getItemIDsFromUser(userID);
   }
 
   @Override
   public LongPrimitiveIterator getItemIDs() throws TasteException {
-    checkLoaded();
     return delegate.getItemIDs();
   }
 
   @Override
   public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
-    checkLoaded();
     return delegate.getPreferencesForItem(itemID);
   }
 
   @Override
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
-    checkLoaded();
     return delegate.getPreferenceValue(userID, itemID);
   }
 
   @Override
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
-    checkLoaded();
     return delegate.getPreferenceTime(userID, itemID);
   }
 
   @Override
   public int getNumItems() throws TasteException {
-    checkLoaded();
     return delegate.getNumItems();
   }
 
   @Override
   public int getNumUsers() throws TasteException {
-    checkLoaded();
     return delegate.getNumUsers();
   }
 
   @Override
   public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
-    checkLoaded();
     return delegate.getNumUsersWithPreferenceFor(itemIDs);
   }
 
@@ -698,14 +682,12 @@ public class FileDataModel extends AbstractDataModel {
    */
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
-    checkLoaded();
     delegate.setPreference(userID, itemID, value);
   }
 
   /** See the warning at {@link #setPreference(long, long, float)}. */
   @Override
   public void removePreference(long userID, long itemID) throws TasteException {
-    checkLoaded();
     delegate.removePreference(userID, itemID);
   }
 
@@ -720,19 +702,16 @@ public class FileDataModel extends AbstractDataModel {
 
   @Override
   public boolean hasPreferenceValues() {
-    checkLoaded();
     return delegate.hasPreferenceValues();
   }
 
   @Override
   public float getMaxPreference() {
-    checkLoaded();
     return delegate.getMaxPreference();
   }
 
   @Override
   public float getMinPreference() {
-    checkLoaded();    
     return delegate.getMinPreference();
   }
 

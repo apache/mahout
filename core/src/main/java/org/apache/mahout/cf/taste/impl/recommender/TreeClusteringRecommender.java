@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -74,8 +73,6 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   private FastByIDMap<List<RecommendedItem>> topRecsByUserID;
   private FastIDSet[] allClusters;
   private FastByIDMap<FastIDSet> clustersByUserID;
-  private boolean clustersBuilt;
-  private final ReentrantLock buildClustersLock;
   private final RefreshHelper refreshHelper;
   
   /**
@@ -88,7 +85,8 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    * @throws IllegalArgumentException
    *           if arguments are <code>null</code>, or <code>numClusters</code> is less than 2
    */
-  public TreeClusteringRecommender(DataModel dataModel, ClusterSimilarity clusterSimilarity, int numClusters) {
+  public TreeClusteringRecommender(DataModel dataModel, ClusterSimilarity clusterSimilarity, int numClusters)
+    throws TasteException {
     this(dataModel, clusterSimilarity, numClusters, 1.0);
   }
   
@@ -109,7 +107,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
                                    int numClusters,
-                                   double samplingRate) {
+                                   double samplingRate) throws TasteException {
     super(dataModel);
     if (clusterSimilarity == null) {
       throw new IllegalArgumentException("clusterSimilarity is null");
@@ -125,7 +123,6 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     this.clusteringThreshold = Double.NaN;
     this.clusteringByThreshold = false;
     this.samplingRate = samplingRate;
-    this.buildClustersLock = new ReentrantLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
@@ -135,6 +132,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     });
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(clusterSimilarity);
+    buildClusters();
   }
   
   /**
@@ -150,7 +148,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
    */
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
-                                   double clusteringThreshold) {
+                                   double clusteringThreshold) throws TasteException {
     this(dataModel, clusterSimilarity, clusteringThreshold, 1.0);
   }
   
@@ -172,7 +170,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   public TreeClusteringRecommender(DataModel dataModel,
                                    ClusterSimilarity clusterSimilarity,
                                    double clusteringThreshold,
-                                   double samplingRate) {
+                                   double samplingRate) throws TasteException {
     super(dataModel);
     if (clusterSimilarity == null) {
       throw new IllegalArgumentException("clusterSimilarity is null");
@@ -188,7 +186,6 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     this.clusteringThreshold = clusteringThreshold;
     this.clusteringByThreshold = true;
     this.samplingRate = samplingRate;
-    this.buildClustersLock = new ReentrantLock();
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
@@ -198,6 +195,7 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
     });
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(clusterSimilarity);
+    buildClusters();
   }
   
   @Override
@@ -267,39 +265,27 @@ public final class TreeClusteringRecommender extends AbstractRecommender impleme
   }
 
   private void buildClusters() throws TasteException {
-    if (clustersBuilt) {
-      return;
-    }
-    buildClustersLock.lock();
-    try {
-      if (clustersBuilt) {
-        return;
+    DataModel model = getDataModel();
+    int numUsers = model.getNumUsers();
+    if (numUsers > 0) {
+      List<FastIDSet> newClusters = new ArrayList<FastIDSet>(numUsers);
+      // Begin with a cluster for each user:
+      LongPrimitiveIterator it = model.getUserIDs();
+      while (it.hasNext()) {
+        FastIDSet newCluster = new FastIDSet();
+        newCluster.add(it.nextLong());
+        newClusters.add(newCluster);
       }
-      DataModel model = getDataModel();
-      int numUsers = model.getNumUsers();
-      if (numUsers > 0) {
-        List<FastIDSet> newClusters = new ArrayList<FastIDSet>(numUsers);
-        // Begin with a cluster for each user:
-        LongPrimitiveIterator it = model.getUserIDs();
-        while (it.hasNext()) {
-          FastIDSet newCluster = new FastIDSet();
-          newCluster.add(it.nextLong());
-          newClusters.add(newCluster);
-        }
-        if (numUsers > 1) {
-          findClusters(newClusters);
-        }
-        topRecsByUserID = computeTopRecsPerUserID(newClusters);
-        clustersByUserID = computeClustersPerUserID(newClusters);
-        allClusters = newClusters.toArray(new FastIDSet[newClusters.size()]);
-      } else {
-        topRecsByUserID = new FastByIDMap<List<RecommendedItem>>();
-        clustersByUserID = new FastByIDMap<FastIDSet>();
-        allClusters = NO_CLUSTERS;
+      if (numUsers > 1) {
+        findClusters(newClusters);
       }
-      clustersBuilt = true;
-    } finally {
-      buildClustersLock.unlock();
+      topRecsByUserID = computeTopRecsPerUserID(newClusters);
+      clustersByUserID = computeClustersPerUserID(newClusters);
+      allClusters = newClusters.toArray(new FastIDSet[newClusters.size()]);
+    } else {
+      topRecsByUserID = new FastByIDMap<List<RecommendedItem>>();
+      clustersByUserID = new FastByIDMap<FastIDSet>();
+      allClusters = NO_CLUSTERS;
     }
   }
   

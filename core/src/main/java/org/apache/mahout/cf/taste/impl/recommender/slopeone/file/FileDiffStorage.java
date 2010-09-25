@@ -62,7 +62,6 @@ public final class FileDiffStorage implements DiffStorage {
   
   private final File dataFile;
   private long lastModified;
-  private boolean loaded;
   private final long maxEntries;
   private final FastByIDMap<FastByIDMap<RunningAverage>> averageDiffs;
   private final FastIDSet allRecommendableItemIDs;
@@ -95,6 +94,8 @@ public final class FileDiffStorage implements DiffStorage {
     this.averageDiffs = new FastByIDMap<FastByIDMap<RunningAverage>>();
     this.allRecommendableItemIDs = new FastIDSet();
     this.buildAverageDiffsLock = new ReentrantReadWriteLock();
+
+    buildDiffs();
   }
   
   private void buildDiffs() {
@@ -206,17 +207,9 @@ public final class FileDiffStorage implements DiffStorage {
     allRecommendableItemIDs.rehash();
   }
   
-  private void checkLoaded() {
-    if (!loaded) {
-      buildDiffs();
-      loaded = true;
-    }
-  }
-  
   @Override
   public RunningAverage getDiff(long itemID1, long itemID2) {
-    checkLoaded();
-    
+
     boolean inverted = false;
     if (itemID1 > itemID2) {
       inverted = true;
@@ -248,7 +241,6 @@ public final class FileDiffStorage implements DiffStorage {
   
   @Override
   public RunningAverage[] getDiffs(long userID, long itemID, PreferenceArray prefs) {
-    checkLoaded();
     try {
       buildAverageDiffsLock.readLock().lock();
       int size = prefs.length();
@@ -264,13 +256,11 @@ public final class FileDiffStorage implements DiffStorage {
   
   @Override
   public RunningAverage getAverageItemPref(long itemID) {
-    checkLoaded();
     return null; // TODO can't do this without a DataModel
   }
   
   @Override
   public void updateItemPref(long itemID, float prefDelta, boolean remove) {
-    checkLoaded();
     try {
       buildAverageDiffsLock.readLock().lock();
       for (Map.Entry<Long,FastByIDMap<RunningAverage>> entry : averageDiffs.entrySet()) {
@@ -303,7 +293,6 @@ public final class FileDiffStorage implements DiffStorage {
   
   @Override
   public FastIDSet getRecommendableItemIDs(long userID) {
-    checkLoaded();
     try {
       buildAverageDiffsLock.readLock().lock();
       return allRecommendableItemIDs.clone();

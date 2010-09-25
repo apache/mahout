@@ -46,11 +46,10 @@ public class FileIDMigrator extends AbstractIDMigrator {
   public static final long DEFAULT_MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
 
   private final File dataFile;
-  private final FastByIDMap<String> longToString;
+  private FastByIDMap<String> longToString;
   private final ReentrantLock reloadLock;
 
   private long lastModified;
-  private boolean loaded;
   private long minReloadIntervalMS;
 
   private static final Logger log = LoggerFactory.getLogger(FileIDMigrator.class);
@@ -60,7 +59,6 @@ public class FileIDMigrator extends AbstractIDMigrator {
   }
 
   public FileIDMigrator(File dataFile, long minReloadIntervalMS) throws FileNotFoundException {
-    super();
     longToString = new FastByIDMap<String>(100);
     if (dataFile == null) {
       throw new IllegalArgumentException("dataFile is null");
@@ -74,30 +72,20 @@ public class FileIDMigrator extends AbstractIDMigrator {
     this.dataFile = dataFile;
     this.reloadLock = new ReentrantLock();
     this.lastModified = dataFile.lastModified();
-    this.loaded = false;
     this.minReloadIntervalMS = minReloadIntervalMS;
+
+    reload();
   }
 
   @Override
   public String toStringID(long longID) {
-    if (!loaded) {
-      reload();
-    }
-    synchronized (longToString) {
-      return longToString.get(longID);
-    }
+    return longToString.get(longID);
   }
 
   private void reload() {
-    if (!reloadLock.isLocked()) {
-      reloadLock.lock();
+    if (reloadLock.tryLock()) {
       try {
-        longToString.clear();
-        for (String line : new FileLineIterable(dataFile)) {
-          longToString.put(toLongID(line), line);
-        }
-        lastModified = dataFile.lastModified();
-        loaded = true;
+        longToString = buildMapping();
       } catch (IOException ioe) {
         throw new IllegalStateException(ioe);
       } finally {
@@ -106,9 +94,18 @@ public class FileIDMigrator extends AbstractIDMigrator {
     }
   }
 
+  private FastByIDMap<String> buildMapping() throws IOException {
+    FastByIDMap<String> mapping = new FastByIDMap<String>();
+    for (String line : new FileLineIterable(dataFile)) {
+      mapping.put(toLongID(line), line);
+    }
+    lastModified = dataFile.lastModified();
+    return mapping;
+  }
+
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    if (!loaded || dataFile.lastModified() > lastModified + minReloadIntervalMS) {
+    if (dataFile.lastModified() > lastModified + minReloadIntervalMS) {
       log.debug("File has changed; reloading...");
       reload();
     }

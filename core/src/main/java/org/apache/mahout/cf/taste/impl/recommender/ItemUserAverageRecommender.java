@@ -54,11 +54,10 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
   private final FastByIDMap<RunningAverage> itemAverages;
   private final FastByIDMap<RunningAverage> userAverages;
   private final RunningAverage overallAveragePrefValue;
-  private boolean averagesBuilt;
   private final ReadWriteLock buildAveragesLock;
   private final RefreshHelper refreshHelper;
   
-  public ItemUserAverageRecommender(DataModel dataModel) {
+  public ItemUserAverageRecommender(DataModel dataModel) throws TasteException {
     super(dataModel);
     this.itemAverages = new FastByIDMap<RunningAverage>();
     this.userAverages = new FastByIDMap<RunningAverage>();
@@ -72,6 +71,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       }
     });
     refreshHelper.addDependency(dataModel);
+    buildAverageDiffs();
   }
   
   @Override
@@ -80,8 +80,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       throw new IllegalArgumentException("howMany must be at least 1");
     }
     log.debug("Recommending items for user ID '{}'", userID);
-    checkAverageDiffsBuilt();
-    
+
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
     
     TopItems.Estimator<Long> estimator = new Estimator(userID);
@@ -100,7 +99,6 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
     if (actualPref != null) {
       return actualPref;
     }
-    checkAverageDiffsBuilt();
     return doEstimatePreference(userID, itemID);
   }
   
@@ -121,13 +119,7 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
       buildAveragesLock.readLock().unlock();
     }
   }
-  
-  private void checkAverageDiffsBuilt() throws TasteException {
-    if (!averagesBuilt) {
-      buildAverageDiffs();
-    }
-  }
-  
+
   private void buildAverageDiffs() throws TasteException {
     try {
       buildAveragesLock.writeLock().lock();
@@ -145,7 +137,6 @@ public final class ItemUserAverageRecommender extends AbstractRecommender {
           overallAveragePrefValue.addDatum(value);
         }
       }
-      averagesBuilt = true;
     } finally {
       buildAveragesLock.writeLock().unlock();
     }

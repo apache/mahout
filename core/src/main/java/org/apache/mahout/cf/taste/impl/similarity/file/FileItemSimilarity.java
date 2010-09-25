@@ -18,19 +18,13 @@
 package org.apache.mahout.cf.taste.impl.similarity.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Pattern;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
-import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.common.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +59,6 @@ public class FileItemSimilarity implements ItemSimilarity {
   private final ReentrantLock reloadLock;
   private final File dataFile;
   private long lastModified;
-  private boolean loaded;
   private final long minReloadIntervalMS;
 
   private static final Logger log = LoggerFactory.getLogger(FileItemSimilarity.class);
@@ -73,9 +66,8 @@ public class FileItemSimilarity implements ItemSimilarity {
   /**
    * @param dataFile
    *          file containing the similarity data
-   * @throws IOException
    */
-  public FileItemSimilarity(File dataFile) throws IOException {
+  public FileItemSimilarity(File dataFile) {
     this(dataFile, DEFAULT_MIN_RELOAD_INTERVAL_MS);
   }
 
@@ -85,57 +77,48 @@ public class FileItemSimilarity implements ItemSimilarity {
    *          when refresh() is called
    * @see #FileItemSimilarity(File)
    */
-  public FileItemSimilarity(File dataFile, long minReloadIntervalMS) throws IOException {
+  public FileItemSimilarity(File dataFile, long minReloadIntervalMS) {
     if (dataFile == null) {
       throw new IllegalArgumentException("dataFile is null");
     }
     if (!dataFile.exists() || dataFile.isDirectory()) {
-      throw new FileNotFoundException(dataFile.toString());
+      throw new IllegalArgumentException("dataFile is missing or a directory: " + dataFile);
     }
 
     log.info("Creating FileItemSimilarity for file {}", dataFile);
 
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
-    this.loaded = false;
     this.minReloadIntervalMS = minReloadIntervalMS;
     this.reloadLock = new ReentrantLock();
+
+    reload();
   }
 
   @Override
   public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
-    checkLoaded();
     return delegate.itemSimilarities(itemID1, itemID2s);
   }
 
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
-    checkLoaded();
     return delegate.itemSimilarity(itemID1, itemID2);
   }
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    if (delegate == null || dataFile.lastModified() > lastModified + minReloadIntervalMS) {
+    if (dataFile.lastModified() > lastModified + minReloadIntervalMS) {
       log.debug("File has changed; reloading...");
       reload();
     }
   }
 
-  private void checkLoaded() {
-    if (!loaded) {
-      reload();
-    }
-  }
-
   protected void reload() {
-    if (!reloadLock.isLocked()) {
-      reloadLock.lock();
+    if (reloadLock.tryLock()) {
       try {
         long newLastModified = dataFile.lastModified();
         delegate = new GenericItemSimilarity(new FileItemItemSimilarityIterable(dataFile));
         lastModified = newLastModified;
-        loaded = true;
       } finally {
         reloadLock.unlock();
       }
@@ -147,58 +130,4 @@ public class FileItemSimilarity implements ItemSimilarity {
     return "FileItemSimilarity[dataFile:" + dataFile + ']';
   }
 
-  /**
-   * {@link Iterable} to be able to read a file linewise into a {@link GenericItemSimilarity}
-   */
-  static class FileItemItemSimilarityIterable implements Iterable<ItemItemSimilarity> {
-
-    private final File similaritiesFile;
-
-    FileItemItemSimilarityIterable(File similaritiesFile) {
-      this.similaritiesFile = similaritiesFile;
-    }
-
-    @Override
-    public Iterator<ItemItemSimilarity> iterator() {
-      return new FileItemItemSimilarityIterator(similaritiesFile);
-    }
-
-    /**
-     * a simple iterator using a {@link FileLineIterator} internally, parsing each
-     * line into an {@link ItemItemSimilarity}
-     */
-    static class FileItemItemSimilarityIterator implements Iterator<ItemItemSimilarity> {
-
-      private static final Pattern SEPARATOR = Pattern.compile("[,\t]");
-
-      private final FileLineIterator lineIterator;
-
-      FileItemItemSimilarityIterator(File similaritiesFile) {
-        try {
-          lineIterator = new FileLineIterator(similaritiesFile);
-        } catch (IOException e) {
-          throw new IllegalArgumentException("Cannot read similarities file", e);
-        }
-      }
-
-      @Override
-      public boolean hasNext() {
-        return lineIterator.hasNext();
-      }
-
-      @Override
-      public ItemItemSimilarity next() {
-        String line = lineIterator.next();
-        String[] tokens = SEPARATOR.split(line);
-        return new ItemItemSimilarity(Long.parseLong(tokens[0]), Long.parseLong(tokens[1]),
-            Double.parseDouble(tokens[2]));
-      }
-
-      @Override
-      public void remove() {
-        throw new UnsupportedOperationException();
-      }
-    }
-
-  }
 }

@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.impl.similarity.file;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
@@ -110,16 +109,14 @@ public final class FileItemSimilarityTest extends TasteTestCase {
     assertEquals(0.112, similarity.itemSimilarity(8L, 7L), EPSILON);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testFileNotFoundExceptionForNonExistingFile() throws Exception {
-    try {
-      new FileItemSimilarity(new File("xKsdfksdfsdf"));
-      fail();
-    } catch (FileNotFoundException e) {}
+    new FileItemSimilarity(new File("xKsdfksdfsdf"));
   }
 
+  @Test
   public void testFileItemItemSimilarityIterable() throws Exception {
-    Iterable<ItemItemSimilarity> similarityIterable = new FileItemSimilarity.FileItemItemSimilarityIterable(testFile);
+    Iterable<ItemItemSimilarity> similarityIterable = new FileItemItemSimilarityIterable(testFile);
     GenericItemSimilarity similarity = new GenericItemSimilarity(similarityIterable);
 
     assertEquals(0.125, similarity.itemSimilarity(1L, 5L), EPSILON);
