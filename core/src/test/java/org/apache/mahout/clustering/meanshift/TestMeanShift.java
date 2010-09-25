@@ -33,6 +33,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
@@ -151,8 +152,7 @@ public final class TestMeanShift extends MahoutTestCase {
   @Test
   public void testClustererReferenceImplementation() {
     Iterable<Vector> points = new ArrayList<Vector>(Arrays.asList(raw));
-    List<MeanShiftCanopy> canopies =
-        MeanShiftCanopyClusterer.clusterPoints(points, euclideanDistanceMeasure, 0.5, 4, 1, 10);
+    List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, euclideanDistanceMeasure, 0.5, 4, 1, 10);
     printCanopies(canopies);
     printImage(canopies);
   }
@@ -182,8 +182,9 @@ public final class TestMeanShift extends MahoutTestCase {
     // map the data
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     DummyRecordWriter<Text, MeanShiftCanopy> mapWriter = new DummyRecordWriter<Text, MeanShiftCanopy>();
-    Mapper<WritableComparable<?>, MeanShiftCanopy, Text, MeanShiftCanopy>.Context mapContext =
-        DummyRecordWriter.build(mapper, conf, mapWriter);
+    Mapper<WritableComparable<?>, MeanShiftCanopy, Text, MeanShiftCanopy>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                       conf,
+                                                                                                                       mapWriter);
     mapper.setup(mapContext);
     for (MeanShiftCanopy canopy : canopies) {
       mapper.map(new Text(), canopy, mapContext);
@@ -212,8 +213,7 @@ public final class TestMeanShift extends MahoutTestCase {
 
       MeanShiftCanopy canopy = canopyMap.get((ref.isConverged() ? "MSV-" : "MSC-") + ref.getId());
       assertEquals("ids", ref.getId(), canopy.getId());
-      assertEquals("centers(" + ref.getIdentifier() + ')',
-                   ref.getCenter().asFormatString(), canopy.getCenter().asFormatString());
+      assertEquals("centers(" + ref.getIdentifier() + ')', ref.getCenter().asFormatString(), canopy.getCenter().asFormatString());
       assertEquals("bound points", ref.getBoundPoints().toList().size(), canopy.getBoundPoints().toList().size());
     }
   }
@@ -254,8 +254,9 @@ public final class TestMeanShift extends MahoutTestCase {
 
     MeanShiftCanopyMapper mapper = new MeanShiftCanopyMapper();
     DummyRecordWriter<Text, MeanShiftCanopy> mapWriter = new DummyRecordWriter<Text, MeanShiftCanopy>();
-    Mapper<WritableComparable<?>, MeanShiftCanopy, Text, MeanShiftCanopy>.Context mapContext =
-        DummyRecordWriter.build(mapper, conf, mapWriter);
+    Mapper<WritableComparable<?>, MeanShiftCanopy, Text, MeanShiftCanopy>.Context mapContext = DummyRecordWriter.build(mapper,
+                                                                                                                       conf,
+                                                                                                                       mapWriter);
     mapper.setup(mapContext);
 
     // map the data
@@ -268,8 +269,11 @@ public final class TestMeanShift extends MahoutTestCase {
     // now reduce the mapper output
     MeanShiftCanopyReducer reducer = new MeanShiftCanopyReducer();
     DummyRecordWriter<Text, MeanShiftCanopy> reduceWriter = new DummyRecordWriter<Text, MeanShiftCanopy>();
-    Reducer<Text, MeanShiftCanopy, Text, MeanShiftCanopy>.Context reduceContext =
-        DummyRecordWriter.build(reducer, conf, reduceWriter, Text.class, MeanShiftCanopy.class);
+    Reducer<Text, MeanShiftCanopy, Text, MeanShiftCanopy>.Context reduceContext = DummyRecordWriter.build(reducer,
+                                                                                                          conf,
+                                                                                                          reduceWriter,
+                                                                                                          Text.class,
+                                                                                                          MeanShiftCanopy.class);
     reducer.setup(reduceContext);
     reducer.reduce(new Text("canopy"), mapWriter.getValue(new Text("canopy")), reduceContext);
     reducer.cleanup(reduceContext);
@@ -286,8 +290,8 @@ public final class TestMeanShift extends MahoutTestCase {
     for (Map.Entry<String, MeanShiftCanopy> mapEntry : reducerReferenceMap.entrySet()) {
       MeanShiftCanopy refCanopy = mapEntry.getValue();
 
-      List<MeanShiftCanopy> values =
-          reduceWriter.getValue(new Text((refCanopy.isConverged() ? "MSV-" : "MSC-") + refCanopy.getId()));
+      List<MeanShiftCanopy> values = reduceWriter
+          .getValue(new Text((refCanopy.isConverged() ? "MSV-" : "MSC-") + refCanopy.getId()));
       assertEquals("values", 1, values.size());
       MeanShiftCanopy reducerCanopy = values.get(0);
       assertEquals("ids", refCanopy.getId(), reducerCanopy.getId());
@@ -297,9 +301,7 @@ public final class TestMeanShift extends MahoutTestCase {
       String refCenter = refCanopy.getCenter().asFormatString();
       String reducerCenter = reducerCanopy.getCenter().asFormatString();
       assertEquals("centers(" + mapEntry.getKey() + ')', refCenter, reducerCenter);
-      assertEquals("bound points",
-                   refCanopy.getBoundPoints().toList().size(),
-                   reducerCanopy.getBoundPoints().toList().size());
+      assertEquals("bound points", refCanopy.getBoundPoints().toList().size(), reducerCanopy.getBoundPoints().toList().size());
     }
   }
 
@@ -327,7 +329,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.T2_OPTION), "1", optKey(DefaultOptionCreator.CLUSTERING_OPTION),
         optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "4", optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.5",
         optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
-    new MeanShiftCanopyDriver().run(args);
+    ToolRunner.run(conf, new MeanShiftCanopyDriver(), args);
     Path outPart = new Path(output, "clusters-3/part-r-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Writable key = new Text();
@@ -366,7 +368,7 @@ public final class TestMeanShift extends MahoutTestCase {
         optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION), "4", optKey(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION), "0.5",
         optKey(DefaultOptionCreator.OVERWRITE_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
         DefaultOptionCreator.SEQUENTIAL_METHOD };
-    new MeanShiftCanopyDriver().run(args);
+    ToolRunner.run(new Configuration(), new MeanShiftCanopyDriver(), args);
     Path outPart = new Path(output, "clusters-4/part-r-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Writable key = new Text();
