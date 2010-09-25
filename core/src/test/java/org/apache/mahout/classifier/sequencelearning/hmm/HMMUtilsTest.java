@@ -18,8 +18,7 @@
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
 import java.util.Arrays;
-
-import junit.framework.Assert;
+import java.util.List;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -29,48 +28,49 @@ import org.junit.Test;
 
 public class HMMUtilsTest extends HMMTestBase {
 
-  Matrix legal2_2;
-  Matrix legal2_3;
-  Matrix legal3_3;
-  Vector legal2;
-  Matrix illegal2_2;
+  private Matrix legal22;
+  private Matrix legal23;
+  private Matrix legal33;
+  private Vector legal2;
+  private Matrix illegal22;
 
+  @Override
   public void setUp() throws Exception {
     super.setUp();
-    legal2_2 = new DenseMatrix(new double[][]{{0.5, 0.5}, {0.3, 0.7}});
-    legal2_3 = new DenseMatrix(new double[][]{{0.2, 0.2, 0.6},
+    legal22 = new DenseMatrix(new double[][]{{0.5, 0.5}, {0.3, 0.7}});
+    legal23 = new DenseMatrix(new double[][]{{0.2, 0.2, 0.6},
         {0.3, 0.3, 0.4}});
-    legal3_3 = new DenseMatrix(new double[][]{{0.1, 0.1, 0.8},
+    legal33 = new DenseMatrix(new double[][]{{0.1, 0.1, 0.8},
         {0.1, 0.2, 0.7}, {0.2, 0.3, 0.5}});
     legal2 = new DenseVector(new double[]{0.4, 0.6});
-    illegal2_2 = new DenseMatrix(new double[][]{{1, 2}, {3, 4}});
+    illegal22 = new DenseMatrix(new double[][]{{1, 2}, {3, 4}});
   }
 
   @Test
   public void testValidatorLegal() {
-    HmmUtils.validate(new HmmModel(legal2_2, legal2_3, legal2));
+    HmmUtils.validate(new HmmModel(legal22, legal23, legal2));
   }
 
   @Test
   public void testValidatorDimensionError() {
     try {
-      HmmUtils.validate(new HmmModel(legal3_3, legal2_3, legal2));
+      HmmUtils.validate(new HmmModel(legal33, legal23, legal2));
     } catch (IllegalArgumentException e) {
       // success
       return;
     }
-    Assert.fail();
+    fail();
   }
 
   @Test
   public void testValidatorIllegelMatrixError() {
     try {
-      HmmUtils.validate(new HmmModel(illegal2_2, legal2_3, legal2));
+      HmmUtils.validate(new HmmModel(illegal22, legal23, legal2));
     } catch (IllegalArgumentException e) {
       // success
       return;
     }
-    Assert.fail();
+    fail();
   }
 
   @Test
@@ -78,18 +78,20 @@ public class HMMUtilsTest extends HMMTestBase {
     String[] hiddenSequence = {"H1", "H2", "H0", "H3", "H4"};
     String[] outputSequence = {"O1", "O2", "O4", "O0"};
     // test encoding the hidden Sequence
-    int[] hiddenSequenceEnc = HmmUtils.encodeStateSequence(model, Arrays
+    int[] hiddenSequenceEnc = HmmUtils.encodeStateSequence(getModel(), Arrays
         .asList(hiddenSequence), false, -1);
-    int[] outputSequenceEnc = HmmUtils.encodeStateSequence(model, Arrays
+    int[] outputSequenceEnc = HmmUtils.encodeStateSequence(getModel(), Arrays
         .asList(outputSequence), true, -1);
     // expected state sequences
     int[] hiddenSequenceExp = {1, 2, 0, 3, -1};
     int[] outputSequenceExp = {1, 2, -1, 0};
     // compare
-    for (int i = 0; i < hiddenSequenceEnc.length; ++i)
-      Assert.assertEquals(hiddenSequenceExp[i], hiddenSequenceEnc[i]);
-    for (int i = 0; i < outputSequenceEnc.length; ++i)
-      Assert.assertEquals(outputSequenceExp[i], outputSequenceEnc[i]);
+    for (int i = 0; i < hiddenSequenceEnc.length; ++i) {
+      assertEquals(hiddenSequenceExp[i], hiddenSequenceEnc[i]);
+    }
+    for (int i = 0; i < outputSequenceEnc.length; ++i) {
+      assertEquals(outputSequenceExp[i], outputSequenceEnc[i]);
+    }
   }
 
   @Test
@@ -97,18 +99,20 @@ public class HMMUtilsTest extends HMMTestBase {
     int[] hiddenSequence = {1, 2, 0, 3, 10};
     int[] outputSequence = {1, 2, 10, 0};
     // test encoding the hidden Sequence
-    java.util.Vector<String> hiddenSequenceDec = HmmUtils.decodeStateSequence(
-        model, hiddenSequence, false, "unknown");
-    java.util.Vector<String> outputSequenceDec = HmmUtils.decodeStateSequence(
-        model, outputSequence, true, "unknown");
+    List<String> hiddenSequenceDec = HmmUtils.decodeStateSequence(
+        getModel(), hiddenSequence, false, "unknown");
+    List<String> outputSequenceDec = HmmUtils.decodeStateSequence(
+        getModel(), outputSequence, true, "unknown");
     // expected state sequences
     String[] hiddenSequenceExp = {"H1", "H2", "H0", "H3", "unknown"};
     String[] outputSequenceExp = {"O1", "O2", "unknown", "O0"};
     // compare
-    for (int i = 0; i < hiddenSequenceExp.length; ++i)
-      Assert.assertEquals(hiddenSequenceExp[i], hiddenSequenceDec.get(i));
-    for (int i = 0; i < outputSequenceExp.length; ++i)
-      Assert.assertEquals(outputSequenceExp[i], outputSequenceDec.get(i));
+    for (int i = 0; i < hiddenSequenceExp.length; ++i) {
+      assertEquals(hiddenSequenceExp[i], hiddenSequenceDec.get(i));
+    }
+    for (int i = 0; i < outputSequenceExp.length; ++i) {
+      assertEquals(outputSequenceExp[i], outputSequenceDec.get(i));
+    }
   }
 
   @Test
@@ -141,17 +145,18 @@ public class HMMUtilsTest extends HMMTestBase {
     Matrix sparse_tr = sparseModel.getTransitionMatrix();
     Matrix sparse_em = sparseModel.getEmissionMatrix();
     for (int i = 0; i < sparseModel.getNrOfHiddenStates(); ++i) {
-      if (i == 2)
-        Assert.assertEquals(1.0, sparse_ip.getQuick(i));
-      else
-        Assert.assertEquals(0.0, sparse_ip.getQuick(i));
+      if (i == 2) {
+        assertEquals(1.0, sparse_ip.getQuick(i), EPSILON);
+      } else {
+        assertEquals(0.0, sparse_ip.getQuick(i), EPSILON);
+      }
       for (int j = 0; j < sparseModel.getNrOfHiddenStates(); ++j) {
         if (i == j) {
-          Assert.assertEquals(1.0, sparse_tr.getQuick(i, j));
-          Assert.assertEquals(1.0, sparse_em.getQuick(i, j));
+          assertEquals(1.0, sparse_tr.getQuick(i, j), EPSILON);
+          assertEquals(1.0, sparse_em.getQuick(i, j), EPSILON);
         } else {
-          Assert.assertEquals(0.0, sparse_tr.getQuick(i, j));
-          Assert.assertEquals(0.0, sparse_em.getQuick(i, j));
+          assertEquals(0.0, sparse_tr.getQuick(i, j), EPSILON);
+          assertEquals(0.0, sparse_em.getQuick(i, j), EPSILON);
         }
       }
     }

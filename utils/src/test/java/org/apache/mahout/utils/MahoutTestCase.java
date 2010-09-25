@@ -25,6 +25,6 @@ package org.apache.mahout.utils;
 public abstract class MahoutTestCase extends org.apache.mahout.common.MahoutTestCase {
 
   /** "Close enough" value for floating-point comparisons. */
-  public static final double EPSILON = 0.0000001;
+  public static final double EPSILON = 0.000001;
 
 }

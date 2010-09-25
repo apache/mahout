@@ -26,6 +26,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 import org.apache.lucene.util.Version;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -45,6 +46,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -97,17 +99,18 @@ import java.util.Set;
  * <tr><td colspan=4><hr></td></tr>
  * </table>
  */
-public class TrainNewsGroups {
+public final class TrainNewsGroups {
+
   private static final int FEATURES = 10000;
   // 1997-01-15 00:01:00 GMT
   private static final long DATE_REFERENCE = 853286460;
   private static final long MONTH = 30 * 24 * 3600;
   private static final long WEEK = 7 * 24 * 3600;
 
-  private static final Random rand = new Random();
+  private static final Random rand = RandomUtils.getRandom();
 
   private static final String[] leakLabels = {"none", "month-year", "day-month-year"};
-  private static final SimpleDateFormat[] df = new SimpleDateFormat[]{
+  private static final SimpleDateFormat[] df = {
     new SimpleDateFormat(""),
     new SimpleDateFormat("MMM-yyyy"),
     new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
@@ -116,6 +119,9 @@ public class TrainNewsGroups {
   private static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
   private static final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
   private static final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
+
+  private TrainNewsGroups() {
+  }
 
   public static void main(String[] args) throws IOException {
     File base = new File(args[0]);
@@ -145,7 +151,7 @@ public class TrainNewsGroups {
 
     int k = 0;
     double step = 0;
-    int[] bumps = new int[]{1, 2, 5};
+    int[] bumps = {1, 2, 5};
     for (File file : files.subList(0, 10000)) {
       String ng = file.getParentFile().getName();
       int actual = newsGroups.intern(ng);
@@ -242,25 +248,28 @@ public class TrainNewsGroups {
     Multiset<String> words = ConcurrentHashMultiset.create();
 
     BufferedReader reader = new BufferedReader(new FileReader(file));
-    String line = reader.readLine();
-    Reader dateString = new StringReader(df[leakType % 3].format(new Date(date)));
-    countWords(analyzer, words, dateString);
-    while (line != null && line.length() > 0) {
-      boolean countHeader = (
-        line.startsWith("From:") || line.startsWith("Subject:") ||
-          line.startsWith("Keywords:") || line.startsWith("Summary:")) && (leakType < 6);
-      do {
-        StringReader in = new StringReader(line);
-        if (countHeader) {
-          countWords(analyzer, words, in);
-        }
-        line = reader.readLine();
-      } while (line.startsWith(" "));
+    try {
+      String line = reader.readLine();
+      Reader dateString = new StringReader(df[leakType % 3].format(new Date(date)));
+      countWords(analyzer, words, dateString);
+      while (line != null && line.length() > 0) {
+        boolean countHeader = (
+          line.startsWith("From:") || line.startsWith("Subject:") ||
+            line.startsWith("Keywords:") || line.startsWith("Summary:")) && (leakType < 6);
+        do {
+          Reader in = new StringReader(line);
+          if (countHeader) {
+            countWords(analyzer, words, in);
+          }
+          line = reader.readLine();
+        } while (line.startsWith(" "));
+      }
+      if (leakType < 3) {
+        countWords(analyzer, words, reader);
+      }
+    } finally {
+      reader.close();
     }
-    if (leakType < 3) {
-      countWords(analyzer, words, reader);
-    }
-    reader.close();
 
     Vector v = new RandomAccessSparseVector(FEATURES);
     bias.addToVector("", 1, v);
@@ -271,7 +280,7 @@ public class TrainNewsGroups {
     return v;
   }
 
-  private static void countWords(Analyzer analyzer, Multiset<String> words, Reader in) throws IOException {
+  private static void countWords(Analyzer analyzer, Collection<String> words, Reader in) throws IOException {
     TokenStream ts = analyzer.tokenStream("text", in);
     ts.addAttribute(TermAttribute.class);
     while (ts.incrementToken()) {
@@ -280,7 +289,7 @@ public class TrainNewsGroups {
     }
   }
 
-  private static List<File> permute(List<File> files, Random rand) {
+  private static List<File> permute(Iterable<File> files, Random rand) {
     List<File> r = Lists.newArrayList();
     for (File file : files) {
       int i = rand.nextInt(r.size() + 1);

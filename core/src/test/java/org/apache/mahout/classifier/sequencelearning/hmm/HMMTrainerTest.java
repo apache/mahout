@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
-import junit.framework.Assert;
-
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
@@ -29,32 +27,31 @@ public class HMMTrainerTest extends HMMTestBase {
   public void testViterbiTraining() {
     // initialize the expected model parameters (from R)
     // expected transition matrix
-    double transitionE[][] = {{0.3125, 0.0625, 0.3125, 0.3125},
+    double[][] transitionE = {{0.3125, 0.0625, 0.3125, 0.3125},
         {0.25, 0.25, 0.25, 0.25}, {0.5, 0.071429, 0.357143, 0.071429},
         {0.5, 0.1, 0.1, 0.3}};
     // initialize the emission matrix
-    double emissionE[][] = {{0.882353, 0.058824, 0.058824},
+    double[][] emissionE = {{0.882353, 0.058824, 0.058824},
         {0.333333, 0.333333, 0.3333333}, {0.076923, 0.846154, 0.076923},
         {0.111111, 0.111111, 0.777778}};
 
     // train the given network to the following output sequence
     int[] observed = {1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0};
 
-    HmmModel trained = HmmTrainer.trainViterbi(model, observed, 0.5, 0.1, 10,
-        false);
+    HmmModel trained = HmmTrainer.trainViterbi(getModel(), observed, 0.5, 0.1, 10, false);
 
     // now check whether the model matches our expectations
     Matrix emissionMatrix = trained.getEmissionMatrix();
     Matrix transitionMatrix = trained.getTransitionMatrix();
 
     for (int i = 0; i < trained.getNrOfHiddenStates(); ++i) {
-      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j)
-        Assert.assertEquals(transitionMatrix.getQuick(i, j), transitionE[i][j],
-            0.00001);
+      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j) {
+        assertEquals(transitionMatrix.getQuick(i, j), transitionE[i][j], EPSILON);
+      }
 
-      for (int j = 0; j < trained.getNrOfOutputStates(); ++j)
-        Assert.assertEquals(emissionMatrix.getQuick(i, j), emissionE[i][j],
-            0.00001);
+      for (int j = 0; j < trained.getNrOfOutputStates(); ++j) {
+        assertEquals(emissionMatrix.getQuick(i, j), emissionE[i][j], EPSILON);
+      }
     }
 
   }
@@ -63,18 +60,18 @@ public class HMMTrainerTest extends HMMTestBase {
   public void testScaledViterbiTraining() {
     // initialize the expected model parameters (from R)
     // expected transition matrix
-    double transitionE[][] = {{0.3125, 0.0625, 0.3125, 0.3125},
+    double[][] transitionE = {{0.3125, 0.0625, 0.3125, 0.3125},
         {0.25, 0.25, 0.25, 0.25}, {0.5, 0.071429, 0.357143, 0.071429},
         {0.5, 0.1, 0.1, 0.3}};
     // initialize the emission matrix
-    double emissionE[][] = {{0.882353, 0.058824, 0.058824},
+    double[][] emissionE = {{0.882353, 0.058824, 0.058824},
         {0.333333, 0.333333, 0.3333333}, {0.076923, 0.846154, 0.076923},
         {0.111111, 0.111111, 0.777778}};
 
     // train the given network to the following output sequence
     int[] observed = {1, 0, 2, 2, 0, 0, 1, 1, 1, 0, 2, 0, 1, 0, 0};
 
-    HmmModel trained = HmmTrainer.trainViterbi(model, observed, 0.5, 0.1, 10,
+    HmmModel trained = HmmTrainer.trainViterbi(getModel(), observed, 0.5, 0.1, 10,
         true);
 
     // now check whether the model matches our expectations
@@ -82,13 +79,15 @@ public class HMMTrainerTest extends HMMTestBase {
     Matrix transitionMatrix = trained.getTransitionMatrix();
 
     for (int i = 0; i < trained.getNrOfHiddenStates(); ++i) {
-      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j)
-        Assert.assertEquals(transitionMatrix.getQuick(i, j), transitionE[i][j],
-            0.00001);
+      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j) {
+        assertEquals(transitionMatrix.getQuick(i, j), transitionE[i][j],
+            EPSILON);
+      }
 
-      for (int j = 0; j < trained.getNrOfOutputStates(); ++j)
-        Assert.assertEquals(emissionMatrix.getQuick(i, j), emissionE[i][j],
-            0.00001);
+      for (int j = 0; j < trained.getNrOfOutputStates(); ++j) {
+        assertEquals(emissionMatrix.getQuick(i, j), emissionE[i][j],
+            EPSILON);
+      }
     }
 
   }
@@ -106,7 +105,7 @@ public class HMMTrainerTest extends HMMTestBase {
     double[][] emissionExpected = {{0.9995, 0.0004, 0.0001},
         {0.9943, 0.0036, 0.0021}, {0.0059, 0.9941, 0}, {0, 0, 1}};
 
-    HmmModel trained = HmmTrainer.trainBaumWelch(model, observed, 0.1, 10,
+    HmmModel trained = HmmTrainer.trainBaumWelch(getModel(), observed, 0.1, 10,
         false);
 
     Vector initialProbabilities = trained.getInitialProbabilities();
@@ -114,14 +113,16 @@ public class HMMTrainerTest extends HMMTestBase {
     Matrix transitionMatrix = trained.getTransitionMatrix();
 
     for (int i = 0; i < trained.getNrOfHiddenStates(); ++i) {
-      Assert.assertEquals(initialProbabilities.get(i), initialExpected[i],
+      assertEquals(initialProbabilities.get(i), initialExpected[i],
           0.0001);
-      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j)
-        Assert.assertEquals(transitionMatrix.getQuick(i, j),
+      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j) {
+        assertEquals(transitionMatrix.getQuick(i, j),
             transitionExpected[i][j], 0.0001);
-      for (int j = 0; j < trained.getNrOfOutputStates(); ++j)
-        Assert.assertEquals(emissionMatrix.getQuick(i, j),
+      }
+      for (int j = 0; j < trained.getNrOfOutputStates(); ++j) {
+        assertEquals(emissionMatrix.getQuick(i, j),
             emissionExpected[i][j], 0.0001);
+      }
     }
   }
 
@@ -139,21 +140,23 @@ public class HMMTrainerTest extends HMMTestBase {
         {0.9943, 0.0036, 0.0021}, {0.0059, 0.9941, 0}, {0, 0, 1}};
 
     HmmModel trained = HmmTrainer
-        .trainBaumWelch(model, observed, 0.1, 10, true);
+        .trainBaumWelch(getModel(), observed, 0.1, 10, true);
 
     Vector initialProbabilities = trained.getInitialProbabilities();
     Matrix emissionMatrix = trained.getEmissionMatrix();
     Matrix transitionMatrix = trained.getTransitionMatrix();
 
     for (int i = 0; i < trained.getNrOfHiddenStates(); ++i) {
-      Assert.assertEquals(initialProbabilities.get(i), initialExpected[i],
+      assertEquals(initialProbabilities.get(i), initialExpected[i],
           0.0001);
-      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j)
-        Assert.assertEquals(transitionMatrix.getQuick(i, j),
+      for (int j = 0; j < trained.getNrOfHiddenStates(); ++j) {
+        assertEquals(transitionMatrix.getQuick(i, j),
             transitionExpected[i][j], 0.0001);
-      for (int j = 0; j < trained.getNrOfOutputStates(); ++j)
-        Assert.assertEquals(emissionMatrix.getQuick(i, j),
+      }
+      for (int j = 0; j < trained.getNrOfOutputStates(); ++j) {
+        assertEquals(emissionMatrix.getQuick(i, j),
             emissionExpected[i][j], 0.0001);
+      }
     }
   }
 

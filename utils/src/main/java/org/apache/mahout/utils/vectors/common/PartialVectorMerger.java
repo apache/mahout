@@ -18,7 +18,6 @@
 package org.apache.mahout.utils.vectors.common;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -71,13 +70,10 @@ public final class PartialVectorMerger {
    * @param dimension
    * @param sequentialAccess
    *          output vectors should be optimized for sequential access
-   * @param namedVectors
+   * @param namedVector
    *          output vectors should be named, retaining key (doc id) as a label
    * @param numReducers 
    *          The number of reducers to spawn
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   public static void mergePartialVectors(Iterable<Path> partialVectorPaths,
                                          Path output,
@@ -122,7 +118,7 @@ public final class PartialVectorMerger {
   }
 
   private static String getCommaSeparatedPaths(Iterable<Path> paths) {
-    StringBuilder commaSeparatedPaths = new StringBuilder();
+    StringBuilder commaSeparatedPaths = new StringBuilder(100);
     String sep = "";
     for (Path path : paths) {
       commaSeparatedPaths.append(sep).append(path.toString());

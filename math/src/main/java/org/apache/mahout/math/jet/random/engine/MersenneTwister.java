@@ -144,7 +144,7 @@ import java.util.Date;
  @version 1.0, 09/24/99
  @see java.util.Random
    */
-public class MersenneTwister extends RandomEngine {
+public final class MersenneTwister extends RandomEngine {
 
   /* Period parameters */
   private static final int N = 624;
@@ -206,7 +206,7 @@ public class MersenneTwister extends RandomEngine {
   }
 
   /** Generates N words at one time */
-  protected void nextBlock() {
+  void nextBlock() {
     int y;
     int kk;
 
@@ -248,7 +248,7 @@ public class MersenneTwister extends RandomEngine {
 
   /** Sets the receiver's seed. This method resets the receiver's entire internal state.
    * @param seed An integer that is used to reset the internal state of the generator */
-  protected void setSeed(int seed) {
+  void setSeed(int seed) {
     mt[0] = seed;
     for (int i = 1; i < N; i++) {
       mt[i] = 1812433253 * (mt[i - 1] ^ (mt[i - 1] >> 30)) + i;
@@ -275,7 +275,7 @@ public class MersenneTwister extends RandomEngine {
    * done in the 1999 reference implementation.  Should only be used for testing, not
    * actual coding.
    */
-  protected void setReferenceSeed(int seed) {
+  void setReferenceSeed(int seed) {
     for (int i = 0; i < N; i++) {
       mt[i] = seed & 0xffff0000;
       seed = 69069 * seed + 1;

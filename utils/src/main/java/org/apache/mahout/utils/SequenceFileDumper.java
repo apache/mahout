@@ -90,37 +90,37 @@ public final class SequenceFileDumper {
         } else {
           writer = new OutputStreamWriter(System.out);
         }
-        writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
-        
-        int sub = Integer.MAX_VALUE;
-        if (cmdLine.hasOption(substringOpt)) {
-          sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
-        }
-        boolean countOnly = cmdLine.hasOption(countOpt);
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        writer.append("Key class: ").append(String.valueOf(reader.getKeyClass()));
-        writer.append(" Value Class: ").append(String.valueOf(value.getClass())).append('\n');
-        writer.flush();
-        long count = 0;
-        if (countOnly) {
-          while (reader.next(key, value)) {
-            count++;
+        try {
+          writer.append("Input Path: ").append(String.valueOf(path)).append('\n');
+
+          int sub = Integer.MAX_VALUE;
+          if (cmdLine.hasOption(substringOpt)) {
+            sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
           }
-          writer.append("Count: ").append(String.valueOf(count)).append('\n');
-        } else {
-          while (reader.next(key, value)) {
-            writer.append("Key: ").append(String.valueOf(key));
-            String str = value.toString();
-            writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
-            writer.write('\n');
-            writer.flush();
-            count++;
+          boolean countOnly = cmdLine.hasOption(countOpt);
+          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
+          Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
+          writer.append("Key class: ").append(String.valueOf(reader.getKeyClass()));
+          writer.append(" Value Class: ").append(String.valueOf(value.getClass())).append('\n');
+          writer.flush();
+          long count = 0;
+          if (countOnly) {
+            while (reader.next(key, value)) {
+              count++;
+            }
+            writer.append("Count: ").append(String.valueOf(count)).append('\n');
+          } else {
+            while (reader.next(key, value)) {
+              writer.append("Key: ").append(String.valueOf(key));
+              String str = value.toString();
+              writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
+              writer.write('\n');
+              writer.flush();
+              count++;
+            }
+            writer.append("Count: ").append(String.valueOf(count)).append('\n');
           }
-          writer.append("Count: ").append(String.valueOf(count)).append('\n');
-        }
-        writer.flush();
-        if (cmdLine.hasOption(outputOpt)) {
+        } finally {
           writer.close();
         }
       }

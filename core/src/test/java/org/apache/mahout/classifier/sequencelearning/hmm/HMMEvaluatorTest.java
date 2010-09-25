@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
-import junit.framework.Assert;
-
 import org.apache.mahout.math.Matrix;
 import org.junit.Test;
 
@@ -32,15 +30,15 @@ public class HMMEvaluatorTest extends HMMTestBase {
   @Test
   public void testModelLikelihood() {
     // compute alpha and beta values
-    Matrix alpha = HmmAlgorithms.forwardAlgorithm(model, sequence, false);
-    Matrix beta = HmmAlgorithms.backwardAlgorithm(model, sequence, false);
+    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), false);
+    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), false);
     // now test whether forward == backward likelihood
     double forwardLikelihood = HmmEvaluator.modelLikelihood(alpha, false);
-    double backwardLikelihood = HmmEvaluator.modelLikelihood(model, sequence,
+    double backwardLikelihood = HmmEvaluator.modelLikelihood(getModel(), getSequence(),
         beta, false);
-    Assert.assertEquals(forwardLikelihood, backwardLikelihood, 1e-6);
+    assertEquals(forwardLikelihood, backwardLikelihood, EPSILON);
     // also make sure that the likelihood matches the expected one
-    Assert.assertEquals(forwardLikelihood, 1.8425e-4, 1e-6);
+    assertEquals(1.8425e-4, forwardLikelihood, EPSILON);
   }
 
   /**
@@ -51,15 +49,15 @@ public class HMMEvaluatorTest extends HMMTestBase {
   @Test
   public void testScaledModelLikelihood() {
     // compute alpha and beta values
-    Matrix alpha = HmmAlgorithms.forwardAlgorithm(model, sequence, true);
-    Matrix beta = HmmAlgorithms.backwardAlgorithm(model, sequence, true);
+    Matrix alpha = HmmAlgorithms.forwardAlgorithm(getModel(), getSequence(), true);
+    Matrix beta = HmmAlgorithms.backwardAlgorithm(getModel(), getSequence(), true);
     // now test whether forward == backward likelihood
     double forwardLikelihood = HmmEvaluator.modelLikelihood(alpha, true);
-    double backwardLikelihood = HmmEvaluator.modelLikelihood(model, sequence,
+    double backwardLikelihood = HmmEvaluator.modelLikelihood(getModel(), getSequence(),
         beta, true);
-    Assert.assertEquals(forwardLikelihood, backwardLikelihood, 1e-6);
+    assertEquals(forwardLikelihood, backwardLikelihood, EPSILON);
     // also make sure that the likelihood matches the expected one
-    Assert.assertEquals(forwardLikelihood, 1.8425e-4, 1e-6);
+    assertEquals(1.8425e-4, forwardLikelihood, EPSILON);
   }
 
 }

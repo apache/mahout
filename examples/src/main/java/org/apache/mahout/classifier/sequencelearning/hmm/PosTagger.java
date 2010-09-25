@@ -28,9 +28,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.mahout.math.Matrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements a sample program that uses a pre-tagged training data
@@ -42,10 +42,10 @@ import org.apache.mahout.math.Matrix;
  * http://www.jaist.ac.jp/~hieuxuan/flexcrfs/CoNLL2000-NP/test.txt Further
  * details regarding the data files can be found at
  * http://flexcrfs.sourceforge.net/#Case_Study
- *
- * @author mheimel
  */
 public final class PosTagger {
+
+  private static final Logger log = LoggerFactory.getLogger(PosTagger.class);
 
   /**
    * No public constructors for utility classes.
@@ -54,10 +54,6 @@ public final class PosTagger {
     // nothing to do here really.
   }
 
-  /**
-   * Logger for this class.
-   */
-  private static final Log LOG = LogFactory.getLog(PosTagger.class);
   /**
    * Model trained in the example.
    */
@@ -146,10 +142,12 @@ public final class PosTagger {
       String[] tags = line.split(" ");
       // when analyzing the training set, assign IDs
       if (assignIDs) {
-        if (!wordIDs.containsKey(tags[0]))
+        if (!wordIDs.containsKey(tags[0])) {
           wordIDs.put(tags[0], nextWordId++);
-        if (!tagIDs.containsKey(tags[1]))
+        }
+        if (!tagIDs.containsKey(tags[1])) {
           tagIDs.put(tags[1], nextTagId++);
+        }
       }
       // determine the IDs
       Integer wordID = wordIDs.get(tags[0]);
@@ -179,16 +177,14 @@ public final class PosTagger {
     tagIDs = new HashMap<String, Integer>(44); // we expect 44 distinct tags
     wordIDs = new HashMap<String, Integer>(19122); // we expect 19122
     // distinct words
-    LOG.info("Reading and parsing training data file from URL: " + trainingURL);
+    log.info("Reading and parsing training data file from URL: {}", trainingURL);
     long start = System.currentTimeMillis();
     readFromURL(trainingURL, true);
     long end = System.currentTimeMillis();
-    double duration = (end - start) / (double) 1000;
-    LOG.info("Parsing done in " + duration + " seconds!");
-    LOG.info("Read " + readLines + " lines containing "
-        + hiddenSequences.size() + " sentences with a total of "
-        + (nextWordId - 1) + " distinct words and " + (nextTagId - 1)
-        + " distinct POS tags.");
+    double duration = (end - start) / 1000.0;
+    log.info("Parsing done in {} seconds!", duration);
+    log.info("Read {} lines containing {} sentences with a total of {} distinct words and {} distinct POS tags.",
+             new Object[] {readLines, hiddenSequences.size(), (nextWordId - 1), (nextTagId - 1)});
     start = System.currentTimeMillis();
     taggingModel = HmmTrainer.trainSupervisedSequence(nextTagId, nextWordId,
         hiddenSequences, observedSequences, 0.05);
@@ -196,55 +192,53 @@ public final class PosTagger {
     // since we assume a higher probability that a given unknown word is NNP
     // than anything else
     Matrix emissions = taggingModel.getEmissionMatrix();
-    for (int i = 0; i < taggingModel.getNrOfHiddenStates(); ++i)
-      emissions.setQuick(i, 0, 0.1 / (double) taggingModel
-          .getNrOfHiddenStates());
+    for (int i = 0; i < taggingModel.getNrOfHiddenStates(); ++i) {
+      emissions.setQuick(i, 0, 0.1 / (double) taggingModel.getNrOfHiddenStates());
+    }
     int nnptag = tagIDs.get("NNP");
-    emissions.setQuick(nnptag, 0, 1 / (double) taggingModel
-        .getNrOfHiddenStates());
+    emissions.setQuick(nnptag, 0, 1 / (double) taggingModel.getNrOfHiddenStates());
     // re-normalize the emission probabilities
     HmmUtils.normalizeModel(taggingModel);
     // now register the names
     taggingModel.registerHiddenStateNames(tagIDs);
     taggingModel.registerOutputStateNames(wordIDs);
     end = System.currentTimeMillis();
-    duration = (end - start) / (double) 1000;
-    LOG.info("Trained HMM model sin " + duration + " seconds!");
+    duration = (end - start) / 1000.0;
+    log.info("Trained HMM models in {} seconds!", duration);
   }
 
   private static void testModel(String testingURL) throws IOException {
-    LOG.info("Reading and parsing test data file from URL:" + testingURL);
+    log.info("Reading and parsing test data file from URL:" + testingURL);
     long start = System.currentTimeMillis();
     readFromURL(testingURL, false);
     long end = System.currentTimeMillis();
-    double duration = (end - start) / (double) 1000;
-    LOG.info("Parsing done in " + duration + " seconds!");
-    LOG.info("Read " + readLines + " lines containing "
-        + hiddenSequences.size() + " sentences.");
+    double duration = (end - start) / 1000.0;
+    log.info("Parsing done in {} seconds!", duration);
+    log.info("Read {} lines containing {} sentences.", readLines, hiddenSequences.size());
 
     start = System.currentTimeMillis();
     int errorCount = 0;
     int totalCount = 0;
     for (int i = 0; i < observedSequences.size(); ++i) {
       // fetch the viterbi path as the POS tag for this observed sequence
-      int[] posEstimate = HmmEvaluator.decode(taggingModel, observedSequences
-          .get(i), false);
+      int[] posEstimate = HmmEvaluator.decode(taggingModel, observedSequences.get(i), false);
       // compare with the expected
       int[] posExpected = hiddenSequences.get(i);
       for (int j = 0; j < posExpected.length; ++j) {
         totalCount++;
-        if (posEstimate[j] != posExpected[j])
+        if (posEstimate[j] != posExpected[j]) {
           errorCount++;
+        }
       }
     }
     end = System.currentTimeMillis();
-    duration = (end - start) / (double) 1000;
-    LOG.info("POS tagged test file in " + duration + " seconds!");
+    duration = (end - start) / 1000.0;
+    log.info("POS tagged test file in {} seconds!", duration);
     double errorRate = (double) errorCount / (double) totalCount;
-    LOG.info("Tagged the test file with an error rate of: " + errorRate);
+    log.info("Tagged the test file with an error rate of: {}", errorRate);
   }
 
-  private static java.util.Vector<String> tagSentence(String sentence) {
+  private static List<String> tagSentence(String sentence) {
     // first, we need to isolate all punctuation characters, so that they
     // can be recognized
     sentence = sentence.replaceAll("[,.!?:;\"]", " $0 ");
@@ -252,14 +246,11 @@ public final class PosTagger {
     // now we tokenize the sentence
     String[] tokens = sentence.split("[ ]+");
     // now generate the observed sequence
-    int[] observedSequence = HmmUtils.encodeStateSequence(taggingModel, Arrays
-        .asList(tokens), true, 0);
+    int[] observedSequence = HmmUtils.encodeStateSequence(taggingModel, Arrays.asList(tokens), true, 0);
     // POS tag this observedSequence
-    int[] hiddenSequence = HmmEvaluator.decode(taggingModel, observedSequence,
-        false);
+    int[] hiddenSequence = HmmEvaluator.decode(taggingModel, observedSequence, false);
     // and now decode the tag names
-    return HmmUtils.decodeStateSequence(taggingModel, hiddenSequence, false,
-        null);
+    return HmmUtils.decodeStateSequence(taggingModel, hiddenSequence, false, null);
   }
 
   public static void main(String[] args) throws IOException {
@@ -269,10 +260,10 @@ public final class PosTagger {
     // tag an exemplary sentence
     String test = "McDonalds is a huge company with many employees .";
     String[] testWords = test.split(" ");
-    java.util.Vector<String> posTags;
-    posTags = tagSentence(test);
-    for (int i = 0; i < posTags.size(); ++i)
-      LOG.info(testWords[i] + "[" + posTags.get(i) + "]");
+    List<String> posTags = tagSentence(test);
+    for (int i = 0; i < posTags.size(); ++i) {
+      log.info("{}[{}]", testWords[i], posTags.get(i));
+    }
   }
 
 }

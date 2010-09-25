@@ -20,7 +20,7 @@ package org.apache.mahout.vectors;
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
-  private int dataSize;
+  private final int dataSize;
   private OpenIntIntHashMap[] caches;
 //  private TIntIntHashMap[] caches;
 
@@ -49,7 +49,8 @@ public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
 
   protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
     if (dataSize != this.dataSize) {
-      throw new IllegalArgumentException("dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + "]");
+      throw new IllegalArgumentException("dataSize argument ["
+          + dataSize + "] does not match expected dataSize [" + this.dataSize + "]");
     }
     if (caches[probe].containsKey(originalForm.hashCode())) {
       return caches[probe].get(originalForm.hashCode());

@@ -29,8 +29,7 @@ import org.apache.mahout.math.Varint;
 import org.apache.mahout.utils.nlp.collocations.llr.Gram.Type;
 
 /** A GramKey, based on the identity fields of Gram (type, string) plus a byte[] used for secondary ordering */
-public class GramKey extends BinaryComparable implements
-    WritableComparable<BinaryComparable> {
+public final class GramKey extends BinaryComparable implements WritableComparable<BinaryComparable> {
 
   private int primaryLength;
   private int length;

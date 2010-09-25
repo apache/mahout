@@ -14,9 +14,11 @@ import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
+import java.io.Serializable;
+
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class LUDecompositionQuick implements java.io.Serializable {
+public class LUDecompositionQuick implements Serializable {
 
   /** Array for internal storage of decomposition. */
   private DoubleMatrix2D lu;

@@ -73,13 +73,13 @@ public final class ClusterDumper extends AbstractJob {
 
   private Path seqFileDir;
 
-  private Path pointsDir = null;
+  private Path pointsDir;
 
-  private String termDictionary = null;
+  private String termDictionary;
 
-  private String dictionaryFormat = null;
+  private String dictionaryFormat;
 
-  private String outputFile = null;
+  private String outputFile;
 
   private int subString = Integer.MAX_VALUE;
 
@@ -109,9 +109,11 @@ public final class ClusterDumper extends AbstractJob {
     addOption(OUTPUT_OPTION, "o", "Optional output directory. Default is to output to the console.");
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
-    addOption(JSON_OPTION, "j", "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries");
-    addOption(POINTS_DIR_OPTION, "p", "The directory containing points sequence files mapping input vectors to their cluster.  "
-        + "If specified, then the program will output the points associated with a cluster");
+    addOption(JSON_OPTION, "j",
+        "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries");
+    addOption(POINTS_DIR_OPTION, "p",
+        "The directory containing points sequence files mapping input vectors to their cluster.  "
+            + "If specified, then the program will output the points associated with a cluster");
     addOption(DICTIONARY_OPTION, "d", "The dictionary file");
     addOption(DICTIONARY_TYPE_OPTION, "dt", "The dictionary file type (text|sequencefile)", "text");
     if (parseArguments(args) == null) {
@@ -256,11 +258,8 @@ public final class ClusterDumper extends AbstractJob {
     return this.numTopFeatures;
   }
 
-  private void setUseJSON(boolean json) {
-    this.useJSON = json;
-  }
-
-  private static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, Configuration conf) throws IOException {
+  private static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir,
+                                                                       Configuration conf) throws IOException {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
 
     FileSystem fs = pointsPathDir.getFileSystem(conf);

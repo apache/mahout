@@ -6,8 +6,8 @@ import org.apache.mahout.math.DenseVector;
 
 public class HMMTestBase extends MahoutTestCase {
 
-  protected HmmModel model;
-  protected int[] sequence = {1, 0, 2, 2, 0, 0, 1};
+  private HmmModel model;
+  private final int[] sequence = {1, 0, 2, 2, 0, 0, 1};
 
   /**
    * We initialize a new HMM model using the following parameters # hidden
@@ -27,16 +27,16 @@ public class HMMTestBase extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     // intialize the hidden/output state names
-    String hiddenNames[] = {"H0", "H1", "H2", "H3"};
-    String outputNames[] = {"O0", "O1", "O2"};
+    String[] hiddenNames = {"H0", "H1", "H2", "H3"};
+    String[] outputNames = {"O0", "O1", "O2"};
     // initialize the transition matrix
-    double transitionP[][] = {{0.5, 0.1, 0.1, 0.3}, {0.4, 0.4, 0.1, 0.1},
+    double[][] transitionP = {{0.5, 0.1, 0.1, 0.3}, {0.4, 0.4, 0.1, 0.1},
         {0.1, 0.0, 0.8, 0.1}, {0.1, 0.1, 0.1, 0.7}};
     // initialize the emission matrix
-    double emissionP[][] = {{0.8, 0.1, 0.1}, {0.6, 0.1, 0.3},
+    double[][] emissionP = {{0.8, 0.1, 0.1}, {0.6, 0.1, 0.3},
         {0.1, 0.8, 0.1}, {0.0, 0.1, 0.9}};
     // initialize the initial probability vector
-    double initialP[] = {0.2, 0.1, 0.4, 0.3};
+    double[] initialP = {0.2, 0.1, 0.4, 0.3};
     // now generate the model
     model = new HmmModel(new DenseMatrix(transitionP), new DenseMatrix(
         emissionP), new DenseVector(initialP));
@@ -46,4 +46,11 @@ public class HMMTestBase extends MahoutTestCase {
     HmmUtils.validate(model);
   }
 
+  protected HmmModel getModel() {
+    return model;
+  }
+
+  protected int[] getSequence() {
+    return sequence;
+  }
 }

@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -52,7 +53,7 @@ import java.util.Set;
  * but instead can be cleared between updates.
  */
 public class ModelDissector {
-  private Map<String,Vector> weightMap;
+  private final Map<String,Vector> weightMap;
 
   public ModelDissector(int n) {
     weightMap = Maps.newHashMap();
@@ -60,16 +61,18 @@ public class ModelDissector {
 
   public void update(Vector features, Map<String, Set<Integer>> traceDictionary, AbstractVectorClassifier learner) {
     features.assign(0);
-    for (String feature : traceDictionary.keySet()) {
-      if (!weightMap.containsKey(feature)) {
-        for (Integer where : traceDictionary.get(feature)) {
+    for (Map.Entry<String, Set<Integer>> entry : traceDictionary.entrySet()) {
+      String key = entry.getKey();
+      Set<Integer> value = entry.getValue();
+      if (!weightMap.containsKey(key)) {
+        for (Integer where : value) {
           features.set(where, 1);
         }
 
         Vector v = learner.classifyNoLink(features);
-        weightMap.put(feature, v);
+        weightMap.put(key, v);
 
-        for (Integer where : traceDictionary.get(feature)) {
+        for (Integer where : value) {
           features.set(where, 0);
         }
       }
@@ -78,9 +81,9 @@ public class ModelDissector {
   }
 
   public List<Weight> summary(int n) {
-    PriorityQueue<Weight> pq = new PriorityQueue<Weight>();
-    for (String s : weightMap.keySet()) {
-      pq.add(new Weight(s, weightMap.get(s)));
+    Queue<Weight> pq = new PriorityQueue<Weight>();
+    for (Map.Entry<String, Vector> entry : weightMap.entrySet()) {
+      pq.add(new Weight(entry.getKey(), entry.getValue()));
       while (pq.size() > n) {
         pq.poll();
       }
@@ -91,9 +94,9 @@ public class ModelDissector {
   }
 
   public static class Weight implements Comparable<Weight> {
-    private String feature;
-    private double value;
-    private int maxIndex;
+    private final String feature;
+    private final double value;
+    private final int maxIndex;
 
     public Weight(String feature, Vector weights) {
       this.feature = feature;
@@ -117,10 +120,10 @@ public class ModelDissector {
     @Override
     public int compareTo(Weight other) {
       int r = Double.compare(Math.abs(this.value), Math.abs(other.value));
-      if (r != 0) {
-        return r;
-      } else {
+      if (r == 0) {
         return feature.compareTo(other.feature);
+      } else {
+        return r;
       }
     }
 

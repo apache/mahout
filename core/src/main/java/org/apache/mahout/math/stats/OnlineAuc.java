@@ -24,7 +24,6 @@ package org.apache.mahout.math.stats;
  * as a recommendation system.
  */
 public interface OnlineAuc {
-  @SuppressWarnings({"UnusedDeclaration"})
   double addSample(int category, String groupKey, double score);
 
   double addSample(int category, double score);

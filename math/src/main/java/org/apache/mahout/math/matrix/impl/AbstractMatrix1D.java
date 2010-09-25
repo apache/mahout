@@ -9,8 +9,10 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix.impl;
 
 /**
- Abstract base class for 1-d matrices (aka <i>vectors</i>) holding objects or primitive data types such as <code>int</code>, <code>double</code>, etc.
- First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
+ Abstract base class for 1-d matrices (aka <i>vectors</i>) holding objects or primitive data types such as
+ <code>int</code>, <code>double</code>, etc.
+ First see the <a href="package-summary.html">package summary</a> and javadoc
+ <a href="package-tree.html">tree view</a> to get the broad picture.
  <p>
  <b>Note that this implementation is not synchronized.</b>
 
@@ -53,7 +55,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    * @param rank the relative rank of the element.
    * @return the absolute rank of the element.
    */
-  protected int _rank(int rank) {
+  protected int rank(int rank) {
     return zero + rank * stride;
     //return zero + ((rank+flipMask)^flipMask);
     //return zero + rank*flip; // slower
@@ -98,22 +100,22 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
   /**
    * Sanity check for operations requiring two matrices with the same size.
    *
-   * @throws IllegalArgumentException if <tt>size() != B.size()</tt>.
+   * @throws IllegalArgumentException if <tt>size() != b.size()</tt>.
    */
-  protected void checkSize(double[] B) {
-    if (size != B.length) {
-      throw new IllegalArgumentException("Incompatible sizes: " + size + " and " + B.length);
+  protected void checkSize(double[] b) {
+    if (size != b.length) {
+      throw new IllegalArgumentException("Incompatible sizes: " + size + " and " + b.length);
     }
   }
 
   /**
    * Sanity check for operations requiring two matrices with the same size.
    *
-   * @throws IllegalArgumentException if <tt>size() != B.size()</tt>.
+   * @throws IllegalArgumentException if <tt>size() != b.size()</tt>.
    */
-  public void checkSize(AbstractMatrix1D B) {
-    if (size != B.size) {
-      throw new IllegalArgumentException("Incompatible sizes: " + size + " and " + B.size);
+  public void checkSize(AbstractMatrix1D b) {
+    if (size != b.size) {
+      throw new IllegalArgumentException("Incompatible sizes: " + size + " and " + b.size);
     }
   }
 
@@ -124,7 +126,7 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
    * @param rank the rank of the element.
    */
   protected int index(int rank) {
-    return offset(_rank(rank));
+    return offset(rank(rank));
   }
 
   /**

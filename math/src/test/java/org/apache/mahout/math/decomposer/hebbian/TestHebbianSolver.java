@@ -143,7 +143,7 @@ public final class TestHebbianSolver extends SolverTest {
     _eigensVectorFactory = new DenseMapVectorFactory();
     int desiredRank = 200;
     long time = timeSolver(TMP_EIGEN_DIR,
-                           0.00001, 
+                           0.00001,
                            5, 
                            desiredRank,
                            new TrainingState());

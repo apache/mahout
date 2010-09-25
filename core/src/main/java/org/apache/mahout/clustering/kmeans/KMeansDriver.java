@@ -90,7 +90,7 @@ public class KMeansDriver extends AbstractJob {
       HadoopUtil.overwriteOutput(output);
     }
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = ((Class<?>) ccl.loadClass(measureClass)).asSubclass(DistanceMeasure.class).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
       clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer

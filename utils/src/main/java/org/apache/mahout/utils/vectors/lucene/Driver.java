@@ -141,8 +141,8 @@ public final class Driver {
       if (cmdLine.hasOption(inputOpt)) { // Lucene case
         File file = new File(cmdLine.getValue(inputOpt).toString());
         if (!file.isDirectory()) {
-          throw new IllegalArgumentException("Lucene directory: " + file.getAbsolutePath() + 
-              " does not exist or is not a directory");
+          throw new IllegalArgumentException("Lucene directory: " + file.getAbsolutePath()
+              +  " does not exist or is not a directory");
         }
 
         long maxDocs = Long.MAX_VALUE;

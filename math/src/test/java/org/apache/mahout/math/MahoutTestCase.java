@@ -32,7 +32,7 @@ import org.junit.Before;
 public abstract class MahoutTestCase extends Assert {
 
   /** "Close enough" value for floating-point comparisons. */
-  public static final double EPSILON = 0.0000001;
+  public static final double EPSILON = 0.000001;
   
   private File testTempDir;
 

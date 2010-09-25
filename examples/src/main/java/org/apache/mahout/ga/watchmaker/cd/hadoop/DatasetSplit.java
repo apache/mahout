@@ -34,7 +34,7 @@ import org.apache.mahout.common.StringUtils;
 /**
  * Separate the input data into a training and testing set.
  */
-public class DatasetSplit {
+public final class DatasetSplit {
 
   private static final String SEED = "traintest.seed";
 
@@ -119,7 +119,7 @@ public class DatasetSplit {
   }
 
   /**
-   * a {@link org.apache.hadoop.mapred.LineRecordReader LineRecordReader} that skips some lines from the
+   * a {@link RecordReader} that skips some lines from the
    * input. Uses a Random number generator with a specific seed to decide if a line will be skipped or not.
    */
   public static class RndLineRecordReader extends RecordReader<LongWritable, Text> {

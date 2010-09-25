@@ -14,7 +14,7 @@ import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class RandomSamplingAssistant extends PersistentObject {
+public final class RandomSamplingAssistant extends PersistentObject {
 
   private static final int MAX_BUFFER_SIZE = 200;
 

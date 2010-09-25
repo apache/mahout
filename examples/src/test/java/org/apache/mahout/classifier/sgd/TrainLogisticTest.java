@@ -22,7 +22,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.examples.MahoutTestCase;
@@ -30,18 +29,20 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 public class TrainLogisticTest extends MahoutTestCase {
-  Splitter onWhiteSpace = Splitter.on(CharMatcher.BREAKING_WHITESPACE).trimResults().omitEmptyStrings();
+
+  private static final Splitter ON_WHITE_SPACE = 
+      Splitter.on(CharMatcher.BREAKING_WHITESPACE).trimResults().omitEmptyStrings();
+
   @Test
   public void testMain() throws IOException {
     String outputFile = "./model";
     String inputFile = "donut.csv";
-    String[] args = Iterables.toArray(onWhiteSpace.split(
+    String[] args = Iterables.toArray(ON_WHITE_SPACE.split(
       "--input " +
         inputFile +
         " --output " +
@@ -50,9 +51,9 @@ public class TrainLogisticTest extends MahoutTestCase {
         "--predictors x y --types numeric --features 20 --passes 100 --rate 50 "), String.class);
     TrainLogistic.main(args);
     LogisticModelParameters lmp = TrainLogistic.getParameters();
-    assertEquals(1e-4, lmp.getLambda(), 1e-9);
+    assertEquals(1.0e-4, lmp.getLambda(), 1.0e-9);
     assertEquals(20, lmp.getNumFeatures());
-    assertEquals(true, lmp.useBias());
+    assertTrue(lmp.useBias());
     assertEquals("color", lmp.getTargetVariable());
     CsvRecordFactory csv = lmp.getCsvRecordFactory();
     assertEquals("[1, 2]", Sets.newTreeSet(csv.getTargetCategories()).toString());

@@ -84,8 +84,6 @@ public abstract class AbstractCluster implements Cluster {
 
   private transient Vector s2;
 
-  protected static final double SQRT2PI = Math.sqrt(2.0 * Math.PI);
-
   /**
    * @return the s0
    */

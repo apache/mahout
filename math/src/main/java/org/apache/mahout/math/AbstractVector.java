@@ -573,15 +573,15 @@ public abstract class AbstractVector implements Vector {
     }
 
     public double get() {
-        return getQuick(index);
-      }
+      return getQuick(index);
+    }
 
-      public int index() {
-        return index;
-      }
+    public int index() {
+      return index;
+    }
 
-      public void set(double value) {
-        setQuick(index, value);
-      }
+    public void set(double value) {
+      setQuick(index, value);
+    }
   }
 }

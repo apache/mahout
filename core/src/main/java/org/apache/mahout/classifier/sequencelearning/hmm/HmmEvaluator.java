@@ -30,8 +30,6 @@ import org.apache.mahout.math.Vector;
  * generated a given sequence of output states (model likelihood). 3) Compute
  * the most likely hidden sequence for a given model and a given observed
  * sequence (decoding).
- *
- * @author mheimel
  */
 public final class HmmEvaluator {
 
@@ -67,10 +65,11 @@ public final class HmmEvaluator {
   public static int[] predict(HmmModel model, int steps, long seed) {
     // create the random number generator
     Random rand;
-    if (seed == 0)
+    if (seed == 0) {
       rand = RandomUtils.getRandom();
-    else
+    } else {
       rand = RandomUtils.getRandom(seed);
+    }
     // fetch the cumulative distributions
     Vector cip = HmmUtils.getCumulativeInitialProbabilities(model);
     Matrix ctm = HmmUtils.getCumulativeTransitionMatrix(model);
@@ -81,8 +80,9 @@ public final class HmmEvaluator {
     int hiddenState = 0;
 
     double randnr = rand.nextDouble();
-    while (cip.get(hiddenState) < randnr)
+    while (cip.get(hiddenState) < randnr) {
       hiddenState++;
+    }
 
     // now draw steps output states according to the cumulative
     // distributions
@@ -90,14 +90,16 @@ public final class HmmEvaluator {
       // choose output state to given hidden state
       randnr = rand.nextDouble();
       int outputState = 0;
-      while (com.get(hiddenState, outputState) < randnr)
+      while (com.get(hiddenState, outputState) < randnr) {
         outputState++;
+      }
       result[step] = outputState;
       // choose the next hidden state
       randnr = rand.nextDouble();
       int nextHiddenState = 0;
-      while (ctm.get(hiddenState, nextHiddenState) < randnr)
+      while (ctm.get(hiddenState, nextHiddenState) < randnr) {
         nextHiddenState++;
+      }
       hiddenState = nextHiddenState;
     }
     return result;
@@ -118,8 +120,7 @@ public final class HmmEvaluator {
    */
   public static double modelLikelihood(HmmModel model, int[] outputSequence,
                                        boolean scaled) {
-    return modelLikelihood(HmmAlgorithms.forwardAlgorithm(model,
-        outputSequence, scaled), scaled);
+    return modelLikelihood(HmmAlgorithms.forwardAlgorithm(model, outputSequence, scaled), scaled);
   }
 
   /**
@@ -163,13 +164,11 @@ public final class HmmEvaluator {
     int firstOutput = outputSequence[0];
     if (scaled) {
       for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
-        likelihood += pi.getQuick(i) * Math.exp(beta.getQuick(0, i))
-            * e.getQuick(i, firstOutput);
+        likelihood += pi.getQuick(i) * Math.exp(beta.getQuick(0, i)) * e.getQuick(i, firstOutput);
       }
     } else {
       for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
-        likelihood += pi.getQuick(i) * beta.getQuick(0, i)
-            * e.getQuick(i, firstOutput);
+        likelihood += pi.getQuick(i) * beta.getQuick(0, i) * e.getQuick(i, firstOutput);
       }
     }
     return likelihood;

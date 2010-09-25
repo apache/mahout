@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 public class HMMModelTest extends HMMTestBase {
@@ -33,12 +31,12 @@ public class HMMModelTest extends HMMTestBase {
 
   @Test
   public void testSerialization() {
-    String serialized = model.toJson();
+    String serialized = getModel().toJson();
     HmmModel model2 = HmmModel.fromJson(serialized);
     String serialized2 = model2.toJson();
     // since there are no equals methods for the underlying objects, we
     // check identity via the serialization string
-    Assert.assertEquals(serialized, serialized2);
+    assertEquals(serialized, serialized2);
   }
 
 }

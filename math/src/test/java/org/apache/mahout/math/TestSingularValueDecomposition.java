@@ -36,7 +36,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
       {  -360.0 / 625.0,  192.0 / 625.0, 1756.0 / 625.0 },
   };
   
-  private static final double normTolerance = 10.0e-14;
+  private static final double NORM_TOLERANCE = 10.0e-14;
   
   @Test
   public void testMoreRows() {
@@ -158,7 +158,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     }
     
     double norm = Algebra.getNorm(u.times(s).times(v.transpose()).minus(matrix));
-    assertEquals(0, norm, normTolerance);
+    assertEquals(0, norm, NORM_TOLERANCE);
     
   }
   
@@ -184,7 +184,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     for (int i = 0; i < mTm.numRows(); i++) {
       id.set(i, i, 1);
     }
-    assertEquals(0, Algebra.getNorm(mTm.minus(id)), normTolerance);
+    assertEquals(0, Algebra.getNorm(mTm.minus(id)), NORM_TOLERANCE);
   }
   
   /** test matrices values */
@@ -208,11 +208,11 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     // check values against known references
     Matrix u = svd.getU();
     
-    assertEquals(0,  Algebra.getNorm(u.minus(uRef)), normTolerance);
+    assertEquals(0,  Algebra.getNorm(u.minus(uRef)), NORM_TOLERANCE);
     Matrix s = svd.getS();
-    assertEquals(0,  Algebra.getNorm(s.minus(sRef)), normTolerance);
+    assertEquals(0,  Algebra.getNorm(s.minus(sRef)), NORM_TOLERANCE);
     Matrix v = svd.getV();
-    assertEquals(0,  Algebra.getNorm(v.minus(vRef)), normTolerance);
+    assertEquals(0,  Algebra.getNorm(v.minus(vRef)), NORM_TOLERANCE);
   }
   
   

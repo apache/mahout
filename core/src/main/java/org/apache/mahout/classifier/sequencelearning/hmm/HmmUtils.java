@@ -17,8 +17,10 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -30,8 +32,6 @@ import org.uncommons.maths.Maths;
 
 /**
  * A collection of utilities for handling HMMModel objects.
- *
- * @author mheimel
  */
 public final class HmmUtils {
 
@@ -264,10 +264,11 @@ public final class HmmUtils {
     for (int i = 0; i < sequence.size(); ++i) {
       String nextState = seqIter.next();
       int nextID;
-      if (observed)
+      if (observed) {
         nextID = model.getOutputStateID(nextState);
-      else
+      } else {
         nextID = model.getHiddenStateID(nextState);
+      }
       // if the ID is -1, use the default value
       encoded[i] = (nextID < 0) ? defaultValue : nextID;
     }
@@ -283,18 +284,17 @@ public final class HmmUtils {
    * @param observed     If set, the sequence is encoded as a sequence of observed states,
    *                     else it is encoded as sequence of hidden states
    * @param defaultValue The default value in case a state is not known
-   * @return java.util.Vector containing the decoded state names
+   * @return list containing the decoded state names
    */
-  public static java.util.Vector<String> decodeStateSequence(HmmModel model,
-                                                             int[] sequence, boolean observed, String defaultValue) {
-    java.util.Vector<String> decoded = new java.util.Vector<String>(
-        sequence.length);
+  public static List<String> decodeStateSequence(HmmModel model, int[] sequence, boolean observed, String defaultValue) {
+    List<String> decoded = new ArrayList<String>(sequence.length);
     for (int position : sequence) {
       String nextState;
-      if (observed)
+      if (observed) {
         nextState = model.getOutputStateName(position);
-      else
+      } else {
         nextState = model.getHiddenStateName(position);
+      }
       // if null was returned, use the default value
       decoded.add(nextState == null ? defaultValue : nextState);
     }
@@ -315,23 +315,28 @@ public final class HmmUtils {
     for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
       isum += ip.getQuick(i);
       double sum = 0;
-      for (int j = 0; j < model.getNrOfHiddenStates(); ++j)
+      for (int j = 0; j < model.getNrOfHiddenStates(); ++j) {
         sum += transition.getQuick(i, j);
+      }
       if (sum != 1.0) {
-        for (int j = 0; j < model.getNrOfHiddenStates(); ++j)
+        for (int j = 0; j < model.getNrOfHiddenStates(); ++j) {
           transition.setQuick(i, j, transition.getQuick(i, j) / sum);
+        }
       }
       sum = 0;
-      for (int j = 0; j < model.getNrOfOutputStates(); ++j)
+      for (int j = 0; j < model.getNrOfOutputStates(); ++j) {
         sum += emission.getQuick(i, j);
+      }
       if (sum != 1.0) {
-        for (int j = 0; j < model.getNrOfOutputStates(); ++j)
+        for (int j = 0; j < model.getNrOfOutputStates(); ++j) {
           emission.setQuick(i, j, emission.getQuick(i, j) / sum);
+        }
       }
     }
     if (isum != 1.0) {
-      for (int i = 0; i < model.getNrOfHiddenStates(); ++i)
+      for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
         ip.setQuick(i, ip.getQuick(i) / isum);
+      }
     }
   }
 
@@ -358,24 +363,27 @@ public final class HmmUtils {
     // now transfer the values
     for (int i = 0; i < model.getNrOfHiddenStates(); ++i) {
       double value = ip.getQuick(i);
-      if (value > threshold)
+      if (value > threshold) {
         sparseIp.setQuick(i, value);
+      }
       for (int j = 0; j < model.getNrOfHiddenStates(); ++j) {
         value = tr.getQuick(i, j);
-        if (value > threshold)
+        if (value > threshold) {
           sparseTr.setQuick(i, j, value);
+        }
       }
 
       for (int j = 0; j < model.getNrOfOutputStates(); ++j) {
         value = em.getQuick(i, j);
-        if (value > threshold)
+        if (value > threshold) {
           sparseEm.setQuick(i, j, value);
+        }
       }
     }
     // create a new model
     HmmModel sparseModel = new HmmModel(sparseTr, sparseEm, sparseIp);
     // normalize the model
-    HmmUtils.normalizeModel(sparseModel);
+    normalizeModel(sparseModel);
     // register the names
     sparseModel.registerHiddenStateNames(model.getHiddenStateNames());
     sparseModel.registerOutputStateNames(model.getOutputStateNames());

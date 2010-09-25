@@ -672,9 +672,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @param columnIndexes The columns of the cells that shall be visible in the new view. To indicate that <i>all</i>
    *                      columns shall be visible, simply set this parameter to <tt>null</tt>.
    * @return the new view.
-   * @throws IndexOutOfBoundsException if <tt>!(0 <= rowIndexes[i] < rows())</tt> for any <tt>i=0..rowIndexes.length()-1</tt>.
-   * @throws IndexOutOfBoundsException if <tt>!(0 <= columnIndexes[i] < columns())</tt> for any
-   *                                   <tt>i=0..columnIndexes.length()-1</tt>.
+   * @throws IndexOutOfBoundsException
+   *  if <tt>!(0 <= rowIndexes[i] < rows())</tt> for any <tt>i=0..rowIndexes.length()-1</tt>.
+   * @throws IndexOutOfBoundsException
+   *  if <tt>!(0 <= columnIndexes[i] < columns())</tt> for any <tt>i=0..columnIndexes.length()-1</tt>.
    */
   public DoubleMatrix2D viewSelection(int[] rowIndexes, int[] columnIndexes) {
     // check for "all"
@@ -792,13 +793,15 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    *
    * // 8 neighbors org.apache.mahout.math.function.Double9Function f = new Double9Function() {
    * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
+   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
+   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 +
    * alpha*(a00+a01+a02 + a10+a12 + a20+a21+a22); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} }; A.zAssign8Neighbors(B,f);
    *
    * // 4 neighbors org.apache.mahout.math.function.Double9Function g = new Double9Function() {
    * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
+   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
+   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
    * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 + alpha*(a01+a10+a12+a21);
    * &nbsp;&nbsp;&nbsp;} C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it }; </pre>
    *
@@ -848,9 +851,12 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
     }
   }
 
-  /** Linear algebraic matrix-vector multiplication; <tt>z = A * y</tt>; Equivalent to <tt>return A.zMult(y,z,1,0);</tt> */
+  /**
+   * Linear algebraic matrix-vector multiplication; <tt>z = A * y</tt>;
+   * Equivalent to <tt>return A.zMult(y,z,1,0);</tt>
+   */
   public DoubleMatrix1D zMult(DoubleMatrix1D y, DoubleMatrix1D z) {
-    return zMult(y, z, 1, (z == null ? 1 : 0), false);
+    return zMult(y, z, 1, z == null ? 1 : 0, false);
   }
 
   /**
@@ -891,7 +897,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * <tt>A.zMult(B,C,1,0,false,false)</tt>.
    */
   public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C) {
-    return zMult(B, C, 1, (C == null ? 1 : 0), false, false);
+    return zMult(B, C, 1, C == null ? 1 : 0, false, false);
   }
 
   /**

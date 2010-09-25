@@ -26,6 +26,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
@@ -245,7 +246,7 @@ public final class RecommenderJob extends AbstractJob {
       FileSystem fs = FileSystem.get(tempDirPath.toUri(), partialMultiplyConf);
       prePartialMultiplyPath1 = prePartialMultiplyPath1.makeQualified(fs);
       prePartialMultiplyPath2 = prePartialMultiplyPath2.makeQualified(fs);
-      SequenceFileInputFormat.setInputPaths(partialMultiply, prePartialMultiplyPath1, prePartialMultiplyPath2);
+      FileInputFormat.setInputPaths(partialMultiply, prePartialMultiplyPath1, prePartialMultiplyPath2);
       partialMultiply.waitForCompletion(true);
     }
 
@@ -280,7 +281,7 @@ public final class RecommenderJob extends AbstractJob {
         FileSystem fs = FileSystem.get(tempDirPath.toUri(), aggregateAndRecommendConf);
         partialMultiplyPath = partialMultiplyPath.makeQualified(fs);
         explicitFilterPath = explicitFilterPath.makeQualified(fs);
-        SequenceFileInputFormat.setInputPaths(aggregateAndRecommend, partialMultiplyPath, explicitFilterPath);
+        FileInputFormat.setInputPaths(aggregateAndRecommend, partialMultiplyPath, explicitFilterPath);
       }
       setIOSort(aggregateAndRecommend);
       aggregateAndRecommendConf.set(AggregateAndRecommendReducer.ITEMID_INDEX_PATH, itemIDIndexPath.toString());

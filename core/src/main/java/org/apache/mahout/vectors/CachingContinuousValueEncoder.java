@@ -21,7 +21,7 @@ import org.apache.mahout.math.map.OpenIntIntHashMap;
 
 
 public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
-  private int dataSize;
+  private final int dataSize;
   private OpenIntIntHashMap[] caches;
 
   public CachingContinuousValueEncoder(String name, int dataSize) {
@@ -49,7 +49,8 @@ public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
 
   protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
     if (dataSize != this.dataSize) {
-      throw new IllegalArgumentException("dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + "]");
+      throw new IllegalArgumentException("dataSize argument ["
+          + dataSize + "] does not match expected dataSize [" + this.dataSize + "]");
     }
     if (caches[probe].containsKey(originalForm.hashCode())) {
       return caches[probe].get(originalForm.hashCode());

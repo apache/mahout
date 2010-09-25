@@ -16,7 +16,7 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Algebra extends PersistentObject {
+public final class Algebra extends PersistentObject {
 
   /**
    * A default Algebra object; has {@link Property#DEFAULT} attached for tolerance. Allows ommiting to construct an
@@ -85,7 +85,7 @@ public class Algebra extends PersistentObject {
   }
 
   /** Returns sqrt(a^2 + b^2) without under/overflow. */
-  protected static double hypot(double a, double b) {
+  static double hypot(double a, double b) {
     double r;
     if (Math.abs(a) > Math.abs(b)) {
       r = b / a;
@@ -280,7 +280,7 @@ public class Algebra extends PersistentObject {
    * @return X; a new independent matrix; solution if A is square, least squares solution otherwise.
    */
   public static DoubleMatrix2D solve(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return (A.rows() == A.columns() ? (lu(A).solve(B)) : (qr(A).solve(B)));
+    return A.rows() == A.columns() ? (lu(A).solve(B)) : (qr(A).solve(B));
   }
 
   /**
@@ -288,7 +288,7 @@ public class Algebra extends PersistentObject {
    *
    * @return <tt>A</tt> (for convenience only).
    */
-  protected static DoubleMatrix2D trapezoidalLower(DoubleMatrix2D A) {
+  static DoubleMatrix2D trapezoidalLower(DoubleMatrix2D A) {
     int rows = A.rows();
     int columns = A.columns();
     for (int r = rows; --r >= 0;) {

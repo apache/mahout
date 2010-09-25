@@ -29,8 +29,6 @@ import org.apache.mahout.math.Vector;
  * Class containing several algorithms used to train a Hidden Markov Model. The
  * three main algorithms are: supervised learning, unsupervised Viterbi and
  * unsupervised Baum-Welch.
- *
- * @author mheimel
  */
 public final class HmmTrainer {
 
@@ -60,10 +58,8 @@ public final class HmmTrainer {
     pseudoCount = (pseudoCount == 0) ? Double.MIN_VALUE : pseudoCount;
 
     // initialize the parameters
-    DenseMatrix transitionMatrix = new DenseMatrix(nrOfHiddenStates,
-        nrOfHiddenStates);
-    DenseMatrix emissionMatrix = new DenseMatrix(nrOfHiddenStates,
-        nrOfOutputStates);
+    DenseMatrix transitionMatrix = new DenseMatrix(nrOfHiddenStates, nrOfHiddenStates);
+    DenseMatrix emissionMatrix = new DenseMatrix(nrOfHiddenStates, nrOfOutputStates);
     // assign a small initial probability that is larger than zero, so
     // unseen states will not get a zero probability
     transitionMatrix.assign(pseudoCount);
@@ -81,18 +77,22 @@ public final class HmmTrainer {
     for (int i = 0; i < nrOfHiddenStates; i++) {
       // compute sum of probabilities for current row of transition matrix
       double sum = 0;
-      for (int j = 0; j < nrOfHiddenStates; j++)
+      for (int j = 0; j < nrOfHiddenStates; j++) {
         sum += transitionMatrix.getQuick(i, j);
+      }
       // normalize current row of transition matrix
-      for (int j = 0; j < nrOfHiddenStates; j++)
+      for (int j = 0; j < nrOfHiddenStates; j++) {
         transitionMatrix.setQuick(i, j, transitionMatrix.getQuick(i, j) / sum);
+      }
       // compute sum of probabilities for current row of emission matrix
       sum = 0;
-      for (int j = 0; j < nrOfOutputStates; j++)
+      for (int j = 0; j < nrOfOutputStates; j++) {
         sum += emissionMatrix.getQuick(i, j);
+      }
       // normalize current row of emission matrix
-      for (int j = 0; j < nrOfOutputStates; j++)
+      for (int j = 0; j < nrOfOutputStates; j++) {
         emissionMatrix.setQuick(i, j, emissionMatrix.getQuick(i, j) / sum);
+      }
     }
 
     // return a new model using the parameter estimations
@@ -172,22 +172,27 @@ public final class HmmTrainer {
       isum += initialProbabilities.getQuick(i);
       // compute sum of probabilities for current row of transition matrix
       double sum = 0;
-      for (int j = 0; j < nrOfHiddenStates; j++)
+      for (int j = 0; j < nrOfHiddenStates; j++) {
         sum += transitionMatrix.getQuick(i, j);
+      }
       // normalize current row of transition matrix
-      for (int j = 0; j < nrOfHiddenStates; j++)
+      for (int j = 0; j < nrOfHiddenStates; j++) {
         transitionMatrix.setQuick(i, j, transitionMatrix.getQuick(i, j) / sum);
+      }
       // compute sum of probabilities for current row of emission matrix
       sum = 0;
-      for (int j = 0; j < nrOfOutputStates; j++)
+      for (int j = 0; j < nrOfOutputStates; j++) {
         sum += emissionMatrix.getQuick(i, j);
+      }
       // normalize current row of emission matrix
-      for (int j = 0; j < nrOfOutputStates; j++)
+      for (int j = 0; j < nrOfOutputStates; j++) {
         emissionMatrix.setQuick(i, j, emissionMatrix.getQuick(i, j) / sum);
+      }
     }
     // normalize the initial probabilities
-    for (int i = 0; i < nrOfHiddenStates; ++i)
+    for (int i = 0; i < nrOfHiddenStates; ++i) {
       initialProbabilities.setQuick(i, initialProbabilities.getQuick(i) / isum);
+    }
 
     // return a new model using the parameter estimates
     return new HmmModel(transitionMatrix, emissionMatrix, initialProbabilities);
@@ -254,21 +259,26 @@ public final class HmmTrainer {
       for (int j = 0; j < iteration.getNrOfHiddenStates(); ++j) {
         double sum = 0;
         // normalize the rows of the transition matrix
-        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k)
+        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k) {
           sum += transitionMatrix.getQuick(j, k);
-        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k)
+        }
+        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k) {
           transitionMatrix
               .setQuick(j, k, transitionMatrix.getQuick(j, k) / sum);
+        }
         // normalize the rows of the emission matrix
         sum = 0;
-        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k)
+        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k) {
           sum += emissionMatrix.getQuick(j, k);
-        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k)
+        }
+        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k) {
           emissionMatrix.setQuick(j, k, emissionMatrix.getQuick(j, k) / sum);
+        }
       }
       // check for convergence
-      if (checkConvergence(lastIteration, iteration, epsilon))
+      if (checkConvergence(lastIteration, iteration, epsilon)) {
         break;
+      }
       // overwrite the last iterated model by the new iteration
       lastIteration.assign(iteration);
     }
@@ -303,8 +313,8 @@ public final class HmmTrainer {
     // allocate space for baum-welch factors
     int hiddenCount = initialModel.getNrOfHiddenStates();
     int visibleCount = observedSequence.length;
-    DenseMatrix alpha = new DenseMatrix(visibleCount, hiddenCount);
-    DenseMatrix beta = new DenseMatrix(visibleCount, hiddenCount);
+    Matrix alpha = new DenseMatrix(visibleCount, hiddenCount);
+    Matrix beta = new DenseMatrix(visibleCount, hiddenCount);
 
     // now run the baum Welch training iteration
     for (int it = 0; it < maxIterations; ++it) {
@@ -328,17 +338,21 @@ public final class HmmTrainer {
       for (int j = 0; j < iteration.getNrOfHiddenStates(); ++j) {
         double sum = 0;
         // normalize the rows of the transition matrix
-        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k)
+        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k) {
           sum += transitionMatrix.getQuick(j, k);
-        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k)
+        }
+        for (int k = 0; k < iteration.getNrOfHiddenStates(); ++k) {
           transitionMatrix
               .setQuick(j, k, transitionMatrix.getQuick(j, k) / sum);
+        }
         // normalize the rows of the emission matrix
         sum = 0;
-        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k)
+        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k) {
           sum += emissionMatrix.getQuick(j, k);
-        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k)
+        }
+        for (int k = 0; k < iteration.getNrOfOutputStates(); ++k) {
           emissionMatrix.setQuick(j, k, emissionMatrix.getQuick(j, k) / sum);
+        }
         // normalization parameter for initial probabilities
         isum += initialProbabilities.getQuick(j);
       }
@@ -348,8 +362,9 @@ public final class HmmTrainer {
             / isum);
       }
       // check for convergence
-      if (checkConvergence(lastIteration, iteration, epsilon))
+      if (checkConvergence(lastIteration, iteration, epsilon)) {
         break;
+      }
       // overwrite the last iterated model by the new iteration
       lastIteration.assign(iteration);
     }
@@ -357,7 +372,7 @@ public final class HmmTrainer {
     return iteration;
   }
 
-  private static void unscaledBaumWelch(int[] observedSequence, HmmModel iteration, DenseMatrix alpha, DenseMatrix beta) {
+  private static void unscaledBaumWelch(int[] observedSequence, HmmModel iteration, Matrix alpha, Matrix beta) {
     Vector initialProbabilities = iteration.getInitialProbabilities();
     Matrix emissionMatrix = iteration.getEmissionMatrix();
     Matrix transitionMatrix = iteration.getTransitionMatrix();
@@ -396,7 +411,7 @@ public final class HmmTrainer {
     }
   }
 
-  private static void logScaledBaumWelch(int[] observedSequence, HmmModel iteration, DenseMatrix alpha, DenseMatrix beta) {
+  private static void logScaledBaumWelch(int[] observedSequence, HmmModel iteration, Matrix alpha, Matrix beta) {
     Vector initialProbabilities = iteration.getInitialProbabilities();
     Matrix emissionMatrix = iteration.getEmissionMatrix();
     Matrix transitionMatrix = iteration.getTransitionMatrix();
@@ -414,9 +429,10 @@ public final class HmmTrainer {
           double temp = alpha.getQuick(t, i)
               + Math.log(emissionMatrix.getQuick(j, observedSequence[t + 1]))
               + beta.getQuick(t + 1, j);
-          if (temp > Double.NEGATIVE_INFINITY) // handle
-            // 0-probabilities
+          if (temp > Double.NEGATIVE_INFINITY) {
+            // handle 0-probabilities
             sum = temp + Math.log(1 + Math.exp(sum - temp));
+          }
         }
         transitionMatrix.setQuick(i, j, transitionMatrix.getQuick(i, j)
             * Math.exp(sum - modelLikelihood));
@@ -430,9 +446,10 @@ public final class HmmTrainer {
           // delta tensor
           if (observedSequence[t] == j) {
             double temp = alpha.getQuick(t, i) + beta.getQuick(t, i);
-            if (temp > Double.NEGATIVE_INFINITY) // handle
-              // 0-probabilities
+            if (temp > Double.NEGATIVE_INFINITY) {
+              // handle 0-probabilities
               sum = temp + Math.log(1 + Math.exp(sum - temp));
+            }
           }
         }
         emissionMatrix.setQuick(i, j, Math.exp(sum - modelLikelihood));

@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -180,8 +179,8 @@ public class ClusterLabels {
   /**
    * Get the list of labels, sorted by best score.
    */
-  protected List<TermInfoClusterInOut> getClusterLabels(Integer integer, Collection<WeightedVectorWritable> wvws)
-      throws IOException {
+  protected List<TermInfoClusterInOut> getClusterLabels(Integer integer,
+                                                        Collection<WeightedVectorWritable> wvws) throws IOException {
 
     if (wvws.size() < minNumIds) {
       log.info("Skipping small cluster {} with size: {}", integer, wvws.size());
@@ -267,8 +266,9 @@ public class ClusterLabels {
     return clusteredTermInfo.subList(0, Math.min(clusteredTermInfo.size(), maxLabels));
   }
 
-  private static OpenBitSet getClusterDocBitset(IndexReader reader, Collection<String> idSet, String idField)
-      throws IOException {
+  private static OpenBitSet getClusterDocBitset(IndexReader reader,
+                                                Collection<String> idSet,
+                                                String idField) throws IOException {
     int numDocs = reader.numDocs();
 
     OpenBitSet bitset = new OpenBitSet(numDocs);

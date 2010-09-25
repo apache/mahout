@@ -44,8 +44,6 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * Main class defining a Hidden Markov Model
- *
- * @author mheimel
  */
 public class HmmModel implements JsonDeserializer<HmmModel>,
     JsonSerializer<HmmModel>, Cloneable {
@@ -60,14 +58,16 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
   /**
    * Get a copy of this model
    */
+  @Override
   public HmmModel clone() throws CloneNotSupportedException {
     super.clone();
-    HmmModel model = new HmmModel(transitionMatrix.clone(), emissionMatrix
-        .clone(), initialProbabilities.clone());
-    if (hiddenStateNames != null)
+    HmmModel model = new HmmModel(transitionMatrix.clone(), emissionMatrix.clone(), initialProbabilities.clone());
+    if (hiddenStateNames != null) {
       model.hiddenStateNames = new TreeBidiMap(hiddenStateNames);
-    if (outputStateNames != null)
+    }
+    if (outputStateNames != null) {
       model.outputStateNames = new TreeBidiMap(outputStateNames);
+    }
     return model;
   }
 
@@ -142,10 +142,11 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
   private void initRandomParameters(long seed) {
     Random rand;
     // initialize the random number generator
-    if (seed == 0)
+    if (seed == 0) {
       rand = RandomUtils.getRandom();
-    else
+    } else {
       rand = RandomUtils.getRandom(seed);
+    }
     // initialize the initial Probabilities
     double sum = 0; // used for normalization
     for (int i = 0; i < nrOfHiddenStates; i++) {
@@ -165,8 +166,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
         sum += values[j];
       }
       // normalize the random values to obtain probabilities
-      for (int j = 0; j < nrOfHiddenStates; j++)
+      for (int j = 0; j < nrOfHiddenStates; j++) {
         values[j] /= sum;
+      }
       // set this row of the transition matrix
       transitionMatrix.set(i, values);
     }
@@ -180,8 +182,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
         sum += values[j];
       }
       // normalize the random values to obtain probabilities
-      for (int j = 0; j < nrOfOutputStates; j++)
+      for (int j = 0; j < nrOfOutputStates; j++) {
         values[j] /= sum;
+      }
       // set this row of the output matrix
       emissionMatrix.set(i, values);
     }
@@ -280,9 +283,8 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    *
    * @return hidden state names.
    */
-  @SuppressWarnings("unchecked")
   public Map<String, Integer> getHiddenStateNames() {
-    return hiddenStateNames;
+    return (Map<String, Integer>) hiddenStateNames;
   }
 
   /**
@@ -306,8 +308,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    * @param stateNames <String,Integer> Map that assigns each state name an integer ID
    */
   public void registerHiddenStateNames(Map<String, Integer> stateNames) {
-    if (stateNames != null)
+    if (stateNames != null) {
       hiddenStateNames = new TreeBidiMap(stateNames);
+    }
   }
 
   /**
@@ -318,8 +321,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    *         known or no hidden state names were specified
    */
   public String getHiddenStateName(int id) {
-    if (hiddenStateNames == null)
+    if (hiddenStateNames == null) {
       return null;
+    }
     return (String) hiddenStateNames.getKey(id);
   }
 
@@ -331,8 +335,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    *         known or no hidden state names were specified
    */
   public int getHiddenStateID(String name) {
-    if (hiddenStateNames == null)
+    if (hiddenStateNames == null) {
       return -1;
+    }
     Integer tmp = (Integer) hiddenStateNames.get(name);
     return (tmp == null) ? -1 : tmp;
   }
@@ -347,9 +352,8 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    *
    * @return names of output states.
    */
-  @SuppressWarnings("unchecked")
   public Map<String, Integer> getOutputStateNames() {
-    return outputStateNames;
+    return (Map<String, Integer>) outputStateNames;
   }
 
   /**
@@ -373,8 +377,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    * @param stateNames <String,Integer> Map that assigns each state name an integer ID
    */
   public void registerOutputStateNames(Map<String, Integer> stateNames) {
-    if (stateNames != null)
+    if (stateNames != null) {
       outputStateNames = new TreeBidiMap(stateNames);
+    }
   }
 
   /**
@@ -385,8 +390,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    *         known or no output state names were specified
    */
   public String getOutputStateName(int id) {
-    if (outputStateNames == null)
+    if (outputStateNames == null) {
       return null;
+    }
     return (String) outputStateNames.getKey(id);
   }
 
@@ -398,8 +404,9 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
    *         known or no output state names were specified
    */
   public int getOutputStateID(String name) {
-    if (outputStateNames == null)
+    if (outputStateNames == null) {
       return -1;
+    }
     Integer tmp = (Integer) outputStateNames.get(name);
     return (tmp == null) ? -1 : tmp;
   }
@@ -435,9 +442,6 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
   private static final String OUTNAMES = "HMMOutNames";
   private static final String HIDDENNAMES = "HmmHiddenNames";
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public HmmModel deserialize(JsonElement json, Type type,
                               JsonDeserializationContext context) {
