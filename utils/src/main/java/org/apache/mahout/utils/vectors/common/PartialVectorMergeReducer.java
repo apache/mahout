@@ -40,6 +40,8 @@ public class PartialVectorMergeReducer extends
 
   private boolean sequentialAccess;
 
+  private boolean namedVector;
+  
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context) throws IOException,
       InterruptedException {
@@ -54,7 +56,12 @@ public class PartialVectorMergeReducer extends
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
+    
+    if (namedVector) {
+      vector = new NamedVector(vector, key.toString());
+    }
+    
+    VectorWritable vectorWritable = new VectorWritable(vector);
     context.write(key, vectorWritable);
   }
 
@@ -65,6 +72,7 @@ public class PartialVectorMergeReducer extends
     normPower = conf.getFloat(PartialVectorMerger.NORMALIZATION_POWER, PartialVectorMerger.NO_NORMALIZING);
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+    namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
   }
 
 }

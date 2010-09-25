@@ -119,7 +119,8 @@ public final class DictionaryVectorizer {
                                                 float minLLRValue,
                                                 int numReducers,
                                                 int chunkSizeInMegabytes,
-                                                boolean sequentialAccess)
+                                                boolean sequentialAccess,
+                                                boolean namedVectors)
     throws IOException, InterruptedException, ClassNotFoundException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
@@ -152,7 +153,7 @@ public final class DictionaryVectorizer {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
       makePartialVectors(input, maxNGramSize, dictionaryChunk, partialVectorOutputPath,
-        maxTermDimension[0], sequentialAccess, numReducers);
+        maxTermDimension[0], sequentialAccess, namedVectors, numReducers);
     }
     
     Configuration conf = new Configuration();
@@ -161,7 +162,7 @@ public final class DictionaryVectorizer {
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     if (dictionaryChunks.size() > 1) {
       PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, -1, maxTermDimension[0],
-        sequentialAccess, numReducers);
+        sequentialAccess, namedVectors, numReducers);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
       Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
@@ -242,6 +243,11 @@ public final class DictionaryVectorizer {
    *          location of the chunk of features and the id's
    * @param output
    *          output directory were the partial vectors have to be created
+   * @param dimension
+   * @param sequentialAccess
+   *          output vectors should be optimized for sequential access
+   * @param namedVectors
+   *          output vectors should be named, retaining key (doc id) as a label
    * @param numReducers 
    *          the desired number of reducer tasks
    * @throws IOException
@@ -254,6 +260,7 @@ public final class DictionaryVectorizer {
                                          Path output,
                                          int dimension,
                                          boolean sequentialAccess, 
+                                         boolean namedVectors,
                                          int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
@@ -262,6 +269,7 @@ public final class DictionaryVectorizer {
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setInt(PartialVectorMerger.DIMENSION, dimension);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
+    conf.setBoolean(PartialVectorMerger.NAMED_VECTOR, namedVectors);
     conf.setInt(MAX_NGRAMS, maxNGramSize);   
     DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
     

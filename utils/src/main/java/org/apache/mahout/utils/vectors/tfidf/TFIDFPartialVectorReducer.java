@@ -59,6 +59,8 @@ public class TFIDFPartialVectorReducer extends
 
   private boolean sequentialAccess;
 
+  private boolean namedVector;
+  
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
       throws IOException, InterruptedException {
@@ -86,7 +88,12 @@ public class TFIDFPartialVectorReducer extends
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
-    VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
+    
+    if (namedVector) {
+      vector = new NamedVector(vector, key.toString());
+    }
+    
+    VectorWritable vectorWritable = new VectorWritable(vector);
     context.write(key, vectorWritable);
   }
 
@@ -105,6 +112,7 @@ public class TFIDFPartialVectorReducer extends
       minDf = conf.getInt(TFIDFConverter.MIN_DF, 1);
       maxDfPercent = conf.getInt(TFIDFConverter.MAX_DF_PERCENTAGE, 99);
       sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+      namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
 
       Path dictionaryFile = new Path(localFiles[0].getPath());
       FileSystem fs = dictionaryFile.getFileSystem(conf);

@@ -54,6 +54,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
   private boolean sequentialAccess;
 
+  private boolean namedVector;
+  
   private int maxNGramSize = 1;
 
   @Override
@@ -94,9 +96,14 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
     }
+    
+    if (namedVector) {
+      vector = new NamedVector(vector, key.toString());
+    }
+    
     // if the vector has no nonZero entries (nothing in the dictionary), let's not waste space sending it to disk.
     if (vector.getNumNondefaultElements() > 0) {
-      VectorWritable vectorWritable = new VectorWritable(new NamedVector(vector, key.toString()));
+      VectorWritable vectorWritable = new VectorWritable(vector);
       context.write(key, vectorWritable);
     } else {
       context.getCounter("TFParticalVectorReducer", "emptyVectorCount").increment(1);
@@ -110,6 +117,7 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     try {
       dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
       sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+      namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
       maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
       URI[] localFiles = DistributedCache.getCacheFiles(conf);
       if (localFiles == null || localFiles.length < 1) {

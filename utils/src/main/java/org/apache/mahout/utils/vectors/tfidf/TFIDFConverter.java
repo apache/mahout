@@ -120,6 +120,7 @@ public final class TFIDFConverter {
                                   int maxDFPercent,
                                   float normPower,
                                   boolean sequentialAccessOutput,
+                                  boolean namedVector,
                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
@@ -156,7 +157,8 @@ public final class TFIDFConverter {
                          maxDFPercent,
                          dictionaryChunk,
                          partialVectorOutputPath,
-                         sequentialAccessOutput);
+                         sequentialAccessOutput,
+                         namedVector);
     }
 
     Configuration conf = new Configuration();
@@ -169,6 +171,7 @@ public final class TFIDFConverter {
                                               normPower,
                                               datasetFeatures.getFirst()[0].intValue(),
                                               sequentialAccessOutput,
+                                              namedVector,
                                               numReducers);
       HadoopUtil.deletePaths(partialVectorPaths, fs);
     } else {
@@ -256,6 +259,10 @@ public final class TFIDFConverter {
    *          location of the chunk of features and the id's
    * @param output
    *          output directory were the partial vectors have to be created
+   * @param sequentialAccess
+   *          output vectors should be optimized for sequential access
+   * @param namedVectors
+   *          output vectors should be named, retaining key (doc id) as a label
    */
   private static void makePartialVectors(Path input,
                                          Long featureCount,
@@ -264,7 +271,8 @@ public final class TFIDFConverter {
                                          int maxDFPercent,
                                          Path dictionaryFilePath,
                                          Path output,
-                                         boolean sequentialAccess)
+                                         boolean sequentialAccess,
+                                         boolean namedVector)
     throws IOException, InterruptedException, ClassNotFoundException {
 
     Configuration conf = new Configuration();
@@ -276,6 +284,7 @@ public final class TFIDFConverter {
     conf.setInt(MIN_DF, minDf);
     conf.setInt(MAX_DF_PERCENTAGE, maxDFPercent);
     conf.setBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, sequentialAccess);
+    conf.setBoolean(PartialVectorMerger.NAMED_VECTOR, namedVector);
     DistributedCache.setCacheFiles(new URI[] {dictionaryFilePath.toUri()}, conf);
 
     Job job = new Job(conf);

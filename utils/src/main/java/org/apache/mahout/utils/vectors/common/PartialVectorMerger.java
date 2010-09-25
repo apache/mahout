@@ -48,6 +48,8 @@ public final class PartialVectorMerger {
   public static final String DIMENSION = "vector.dimension";
 
   public static final String SEQUENTIAL_ACCESS = "vector.sequentialAccess";
+  
+  public static final String NAMED_VECTOR = "vector.named";
 
   /**
    * Cannot be initialized. Use the static functions
@@ -66,6 +68,11 @@ public final class PartialVectorMerger {
    *          output directory were the partial vectors have to be created
    * @param normPower
    *          The normalization value. Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
+   * @param dimension
+   * @param sequentialAccess
+   *          output vectors should be optimized for sequential access
+   * @param namedVectors
+   *          output vectors should be named, retaining key (doc id) as a label
    * @param numReducers 
    *          The number of reducers to spawn
    * @throws IOException
@@ -77,6 +84,7 @@ public final class PartialVectorMerger {
                                          float normPower,
                                          int dimension,
                                          boolean sequentialAccess,
+                                         boolean namedVector,
                                          int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
@@ -87,6 +95,7 @@ public final class PartialVectorMerger {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");
     conf.setBoolean(SEQUENTIAL_ACCESS, sequentialAccess);
+    conf.setBoolean(NAMED_VECTOR, namedVector);
     conf.setInt(DIMENSION, dimension);
     conf.setFloat(NORMALIZATION_POWER, normPower);
 

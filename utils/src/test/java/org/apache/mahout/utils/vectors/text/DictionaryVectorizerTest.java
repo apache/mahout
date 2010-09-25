@@ -19,15 +19,26 @@ package org.apache.mahout.utils.vectors.text;
 
 import java.util.Random;
 
+import junit.framework.TestCase;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.NamedVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.text.DefaultAnalyzer;
 import org.apache.mahout.utils.MahoutTestCase;
+import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
+import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 import org.apache.mahout.utils.vectors.tfidf.TFIDFConverter;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,89 +48,122 @@ import org.junit.Test;
  */
 public final class DictionaryVectorizerTest extends MahoutTestCase {
 
-  private static final int AVG_DOCUMENT_LENGTH = 20;
-  private static final int AVG_SENTENCE_LENGTH = 8;
-  private static final int AVG_WORD_LENGTH = 6;
   private static final int NUM_DOCS = 100;
-  private static final String CHARSET = "abcdef";
-  private static final String DELIM = " .,?;:!\t\n\r";
-  private static final String ERRORSET = "`1234567890" + "-=~@#$%^&*()_+[]{}'\"/<>|\\";
-
-  private final Random random = RandomUtils.getRandom();
+  
+  private Configuration conf;
   private FileSystem fs;
-
-  private char getRandomDelimiter() {
-    return DELIM.charAt(random.nextInt(DELIM.length()));
-  }
-
-  private String getRandomDocument() {
-    int length = (AVG_DOCUMENT_LENGTH >> 1) + random.nextInt(AVG_DOCUMENT_LENGTH);
-    StringBuilder sb = new StringBuilder(length * AVG_SENTENCE_LENGTH * AVG_WORD_LENGTH);
-    for (int i = 0; i < length; i++) {
-      sb.append(getRandomSentence());
-    }
-    return sb.toString();
-  }
-
-  private String getRandomSentence() {
-    int length = (AVG_SENTENCE_LENGTH >> 1) + random.nextInt(AVG_SENTENCE_LENGTH);
-    StringBuilder sb = new StringBuilder(length * AVG_WORD_LENGTH);
-    for (int i = 0; i < length; i++) {
-      sb.append(getRandomString()).append(' ');
-    }
-    sb.append(getRandomDelimiter());
-    return sb.toString();
-  }
-
-  private String getRandomString() {
-    int length = (AVG_WORD_LENGTH >> 1) + random.nextInt(AVG_WORD_LENGTH);
-    StringBuilder sb = new StringBuilder(length);
-    for (int i = 0; i < length; i++) {
-      sb.append(CHARSET.charAt(random.nextInt(CHARSET.length())));
-    }
-    if (random.nextInt(10) == 0) {
-      sb.append(ERRORSET.charAt(random.nextInt(ERRORSET.length())));
-    }
-    return sb.toString();
-  }
-
+  private Path inputPath;
+  
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    Configuration conf = new Configuration();
+    conf = new Configuration();
     fs = FileSystem.get(conf);
+
+    inputPath = getTestTempFilePath("documents/docs.file");
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
+
+    RandomDocumentGenerator gen = new RandomDocumentGenerator();
+    
+    for (int i = 0; i < NUM_DOCS; i++) {
+      writer.append(new Text("Document::ID::" + i), new Text(gen.getRandomDocument()));
+    }
+    writer.close();
+  }
+  
+  @Test
+  public void testCreateTermFrequencyVectors() throws Exception {
+    runTest(false, false);
   }
 
   @Test
-  public void testCreateTermFrequencyVectors() throws Exception {
-    Configuration conf = new Configuration();
-    Path path = getTestTempFilePath("documents/docs.file");
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, Text.class, Text.class);
-
-    for (int i = 0; i < NUM_DOCS; i++) {
-      writer.append(new Text("Document::ID::" + i), new Text(getRandomDocument()));
-    }
-    writer.close();
+  public void testCreateTermFrequencyVectorsNam() throws Exception {
+    runTest(false, true);
+  }
+  
+  @Test
+  public void testCreateTermFrequencyVectorsSeq() throws Exception {
+    runTest(true, false);
+  }
+  
+  @Test
+  public void testCreateTermFrequencyVectorsSeqNam() throws Exception {
+    runTest(true, true);
+  }
+  
+  public void runTest(boolean sequential, boolean named) throws Exception {
+    
     Class<? extends Analyzer> analyzer = DefaultAnalyzer.class;
-    DocumentProcessor.tokenizeDocuments(path, analyzer, getTestTempDirPath("output/tokenized-documents"));
-    DictionaryVectorizer.createTermFrequencyVectors(getTestTempDirPath("output/tokenized-documents"),
-                                                    getTestTempDirPath("output/wordcount"),
+    
+    Path tokenizedDocuments = getTestTempDirPath("output/tokenized-documents");
+    Path wordCount = getTestTempDirPath("output/wordcount");
+    Path tfVectors = new Path(wordCount, "tf-vectors");
+    Path tfidf = getTestTempDirPath("output/tfidf");
+    Path tfidfVectors = new Path(tfidf, "tfidf-vectors");
+    
+    DocumentProcessor.tokenizeDocuments(inputPath, analyzer, tokenizedDocuments);
+    
+    DictionaryVectorizer.createTermFrequencyVectors(tokenizedDocuments,
+                                                    wordCount,
                                                     conf,
                                                     2,
                                                     1,
                                                     0.0f,
                                                     1,
                                                     100,
-                                                    false);
-    TFIDFConverter.processTfIdf(getTestTempDirPath("output/wordcount/tf-vectors"),
-                                getTestTempDirPath("output/tfidf"),
+                                                    sequential,
+                                                    named);
+    
+    validateVectors(fs, conf, NUM_DOCS, tfVectors, sequential, named);
+    
+    TFIDFConverter.processTfIdf(tfVectors,
+                                tfidf,
                                 100,
                                 1,
                                 99,
                                 1.0f,
-                                false,
+                                sequential,
+                                named,
                                 1);
+    
+    
+    validateVectors(fs, conf, NUM_DOCS, tfidfVectors, sequential, named);
+  }
+  
+  public static void validateVectors(FileSystem fs, Configuration conf, int numDocs, Path vectorPath, boolean sequential, boolean named) throws Exception {
+    FileStatus[] stats = fs.listStatus(vectorPath, new PathFilter() {
+      @Override
+      public boolean accept(Path path) {
+        return path.getName().startsWith("part-");
+      }
+      
+    });
 
+    int count = 0;
+    Text key = new Text();
+    VectorWritable vw = new VectorWritable();
+    for (FileStatus s: stats) {
+      SequenceFile.Reader tfidfReader = new SequenceFile.Reader(fs, s.getPath(), conf);
+      while (tfidfReader.next(key, vw)) {
+        count++;
+        Vector v = vw.get();
+        if (named) {
+          TestCase.assertTrue("Expected NamedVector", v instanceof NamedVector);
+          v = ((NamedVector) v).getDelegate();
+        }
+        
+        if (sequential) {
+          TestCase.assertTrue("Expected SequentialAccessSparseVector", v instanceof SequentialAccessSparseVector);
+        }
+        else {
+          TestCase.assertTrue("Expected RandomAccessSparseVector", v instanceof RandomAccessSparseVector);
+        }
+        
+      }
+      tfidfReader.close();
+    }
+
+    TestCase.assertEquals("Expected " + numDocs + " documents", numDocs, count);
   }
 }

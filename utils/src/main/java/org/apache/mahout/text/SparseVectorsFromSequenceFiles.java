@@ -60,6 +60,7 @@ public final class SparseVectorsFromSequenceFiles {
     Option outputDirOpt = obuilder.withLongName("output").withRequired(true).withArgument(
       abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
       "The output directory").withShortName("o").create();
+    
     Option minSupportOpt = obuilder.withLongName("minSupport").withArgument(
       abuilder.withName("minSupport").withMinimum(1).withMaximum(1).create()).withDescription(
       "(Optional) Minimum Support. Default Value: 2").withShortName("s").create();
@@ -98,15 +99,22 @@ public final class SparseVectorsFromSequenceFiles {
       abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
       "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
           + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
+    
     Option maxNGramSizeOpt = obuilder.withLongName("maxNGramSize").withRequired(false).withArgument(
       abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
         .withDescription(
           "(Optional) The maximum size of ngrams to create"
               + " (2 = bigrams, 3 = trigrams, etc) Default Value:1").withShortName("ng").create();
+    
     Option sequentialAccessVectorOpt = obuilder.withLongName("sequentialAccessVector").withRequired(false)
         .withDescription(
           "(Optional) Whether output vectors should be SequentialAccessVectors. If set true else false")
         .withShortName("seq").create();
+    
+    Option namedVectorOpt = obuilder.withLongName("namedVector").withRequired(false)
+    .withDescription(
+      "(Optional) Whether output vectors should be NamedVectors. If set true else false")
+    .withShortName("nv").create();
     
     Option overwriteOutput = obuilder.withLongName("overwrite").withRequired(false).withDescription(
       "If set, overwrite the output directory").withShortName("ow").create();
@@ -117,7 +125,7 @@ public final class SparseVectorsFromSequenceFiles {
         .withOption(chunkSizeOpt).withOption(outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
         .withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt).withOption(minLLROpt)
         .withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput).withOption(
-          helpOpt).withOption(sequentialAccessVectorOpt).create();
+          helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt).create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -220,14 +228,19 @@ public final class SparseVectorsFromSequenceFiles {
         sequentialAccessOutput = true;
       }
       
+      boolean namedVectors = false;
+      if (cmdLine.hasOption(namedVectorOpt)) {
+        namedVectors = true;
+      }
+      
       Configuration conf = new Configuration();
       DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, conf, minSupport, maxNGramSize,
-        minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput);
+        minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput, namedVectors);
       if (processIdf) {
         TFIDFConverter.processTfIdf(
           new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
           outputDir, chunkSize, minDf, maxDFPercent, norm,
-          sequentialAccessOutput, reduceTasks);
+          sequentialAccessOutput, namedVectors, reduceTasks);
       }
     } catch (OptionException e) {
       log.error("Exception", e);
