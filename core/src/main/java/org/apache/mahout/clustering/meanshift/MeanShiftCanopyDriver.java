@@ -426,13 +426,12 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     // iterate over all points, assigning each to the closest canopy and outputting that clustering
     fs = FileSystem.get(input.toUri(), conf);
     status = fs.listStatus(input, new OutputLogFilter());
-    Path outPath = new Path(output, CanopyDriver.DEFAULT_CLUSTERED_POINTS_DIRECTORY);
     int part = 0;
     for (FileStatus s : status) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs,
                                                            conf,
-                                                           new Path(outPath, "part-m-" + part++),
+                                                           new Path(output, "part-m-" + part++),
                                                            IntWritable.class,
                                                            WeightedVectorWritable.class);
       try {
