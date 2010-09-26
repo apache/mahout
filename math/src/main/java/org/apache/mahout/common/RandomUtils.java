@@ -78,9 +78,11 @@ public final class RandomUtils {
   }
   
   public static long seedBytesToLong(byte[] seed) {
-    return (seed[0] & 0xFFL) << 56 | (seed[1] & 0xFFL) << 48 | (seed[2] & 0xFFL) << 40
-           | (seed[3] & 0xFFL) << 32 | (seed[4] & 0xFFL) << 24 | (seed[5] & 0xFFL) << 16
-           | (seed[6] & 0xFFL) << 8 | seed[7] & 0xFFL;
+    long result = 0L;
+    for (int i = 0; i < 8; i++) {
+      result |= (seed[i] & 0xFFL) << (8 * (7 - i));
+    }
+    return result;
   }
   
   /** @return what {@link Double#hashCode()} would return for the same value */
@@ -109,7 +111,7 @@ public final class RandomUtils {
       throw new IllegalArgumentException();
     }
     if (n <= 3) {
-      return 3;
+      return 5;
     }
     int next = nextPrime(n);
     while (isNotPrime(next + 2)) {
@@ -124,7 +126,7 @@ public final class RandomUtils {
    * </p>
    */
   public static int nextPrime(int n) {
-    if (n < 2) {
+    if (n <= 2) {
       return 2;
     }
     // Make sure the number is odd. Is this too clever?
@@ -139,7 +141,7 @@ public final class RandomUtils {
   /** @return <code>true</code> iff n is not a prime */
   public static boolean isNotPrime(int n) {
     if (n < 2 || (n & 0x1) == 0) { // < 2 or even
-      return true;
+      return n != 2;
     }
     int max = 1 + (int) Math.sqrt(n);
     for (int d = 3; d <= max; d += 2) {
