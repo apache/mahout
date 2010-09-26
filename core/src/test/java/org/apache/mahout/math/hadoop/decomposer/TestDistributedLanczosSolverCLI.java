@@ -17,10 +17,6 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,7 +31,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.TestDistributedRowMatrix;
-import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver.DistributedLanczosSolverJob;
 import org.junit.Test;
 
 public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
@@ -43,13 +38,19 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
   @Test
   public void testDistributedLanczosSolverCLI() throws Exception {
     Path testData = getTestTempDirPath("testdata");
-    DistributedRowMatrix corpus = new TestDistributedRowMatrix().randomDistributedMatrix(500, 450, 500, 10, 10.0, true, testData
-        .toString());
+    DistributedRowMatrix corpus =
+        new TestDistributedRowMatrix().randomDistributedMatrix(500, 450, 500, 10, 10.0, true, testData.toString());
     corpus.configure(new JobConf());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
-    String[] args = { "-i", new Path(testData, "distMatrix").toString(), "-o", output.toString(), "--tempDir", tmp.toString(), "--numRows", "500",
-        "--numCols", "500", "--rank", "10", "--symmetric", "true" };
+    String[] args = {
+        "-i", new Path(testData, "distMatrix").toString(),
+        "-o", output.toString(),
+        "--tempDir", tmp.toString(), "--numRows", "500",
+        "--numCols", "500",
+        "--rank", "10",
+        "--symmetric", "true"
+    };
     new DistributedLanczosSolver().new DistributedLanczosSolverJob().run(args);
 
     Path rawEigenvectors = new Path(output, DistributedLanczosSolver.RAW_EIGENVECTORS);
@@ -78,13 +79,21 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
   @Test
   public void testDistributedLanczosSolverEVJCLI() throws Exception {
     Path testData = getTestTempDirPath("testdata");
-    DistributedRowMatrix corpus = new TestDistributedRowMatrix().randomDistributedMatrix(500, 450, 500, 10, 10.0, true, testData
-        .toString());
+    DistributedRowMatrix corpus =
+        new TestDistributedRowMatrix().randomDistributedMatrix(500, 450, 500, 10, 10.0, true, testData.toString());
     corpus.configure(new JobConf());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
-    String[] args = { "-i", new Path(testData, "distMatrix").toString(), "-o", output.toString(), "--tempDir", tmp.toString(), "--numRows", "500",
-        "--numCols", "500", "--rank", "10", "--symmetric", "true", "--cleansvd", "true" };
+    String[] args = {
+        "-i", new Path(testData, "distMatrix").toString(),
+        "-o", output.toString(),
+        "--tempDir", tmp.toString(),
+        "--numRows", "500",
+        "--numCols", "500",
+        "--rank", "10",
+        "--symmetric", "true",
+        "--cleansvd", "true"
+    };
     new DistributedLanczosSolver().new DistributedLanczosSolverJob().run(args);
   
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);

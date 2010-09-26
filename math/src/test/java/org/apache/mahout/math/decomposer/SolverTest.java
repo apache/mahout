@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.decomposer;
 
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -84,7 +83,8 @@ public abstract class SolverTest extends MahoutTestCase {
                                                           double entryMean) {
     SparseRowMatrix m = new SparseRowMatrix(new int[]{numRows, numCols});
     //double n = 0;
-    Random r = RandomUtils.getRandom(1234L);
+    // TODO figure out how to redo the test so this can use RandomUtils
+    Random r = new Random(1234L);
     for (int i = 0; i < nonNullRows; i++) {
       SequentialAccessSparseVector v = new SequentialAccessSparseVector(numCols);
       for (int j = 0; j < entriesPerRow; j++) {
