@@ -127,29 +127,39 @@ public final class TestClassifier {
         return;
       }
       
+      BayesParameters params = new BayesParameters();
+      // Setting all default values
       int gramSize = 1;
+      String classifierType = "bayes";      
+      String dataSource = "hdfs";
+      String defaultCat = "unknown";
+      String encoding = "UTF-8";
+      String alphaI = "1.0";
+      String classificationMethod = "sequential";
+
+      String modelBasePath = (String) cmdLine.getValue(pathOpt);
+      
       if (cmdLine.hasOption(gramSizeOpt)) {
         gramSize = Integer.parseInt((String) cmdLine.getValue(gramSizeOpt));
         
       }
-      BayesParameters params = new BayesParameters(gramSize);
       
-      String modelBasePath = (String) cmdLine.getValue(pathOpt);
+      if (cmdLine.hasOption(classifierType)) {
+        classifierType = (String) cmdLine.getValue(typeOpt);
+      }
       
-      String classifierType = (String) cmdLine.getValue(typeOpt);
-      String dataSource = (String) cmdLine.getValue(dataSourceOpt);
+      if (cmdLine.hasOption(dataSource)) {
+        dataSource = (String) cmdLine.getValue(dataSource);
+      }
       
-      String defaultCat = "unknown";
       if (cmdLine.hasOption(defaultCatOpt)) {
         defaultCat = (String) cmdLine.getValue(defaultCatOpt);
       }
       
-      String encoding = "UTF-8";
       if (cmdLine.hasOption(encodingOpt)) {
         encoding = (String) cmdLine.getValue(encodingOpt);
       }
       
-      String alphaI = "1.0";
       if (cmdLine.hasOption(alphaOpt)) {
         alphaI = (String) cmdLine.getValue(alphaOpt);
       }
@@ -158,11 +168,11 @@ public final class TestClassifier {
       
       String testDirPath = (String) cmdLine.getValue(dirOpt);
       
-      String classificationMethod = "sequential";
       if (cmdLine.hasOption(methodOpt)) {
         classificationMethod = (String) cmdLine.getValue(methodOpt);
       }
       
+      params.setGramSize(gramSize);
       params.set("verbose", Boolean.toString(verbose));
       params.set("basePath", modelBasePath);
       params.set("classifierType", classifierType);

@@ -76,7 +76,7 @@ public final class TrainClassifier {
       abuilder.withName("output").withMinimum(1).withMaximum(1).create()).withDescription(
       "The location of the model on the HDFS").withShortName("o").create();
     
-    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(false).withArgument(
       abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription(
       "Size of the n-gram. Default Value: 1 ").withShortName("ng").create();
     
@@ -92,11 +92,11 @@ public final class TrainClassifier {
       abuilder.withName("a").withMinimum(1).withMaximum(1).create()).withDescription(
       "Smoothing parameter Default Value: 1.0").withShortName("a").create();
     
-    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(false).withArgument(
       abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).withDescription(
       "Type of classifier: bayes|cbayes. Default: bayes").withShortName("type").create();
     
-    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(true).withArgument(
+    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(false).withArgument(
       abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
       "Location of model: hdfs|hbase. Default Value: hdfs").withShortName("source").create();
     
@@ -121,6 +121,12 @@ public final class TrainClassifier {
       String dataSourceType = (String) cmdLine.getValue(dataSourceOpt);
       
       BayesParameters params = new BayesParameters();
+      // Setting all the default parameter values
+      params.setGramSize(1);
+      params.setMinDF(1);
+      params.set("alpha_i","1.0");
+      params.set("dataSource", "hdfs");
+      
       if (cmdLine.hasOption(gramSizeOpt)) {
         params.setGramSize(Integer.parseInt((String) cmdLine.getValue(gramSizeOpt)));
       }
@@ -137,29 +143,23 @@ public final class TrainClassifier {
         params.setSkipCleanup(true);
       }
       
-      String alphaI = "1.0";
       if (cmdLine.hasOption(alphaOpt)) {
-        alphaI = (String) cmdLine.getValue(alphaOpt);
+        params.set("alpha_i",(String) cmdLine.getValue(alphaOpt));
       }
       
-      params.set("alpha_i", alphaI);
-      
-      if ("hbase".equals(dataSourceType)) {
-        params.set("dataSource", "hbase");
-      } else {
-        params.set("dataSource", "hdfs");
-      }
+      if (cmdLine.hasOption(dataSourceOpt)){
+        params.set("dataSource", dataSourceType);
+      } 
 
       Path inputPath = new Path((String) cmdLine.getValue(inputDirOpt));
       Path outputPath = new Path((String) cmdLine.getValue(outputOpt));
-      if ("bayes".equalsIgnoreCase(classifierType)) {
-        log.info("Training Bayes Classifier");
-        trainNaiveBayes(inputPath, outputPath, params);
-        
-      } else if ("cbayes".equalsIgnoreCase(classifierType)) {
+      if ("cbayes".equalsIgnoreCase(classifierType)) {
         log.info("Training Complementary Bayes Classifier");
-        // setup the HDFS and copy the files there, then run the trainer
         trainCNaiveBayes(inputPath, outputPath, params);
+      } else {
+        log.info("Training Bayes Classifier");
+        // setup the HDFS and copy the files there, then run the trainer
+        trainNaiveBayes(inputPath, outputPath, params);
       }
     } catch (OptionException e) {
       log.error("Error while parsing options", e);
