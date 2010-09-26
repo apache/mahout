@@ -41,8 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class InputDriver {
-  /**Logger for this class.*/
-  private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
+
+  private static final Logger log = LoggerFactory.getLogger(InputDriver.class);
   
   private InputDriver() {
   }
@@ -78,12 +78,13 @@ public final class InputDriver {
          "org.apache.mahout.math.RandomAccessSparseVector").toString();
       runJob(input, output, vectorClassName);
     } catch (OptionException e) {
-      InputDriver.LOG.error("Exception parsing command line: ", e);
+      InputDriver.log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }
   
-  public static void runJob(Path input, Path output, String vectorClassName) throws IOException, InterruptedException, ClassNotFoundException {
+  public static void runJob(Path input, Path output, String vectorClassName)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set("vector.implementation.class.name", vectorClassName);
     Job job = new Job(conf);

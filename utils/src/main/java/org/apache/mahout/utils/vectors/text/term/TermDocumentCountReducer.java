@@ -29,7 +29,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 public class TermDocumentCountReducer extends Reducer<IntWritable, LongWritable, IntWritable, LongWritable> {
 
   @Override
-  protected void reduce(IntWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(IntWritable key, Iterable<LongWritable> values, Context context)
+    throws IOException, InterruptedException {
     long sum = 0;
     for (LongWritable value : values) {
       sum += value.get();

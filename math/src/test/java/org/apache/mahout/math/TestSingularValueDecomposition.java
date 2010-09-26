@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
 import java.util.Random;
@@ -43,7 +44,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
     int rows    = singularValues.length + 2;
     int columns = singularValues.length;
-    Random r = new Random(15338437322523L);
+    Random r = RandomUtils.getRandom(15338437322523L);
     SingularValueDecomposition svd =
       new SingularValueDecomposition(createTestMatrix(r, rows, columns, singularValues));
     double[] computedSV = svd.getSingularValues();
@@ -58,7 +59,7 @@ public final class TestSingularValueDecomposition extends MahoutTestCase {
     double[] singularValues = { 123.456, 2.3, 1.001, 0.999 };
     int rows    = singularValues.length;
     int columns = singularValues.length + 2;
-    Random r = new Random(732763225836210L);
+    Random r = RandomUtils.getRandom(732763225836210L);
     SingularValueDecomposition svd =
       new SingularValueDecomposition(createTestMatrix(r, rows, columns, singularValues));
     double[] computedSV = svd.getSingularValues();

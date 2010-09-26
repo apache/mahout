@@ -146,11 +146,12 @@ public final class WikipediaToSequenceFile {
    *          category string
    * @param all
    *          if true select all categories
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  public static void runJob(String input, String output, String catFile,
-                            boolean exactMatchOnly, boolean all) throws IOException, InterruptedException, ClassNotFoundException {
+  public static void runJob(String input,
+                            String output,
+                            String catFile,
+                            boolean exactMatchOnly,
+                            boolean all) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set("xmlinput.start", "<page>");
     conf.set("xmlinput.end", "</page>");

@@ -37,7 +37,8 @@ public class GramKeyPartitioner extends Partitioner<GramKey, Gram> {
 
   @Override
   public int getPartition(GramKey key, Gram value, int numPartitions) {
-    // see: http://svn.apache.org/viewvc/hadoop/mapreduce/trunk/src/java/org/apache/hadoop/mapreduce/lib/partition/BinaryPartitioner.java?revision=816664&view=markup
+    // see: http://svn.apache.org/viewvc/hadoop/mapreduce/trunk/src/java/org/apache/hadoop/mapreduce/
+    //      lib/partition/BinaryPartitioner.java?revision=816664&view=markup
     int length = key.getLength() - 1;
     int right = (offset + length) % length;
     int hash = WritableComparator.hashBytes(key.getBytes(), right);

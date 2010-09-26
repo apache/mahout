@@ -34,7 +34,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 
-public class RunLogistic {
+public final class RunLogistic {
 
   private static String inputFile;
   private static String modelFile;

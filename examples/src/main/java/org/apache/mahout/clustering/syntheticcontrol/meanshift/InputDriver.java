@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public final class InputDriver {
 
-  private static final Logger LOG = LoggerFactory.getLogger(InputDriver.class);
+  private static final Logger log = LoggerFactory.getLogger(InputDriver.class);
 
   private InputDriver() {
   }
@@ -67,7 +67,7 @@ public final class InputDriver {
       Path output = new Path(cmdLine.getValue(outputOpt, "output").toString());
       runJob(input, output);
     } catch (OptionException e) {
-      InputDriver.LOG.error("Exception parsing command line: ", e);
+      InputDriver.log.error("Exception parsing command line: ", e);
       CommandLineUtil.printHelp(group);
     }
   }

@@ -26,7 +26,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
-import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -39,6 +38,8 @@ import org.slf4j.LoggerFactory;
 public final class Job extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
+
+  private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
 
   private Job() {
   }
@@ -56,7 +57,8 @@ public final class Job extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args)
+    throws IOException, ClassNotFoundException, InterruptedException, InstantiationException, IllegalAccessException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.convergenceOption().create());
@@ -87,7 +89,7 @@ public final class Job extends AbstractJob {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    DistanceMeasure measure = (DistanceMeasure) ((Class<?>) ccl.loadClass(measureClass)).newInstance();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     run(getConf(), input, output, measure, t1, t2, convergenceDelta, maxIterations);
     return 0;
@@ -100,7 +102,6 @@ public final class Job extends AbstractJob {
    * the job expects the a file containing synthetic_control.data as obtained from
    * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series resides in a directory named
    * "testdata", and writes output to a directory named "output".
-   * @param conf TODO
    * @param input
    *          the String denoting the input directory path
    * @param output
@@ -123,9 +124,9 @@ public final class Job extends AbstractJob {
                   double t1,
                   double t2,
                   double convergenceDelta,
-                  int maxIterations) throws IOException, InterruptedException, ClassNotFoundException, InstantiationException,
-      IllegalAccessException {
-    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
+                  int maxIterations)
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
     new MeanShiftCanopyDriver().run(conf,
                                     directoryContainingConvertedInput,
@@ -138,8 +139,8 @@ public final class Job extends AbstractJob {
                                     true,
                                     true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 

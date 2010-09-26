@@ -170,7 +170,7 @@ public final class RecommenderServlet extends HttpServlet {
   }
 
   private void writeDebugRecommendations(long userID, Iterable<RecommendedItem> items, PrintWriter writer)
-      throws TasteException {
+    throws TasteException {
     DataModel dataModel = recommender.getDataModel();
     writer.print("User:");
     writer.println(userID);

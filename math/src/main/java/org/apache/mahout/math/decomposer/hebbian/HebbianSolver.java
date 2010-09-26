@@ -23,6 +23,7 @@ import java.util.Random;
 
 import java.util.ArrayList;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -50,7 +51,7 @@ public class HebbianSolver {
   private final SingularVectorVerifier verifier;
   private final double convergenceTarget;
   private final int maxPassesPerEigen;
-  private final Random rng = new Random();
+  private final Random rng = RandomUtils.getRandom();
 
   private int numPasses = 0;
   private static final boolean debug = false;

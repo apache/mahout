@@ -50,7 +50,7 @@ public class TermCountMapper extends Mapper<Text, StringTuple, Text, LongWritabl
           context.getCounter("Exception", "Output IO Exception").increment(1);
         } catch (InterruptedException e) {
           context.getCounter("Exception", "Interrupted Exception").increment(1);
-       }
+        }
         return true;
       }
     });

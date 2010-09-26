@@ -43,7 +43,9 @@ public class ToolReducer extends Reducer<LongWritable, Text, LongWritable, Text>
   private final Collection<String> distinct = new HashSet<String>();
 
   @Override
-  protected void reduce(LongWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(LongWritable key,
+                        Iterable<Text> values,
+                        Context context) throws IOException, InterruptedException {
     context.write(key, new Text(combineDescriptions((int) key.get(), values.iterator())));
   }
 

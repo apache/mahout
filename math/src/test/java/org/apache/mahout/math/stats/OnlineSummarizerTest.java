@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.stats;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public final class OnlineSummarizerTest extends MahoutTestCase {
     // 95% confidence limits for those values.
 
     // symmetrical, well behaved
-    check(normal(10000, 1),
+    check(normal(10000),
             -4.417246, -3.419809,
             -0.6972919, -0.6519899,
             -0.02056658, 0.02176474,
@@ -55,7 +56,7 @@ public final class OnlineSummarizerTest extends MahoutTestCase {
             0.988395, 1.011883);
 
     // asymmetrical, well behaved.  The range for the maximum was fudged slightly to all this to pass.
-    check(exp(10000, 1),
+    check(exp(10000),
             4.317969e-06, 3.278763e-04,
             0.2783866, 0.298,
             0.6765024, 0.7109463,
@@ -93,34 +94,25 @@ public final class OnlineSummarizerTest extends MahoutTestCase {
     }
   }
 
-  private static OnlineSummarizer normal(int n, int seed) {
+  private static OnlineSummarizer normal(int n) {
     OnlineSummarizer x = new OnlineSummarizer();
-    Random gen = new Random(seed);
+    // TODO use RandomUtils.getRandom() and rejigger constants to make test pass
+    Random gen = new Random(1L);
     for (int i = 0; i < n; i++) {
       x.add(gen.nextGaussian());
     }
     return x;
   }
 
-  private static OnlineSummarizer exp(int n, int seed) {
+  private static OnlineSummarizer exp(int n) {
     OnlineSummarizer x = new OnlineSummarizer();
-    Random gen = new Random(seed);
+    // TODO use RandomUtils.getRandom() and rejigger constants to make test pass
+    Random gen = new Random(1L);
     for (int i = 0; i < n; i++) {
       x.add(-Math.log(1 - gen.nextDouble()));
     }
     return x;
   }
-
-  /*
-  private static OnlineSummarizer gamma(int n, int seed) {
-    OnlineSummarizer x = new OnlineSummarizer();
-    Gamma g = new Gamma(0.01, 100, new MersenneTwister(seed));
-    for (int i = 0; i < n; i++) {
-      x.add(g.nextDouble());
-    }
-    return x;
-  }
-   */
 
 }
 

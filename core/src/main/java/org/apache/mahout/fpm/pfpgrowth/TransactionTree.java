@@ -247,12 +247,12 @@ public final class TransactionTree implements Writable {
   public Map<Integer,MutableLong> generateFList() {
     Map<Integer,MutableLong> frequencyList = new HashMap<Integer,MutableLong>();
     Iterator<Pair<List<Integer>,Long>> it = getIterator();
-    int items = 0;
-    int count = 0;
+    //int items = 0;
+    //int count = 0;
     while (it.hasNext()) {
       Pair<List<Integer>,Long> p = it.next();
-      items += p.getFirst().size();
-      count++;
+      //items += p.getFirst().size();
+      //count++;
       for (Integer i : p.getFirst()) {
         if (!frequencyList.containsKey(i)) {
           frequencyList.put(i, new MutableLong(0));
@@ -398,7 +398,8 @@ public final class TransactionTree implements Writable {
         vLong.write(out);
         vInt.set(childCount[i]);
         vInt.write(out);
-        for (int j = 0, k = childCount[i]; j < k; j++) {
+        int max = childCount[i];
+        for (int j = 0; j < max; j++) {
           vInt.set(nodeChildren[i][j]);
           vInt.write(out);
         }

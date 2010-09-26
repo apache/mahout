@@ -25,6 +25,9 @@ import org.apache.mahout.math.function.UnaryFunction;
  */
 public abstract class Mapping implements UnaryFunction {
 
+  private Mapping() {
+  }
+
   public static final class SoftLimit extends Mapping {
     private double min;
     private double max;

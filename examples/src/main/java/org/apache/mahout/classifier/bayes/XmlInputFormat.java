@@ -87,18 +87,16 @@ public class XmlInputFormat extends TextInputFormat {
     }
 
     private boolean next(LongWritable key, Text value) throws IOException {
-      if (fsin.getPos() < end) {
-        if (readUntilMatch(startTag, false)) {
-          try {
-            buffer.write(startTag);
-            if (readUntilMatch(endTag, true)) {
-              key.set(fsin.getPos());
-              value.set(buffer.getData(), 0, buffer.getLength());
-              return true;
-            }
-          } finally {
-            buffer.reset();
+      if (fsin.getPos() < end && readUntilMatch(startTag, false)) {
+        try {
+          buffer.write(startTag);
+          if (readUntilMatch(endTag, true)) {
+            key.set(fsin.getPos());
+            value.set(buffer.getData(), 0, buffer.getLength());
+            return true;
           }
+        } finally {
+          buffer.reset();
         }
       }
       return false;

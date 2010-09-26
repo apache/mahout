@@ -27,7 +27,8 @@ import java.nio.ByteOrder;
  * <p>The C version of MurmurHash 2.0 found at that site was ported
  * to Java by Andrzej Bialecki (ab at getopt org).</p>
  */
-public class MurmurHash {
+public final class MurmurHash {
+
   private MurmurHash() {
   }
 

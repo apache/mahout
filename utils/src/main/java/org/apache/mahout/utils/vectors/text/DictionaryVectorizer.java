@@ -250,9 +250,6 @@ public final class DictionaryVectorizer {
    *          output vectors should be named, retaining key (doc id) as a label
    * @param numReducers 
    *          the desired number of reducer tasks
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   private static void makePartialVectors(Path input,
                                          int maxNGramSize,
@@ -261,7 +258,8 @@ public final class DictionaryVectorizer {
                                          int dimension,
                                          boolean sequentialAccess, 
                                          boolean namedVectors,
-                                         int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+                                         int numReducers)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
     // this conf parameter needs to be set enable serialisation of conf values
@@ -300,10 +298,9 @@ public final class DictionaryVectorizer {
   /**
    * Count the frequencies of words in parallel using Map/Reduce. The input documents have to be in
    * {@link SequenceFile} format
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  private static void startWordCounting(Path input, Path output, int minSupport) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void startWordCounting(Path input, Path output, int minSupport)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
     // this conf parameter needs to be set enable serialisation of conf values

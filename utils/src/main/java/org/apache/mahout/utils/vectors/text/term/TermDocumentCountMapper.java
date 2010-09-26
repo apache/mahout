@@ -29,7 +29,6 @@ import org.apache.mahout.math.VectorWritable;
 
 /**
  * TextVectorizer Document Frequency Count Mapper. Outputs 1 for each feature
- * 
  */
 public class TermDocumentCountMapper extends Mapper<WritableComparable<?>, VectorWritable, IntWritable, LongWritable> {
 
@@ -39,7 +38,7 @@ public class TermDocumentCountMapper extends Mapper<WritableComparable<?>, Vecto
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable value, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Vector vector = value.get();
     Iterator<Vector.Element> it = vector.iterateNonZero();
 

@@ -17,7 +17,6 @@
 
 package org.apache.mahout.vectors;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
@@ -62,7 +61,7 @@ public final class TextValueEncoderTest extends MahoutTestCase {
   @Test
   public void testAsString() {
     Locale.setDefault(Locale.ENGLISH);
-    TextValueEncoder enc = new TextValueEncoder("text");
+    FeatureVectorEncoder enc = new TextValueEncoder("text");
     assertEquals("[text:test1:1.0000, text:and:1.0000, text:more:1.0000]", enc.asString("test1 and more"));
   }
 }

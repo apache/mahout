@@ -23,6 +23,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 
@@ -95,10 +96,10 @@ public final class GammaTest extends MahoutTestCase {
 
   @Test
   public void beta() {
-    Random x = new Random(1);
+    Random r = RandomUtils.getRandom(1L);
     for (int i = 0; i < 200; i++) {
-      double alpha = -50 * Math.log(1 - x.nextDouble());
-      double beta = -50 * Math.log(1 - x.nextDouble());
+      double alpha = -50 * Math.log(1 - r.nextDouble());
+      double beta = -50 * Math.log(1 - r.nextDouble());
       double ref = Math.exp(Gamma.logGamma(alpha) + Gamma.logGamma(beta) - Gamma.logGamma(alpha + beta));
       double actual = Gamma.beta(alpha, beta);
       double err = (ref - actual) / ref;

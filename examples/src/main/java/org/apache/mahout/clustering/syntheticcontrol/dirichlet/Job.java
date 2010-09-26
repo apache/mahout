@@ -37,7 +37,6 @@ import org.apache.mahout.clustering.dirichlet.DirichletMapper;
 import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
-import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -52,6 +51,8 @@ public final class Job extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
 
+  private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
+
   private Job() {
   }
 
@@ -63,30 +64,35 @@ public final class Job extends AbstractJob {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
+      ModelDistribution<VectorWritable> modelDistribution = 
+          new GaussianClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
       new Job().run(new Path("testdata"), output, modelDistribution, 10, 5, 1.0, true, 0);
     }
   }
 
   @Override
-  public int run(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, InvocationTargetException, InterruptedException {
+  public int run(String[] args)
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+           NoSuchMethodException, InvocationTargetException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.numClustersOption().withRequired(true).create());
     addOption(DefaultOptionCreator.overwriteOption().create());
-    addOption(new DefaultOptionBuilder().withLongName(DirichletDriver.ALPHA_OPTION).withRequired(false).withShortName("m")
-        .withArgument(new ArgumentBuilder().withName(DirichletDriver.ALPHA_OPTION).withDefault("1.0").withMinimum(1).withMaximum(1)
-            .create()).withDescription("The alpha0 value for the DirichletDistribution. Defaults to 1.0").create());
-    addOption(new DefaultOptionBuilder().withLongName(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION).withRequired(false)
-        .withShortName("md").withArgument(new ArgumentBuilder().withName(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION)
+    addOption(new DefaultOptionBuilder().withLongName(DirichletDriver.ALPHA_OPTION).withRequired(false)
+        .withShortName("m").withArgument(new ArgumentBuilder().withName(DirichletDriver.ALPHA_OPTION).withDefault("1.0")
+            .withMinimum(1).withMaximum(1).create())
+        .withDescription("The alpha0 value for the DirichletDistribution. Defaults to 1.0").create());
+    addOption(new DefaultOptionBuilder().withLongName(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION)
+        .withRequired(false).withShortName("md").withArgument(new ArgumentBuilder()
+            .withName(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION)
             .withDefault(NormalModelDistribution.class.getName()).withMinimum(1).withMaximum(1).create())
         .withDescription("The ModelDistribution class name. " + "Defaults to NormalModelDistribution").create());
     addOption(new DefaultOptionBuilder().withLongName(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION).withRequired(false)
         .withShortName("mp").withArgument(new ArgumentBuilder().withName("prototypeClass")
             .withDefault(RandomAccessSparseVector.class.getName()).withMinimum(1).withMaximum(1).create())
-        .withDescription("The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector").create());
+        .withDescription("The ModelDistribution prototype Vector class name. Defaults to RandomAccessSparseVector")
+        .create());
     addOption(DefaultOptionCreator.distanceMeasureOption().withRequired(false).create());
     addOption(DefaultOptionCreator.emitMostLikelyOption().create());
     addOption(DefaultOptionCreator.thresholdOption().create());
@@ -141,9 +147,10 @@ public final class Job extends AbstractJob {
                   int maxIterations,
                   double alpha0,
                   boolean emitMostLikely,
-                  double threshold) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-      NoSuchMethodException, InvocationTargetException, SecurityException, InterruptedException {
-    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
+                  double threshold)
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+           SecurityException, InterruptedException {
+    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     DirichletDriver.run(directoryContainingConvertedInput,
                         output,
@@ -156,8 +163,8 @@ public final class Job extends AbstractJob {
                         threshold,
                         false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
@@ -203,7 +210,7 @@ public final class Job extends AbstractJob {
    */
   private static void printClusters(Iterable<List<DirichletCluster>> clusters, int significant) {
     int row = 0;
-    StringBuilder result = new StringBuilder();
+    StringBuilder result = new StringBuilder(100);
     for (List<DirichletCluster> r : clusters) {
       result.append("sample=").append(row++).append("]= ");
       for (int k = 0; k < r.size(); k++) {

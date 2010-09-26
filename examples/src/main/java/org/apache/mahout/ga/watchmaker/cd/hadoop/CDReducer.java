@@ -29,8 +29,9 @@ import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 public class CDReducer extends Reducer<LongWritable, CDFitness, LongWritable, CDFitness> {
 
   @Override
-  protected void reduce(LongWritable key, Iterable<CDFitness> values, Context context)
-      throws IOException, InterruptedException {
+  protected void reduce(LongWritable key,
+                        Iterable<CDFitness> values,
+                        Context context) throws IOException, InterruptedException {
     int tp = 0;
     int fp = 0;
     int tn = 0;

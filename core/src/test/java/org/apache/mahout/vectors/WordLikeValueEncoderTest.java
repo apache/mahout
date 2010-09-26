@@ -17,7 +17,6 @@
 
 package org.apache.mahout.vectors;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.common.MahoutTestCase;

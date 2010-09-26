@@ -59,7 +59,8 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   private int maxNGramSize = 1;
 
   @Override
-  protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<StringTuple> values, Context context)
+    throws IOException, InterruptedException {
     Iterator<StringTuple> it = values.iterator();
     if (!it.hasNext()) {
       return;
@@ -73,11 +74,9 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
 
       do {
         String term = (sf.getAttribute(TermAttribute.class)).term();
-        if (term.length() > 0) { // ngram
-          if (dictionary.containsKey(term)) {
-            int termId = dictionary.get(term);
-            vector.setQuick(termId, vector.getQuick(termId) + 1);
-          }
+        if (term.length() > 0 && dictionary.containsKey(term)) { // ngram
+          int termId = dictionary.get(term);
+          vector.setQuick(termId, vector.getQuick(termId) + 1);
         }
       } while (sf.incrementToken());
 
@@ -85,11 +84,9 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
       sf.close();
     } else {
       for (String term : value.getEntries()) {
-        if (term.length() > 0) { // unigram
-          if (dictionary.containsKey(term)) {
-            int termId = dictionary.get(term);
-            vector.setQuick(termId, vector.getQuick(termId) + 1);
-          }
+        if (term.length() > 0 && dictionary.containsKey(term)) { // unigram
+          int termId = dictionary.get(term);
+          vector.setQuick(termId, vector.getQuick(termId) + 1);
         }
       }
     }

@@ -29,7 +29,6 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
-import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -43,8 +42,10 @@ import org.slf4j.LoggerFactory;
 
 public final class Job extends AbstractJob {
 
-  private static final String M_OPTION = FuzzyKMeansDriver.M_OPTION;
   private static final Logger log = LoggerFactory.getLogger(Job.class);
+
+  private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
+  private static final String M_OPTION = FuzzyKMeansDriver.M_OPTION;
 
   private Job() {
   }
@@ -57,12 +58,17 @@ public final class Job extends AbstractJob {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().run(new Configuration(), new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 10, (float) 2, 0.5);
+      new Job().run(new Configuration(),
+                    new Path("testdata"),
+                    output,
+                    new EuclideanDistanceMeasure(),
+                    80, 55, 10, (float) 2, 0.5);
     }
   }
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args)
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -105,14 +111,8 @@ public final class Job extends AbstractJob {
 
   /**
    * Return the path to the final iteration's clusters
-   * 
-   * @param conf 
-   * @param output
-   * @param maxIterations
-   * @return
-   * @throws IOException 
    */
-  private Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
+  private static Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
       Path clusters = new Path(output, "clusters-" + i);
@@ -130,7 +130,6 @@ public final class Job extends AbstractJob {
    * expects the a file containing synthetic_control.data as obtained from
    * http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series resides in a directory named
    * "testdata", and writes output to a directory named "output".
-   * @param conf TODO
    * @param input
    *          the String denoting the input directory path
    * @param output
@@ -154,9 +153,9 @@ public final class Job extends AbstractJob {
                   double t2,
                   int maxIterations,
                   float fuzziness,
-                  double convergenceDelta) throws IOException, InstantiationException, IllegalAccessException,
-      InterruptedException, ClassNotFoundException {
-    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
+                  double convergenceDelta)
+    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
@@ -174,8 +173,8 @@ public final class Job extends AbstractJob {
                           0.0,
                           false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 }

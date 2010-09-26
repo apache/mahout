@@ -18,14 +18,17 @@
 package org.apache.mahout.classifier.sgd;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 
 /**
  * Uses the same logic as TrainLogistic and RunLogistic for finding an input, but instead
  * of processing the input, this class just prints the input to standard out.
  */
-public class PrintResourceOrFile {
-  public static void main(String[] args) throws IOException {
+public final class PrintResourceOrFile {
+
+  private PrintResourceOrFile() {
+  }
+
+  public static void main(String[] args) throws Exception {
     if (args.length != 1) {
       throw new IllegalArgumentException("Must have a single argument that names a file or resource.");
     }

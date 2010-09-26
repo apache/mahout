@@ -27,7 +27,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.math.VectorWritable;
 
-public class RepresentativePointsReducer extends Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
+public class RepresentativePointsReducer
+  extends Reducer<IntWritable, WeightedVectorWritable, IntWritable, VectorWritable> {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
@@ -43,8 +44,8 @@ public class RepresentativePointsReducer extends Reducer<IntWritable, WeightedVe
   }
 
   @Override
-  protected void reduce(IntWritable key, Iterable<WeightedVectorWritable> values, Context context) throws IOException,
-      InterruptedException {
+  protected void reduce(IntWritable key, Iterable<WeightedVectorWritable> values, Context context)
+    throws IOException, InterruptedException {
     // find the most distant point
     WeightedVectorWritable mdp = null;
     for (WeightedVectorWritable dpw : values) {

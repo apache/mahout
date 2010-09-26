@@ -148,9 +148,9 @@ public final class ClusterDumper extends AbstractJob {
     Configuration conf = new Configuration();
 
     if (this.termDictionary != null) {
-      if (dictionaryFormat.equals("text")) {
+      if ("text".equals(dictionaryFormat)) {
         dictionary = VectorHelper.loadTermDictionary(new File(this.termDictionary));
-      } else if (dictionaryFormat.equals("sequencefile")) {
+      } else if ("sequencefile".equals(dictionaryFormat)) {
         FileSystem fs = FileSystem.get(new Path(this.termDictionary).toUri(), conf);
         dictionary = VectorHelper.loadTermDictionary(conf, fs, this.termDictionary);
       } else {
@@ -340,7 +340,7 @@ public final class ClusterDumper extends AbstractJob {
       topTerms.add(new Pair<String, Double>(dictTerm, vectorTerms.get(i).weight));
     }
 
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(100);
 
     for (Pair<String, Double> item : topTerms) {
       String term = item.getFirst();

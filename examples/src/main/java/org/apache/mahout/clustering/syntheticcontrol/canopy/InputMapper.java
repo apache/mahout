@@ -79,6 +79,6 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     }
+  }
 
-    }
 }

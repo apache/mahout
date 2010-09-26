@@ -22,6 +22,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -109,10 +110,11 @@ final class DisplayMeanShift extends DisplayClustering {
     writeSampleData(samples);
     boolean b = true;
     if (b) {
-      new MeanShiftCanopyDriver().run(new Configuration(), samples, output, measure, t1, t2, 0.005, 20, false, true, true);
+      new MeanShiftCanopyDriver().run(
+          new Configuration(), samples, output, measure, t1, t2, 0.005, 20, false, true, true);
       loadClusters(output);
     } else {
-      List<Vector> points = new ArrayList<Vector>();
+      Collection<Vector> points = new ArrayList<Vector>();
       for (VectorWritable sample : SAMPLE_DATA) {
         points.add(sample.get());
       }

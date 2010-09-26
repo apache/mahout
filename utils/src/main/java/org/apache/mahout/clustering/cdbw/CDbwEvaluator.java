@@ -51,7 +51,7 @@ public class CDbwEvaluator {
 
   private final DistanceMeasure measure;
 
-  private boolean pruned = false;
+  private boolean pruned;
 
   /**
    * For testing only

@@ -27,7 +27,6 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
-import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.clustering.syntheticcontrol.canopy.InputDriver;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
@@ -42,6 +41,8 @@ import org.slf4j.LoggerFactory;
 public final class Job extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(Job.class);
+
+  private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
 
   private Job() {
   }
@@ -59,7 +60,8 @@ public final class Job extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args)
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
@@ -116,11 +118,6 @@ public final class Job extends AbstractJob {
    *          the double convergence criteria for iterations
    * @param maxIterations
    *          the int maximum number of iterations
-   * 
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
   public void run(Configuration conf,
                   Path input,
@@ -129,9 +126,9 @@ public final class Job extends AbstractJob {
                   double t1,
                   double t2,
                   double convergenceDelta,
-                  int maxIterations) throws IOException, InstantiationException, IllegalAccessException, InterruptedException,
-      ClassNotFoundException {
-    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
+                  int maxIterations)
+    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running Canopy to get initial clusters");
@@ -147,21 +144,15 @@ public final class Job extends AbstractJob {
                      true,
                      false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output,
-                                                                                                            "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 
   /**
    * Return the path to the final iteration's clusters
-   * 
-   * @param conf 
-   * @param output
-   * @param maxIterations
-   * @return
-   * @throws IOException 
    */
-  private Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
+  private static Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
       Path clusters = new Path(output, "clusters-" + i);

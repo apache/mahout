@@ -166,8 +166,7 @@ public final class CDGA {
                              double mutrange,
                              int mutprec,
                              int popSize,
-                             int genCount)
-      throws IOException, InterruptedException, ClassNotFoundException {
+                             int genCount) throws IOException, InterruptedException, ClassNotFoundException {
     Path inpath = new Path(dataset);
     CDMahoutEvaluator.initializeDataSet(inpath);
 

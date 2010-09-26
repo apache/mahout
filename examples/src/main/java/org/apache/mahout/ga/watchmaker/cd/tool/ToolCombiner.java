@@ -18,9 +18,9 @@
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -38,13 +38,14 @@ import org.apache.mahout.common.StringUtils;
  */
 public class ToolCombiner extends Reducer<LongWritable, Text, LongWritable, Text> {
 
-  private final Set<String> distinct = new HashSet<String>();
+  private final Collection<String> distinct = new HashSet<String>();
 
   private Descriptors descriptors;
 
   @Override
-  protected void reduce(LongWritable key, Iterable<Text> values, Context context)
-      throws IOException, InterruptedException {
+  protected void reduce(LongWritable key,
+                        Iterable<Text> values,
+                        Context context) throws IOException, InterruptedException {
     context.write(key, new Text(createDescription((int) key.get(), values.iterator())));
   }
 

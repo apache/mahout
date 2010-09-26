@@ -85,25 +85,22 @@ public class MapBackedARFFModel implements ARFFModel {
     data = data.trim();
     double result = 0.0;
     switch (type) {
-      case NUMERIC: {
+      case NUMERIC:
         result = processNumeric(data);
         break;
-      }
-      case DATE: {
+      case DATE:
         result = processDate(data, idx);
         break;
-      }
-      case STRING: {
+      case STRING:
         // may have quotes
         result = processString(data);
         break;
-      }
-      case NOMINAL: {
+      case NOMINAL:
         String label = idxLabel.get(idx);
         result = processNominal(label, data);
         break;
-      }
-        
+      default:
+        throw new IllegalStateException("Unknown type: " + type);
     }
     return result;
   }

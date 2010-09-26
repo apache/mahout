@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.VectorFunction;
 import org.junit.Before;
@@ -250,7 +251,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     assertEquals(c[COL], test.viewRow(3).size());
     assertEquals(c[COL], test.viewRow(5).size());
 
-    Random gen = new Random(1);
+    Random gen = RandomUtils.getRandom(1L);
     for (int row = 0; row < c[ROW]; row++) {
       int j = gen.nextInt(c[COL]);
       double old = test.get(row, j);
@@ -274,7 +275,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     assertEquals(c[ROW], test.viewColumn(3).size());
     assertEquals(c[ROW], test.viewColumn(5).size());
 
-    Random gen = new Random(1);
+    Random gen = RandomUtils.getRandom(1L);
     for (int col = 0; col < c[COL]; col++) {
       int j = gen.nextInt(c[COL]);
       double old = test.get(col, j);

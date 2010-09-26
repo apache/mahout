@@ -63,7 +63,7 @@ public class TFIDFPartialVectorReducer extends
   
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Iterator<VectorWritable> it = values.iterator();
     if (!it.hasNext()) {
       return;

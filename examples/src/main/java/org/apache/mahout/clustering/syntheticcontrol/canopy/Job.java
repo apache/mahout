@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
-import org.apache.mahout.clustering.syntheticcontrol.Constants;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -35,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class Job extends AbstractJob {
+
+  private static final String DIRECTORY_CONTAINING_CONVERTED_INPUT = "data";
 
   private Job() {
   }
@@ -74,11 +75,12 @@ public final class Job extends AbstractJob {
    */
   private static void run(Path input, Path output, DistanceMeasure measure, double t1, double t2) throws IOException,
       InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
-    Path directoryContainingConvertedInput = new Path(output, Constants.DIRECTORY_CONTAINING_CONVERTED_INPUT);
+    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, output, measure, t1, t2, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper =
+        new ClusterDumper(new Path(output, "clusters-0"), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
   }
 

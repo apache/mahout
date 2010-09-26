@@ -81,7 +81,8 @@ public final class PartialVectorMerger {
                                          int dimension,
                                          boolean sequentialAccess,
                                          boolean namedVector,
-                                         int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
+                                         int numReducers)
+    throws IOException, InterruptedException, ClassNotFoundException {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
     }

@@ -33,7 +33,7 @@ public final class NormalTest extends MahoutTestCase {
 
   @Test
   public void testCdf() {
-    Random gen = new Random(1);
+    Random gen = RandomUtils.getRandom(1L);
     double offset = 0;
     double scale = 1;
     for (int k = 0; k < 20; k++) {
@@ -46,7 +46,7 @@ public final class NormalTest extends MahoutTestCase {
 
   @Test
   public void consistency() throws ConvergenceException, FunctionEvaluationException {
-    Random gen = new Random(1);
+    Random gen = RandomUtils.getRandom(1L);
     double offset = 0;
     double scale = 1;
     Normal dist = new Normal(offset, scale, RandomUtils.getRandom());
