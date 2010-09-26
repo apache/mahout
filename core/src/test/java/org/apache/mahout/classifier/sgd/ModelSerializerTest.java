@@ -64,7 +64,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
   public void onlineAucRoundtrip() {
     RandomUtils.useTestSeed();
     OnlineAuc auc1 = new GlobalOnlineAuc();
-    Random gen = RandomUtils.getRandom(2L);
+    Random gen = RandomUtils.getRandom();
     for (int i = 0; i < 10000; i++) {
       auc1.addSample(0, gen.nextGaussian());
       auc1.addSample(1, gen.nextGaussian() + 1);
@@ -162,7 +162,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
 
   @Test
   public void trainingExampleList() {
-    Random gen = RandomUtils.getRandom(1L);
+    Random gen = RandomUtils.getRandom();
     List<AdaptiveLogisticRegression.TrainingExample> x1 = Lists.newArrayList();
     for (int i = 0; i < 10; i++) {
       AdaptiveLogisticRegression.TrainingExample t =
@@ -189,7 +189,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
 
   private static void train(OnlineLearner olr, int n) {
     Vector beta = new DenseVector(new double[]{1, -1, 0, 0.5, -0.5});
-    Random gen = RandomUtils.getRandom(1L);
+    Random gen = RandomUtils.getRandom();
     for (int i = 0; i < n; i++) {
       Vector x = randomVector(gen, 5);
 

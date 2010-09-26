@@ -96,7 +96,7 @@ public final class GammaTest extends MahoutTestCase {
 
   @Test
   public void beta() {
-    Random r = RandomUtils.getRandom(1L);
+    Random r = RandomUtils.getRandom();
     for (int i = 0; i < 200; i++) {
       double alpha = -50 * Math.log(1 - r.nextDouble());
       double beta = -50 * Math.log(1 - r.nextDouble());

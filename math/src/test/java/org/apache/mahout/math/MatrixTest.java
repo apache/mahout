@@ -251,7 +251,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     assertEquals(c[COL], test.viewRow(3).size());
     assertEquals(c[COL], test.viewRow(5).size());
 
-    Random gen = RandomUtils.getRandom(1L);
+    Random gen = RandomUtils.getRandom();
     for (int row = 0; row < c[ROW]; row++) {
       int j = gen.nextInt(c[COL]);
       double old = test.get(row, j);
@@ -275,7 +275,7 @@ public abstract class MatrixTest extends MahoutTestCase {
     assertEquals(c[ROW], test.viewColumn(3).size());
     assertEquals(c[ROW], test.viewColumn(5).size());
 
-    Random gen = RandomUtils.getRandom(1L);
+    Random gen = RandomUtils.getRandom();
     for (int col = 0; col < c[COL]; col++) {
       int j = gen.nextInt(c[COL]);
       double old = test.get(col, j);
