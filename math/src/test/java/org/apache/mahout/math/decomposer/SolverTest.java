@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.decomposer;
 
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SequentialAccessSparseVector;

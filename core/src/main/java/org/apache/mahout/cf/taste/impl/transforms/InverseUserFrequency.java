@@ -108,7 +108,7 @@ public final class InverseUserFrequency implements PreferenceTransform {
     refreshHelper.refresh(alreadyRefreshed);
   }
   
-  private synchronized void recompute() throws TasteException {
+  private void recompute() throws TasteException {
     Counters itemPreferenceCounts = new Counters();
     int numUsers = 0;
     LongPrimitiveIterator it = dataModel.getUserIDs();

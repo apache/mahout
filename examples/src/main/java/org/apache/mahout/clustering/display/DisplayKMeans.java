@@ -53,13 +53,13 @@ class DisplayKMeans extends DisplayClustering {
     //if (b) {
     Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3, measure);
     KMeansDriver.run(samples,
-    clusters,
-    output,
-    measure,
-    distanceThreshold,
-    maxIter,
-    true,
-    true);
+                     clusters,
+                     output,
+                     measure,
+                     distanceThreshold,
+                     maxIter,
+                     true,
+                     true);
     loadClusters(output);
     //} else {
     //  List<Vector> points = new ArrayList<Vector>();

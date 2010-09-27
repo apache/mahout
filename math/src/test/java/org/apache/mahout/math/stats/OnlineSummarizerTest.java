@@ -17,7 +17,6 @@
 
 package org.apache.mahout.math.stats;
 
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
 

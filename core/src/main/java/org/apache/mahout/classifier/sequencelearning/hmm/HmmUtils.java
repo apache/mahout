@@ -286,7 +286,10 @@ public final class HmmUtils {
    * @param defaultValue The default value in case a state is not known
    * @return list containing the decoded state names
    */
-  public static List<String> decodeStateSequence(HmmModel model, int[] sequence, boolean observed, String defaultValue) {
+  public static List<String> decodeStateSequence(HmmModel model,
+                                                 int[] sequence,
+                                                 boolean observed,
+                                                 String defaultValue) {
     List<String> decoded = new ArrayList<String>(sequence.length);
     for (int position : sequence) {
       String nextState;

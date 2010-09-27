@@ -32,7 +32,7 @@ public final class PrintResourceOrFile {
     if (args.length != 1) {
       throw new IllegalArgumentException("Must have a single argument that names a file or resource.");
     }
-    BufferedReader in = TrainLogistic.InputOpener.open(args[0]);
+    BufferedReader in = TrainLogistic.open(args[0]);
     String line = in.readLine();
     while (line != null) {
       System.out.println(line);

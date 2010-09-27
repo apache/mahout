@@ -106,7 +106,6 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * @param minEigenvalue the minimum usable eigenvalue
    * @param inMemory true if the verification can be done in memory
    * @return an int indicating success (0) or otherwise
-   * @throws Exception
    */
   public int run(Path inputPath,
                  Path outputPath,
@@ -144,10 +143,14 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * @param isSymmetric true if the input matrix is symmetric
    * @param desiredRank the int desired rank of eigenvectors to produce
    * @return  an int indicating success (0) or otherwise
-   * @throws Exception
    */
-  public int run(Path inputPath, Path outputPath, Path outputTmpPath, int numRows, int numCols, boolean isSymmetric, int desiredRank)
-      throws Exception {
+  public int run(Path inputPath,
+                 Path outputPath,
+                 Path outputTmpPath,
+                 int numRows,
+                 int numCols,
+                 boolean isSymmetric,
+                 int desiredRank) throws Exception {
     Matrix eigenVectors = new DenseMatrix(desiredRank, numCols);
     List<Double> eigenValues = new ArrayList<Double>();
 

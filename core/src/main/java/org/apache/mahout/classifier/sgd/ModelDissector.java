@@ -55,7 +55,7 @@ import java.util.Set;
 public class ModelDissector {
   private final Map<String,Vector> weightMap;
 
-  public ModelDissector(int n) {
+  public ModelDissector() {
     weightMap = Maps.newHashMap();
   }
 

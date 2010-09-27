@@ -52,9 +52,9 @@ class DisplayCanopy extends DisplayClustering {
         if (isSignificant(cluster)) {
           g2.setStroke(new BasicStroke(1));
           g2.setColor(Color.BLUE);
-          double[] t1 = { T1, T1 };
+          double[] t1 = {T1, T1};
           plotEllipse(g2, cluster.getCenter(), new DenseVector(t1));
-          double[] t2 = { T2, T2 };
+          double[] t2 = {T2, T2};
           plotEllipse(g2, cluster.getCenter(), new DenseVector(t2));
           g2.setColor(COLORS[Math.min(DisplayClustering.COLORS.length - 1, cx)]);
           g2.setStroke(new BasicStroke(cx == 0 ? 3 : 1));

@@ -36,7 +36,6 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.stats.GlobalOnlineAuc;
 import org.apache.mahout.math.stats.OnlineAuc;
 
 import java.io.FileWriter;

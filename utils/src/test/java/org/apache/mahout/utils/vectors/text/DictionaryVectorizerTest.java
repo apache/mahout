@@ -17,10 +17,6 @@
 
 package org.apache.mahout.utils.vectors.text;
 
-import java.util.Random;
-
-import junit.framework.TestCase;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,7 +25,6 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -37,8 +32,6 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.text.DefaultAnalyzer;
 import org.apache.mahout.utils.MahoutTestCase;
-import org.apache.mahout.utils.vectors.text.DictionaryVectorizer;
-import org.apache.mahout.utils.vectors.text.DocumentProcessor;
 import org.apache.mahout.utils.vectors.tfidf.TFIDFConverter;
 import org.junit.Before;
 import org.junit.Test;
@@ -131,7 +124,12 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     validateVectors(fs, conf, NUM_DOCS, tfidfVectors, sequential, named);
   }
   
-  public static void validateVectors(FileSystem fs, Configuration conf, int numDocs, Path vectorPath, boolean sequential, boolean named) throws Exception {
+  public static void validateVectors(FileSystem fs,
+                                     Configuration conf,
+                                     int numDocs,
+                                     Path vectorPath,
+                                     boolean sequential,
+                                     boolean named) throws Exception {
     FileStatus[] stats = fs.listStatus(vectorPath, new PathFilter() {
       @Override
       public boolean accept(Path path) {
@@ -149,21 +147,21 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
         count++;
         Vector v = vw.get();
         if (named) {
-          TestCase.assertTrue("Expected NamedVector", v instanceof NamedVector);
+          assertTrue("Expected NamedVector", v instanceof NamedVector);
           v = ((NamedVector) v).getDelegate();
         }
         
         if (sequential) {
-          TestCase.assertTrue("Expected SequentialAccessSparseVector", v instanceof SequentialAccessSparseVector);
+          assertTrue("Expected SequentialAccessSparseVector", v instanceof SequentialAccessSparseVector);
         }
         else {
-          TestCase.assertTrue("Expected RandomAccessSparseVector", v instanceof RandomAccessSparseVector);
+          assertTrue("Expected RandomAccessSparseVector", v instanceof RandomAccessSparseVector);
         }
         
       }
       tfidfReader.close();
     }
 
-    TestCase.assertEquals("Expected " + numDocs + " documents", numDocs, count);
+    assertEquals("Expected " + numDocs + " documents", numDocs, count);
   }
 }

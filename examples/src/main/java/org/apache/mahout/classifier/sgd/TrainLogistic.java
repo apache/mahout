@@ -64,7 +64,7 @@ public final class TrainLogistic {
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
       OnlineLogisticRegression lr = lmp.createRegression();
       for (int pass = 0; pass < passes; pass++) {
-        BufferedReader in = InputOpener.open(inputFile);
+        BufferedReader in = open(inputFile);
 
         // read variable names
         csv.firstLine(in.readLine());
@@ -87,7 +87,8 @@ public final class TrainLogistic {
           }
           double p = lr.classifyScalar(input);
           if (scores) {
-            System.out.printf("%10d %2d %10.2f %2.4f %10.4f %10.4f\n", samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
+            System.out.printf("%10d %2d %10.2f %2.4f %10.4f %10.4f\n",
+                samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
           }
 
           // now update model
@@ -295,20 +296,14 @@ public final class TrainLogistic {
     return lmp;
   }
 
-  public static class InputOpener {
-    private InputOpener() {
+  static BufferedReader open(String inputFile) throws IOException {
+    InputStreamReader s;
+    try {
+      URL resource = Resources.getResource(inputFile);
+      s = new InputStreamReader(resource.openStream());
+    } catch (IllegalArgumentException e) {
+      s = new FileReader(inputFile);
     }
-
-    public static BufferedReader open(String inputFile) throws IOException {
-      InputStreamReader s;
-      try {
-        URL resource = Resources.getResource(inputFile);
-        s = new InputStreamReader(resource.openStream());
-      } catch (IllegalArgumentException e) {
-        s = new FileReader(inputFile);
-      }
-
-      return new BufferedReader(s);
-    }
+    return new BufferedReader(s);
   }
 }

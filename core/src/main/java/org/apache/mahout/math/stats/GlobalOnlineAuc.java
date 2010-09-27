@@ -63,7 +63,6 @@ public class GlobalOnlineAuc implements OnlineAuc {
   }
 
   @Override
-  @SuppressWarnings({"UnusedDeclaration"})
   public double addSample(int category, String groupKey, double score) {
     return addSample(category, score);
   }
@@ -88,6 +87,8 @@ public class GlobalOnlineAuc implements OnlineAuc {
           int j2 = random.nextInt(HISTORY);
           scores.set(category, j2, score);
           break;
+        default:
+          throw new IllegalStateException("Unknown policy: " + policy);
       }
     }
 
@@ -106,13 +107,14 @@ public class GlobalOnlineAuc implements OnlineAuc {
         count++;
         if (score > v) {
           m++;
-        } else if (score < v) {
+        // } else if (score < v) {
           // m += 0
         } else if (score == v) {
           m += 0.5;
         }
       }
-      averages.set(category, averages.get(category) + (m / count - averages.get(category)) / Math.min(windowSize, samples.get(category)));
+      averages.set(category, averages.get(category)
+          + (m / count - averages.get(category)) / Math.min(windowSize, samples.get(category)));
     }
     return auc();
   }

@@ -109,16 +109,16 @@ public final class TrainNewsGroups {
 
   private static final Random rand = RandomUtils.getRandom();
 
-  private static final String[] leakLabels = {"none", "month-year", "day-month-year"};
-  private static final SimpleDateFormat[] df = {
+  private static final String[] LEAK_LABELS = {"none", "month-year", "day-month-year"};
+  private static final SimpleDateFormat[] DATE_FORMATS = {
     new SimpleDateFormat(""),
     new SimpleDateFormat("MMM-yyyy"),
     new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
   };
 
-  private static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
-  private static final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
-  private static final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
+  private static final Analyzer ANALYZER = new StandardAnalyzer(Version.LUCENE_30);
+  private static final FeatureVectorEncoder ENCODER = new StaticWordValueEncoder("body");
+  private static final FeatureVectorEncoder BIAS = new ConstantValueEncoder("Intercept");
 
   private TrainNewsGroups() {
   }
@@ -133,7 +133,7 @@ public final class TrainNewsGroups {
 
     Dictionary newsGroups = new Dictionary();
 
-    encoder.setProbes(2);
+    ENCODER.setProbes(2);
     AdaptiveLogisticRegression learningAlgorithm = new AdaptiveLogisticRegression(20, FEATURES, new L1());
     learningAlgorithm.setInterval(800);
     learningAlgorithm.setAveragingWindow(500);
@@ -186,7 +186,7 @@ public final class TrainNewsGroups {
         nonZeros = beta.aggregate(Functions.PLUS, new UnaryFunction() {
           @Override
           public double apply(double v) {
-            return Math.abs(v) > 1e-6 ? 1 : 0;
+            return Math.abs(v) > 1.0e-6 ? 1 : 0;
           }
         });
         positive = beta.aggregate(Functions.PLUS, new UnaryFunction() {
@@ -209,7 +209,7 @@ public final class TrainNewsGroups {
         step += 0.25;
         System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.8f\t%.8f\t", maxBeta, nonZeros, positive, norm, lambda, mu);
         System.out.printf("%d\t%.3f\t%.2f\t%s\n",
-          k, averageLL, averageCorrect * 100, leakLabels[leakType % 3]);
+          k, averageLL, averageCorrect * 100, LEAK_LABELS[leakType % 3]);
       }
     }
     learningAlgorithm.close();
@@ -217,15 +217,18 @@ public final class TrainNewsGroups {
     System.out.println("exiting main");
   }
 
-  private static void dissect(int leakType, Dictionary newsGroups, AdaptiveLogisticRegression learningAlgorithm, List<File> files) throws IOException {
+  private static void dissect(int leakType,
+                              Dictionary newsGroups,
+                              AdaptiveLogisticRegression learningAlgorithm,
+                              Iterable<File> files) throws IOException {
     CrossFoldLearner model = learningAlgorithm.getBest().getPayload().getLearner();
     model.close();
 
     Map<String, Set<Integer>> traceDictionary = Maps.newTreeMap();
-    ModelDissector md = new ModelDissector(model.numCategories());
+    ModelDissector md = new ModelDissector();
 
-    encoder.setTraceDictionary(traceDictionary);
-    bias.setTraceDictionary(traceDictionary);
+    ENCODER.setTraceDictionary(traceDictionary);
+    BIAS.setTraceDictionary(traceDictionary);
 
     for (File file : permute(files, rand).subList(0, 500)) {
       String ng = file.getParentFile().getName();
@@ -250,8 +253,8 @@ public final class TrainNewsGroups {
     BufferedReader reader = new BufferedReader(new FileReader(file));
     try {
       String line = reader.readLine();
-      Reader dateString = new StringReader(df[leakType % 3].format(new Date(date)));
-      countWords(analyzer, words, dateString);
+      Reader dateString = new StringReader(DATE_FORMATS[leakType % 3].format(new Date(date)));
+      countWords(ANALYZER, words, dateString);
       while (line != null && line.length() > 0) {
         boolean countHeader = (
           line.startsWith("From:") || line.startsWith("Subject:") ||
@@ -259,22 +262,22 @@ public final class TrainNewsGroups {
         do {
           Reader in = new StringReader(line);
           if (countHeader) {
-            countWords(analyzer, words, in);
+            countWords(ANALYZER, words, in);
           }
           line = reader.readLine();
         } while (line.startsWith(" "));
       }
       if (leakType < 3) {
-        countWords(analyzer, words, reader);
+        countWords(ANALYZER, words, reader);
       }
     } finally {
       reader.close();
     }
 
     Vector v = new RandomAccessSparseVector(FEATURES);
-    bias.addToVector("", 1, v);
+    BIAS.addToVector("", 1, v);
     for (String word : words.elementSet()) {
-      encoder.addToVector(word, Math.log(1 + words.count(word)), v);
+      ENCODER.addToVector(word, Math.log(1 + words.count(word)), v);
     }
 
     return v;

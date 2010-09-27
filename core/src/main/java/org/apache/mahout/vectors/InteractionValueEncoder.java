@@ -79,11 +79,12 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
     String name = getName();
     double w = getWeight(originalForm1, originalForm2, weight);
     for (int i = 0; i < probes(); i++) {
-      Iterable<Integer> jValues = secondEncoder.hashesForProbe(originalForm2, data.size(), name, i % secondEncoder.getProbes());
-      for(Integer k : firstEncoder.hashesForProbe(originalForm1, data.size(), name, i % firstEncoder.getProbes())){
-        for(Integer j : jValues) {
+      Iterable<Integer> jValues =
+          secondEncoder.hashesForProbe(originalForm2, data.size(), name, i % secondEncoder.getProbes());
+      for (Integer k : firstEncoder.hashesForProbe(originalForm1, data.size(), name, i % firstEncoder.getProbes())) {
+        for (Integer j : jValues) {
           int n = (k + j) % data.size();
-          if(isTraceEnabled()){
+          if (isTraceEnabled()) {
             trace(String.format("%s:%s", originalForm1, originalForm2), n);            
           }
           data.set(n, data.get(n) + w);

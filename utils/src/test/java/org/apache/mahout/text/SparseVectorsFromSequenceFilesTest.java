@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.mahout.text;
 
 import java.util.LinkedList;
@@ -14,8 +31,8 @@ import org.apache.mahout.utils.vectors.text.RandomDocumentGenerator;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
+
   private static final int NUM_DOCS = 100;
   
   private Configuration conf;
@@ -61,7 +78,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     runTest(true, true);
   }
   
-  protected void runTest(boolean sequential, boolean named) throws Exception {
+  private void runTest(boolean sequential, boolean named) throws Exception {
     Path outputPath = getTestTempFilePath("output");
 
     
@@ -71,13 +88,15 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     argList.add("-o");
     argList.add(outputPath.toString());
     
-    if (sequential) 
+    if (sequential) {
       argList.add("-seq");
+    }
     
-    if (named)
+    if (named) {
       argList.add("-nv");
+    }
     
-    String[] args = argList.toArray(new String[0]);
+    String[] args = argList.toArray(new String[argList.size()]);
     
     SparseVectorsFromSequenceFiles.main(args);
 

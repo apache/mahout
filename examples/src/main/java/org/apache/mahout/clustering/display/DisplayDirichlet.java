@@ -38,7 +38,8 @@ public class DisplayDirichlet extends DisplayClustering {
 
   public DisplayDirichlet() {
     initialize();
-    this.setTitle("Dirichlet Process Clusters - Normal Distribution (>" + (int) (significance * 100) + "% of population)");
+    this.setTitle("Dirichlet Process Clusters - Normal Distribution (>"
+        + (int) (significance * 100) + "% of population)");
   }
 
   // Override the paint() method
@@ -48,9 +49,9 @@ public class DisplayDirichlet extends DisplayClustering {
     plotClusters((Graphics2D) g);
   }
 
-  protected static void printModels(List<Cluster[]> result, int significant) {
+  protected static void printModels(Iterable<Cluster[]> result, int significant) {
     int row = 0;
-    StringBuilder models = new StringBuilder();
+    StringBuilder models = new StringBuilder(100);
     for (Cluster[] r : result) {
       models.append("sample[").append(row++).append("]= ");
       for (int k = 0; k < r.length; k++) {
@@ -68,10 +69,10 @@ public class DisplayDirichlet extends DisplayClustering {
   protected static void generateResults(ModelDistribution<VectorWritable> modelDist,
                                         int numClusters,
                                         int numIterations,
-                                        double alpha_0,
+                                        double alpha0,
                                         int thin,
                                         int burnin) {
-    DirichletClusterer dc = new DirichletClusterer(SAMPLE_DATA, modelDist, alpha_0, numClusters, thin, burnin);
+    DirichletClusterer dc = new DirichletClusterer(SAMPLE_DATA, modelDist, alpha0, numClusters, thin, burnin);
     List<Cluster[]> result = dc.cluster(numIterations);
     printModels(result, burnin);
     for (Cluster[] models : result) {
@@ -89,17 +90,17 @@ public class DisplayDirichlet extends DisplayClustering {
     VectorWritable modelPrototype = new VectorWritable(new DenseVector(2));
     //ModelDistribution<VectorWritable> modelDist = new NormalModelDistribution(modelPrototype);
     // ModelDistribution<VectorWritable> modelDist = new SampledNormalDistribution(modelPrototype);
-     ModelDistribution<VectorWritable> modelDist = new AsymmetricSampledNormalDistribution(modelPrototype);
+    ModelDistribution<VectorWritable> modelDist = new AsymmetricSampledNormalDistribution(modelPrototype);
     //ModelDistribution<VectorWritable> modelDist = new GaussianClusterDistribution(modelPrototype);
 
     RandomUtils.useTestSeed();
     generateSamples();
     int numIterations = 40;
     int numClusters = 40;
-    int alpha_0 = 1;
+    int alpha0 = 1;
     int thin = 3;
     int burnin = 5;
-    generateResults(modelDist, numClusters, numIterations, alpha_0, thin, burnin);
+    generateResults(modelDist, numClusters, numIterations, alpha0, thin, burnin);
     new DisplayDirichlet();
   }
 

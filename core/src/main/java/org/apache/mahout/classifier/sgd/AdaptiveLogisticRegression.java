@@ -59,9 +59,10 @@ import java.util.concurrent.ExecutionException;
  * a different fitness value in non-binary cases.
  */
 public class AdaptiveLogisticRegression implements OnlineLearner {
+
   private static final int SURVIVORS = 2;
 
-  private int record = 0;
+  private int record;
   private int evaluationInterval = 1000;
 
   // transient here is a signal to GSON not to serialize pending records
@@ -72,7 +73,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int poolSize = 20;
   private State<Wrapper> seed;
   private int numFeatures;
-  private double averagingWindow;
+  //private double averagingWindow;
 
   private boolean freezeSurvivors = true;
 

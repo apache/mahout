@@ -147,7 +147,7 @@ public final class TrainClassifier {
         params.set("alpha_i",(String) cmdLine.getValue(alphaOpt));
       }
       
-      if (cmdLine.hasOption(dataSourceOpt)){
+      if (cmdLine.hasOption(dataSourceOpt)) {
         params.set("dataSource", dataSourceType);
       } 
 

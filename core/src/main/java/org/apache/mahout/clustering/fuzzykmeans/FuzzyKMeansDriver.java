@@ -71,7 +71,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected"
+            + " and written out to this path first")
         .create());
     addOption(DefaultOptionCreator.numClustersOption()
         .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -113,7 +114,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
           .get(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD));
+    boolean runSequential =
+        getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     run(getConf(),
         input,
         clusters,
@@ -164,8 +166,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
                          boolean runClustering,
                          boolean emitMostLikely,
                          double threshold,
-                         boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException,
-      InstantiationException, IllegalAccessException {
+                         boolean runSequential)
+    throws IOException, ClassNotFoundException, InterruptedException, InstantiationException, IllegalAccessException {
     Path clustersOut = buildClusters(new Configuration(),
                                      input,
                                      clustersIn,
@@ -291,9 +293,10 @@ public class FuzzyKMeansDriver extends AbstractJob {
                          boolean runClustering,
                          boolean emitMostLikely,
                          double threshold,
-                         boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException,
-      InstantiationException, IllegalAccessException {
-    Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, convergenceDelta, maxIterations, m, runSequential);
+                         boolean runSequential)
+    throws IOException, ClassNotFoundException, InterruptedException, InstantiationException, IllegalAccessException {
+    Path clustersOut =
+        buildClusters(conf, input, clustersIn, output, measure, convergenceDelta, maxIterations, m, runSequential);
     if (runClustering) {
       log.info("Clustering ");
       clusterData(input,
@@ -338,7 +341,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                    double convergenceDelta,
                                    int maxIterations,
                                    float m,
-                                   boolean runSequential) throws IOException, InstantiationException, IllegalAccessException {
+                                   boolean runSequential)
+    throws IOException, InstantiationException, IllegalAccessException {
     if (runSequential) {
       return buildClustersSeq(input, clustersIn, output, measure, convergenceDelta, maxIterations, m);
     } else {
@@ -456,8 +460,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                  float m,
                                  boolean emitMostLikely,
                                  double threshold,
-                                 boolean runSequential) throws IOException, ClassNotFoundException, InterruptedException,
-      InstantiationException, IllegalAccessException {
+                                 boolean runSequential)
+    throws IOException, ClassNotFoundException, InterruptedException, InstantiationException, IllegalAccessException {
     if (runSequential) {
       clusterDataSeq(input, clustersIn, output, measure, convergenceDelta, m);
     } else {
@@ -564,7 +568,8 @@ public class FuzzyKMeansDriver extends AbstractJob {
       }
     };
 
-    FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
+    FileStatus[] matches =
+        fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
 
     for (FileStatus match : matches) {
       result.add(fs.makeQualified(match.getPath()));

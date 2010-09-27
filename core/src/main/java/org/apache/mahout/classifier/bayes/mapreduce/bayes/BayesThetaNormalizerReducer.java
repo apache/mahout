@@ -65,14 +65,11 @@ public class BayesThetaNormalizerReducer extends MapReduceBase implements
       weightSumPerLabel += values.next().get();
     }
     reporter.setStatus("Bayes Theta Normalizer Reducer: " + key + " => " + weightSumPerLabel);
-    if (useHbase) {
-      if (key.stringAt(0).equals(BayesConstants.LABEL_THETA_NORMALIZER)) {
-        String label = key.stringAt(1);
-        Put bu = new Put(Bytes.toBytes(BayesConstants.LABEL_THETA_NORMALIZER));
-        bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(label), Bytes
-            .toBytes(weightSumPerLabel));
-        table.put(bu);
-      }
+    if (useHbase && key.stringAt(0).equals(BayesConstants.LABEL_THETA_NORMALIZER)) {
+      String label = key.stringAt(1);
+      Put bu = new Put(Bytes.toBytes(BayesConstants.LABEL_THETA_NORMALIZER));
+      bu.add(Bytes.toBytes(BayesConstants.HBASE_COLUMN_FAMILY), Bytes.toBytes(label), Bytes.toBytes(weightSumPerLabel));
+      table.put(bu);
     }
     output.collect(key, new DoubleWritable(weightSumPerLabel));
     

@@ -57,7 +57,7 @@ public final class RunLogistic {
 
       CsvRecordFactory csv = lmp.getCsvRecordFactory();
       OnlineLogisticRegression lr = lmp.createRegression();
-      BufferedReader in = TrainLogistic.InputOpener.open(inputFile);
+      BufferedReader in = TrainLogistic.open(inputFile);
       String line = in.readLine();
       csv.firstLine(line);
       line = in.readLine();

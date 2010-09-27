@@ -61,7 +61,7 @@ public class TrainLogisticTest extends MahoutTestCase {
 
 
     AbstractVectorClassifier model = TrainLogistic.getModel();
-    ModelDissector md = new ModelDissector(2);
+    ModelDissector md = new ModelDissector();
     List<String> data = Resources.readLines(Resources.getResource(inputFile), Charsets.UTF_8);
     for (String line : data.subList(1, data.size())) {
       Vector v = new DenseVector(lmp.getNumFeatures());

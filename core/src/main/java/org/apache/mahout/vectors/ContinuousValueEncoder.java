@@ -17,7 +17,6 @@
 
 package org.apache.mahout.vectors;
 
-import com.google.common.base.Charsets;
 import org.apache.mahout.math.Vector;
 
 /**
@@ -41,7 +40,7 @@ public class ContinuousValueEncoder extends FeatureVectorEncoder {
     String name = getName();
     for (int i = 0; i < probes; i++) {
       int n = hashForProbe(originalForm, data.size(), name, i);
-      if(isTraceEnabled()){
+      if (isTraceEnabled()) {
         trace((String) null, n);        
       }
       data.set(n, data.get(n) + getWeight(originalForm,weight));

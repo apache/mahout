@@ -93,10 +93,8 @@ public final class PlusAnonymousUserDataModel implements DataModel {
     }
     this.tempPrefs = prefs;
     this.prefItemIDs.clear();
-    if (prefs != null) {
-      for (int i = 0; i < prefs.length(); i++) {
-        this.prefItemIDs.add(prefs.getItemID(i));
-      }
+    for (int i = 0; i < prefs.length(); i++) {
+      this.prefItemIDs.add(prefs.getItemID(i));
     }
   }
 
