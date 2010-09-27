@@ -57,7 +57,7 @@ public class FuzzyKMeansMapper extends Mapper<WritableComparable<?>,VectorWritab
     }
     
     if (clusters.isEmpty()) {
-      throw new IllegalStateException("Cluster is empty!!!");
+      throw new IllegalStateException("No clusters found. Check your -c path.");
     }
   }
 
