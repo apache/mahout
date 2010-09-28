@@ -63,7 +63,11 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private static final int SURVIVORS = 2;
 
   private int record;
-  private int evaluationInterval = 1000;
+  private int cutoff = 1000;
+  private int minInterval = 1000;
+  private int maxInterval = 1000;
+  private int currentStep = 1000;
+  private int bufferSize = 1000;
 
   // transient here is a signal to GSON not to serialize pending records
   private transient List<TrainingExample> buffer = Lists.newArrayList();
@@ -105,7 +109,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     record++;
 
     buffer.add(new TrainingExample(trackingKey, groupKey, actual, instance));
-    if (buffer.size() > evaluationInterval) {
+    if (buffer.size() > bufferSize) {
       trainWithBufferedExamples();
     }
   }
@@ -134,19 +138,52 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     } catch (ExecutionException e) {
       throw new IllegalStateException(e);
     }
+    buffer.clear();
 
-    // evolve based on new fitness
-    ep.mutatePopulation(SURVIVORS);
+    if (record > cutoff) {
+      cutoff = nextStep(record);
 
-    if (freezeSurvivors) {
-      // now grossly hack the top survivors so they stick around.  Set their
-      // mutation rates small and also hack their learning rate to be small
-      // as well.
-      for (State<Wrapper> state : ep.getPopulation().subList(0, SURVIVORS)) {
-        state.getPayload().freeze(state);
+      // evolve based on new fitness
+      ep.mutatePopulation(SURVIVORS);
+
+      if (freezeSurvivors) {
+        // now grossly hack the top survivors so they stick around.  Set their
+        // mutation rates small and also hack their learning rate to be small
+        // as well.
+        for (State<Wrapper> state : ep.getPopulation().subList(0, SURVIVORS)) {
+          state.getPayload().freeze(state);
+        }
       }
     }
-    buffer.clear();
+
+  }
+
+  public int nextStep(int recordNumber) {
+    int stepSize = stepSize(recordNumber, 2.6);
+    if (stepSize < minInterval) {
+      stepSize = minInterval;
+    }
+
+    if (stepSize > maxInterval) {
+      stepSize = maxInterval;
+    }
+
+    int newCutoff = stepSize * (recordNumber / stepSize + 1);
+    if (newCutoff < cutoff + currentStep) {
+      newCutoff = cutoff + currentStep;
+    } else {
+      this.currentStep = stepSize;
+    }
+    return newCutoff;
+  }
+
+  public static int stepSize(int recordNumber, double multiplier) {
+    final int[] bumps = new int[]{1, 2, 5};
+    double log = Math.floor(multiplier * Math.log10(recordNumber));
+    int bump = bumps[(int) log % bumps.length];
+    int scale = (int) Math.pow(10, Math.floor(log / bumps.length));
+
+    return bump * scale;
   }
 
   @Override
@@ -173,7 +210,23 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    * @param interval  Number of training examples to use in each epoch of optimization.
    */
   public void setInterval(int interval) {
-    this.evaluationInterval = interval;
+    this.minInterval = interval;
+    this.maxInterval = interval;
+    this.cutoff = interval * (record / interval + 1);
+  }
+
+  /**
+   * Starts optimization using the shorter interval and progresses to the longer using the specified
+   * number of steps per decade.  Note that values < 200 are not accepted.  Values even that small
+   * are unlikely to be useful.
+   *
+   * @param minInterval  The minimum epoch length for the evolutionary optimization
+   * @param maxInterval  The maximum epoch length
+   */
+  public void setInterval(int minInterval, int maxInterval) {
+    this.minInterval = Math.max(200, minInterval);
+    this.maxInterval = Math.max(200, maxInterval);
+    this.cutoff = minInterval * (record / minInterval + 1);
   }
 
   public void setPoolSize(int poolSize) {
@@ -234,8 +287,12 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     this.record = record;
   }
 
-  public int getEvaluationInterval() {
-    return evaluationInterval;
+  public int getMinInterval() {
+    return minInterval;
+  }
+
+  public int getMaxInterval() {
+    return maxInterval;
   }
 
   public int getNumCategories() {
@@ -244,10 +301,6 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   public PriorFunction getPrior() {
     return seed.getPayload().getLearner().getPrior();
-  }
-
-  public void setEvaluationInterval(int evaluationInterval) {
-    this.evaluationInterval = evaluationInterval;
   }
 
   public void setBuffer(List<TrainingExample> buffer) {

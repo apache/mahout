@@ -138,4 +138,44 @@ public final class AdaptiveLogisticRegressionTest extends MahoutTestCase {
     // make sure that the copy didn't lose anything
     assertEquals(auc1, w.getLearner().auc(), 0);
   }
+
+  @Test
+  public void stepSize() {
+    assertEquals(500, AdaptiveLogisticRegression.stepSize(15000, 2));
+    assertEquals(2000, AdaptiveLogisticRegression.stepSize(15000, 2.6));
+    assertEquals(5000, AdaptiveLogisticRegression.stepSize(24000, 2.6));
+    assertEquals(10000, AdaptiveLogisticRegression.stepSize(15000, 3));
+  }
+
+  @Test
+  public void constantStep() {
+    AdaptiveLogisticRegression lr = new AdaptiveLogisticRegression(2, 1000, new L1());
+    lr.setInterval(5000);
+    assertEquals(20000, lr.nextStep(15000));
+    assertEquals(20000, lr.nextStep(15001));
+    assertEquals(20000, lr.nextStep(16500));
+    assertEquals(20000, lr.nextStep(19999));
+  }
+    
+
+  @Test
+  public void growingStep() {
+    AdaptiveLogisticRegression lr = new AdaptiveLogisticRegression(2, 1000, new L1());
+    lr.setInterval(2000, 10000);
+
+    // start with minimum step size
+    for (int i = 2000; i < 20000;i+=2000) {
+      assertEquals(i + 2000, lr.nextStep(i));
+    }
+
+    // then level up a bit
+    for (int i = 20000; i < 50000; i += 5000) {
+      assertEquals(i + 5000, lr.nextStep(i));
+    }
+
+    // and more, but we top out with this step size
+    for (int i = 50000; i < 500000; i += 10000) {
+      assertEquals(i + 10000, lr.nextStep(i));
+    }
+  }
 }

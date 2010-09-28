@@ -340,7 +340,11 @@ public final class ModelSerializer {
                                          x.get("numFeatures").getAsInt(),
                                          jdc.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
       Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
-      r.setEvaluationInterval(x.get("evaluationInterval").getAsInt());
+      if (x.get("evaluationInterval")!=null) {
+        r.setInterval(x.get("evaluationInterval").getAsInt());
+      } else {
+        r.setInterval(x.get("minInterval").getAsInt(), x.get("minInterval").getAsInt());
+      }
       r.setRecord(x.get("record").getAsInt());
 
       Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
@@ -360,7 +364,8 @@ public final class ModelSerializer {
           new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType()));
       r.add("buffer", jsc.serialize(x.getBuffer(),
           new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {}.getType()));
-      r.add("evaluationInterval", jsc.serialize(x.getEvaluationInterval()));
+      r.add("minInterval", jsc.serialize(x.getMinInterval()));
+      r.add("maxInterval", jsc.serialize(x.getMaxInterval()));
       Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
       r.add("best", jsc.serialize(x.getBest(), stateType));
       r.add("numFeatures", jsc.serialize(x.getNumFeatures()));
