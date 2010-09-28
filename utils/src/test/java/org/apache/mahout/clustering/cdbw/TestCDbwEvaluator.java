@@ -71,9 +71,10 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
   }
 
-  private void checkRefPoints(int numIterations) throws IOException {
+  private void printRepPoints(int numIterations) throws IOException {
     for (int i = 0; i <= numIterations; i++) {
       Path out = new Path(getTestTempDirPath("output"), "representativePoints-" + i);
+      System.out.println("Representative Points for iteration " + i);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(conf);
       for (FileStatus file : fs.listStatus(out)) {
@@ -204,7 +205,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   }
 
   @Test
-  public void testCanopy() throws Exception { // now run the Job
+  public void testCanopy() throws Exception {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     CanopyDriver.run(new Configuration(),
                      getTestTempDirPath("testdata"),
@@ -213,14 +214,14 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                      3.1,
                      2.1,
                      true,
-                     false);
+                     true);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
     Configuration conf = new Configuration();
     Path clustersIn = new Path(output, "clusters-0");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
     // now print out the Results
     System.out.println("CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -239,16 +240,16 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                      3.1,
                      2.1,
                      false,
-                     false);
+                     true);
     // now run the KMeans job
     Path output = getTestTempDirPath("output");
-    KMeansDriver.run(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output, measure, 0.001, 10, true, false);
+    KMeansDriver.run(getTestTempDirPath("testdata"), new Path(output, "clusters-0"), output, measure, 0.001, 10, true, true);
     int numIterations = 2;
     Configuration conf = new Configuration();
     Path clustersIn = new Path(output, "clusters-2");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
     // now print out the Results
     System.out.println("CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -267,7 +268,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                      3.1,
                      2.1,
                      false,
-                     false);
+                     true);
     // now run the KMeans job
     Path output = getTestTempDirPath("output");
     FuzzyKMeansDriver.run(getTestTempDirPath("testdata"),
@@ -280,13 +281,13 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                           true,
                           true,
                           0,
-                          false);
+                          true);
     int numIterations = 2;
     Configuration conf = new Configuration();
     Path clustersIn = new Path(output, "clusters-4");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
     // now print out the Results
     System.out.println("CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -307,13 +308,14 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                                     0.001,
                                     10,
                                     false,
-                                    true, false);
+                                    true,
+                                    true);
     int numIterations = 2;
     Path output = getTestTempDirPath("output");
     Path clustersIn = new Path(output, "clusters-2");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
     // now print out the Results
     System.out.println("CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
@@ -343,9 +345,10 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
                                    new Path(output, "clusteredPoints"),
                                    output,
                                    new EuclideanDistanceMeasure(),
-                                   numIterations);
+                                   numIterations,
+                                   true);
     CDbwEvaluator evaluator = new CDbwEvaluator(conf, clustersIn);
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
     // now print out the Results
     System.out.println("CDbw = " + evaluator.getCDbw());
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());

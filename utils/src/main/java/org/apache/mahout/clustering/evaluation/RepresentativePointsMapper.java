@@ -54,12 +54,20 @@ public class RepresentativePointsMapper extends Mapper<IntWritable, WeightedVect
 
   @Override
   protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context) throws IOException, InterruptedException {
+    mapPoint(clusterId, point, measure, representativePoints, mostDistantPoints);
+  }
+
+  public static void mapPoint(IntWritable clusterId,
+                              WeightedVectorWritable point,
+                              DistanceMeasure measure,
+                              Map<Integer, List<VectorWritable>> representativePoints,
+                              Map<Integer, WeightedVectorWritable> mostDistantPoints) {
     int key = clusterId.get();
     WeightedVectorWritable currentMDP = mostDistantPoints.get(key);
 
-    List<VectorWritable> refPoints = representativePoints.get(key);
+    List<VectorWritable> repPoints = representativePoints.get(key);
     double totalDistance = 0.0;
-    for (VectorWritable refPoint : refPoints) {
+    for (VectorWritable refPoint : repPoints) {
       totalDistance += measure.distance(refPoint.get(), point.getVector());
     }
     if (currentMDP == null || currentMDP.getWeight() < totalDistance) {
@@ -98,11 +106,14 @@ public class RepresentativePointsMapper extends Mapper<IntWritable, WeightedVect
 
   public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf) {
     String statePath = conf.get(RepresentativePointsDriver.STATE_IN_KEY);
+    return getRepresentativePoints(conf, new Path(statePath));
+  }
+
+  public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf, Path statePath) {
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
     try {
-      Path path = new Path(statePath);
-      FileSystem fs = FileSystem.get(path.toUri(), conf);
-      FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
+      FileSystem fs = FileSystem.get(statePath.toUri(), conf);
+      FileStatus[] status = fs.listStatus(statePath, new OutputLogFilter());
       for (FileStatus s : status) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {

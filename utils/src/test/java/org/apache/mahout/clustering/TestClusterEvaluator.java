@@ -41,6 +41,7 @@ import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
@@ -114,9 +115,10 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     generateSamples(300, 0, 2, 0.1);
   }
 
-  private void checkRefPoints(int numIterations) throws IOException {
+  private void printRepPoints(int numIterations) throws IOException {
     for (int i = 0; i <= numIterations; i++) {
       Path out = new Path(getTestTempDirPath("output"), "representativePoints-" + i);
+      System.out.println("Representative Points for iteration " + i);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(conf);
       for (FileStatus file : fs.listStatus(out)) {
@@ -158,6 +160,29 @@ public final class TestClusterEvaluator extends MahoutTestCase {
       points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { -dP, -dP }))));
       points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { -dP, dP }))));
     }
+  }
+
+  @Test
+  public void testRepresentativePoints() throws Exception {
+    ClusteringTestUtils.writePointsToFile(referenceData, new Path(testdata, "file1"), fs, conf);
+    DistanceMeasure measure = new EuclideanDistanceMeasure();
+    Configuration conf = new Configuration();
+    // run using MR reference point calculation
+    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
+    int numIterations = 2;
+    Path clustersIn = new Path(output, "clusters-0");
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, false);
+    printRepPoints(numIterations);
+    ClusterEvaluator evaluatorMR = new ClusterEvaluator(conf, clustersIn);
+    // now run again using sequential reference point calculation
+    HadoopUtil.overwriteOutput(output);
+    CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
+    printRepPoints(numIterations);
+    ClusterEvaluator evaluatorSeq = new ClusterEvaluator(conf, clustersIn);
+    // compare results
+    assertEquals("InterCluster Density", evaluatorMR.interClusterDensity(), evaluatorSeq.interClusterDensity(), EPSILON);
+    assertEquals("IntraCluster Density", evaluatorMR.intraClusterDensity(), evaluatorSeq.intraClusterDensity(), EPSILON);
   }
 
   @Test
@@ -249,13 +274,13 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     CanopyDriver.run(conf, testdata, output, measure, 3.1, 1.1, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
     System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
 
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
   }
 
   @Test
@@ -269,12 +294,12 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     KMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure, 0.001, 10, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-2");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
     System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
   }
 
   @Test
@@ -288,12 +313,12 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     FuzzyKMeansDriver.run(testdata, new Path(output, "clusters-0"), output, measure, 0.001, 10, 2, true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-4");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
     System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
   }
 
   @Test
@@ -304,12 +329,12 @@ public final class TestClusterEvaluator extends MahoutTestCase {
     new MeanShiftCanopyDriver().run(conf, testdata, output, measure, 2.1, 1.0, 0.001, 10, false, true, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-10");
-    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations);
+    RepresentativePointsDriver.run(conf, clustersIn, new Path(output, "clusteredPoints"), output, measure, numIterations, true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
     System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
   }
 
   @Test
@@ -325,12 +350,13 @@ public final class TestClusterEvaluator extends MahoutTestCase {
                                    new Path(output, "clusteredPoints"),
                                    output,
                                    new EuclideanDistanceMeasure(),
-                                   numIterations);
+                                   numIterations,
+                                   true);
     ClusterEvaluator evaluator = new ClusterEvaluator(conf, clustersIn);
     // now print out the Results
     System.out.println("Intra-cluster density = " + evaluator.intraClusterDensity());
     System.out.println("Inter-cluster density = " + evaluator.interClusterDensity());
-    checkRefPoints(numIterations);
+    printRepPoints(numIterations);
   }
 
 }

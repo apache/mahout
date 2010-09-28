@@ -18,6 +18,10 @@
 package org.apache.mahout.clustering.evaluation;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -35,6 +39,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -64,6 +69,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.maxIterationsOption().create());
+    addOption(DefaultOptionCreator.methodOption().create());
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -72,10 +78,11 @@ public final class RepresentativePointsDriver extends AbstractJob {
     Path output = getOutputPath();
     String distanceMeasureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = ccl.loadClass(distanceMeasureClass).asSubclass(DistanceMeasure.class).newInstance();
 
-    run(getConf(), input, null, output, measure, maxIterations);
+    run(getConf(), input, null, output, measure, maxIterations, runSequential);
     return 0;
   }
 
@@ -84,7 +91,8 @@ public final class RepresentativePointsDriver extends AbstractJob {
                          Path clusteredPointsIn,
                          Path output,
                          DistanceMeasure measure,
-                         int numIterations) throws InstantiationException, IllegalAccessException, IOException,
+                         int numIterations,
+                         boolean runSequential) throws InstantiationException, IllegalAccessException, IOException,
       InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
@@ -93,7 +101,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "representativePoints-" + (iteration + 1));
-      runIteration(clusteredPointsIn, stateIn, stateOut, measure);
+      runIteration(conf, clusteredPointsIn, stateIn, stateOut, measure, runSequential);
       // now point the input to the old output directory
       stateIn = stateOut;
     }
@@ -124,9 +132,24 @@ public final class RepresentativePointsDriver extends AbstractJob {
     }
   }
 
+  private static void runIteration(Configuration conf,
+                                   Path clusteredPointsIn,
+                                   Path stateIn,
+                                   Path stateOut,
+                                   DistanceMeasure measure,
+                                   boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException {
+    if (runSequential) {
+      runIterationSeq(conf, clusteredPointsIn, stateIn, stateOut, measure);
+    } else {
+      runIterationMR(conf, clusteredPointsIn, stateIn, stateOut, measure);
+    }
+  }
+
   /**
-   * Run the job using supplied arguments
-   * 
+   * Run the job using supplied arguments as a sequential process
+   * @param conf 
+   *          the Configuration to use
    * @param input
    *          the directory pathname for input points
    * @param stateIn
@@ -134,11 +157,70 @@ public final class RepresentativePointsDriver extends AbstractJob {
    * @param stateOut
    *          the directory pathname for output state
    * @param measure
-   *          the DistanceMeasure
+   *          the DistanceMeasure to use
    */
-  private static void runIteration(Path input, Path stateIn, Path stateOut, DistanceMeasure measure) throws IOException,
-      InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
+  private static void runIterationSeq(Configuration conf,
+                                      Path clusteredPointsIn,
+                                      Path stateIn,
+                                      Path stateOut,
+                                      DistanceMeasure measure) throws IOException, InstantiationException, IllegalAccessException {
+
+    Map<Integer, List<VectorWritable>> repPoints = RepresentativePointsMapper.getRepresentativePoints(conf, stateIn);
+    Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<Integer, WeightedVectorWritable>();
+    FileSystem fs = FileSystem.get(clusteredPointsIn.toUri(), conf);
+    FileStatus[] status = fs.listStatus(clusteredPointsIn, new OutputLogFilter());
+    int part = 0;
+    for (FileStatus s : status) {
+      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
+      try {
+        IntWritable key = (IntWritable) reader.getKeyClass().asSubclass(Writable.class).newInstance();
+        WeightedVectorWritable vw = (WeightedVectorWritable) reader.getValueClass().asSubclass(Writable.class).newInstance();
+        while (reader.next(key, vw)) {
+          RepresentativePointsMapper.mapPoint(key, vw, measure, repPoints, mostDistantPoints);
+        }
+      } finally {
+        reader.close();
+      }
+    }
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs,
+                                                         conf,
+                                                         new Path(stateOut, "part-m-" + part++),
+                                                         IntWritable.class,
+                                                         VectorWritable.class);
+    try {
+      for (Entry<Integer, List<VectorWritable>> entry : repPoints.entrySet()) {
+        for (VectorWritable vw : entry.getValue()) {
+          writer.append(new IntWritable(entry.getKey()), vw);
+        }
+      }
+    } finally {
+      writer.close();
+    }
+    writer = new SequenceFile.Writer(fs, conf, new Path(stateOut, "part-m-" + part++), IntWritable.class, VectorWritable.class);
+    try {
+      for (Map.Entry<Integer, WeightedVectorWritable> entry : mostDistantPoints.entrySet()) {
+        writer.append(new IntWritable(entry.getKey()), new VectorWritable(entry.getValue().getVector()));
+      }
+    } finally {
+      writer.close();
+    }
+  }
+
+  /**
+   * Run the job using supplied arguments as a Map/Reduce process
+   * @param conf 
+   *          the Configuration to use
+   * @param input
+   *          the directory pathname for input points
+   * @param stateIn
+   *          the directory pathname for input state
+   * @param stateOut
+   *          the directory pathname for output state
+   * @param measure
+   *          the DistanceMeasure to use
+   */
+  private static void runIterationMR(Configuration conf, Path input, Path stateIn, Path stateOut, DistanceMeasure measure)
+      throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
     Job job = new Job(conf);
