@@ -58,7 +58,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
-  private Map<Integer, Cluster> clusters;
+  private List<Cluster> clusters;
 
   @Override
   @Before
@@ -101,13 +101,13 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    * @param measure the DistanceMeasure
    */
   private void initData(double dC, double dP, DistanceMeasure measure) {
-    clusters = new HashMap<Integer, Cluster>();
-    clusters.put(1, new Canopy(new DenseVector(new double[] { -dC, -dC }), 1, measure));
-    clusters.put(3, new Canopy(new DenseVector(new double[] { -dC, dC }), 3, measure));
-    clusters.put(5, new Canopy(new DenseVector(new double[] { dC, dC }), 5, measure));
-    clusters.put(7, new Canopy(new DenseVector(new double[] { dC, -dC }), 7, measure));
+    clusters = new ArrayList<Cluster>();
+    clusters.add(new Canopy(new DenseVector(new double[] { -dC, -dC }), 1, measure));
+    clusters.add(new Canopy(new DenseVector(new double[] { -dC, dC }), 3, measure));
+    clusters.add(new Canopy(new DenseVector(new double[] { dC, dC }), 5, measure));
+    clusters.add(new Canopy(new DenseVector(new double[] { dC, -dC }), 7, measure));
     representativePoints = new HashMap<Integer, List<VectorWritable>>();
-    for (Cluster cluster : clusters.values()) {
+    for (Cluster cluster : clusters) {
       List<VectorWritable> points = new ArrayList<VectorWritable>();
       representativePoints.put(cluster.getId(), points);
       points.add(new VectorWritable(cluster.getCenter().clone()));
@@ -124,9 +124,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     initData(1, 0.25, measure);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 1.5, evaluator.separation(), EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
     assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 1.3416407864998736, evaluator.getCDbw(), EPSILON);
+    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -135,9 +135,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     initData(1, 0.5, measure);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 1.0, evaluator.separation(), EPSILON);
+    assertEquals("separation", 13.656854249492381, evaluator.separation(), EPSILON);
     assertEquals("intra cluster density", 0.44721359549995787, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 0.44721359549995787, evaluator.getCDbw(), EPSILON);
+    assertEquals("CDbw", 6.107530892134367, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -145,10 +145,10 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.75, measure);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 1.017921815355728, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 0.24777966925931558, evaluator.separation(), EPSILON);
+    assertEquals("inter cluster density", 0.7634413615167959, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("separation", 3.8722167199667066, evaluator.separation(), EPSILON);
     assertEquals("intra cluster density", 0.29814239699997197, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 0.07387362452083261, evaluator.getCDbw(), EPSILON);
+    assertEquals("CDbw", 1.1544719745942431, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -156,14 +156,14 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] { 10, 10 }), 19, measure);
-    clusters.put(cluster.getId(), cluster);
+    clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     representativePoints.put(cluster.getId(), points);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 1.5, evaluator.separation(), EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
     assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 1.3416407864998736, evaluator.getCDbw(), EPSILON);
+    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -171,15 +171,15 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
-    clusters.put(cluster.getId(), cluster);
+    clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     points.add(new VectorWritable(cluster.getCenter().plus(new DenseVector(new double[] { 1, 1 }))));
     representativePoints.put(cluster.getId(), points);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 1.5, evaluator.separation(), EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
     assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 1.3416407864998736, evaluator.getCDbw(), EPSILON);
+    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
   }
 
   /**
@@ -191,7 +191,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.25, measure);
     Canopy cluster = new Canopy(new DenseVector(new double[] { 0, 0 }), 19, measure);
-    clusters.put(cluster.getId(), cluster);
+    clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     points.add(new VectorWritable(cluster.getCenter()));
     points.add(new VectorWritable(cluster.getCenter()));
@@ -199,9 +199,9 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     representativePoints.put(cluster.getId(), points);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 1.5, evaluator.separation(), EPSILON);
+    assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
     assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 1.3416407864998736, evaluator.getCDbw(), EPSILON);
+    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
   }
 
   @Test

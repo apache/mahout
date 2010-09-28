@@ -18,6 +18,7 @@
 package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,10 @@ import org.apache.mahout.math.function.SquareRootFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class calculates the CDbw metric as defined in
+ * http://www.db-net.aueb.gr/index.php/corporate/content/download/227/833/file/HV_poster2002.pdf 
+ */
 public class CDbwEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(CDbwEvaluator.class);
@@ -47,7 +52,7 @@ public class CDbwEvaluator {
 
   private final Map<Integer, Double> stDevs = new HashMap<Integer, Double>();
 
-  private final Map<Integer, Cluster> clusters;
+  private final List<Cluster> clusters;
 
   private final DistanceMeasure measure;
 
@@ -63,9 +68,7 @@ public class CDbwEvaluator {
    * @param measure
    *            an appropriate DistanceMeasure
    */
-  public CDbwEvaluator(Map<Integer, List<VectorWritable>> representativePoints,
-                       Map<Integer, Cluster> clusters,
-                       DistanceMeasure measure) {
+  public CDbwEvaluator(Map<Integer, List<VectorWritable>> representativePoints, List<Cluster> clusters, DistanceMeasure measure) {
     this.representativePoints = representativePoints;
     this.clusters = clusters;
     this.measure = measure;
@@ -101,9 +104,9 @@ public class CDbwEvaluator {
    *            a String pathname to the directory containing input cluster files
    * @return a List<Cluster> of the clusters
    */
-  private static Map<Integer, Cluster> loadClusters(Configuration conf, Path clustersIn) throws InstantiationException,
+  private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) throws InstantiationException,
       IllegalAccessException, IOException {
-    Map<Integer, Cluster> clusters = new HashMap<Integer, Cluster>();
+    List<Cluster> clusters = new ArrayList<Cluster>();
     FileSystem fs = clustersIn.getFileSystem(conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {
       if (!part.getPath().getName().startsWith(".")) {
@@ -113,7 +116,7 @@ public class CDbwEvaluator {
         Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
-          clusters.put(cluster.getId(), cluster);
+          clusters.add(cluster);
           value = reader.getValueClass().asSubclass(Writable.class).newInstance();
         }
         reader.close();
@@ -122,7 +125,14 @@ public class CDbwEvaluator {
     return clusters;
   }
 
+  /**
+   * Compute the standard deviation of the representative points for the given cluster.
+   * Store these in stDevs, indexed by cI
+   * 
+   * @param cI a int clusterId. 
+   */
   private void computeStd(int cI) {
+    // TODO: verify this approach
     List<VectorWritable> repPts = representativePoints.get(cI);
     int s0 = 0;
     Vector s1 = null;
@@ -167,7 +177,7 @@ public class CDbwEvaluator {
     if (pruned) {
       return;
     }
-    for (Iterator<Cluster> it = clusters.values().iterator(); it.hasNext();) {
+    for (Iterator<Cluster> it = clusters.iterator(); it.hasNext();) {
       Cluster cluster = it.next();
       if (invalidCluster(cluster)) {
         log.info("Pruning cluster Id=" + cluster.getId());
@@ -178,82 +188,116 @@ public class CDbwEvaluator {
     pruned = true;
   }
 
+  /**
+   * Compute the term density (eqn 2) used for inter-cluster density calculation
+   * 
+   * @param uIJ the Vector midpoint between the closest representative of the clusters
+   * @param cI the int clusterId of the i-th cluster
+   * @param cJ the int clusterId of the j-th cluster
+   * @return a double
+   */
   double interDensity(Vector uIJ, int cI, int cJ) {
     List<VectorWritable> repI = representativePoints.get(cI);
     List<VectorWritable> repJ = representativePoints.get(cJ);
-    double density = 0.0;
-    double std = (stDevs.get(cI) + stDevs.get(cJ)) / 2.0;
+    double sum = 0.0;
+    Double stdevI = stDevs.get(cI);
+    Double stdevJ = stDevs.get(cJ);
+    // count the number of representative points of the clusters which are within the
+    // average std of the two clusters from the midpoint uIJ (eqn 3)
+    double avgStd = (stdevI + stdevJ) / 2.0;
     for (VectorWritable vwI : repI) {
-      if (measure.distance(uIJ, vwI.get()) <= std) {
-        density++;
+      if (measure.distance(uIJ, vwI.get()) <= avgStd) {
+        sum++;
       }
     }
     for (VectorWritable vwJ : repJ) {
-      if (measure.distance(uIJ, vwJ.get()) <= std) {
-        density++;
+      if (measure.distance(uIJ, vwJ.get()) <= avgStd) {
+        sum++;
       }
     }
-    return density / (repI.size() + repJ.size());
+    int nI = repI.size();
+    int nJ = repJ.size();
+    return sum / (nI + nJ);
   }
 
-  double intraDensity(Vector clusterCenter, Vector repPoint, double avgStd) {
-    return measure.distance(clusterCenter, repPoint) <= avgStd ? 1.0 : 0.0;
-  }
-
+  /**
+   * Compute the validity index (eqn 8)
+   * 
+   * @return a double
+   */
   public double getCDbw() {
     pruneInvalidClusters();
     return intraClusterDensity() * separation();
   }
 
+  /**
+   * The average density within clusters is defined as the percentage of points that belong 
+   * to the neighborhood of representative points of the considered clusters. The goal is 
+   * the density within clusters to be significant high. (eqn 5)
+   * 
+   * @return a double
+   */
   public double intraClusterDensity() {
     pruneInvalidClusters();
-    double avgStd = 0.0;
-    for (Integer cId : representativePoints.keySet()) {
-      avgStd += stDevs.get(cId);
+    // compute the average standard deviation of the clusters
+    double stdev = 0.0;
+    for (Integer cI : representativePoints.keySet()) {
+      stdev += stDevs.get(cI);
     }
-    avgStd /= representativePoints.size();
-
-    double sum = 0.0;
-    for (Map.Entry<Integer, List<VectorWritable>> entry : representativePoints.entrySet()) {
-      Integer cId = entry.getKey();
-      List<VectorWritable> repI = entry.getValue();
-      double cSum = 0.0;
-      for (VectorWritable aRepI : repI) {
-        double inDensity = intraDensity(clusters.get(cId).getCenter(), aRepI.get(), avgStd);
-        double std = stDevs.get(cId);
-        if (std > 0.0) {
-          cSum += inDensity / std;
-        }
+    int c = representativePoints.size();
+    stdev /= c;
+    // accumulate the summations
+    double sumI = 0.0;
+    for (int i = 0; i < clusters.size(); i++) {
+      Integer cI = clusters.get(i).getId();
+      List<VectorWritable> repPtsI = representativePoints.get(cI);
+      int r = repPtsI.size();
+      double sumJ = 0.0;
+      // compute the term density (eqn 6) 
+      for (int j = 0; j < r; j++) {
+        // compute f(x, vIJ) (eqn 7)
+        Vector repJ = repPtsI.get(j).get();
+        double densityIJ = (measure.distance(clusters.get(i).getCenter(), repJ) <= stdev ? 1.0 : 0.0);
+        // accumulate sumJ
+        sumJ += densityIJ / stdev;
       }
-      if (repI.size() > 0) {
-        sum += cSum / repI.size();
-      }
+      // accumulate sumI
+      sumI += sumJ / r;
     }
-    return sum / representativePoints.size();
+    return sumI / c;
   }
 
+  /**
+   * This function evaluates the average density in the region among clusters (eqn 1). 
+   * The goal is the density in the area among clusters to be significant low.
+   * 
+   * @return a double
+   */
   public double interClusterDensity() {
     pruneInvalidClusters();
     double sum = 0.0;
-    for (Map.Entry<Integer, List<VectorWritable>> entry1 : representativePoints.entrySet()) {
-      Integer cI = entry1.getKey();
-      List<VectorWritable> repI = entry1.getValue();
-      for (Map.Entry<Integer, List<VectorWritable>> entry2 : representativePoints.entrySet()) {
-        Integer cJ = entry2.getKey();
-        if (cI.equals(cJ)) {
+    // find the closest representative points between the clusters
+    for (int i = 0; i < clusters.size(); i++) {
+      Integer cI = clusters.get(i).getId();
+      List<VectorWritable> repI = representativePoints.get(cI);
+      for (int j = 1; j < clusters.size(); j++) {
+        Integer cJ = clusters.get(j).getId();
+        if (i == j) {
           continue;
         }
-        List<VectorWritable> repJ = entry2.getValue();
-        double minDistance = Double.MAX_VALUE;
-        Vector uIJ = null;
+        List<VectorWritable> repJ = representativePoints.get(cJ);
+        double minDistance = Double.MAX_VALUE; // the distance between the closest representative points
+        Vector uIJ = null; // the midpoint between the closest representative points
+        // find the closest representative points between the i-th and j-th clusters
         for (VectorWritable aRepI : repI) {
           for (VectorWritable aRepJ : repJ) {
-            Vector vI = aRepI.get();
-            Vector vJ = aRepJ.get();
-            double distance = measure.distance(vI, vJ);
+            Vector closRepI = aRepI.get();
+            Vector closRepJ = aRepJ.get();
+            double distance = measure.distance(closRepI, closRepJ);
             if (distance < minDistance) {
+              // set the distance and compute the midpoint
               minDistance = distance;
-              uIJ = vI.plus(vJ).divide(2);
+              uIJ = closRepI.plus(closRepJ).divide(2);
             }
           }
         }
@@ -275,31 +319,42 @@ public class CDbwEvaluator {
         sum += density;
       }
     }
-    //System.out.println("interClusterDensity=" + sum);
+    log.info("interClusterDensity=" + sum);
     return sum;
   }
 
+  /**
+   * Calculate the separation of clusters (eqn 4) taking into account both the distances between the closest
+   * clusters and the Inter-cluster density. The goal is the distances among clusters to be high while 
+   * the density in the area among them to be low.
+   * 
+   * @return a double
+   */
   public double separation() {
     pruneInvalidClusters();
-    double minDistance = Double.MAX_VALUE;
-    for (Map.Entry<Integer, List<VectorWritable>> entry1 : representativePoints.entrySet()) {
-      Integer cI = entry1.getKey();
-      List<VectorWritable> repI = entry1.getValue();
-      for (Map.Entry<Integer, List<VectorWritable>> entry2 : representativePoints.entrySet()) {
-        if (cI.equals(entry2.getKey())) {
+    double minDistanceSum = 0;
+    for (int i = 0; i < clusters.size(); i++) {
+      Integer cI = clusters.get(i).getId();
+      List<VectorWritable> closRepI = representativePoints.get(cI);
+      for (int j = 0; j < clusters.size(); j++) {
+        if (i == j) {
           continue;
         }
-        List<VectorWritable> repJ = entry2.getValue();
-        for (VectorWritable aRepI : repI) {
-          for (VectorWritable aRepJ : repJ) {
+        // find min{d(closRepI, closRepJ)}
+        Integer cJ = clusters.get(j).getId();
+        List<VectorWritable> closRepJ = representativePoints.get(cJ);
+        double minDistance = Double.MAX_VALUE;
+        for (VectorWritable aRepI : closRepI) {
+          for (VectorWritable aRepJ : closRepJ) {
             double distance = measure.distance(aRepI.get(), aRepJ.get());
             if (distance < minDistance) {
               minDistance = distance;
             }
           }
         }
+        minDistanceSum += minDistance;
       }
     }
-    return minDistance / (1.0 + interClusterDensity());
+    return minDistanceSum / (1.0 + interClusterDensity());
   }
 }
