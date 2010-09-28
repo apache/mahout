@@ -32,9 +32,6 @@ import java.util.Iterator;
  * response to a feature vector.  This classifier uses 1 of n-1 coding where the 0-th category
  * is not stored explicitly.
  * <p/>
- * TODO: implement symbolic input with string, overall cooccurrence and n-gram hash encoding
- * TODO: implement reporter system to monitor progress
- *
  * Provides the based SGD based algorithm for learning a logistic regression, but omits all
  * annealing of learning rates.  Any extension of this abstract class must define the overall
  * and per-term annealing for themselves.
