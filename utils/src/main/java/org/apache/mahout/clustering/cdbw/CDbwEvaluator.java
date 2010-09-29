@@ -32,7 +32,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.GaussianAccumulator;
-import org.apache.mahout.clustering.RunningSumsGaussianAccumulator;
+import org.apache.mahout.clustering.OnlineGaussianAccumulator;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsMapper;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -134,7 +134,7 @@ public class CDbwEvaluator {
    */
   private void computeStd(int cI) {
     List<VectorWritable> repPts = representativePoints.get(cI);
-    GaussianAccumulator accumulator = new RunningSumsGaussianAccumulator();
+    GaussianAccumulator accumulator = new OnlineGaussianAccumulator();
     for (VectorWritable vw : repPts) {
       accumulator.observe(vw.get());
     }

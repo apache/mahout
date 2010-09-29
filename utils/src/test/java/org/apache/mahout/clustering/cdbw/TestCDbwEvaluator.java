@@ -175,8 +175,8 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
     assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -185,10 +185,10 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.5, measure);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 13.656854249492381, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.44721359549995787, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 6.107530892134367, evaluator.getCDbw(), EPSILON);
+    assertEquals("inter cluster density", 1.2, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("separation", 6.207661022496537, evaluator.separation(), EPSILON);
+    assertEquals("intra cluster density", 0.4, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 2.483064408998615, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -197,10 +197,10 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     initData(1, 0.75, measure);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
-    assertEquals("inter cluster density", 0.7634413615167959, evaluator.interClusterDensity(), EPSILON);
-    assertEquals("separation", 3.8722167199667066, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.29814239699997197, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 1.1544719745942431, evaluator.getCDbw(), EPSILON);
+    assertEquals("inter cluster density", 0.682842712474619, evaluator.interClusterDensity(), EPSILON);
+    assertEquals("separation", 4.0576740025245694, evaluator.separation(), EPSILON);
+    assertEquals("intra cluster density", 0.26666666666666666, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 1.0820464006732184, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -215,8 +215,8 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
     assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
 
   @Test
@@ -232,8 +232,8 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
     assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
 
   /**
@@ -256,8 +256,8 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
     assertEquals("separation", 20.485281374238568, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 0.8944271909999157, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 18.322592676403097, evaluator.getCDbw(), EPSILON);
+    assertEquals("intra cluster density", 0.8, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 16.388225099390855, evaluator.getCDbw(), EPSILON);
   }
 
   /**
@@ -274,17 +274,17 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     clusters.add(cluster);
     List<VectorWritable> points = new ArrayList<VectorWritable>();
     Vector delta = new DenseVector(new double[] { 0, Double.MIN_NORMAL });
-    points.add(new VectorWritable(delta));
-    points.add(new VectorWritable(cluster.getCenter()));
-    points.add(new VectorWritable(cluster.getCenter()));
-    points.add(new VectorWritable(cluster.getCenter()));
-    points.add(new VectorWritable(cluster.getCenter()));
+    points.add(new VectorWritable(delta.clone()));
+    points.add(new VectorWritable(delta.clone()));
+    points.add(new VectorWritable(delta.clone()));
+    points.add(new VectorWritable(delta.clone()));
+    points.add(new VectorWritable(delta.clone()));
     representativePoints.put(cluster.getId(), points);
     CDbwEvaluator evaluator = new CDbwEvaluator(representativePoints, clusters, measure);
     assertEquals("inter cluster density", 0.0, evaluator.interClusterDensity(), EPSILON);
     assertEquals("separation", 28.970562748477143, evaluator.separation(), EPSILON);
-    assertEquals("intra cluster density", 2.0124611797498106, evaluator.intraClusterDensity(), EPSILON);
-    assertEquals("CDbw", 58.30213288681623, evaluator.getCDbw(), EPSILON);
+    assertEquals("intra cluster density", 1.8, evaluator.intraClusterDensity(), EPSILON);
+    assertEquals("CDbw", 52.147012947258865, evaluator.getCDbw(), EPSILON);
   }
 
   @Test

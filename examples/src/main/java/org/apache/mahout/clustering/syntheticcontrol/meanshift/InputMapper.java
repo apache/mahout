@@ -46,12 +46,15 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanop
         doubles.add(Double.valueOf(value));
       }
     }
-    Vector point = new DenseVector(doubles.size());
-    int index = 0;
-    for (Double d : doubles) {
-      point.set(index++, d);
+    // ignore empty lines in input data
+    if (!doubles.isEmpty()) {
+      Vector point = new DenseVector(doubles.size());
+      int index = 0;
+      for (Double d : doubles) {
+        point.set(index++, d);
+      }
+      MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++, new EuclideanDistanceMeasure());
+      context.write(new Text(), canopy);
     }
-    MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++, new EuclideanDistanceMeasure());
-    context.write(new Text(), canopy);
   }
 }

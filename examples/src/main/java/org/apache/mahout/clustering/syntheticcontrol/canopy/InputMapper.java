@@ -48,21 +48,24 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
         doubles.add(Double.valueOf(value));
       }
     }
-    try {
-      Vector result = (Vector) constructor.newInstance(doubles.size());
-      int index = 0;
-      for (Double d : doubles) {
-        result.set(index++, d);
-      }
-      VectorWritable vectorWritable = new VectorWritable(result);
-      context.write(new Text(String.valueOf(index)), vectorWritable);
+    // ignore empty lines in data file
+    if (!doubles.isEmpty()) {
+      try {
+        Vector result = (Vector) constructor.newInstance(doubles.size());
+        int index = 0;
+        for (Double d : doubles) {
+          result.set(index++, d);
+        }
+        VectorWritable vectorWritable = new VectorWritable(result);
+        context.write(new Text(String.valueOf(index)), vectorWritable);
 
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
-      throw new IllegalStateException(e);
+      } catch (InstantiationException e) {
+        throw new IllegalStateException(e);
+      } catch (IllegalAccessException e) {
+        throw new IllegalStateException(e);
+      } catch (InvocationTargetException e) {
+        throw new IllegalStateException(e);
+      }
     }
   }
 

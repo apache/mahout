@@ -20,9 +20,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.SquareRootFunction;
 
 /**
- * An online Gaussian statistics accumulator based upon Knuth (who cites Wellford) which is declared to be
+ * An online Gaussian statistics accumulator based upon Knuth (who cites Welford) which is declared to be
  * numerically-stable. See http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
- * The cited algorithm has been modified to accumulate weighted Vectors
  */
 public class OnlineGaussianAccumulator implements GaussianAccumulator {
   private double n = 0;
