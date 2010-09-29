@@ -45,7 +45,7 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public Vector getStd() {
-    return variance.assign(new SquareRootFunction());
+    return variance.clone().assign(new SquareRootFunction());
   }
 
   @Override
@@ -60,7 +60,6 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
       delta = weightedX.clone();
     }
     mean = mean.plus(delta.divide(n));
-
     if (M2 != null) {
       M2 = M2.plus(delta.times(weightedX.minus(mean)));
     } else {

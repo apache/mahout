@@ -37,6 +37,7 @@ public class TestGaussianAccumulators extends MahoutTestCase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
+    sampleData = new ArrayList<VectorWritable>();
     generateSamples();
   }
 
@@ -111,6 +112,6 @@ public class TestGaussianAccumulators extends MahoutTestCase {
     assertEquals("N", accumulator0.getN(), accumulator1.getN(), EPSILON);
     assertEquals("Means", accumulator0.getMean().zSum(), accumulator1.getMean().zSum(), EPSILON);
     assertEquals("Stds", accumulator0.getStd().zSum(), accumulator1.getStd().zSum(), 0.01);
-    //assertEquals("Variance", accumulator0.getVariance().zSum(), accumulator1.getVariance().zSum(), 1.6);
+    assertEquals("Variance", accumulator0.getVariance().zSum(), accumulator1.getVariance().zSum(), 0.1);
   }
 }
