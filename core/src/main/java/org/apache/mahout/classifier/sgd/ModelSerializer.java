@@ -350,10 +350,15 @@ public final class ModelSerializer {
       Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
       r.setEp(jdc.<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("ep"), epType));
       r.setSeed(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("seed"), stateType));
-      r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("best"), stateType));
+      if (x.get("best") != null) {
+        r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("best"), stateType));
+      }
 
-      r.setBuffer(jdc.<List<AdaptiveLogisticRegression.TrainingExample>>deserialize(x.get("buffer"),
-                  new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {}.getType()));
+      if (x.get("buffer") != null) {
+        r.setBuffer(jdc.<List<AdaptiveLogisticRegression.TrainingExample>>deserialize(x.get("buffer"),
+          new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {
+          }.getType()));
+      }
       return r;
     }
 
@@ -362,8 +367,6 @@ public final class ModelSerializer {
       JsonObject r = new JsonObject();
       r.add("ep", jsc.serialize(x.getEp(),
           new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType()));
-      r.add("buffer", jsc.serialize(x.getBuffer(),
-          new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {}.getType()));
       r.add("minInterval", jsc.serialize(x.getMinInterval()));
       r.add("maxInterval", jsc.serialize(x.getMaxInterval()));
       Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();

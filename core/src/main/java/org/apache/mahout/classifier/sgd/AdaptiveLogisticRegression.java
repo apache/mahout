@@ -210,9 +210,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    * @param interval  Number of training examples to use in each epoch of optimization.
    */
   public void setInterval(int interval) {
-    this.minInterval = interval;
-    this.maxInterval = interval;
-    this.cutoff = interval * (record / interval + 1);
+    setInterval(interval, interval);
   }
 
   /**
@@ -227,6 +225,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     this.minInterval = Math.max(200, minInterval);
     this.maxInterval = Math.max(200, maxInterval);
     this.cutoff = minInterval * (record / minInterval + 1);
+    this.currentStep = minInterval;
+    bufferSize = Math.min(minInterval, bufferSize);
   }
 
   public void setPoolSize(int poolSize) {

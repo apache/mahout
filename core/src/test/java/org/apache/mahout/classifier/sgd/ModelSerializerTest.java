@@ -140,7 +140,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
     assertTrue(auc2 > auc1);
   }
 
-//  @Test
+  @Test
   public void adaptiveLogisticRegressionRoundTrip() {
     AdaptiveLogisticRegression learner = new AdaptiveLogisticRegression(2, 5, new L1());
     learner.setInterval(200);
