@@ -33,64 +33,43 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
 
   private Vector variance;
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.OnlineGaussianAccumulator#getN()
-   */
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.GaussianAccumulator#getN()
-   */
+  @Override
   public double getN() {
     return n;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.OnlineGaussianAccumulator#getMean()
-   */
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.GaussianAccumulator#getMean()
-   */
+  @Override
   public Vector getMean() {
     return mean;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.OnlineGaussianAccumulator#getVariance()
-   */
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.GaussianAccumulator#getStd()
-   */
+  @Override
   public Vector getStd() {
     return variance.assign(new SquareRootFunction());
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.OnlineGaussianAccumulator#observe(org.apache.mahout.math.Vector, double)
-   */
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.GaussianAccumulator#observe(org.apache.mahout.math.Vector, double)
-   */
+  @Override
   public void observe(Vector x, double weight) {
-    n = n + weight;
+    n += weight;
+    Vector weightedX = x.times(weight);
     Vector delta;
     if (mean != null) {
-      delta = x.minus(mean);
+      delta = weightedX.minus(mean);
     } else {
       mean = x.like();
-      delta = x.clone();
+      delta = weightedX.clone();
     }
     mean = mean.plus(delta.divide(n));
 
     if (M2 != null) {
-      M2 = M2.plus(delta.times(x.minus(mean)));
+      M2 = M2.plus(delta.times(weightedX.minus(mean)));
     } else {
-      M2 = delta.times(x.minus(mean));
+      M2 = delta.times(weightedX.minus(mean));
     }
     variance = M2.divide(n - 1);
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.clustering.GaussianAccumulator#compute()
-   */
+  @Override
   public void compute() {
     // nothing to do here!
   }
