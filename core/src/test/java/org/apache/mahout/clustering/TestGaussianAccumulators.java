@@ -104,8 +104,8 @@ public class TestGaussianAccumulators extends MahoutTestCase {
     GaussianAccumulator accumulator0 = new RunningSumsGaussianAccumulator();
     GaussianAccumulator accumulator1 = new OnlineGaussianAccumulator();
     for (VectorWritable vw : sampleData) {
-      accumulator0.observe(vw.get(), 1);
-      accumulator1.observe(vw.get(), 1);
+      accumulator0.observe(vw.get());
+      accumulator1.observe(vw.get());
     }
     accumulator0.compute();
     accumulator1.compute();

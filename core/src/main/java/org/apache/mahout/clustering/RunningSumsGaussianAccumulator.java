@@ -65,15 +65,14 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
   }
 
   @Override
-  public void observe(Vector x, double weight) {
-    s0 += weight;
-    Vector weightedX = x.times(weight);
+  public void observe(Vector x) {
+    s0++;
     if (s1 == null) {
-      s1 = weightedX;
+      s1 = x.clone();
     } else {
-      weightedX.addTo(s1);
+      x.addTo(s1);
     }
-    Vector x2 = x.times(x).times(weight);
+    Vector x2 = x.times(x);
     if (s2 == null) {
       s2 = x2;
     } else {

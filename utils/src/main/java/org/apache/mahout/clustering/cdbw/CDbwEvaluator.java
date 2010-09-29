@@ -136,7 +136,7 @@ public class CDbwEvaluator {
     List<VectorWritable> repPts = representativePoints.get(cI);
     GaussianAccumulator accumulator = new RunningSumsGaussianAccumulator();
     for (VectorWritable vw : repPts) {
-      accumulator.observe(vw.get(), 1);
+      accumulator.observe(vw.get());
     }
     accumulator.compute();
     double d = accumulator.getAverageStd();

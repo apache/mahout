@@ -49,21 +49,20 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
   }
 
   @Override
-  public void observe(Vector x, double weight) {
-    n += weight;
-    Vector weightedX = x.times(weight);
+  public void observe(Vector x) {
+    n++;
     Vector delta;
     if (mean != null) {
-      delta = weightedX.minus(mean);
+      delta = x.minus(mean);
     } else {
       mean = x.like();
-      delta = weightedX.clone();
+      delta = x.clone();
     }
     mean = mean.plus(delta.divide(n));
     if (M2 != null) {
-      M2 = M2.plus(delta.times(weightedX.minus(mean)));
+      M2 = M2.plus(delta.times(x.minus(mean)));
     } else {
-      M2 = delta.times(weightedX.minus(mean));
+      M2 = delta.times(x.minus(mean));
     }
     variance = M2.divide(n - 1);
   }

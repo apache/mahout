@@ -30,15 +30,14 @@ public interface GaussianAccumulator {
   public abstract Vector getVariance();
 
   /**
-   * Observe the vector with the given weight
+   * Observe the vector 
    * 
    * @param x a Vector
-   * @param weight a double
    */
-  public abstract void observe(Vector x, double weight);
+  public abstract void observe(Vector x);
 
   /**
-   * Compute the mean and standard deviation
+   * Compute the mean, variance and standard deviation
    */
   public abstract void compute();
 
