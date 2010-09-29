@@ -60,6 +60,9 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   // can we ignore any further regularization when doing classification?
   private boolean sealed = false;
 
+  // by default we don't do any fancy training
+  private Gradient gradient = new DefaultGradient();
+
   /**
    * Chainable configuration option.
    *
@@ -149,11 +152,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   }
 
   @Override
-  public void train(long trackingKey, int actual, Vector instance) {
-    train(actual, instance);
-  }
-
-  public void train(int actual, Vector instance) {
+  public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     unseal();
 
     double learningRate = currentLearningRate();
@@ -165,12 +164,9 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     Vector v = classify(instance);
 
     // update each row of coefficients according to result
+    Vector gradient = this.gradient.apply(groupKey, actual, v);
     for (int i = 0; i < numCategories - 1; i++) {
-      double gradientBase = -v.getQuick(i);
-      // the use of i+1 instead of i here is what makes the 0-th category be the one without coefficients
-      if ((i + 1) == actual) {
-        gradientBase += 1;
-      }
+      double gradientBase = gradient.get(i);
 
       // then we apply the gradientBase to the resulting element.
       Iterator<Vector.Element> nonZeros = instance.iterateNonZero();
@@ -193,6 +189,16 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     }
     nextStep();
 
+  }
+
+  @Override
+  public void train(long trackingKey, int actual, Vector instance) {
+    train(trackingKey, null, actual, instance);
+  }
+
+  @Override
+  public void train(int actual, Vector instance) {
+    train(0, null, actual, instance);
   }
 
   public void regularize(Vector instance) {
@@ -228,6 +234,10 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
 
   public void setPrior(PriorFunction prior) {
     this.prior = prior;
+  }
+
+  public void setGradient(Gradient gradient) {
+    this.gradient = gradient;
   }
 
   public PriorFunction getPrior() {
@@ -307,5 +317,26 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
       }
     });
     return k < 1;
+  }
+
+  public static class DefaultGradient implements Gradient {
+    /**
+     * Provides a default gradient computation useful for logistic regression.  This
+     * can be over-ridden to incorporate AUC driven learning.
+     * <p>
+     * See www.eecs.tufts.edu/~dsculley/papers/combined-ranking-and-regression.pdf
+     * @param groupKey     A grouping key to allow per-something AUC loss to be used for training.
+     *@param actual       The target variable value.
+     * @param v            The current score vector.   @return
+     */
+    @Override
+    public final Vector apply(String groupKey, int actual, Vector v) {
+      Vector r = v.like();
+      if (actual != 0) {
+        r.setQuick(actual - 1, 1);
+      }
+      r.assign(v, Functions.MINUS);
+      return r;
+    }
   }
 }

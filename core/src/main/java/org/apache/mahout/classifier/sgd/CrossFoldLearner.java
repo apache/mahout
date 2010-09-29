@@ -90,7 +90,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   // -------- training methods
   @Override
   public void train(int actual, Vector instance) {
-    train(record, actual, instance);
+    train(record, null, actual, instance);
   }
 
   @Override
@@ -98,6 +98,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
     train(trackingKey, null, actual, instance);
   }
 
+  @Override
   public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     record++;
     int k = 0;
@@ -113,7 +114,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
           auc.addSample(actual, groupKey, v.get(1));
         }
       } else {
-        model.train(trackingKey, actual, instance);
+        model.train(trackingKey, groupKey, actual, instance);
       }
       k++;
     }

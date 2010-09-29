@@ -38,8 +38,30 @@ public interface OnlineLearner {
    * the original data record in a data file.
    *
    * @param trackingKey The tracking key for this training example.
+   * @param groupKey     An optional value that allows examples to be grouped in the computation of
+   * the update to the model.
    * @param actual   The value of the target variable.  This value should be in the half-open
- *                 interval [0..n) where n is the number of target categories.
+   *                 interval [0..n) where n is the number of target categories.
+   * @param instance The feature vector for this example.
+   */
+  void train(long trackingKey, String groupKey, int actual, Vector instance);
+
+  /**
+   * Updates the model using a particular target variable value and a feature vector.
+   * <p/>
+   * There may an assumption that if multiple passes through the training data are necessary that
+   * the tracking key for a record will be the same for each pass and that there will be a
+   * relatively large number of distinct tracking keys and that the low-order bits of the tracking
+   * keys will not correlate with any of the input variables.  This tracking key is used to assign
+   * training examples to different test/training splits.
+   * <p/>
+   * Examples of useful tracking keys include id-numbers for the training records derived from
+   * a database id for the base table from the which the record is derived, or the offset of
+   * the original data record in a data file.
+   *
+   * @param trackingKey The tracking key for this training example.
+   * @param actual   The value of the target variable.  This value should be in the half-open
+   *                 interval [0..n) where n is the number of target categories.
    * @param instance The feature vector for this example.
    */
   void train(long trackingKey, int actual, Vector instance);

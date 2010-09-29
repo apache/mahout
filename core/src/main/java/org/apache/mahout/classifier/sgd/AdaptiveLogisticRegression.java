@@ -69,19 +69,18 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int currentStep = 1000;
   private int bufferSize = 1000;
 
-  // transient here is a signal to GSON not to serialize pending records
-  private transient List<TrainingExample> buffer = Lists.newArrayList();
+  private List<TrainingExample> buffer = Lists.newArrayList();
   private EvolutionaryProcess<Wrapper> ep;
   private State<Wrapper> best;
   private int threadCount = 20;
   private int poolSize = 20;
   private State<Wrapper> seed;
   private int numFeatures;
-  //private double averagingWindow;
 
   private boolean freezeSurvivors = true;
 
   // for GSON
+  @SuppressWarnings({"UnusedDeclaration"})
   private AdaptiveLogisticRegression() {
   }
 
@@ -96,7 +95,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   @Override
   public void train(int actual, Vector instance) {
-    train(record, actual, instance);
+    train(record, null, actual, instance);
   }
 
   @Override
@@ -104,7 +103,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     train(trackingKey, null, actual, instance);
   }
 
-
+  @Override
   public void train(long trackingKey, String groupKey, int actual, Vector instance) {
     record++;
 
@@ -424,6 +423,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     private Vector instance;
 
     // for GSON
+    @SuppressWarnings({"UnusedDeclaration"})
     private TrainingExample() {
     }
 

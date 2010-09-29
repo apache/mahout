@@ -55,9 +55,10 @@ public final class ModelSerializer {
   static {
     final GsonBuilder gb = new GsonBuilder();
     gb.registerTypeAdapter(AdaptiveLogisticRegression.class, new AdaptiveLogisticRegressionTypeAdapter());
-    gb.registerTypeAdapter(Mapping.class, new MappingTypeAdapter());
-    gb.registerTypeAdapter(PriorFunction.class, new PriorTypeAdapter());
-    gb.registerTypeAdapter(OnlineAuc.class, new AucTypeAdapter());
+    gb.registerTypeAdapter(Mapping.class, new PolymorphicTypeAdapter<Mapping>());
+    gb.registerTypeAdapter(PriorFunction.class, new PolymorphicTypeAdapter<PriorFunction>());
+    gb.registerTypeAdapter(OnlineAuc.class, new PolymorphicTypeAdapter<OnlineAuc>());
+    gb.registerTypeAdapter(Gradient.class, new PolymorphicTypeAdapter<Gradient>());
     gb.registerTypeAdapter(CrossFoldLearner.class, new CrossFoldLearnerTypeAdapter());
     gb.registerTypeAdapter(Vector.class, new VectorTypeAdapter());
     gb.registerTypeAdapter(Matrix.class, new MatrixTypeAdapter());
@@ -92,44 +93,22 @@ public final class ModelSerializer {
    * Reads a model in JSON format.
    *
    * @param in Where to read the model from.
-   * @param clazz
+   * @param clazz The class of the object we expect to read.
    * @return The LogisticModelParameters object that we read.
    */
   public static AdaptiveLogisticRegression loadJsonFrom(Reader in, Class<AdaptiveLogisticRegression> clazz) {
     return gson().fromJson(in, clazz);
   }
 
-  private static class MappingTypeAdapter implements JsonDeserializer<Mapping>, JsonSerializer<Mapping> {
+  private static class PolymorphicTypeAdapter<T> implements JsonDeserializer<T>, JsonSerializer<T> {
     @Override
-    public Mapping deserialize(JsonElement jsonElement,
-                               Type type,
-                               JsonDeserializationContext jsonDeserializationContext) {
-      JsonObject x = jsonElement.getAsJsonObject();
-      try {
-        return jsonDeserializationContext.deserialize(x.get("value"), Class.forName(x.get("class").getAsString()));
-      } catch (ClassNotFoundException e) {
-        throw new IllegalStateException("Can't understand serialized data, found bad type: "
-            + x.get("class").getAsString());
-      }
-    }
-
-    @Override
-    public JsonElement serialize(Mapping mapping, Type type, JsonSerializationContext jsonSerializationContext) {
-      JsonObject r = new JsonObject();
-      r.add("class", new JsonPrimitive(mapping.getClass().getName()));
-      r.add("value", jsonSerializationContext.serialize(mapping));
-      return r;
-    }
-  }
-
-  private static class PriorTypeAdapter implements JsonDeserializer<PriorFunction>, JsonSerializer<PriorFunction> {
-    @Override
-    public PriorFunction deserialize(JsonElement jsonElement,
+    public T deserialize(JsonElement jsonElement,
                                      Type type,
                                      JsonDeserializationContext jsonDeserializationContext) {
       JsonObject x = jsonElement.getAsJsonObject();
       try {
-        return jsonDeserializationContext.deserialize(x.get("value"), Class.forName(x.get("class").getAsString()));
+        //noinspection RedundantTypeArguments
+        return jsonDeserializationContext.<T>deserialize(x.get("value"), Class.forName(x.get("class").getAsString()));
       } catch (ClassNotFoundException e) {
         throw new IllegalStateException("Can't understand serialized data, found bad type: "
             + x.get("class").getAsString());
@@ -137,37 +116,12 @@ public final class ModelSerializer {
     }
 
     @Override
-    public JsonElement serialize(PriorFunction priorFunction,
+    public JsonElement serialize(T x,
                                  Type type,
                                  JsonSerializationContext jsonSerializationContext) {
       JsonObject r = new JsonObject();
-      r.add("class", new JsonPrimitive(priorFunction.getClass().getName()));
-      r.add("value", jsonSerializationContext.serialize(priorFunction));
-      return r;
-    }
-  }
-
-  private static class AucTypeAdapter implements JsonDeserializer<OnlineAuc>, JsonSerializer<OnlineAuc> {
-    @Override
-    public OnlineAuc deserialize(JsonElement jsonElement,
-                                     Type type,
-                                     JsonDeserializationContext jsonDeserializationContext) {
-      JsonObject x = jsonElement.getAsJsonObject();
-      try {
-        return jsonDeserializationContext.deserialize(x.get("value"), Class.forName(x.get("class").getAsString()));
-      } catch (ClassNotFoundException e) {
-        throw new IllegalStateException("Can't understand serialized data, found bad type: "
-            + x.get("class").getAsString());
-      }
-    }
-
-    @Override
-    public JsonElement serialize(OnlineAuc auc,
-                                 Type type,
-                                 JsonSerializationContext jsonSerializationContext) {
-      JsonObject r = new JsonObject();
-      r.add("class", new JsonPrimitive(auc.getClass().getName()));
-      r.add("value", jsonSerializationContext.serialize(auc));
+      r.add("class", new JsonPrimitive(x.getClass().getName()));
+      r.add("value", jsonSerializationContext.serialize(x));
       return r;
     }
   }
@@ -192,6 +146,59 @@ public final class ModelSerializer {
       r.setParameters(asArray(x, "parameters"));
       r.setNumFeatures(x.get("numFeatures").getAsInt());
       r.setPrior(jsonDeserializationContext.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
+      return r;
+    }
+  }
+
+  private static class AdaptiveLogisticRegressionTypeAdapter implements JsonSerializer<AdaptiveLogisticRegression>,
+    JsonDeserializer<AdaptiveLogisticRegression> {
+
+    @Override
+    public AdaptiveLogisticRegression deserialize(JsonElement element, Type type, JsonDeserializationContext jdc) {
+      JsonObject x = element.getAsJsonObject();
+      AdaptiveLogisticRegression r =
+          new AdaptiveLogisticRegression(x.get("numCategories").getAsInt(),
+                                         x.get("numFeatures").getAsInt(),
+                                         jdc.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
+      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
+      if (x.get("evaluationInterval")!=null) {
+        r.setInterval(x.get("evaluationInterval").getAsInt());
+      } else {
+        r.setInterval(x.get("minInterval").getAsInt(), x.get("minInterval").getAsInt());
+      }
+      r.setRecord(x.get("record").getAsInt());
+
+      Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
+      r.setEp(jdc.<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("ep"), epType));
+      r.setSeed(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("seed"), stateType));
+      if (x.get("best") != null) {
+        r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("best"), stateType));
+      }
+
+      if (x.get("buffer") != null) {
+        r.setBuffer(jdc.<List<AdaptiveLogisticRegression.TrainingExample>>deserialize(x.get("buffer"),
+          new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {
+          }.getType()));
+      }
+      return r;
+    }
+
+    @Override
+    public JsonElement serialize(AdaptiveLogisticRegression x, Type type, JsonSerializationContext jsc) {
+      JsonObject r = new JsonObject();
+      r.add("ep", jsc.serialize(x.getEp(),
+          new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType()));
+      r.add("minInterval", jsc.serialize(x.getMinInterval()));
+      r.add("maxInterval", jsc.serialize(x.getMaxInterval()));
+      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
+      r.add("best", jsc.serialize(x.getBest(), stateType));
+      r.add("numFeatures", jsc.serialize(x.getNumFeatures()));
+      r.add("numCategories", jsc.serialize(x.getNumCategories()));
+      PriorFunction prior = x.getPrior();
+      JsonElement pf = jsc.serialize(prior, PriorFunction.class);
+      r.add("prior", pf);
+      r.add("record", jsc.serialize(x.getRecord()));
+      r.add("seed", jsc.serialize(x.getSeed(), stateType));
       return r;
     }
   }
@@ -329,59 +336,6 @@ public final class ModelSerializer {
     }
   }
 
-  private static class AdaptiveLogisticRegressionTypeAdapter implements JsonSerializer<AdaptiveLogisticRegression>,
-    JsonDeserializer<AdaptiveLogisticRegression> {
-
-    @Override
-    public AdaptiveLogisticRegression deserialize(JsonElement element, Type type, JsonDeserializationContext jdc) {
-      JsonObject x = element.getAsJsonObject();
-      AdaptiveLogisticRegression r =
-          new AdaptiveLogisticRegression(x.get("numCategories").getAsInt(),
-                                         x.get("numFeatures").getAsInt(),
-                                         jdc.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
-      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
-      if (x.get("evaluationInterval")!=null) {
-        r.setInterval(x.get("evaluationInterval").getAsInt());
-      } else {
-        r.setInterval(x.get("minInterval").getAsInt(), x.get("minInterval").getAsInt());
-      }
-      r.setRecord(x.get("record").getAsInt());
-
-      Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
-      r.setEp(jdc.<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("ep"), epType));
-      r.setSeed(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("seed"), stateType));
-      if (x.get("best") != null) {
-        r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("best"), stateType));
-      }
-
-      if (x.get("buffer") != null) {
-        r.setBuffer(jdc.<List<AdaptiveLogisticRegression.TrainingExample>>deserialize(x.get("buffer"),
-          new TypeToken<List<AdaptiveLogisticRegression.TrainingExample>>() {
-          }.getType()));
-      }
-      return r;
-    }
-
-    @Override
-    public JsonElement serialize(AdaptiveLogisticRegression x, Type type, JsonSerializationContext jsc) {
-      JsonObject r = new JsonObject();
-      r.add("ep", jsc.serialize(x.getEp(),
-          new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType()));
-      r.add("minInterval", jsc.serialize(x.getMinInterval()));
-      r.add("maxInterval", jsc.serialize(x.getMaxInterval()));
-      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
-      r.add("best", jsc.serialize(x.getBest(), stateType));
-      r.add("numFeatures", jsc.serialize(x.getNumFeatures()));
-      r.add("numCategories", jsc.serialize(x.getNumCategories()));
-      PriorFunction prior = x.getPrior();
-      JsonElement pf = jsc.serialize(prior, PriorFunction.class);
-      r.add("prior", pf);
-      r.add("record", jsc.serialize(x.getRecord()));
-      r.add("seed", jsc.serialize(x.getSeed(), stateType));
-      return r;
-    }
-  }
-
   private static class EvolutionaryProcessTypeAdapter implements
     InstanceCreator<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>,
     JsonDeserializer<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>,
@@ -434,5 +388,4 @@ public final class ModelSerializer {
     }
     return params;
   }
-
 }

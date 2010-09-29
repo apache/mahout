@@ -66,7 +66,7 @@ public class LogisticModelParameters {
    * the model.  If the input isn't CSV, then calling setTargetCategories before calling saveTo will
    * suffice.
    *
-   * @return
+   * @return The CsvRecordFactory.
    */
   public CsvRecordFactory getCsvRecordFactory() {
     if (csv == null) {
@@ -83,7 +83,7 @@ public class LogisticModelParameters {
   /**
    * Creates a logistic regression trainer using the parameters collected here.
    *
-   * @return
+   * @return The newly allocated OnlineLogisticRegression object
    */
   public OnlineLogisticRegression createRegression() {
     if (lr == null) {
@@ -113,7 +113,7 @@ public class LogisticModelParameters {
    * trainer and the dictionary for the target categories.
    *
    * @param out Where to write the model.
-   * @throws IOException
+   * @throws IOException If we can't write the model.
    */
   public void saveTo(Writer out) throws IOException {
     if (lr != null) {
@@ -180,7 +180,7 @@ public class LogisticModelParameters {
   /**
    * Sets the target variable.  If you don't use the CSV record factory, then this is irrelevant.
    *
-   * @param targetVariable
+   * @param targetVariable The name of the target variable.
    */
   public void setTargetVariable(String targetVariable) {
     this.targetVariable = targetVariable;
@@ -189,7 +189,7 @@ public class LogisticModelParameters {
   /**
    * Sets the number of target categories to be considered.
    *
-   * @param maxTargetCategories
+   * @param maxTargetCategories The number of target categories.
    */
   public void setMaxTargetCategories(int maxTargetCategories) {
     this.maxTargetCategories = maxTargetCategories;
