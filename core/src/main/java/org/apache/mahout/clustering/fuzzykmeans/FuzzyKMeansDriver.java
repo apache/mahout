@@ -393,7 +393,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
                                                            SoftCluster.class);
       try {
         for (SoftCluster cluster : clusters) {
-          log.info("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}", new Object[] { cluster.getId(),
+          log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}", new Object[] { cluster.getId(),
               AbstractCluster.formatVector(cluster.getCenter(), null), cluster.getNumPoints(),
               AbstractCluster.formatVector(cluster.getRadius(), null), clustersOut.getName() });
           writer.append(new Text(cluster.getIdentifier()), cluster);
@@ -420,7 +420,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
 
     // iterate until the clusters converge
     while (!converged && (iteration <= maxIterations)) {
-      log.info("Iteration {}", iteration);
+      log.info("Fuzzy K-Means Iteration {}", iteration);
 
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);

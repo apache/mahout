@@ -258,7 +258,7 @@ public class KMeansDriver extends AbstractJob {
                                                            Cluster.class);
       try {
         for (Cluster cluster : clusters) {
-          log.info("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}", new Object[] { cluster.getId(),
+          log.debug("Writing Cluster:{} center:{} numPoints:{} radius:{} to: {}", new Object[] { cluster.getId(),
               AbstractCluster.formatVector(cluster.getCenter(), null), cluster.getNumPoints(),
               AbstractCluster.formatVector(cluster.getRadius(), null), clustersOut.getName() });
           writer.append(new Text(cluster.getIdentifier()), cluster);
@@ -283,7 +283,7 @@ public class KMeansDriver extends AbstractJob {
     boolean converged = false;
     int iteration = 1;
     while (!converged && (iteration <= maxIterations)) {
-      log.info("Iteration {}", iteration);
+      log.info("K-Means Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, AbstractCluster.CLUSTERS_DIR + iteration);
       converged = runIteration(conf, input, clustersIn, clustersOut, measure.getClass().getName(), delta);

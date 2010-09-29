@@ -31,12 +31,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.Cluster;
+import org.apache.mahout.clustering.GaussianAccumulator;
+import org.apache.mahout.clustering.RunningSumsGaussianAccumulator;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsMapper;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.function.SquareRootFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,23 +133,14 @@ public class CDbwEvaluator {
    * @param cI a int clusterId. 
    */
   private void computeStd(int cI) {
-    // TODO: verify this approach
     List<VectorWritable> repPts = representativePoints.get(cI);
-    int s0 = 0;
-    Vector s1 = null;
-    Vector s2 = null;
+    GaussianAccumulator accumulator = new RunningSumsGaussianAccumulator();
     for (VectorWritable vw : repPts) {
-      s0++;
-      Vector v = vw.get();
-      s1 = s1 == null ? v.clone() : s1.plus(v);
-      s2 = s2 == null ? v.times(v) : s2.plus(v.times(v));
+      accumulator.observe(vw.get(), 1);
     }
-    if (s0 > 1) {
-      Vector std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
-      double d = std.zSum() / std.size();
-      log.debug("stDev[" + cI + "]=" + d);
-      stDevs.put(cI, d);
-    }
+    accumulator.compute();
+    double d = accumulator.getAverageStd();
+    stDevs.put(cI, d);
   }
 
   /**
@@ -221,7 +213,8 @@ public class CDbwEvaluator {
   }
 
   /**
-   * Compute the validity index (eqn 8)
+   * Compute the CDbw validity metric (eqn 8). The goal of this metric is to reward clusterings which
+   * have a high intraClusterDensity and also a high cluster separation.
    * 
    * @return a double
    */
@@ -231,9 +224,9 @@ public class CDbwEvaluator {
   }
 
   /**
-   * The average density within clusters is defined as the percentage of points that belong 
-   * to the neighborhood of representative points of the considered clusters. The goal is 
-   * the density within clusters to be significant high. (eqn 5)
+   * The average density within clusters is defined as the percentage of representative points that reside 
+   * in the neighborhood of the clusters' centers. The goal is the density within clusters to be 
+   * significantly high. (eqn 5)
    * 
    * @return a double
    */
@@ -268,8 +261,43 @@ public class CDbwEvaluator {
   }
 
   /**
-   * This function evaluates the average density in the region among clusters (eqn 1). 
-   * The goal is the density in the area among clusters to be significant low.
+   * Calculate the separation of clusters (eqn 4) taking into account both the distances between the
+   * clusters' closest points and the Inter-cluster density. The goal is the distances between clusters 
+   * to be high while the representative point density in the areas between them are low.
+   * 
+   * @return a double
+   */
+  public double separation() {
+    pruneInvalidClusters();
+    double minDistanceSum = 0;
+    for (int i = 0; i < clusters.size(); i++) {
+      Integer cI = clusters.get(i).getId();
+      List<VectorWritable> closRepI = representativePoints.get(cI);
+      for (int j = 0; j < clusters.size(); j++) {
+        if (i == j) {
+          continue;
+        }
+        // find min{d(closRepI, closRepJ)}
+        Integer cJ = clusters.get(j).getId();
+        List<VectorWritable> closRepJ = representativePoints.get(cJ);
+        double minDistance = Double.MAX_VALUE;
+        for (VectorWritable aRepI : closRepI) {
+          for (VectorWritable aRepJ : closRepJ) {
+            double distance = measure.distance(aRepI.get(), aRepJ.get());
+            if (distance < minDistance) {
+              minDistance = distance;
+            }
+          }
+        }
+        minDistanceSum += minDistance;
+      }
+    }
+    return minDistanceSum / (1.0 + interClusterDensity());
+  }
+
+  /**
+   * This function evaluates the average density of points in the regions between clusters (eqn 1). 
+   * The goal is the density in the area between clusters to be significant low.
    * 
    * @return a double
    */
@@ -319,42 +347,7 @@ public class CDbwEvaluator {
         sum += density;
       }
     }
-    log.info("interClusterDensity=" + sum);
+    log.debug("interClusterDensity=" + sum);
     return sum;
-  }
-
-  /**
-   * Calculate the separation of clusters (eqn 4) taking into account both the distances between the closest
-   * clusters and the Inter-cluster density. The goal is the distances among clusters to be high while 
-   * the density in the area among them to be low.
-   * 
-   * @return a double
-   */
-  public double separation() {
-    pruneInvalidClusters();
-    double minDistanceSum = 0;
-    for (int i = 0; i < clusters.size(); i++) {
-      Integer cI = clusters.get(i).getId();
-      List<VectorWritable> closRepI = representativePoints.get(cI);
-      for (int j = 0; j < clusters.size(); j++) {
-        if (i == j) {
-          continue;
-        }
-        // find min{d(closRepI, closRepJ)}
-        Integer cJ = clusters.get(j).getId();
-        List<VectorWritable> closRepJ = representativePoints.get(cJ);
-        double minDistance = Double.MAX_VALUE;
-        for (VectorWritable aRepI : closRepI) {
-          for (VectorWritable aRepJ : closRepJ) {
-            double distance = measure.distance(aRepI.get(), aRepJ.get());
-            if (distance < minDistance) {
-              minDistance = distance;
-            }
-          }
-        }
-        minDistanceSum += minDistance;
-      }
-    }
-    return minDistanceSum / (1.0 + interClusterDensity());
   }
 }

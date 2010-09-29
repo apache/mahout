@@ -98,7 +98,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
     writeInitialState(stateIn, clustersIn);
 
     for (int iteration = 0; iteration < numIterations; iteration++) {
-      log.info("Iteration {}", iteration);
+      log.info("Representative Points Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "representativePoints-" + (iteration + 1));
       runIteration(conf, clusteredPointsIn, stateIn, stateOut, measure, runSequential);
@@ -124,7 +124,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
         SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
         while (reader.next(key, value)) {
           Cluster cluster = (Cluster) value;
-          log.info("C-" + cluster.getId() + ": " + AbstractCluster.formatVector(cluster.getCenter(), null));
+          log.debug("C-" + cluster.getId() + ": " + AbstractCluster.formatVector(cluster.getCenter(), null));
           writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
         }
         writer.close();

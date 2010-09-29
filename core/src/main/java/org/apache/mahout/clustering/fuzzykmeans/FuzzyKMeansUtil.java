@@ -46,7 +46,6 @@ final class FuzzyKMeansUtil {
     Configuration job = new Configuration();
     Path clusterPath = new Path(clusterPathStr, "*");
     List<Path> result = new ArrayList<Path>();
-    //log.info("I am here");
     // filter out the files
     PathFilter clusterFileFilter = new PathFilter() {
       @Override

@@ -32,7 +32,6 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.OutputLogFilter;
-import org.apache.mahout.math.VectorWritable;
 
 public class MeanShiftCanopyClusterMapper
   extends Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {

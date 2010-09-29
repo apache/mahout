@@ -183,7 +183,7 @@ public final class LDADriver extends AbstractJob {
     boolean converged = false;
 
     for (int iteration = 1; ((maxIterations < 1) || (iteration <= maxIterations)) && !converged; iteration++) {
-      log.info("Iteration {}", iteration);
+      log.info("LDA Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path stateOut = new Path(output, "state-" + iteration);
       double ll = runIteration(conf, input, stateIn, stateOut, numTopics, numWords, topicSmoothing);

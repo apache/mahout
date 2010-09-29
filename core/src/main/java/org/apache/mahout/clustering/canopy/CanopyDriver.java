@@ -161,7 +161,7 @@ public class CanopyDriver extends AbstractJob {
                                    double t2,
                                    boolean runSequential) throws InstantiationException, IllegalAccessException, IOException,
       InterruptedException, ClassNotFoundException {
-    log.info("Input: {} Out: {} " + "Measure: {} t1: {} t2: {}", new Object[] { input, output, measure, t1, t2 });
+    log.info("Build Clusters Input: {} Out: {} " + "Measure: {} t1: {} t2: {}", new Object[] { input, output, measure, t1, t2 });
     if (runSequential) {
       return buildClustersSeq(input, output, measure, t1, t2);
     } else {
@@ -206,7 +206,7 @@ public class CanopyDriver extends AbstractJob {
     try {
       for (Canopy canopy : canopies) {
         canopy.computeParameters();
-        log.info("Writing Canopy:" + canopy.getIdentifier() + " center:" + AbstractCluster.formatVector(canopy.getCenter(), null)
+        log.debug("Writing Canopy:" + canopy.getIdentifier() + " center:" + AbstractCluster.formatVector(canopy.getCenter(), null)
             + " numPoints:" + canopy.getNumPoints() + " radius:" + AbstractCluster.formatVector(canopy.getRadius(), null));
         writer.append(new Text(canopy.getIdentifier()), canopy);
       }
