@@ -22,7 +22,7 @@ import java.util.List;
 
 public final class OrthonormalityVerifier {
 
-  private OrthonormalityVerifier() {
+  public OrthonormalityVerifier() {
   }
 
   public static VectorIterable pairwiseInnerProducts(Iterable<MatrixSlice> basis) {
