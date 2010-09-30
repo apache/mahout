@@ -17,6 +17,7 @@
 
 package org.apache.mahout.clustering.spectral.kmeans;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,11 @@ import org.apache.mahout.clustering.spectral.common.MatrixDiagonalizeJob;
 import org.apache.mahout.clustering.spectral.common.UnitVectorizerJob;
 import org.apache.mahout.clustering.spectral.common.VectorMatrixMultiplicationJob;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
@@ -62,24 +66,65 @@ public class SpectralKMeansDriver extends AbstractJob {
   @Override
   public int run(String[] arg0) throws Exception {
     // set up command line options
-    Configuration conf = new Configuration();
-    addOption("input", "i", "Path to input affinity matrix data", true);
-    addOption("output", "o", "Output of clusterings", true);
+    Configuration conf = getConf();
+    addInputOption();
+    addOutputOption();
     addOption("dimensions", "d", "Square dimensions of affinity matrix", true);
     addOption("clusters", "k", "Number of clusters and top eigenvectors", true);
+    addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.convergenceOption().create());
+    addOption(DefaultOptionCreator.maxIterationsOption().create());
+    addOption(DefaultOptionCreator.overwriteOption().create());
     Map<String, String> parsedArgs = parseArguments(arg0);
     if (parsedArgs == null) {
       return 0;
     }
 
-    // TODO: Need to be able to read all k-means parameters, though
-    // they will be optional parameters to the algorithm
-    // read the values of the command line
-    Path input = new Path(parsedArgs.get("--input"));
-    Path output = new Path(parsedArgs.get("--output"));
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+      HadoopUtil.overwriteOutput(output);
+    }
     int numDims = Integer.parseInt(parsedArgs.get("--dimensions"));
     int clusters = Integer.parseInt(parsedArgs.get("--clusters"));
+    String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
+    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+    DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
+    double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
 
+    run(conf, input, output, numDims, clusters, measure, convergenceDelta, maxIterations);
+
+    return 0;
+  }
+
+  /**
+   * Run the Spectral KMeans clustering on the supplied arguments
+   * 
+   * @param conf the Configuration to be used
+   * @param input the Path to the input tuples directory
+   * @param output the Path to the output directory
+   * @param numDims the int number of dimensions of the affinity matrix
+   * @param clusters the int number of eigenvectors and thus clusters to produce
+   * @param measure the DistanceMeasure for the k-Means calculations
+   * @param convergenceDelta the double convergence delta for the k-Means calculations
+   * @param maxIterations the int maximum number of iterations for the k-Means calculations
+   * 
+   * @throws IOException
+   * @throws InterruptedException
+   * @throws ClassNotFoundException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   */
+  public static void run(Configuration conf,
+                         Path input,
+                         Path output,
+                         int numDims,
+                         int clusters,
+                         DistanceMeasure measure,
+                         double convergenceDelta,
+                         int maxIterations) throws IOException, InterruptedException, ClassNotFoundException,
+      IllegalAccessException, InstantiationException {
     // create a few new Paths for temp files and transformations
     Path outputCalc = new Path(output, "calculations");
     Path outputTmp = new Path(output, "temporary");
@@ -157,12 +202,11 @@ public class SpectralKMeansDriver extends AbstractJob {
 
     // Finally, perform k-means clustering on the rows of L (or W)
     // generate random initial clusters
-    DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path initialclusters = RandomSeedGenerator.buildRandom(Wt.getRowPath(),
                                                            new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
                                                            clusters,
                                                            measure);
-    KMeansDriver.run(new Configuration(), Wt.getRowPath(), initialclusters, output, measure, 0.001, 10, true, false);
+    KMeansDriver.run(conf, Wt.getRowPath(), initialclusters, output, measure, convergenceDelta, maxIterations, true, false);
 
     // Read through the cluster assignments
     Path clusteredPointsPath = new Path(output, "clusteredPoints");
@@ -190,7 +234,5 @@ public class SpectralKMeansDriver extends AbstractJob {
     reader.close();
 
     // TODO: output format???
-
-    return 0;
   }
 }
