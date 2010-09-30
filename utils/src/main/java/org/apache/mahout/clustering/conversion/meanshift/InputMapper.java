@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,31 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.clustering.syntheticcontrol.canopy;
+package org.apache.mahout.clustering.conversion.meanshift;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
+import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 
-public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable> {
+public class InputMapper extends Mapper<LongWritable, Text, Text, MeanShiftCanopy> {
 
   private static final Pattern SPACE = Pattern.compile(" ");
 
-  private Constructor<?> constructor;
+  private int nextCanopyId;
 
   @Override
   protected void map(LongWritable key, Text values, Context context) throws IOException, InterruptedException {
-
     String[] numbers = InputMapper.SPACE.split(values.toString());
     // sometimes there are multiple separator spaces
     Collection<Double> doubles = new ArrayList<Double>();
@@ -48,40 +46,15 @@ public class InputMapper extends Mapper<LongWritable, Text, Text, VectorWritable
         doubles.add(Double.valueOf(value));
       }
     }
-    // ignore empty lines in data file
+    // ignore empty lines in input data
     if (!doubles.isEmpty()) {
-      try {
-        Vector result = (Vector) constructor.newInstance(doubles.size());
-        int index = 0;
-        for (Double d : doubles) {
-          result.set(index++, d);
-        }
-        VectorWritable vectorWritable = new VectorWritable(result);
-        context.write(new Text(String.valueOf(index)), vectorWritable);
-
-      } catch (InstantiationException e) {
-        throw new IllegalStateException(e);
-      } catch (IllegalAccessException e) {
-        throw new IllegalStateException(e);
-      } catch (InvocationTargetException e) {
-        throw new IllegalStateException(e);
+      Vector point = new DenseVector(doubles.size());
+      int index = 0;
+      for (Double d : doubles) {
+        point.set(index++, d);
       }
+      MeanShiftCanopy canopy = new MeanShiftCanopy(point, nextCanopyId++, new EuclideanDistanceMeasure());
+      context.write(new Text(), canopy);
     }
   }
-
-  @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
-    super.setup(context);
-    Configuration conf = context.getConfiguration();
-    String vectorImplClassName = conf.get("vector.implementation.class.name");
-    try {
-      Class<? extends Vector> outputClass = conf.getClassByName(vectorImplClassName).asSubclass(Vector.class);
-      constructor = outputClass.getConstructor(int.class);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    }
-  }
-
 }
