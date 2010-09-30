@@ -145,7 +145,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     if (numRows != other.numRows()) {
       throw new CardinalityException(numRows, other.numRows());
     }
-    Path outPath = new Path(outputTmpBasePath.getParent(), "productWith");
+    Path outPath = new Path(outputTmpBasePath.getParent(), "productWith-" + (System.nanoTime() & 0xFF));
     JobConf conf = MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
     JobClient.runJob(conf);
     DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numCols, other.numCols());

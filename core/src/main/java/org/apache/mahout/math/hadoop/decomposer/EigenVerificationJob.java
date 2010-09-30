@@ -90,6 +90,10 @@ public class EigenVerificationJob extends AbstractJob {
 
   private JobConf conf;
 
+  private int maxEigensToKeep;
+
+  private Path cleanedEigensPath;
+
   public void setEigensToVerify(VectorIterable eigens) {
     eigensToVerify = eigens;
   }
@@ -102,20 +106,14 @@ public class EigenVerificationJob extends AbstractJob {
     } else if (argMap.isEmpty()) {
       return 0;
     }
-    outPath = getOutputPath();
-    tmpOut = new Path(outPath, "tmp");
-
-    Path eigenInput = null;
-    boolean inMemory = false;
-    if (argMap.get("--eigenInput") != null) {
-      eigenInput = new Path(argMap.get("--eigenInput"));
-      inMemory = argMap.get("--inMemory") != null;
-    }
-    Path corpusInput = new Path(argMap.get("--corpusInput"));
-
-    run(corpusInput, eigenInput, outPath, tmpOut, Double.parseDouble(argMap.get("--maxError")), Double.parseDouble(argMap
-        .get("--minEigenvalue")), inMemory, new JobConf(getConf()));
-
+    // parse out the arguments
+    runJob(new Path(argMap.get("--eigenInput")),
+           new Path(argMap.get("--corpusInput")),
+           getOutputPath(),
+           argMap.get("--inMemory") != null,
+           Double.parseDouble(argMap.get("--maxError")),
+           Double.parseDouble(argMap.get("--minEigenvalue")),
+           Integer.parseInt(argMap.get("--maxEigens")));
     return 0;
   }
 
@@ -132,13 +130,13 @@ public class EigenVerificationJob extends AbstractJob {
    * @throws IOException
    */
   public int run(Path corpusInput,
-                  Path eigenInput,
-                  Path output,
-                  Path tempOut,
-                  double maxError,
-                  double minEigenValue,
-                  boolean inMemory,
-                  JobConf config) throws IOException {
+                 Path eigenInput,
+                 Path output,
+                 Path tempOut,
+                 double maxError,
+                 double minEigenValue,
+                 boolean inMemory,
+                 JobConf config) throws IOException {
     this.outPath = output;
     this.tmpOut = tempOut;
     this.maxError = maxError;
@@ -200,8 +198,19 @@ public class EigenVerificationJob extends AbstractJob {
       VectorWritable vw = new VectorWritable(ev);
       iw.set(s.index());
       seqWriter.append(iw, vw);
+
+      int numEigensWritten = 0;
+      // increment the number of eigenvectors written and see if we've
+      // reached our specified limit, or if we wish to write all eigenvectors
+      // (latter is built-in, since numEigensWritten will always be > 0
+      numEigensWritten++;
+      if (numEigensWritten == maxEigensToKeep) {
+        log.info("{} of the {} total eigens have been written", new Integer(maxEigensToKeep), new Integer(prunedEigenMeta.size()));
+        break;
+      }
     }
     seqWriter.close();
+    cleanedEigensPath = path;
   }
 
   private List<Map.Entry<MatrixSlice, EigenStatus>> pruneEigens(Map<MatrixSlice, EigenStatus> eigenMetaData) {
@@ -248,7 +257,54 @@ public class EigenVerificationJob extends AbstractJob {
     }
   }
 
+  public Path getCleanedEigensPath() {
+    return cleanedEigensPath;
+  }
+
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new EigenVerificationJob(), args);
+  }
+
+  /**
+   * Progammatic invocation of run()
+   * @param eigenInput Output of LanczosSolver
+   * @param corpusInput Input of LanczosSolver
+   * @param output
+   * @param inMemory
+   * @param maxError
+   * @param minEigenValue
+   * @param maxEigens
+   */
+  public void runJob(Path eigenInput,
+                     Path corpusInput,
+                     Path output,
+                     boolean inMemory,
+                     double maxError,
+                     double minEigenValue,
+                     int maxEigens) throws IOException {
+    // no need to handle command line arguments
+    outPath = output;
+    tmpOut = new Path(outPath, "tmp");
+    maxEigensToKeep = maxEigens;
+    this.maxError = maxError;
+    if (getConf() == null) {
+      setConf(new Configuration());
+    }
+    if (eigenInput != null && eigensToVerify == null) {
+      prepareEigens(eigenInput, inMemory);
+    }
+
+    DistributedRowMatrix c = new DistributedRowMatrix(corpusInput, tmpOut, 1, 1);
+    c.configure(new JobConf(getConf()));
+    corpus = c;
+
+    eigenVerifier = new SimpleEigenVerifier();
+    OrthonormalityVerifier orthoVerifier = new OrthonormalityVerifier();
+    VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
+    // FIXME: Why is the above vector computed if it is never used?
+
+    Map<MatrixSlice, EigenStatus> eigenMetaData = verifyEigens();
+    List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta = pruneEigens(eigenMetaData);
+    saveCleanEigens(prunedEigenMeta);
   }
 }

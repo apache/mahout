@@ -62,6 +62,34 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     initialVector.assign(1.0 / Math.sqrt(corpus.numCols()));
     return initialVector;
   }
+  
+  /**
+   * Factored-out LanczosSolver for the purpose of invoking it programmatically
+   * @param originalConfig
+   * @param inputPathString
+   * @param outputTmpPath
+   * @param numRows
+   * @param numCols
+   * @param isSymmetric
+   * @param desiredRank
+   * @param eigenVectors
+   * @param eigenValues
+   * @param outputEigenVectorPathString
+   * @throws IOException
+   */
+  public void runJob(Configuration originalConfig, Path inputPath,
+		  			Path outputTmpPath, int numRows, int numCols,
+		  			boolean isSymmetric, int desiredRank, Matrix eigenVectors, 
+		  			List<Double> eigenValues, String outputEigenVectorPathString) 
+  					throws IOException {
+	  DistributedRowMatrix matrix = new DistributedRowMatrix(
+			  							inputPath, outputTmpPath, 
+			  							numRows, numCols);
+	  matrix.configure(new JobConf(originalConfig));
+	  setConf(originalConfig);
+	  solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
+	  serializeOutput(eigenVectors, eigenValues, new Path(outputEigenVectorPathString));
+  }
 
   @Override
   public int run(String[] strings) throws Exception {
@@ -164,7 +192,6 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   }
 
   /**
-   * TODO: this should be refactored to allow both LanczosSolver impls to properly serialize output in a generic way.
    * @param eigenVectors The eigenvectors to be serialized
    * @param eigenValues The eigenvalues to be serialized
    * @param outputPath The path (relative to the current Configuration's FileSystem) to save the output to.
