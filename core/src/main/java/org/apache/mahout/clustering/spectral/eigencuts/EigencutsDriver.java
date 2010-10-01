@@ -57,7 +57,6 @@ public class EigencutsDriver extends AbstractJob {
   public int run(String[] arg0) throws Exception {
 
     // set up command line arguments
-    Configuration conf = new Configuration();
     addOption("input", "i", "Path to input affinity matrix data", true);
     addOption("output", "o", "Output of clusterings", true);
     addOption("half-life", "b", "Minimal half-life threshold", true);
@@ -81,7 +80,7 @@ public class EigencutsDriver extends AbstractJob {
     double epsilon = Double.parseDouble(parsedArgs.get("--epsilon"));
     double tau = Double.parseDouble(parsedArgs.get("--tau"));
 
-    run(conf, input, output, dimensions, halflife, epsilon, tau);
+    run(getConf(), input, output, dimensions, halflife, epsilon, tau);
 
     return 0;
   }
