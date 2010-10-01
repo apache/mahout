@@ -124,7 +124,7 @@ public final class LDADriver extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
     addInputOption();
     addOutputOption();
@@ -158,25 +158,14 @@ public final class LDADriver extends AbstractJob {
     return 0;
   }
 
-  /**
-   * @param conf 
-   * @param input
-   * @param output
-   * @param numTopics
-   * @param numWords
-   * @param topicSmoothing
-   * @param maxIterations
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   */
-  private void run(Configuration conf,
-                   Path input,
-                   Path output,
-                   int numTopics,
-                   int numWords,
-                   double topicSmoothing,
-                   int maxIterations) throws IOException, InterruptedException, ClassNotFoundException {
+  private static void run(Configuration conf,
+                          Path input,
+                          Path output,
+                          int numTopics,
+                          int numWords,
+                          double topicSmoothing,
+                          int maxIterations)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "state-0");
     writeInitialState(stateIn, numTopics, numWords);
     double oldLL = Double.NEGATIVE_INFINITY;
@@ -263,13 +252,14 @@ public final class LDADriver extends AbstractJob {
    * @param numTopics
    *          the number of clusters
    */
-  private double runIteration(Configuration conf,
-                              Path input,
-                              Path stateIn,
-                              Path stateOut,
-                              int numTopics,
-                              int numWords,
-                              double topicSmoothing) throws IOException, InterruptedException, ClassNotFoundException {
+  private static double runIteration(Configuration conf,
+                                     Path input,
+                                     Path stateIn,
+                                     Path stateOut,
+                                     int numTopics,
+                                     int numWords,
+                                     double topicSmoothing)
+    throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(NUM_TOPICS_KEY, Integer.toString(numTopics));
     conf.set(NUM_WORDS_KEY, Integer.toString(numWords));

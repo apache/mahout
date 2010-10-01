@@ -30,7 +30,7 @@ import java.util.Map;
  * user (or user cluster) helps avoid optimizing for the wrong quality.
  */
 public class GroupedOnlineAuc implements OnlineAuc {
-  private Map<String, OnlineAuc> map = Maps.newHashMap();
+  private final Map<String, OnlineAuc> map = Maps.newHashMap();
   private GlobalOnlineAuc.ReplacementPolicy policy;
   private int windowSize;
 

@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.stats;
 
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
@@ -48,7 +49,7 @@ public class GlobalOnlineAuc implements OnlineAuc {
 
   // FIFO has distinctly the best properties as a policy.  See OnlineAucTest for details
   private ReplacementPolicy policy = ReplacementPolicy.FIFO;
-  private transient Random random = org.apache.mahout.common.RandomUtils.getRandom();
+  private final transient Random random = RandomUtils.getRandom();
   private final Matrix scores;
   private final Vector averages;
   private final Vector samples;

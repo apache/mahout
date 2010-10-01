@@ -119,8 +119,8 @@ public final class AggregateAndRecommendReducer extends
   }
 
   private void reduceBooleanData(VarLongWritable userID,
-                        Iterable<PrefAndSimilarityColumnWritable> values,
-                        Context context) throws IOException, InterruptedException {
+                                 Iterable<PrefAndSimilarityColumnWritable> values,
+                                 Context context) throws IOException, InterruptedException {
 
     /* having boolean data, each estimated preference can only be 1,
      * so the computation is much simpler */

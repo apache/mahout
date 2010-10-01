@@ -32,7 +32,7 @@ import org.junit.Test;
 
 public class TestUnitVectorizerJob extends MahoutTestCase {
 
-  private double [][] raw = { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} };
+  private static final double [][] RAW = { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} };
 
   @Test
   public void testUnitVectorizerMapper() throws Exception {
@@ -46,15 +46,15 @@ public class TestUnitVectorizerJob extends MahoutTestCase {
       context = DummyRecordWriter.build(mapper, conf, writer);
     
     // perform the mapping
-    for (int i = 0; i < raw.length; i++) {
-      Vector vector = new RandomAccessSparseVector(raw[i].length);
-      vector.assign(raw[i]);
+    for (int i = 0; i < RAW.length; i++) {
+      Vector vector = new RandomAccessSparseVector(RAW[i].length);
+      vector.assign(RAW[i]);
       mapper.map(new IntWritable(i), new VectorWritable(vector), context);
     }
     
     // check the results
-    assertEquals("Number of map results", raw.length, writer.getData().size());
-    for (int i = 0; i < raw.length; i++) {
+    assertEquals("Number of map results", RAW.length, writer.getData().size());
+    for (int i = 0; i < RAW.length; i++) {
       IntWritable key = new IntWritable(i);
       List<VectorWritable> list = writer.getValue(key);
       assertEquals("Only one element per row", 1, list.size());

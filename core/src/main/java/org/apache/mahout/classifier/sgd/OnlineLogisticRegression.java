@@ -28,7 +28,7 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
   // these next two control decayFactor^steps exponential type of annealing
   // learning rate and decay factor
   private double mu0 = 1;
-  private double decayFactor = 1 - 1e-3;
+  private double decayFactor = 1 - 1.0e-3;
 
   // these next two control 1/steps^forget type annealing
   private int stepOffset = 10;
@@ -62,6 +62,7 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
     return this;
   }
 
+  @Override
   public OnlineLogisticRegression lambda(double lambda) {
     // we only over-ride this to provide a more restrictive return type
     super.lambda(lambda);

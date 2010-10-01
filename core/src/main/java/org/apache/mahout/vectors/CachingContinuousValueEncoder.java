@@ -50,7 +50,7 @@ public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
   protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
     if (dataSize != this.dataSize) {
       throw new IllegalArgumentException("dataSize argument ["
-          + dataSize + "] does not match expected dataSize [" + this.dataSize + "]");
+          + dataSize + "] does not match expected dataSize [" + this.dataSize + ']');
     }
     if (caches[probe].containsKey(originalForm.hashCode())) {
       return caches[probe].get(originalForm.hashCode());

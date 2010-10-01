@@ -28,7 +28,7 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
 
   private Vector mean;
 
-  private Vector M2;
+  private Vector m2;
 
   private Vector variance;
 
@@ -58,12 +58,12 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
       delta = x.clone();
     }
     mean = mean.plus(delta.divide(n));
-    if (M2 != null) {
-      M2 = M2.plus(delta.times(x.minus(mean)));
+    if (m2 != null) {
+      m2 = m2.plus(delta.times(x.minus(mean)));
     } else {
-      M2 = delta.times(x.minus(mean));
+      m2 = delta.times(x.minus(mean));
     }
-    variance = M2.divide(n - 1);
+    variance = m2.divide(n - 1);
   }
 
   @Override

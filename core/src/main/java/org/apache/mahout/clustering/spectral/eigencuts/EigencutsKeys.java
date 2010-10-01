@@ -22,63 +22,63 @@ package org.apache.mahout.clustering.spectral.eigencuts;
  */
 public interface EigencutsKeys {
 
-	/**
-	 * B_0, or the user-specified minimum eigenflow half-life threshold
-	 * for an eigenvector/eigenvalue pair to be considered. Increasing
-	 * B_0 equates to fewer clusters
-	 */
-	String BETA = "org.apache.mahout.clustering.spectral.beta";
-	
-	/**
-	 * Tau, or the user-specified threshold for making cuts (setting edge
-	 * affinities to 0) after performing non-maximal suppression on edge weight
-	 * sensitivies. Increasing tau equates to more edge cuts
-	 */
-	String TAU = "org.apache.mahout.clustering.spectral.tau";
-	
-	/**
-	 * The normalization factor for computing the cut threshold
-	 */
-	String DELTA = "org.apache.mahout.clustering.spectral.delta";
-	
-	/**
-	 * Epsilon, or the user-specified coefficient that works in tandem with 
-	 * MINIMUM_HALF_LIFE to determine which eigenvector/eigenvalue pairs to use.
-	 * Increasing epsilon equates to fewer eigenvector/eigenvalue pairs
-	 */
-	String EPSILON = "org.apache.mahout.clustering.spectral.epsilon";
-	
-	/**
-	 * Base path to the location on HDFS where the diagonal matrix (a vector)
-	 * and the list of eigenvalues will be stored for one of the map/reduce 
-	 * jobs in Eigencuts.
-	 */
-	String VECTOR_CACHE_BASE = "org.apache.mahout.clustering.spectral.eigencuts.vectorcache";
-	
-	/**
-	 * Refers to the dimensions of the raw affinity matrix input. Since this
-	 * matrix is symmetrical, it is a square matrix, hence all its dimensions
-	 * are equal.
-	 */
-	String AFFINITY_DIMENSIONS = "org.apache.mahout.clustering.spectral.eigencuts.affinitydimensions";
-	
-	/**
-	 * Refers to the Path to the SequenceFile representing the affinity matrix
-	 */
-	String AFFINITY_PATH = "org.apache.mahout.clustering.spectral.eigencuts.affinitypath";
-	
-	/**
-	 * Refers to the Path to the SequenceFile representing the cut matrix
-	 */
-	String CUTMATRIX_PATH = "org.apache.mahout.clustering.spectral.eigencuts.cutmatrixpath";
-	
-	/**
-     * Sets the SequenceFile index for the list of eigenvalues.
-     */
-    final int EIGENVALUES_CACHE_INDEX = 0;
-	
-	/**
-	 * Sets the SequenceFile index for the diagonal matrix. 
-	 */
-	final int DIAGONAL_CACHE_INDEX = 1;
+  /**
+   * B_0, or the user-specified minimum eigenflow half-life threshold
+   * for an eigenvector/eigenvalue pair to be considered. Increasing
+   * B_0 equates to fewer clusters
+   */
+  String BETA = "org.apache.mahout.clustering.spectral.beta";
+
+  /**
+   * Tau, or the user-specified threshold for making cuts (setting edge
+   * affinities to 0) after performing non-maximal suppression on edge weight
+   * sensitivies. Increasing tau equates to more edge cuts
+   */
+  String TAU = "org.apache.mahout.clustering.spectral.tau";
+
+  /**
+   * The normalization factor for computing the cut threshold
+   */
+  String DELTA = "org.apache.mahout.clustering.spectral.delta";
+
+  /**
+   * Epsilon, or the user-specified coefficient that works in tandem with
+   * MINIMUM_HALF_LIFE to determine which eigenvector/eigenvalue pairs to use.
+   * Increasing epsilon equates to fewer eigenvector/eigenvalue pairs
+   */
+  String EPSILON = "org.apache.mahout.clustering.spectral.epsilon";
+
+  /**
+   * Base path to the location on HDFS where the diagonal matrix (a vector)
+   * and the list of eigenvalues will be stored for one of the map/reduce
+   * jobs in Eigencuts.
+   */
+  String VECTOR_CACHE_BASE = "org.apache.mahout.clustering.spectral.eigencuts.vectorcache";
+
+  /**
+   * Refers to the dimensions of the raw affinity matrix input. Since this
+   * matrix is symmetrical, it is a square matrix, hence all its dimensions
+   * are equal.
+   */
+  String AFFINITY_DIMENSIONS = "org.apache.mahout.clustering.spectral.eigencuts.affinitydimensions";
+
+  /**
+   * Refers to the Path to the SequenceFile representing the affinity matrix
+   */
+  String AFFINITY_PATH = "org.apache.mahout.clustering.spectral.eigencuts.affinitypath";
+
+  /**
+   * Refers to the Path to the SequenceFile representing the cut matrix
+   */
+  String CUTMATRIX_PATH = "org.apache.mahout.clustering.spectral.eigencuts.cutmatrixpath";
+
+  /**
+   * Sets the SequenceFile index for the list of eigenvalues.
+   */
+  int EIGENVALUES_CACHE_INDEX = 0;
+
+  /**
+   * Sets the SequenceFile index for the diagonal matrix.
+   */
+  int DIAGONAL_CACHE_INDEX = 1;
 }

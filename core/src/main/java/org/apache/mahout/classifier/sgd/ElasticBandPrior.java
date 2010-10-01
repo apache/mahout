@@ -21,7 +21,7 @@ package org.apache.mahout.classifier.sgd;
  * Implements a linear combination of L1 and L2 priors.  This can give an
  * interesting mixture of sparsity and load-sharing between redundant predictors.
  */
-public class ElasticBandPrior extends PriorFunction {
+public class ElasticBandPrior implements PriorFunction {
   private final double alphaByLambda;
   private final L1 l1;
   private final L2 l2;

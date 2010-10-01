@@ -34,14 +34,14 @@ import org.junit.Test;
 
 public class TestVectorCache extends MahoutTestCase {
 
-  private double [] vector = { 1, 2, 3, 4 };
+  private static final double [] VECTOR = { 1, 2, 3, 4 };
   
   @Test
   public void testSave() throws Exception {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     IntWritable key = new IntWritable(0);
-    Vector value = new DenseVector(vector);
+    Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
     
     // write the vector out
@@ -63,7 +63,7 @@ public class TestVectorCache extends MahoutTestCase {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     IntWritable key = new IntWritable(0);
-    Vector value = new DenseVector(vector);
+    Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
     
     // write the vector
@@ -80,14 +80,14 @@ public class TestVectorCache extends MahoutTestCase {
     Vector result = VectorCache.load(key, conf);
     
     // are they the same?
-    assertTrue("Vector is not null", result != null);
-    assertTrue("Loaded vector is identical to original", result.equals(value));
+    assertNotNull("Vector is not null", result);
+    assertEquals("Loaded vector is identical to original", result, value);
   }
   
   @Test
   public void testAll() throws Exception {
     Configuration conf = new Configuration();
-    Vector v = new DenseVector(vector);
+    Vector v = new DenseVector(VECTOR);
     Path toSave = getTestTempDirPath("output");
     IntWritable key = new IntWritable(0);
     
@@ -99,7 +99,7 @@ public class TestVectorCache extends MahoutTestCase {
     Vector v2 = VectorCache.load(key, conf);
     
     // are they the same?
-    assertTrue("Vector is not null", v2 != null);
-    assertTrue("Vectors are identical", v2.equals(v));
+    assertNotNull("Vector is not null", v2);
+    assertEquals("Vectors are identical", v2, v);
   }
 }

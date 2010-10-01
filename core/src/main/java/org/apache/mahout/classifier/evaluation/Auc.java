@@ -37,7 +37,7 @@ public class Auc {
   private final DoubleArrayList[] scores = {new DoubleArrayList(), new DoubleArrayList()};
   private final Random rand;
   private int samples;
-  private double threshold;
+  private final double threshold;
   private final Matrix confusion;
   private final DenseMatrix entropy;
 

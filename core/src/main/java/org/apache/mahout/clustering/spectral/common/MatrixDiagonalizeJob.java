@@ -42,7 +42,10 @@ import org.apache.mahout.math.VectorWritable;
  */
 public final class MatrixDiagonalizeJob {
 
-  public static Vector runJob(Path affInput, int dimensions) 
+  private MatrixDiagonalizeJob() {
+  }
+
+  public static Vector runJob(Path affInput, int dimensions)
     throws IOException, ClassNotFoundException, InterruptedException {
     
     // set up all the job tasks
@@ -86,7 +89,8 @@ public final class MatrixDiagonalizeJob {
   public static class MatrixDiagonalizeReducer
     extends Reducer<NullWritable, IntDoublePairWritable, NullWritable, VectorWritable> {
     
-    protected void reduce(NullWritable key, Iterable<IntDoublePairWritable> values, 
+    @Override
+    protected void reduce(NullWritable key, Iterable<IntDoublePairWritable> values,
       Context context) throws IOException, InterruptedException {
       // create the return vector
       Vector retval = new DenseVector(context.getConfiguration().getInt(

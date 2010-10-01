@@ -171,13 +171,6 @@ public class DirichletDriver extends AbstractJob {
    * @param threshold 
    *          a double threshold value emits all clusters having greater pdf (emitMostLikely = false)
    * @param runSequential execute sequentially if true
-   * @param numClusters
-   *          the number of models to iterate over
-   * @throws IllegalAccessException 
-   * @throws InterruptedException 
-   * @throws ClassNotFoundException 
-   * @throws InstantiationException 
-   * @throws IOException 
    */
   public static void run(Configuration conf,
                          Path input,

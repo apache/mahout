@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.canopy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -269,11 +268,16 @@ public class CanopyDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path points, Path canopies, Path output, DistanceMeasure measure, double t1, double t2)
-      throws InstantiationException, IllegalAccessException, IOException {
+  private static void clusterDataSeq(Path points,
+                                     Path canopies,
+                                     Path output,
+                                     DistanceMeasure measure,
+                                     double t1,
+                                     double t2)
+    throws InstantiationException, IllegalAccessException, IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
 
-    List<Canopy> clusters = new ArrayList<Canopy>();
+    Collection<Canopy> clusters = new ArrayList<Canopy>();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(canopies.toUri(), conf);
     FileStatus[] status = fs.listStatus(canopies, new OutputLogFilter());

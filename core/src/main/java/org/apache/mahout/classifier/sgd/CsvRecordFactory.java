@@ -101,7 +101,7 @@ public class CsvRecordFactory implements RecordFactory {
    * @param targetName            The name of the target variable.
    * @param typeMap               A map describing the types of the predictor variables.
    */
-  public CsvRecordFactory(String targetName, final Map<String, String> typeMap) {
+  public CsvRecordFactory(String targetName, Map<String, String> typeMap) {
     this.targetName = targetName;
     this.typeMap = typeMap;
     targetDictionary = new Dictionary();
@@ -156,8 +156,8 @@ public class CsvRecordFactory implements RecordFactory {
   public void firstLine(String line) {
     // read variable names, build map of name -> column
     final Map<String, Integer> vars = Maps.newHashMap();
-    int column = 0;
     variableNames = Lists.newArrayList(onComma.split(line));
+    int column = 0;
     for (String var : variableNames) {
       vars.put(var, column++);
     }
@@ -187,12 +187,12 @@ public class CsvRecordFactory implements RecordFactory {
     for (Integer predictor : predictors) {
       String name;
       Class<? extends FeatureVectorEncoder> c;
-      if (predictor != -1) {
-        name = variableNames.get(predictor);
-        c = typeDictionary.get(typeMap.get(name));
-      } else {
+      if (predictor == -1) {
         name = INTERCEPT_TERM;
         c = ConstantValueEncoder.class;
+      } else {
+        name = variableNames.get(predictor);
+        c = typeDictionary.get(typeMap.get(name));
       }
       try {
         if (c == null) {

@@ -101,7 +101,7 @@ public abstract class Mapping implements UnaryFunction {
    * @param scale  Defines how sharp the boundaries are.
    * @return A mapping that satisfies the desired constraint.
    */
-  public static Mapping softLimit(double min, double max, final double scale) {
+  public static Mapping softLimit(double min, double max, double scale) {
     return new SoftLimit(min, max, scale);
   }
 

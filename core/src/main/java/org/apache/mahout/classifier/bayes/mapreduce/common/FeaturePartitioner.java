@@ -28,10 +28,8 @@ import org.apache.mahout.common.StringTuple;
 /**
  * ensure that features all make it into the same partition.
  */
-public class FeaturePartitioner implements
-    Partitioner<StringTuple,DoubleWritable> {
+public class FeaturePartitioner implements Partitioner<StringTuple,DoubleWritable> {
   
-  /** {@inheritDoc} */
   @Override
   public int getPartition(StringTuple key, DoubleWritable value,
       int numPartitions) {
@@ -51,7 +49,6 @@ public class FeaturePartitioner implements
     return (hash & Integer.MAX_VALUE) % numPartitions;
   }
   
-  /** {@inheritDoc} */
   @Override
   public void configure(JobConf job) {
   /* no-op */

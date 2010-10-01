@@ -62,10 +62,8 @@ public abstract class MultipleOutputFormat<K, V> extends FileOutputFormat<K, V> 
    * @param arg3
    *          a progressable for reporting progress.
    * @return a composite record writer
-   * @throws IOException
    */
-  public RecordWriter<K, V> getRecordWriter(FileSystem fs, Configuration job, String name, Progressable arg3)
-      throws IOException {
+  public RecordWriter<K, V> getRecordWriter(FileSystem fs, Configuration job, String name, Progressable arg3) {
 
     final FileSystem myFS = fs;
     final String myName = generateLeafFileName(name);

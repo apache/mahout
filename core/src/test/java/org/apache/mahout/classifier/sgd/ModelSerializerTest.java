@@ -44,12 +44,12 @@ public final class ModelSerializerTest extends MahoutTestCase {
   public void testSoftLimitDeserialization() {
     Mapping m = ModelSerializer.gson().fromJson(new StringReader("{\"min\":-18.420680743952367,\"max\":-2.3025850929940455,\"scale\":1.0}"), Mapping.SoftLimit.class);
     assertTrue(m instanceof Mapping.SoftLimit);
-    assertEquals((-18.420680743952367 + -2.3025850929940455) / 2, m.apply(0), 1.0e-6);
+    assertEquals((-18.420680743952367 - 2.3025850929940455) / 2, m.apply(0), 1.0e-6);
 
     String data = "{\"class\":\"org.apache.mahout.ep.Mapping$SoftLimit\",\"value\":{\"min\":-18.420680743952367,\"max\":-2.3025850929940455,\"scale\":1.0}}";
     m = ModelSerializer.gson().fromJson(new StringReader(data), Mapping.class);
     assertTrue(m instanceof Mapping.SoftLimit);
-    assertEquals((-18.420680743952367 + -2.3025850929940455) / 2, m.apply(0), 1.0e-6);
+    assertEquals((-18.420680743952367 - 2.3025850929940455) / 2, m.apply(0), 1.0e-6);
   }
 
   @Test

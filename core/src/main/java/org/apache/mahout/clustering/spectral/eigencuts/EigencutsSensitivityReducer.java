@@ -36,12 +36,11 @@ public class EigencutsSensitivityReducer extends
     Reducer<IntWritable, EigencutsSensitivityNode, IntWritable, VectorWritable> {
 
   @Override
-  protected void reduce(IntWritable key, Iterable<EigencutsSensitivityNode> arr, 
-      Context context) throws IOException, InterruptedException {
+  protected void reduce(IntWritable key, Iterable<EigencutsSensitivityNode> arr, Context context)
+    throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
-    Vector v = new RandomAccessSparseVector(conf
-      .getInt(EigencutsKeys.AFFINITY_DIMENSIONS, Integer.MAX_VALUE), 100);
-    double threshold = Double.parseDouble(conf.get(EigencutsKeys.TAU)) / 
+    Vector v = new RandomAccessSparseVector(conf.getInt(EigencutsKeys.AFFINITY_DIMENSIONS, Integer.MAX_VALUE), 100);
+    double threshold = Double.parseDouble(conf.get(EigencutsKeys.TAU)) /
       Double.parseDouble(conf.get(EigencutsKeys.DELTA));
     
     for (EigencutsSensitivityNode n : arr) {

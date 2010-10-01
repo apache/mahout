@@ -34,14 +34,19 @@ import org.apache.mahout.clustering.spectral.common.VertexWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * TODO: Need a really good description of what this job does...
- *
- */
 public final class EigencutsAffinityCutsJob {
-  
-  static enum CUTSCOUNTER {NUM_CUTS}
+
+  private static final Logger log = LoggerFactory.getLogger(EigencutsAffinityCutsJob.class);
+
+  private EigencutsAffinityCutsJob() {
+  }
+
+  enum CUTSCOUNTER {
+    NUM_CUTS
+  }
 
   /**
    * Runs a single iteration of defining cluster boundaries, based on
@@ -50,14 +55,9 @@ public final class EigencutsAffinityCutsJob {
    * @param currentAffinity Path to the current affinity matrix.
    * @param cutMatrix Path to the sensitivity matrix.
    * @param nextAffinity Output path for the new affinity matrix.
-   * @param conf
-   * @throws IOException
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
    */
-  public static long runjob(Path currentAffinity, Path cutMatrix, Path nextAffinity,
-      Configuration conf) throws IOException, ClassNotFoundException, 
-      InterruptedException {
+  public static long runjob(Path currentAffinity, Path cutMatrix, Path nextAffinity, Configuration conf)
+    throws IOException, ClassNotFoundException, InterruptedException {
     
     // these options allow us to differentiate between the two vectors
     // in the mapper and reducer - we'll know from the working path
@@ -121,12 +121,13 @@ public final class EigencutsAffinityCutsJob {
       // 2) add their former values to the (i, i) and (j, j) coordinates
       //
       // though obviously we want to perform these steps in reverse order
-      boolean zero = false;
-      int i = -1, j = -1;
-      double k = 0;
       Configuration conf = context.getConfiguration();
+      log.debug("{}", t);
+      boolean zero = false;
+      int i = -1;
+      int j = -1;
+      double k = 0;
       int count = 0;
-      System.out.println("DEBUG: " + t.toString());
       for (VertexWritable v : vertices) {
         count++;
         if (v.getType().equals(conf.get(EigencutsKeys.AFFINITY_PATH))) {

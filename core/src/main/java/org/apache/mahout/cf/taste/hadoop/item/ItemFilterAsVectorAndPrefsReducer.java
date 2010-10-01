@@ -47,7 +47,7 @@ public class ItemFilterAsVectorAndPrefsReducer
     List<Float> prefValues = new ArrayList<Float>();
     for (VarLongWritable userID : values) {
       userIDs.add(userID.get());
-      prefValues.add(1f);
+      prefValues.add(1.0f);
     }
 
     ctx.write(new VarIntWritable(itemIDIndex), new VectorAndPrefsWritable(vector, userIDs, prefValues));

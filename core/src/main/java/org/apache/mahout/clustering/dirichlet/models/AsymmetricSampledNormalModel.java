@@ -79,6 +79,7 @@ public class AsymmetricSampledNormalModel implements Cluster {
    * 
    * @return an AsymmetricSampledNormalModel
    */
+  @Override
   public AsymmetricSampledNormalModel sampleFromPosterior() {
     return new AsymmetricSampledNormalModel(id, mean, stdDev);
   }

@@ -32,7 +32,6 @@ import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix.MatrixEntryWritable;
 import org.junit.Test;
 
@@ -65,34 +64,34 @@ import org.junit.Test;
  */
 public class TestAffinityMatrixInputJob extends MahoutTestCase {
   
-  private String [] raw = {"0,0,0", "0,1,5", "0,2,10", "1,0,5", "1,1,0", 
-                          "1,2,20", "2,0,10", "2,1,20", "2,2,0"};
-  private int rawDimensions = 3;
+  private static final String [] RAW = {"0,0,0", "0,1,5", "0,2,10", "1,0,5", "1,1,0",
+                                        "1,2,20", "2,0,10", "2,1,20", "2,2,0"};
+  private static final int RAW_DIMENSIONS = 3;
 
   @Test
   public void testAffinityMatrixInputMapper() throws Exception {
     AffinityMatrixInputMapper mapper = new AffinityMatrixInputMapper();
     Configuration conf = new Configuration();
-    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, rawDimensions);
+    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writer and the M/R context
-    DummyRecordWriter<IntWritable, DistributedRowMatrix.MatrixEntryWritable> writer = 
-      new DummyRecordWriter<IntWritable, DistributedRowMatrix.MatrixEntryWritable>();
-    Mapper<LongWritable, Text, IntWritable, DistributedRowMatrix.MatrixEntryWritable>.Context 
+    DummyRecordWriter<IntWritable, MatrixEntryWritable> writer =
+      new DummyRecordWriter<IntWritable, MatrixEntryWritable>();
+    Mapper<LongWritable, Text, IntWritable, MatrixEntryWritable>.Context 
       context = DummyRecordWriter.build(mapper, conf, writer);
 
     // loop through all the points and test each one is converted
     // successfully to a DistributedRowMatrix.MatrixEntry
-    for (int i = 0; i < raw.length; i++) {
-      mapper.map(new LongWritable(), new Text(raw[i]), context);
+    for (String s : RAW) {
+      mapper.map(new LongWritable(), new Text(s), context);
     }
 
     // test the data was successfully constructed
-    assertEquals("Number of map results", rawDimensions, writer.getData().size());
+    assertEquals("Number of map results", RAW_DIMENSIONS, writer.getData().size());
     Set<IntWritable> keys = writer.getData().keySet();
     for (IntWritable i : keys) {
       List<MatrixEntryWritable> row = writer.getData().get(i);
-      assertEquals("Number of items in row", rawDimensions, row.size());
+      assertEquals("Number of items in row", RAW_DIMENSIONS, row.size());
     }
   }
   
@@ -100,18 +99,18 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
   public void testAffinitymatrixInputReducer() throws Exception {
     AffinityMatrixInputMapper mapper = new AffinityMatrixInputMapper();
     Configuration conf = new Configuration();
-    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, rawDimensions);
+    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writer and the M/R context
-    DummyRecordWriter<IntWritable, DistributedRowMatrix.MatrixEntryWritable> mapWriter = 
-      new DummyRecordWriter<IntWritable, DistributedRowMatrix.MatrixEntryWritable>();
-    Mapper<LongWritable, Text, IntWritable, DistributedRowMatrix.MatrixEntryWritable>.Context 
+    DummyRecordWriter<IntWritable, MatrixEntryWritable> mapWriter =
+      new DummyRecordWriter<IntWritable, MatrixEntryWritable>();
+    Mapper<LongWritable, Text, IntWritable, MatrixEntryWritable>.Context
       mapContext = DummyRecordWriter.build(mapper, conf, mapWriter);
 
     // loop through all the points and test each one is converted
     // successfully to a DistributedRowMatrix.MatrixEntry
-    for (int i = 0; i < raw.length; i++) {
-      mapper.map(new LongWritable(), new Text(raw[i]), mapContext);
+    for (String s : RAW) {
+      mapper.map(new LongWritable(), new Text(s), mapContext);
     }
     // store the data for checking later
     Map<IntWritable, List<MatrixEntryWritable>> map = mapWriter.getData();
@@ -120,7 +119,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
     AffinityMatrixInputReducer reducer = new AffinityMatrixInputReducer();
     DummyRecordWriter<IntWritable, VectorWritable> redWriter = 
       new DummyRecordWriter<IntWritable, VectorWritable>();
-    Reducer<IntWritable, DistributedRowMatrix.MatrixEntryWritable, 
+    Reducer<IntWritable, MatrixEntryWritable,
       IntWritable, VectorWritable>.Context redContext = DummyRecordWriter
       .build(reducer, conf, redWriter, IntWritable.class, MatrixEntryWritable.class);
     for (IntWritable key : mapWriter.getKeys()) {
@@ -128,7 +127,7 @@ public class TestAffinityMatrixInputJob extends MahoutTestCase {
     }
     
     // check that all the elements are correctly ordered
-    assertEquals("Number of reduce results", rawDimensions, redWriter.getData().size());
+    assertEquals("Number of reduce results", RAW_DIMENSIONS, redWriter.getData().size());
     for (IntWritable row : redWriter.getKeys()) {
       List<VectorWritable> list = redWriter.getValue(row);
       assertEquals("Should only be one vector", 1, list.size());

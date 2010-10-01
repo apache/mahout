@@ -21,7 +21,7 @@ package org.apache.mahout.classifier.sgd;
  * Implements the Gaussian prior.  This prior has a tendency to decrease large coefficients toward zero, but
  * doesn't tend to set them to exactly zero.
  */
-public class L2 extends PriorFunction {
+public class L2 implements PriorFunction {
   private final double s2;
   private final double s;
 

@@ -96,6 +96,7 @@ public class DenseMatrix extends AbstractMatrix {
     return viewPart(rowOffset, rowsRequested, columnOffset, columnsRequested);
   }
 
+  @Override
   public Matrix viewPart(int rowOffset, int rowsRequested, int columnOffset, int columnsRequested) {
     if (rowOffset < 0) {
       throw new IndexException(rowOffset, rowSize());

@@ -26,7 +26,7 @@ public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
   @Test
   public void testOptimize() throws ExecutionException, InterruptedException {
     ThreadedEvolutionaryProcess ep = new ThreadedEvolutionaryProcess(50);
-    State<?> x = ep.optimize(new ThreadedEvolutionaryProcess.Function() {
+    ep.optimize(new ThreadedEvolutionaryProcess.Function() {
       /**
        * Implements a skinny quadratic bowl.
        */

@@ -20,7 +20,7 @@ package org.apache.mahout.classifier.sgd;
 /**
  * A uniform prior.  This is an improper prior that corresponds to no regularization at all.
  */
-public class UniformPrior extends PriorFunction {
+public class UniformPrior implements PriorFunction {
   @Override
   public double age(double oldValue, double generations, double learningRate) {
     return oldValue;

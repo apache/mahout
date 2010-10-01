@@ -79,7 +79,7 @@ public class DisplayDirichlet extends DisplayClustering {
       List<Cluster> clusters = new ArrayList<Cluster>();
       for (Cluster cluster : models) {
         if (isSignificant(cluster)) {
-          clusters.add((Cluster) cluster);
+          clusters.add(cluster);
         }
       }
       CLUSTERS.add(clusters);

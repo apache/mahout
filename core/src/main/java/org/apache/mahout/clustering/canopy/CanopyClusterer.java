@@ -103,7 +103,7 @@ public class CanopyClusterer {
    * @param canopies
    *          the List<Canopy> to be appended
    */
-  public void addPointToCanopies(Vector point, Collection<Canopy> canopies) throws IOException {
+  public void addPointToCanopies(Vector point, Collection<Canopy> canopies) {
     boolean pointStronglyBound = false;
     for (Canopy canopy : canopies) {
       double dist = measure.distance(canopy.getCenter().getLengthSquared(), canopy.getCenter(), point);

@@ -83,7 +83,7 @@ public class MapBackedARFFModel implements ARFFModel {
     ARFFType type = typeMap.get(idx);
     data = MapBackedARFFModel.QUOTE_PATTERN.matcher(data).replaceAll("");
     data = data.trim();
-    double result = 0.0;
+    double result;
     switch (type) {
       case NUMERIC:
         result = processNumeric(data);

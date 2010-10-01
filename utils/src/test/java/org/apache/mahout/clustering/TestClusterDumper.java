@@ -152,14 +152,8 @@ public final class TestClusterDumper extends MahoutTestCase {
 
   /**
    * Return the path to the final iteration's clusters
-   * 
-   * @param conf 
-   * @param output
-   * @param maxIterations
-   * @return
-   * @throws IOException 
    */
-  private Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
+  private static Path finalClusterPath(Configuration conf, Path output, int maxIterations) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (int i = maxIterations; i >= 0; i--) {
       Path clusters = new Path(output, "clusters-" + i);

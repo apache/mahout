@@ -94,6 +94,7 @@ public class L1Model implements Cluster {
     VectorWritable.writeVector(out, coefficients);
   }
 
+  @Override
   public L1Model sampleFromPosterior() {
     return new L1Model(id, coefficients.clone());
   }

@@ -630,7 +630,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
       Map<Integer, List<WeightedVectorWritable>> refClusters = new HashMap<Integer, List<WeightedVectorWritable>>();
       Collection<Vector> pointsVectors = new ArrayList<Vector>();
       for (VectorWritable point : points) {
-        pointsVectors.add((Vector) point.get());
+        pointsVectors.add(point.get());
       }
 
       List<List<SoftCluster>> clusters = FuzzyKMeansClusterer.clusterPoints(pointsVectors,

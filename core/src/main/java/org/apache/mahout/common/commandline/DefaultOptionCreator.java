@@ -166,6 +166,7 @@ public final class DefaultOptionCreator {
    * Used by Dirichlet, FuzzyKmeans, Kmeans and LDA
    * @deprecated 
    */
+  @Deprecated
   public static DefaultOptionBuilder numReducersOption() {
     return new DefaultOptionBuilder().withLongName(MAX_REDUCERS_OPTION).withRequired(false).withShortName("r")
         .withArgument(new ArgumentBuilder().withName(MAX_REDUCERS_OPTION).withDefault("2")

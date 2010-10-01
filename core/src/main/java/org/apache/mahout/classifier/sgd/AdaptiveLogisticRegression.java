@@ -80,7 +80,6 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private boolean freezeSurvivors = true;
 
   // for GSON
-  @SuppressWarnings({"UnusedDeclaration"})
   private AdaptiveLogisticRegression() {
   }
 
@@ -177,7 +176,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   }
 
   public static int stepSize(int recordNumber, double multiplier) {
-    final int[] bumps = new int[]{1, 2, 5};
+    int[] bumps = {1, 2, 5};
     double log = Math.floor(multiplier * Math.log10(recordNumber));
     int bump = bumps[(int) log % bumps.length];
     int scale = (int) Math.pow(10, Math.floor(log / bumps.length));
@@ -200,7 +199,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     } catch (InterruptedException e) {
       // ignore
     } catch (ExecutionException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
@@ -395,7 +394,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
       // set the range for regularization (lambda)
       x.setMap(i++, Mapping.logLimit(1.0e-8, 0.1));
       // set the range for learning rate (mu)
-      x.setMap(i, Mapping.logLimit(1e-8, 1));
+      x.setMap(i, Mapping.logLimit(1.0e-8, 1));
     }
 
     public void train(TrainingExample example) {
@@ -423,7 +422,6 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     private Vector instance;
 
     // for GSON
-    @SuppressWarnings({"UnusedDeclaration"})
     private TrainingExample() {
     }
 

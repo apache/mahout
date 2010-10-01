@@ -26,7 +26,7 @@ import java.util.Locale;
  * sub-class.
  */
 public abstract class WordValueEncoder extends FeatureVectorEncoder {
-  private byte[] nameBytes;
+  private final byte[] nameBytes;
 
   protected WordValueEncoder(String name) {
     super(name, 2);

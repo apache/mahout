@@ -154,8 +154,8 @@ public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
       VertexWritable.class);
     
     // perform the combining
-    for (Text key : data.keySet()) {
-      combiner.reduce(key, data.get(key), redContext);
+    for (Map.Entry<Text, List<VertexWritable>> entry : data.entrySet()) {
+      combiner.reduce(entry.getKey(), entry.getValue(), redContext);
     }
     
     // test the number of cuts, there should be 2
@@ -165,9 +165,9 @@ public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
     // loop through all the results; let's see if they match up to our
     // affinity matrix (and all the cuts appear where they should
     Map<Text, List<VertexWritable>> results = redWriter.getData();
-    for (Text thekey : results.keySet()) {
-      List<VertexWritable> row = results.get(thekey);
-      IntWritable key = new IntWritable(Integer.parseInt(thekey.toString()));
+    for (Map.Entry<Text, List<VertexWritable>> entry : results.entrySet()) {
+      List<VertexWritable> row = entry.getValue();
+      IntWritable key = new IntWritable(Integer.parseInt(entry.getKey().toString()));
       
       double calcDiag = 0.0, trueDiag = sumOfRowCuts(key.get(), this.sensitivity);
       for (VertexWritable e : row) {
@@ -227,8 +227,8 @@ public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
       VertexWritable.class);
     
     // perform the combining
-    for (Text key : data.keySet()) {
-      combiner.reduce(key, data.get(key), comContext);
+    for (Map.Entry<Text, List<VertexWritable>> entry : data.entrySet()) {
+      combiner.reduce(entry.getKey(), entry.getValue(), comContext);
     }
     
     // finally, set up the reduction writers

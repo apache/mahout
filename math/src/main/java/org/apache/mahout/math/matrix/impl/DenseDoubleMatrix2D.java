@@ -66,7 +66,7 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * @throws IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or
    *                                  flip's are illegal.
    */
-  protected DenseDoubleMatrix2D(int rows, int columns, double[] elements, int rowZero, int columnZero, int rowStride,
+  DenseDoubleMatrix2D(int rows, int columns, double[] elements, int rowZero, int columnZero, int rowStride,
                                 int columnStride) {
     setUp(rows, columns, rowZero, columnZero, rowStride, columnStride);
     this.elements = elements;

@@ -47,17 +47,6 @@ public class AdaptiveWordValueEncoder extends WordValueEncoder {
     super.addToVector(originalForm, weight, data);
   }
 
-  /**
-   * Adds a value to a vector.
-   *
-   * @param originalForm The original form of the value as a byte array.
-   * @param data         The vector to which the value should be added.
-   */
-  @Override
-  public void addToVector(byte[] originalForm, double weight, Vector data) {
-    super.addToVector(originalForm, weight, data);
-  }
-
   @Override
   protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     return super.hashForProbe(originalForm, dataSize, name, probe);

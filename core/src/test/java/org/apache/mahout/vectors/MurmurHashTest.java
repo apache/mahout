@@ -58,8 +58,7 @@ public class MurmurHashTest extends MahoutTestCase {
   @Test
   public void testChangingSeed() {
     // use a fixed key
-    byte[] key = new byte[]{0x4E, (byte) 0xE3, (byte) 0x91, 0x00,
-      0x10, (byte) 0x8F, (byte) 0xFF};
+    byte[] key = {0x4E, (byte) 0xE3, (byte) 0x91, 0x00, 0x10, (byte) 0x8F, (byte) 0xFF};
 
     int[] expected = {0xeef8be32, 0x8109dec6, 0x9aaf4192, 0xc1bcaf1c,
       0x821d2ce4, 0xd45ed1df, 0x6c0357a7, 0x21d4e845,
@@ -109,7 +108,7 @@ public class MurmurHashTest extends MahoutTestCase {
   /**
    * Fill a key with a known pattern (incrementing numbers)
    */
-  private void setKey(byte[] key, int start) {
+  private static void setKey(byte[] key, int start) {
     for (int i = 0; i < key.length; i++) {
       key[i] = (byte) ((start + i) & 0xFF);
     }

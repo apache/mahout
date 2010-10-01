@@ -59,7 +59,7 @@ public final class TestClusterEvaluator extends MahoutTestCase {
 
   private List<VectorWritable> referenceData = new ArrayList<VectorWritable>();
 
-  private List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  private final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 

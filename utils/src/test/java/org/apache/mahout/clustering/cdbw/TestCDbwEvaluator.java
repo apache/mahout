@@ -71,7 +71,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
 
   private FileSystem fs;
 
-  private List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  private final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
 
   private List<VectorWritable> referenceData = new ArrayList<VectorWritable>();
 

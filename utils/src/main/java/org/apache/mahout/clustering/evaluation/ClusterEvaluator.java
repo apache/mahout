@@ -201,7 +201,7 @@ public class ClusterEvaluator {
       avgDensity += density;
       log.info("Intra-Cluster Density[" + cluster.getId() + "] = " + density);
     }
-    avgDensity = clusters.size() == 0 ? 0 : avgDensity / clusters.size();
+    avgDensity = clusters.isEmpty() ? 0 : avgDensity / clusters.size();
     log.info("Intra-Cluster Density = " + avgDensity);
     return avgDensity;
 

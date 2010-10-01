@@ -39,9 +39,6 @@ public class VectorModelClassifier extends AbstractVectorClassifier {
     this.models = models;
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.classifier.AbstractVectorClassifier#classify(org.apache.mahout.math.Vector)
-   */
   @Override
   public Vector classify(Vector instance) {
     Vector pdfs = new DenseVector(models.size());
@@ -63,9 +60,6 @@ public class VectorModelClassifier extends AbstractVectorClassifier {
     }
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.classifier.AbstractVectorClassifier#classifyScalar(org.apache.mahout.math.Vector)
-   */
   @Override
   public double classifyScalar(Vector instance) {
     if (models.size() == 2) {
@@ -76,9 +70,6 @@ public class VectorModelClassifier extends AbstractVectorClassifier {
     throw new IllegalStateException();
   }
 
-  /* (non-Javadoc)
-   * @see org.apache.mahout.classifier.AbstractVectorClassifier#numCategories()
-   */
   @Override
   public int numCategories() {
     return models.size();

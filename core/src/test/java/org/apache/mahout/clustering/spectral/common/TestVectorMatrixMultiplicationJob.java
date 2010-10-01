@@ -37,8 +37,8 @@ import org.junit.Test;
  */
 public class TestVectorMatrixMultiplicationJob extends MahoutTestCase {
   
-  private double [][] matrix = { {1, 1}, {2, 3} };
-  private double [] vector = {9, 16};
+  private static final double [][] MATRIX = { {1, 1}, {2, 3} };
+  private static final double [] VECTOR = {9, 16};
   
   @Test
   public void testVectorMatrixMultiplicationMapper() throws Exception {
@@ -46,7 +46,7 @@ public class TestVectorMatrixMultiplicationJob extends MahoutTestCase {
     Configuration conf = new Configuration();
     
     // set up all the parameters for the job
-    Vector toSave = new DenseVector(vector);
+    Vector toSave = new DenseVector(VECTOR);
     DummyRecordWriter<IntWritable, VectorWritable> writer = new 
       DummyRecordWriter<IntWritable, VectorWritable>();
     Mapper<IntWritable, VectorWritable, IntWritable, VectorWritable>.Context
@@ -54,20 +54,20 @@ public class TestVectorMatrixMultiplicationJob extends MahoutTestCase {
     mapper.setup(toSave);
     
     // run the job
-    for (int i = 0; i < matrix.length; i++) {
-      Vector v = new RandomAccessSparseVector(matrix[i].length);
-      v.assign(matrix[i]);
+    for (int i = 0; i < MATRIX.length; i++) {
+      Vector v = new RandomAccessSparseVector(MATRIX[i].length);
+      v.assign(MATRIX[i]);
       mapper.map(new IntWritable(i), new VectorWritable(v), context);
     }
     
     // check the results
-    assertEquals("Number of map results", matrix.length, writer.getData().size());
-    for (int i = 0; i < matrix.length; i++) {
+    assertEquals("Number of map results", MATRIX.length, writer.getData().size());
+    for (int i = 0; i < MATRIX.length; i++) {
       List<VectorWritable> list = writer.getValue(new IntWritable(i));
       assertEquals("Only one vector per key", 1, list.size());
       Vector v = list.get(0).get();
-      for (int j = 0; j < matrix[i].length; j++) {
-        double total = Math.sqrt(vector[i]) * Math.sqrt(vector[j]) * matrix[i][j];
+      for (int j = 0; j < MATRIX[i].length; j++) {
+        double total = Math.sqrt(VECTOR[i]) * Math.sqrt(VECTOR[j]) * MATRIX[i][j];
         assertEquals("Product matrix elements", total, v.get(j),EPSILON);
       }
     }

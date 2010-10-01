@@ -91,7 +91,7 @@ public class EigencutsSensitivityMapper extends
       }
       
       // is this the smallest value in the column?
-      Integer column = new Integer(minInd);
+      Integer column = minInd;
       EigencutsSensitivityNode value = new EigencutsSensitivityNode(i, minInd, minS_ij);
       if (!columns.containsKey(column)) {
         columns.put(column, value);
@@ -103,7 +103,7 @@ public class EigencutsSensitivityMapper extends
     
     // write whatever values made it through
     
-    for (EigencutsSensitivityNode e : columns.values().toArray(new EigencutsSensitivityNode[0])) {
+    for (EigencutsSensitivityNode e : columns.values()) {
       context.write(new IntWritable(e.getRow()), e);
     }
   }

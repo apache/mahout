@@ -49,15 +49,15 @@ import org.apache.mahout.math.hadoop.DistributedRowMatrix;
  */
 public final class VectorMatrixMultiplicationJob {
 
+  private VectorMatrixMultiplicationJob() {
+  }
+
   /**
    * Invokes the job.
    * @param markovPath Path to the markov DRM's sequence files
-   * @param diag
-   * @param outputPath
-   * @return
    */
-  public static DistributedRowMatrix runJob(Path markovPath, Vector diag, 
-      Path outputPath) throws IOException, ClassNotFoundException, InterruptedException {
+  public static DistributedRowMatrix runJob(Path markovPath, Vector diag, Path outputPath)
+    throws IOException, ClassNotFoundException, InterruptedException {
     
     // set up the serialization of the diagonal vector
     Configuration conf = new Configuration();

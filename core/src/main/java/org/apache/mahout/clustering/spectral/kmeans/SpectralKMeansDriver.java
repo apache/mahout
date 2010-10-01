@@ -41,30 +41,31 @@ import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
-import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver;
 import org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the EigenCuts spectral clustering algorithm.
  */
 public class SpectralKMeansDriver extends AbstractJob {
 
-  public static final boolean DEBUG = false;
+  private static final Logger log = LoggerFactory.getLogger(SpectralKMeansDriver.class);
 
   public static final double OVERSHOOT_MULTIPLIER = 2.0;
 
-  public static void main(String args[]) throws Exception {
+  public static void main(String[] args) throws Exception {
     ToolRunner.run(new SpectralKMeansDriver(), args);
   }
 
   @Override
-  public int run(String[] arg0) throws Exception {
+  public int run(String[] arg0)
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
     // set up command line options
     Configuration conf = getConf();
     addInputOption();
@@ -109,12 +110,6 @@ public class SpectralKMeansDriver extends AbstractJob {
    * @param measure the DistanceMeasure for the k-Means calculations
    * @param convergenceDelta the double convergence delta for the k-Means calculations
    * @param maxIterations the int maximum number of iterations for the k-Means calculations
-   * 
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
    */
   public static void run(Configuration conf,
                          Path input,
@@ -123,8 +118,8 @@ public class SpectralKMeansDriver extends AbstractJob {
                          int clusters,
                          DistanceMeasure measure,
                          double convergenceDelta,
-                         int maxIterations) throws IOException, InterruptedException, ClassNotFoundException,
-      IllegalAccessException, InstantiationException {
+                         int maxIterations)
+    throws IOException, InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
     // create a few new Paths for temp files and transformations
     Path outputCalc = new Path(output, "calculations");
     Path outputTmp = new Path(output, "temporary");
@@ -148,15 +143,16 @@ public class SpectralKMeansDriver extends AbstractJob {
     // and calculate the normalized Laplacian of the form:
     // L = D^(-0.5)AD^(-0.5)
     Vector D = MatrixDiagonalizeJob.runJob(affSeqFiles, numDims);
-    DistributedRowMatrix L = VectorMatrixMultiplicationJob.runJob(affSeqFiles, D, new Path(outputCalc, "laplacian-"
-        + (System.nanoTime() & 0xFF)));
+    DistributedRowMatrix L =
+        VectorMatrixMultiplicationJob.runJob(affSeqFiles, D,
+            new Path(outputCalc, "laplacian-" + (System.nanoTime() & 0xFF)));
     L.configure(new JobConf(conf));
 
     // Next step: perform eigen-decomposition using LanczosSolver
     // since some of the eigen-output is spurious and will be eliminated
     // upon verification, we have to aim to overshoot and then discard
     // unnecessary vectors later
-    int overshoot = (int) ((double) clusters * SpectralKMeansDriver.OVERSHOOT_MULTIPLIER);
+    int overshoot = (int) ((double) clusters * OVERSHOOT_MULTIPLIER);
     List<Double> eigenValues = new ArrayList<Double>(overshoot);
     Matrix eigenVectors = new DenseMatrix(overshoot, numDims);
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
@@ -180,25 +176,13 @@ public class SpectralKMeansDriver extends AbstractJob {
     DistributedRowMatrix W = new DistributedRowMatrix(cleanedEigens, new Path(cleanedEigens, "tmp"), clusters, numDims);
     W.configure(new JobConf());
     DistributedRowMatrix Wtrans = W.transpose();
-    //		DistributedRowMatrix Wt = W.transpose();
+    //    DistributedRowMatrix Wt = W.transpose();
 
     // next step: normalize the rows of Wt to unit length
     Path unitVectors = new Path(outputCalc, "unitvectors-" + (System.nanoTime() & 0xFF));
     UnitVectorizerJob.runJob(Wtrans.getRowPath(), unitVectors);
     DistributedRowMatrix Wt = new DistributedRowMatrix(unitVectors, new Path(unitVectors, "tmp"), clusters, numDims);
     Wt.configure(new JobConf());
-
-    //		Iterator<MatrixSlice> i = W.iterator();
-    //		int x = 0;
-    //		while (i.hasNext()) {
-    //			Vector v = i.next().vector();
-    //			System.out.println("EIGENVECTOR " + (++x));
-    //			for (int c = 0; c < v.size(); c++) {
-    //				System.out.print(v.get(c) + " ");
-    //			}
-    //			System.out.println();
-    //		}
-    //		System.exit(0);
 
     // Finally, perform k-means clustering on the rows of L (or W)
     // generate random initial clusters
@@ -217,17 +201,9 @@ public class SpectralKMeansDriver extends AbstractJob {
     // The value is the weighted vector
     WeightedVectorWritable value = new WeightedVectorWritable();
 
-    //	    Map<Integer, Integer> map = new HashMap<Integer, Integer>();
     int id = 0;
     while (reader.next(clusterId, value)) {
-      //	    	Integer key = new Integer(clusterId.get());
-      //	    	if (map.containsKey(key)) {
-      //	    		Integer count = map.remove(key);
-      //	    		map.put(key, new Integer(count.intValue() + 1));
-      //	    	} else {
-      //	    		map.put(key, new Integer(1));
-      //	    	}
-      System.out.println((id++) + ": " + clusterId.get());
+      log.info("{}: {}", id++, clusterId.get());
       clusterId = new IntWritable(0);
       value = new WeightedVectorWritable();
     }

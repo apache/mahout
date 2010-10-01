@@ -65,17 +65,6 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   
   /**
    * Factored-out LanczosSolver for the purpose of invoking it programmatically
-   * @param originalConfig
-   * @param inputPathString
-   * @param outputTmpPath
-   * @param numRows
-   * @param numCols
-   * @param isSymmetric
-   * @param desiredRank
-   * @param eigenVectors
-   * @param eigenValues
-   * @param outputEigenVectorPathString
-   * @throws IOException
    */
   public void runJob(Configuration originalConfig, Path inputPath,
 		  			Path outputTmpPath, int numRows, int numCols,

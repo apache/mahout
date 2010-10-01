@@ -143,7 +143,6 @@ public final class TestMeanShift extends MahoutTestCase {
       printImage(canopies);
       System.out.println(iter++);
     }
-    assertTrue(true);
   }
 
   /**

@@ -273,7 +273,7 @@ public class DirichletClusterer {
     model.computeParameters();
     DirichletCluster cluster = state.getClusters().get(k);
     cluster.setModel(model);
-    return (DirichletCluster) cluster;
+    return cluster;
   }
 
   /**

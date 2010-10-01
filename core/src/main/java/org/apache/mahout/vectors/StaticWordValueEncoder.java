@@ -34,7 +34,7 @@ import java.util.Map;
 public class StaticWordValueEncoder extends WordValueEncoder {
   private Map<String, Double> dictionary;
   private double missingValueWeight = 1;
-  private byte[] nameBytes;
+  private final byte[] nameBytes;
 
   public StaticWordValueEncoder(String name) {
     super(name);

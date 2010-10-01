@@ -54,7 +54,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   protected Vector updateCounts;
 
   // weight of the prior on beta
-  private double lambda = 1e-5;
+  private double lambda = 1.0e-5;
   protected PriorFunction prior;
 
   // can we ignore any further regularization when doing classification?
@@ -109,6 +109,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     }
   }
 
+  @Override
   public Vector classifyNoLink(Vector instance) {
     // apply pending regularization to whichever coefficients matter
     regularize(instance);
@@ -126,6 +127,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    * @param instance A vector of features to be classified.
    * @return A vector of probabilities, one for each of the first n-1 categories.
    */
+  @Override
   public Vector classify(Vector instance) {
     return link(classifyNoLink(instance));
   }
@@ -139,6 +141,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    * @return The probability of the first of two categories.
    * @throws IllegalArgumentException If the classifier doesn't have two categories.
    */
+  @Override
   public double classifyScalar(Vector instance) {
     if (numCategories() != 2) {
       throw new IllegalArgumentException("Can only call classifyScalar with two categories");
@@ -253,6 +256,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     beta.set(i, j, betaIJ);
   }
 
+  @Override
   public int numCategories() {
     return numCategories;
   }
@@ -287,6 +291,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     regularize(all);
   }
 
+  @Override
   public void close() {
     if (!sealed) {
       step++;

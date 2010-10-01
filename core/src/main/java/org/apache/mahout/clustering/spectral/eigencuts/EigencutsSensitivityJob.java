@@ -67,6 +67,9 @@ import org.apache.mahout.math.VectorWritable;
  */
 public final class EigencutsSensitivityJob {
 
+  private EigencutsSensitivityJob() {
+  }
+
   /**
    * Initializes the configuration tasks, loads the needed data into
    * the HDFS cache, and executes the job.
@@ -74,19 +77,18 @@ public final class EigencutsSensitivityJob {
    * @param eigenvalues Vector of eigenvalues
    * @param diagonal Vector representing the diagonal matrix
    * @param eigenvectors Path to the DRM of eigenvectors
-   * @param beta
-   * @param tau
-   * @param delta
-   * @param epsilon
    * @param output Path to the output matrix (will have between n and full-rank
    *                non-zero elements)
-   * @throws IOException
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
    */
-  public static void runJob(Vector eigenvalues, Vector diagonal, Path 
-      eigenvectors, double beta, double tau, double delta, double epsilon, Path output) 
-      throws IOException, ClassNotFoundException, InterruptedException {
+  public static void runJob(Vector eigenvalues,
+                            Vector diagonal,
+                            Path eigenvectors,
+                            double beta,
+                            double tau,
+                            double delta,
+                            double epsilon,
+                            Path output)
+    throws IOException, ClassNotFoundException, InterruptedException {
     
     // save the two vectors to the distributed cache
     Configuration jobConfig = new Configuration();

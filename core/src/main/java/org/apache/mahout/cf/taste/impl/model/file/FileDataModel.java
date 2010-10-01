@@ -589,9 +589,9 @@ public class FileDataModel extends AbstractDataModel {
     }
   }
 
-  private void removeTimestamp(long userID,
-                               long itemID,
-                               FastByIDMap<FastByIDMap<Long>> timestamps) {
+  private static void removeTimestamp(long userID,
+                                      long itemID,
+                                      FastByIDMap<FastByIDMap<Long>> timestamps) {
     FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
     if (itemTimestamps != null) {
       itemTimestamps.remove(itemID);

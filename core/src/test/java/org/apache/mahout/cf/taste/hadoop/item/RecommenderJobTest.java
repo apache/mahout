@@ -512,7 +512,7 @@ public class RecommenderJobTest extends TasteTestCase {
     EasyMock.replay(context);
 
     VectorAndPrefsWritable vectorAndPrefs = new VectorAndPrefsWritable(similarityColumn, Arrays.asList(123L, 456L),
-        Arrays.asList(1f, 3f));
+        Arrays.asList(1.0f, 3.0f));
 
     new PartialMultiplyMapper().map(new VarIntWritable(1), vectorAndPrefs, context);
 

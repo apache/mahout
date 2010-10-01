@@ -92,7 +92,6 @@ public final class TestVectorModelClassifier extends MahoutTestCase {
       classifier.classify(new DenseVector(2));
       fail("Expected NotImplementedException");
     } catch (NotImplementedException e) {
-      assertTrue(true);
     }
   }
 

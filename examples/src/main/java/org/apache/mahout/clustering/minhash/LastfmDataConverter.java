@@ -123,7 +123,7 @@ public final class LastfmDataConverter {
         features.add(featureIdx);
         parsedRecords++;
         // Update the progress
-        percentDone = (parsedRecords * 100) / totalRecords;
+        percentDone = (parsedRecords * 100.0) / totalRecords;
         msg = usedMemory() + "Converting data to internal vector format: ";
         if (percentDone > prevPercentDone) {
           System.out.print('\r' + msg + percentDone + '%');
@@ -171,7 +171,7 @@ public final class LastfmDataConverter {
         featuresWritable.set(featureVector);
         writer.append(itemWritable, featuresWritable);
         // Update the progress
-        double percentDone = ((++doneRecords) * 100) / totalRecords;
+        double percentDone = ((++doneRecords) * 100.0) / totalRecords;
         if (percentDone > prevPercentDone) {
           System.out.print('\r' + msg + percentDone + "% " + ((percentDone >= 100) ? "Completed\n" : ""));
           prevPercentDone++;

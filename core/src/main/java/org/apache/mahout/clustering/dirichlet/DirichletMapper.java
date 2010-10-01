@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -66,10 +65,6 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
       throw new IllegalStateException(e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
-      throw new IllegalStateException(e);
     }
   }
 
@@ -77,7 +72,7 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     this.clusterer = new DirichletClusterer(state);
   }
 
-  public static DirichletState getDirichletState(Configuration conf) throws NoSuchMethodException, InvocationTargetException {
+  public static DirichletState getDirichletState(Configuration conf) {
     String statePath = conf.get(DirichletDriver.STATE_IN_KEY);
     String json = conf.get(DirichletDriver.MODEL_DISTRIBUTION_KEY);
     GsonBuilder builder = new GsonBuilder();

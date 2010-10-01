@@ -37,19 +37,17 @@ public class AsyncEigenVerifier extends SimpleEigenVerifier {
   }
 
   @Override
-  public EigenStatus verify(VectorIterable corpus, Vector vector) {
-    synchronized (status) {
-      if (!finished && !started) { // not yet started or finished, so start!
-        status = new EigenStatus(-1, 0);
-        Vector vectorCopy = vector.clone();
-        threadPool.execute(new VerifierRunnable(corpus, vectorCopy));
-        started = true;
-      }
-      if (finished) {
-        finished = false;
-      }
-      return status;
+  public synchronized EigenStatus verify(VectorIterable corpus, Vector vector) {
+    if (!finished && !started) { // not yet started or finished, so start!
+      status = new EigenStatus(-1, 0);
+      Vector vectorCopy = vector.clone();
+      threadPool.execute(new VerifierRunnable(corpus, vectorCopy));
+      started = true;
     }
+    if (finished) {
+      finished = false;
+    }
+    return status;
   }
 
   protected EigenStatus innerVerify(VectorIterable corpus, Vector vector) {
@@ -67,7 +65,7 @@ public class AsyncEigenVerifier extends SimpleEigenVerifier {
 
     public void run() {
       EigenStatus status = innerVerify(corpus, vector);
-      synchronized (AsyncEigenVerifier.this.status) {
+      synchronized (AsyncEigenVerifier.this) {
         AsyncEigenVerifier.this.status = status;
         finished = true;
         started = false;

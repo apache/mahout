@@ -42,7 +42,10 @@ import org.apache.mahout.math.function.Functions;
  */
 public final class UnitVectorizerJob {
 
-  public static void runJob(Path input, Path output) 
+  private UnitVectorizerJob() {
+  }
+
+  public static void runJob(Path input, Path output)
     throws IOException, InterruptedException, ClassNotFoundException {
     
     Configuration conf = new Configuration();
@@ -83,9 +86,9 @@ public final class UnitVectorizerJob {
      * @param u
      * @return
      */
-    private double vectorNorm(Vector u) {
+    private static double vectorNorm(Vector u) {
       double retval = 0.0;
-      for (Vector.Element e : u) {;
+      for (Vector.Element e : u) {
         retval += Functions.POW.apply(e.get(), 2);
       }
       return Functions.SQRT.apply(retval);

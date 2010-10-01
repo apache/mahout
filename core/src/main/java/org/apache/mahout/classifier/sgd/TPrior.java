@@ -22,7 +22,7 @@ import org.apache.commons.math.special.Gamma;
 /**
  * Provides a t-distribution as a prior.
  */
-public class TPrior extends PriorFunction {
+public class TPrior implements PriorFunction {
   private final double df;
 
   public TPrior(double df) {

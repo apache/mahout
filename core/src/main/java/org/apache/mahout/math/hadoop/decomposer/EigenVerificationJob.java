@@ -205,7 +205,7 @@ public class EigenVerificationJob extends AbstractJob {
       // (latter is built-in, since numEigensWritten will always be > 0
       numEigensWritten++;
       if (numEigensWritten == maxEigensToKeep) {
-        log.info("{} of the {} total eigens have been written", new Integer(maxEigensToKeep), new Integer(prunedEigenMeta.size()));
+        log.info("{} of the {} total eigens have been written", maxEigensToKeep, prunedEigenMeta.size());
         break;
       }
     }
@@ -299,7 +299,7 @@ public class EigenVerificationJob extends AbstractJob {
     corpus = c;
 
     eigenVerifier = new SimpleEigenVerifier();
-    OrthonormalityVerifier orthoVerifier = new OrthonormalityVerifier();
+    //OrthonormalityVerifier orthoVerifier = new OrthonormalityVerifier();
     VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
     // FIXME: Why is the above vector computed if it is never used?
 

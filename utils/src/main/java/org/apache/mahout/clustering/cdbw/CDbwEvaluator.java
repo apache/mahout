@@ -241,16 +241,16 @@ public class CDbwEvaluator {
     stdev /= c;
     // accumulate the summations
     double sumI = 0.0;
-    for (int i = 0; i < clusters.size(); i++) {
-      Integer cI = clusters.get(i).getId();
+    for (Cluster cluster : clusters) {
+      Integer cI = cluster.getId();
       List<VectorWritable> repPtsI = representativePoints.get(cI);
       int r = repPtsI.size();
       double sumJ = 0.0;
-      // compute the term density (eqn 6) 
+      // compute the term density (eqn 6)
       for (int j = 0; j < r; j++) {
         // compute f(x, vIJ) (eqn 7)
         Vector repJ = repPtsI.get(j).get();
-        double densityIJ = (measure.distance(clusters.get(i).getCenter(), repJ) <= stdev ? 1.0 : 0.0);
+        double densityIJ = (measure.distance(cluster.getCenter(), repJ) <= stdev ? 1.0 : 0.0);
         // accumulate sumJ
         sumJ += densityIJ / stdev;
       }
@@ -338,11 +338,11 @@ public class CDbwEvaluator {
           density = minDistance * interDensity / stdSum;
         }
 
-        log.debug("minDistance[" + cI + "," + cJ + "]=" + minDistance);
+        log.debug("minDistance[" + cI + ',' + cJ + "]=" + minDistance);
         log.debug("stDev[" + cI + "]=" + stDevI);
         log.debug("stDev[" + cJ + "]=" + stDevJ);
-        log.debug("interDensity[" + cI + "," + cJ + "]=" + interDensity);
-        log.debug("density[" + cI + "," + cJ + "]=" + density);
+        log.debug("interDensity[" + cI + ',' + cJ + "]=" + interDensity);
+        log.debug("density[" + cI + ',' + cJ + "]=" + density);
 
         sum += density;
       }

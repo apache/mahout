@@ -58,7 +58,7 @@ public class AsymmetricSampledNormalDistribution extends AbstractVectorModelDist
   public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
     Model<VectorWritable>[] result = new AsymmetricSampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
-      AsymmetricSampledNormalModel m = (AsymmetricSampledNormalModel) posterior[i];
+      Model<VectorWritable> m = posterior[i];
       result[i] = m.sampleFromPosterior();
     }
     return result;

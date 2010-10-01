@@ -34,6 +34,7 @@ public class BayesParameters extends Parameters {
    * @param gramSize
    * @deprecated use {@link #BayesParameters()} and {@link #setGramSize(int)} instead
    */
+  @Deprecated
   public BayesParameters(int gramSize) {
     this.setGramSize(gramSize);
   }

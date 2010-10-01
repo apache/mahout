@@ -38,14 +38,13 @@ import org.apache.mahout.math.VectorWritable;
  */
 public final class VectorCache {
 
+  private VectorCache() {
+  }
+
   /**
    * 
    * @param key SequenceFile key
    * @param vector Vector to save, to be wrapped as VectorWritable
-   * @param output
-   * @param conf
-   * @param overwritePath
-   * @param deleteOnExit
    */
   public static void save(Writable key, Vector vector, Path output, Configuration
       conf, boolean overwritePath, boolean deleteOnExit) throws IOException {
@@ -73,42 +72,27 @@ public final class VectorCache {
   /**
    * Calls the save() method, setting the cache to overwrite any previous
    * Path and to delete the path after exiting
-   * @param key
-   * @param vector
-   * @param output
-   * @param conf
    */
-  public static void save(Writable key, Vector vector, Path output, Configuration conf)
-    throws IOException {
-    VectorCache.save(key, vector, output, conf, true, true);
+  public static void save(Writable key, Vector vector, Path output, Configuration conf) throws IOException {
+    save(key, vector, output, conf, true, true);
   }
   
   /**
    * Loads the vector with the specified key from the cache. Returns null
    * if nothing is found (up to the caller to handle this accordingly)
-   * 
-   * @param key
-   * @param conf
-   * @return
-   * @throws IOException
    */
   public static Vector load(Writable key, Configuration conf) throws IOException {
     URI [] files = DistributedCache.getCacheFiles(conf);
     if (files == null || files.length < 1) {
       return null;
     }
-    return VectorCache.load(key, conf, new Path(files[0].getPath()));
+    return load(key, conf, new Path(files[0].getPath()));
   }
   
   /**
    * Loads a Vector from the specified path
-   * 
-   * @param key
-   * @param conf
-   * @return
    */
-  public static Vector load(Writable key, Configuration conf, Path input) 
-    throws IOException {
+  public static Vector load(Writable key, Configuration conf, Path input) throws IOException {
 
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, input, conf);

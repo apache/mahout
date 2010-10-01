@@ -184,7 +184,7 @@ public class EvolutionaryProcess<T extends Payload<T>> {
 
   public void close() {
     List<Runnable> remainingTasks = pool.shutdownNow();
-    if (remainingTasks.size() > 0) {
+    if (!remainingTasks.isEmpty()) {
       throw new EarlyTerminationException("Had to forcefully shut down " + remainingTasks.size() + " tasks");
     }
   }

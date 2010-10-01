@@ -17,7 +17,7 @@
 package org.apache.mahout.clustering;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
 import org.apache.mahout.common.MahoutTestCase;
@@ -28,12 +28,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestGaussianAccumulators extends MahoutTestCase {
+public final class TestGaussianAccumulators extends MahoutTestCase {
 
-  private static List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  private Collection<VectorWritable> sampleData = new ArrayList<VectorWritable>();
 
   private static final Logger log = LoggerFactory.getLogger(TestGaussianAccumulators.class);
 
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -54,7 +55,7 @@ public class TestGaussianAccumulators extends MahoutTestCase {
    *          double standard deviation of the samples
    * @throws Exception 
    */
-  public static void generateSamples(int num, double mx, double my, double sd) throws Exception {
+  private void generateSamples(int num, double mx, double my, double sd) {
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] { num, mx, my, sd });
     for (int i = 0; i < num; i++) {
       sampleData.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sd),
@@ -76,7 +77,7 @@ public class TestGaussianAccumulators extends MahoutTestCase {
    * @param sdy
    *          double y-value standard deviation of the samples
    */
-  public static void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
+  private void generate2dSamples(int num, double mx, double my, double sdx, double sdy) {
     log.info("Generating {} samples m=[{}, {}] sd=[{}, {}]", new Object[] { num, mx, my, sdx, sdy });
     for (int i = 0; i < num; i++) {
       sampleData.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sdx),
@@ -84,7 +85,7 @@ public class TestGaussianAccumulators extends MahoutTestCase {
     }
   }
 
-  private void generateSamples() throws Exception {
+  private void generateSamples() {
     generate2dSamples(500, 1, 2, 3, 4);
   }
 

@@ -261,7 +261,7 @@ public final class TFIDFConverter {
    *          output directory were the partial vectors have to be created
    * @param sequentialAccess
    *          output vectors should be optimized for sequential access
-   * @param namedVectors
+   * @param namedVector
    *          output vectors should be named, retaining key (doc id) as a label
    */
   private static void makePartialVectors(Path input,

@@ -31,7 +31,6 @@ public class Cluster extends DistanceMeasureCluster {
 
   /** For (de)serialization as a Writable */
   public Cluster() {
-    super();
   }
 
   /**

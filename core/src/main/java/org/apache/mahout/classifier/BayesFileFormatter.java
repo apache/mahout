@@ -234,7 +234,7 @@ public final class BayesFileFormatter {
     TokenStream ts = analyzer.tokenStream("", reader);
     
     List<String> coll = new ArrayList<String>();
-    TermAttribute termAtt = (TermAttribute) ts.addAttribute(TermAttribute.class);
+    TermAttribute termAtt = ts.addAttribute(TermAttribute.class);
     while (ts.incrementToken()) {
       char[] termBuffer = termAtt.termBuffer();
       int termLen = termAtt.termLength();

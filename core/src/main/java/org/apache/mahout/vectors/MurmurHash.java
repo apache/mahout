@@ -70,9 +70,8 @@ public final class MurmurHash {
 
     int h = seed ^ buf.remaining();
 
-    int k;
     while (buf.remaining() >= 4) {
-      k = buf.getInt();
+      int k = buf.getInt();
 
       k *= m;
       k ^= k >>> r;

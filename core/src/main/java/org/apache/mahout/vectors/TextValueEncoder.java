@@ -38,7 +38,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
   private static final double LOG_2 = Math.log(2);
 
   private FeatureVectorEncoder wordEncoder;
-  private Multiset<String> counts;
+  private final Multiset<String> counts;
 
   public TextValueEncoder(String name) {
     super(name, 2);

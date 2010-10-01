@@ -85,6 +85,7 @@ public class NormalModel implements Cluster {
    * 
    * @return an NormalModel
    */
+  @Override
   public NormalModel sampleFromPosterior() {
     return new NormalModel(id, mean, stdDev);
   }

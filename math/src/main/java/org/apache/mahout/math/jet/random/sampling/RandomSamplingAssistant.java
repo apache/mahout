@@ -54,7 +54,7 @@ public final class RandomSamplingAssistant extends PersistentObject {
   }
 
   /** Not yet commented. */
-  protected void fetchNextBlock() {
+  void fetchNextBlock() {
     if (n > 0) {
       long last = buffer[bufferPosition];
       sampler.nextBlock((int) Math.min(n, MAX_BUFFER_SIZE), buffer, 0);

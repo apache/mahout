@@ -33,7 +33,7 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 final class SelectedDenseDoubleMatrix2D extends DoubleMatrix2D {
 
   /** The elements of this matrix. */
-  double[] elements;
+  final double[] elements;
 
   /** The offsets of the visible cells of this matrix. */
   private int[] rowOffsets;

@@ -24,7 +24,7 @@ package org.apache.mahout.classifier.sgd;
  * which can be approximated using different priors.  For large sparse systems, such
  * as text classification, the L1 prior is often used which favors sparse models.
  */
-public abstract class PriorFunction {
+public interface PriorFunction {
   /**
    * Applies the regularization to a coefficient.
    * @param oldValue        The previous value.
@@ -32,12 +32,12 @@ public abstract class PriorFunction {
    * @param learningRate    The learning rate with lambda baked in.
    * @return                The new coefficient value after regularization.
    */
-  public abstract double age(double oldValue, double generations, double learningRate);
+  double age(double oldValue, double generations, double learningRate);
 
   /**
    * Returns the log of the probability of a particular coefficient value according to the prior.
    * @param betaIJ          The coefficient.
    * @return                The log probability.
    */
-  public abstract double logP(double betaIJ);
+  double logP(double betaIJ);
 }

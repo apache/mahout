@@ -41,12 +41,14 @@ import org.junit.Test;
  */
 public class TestMatrixDiagonalizeJob extends MahoutTestCase {
   
-  private double [][] raw = { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} };
-  private int rawDimensions = 3;
+  private static final double[][] RAW = { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} };
+  private static final int RAW_DIMENSIONS = 3;
   
   private static double rowSum(double [] row) {
     double sum = 0;
-    for (int i = 0; i < row.length; i++) { sum += row[i]; }
+    for (double r : row) {
+      sum += r;
+    }
     return sum;
   }
 
@@ -54,7 +56,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
   public void testMatrixDiagonalizeMapper() throws Exception {
     MatrixDiagonalizeMapper mapper = new MatrixDiagonalizeMapper();
     Configuration conf = new Configuration();
-    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, rawDimensions);
+    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writers
     DummyRecordWriter<NullWritable, IntDoublePairWritable> writer = 
@@ -63,14 +65,14 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
       context = DummyRecordWriter.build(mapper, conf, writer);
     
     // perform the mapping
-    for (int i = 0; i < rawDimensions; i++) {
-      RandomAccessSparseVector toAdd = new RandomAccessSparseVector(rawDimensions);
-      toAdd.assign(raw[i]);
+    for (int i = 0; i < RAW_DIMENSIONS; i++) {
+      RandomAccessSparseVector toAdd = new RandomAccessSparseVector(RAW_DIMENSIONS);
+      toAdd.assign(RAW[i]);
       mapper.map(new IntWritable(i), new VectorWritable(toAdd), context);
     }
     
     // check the number of the results
-    assertEquals("Number of map results", rawDimensions, 
+    assertEquals("Number of map results", RAW_DIMENSIONS,
         writer.getValue(NullWritable.get()).size());
   }
   
@@ -78,7 +80,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
  public void testMatrixDiagonalizeReducer() throws Exception {
     MatrixDiagonalizeMapper mapper = new MatrixDiagonalizeMapper();
     Configuration conf = new Configuration();
-    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, rawDimensions);
+    conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, RAW_DIMENSIONS);
     
     // set up the dummy writers
     DummyRecordWriter<NullWritable, IntDoublePairWritable> mapWriter = 
@@ -87,9 +89,9 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
       mapContext = DummyRecordWriter.build(mapper, conf, mapWriter);
     
     // perform the mapping
-    for (int i = 0; i < rawDimensions; i++) {
-      RandomAccessSparseVector toAdd = new RandomAccessSparseVector(rawDimensions);
-      toAdd.assign(raw[i]);
+    for (int i = 0; i < RAW_DIMENSIONS; i++) {
+      RandomAccessSparseVector toAdd = new RandomAccessSparseVector(RAW_DIMENSIONS);
+      toAdd.assign(RAW[i]);
       mapper.map(new IntWritable(i), new VectorWritable(toAdd), mapContext);
     }
     
@@ -109,7 +111,7 @@ public class TestMatrixDiagonalizeJob extends MahoutTestCase {
     assertEquals("Only a single resulting vector", 1, list.size());
     Vector v = list.get(0).get();
     for (int i = 0; i < v.size(); i++) {
-      assertEquals("Element sum is correct", rowSum(raw[i]), v.get(i),0.01);
+      assertEquals("Element sum is correct", rowSum(RAW[i]), v.get(i),0.01);
     }
   }
 }

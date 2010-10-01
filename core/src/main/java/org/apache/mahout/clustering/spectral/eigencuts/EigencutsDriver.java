@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.spectral.eigencuts;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public class EigencutsDriver extends AbstractJob {
 
   public static final double OVERSHOOT_MULTIPLIER = 1.5;
 
-  public static void main(String args[]) throws Exception {
+  public static void main(String[] args) throws Exception {
     ToolRunner.run(new EigencutsDriver(), args);
   }
 
@@ -61,8 +62,8 @@ public class EigencutsDriver extends AbstractJob {
     addOption("output", "o", "Output of clusterings", true);
     addOption("half-life", "b", "Minimal half-life threshold", true);
     addOption("dimensions", "d", "Square dimensions of affinity matrix", true);
-    addOption("epsilon", "e", "Half-life threshold coefficient", Double.toString(EigencutsDriver.EPSILON_DEFAULT));
-    addOption("tau", "t", "Threshold for cutting affinities", Double.toString(EigencutsDriver.TAU_DEFAULT));
+    addOption("epsilon", "e", "Half-life threshold coefficient", Double.toString(EPSILON_DEFAULT));
+    addOption("tau", "t", "Threshold for cutting affinities", Double.toString(TAU_DEFAULT));
     addOption(DefaultOptionCreator.overwriteOption().create());
     Map<String, String> parsedArgs = parseArguments(arg0);
     if (parsedArgs == null) {
@@ -95,12 +96,15 @@ public class EigencutsDriver extends AbstractJob {
    * @param halflife the double minimum half-life threshold
    * @param epsilon the double coefficient for setting minimum half-life threshold
    * @param tau the double tau threshold for cutting links in the affinity graph
-   * @throws IOException
-   * @throws InterruptedException
-   * @throws ClassNotFoundException
    */
-  public static void run(Configuration conf, Path input, Path output, int dimensions, double halflife, double epsilon, double tau)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  public static void run(Configuration conf,
+                         Path input,
+                         Path output,
+                         int dimensions,
+                         double halflife,
+                         double epsilon,
+                         double tau)
+    throws IOException, InterruptedException, ClassNotFoundException {
     // set the instance variables
     // create a few new Paths for temp files and transformations
     Path outputCalc = new Path(output, "calculations");
@@ -109,19 +113,20 @@ public class EigencutsDriver extends AbstractJob {
     DistributedRowMatrix A = AffinityMatrixInputJob.runJob(input, outputCalc, dimensions);
     Vector D = MatrixDiagonalizeJob.runJob(A.getRowPath(), dimensions);
 
-    long numCuts = 0;
+    long numCuts;
     do {
       // first three steps are the same as spectral k-means:
       // 1) calculate D from A
       // 2) calculate L = D^-0.5 * A * D^-0.5
       // 3) calculate eigenvectors of L
 
-      DistributedRowMatrix L = VectorMatrixMultiplicationJob.runJob(A.getRowPath(), D, new Path(outputCalc, "laplacian-"
-          + (System.nanoTime() & 0xFF)));
+      DistributedRowMatrix L =
+          VectorMatrixMultiplicationJob.runJob(A.getRowPath(), D,
+              new Path(outputCalc, "laplacian-" + (System.nanoTime() & 0xFF)));
       L.configure(new JobConf(conf));
 
       // eigendecomposition (step 3)
-      int overshoot = (int) ((double) dimensions * EigencutsDriver.OVERSHOOT_MULTIPLIER);
+      int overshoot = (int) ((double) dimensions * OVERSHOOT_MULTIPLIER);
       List<Double> eigenValues = new ArrayList<Double>(overshoot);
       Matrix eigenVectors = new DenseMatrix(overshoot, dimensions);
       DistributedRowMatrix U = performEigenDecomposition(L, dimensions, overshoot, eigenValues, eigenVectors, outputCalc);
@@ -158,13 +163,6 @@ public class EigencutsDriver extends AbstractJob {
    * Does most of the heavy lifting in setting up Paths, configuring return
    * values, and generally performing the tedious administrative tasks involved
    * in an eigen-decomposition and running the verifier
-   * @param input
-   * @param numEigenVectors
-   * @param overshoot
-   * @param eigenValues
-   * @param eigenVectors
-   * @param tmp
-   * @return
    */
   public static DistributedRowMatrix performEigenDecomposition(DistributedRowMatrix input,
                                                                int numEigenVectors,
@@ -212,14 +210,12 @@ public class EigencutsDriver extends AbstractJob {
   /**
    * Iteratively loops through the list, converting it to a Vector of double
    * primitives worthy of other Mahout operations
-   * @param list
-   * @return
    */
-  private static Vector listToVector(List<Double> list) {
+  private static Vector listToVector(Collection<Double> list) {
     Vector retval = new DenseVector(list.size());
     int index = 0;
     for (Double d : list) {
-      retval.setQuick(index++, d.doubleValue());
+      retval.setQuick(index++, d);
     }
     return retval;
   }

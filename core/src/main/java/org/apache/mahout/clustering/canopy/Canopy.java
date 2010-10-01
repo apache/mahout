@@ -17,9 +17,6 @@
 
 package org.apache.mahout.clustering.canopy;
 
-import java.io.DataInput;
-import java.io.IOException;
-
 import org.apache.mahout.clustering.DistanceMeasureCluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.Vector;
@@ -46,11 +43,6 @@ public class Canopy extends DistanceMeasureCluster {
     observe(center);
   }
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    super.readFields(in);
-  }
-  
   public String asFormatString() {
     return "C" + this.getId() + ": " + this.computeCentroid().asFormatString();
   }

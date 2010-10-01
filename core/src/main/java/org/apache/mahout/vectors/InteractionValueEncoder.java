@@ -19,6 +19,7 @@ package org.apache.mahout.vectors;
 
 import org.apache.mahout.math.Vector;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public class InteractionValueEncoder extends FeatureVectorEncoder {
@@ -85,7 +86,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
         for (Integer j : jValues) {
           int n = (k + j) % data.size();
           if (isTraceEnabled()) {
-            trace(String.format("%s:%s", originalForm1, originalForm2), n);            
+            trace(String.format("%s:%s", Arrays.toString(originalForm1), Arrays.toString(originalForm2)), n);
           }
           data.set(n, data.get(n) + w);
         }

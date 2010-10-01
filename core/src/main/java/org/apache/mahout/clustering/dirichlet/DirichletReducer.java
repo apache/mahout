@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -46,10 +45,6 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
     } catch (SecurityException e) {
       throw new IllegalStateException(e);
     } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException(e);
-    } catch (InvocationTargetException e) {
       throw new IllegalStateException(e);
     }
   }
