@@ -25,6 +25,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.ClassifierData;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.examples.MahoutTestCase;
@@ -36,24 +39,29 @@ public final class SplitBayesInputTest extends MahoutTestCase {
 
   private OpenObjectIntHashMap<String> countMap;
   private Charset charset;
-  private File tempInputFile;
-  private File tempTrainingDirectory;
-  private File tempTestDirectory;
-  private File tempInputDirectory;
+  private FileSystem fs;
+  private Configuration conf;
+  private Path tempInputFile;
+  private Path tempTrainingDirectory;
+  private Path tempTestDirectory;
+  private Path tempInputDirectory;
   private SplitBayesInput si;
     
   @Override
   @Before
   public void setUp() throws Exception {
+    conf = new Configuration();
+    fs   = FileSystem.get(conf);
+    
     super.setUp();
   
     countMap = new OpenObjectIntHashMap<String>();
     
     charset = Charset.forName("UTF-8");
-    tempInputFile = getTestTempFile("bayesinputfile");
-    tempTrainingDirectory = getTestTempDir("bayestrain");
-    tempTestDirectory = getTestTempDir("bayestest");
-    tempInputDirectory = getTestTempDir("bayesinputdir");
+    tempInputFile = getTestTempFilePath("bayesinputfile");
+    tempTrainingDirectory = getTestTempDirPath("bayestrain");
+    tempTestDirectory = getTestTempDirPath("bayestest");
+    tempInputDirectory = getTestTempDirPath("bayesinputdir");
     
     si = new SplitBayesInput();
     si.setTrainingOutputDirectory(tempTrainingDirectory);
@@ -71,9 +79,10 @@ public final class SplitBayesInputTest extends MahoutTestCase {
         if (writer != null) {
           IOUtils.quietClose(writer);
         }
+        
         writer = new BufferedWriter(
             new OutputStreamWriter(
-                new FileOutputStream(new File(tempInputDirectory, currentLabel)), Charset.forName("UTF-8")));
+                fs.create(new Path(tempInputDirectory, currentLabel)), Charset.forName("UTF-8")));
       }
       countMap.adjustOrPutValue(currentLabel, 1, 1);
       writer.write(currentLabel + '\t' + entry[1] + '\n');
@@ -83,7 +92,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
 
   private void writeSingleInputFile() throws IOException {
     BufferedWriter writer = new BufferedWriter(
-        new OutputStreamWriter(new FileOutputStream(tempInputFile), Charset.forName("UTF-8")));
+        new OutputStreamWriter(fs.create(tempInputFile), Charset.forName("UTF-8")));
     for (String[] entry : ClassifierData.DATA) {
       writer.write(entry[0] + '\t' + entry[1] + '\n');
     }
@@ -99,9 +108,9 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     si.setTestSplitSize(testSplitSize);
     si.setCallback(new SplitBayesInput.SplitCallback() {
           @Override
-          public void splitComplete(File inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
+          public void splitComplete(Path inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
             int trainingLines = countMap.get(inputFile.getName()) - testSplitSize;
-            assertSplit(inputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
+            assertSplit(fs, inputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
           }
     });
     
@@ -207,8 +216,8 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     }
     
     @Override
-    public void splitComplete(File inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
-      assertSplit(tempInputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
+    public void splitComplete(Path inputFile, int lineCount, int trainCount, int testCount, int testSplitStart) {
+      assertSplit(fs, tempInputFile, charset, testSplitSize, trainingLines, tempTrainingDirectory, tempTestDirectory);
     }
   }
   
@@ -223,21 +232,22 @@ public final class SplitBayesInputTest extends MahoutTestCase {
     } 
   }
   
-  private static void assertSplit(File tempInputFile,
+  private static void assertSplit(FileSystem fs,
+                                  Path tempInputFile,
                                   Charset charset,
                                   int testSplitSize,
                                   int trainingLines,
-                                  File tempTrainingDirectory,
-                                  File tempTestDirectory) {
+                                  Path tempTrainingDirectory,
+                                  Path tempTestDirectory) {
 
     try {
-      File testFile = new File(tempTestDirectory, tempInputFile.getName());
-      assertTrue("test file exists", testFile.isFile());
-      assertEquals("test line count", testSplitSize, SplitBayesInput.countLines(testFile, charset));
+      Path testFile = new Path(tempTestDirectory, tempInputFile.getName());
+      //assertTrue("test file exists", testFile.isFile());
+      assertEquals("test line count", testSplitSize, SplitBayesInput.countLines(fs, testFile, charset));
 
-      File trainingFile = new File(tempTrainingDirectory, tempInputFile.getName());
-      assertTrue("training file exists", trainingFile.isFile());
-      assertEquals("training line count", trainingLines, SplitBayesInput.countLines(trainingFile, charset));
+      Path trainingFile = new Path(tempTrainingDirectory, tempInputFile.getName());
+      //assertTrue("training file exists", trainingFile.isFile());
+      assertEquals("training line count", trainingLines, SplitBayesInput.countLines(fs, trainingFile, charset));
     } catch (IOException ioe) {
       fail(ioe.toString());
     }

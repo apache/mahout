@@ -19,8 +19,6 @@ package org.apache.mahout.classifier.bayes;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -36,6 +34,10 @@ import org.apache.commons.cli2.builder.ArgumentBuilder;
 import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.RandomUtils;
@@ -116,9 +118,11 @@ public class SplitBayesInput {
   private int testRandomSelectionPct = -1;
   private Charset charset = Charset.forName("UTF-8");
   
-  private File inputDirectory;
-  private File trainingOutputDirectory;
-  private File testOutputDirectory;
+  private Configuration conf;
+  private FileSystem fs; 
+  private Path inputDirectory;
+  private Path trainingOutputDirectory;
+  private Path testOutputDirectory;
   
   private SplitCallback callback;
   
@@ -127,6 +131,11 @@ public class SplitBayesInput {
     if (si.parseArgs(args)) {
       si.splitDirectory();
     }
+  }
+  
+  public SplitBayesInput() throws IOException {
+    conf = new Configuration();
+    fs = FileSystem.get(conf);
   }
   
   /** Configure this instance based on the command-line arguments contained within provided array. 
@@ -196,9 +205,9 @@ public class SplitBayesInput {
         return false;
       }
       
-      inputDirectory = new File((String) cmdLine.getValue(inputDirOpt));
-      trainingOutputDirectory = new File((String) cmdLine.getValue(trainingOutputDirOpt));
-      testOutputDirectory = new File((String) cmdLine.getValue(testOutputDirOpt));
+      inputDirectory = new Path((String) cmdLine.getValue(inputDirOpt));
+      trainingOutputDirectory = new Path((String) cmdLine.getValue(trainingOutputDirOpt));
+      testOutputDirectory = new Path((String) cmdLine.getValue(testOutputDirOpt));
      
       charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
 
@@ -228,8 +237,8 @@ public class SplitBayesInput {
         setTestRandomSelectionPct(Integer.parseInt((String) cmdLine.getValue(randomSelectionPctOpt)));
       }
 
-      trainingOutputDirectory.mkdirs();
-      testOutputDirectory.mkdirs();
+      fs.mkdirs(trainingOutputDirectory);
+      fs.mkdirs(testOutputDirectory);
      
     } catch (OptionException e) {
       log.error("Command-line option Exception", e);
@@ -256,34 +265,41 @@ public class SplitBayesInput {
    * @param inputDir
    * @throws IOException
    */
-  public void splitDirectory(File inputDir) throws IOException {
-    if (!inputDir.isDirectory()) {
-      throw new IOException(inputDir + " does not exist, or is not a directory");
+  public void splitDirectory(Path inputDir) throws IOException {
+    if (fs.getFileStatus(inputDir) == null) {
+      throw new IOException(inputDir + " does not exist");
     }
-    
+    else if (!fs.getFileStatus(inputDir).isDir()) {
+      throw new IOException(inputDir + " is not a directory");
+    }
+
     // input dir contains one file per category.
-    File[] inputFiles = inputDir.listFiles();
-    for (File inputFile : inputFiles) {
-      if (inputFile.isFile()) {
-        splitFile(inputFile);
+    FileStatus[] fileStats = fs.listStatus(inputDir);
+    for (FileStatus inputFile : fileStats) {
+      if (!inputFile.isDir()) {
+        splitFile(inputFile.getPath());
       }
     }
   }
+  
 
   /** Perform a split on the specified input file. Results will be written to files of the same name in the specified 
    *  training and test output directories. The {@link #validate()} method is called prior to executing the split.
    */
-  public void splitFile(File inputFile) throws IOException {
-    if (!inputFile.isFile()) {
-      throw new IOException(inputFile + " does not exist, or is not a file");
+  public void splitFile(Path inputFile) throws IOException {
+    if (fs.getFileStatus(inputFile) == null) {
+      throw new IOException(inputFile + " does not exist");
+    }
+    else if (fs.getFileStatus(inputFile).isDir()) {
+      throw new IOException(inputFile + " is a directory");
     }
     
     validate();
     
-    File testOutputFile = new File(testOutputDirectory, inputFile.getName());
-    File trainingOutputFile = new File(trainingOutputDirectory, inputFile.getName());
+    Path testOutputFile = new Path(testOutputDirectory, inputFile.getName());
+    Path trainingOutputFile = new Path(trainingOutputDirectory, inputFile.getName());
     
-    int lineCount = countLines(inputFile, charset);
+    int lineCount = countLines(fs, inputFile, charset);
     
     log.info("{} has {} lines", inputFile.getName(), lineCount);
     
@@ -333,9 +349,10 @@ public class SplitBayesInput {
                  new Object[] {inputFile, testSplitSize, lineCount - testSplitSize});
       }
     }
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), charset));
-    Writer trainingWriter = new OutputStreamWriter(new FileOutputStream(trainingOutputFile), charset);
-    Writer testWriter     = new OutputStreamWriter(new FileOutputStream(testOutputFile), charset);
+    
+    BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
+    Writer trainingWriter = new OutputStreamWriter(fs.create(trainingOutputFile), charset);
+    Writer testWriter     = new OutputStreamWriter(fs.create(testOutputFile), charset);
 
     int pos = 0;
     int trainCount = 0;
@@ -429,33 +446,33 @@ public class SplitBayesInput {
     this.charset = charset;
   }
 
-  public File getInputDirectory() {
+  public Path getInputDirectory() {
     return inputDirectory;
   }
 
   /** Set the directory from which input data will be read when the the {@link #splitDirectory()} method is invoked
    */
-  public void setInputDirectory(File inputDir) {
+  public void setInputDirectory(Path inputDir) {
     this.inputDirectory = inputDir;
   }
 
-  public File getTrainingOutputDirectory() {
+  public Path getTrainingOutputDirectory() {
     return trainingOutputDirectory;
   }
 
   /** Set the directory to which training data will be written.
    */
-  public void setTrainingOutputDirectory(File trainingOutputDir) {
+  public void setTrainingOutputDirectory(Path trainingOutputDir) {
     this.trainingOutputDirectory = trainingOutputDir;
   }
 
-  public File getTestOutputDirectory() {
+  public Path getTestOutputDirectory() {
     return testOutputDirectory;
   }
 
   /** Set the directory to which test data will be written.
    */
-  public void setTestOutputDirectory(File testOutputDir) {
+  public void setTestOutputDirectory(Path testOutputDir) {
     this.testOutputDirectory = testOutputDir;
   }
 
@@ -552,12 +569,18 @@ public class SplitBayesInput {
       throw new IllegalArgumentException("no test output directory was specified");
     }
 
-    if (!trainingOutputDirectory.isDirectory()) {
-      throw new IOException(inputDirectory + " does not exist, or is not a directory");
+    if (fs.getFileStatus(trainingOutputDirectory) == null) {
+      throw new IOException(trainingOutputDirectory + " does not exist");
+    }
+    else if (!fs.getFileStatus(trainingOutputDirectory).isDir()) {
+      throw new IOException(trainingOutputDirectory + " is not a directory");
     }
 
-    if (!testOutputDirectory.isDirectory()) {
-      throw new IOException(inputDirectory + " does not exist, or is not a directory");
+    if (fs.getFileStatus(testOutputDirectory) == null) {
+      throw new IOException(testOutputDirectory + " does not exist");
+    }
+    else if (!fs.getFileStatus(testOutputDirectory).isDir()) {
+      throw new IOException(testOutputDirectory + " is not a directory");
     }
   }
   
@@ -574,8 +597,8 @@ public class SplitBayesInput {
    * @throws IOException 
    *   if there is a problem opening or reading the file.
    */
-  public static int countLines(File inputFile, Charset charset) throws IOException {
-    BufferedReader countReader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), charset));
+  public static int countLines(FileSystem fs, Path inputFile, Charset charset) throws IOException {
+    BufferedReader countReader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
     int lineCount = 0;
     while (countReader.readLine() != null) {
       lineCount++;
@@ -587,7 +610,7 @@ public class SplitBayesInput {
   
   /** Used to pass information back to a caller once a file has been split without the need for a data object */
   public interface SplitCallback {
-    void splitComplete(File inputFile, int lineCount, int trainCount, int testCount, int testSplitStart);
+    void splitComplete(Path inputFile, int lineCount, int trainCount, int testCount, int testSplitStart);
   }
 
 }
