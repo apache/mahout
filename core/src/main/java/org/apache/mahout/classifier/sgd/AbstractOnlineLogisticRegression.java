@@ -163,11 +163,8 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     // push coefficients back to zero based on the prior
     regularize(instance);
 
-    // what does the current model say?
-    Vector v = classify(instance);
-
     // update each row of coefficients according to result
-    Vector gradient = this.gradient.apply(groupKey, actual, v);
+    Vector gradient = this.gradient.apply(groupKey, actual, instance, this);
     for (int i = 0; i < numCategories - 1; i++) {
       double gradientBase = gradient.get(i);
 
@@ -177,7 +174,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
         Vector.Element updateLocation = nonZeros.next();
         int j = updateLocation.index();
 
-        double newValue = beta.getQuick(i, j) + learningRate * gradientBase * instance.get(j) * perTermLearningRate(j);
+        double newValue = beta.getQuick(i, j) + gradientBase * learningRate * perTermLearningRate(j) * instance.get(j);
         beta.setQuick(i, j, newValue);
       }
     }
@@ -324,24 +321,4 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
     return k < 1;
   }
 
-  public static class DefaultGradient implements Gradient {
-    /**
-     * Provides a default gradient computation useful for logistic regression.  This
-     * can be over-ridden to incorporate AUC driven learning.
-     * <p>
-     * See www.eecs.tufts.edu/~dsculley/papers/combined-ranking-and-regression.pdf
-     * @param groupKey     A grouping key to allow per-something AUC loss to be used for training.
-     *@param actual       The target variable value.
-     * @param v            The current score vector.   @return
-     */
-    @Override
-    public final Vector apply(String groupKey, int actual, Vector v) {
-      Vector r = v.like();
-      if (actual != 0) {
-        r.setQuick(actual - 1, 1);
-      }
-      r.assign(v, Functions.MINUS);
-      return r;
-    }
-  }
 }

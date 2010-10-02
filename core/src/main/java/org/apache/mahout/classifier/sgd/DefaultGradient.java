@@ -19,12 +19,31 @@ package org.apache.mahout.classifier.sgd;
 
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.Functions;
 
 /**
- * Provides the ability to inject a gradient into the SGD logistic regresion.
- * Typical uses of this are to use a ranking score such as AUC instead of a
- * normal loss function.
+ * Implements the basic logistic training law.
  */
-public interface Gradient {
-  Vector apply(String groupKey, int actual, Vector instance, AbstractVectorClassifier classifier);
+public class DefaultGradient implements Gradient {
+  /**
+   * Provides a default gradient computation useful for logistic regression.  
+   *
+   * @param groupKey     A grouping key to allow per-something AUC loss to be used for training.
+   * @param actual       The target variable value.
+   * @param instance     The current feature vector to use for gradient computation
+   * @param classifier   The classifier that can compute scores
+   * @return  The gradient to be applied to beta
+   */
+  @Override
+  public final Vector apply(String groupKey, int actual, Vector instance, AbstractVectorClassifier classifier) {
+    // what does the current model say?
+    Vector v = classifier.classify(instance);
+
+    Vector r = v.like();
+    if (actual != 0) {
+      r.setQuick(actual - 1, 1);
+    }
+    r.assign(v, Functions.MINUS);
+    return r;
+  }
 }
