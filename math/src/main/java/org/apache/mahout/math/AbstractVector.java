@@ -161,6 +161,30 @@ public abstract class AbstractVector implements Vector {
   public Vector normalize(double power) {
     return divide(norm(power));
   }
+  
+  public Vector logNormalize() {
+      return logNormalize(2, Math.sqrt(dotSelf()));
+  }
+  
+  public Vector logNormalize(double power) {
+    return logNormalize(power, norm(power));
+  }
+  
+  public Vector logNormalize(double power, double normLength) {   
+    // we can special case certain powers
+    if (Double.isInfinite(power) || power <= 1.0) {
+      throw new IllegalArgumentException("Power must be > 1 and < infinity");
+    } else {
+      double denominator = normLength * Math.log(power);
+      Vector result = like().assign(this);
+      Iterator<Element> iter = result.iterateNonZero();
+      while (iter.hasNext()) {
+        Element element = iter.next();
+        element.set(Math.log(1 + element.get()) / denominator);
+      }
+      return result;
+    }
+  }
 
   public double norm(double power) {
     if (power < 0.0) {

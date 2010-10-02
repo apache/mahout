@@ -119,6 +119,7 @@ public final class TFIDFConverter {
                                   int minDf,
                                   int maxDFPercent,
                                   float normPower,
+                                  boolean logNormalize,
                                   boolean sequentialAccessOutput,
                                   boolean namedVector,
                                   int numReducers) throws IOException, InterruptedException, ClassNotFoundException {
@@ -130,6 +131,9 @@ public final class TFIDFConverter {
 
     if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
+    }
+    if (normPower != PartialVectorMerger.NO_NORMALIZING && (normPower <= 1 || Double.isInfinite(normPower)) && logNormalize) {
+      throw new IllegalArgumentException("normPower must be > 1 and not +infinity if log normalization is chosen");
     }
 
     if (minDf < 1) {
@@ -165,20 +169,17 @@ public final class TFIDFConverter {
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
 
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
-    if (dictionaryChunks.size() > 1) {
-      PartialVectorMerger.mergePartialVectors(partialVectorPaths,
-                                              outputDir,
-                                              normPower,
-                                              datasetFeatures.getFirst()[0].intValue(),
-                                              sequentialAccessOutput,
-                                              namedVector,
-                                              numReducers);
-      HadoopUtil.deletePaths(partialVectorPaths, fs);
-    } else {
-      Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
-      fs.delete(outputDir, true);
-      fs.rename(singlePartialVectorOutputPath, outputDir);
-    }
+    
+    PartialVectorMerger.mergePartialVectors(partialVectorPaths,
+                                            outputDir,
+                                            normPower,
+                                            logNormalize,
+                                            datasetFeatures.getFirst()[0].intValue(),
+                                            sequentialAccessOutput,
+                                            namedVector,
+                                            numReducers);
+    HadoopUtil.deletePaths(partialVectorPaths, fs);
+
   }
 
   /**

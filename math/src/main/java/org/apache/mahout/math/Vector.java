@@ -222,6 +222,21 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    * @return a new Vector
    */
   Vector normalize(double power);
+  
+  /**
+   * Return a new vector containing the log(1 + entry)/ L_2 norm  values of the recipient
+   *
+   * @return a new Vector
+   */
+  Vector logNormalize();
+
+  /**
+   * Return a new Vector with a normalized value calculated as log_power(1 + entry)/ L_power norm. <p/>
+   *
+   * @param power The power to use. Must be > 1. Cannot be {@link Double#POSITIVE_INFINITY}.
+   * @return a new Vector
+   */
+  Vector logNormalize(double power);
 
   /**
    * Return the k-norm of the vector. <p/> See http://en.wikipedia.org/wiki/Lp_space <p/> Technically, when 0 &gt; power

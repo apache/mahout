@@ -151,6 +151,14 @@ public class NamedVector implements Vector {
     return delegate.normalize(power);
   }
 
+  public Vector logNormalize() {
+    return delegate.logNormalize();
+  }
+
+  public Vector logNormalize(double power) {
+    return delegate.logNormalize(power);
+  }
+
   public double norm(double power) {
     return delegate.norm(power);
   }

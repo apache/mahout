@@ -42,6 +42,8 @@ public class PartialVectorMergeReducer extends
 
   private boolean namedVector;
   
+  private boolean logNormalize;
+  
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context) throws IOException,
       InterruptedException {
@@ -51,7 +53,11 @@ public class PartialVectorMergeReducer extends
       value.get().addTo(vector);
     }
     if (normPower != PartialVectorMerger.NO_NORMALIZING) {
-      vector = vector.normalize(normPower);
+      if (logNormalize) {
+        vector = vector.logNormalize(normPower);
+      } else {
+        vector = vector.normalize(normPower);
+      }
     }
     if (sequentialAccess) {
       vector = new SequentialAccessSparseVector(vector);
@@ -73,6 +79,7 @@ public class PartialVectorMergeReducer extends
     dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
     sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
+    logNormalize = conf.getBoolean(PartialVectorMerger.LOG_NORMALIZE, false);
   }
 
 }

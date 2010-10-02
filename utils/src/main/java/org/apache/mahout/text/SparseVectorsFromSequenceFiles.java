@@ -100,6 +100,11 @@ public final class SparseVectorsFromSequenceFiles {
       "The norm to use, expressed as either a float or \"INF\" if you want to use the Infinite norm.  "
           + "Must be greater or equal to 0.  The default is not to normalize").withShortName("n").create();
     
+    Option logNormalizeOpt = obuilder.withLongName("logNormalize").withRequired(false)
+    .withDescription(
+      "(Optional) Whether output vectors should be logNormalize. If set true else false")
+    .withShortName("lnorm").create();
+    
     Option maxNGramSizeOpt = obuilder.withLongName("maxNGramSize").withRequired(false).withArgument(
       abuilder.withName("ngramSize").withMinimum(1).withMaximum(1).create())
         .withDescription(
@@ -124,8 +129,9 @@ public final class SparseVectorsFromSequenceFiles {
     Group group = gbuilder.withName("Options").withOption(minSupportOpt).withOption(analyzerNameOpt)
         .withOption(chunkSizeOpt).withOption(outputDirOpt).withOption(inputDirOpt).withOption(minDFOpt)
         .withOption(maxDFPercentOpt).withOption(weightOpt).withOption(powerOpt).withOption(minLLROpt)
-        .withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput).withOption(
-          helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt).create();
+        .withOption(numReduceTasksOpt).withOption(maxNGramSizeOpt).withOption(overwriteOutput)
+        .withOption(helpOpt).withOption(sequentialAccessVectorOpt).withOption(namedVectorOpt).withOption(logNormalizeOpt)
+        .create();
     try {
       Parser parser = new Parser();
       parser.setGroup(group);
@@ -219,6 +225,12 @@ public final class SparseVectorsFromSequenceFiles {
           norm = Float.parseFloat(power);
         }
       }
+      
+      boolean logNormalize = false;
+      if (cmdLine.hasOption(logNormalizeOpt)) {
+        logNormalize = true;
+      }
+      
       HadoopUtil.overwriteOutput(outputDir);
       Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
       DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath);
@@ -234,12 +246,16 @@ public final class SparseVectorsFromSequenceFiles {
       }
       
       Configuration conf = new Configuration();
-      DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, conf, minSupport, maxNGramSize,
-        minLLRValue, reduceTasks, chunkSize, sequentialAccessOutput, namedVectors);
-      if (processIdf) {
+      if (!processIdf) {
+        DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, conf, minSupport, maxNGramSize,
+          minLLRValue, norm, logNormalize, reduceTasks, chunkSize, sequentialAccessOutput, namedVectors);
+      } else if (processIdf) {
+        DictionaryVectorizer.createTermFrequencyVectors(tokenizedPath, outputDir, conf, minSupport, maxNGramSize,
+          minLLRValue, -1.0f, false, reduceTasks, chunkSize, sequentialAccessOutput, namedVectors);
+      
         TFIDFConverter.processTfIdf(
           new Path(outputDir, DictionaryVectorizer.DOCUMENT_VECTOR_OUTPUT_FOLDER),
-          outputDir, chunkSize, minDf, maxDFPercent, norm,
+          outputDir, chunkSize, minDf, maxDFPercent, norm, logNormalize,
           sequentialAccessOutput, namedVectors, reduceTasks);
       }
     } catch (OptionException e) {

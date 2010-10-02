@@ -460,6 +460,61 @@ public final class VectorTest extends MahoutTestCase {
       // expected
     }
   }
+  
+  @Test
+  public void testLogNormalize() {
+    Vector vec1 = new RandomAccessSparseVector(3);
+    
+    vec1.setQuick(0, 1);
+    vec1.setQuick(1, 2);
+    vec1.setQuick(2, 3);
+    Vector norm = vec1.logNormalize();
+    assertNotNull("norm1 is null and it shouldn't be", norm);
+    
+    Vector vec2 = new SequentialAccessSparseVector(3);
+    
+    vec2.setQuick(0, 1);
+    vec2.setQuick(1, 2);
+    vec2.setQuick(2, 3);
+    Vector norm2 = vec2.logNormalize();
+    assertNotNull("norm1 is null and it shouldn't be", norm2);
+    
+    Vector expected = new RandomAccessSparseVector(3);
+    
+    expected.setQuick(0, 0.2672612419124244);
+    expected.setQuick(1, 0.4235990463273581);
+    expected.setQuick(2, 0.5345224838248488);
+    
+    assertEquals(expected, norm);
+    
+    norm = vec1.logNormalize(2);
+    assertEquals(expected, norm);
+    
+    norm2 = vec2.logNormalize(2);
+    assertEquals(expected, norm2);
+    
+    try {
+      norm = vec1.logNormalize(1);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // expected
+    }
+    norm = vec1.logNormalize(3);
+  
+    try {
+      vec1.logNormalize(-1);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // expected
+    }
+    
+    try {
+      vec2.logNormalize(Double.POSITIVE_INFINITY);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // expected
+    }  
+  }
 
   @Test
   public void testMax()  {

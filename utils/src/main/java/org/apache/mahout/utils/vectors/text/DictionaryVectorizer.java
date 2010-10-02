@@ -97,6 +97,10 @@ public final class DictionaryVectorizer {
    * @param output
    *          output directory where {@link org.apache.mahout.math.RandomAccessSparseVector}'s of the document
    *          are generated
+   * @param normPower
+   *          L_p norm to be computed
+   * @param logNormalize
+   *          whether to use log normalization         
    * @param minSupport
    *          the minimum frequency of the feature in the entire corpus to be considered for inclusion in the
    *          sparse vector
@@ -117,11 +121,19 @@ public final class DictionaryVectorizer {
                                                 int minSupport,
                                                 int maxNGramSize,
                                                 float minLLRValue,
+                                                float normPower,
+                                                boolean logNormalize,
                                                 int numReducers,
                                                 int chunkSizeInMegabytes,
                                                 boolean sequentialAccess,
                                                 boolean namedVectors)
     throws IOException, InterruptedException, ClassNotFoundException {
+    if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
+      throw new IllegalArgumentException("normPower must either be -1 or >= 0");
+    }
+    if (normPower != PartialVectorMerger.NO_NORMALIZING && (normPower <= 1 || Double.isInfinite(normPower)) && logNormalize) {
+      throw new IllegalArgumentException("normPower must be > 1 and not +infinity if log normalization is chosen");
+    }
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB
@@ -160,15 +172,9 @@ public final class DictionaryVectorizer {
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
     
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
-    if (dictionaryChunks.size() > 1) {
-      PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, -1, maxTermDimension[0],
-        sequentialAccess, namedVectors, numReducers);
-      HadoopUtil.deletePaths(partialVectorPaths, fs);
-    } else {
-      Path singlePartialVectorOutputPath = partialVectorPaths.get(0);
-      fs.delete(outputDir, true);
-      fs.rename(singlePartialVectorOutputPath, outputDir);
-    }
+    PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, normPower, logNormalize,
+      maxTermDimension[0], sequentialAccess, namedVectors, numReducers);
+    HadoopUtil.deletePaths(partialVectorPaths, fs);  
   }
   
   /**

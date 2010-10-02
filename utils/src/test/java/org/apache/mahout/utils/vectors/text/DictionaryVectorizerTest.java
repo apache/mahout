@@ -103,6 +103,8 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
                                                     2,
                                                     1,
                                                     0.0f,
+                                                    -1.0f,
+                                                    true,
                                                     1,
                                                     100,
                                                     sequential,
@@ -115,7 +117,8 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
                                 100,
                                 1,
                                 99,
-                                1.0f,
+                                2.0f,
+                                false,
                                 sequential,
                                 named,
                                 1);

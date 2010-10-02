@@ -50,6 +50,8 @@ public final class PartialVectorMerger {
   
   public static final String NAMED_VECTOR = "vector.named";
 
+  public static final String LOG_NORMALIZE = "vector.lognormalize";
+
   /**
    * Cannot be initialized. Use the static functions
    */
@@ -78,6 +80,7 @@ public final class PartialVectorMerger {
   public static void mergePartialVectors(Iterable<Path> partialVectorPaths,
                                          Path output,
                                          float normPower,
+                                         boolean logNormalize,
                                          int dimension,
                                          boolean sequentialAccess,
                                          boolean namedVector,
@@ -85,6 +88,9 @@ public final class PartialVectorMerger {
     throws IOException, InterruptedException, ClassNotFoundException {
     if (normPower != NO_NORMALIZING && normPower < 0) {
       throw new IllegalArgumentException("normPower must either be -1 or >= 0");
+    }
+    if (normPower != NO_NORMALIZING && (normPower <= 1 || Double.isInfinite(normPower)) && logNormalize) {
+      throw new IllegalArgumentException("normPower must be > 1 and not +infinity if log normalization is chosen");
     }
 
     Configuration conf = new Configuration();
@@ -95,6 +101,7 @@ public final class PartialVectorMerger {
     conf.setBoolean(NAMED_VECTOR, namedVector);
     conf.setInt(DIMENSION, dimension);
     conf.setFloat(NORMALIZATION_POWER, normPower);
+    conf.setBoolean(LOG_NORMALIZE, logNormalize);
 
     Job job = new Job(conf);
     job.setJobName("PartialVectorMerger::MergePartialVectors");
