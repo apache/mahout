@@ -22,6 +22,8 @@ import java.util.Collection;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Applies "case amplification" to similarities. This essentially makes big values bigger and small values
@@ -43,9 +45,7 @@ public final class CaseAmplification implements SimilarityTransform {
    *           if factor is 0.0 or {@link Double#NaN}
    */
   public CaseAmplification(double factor) {
-    if (Double.isNaN(factor) || (factor == 0.0)) {
-      throw new IllegalArgumentException("factor is 0 or NaN");
-    }
+    Preconditions.checkArgument(factor != 0.0 && !Double.isNaN(factor), "factor is 0 or NaN");
     this.factor = factor;
   }
   

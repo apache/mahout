@@ -28,6 +28,8 @@ import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 public abstract class AbstractRecommender implements Recommender {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractRecommender.class);
@@ -36,9 +38,8 @@ public abstract class AbstractRecommender implements Recommender {
   private final CandidateItemsStrategy candidateItemsStrategy;
   
   protected AbstractRecommender(DataModel dataModel, CandidateItemsStrategy candidateItemsStrategy) {
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
+
     this.dataModel = dataModel;
     this.candidateItemsStrategy = candidateItemsStrategy;
   }
@@ -73,9 +74,8 @@ public abstract class AbstractRecommender implements Recommender {
    */
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
-    if (Double.isNaN(value)) {
-      throw new IllegalArgumentException("Invalid value: " + value);
-    }
+    Preconditions.checkArgument(!Double.isNaN(value), "Invalid value: " + value);
+
     log.debug("Setting preference for user {}, item {}", userID, itemID);
     dataModel.setPreference(userID, itemID, value);
   }

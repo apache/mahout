@@ -25,21 +25,18 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Partitioner;
 import org.apache.mahout.common.StringTuple;
 
+import com.google.common.base.Preconditions;
+
 /**
  * ensure that features all make it into the same partition.
  */
 public class FeaturePartitioner implements Partitioner<StringTuple,DoubleWritable> {
   
   @Override
-  public int getPartition(StringTuple key, DoubleWritable value,
-      int numPartitions) {
-    
-    if (key.length() < 2 || key.length() > 3) {
-      throw new IllegalArgumentException("StringTuple length out of bounds");
-    }
-    
+  public int getPartition(StringTuple key, DoubleWritable value, int numPartitions) {
+    Preconditions.checkArgument(key.length() >= 2 && key.length() <= 3, "StringTuple length out of bounds");
     String feature = key.length() == 2 ? key.stringAt(1) : key.stringAt(2);
-    
+
     int length = feature.length();
     int right = 0;
     if (length > 0) {

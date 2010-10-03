@@ -17,6 +17,8 @@
 
 package org.apache.mahout.df;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Various methods to compute from the output of a random forest
  */
@@ -26,25 +28,22 @@ public final class ErrorEstimate {
   }
   
   public static double errorRate(int[] labels, int[] predictions) {
-    if (labels.length != predictions.length) {
-      throw new IllegalArgumentException("labels.length != predictions.length");
-    }
-    
+    Preconditions.checkArgument(labels.length == predictions.length, "labels.length != predictions.length");
     double nberrors = 0; // number of instance that got bad predictions
     double datasize = 0; // number of classified instances
-    
+
     for (int index = 0; index < labels.length; index++) {
       if (predictions[index] == -1) {
         continue; // instance not classified
       }
-      
+
       if (predictions[index] != labels[index]) {
         nberrors++;
       }
-      
+
       datasize++;
     }
-    
+
     return nberrors / datasize;
   }
   
@@ -67,10 +66,8 @@ public final class ErrorEstimate {
    * Counts the number of instance that got bad predictions
    */
   public static int nbErrors(int[] labels, int[] predictions) {
-    if (labels.length != predictions.length) {
-      throw new IllegalArgumentException("labels.length != predictions.length");
-    }
-    
+    Preconditions.checkArgument(labels.length == predictions.length, "labels.length != predictions.length");
+
     int nberrors = 0;
     
     for (int index = 0; index < labels.length; index++) {

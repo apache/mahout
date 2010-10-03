@@ -22,6 +22,8 @@ import java.io.Serializable;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.common.RandomUtils;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple implementation of {@link RecommendedItem}.
@@ -37,9 +39,7 @@ public final class GenericRecommendedItem implements RecommendedItem, Serializab
    *           if item is null or value is NaN
    */
   public GenericRecommendedItem(long itemID, float value) {
-    if (Float.isNaN(value)) {
-      throw new IllegalArgumentException("value is NaN");
-    }
+    Preconditions.checkArgument(!Float.isNaN(value), "value is NaN");
     this.itemID = itemID;
     this.value = value;
   }

@@ -19,6 +19,7 @@ package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
@@ -115,11 +116,9 @@ public class CsvRecordFactory implements RecordFactory {
    */
   @Override
   public void defineTargetCategories(List<String> values) {
-    if (values.size() > maxTargetValue) {
-      throw new IllegalArgumentException("Must have less than or equal to " + maxTargetValue
-        + " categories for target variable, but found " + values.size());
-    }
-
+    Preconditions.checkArgument(values.size() <= maxTargetValue,
+      "Must have less than or equal to " + maxTargetValue +
+        " categories for target variable, but found " + values.size());
     if (maxTargetValue == Integer.MAX_VALUE) {
       maxTargetValue = values.size();
     }
@@ -170,9 +169,7 @@ public class CsvRecordFactory implements RecordFactory {
       @Override
       public Integer apply(String from) {
         Integer r = vars.get(from);
-        if (r == null) {
-          throw new IllegalArgumentException("Can't find variable " + from + ", only know about " + vars);
-        }
+        Preconditions.checkArgument(r != null, "Can't find variable %s, only know about %s", from, vars);
         return r;
       }
     }));
@@ -195,14 +192,10 @@ public class CsvRecordFactory implements RecordFactory {
         c = typeDictionary.get(typeMap.get(name));
       }
       try {
-        if (c == null) {
-          throw new IllegalArgumentException("Invalid type of variable " + typeMap.get(name)
-            + " wanted one of " + typeDictionary.keySet());
-        }
+        Preconditions.checkArgument(c != null, "Invalid type of variable %s,  wanted one of %s",
+          typeMap.get(name), typeDictionary.keySet());
         Constructor<? extends FeatureVectorEncoder> constructor = c.getConstructor(String.class);
-        if (constructor == null) {
-          throw new IllegalArgumentException("Can't find correct constructor for " + typeMap.get(name));
-        }
+        Preconditions.checkArgument(constructor != null, "Can't find correct constructor for %s", typeMap.get(name));
         FeatureVectorEncoder encoder = constructor.newInstance(name);
         predictorEncoders.put(predictor, encoder);
         encoder.setTraceDictionary(traceDictionary);

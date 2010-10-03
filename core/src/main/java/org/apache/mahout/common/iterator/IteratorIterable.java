@@ -19,6 +19,8 @@ package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Simple utility class that makes an {@link Iterator} {@link Iterable} by returning the {@link Iterator}
@@ -38,9 +40,7 @@ public final class IteratorIterable<T> implements Iterable<T> {
    *          {@link Iterator} on which to base this
    */
   public IteratorIterable(Iterator<T> iterator) {
-    if (iterator == null) {
-      throw new IllegalArgumentException("iterator is null");
-    }
+    Preconditions.checkArgument(iterator != null, "iterator is null");
     this.iterator = iterator;
   }
   

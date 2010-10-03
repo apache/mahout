@@ -28,6 +28,8 @@ import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * This {@link DataModel} decorator class is useful in a situation where you wish to recommend to a user that
@@ -75,7 +77,7 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
  * </p>
  */
 public final class PlusAnonymousUserDataModel implements DataModel {
-  
+
   public static final long TEMP_USER_ID = Long.MIN_VALUE;
   
   private final DataModel delegate;
@@ -88,9 +90,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   }
   
   public void setTempPrefs(PreferenceArray prefs) {
-    if (prefs == null || prefs.length() < 1) {
-      throw new IllegalArgumentException("prefs are null or empty");
-    }
+    Preconditions.checkArgument(prefs != null && prefs.length() > 0, "prefs is null or empty");
     this.tempPrefs = prefs;
     this.prefItemIDs.clear();
     for (int i = 0; i < prefs.length(); i++) {

@@ -38,6 +38,8 @@ import org.apache.mahout.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * First step of the Partial Data Builder. Builds the trees using the data available in the InputSplit.
  * Predict the oob classes for each tree in its growing partition (input split).
@@ -99,9 +101,7 @@ public class Step1Mapper extends MapredMapper<LongWritable,Text,TreeID,MapredOut
     }
     
     // mapper's partition
-    if (partition < 0) {
-      throw new IllegalArgumentException("Wrong partition ID");
-    }
+    Preconditions.checkArgument(partition >= 0, "Wrong partition ID");
     this.partition = partition;
     
     // compute number of trees to build

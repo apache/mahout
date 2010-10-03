@@ -32,6 +32,8 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.IteratorIterable;
 import org.apache.mahout.common.iterator.IteratorUtils;
 
+import com.google.common.base.Preconditions;
+
 public final class GenericUserSimilarity implements UserSimilarity {
   
   private final FastByIDMap<FastByIDMap<Double>> similarityMaps = new FastByIDMap<FastByIDMap<Double>>();
@@ -120,15 +122,13 @@ public final class GenericUserSimilarity implements UserSimilarity {
   }
   
   public static final class UserUserSimilarity implements Comparable<UserUserSimilarity> {
-    
+
     private final long userID1;
     private final long userID2;
     private final double value;
     
     public UserUserSimilarity(long userID1, long userID2, double value) {
-      if (Double.isNaN(value) || (value < -1.0) || (value > 1.0)) {
-        throw new IllegalArgumentException("Illegal value: " + value);
-      }
+      Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: %s", value);
       this.userID1 = userID1;
       this.userID2 = userID2;
       this.value = value;

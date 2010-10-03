@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.meanshift;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -59,9 +60,10 @@ public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, 
     if (nextCanopyId == -1) {
       String taskId = context.getConfiguration().get("mapred.task.id");
       String[] parts = UNDERSCORE_PATTERN.split(taskId);
-      if (parts.length != 6 || !"attempt".equals(parts[0]) || (!"m".equals(parts[3]) && !"r".equals(parts[3]))) {
-        throw new IllegalArgumentException("TaskAttemptId string : " + taskId + " is not properly formed");
-      }
+      Preconditions.checkArgument(parts.length == 6
+          && "attempt".equals(parts[0])
+          && ("m".equals(parts[3]) || "r".equals(parts[3])),
+          "TaskAttemptId string: %d is not properly formed", taskId);
       nextCanopyId = ((1 << 31) / 50000) * (Integer.parseInt(parts[4]));
       //each mapper has 42,949 ids to give.
     }

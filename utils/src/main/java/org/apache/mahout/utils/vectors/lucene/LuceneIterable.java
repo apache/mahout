@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
 import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
@@ -68,9 +69,8 @@ public class LuceneIterable implements Iterable<Vector> {
                         String field,
                         VectorMapper mapper,
                         double normPower) {
-    if (normPower != NO_NORMALIZING && normPower < 0) {
-      throw new IllegalArgumentException("normPower must either be -1 or >= 0");
-    }
+    Preconditions.checkArgument(normPower == NO_NORMALIZING || normPower >= 0,
+        "If specified normPower must be nonnegative", normPower);
     idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
     this.indexReader = reader;
     this.idField = idField;

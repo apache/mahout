@@ -21,6 +21,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * An implementation of the cosine similarity. The result is the cosine of the angle formed between
@@ -47,9 +49,7 @@ public final class UncenteredCosineSimilarity extends AbstractSimilarity {
    */
   public UncenteredCosineSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting, false);
-    if (!dataModel.hasPreferenceValues()) {
-      throw new IllegalArgumentException("DataModel doesn't have preference values");
-    }
+    Preconditions.checkArgument(dataModel.hasPreferenceValues(), "DataModel doesn't have preference values");
   }
 
   @Override

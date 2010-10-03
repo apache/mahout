@@ -31,6 +31,8 @@ import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataModel {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractBooleanPrefJDBCDataModel.class);
@@ -87,10 +89,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
-    if (!Float.isNaN(value)) {
-      throw new IllegalArgumentException("Invalid value: " + value);
-    }
-    
+    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value );
     log.debug("Setting preference for user {}, item {}", userID, itemID);
     
     Connection conn = null;

@@ -47,6 +47,8 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>Superclass of many Mahout Hadoop "jobs". A job drives configuration and launch of one or
  * more maps and reduces in order to accomplish some task.</p>
@@ -340,15 +342,10 @@ public abstract class AbstractJob extends Configured implements Tool {
       this.outputPath = new Path(conf.get("mapred.output.dir"));
     }
 
-    if (inputOption != null && inputPath == null) {
-      throw new IllegalArgumentException("No input specified: " + inputOption.getPreferredName()
-          + " or -Dmapred.input.dir must be provided to specify input directory");
-    }
-
-    if (outputOption != null && outputPath == null) {
-      throw new IllegalArgumentException("No output specified: " + outputOption.getPreferredName()
-          + " or -Dmapred.output.dir must be provided to specify output directory");
-    }
+    Preconditions.checkArgument(inputOption == null || inputPath != null,
+        "No input specified or -Dmapred.input.dir must be provided to specify input directory");
+    Preconditions.checkArgument(outputOption == null || outputPath != null,
+        "No output specified:  or -Dmapred.output.dir must be provided to specify output directory" );
   }
 
   protected static void maybePut(Map<String, String> args, CommandLine cmdLine, Option... opt) {

@@ -35,6 +35,8 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.conf.Configuration;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Represents a forest of decision trees.
  */
@@ -47,10 +49,8 @@ public class DecisionForest implements Writable {
   }
   
   public DecisionForest(List<Node> trees) {
-    if (!((trees != null) && !trees.isEmpty())) {
-      throw new IllegalArgumentException("trees argument must not be null or empty");
-    }
-    
+    Preconditions.checkArgument(trees != null && !trees.isEmpty(), "trees argument must not be null or empty");
+
     this.trees = trees;
   }
   
@@ -62,17 +62,15 @@ public class DecisionForest implements Writable {
    * Classifies the data and calls callback for each classification
    */
   public void classify(Data data, PredictionCallback callback) {
-    if (callback == null) {
-      throw new IllegalArgumentException("callback must not be null");
-    }
-    
+    Preconditions.checkArgument(callback != null, "callback must not be null");
+
     if (data.isEmpty()) {
       return; // nothing to classify
     }
-    
+
     for (int treeId = 0; treeId < trees.size(); treeId++) {
       Node tree = trees.get(treeId);
-      
+
       for (int index = 0; index < data.size(); index++) {
         int prediction = tree.classify(data.get(index));
         callback.prediction(treeId, index, prediction);

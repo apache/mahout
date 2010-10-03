@@ -23,6 +23,8 @@ import java.util.NoSuchElementException;
 
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Simple, fast {@link Iterator} for an array.
@@ -43,9 +45,8 @@ public final class ArrayIterator<T> implements SkippingIterator<T>, Iterable<T> 
    *          array to iterate over
    */
   public ArrayIterator(T[] array) {
-    if (array == null) {
-      throw new IllegalArgumentException("array is null");
-    }
+    Preconditions.checkArgument(array != null, "array is null");
+
     this.array = array; // yeah, not going to copy the array here, for performance
     this.position = 0;
     this.max = array.length;

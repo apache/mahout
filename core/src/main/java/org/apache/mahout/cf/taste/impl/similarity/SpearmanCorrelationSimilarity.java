@@ -27,6 +27,8 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Like {@link PearsonCorrelationSimilarity}, but compares relative ranking of preference values instead of
@@ -39,9 +41,7 @@ public final class SpearmanCorrelationSimilarity implements UserSimilarity {
   private final DataModel dataModel;
   
   public SpearmanCorrelationSimilarity(DataModel dataModel) {
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
     this.dataModel = dataModel;
   }
   

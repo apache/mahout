@@ -19,6 +19,8 @@ package org.apache.mahout.ep;
 
 import org.apache.mahout.math.function.UnaryFunction;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Provides coordinate tranformations so that evolution can proceed on the entire space of
  * reals but have the output limited and squished in convenient (and safe) ways.
@@ -127,12 +129,8 @@ public abstract class Mapping implements UnaryFunction {
    * @return A mapped value.
    */
   public static Mapping logLimit(double low, double high) {
-    if (low <= 0) {
-      throw new IllegalArgumentException("Lower bound for log limit must be > 0 but was " + low);
-    }
-    if (high <= 0) {
-      throw new IllegalArgumentException("Upper bound for log limit must be > 0 but was " + high);
-    }
+    Preconditions.checkArgument(low > 0, "Lower bound for log limit must be > 0 but was %f", low);
+    Preconditions.checkArgument(high > 0, "Upper bound for log limit must be > 0 but was %f", high);
     return new LogLimit(low, high);
   }
 

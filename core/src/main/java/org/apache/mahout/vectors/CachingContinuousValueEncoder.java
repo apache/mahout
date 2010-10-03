@@ -19,6 +19,7 @@ package org.apache.mahout.vectors;
 
 import org.apache.mahout.math.map.OpenIntIntHashMap;
 
+import com.google.common.base.Preconditions;
 
 public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
   private final int dataSize;
@@ -48,10 +49,7 @@ public class CachingContinuousValueEncoder extends ContinuousValueEncoder {
   }
 
   protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
-    if (dataSize != this.dataSize) {
-      throw new IllegalArgumentException("dataSize argument ["
-          + dataSize + "] does not match expected dataSize [" + this.dataSize + ']');
-    }
+    Preconditions.checkArgument(dataSize == this.dataSize, "dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + "]");
     if (caches[probe].containsKey(originalForm.hashCode())) {
       return caches[probe].get(originalForm.hashCode());
     }

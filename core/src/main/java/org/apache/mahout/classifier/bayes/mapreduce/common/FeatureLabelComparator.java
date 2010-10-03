@@ -23,6 +23,8 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.mahout.common.StringTuple;
 
+import com.google.common.base.Preconditions;
+
 import java.io.Serializable;
 
 public class FeatureLabelComparator extends WritableComparator implements Serializable {
@@ -35,11 +37,7 @@ public class FeatureLabelComparator extends WritableComparator implements Serial
   public int compare(WritableComparable a, WritableComparable b) {
     StringTuple ta = (StringTuple) a;
     StringTuple tb = (StringTuple) b;
-
-    if (ta.length() < 2 || ta.length() > 3 || tb.length() < 2 || tb.length() > 3) {
-      throw new IllegalArgumentException("StringTuple length out of bounds");
-    }
-    
+    Preconditions.checkArgument(ta.length() >= 2 && ta.length() <= 3 && tb.length() >= 2 && tb.length() <= 3, "StringTuple length out of bounds");
     // token
     String tmpa = ta.length() == 2 ? ta.stringAt(1) : ta.stringAt(2);
     String tmpb = tb.length() == 2 ? tb.stringAt(1) : tb.stringAt(2);

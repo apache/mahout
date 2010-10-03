@@ -49,6 +49,8 @@ import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * An abstract superclass for {@link JDBCDataModel} implementations, providing most of the common
@@ -551,13 +553,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   @Override
   public int getNumUsersWithPreferenceFor(long... itemIDs) throws TasteException {
-    if (itemIDs == null) {
-      throw new IllegalArgumentException("itemIDs is null");
-    }
+    Preconditions.checkArgument(itemIDs != null, "itemIDs is null");
+
     int length = itemIDs.length;
-    if ((length == 0) || (length > 2)) {
-      throw new IllegalArgumentException("Illegal number of item IDs: " + length);
-    }
+    Preconditions.checkArgument(length != 0 && length <= 2, "Illegal number of item IDs: " + length);
+
     return length == 1 ? itemPrefCounts.get(itemIDs[0]) : getNumThings("user preferring items",
       getNumPreferenceForItemsSQL, itemIDs);
   }
@@ -591,9 +591,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
 
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
-    if (Float.isNaN(value)) {
-      throw new IllegalArgumentException("Invalid value: " + value);
-    }
+    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value);
 
     log.debug("Setting preference for user {}, item {}", userID, itemID);
 

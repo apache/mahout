@@ -27,6 +27,8 @@ import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 
+import com.google.common.base.Preconditions;
+
 /** A caching wrapper around an underlying {@link UserNeighborhood} implementation. */
 public final class CachingUserNeighborhood implements UserNeighborhood {
   
@@ -34,9 +36,7 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
   private final Cache<Long,long[]> neighborhoodCache;
   
   public CachingUserNeighborhood(UserNeighborhood neighborhood, DataModel dataModel) throws TasteException {
-    if (neighborhood == null) {
-      throw new IllegalArgumentException("neighborhood is null");
-    }
+    Preconditions.checkArgument(neighborhood != null, "neighborhood is null");
     this.neighborhood = neighborhood;
     int maxCacheSize = dataModel.getNumUsers(); // just a dumb heuristic for sizing
     this.neighborhoodCache = new Cache<Long,long[]>(new NeighborhoodRetriever(neighborhood), maxCacheSize);
@@ -66,5 +66,4 @@ public final class CachingUserNeighborhood implements UserNeighborhood {
       return neighborhood.getUserNeighborhood(key);
     }
   }
-  
 }

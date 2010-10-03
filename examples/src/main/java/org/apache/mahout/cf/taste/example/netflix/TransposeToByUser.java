@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.cli2.OptionException;
 import org.apache.mahout.cf.taste.example.TasteOptionParser;
 import org.apache.mahout.cf.taste.impl.common.FastMap;
@@ -47,16 +48,12 @@ public final class TransposeToByUser {
     File dataDirectory = TasteOptionParser.getRatings(args);
     File byItemDirectory = new File(dataDirectory, "training_set");
     File byUserDirectory = new File(dataDirectory, "training_set_by_user");
-    
-    if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
-      throw new IllegalArgumentException(dataDirectory + " is not a directory");
-    }
-    if (!byItemDirectory.exists() || !byItemDirectory.isDirectory()) {
-      throw new IllegalArgumentException(byItemDirectory + " is not a directory");
-    }
-    if (byUserDirectory.exists()) {
-      throw new IllegalArgumentException(byUserDirectory + " already exists");
-    }
+
+    Preconditions.checkArgument(dataDirectory.exists() && dataDirectory.isDirectory(),
+                                "%s is not a directory", dataDirectory);
+    Preconditions.checkArgument(byItemDirectory.exists() && byItemDirectory.isDirectory(),
+                                "%s is not a directory", byItemDirectory);
+    Preconditions.checkArgument(!byUserDirectory.exists(), "%s already exists", byUserDirectory);
     
     byUserDirectory.mkdirs();
     

@@ -39,6 +39,8 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple recommender that always estimates preference for an item to be the average of all known preference
@@ -71,18 +73,16 @@ public final class ItemAverageRecommender extends AbstractRecommender {
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
-    if (howMany < 1) {
-      throw new IllegalArgumentException("howMany must be at least 1");
-    }
+    Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
 
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
-    
+
     TopItems.Estimator<Long> estimator = new Estimator();
-    
+
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
-    
+
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }

@@ -19,6 +19,8 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import java.io.Serializable;
 
+import com.google.common.base.Preconditions;
+
 public final class WeightedRunningAverage implements RunningAverage, Serializable {
   
   private double totalWeight;
@@ -66,9 +68,7 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
   }
   
   public synchronized void changeDatum(double delta, double weight) {
-    if (weight > totalWeight) {
-      throw new IllegalArgumentException();
-    }
+    Preconditions.checkArgument(weight <= totalWeight);
     average += delta * weight / totalWeight;
   }
   

@@ -24,6 +24,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.df.builder.TreeBuilder;
 import org.apache.mahout.df.data.Dataset;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Base class for Mapred mappers. Loads common parameters from the job
  */
@@ -73,21 +75,12 @@ public class MapredMapper<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends Mapper<KEYIN,VA
   
   /**
    * Useful for testing
-   * 
-   * @param noOutput
-   * @param oobEstimate
-   * @param treeBuilder
-   * @param dataset
    */
   protected void configure(boolean noOutput, boolean oobEstimate, TreeBuilder treeBuilder, Dataset dataset) {
+    Preconditions.checkArgument(treeBuilder != null, "TreeBuilder not found in the Job parameters");
     this.noOutput = noOutput;
     this.oobEstimate = oobEstimate;
-    
-    if (treeBuilder == null) {
-      throw new IllegalArgumentException("TreeBuilder not found in the Job parameters");
-    }
     this.treeBuilder = treeBuilder;
-    
     this.dataset = dataset;
   }
 }

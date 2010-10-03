@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.AbstractLongPrimitiveIterator;
@@ -41,13 +42,9 @@ public final class NetflixFileDataModel implements DataModel {
   
   private final File dataDirectory;
   
-  public NetflixFileDataModel(File dataDirectory) throws IOException {
-    if (dataDirectory == null) {
-      throw new IllegalArgumentException("dataDirectory is null");
-    }
-    if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
-      throw new FileNotFoundException(dataDirectory.toString());
-    }
+  public NetflixFileDataModel(File dataDirectory) {
+    Preconditions.checkArgument(dataDirectory != null && dataDirectory.exists() && dataDirectory.isDirectory(),
+                                "%s is not a directory", dataDirectory);
     this.dataDirectory = dataDirectory;
   }
   

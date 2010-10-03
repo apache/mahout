@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -63,22 +64,18 @@ public final class CDMahoutEvaluator {
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
    * @param split DatasetSplit used to separate training and testing input
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  public static void evaluate(List<? extends Rule> rules, int target, Path inpath, Path output, List<CDFitness> evaluations,
-      DatasetSplit split) throws IOException, InterruptedException, ClassNotFoundException {
+  public static void evaluate(List<? extends Rule> rules,
+                              int target,
+                              Path inpath,
+                              Path output,
+                              Collection<CDFitness> evaluations,
+                              DatasetSplit split) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(inpath.toUri(), conf);
+    Preconditions.checkArgument(fs.exists(inpath) && fs.getFileStatus(inpath).isDir(), "%s is not a directory", inpath);
 
     Job job = new Job(conf);
-    
-    FileSystem fs = FileSystem.get(inpath.toUri(), conf);
-
-    // check the input
-    if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir()) {
-      throw new IllegalArgumentException("Input path not found or is not a directory");
-    }
 
     configureJob(job, rules, target, inpath, output, split);
     job.waitForCompletion(true);
@@ -129,12 +126,13 @@ public final class CDMahoutEvaluator {
    * @param evaluations <code>List&lt;CDFitness&gt;</code> that contains the
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  public static void evaluate(List<? extends Rule> rules, int target, Path inpath, Path output, List<CDFitness> evaluations)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  public static void evaluate(List<? extends Rule> rules,
+                              int target,
+                              Path inpath,
+                              Path output,
+                              Collection<CDFitness> evaluations)
+    throws IOException, InterruptedException, ClassNotFoundException {
     evaluate(rules, target, inpath, output, evaluations, new DatasetSplit(1));
   }
 
@@ -147,9 +145,13 @@ public final class CDMahoutEvaluator {
    * @param inpath input path (the dataset)
    * @param outpath output <code>Path</code>
    * @param split DatasetSplit used to separate training and testing input
-   * @throws IOException 
    */
-  private static void configureJob(Job job, List<? extends Rule> rules, int target, Path inpath, Path outpath, DatasetSplit split) throws IOException {
+  private static void configureJob(Job job,
+                                   List<? extends Rule> rules,
+                                   int target,
+                                   Path inpath,
+                                   Path outpath,
+                                   DatasetSplit split) throws IOException {
     split.storeJobParameters(job.getConfiguration());
 
     FileInputFormat.setInputPaths(job, inpath);
@@ -182,12 +184,11 @@ public final class CDMahoutEvaluator {
    * @param evaluations <code>List&lt;Fitness&gt;</code> that contains the
    *        evaluated fitness for each candidate from the input population,
    *        sorted in the same order as the candidates.
-   * @throws IOException
    */
   private static void importEvaluations(FileSystem fs,
                                         Configuration conf, Path outpath,
                                         Collection<CDFitness> evaluations)
-      throws IOException {
+    throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, CDFitness.class, conf);
 
     // merge and sort the outputs

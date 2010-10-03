@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.ga.watchmaker.MahoutFitnessEvaluator;
 import org.uncommons.maths.random.PoissonGenerator;
@@ -94,12 +95,9 @@ public class EvolutionaryTravellingSalesman implements TravellingSalesmanStrateg
                                         boolean crossover,
                                         boolean mutation,
                                         boolean mahout) {
-    if (eliteCount < 0 || eliteCount >= populationSize) {
-      throw new IllegalArgumentException("Elite count must be non-zero and less than population size.");
-    }
-    if (!crossover && !mutation) {
-      throw new IllegalArgumentException("At least one of cross-over or mutation must be selected.");
-    }
+    Preconditions.checkArgument(eliteCount >= 0 && eliteCount < populationSize,
+        "Elite count must be non-zero and less than population size.");
+    Preconditions.checkArgument(crossover || mutation, "At least one of cross-over or mutation must be selected.");
     this.distances = distances;
     this.selectionStrategy = selectionStrategy;
     this.populationSize = populationSize;

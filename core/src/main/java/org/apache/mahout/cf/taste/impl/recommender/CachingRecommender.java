@@ -35,6 +35,8 @@ import org.apache.mahout.common.LongPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A {@link Recommender} which caches the results from another {@link Recommender} in memory.
@@ -52,17 +54,15 @@ public final class CachingRecommender implements Recommender {
   private IDRescorer currentRescorer;
   
   public CachingRecommender(Recommender recommender) throws TasteException {
-    if (recommender == null) {
-      throw new IllegalArgumentException("recommender is null");
-    }
+    Preconditions.checkArgument(recommender != null, "recommender is null");
     this.recommender = recommender;
-    this.maxHowMany = new int[] {1};
+    this.maxHowMany = new int[]{1};
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
-    this.recommendationCache = new Cache<Long,Recommendations>(new RecommendationRetriever(this.recommender),
-        numUsers);
-    this.estimatedPrefCache = new Cache<LongPair,Float>(new EstimatedPrefRetriever(this.recommender),
-        numUsers);
+    this.recommendationCache = new Cache<Long, Recommendations>(new RecommendationRetriever(this.recommender),
+      numUsers);
+    this.estimatedPrefCache = new Cache<LongPair, Float>(new EstimatedPrefRetriever(this.recommender),
+      numUsers);
     this.refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() {
@@ -98,18 +98,15 @@ public final class CachingRecommender implements Recommender {
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
-    if (howMany < 1) {
-      throw new IllegalArgumentException("howMany must be at least 1");
-    }
-    
+    Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     synchronized (maxHowMany) {
       if (howMany > maxHowMany[0]) {
         maxHowMany[0] = howMany;
       }
     }
-    
+
     setCurrentRescorer(rescorer);
-    
+
     Recommendations recommendations = recommendationCache.get(userID);
     if ((recommendations.getItems().size() < howMany) && !recommendations.isNoMoreRecommendableItems()) {
       clear(userID);
@@ -118,7 +115,7 @@ public final class CachingRecommender implements Recommender {
         recommendations.setNoMoreRecommendableItems(true);
       }
     }
-    
+
     List<RecommendedItem> recommendedItems = recommendations.getItems();
     return recommendedItems.size() > howMany ? recommendedItems.subList(0, howMany) : recommendedItems;
   }

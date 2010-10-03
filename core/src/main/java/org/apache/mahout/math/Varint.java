@@ -21,6 +21,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>Encodes signed and unsigned values using a common variable-length
  * scheme, found for example in
@@ -123,9 +125,7 @@ public final class Varint {
     while (((b = in.readByte()) & 0x80L) != 0) {
       value |= (b & 0x7F) << i;
       i += 7;
-      if (i > 63) {
-        throw new IllegalArgumentException("Variable length quantity is too long");
-      }
+      Preconditions.checkArgument(i <= 63, "Variable length quantity is too long");
     }
     return value | (b << i);
   }
@@ -159,9 +159,7 @@ public final class Varint {
     while (((b = in.readByte()) & 0x80) != 0) {
       value |= (b & 0x7F) << i;
       i += 7;
-      if (i > 35) {
-        throw new IllegalArgumentException("Variable length quantity is too long");
-      }
+      Preconditions.checkArgument(i <= 35, "Variable length quantity is too long");
     }
     return value | (b << i);
   }

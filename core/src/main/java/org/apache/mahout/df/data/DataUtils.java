@@ -17,6 +17,8 @@
 
 package org.apache.mahout.df.data;
 
+import com.google.common.base.Preconditions;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -45,10 +47,7 @@ public final class DataUtils {
    * foreach i : array1[i] += array2[i]
    */
   public static void add(int[] array1, int[] array2) {
-    if (array1.length != array2.length) {
-      throw new IllegalArgumentException("array1.length != array2.length");
-    }
-    
+    Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");
     for (int index = 0; index < array1.length; index++) {
       array1[index] += array2[index];
     }
@@ -58,10 +57,7 @@ public final class DataUtils {
    * foreach i : array1[i] -= array2[i]
    */
   public static void dec(int[] array1, int[] array2) {
-    if (array1.length != array2.length) {
-      throw new IllegalArgumentException("array1.length != array2.length");
-    }
-    
+    Preconditions.checkArgument(array1.length == array2.length, "array1.length != array2.length");
     for (int index = 0; index < array1.length; index++) {
       array1[index] -= array2[index];
     }

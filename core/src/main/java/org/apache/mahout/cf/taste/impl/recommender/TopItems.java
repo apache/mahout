@@ -32,6 +32,8 @@ import org.apache.mahout.cf.taste.impl.similarity.GenericUserSimilarity;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple class that refactors the "find top N things" logic that is used in several places.
@@ -47,11 +49,11 @@ public final class TopItems {
                                                   LongPrimitiveIterator possibleItemIDs,
                                                   IDRescorer rescorer,
                                                   Estimator<Long> estimator) throws TasteException {
-    if ((possibleItemIDs == null) || (estimator == null)) {
-      throw new IllegalArgumentException("argument is null");
-    }
+    Preconditions.checkArgument(possibleItemIDs != null, "argument is null");
+    Preconditions.checkArgument(estimator != null, "argument is null");
+
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(howMany + 1,
-        Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
+      Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
     boolean full = false;
     double lowestTopValue = Double.NEGATIVE_INFINITY;
     while (possibleItemIDs.hasNext()) {

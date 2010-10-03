@@ -100,7 +100,7 @@ public final class PrepareTwentyNewsgroups {
       for (File dir : categoryDirs) {
         if (dir.isDirectory()) {
           if (!outputDir.exists() && !outputDir.mkdirs()) {
-            throw new IllegalArgumentException("Can't create output directory");
+            throw new IllegalStateException("Can't create output directory");
           }
 
           File outputFile = new File(outputDir, dir.getName() + ".txt");

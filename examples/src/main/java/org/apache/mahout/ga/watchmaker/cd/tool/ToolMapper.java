@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -55,9 +56,8 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
     extractAttributes(value, attributes);
-    if (attributes.size() != descriptors.size()) {
-      throw new IllegalArgumentException("Attributes number should be equal to the descriptors's array length");
-    }
+    Preconditions.checkArgument(attributes.size() == descriptors.size(),
+        "Attributes number should be equal to the descriptors's array length");
 
     // output non ignored attributes
     for (int index = 0; index < attributes.size(); index++) {
@@ -80,10 +80,7 @@ public class ToolMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
   }
 
   void configure(char[] descriptors) {
-    if (descriptors == null || descriptors.length == 0) {
-      throw new IllegalArgumentException("Descriptors's array not found or is empty");
-    }
-
+    Preconditions.checkArgument(descriptors != null && descriptors.length > 0, "descriptors null or empty");
     this.descriptors = new Descriptors(descriptors);
   }
 

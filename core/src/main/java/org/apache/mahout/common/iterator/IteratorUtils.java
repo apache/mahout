@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * {@link java.util.Iterator}-related methods without a better home.
@@ -71,9 +73,7 @@ public final class IteratorUtils {
    *         according to the given {@link Comparator}
    */
   public static <K> List<K> iterableToList(Iterable<K> iterable, Comparator<K> comparator) {
-    if (iterable == null) {
-      throw new IllegalArgumentException("iterable is null");
-    }
+    Preconditions.checkArgument(iterable != null, "iterable is null");
     List<K> list;
     if (iterable instanceof Collection<?>) {
       if (iterable instanceof List<?>) {

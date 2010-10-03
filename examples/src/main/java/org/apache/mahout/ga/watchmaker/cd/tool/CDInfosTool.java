@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -74,20 +75,15 @@ public final class CDInfosTool {
    * @param inpath input path (the dataset)
    * @param descriptions <code>List&lt;String&gt;</code> that contains the
    *        generated descriptions for each non ignored attribute
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  public static void gatherInfos(Descriptors descriptors, Path inpath, Path output, List<String> descriptions) throws IOException,
-      InterruptedException, ClassNotFoundException {
+  public static void gatherInfos(Descriptors descriptors, Path inpath, Path output, Collection<String> descriptions)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
-    Job job = new Job(conf);
     FileSystem fs = FileSystem.get(inpath.toUri(), conf);
+    Preconditions.checkArgument(fs.exists(inpath) && fs.getFileStatus(inpath).isDir(),
+        "%s is not a directory", inpath);
 
-    // check the input
-    if (!fs.exists(inpath) || !fs.getFileStatus(inpath).isDir()) {
-      throw new IllegalArgumentException("Input path not found or is not a directory");
-    }
+    Job job = new Job(conf);
 
     configureJob(job, descriptors, inpath, output);
     job.waitForCompletion(true);
@@ -98,11 +94,9 @@ public final class CDInfosTool {
   /**
    * Configure the job
    * 
-   * @param job
    * @param descriptors attributes's descriptors
    * @param inpath input <code>Path</code>
    * @param outpath output <code>Path</code>
-   * @throws IOException 
    */
   private static void configureJob(Job job, Descriptors descriptors, Path inpath, Path outpath) throws IOException {
     FileInputFormat.setInputPaths(job, inpath);
@@ -130,12 +124,11 @@ public final class CDInfosTool {
    * @param conf job configuration
    * @param outpath output <code>Path</code>
    * @param descriptions List of attribute's descriptions
-   * @throws IOException
    */
   private static void importDescriptions(FileSystem fs,
                                          Configuration conf, Path outpath,
                                          Collection<String> descriptions)
-      throws IOException {
+    throws IOException {
     Sorter sorter = new Sorter(fs, LongWritable.class, Text.class, conf);
 
     // merge and sort the outputs
@@ -223,8 +216,8 @@ public final class CDInfosTool {
     GroupBuilder gbuilder = new GroupBuilder();
 
     Option inputOpt = obuilder.withLongName("input").withRequired(true).withShortName("i").withArgument(
-        abuilder.withName("input").withMinimum(1).withMaximum(1).create()).withDescription("The Path for input data directory.")
-        .create();
+        abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+        .withDescription("The Path for input data directory.").create();
 
     Option helpOpt = DefaultOptionCreator.helpOption();
 

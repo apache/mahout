@@ -20,6 +20,7 @@ package org.apache.mahout.ga.watchmaker.cd.hadoop;
 import java.io.IOException;
 import java.util.Random;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -94,27 +95,18 @@ public final class DatasetSplit {
 
   static long getSeed(Configuration conf) {
     String seedstr = conf.get(SEED);
-    if (seedstr == null) {
-      throw new IllegalArgumentException("SEED job parameter not found");
-    }
-
+    Preconditions.checkArgument(seedstr != null, "Job parameter %s not found", SEED);
     return StringUtils.<Long> fromString(seedstr);
   }
 
   static double getThreshold(Configuration conf) {
     String thrstr = conf.get(THRESHOLD);
-    if (thrstr == null) {
-      throw new IllegalArgumentException("THRESHOLD job parameter not found");
-    }
-
+    Preconditions.checkArgument(thrstr != null, "Job parameter %s not found", THRESHOLD);
     return Double.parseDouble(thrstr);
   }
 
   static boolean isTraining(Configuration conf) {
-    if (conf.get(TRAINING) == null) {
-      throw new IllegalArgumentException("TRAINING job parameter not found");
-    }
-
+    Preconditions.checkArgument(conf.get(TRAINING) != null, "Job parameter %s not found", TRAINING);
     return conf.getBoolean(TRAINING, true);
   }
 
@@ -137,14 +129,9 @@ public final class DatasetSplit {
     private final Text v = new Text();
 
     public RndLineRecordReader(RecordReader<LongWritable, Text> reader, Configuration conf) {
-      if (reader == null) {
-        throw new IllegalArgumentException("null reader");
-      }
-
+      Preconditions.checkArgument(reader != null, "Null reader");
       this.reader = reader;
-
       DatasetSplit split = new DatasetSplit(conf);
-
       rng = RandomUtils.getRandom(split.getSeed());
       threshold = split.getThreshold();
       training = split.isTraining();
@@ -160,7 +147,7 @@ public final class DatasetSplit {
       try {
         return reader.getProgress();
       } catch (InterruptedException e) {
-        return 0;
+        return 0.0f;
       }
     }
 

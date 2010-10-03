@@ -40,6 +40,8 @@ import org.apache.mahout.common.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * {@link DiffStorage} which reads pre-computed diffs from a file and stores in memory. The file should have
@@ -76,18 +78,12 @@ public final class FileDiffStorage implements DiffStorage {
    *           if data file does not exist or is a directory
    */
   public FileDiffStorage(File dataFile, long maxEntries) throws FileNotFoundException {
-    if (dataFile == null) {
-      throw new IllegalArgumentException("dataFile is null");
-    }
+    Preconditions.checkArgument(dataFile != null, "dataFile is null");
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }
-    if (maxEntries <= 0L) {
-      throw new IllegalArgumentException("maxEntries must be positive");
-    }
-    
+    Preconditions.checkArgument(maxEntries > 0L, "maxEntries must be positive");
     log.info("Creating FileDataModel for file {}", dataFile);
-    
     this.dataFile = dataFile.getAbsoluteFile();
     this.lastModified = dataFile.lastModified();
     this.maxEntries = maxEntries;
@@ -101,7 +97,7 @@ public final class FileDiffStorage implements DiffStorage {
   private void buildDiffs() {
     if (buildAverageDiffsLock.writeLock().tryLock()) {
       try {
-        
+
         averageDiffs.clear();
         allRecommendableItemIDs.clear();
         
@@ -129,19 +125,15 @@ public final class FileDiffStorage implements DiffStorage {
   }
   
   private long processLine(String line, char delimiter, long averageCount) {
-    
+
     if ((line.length() == 0) || (line.charAt(0) == COMMENT_CHAR)) {
       return averageCount;
     }
     
     int delimiterOne = line.indexOf(delimiter);
-    if (delimiterOne < 0) {
-      throw new IllegalArgumentException("Bad line: " + line);
-    }
+    Preconditions.checkArgument(delimiterOne >= 0, "Bad line: %s", line);
     int delimiterTwo = line.indexOf(delimiter, delimiterOne + 1);
-    if (delimiterTwo < 0) {
-      throw new IllegalArgumentException("Bad line: " + line);
-    }
+    Preconditions.checkArgument(delimiterTwo >= 0, "Bad line: %s", line);
     
     long itemID1 = Long.parseLong(line.substring(0, delimiterOne));
     long itemID2 = Long.parseLong(line.substring(delimiterOne + 1, delimiterTwo));

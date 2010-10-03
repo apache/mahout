@@ -31,6 +31,8 @@ import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Implements an "inverse user frequency" transformation, which boosts preference values for items for which
@@ -69,12 +71,8 @@ public final class InverseUserFrequency implements PreferenceTransform {
    *           if dataModel is <code>null</code> or logBase is {@link Double#NaN} or &lt;= 1.0
    */
   public InverseUserFrequency(DataModel dataModel, double logBase) throws TasteException {
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
-    if (Double.isNaN(logBase) || (logBase <= 1.0)) {
-      throw new IllegalArgumentException("logBase is NaN or <= 1.0");
-    }
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
+    Preconditions.checkArgument(logBase > 1.0, "logBase should be > 1.0");
     this.dataModel = dataModel;
     this.logBase = logBase;
     this.iufFactors = new FastByIDMap<Double>();

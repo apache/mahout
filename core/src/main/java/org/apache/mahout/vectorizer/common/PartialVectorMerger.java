@@ -19,6 +19,7 @@ package org.apache.mahout.vectorizer.common;
 
 import java.io.IOException;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -86,12 +87,12 @@ public final class PartialVectorMerger {
                                          boolean namedVector,
                                          int numReducers)
     throws IOException, InterruptedException, ClassNotFoundException {
-    if (normPower != NO_NORMALIZING && normPower < 0) {
-      throw new IllegalArgumentException("normPower must either be -1 or >= 0");
-    }
-    if (normPower != NO_NORMALIZING && (normPower <= 1 || Double.isInfinite(normPower)) && logNormalize) {
-      throw new IllegalArgumentException("normPower must be > 1 and not +infinity if log normalization is chosen");
-    }
+    Preconditions.checkArgument(normPower == NO_NORMALIZING || normPower >= 0,
+        "If specified normPower must be nonnegative", normPower);
+    Preconditions.checkArgument(normPower == NO_NORMALIZING
+                                || (normPower > 1 && !Double.isInfinite(normPower))
+                                || !logNormalize,
+        "normPower must be > 1 and not infinite if log normalization is chosen", normPower);
 
     Configuration conf = new Configuration();
     // this conf parameter needs to be set enable serialisation of conf values

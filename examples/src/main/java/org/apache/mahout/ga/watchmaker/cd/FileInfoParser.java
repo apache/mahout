@@ -25,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -108,35 +109,18 @@ public final class FileInfoParser {
   /**
    * Prepares the path for the info file corresponding to the input path.
    * 
-   * @param fs
-   *          file system
-   * @param inpath
-   * @throws IOException
+   * @param fs file system
    */
   public static Path getInfoFile(FileSystem fs, Path inpath) throws IOException {
-    if (inpath == null) {
-      throw new IllegalArgumentException("null inpath parameter");
-    }
-    if (!fs.exists(inpath)) {
-      throw new IllegalArgumentException("Input path does not exist: " + inpath);
-    }
-    if (!fs.getFileStatus(inpath).isDir()) {
-      throw new IllegalArgumentException("Input path should be a directory: " + inpath);
-    }
-    
-    // info file name
+    Preconditions.checkArgument(inpath != null && fs.exists(inpath) && fs.getFileStatus(inpath).isDir(),
+        "Input path should be a directory", inpath);
     Path infoPath = new Path(inpath.getParent(), inpath.getName() + ".infos");
-    if (!fs.exists(infoPath)) {
-      throw new IllegalArgumentException("Info file does not exist");
-    }
-    
+    Preconditions.checkArgument(fs.exists(infoPath), "Info file does not exist", infoPath);
     return infoPath;
   }
   
   /**
    * Parse a nominal attribute.
-   * 
-   * @param tokenizer
    */
   private static NominalAttr parseNominal(StringTokenizer tokenizer) {
     Collection<String> vlist = new ArrayList<String>();
@@ -152,16 +136,11 @@ public final class FileInfoParser {
   
   /**
    * Parse a numerical attribute.
-   * 
-   * @param tokenizer
    */
   private static NumericalAttr parseNumerical(StringTokenizer tokenizer) {
     double min = nextDouble(tokenizer);
     double max = nextDouble(tokenizer);
-    if (min > max) {
-      throw new IllegalArgumentException("min > max");
-    }
-    
+    Preconditions.checkArgument(min <= max, "min > max");
     return new NumericalAttr(min, max);
   }
   

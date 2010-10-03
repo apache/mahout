@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -176,13 +177,8 @@ public class Dataset implements Writable {
    *          attribute's index
    */
   public int valueOf(int attr, String token) {
-    if (isNumerical(attr)) {
-      throw new IllegalArgumentException("Only for CATEGORICAL attributes");
-    }
-    if (values == null) {
-      throw new IllegalStateException("Values not found");
-    }
-    
+    Preconditions.checkArgument(!isNumerical(attr), "Only for CATEGORICAL attributes");
+    Preconditions.checkArgument(values != null, "Values not found");
     return ArrayUtils.indexOf(values[attr], token);
   }
   
@@ -209,16 +205,10 @@ public class Dataset implements Writable {
   }
   
   private static void validateValues(Attribute[] attrs, List<String>[] values) {
-    if (attrs.length != values.length) {
-      throw new IllegalArgumentException("attrs.length != values.length");
-    }
-    
+    Preconditions.checkArgument(attrs.length == values.length,  "attrs.length != values.length");
     for (int attr = 0; attr < attrs.length; attr++) {
-      if (attrs[attr].isCategorical()) {
-        if (values[attr] == null) {
-          throw new IllegalArgumentException("values not found for attribute N° " + attr);
-        }
-      }
+      Preconditions.checkArgument(!attrs[attr].isCategorical() || values[attr] != null,
+          "values not found for attribute " + attr);
     }
   }
   

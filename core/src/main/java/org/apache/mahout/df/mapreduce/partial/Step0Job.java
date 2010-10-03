@@ -46,6 +46,8 @@ import org.apache.mahout.df.DFUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * preparation step of the partial mapreduce builder. Computes some stats that will be used by the builder.
  */
@@ -212,9 +214,7 @@ public class Step0Job {
      */
     protected void configure(int p) {
       partition = p;
-      if (partition < 0) {
-        throw new IllegalArgumentException("Wrong partition id : " + partition);
-      }
+      Preconditions.checkArgument(partition >= 0, "Wrong partition id: %d", partition);
     }
     
     @Override

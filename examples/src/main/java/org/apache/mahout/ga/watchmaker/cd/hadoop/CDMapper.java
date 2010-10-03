@@ -20,6 +20,7 @@ package org.apache.mahout.ga.watchmaker.cd.hadoop;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -60,19 +61,13 @@ public class CDMapper extends Mapper<LongWritable, Text, LongWritable, CDFitness
     super.setup(context);
     Configuration conf = context.getConfiguration();
     String rstr = conf.get(CLASSDISCOVERY_RULES);
-    if (rstr == null) {
-      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_RULES + ") not found!");
-    }
+    Preconditions.checkArgument(rstr != null, "Job parameter %s not found", CLASSDISCOVERY_RULES);
 
     String datastr = conf.get(CLASSDISCOVERY_DATASET);
-    if (datastr == null) {
-      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_DATASET + ") not found!");
-    }
+    Preconditions.checkArgument(datastr != null, "Job parameter %s not found", CLASSDISCOVERY_DATASET);
 
     int target = conf.getInt(CLASSDISCOVERY_TARGET_LABEL, -1);
-    if (target == -1) {
-      throw new IllegalArgumentException("Job Parameter (" + CLASSDISCOVERY_TARGET_LABEL + ") not found!");
-    }
+    Preconditions.checkArgument(target != -1, "Job parameter %s not found", CLASSDISCOVERY_TARGET_LABEL);
 
     initializeDataSet(StringUtils.<DataSet> fromString(datastr));
     configure(StringUtils.<List<Rule>> fromString(rstr), target);
@@ -86,16 +81,10 @@ public class CDMapper extends Mapper<LongWritable, Text, LongWritable, CDFitness
   }
 
   void configure(List<Rule> rules, int target) {
-    if (rules == null || rules.isEmpty()) {
-      throw new IllegalArgumentException("bad 'rules' configuration parameter");
-    }
-    if (target < 0) {
-      throw new IllegalArgumentException("bad 'target' configuration parameter");
-    }
-
+    Preconditions.checkArgument(rules != null && !rules.isEmpty(), "Bad rules", rules);
+    Preconditions.checkArgument(target >= 0, "Bad target", target);
     this.rules = rules;
     this.target = target;
-
   }
 
   /**

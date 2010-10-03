@@ -20,6 +20,8 @@ package org.apache.mahout.math;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.Writable;
 
+import com.google.common.base.Preconditions;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -127,9 +129,7 @@ public final class VectorWritable extends Configured implements Writable {
   @Override
   public void readFields(DataInput in) throws IOException {
     int flags = in.readByte();
-    if (flags >> NUM_FLAGS != 0) {
-      throw new IllegalArgumentException("Unknown flags set: " + Integer.toString(flags, 2));
-    }
+    Preconditions.checkArgument(flags >> NUM_FLAGS == 0, "Unknown flags set: %d", Integer.toString(flags, 2));
     boolean dense = (flags & FLAG_DENSE) != 0;
     boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
     boolean named = (flags & FLAG_NAMED) != 0;

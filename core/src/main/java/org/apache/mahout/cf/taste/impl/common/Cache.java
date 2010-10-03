@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.common;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
@@ -65,13 +66,9 @@ public final class Cache<K,V> implements Retriever<K,V> {
    *          maximum number of entries the cache will store before evicting some
    */
   public Cache(Retriever<? super K,? extends V> retriever, int maxEntries) {
-    if (retriever == null) {
-      throw new IllegalArgumentException("retriever is null");
-    }
-    if (maxEntries < 1) {
-      throw new IllegalArgumentException("maxEntries must be at least 1");
-    }
-    cache = new FastMap<K,V>(11, maxEntries);
+    Preconditions.checkArgument(retriever != null, "retriever is null");
+    Preconditions.checkArgument(maxEntries >= 1, "maxEntries must be at least 1");
+    cache = new FastMap<K, V>(11, maxEntries);
     this.retriever = retriever;
   }
   

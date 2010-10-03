@@ -21,6 +21,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.model.DataModel;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * An implementation of a "similarity" based on the Euclidean "distance" between two users X and Y. Thinking
@@ -44,9 +46,7 @@ public final class EuclideanDistanceSimilarity extends AbstractSimilarity {
    */
   public EuclideanDistanceSimilarity(DataModel dataModel, Weighting weighting) throws TasteException {
     super(dataModel, weighting, false);
-    if (!dataModel.hasPreferenceValues()) {
-      throw new IllegalArgumentException("DataModel doesn't have preference values");
-    }
+    Preconditions.checkArgument(dataModel.hasPreferenceValues(), "DataModel doesn't have preference values");
   }
   
   @Override

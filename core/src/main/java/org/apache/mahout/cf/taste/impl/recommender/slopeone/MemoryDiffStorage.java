@@ -45,6 +45,8 @@ import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * An implementation of {@link DiffStorage} that merely stores item-item diffs in memory. It is fast, but can
@@ -99,15 +101,9 @@ public final class MemoryDiffStorage implements DiffStorage {
                            Weighting stdDevWeighted,
                            boolean compactAverages,
                            long maxEntries) throws TasteException {
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
-    if (dataModel.getNumItems() < 1) {
-      throw new IllegalArgumentException("dataModel has no items");
-    }
-    if (maxEntries <= 0L) {
-      throw new IllegalArgumentException("maxEntries must be positive");
-    }
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
+    Preconditions.checkArgument(dataModel.getNumItems() >= 1, "dataModel has no items");
+    Preconditions.checkArgument(maxEntries > 0L, "maxEntries must be positive");
     this.dataModel = dataModel;
     this.stdDevWeighted = stdDevWeighted == Weighting.WEIGHTED;
     this.compactAverages = compactAverages;
@@ -313,7 +309,6 @@ public final class MemoryDiffStorage implements DiffStorage {
         if (average != null) {
           average.addDatum(userPreferences.getValue(j) - prefAValue);
         }
-        
       }
       RunningAverage itemAverage = averageItemPref.get(itemIDA);
       if (itemAverage == null) {

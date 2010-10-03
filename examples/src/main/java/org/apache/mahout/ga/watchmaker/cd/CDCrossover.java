@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.base.Preconditions;
 import org.uncommons.maths.random.Probability;
 import org.uncommons.watchmaker.framework.operators.AbstractCrossover;
 
@@ -39,9 +40,9 @@ public class CDCrossover extends AbstractCrossover<CDRule> {
   
   @Override
   protected List<CDRule> mate(CDRule parent1, CDRule parent2, int numberOfCrossoverPoints, Random rng) {
-    if (parent1.getNbConditions() != parent2.getNbConditions()) {
-      throw new IllegalArgumentException("Cannot perform cross-over with parents of different size.");
-    }
+    Preconditions.checkArgument(
+        parent1.getNbConditions() == parent2.getNbConditions(),
+        "Cannot perform cross-over with parents of different size.");
     CDRule offspring1 = new CDRule(parent1);
     CDRule offspring2 = new CDRule(parent2);
     // Apply as many cross-overs as required.

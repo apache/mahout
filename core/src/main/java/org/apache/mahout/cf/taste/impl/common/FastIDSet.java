@@ -24,6 +24,8 @@ import java.util.NoSuchElementException;
 
 import org.apache.mahout.common.RandomUtils;
 
+import com.google.common.base.Preconditions;
+
 /**
  * @see FastByIDMap
  */
@@ -45,13 +47,9 @@ public final class FastIDSet implements Serializable, Cloneable {
   }
   
   public FastIDSet(int size) {
-    if (size < 0) {
-      throw new IllegalArgumentException("size must be at least 0");
-    }
+    Preconditions.checkArgument(size >= 0, "size must be at least 0");
     int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
-    if (size >= max) {
-      throw new IllegalArgumentException("size must be less than " + max);
-    }
+    Preconditions.checkArgument(size < max, "size must be less than %d", max);
     int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
     keys = new long[hashSize];
     Arrays.fill(keys, NULL);
@@ -113,9 +111,8 @@ public final class FastIDSet implements Serializable, Cloneable {
   }
   
   public boolean add(long key) {
-    if ((key == NULL) || (key == REMOVED)) {
-      throw new IllegalArgumentException();
-    }
+    Preconditions.checkArgument(key != NULL && key != REMOVED);
+
     // If less than half the slots are open, let's clear it up
     if (numSlotsUsed * ALLOWED_LOAD_FACTOR >= keys.length) {
       // If over half the slots used are actual entries, let's grow

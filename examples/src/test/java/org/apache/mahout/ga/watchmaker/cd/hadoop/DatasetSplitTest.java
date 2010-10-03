@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -46,9 +47,7 @@ public final class DatasetSplitTest extends MahoutTestCase {
     private final Text currentValue = new Text();
 
     MockReader(long size) {
-      if (size <= 0) {
-        throw new IllegalArgumentException("size must be positive");
-      }
+      Preconditions.checkArgument(size > 0, "Size must be positive", size);
       this.size = size;
     }
 

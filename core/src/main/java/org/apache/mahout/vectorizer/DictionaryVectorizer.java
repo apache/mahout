@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
@@ -128,12 +129,12 @@ public final class DictionaryVectorizer {
                                                 boolean sequentialAccess,
                                                 boolean namedVectors)
     throws IOException, InterruptedException, ClassNotFoundException {
-    if (normPower != PartialVectorMerger.NO_NORMALIZING && normPower < 0) {
-      throw new IllegalArgumentException("normPower must either be -1 or >= 0");
-    }
-    if (normPower != PartialVectorMerger.NO_NORMALIZING && (normPower <= 1 || Double.isInfinite(normPower)) && logNormalize) {
-      throw new IllegalArgumentException("normPower must be > 1 and not +infinity if log normalization is chosen");
-    }
+    Preconditions.checkArgument(normPower == PartialVectorMerger.NO_NORMALIZING || normPower >= 0,
+        "If specified normPower must be nonnegative", normPower);
+    Preconditions.checkArgument(normPower == PartialVectorMerger.NO_NORMALIZING 
+                                || (normPower > 1 && !Double.isInfinite(normPower))
+                                || !logNormalize,
+        "normPower must be > 1 and not infinite if log normalization is chosen", normPower);
     if (chunkSizeInMegabytes < MIN_CHUNKSIZE) {
       chunkSizeInMegabytes = MIN_CHUNKSIZE;
     } else if (chunkSizeInMegabytes > MAX_CHUNKSIZE) { // 10GB

@@ -28,6 +28,8 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * An {@link ItemSimilarity} backed by a comma-delimited file. This class typically expects a file where each line
@@ -78,12 +80,9 @@ public class FileItemSimilarity implements ItemSimilarity {
    * @see #FileItemSimilarity(File)
    */
   public FileItemSimilarity(File dataFile, long minReloadIntervalMS) {
-    if (dataFile == null) {
-      throw new IllegalArgumentException("dataFile is null");
-    }
-    if (!dataFile.exists() || dataFile.isDirectory()) {
-      throw new IllegalArgumentException("dataFile is missing or a directory: " + dataFile);
-    }
+    Preconditions.checkArgument(dataFile != null, "dataFile is null");
+    Preconditions.checkArgument(dataFile.exists() && !dataFile.isDirectory(),
+      "dataFile is missing or a directory: %s", dataFile);
 
     log.info("Creating FileItemSimilarity for file {}", dataFile);
 

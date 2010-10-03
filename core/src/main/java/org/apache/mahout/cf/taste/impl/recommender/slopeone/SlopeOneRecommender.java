@@ -38,6 +38,8 @@ import org.apache.mahout.cf.taste.recommender.slopeone.DiffStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A basic "slope one" recommender. (See an <a href="http://www.daniel-lemire.com/fr/abstracts/SDM2005.html">
@@ -94,12 +96,9 @@ public final class SlopeOneRecommender extends AbstractRecommender {
                              Weighting stdDevWeighting,
                              DiffStorage diffStorage) {
     super(dataModel);
-    if ((stdDevWeighting == Weighting.WEIGHTED) && (weighting == Weighting.UNWEIGHTED)) {
-      throw new IllegalArgumentException("weighted required when stdDevWeighted is set");
-    }
-    if (diffStorage == null) {
-      throw new IllegalArgumentException("diffStorage is null");
-    }
+    Preconditions.checkArgument(stdDevWeighting != Weighting.WEIGHTED || weighting != Weighting.UNWEIGHTED,
+      "weighted required when stdDevWeighted is set");
+    Preconditions.checkArgument(diffStorage != null, "diffStorage is null");
     this.weighted = weighting == Weighting.WEIGHTED;
     this.stdDevWeighted = stdDevWeighting == Weighting.WEIGHTED;
     this.diffStorage = diffStorage;
@@ -107,19 +106,16 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
-    if (howMany < 1) {
-      throw new IllegalArgumentException("howMany must be at least 1");
-    }
-    
+    Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
-    
+
     FastIDSet possibleItemIDs = diffStorage.getRecommendableItemIDs(userID);
-    
+
     TopItems.Estimator<Long> estimator = new Estimator(userID);
-    
+
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
-    
+
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }

@@ -27,6 +27,7 @@ import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.common.LongPair;
+import com.google.common.base.Preconditions;
 
 /** Caches the results from an underlying {@link ItemSimilarity} implementation. */
 public final class CachingItemSimilarity implements ItemSimilarity {
@@ -47,9 +48,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
    * The cache size is capped by the given size.
    */
   public CachingItemSimilarity(ItemSimilarity similarity, int maxCacheSize) {
-    if (similarity == null) {
-      throw new IllegalArgumentException("similarity is null");
-    }
+    Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
     this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }

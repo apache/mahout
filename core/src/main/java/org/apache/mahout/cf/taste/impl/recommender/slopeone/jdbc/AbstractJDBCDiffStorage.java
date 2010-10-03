@@ -42,6 +42,8 @@ import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A {@link DiffStorage} which stores diffs in a database. Database-specific implementations subclass this
@@ -96,10 +98,9 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     AbstractJDBCComponent.checkNotNullAndLog("deleteDiffsSQL", deleteDiffsSQL);
     AbstractJDBCComponent.checkNotNullAndLog("createDiffsSQL", createDiffsSQL);
     AbstractJDBCComponent.checkNotNullAndLog("diffsExistSQL", diffsExistSQL);
+
+    Preconditions.checkArgument(minDiffCount >= 0, "minDiffCount is not positive");
     
-    if (minDiffCount < 0) {
-      throw new IllegalArgumentException("minDiffCount is not positive");
-    }
     this.dataSource = dataModel.getDataSource();
     this.getDiffSQL = getDiffSQL;
     this.getDiffsSQL = getDiffsSQL;

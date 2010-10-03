@@ -24,6 +24,8 @@ import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Computes a neigbhorhood consisting of all users whose similarity to the given user meets or exceeds a
@@ -68,9 +70,7 @@ public final class ThresholdUserNeighborhood extends AbstractUserNeighborhood {
                                    DataModel dataModel,
                                    double samplingRate) {
     super(userSimilarity, dataModel, samplingRate);
-    if (Double.isNaN(threshold)) {
-      throw new IllegalArgumentException("threshold must not be NaN");
-    }
+    Preconditions.checkArgument(!Double.isNaN(threshold), "threshold must not be NaN");
     this.threshold = threshold;
   }
   

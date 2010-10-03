@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.common.LongPair;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Caches the results from an underlying {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}
  * implementation.
@@ -51,9 +53,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
    * The cache size is capped by the given size.
    */
   public CachingUserSimilarity(UserSimilarity similarity, int maxCacheSize) {
-    if (similarity == null) {
-      throw new IllegalArgumentException("similarity is null");
-    }
+    Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
     this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
   }

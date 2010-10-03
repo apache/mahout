@@ -29,6 +29,8 @@ import java.util.Set;
 
 import org.apache.mahout.common.RandomUtils;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * This is an optimized {@link Map} implementation, based on algorithms described in Knuth's "Art of Computer
@@ -92,16 +94,10 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
    *           {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
   public FastMap(int size, int maxSize) {
-    if (size < 0) {
-      throw new IllegalArgumentException("size must be at least 0");
-    }
+    Preconditions.checkArgument(size >= 0, "size must be at least 0");
     int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
-    if (size >= max) {
-      throw new IllegalArgumentException("size must be less than " + max);
-    }
-    if (maxSize < 1) {
-      throw new IllegalArgumentException("maxSize must be at least 1");
-    }
+    Preconditions.checkArgument(size < max, "size must be less than " + max);
+    Preconditions.checkArgument(maxSize >= 1, "maxSize must be at least 1");
     int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
     keys = (K[]) new Object[hashSize];
     values = (V[]) new Object[hashSize];
@@ -486,9 +482,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
       
       @Override
       public V setValue(V value) {
-        if (value == null) {
-          throw new IllegalArgumentException();
-        }
+        Preconditions.checkArgument(value != null);
         V oldValue = values[index];
         values[index] = value;
         return oldValue;

@@ -32,6 +32,8 @@ import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple {@link DataModel} which uses given user data as its data source. This implementation
@@ -69,14 +71,12 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
    *  User IDs are mapped to maps of item IDs to Long timestamps.
    */
   public GenericBooleanPrefDataModel(FastByIDMap<FastIDSet> userData, FastByIDMap<FastByIDMap<Long>> timestamps) {
-    if (userData == null) {
-      throw new IllegalArgumentException("userData is null");
-    }
-    
+    Preconditions.checkArgument(userData != null, "userData is null");
+
     this.preferenceFromUsers = userData;
     this.preferenceForItems = new FastByIDMap<FastIDSet>();
     FastIDSet itemIDSet = new FastIDSet();
-    for (Map.Entry<Long,FastIDSet> entry : preferenceFromUsers.entrySet()) {
+    for (Map.Entry<Long, FastIDSet> entry : preferenceFromUsers.entrySet()) {
       long userID = entry.getKey();
       FastIDSet itemIDs = entry.getValue();
       itemIDSet.addAll(itemIDs);
@@ -91,11 +91,11 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
         userIDs.add(userID);
       }
     }
-    
+
     this.itemIDs = itemIDSet.toArray();
     itemIDSet = null; // Might help GC -- this is big
     Arrays.sort(itemIDs);
-    
+
     this.userIDs = new long[userData.size()];
     int i = 0;
     LongPrimitiveIterator it = userData.keySetIterator();
@@ -254,9 +254,8 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   
   @Override
   public int getNumUsersWithPreferenceFor(long... itemIDs) {
-    if (itemIDs == null || itemIDs.length == 0) {
-      throw new IllegalArgumentException("itemIDs is null or empty");
-    }
+    Preconditions.checkArgument(itemIDs != null, "itemIDs is null");
+    Preconditions.checkArgument(itemIDs.length == 1 || itemIDs.length == 2, "Illegal number of IDs", itemIDs.length);
     FastIDSet userIDs1 = preferenceForItems.get(itemIDs[0]);
     if (userIDs1 == null) {
       return 0;
@@ -265,14 +264,13 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     if (itemIDs.length == 1) {
       return userIDs1.size();
     }
-    
-    if (itemIDs.length == 2) {
-      FastIDSet userIDs2 = preferenceForItems.get(itemIDs[1]);
-      if (userIDs2 == null) {
-        return 0;
-      }
-      return userIDs1.intersectionSize(userIDs2);
+
+    // itemIDs.length == 2
+    FastIDSet userIDs2 = preferenceForItems.get(itemIDs[1]);
+    if (userIDs2 == null) {
+      return 0;
     }
+    return userIDs1.intersectionSize(userIDs2);
 
     /*
     FastIDSet intersection = new FastIDSet(userIDs1.size());
@@ -288,7 +286,6 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     }
     return intersection.size();
      */
-    throw new IllegalArgumentException("Illegal number of item IDs: " + itemIDs.length);
   }
   
   @Override

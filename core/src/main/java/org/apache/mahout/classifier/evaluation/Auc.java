@@ -22,6 +22,8 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.list.DoubleArrayList;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Random;
 
 /**
@@ -69,11 +71,8 @@ public class Auc {
    */
   public void add(int trueValue, double score) {
     hasScore = true;
-
-    if (trueValue != 0 && trueValue != 1) {
-      throw new IllegalArgumentException("True value must be 0 or 1");
-    }
-
+    Preconditions.checkArgument(trueValue == 0 || trueValue == 1, "True value must be 0 or 1" );
+    
     int predictedClass = (score > threshold) ? 1 : 0;
     confusion.set(trueValue, predictedClass, confusion.get(trueValue, predictedClass) + 1);
 
@@ -113,11 +112,7 @@ public class Auc {
 
   public void add(int trueValue, int predictedClass) {
     hasScore = false;
-
-    if (trueValue != 0 && trueValue != 1) {
-      throw new IllegalArgumentException("True value must be 0 or 1");
-    }
-
+    Preconditions.checkArgument(trueValue == 0 || trueValue == 1, "True value must be 0 or 1");
     confusion.set(trueValue, predictedClass, confusion.get(trueValue, predictedClass) + 1);
   }
 
@@ -128,10 +123,7 @@ public class Auc {
    * @return The value of the Area Under the receiver operating Curve.
    */
   public double auc() {
-    if (!hasScore) {
-      throw new IllegalArgumentException("Can't compute AUC for classifier without a score");
-    }
-
+    Preconditions.checkArgument(hasScore, "Can't compute AUC for classifier without a score");
     scores[0].sort();
     scores[1].sort();
 

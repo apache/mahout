@@ -31,12 +31,11 @@ import java.util.Random;
  * See www.eecs.tufts.edu/~dsculley/papers/combined-ranking-and-regression.pdf
  */
 public class MixedGradient implements Gradient {
-  private double alpha;
 
-  private RankingGradient rank;
-  private Gradient basic;
-
-  Random random = RandomUtils.getRandom();
+  private final double alpha;
+  private final RankingGradient rank;
+  private final Gradient basic;
+  private final Random random = RandomUtils.getRandom();
 
   public MixedGradient(double alpha, int window) {
     this.alpha = alpha;

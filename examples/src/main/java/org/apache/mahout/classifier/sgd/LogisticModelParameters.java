@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -149,9 +150,11 @@ public class LogisticModelParameters {
    */
   public static LogisticModelParameters loadFrom(File in) throws IOException {
     InputStreamReader input = new FileReader(in);
-    LogisticModelParameters r = loadFrom(input);
-    input.close();
-    return r;
+    try {
+      return loadFrom(input);
+    } finally {
+      input.close();
+    }
   }
 
   /**
@@ -161,11 +164,9 @@ public class LogisticModelParameters {
    * @param predictorList The list of variable names.
    * @param typeList      The list of types in the format preferred by CsvRecordFactory.
    */
-  public void setTypeMap(List<String> predictorList, List<String> typeList) {
+  public void setTypeMap(Iterable<String> predictorList, List<String> typeList) {
+    Preconditions.checkArgument(!typeList.isEmpty(), "Must have at least one type specifier");
     typeMap = Maps.newHashMap();
-    if (typeList.isEmpty()) {
-      throw new IllegalArgumentException("Must have at least one type specifier");
-    }
     Iterator<String> iTypes = typeList.iterator();
     String lastType = null;
     for (Object x : predictorList) {

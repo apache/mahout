@@ -47,6 +47,8 @@ import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * For each user, these implementation determine the top <code>n</code> preferences, then evaluate the IR
@@ -81,20 +83,12 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
                                int at,
                                double relevanceThreshold,
                                double evaluationPercentage) throws TasteException {
-    
-    if (recommenderBuilder == null) {
-      throw new IllegalArgumentException("recommenderBuilder is null");
-    }
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
-    if (at < 1) {
-      throw new IllegalArgumentException("at must be at least 1");
-    }
-    if (Double.isNaN(evaluationPercentage) || (evaluationPercentage <= 0.0) || (evaluationPercentage > 1.0)) {
-      throw new IllegalArgumentException("Invalid evaluationPercentage: " + evaluationPercentage);
-    }
-    
+    Preconditions.checkArgument(recommenderBuilder != null, "recommenderBuilder is null");
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
+    Preconditions.checkArgument(at >= 1, "at must be at least 1");
+    Preconditions.checkArgument(evaluationPercentage > 0.0 && evaluationPercentage <= 1.0,
+      "Invalid evaluationPercentage: %s", evaluationPercentage);
+
     int numItems = dataModel.getNumItems();
     RunningAverage precision = new FullRunningAverage();
     RunningAverage recall = new FullRunningAverage();
@@ -111,7 +105,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
           // Really not enough prefs to meaningfully evaluate this user
           continue;
         }
-        
+
         // List some most-preferred items that would count as (most) "relevant" results
         double theRelevanceThreshold =
             Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
@@ -130,17 +124,17 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
             processOtherUser(userID, relevantItemIDs, trainingUsers, it2
                 .nextLong(), dataModel);
           }
-          
+
           DataModel trainingModel = dataModelBuilder == null ? new GenericDataModel(trainingUsers)
               : dataModelBuilder.buildDataModel(trainingUsers);
           Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
-          
+
           try {
             trainingModel.getPreferencesFromUser(userID);
           } catch (NoSuchUserException nsee) {
             continue; // Oops we excluded all prefs for the user -- just move on
           }
-          
+
           int intersectionSize = 0;
           List<RecommendedItem> recommendedItems = recommender.recommend(userID, at, rescorer);
           for (RecommendedItem recommendedItem : recommendedItems) {
@@ -157,7 +151,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
             fallOut.addDatum((double) (numRecommendedItems - intersectionSize)
                              / (double) (numItems - numRelevantItems));
           }
-          
+
           long end = System.currentTimeMillis();
           GenericRecommenderIRStatsEvaluator.log.info("Evaluated with user {} in {}ms", userID, end - start);
           log.info("Precision/recall/fall-out: {} / {} / {}",
@@ -165,7 +159,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
         }
       }
     }
-    
+
     return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage());
   }
   

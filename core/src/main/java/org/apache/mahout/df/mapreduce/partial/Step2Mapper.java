@@ -38,6 +38,8 @@ import org.apache.mahout.df.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Second step of PartialBuilder. Using the trees of the first step, computes the oob predictions for each
  * tree, except those of its own partition, on all instancesof the partition.
@@ -68,9 +70,7 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
     
     log.info("DistributedCache.getCacheFiles(): {}", ArrayUtils.toString(files));
     
-    if ((files == null) || (files.length < 2)) {
-      throw new IllegalArgumentException("missing paths from the DistributedCache");
-    }
+    Preconditions.checkArgument(files != null && files.length >= 2, "missing paths from the DistributedCache" );
     
     Path datasetPath = new Path(files[0].getPath());
     Dataset dataset = Dataset.load(conf, datasetPath);
@@ -80,9 +80,7 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
     
     // total number of trees in the forest
     int numTrees = Builder.getNbTrees(conf);
-    if (numTrees == -1) {
-      throw new IllegalArgumentException("numTrees not found !");
-    }
+    Preconditions.checkArgument(numTrees != -1, "numTrees not found !");
     
     int nbConcerned = nbConcerned(numMaps, numTrees, p);
     keys = new TreeID[nbConcerned];
@@ -107,9 +105,7 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
    *          mapper's partition
    */
   public static int nbConcerned(int numMaps, int numTrees, int partition) {
-    if (partition < 0) {
-      throw new IllegalArgumentException("partition < 0");
-    }
+    Preconditions.checkArgument(partition >= 0, "partition < 0");
     // the trees of the mapper's partition are not concerned
     return numTrees - Step1Mapper.nbTrees(numMaps, numTrees, partition);
   }
@@ -130,15 +126,11 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
    */
   public void configure(int partition, Dataset dataset, TreeID[] keys, Node[] trees, int numInstances) {
     this.partition = partition;
-    if (partition < 0) {
-      throw new IllegalArgumentException("Wrong partition id : " + partition);
-    }
+    Preconditions.checkArgument(partition >= 0, "Wrong partition id : " + partition);
     
     converter = new DataConverter(dataset);
-    
-    if (keys.length != trees.length) {
-      throw new IllegalArgumentException("keys.length != trees.length");
-    }
+
+    Preconditions.checkArgument(keys.length == trees.length, "keys.length != trees.length");
     int nbConcerned = keys.length;
     
     this.keys = keys;
@@ -146,9 +138,7 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
     
     // make sure the trees are not from this partition
     for (TreeID key : keys) {
-      if (key.partition() == partition) {
-        throw new IllegalArgumentException("a tree from this partition was found !");
-      }
+      Preconditions.checkArgument(key.partition() != partition, "a tree from this partition was found !");
     }
     
     // init the callbacks

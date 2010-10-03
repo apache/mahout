@@ -41,6 +41,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.Functions;
 
+import com.google.common.base.Preconditions;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
@@ -151,10 +153,8 @@ public final class TimesSquaredJob {
     public void configure(JobConf conf) {
       try {
         URI[] localFiles = DistributedCache.getCacheFiles(conf);
-        if (localFiles == null || localFiles.length < 1) {
-          throw new IllegalArgumentException(
-            "missing paths from the DistributedCache");
-        }
+        Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
+          "missing paths from the DistributedCache" );
         Path inputVectorPath = new Path(localFiles[0].getPath());
         FileSystem fs = inputVectorPath.getFileSystem(conf);
 

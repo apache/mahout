@@ -39,6 +39,8 @@ import org.apache.mahout.common.LongPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple {@link org.apache.mahout.cf.taste.recommender.Recommender} which uses a given
@@ -74,9 +76,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
                                      ItemSimilarity similarity,
                                      CandidateItemsStrategy candidateItemsStrategy) {
     super(dataModel, candidateItemsStrategy);
-    if (similarity == null) {
-      throw new IllegalArgumentException("similarity is null");
-    }
+    Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
     this.refreshHelper = new RefreshHelper(null);
     refreshHelper.addDependency(dataModel);
@@ -95,23 +95,20 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
-    if (howMany < 1) {
-      throw new IllegalArgumentException("howMany must be at least 1");
-    }
-    
+    Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
-    
+
     if (getNumPreferences(userID) == 0) {
       return Collections.emptyList();
     }
-    
+
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
-    
+
     TopItems.Estimator<Long> estimator = new Estimator(userID);
-    
+
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
-    
+
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }
@@ -152,13 +149,11 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> recommendedBecause(long userID, long itemID, int howMany) throws TasteException {
-    if (howMany < 1) {
-      throw new IllegalArgumentException("howMany must be at least 1");
-    }
-    
+    Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
+
     DataModel model = getDataModel();
     TopItems.Estimator<Long> estimator = new RecommendedBecauseEstimator(userID, itemID, similarity);
-    
+
     PreferenceArray prefs = model.getPreferencesFromUser(userID);
     int size = prefs.length();
     FastIDSet allUserItems = new FastIDSet(size);
@@ -166,7 +161,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
       allUserItems.add(prefs.getItemID(i));
     }
     allUserItems.remove(itemID);
-    
+
     return TopItems.getTopItems(howMany, allUserItems.iterator(), null, estimator);
   }
   

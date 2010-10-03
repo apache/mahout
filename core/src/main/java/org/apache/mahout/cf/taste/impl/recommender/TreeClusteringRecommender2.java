@@ -43,6 +43,8 @@ import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A {@link org.apache.mahout.cf.taste.recommender.Recommender} that clusters users, then determines the
@@ -94,12 +96,8 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   public TreeClusteringRecommender2(DataModel dataModel, ClusterSimilarity clusterSimilarity, int numClusters)
     throws TasteException {
     super(dataModel);
-    if (clusterSimilarity == null) {
-      throw new IllegalArgumentException("clusterSimilarity is null");
-    }
-    if (numClusters < 2) {
-      throw new IllegalArgumentException("numClusters must be at least 2");
-    }
+    Preconditions.checkArgument(clusterSimilarity != null, "clusterSimilarity is null");
+    Preconditions.checkArgument(numClusters >= 2, "numClusters must be at least 2");
     this.clusterSimilarity = clusterSimilarity;
     this.numClusters = numClusters;
     this.clusteringThreshold = Double.NaN;
@@ -132,12 +130,8 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
                                     ClusterSimilarity clusterSimilarity,
                                     double clusteringThreshold) throws TasteException {
     super(dataModel);
-    if (clusterSimilarity == null) {
-      throw new IllegalArgumentException("clusterSimilarity is null");
-    }
-    if (Double.isNaN(clusteringThreshold)) {
-      throw new IllegalArgumentException("clusteringThreshold must not be NaN");
-    }
+    Preconditions.checkArgument(clusterSimilarity != null, "clusterSimilarity is null");
+    Preconditions.checkArgument(!(Double.isNaN(clusteringThreshold)), "clusteringThreshold must not be NaN");
     this.clusterSimilarity = clusterSimilarity;
     this.numClusters = Integer.MIN_VALUE;
     this.clusteringThreshold = clusteringThreshold;
@@ -156,18 +150,16 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
-    if (howMany < 1) {
-      throw new IllegalArgumentException("howMany must be at least 1");
-    }
+    Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     buildClusters();
-    
+
     log.debug("Recommending items for user ID '{}'", userID);
-    
+
     List<RecommendedItem> recommended = topRecsByUserID.get(userID);
     if (recommended == null) {
       return Collections.emptyList();
     }
-    
+
     DataModel dataModel = getDataModel();
     List<RecommendedItem> rescored = new ArrayList<RecommendedItem>(recommended.size());
     // Only add items the user doesn't already have a preference for.
@@ -183,7 +175,7 @@ public final class TreeClusteringRecommender2 extends AbstractRecommender implem
       }
     }
     Collections.sort(rescored, new ByRescoreComparator(rescorer));
-    
+
     return rescored;
   }
   

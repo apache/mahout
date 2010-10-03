@@ -41,6 +41,8 @@ import org.apache.mahout.math.DenseMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Estimates an LDA model from a corpus of documents, which are SparseVectors of word counts. At each phase,
  * it outputs a matrix of log probabilities of each topic.
@@ -99,22 +101,16 @@ public final class LDADriver extends AbstractJob {
         int word = key.getSecond();
         if (word == TOPIC_SUM_KEY) {
           logTotals[topic] = value.get();
-          if (Double.isInfinite(value.get())) {
-            throw new IllegalArgumentException();
-          }
+          Preconditions.checkArgument(!Double.isInfinite(value.get()));
         } else if (topic == LOG_LIKELIHOOD_KEY) {
           ll = value.get();
         } else {
-          if (!((topic >= 0) && (word >= 0))) {
-            throw new IllegalArgumentException(topic + " " + word);
-          }
-          if (pWgT.getQuick(topic, word) != 0.0) {
-            throw new IllegalArgumentException();
-          }
+          Preconditions.checkArgument(topic >= 0, "topic should be non-negative, not %d", topic);
+          Preconditions.checkArgument(word >= 0, "word should be non-negative not %d", word);
+          Preconditions.checkArgument(pWgT.getQuick(topic, word) == 0.0);
+
           pWgT.setQuick(topic, word, value.get());
-          if (Double.isInfinite(pWgT.getQuick(topic, word))) {
-            throw new IllegalArgumentException();
-          }
+          Preconditions.checkArgument(!Double.isInfinite(pWgT.getQuick(topic, word)));
         }
       }
       reader.close();

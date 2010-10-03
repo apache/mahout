@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.base.Preconditions;
 import org.uncommons.watchmaker.framework.EvolutionaryOperator;
 
 /**
@@ -50,16 +51,9 @@ public class CDMutation implements EvolutionaryOperator<CDRule> {
    * for more information about the parameters
    */
   public CDMutation(double rate, double range, int k) {
-    if (rate <= 0 || rate > 1) {
-      throw new IllegalArgumentException("mutation rate must be in ]0, 1]");
-    }
-    if (range <= 0 || range > 1) {
-      throw new IllegalArgumentException("mutation range must be in ]0, 1]");
-    }
-    if (k < 0) {
-      throw new IllegalArgumentException("mutation precision must be >= 0");
-    }
-    
+    Preconditions.checkArgument(rate > 0.0 && rate <= 1.0, "mutation rate must be in (0, 1]");
+    Preconditions.checkArgument(range > 0.0 && range <= 1.0, "mutation range must be in (0, 1]");
+    Preconditions.checkArgument(k >= 0, "mutation precision must be nonnegative");
     this.rate = rate;
     this.range = range;
     this.k = k;

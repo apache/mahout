@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -55,16 +56,11 @@ public final class NetflixDataModel implements DataModel {
    * @param dataDirectory root directory of Netflix data set, unpacked
    * @param useSubset if true, will use only a small fraction of the data -- may be useful
    *  for quick experiments
-   * @throws IOException
    */
   public NetflixDataModel(File dataDirectory, boolean useSubset) throws IOException {
-    if (dataDirectory == null) {
-      throw new IllegalArgumentException("dataDirectory is null");
-    }
-    if (!dataDirectory.exists() || !dataDirectory.isDirectory()) {
-      throw new FileNotFoundException(dataDirectory.toString());
-    }
-    
+    Preconditions.checkArgument(dataDirectory != null && dataDirectory.exists() && dataDirectory.isDirectory(),
+                                "%s is not a directory", dataDirectory);
+
     this.useSubset = useSubset;
     
     log.info("Creating NetflixDataModel for directory: {}", dataDirectory);

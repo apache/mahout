@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -100,32 +101,27 @@ public class TFIDFPartialVectorReducer extends
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    try {
-      Configuration conf = context.getConfiguration();
-      URI[] localFiles = DistributedCache.getCacheFiles(conf);
-      if (localFiles == null || localFiles.length < 1) {
-        throw new IllegalArgumentException("missing paths from the DistributedCache");
-      }
+    Configuration conf = context.getConfiguration();
+    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Preconditions.checkArgument(localFiles != null && localFiles.length >= 1, 
+        "missing paths from the DistributedCache");
 
-      vectorCount = conf.getLong(TFIDFConverter.VECTOR_COUNT, 1);
-      featureCount = conf.getLong(TFIDFConverter.FEATURE_COUNT, 1);
-      minDf = conf.getInt(TFIDFConverter.MIN_DF, 1);
-      maxDfPercent = conf.getInt(TFIDFConverter.MAX_DF_PERCENTAGE, 99);
-      sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
-      namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
+    vectorCount = conf.getLong(TFIDFConverter.VECTOR_COUNT, 1);
+    featureCount = conf.getLong(TFIDFConverter.FEATURE_COUNT, 1);
+    minDf = conf.getInt(TFIDFConverter.MIN_DF, 1);
+    maxDfPercent = conf.getInt(TFIDFConverter.MAX_DF_PERCENTAGE, 99);
+    sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+    namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
 
-      Path dictionaryFile = new Path(localFiles[0].getPath());
-      FileSystem fs = dictionaryFile.getFileSystem(conf);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
-      IntWritable key = new IntWritable();
-      LongWritable value = new LongWritable();
+    Path dictionaryFile = new Path(localFiles[0].getPath());
+    FileSystem fs = dictionaryFile.getFileSystem(conf);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
+    IntWritable key = new IntWritable();
+    LongWritable value = new LongWritable();
 
-      // key is feature, value is the document frequency
-      while (reader.next(key, value)) {
-        dictionary.put(key.get(), value.get());
-      }
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
+    // key is feature, value is the document frequency
+    while (reader.next(key, value)) {
+      dictionary.put(key.get(), value.get());
     }
   }
 

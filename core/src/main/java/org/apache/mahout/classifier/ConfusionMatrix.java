@@ -24,6 +24,8 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mahout.common.Summarizable;
 
+import com.google.common.base.Preconditions;
+
 /**
  * The ConfusionMatrix Class stores the result of Classification of a Test Dataset.
  * 
@@ -93,18 +95,20 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public int getCount(String correctLabel, String classifiedLabel) {
-    if (labels.contains(correctLabel) && !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
-      throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
-    }
+    Preconditions.checkArgument(!labels.contains(correctLabel)
+        || labels.contains(classifiedLabel)
+        || defaultLabel.equals(classifiedLabel),
+        "Label not found " + correctLabel + ' ' + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
     return confusionMatrix[correctId][classifiedId];
   }
   
   public void putCount(String correctLabel, String classifiedLabel, int count) {
-    if (labels.contains(correctLabel) && !(labels.contains(classifiedLabel) || defaultLabel.equals(classifiedLabel))) {
-      throw new IllegalArgumentException("Label not found " + correctLabel + ' ' + classifiedLabel);
-    }
+    Preconditions.checkArgument(!labels.contains(correctLabel)
+        || labels.contains(classifiedLabel)
+        || defaultLabel.equals(classifiedLabel),
+        "Label not found " + correctLabel + ' ' + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
     confusionMatrix[correctId][classifiedId] = count;
@@ -119,12 +123,7 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public ConfusionMatrix merge(ConfusionMatrix b) {
-    if (labels.size() != b.getLabels().size()) {
-      throw new IllegalArgumentException("The Labels do not Match");
-    }
-    
-    // if (labels.containsAll(b.getLabels()))
-    // ;
+    Preconditions.checkArgument(labels.size() == b.getLabels().size(), "The label sizes do not match");
     for (String correctLabel : this.labels) {
       for (String classifiedLabel : this.labels) {
         incrementCount(correctLabel, classifiedLabel, b.getCount(correctLabel, classifiedLabel));
@@ -155,8 +154,8 @@ public class ConfusionMatrix implements Summarizable {
         labelTotal += getCount(correctLabel, classifiedLabel);
       }
       returnString.append(" |  ").append(StringUtils.rightPad(String.valueOf(labelTotal), 6)).append('\t')
-          .append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)), 5)).append(
-            " = ").append(correctLabel).append('\n');
+          .append(StringUtils.rightPad(getSmallLabel(labelMap.get(correctLabel)), 5))
+          .append(" = ").append(correctLabel).append('\n');
     }
     returnString.append("Default Category: ").append(defaultLabel).append(": ").append(
       labelMap.get(defaultLabel)).append('\n');
@@ -169,8 +168,7 @@ public class ConfusionMatrix implements Summarizable {
     StringBuilder returnString = new StringBuilder();
     do {
       int n = val % 26;
-      int c = 'a';
-      returnString.insert(0, (char) (c + n));
+      returnString.insert(0, (char) ('a' + n));
       val /= 26;
     } while (val > 0);
     return returnString.toString();

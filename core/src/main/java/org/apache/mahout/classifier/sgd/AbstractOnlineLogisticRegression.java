@@ -25,6 +25,8 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.UnaryFunction;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Iterator;
 
 /**
@@ -143,9 +145,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    */
   @Override
   public double classifyScalar(Vector instance) {
-    if (numCategories() != 2) {
-      throw new IllegalArgumentException("Can only call classifyScalar with two categories");
-    }
+    Preconditions.checkArgument(numCategories() == 2, "Can only call classifyScalar with two categories");
 
     // apply pending regularization to whichever coefficients matter
     regularize(instance);
@@ -299,9 +299,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
 
   public void copyFrom(AbstractOnlineLogisticRegression other) {
     // number of categories we are classifying.  This should the number of rows of beta plus one.
-    if (numCategories != other.numCategories) {
-      throw new IllegalArgumentException("Can't copy unless number of target categories is the same");
-    }
+    Preconditions.checkArgument(numCategories == other.numCategories, "Can't copy unless number of target categories is the same");
 
     beta.assign(other.beta);
 

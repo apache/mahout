@@ -17,6 +17,8 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import com.google.common.base.Preconditions;
+
 import java.util.List;
 
 /**
@@ -96,10 +98,7 @@ public class DataSet {
    * @throws IllegalArgumentException if the attribute is nominal
    */
   public double getMax(int index) {
-    if (!isNumerical(index)) {
-      throw new IllegalArgumentException("Nominal Attribute");
-    }
-    
+    Preconditions.checkArgument(isNumerical(index), "Nominal attribute");
     return ((NumericalAttr) attributes.get(index)).getMax();
   }
   
@@ -110,10 +109,7 @@ public class DataSet {
    * @throws IllegalArgumentException if the attribute is nominal
    */
   public double getMin(int index) {
-    if (!isNumerical(index)) {
-      throw new IllegalArgumentException("Nominal Attribute");
-    }
-    
+    Preconditions.checkArgument(isNumerical(index), "Nominal attribute");
     return ((NumericalAttr) attributes.get(index)).getMin();
   }
   
@@ -124,10 +120,7 @@ public class DataSet {
    * @throws IllegalArgumentException if the attribute is numerical
    */
   public int getNbValues(int index) {
-    if (isNumerical(index)) {
-      throw new IllegalArgumentException("Numerical Attribute");
-    }
-    
+    Preconditions.checkArgument(!isNumerical(index), "Numerical attribute");
     return ((NominalAttr) attributes.get(index)).getNbvalues();
   }
   
@@ -150,10 +143,7 @@ public class DataSet {
    * @throws IllegalArgumentException if the value is not found.
    */
   public int valueIndex(int index, String value) {
-    if (isNumerical(index)) {
-      throw new IllegalArgumentException("Numerical Attribute");
-    }
-    
+    Preconditions.checkArgument(!isNumerical(index), "Numerical attribute");
     return ((NominalAttr) attributes.get(index)).valueIndex(value);
   }
 }

@@ -27,6 +27,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.common.StringUtils;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Generic Mapper class for fitness evaluation. Works with the following : <code>&lt;key, candidate, key,
@@ -47,9 +49,7 @@ public class EvalMapper extends Mapper<LongWritable,Text,LongWritable,DoubleWrit
   public void setup(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
     String evlstr = conf.get(MAHOUT_GA_EVALUATOR);
-    if (evlstr == null) {
-      throw new IllegalArgumentException("'MAHOUT_GA_EVALUATOR' job parameter non found");
-    }
+    Preconditions.checkArgument(evlstr != null, "'MAHOUT_GA_EVALUATOR' job parameter not found");
     
     evaluator = StringUtils.fromString(evlstr);
     

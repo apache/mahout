@@ -22,6 +22,8 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Defines the interface for classifiers that take input as a vector.  This is implemented
  * as an abstract class so that it can implement a number of handy convenience methods
@@ -144,9 +146,7 @@ public abstract class AbstractVectorClassifier {
    * @return A vector of scores, with one value per row of the input matrix.
    */
   public Vector classifyScalar(Matrix data) {
-    if (numCategories() != 2) {
-      throw new IllegalArgumentException("Can only call classifyScalar with two categories");
-    }
+    Preconditions.checkArgument(numCategories() == 2, "Can only call classifyScalar with two categories");
 
     Vector r = new DenseVector(data.numRows());
     for (int row = 0; row < data.numRows(); row++) {

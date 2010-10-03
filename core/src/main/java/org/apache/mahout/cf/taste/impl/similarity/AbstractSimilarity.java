@@ -32,6 +32,8 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
 import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 
+import com.google.common.base.Preconditions;
+
 /** Abstract superclass encapsulating functionality that is common to most implementations in this package. */
 abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   
@@ -51,9 +53,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
    * </p>
    */
   AbstractSimilarity(final DataModel dataModel, Weighting weighting, boolean centerData) throws TasteException {
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
     this.dataModel = dataModel;
     this.weighted = weighting == Weighting.WEIGHTED;
     this.centerData = centerData;
@@ -80,9 +80,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   
   @Override
   public final void setPreferenceInferrer(PreferenceInferrer inferrer) {
-    if (inferrer == null) {
-      throw new IllegalArgumentException("inferrer is null");
-    }
+    Preconditions.checkArgument(inferrer != null, "inferrer is null");
     refreshHelper.addDependency(inferrer);
     refreshHelper.removeDependency(this.inferrer);
     this.inferrer = inferrer;

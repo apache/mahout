@@ -20,6 +20,8 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.IntPairWritable;
 
+import com.google.common.base.Preconditions;
+
 /**
  * A very simple reducer which simply logSums the input doubles and outputs a new double for sufficient
  * statistics, and sums log likelihoods.
@@ -36,9 +38,7 @@ public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWr
       double accum = 0.0;
       for (DoubleWritable vw : values) {
         double v = vw.get();
-        if (Double.isNaN(v)) {
-          throw new IllegalArgumentException(topicWord.getFirst() + " " + topicWord.getSecond());
-        }
+        Preconditions.checkArgument(!Double.isNaN(v), "Found NaN for topic=(%d,%d)", topicWord.getFirst(), topicWord.getSecond());
         accum += v;
       }
       context.write(topicWord, new DoubleWritable(accum));
@@ -46,17 +46,11 @@ public class LDAReducer extends Reducer<IntPairWritable,DoubleWritable,IntPairWr
       double accum = Double.NEGATIVE_INFINITY;
       for (DoubleWritable vw : values) {
         double v = vw.get();
-        if (Double.isNaN(v)) {
-          throw new IllegalArgumentException(topicWord.getFirst() + " " + topicWord.getSecond());
-        }
+        Preconditions.checkArgument(!Double.isNaN(v), "Found NaN for topic = (%d,%d)", topicWord.getFirst(), topicWord.getSecond());
         accum = LDAUtil.logSum(accum, v);
-        if (Double.isNaN(accum)) {
-          throw new IllegalArgumentException(topicWord.getFirst() + " " + topicWord.getSecond());
-        }
+        Preconditions.checkArgument(!Double.isNaN(accum), "Accumulated NaN for topic = (%d,%d)", topicWord.getFirst(), topicWord.getSecond());
       }
       context.write(topicWord, new DoubleWritable(accum));
     }
-    
   }
-  
 }

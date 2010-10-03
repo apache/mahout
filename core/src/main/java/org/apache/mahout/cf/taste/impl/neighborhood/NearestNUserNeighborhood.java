@@ -24,6 +24,8 @@ import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Computes a neighborhood consisting of the nearest n users to a given user. "Nearest" is defined by the
@@ -72,9 +74,7 @@ public final class NearestNUserNeighborhood extends AbstractUserNeighborhood {
                                   DataModel dataModel,
                                   double samplingRate) throws TasteException {
     super(userSimilarity, dataModel, samplingRate);
-    if (n < 1) {
-      throw new IllegalArgumentException("n must be at least 1");
-    }
+    Preconditions.checkArgument(n >= 1, "n must be at least 1");
     int numUsers = dataModel.getNumUsers();
     this.n = n > numUsers ? numUsers : n;
     this.minSimilarity = minSimilarity;

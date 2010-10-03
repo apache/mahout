@@ -38,7 +38,7 @@ public class RankingGradient implements Gradient {
 
   private int window = 10;
 
-  private List<Deque<Vector>> history = Lists.newArrayList();
+  private final List<Deque<Vector>> history = Lists.newArrayList();
 
   public RankingGradient(int window) {
     this.window = window;

@@ -19,6 +19,8 @@ package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
+
 /**
  * An iterator that delegates to another iterator.
  */
@@ -27,9 +29,7 @@ public abstract class DelegatingIterator<T> implements Iterator<T> {
   private final Iterator<? extends T> delegate;
   
   protected DelegatingIterator(Iterator<T> delegate) {
-    if (delegate == null) {
-      throw new IllegalArgumentException("delegate is null");
-    }
+    Preconditions.checkArgument(delegate != null, "delegate is null");
     this.delegate = delegate;
   }
   

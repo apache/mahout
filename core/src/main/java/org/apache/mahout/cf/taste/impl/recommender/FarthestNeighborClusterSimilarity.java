@@ -27,6 +27,8 @@ import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.SamplingLongPrimitiveIterator;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * Defines cluster similarity as the <em>smallest</em> similarity between any two users in the clusters --
@@ -58,12 +60,8 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
    * </p>
    */
   public FarthestNeighborClusterSimilarity(UserSimilarity similarity, double samplingRate) {
-    if (similarity == null) {
-      throw new IllegalArgumentException("similarity is null");
-    }
-    if (Double.isNaN(samplingRate) || (samplingRate <= 0.0) || (samplingRate > 1.0)) {
-      throw new IllegalArgumentException("samplingRate is invalid: " + samplingRate);
-    }
+    Preconditions.checkArgument(similarity != null, "similarity is null");
+    Preconditions.checkArgument(!Double.isNaN(samplingRate) && samplingRate > 0.0 && samplingRate <= 1.0, "samplingRate is invalid: %.4f", samplingRate);
     this.similarity = similarity;
     this.samplingRate = samplingRate;
   }

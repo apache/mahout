@@ -28,6 +28,8 @@ import java.util.Set;
 
 import org.apache.mahout.common.RandomUtils;
 
+import com.google.common.base.Preconditions;
+
 /**
  * @see FastMap
  * @see FastIDSet
@@ -71,16 +73,10 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
    *           {@link RandomUtils#MAX_INT_SMALLER_TWIN_PRIME}
    */
   public FastByIDMap(int size, int maxSize) {
-    if (size < 0) {
-      throw new IllegalArgumentException("size must be at least 0");
-    }
+    Preconditions.checkArgument(size >= 0, "size must be at least 0");
     int max = (int) (RandomUtils.MAX_INT_SMALLER_TWIN_PRIME / ALLOWED_LOAD_FACTOR);
-    if (size >= max) {
-      throw new IllegalArgumentException("size must be less than " + max);
-    }
-    if (maxSize < 1) {
-      throw new IllegalArgumentException("maxSize must be at least 1");
-    }
+    Preconditions.checkArgument(size < max, "size must be less than " + max);
+    Preconditions.checkArgument(maxSize >= 1, "maxSize must be at least 1");
     int hashSize = RandomUtils.nextTwinPrime((int) (ALLOWED_LOAD_FACTOR * size));
     keys = new long[hashSize];
     Arrays.fill(keys, NULL);
@@ -169,9 +165,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   }
   
   public V put(long key, V value) {
-    if ((key == NULL) || (key == REMOVED)) {
-      throw new IllegalArgumentException();
-    }
+    Preconditions.checkArgument(key != NULL && key != REMOVED);
     if (value == null) {
       throw new NullPointerException();
     }
@@ -521,9 +515,8 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
       
       @Override
       public V setValue(V value) {
-        if (value == null) {
-          throw new IllegalArgumentException();
-        }
+        Preconditions.checkArgument(value != null);
+
         V oldValue = values[index];
         values[index] = value;
         return oldValue;

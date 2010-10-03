@@ -37,6 +37,8 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple {@link DataModel} which uses a given {@link List} of users as its data source. This implementation
@@ -76,17 +78,15 @@ public final class GenericDataModel extends AbstractDataModel {
    *  User IDs are mapped to maps of item IDs to Long timestamps.
    */
   public GenericDataModel(FastByIDMap<PreferenceArray> userData, FastByIDMap<FastByIDMap<Long>> timestamps) {
-    if (userData == null) {
-      throw new IllegalArgumentException("userData is null");
-    }
-    
+    Preconditions.checkArgument(userData != null, "userData is null");
+
     this.preferenceFromUsers = userData;
     FastByIDMap<Collection<Preference>> prefsForItems = new FastByIDMap<Collection<Preference>>();
     FastIDSet itemIDSet = new FastIDSet();
     int currentCount = 0;
     float maxPrefValue = Float.NEGATIVE_INFINITY;
     float minPrefValue = Float.POSITIVE_INFINITY;
-    for (Map.Entry<Long,PreferenceArray> entry : preferenceFromUsers.entrySet()) {
+    for (Map.Entry<Long, PreferenceArray> entry : preferenceFromUsers.entrySet()) {
       PreferenceArray prefs = entry.getValue();
       prefs.sortByItem();
       for (Preference preference : prefs) {
@@ -114,17 +114,17 @@ public final class GenericDataModel extends AbstractDataModel {
 
     setMinPreference(minPrefValue);
     setMaxPreference(maxPrefValue);
-    
+
     this.itemIDs = itemIDSet.toArray();
     itemIDSet = null; // Might help GC -- this is big
     Arrays.sort(itemIDs);
-    
+
     this.preferenceForItems = toDataMap(prefsForItems, false);
-    
-    for (Map.Entry<Long,PreferenceArray> entry : preferenceForItems.entrySet()) {
+
+    for (Map.Entry<Long, PreferenceArray> entry : preferenceForItems.entrySet()) {
       entry.getValue().sortByUser();
     }
-    
+
     this.userIDs = new long[userData.size()];
     int i = 0;
     LongPrimitiveIterator it = userData.keySetIterator();
@@ -269,9 +269,8 @@ public final class GenericDataModel extends AbstractDataModel {
   
   @Override
   public int getNumUsersWithPreferenceFor(long... itemIDs) {
-    if (itemIDs == null || itemIDs.length == 0) {
-      throw new IllegalArgumentException("itemIDs is null or empty");
-    }
+    Preconditions.checkArgument(itemIDs != null, "itemIDs is null");
+    Preconditions.checkArgument(itemIDs.length == 1 || itemIDs.length == 2, "Illegal number of IDs", itemIDs.length);
     PreferenceArray prefs1 = preferenceForItems.get(itemIDs[0]);
     if (prefs1 == null) {
       return 0;
@@ -281,28 +280,25 @@ public final class GenericDataModel extends AbstractDataModel {
       return prefs1.length();
     }
 
-    if (itemIDs.length == 2) {
-      PreferenceArray prefs2 = preferenceForItems.get(itemIDs[1]);
-      if (prefs2 == null) {
-        return 0;
-      }
-      FastIDSet users1 = new FastIDSet(prefs1.length());
-      int size1 = prefs1.length();
-      for (int i = 0; i < size1; i++) {
-        users1.add(prefs1.getUserID(i));
-      }
-      FastIDSet users2 = new FastIDSet(prefs2.length());
-      int size2 = prefs2.length();
-      for (int i = 0; i < size2; i++) {
-        users2.add(prefs2.getUserID(i));
-      }
-      users1.retainAll(users2);
-      return users1.size();
+    // itemIDs.length == 2)
+    PreferenceArray prefs2 = preferenceForItems.get(itemIDs[1]);
+    if (prefs2 == null) {
+      return 0;
     }
-
-    throw new IllegalArgumentException("Illegal number of item IDs: " + itemIDs.length);
+    FastIDSet users1 = new FastIDSet(prefs1.length());
+    int size1 = prefs1.length();
+    for (int i = 0; i < size1; i++) {
+      users1.add(prefs1.getUserID(i));
+    }
+    FastIDSet users2 = new FastIDSet(prefs2.length());
+    int size2 = prefs2.length();
+    for (int i = 0; i < size2; i++) {
+      users2.add(prefs2.getUserID(i));
+    }
+    users1.retainAll(users2);
+    return users1.size();
   }
-  
+
   @Override
   public void removePreference(long userID, long itemID) {
     throw new UnsupportedOperationException();

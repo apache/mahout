@@ -40,6 +40,7 @@ import org.apache.mahout.math.SingularValueDecomposition;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.MatrixWritable;
 
+import com.google.common.base.Preconditions;
 
 //See http://en.wikipedia.org/wiki/Mahalanobis_distance for details
 public class MahalanobisDistanceMeasure implements DistanceMeasure {
@@ -136,11 +137,9 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
    * @return Mahalanobis distance of a multivariate vector
    */
   public double distance(Vector v) {
-    if (meanVector == null || inverseCovarianceMatrix == null) {
-      throw new IllegalArgumentException("meanVector or inverseCovarianceMatrix not initialized");
-    }
-    
-    return Math.sqrt(v.minus(meanVector).dot(Algebra.mult(inverseCovarianceMatrix, v.minus(meanVector))));  
+    Preconditions.checkArgument(meanVector != null, "meanVector not initialized");
+    Preconditions.checkArgument(inverseCovarianceMatrix != null, "inverseCovarianceMatrix not initialized");
+    return Math.sqrt(v.minus(meanVector).dot(Algebra.mult(inverseCovarianceMatrix, v.minus(meanVector))));
   }
   
   @Override
@@ -148,10 +147,8 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     if (v1.size() != v2.size()) {
       throw new CardinalityException(v1.size(), v2.size());
     }
-    
-    if (meanVector == null || inverseCovarianceMatrix == null) {
-      throw new IllegalArgumentException("meanVector or inverseCovarianceMatrix not initialized");
-    }
+    Preconditions.checkArgument(meanVector != null, "meanVector not initialized");
+    Preconditions.checkArgument(inverseCovarianceMatrix != null, "inverseCovarianceMatrix not initialized");
     
     return Math.sqrt(v1.minus(v2).dot(Algebra.mult(inverseCovarianceMatrix, v1.minus(v2))));
   }
@@ -188,7 +185,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
       if (diagElem > 0.0) {
         sInv.set(i, i, 1 / diagElem);
       } else {
-        throw new IllegalArgumentException("Eigen Value equals to 0 found.");
+        throw new IllegalStateException("Eigen Value equals to 0 found.");
       }
     }
     inverseCovarianceMatrix = svd.getU().times(sInv.times(svd.getU().transpose()));

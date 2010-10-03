@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -60,10 +61,7 @@ public class ToolReducer extends Reducer<LongWritable, Text, LongWritable, Text>
   }
 
   void configure(char[] descriptors) {
-    if (descriptors == null || descriptors.length == 0) {
-      throw new IllegalArgumentException("Descriptors's array not found or is empty");
-    }
-
+    Preconditions.checkArgument(descriptors != null && descriptors.length > 0, "descriptors null or empty");
     this.descriptors = new Descriptors(descriptors);
   }
 

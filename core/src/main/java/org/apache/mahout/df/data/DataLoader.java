@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -61,11 +62,8 @@ public final class DataLoader {
    */
   private static Instance parseString(int id, Attribute[] attrs, List<String>[] values, String string) {
     StringTokenizer tokenizer = new StringTokenizer(string, ", ");
-    if (tokenizer.countTokens() != attrs.length) {
-      log.error("{}: {}", id, string);
-      throw new IllegalArgumentException("Wrong number of attributes in the string");
-    }
-    
+    Preconditions.checkArgument(tokenizer.countTokens() == attrs.length, "Wrong number of attributes in the string");
+
     // extract tokens and check is there is any missing value
     String[] tokens = new String[attrs.length];
     for (int attr = 0; attr < attrs.length; attr++) {

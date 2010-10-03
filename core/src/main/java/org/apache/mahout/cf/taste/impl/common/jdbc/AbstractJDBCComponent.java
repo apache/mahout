@@ -29,6 +29,8 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * A helper class with common elements for several JDBC-related components.
  */
@@ -40,16 +42,14 @@ public abstract class AbstractJDBCComponent {
   protected static final String DEFAULT_DATASOURCE_NAME = "jdbc/taste";
   
   protected static void checkNotNullAndLog(String argName, Object value) {
-    if ((value == null) || (value.toString().length() == 0)) {
-      throw new IllegalArgumentException(argName + " is null or empty");
-    }
+    Preconditions.checkArgument(value != null && value.toString().length() != 0,
+      argName + " is null or empty");
     log.debug("{}: {}", argName, value);
   }
   
   protected static void checkNotNullAndLog(String argName, Object[] values) {
-    if ((values == null) || (values.length == 0)) {
-      throw new IllegalArgumentException(argName + " is null or zero-length");
-    }
+    Preconditions.checkArgument(values != null && values.length != 0,
+      argName + " is null or zero-length" );
     for (Object value : values) {
       checkNotNullAndLog(argName, value);
     }

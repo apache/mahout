@@ -45,6 +45,8 @@ import org.apache.mahout.common.FileLineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A {@link DataModel} backed by a delimited file. This class expects a file where each line
@@ -152,15 +154,11 @@ public class FileDataModel extends AbstractDataModel {
    * @see #FileDataModel(File)
    */
   public FileDataModel(File dataFile, boolean transpose, long minReloadIntervalMS) throws IOException {
-    if (dataFile == null) {
-      throw new IllegalArgumentException("dataFile is null");
-    }
+    Preconditions.checkArgument(dataFile != null, "dataFile is null");
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }
-    if (minReloadIntervalMS < 0L) {
-      throw new IllegalArgumentException("minReloadIntervalMs is negative");
-    }
+    Preconditions.checkArgument(minReloadIntervalMS >= 0L, "minReloadIntervalMs must be non-negative");
 
     log.info("Creating FileDataModel for file {}", dataFile);
 
@@ -368,9 +366,7 @@ public class FileDataModel extends AbstractDataModel {
     }
 
     String[] tokens = delimiterPattern.split(line);
-    if (tokens.length < 3) {
-      throw new IllegalArgumentException("Bad line: " + line);
-    }
+    Preconditions.checkArgument(tokens.length >= 3, "Bad line: %s", line);
 
     String userIDString = tokens[0];
     String itemIDString = tokens[1];
@@ -532,10 +528,7 @@ public class FileDataModel extends AbstractDataModel {
     }
 
     String[] tokens = delimiterPattern.split(line);
-    if (tokens.length < 2) {
-      throw new IllegalArgumentException("Bad line: " + line);
-    }
-
+    Preconditions.checkArgument(tokens.length >= 2, "Bad line: %s", line);
     String userIDString = tokens[0];
     String itemIDString = tokens[1];
     String preferenceValueString = tokens.length >= 3 ? tokens[2] : "";

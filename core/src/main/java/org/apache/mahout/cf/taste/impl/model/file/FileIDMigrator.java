@@ -30,6 +30,8 @@ import org.apache.mahout.common.FileLineIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * An {@link IDMigrator} backed by a file. This class typically expects a file where each line
@@ -60,9 +62,7 @@ public class FileIDMigrator extends AbstractIDMigrator {
 
   public FileIDMigrator(File dataFile, long minReloadIntervalMS) throws FileNotFoundException {
     longToString = new FastByIDMap<String>(100);
-    if (dataFile == null) {
-      throw new IllegalArgumentException("dataFile is null");
-    }
+    Preconditions.checkArgument(dataFile != null, "dataFile is null");
     if (!dataFile.exists() || dataFile.isDirectory()) {
       throw new FileNotFoundException(dataFile.toString());
     }

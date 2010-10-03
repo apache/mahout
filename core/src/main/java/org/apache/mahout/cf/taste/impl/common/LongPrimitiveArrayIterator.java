@@ -19,6 +19,8 @@ package org.apache.mahout.cf.taste.impl.common;
 
 import java.util.NoSuchElementException;
 
+import com.google.common.base.Preconditions;
+
 /**
  * While long[] is an Iterable, it is not an Iterable&lt;Long&gt;. This adapter class addresses that.
  */
@@ -37,9 +39,7 @@ public final class LongPrimitiveArrayIterator implements LongPrimitiveIterator {
    *          array to iterate over
    */
   public LongPrimitiveArrayIterator(long[] array) {
-    if (array == null) {
-      throw new IllegalArgumentException("array is null");
-    }
+    Preconditions.checkArgument(array != null, "array is null");
     this.array = array; // yeah, not going to copy the array here, for performance
     this.position = 0;
     this.max = array.length;

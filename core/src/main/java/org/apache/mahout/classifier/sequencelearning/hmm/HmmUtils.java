@@ -30,6 +30,8 @@ import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
 import org.uncommons.maths.Maths;
 
+import com.google.common.base.Preconditions;
+
 /**
  * A collection of utilities for handling HMMModel objects.
  */
@@ -143,75 +145,51 @@ public final class HmmUtils {
     /*
      * The number of hidden states is positive.
      */
-    if (model.getNrOfHiddenStates() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The number of hidden states has to be greater than 0!");
-    }
-
+    Preconditions.checkArgument(model.getNrOfHiddenStates() > 0,
+      "Error: The number of hidden states has to be greater than 0");
+    
     /*
      * The number of output states is positive.
      */
-    if (model.getNrOfOutputStates() <= 0) {
-      throw new IllegalArgumentException(
-          "Error: The number of output states has to be greater than 0!");
-    }
+    Preconditions.checkArgument(model.getNrOfOutputStates() > 0,
+      "Error: The number of output states has to be greater than 0!");
 
     /*
      * The size of the vector of initial probabilities is equal to the number of
      * the hidden states. Each initial probability is non-negative. The sum of
      * initial probabilities is equal to 1.
      */
-    if (model.getInitialProbabilities() == null) {
-      throw new IllegalArgumentException(
-          "Error: The vector of initial probabilities is not initialized!");
-    }
-    if (model.getInitialProbabilities().size() != model.getNrOfHiddenStates()) {
-      throw new IllegalArgumentException(
-          "Error: The vector of initial probabilities is not initialized!");
-    }
+    Preconditions.checkArgument(model.getInitialProbabilities() != null
+      && model.getInitialProbabilities().size() == model.getNrOfHiddenStates(),
+      "Error: The vector of initial probabilities is not initialized!");
+    
     double sum = 0;
     for (int i = 0; i < model.getInitialProbabilities().size(); i++) {
-      if (model.getInitialProbabilities().get(i) < 0) {
-        throw new IllegalArgumentException(
-            "Error: Initial probability of state " + i + " is negative!");
-      }
+      Preconditions.checkArgument(model.getInitialProbabilities().get(i) >= 0,
+        "Error: Initial probability of state %d is negative", i);
       sum += model.getInitialProbabilities().get(i);
     }
-    if (!Maths.approxEquals(sum, 1, 0.00001)) {
-      throw new IllegalArgumentException(
-          "Error: Initial probabilities do not add up to 1!");
-    }
-
+    Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001), "Error: Initial probabilities do not add up to 1");
     /*
      * The row size of the output matrix is equal to the number of the hidden
      * states. The column size is equal to the number of output states. Each
      * probability of the matrix is non-negative. The sum of each row is equal
      * to 1.
      */
-    if (model.getEmissionMatrix() == null) {
-      throw new IllegalArgumentException(
-          "Error: The output state matrix is not initialized!");
-    }
-    if (model.getEmissionMatrix().numRows() != model.getNrOfHiddenStates()
-        || model.getEmissionMatrix().numCols() != model.getNrOfOutputStates()) {
-      throw new IllegalArgumentException(
-          "Error: The output state matrix is not of the form nrOfHiddenStates x nrOfOutputStates!");
-    }
+    Preconditions.checkArgument(model.getEmissionMatrix() != null, "Error: The output state matrix is not initialized!");
+    Preconditions.checkArgument(model.getEmissionMatrix().numRows() == model.getNrOfHiddenStates()
+      && model.getEmissionMatrix().numCols() == model.getNrOfOutputStates(),
+      "Error: The output state matrix is not of the form nrOfHiddenStates x nrOfOutputStates");
     for (int i = 0; i < model.getEmissionMatrix().numRows(); i++) {
       sum = 0;
       for (int j = 0; j < model.getEmissionMatrix().numCols(); j++) {
-        if (model.getEmissionMatrix().get(i, j) < 0) {
-          throw new IllegalArgumentException(
-              "Error: The output state probability from hidden state " + i
-                  + " to output state " + j + " is negative!");
-        }
+        Preconditions.checkArgument(model.getEmissionMatrix().get(i, j) >= 0,
+          "Error: The output state probability from hidden state " + i +
+            " to output state " + j + " is negative");
         sum += model.getEmissionMatrix().get(i, j);
       }
-      if (!Maths.approxEquals(sum, 1, 0.00001)) {
-        throw new IllegalArgumentException(
-            "Error: The output state probabilities for hidden state " + i
-                + " don't add up to 1.");
-      }
+      Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),
+        "Error: The output state probabilities for hidden state %d don't add up to 1", i);
     }
 
     /*
@@ -219,30 +197,21 @@ public final class HmmUtils {
      * number of the hidden states. Each probability of the matrix is
      * non-negative. The sum of each row in transition matrix is equal to 1.
      */
-    if (model.getTransitionMatrix() == null) {
-      throw new IllegalArgumentException(
-          "Error: The hidden state matrix is not initialized!");
-    }
-    if (model.getTransitionMatrix().numRows() != model.getNrOfHiddenStates()
-        || model.getTransitionMatrix().numCols() != model.getNrOfHiddenStates()) {
-      throw new IllegalArgumentException(
-          "Error: The output state matrix is not of the form nrOfHiddenStates x nrOfHiddenStates!");
-    }
+    Preconditions.checkArgument(model.getTransitionMatrix() != null,
+      "Error: The hidden state matrix is not initialized!");
+    Preconditions.checkArgument(model.getTransitionMatrix().numRows() == model.getNrOfHiddenStates()
+      && model.getTransitionMatrix().numCols() == model.getNrOfHiddenStates(),
+      "Error: The output state matrix is not of the form nrOfHiddenStates x nrOfHiddenStates");
     for (int i = 0; i < model.getTransitionMatrix().numRows(); i++) {
       sum = 0;
       for (int j = 0; j < model.getTransitionMatrix().numCols(); j++) {
-        if (model.getTransitionMatrix().get(i, j) < 0) {
-          throw new IllegalArgumentException(
-              "Error: The transition probability from hidden state " + i
-                  + " to hidden state " + j + " is negative!");
-        }
+        Preconditions.checkArgument(model.getTransitionMatrix().get(i, j) >= 0,
+          "Error: The transition probability from hidden state %d to hidden state %d is negative",
+          i, j);
         sum += model.getTransitionMatrix().get(i, j);
       }
-      if (!Maths.approxEquals(sum, 1, 0.00001)) {
-        throw new IllegalArgumentException(
-            "Error: The transition probabilities for hidden state " + i
-                + " don't add up to 1.");
-      }
+      Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),
+        "Error: The transition probabilities for hidden state " + i + " don't add up to 1.");
     }
   }
 

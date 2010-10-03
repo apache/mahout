@@ -36,6 +36,8 @@ import org.apache.mahout.common.LongPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple {@link org.apache.mahout.cf.taste.recommender.Recommender}
@@ -55,9 +57,7 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
                                      UserNeighborhood neighborhood,
                                      UserSimilarity similarity) {
     super(dataModel);
-    if (neighborhood == null) {
-      throw new IllegalArgumentException("neighborhood is null");
-    }
+    Preconditions.checkArgument(neighborhood != null, "neighborhood is null");
     this.neighborhood = neighborhood;
     this.similarity = similarity;
     this.refreshHelper = new RefreshHelper(null);
@@ -73,25 +73,23 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
-    if (howMany < 1) {
-      throw new IllegalArgumentException("howMany must be at least 1");
-    }
-    
+    Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
+
     log.debug("Recommending items for user ID '{}'", userID);
-    
+
     long[] theNeighborhood = neighborhood.getUserNeighborhood(userID);
-    
+
     if (theNeighborhood.length == 0) {
       return Collections.emptyList();
     }
-    
+
     FastIDSet allItemIDs = getAllOtherItems(theNeighborhood, userID);
-    
+
     TopItems.Estimator<Long> estimator = new Estimator(userID, theNeighborhood);
-    
+
     List<RecommendedItem> topItems = TopItems
         .getTopItems(howMany, allItemIDs.iterator(), rescorer, estimator);
-    
+
     log.debug("Recommendations are: {}", topItems);
     return topItems;
   }

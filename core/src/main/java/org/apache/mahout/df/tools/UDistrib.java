@@ -45,6 +45,8 @@ import org.apache.mahout.df.data.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * This tool is used to uniformly distribute the class of all the tuples of the dataset over a given number of
  * partitions.
@@ -111,20 +113,15 @@ public final class UDistrib {
   }
   
   private static void runTool(String dataStr, String datasetStr, String output, int numPartitions) throws IOException {
-    
     Configuration conf = new Configuration();
-    
-    if (numPartitions <= 0) {
-      throw new IllegalArgumentException("numPartitions <= 0");
-    }
+
+    Preconditions.checkArgument(numPartitions > 0, "numPartitions <= 0");
     
     // make sure the output file does not exist
     Path outputPath = new Path(output);
     FileSystem fs = outputPath.getFileSystem(conf);
-    
-    if (fs.exists(outputPath)) {
-      throw new IllegalArgumentException("Output path already exists");
-    }
+
+    Preconditions.checkArgument(!fs.exists(outputPath), "Output path already exists");
     
     // create a new file corresponding to each partition
     // Path workingDir = fs.getWorkingDirectory();

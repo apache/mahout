@@ -19,6 +19,7 @@ package org.apache.mahout.ga.watchmaker.cd;
 
 import java.util.Random;
 
+import com.google.common.base.Preconditions;
 import org.uncommons.maths.binary.BitString;
 
 /**
@@ -55,10 +56,8 @@ public final class CDRule implements Rule {
    */
   public CDRule(double threshold) {
     // crossover needs at least 2 attributes
-    if (!(threshold >= 0 && threshold <= 1)) {
-      throw new IllegalArgumentException("bad threshold");
-    }
-    
+    Preconditions.checkArgument(threshold >= 0.0 && threshold <= 1.0, "Threshold must be in [0,1]");
+
     this.threshold = threshold;
     
     // the label is not included in the conditions

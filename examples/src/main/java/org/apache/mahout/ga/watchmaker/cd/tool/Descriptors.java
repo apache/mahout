@@ -17,6 +17,8 @@
 
 package org.apache.mahout.ga.watchmaker.cd.tool;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Used as a configuration Parameters for the mapper-combiner-reducer<br>
  * CDTOOL.ATTRIBUTES : char[] description of the attributes.<br>
@@ -34,18 +36,12 @@ public final class Descriptors {
   private final char[] descriptors;
   
   public Descriptors(char[] descriptors) {
-    if (!(descriptors != null && descriptors.length > 0)) {
-      throw new IllegalArgumentException();
-    }
-    
+    Preconditions.checkArgument(descriptors != null && descriptors.length > 0, "descriptors null or empty");
     this.descriptors = descriptors;
-    
     // check that all the descriptors are correct ('I', 'N' 'L' or 'C')
     for (int index = 0; index < descriptors.length; index++) {
-      if (!isIgnored(index) && !isNumerical(index) && !isNominal(index)) {
-        throw new IllegalArgumentException("Bad descriptor value : "
-          + descriptors[index]);
-      }
+      Preconditions.checkArgument(isIgnored(index) || isNumerical(index) || isNominal(index),
+          "Bad descriptor value", descriptors[index]);
     }
   }
   

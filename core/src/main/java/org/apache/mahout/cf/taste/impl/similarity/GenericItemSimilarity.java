@@ -31,6 +31,8 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.IteratorIterable;
 import org.apache.mahout.common.iterator.IteratorUtils;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A "generic" {@link ItemSimilarity} which takes a static list of precomputed item similarities and bases its
@@ -240,9 +242,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
      *           if value is NaN, less than -1.0 or greater than 1.0
      */
     public ItemItemSimilarity(long itemID1, long itemID2, double value) {
-      if (Double.isNaN(value) || (value < -1.0) || (value > 1.0)) {
-        throw new IllegalArgumentException("Illegal value: " + value);
-      }
+      Preconditions.checkArgument(value >= -1.0 && value <= 1.0, "Illegal value: %s", value);
       this.itemID1 = itemID1;
       this.itemID2 = itemID2;
       this.value = value;

@@ -40,7 +40,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(String originalForm, double w, Vector data) {
-    throw new IllegalArgumentException("addToVector is not supported for InteractionVectorEncoder");
+    throw new UnsupportedOperationException("addToVector is not supported for InteractionVectorEncoder");
   }
 
   /**
@@ -51,7 +51,7 @@ public class InteractionValueEncoder extends FeatureVectorEncoder {
    */
   @Override
   public void addToVector(byte[] originalForm, double w, Vector data) {
-    throw new IllegalArgumentException("addToVector is not supported for InteractionVectorEncoder");
+    throw new UnsupportedOperationException("addToVector is not supported for InteractionVectorEncoder");
   }
 
   /**

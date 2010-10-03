@@ -37,6 +37,8 @@ import org.apache.mahout.df.data.Dataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Base class for Mapred DecisionForest builders. Takes care of storing the parameters common to the mapred
  * implementations.<br>
@@ -191,10 +193,8 @@ public abstract class Builder {
    *           if (nbTrees <= 0)
    */
   public static void setNbTrees(Configuration conf, int nbTrees) {
-    if (nbTrees <= 0) {
-      throw new IllegalArgumentException("nbTrees should be greater than 0");
-    }
-    
+    Preconditions.checkArgument(nbTrees > 0, "nbTrees should be greater than 0");
+
     conf.setInt("mahout.rf.nbtrees", nbTrees);
   }
   
@@ -297,13 +297,11 @@ public abstract class Builder {
    * @throws IOException
    *           if anything goes wrong while parsing the output
    */
-  protected abstract DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException,
-                                                                                     ClassNotFoundException,
-                                                                                     InterruptedException;
+  protected abstract DecisionForest parseOutput(Job job, PredictionCallback callback)
+    throws IOException, ClassNotFoundException, InterruptedException;
   
-  public DecisionForest build(int nbTrees, PredictionCallback callback) throws IOException,
-                                                                       ClassNotFoundException,
-                                                                       InterruptedException {
+  public DecisionForest build(int nbTrees, PredictionCallback callback)
+      throws IOException, ClassNotFoundException, InterruptedException {
     // int numTrees = getNbTrees(conf);
     
     Path outputPath = getOutputPath(conf);

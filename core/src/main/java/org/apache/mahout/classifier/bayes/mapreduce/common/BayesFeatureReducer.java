@@ -32,6 +32,8 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
 
+import com.google.common.base.Preconditions;
+
 /** Can also be used as a local Combiner. A simple summing reducer */
 public class BayesFeatureReducer extends MapReduceBase implements
     Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
@@ -66,9 +68,7 @@ public class BayesFeatureReducer extends MapReduceBase implements
     }
     reporter.setStatus("Bayes Feature Reducer: " + key + " => " + sum);
 
-    if (key.length() < 2 || key.length() > 3) {
-      throw new IllegalArgumentException("StringTuple length out of bounds, not (2 < length < 3)");
-    }
+    Preconditions.checkArgument(key.length() >= 2 && key.length() <= 3, "StringTuple length out of bounds, not (2 < length < 3)");
     
     int featureIndex = key.length() == 2 ? 1 : 2;
     

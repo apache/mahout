@@ -50,6 +50,8 @@ import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Abstract superclass of a couple implementations, providing shared functionality.
  */
@@ -93,22 +95,14 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
                                DataModel dataModel,
                                double trainingPercentage,
                                double evaluationPercentage) throws TasteException {
-    
-    if (recommenderBuilder == null) {
-      throw new IllegalArgumentException("recommenderBuilder is null");
-    }
-    if (dataModel == null) {
-      throw new IllegalArgumentException("dataModel is null");
-    }
-    if (Double.isNaN(trainingPercentage) || (trainingPercentage <= 0.0) || (trainingPercentage >= 1.0)) {
-      throw new IllegalArgumentException("Invalid trainingPercentage: " + trainingPercentage);
-    }
-    if (Double.isNaN(evaluationPercentage) || (evaluationPercentage <= 0.0) || (evaluationPercentage > 1.0)) {
-      throw new IllegalArgumentException("Invalid evaluationPercentage: " + evaluationPercentage);
-    }
-    
-    log.info("Beginning evaluation using {} of {}",
-      trainingPercentage, dataModel);
+    Preconditions.checkArgument(recommenderBuilder != null, "recommenderBuilder is null");
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
+    Preconditions.checkArgument(trainingPercentage >= 0.0 && trainingPercentage <= 1.0,
+      "Invalid trainingPercentage: " + trainingPercentage);
+    Preconditions.checkArgument(evaluationPercentage >= 0.0 && evaluationPercentage <= 1.0,
+      "Invalid evaluationPercentage: " + evaluationPercentage);
+
+    log.info("Beginning evaluation using {} of {}", trainingPercentage, dataModel);
     
     int numUsers = dataModel.getNumUsers();
     FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<PreferenceArray>(

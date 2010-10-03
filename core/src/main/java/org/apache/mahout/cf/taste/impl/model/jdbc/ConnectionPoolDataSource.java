@@ -30,6 +30,8 @@ import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A wrapper {@link DataSource} which pools connections.
@@ -40,9 +42,7 @@ public final class ConnectionPoolDataSource implements DataSource {
   private final DataSource delegate;
   
   public ConnectionPoolDataSource(DataSource underlyingDataSource) {
-    if (underlyingDataSource == null) {
-      throw new IllegalArgumentException("underlyingDataSource is null");
-    }
+    Preconditions.checkArgument(underlyingDataSource != null, "underlyingDataSource is null");
     ConnectionFactory connectionFactory = new ConfiguringConnectionFactory(underlyingDataSource);
     GenericObjectPool objectPool = new GenericObjectPool();
     objectPool.setTestOnBorrow(false);
@@ -50,7 +50,7 @@ public final class ConnectionPoolDataSource implements DataSource {
     objectPool.setTestWhileIdle(true);
     objectPool.setTimeBetweenEvictionRunsMillis(60 * 1000L);
     PoolableObjectFactory factory = new PoolableConnectionFactory(connectionFactory, objectPool, null,
-        "SELECT 1", false, false);
+      "SELECT 1", false, false);
     objectPool.setFactory(factory);
     delegate = new PoolingDataSource(objectPool);
   }

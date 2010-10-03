@@ -21,6 +21,8 @@ import java.io.Serializable;
 
 import org.apache.mahout.cf.taste.model.Preference;
 
+import com.google.common.base.Preconditions;
+
 /**
  * <p>
  * A simple {@link Preference} encapsulating an item and preference value.
@@ -33,9 +35,7 @@ public class GenericPreference implements Preference, Serializable {
   private float value;
   
   public GenericPreference(long userID, long itemID, float value) {
-    if (Float.isNaN(value)) {
-      throw new IllegalArgumentException("Invalid value: " + value);
-    }
+    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value);
     this.userID = userID;
     this.itemID = itemID;
     this.value = value;
@@ -58,9 +58,7 @@ public class GenericPreference implements Preference, Serializable {
   
   @Override
   public void setValue(float value) {
-    if (Float.isNaN(value)) {
-      throw new IllegalArgumentException("Invalid value: " + value);
-    }
+    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value);
     this.value = value;
   }
   

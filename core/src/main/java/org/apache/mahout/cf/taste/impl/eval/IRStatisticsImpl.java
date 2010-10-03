@@ -21,6 +21,8 @@ import java.io.Serializable;
 
 import org.apache.mahout.cf.taste.eval.IRStatistics;
 
+import com.google.common.base.Preconditions;
+
 public final class IRStatisticsImpl implements IRStatistics, Serializable {
   
   private final double precision;
@@ -28,15 +30,9 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
   private final double fallOut;
   
   IRStatisticsImpl(double precision, double recall, double fallOut) {
-    if ((precision < 0.0) || (precision > 1.0)) {
-      throw new IllegalArgumentException("Illegal precision: " + precision);
-    }
-    if ((recall < 0.0) || (recall > 1.0)) {
-      throw new IllegalArgumentException("Illegal recall: " + recall);
-    }
-    if ((fallOut < 0.0) || (fallOut > 1.0)) {
-      throw new IllegalArgumentException("Illegal fallOut: " + fallOut);
-    }
+    Preconditions.checkArgument(precision >= 0.0 && precision <= 1.0, "Illegal precision: " + precision);
+    Preconditions.checkArgument(recall >= 0.0 && recall <= 1.0, "Illegal recall: " + recall);
+    Preconditions.checkArgument(fallOut >= 0.0 && fallOut <= 1.0, "Illegal fallOut: " + fallOut);
     this.precision = precision;
     this.recall = recall;
     this.fallOut = fallOut;

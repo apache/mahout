@@ -25,6 +25,8 @@ import org.apache.mahout.math.DenseVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Converts String to Instance using a Dataset
  */
@@ -43,9 +45,7 @@ public class DataConverter {
     int nball = dataset.nbAttributes() + dataset.getIgnored().length + 1;
     
     StringTokenizer tokenizer = new StringTokenizer(string, ", ");
-    if (tokenizer.countTokens() != nball) {
-      throw new IllegalArgumentException("Wrong number of attributes in the string");
-    }
+    Preconditions.checkArgument(tokenizer.countTokens() == nball, "Wrong number of attributes in the string");
     
     int nbattrs = dataset.nbAttributes();
     DenseVector vector = new DenseVector(nbattrs);

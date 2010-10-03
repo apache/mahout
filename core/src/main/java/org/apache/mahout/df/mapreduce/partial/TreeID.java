@@ -19,6 +19,8 @@ package org.apache.mahout.df.mapreduce.partial;
 
 import org.apache.hadoop.io.LongWritable;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Indicates both the tree and the data partition used to grow the tree
  */
@@ -29,12 +31,8 @@ public class TreeID extends LongWritable implements Cloneable {
   public TreeID() { }
   
   public TreeID(int partition, int treeId) {
-    if (partition < 0) {
-      throw new IllegalArgumentException("partition < 0");
-    }
-    if (treeId < 0) {
-      throw new IllegalArgumentException("treeId < 0");
-    }
+    Preconditions.checkArgument(partition >= 0, "partition < 0");
+    Preconditions.checkArgument(treeId >= 0, "treeId < 0");
     set(partition, treeId);
   }
   

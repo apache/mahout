@@ -19,6 +19,8 @@ package org.apache.mahout.df.callback;
 
 import java.util.Arrays;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Collects the predictions for a single tree
  */
@@ -40,9 +42,7 @@ public class SingleTreePredictions implements PredictionCallback {
     if (this.treeId == null) {
       this.treeId = treeId;
     } else {
-      if (this.treeId != treeId) {
-        throw new IllegalArgumentException("the predictions does not belong to the same tree");
-      }
+      Preconditions.checkArgument(this.treeId == treeId, "the predictions does not belong to the same tree");
     }
     
     predictions[instanceId] = prediction;

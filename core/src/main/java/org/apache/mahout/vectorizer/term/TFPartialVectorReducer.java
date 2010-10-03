@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
@@ -111,27 +112,24 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    try {
-      dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
-      sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
-      namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
-      maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
-      URI[] localFiles = DistributedCache.getCacheFiles(conf);
-      if (localFiles == null || localFiles.length < 1) {
-        throw new IllegalArgumentException("missing paths from the DistributedCache");
-      }
-      Path dictionaryFile = new Path(localFiles[0].getPath());
-      FileSystem fs = dictionaryFile.getFileSystem(conf);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
-      Writable key = new Text();
-      IntWritable value = new IntWritable();
+    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
+        "missing paths from the DistributedCache");
+    
+    dimension = conf.getInt(PartialVectorMerger.DIMENSION, Integer.MAX_VALUE);
+    sequentialAccess = conf.getBoolean(PartialVectorMerger.SEQUENTIAL_ACCESS, false);
+    namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
+    maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
 
-      // key is word value is id
-      while (reader.next(key, value)) {
-        dictionary.put(key.toString(), value.get());
-      }
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
+    Path dictionaryFile = new Path(localFiles[0].getPath());
+    FileSystem fs = dictionaryFile.getFileSystem(conf);
+    SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
+    Writable key = new Text();
+    IntWritable value = new IntWritable();
+
+    // key is word value is id
+    while (reader.next(key, value)) {
+      dictionary.put(key.toString(), value.get());
     }
   }
 

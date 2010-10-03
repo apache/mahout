@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
+import com.google.common.base.Preconditions;
+
 /** Special Fitness Evaluator that evaluates all the population ones. */
 public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
   
@@ -39,9 +41,7 @@ public abstract class STFitnessEvaluator<T> implements FitnessEvaluator<T> {
     }
     
     int index = population.indexOf(candidate);
-    if (index == -1) {
-      throw new IllegalArgumentException("Candidate is not part of the population");
-    }
+    Preconditions.checkArgument(index != -1, "Candidate is not part of the population");
     
     return evaluations.get(index);
   }

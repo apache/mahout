@@ -24,6 +24,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.df.node.Node;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Stores/Loads the intermediate results of step1 needed by step2.<br>
  * This class should not be needed outside of the partial package, so all its methods are protected.<br>
@@ -58,15 +60,13 @@ public final class InterResults {
                          int partition,
                          TreeID[] keys,
                          Node[] trees) throws IOException {
-    if (keys.length != trees.length) {
-      throw new IllegalArgumentException("keys.length != trees.length");
-    }
-    
+    Preconditions.checkArgument(keys.length == trees.length, "keys.length != trees.length");
+
     FSDataInputStream in = fs.open(forestPath);
-    
+
     TreeID key = new TreeID();
     int numInstances = -1;
-    
+
     try {
       // get current partition's size
       for (int p = 0; p < numMaps; p++) {
@@ -76,12 +76,12 @@ public final class InterResults {
           in.readInt();
         }
       }
-      
+
       // load (key, tree)
       int current = 0;
       for (int index = 0; index < numTrees; index++) {
         key.readFields(in);
-        
+
         if (key.partition() == partition) {
           // skip the trees of the current partition
           Node.read(in);
@@ -91,14 +91,14 @@ public final class InterResults {
           current++;
         }
       }
-      
+
       if (current != keys.length) {
         throw new IllegalStateException("loaded less keys/trees than expected");
       }
     } finally {
       in.close();
     }
-    
+
     return numInstances;
   }
   
@@ -120,9 +120,7 @@ public final class InterResults {
                            TreeID[] keys,
                            Node[] trees,
                            int[] sizes) throws IOException {
-    if (keys.length != trees.length) {
-      throw new IllegalArgumentException("keys.length != trees.length");
-    }
+    Preconditions.checkArgument(keys.length == trees.length, "keys.length != trees.length");
     
     int numTrees = keys.length;
     int numMaps = sizes.length;

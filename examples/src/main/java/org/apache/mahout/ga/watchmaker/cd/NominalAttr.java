@@ -17,14 +17,14 @@
 
 package org.apache.mahout.ga.watchmaker.cd;
 
+import com.google.common.base.Preconditions;
+
 class NominalAttr implements Attribute {
   
   private final String[] values;
   
   NominalAttr(String[] values) {
-    if (values.length <= 0) {
-      throw new IllegalArgumentException("values is empty");
-    }
+    Preconditions.checkArgument(values.length > 0, "values is empty");
     this.values = values;
   }
   

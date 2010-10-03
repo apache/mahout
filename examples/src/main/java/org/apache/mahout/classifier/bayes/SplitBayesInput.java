@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.BitSet;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
 import org.apache.commons.cli2.Option;
@@ -56,11 +57,11 @@ import org.slf4j.LoggerFactory;
  * This class can be used to split directories of files or individual files into
  * training and test sets using a number of different methods.
  * <p>
- * When executed via {@link #splitDirectory(File)} or {@link #splitFile(File)},
+ * When executed via {@link #splitDirectory(Path)} or {@link #splitFile(Path)},
  * the lines read from one or more, input files are written to files of the same
  * name into the directories specified by the
- * {@link #setTestOutputDirectory(File)} and
- * {@link #setTrainingOutputDirectory(File)} methods.
+ * {@link #setTestOutputDirectory(Path)} and
+ * {@link #setTrainingOutputDirectory(Path)} methods.
  * <p>
  * The composition of the test set is determined using one of the following
  * approaches:
@@ -117,9 +118,8 @@ public class SplitBayesInput {
   private int testRandomSelectionSize = -1;
   private int testRandomSelectionPct = -1;
   private Charset charset = Charset.forName("UTF-8");
-  
-  private Configuration conf;
-  private FileSystem fs; 
+
+  private final FileSystem fs;
   private Path inputDirectory;
   private Path trainingOutputDirectory;
   private Path testOutputDirectory;
@@ -134,7 +134,7 @@ public class SplitBayesInput {
   }
   
   public SplitBayesInput() throws IOException {
-    conf = new Configuration();
+    Configuration conf = new Configuration();
     fs = FileSystem.get(conf);
   }
   
@@ -250,20 +250,15 @@ public class SplitBayesInput {
     return true;
   }
   
-  /** Perform a split on directory specified by {@link #setInputDirectory(File)} by calling {@link #splitFile(File)} 
+  /** Perform a split on directory specified by {@link #setInputDirectory(Path)} by calling {@link #splitFile(Path)}
    *  on each file found within that directory.
-   *  
-   * @throws IOException
    */
   public void splitDirectory() throws IOException {
     this.splitDirectory(inputDirectory);
   }
   
-  /** Perform a split on the specified directory by calling {@link #splitFile(File)} on each file found within that
+  /** Perform a split on the specified directory by calling {@link #splitFile(Path)} on each file found within that
    *  directory.
-   *  
-   * @param inputDir
-   * @throws IOException
    */
   public void splitDirectory(Path inputDir) throws IOException {
     if (fs.getFileStatus(inputDir) == null) {
@@ -518,25 +513,20 @@ public class SplitBayesInput {
    *   if output directories do not exist or are not directories.
    */
   public void validate() throws IOException {
-    if ((testSplitSize < 1) && (testSplitSize != -1)) {
-      throw new IllegalArgumentException("test split size must be 1 or greater");
-    }
-    
-    if ((splitLocation < 0 || splitLocation > 100) && (splitLocation != -1)) {
-      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
-    }
+    Preconditions.checkArgument(testSplitSize >= 1 || testSplitSize == -1,
+                                "Invalid testSplitSize", testSplitSize);
+    Preconditions.checkArgument((splitLocation >= 0 && splitLocation <= 100) || splitLocation == -1,
+                                "Invalid splitLocation percentage", splitLocation);
+    Preconditions.checkArgument((testSplitPct >= 0 && testSplitPct <= 100) || testSplitPct == -1,
+                                "Invalid testSplitPct percentage", testSplitPct);
+    Preconditions.checkArgument((splitLocation >= 0 && splitLocation <= 100) || splitLocation == -1,
+                                "Invalid splitLocation percentage", splitLocation);
+    Preconditions.checkArgument((testRandomSelectionPct >= 0 && testRandomSelectionPct <= 100)
+                                || testRandomSelectionPct == -1,
+                                "Invalid testRandomSelectionPct percentage", testRandomSelectionPct);
 
-    if ((testSplitPct < 0 || testSplitPct > 100) && (testSplitPct != -1)) {
-      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
-    }
-
-    if ((splitLocation < 0 || splitLocation > 100) && (splitLocation != -1)) {
-      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
-    }
-
-    if ((testRandomSelectionPct < 0 || testRandomSelectionPct > 100) && (testRandomSelectionPct != -1)) {
-      throw new IllegalArgumentException("test split percentage must be between 0 and 100");
-    }
+    Preconditions.checkArgument(trainingOutputDirectory != null, "No training output directory was specified");
+    Preconditions.checkArgument(testOutputDirectory != null, "No test output directory was specified");
 
     // only one of the following may be set, one must be set.
     int count = 0;
@@ -553,35 +543,15 @@ public class SplitBayesInput {
       count++;
     }
 
-    if (count == 0) {
-      throw new IllegalArgumentException("either test split size, test split pct, "
-          + "random selection size or random selection pct must be specified and a positive integer");
-    } else if (count > 1) {
-      throw new IllegalArgumentException("only test split size, test split pct, "
-          + "random selection size or random selection pct may be specified");
-    }
+    Preconditions.checkArgument(count == 1,
+        "Exactly one of testSplitSize, testSplitPct, testRandomSelectionSize, testRandomSelectionPct should be set");
 
-    if (trainingOutputDirectory == null) {
-      throw new IllegalArgumentException("no training output directory was specified");
-    }
-
-    if (testOutputDirectory == null) {
-      throw new IllegalArgumentException("no test output directory was specified");
-    }
-
-    if (fs.getFileStatus(trainingOutputDirectory) == null) {
-      throw new IOException(trainingOutputDirectory + " does not exist");
-    }
-    else if (!fs.getFileStatus(trainingOutputDirectory).isDir()) {
-      throw new IOException(trainingOutputDirectory + " is not a directory");
-    }
-
-    if (fs.getFileStatus(testOutputDirectory) == null) {
-      throw new IOException(testOutputDirectory + " does not exist");
-    }
-    else if (!fs.getFileStatus(testOutputDirectory).isDir()) {
-      throw new IOException(testOutputDirectory + " is not a directory");
-    }
+    FileStatus trainingOutputDirStatus = fs.getFileStatus(trainingOutputDirectory);
+    Preconditions.checkArgument(trainingOutputDirStatus != null && trainingOutputDirStatus.isDir(),
+                                "%s is not a directory", trainingOutputDirectory);
+    FileStatus testOutputDirStatus = fs.getFileStatus(testOutputDirectory);
+    Preconditions.checkArgument(testOutputDirStatus != null && testOutputDirStatus.isDir(),
+                                "%s is not a directory", testOutputDirectory);
   }
   
   /** Count the lines in the file specified as returned by <code>BufferedReader.readLine()</code>
@@ -598,12 +568,15 @@ public class SplitBayesInput {
    *   if there is a problem opening or reading the file.
    */
   public static int countLines(FileSystem fs, Path inputFile, Charset charset) throws IOException {
-    BufferedReader countReader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
     int lineCount = 0;
-    while (countReader.readLine() != null) {
-      lineCount++;
+    BufferedReader countReader = new BufferedReader(new InputStreamReader(fs.open(inputFile), charset));
+    try {
+      while (countReader.readLine() != null) {
+        lineCount++;
+      }
+    } finally {
+      IOUtils.quietClose(countReader);
     }
-    IOUtils.quietClose(countReader);
     
     return lineCount;
   }
