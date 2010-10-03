@@ -39,13 +39,13 @@ import org.apache.mahout.clustering.dirichlet.models.L1ModelDistribution;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.MahoutTestCase;
-import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
-import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.lucene.CachedTermInfo;
 import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
 import org.apache.mahout.utils.vectors.lucene.TFDFMapper;
 import org.apache.mahout.utils.vectors.lucene.VectorMapper;
+import org.apache.mahout.vectorizer.TFIDF;
+import org.apache.mahout.vectorizer.Weight;
 import org.junit.Test;
 
 public final class TestL1ModelClustering extends MahoutTestCase {

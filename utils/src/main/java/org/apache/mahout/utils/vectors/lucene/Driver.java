@@ -43,14 +43,14 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.utils.vectors.TF;
-import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
-import org.apache.mahout.utils.vectors.Weight;
 import org.apache.mahout.utils.vectors.io.JWriterTermInfoWriter;
 import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 import org.apache.mahout.utils.vectors.io.VectorWriter;
+import org.apache.mahout.vectorizer.TF;
+import org.apache.mahout.vectorizer.TFIDF;
+import org.apache.mahout.vectorizer.Weight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

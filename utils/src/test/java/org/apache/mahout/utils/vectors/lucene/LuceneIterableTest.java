@@ -28,9 +28,9 @@ import org.apache.lucene.util.Version;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.MahoutTestCase;
-import org.apache.mahout.utils.vectors.TFIDF;
 import org.apache.mahout.utils.vectors.TermInfo;
-import org.apache.mahout.utils.vectors.Weight;
+import org.apache.mahout.vectorizer.TFIDF;
+import org.apache.mahout.vectorizer.Weight;
 import org.junit.Test;
 
 public final class LuceneIterableTest extends MahoutTestCase {
