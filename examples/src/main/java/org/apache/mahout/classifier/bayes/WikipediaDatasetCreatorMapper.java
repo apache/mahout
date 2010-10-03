@@ -19,7 +19,9 @@ package org.apache.mahout.classifier.bayes;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -48,24 +50,20 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
   private static final Logger log = LoggerFactory.getLogger(WikipediaDatasetCreatorMapper.class);
 
   private static final Pattern SPACE_NON_ALPHA_PATTERN = Pattern.compile("[\\s\\W]");
-
   private static final Pattern OPEN_TEXT_TAG_PATTERN = Pattern.compile("<text xml:space=\"preserve\">");
-
   private static final Pattern CLOSE_TEXT_TAG_PATTERN = Pattern.compile("</text>");
 
-  private Set<String> inputCategories;
-
+  private List<String> inputCategories;
+  private List<Pattern> inputCategoryPatterns;
   private boolean exactMatchOnly;
-
   private Analyzer analyzer;
 
   @Override
   protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-    StringBuilder contents = new StringBuilder();
     String document = value.toString();
     String catMatch = findMatchingCategory(document);
-
     if (!"Unknown".equals(catMatch)) {
+      StringBuilder contents = new StringBuilder(1000);
       document = StringEscapeUtils.unescapeHtml(WikipediaDatasetCreatorMapper.CLOSE_TEXT_TAG_PATTERN.matcher(
           WikipediaDatasetCreatorMapper.OPEN_TEXT_TAG_PATTERN.matcher(document).replaceFirst("")).replaceAll(""));
       TokenStream stream = analyzer.tokenStream(catMatch, new StringReader(document));
@@ -82,33 +80,39 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
+
     Configuration conf = context.getConfiguration();
-    try {
-      if (inputCategories == null) {
-        Set<String> newCategories = new HashSet<String>();
 
-        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
-            .getClass(newCategories));
-
-        String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
-        inputCategories = setStringifier.fromString(categoriesStr);
-
+    if (inputCategories == null) {
+      Set<String> newCategories = new HashSet<String>();
+      DefaultStringifier<Set<String>> setStringifier =
+          new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(newCategories));
+      String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
+      Set<String> inputCategoriesSet = setStringifier.fromString(categoriesStr);
+      inputCategories = new ArrayList<String>(inputCategoriesSet);
+      inputCategoryPatterns = new ArrayList<Pattern>(inputCategories.size());
+      for (String inputCategory : inputCategories) {
+        inputCategoryPatterns.add(Pattern.compile(".*\\b" + inputCategory + "\\b.*"));
       }
-      exactMatchOnly = conf.getBoolean("exact.match.only", false);
-      if (analyzer == null) {
+
+    }
+
+    exactMatchOnly = conf.getBoolean("exact.match.only", false);
+
+    if (analyzer == null) {
+      try {
         String analyzerStr = conf.get("analyzer.class", WikipediaAnalyzer.class.getName());
         Class<? extends Analyzer> analyzerClass = Class.forName(analyzerStr).asSubclass(Analyzer.class);
         analyzer = analyzerClass.newInstance();
+      } catch (ClassNotFoundException e) {
+        throw new IllegalStateException(e);
+      } catch (IllegalAccessException e) {
+        throw new IllegalStateException(e);
+      } catch (InstantiationException e) {
+        throw new IllegalStateException(e);
       }
-    } catch (IOException ex) {
-      throw new IllegalStateException(ex);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
     }
+
     log.info("Configure: Input Categories size: {} Exact Match: {} Analyzer: {}",
              new Object[] {inputCategories.size(), exactMatchOnly, analyzer.getClass().getName()});
   }
@@ -127,8 +131,10 @@ public class WikipediaDatasetCreatorMapper extends Mapper<LongWritable, Text, Te
       if (exactMatchOnly && inputCategories.contains(category)) {
         return category;
       } else if (!exactMatchOnly) {
-        for (String inputCategory : inputCategories) {
-          if (category.contains(inputCategory)) { // we have an inexact match
+        for (int i = 0; i < inputCategories.size(); i++) {
+          String inputCategory = inputCategories.get(i);
+          Pattern inputCategoryPattern = inputCategoryPatterns.get(i);
+          if (inputCategoryPattern.matcher(category).matches()) { // inexact match with word boundary. 
             return inputCategory;
           }
         }
