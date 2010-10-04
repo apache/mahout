@@ -26,12 +26,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.vectors.ConstantValueEncoder;
-import org.apache.mahout.vectors.ContinuousValueEncoder;
-import org.apache.mahout.vectors.Dictionary;
-import org.apache.mahout.vectors.FeatureVectorEncoder;
-import org.apache.mahout.vectors.StaticWordValueEncoder;
-import org.apache.mahout.vectors.TextValueEncoder;
+import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
+import org.apache.mahout.vectorizer.encoders.ContinuousValueEncoder;
+import org.apache.mahout.vectorizer.encoders.Dictionary;
+import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
+import org.apache.mahout.vectorizer.encoders.StaticWordValueEncoder;
+import org.apache.mahout.vectorizer.encoders.TextValueEncoder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
