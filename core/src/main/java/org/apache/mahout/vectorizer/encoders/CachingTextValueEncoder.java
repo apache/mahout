@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.vectors;
+package org.apache.mahout.vectorizer.encoders;
 
 public class CachingTextValueEncoder extends TextValueEncoder {
   public CachingTextValueEncoder(String name, int dataSize) {

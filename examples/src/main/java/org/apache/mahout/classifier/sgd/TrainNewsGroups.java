@@ -35,10 +35,10 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.UnaryFunction;
-import org.apache.mahout.vectors.ConstantValueEncoder;
-import org.apache.mahout.vectors.Dictionary;
-import org.apache.mahout.vectors.FeatureVectorEncoder;
-import org.apache.mahout.vectors.StaticWordValueEncoder;
+import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
+import org.apache.mahout.vectorizer.encoders.Dictionary;
+import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
+import org.apache.mahout.vectorizer.encoders.StaticWordValueEncoder;
 
 import java.io.BufferedReader;
 import java.io.File;

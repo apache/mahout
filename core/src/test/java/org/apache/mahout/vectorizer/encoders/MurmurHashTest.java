@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.vectors;
+package org.apache.mahout.vectorizer.encoders;
 
 import com.google.common.base.Charsets;
 import org.apache.mahout.common.MahoutTestCase;

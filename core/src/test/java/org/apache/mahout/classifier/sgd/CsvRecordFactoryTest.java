@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.vectors.Dictionary;
+import org.apache.mahout.vectorizer.encoders.Dictionary;
 import org.junit.Test;
 
 public final class CsvRecordFactoryTest extends MahoutTestCase {

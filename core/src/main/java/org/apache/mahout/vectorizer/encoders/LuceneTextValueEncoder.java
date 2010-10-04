@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.vectors;
+package org.apache.mahout.vectorizer.encoders;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
