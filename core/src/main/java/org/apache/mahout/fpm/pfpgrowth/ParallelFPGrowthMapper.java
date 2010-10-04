@@ -71,15 +71,15 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,TransactionTree,
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
+    Parameters params = Parameters.fromString(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
     
     OpenObjectIntHashMap<String> fMap = new OpenObjectIntHashMap<String>();
     int i = 0;
-    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList", context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, PFPGrowth.F_LIST, context.getConfiguration())) {
       fMap.put(e.getFirst(), i++);
     }
     
-    for (Entry<String,Long> e : PFPGrowth.deserializeMap(params, "gList", context.getConfiguration())
+    for (Entry<String,Long> e : PFPGrowth.deserializeMap(params, PFPGrowth.G_LIST, context.getConfiguration())
         .entrySet()) {
       gListInt.put(fMap.get(e.getKey()), e.getValue());
     }

@@ -57,6 +57,24 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public final class PFPGrowth {
+  
+  public static final String ENCODING = "encoding";
+  public static final String F_LIST = "fList";
+  public static final String G_LIST = "gList";
+  public static final String NUM_GROUPS = "numGroups";
+  public static final String OUTPUT = "output";
+  public static final String MIN_SUPPORT = "minSupport";
+  public static final String MAX_HEAPSIZE = "maxHeapSize";
+  public static final String INPUT = "input";
+  public static final String PFP_PARAMETERS = "pfp.parameters";
+  public static final String FILE_PATTERN = "part-*";
+  public static final String FPGROWTH = "fpgrowth";
+  public static final String FREQUENT_PATTERNS = "frequentpatterns";
+  public static final String PARALLEL_COUNTING = "parallelcounting";  
+  public static final String SORTED_OUTPUT = "sortedoutput";
+  public static final String SPLIT_PATTERN = "splitPattern";
+  public static final String TREE_CACHE_SIZE = "treeCacheSize";
+  
   public static final Pattern SPLITTER = Pattern.compile("[ ,\t]*[,|\t][ ,\t]*");
   
   private static final Logger log = LoggerFactory.getLogger(PFPGrowth.class);
@@ -116,12 +134,12 @@ public final class PFPGrowth {
   public static List<Pair<String,Long>> readFList(Parameters params) throws IOException {
     Writable key = new Text();
     LongWritable value = new LongWritable();
-    int minSupport = Integer.valueOf(params.get("minSupport", "3"));
+    int minSupport = Integer.valueOf(params.get(MIN_SUPPORT, "3"));
     Configuration conf = new Configuration();
-
-    Path parallelCountingPath = new Path(params.get("output"), "parallelcounting");
+      
+    Path parallelCountingPath = new Path(params.get(OUTPUT), PARALLEL_COUNTING);
     FileSystem fs = FileSystem.get(parallelCountingPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(parallelCountingPath, "part-*"));
+    FileStatus[] outputFiles = fs.globStatus(new Path(parallelCountingPath, FILE_PATTERN));
     
     PriorityQueue<Pair<String,Long>> queue = new PriorityQueue<Pair<String,Long>>(11,
         new Comparator<Pair<String,Long>>() {
@@ -162,9 +180,9 @@ public final class PFPGrowth {
     
     Configuration conf = new Configuration();
 
-    Path frequentPatternsPath = new Path(params.get("output"), "frequentPatterns");
+    Path frequentPatternsPath = new Path(params.get(OUTPUT), FREQUENT_PATTERNS);
     FileSystem fs = FileSystem.get(frequentPatternsPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(frequentPatternsPath, "part-*"));
+    FileStatus[] outputFiles = fs.globStatus(new Path(frequentPatternsPath, FILE_PATTERN));
     
     List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
     for (FileStatus fileStatus : outputFiles) {
@@ -199,21 +217,21 @@ public final class PFPGrowth {
                                                         ClassNotFoundException {
     
     Configuration conf = new Configuration();
-    params.set("fList", "");
-    params.set("gList", "");
-    conf.set("pfp.parameters", params.toString());
+    params.set(F_LIST, "");
+    params.set(G_LIST, "");
+    conf.set(PFP_PARAMETERS, params.toString());
     conf.set("mapred.compress.map.output", "true");
     conf.set("mapred.output.compression.type", "BLOCK");
     
-    String input = params.get("output") + "/fpgrowth";
+    Path input = new Path(params.get(OUTPUT), FPGROWTH);
     Job job = new Job(conf, "PFP Aggregator Driver running over input: " + input);
     job.setJarByClass(PFPGrowth.class);
     
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(TopKStringPatterns.class);
     
-    FileInputFormat.addInputPath(job, new Path(input));
-    Path outPath = new Path(params.get("output"), "frequentPatterns");
+    FileInputFormat.addInputPath(job, input);
+    Path outPath = new Path(params.get(OUTPUT), FREQUENT_PATTERNS);
     FileOutputFormat.setOutputPath(job, outPath);
     
     job.setInputFormatClass(SequenceFileInputFormat.class);
@@ -235,7 +253,7 @@ public final class PFPGrowth {
   public static void startGroupingItems(Parameters params) throws IOException {
     Configuration conf = new Configuration();
     List<Pair<String,Long>> fList = readFList(params);
-    Integer numGroups = Integer.valueOf(params.get("numGroups", "50"));
+    Integer numGroups = Integer.valueOf(params.get(NUM_GROUPS, "50"));
     
     Map<String,Long> gList = new HashMap<String,Long>();
     long maxPerGroup = fList.size() / numGroups;
@@ -258,8 +276,8 @@ public final class PFPGrowth {
     
     log.info("No of Features: {}", fList.size());
     
-    params.set("gList", serializeMap(gList, conf));
-    params.set("fList", serializeList(fList, conf));
+    params.set(G_LIST, serializeMap(gList, conf));
+    params.set(F_LIST, serializeList(fList, conf));
   }
   
   /**
@@ -270,12 +288,12 @@ public final class PFPGrowth {
                                                              ClassNotFoundException {
     
     Configuration conf = new Configuration();
-    conf.set("pfp.parameters", params.toString());
+    conf.set(PFP_PARAMETERS, params.toString());
     
     conf.set("mapred.compress.map.output", "true");
     conf.set("mapred.output.compression.type", "BLOCK");
     
-    String input = params.get("input");
+    String input = params.get(INPUT);
     Job job = new Job(conf, "Parallel Counting Driver running over input: " + input);
     job.setJarByClass(PFPGrowth.class);
     
@@ -283,7 +301,7 @@ public final class PFPGrowth {
     job.setOutputValueClass(LongWritable.class);
     
     FileInputFormat.addInputPath(job, new Path(input));
-    Path outPath = new Path(params.get("output"), "parallelcounting");
+    Path outPath = new Path(params.get(OUTPUT), PARALLEL_COUNTING);
     FileOutputFormat.setOutputPath(job, outPath);
     
     HadoopUtil.overwriteOutput(outPath);
@@ -306,12 +324,12 @@ public final class PFPGrowth {
                                                                ClassNotFoundException {
     
     Configuration conf = new Configuration();
-    String gList = params.get("gList");
-    params.set("gList", "");
-    conf.set("pfp.parameters", params.toString());
+    String gList = params.get(G_LIST);
+    params.set(G_LIST, "");
+    conf.set(PFP_PARAMETERS, params.toString());
     conf.set("mapred.compress.map.output", "true");
     conf.set("mapred.output.compression.type", "BLOCK");
-    String input = params.get("input");
+    String input = params.get(INPUT);
     Job job = new Job(conf, "PFP Transaction Sorting running over input" + input);
     job.setJarByClass(PFPGrowth.class);
     
@@ -322,7 +340,7 @@ public final class PFPGrowth {
     job.setOutputValueClass(TransactionTree.class);
     
     FileInputFormat.addInputPath(job, new Path(input));
-    Path outPath = new Path(params.get("output") + "/sortedoutput");
+    Path outPath = new Path(params.get(OUTPUT), SORTED_OUTPUT);
     FileOutputFormat.setOutputPath(job, outPath);
     
     HadoopUtil.overwriteOutput(outPath);
@@ -333,7 +351,7 @@ public final class PFPGrowth {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
     job.waitForCompletion(true);
-    params.set("gList", gList);
+    params.set(G_LIST, gList);
   }
   
   /**
@@ -344,10 +362,10 @@ public final class PFPGrowth {
                                                              ClassNotFoundException {
     
     Configuration conf = new Configuration();
-    conf.set("pfp.parameters", params.toString());
+    conf.set(PFP_PARAMETERS, params.toString());
     conf.set("mapred.compress.map.output", "true");
     conf.set("mapred.output.compression.type", "BLOCK");
-    String input = params.get("output") + "/sortedoutput";
+    Path input = new Path(params.get(OUTPUT), SORTED_OUTPUT);
     Job job = new Job(conf, "PFP Growth Driver running over input" + input);
     job.setJarByClass(PFPGrowth.class);
     
@@ -357,8 +375,8 @@ public final class PFPGrowth {
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(TopKStringPatterns.class);
     
-    FileInputFormat.addInputPath(job, new Path(input));
-    Path outPath = new Path(new Path(params.get("output")), "fpgrowth");
+    FileInputFormat.addInputPath(job, input);
+    Path outPath = new Path(params.get(OUTPUT), FPGROWTH);
     FileOutputFormat.setOutputPath(job, outPath);
     
     HadoopUtil.overwriteOutput(outPath);

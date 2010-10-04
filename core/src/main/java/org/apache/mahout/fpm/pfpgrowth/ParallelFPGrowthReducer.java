@@ -109,16 +109,16 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
   protected void setup(Context context) throws IOException, InterruptedException {
     
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
+    Parameters params = Parameters.fromString(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
     
     int i = 0;
-    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, "fList", context.getConfiguration())) {
+    for (Pair<String,Long> e : PFPGrowth.deserializeList(params, PFPGrowth.F_LIST, context.getConfiguration())) {
       featureReverseMap.add(e.getFirst());
       fMap.put(e.getFirst(), i++);
       
     }
     
-    Map<String,Long> gList = PFPGrowth.deserializeMap(params, "gList", context.getConfiguration());
+    Map<String,Long> gList = PFPGrowth.deserializeMap(params, PFPGrowth.G_LIST, context.getConfiguration());
     
     for (Entry<String,Long> entry : gList.entrySet()) {
       IntArrayList groupList = groupFeatures.get(entry.getValue());
@@ -132,9 +132,9 @@ public class ParallelFPGrowthReducer extends Reducer<LongWritable,TransactionTre
       }
       
     }
-    maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
-    minSupport = Integer.valueOf(params.get("minSupport", "3"));
-    FPTreeDepthCache.setFirstLevelCacheSize(Integer.valueOf(params.get("treeCacheSize", Integer
+    maxHeapSize = Integer.valueOf(params.get(PFPGrowth.MAX_HEAPSIZE, "50"));
+    minSupport = Integer.valueOf(params.get(PFPGrowth.MIN_SUPPORT, "3"));
+    FPTreeDepthCache.setFirstLevelCacheSize(Integer.valueOf(params.get(PFPGrowth.TREE_CACHE_SIZE, Integer
         .toString(FPTreeDepthCache.getFirstLevelCacheSize()))));
   }
 }

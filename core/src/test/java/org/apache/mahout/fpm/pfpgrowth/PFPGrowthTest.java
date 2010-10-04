@@ -40,19 +40,23 @@ public final class PFPGrowthTest extends MahoutTestCase {
   private static final Logger log = LoggerFactory.getLogger(PFPGrowthTest.class);
   
   private final Parameters params = new Parameters();
+  private File input;
+  private File inputDir;
+  private File outputDir;
   
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    params.set("minSupport", "3");
-    params.set("maxHeapSize", "4");
-    params.set("numGroups", "2");
-    params.set("encoding", "UTF-8");
-    params.set("treeCacheSize", "5");
-    File inputDir = getTestTempDir("testdata/transactions");
-    File input = new File(inputDir, "test.txt");
-    params.set("input", input.getAbsolutePath());
-    params.set("output", "output/frequentpatterns");
+    params.set(PFPGrowth.MIN_SUPPORT, "3");
+    params.set(PFPGrowth.MAX_HEAPSIZE, "4");
+    params.set(PFPGrowth.NUM_GROUPS, "2");
+    params.set(PFPGrowth.ENCODING, "UTF-8");
+    params.set(PFPGrowth.TREE_CACHE_SIZE, "5");
+    inputDir = getTestTempDir("transactions");
+    outputDir = getTestTempDir("frequentpatterns");
+    input = new File(inputDir, "test.txt");
+    params.set(PFPGrowth.INPUT, input.getAbsolutePath());
+    params.set(PFPGrowth.OUTPUT, outputDir.getAbsolutePath());
     BufferedWriter writer = new BufferedWriter(new FileWriter(input));
     try {
       Collection<List<String>> transactions = new ArrayList<List<String>>();
@@ -79,31 +83,25 @@ public final class PFPGrowthTest extends MahoutTestCase {
   }
 
   @Test
-  public void testStartParallelCounting() throws Exception {
-    log.info("Starting Parallel Counting Test: {}", params.get("maxHeapSize"));
+  public void testStartParallelFPGrowth() throws Exception {
+    log.info("Starting Parallel Counting Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startParallelCounting(params);
-    log.info("Reading fList Test: {}", params.get("maxHeapSize"));
+    log.info("Reading fList Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     List<Pair<String,Long>> fList = PFPGrowth.readFList(params);
     log.info("{}", fList);
     assertEquals("[(B,6), (D,6), (A,5), (E,4), (C,3)]", fList.toString());
-  }
-
-  @Test
-  public void testStartGroupingItems() throws Exception {
-    log.info("Starting Grouping Test: {}", params.get("maxHeapSize"));
+ 
+    log.info("Starting Grouping Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startGroupingItems(params);
-    Map<String,Long> gList = PFPGrowth.deserializeMap(params, "gList", new Configuration());
+    Map<String,Long> gList = PFPGrowth.deserializeMap(params, PFPGrowth.G_LIST, new Configuration());
     log.info("{}", gList);
     assertEquals("{D=0, E=1, A=0, B=0, C=1}", gList.toString());
-  }
-
-  @Test
-  public void testStartParallelFPGrowth() throws Exception {
-    log.info("Starting Parallel FPGrowth Test: {}", params.get("maxHeapSize"));
+ 
+    log.info("Starting Parallel FPGrowth Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startGroupingItems(params);
     PFPGrowth.startTransactionSorting(params);
     PFPGrowth.startParallelFPGrowth(params);
-    log.info("Starting Pattern Aggregation Test: {}", params.get("maxHeapSize"));
+    log.info("Starting Pattern Aggregation Test: {}", params.get(PFPGrowth.MAX_HEAPSIZE));
     PFPGrowth.startAggregating(params);
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
     assertEquals("[(A,([A],5), ([D, A],4), ([B, A],4), ([A, E],4)), "
@@ -113,5 +111,4 @@ public final class PFPGrowthTest extends MahoutTestCase {
                  + "(E,([A, E],4), ([D, A, E],3), ([B, A, E],3))]", frequentPatterns.toString());
     
   }
-  
 }
