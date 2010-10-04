@@ -17,7 +17,10 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+    http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.mahout</groupId>
@@ -63,66 +66,22 @@
         </executions>
       </plugin>
 
-      <!-- Build the Job Jar -->
+      <!-- create core hadoop job jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-5</version>
         <executions>
           <execution>
-            <id>copy-dependencies</id>
+            <id>job</id>
             <phase>package</phase>
             <goals>
-              <goal>copy-dependencies</goal>
+              <goal>single</goal>
             </goals>
             <configuration>
-              <!-- configure the plugin here -->
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <ant antfile="../etc/build.xml" target="core-job">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="fullnamever" value="${project.artifactId}-${project.version}" />
-                </ant>
-              </tasks>
-
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- attach the Job jar -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${project.build.directory}/${artifactId}-${version}.job</file>
-                  <type>job</type>
-                  <!--<classifier>job</classifier>-->
-                </artifact>
-
-              </artifacts>
+              <descriptors>
+                <descriptor>src/main/assembly/job.xml</descriptor>
+              </descriptors>
             </configuration>
           </execution>
         </executions>
@@ -132,6 +91,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.4</version>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>

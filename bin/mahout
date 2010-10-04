@@ -30,7 +30,7 @@
 #                      running mahout locally. If specified, the classes
 #                      from the 'target/classes' directories in each project
 #                      are used. Otherwise classes will be retrived from
-#                      jars in the binary releas collection or *.job files
+#                      jars in the binary releas collection or *-job.jar files
 #                      found in build directories. When running on hadoop
 #                      the job files will always be used.
 
@@ -124,7 +124,7 @@ then
   done
 
   # add dev targets if they exist
-  for f in $MAHOUT_HOME/*/target/mahout-*.job; do
+  for f in $MAHOUT_HOME/*/target/mahout-*-job.jar; do
     CLASSPATH=${CLASSPATH}:$f;
   done
 
@@ -176,14 +176,14 @@ fi
 
 CLASS=org.apache.mahout.driver.MahoutDriver
 
-for f in $MAHOUT_HOME/examples/target/mahout-examples-*.job; do
+for f in $MAHOUT_HOME/examples/target/mahout-examples-*-job.jar; do
   if [ -e "$f" ]; then
     MAHOUT_JOB=$f
   fi
 done
 
 if [ "$MAHOUT_JOB" = "" ]; then
-  for f in $MAHOUT_HOME/mahout-examples-*.job; do
+  for f in $MAHOUT_HOME/mahout-examples-*-job.jar; do
     if [ -e "$f" ]; then
       MAHOUT_JOB=$f
     fi

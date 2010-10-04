@@ -24,28 +24,6 @@
  -->
 
 <project name="mahout" default="core-job" basedir=".">
-  <!-- Run in core during the package phase -->
-  <target name="core-job" >
-    <jar jarfile="${dest}/${fullnamever}.job">
-      <zipfileset dir="${dest}/classes"/>
-      <zipfileset dir="../math/target/classes"/>
-      <zipfileset dir="${dest}/dependency" prefix="lib"
-                  includes="**/*.jar" excludes="mahout-math-*.jar,mahout-core*.jar,mahout-utils*.jar"/>
-    </jar>
-  </target>
-
-  <!-- Run in examples during the package phase -->
-  <target name="example-job" depends="">
-    <jar jarfile="${dest}/${fullnamever}.job">
-      <zipfileset dir="${dest}/classes"/>
-      <zipfileset dir="../math/target/classes"/>
-      <zipfileset dir="../core/target/classes"/>
-      <zipfileset dir="../utils/target/classes"/>
-      <zipfileset dir="${dest}/dependency" prefix="lib"
-                  includes="**/*.jar" excludes="mahout-math-*.jar,mahout-core*.jar,mahout-utils*.jar"/>
-    </jar>
-  </target>
-
   <!-- Run in examples during the package phase -->
   <target name="build-grouplens-jar">
     <jar jarfile="${dest}/grouplens.jar">
