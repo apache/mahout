@@ -54,7 +54,7 @@ public class KMeansClusterMapper extends Mapper<WritableComparable<?>,VectorWrit
       if ((clusterPath != null) && (clusterPath.length() > 0)) {
         KMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
         if (clusters.isEmpty()) {
-          throw new IllegalStateException("Cluster is empty!");
+          throw new IllegalStateException("No clusters found. Check your -c path.");
         }
       }  
       this.clusterer = new KMeansClusterer(measure);
