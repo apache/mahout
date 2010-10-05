@@ -101,7 +101,7 @@ public final class RecommenderJob extends AbstractJob {
     addOption("usersFile", "u", "File of users to recommend for", null);
     addOption("itemsFile", "i", "File of items to recommend for", null);
     addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from "
-        + "the recommendations for that user(optional)", null);
+        + "the recommendations for that user (optional)", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
     addOption("maxPrefsPerUser", null,
         "Maximum number of preferences considered per user in final recommendation phase",
