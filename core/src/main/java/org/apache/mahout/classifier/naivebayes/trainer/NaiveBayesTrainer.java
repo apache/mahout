@@ -197,6 +197,7 @@ public final class NaiveBayesTrainer {
       Writable key = new Text(label);
       dictWriter.append(key, new IntWritable(i++));
     }
+    dictWriter.close();
     return labelMapPath;
   }
 }

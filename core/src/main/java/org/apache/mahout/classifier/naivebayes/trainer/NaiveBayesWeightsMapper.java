@@ -81,8 +81,10 @@ public class NaiveBayesWeightsMapper extends Mapper<IntWritable, VectorWritable,
   
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
-    context.write(new Text(BayesConstants.FEATURE_SUM), new VectorWritable(featureSum));
-    context.write(new Text(BayesConstants.LABEL_SUM), new VectorWritable(labelSum));
+    if (featureSum != null) {
+      context.write(new Text(BayesConstants.FEATURE_SUM), new VectorWritable(featureSum));
+      context.write(new Text(BayesConstants.LABEL_SUM), new VectorWritable(labelSum));
+    }
     super.cleanup(context);
   }
 }

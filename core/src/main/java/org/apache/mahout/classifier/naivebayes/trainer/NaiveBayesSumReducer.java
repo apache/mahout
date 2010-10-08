@@ -42,5 +42,4 @@ public class NaiveBayesSumReducer extends Reducer<WritableComparable<?>, VectorW
     }
     context.write(key, new VectorWritable(vector));
   }
-
 }
