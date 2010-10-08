@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.IntPairWritable;
@@ -75,7 +76,7 @@ public final class LDADriver extends AbstractJob {
   }
 
   public static void main(String[] args) throws Exception {
-    new LDADriver().run(args);
+    ToolRunner.run(new Configuration(), new LDADriver(), args);
   }
 
   static LDAState createState(Configuration job) throws IOException {
