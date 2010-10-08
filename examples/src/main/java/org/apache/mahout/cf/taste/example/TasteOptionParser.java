@@ -52,15 +52,13 @@ public final class TasteOptionParser {
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
     
-    Option inputOpt = obuilder.withLongName("input").withRequired(false)
-    .withShortName("i").withArgument(
-      abuilder.withName("input").withMinimum(1).withMaximum(1).create())
-      .withDescription("The Path for input data directory.").create();
+    Option inputOpt = obuilder.withLongName("input").withRequired(false).withShortName("i")
+        .withArgument(abuilder.withName("input").withMinimum(1).withMaximum(1).create())
+        .withDescription("The Path for input data directory.").create();
     
     Option helpOpt = DefaultOptionCreator.helpOption();
     
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(
-      helpOpt).create();
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(helpOpt).create();
     
     Parser parser = new Parser();
     parser.setGroup(group);
@@ -70,9 +68,8 @@ public final class TasteOptionParser {
       CommandLineUtil.printHelp(group);
       return null;
     }
-    
-    String prefsFile = cmdLine.getValue(inputOpt).toString();
-    return new File(prefsFile);
+
+    return cmdLine.hasOption(inputOpt) ? new File(cmdLine.getValue(inputOpt).toString()) : null;
   }
   
 }
