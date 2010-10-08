@@ -339,7 +339,9 @@ public class KMeansDriver extends AbstractJob {
 
     job.setJarByClass(KMeansDriver.class);
     HadoopUtil.overwriteOutput(clustersOut);
-    job.waitForCompletion(true);
+    if (job.waitForCompletion(true) == false) {
+      throw new InterruptedException("K-Means Iteration failed processing " + clustersIn.toString());
+    }
     FileSystem fs = FileSystem.get(clustersOut.toUri(), conf);
 
     return isConverged(clustersOut, conf, fs);
@@ -482,6 +484,8 @@ public class KMeansDriver extends AbstractJob {
     job.setNumReduceTasks(0);
     job.setJarByClass(KMeansDriver.class);
 
-    job.waitForCompletion(true);
+    if (job.waitForCompletion(true) == false) {
+      throw new InterruptedException("K-Means Clustering failed processing " + clustersIn.toString());
+    }
   }
 }

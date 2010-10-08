@@ -372,7 +372,9 @@ public class DirichletDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, stateOut);
 
-    job.waitForCompletion(true);
+    if (job.waitForCompletion(true) == false) {
+      throw new InterruptedException("Dirichlet Iteration failed processing " + stateIn.toString());
+    }
   }
 
   /**
@@ -561,6 +563,8 @@ public class DirichletDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
 
-    job.waitForCompletion(true);
+    if (job.waitForCompletion(true) == false) {
+      throw new InterruptedException("Dirichlet Clustering failed processing " + stateIn.toString());
+    }
   }
 }

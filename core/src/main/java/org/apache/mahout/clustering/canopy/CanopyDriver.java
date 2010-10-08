@@ -248,7 +248,9 @@ public class CanopyDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, input);
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
     FileOutputFormat.setOutputPath(job, canopyOutputDir);
-    job.waitForCompletion(true);
+    if (job.waitForCompletion(true) == false) {
+      throw new InterruptedException("Canopy Job failed processing " + input.toString());
+    }
     return canopyOutputDir;
   }
 
@@ -347,7 +349,9 @@ public class CanopyDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, outPath);
     HadoopUtil.overwriteOutput(outPath);
 
-    job.waitForCompletion(true);
+    if (job.waitForCompletion(true) == false) {
+      throw new InterruptedException("Canopy Clustering failed processing " + canopies.toString());
+    }
   }
 
 }

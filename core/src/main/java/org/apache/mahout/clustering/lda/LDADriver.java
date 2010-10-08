@@ -276,7 +276,9 @@ public final class LDADriver extends AbstractJob {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setJarByClass(LDADriver.class);
 
-    job.waitForCompletion(true);
+    if (job.waitForCompletion(true) == false) {
+      throw new InterruptedException("LDA Iteration failed processing " + stateIn.toString());
+    }
     return findLL(stateOut, conf);
   }
 }

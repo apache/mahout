@@ -25,7 +25,9 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -63,16 +65,23 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
 
     canopyClusterer = new CanopyClusterer(context.getConfiguration());
 
-    Configuration configuration = context.getConfiguration();
-    String canopyPath = configuration.get(CanopyConfigKeys.CANOPY_PATH_KEY);
+    Configuration conf = context.getConfiguration();
+    String clustersIn = conf.get(CanopyConfigKeys.CANOPY_PATH_KEY);
 
-    if ((canopyPath != null) && (canopyPath.length() > 0)) {
+    // filter out the files
+    PathFilter clusterFileFilter = new PathFilter() {
+      @Override
+      public boolean accept(Path path) {
+        return path.getName().startsWith("part");
+      }
+    };
+    if ((clustersIn != null) && (clustersIn.length() > 0)) {
       try {
-        Path path = new Path(canopyPath);
-        FileSystem fs = FileSystem.get(path.toUri(), configuration);
-        FileStatus[] files = fs.listStatus(path);
+        Path clusterPath = new Path(clustersIn,"*");
+        FileSystem fs = clusterPath.getFileSystem(conf);
+        FileStatus[] files = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
         for (FileStatus file : files) {
-          SequenceFile.Reader reader = new SequenceFile.Reader(fs, file.getPath(), configuration);
+          SequenceFile.Reader reader = new SequenceFile.Reader(fs, file.getPath(), conf);
           try {
             Text key = new Text();
             Canopy value = new Canopy();
