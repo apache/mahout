@@ -58,25 +58,35 @@ import java.util.regex.Pattern;
 /**
  * <p>Runs a completely distributed recommender job as a series of mapreduces.</p>
  *
+ * <p>Preferences in the input file should look like <code>userID,itemID[,preferencevalue]</code></p>
+ *
+ * <p>
+ * Preference value is optional to accommodate applications that have no notion of a preference value (that is, the user
+ * simply expresses a preference for an item, but no degree of preference).
+ * </p>
+ *
+ * <p>
+ * The preference value is assumed to be parseable as a <code>double</code>. The user IDs and item IDs are
+ * parsed as <code>long</code>s.
+ * </p>
+ *
  * <p>Command line arguments specific to this class are:</p>
  *
  * <ol>
- * <li>-Dmapred.input.dir=(path): Directory containing a text file containing user IDs
- *  for which recommendations should be computed, one per line</li>
+ * <li>-Dmapred.input.dir=(path): Directory containing one or more text files with the preference data</li>
  * <li>-Dmapred.output.dir=(path): output path where recommender output should go</li>
- * <li>--similarityClassname (classname): Name of distributed similarity class to instantiate</li>
- * <li>--usersFile (path): file containing user IDs to recommend for (optional)</li>
- * <li>--itemsFile (path): file containing item IDs to recommend for (optional)</li>
+ * <li>--similarityClassname (classname): Name of distributed similarity class to instantiate or a predefined similarity
+ *  from {@link org.apache.mahout.math.hadoop.similarity.SimilarityType}</li>
+ * <li>--usersFile (path): only compute recommendations for user IDs contained in this file (optional)</li>
+ * <li>--itemsFile (path): only include item IDs from this file in the recommendations (optional)</li>
  * <li>--filterFile (path): file containing comma-separated userID,itemID pairs. Used to exclude the item from the
- * recommendations for that user(optional)</li>
- * <li>--numRecommendations (integer): Number of recommendations to compute per user (optional; default 10)</li>
- * <li>--booleanData (boolean): Treat input data as having to pref values (false)</li>
- * <li>--maxPrefsPerUser(integer): Maximum number of preferences considered per user in
+ * recommendations for that user (optional)</li>
+ * <li>--numRecommendations (integer): Number of recommendations to compute per user (10)</li>
+ * <li>--booleanData (boolean): Treat input data as having no pref values (false)</li>
+ * <li>--maxPrefsPerUser (integer): Maximum number of preferences considered per user in
  *  final recommendation phase (10)</li>
- * <li>--maxSimilaritiesPerItem (integer): Maximum number of similarities considered per item (optional;
- *  default 100)</li>
- * <li>--maxCooccurrencesPerItem (integer): Maximum number of cooccurrences considered per item (optional;
- *  default 100)</li>
+ * <li>--maxSimilaritiesPerItem (integer): Maximum number of similarities considered per item (100)</li>
+ * <li>--maxCooccurrencesPerItem (integer): Maximum number of cooccurrences considered per item (100)</li>
  * </ol>
  *
  * <p>General command line options are documented in {@link AbstractJob}.</p>

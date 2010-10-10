@@ -48,8 +48,9 @@ import org.apache.mahout.math.hadoop.similarity.vector.DistributedVectorSimilari
  * <p>Runs a completely distributed computation of the pairwise similarity of the row vectors of a
  * {@link DistributedRowMatrix} as a series of mapreduces.</p>
  *
- * <p>The algorithm used is a slight modification from the algorithm described in
- * http://www.umiacs.umd.edu/~jimmylin/publications/Elsayed_etal_ACL2008_short.pdf</p>
+ * <p>The algorithm used is a slight modification of the algorithm described in
+ * T. Elsayed et al: &quot;Pairwise document similarity in large collections with MapReduce&quot; 
+ * (http://www.umiacs.umd.edu/~jimmylin/publications/Elsayed_etal_ACL2008_short.pdf)</p>
  *
  *
  * <p>Command line arguments specific to this class are:</p>
@@ -62,7 +63,7 @@ import org.apache.mahout.math.hadoop.similarity.vector.DistributedVectorSimilari
  * <li>--numberOfColumns: the number of columns in the input matrix</li>
  * <li>--similarityClassname (classname): an implementation of {@link DistributedVectorSimilarity} used to compute the
  * similarity</li>
- * <li>--maxSimilaritiesPerRow (integer): cap the number of similar rows per row to this number (default: 100)</li>
+ * <li>--maxSimilaritiesPerRow (integer): cap the number of similar rows per row to this number (100)</li>
  * </ol>
  *
  *
