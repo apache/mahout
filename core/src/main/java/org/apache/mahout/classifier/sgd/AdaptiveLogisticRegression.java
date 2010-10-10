@@ -134,7 +134,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     } catch (InterruptedException e) {
       // ignore ... shouldn't happen
     } catch (ExecutionException e) {
-      throw new IllegalStateException(e);
+      throw new IllegalStateException(e.getCause());
     }
     buffer.clear();
 

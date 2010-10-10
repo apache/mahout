@@ -142,8 +142,10 @@ public final class TrainNewsGroups {
 
     List<File> files = Lists.newArrayList();
     for (File newsgroup : base.listFiles()) {
-      newsGroups.intern(newsgroup.getName());
-      files.addAll(Arrays.asList(newsgroup.listFiles()));
+      if (newsgroup.isDirectory()) {
+        newsGroups.intern(newsgroup.getName());
+        files.addAll(Arrays.asList(newsgroup.listFiles()));
+      }
     }
     Collections.shuffle(files);
     System.out.printf("%d training files\n", files.size());
