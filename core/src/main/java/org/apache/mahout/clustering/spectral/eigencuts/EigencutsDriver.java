@@ -129,7 +129,7 @@ public class EigencutsDriver extends AbstractJob {
       int overshoot = (int) ((double) dimensions * OVERSHOOT_MULTIPLIER);
       List<Double> eigenValues = new ArrayList<Double>(overshoot);
       Matrix eigenVectors = new DenseMatrix(overshoot, dimensions);
-      DistributedRowMatrix U = performEigenDecomposition(L, dimensions, overshoot, eigenValues, eigenVectors, outputCalc);
+      DistributedRowMatrix U = performEigenDecomposition(conf, L, dimensions, overshoot, eigenValues, eigenVectors, outputCalc);
       U.configure(new JobConf(conf));
       eigenValues = eigenValues.subList(0, dimensions);
 
@@ -164,15 +164,15 @@ public class EigencutsDriver extends AbstractJob {
    * values, and generally performing the tedious administrative tasks involved
    * in an eigen-decomposition and running the verifier
    */
-  public static DistributedRowMatrix performEigenDecomposition(DistributedRowMatrix input,
+  public static DistributedRowMatrix performEigenDecomposition(Configuration conf,
+                                                               DistributedRowMatrix input,
                                                                int numEigenVectors,
                                                                int overshoot,
                                                                List<Double> eigenValues,
-                                                               Matrix eigenVectors,
-                                                               Path tmp) throws IOException {
+                                                               Matrix eigenVectors, Path tmp) throws IOException {
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Path seqFiles = new Path(tmp, "eigendecomp-" + (System.nanoTime() & 0xFF));
-    solver.runJob(new Configuration(),
+    solver.runJob(conf,
                   input.getRowPath(),
                   new Path(tmp, "lanczos-" + (System.nanoTime() & 0xFF)),
                   input.numRows(),
@@ -186,7 +186,7 @@ public class EigencutsDriver extends AbstractJob {
     // now run the verifier to trim down the number of eigenvectors
     EigenVerificationJob verifier = new EigenVerificationJob();
     Path verifiedEigens = new Path(tmp, "verifiedeigens");
-    verifier.runJob(seqFiles, input.getRowPath(), verifiedEigens, false, 1.0, 0.0, numEigenVectors);
+    verifier.runJob(conf, seqFiles, input.getRowPath(), verifiedEigens, false, 1.0, 0.0, numEigenVectors);
     Path cleanedEigens = verifier.getCleanedEigensPath();
     return new DistributedRowMatrix(cleanedEigens, new Path(cleanedEigens, "tmp"), numEigenVectors, input.numRows());
   }

@@ -88,8 +88,6 @@ public class EigenVerificationJob extends AbstractJob {
 
   private Path outPath;
 
-  private JobConf conf;
-
   private int maxEigensToKeep;
 
   private Path cleanedEigensPath;
@@ -107,13 +105,13 @@ public class EigenVerificationJob extends AbstractJob {
       return 0;
     }
     // parse out the arguments
-    runJob(new Path(argMap.get("--eigenInput")),
+    runJob(getConf(),
+           new Path(argMap.get("--eigenInput")),
            new Path(argMap.get("--corpusInput")),
            getOutputPath(),
            argMap.get("--inMemory") != null,
            Double.parseDouble(argMap.get("--maxError")),
-           Double.parseDouble(argMap.get("--minEigenvalue")),
-           Integer.parseInt(argMap.get("--maxEigens")));
+           Double.parseDouble(argMap.get("--minEigenvalue")), Integer.parseInt(argMap.get("--maxEigens")));
     return 0;
   }
 
@@ -141,13 +139,12 @@ public class EigenVerificationJob extends AbstractJob {
     this.tmpOut = tempOut;
     this.maxError = maxError;
     this.minEigenValue = minEigenValue;
-    this.conf = config != null ? config : new JobConf();
 
     if (eigenInput != null && eigensToVerify == null) {
-      prepareEigens(eigenInput, inMemory);
+      prepareEigens(config, eigenInput, inMemory);
     }
     DistributedRowMatrix c = new DistributedRowMatrix(corpusInput, tempOut, 1, 1);
-    c.configure(conf);
+    c.configure(config);
     corpus = c;
 
     // set up eigenverifier and orthoverifier TODO: allow multithreaded execution
@@ -161,7 +158,7 @@ public class EigenVerificationJob extends AbstractJob {
 
     List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta = pruneEigens(eigenMetaData);
 
-    saveCleanEigens(prunedEigenMeta);
+    saveCleanEigens(new Configuration(), prunedEigenMeta);
     return 0;
   }
 
@@ -185,7 +182,7 @@ public class EigenVerificationJob extends AbstractJob {
     return OrthonormalityVerifier.pairwiseInnerProducts(eigensToVerify);
   }
 
-  private void saveCleanEigens(List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta) throws IOException {
+  private void saveCleanEigens(Configuration conf, List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta) throws IOException {
     Path path = new Path(outPath, CLEAN_EIGENVECTORS);
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
@@ -241,7 +238,7 @@ public class EigenVerificationJob extends AbstractJob {
     return eigenMetaData;
   }
 
-  private void prepareEigens(Path eigenInput, boolean inMemory) {
+  private void prepareEigens(JobConf conf, Path eigenInput, boolean inMemory) {
     DistributedRowMatrix eigens = new DistributedRowMatrix(eigenInput, tmpOut, 1, 1);
     eigens.configure(conf);
     if (inMemory) {
@@ -267,6 +264,7 @@ public class EigenVerificationJob extends AbstractJob {
 
   /**
    * Progammatic invocation of run()
+   * @param conf TODO
    * @param eigenInput Output of LanczosSolver
    * @param corpusInput Input of LanczosSolver
    * @param output
@@ -275,27 +273,24 @@ public class EigenVerificationJob extends AbstractJob {
    * @param minEigenValue
    * @param maxEigens
    */
-  public void runJob(Path eigenInput,
+  public void runJob(Configuration conf,
+                     Path eigenInput,
                      Path corpusInput,
                      Path output,
                      boolean inMemory,
                      double maxError,
-                     double minEigenValue,
-                     int maxEigens) throws IOException {
+                     double minEigenValue, int maxEigens) throws IOException {
     // no need to handle command line arguments
     outPath = output;
     tmpOut = new Path(outPath, "tmp");
     maxEigensToKeep = maxEigens;
     this.maxError = maxError;
-    if (getConf() == null) {
-      setConf(new Configuration());
-    }
     if (eigenInput != null && eigensToVerify == null) {
-      prepareEigens(eigenInput, inMemory);
+      prepareEigens(new JobConf(conf), eigenInput, inMemory);
     }
 
     DistributedRowMatrix c = new DistributedRowMatrix(corpusInput, tmpOut, 1, 1);
-    c.configure(new JobConf(getConf()));
+    c.configure(new JobConf(conf));
     corpus = c;
 
     eigenVerifier = new SimpleEigenVerifier();
@@ -305,6 +300,6 @@ public class EigenVerificationJob extends AbstractJob {
 
     Map<MatrixSlice, EigenStatus> eigenMetaData = verifyEigens();
     List<Map.Entry<MatrixSlice, EigenStatus>> prunedEigenMeta = pruneEigens(eigenMetaData);
-    saveCleanEigens(prunedEigenMeta);
+    saveCleanEigens(conf, prunedEigenMeta);
   }
 }

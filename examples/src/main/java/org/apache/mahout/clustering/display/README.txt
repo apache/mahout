@@ -12,9 +12,9 @@ DisplayClustering - generates 1000 samples from three, symmetric distributions. 
   * DisplayFuzzyKMeans - uses Fuzzy k-Means clustering
   * DisplayMeanShift - uses MeanShift clustering
   
-  * NOTE: some of these programs display the sample points and then superimposes all of the clusters
+  * NOTE: some of these programs display the sample points and then superimpose all of the clusters
     from each iteration. The last iteration's clusters are in bold red and the previous several are 
-    colored (orange, yellow, green, blue, magenta) in order after which all earlier clusters are in
+    colored (orange, yellow, green, blue, violet) in order after which all earlier clusters are in
     light grey. This helps to visualize how the clusters converge upon a solution over multiple
     iterations.
   * NOTE: by changing the parameter values (k, ALPHA_0, numIterations) and the display SIGNIFICANCE

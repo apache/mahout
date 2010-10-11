@@ -146,7 +146,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     DistributedRowMatrix L =
         VectorMatrixMultiplicationJob.runJob(affSeqFiles, D,
             new Path(outputCalc, "laplacian-" + (System.nanoTime() & 0xFF)));
-    L.configure(new JobConf(conf));
+    L.configure(depConf);
 
     // Next step: perform eigen-decomposition using LanczosSolver
     // since some of the eigen-output is spurious and will be eliminated
@@ -171,10 +171,10 @@ public class SpectralKMeansDriver extends AbstractJob {
     // perform a verification
     EigenVerificationJob verifier = new EigenVerificationJob();
     Path verifiedEigensPath = new Path(outputCalc, "eigenverifier");
-    verifier.runJob(lanczosSeqFiles, L.getRowPath(), verifiedEigensPath, true, 1.0, 0.0, clusters);
+    verifier.runJob(conf, lanczosSeqFiles, L.getRowPath(), verifiedEigensPath, true, 1.0, 0.0, clusters);
     Path cleanedEigens = verifier.getCleanedEigensPath();
     DistributedRowMatrix W = new DistributedRowMatrix(cleanedEigens, new Path(cleanedEigens, "tmp"), clusters, numDims);
-    W.configure(new JobConf());
+    W.configure(depConf);
     DistributedRowMatrix Wtrans = W.transpose();
     //    DistributedRowMatrix Wt = W.transpose();
 
@@ -182,7 +182,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path unitVectors = new Path(outputCalc, "unitvectors-" + (System.nanoTime() & 0xFF));
     UnitVectorizerJob.runJob(Wtrans.getRowPath(), unitVectors);
     DistributedRowMatrix Wt = new DistributedRowMatrix(unitVectors, new Path(unitVectors, "tmp"), clusters, numDims);
-    Wt.configure(new JobConf());
+    Wt.configure(depConf);
 
     // Finally, perform k-means clustering on the rows of L (or W)
     // generate random initial clusters
