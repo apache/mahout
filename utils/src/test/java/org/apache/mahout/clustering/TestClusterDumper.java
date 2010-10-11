@@ -373,12 +373,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     // call EigenVerificationJob separately
     solver.run(testData, output, tmp, sampleData.size(), sampleDimension, false, desiredRank);
     Path rawEigenvectors = new Path(output, DistributedLanczosSolver.RAW_EIGENVECTORS);
-    new EigenVerificationJob().run(testData, rawEigenvectors, output, tmp, 0.5, 0.0, true, null);
+    JobConf conf = new JobConf(config);
+    new EigenVerificationJob().run(testData, rawEigenvectors, output, tmp, 0.5, 0.0, true, conf);
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
 
     // now multiply the testdata matrix and the eigenvector matrix
     DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank - 1, sampleDimension);
-    JobConf conf = new JobConf(config);
     svdT.configure(conf);
     DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(), sampleDimension);
     a.configure(conf);
