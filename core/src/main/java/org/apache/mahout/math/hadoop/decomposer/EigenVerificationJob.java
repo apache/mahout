@@ -187,6 +187,7 @@ public class EigenVerificationJob extends AbstractJob {
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
+    int numEigensWritten = 0;
     for (Map.Entry<MatrixSlice, EigenStatus> pruneSlice : prunedEigenMeta) {
       MatrixSlice s = pruneSlice.getKey();
       EigenStatus meta = pruneSlice.getValue();
@@ -196,7 +197,6 @@ public class EigenVerificationJob extends AbstractJob {
       iw.set(s.index());
       seqWriter.append(iw, vw);
 
-      int numEigensWritten = 0;
       // increment the number of eigenvectors written and see if we've
       // reached our specified limit, or if we wish to write all eigenvectors
       // (latter is built-in, since numEigensWritten will always be > 0
