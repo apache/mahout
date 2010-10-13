@@ -40,7 +40,7 @@ public class TrainLogisticTest extends MahoutTestCase {
 
   @Test
   public void testMain() throws IOException {
-    String outputFile = "./model";
+    String outputFile = getTestTempFile("model").getAbsolutePath();
     String inputFile = "donut.csv";
     String[] args = Iterables.toArray(ON_WHITE_SPACE.split(
       "--input " +
