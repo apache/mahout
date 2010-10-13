@@ -81,7 +81,7 @@
     <properties>
         <junit.version>4.7</junit.version>
         <tagBase>https://svn.apache.org/repos/asf/mahout/tags</tagBase>
-        <lucene.version>3.0.1</lucene.version>
+        <lucene.version>3.0.2</lucene.version>
         <hadoop.version>0.20.2</hadoop.version>
         <maven.clover.multiproject>true</maven.clover.multiproject>
         <collections.version>1.0</collections.version>
