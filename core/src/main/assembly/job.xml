@@ -15,7 +15,7 @@
       <outputDirectory>lib</outputDirectory>
       <excludes>
         <exclude>org.apache.hadoop:hadoop-core</exclude>
-        <exclude>org.apache.mahout:*</exclude>
+        <exclude>org.apache.mahout:mahout-core</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>
