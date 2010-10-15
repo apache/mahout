@@ -27,5 +27,12 @@
         <exclude>*.jar</exclude>
       </excludes>
     </fileSet>
+    <fileSet>
+      <directory>${basedir}/target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>driver.classes.default.props</include>
+      </includes>
+    </fileSet>
   </fileSets>
 </assembly>

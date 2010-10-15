@@ -17,6 +17,7 @@
 
 package org.apache.mahout.driver;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,7 +98,15 @@ public final class MahoutDriver {
                                     .getContextClassLoader()
                                     .getResourceAsStream("driver.classes.props");
 
-    mainClasses.load(propsStream);
+    try {
+      mainClasses.load(propsStream);
+    } catch (Throwable e) {
+      //try getting the default one
+      propsStream = Thread.currentThread()
+                                    .getContextClassLoader()
+                                    .getResourceAsStream("driver.classes.default.props");
+      mainClasses.load(propsStream);
+    }
 
     boolean foundShortName = false;
     for (Object key :  mainClasses.keySet()) {
