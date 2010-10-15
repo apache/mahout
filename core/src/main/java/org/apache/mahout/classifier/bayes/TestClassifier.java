@@ -89,7 +89,7 @@ public final class TestClassifier {
       abuilder.withName("defaultCat").withMinimum(1).withMaximum(1).create()).withDescription(
       "The default category Default Value: unknown").withShortName("default").create();
     
-    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(true).withArgument(
+    Option gramSizeOpt = obuilder.withLongName("gramSize").withRequired(false).withArgument(
       abuilder.withName("gramSize").withMinimum(1).withMaximum(1).create()).withDescription(
       "Size of the n-gram. Default Value: 1").withShortName("ng").create();
     
@@ -100,11 +100,11 @@ public final class TestClassifier {
     Option verboseOutputOpt = obuilder.withLongName("verbose").withRequired(false).withDescription(
       "Output which values were correctly and incorrectly classified").withShortName("v").create();
     
-    Option typeOpt = obuilder.withLongName("classifierType").withRequired(true).withArgument(
+    Option typeOpt = obuilder.withLongName("classifierType").withRequired(false).withArgument(
       abuilder.withName("classifierType").withMinimum(1).withMaximum(1).create()).withDescription(
       "Type of classifier: bayes|cbayes. Default Value: bayes").withShortName("type").create();
     
-    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(true).withArgument(
+    Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(false).withArgument(
       abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
       "Location of model: hdfs|hbase Default Value: hdfs").withShortName("source").create();
     
