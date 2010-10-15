@@ -175,7 +175,7 @@ public final class TrainNewsGroups {
 
       double lambda = 0;
       double mu = 0;
-      
+
       if (best != null) {
         CrossFoldLearner state = best.getPayload().getLearner();
         averageCorrect = state.percentCorrect();
@@ -210,8 +210,12 @@ public final class TrainNewsGroups {
         norm = 0;
       }
       if (k % (bump * scale) == 0) {
+        if (learningAlgorithm.getBest() != null) {
+          ModelSerializer.writeJson("/tmp/news-group-" + k + ".model", learningAlgorithm.getBest().getPayload().getLearner());
+        }
+
         step += 0.25;
-        System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.8f\t%.8f\t", maxBeta, nonZeros, positive, norm, lambda, mu);
+        System.out.printf("%.2f\t%.2f\t%.2f\t%.2f\t%.8g\t%.8g\t", maxBeta, nonZeros, positive, norm, lambda, mu);
         System.out.printf("%d\t%.3f\t%.2f\t%s\n",
           k, averageLL, averageCorrect * 100, LEAK_LABELS[leakType % 3]);
       }
@@ -219,6 +223,8 @@ public final class TrainNewsGroups {
     learningAlgorithm.close();
     dissect(leakType, newsGroups, learningAlgorithm, files);
     System.out.println("exiting main");
+
+    ModelSerializer.writeJson("/tmp/news-group.model", learningAlgorithm);
 
     List<Integer> counts = Lists.newArrayList();
     System.out.printf("Word counts\n");
@@ -230,6 +236,9 @@ public final class TrainNewsGroups {
     for (Integer count : counts) {
       System.out.printf("%d\t%d\n", k, count);
       k++;
+      if (k > 1000) {
+        break;
+      }
     }
   }
 
@@ -258,7 +267,8 @@ public final class TrainNewsGroups {
     List<String> ngNames = Lists.newArrayList(newsGroups.values());
     List<ModelDissector.Weight> weights = md.summary(100);
     for (ModelDissector.Weight w : weights) {
-      System.out.printf("%s\t%.1f\t%s\n", w.getFeature(), w.getWeight(), ngNames.get(w.getMaxImpact() + 1));
+      System.out.printf("%s\t%.1f\t%s\t%.1f\t%s\t%.1f\t%s\n", w.getFeature(), w.getWeight(), ngNames.get(w.getMaxImpact() + 1),
+        w.getCategory(1), w.getWeight(1), w.getCategory(2), w.getWeight(2));
     }
   }
 

@@ -17,11 +17,13 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 
@@ -66,10 +68,13 @@ public class RankingGradient implements Gradient {
   }
 
   public void addToHistory(int actual, Vector instance) {
+    while (history.size() <= actual) {
+      history.add(new ArrayDeque<Vector>(window));
+    }
     // save this instance
     Deque<Vector> ourSide = history.get(actual);
     ourSide.add(instance);
-    if (ourSide.size() >= window) {
+    while (ourSide.size() >= window) {
       ourSide.pollFirst();
     }
   }

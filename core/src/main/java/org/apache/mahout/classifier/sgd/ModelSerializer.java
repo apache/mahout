@@ -29,6 +29,8 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import org.apache.mahout.classifier.AbstractVectorClassifier;
+import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.ep.EvolutionaryProcess;
 import org.apache.mahout.ep.Mapping;
 import org.apache.mahout.ep.State;
@@ -80,7 +82,7 @@ public final class ModelSerializer {
     return GSON.get();
   }
 
-  public static void writeJson(String path, AdaptiveLogisticRegression model) throws IOException {
+  public static void writeJson(String path, OnlineLearner model) throws IOException {
     OutputStreamWriter out = new FileWriter(path);
     try {
       out.write(gson().toJson(model));
@@ -96,7 +98,7 @@ public final class ModelSerializer {
    * @param clazz The class of the object we expect to read.
    * @return The LogisticModelParameters object that we read.
    */
-  public static AdaptiveLogisticRegression loadJsonFrom(Reader in, Class<AdaptiveLogisticRegression> clazz) {
+  public static AbstractVectorClassifier loadJsonFrom(Reader in, Class<? extends AbstractVectorClassifier> clazz) {
     return gson().fromJson(in, clazz);
   }
 

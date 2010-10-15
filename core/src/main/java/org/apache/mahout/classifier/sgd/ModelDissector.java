@@ -25,6 +25,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.BinaryFunction;
 import org.apache.mahout.math.function.Functions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -59,27 +60,51 @@ public class ModelDissector {
     weightMap = Maps.newHashMap();
   }
 
+  /**
+   * Probes a model to determine the effect of a particular variable.  This is done
+   * with the ade of a trace dictionary which has recorded the locations in the feature
+   * vector that are modified by various variable values.  We can set these locations to
+   * 1 and then look at the resulting score.  This tells us the weight the model places
+   * on that variable.
+   * @param features               A feature vector to use (destructively)
+   * @param traceDictionary        A trace dictionary containing variables and what locations in the feature vector are affected by them
+   * @param learner                The model that we are probing to find weights on features
+   */
+
   public void update(Vector features, Map<String, Set<Integer>> traceDictionary, AbstractVectorClassifier learner) {
+    // zero out feature vector
     features.assign(0);
     for (Map.Entry<String, Set<Integer>> entry : traceDictionary.entrySet()) {
+      // get a feature and locations where it is stored in the feature vector
       String key = entry.getKey();
       Set<Integer> value = entry.getValue();
+
+      // if we haven't looked at this feature yet
       if (!weightMap.containsKey(key)) {
+        // put probe values in the feature vector
         for (Integer where : value) {
           features.set(where, 1);
         }
 
+        // see what the model says
         Vector v = learner.classifyNoLink(features);
         weightMap.put(key, v);
 
+        // and zero out those locations again
         for (Integer where : value) {
           features.set(where, 0);
         }
       }
     }
-
   }
 
+  /**
+   * Returns the n most important features with their
+   * weights, most important category and the top few
+   * categories that they affect.
+   * @param n      How many results to return.
+   * @return       A list of the top variables.
+   */
   public List<Weight> summary(int n) {
     Queue<Weight> pq = new PriorityQueue<Weight>();
     for (Map.Entry<String, Vector> entry : weightMap.entrySet()) {
@@ -93,28 +118,50 @@ public class ModelDissector {
     return r;
   }
 
+  private static class Category implements Comparable<Category> {
+    int index;
+    double weight;
+
+    public Category(int index, double weight) {
+      this.index = index;
+      this.weight = weight;
+    }
+
+    @Override
+    public int compareTo(Category o) {
+      int r = Double.compare(Math.abs(weight), Math.abs(o.weight));
+      if (r != 0) {
+        return r;
+      } else {
+        return index - o.index;
+      }
+    }
+  }
+
   public static class Weight implements Comparable<Weight> {
     private final String feature;
     private final double value;
     private final int maxIndex;
+    private List<Category> categories;
 
     public Weight(String feature, Vector weights) {
+      this(feature, weights, 3);
+    }
+
+    public Weight(String feature, Vector weights, int n) {
       this.feature = feature;
       // pick out the weight with the largest abs value, but don't forget the sign
-      value = weights.aggregate(new BinaryFunction() {
-        @Override
-        public double apply(double arg1, double arg2) {
-          int r = Double.compare(Math.abs(arg1), Math.abs(arg2));
-          if (r < 0) {
-            return arg2;
-          } else if (r > 0) {
-            return arg1;
-          } else {
-            return Math.max(arg1, arg2);
-          }
+      PriorityQueue<Category> biggest = new PriorityQueue<Category>(n + 1, Ordering.natural().reverse());
+      for (Vector.Element element : weights) {
+        biggest.add(new Category(element.index(), element.get()));
+        while (biggest.size() > n) {
+          biggest.poll();
         }
-      }, Functions.IDENTITY);
-      maxIndex = weights.maxValueIndex();
+      }
+      categories = Lists.newArrayList(biggest);
+      Collections.sort(categories, Ordering.natural().reverse());
+      value = categories.get(0).weight;
+      maxIndex = categories.get(0).index;
     }
 
     @Override
@@ -133,6 +180,14 @@ public class ModelDissector {
 
     public double getWeight() {
       return value;
+    }
+
+    public double getWeight(int n) {
+      return categories.get(n).weight;
+    }
+
+    public double getCategory(int n) {
+      return categories.get(n).index;
     }
 
     public int getMaxImpact() {
