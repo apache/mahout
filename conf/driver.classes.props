@@ -24,7 +24,8 @@ org.apache.mahout.math.hadoop.decomposer.DistributedLanczosSolver = svd : Lanczo
 org.apache.mahout.math.hadoop.decomposer.EigenVerificationJob = cleansvd : Cleanup and verification of SVD output
 org.apache.mahout.math.hadoop.similarity.RowSimilarityJob = rowsimilarity : Compute the pairwise similarities of the rows of a matrix
 org.apache.mahout.cf.taste.hadoop.similarity.item.ItemSimilarityJob = itemsimilarity : Compute the item-item-similarities for item-based collaborative filtering
-org.apache.mahout.classifier.sgd.TrainLogistic = trainlogistic : Train a logistic regression using stochastic gradient descentorg.apache.mahout.classifier.sgd.TrainLogistic = trainlogistic : Train a logistic regression using stochastic gradient descent
+org.apache.mahout.cf.taste.hadoop.item.RecommenderJob = recommenditembased : Compute recommendations using item-based collaborative filtering
+org.apache.mahout.classifier.sgd.TrainLogistic = trainlogistic : Train a logistic regression using stochastic gradient descent
 org.apache.mahout.classifier.sgd.RunLogistic = runlogistic : Run a logistic regression model against CSV data
 org.apache.mahout.classifier.sgd.PrintResourceOrFile = cat : Print a file or resource as the logistic regression models would see it
 org.apache.mahout.classifier.bayes.WikipediaXmlSplitter = wikipediaXMLSplitter : Reads wikipedia data and creates ch  
