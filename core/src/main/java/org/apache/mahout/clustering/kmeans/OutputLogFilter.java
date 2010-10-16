@@ -24,6 +24,7 @@ import org.apache.hadoop.fs.PathFilter;
 public class OutputLogFilter implements PathFilter {
   @Override
   public boolean accept(Path path) {
-    return !(path.toString().contains("_logs"));
+    // Filter out Hadoop _logs and Cloudera _SUCCESS file
+    return !(path.getName().startsWith("_"));
   }
 }
