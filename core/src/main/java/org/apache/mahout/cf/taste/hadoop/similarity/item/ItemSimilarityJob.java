@@ -101,7 +101,7 @@ public final class ItemSimilarityJob extends AbstractJob {
         + "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')');
     addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number "
         + "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
-    addOption("maxCooccurrencesPerItem", "o", "try to cap the number of cooccurrences per item to this number "
+    addOption("maxCooccurrencesPerItem", "mo", "try to cap the number of cooccurrences per item to this number "
         + "(default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
 

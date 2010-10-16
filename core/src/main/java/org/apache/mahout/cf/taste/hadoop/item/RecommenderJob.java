@@ -113,12 +113,12 @@ public final class RecommenderJob extends AbstractJob {
     addOption("filterFile", "f", "File containing comma-separated userID,itemID pairs. Used to exclude the item from "
         + "the recommendations for that user (optional)", null);
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
-    addOption("maxPrefsPerUser", null,
+    addOption("maxPrefsPerUser", "mp",
         "Maximum number of preferences considered per user in final recommendation phase",
         String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
-    addOption("maxSimilaritiesPerItem", null, "Maximum number of similarities considered per item ",
+    addOption("maxSimilaritiesPerItem", "m", "Maximum number of similarities considered per item ",
         String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM));
-    addOption("maxCooccurrencesPerItem", "o", "try to cap the number of cooccurrences per item to this "
+    addOption("maxCooccurrencesPerItem", "mo", "try to cap the number of cooccurrences per item to this "
         + "number (default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')',
         String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use "
