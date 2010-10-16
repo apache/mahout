@@ -78,8 +78,8 @@ public final class RandomSeedGenerator {
       int nextClusterId = 0;
       
       for (FileStatus fileStatus : inputFiles) {
-        if (fileStatus.isDir()) {
-          continue; // select only the top level files
+        if (fileStatus.isDir() || fileStatus.getPath().getName().startsWith("_")) {
+          continue; // select only the top level files that do not begin with "_" (Cloudera CHD3 adds _SUCCESS file)
         }
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, fileStatus.getPath(), conf);
         Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
