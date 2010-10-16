@@ -393,7 +393,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-remote-resources-plugin</artifactId>
                 <configuration>
-                    <appendedResourcesDirectory>../src/main/appended-resources</appendedResourcesDirectory>
+                    <appendedResourcesDirectory>./src/main/appended-resources</appendedResourcesDirectory>
                     <resourceBundles>
                         <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
                     </resourceBundles>
