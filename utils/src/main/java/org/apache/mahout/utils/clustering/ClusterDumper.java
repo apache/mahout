@@ -266,7 +266,8 @@ public final class ClusterDumper extends AbstractJob {
     FileStatus[] children = fs.listStatus(pointsPathDir, new PathFilter() {
       @Override
       public boolean accept(Path path) {
-        return !(path.getName().endsWith(".crc") || "_logs".equals(path.getName()));
+        String name = path.getName();
+        return !(name.endsWith(".crc") || name.startsWith("_"));
       }
     });
 
