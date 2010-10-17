@@ -430,8 +430,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     conf.set(MeanShiftCanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(MeanShiftCanopyConfigKeys.CONTROL_PATH_KEY, control.toString());
 
-    Job job = new Job(conf);
-
+    Job job = new Job(conf, "Mean Shift Driver running runIteration over input: " + input);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(MeanShiftCanopy.class);
 
@@ -539,8 +538,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
       ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set(STATE_IN_KEY, clustersIn.toString());
-    Job job = new Job(conf);
-
+    Job job = new Job(conf, "Mean Shift Driver running clusterData over input: " + input);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(WeightedVectorWritable.class);
     job.setMapperClass(MeanShiftCanopyClusterMapper.class);
@@ -554,7 +552,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, output);
 
     if (job.waitForCompletion(true) == false) {
-      throw new InterruptedException("Mean Shift Clustering failed on input " + clustersIn.toString());
+      throw new InterruptedException("Mean Shift Clustering failed on clustersIn " + clustersIn.toString());
     }
   }
 }

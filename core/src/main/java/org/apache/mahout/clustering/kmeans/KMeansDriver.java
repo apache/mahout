@@ -321,8 +321,7 @@ public class KMeansDriver extends AbstractJob {
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
     conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
-    Job job = new Job(conf);
-
+    Job job = new Job(conf, "KMeans Driver running runIteration over clustersIn: " + clustersIn);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(ClusterObservations.class);
     job.setOutputKeyClass(Text.class);
@@ -470,7 +469,7 @@ public class KMeansDriver extends AbstractJob {
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
     conf.set(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY, convergenceDelta);
 
-    Job job = new Job(conf);
+    Job job = new Job(conf, "KMeans Driver running clusterData over input: " + input);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(IntWritable.class);

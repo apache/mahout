@@ -357,8 +357,7 @@ public class DirichletDriver extends AbstractJob {
     conf.set(NUM_CLUSTERS_KEY, Integer.toString(numClusters));
     conf.set(ALPHA_0_KEY, Double.toString(alpha0));
 
-    Job job = new Job(conf);
-
+    Job job = new Job(conf, "Dirichlet Driver running runIteration over stateIn: " + stateIn);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setOutputKeyClass(Text.class);
@@ -551,7 +550,7 @@ public class DirichletDriver extends AbstractJob {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(EMIT_MOST_LIKELY_KEY, Boolean.toString(emitMostLikely));
     conf.set(THRESHOLD_KEY, Double.toString(threshold));
-    Job job = new Job(conf);
+    Job job = new Job(conf, "Dirichlet Driver running clusterData over input: " + input);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(WeightedVectorWritable.class);
     job.setMapperClass(DirichletClusterMapper.class);

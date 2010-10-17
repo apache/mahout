@@ -230,7 +230,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
     throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(STATE_IN_KEY, stateIn.toString());
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
-    Job job = new Job(conf);
+    Job job = new Job(conf, "Representative Points Driver running over input: " + input);
     job.setJarByClass(RepresentativePointsDriver.class);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);

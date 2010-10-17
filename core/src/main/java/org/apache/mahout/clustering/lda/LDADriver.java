@@ -262,8 +262,7 @@ public final class LDADriver extends AbstractJob {
     conf.set(NUM_WORDS_KEY, Integer.toString(numWords));
     conf.set(TOPIC_SMOOTHING_KEY, Double.toString(topicSmoothing));
 
-    Job job = new Job(conf);
-
+    Job job = new Job(conf, "LDA Driver running runIteration over stateIn: " + stateIn);
     job.setOutputKeyClass(IntPairWritable.class);
     job.setOutputValueClass(DoubleWritable.class);
     FileInputFormat.addInputPaths(job, input.toString());

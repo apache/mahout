@@ -226,7 +226,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     conf.set(FuzzyKMeansConfigKeys.EMIT_MOST_LIKELY_KEY, Boolean.toString(true));
     conf.set(FuzzyKMeansConfigKeys.THRESHOLD_KEY, Double.toString(0));
 
-    Job job = new Job(conf);
+    Job job = new Job(conf, "FuzzyKMeans Driver running runIteration over clustersIn: " + clustersIn);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(ClusterObservations.class);
     job.setOutputKeyClass(Text.class);
@@ -517,7 +517,7 @@ public class FuzzyKMeansDriver extends AbstractJob {
     // Clear output
     output.getFileSystem(conf).delete(output, true);
 
-    Job job = new Job(conf);
+    Job job = new Job(conf, "FuzzyKMeans Driver running clusterData over input: " + input);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(WeightedVectorWritable.class);
 

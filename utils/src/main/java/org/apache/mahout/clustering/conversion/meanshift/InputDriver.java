@@ -80,7 +80,7 @@ public final class InputDriver {
   public static void runJob(Path input, Path output) throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
 
-    Job job = new Job(conf);
+    Job job = new Job(conf, "Mean Shift Input Driver running over input: " + input);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(MeanShiftCanopy.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);

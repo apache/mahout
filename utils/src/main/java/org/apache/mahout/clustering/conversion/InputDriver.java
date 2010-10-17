@@ -93,8 +93,8 @@ public final class InputDriver {
     throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration();
     conf.set("vector.implementation.class.name", vectorClassName);
-    Job job = new Job(conf);
-    
+    Job job = new Job(conf, "Input Driver running over input: " + input);
+
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(VectorWritable.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);

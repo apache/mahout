@@ -233,7 +233,7 @@ public class CanopyDriver extends AbstractJob {
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
 
-    Job job = new Job(conf);
+    Job job = new Job(conf, "Canopy Driver running buildClusters over input: " + input);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setMapperClass(CanopyMapper.class);
@@ -335,7 +335,7 @@ public class CanopyDriver extends AbstractJob {
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
     conf.set(CanopyConfigKeys.CANOPY_PATH_KEY, canopies.toString());
 
-    Job job = new Job(conf);
+    Job job = new Job(conf, "Canopy Driver running clusterData over input: " + points);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setMapperClass(ClusterMapper.class);
