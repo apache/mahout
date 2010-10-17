@@ -183,19 +183,20 @@ public abstract class AbstractMatrix implements Matrix {
   }
 
   public static Matrix decodeMatrix(String formatString) {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    Gson gson = builder.create();
-    return gson.fromJson(formatString, Matrix.class);
+    return gson().fromJson(formatString, Matrix.class);
   }
 
   public String asFormatString() {
+    return gson().toJson(this, Matrix.class);
+  }
+
+  static Gson gson() {
     GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(VectorList.class, new VectorList.JsonVectorListAdapter());
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
     Gson gson = builder.create();
-    return gson.toJson(this, Matrix.class);
+    return gson;
   }
 
   public Matrix assign(double value) {
