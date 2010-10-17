@@ -33,12 +33,31 @@ public class MatrixView extends AbstractMatrix {
    *
    * @param matrix      an underlying Matrix
    * @param offset      the int[2] offset into the underlying matrix
-   * @param cardinality the int[2] cardinality of the view
+   * @param size        the int[2] size of the view
    */
-  public MatrixView(Matrix matrix, int[] offset, int[] cardinality) {
+  public MatrixView(Matrix matrix, int[] offset, int[] size) {
+    int rowOffset = offset[ROW];
+    if (rowOffset < 0) {
+      throw new IndexException(rowOffset, rowSize());
+    }
+
+    int rowsRequested = size[ROW];
+    if (rowOffset + rowsRequested > matrix.rowSize()) {
+      throw new IndexException(rowOffset + rowsRequested, matrix.rowSize());
+    }
+
+    int columnOffset = offset[COL];
+    if (columnOffset < 0) {
+      throw new IndexException(columnOffset, columnSize());
+    }
+
+    int columnsRequested = size[COL];
+    if (columnOffset + columnsRequested > matrix.columnSize()) {
+      throw new IndexException(columnOffset + columnsRequested, matrix.columnSize());
+    }
     this.matrix = matrix;
     this.offset = offset;
-    this.cardinality = Arrays.copyOf(cardinality, 2);
+    this.cardinality = Arrays.copyOf(size, 2);
   }
 
   @Override

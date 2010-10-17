@@ -134,6 +134,8 @@ public abstract class MatrixTest extends MahoutTestCase {
     int[] offset = {1, 1};
     int[] size = {2, 1};
     Matrix view = test.viewPart(offset, size);
+    assertEquals(2, view.rowSize());
+    assertEquals(1, view.columnSize());
     int[] c = view.size();
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {

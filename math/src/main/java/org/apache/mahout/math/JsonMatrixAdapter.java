@@ -17,7 +17,6 @@
 package org.apache.mahout.math;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -36,33 +35,31 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>, JsonDeserializ
 
   public JsonElement serialize(Matrix src, Type typeOfSrc,
                                JsonSerializationContext context) {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    Gson gson = builder.create();
     JsonObject obj = new JsonObject();
     obj.add(CLASS, new JsonPrimitive(src.getClass().getName()));
-    obj.add(MATRIX, new JsonPrimitive(gson.toJson(src)));
+    obj.add(MATRIX, context.serialize(src));
     return obj;
   }
 
   public Matrix deserialize(JsonElement json, Type typeOfT,
                             JsonDeserializationContext context) {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
     String klass = obj.get(CLASS).getAsString();
-    String matrix = obj.get(MATRIX).getAsString();
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    Class<?> cl;
+    Class<? extends Matrix> cl;
     try {
-      cl = ccl.loadClass(klass);
+      cl = (Class<? extends Matrix>) ccl.loadClass(klass);
     } catch (ClassNotFoundException e) {
       throw new JsonParseException(e);
     }
-    return (Matrix) gson.fromJson(matrix, cl);
+
+    if (obj.get(MATRIX).isJsonPrimitive()) {
+      String matrix = obj.get(MATRIX).getAsString();
+      Gson gson = AbstractMatrix.gson();
+      return gson.fromJson(matrix, cl);
+    } else {
+      return context.deserialize(obj.get(MATRIX), cl);
+    }
   }
 
 }
