@@ -40,7 +40,7 @@ public class BayesParameters extends Parameters {
   }
   
   public void setGramSize(int gramSize) {
-    set("gramSize", Integer.toBinaryString(gramSize));
+    set("gramSize", Integer.toString(gramSize));
   }
   
   public void setMinSupport(int minSupport) {
