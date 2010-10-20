@@ -5,14 +5,14 @@ Mahout is a scalable machine learning library that implements many different app
  collaborative filtering, all
  enabled to scale by leveraging the power of Hadoop's Map-Reduce (http://hadoop.apache.org) implementation.
 
- Getting Started
+Getting Started
 
- See http://cwiki.apache.org/MAHOUT/quickstart.html
+ See https://cwiki.apache.org/MAHOUT/quickstart.html
 
- Legal
+Legal
 
  Please see the NOTICE.txt included in this directory for more information.
 
 Documentation
 
-See http://mahout.apache.org/ and http://cwiki.apache.org/MAHOUT.
+See http://mahout.apache.org/.
