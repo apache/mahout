@@ -20,7 +20,7 @@
 
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout-eclipse-support</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <name>Mahout Eclipse</name>
     <!-- skips top level project for parent purposes, otherwise we get a cycle -->
     <parent>
@@ -93,10 +93,4 @@
             </build>
       </profile>
     </profiles>
-
-  <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/mahout/tags/mahout-0.4</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4</developerConnection>
-    <url>http://svn.apache.org/viewvc/mahout/tags/mahout-0.4</url>
-  </scm>
 </project>

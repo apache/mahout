@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-utils</artifactId>
-  <version>0.4</version>
+  <version>0.5-SNAPSHOT</version>
   <name>Mahout Utilities</name>
   <description>Utilities for preparing content into formats for Mahout.</description>
 
@@ -175,8 +175,8 @@
 
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/mahout-examples</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/mahout-examples</url>
   </scm>
 </project>
