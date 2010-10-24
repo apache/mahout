@@ -21,16 +21,11 @@
       <outputDirectory>lib</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>../collections/target</directory>
+      <directory>../examples/target/dependency</directory>
       <includes>
-        <include>mahout-*.jar</include>
+        <include>mahout-collections*.jar</include>
       </includes>
-      <excludes>
- 	<exclude>*sources.jar</exclude>
- 	<exclude>*javadoc.jar</exclude>
- 	<exclude>*tests.jar</exclude>
-      </excludes>
-      <outputDirectory/>
+      <outputDirectory>lib</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>../math/target</directory>
