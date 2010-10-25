@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>6</version>
+        <version>7</version>
     </parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
@@ -80,7 +80,6 @@
     </mailingLists>
     <properties>
         <junit.version>4.7</junit.version>
-        <tagBase>https://svn.apache.org/repos/asf/mahout/tags</tagBase>
         <lucene.version>3.0.2</lucene.version>
         <hadoop.version>0.20.2</hadoop.version>
         <maven.clover.multiproject>true</maven.clover.multiproject>
@@ -118,13 +117,6 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
-        </repository>
-        <!-- Needed for mail -->
-        <repository>
-            <id>java.net.legacy</id>
-            <name>Java.net Repo for Maven 1</name>
-            <url>http://download.java.net/maven/1</url>
-            <layout>legacy</layout>
         </repository>
     </repositories>
     <issueManagement>
@@ -243,6 +235,36 @@
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
+	      <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-javadoc-plugin</artifactId>
+		<version>2.7</version>
+  	      </plugin>
+               <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-antrun-plugin</artifactId>
+                 <version>1.6</version>
+               </plugin>
+               <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-assembly-plugin</artifactId>
+                 <version>2.2</version>
+               </plugin>
+               <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-jar-plugin</artifactId>
+                 <version>2.3.1</version>
+                </plugin>
+               <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-install-plugin</artifactId>
+                 <version>2.3.1</version>
+                </plugin>
+                <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-resources-plugin</artifactId>
+                 <version>2.4.3</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-eclipse-plugin</artifactId>
@@ -286,7 +308,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.0-beta-9</version>
+                    <version>2.1</version>
                     <configuration>
                         <useReleaseProfile>true</useReleaseProfile>
                         <releaseProfiles>release,mahout_release,release_perform</releaseProfiles>
@@ -300,7 +322,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.0.2</version>
+                    <version>2.3.2</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
                         <source>1.6</source>
@@ -311,7 +333,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>2.5</version>
+                    <version>2.6</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.mahout</groupId>
@@ -344,7 +366,7 @@
                 <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-pmd-plugin</artifactId>
-                  <version>2.4</version>
+                  <version>2.5</version>
                   <dependencies>
                     <dependency>
                       <groupId>org.apache.mahout</groupId>
@@ -375,24 +397,16 @@
                   </executions>
 		  -->
                 </plugin>
-            </plugins>
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <forkMode>once</forkMode>
-                    <argLine>-Xms256m -Xmx512m</argLine>
-                    <testFailureIgnore>false</testFailureIgnore>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-remote-resources-plugin</artifactId>
-                <configuration>
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-surefire-plugin</artifactId>
+                  <version>2.5</version>
+	      </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-remote-resources-plugin</artifactId>
+                  <version>1.1</version>
+		  <configuration>
                     <appendedResourcesDirectory>./src/main/appended-resources</appendedResourcesDirectory>
                     <resourceBundles>
                         <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
@@ -400,6 +414,19 @@
                     <supplementalModels>
                         <supplementalModel>supplemental-models.xml</supplementalModel>
                     </supplementalModels>
+                </configuration>
+	      </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkMode>once</forkMode>
+                    <argLine>-Xms256m -Xmx512m</argLine>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>
             <plugin>
@@ -457,7 +484,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.5</version>
                         <configuration>
                             <skipTests>true</skipTests>
                         </configuration>
@@ -585,7 +611,9 @@
             </plugin>
 	    <!-- checkstyle -->
             <plugin>
-                <artifactId>maven-checkstyle-plugin</artifactId>
+               <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <configLocation>${project.build.directory}/../../eclipse/src/main/resources/mahout-checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
@@ -639,7 +667,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.3.1</version>
                 <configuration>
                     <xmlOutput>true</xmlOutput>
                     <xmlOutputDirectory>target/findbugs</xmlOutputDirectory>
@@ -656,7 +684,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-changes-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.3</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -665,10 +693,20 @@
                     </reportSet>
                 </reportSets>
             </plugin>
+	    <plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-surefire-report-plugin</artifactId>
+             <version>2.6</version>
+	    </plugin>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-javadoc-plugin</artifactId>
+		<version>2.7</version>
+  	    </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>2.2</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -680,6 +718,16 @@
                     </reportSet>
                 </reportSets>
             </plugin>
+	    <plugin>
+	      <groupId>org.apache.maven.plugins</groupId>
+	      <artifactId>maven-pmd-plugin</artifactId>
+	      <version>2.5</version>
+	    </plugin>
+	    <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>taglist-maven-plugin</artifactId>
+              <version>2.4</version>
+	    </plugin>
         </plugins>
     </reporting>
 </project>

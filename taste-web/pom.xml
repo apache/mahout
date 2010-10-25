@@ -78,6 +78,7 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
+	<version>7.1.2.v20100523</version>
         <configuration>
           <webApp>${project.build.directory}/${project.artifactId}-${project.version}.war</webApp>
         </configuration>

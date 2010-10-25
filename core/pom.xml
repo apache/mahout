@@ -71,7 +71,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.2</version>
         <executions>
           <execution>
             <goals>
@@ -85,7 +84,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-5</version>
         <executions>
           <execution>
             <id>job</id>
@@ -104,7 +102,6 @@
 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.4</version>
       </plugin>
 
       <plugin>

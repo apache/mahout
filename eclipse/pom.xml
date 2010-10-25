@@ -22,12 +22,12 @@
     <artifactId>mahout-eclipse-support</artifactId>
     <version>0.5-SNAPSHOT</version>
     <name>Mahout Eclipse</name>
-    <!-- skips top level project for parent purposes, otherwise we get a cycle -->
-    <parent>
-        <groupId>org.apache</groupId>
-        <artifactId>apache</artifactId>
-        <version>6</version>
-    </parent>
+  <parent>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout</artifactId>
+    <version>0.5-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
     <profiles>
       <profile>
         <id>setup-eclipse-workspace</id>

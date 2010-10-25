@@ -25,9 +25,10 @@
   <version>0.5-SNAPSHOT</version>
 
   <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>apache</artifactId>
-    <version>6</version>
+    <groupId>org.apache.mahout</groupId>
+    <artifactId>mahout</artifactId>
+    <version>0.5-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   
   <name>Mahout Build Tools</name>
