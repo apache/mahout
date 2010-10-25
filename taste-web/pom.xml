@@ -78,6 +78,7 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
+	<version>7.1.2.v20100523</version>
         <configuration>
           <webApp>${project.build.directory}/${project.artifactId}-${project.version}.war</webApp>
         </configuration>
@@ -244,7 +245,7 @@
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/taste-webapp</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/taste-webapp
     </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/mahout-taste-webapp</url>
+    <url>https://svn.apache.org/repos/asf/mahout/mahout-taste-webapp/tags/mahout-0.4/mahout-taste-webapp</url>
   </scm>
 
 </project>

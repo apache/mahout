@@ -54,7 +54,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.2</version>
         <executions>
           <execution>
             <goals>
@@ -67,7 +66,6 @@
 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.4</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -139,7 +137,7 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/math</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/math</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/mahout-math</url>
+    <url>https://svn.apache.org/repos/asf/mahout/mahout-math/tags/mahout-0.4/mahout-math</url>
   </scm>
   <repositories>
     <repository>

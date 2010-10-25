@@ -17,7 +17,7 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0      http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.mahout</groupId>
@@ -71,7 +71,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.2</version>
         <executions>
           <execution>
             <goals>
@@ -85,7 +84,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-5</version>
         <executions>
           <execution>
             <id>job</id>
@@ -104,7 +102,6 @@
 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.4</version>
       </plugin>
 
       <plugin>
@@ -271,6 +268,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/core</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/core</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/mahout-core</url>
+    <url>https://svn.apache.org/repos/asf/mahout/mahout-core/tags/mahout-0.4/mahout-core</url>
   </scm>
 </project>

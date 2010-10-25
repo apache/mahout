@@ -17,7 +17,7 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0       http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -90,7 +90,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-5</version>
         <executions>
           <execution>
             <id>job</id>
@@ -224,6 +223,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples </developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/mahout-examples</url>
+    <url>https://svn.apache.org/repos/asf/mahout/mahout-examples/tags/mahout-0.4/mahout-examples</url>
   </scm>
 </project>

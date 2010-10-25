@@ -39,7 +39,6 @@
     <plugins>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.4</version>
         <configuration>
           <encoding>UTF-8</encoding>
         </configuration>
@@ -177,6 +176,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/mahout-examples</url>
+    <url>https://svn.apache.org/repos/asf/mahout/mahout-examples/tags/mahout-0.4/mahout-examples</url>
   </scm>
 </project>
