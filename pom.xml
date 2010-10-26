@@ -568,6 +568,12 @@
                 <eclipse.outputDirectory>${basedir}/eclipse-classes</eclipse.outputDirectory>
             </properties>
         </profile>
+	<profile>
+	  <id>everything</id>
+	  <modules>
+	    <module>distribution</module>
+	  </modules>
+	</profile>
         <profile>
           <id>setup.eclipse</id>
             <build>
