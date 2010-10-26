@@ -28,12 +28,9 @@
       </excludes>
     </fileSet>
     <fileSet>
-      <directory/>
-      <outputDirectory/>
+      <directory>${project.basedir}/../bin</directory>
+      <outputDirectory>bin</outputDirectory>
       <useDefaultExcludes>true</useDefaultExcludes>
-      <includes>
-        <include>${project.basedir}/../bin/mahout</include>
-      </includes>
       <fileMode>0755</fileMode>
     </fileSet>
   </fileSets>
