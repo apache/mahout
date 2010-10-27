@@ -1,0 +1,52 @@
+<HTML>
+ <!--
+ /**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ --><HEAD>
+    <TITLE>org.apache.mahout.classifier.bayes</TITLE>
+</HEAD>
+<BODY>
+<DIV>The Bayes example package provides some helper classes for training the Naive Bayes classifier on the Twenty Newsgroups
+  data.  See {@link org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups} for details on running the trainer.  See
+  {@link org.apache.mahout.classifier.bayes.PrepareTwentyNewsgroups} for details on formatting the Twenty Newsgroups data
+  properly for the training.
+</DIV>
+<div>
+  The easiest way to prepare the data is to use the ant task in core/build.xml:
+  <pre>
+    ant extract-20news-18828
+  </pre>
+  This runs the arg line:
+  <pre>
+    -p ${working.dir}/20news-18828/ -o ${working.dir}/20news-18828-collapse -a ${analyzer} -c UTF-8
+  </pre>
+</div>
+<DIV>&nbsp;</DIV>
+<div>To Run the Wikipedia examples (assumes you've built the Mahout Job jar):
+<ol>
+  <li>Download the Wikipedia Dataset.  Use the Ant target: ant enwiki-files</li>
+  <li>Chunk the data using the WikipediaXmlSplitter (from the Hadoop home):
+    <div>bin/hadoop jar &lt;PATH TO MAHOUT&gt;/target/mahout-examples-0.2 org.apache.mahout.classifier.bayes.WikipediaXmlSplitter -d &lt;MAHOUT_HOME&gt;/examples/temp/enwiki-latest-pages-articles.xml -o  &lt;MAHOUT_HOME&gt;/examples/work/wikipedia/chunks/ -c 64</div>
+  </li>
+</ol>
+</div>
+<DIV align="center">
+Copyright &copy; 2008 <A HREF="http://www.apache.org">Apache Software Foundation</A>
+</DIV>
+</BODY>
+</HTML>

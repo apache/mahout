@@ -1,0 +1,9 @@
+# The following parameters must be specified
+#i|input = /path/to/input
+#o|output = /path/to/output
+#s|similarityClassname = <Name of distributed similarity class to instantiate>
+
+# The following parameters all have default values if not specified
+#m|maxSimilaritiesPerItem = <try to cap the number of similar items per item to this number. Default: 100>
+#mo|maxCooccurrencesPerItem = <try to cap the number of cooccurrences per item to this number. Default: 100>
+#b|booleanData = <Treat input as without pref values. Default: false>

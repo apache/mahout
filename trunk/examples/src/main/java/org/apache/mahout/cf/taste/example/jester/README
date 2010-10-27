@@ -1,0 +1,10 @@
+Code works with Jester data set, which is not included in this distribution but is downloadable from
+http://www.ieor.berkeley.edu/~goldberg/jester-data/
+
+Note that the code here works on data set 1, after being converted to CSV format.
+
+Data set originated from:
+
+Eigentaste: A Constant Time Collaborative Filtering Algorithm.
+ Ken Goldberg, Theresa Roeder, Dhruv Gupta, and Chris Perkins.
+ Information Retrieval, 4(2), 133-151. July 2001.

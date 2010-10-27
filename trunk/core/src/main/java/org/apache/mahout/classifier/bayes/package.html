@@ -1,0 +1,95 @@
+<HTML>
+
+<!--
+/**
+* Licensed to the Apache Software Foundation (ASF) under one or more
+* contributor license agreements.  See the NOTICE file distributed with
+* this work for additional information regarding copyright ownership.
+* The ASF licenses this file to You under the Apache License, Version 2.0
+* (the "License"); you may not use this file except in compliance with
+* the License.  You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+-->
+<HEAD>
+  <TITLE>org.apache.mahout.classifier.bayes</TITLE>
+</HEAD>
+<BODY>
+<DIV><h2>Introduction</h2>
+  The bayes package provides an implementation of a Map Reduce enabled naive bayes classifier. The naive bayes
+  classifier is a very simple classifier that counts the occurrences of words in association with a label which
+  can then be used to determine the likelihood that a new document, and it's words, should be assigned a particular
+  label.
+</DIV>
+<div><h2>Implementation</h2>
+
+  <p>The implementation is divided up into three parts:
+  <ol>
+    <li>The Trainer -- responsible for doing the counting of the words and the labels</li>
+    <li>The Model -- responsible for holding the training data in a useful way</li>
+    <li>The Classifier -- responsible for using the trainers output to determine the category of previously unseen
+      documents
+    </li>
+  </ol>
+  </p>
+  <div><h3>The Trainer</h3>
+
+    <p>The trainer is manifested in several classes:
+    <ol>
+      <li>{@link org.apache.mahout.classifier.bayes.BayesDriver} -- Creates the Hadoop Naive Bayes job and outputs
+        the model. This Driver encapsulates a lot of intermediate Map-Reduce Classes
+      </li>
+      <li>{@link org.apache.mahout.classifier.bayes.common.BayesFeatureDriver}
+      </li>
+      <li>{@link org.apache.mahout.classifier.bayes.common.BayesTfIdfDriver}
+      </li>
+      <li>{@link org.apache.mahout.classifier.bayes.common.BayesWeightSummerDriver}
+      </li>
+      <li>{@link org.apache.mahout.classifier.bayes.BayesThetaNormalizerDriver}
+      </li>
+    </ol>
+    The trainer assumes that the input files are in the {@link org.apache.hadoop.mapred.KeyValueTextInputFormat}, i.e.
+    the first token of the line
+    is the label and separated from the remaining tokens on the line by a tab-delimiter. The remaining tokens are the
+    unique features (words). Thus, input documents might look
+    like:
+    <pre>
+      hockey puck stick goalie forward defenseman referee ice checking slapshot helmet
+      football field football pigskin referee helmet turf tackle
+    </pre>
+    where hockey and football are the labels and the remaining words are the features associated with those particular
+    labels.</p>
+    <p>The output from the trainer is a {@link org.apache.hadoop.io.SequenceFile}.</p>
+  </div>
+  <div><h3>The Model</h3>
+
+    <p>The {@link org.apache.mahout.classifier.bayes.BayesModel} is the data structure used to represent the results of
+      the training
+      for use by the {@link org.apache.mahout.classifier.bayes.BayesClassifier}. A Model can be created by hand, or, if
+      using
+      the {@link org.apache.mahout.classifier.bayes.BayesDriver}, it can be created from the {@link
+      org.apache.hadoop.io.SequenceFile} that is output. To create it from the SequenceFile, use the
+      {@link org.apache.mahout.classifier.bayes.io.SequenceFileModelReader} located in the io subpackage.</p>
+  </div>
+  <div><h3>The Classifier</h3>
+
+    <p>The {@link org.apache.mahout.classifier.bayes.BayesClassifier} is responsible for using a {@link
+      org.apache.mahout.classifier.bayes.BayesModel} to classify
+      documents into categories.</p>
+  </div>
+</div>
+
+<DIV>&nbsp;</DIV>
+<DIV align="center">
+  Copyright &copy; 2008 <A HREF="http://www.apache.org">Apache Software Foundation</A>
+</DIV>
+</BODY>
+</HTML>

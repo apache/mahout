@@ -1,0 +1,85 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.mahout.math;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.apache.hadoop.io.WritableComparable;
+
+public class VarLongWritable implements WritableComparable<VarLongWritable>, Cloneable {
+
+  private long value;
+
+  public VarLongWritable() {
+  }
+
+  public VarLongWritable(long value) {
+    this.value = value;
+  }
+
+  public long get() {
+    return value;
+  }
+
+  public void set(long value) {
+    this.value = value;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return other != null && VarLongWritable.class.equals(other.getClass()) && ((VarLongWritable) other).value == value;
+  }
+
+  @Override
+  public int hashCode() {
+    return (int) ((value >>> 32) ^ value);
+  }
+
+  @Override
+  public String toString() {
+    return String.valueOf(value);
+  }
+
+  @Override
+  public VarLongWritable clone() {
+    return new VarLongWritable(value);
+  }
+
+  @Override
+  public int compareTo(VarLongWritable other) {
+    if (value < other.value) {
+      return -1;
+    } else if (value > other.value) {
+      return 1;
+    }
+    return 0;
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    Varint.writeSignedVarLong(value, out);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    value = Varint.readSignedVarLong(in);
+  }
+
+}
