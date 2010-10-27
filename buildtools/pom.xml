@@ -22,12 +22,12 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-buildtools</artifactId>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.4-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
