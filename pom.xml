@@ -310,10 +310,10 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.1</version>
                     <configuration>
+		        <arguments>-P!apache-release,everything</arguments>
                         <useReleaseProfile>true</useReleaseProfile>
                         <releaseProfiles>release,mahout_release,release_perform</releaseProfiles>
                         <remoteTagging>true</remoteTagging>
-                        <preparationGoals>clean install</preparationGoals>
                         <goals>deploy</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
