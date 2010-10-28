@@ -172,10 +172,9 @@
 
   </dependencies>
 
-
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/mahout-examples</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/utils</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/utils</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/utils</url>
   </scm>
 </project>

@@ -137,7 +137,7 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/mahout-math</url>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/math</url>
   </scm>
   <repositories>
     <repository>

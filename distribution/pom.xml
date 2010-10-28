@@ -110,8 +110,8 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/trunk/distribution</connection>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/distribution</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/distribution</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/mahout-distribution</url>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/distribution</url>
   </scm>
 </project>

@@ -243,9 +243,8 @@
 
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp
-    </developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/mahout-taste-webapp</url>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</url>
   </scm>
 
 </project>

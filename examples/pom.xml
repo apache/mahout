@@ -223,6 +223,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples </developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/mahout-examples</url>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/examples</url>
   </scm>
 </project>

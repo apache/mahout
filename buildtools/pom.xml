@@ -38,6 +38,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/buildtools</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/buildtools</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/mahout-core</url>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/buildtools</url>
   </scm>
 </project>
