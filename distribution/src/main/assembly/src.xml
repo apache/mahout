@@ -33,5 +33,15 @@
       <useDefaultExcludes>true</useDefaultExcludes>
       <fileMode>0755</fileMode>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../examples/bin</directory>
+      <outputDirectory>examples/bin</outputDirectory>
+      <useDefaultExcludes>true</useDefaultExcludes>
+      <fileMode>0755</fileMode>
+      <excludes>
+        <exclude>work</exclude>
+        <exclude>work/**</exclude>
+      </excludes>
+    </fileSet>
   </fileSets>
 </assembly>

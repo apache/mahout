@@ -268,6 +268,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/core</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/core</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/mahout-core/tags/mahout-0.4/mahout-core</url>
+    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/core</url>
   </scm>
 </project>

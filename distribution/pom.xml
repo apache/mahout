@@ -112,6 +112,6 @@
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/distribution</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/distribution</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/mahout-distribution/tags/mahout-0.4/mahout-distribution</url>
+    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/distribution</url>
   </scm>
 </project>

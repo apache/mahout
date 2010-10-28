@@ -1,9 +1,0 @@
-# The following parameters must be specified
-#i|input = /path/to/input/state/directory
-#d|dict = /path/to/dictionary/file
-
-# The following parameters all have default values if not specified
-#o|output = /path/to/output Default: console
-#w|words = <number of words to print. Default:20>
-#dt|dictionaryType = <The dictionary file type (text|sequencefile). Default: text>
-
