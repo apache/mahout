@@ -642,6 +642,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+		<version>2.7</version>
             </plugin>
             <!-- code duplication - copy and paste detection -->
             <plugin>
