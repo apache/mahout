@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-examples</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.4</version>
   <name>Mahout Examples</name>
   <description>Scalable machine learning library examples</description>
 
@@ -221,8 +221,8 @@
 
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples </developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/examples</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples </developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/examples</url>
   </scm>
 </project>

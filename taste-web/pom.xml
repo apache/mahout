@@ -24,13 +24,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.4</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-taste-webapp</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.4</version>
   <name>Mahout Taste Webapp</name>
   <description>Mahout Taste Collaborative Filtering Web App</description>
 
@@ -242,9 +242,9 @@
   </repositories>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/taste-webapp</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/taste-webapp</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/taste-webapp</url>
   </scm>
 
 </project>
