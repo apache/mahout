@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-distribution</artifactId>
-  <version>0.4</version>
+  <version>0.5-SNAPSHOT</version>
   <name>Mahout Release Package</name>
   <description>Distribution Package</description>
 
@@ -110,8 +110,8 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/distribution</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/distribution</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/distribution</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/distribution</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/distribution</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/distribution</url>
   </scm>
 </project>

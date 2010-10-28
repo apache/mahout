@@ -23,13 +23,13 @@
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-math</artifactId>
-  <version>0.4</version>
+  <version>0.5-SNAPSHOT</version>
   <name>Mahout Math</name>
   <description>High performance scientific and technical computing data structures and methods, mostly based on CERN's
     Colt Java API
@@ -135,9 +135,9 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/math</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/math</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/math</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/math</url>
   </scm>
   <repositories>
     <repository>

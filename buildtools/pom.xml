@@ -22,12 +22,12 @@
 
   <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-buildtools</artifactId>
-  <version>0.4</version>
+  <version>0.5-SNAPSHOT</version>
 
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
@@ -36,8 +36,8 @@
   <packaging>jar</packaging>
 
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/buildtools</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/buildtools</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/tags/mahout-0.4/buildtools</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/buildtools</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/buildtools</developerConnection>
+    <url>https://svn.apache.org/repos/asf/mahout/trunk/buildtools</url>
   </scm>
 </project>
