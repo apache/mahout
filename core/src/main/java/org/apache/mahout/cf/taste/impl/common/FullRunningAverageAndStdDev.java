@@ -20,16 +20,14 @@ package org.apache.mahout.cf.taste.impl.common;
 /**
  * <p>
  * Extends {@link FullRunningAverage} to add a running standard deviation computation.
+ * Uses Welford's method, as described at http://www.johndcook.com/standard_deviation.html
  * </p>
  */
 public final class FullRunningAverageAndStdDev extends FullRunningAverage implements RunningAverageAndStdDev {
-  
-  private double stdDev;
-  private double sumX2;
-  
-  public FullRunningAverageAndStdDev() {
-    stdDev = Double.NaN;
-  }
+
+  private double stdDev = Double.NaN;
+  private double mk;
+  private double sk;
   
   @Override
   public synchronized double getStandardDeviation() {
@@ -39,14 +37,26 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   @Override
   public synchronized void addDatum(double datum) {
     super.addDatum(datum);
-    sumX2 += datum * datum;
+    int count = getCount();
+    if (count == 1) {
+      mk = datum;
+      sk = 0.0;
+    } else {
+      double oldmk = mk;
+      double diff = datum - oldmk;
+      mk += diff / count;
+      sk += diff * (datum - mk);
+    }
     recomputeStdDev();
   }
   
   @Override
   public synchronized void removeDatum(double datum) {
+    int oldCount = getCount();
     super.removeDatum(datum);
-    sumX2 -= datum * datum;
+    double oldmk = mk;
+    mk = (oldCount * oldmk - datum) / (oldCount - 1);
+    sk -= (datum - mk) * (datum - oldmk);
     recomputeStdDev();
   }
   
@@ -61,8 +71,7 @@ public final class FullRunningAverageAndStdDev extends FullRunningAverage implem
   private synchronized void recomputeStdDev() {
     int count = getCount();
     if (count > 1) {
-      double average = getAverage();
-      stdDev = Math.sqrt((sumX2 - average * average * count) / (count - 1));
+      stdDev = Math.sqrt(sk / (count - 1));
     } else {
       stdDev = Double.NaN;
     }

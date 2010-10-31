@@ -20,37 +20,46 @@ package org.apache.mahout.cf.taste.impl.common;
 /**
  * <p>
  * Extends {@link CompactRunningAverage} to add a running standard deviation computation.
+ * Uses Welford's method, as described at http://www.johndcook.com/standard_deviation.html
  * </p>
  */
-public final class CompactRunningAverageAndStdDev extends CompactRunningAverage implements
-    RunningAverageAndStdDev {
-  
-  private float stdDev;
-  private float sumX2;
-  
-  public CompactRunningAverageAndStdDev() {
-    stdDev = Float.NaN;
-  }
-  
+public final class CompactRunningAverageAndStdDev extends CompactRunningAverage implements RunningAverageAndStdDev {
+
+  private float stdDev = Float.NaN;
+  private float mk;
+  private float sk;
+
   @Override
   public synchronized double getStandardDeviation() {
     return stdDev;
   }
-  
+
   @Override
   public synchronized void addDatum(double datum) {
     super.addDatum(datum);
-    sumX2 += (float) (datum * datum);
+    int count = getCount();
+    if (count == 1) {
+      mk = (float) datum;
+      sk = 0.0f;
+    } else {
+      float oldmk = mk;
+      float diff = (float) datum - oldmk;
+      mk += diff / count;
+      sk += diff * (datum - mk);
+    }
     recomputeStdDev();
   }
-  
+
   @Override
   public synchronized void removeDatum(double datum) {
+    int oldCount = getCount();
     super.removeDatum(datum);
-    sumX2 -= (float) (datum * datum);
+    float oldmk = mk;
+    mk = (oldCount * oldmk - (float) datum) / (oldCount - 1);
+    sk -= (datum - mk) * (datum - oldmk);
     recomputeStdDev();
   }
-  
+
   /**
    * @throws UnsupportedOperationException
    */
@@ -58,20 +67,19 @@ public final class CompactRunningAverageAndStdDev extends CompactRunningAverage 
   public void changeDatum(double delta) {
     throw new UnsupportedOperationException();
   }
-  
+
   private synchronized void recomputeStdDev() {
     int count = getCount();
     if (count > 1) {
-      double average = getAverage();
-      stdDev = (float) Math.sqrt((sumX2 - average * average * count) / (count - 1));
+      stdDev = (float) Math.sqrt(sk / (count - 1));
     } else {
       stdDev = Float.NaN;
     }
   }
-  
+
   @Override
   public synchronized String toString() {
     return String.valueOf(String.valueOf(getAverage()) + ',' + stdDev);
   }
-  
+
 }
