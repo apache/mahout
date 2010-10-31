@@ -27,6 +27,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.Cache;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
+import org.apache.mahout.cf.taste.impl.model.PlusAnonymousUserDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -48,6 +49,7 @@ public final class CachingRecommender implements Recommender {
   
   private final Recommender recommender;
   private final int[] maxHowMany;
+  private final Retriever<Long,Recommendations> recommendationsRetriever;
   private final Cache<Long,Recommendations> recommendationCache;
   private final Cache<LongPair,Float> estimatedPrefCache;
   private final RefreshHelper refreshHelper;
@@ -56,28 +58,23 @@ public final class CachingRecommender implements Recommender {
   public CachingRecommender(Recommender recommender) throws TasteException {
     Preconditions.checkArgument(recommender != null, "recommender is null");
     this.recommender = recommender;
-    this.maxHowMany = new int[]{1};
+    maxHowMany = new int[]{1};
     // Use "num users" as an upper limit on cache size. Rough guess.
     int numUsers = recommender.getDataModel().getNumUsers();
-    this.recommendationCache = new Cache<Long, Recommendations>(new RecommendationRetriever(this.recommender),
-      numUsers);
-    this.estimatedPrefCache = new Cache<LongPair, Float>(new EstimatedPrefRetriever(this.recommender),
-      numUsers);
-    this.refreshHelper = new RefreshHelper(new Callable<Object>() {
+    recommendationsRetriever = new RecommendationRetriever();
+    recommendationCache = new Cache<Long, Recommendations>(recommendationsRetriever, numUsers);
+    estimatedPrefCache = new Cache<LongPair, Float>(new EstimatedPrefRetriever(), numUsers);
+    refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() {
         clear();
         return null;
       }
     });
-    this.refreshHelper.addDependency(recommender);
+    refreshHelper.addDependency(recommender);
   }
   
-  private synchronized IDRescorer getCurrentRescorer() {
-    return currentRescorer;
-  }
-  
-  private synchronized void setCurrentRescorer(IDRescorer rescorer) {
+  private  void setCurrentRescorer(IDRescorer rescorer) {
     if (rescorer == null) {
       if (currentRescorer != null) {
         currentRescorer = null;
@@ -103,6 +100,11 @@ public final class CachingRecommender implements Recommender {
       if (howMany > maxHowMany[0]) {
         maxHowMany[0] = howMany;
       }
+    }
+
+    // Special case, avoid caching an anonymous user
+    if (userID == PlusAnonymousUserDataModel.TEMP_USER_ID) {
+      return recommendationsRetriever.get(PlusAnonymousUserDataModel.TEMP_USER_ID).getItems();
     }
 
     setCurrentRescorer(rescorer);
@@ -176,38 +178,23 @@ public final class CachingRecommender implements Recommender {
   }
   
   private final class RecommendationRetriever implements Retriever<Long,Recommendations> {
-    
-    private final Recommender recommender;
-    
-    private RecommendationRetriever(Recommender recommender) {
-      this.recommender = recommender;
-    }
-    
     @Override
     public Recommendations get(Long key) throws TasteException {
       log.debug("Retrieving new recommendations for user ID '{}'", key);
       int howMany = maxHowMany[0];
-      IDRescorer rescorer = getCurrentRescorer();
-      List<RecommendedItem> recommendations = rescorer == null ? recommender.recommend(key, howMany)
-          : recommender.recommend(key, howMany, rescorer);
+      IDRescorer rescorer = currentRescorer;
+      List<RecommendedItem> recommendations =
+          rescorer == null ? recommender.recommend(key, howMany) : recommender.recommend(key, howMany, rescorer);
       return new Recommendations(Collections.unmodifiableList(recommendations));
     }
   }
   
-  private static final class EstimatedPrefRetriever implements Retriever<LongPair,Float> {
-    
-    private final Recommender recommender;
-    
-    private EstimatedPrefRetriever(Recommender recommender) {
-      this.recommender = recommender;
-    }
-    
+  private final class EstimatedPrefRetriever implements Retriever<LongPair,Float> {
     @Override
     public Float get(LongPair key) throws TasteException {
       long userID = key.getFirst();
       long itemID = key.getSecond();
-      log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'",
-        userID, itemID);
+      log.debug("Retrieving estimated preference for user ID '{}' and item ID '{}'", userID, itemID);
       return recommender.estimatePreference(userID, itemID);
     }
   }
