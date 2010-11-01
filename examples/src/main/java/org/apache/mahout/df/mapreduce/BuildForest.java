@@ -196,7 +196,10 @@ public class BuildForest extends Configured implements Tool {
     
     time = System.currentTimeMillis() - time;
     log.info("Build Time: {}", DFUtils.elapsedTime(time));
-    
+    log.info("Forest num Nodes: {}", forest.nbNodes());
+    log.info("Forest mean num Nodes: {}", forest.meanNbNodes());
+    log.info("Forest mean max Depth: {}", forest.meanMaxDepth());
+
     if (isOob) {
       Random rng;
       if (seed != null) {

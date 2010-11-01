@@ -20,6 +20,7 @@ package org.apache.mahout.df.builder;
 import java.util.Random;
 
 import org.apache.mahout.df.data.Data;
+import org.apache.mahout.df.data.Dataset;
 import org.apache.mahout.df.data.Instance;
 import org.apache.mahout.df.data.conditions.Condition;
 import org.apache.mahout.df.node.CategoricalNode;
@@ -81,7 +82,10 @@ public class DefaultTreeBuilder implements TreeBuilder {
     }
     
     int[] attributes = randomAttributes(rng, selected, m);
-    
+    if (attributes == null) { // we tried all the attributes and could not split the data anymore
+      return new Leaf(data.majorityLabel(rng));
+    }
+
     // find the best split
     Split best = null;
     for (int attr : attributes) {
@@ -92,7 +96,6 @@ public class DefaultTreeBuilder implements TreeBuilder {
     }
     
     boolean alreadySelected = selected[best.getAttr()];
-    
     if (alreadySelected) {
       // attribute already selected
       log.warn("attribute {} already selected in a parent node", best.getAttr());
@@ -100,12 +103,30 @@ public class DefaultTreeBuilder implements TreeBuilder {
     
     Node childNode;
     if (data.getDataset().isNumerical(best.getAttr())) {
+      boolean[] temp = null;
+
       Data loSubset = data.subset(Condition.lesser(best.getAttr(), best.getSplit()));
-      Node loChild = build(rng, loSubset);
-      
       Data hiSubset = data.subset(Condition.greaterOrEquals(best.getAttr(), best.getSplit()));
+
+      if (loSubset.isEmpty() || hiSubset.isEmpty()) {
+        // the selected attribute did not change the data, avoid using it in the child notes
+        selected[best.getAttr()] = true;
+      } else {
+        // the data changed, so we can unselect all previousely selected NUMERICAL attributes
+        temp = selected;
+        selected = cloneCategoricalAttributes(data.getDataset(), selected);
+      }
+
+      Node loChild = build(rng, loSubset);
       Node hiChild = build(rng, hiSubset);
-      
+
+      // restore the selection state of the attributes
+      if (temp != null) {
+        selected = temp;
+      } else {
+        selected[best.getAttr()] = alreadySelected;
+      }
+
       childNode = new NumericalNode(best.getAttr(), best.getSplit(), loChild, hiChild);
     } else { // CATEGORICAL attribute
       selected[best.getAttr()] = true;
@@ -117,12 +138,10 @@ public class DefaultTreeBuilder implements TreeBuilder {
         Data subset = data.subset(Condition.equals(best.getAttr(), values[index]));
         children[index] = build(rng, subset);
       }
+
+      selected[best.getAttr()] = alreadySelected;
       
       childNode = new CategoricalNode(best.getAttr(), values, children);
-      
-      if (!alreadySelected) {
-        selected[best.getAttr()] = false;
-      }
     }
     
     return childNode;
@@ -154,7 +173,25 @@ public class DefaultTreeBuilder implements TreeBuilder {
     
     return true;
   }
-  
+
+
+  /**
+   * Make a copy of the selection state of the attributes, unselect all numerical attributes
+   * @param dataset
+   * @param selected selection state to clone
+   * @return cloned selection state
+   */
+  protected static boolean[] cloneCategoricalAttributes(Dataset dataset, boolean[] selected) {
+    boolean[] cloned = new boolean[selected.length];
+
+    for (int i = 0; i < selected.length; i++) {
+      if (dataset.isNumerical(i)) cloned[i] = false;
+      else cloned[i] = selected[i];
+    }
+
+    return cloned;
+  }
+
   /**
    * Randomly selects m attributes to consider for split, excludes IGNORED and LABEL attributes
    * 
@@ -164,6 +201,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
    *          attributes' state (selected or not)
    * @param m
    *          number of attributes to choose
+   * @return list of selected attributes' indices, or null if all attributes have already been selected
    */
   protected static int[] randomAttributes(Random rng, boolean[] selected, int m) {
     int nbNonSelected = 0; // number of non selected attributes
@@ -175,6 +213,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     
     if (nbNonSelected == 0) {
       log.warn("All attributes are selected !");
+      return null;
     }
     
     int[] result;
