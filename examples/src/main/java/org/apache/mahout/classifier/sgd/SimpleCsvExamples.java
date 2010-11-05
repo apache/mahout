@@ -53,7 +53,7 @@ import java.util.Random;
  * This doesn't demonstrate text encoding which is subject to somewhat different tricks.  The basic
  * idea of caching hash locations and byte level parsing still very much applies to text, however.
  */
-public class SimpleCsv {
+public class SimpleCsvExamples {
   public static final int SEPARATOR_CHAR = '\t';
   public static final String SEPARATOR = "\t";
   private static final int FIELDS = 100;
