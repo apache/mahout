@@ -39,8 +39,19 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by IntelliJ IDEA. User: tdunning Date: Oct 24, 2010 Time: 7:45:24 PM To change this
- * template use File | Settings | File Templates.
+ * Shows how different encoding choices can make big speed differences.
+ * <p/>
+ * Run with command line options --generate 1000000 test.csv to generate a million data lines in
+ * test.csv.
+ * <p/>
+ * Run with command line options --parser test.csv to time how long it takes to parse and encode
+ * those million data points
+ * <p/>
+ * Run with command line options --fast test.csv to time how long it takes to parse and encode those
+ * million data points using byte-level parsing and direct value encoding.
+ * <p/>
+ * This doesn't demonstrate text encoding which is subject to somewhat different tricks.  The basic
+ * idea of caching hash locations and byte level parsing still very much applies to text, however.
  */
 public class SimpleCsv {
   public static final int SEPARATOR_CHAR = '\t';
@@ -92,7 +103,7 @@ public class SimpleCsv {
         for (int i = 0; i < FIELDS; i++) {
           double z = line.getDouble(i);
           s[i].add(z);
-//          encoder[i].addToVector((byte[]) null, z, v);
+          encoder[i].addToVector((byte[]) null, z, v);
         }
         line = in.read();
       }
