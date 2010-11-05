@@ -48,7 +48,11 @@ public class ContinuousValueEncoder extends CachingValueEncoder {
 
   @Override
   protected double getWeight(byte[] originalForm, double w) {
-    return w * Double.parseDouble(new String(originalForm));
+    if (originalForm!=null) {
+      return w * Double.parseDouble(new String(originalForm));
+    } else {
+      return w;
+    }
   }
 
   /**
@@ -62,5 +66,10 @@ public class ContinuousValueEncoder extends CachingValueEncoder {
   @Override
   public String asString(String originalForm) {
     return getName() + ':' + originalForm;
+  }
+
+  @Override
+  protected int getSeed() {
+    return CONTINUOUS_VALUE_HASH_SEED;
   }
 }

@@ -49,4 +49,9 @@ public class ConstantValueEncoder extends CachingValueEncoder {
   public String asString(String originalForm) {
     return getName();
   }
+
+  @Override
+  protected int getSeed() {
+    return 0;
+  }
 }

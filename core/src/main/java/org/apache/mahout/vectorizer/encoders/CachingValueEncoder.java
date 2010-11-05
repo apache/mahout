@@ -38,8 +38,10 @@ public abstract class CachingValueEncoder extends FeatureVectorEncoder {
   @Override
   public void setProbes(int probes) {
     super.setProbes(probes);
-    cacheProbeLocations(CONTINUOUS_VALUE_HASH_SEED);
+    cacheProbeLocations(getSeed());
   }
+
+  protected abstract int getSeed();
 
   private void cacheProbeLocations(int seed) {
     cachedProbes = new int[getProbes()];

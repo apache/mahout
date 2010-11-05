@@ -22,26 +22,26 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
-public final class ContinuousValueEncoderTest extends MahoutTestCase {
-  
+public final class ConstantValueEncoderTest extends MahoutTestCase {
+
   @Test
   public void testAddToVector() {
-    FeatureVectorEncoder enc = new ContinuousValueEncoder("foo");
+    FeatureVectorEncoder enc = new ConstantValueEncoder("foo");
     Vector v1 = new DenseVector(20);
-    enc.addToVector("-123", v1);
+    enc.addToVector((byte[]) null, -123, v1);
     assertEquals(-123, v1.minValue(), 0);
     assertEquals(0, v1.maxValue(), 0);
     assertEquals(123, v1.norm(1), 0);
 
     v1 = new DenseVector(20);
-    enc.addToVector("123", v1);
+    enc.addToVector((byte[]) null, 123, v1);
     assertEquals(123, v1.maxValue(), 0);
     assertEquals(0, v1.minValue(), 0);
     assertEquals(123, v1.norm(1), 0);
 
     Vector v2 = new DenseVector(20);
     enc.setProbes(2);
-    enc.addToVector("123", v2);
+    enc.addToVector((byte[]) null, 123, v2);
     assertEquals(123, v2.maxValue(), 0);
     assertEquals(2 * 123, v2.norm(1), 0);
 
@@ -53,36 +53,22 @@ public final class ContinuousValueEncoderTest extends MahoutTestCase {
 
     Vector v3 = new DenseVector(20);
     enc.setProbes(2);
-    enc.addToVector("100", v3);
+    enc.addToVector((byte[]) null, 100, v3);
     v1 = v2.minus(v3);
     assertEquals(23, v1.maxValue(), 0);
     assertEquals(2 * 23, v1.norm(1), 0);
 
-    enc.addToVector("7", v1);
+    enc.addToVector((byte[]) null, 7, v1);
     assertEquals(30, v1.maxValue(), 0);
     assertEquals(2 * 30, v1.norm(1), 0);
+    assertEquals(30, v1.get(9), 0);
     assertEquals(30, v1.get(10), 0);
-    assertEquals(30, v1.get(18), 0);
-
-    v2 = new DenseVector(20);
-    v3 = new DenseVector(20);
-    enc.setProbes(6);
-    enc.addToVector("145", v2);
-    enc.addToVector((byte[]) null, 145, v3);
-    assertEquals(0, v2.minus(v3).norm(1), 0);
-
-    try {
-      enc.addToVector("foobar", v1);
-      fail("Should have noticed bad numeric format");
-    } catch (NumberFormatException e) {
-      assertEquals("For input string: \"foobar\"", e.getMessage());
-    }
   }
 
   @Test
   public void testAsString() {
-    ContinuousValueEncoder enc = new ContinuousValueEncoder("foo");
-    assertEquals("foo:123", enc.asString("123"));
+    ConstantValueEncoder enc = new ConstantValueEncoder("foo");
+    assertEquals("foo", enc.asString("123"));
   }
 
 }
