@@ -22,9 +22,9 @@ import org.apache.mahout.math.Vector;
 /**
  * An encoder that does the standard thing for a virtual bias term.
  */
-public class ConstantValueEncoder extends FeatureVectorEncoder {
+public class ConstantValueEncoder extends CachingValueEncoder {
   public ConstantValueEncoder(String name) {
-    super(name);
+    super(name, 0);
   }
 
   @Override
@@ -49,10 +49,4 @@ public class ConstantValueEncoder extends FeatureVectorEncoder {
   public String asString(String originalForm) {
     return getName();
   }
-
-  @Override
-  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe){
-    return hash(name, probe, dataSize);
-  }
-
 }
