@@ -27,6 +27,11 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 /**
  * <p>
+ * Like {@link GenericItemPreferenceArray} but stores preferences for one user (all user IDs the same) rather
+ * than one item.
+ * </p>
+ *
+ * <p>
  * This implementation maintains two parallel arrays, of user IDs and values. The idea is to save allocating
  * {@link Preference} objects themselves. This saves the overhead of {@link Preference} objects but also
  * duplicating the user ID value.
@@ -55,14 +60,20 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
   public GenericUserPreferenceArray(List<Preference> prefs) {
     this(prefs.size());
     int size = prefs.size();
+    long userID = Long.MIN_VALUE;
     for (int i = 0; i < size; i++) {
       Preference pref = prefs.get(i);
+      if (i == 0) {
+        userID = pref.getUserID();
+      } else {
+        if (userID != pref.getUserID()) {
+          throw new IllegalArgumentException("Not all user IDs are the same");
+        }
+      }
       ids[i] = pref.getItemID();
       values[i] = pref.getValue();
     }
-    if (size > 0) {
-      id = prefs.get(0).getUserID();
-    }
+    id = userID;
   }
   
   /**
@@ -241,6 +252,9 @@ public final class GenericUserPreferenceArray implements PreferenceArray {
 
   @Override
   public String toString() {
+    if (ids == null || ids.length == 0) {
+      return "GenericUserPreferenceArray[{}]";
+    }
     StringBuilder result = new StringBuilder(20 * ids.length);
     result.append("GenericUserPreferenceArray[userID:");
     result.append(id);

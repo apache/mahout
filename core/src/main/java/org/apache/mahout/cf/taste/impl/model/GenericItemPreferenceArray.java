@@ -54,14 +54,20 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
   public GenericItemPreferenceArray(List<Preference> prefs) {
     this(prefs.size());
     int size = prefs.size();
+    long itemID = Long.MIN_VALUE;
     for (int i = 0; i < size; i++) {
       Preference pref = prefs.get(i);
       ids[i] = pref.getUserID();
+      if (i == 0) {
+        itemID = pref.getItemID();
+      } else {
+        if (itemID != pref.getItemID()) {
+          throw new IllegalArgumentException("Not all item IDs are the same");
+        }
+      }
       values[i] = pref.getValue();
     }
-    if (size > 0) {
-      id = prefs.get(0).getItemID();
-    }
+    id = itemID;
   }
   
   /**
@@ -240,6 +246,9 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
 
   @Override
   public String toString() {
+    if (ids == null || ids.length == 0) {
+      return "GenericItemPreferenceArray[{}]";
+    }
     StringBuilder result = new StringBuilder(20 * ids.length);
     result.append("GenericItemPreferenceArray[itemID:");
     result.append(id);
