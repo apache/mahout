@@ -456,6 +456,7 @@
         <module>taste-web</module>
         <module>examples</module>
         <module>utils</module>
+	<module>distribution</module>
     </modules>
     <profiles>
         <profile>
@@ -473,6 +474,15 @@
                 <checkstyle.skip>true</checkstyle.skip>
             </properties>
         </profile>
+	<profile>
+	  <!-- most of this profile lives in other places, like distribution -->
+	  <id>release.prepare</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <pmd.skip>true</pmd.skip>
+                <checkstyle.skip>true</checkstyle.skip>
+            </properties>
+	</profile>
         <profile>
             <id>release</id>
             <properties>
@@ -480,9 +490,6 @@
                 <pmd.skip>true</pmd.skip>
                 <checkstyle.skip>true</checkstyle.skip>
             </properties>
-            <modules>
-                <module>distribution</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -557,12 +564,6 @@
                 <eclipse.outputDirectory>${basedir}/eclipse-classes</eclipse.outputDirectory>
             </properties>
         </profile>
-	<profile>
-	  <id>everything</id>
-	  <modules>
-	    <module>distribution</module>
-	  </modules>
-	</profile>
         <profile>
           <id>setup.eclipse</id>
             <build>

@@ -34,7 +34,9 @@
   <description>Scalable machine learning library examples</description>
 
   <packaging>jar</packaging>
-
+  <properties>
+    <mahout.skip.example>false</mahout.skip.example>
+  </properties>
   <build>
     <plugins>
       <plugin>
@@ -98,6 +100,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
+	      <skipAssembly>${mahout.skip.example}</skipAssembly>
               <descriptors>
                 <descriptor>src/main/assembly/job.xml</descriptor>
               </descriptors>
@@ -219,6 +222,14 @@
 
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>release.prepare</id>
+      <properties>
+	<mahout.skip.example>true</mahout.skip.example>
+      </properties>
+    </profile>
+  </profiles>
 
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</connection>
