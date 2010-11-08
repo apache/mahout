@@ -17,7 +17,9 @@
  limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -75,8 +77,8 @@
             <configuration>
               <tasks>
                 <ant antfile="../etc/build.xml" target="build-grouplens-jar">
-                  <property name="dest" value="${project.build.directory}" />
-                  <property name="examples-base" value="src/main/java" />
+                  <property name="dest" value="${project.build.directory}"/>
+                  <property name="examples-base" value="src/main/java"/>
                 </ant>
               </tasks>
 
@@ -100,7 +102,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-	      <skipAssembly>${mahout.skip.example}</skipAssembly>
+              <skipAssembly>${mahout.skip.example}</skipAssembly>
               <descriptors>
                 <descriptor>src/main/assembly/job.xml</descriptor>
               </descriptors>
@@ -226,14 +228,14 @@
     <profile>
       <id>release.prepare</id>
       <properties>
-	<mahout.skip.example>true</mahout.skip.example>
+        <mahout.skip.example>true</mahout.skip.example>
       </properties>
     </profile>
   </profiles>
 
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples </developerConnection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/examples</developerConnection>
     <url>https://svn.apache.org/repos/asf/mahout/trunk/examples</url>
   </scm>
 </project>
