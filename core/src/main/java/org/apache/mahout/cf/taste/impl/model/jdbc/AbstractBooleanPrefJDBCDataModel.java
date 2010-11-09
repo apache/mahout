@@ -36,7 +36,9 @@ import com.google.common.base.Preconditions;
 public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataModel {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractBooleanPrefJDBCDataModel.class);
-  
+
+  static final String NO_SUCH_COLUMN = "NO_SUCH_COLUMN";
+
   private final String setPreferenceSQL;
   
   protected AbstractBooleanPrefJDBCDataModel(DataSource dataSource,
@@ -85,6 +87,11 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   @Override
   protected Preference buildPreference(ResultSet rs) throws SQLException {
     return new BooleanPreference(getLongColumn(rs, 1), getLongColumn(rs, 2));
+  }
+
+  @Override
+  String getSetPreferenceSQL() {
+    return setPreferenceSQL;
   }
   
   @Override

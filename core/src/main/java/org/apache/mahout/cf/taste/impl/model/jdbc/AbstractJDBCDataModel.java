@@ -247,6 +247,10 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     return preferenceColumn;
   }
 
+  String getSetPreferenceSQL() {
+    return setPreferenceSQL;
+  }
+
   @Override
   public LongPrimitiveIterator getUserIDs() throws TasteException {
     log.debug("Retrieving all users...");

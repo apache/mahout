@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +39,15 @@ public final class IOUtils {
   
   private IOUtils() { }
   
-  public static void quietClose(Closeable closeable) {
-    if (closeable != null) {
-      try {
-        closeable.close();
-      } catch (IOException ioe) {
-        log.warn("Unexpected exception while closing; continuing", ioe);
+  public static void quietClose(Closeable... closeables) {
+    Preconditions.checkNotNull(closeables);
+    for (Closeable closeable : closeables) {
+      if (closeable != null) {
+        try {
+          closeable.close();
+        } catch (IOException ioe) {
+          log.warn("Unexpected exception while closing; continuing", ioe);
+        }
       }
     }
   }

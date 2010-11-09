@@ -17,90 +17,102 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
+import org.apache.mahout.common.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * <p>
- * See also {@link MySQLJDBCDataModel} -- same except deals with a table without preference info:
+ * See also {@link org.apache.mahout.cf.taste.impl.model.jdbc.PostgreSQLJDBCDataModel} --
+ * same except deals with a table without preference info:
  * </p>
- * 
+ *
  * <p>
- * 
+ *
  * <pre>
  * CREATE TABLE taste_preferences (
  *   user_id BIGINT NOT NULL,
  *   item_id BIGINT NOT NULL,
- *   PRIMARY KEY (user_id, item_id),
- *   INDEX (user_id),
- *   INDEX (item_id)
- * )
+ *   PRIMARY KEY (user_id, item_id)
+ * );
+ * CREATE INDEX taste_preferences_user_id_index ON taste_preferences (user_id);
+ * CREATE INDEX taste_preferences_item_id_index ON taste_preferences (item_id);
  * </pre>
- * 
+ *
  * </p>
+ *
+ * <p>See {@link MySQLBooleanPrefJDBCDataModel} which is largely identical.</p>
+ *
+ * @see MySQLBooleanPrefJDBCDataModel
  */
-public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataModel {
+public class PostgreSQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataModel {
+
+  private static final Logger log = LoggerFactory.getLogger(PostgreSQLBooleanPrefJDBCDataModel.class);
+  private static final String POSTGRESQL_DUPLICATE_KEY_STATE = "23505"; // this is brittle...
 
   /**
    * <p>
    * Creates a  using the default {@link javax.sql.DataSource} (named
    * {@link #DEFAULT_DATASOURCE_NAME} and default table/column names.
    * </p>
-   * 
+   *
    * @throws org.apache.mahout.cf.taste.common.TasteException
    *           if {@link javax.sql.DataSource} can't be found
    */
-  public MySQLBooleanPrefJDBCDataModel() throws TasteException {
+  public PostgreSQLBooleanPrefJDBCDataModel() throws TasteException {
     this(DEFAULT_DATASOURCE_NAME);
   }
-  
+
   /**
    * <p>
    * Creates a  using the default {@link javax.sql.DataSource} found
    * under the given name, and using default table/column names.
    * </p>
-   * 
+   *
    * @param dataSourceName
    *          name of {@link javax.sql.DataSource} to look up
    * @throws org.apache.mahout.cf.taste.common.TasteException
    *           if {@link javax.sql.DataSource} can't be found
    */
-  public MySQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
+  public PostgreSQLBooleanPrefJDBCDataModel(String dataSourceName) throws TasteException {
     this(AbstractJDBCComponent.lookupDataSource(dataSourceName),
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
          DEFAULT_ITEM_ID_COLUMN,
          DEFAULT_PREFERENCE_TIME_COLUMN);
   }
-  
+
   /**
    * <p>
    * Creates a  using the given {@link javax.sql.DataSource} and default
    * table/column names.
    * </p>
-   * 
+   *
    * @param dataSource
    *          {@link javax.sql.DataSource} to use
    */
-  public MySQLBooleanPrefJDBCDataModel(DataSource dataSource) {
+  public PostgreSQLBooleanPrefJDBCDataModel(DataSource dataSource) {
     this(dataSource,
          DEFAULT_PREFERENCE_TABLE,
          DEFAULT_USER_ID_COLUMN,
          DEFAULT_ITEM_ID_COLUMN,
          DEFAULT_PREFERENCE_TIME_COLUMN);
   }
-  
+
   /**
    * <p>
    * Creates a  using the given {@link javax.sql.DataSource} and default
    * table/column names.
    * </p>
-   * 
+   *
    * @param dataSource
    *          {@link javax.sql.DataSource} to use
    * @param preferenceTable
@@ -111,11 +123,11 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
    *          item ID column name
    * @param timestampColumn timestamp column name (may be null)
    */
-  public MySQLBooleanPrefJDBCDataModel(DataSource dataSource,
-                                       String preferenceTable,
-                                       String userIDColumn,
-                                       String itemIDColumn,
-                                       String timestampColumn) {
+  public PostgreSQLBooleanPrefJDBCDataModel(DataSource dataSource,
+                                            String preferenceTable,
+                                            String userIDColumn,
+                                            String itemIDColumn,
+                                            String timestampColumn) {
     super(dataSource, preferenceTable, userIDColumn, itemIDColumn,
         NO_SUCH_COLUMN,
         // getPreferenceSQL
@@ -134,7 +146,7 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         // getNumUsersSQL
         "SELECT COUNT(DISTINCT " + userIDColumn + ") FROM " + preferenceTable,
         // setPreferenceSQL
-        "INSERT IGNORE INTO " + preferenceTable + '(' + userIDColumn + ',' + itemIDColumn + ") VALUES (?,?)",
+        "INSERT INTO " + preferenceTable + '(' + userIDColumn + ',' + itemIDColumn + ") VALUES (?,?)",
         // removePreference SQL
         "DELETE FROM " + preferenceTable + " WHERE " + userIDColumn + "=? AND " + itemIDColumn + "=?",
         // getUsersSQL
@@ -154,20 +166,34 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
         // getMinPreferenceSQL
         "SELECT 1.0");
   }
-  
+
+  /**
+   * Override since PostgreSQL doesn't have the same non-standard capability that MySQL has, to optionally
+   * ignore an insert that fails since the row exists already.
+   */
   @Override
-  protected int getFetchSize() {
-    // Need to return this for MySQL Connector/J to make it use streaming mode
-    return Integer.MIN_VALUE;
-  }
-  
-  @Override
-  protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
-    // Can't use relative on MySQL Connector/J
-    int i = 0;
-    while ((i < n) && resultSet.next()) {
-      i++;
+  public void setPreference(long userID, long itemID, float value) throws TasteException {
+    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value);
+    log.debug("Setting preference for user {}, item {}", userID, itemID);
+
+    String setPreferenceSQL = getSetPreferenceSQL();
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    try {
+      conn = getDataSource().getConnection();
+      stmt = conn.prepareStatement(setPreferenceSQL);
+      setLongParameter(stmt, 1, userID);
+      setLongParameter(stmt, 2, itemID);
+      log.debug("Executing SQL update: {}", setPreferenceSQL);
+      stmt.executeUpdate();
+    } catch (SQLException sqle) {
+      if (!POSTGRESQL_DUPLICATE_KEY_STATE.equals(sqle.getSQLState())) {
+        log.warn("Exception while setting preference", sqle);
+        throw new TasteException(sqle);
+      }
+    } finally {
+      IOUtils.quietClose(null, stmt, conn);
     }
   }
-  
+
 }
