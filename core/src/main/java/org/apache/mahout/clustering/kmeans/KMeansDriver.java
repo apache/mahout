@@ -18,6 +18,7 @@ package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -62,7 +63,8 @@ public class KMeansDriver extends AbstractJob {
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
     addOption(DefaultOptionCreator.clustersInOption()
         .withDescription("The input centroids, as Vectors.  Must be a SequenceFile of Writable, Cluster/Canopy.  "
-            + "If k is also specified, then a random set of vectors will be selected" + " and written out to this path first")
+            + "If k is also specified, then a random set of vectors will be selected"
+            + " and written out to this path first")
         .create());
     addOption(DefaultOptionCreator.numClustersOption()
         .withDescription("The k in k-Means.  If specified, then a random selection of k Vectors will be chosen"
@@ -97,7 +99,8 @@ public class KMeansDriver extends AbstractJob {
           .parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
+    boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
+        DefaultOptionCreator.SEQUENTIAL_METHOD);
     run(getConf(), input, clusters, output, measure, convergenceDelta, maxIterations, runClustering, runSequential);
     return 0;
   }
@@ -129,21 +132,27 @@ public class KMeansDriver extends AbstractJob {
                          double convergenceDelta,
                          int maxIterations,
                          boolean runClustering,
-                         boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+                         boolean runSequential)
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
     if (log.isInfoEnabled()) {
       log.info("Input: {} Clusters In: {} Out: {} Distance: {}", new Object[] { input, clustersIn, output,
           measure.getClass().getName() });
-      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}", new Object[] { convergenceDelta,
-          maxIterations, VectorWritable.class.getName() });
+      log.info("convergence: {} max Iterations: {} num Reduce Tasks: {} Input Vectors: {}",
+          new Object[] { convergenceDelta, maxIterations, VectorWritable.class.getName() });
     }
     Path clustersOut = buildClusters(conf, input, clustersIn, output, measure, maxIterations, delta, runSequential);
     if (runClustering) {
       log.info("Clustering data");
-      clusterData(conf, input, clustersOut, new Path(output, AbstractCluster.CLUSTERED_POINTS_DIR), measure, delta, runSequential);
+      clusterData(conf,
+          input,
+          clustersOut,
+          new Path(output, AbstractCluster.CLUSTERED_POINTS_DIR),
+          measure,
+          delta,
+          runSequential);
     }
   }
 
@@ -174,9 +183,17 @@ public class KMeansDriver extends AbstractJob {
                          double convergenceDelta,
                          int maxIterations,
                          boolean runClustering,
-                         boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
-    run(new Configuration(), input, clustersIn, output, measure, convergenceDelta, maxIterations, runClustering, runSequential);
+                         boolean runSequential)
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    run(new Configuration(),
+        input,
+        clustersIn,
+        output,
+        measure,
+        convergenceDelta,
+        maxIterations,
+        runClustering,
+        runSequential);
   }
 
   /**
@@ -206,8 +223,8 @@ public class KMeansDriver extends AbstractJob {
                                    DistanceMeasure measure,
                                    int maxIterations,
                                    String delta,
-                                   boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+                                   boolean runSequential)
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     if (runSequential) {
       return buildClustersSeq(input, clustersIn, output, measure, maxIterations, delta);
     } else {
@@ -220,10 +237,11 @@ public class KMeansDriver extends AbstractJob {
                                        Path output,
                                        DistanceMeasure measure,
                                        int maxIterations,
-                                       String delta) throws InstantiationException, IllegalAccessException, IOException {
+                                       String delta)
+    throws InstantiationException, IllegalAccessException, IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
-    List<Cluster> clusters = new ArrayList<Cluster>();
+    Collection<Cluster> clusters = new ArrayList<Cluster>();
 
     KMeansUtil.configureWithClusterInfo(clustersIn, clusters);
     if (clusters.isEmpty()) {
@@ -315,7 +333,8 @@ public class KMeansDriver extends AbstractJob {
                                       Path clustersIn,
                                       Path clustersOut,
                                       String measureClass,
-                                      String convergenceDelta) throws IOException, InterruptedException, ClassNotFoundException {
+                                      String convergenceDelta)
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measureClass);
@@ -408,8 +427,8 @@ public class KMeansDriver extends AbstractJob {
                                  Path output,
                                  DistanceMeasure measure,
                                  String convergenceDelta,
-                                 boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+                                 boolean runSequential)
+    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
@@ -423,11 +442,11 @@ public class KMeansDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Path input, Path clustersIn, Path output, DistanceMeasure measure) throws IOException,
-      InterruptedException, InstantiationException, IllegalAccessException {
+  private static void clusterDataSeq(Path input, Path clustersIn, Path output, DistanceMeasure measure)
+    throws IOException, InstantiationException, IllegalAccessException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
-    List<Cluster> clusters = new ArrayList<Cluster>();
+    Collection<Cluster> clusters = new ArrayList<Cluster>();
     KMeansUtil.configureWithClusterInfo(clustersIn, clusters);
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
@@ -463,7 +482,8 @@ public class KMeansDriver extends AbstractJob {
                                     Path clustersIn,
                                     Path output,
                                     DistanceMeasure measure,
-                                    String convergenceDelta) throws IOException, InterruptedException, ClassNotFoundException {
+                                    String convergenceDelta)
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     conf.set(KMeansConfigKeys.CLUSTER_PATH_KEY, clustersIn.toString());
     conf.set(KMeansConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());

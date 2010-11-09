@@ -27,7 +27,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class DistanceMeasureCluster extends AbstractCluster {
 
-  protected DistanceMeasure measure;
+  private DistanceMeasure measure;
 
   public DistanceMeasureCluster(Vector point, int id, DistanceMeasure measure) {
     super(point, id);

@@ -182,7 +182,7 @@ public final class TransactionTree implements Writable {
     return false;
   }
   
-  public int addPattern(List<Integer> myList, long addCount) {
+  public int addPattern(Iterable<Integer> myList, long addCount) {
     int temp = ROOTNODEID;
     int ret = 0;
     boolean addCountMode = true;

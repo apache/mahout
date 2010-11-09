@@ -19,7 +19,7 @@ package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -42,12 +42,12 @@ final class KMeansUtil {
   }
 
   /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(Path clusterPathStr, List<Cluster> clusters) {
+  public static void configureWithClusterInfo(Path clusterPathStr, Collection<Cluster> clusters) {
 
     // Get the path location where the cluster Info is stored
     Configuration conf = new Configuration();
     Path clusterPath = new Path(clusterPathStr, "*");
-    List<Path> result = new ArrayList<Path>();
+    Collection<Path> result = new ArrayList<Path>();
 
     // filter out the files
     PathFilter clusterFileFilter = new PathFilter() {

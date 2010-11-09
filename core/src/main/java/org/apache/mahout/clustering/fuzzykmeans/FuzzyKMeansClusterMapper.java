@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.fuzzykmeans;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -62,7 +63,7 @@ public class FuzzyKMeansClusterMapper extends Mapper<WritableComparable<?>, Vect
    * @param clusters
    *          a List<Cluster>
    */
-  void setup(List<SoftCluster> clusters, Configuration conf) {
+  void setup(Collection<SoftCluster> clusters, Configuration conf) {
     this.clusters.clear();
     this.clusters.addAll(clusters);
     this.clusterer = new FuzzyKMeansClusterer(conf);

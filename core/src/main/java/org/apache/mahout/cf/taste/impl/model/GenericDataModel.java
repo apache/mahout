@@ -92,7 +92,7 @@ public final class GenericDataModel extends AbstractDataModel {
       for (Preference preference : prefs) {
         long itemID = preference.getItemID();
         itemIDSet.add(itemID);
-        List<Preference> prefsForItem = (List<Preference>) prefsForItems.get(itemID);
+        Collection<Preference> prefsForItem = prefsForItems.get(itemID);
         if (prefsForItem == null) {
           prefsForItem = new ArrayList<Preference>(2);
           prefsForItems.put(itemID, prefsForItem);

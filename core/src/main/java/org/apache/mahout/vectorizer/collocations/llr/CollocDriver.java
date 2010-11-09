@@ -160,7 +160,7 @@ public final class CollocDriver extends AbstractJob {
   }
 
   /**
-   * Generate all ngrams for the {@link org.apache.mahout.utils.vectors.text.DictionaryVectorizer} job
+   * Generate all ngrams for the {@link org.apache.mahout.vectorizer.DictionaryVectorizer} job
    * 
    * @param input
    *          input path containing tokenized documents
@@ -200,7 +200,7 @@ public final class CollocDriver extends AbstractJob {
                                            int maxNGramSize,
                                            int reduceTasks,
                                            int minSupport)
-      throws IOException, ClassNotFoundException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
 
     Configuration con = new Configuration(baseConf);
     con.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
@@ -247,7 +247,7 @@ public final class CollocDriver extends AbstractJob {
                                               boolean emitUnigrams,
                                               float minLLRValue,
                                               int reduceTasks)
-      throws IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Configuration conf = new Configuration(baseConf);
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);

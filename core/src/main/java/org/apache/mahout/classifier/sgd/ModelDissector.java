@@ -22,10 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.Functions;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -119,10 +116,10 @@ public class ModelDissector {
   }
 
   private static class Category implements Comparable<Category> {
-    int index;
-    double weight;
+    private final int index;
+    private final double weight;
 
-    public Category(int index, double weight) {
+    private Category(int index, double weight) {
       this.index = index;
       this.weight = weight;
     }
@@ -130,10 +127,15 @@ public class ModelDissector {
     @Override
     public int compareTo(Category o) {
       int r = Double.compare(Math.abs(weight), Math.abs(o.weight));
-      if (r != 0) {
-        return r;
+      if (r == 0) {
+        if (index < o.index) {
+          return -1;
+        } else if (index > o.index) {
+          return 1;
+        }
+        return 0;
       } else {
-        return index - o.index;
+        return r;
       }
     }
   }
@@ -142,7 +144,7 @@ public class ModelDissector {
     private final String feature;
     private final double value;
     private final int maxIndex;
-    private List<Category> categories;
+    private final List<Category> categories;
 
     public Weight(String feature, Vector weights) {
       this(feature, weights, 3);
@@ -151,7 +153,7 @@ public class ModelDissector {
     public Weight(String feature, Vector weights, int n) {
       this.feature = feature;
       // pick out the weight with the largest abs value, but don't forget the sign
-      PriorityQueue<Category> biggest = new PriorityQueue<Category>(n + 1, Ordering.natural().reverse());
+      Queue<Category> biggest = new PriorityQueue<Category>(n + 1, Ordering.natural().reverse());
       for (Vector.Element element : weights) {
         biggest.add(new Category(element.index(), element.get()));
         while (biggest.size() > n) {

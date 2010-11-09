@@ -24,7 +24,7 @@ import com.google.common.collect.Multiset;
 import org.apache.mahout.math.Vector;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -99,7 +99,7 @@ public class TextValueEncoder extends FeatureVectorEncoder {
 
   @Override
   protected Iterable<Integer> hashesForProbe(byte[] originalForm, int dataSize, String name, int probe){
-    List<Integer> hashes = new ArrayList<Integer>();
+    Collection<Integer> hashes = new ArrayList<Integer>();
     for (String word : tokenize(new String(originalForm, Charsets.UTF_8))){
       hashes.add(hashForProbe(bytesForString(word), dataSize, name, probe));
     }

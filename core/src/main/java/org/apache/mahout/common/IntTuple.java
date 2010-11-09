@@ -155,8 +155,13 @@ public final class IntTuple implements WritableComparable<IntTuple> {
     int otherLength = otherTuple.length();
     int min = Math.min(thisLength, otherLength);
     for (int i = 0; i < min; i++) {
-      if (this.tuple.get(i) == otherTuple.at(i)) return 0;
-      return this.tuple.get(i) - otherTuple.at(i);
+      int a = this.tuple.get(i);
+      int b = otherTuple.at(i);
+      if (a < b) {
+        return -1;
+      } else if (a > b) {
+        return 1;
+      }
     }
     if (thisLength < otherLength) {
       return -1;

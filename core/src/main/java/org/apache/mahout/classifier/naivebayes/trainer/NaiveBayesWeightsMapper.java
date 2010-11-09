@@ -37,9 +37,9 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 public class NaiveBayesWeightsMapper extends Mapper<IntWritable, VectorWritable, Text, VectorWritable> {
   
-  private OpenObjectIntHashMap<String> labelMap = new OpenObjectIntHashMap<String>();
-  Vector featureSum;
-  Vector labelSum;
+  private final OpenObjectIntHashMap<String> labelMap = new OpenObjectIntHashMap<String>();
+  private Vector featureSum;
+  private Vector labelSum;
  
   @Override
   protected void map(IntWritable key, VectorWritable value, Context context)

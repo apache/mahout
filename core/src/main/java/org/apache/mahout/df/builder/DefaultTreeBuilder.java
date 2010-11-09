@@ -185,8 +185,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     boolean[] cloned = new boolean[selected.length];
 
     for (int i = 0; i < selected.length; i++) {
-      if (dataset.isNumerical(i)) cloned[i] = false;
-      else cloned[i] = selected[i];
+      cloned[i] = !dataset.isNumerical(i) && selected[i];
     }
 
     return cloned;

@@ -18,11 +18,11 @@
 package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -49,7 +49,7 @@ public class ParallelFPGrowthMapper extends Mapper<LongWritable,TransactionTree,
       Pair<List<Integer>,Long> pattern = it.next();
       Integer[] prunedItems = pattern.getFirst().toArray(new Integer[pattern.getFirst().size()]);
       
-      Set<Long> groups = new HashSet<Long>();
+      Collection<Long> groups = new HashSet<Long>();
       for (int j = prunedItems.length - 1; j >= 0; j--) { // generate group
         // dependent
         // shards

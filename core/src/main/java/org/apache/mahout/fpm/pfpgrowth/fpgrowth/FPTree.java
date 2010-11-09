@@ -18,7 +18,7 @@
 package org.apache.mahout.fpm.pfpgrowth.fpgrowth;
 
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Collection;
 import java.util.TreeSet;
 
 /**
@@ -72,7 +72,7 @@ public class FPTree {
   
   private boolean singlePath;
   
-  private final Set<Integer> sortedSet = new TreeSet<Integer>();
+  private final Collection<Integer> sortedSet = new TreeSet<Integer>();
   
   public FPTree() {
     this(DEFAULT_INITIAL_SIZE, DEFAULT_HEADER_TABLE_INITIAL_SIZE);

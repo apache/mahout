@@ -257,8 +257,7 @@ public class DirichletClusterer {
     }
     // then pick one cluster by sampling a Multinomial distribution based upon them
     // see: http://en.wikipedia.org/wiki/Multinomial_distribution
-    int k = UncommonDistributions.rMultinom(pi);
-    return k;
+    return UncommonDistributions.rMultinom(pi);
   }
 
   protected void updateModels(Cluster[] newModels) {

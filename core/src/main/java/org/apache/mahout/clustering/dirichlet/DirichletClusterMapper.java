@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
@@ -74,7 +75,7 @@ public class DirichletClusterMapper extends Mapper<WritableComparable<?>, Vector
       for (FileStatus s : status) {
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
         try {
-          Text key = new Text();
+          Writable key = new Text();
           DirichletCluster cluster = new DirichletCluster();
           while (reader.next(key, cluster)) {
             clusters.add(cluster);

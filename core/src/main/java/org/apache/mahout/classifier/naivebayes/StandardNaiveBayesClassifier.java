@@ -30,6 +30,7 @@ public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
 
   @Override
   public double getScoreForLabelFeature(int label, int feature) {
+    NaiveBayesModel model = getModel();
     double result = model.getWeightMatrix().get(label, feature);
     double vocabCount = model.getVocabCount();
     double sumLabelWeight = model.getLabelSum().get(label);

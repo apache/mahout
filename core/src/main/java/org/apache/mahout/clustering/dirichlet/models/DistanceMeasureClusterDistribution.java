@@ -30,7 +30,7 @@ import org.apache.mahout.math.VectorWritable;
  */
 public class DistanceMeasureClusterDistribution extends AbstractVectorModelDistribution {
 
-  DistanceMeasure measure;
+  private DistanceMeasure measure;
 
   public DistanceMeasureClusterDistribution() {
   }

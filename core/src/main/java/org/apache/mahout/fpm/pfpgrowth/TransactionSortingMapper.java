@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.LongWritable;
@@ -49,7 +48,7 @@ public class TransactionSortingMapper extends Mapper<LongWritable,Text,LongWrita
                                                                       InterruptedException {
     
     String[] items = splitter.split(input.toString());
-    Set<String> uniqueItems = new HashSet<String>(Arrays.asList(items));
+    Iterable<String> uniqueItems = new HashSet<String>(Arrays.asList(items));
     
     List<Integer> itemSet = new ArrayList<Integer>();
     for (String item : uniqueItems) { // remove items not in the fList

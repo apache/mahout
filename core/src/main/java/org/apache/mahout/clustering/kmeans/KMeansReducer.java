@@ -18,8 +18,8 @@ package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -60,7 +60,7 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
 
       String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if (path.length() > 0) {
-        List<Cluster> clusters = new ArrayList<Cluster>();
+        Collection<Cluster> clusters = new ArrayList<Cluster>();
         KMeansUtil.configureWithClusterInfo(new Path(path), clusters);
         setClusterMap(clusters);
         if (clusterMap.isEmpty()) {
@@ -76,7 +76,7 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
     }
   }
 
-  private void setClusterMap(List<Cluster> clusters) {
+  private void setClusterMap(Collection<Cluster> clusters) {
     clusterMap = new HashMap<String, Cluster>();
     for (Cluster cluster : clusters) {
       clusterMap.put(cluster.getIdentifier(), cluster);
@@ -84,7 +84,7 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
     clusters.clear();
   }
 
-  public void setup(List<Cluster> clusters, DistanceMeasure measure) {
+  public void setup(Collection<Cluster> clusters, DistanceMeasure measure) {
     setClusterMap(clusters);
     this.clusterer = new KMeansClusterer(measure);
   }

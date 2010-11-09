@@ -19,7 +19,7 @@ package org.apache.mahout.clustering.kmeans;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -32,7 +32,7 @@ import org.apache.mahout.math.VectorWritable;
 
 public class KMeansClusterMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
   
-  private final List<Cluster> clusters = new ArrayList<Cluster>();
+  private final Collection<Cluster> clusters = new ArrayList<Cluster>();
   private KMeansClusterer clusterer;
 
   @Override

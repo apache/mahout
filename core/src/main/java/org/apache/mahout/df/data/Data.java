@@ -19,10 +19,10 @@ package org.apache.mahout.df.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -225,7 +225,7 @@ public class Data implements Cloneable {
    * @param attr
    */
   public double[] values(int attr) {
-    Set<Double> result = new HashSet<Double>();
+    Collection<Double> result = new HashSet<Double>();
     
     for (Instance instance : instances) {
       result.add(instance.get(attr));

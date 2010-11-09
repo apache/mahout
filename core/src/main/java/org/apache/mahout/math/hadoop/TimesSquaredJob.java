@@ -23,6 +23,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
@@ -104,7 +105,7 @@ public final class TimesSquaredJob {
     Path inputVectorPath = new Path(outputVectorPathBase, INPUT_VECTOR + '/' + now);
     SequenceFile.Writer inputVectorPathWriter = new SequenceFile.Writer(fs,
             conf, inputVectorPath, NullWritable.class, VectorWritable.class);
-    VectorWritable inputVW = new VectorWritable(v);
+    Writable inputVW = new VectorWritable(v);
     inputVectorPathWriter.append(NullWritable.get(), inputVW);
     inputVectorPathWriter.close();
     URI ivpURI = inputVectorPath.toUri();
@@ -158,9 +159,7 @@ public final class TimesSquaredJob {
         Path inputVectorPath = new Path(localFiles[0].getPath());
         FileSystem fs = inputVectorPath.getFileSystem(conf);
 
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs,
-          inputVectorPath,
-          conf);
+        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inputVectorPath, conf);
         VectorWritable val = new VectorWritable();
         NullWritable nw = NullWritable.get();
         reader.next(nw, val);

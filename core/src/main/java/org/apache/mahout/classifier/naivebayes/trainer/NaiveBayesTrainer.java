@@ -19,7 +19,6 @@ package org.apache.mahout.classifier.naivebayes.trainer;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -50,14 +49,17 @@ public final class NaiveBayesTrainer {
   public static final String LABEL_MAP = "labelMap";
   public static final String ALPHA_I = "alphaI";
 
+  private NaiveBayesTrainer() {
+  }
+
   public static void trainNaiveBayes(Path input,
                                       Configuration conf,
-                                      List<String> inputLabels,
+                                      Iterable<String> inputLabels,
                                       Path output,
                                       int numReducers,
                                       float alphaI,
                                       boolean trainComplementary)
-      throws IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     conf.setFloat(ALPHA_I, alphaI);
     Path labelMapPath = createLabelMapFile(inputLabels, conf, new Path(output, LABEL_MAP));
     Path classVectorPath =  new Path(output, CLASS_VECTORS);
@@ -72,7 +74,9 @@ public final class NaiveBayesTrainer {
     }
   }
 
-  private static void runNaiveBayesByLabelSummer(Path input, Configuration conf, Path labelMapPath,
+  private static void runNaiveBayesByLabelSummer(Path input,
+                                                 Configuration conf,
+                                                 Path labelMapPath,
                                                  Path output, int numReducers)
     throws IOException, InterruptedException, ClassNotFoundException {
     
@@ -99,8 +103,11 @@ public final class NaiveBayesTrainer {
     job.waitForCompletion(true);
   }
 
-  private static void runNaiveBayesWeightSummer(Path input, Configuration conf,
-                                                Path labelMapPath, Path output, int numReducers)
+  private static void runNaiveBayesWeightSummer(Path input,
+                                                Configuration conf,
+                                                Path labelMapPath,
+                                                Path output,
+                                                int numReducers)
     throws IOException, InterruptedException, ClassNotFoundException {
     
     // this conf parameter needs to be set enable serialisation of conf values
@@ -124,9 +131,12 @@ public final class NaiveBayesTrainer {
     job.waitForCompletion(true);
   }
   
-  private static void runNaiveBayesThetaSummer(Path input, Configuration conf,
-                                               Path weightFilePath, Path output, int numReducers)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  private static void runNaiveBayesThetaSummer(Path input,
+                                               Configuration conf,
+                                               Path weightFilePath,
+                                               Path output,
+                                               int numReducers)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
@@ -150,9 +160,12 @@ public final class NaiveBayesTrainer {
     job.waitForCompletion(true);
   }
 
-  private static void runNaiveBayesThetaComplementarySummer(Path input, Configuration conf,
-                                                            Path weightFilePath, Path output, int numReducers)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  private static void runNaiveBayesThetaComplementarySummer(Path input,
+                                                            Configuration conf,
+                                                            Path weightFilePath,
+                                                            Path output,
+                                                            int numReducers)
+    throws IOException, InterruptedException, ClassNotFoundException {
     
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
@@ -180,14 +193,10 @@ public final class NaiveBayesTrainer {
   
   /**
    * Write the list of labels into a map file
-   * 
-   * @param wordCountPath
-   * @param dictionaryPathBase
-   * @throws IOException
    */
-  public static Path createLabelMapFile(List<String> labels,
-                                         Configuration conf,
-                                         Path labelMapPathBase) throws IOException {
+  public static Path createLabelMapFile(Iterable<String> labels,
+                                        Configuration conf,
+                                        Path labelMapPathBase) throws IOException {
     FileSystem fs = FileSystem.get(labelMapPathBase.toUri(), conf);
     Path labelMapPath = new Path(labelMapPathBase, LABEL_MAP);
     

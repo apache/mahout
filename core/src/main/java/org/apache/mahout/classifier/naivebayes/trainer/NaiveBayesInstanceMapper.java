@@ -34,7 +34,7 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 public class NaiveBayesInstanceMapper extends Mapper<Text, VectorWritable, IntWritable, VectorWritable> {
   
-  private OpenObjectIntHashMap<String> labelMap = new OpenObjectIntHashMap<String>();
+  private final OpenObjectIntHashMap<String> labelMap = new OpenObjectIntHashMap<String>();
   
   @Override
   protected void map(Text key, VectorWritable value, Context context)

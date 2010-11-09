@@ -18,7 +18,7 @@
 package org.apache.mahout.vectorizer;
 
 /**
- * {@link org.apache.mahout.utils.vectors.Weight} based on term frequency only
+ * {@link Weight} based on term frequency only
  */
 public class TF implements Weight {
   

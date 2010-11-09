@@ -20,7 +20,6 @@ package org.apache.mahout.clustering.canopy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -31,6 +30,7 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
@@ -46,7 +46,7 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
     canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, context);
   }
 
-  private final List<Canopy> canopies = new ArrayList<Canopy>();
+  private final Collection<Canopy> canopies = new ArrayList<Canopy>();
 
   /**
    * Configure the mapper by providing its canopies. Used by unit tests.
@@ -83,7 +83,7 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
         for (FileStatus file : files) {
           SequenceFile.Reader reader = new SequenceFile.Reader(fs, file.getPath(), conf);
           try {
-            Text key = new Text();
+            Writable key = new Text();
             Canopy value = new Canopy();
             while (reader.next(key, value)) {
               canopies.add(value);

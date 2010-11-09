@@ -18,6 +18,7 @@
 package org.apache.mahout.classifier;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
@@ -84,7 +85,7 @@ public class ResultAnalyzer implements Summarizable {
     int totalClassified = correctlyClassified + incorrectlyClassified;
     double percentageCorrect = (double) 100 * correctlyClassified / totalClassified;
     double percentageIncorrect = (double) 100 * incorrectlyClassified / totalClassified;
-    DecimalFormat decimalFormatter = new DecimalFormat("0.####");
+    NumberFormat decimalFormatter = new DecimalFormat("0.####");
     
     returnString.append(StringUtils.rightPad("Correctly Classified Instances", 40)).append(": ").append(
       StringUtils.leftPad(Integer.toString(correctlyClassified), 10)).append('\t').append(

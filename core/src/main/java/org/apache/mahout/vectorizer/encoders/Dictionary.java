@@ -45,7 +45,7 @@ public class Dictionary {
     return dict.size();
   }
 
-  public static Dictionary fromList(List<String> values) {
+  public static Dictionary fromList(Iterable<String> values) {
     Dictionary dict = new Dictionary();
     for (String value : values) {
       dict.intern(value);

@@ -234,7 +234,7 @@ public class FuzzyKMeansClusterer {
     }
   }
 
-  public Vector computePi(List<SoftCluster> clusters, List<Double> clusterDistanceList) {
+  public Vector computePi(Collection<SoftCluster> clusters, List<Double> clusterDistanceList) {
     Vector pi = new DenseVector(clusters.size());
     for (int i = 0; i < clusters.size(); i++) {
       double probWeight = computeProbWeight(clusterDistanceList.get(i), clusterDistanceList);

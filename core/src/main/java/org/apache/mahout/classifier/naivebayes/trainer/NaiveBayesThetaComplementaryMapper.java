@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.classifier.naivebayes.BayesConstants;
 import org.apache.mahout.math.Vector;
@@ -37,7 +38,7 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
 public class NaiveBayesThetaComplementaryMapper extends Mapper<IntWritable, VectorWritable, Text, VectorWritable> {
   
-  private OpenObjectIntHashMap<String> labelMap = new OpenObjectIntHashMap<String>();
+  private final OpenObjectIntHashMap<String> labelMap = new OpenObjectIntHashMap<String>();
   private Vector featureSum;
   private Vector labelSum;
   private Vector perLabelThetaNormalizer;
@@ -74,7 +75,7 @@ public class NaiveBayesThetaComplementaryMapper extends Mapper<IntWritable, Vect
       Path weightFile = new Path(localFiles[0].getPath());
       FileSystem fs = weightFile.getFileSystem(conf);
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, weightFile, conf);
-      Text key = new Text();
+      Writable key = new Text();
       VectorWritable value = new VectorWritable();
 
       while (reader.next(key, value)) {

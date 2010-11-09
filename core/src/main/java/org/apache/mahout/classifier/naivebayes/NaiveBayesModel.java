@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.naivebayes.trainer.NaiveBayesTrainer;
 import org.apache.mahout.math.JsonMatrixAdapter;
 import org.apache.mahout.math.JsonVectorAdapter;
@@ -155,7 +156,7 @@ public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonS
     
     FileSystem fs = sumVectorPath.getFileSystem(conf);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, sumVectorPath, conf);
-    Text key = new Text();
+    Writable key = new Text();
     VectorWritable value = new VectorWritable();
 
     int featureCount = 0;

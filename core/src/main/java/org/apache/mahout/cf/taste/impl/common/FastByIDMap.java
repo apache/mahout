@@ -47,7 +47,7 @@ public final class FastByIDMap<V> implements Serializable, Cloneable {
   private V[] values;
   private int numEntries;
   private int numSlotsUsed;
-  private int maxSize;
+  private final int maxSize;
   private BitSet recentlyAccessed;
   private final boolean countingAccesses;
   

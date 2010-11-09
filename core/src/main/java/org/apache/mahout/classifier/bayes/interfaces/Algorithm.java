@@ -96,10 +96,9 @@ public interface Algorithm {
    * @param document
    *          The document
    * @return The probability
-   * @throws InvalidDatastoreException
    * @see Algorithm#featureWeight(Datastore, String, String)
    */
-  double documentWeight(Datastore datastore, String label, String[] document) throws InvalidDatastoreException;
+  double documentWeight(Datastore datastore, String label, String[] document);
   
   /**
    * Returns the labels in the given Model

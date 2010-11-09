@@ -20,6 +20,7 @@ package org.apache.mahout.ga.watchmaker;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -54,8 +55,8 @@ public final class MahoutEvaluator {
    *          <code>List&lt;Double&gt;</code> that contains the evaluated fitness for each candidate from the
    *          input population, sorted in the same order as the candidates.
    */
-  public static void evaluate(FitnessEvaluator<?> evaluator, List<?> population, List<Double> evaluations)
-      throws IOException, ClassNotFoundException, InterruptedException {
+  public static void evaluate(FitnessEvaluator<?> evaluator, Iterable<?> population, Collection<Double> evaluations)
+    throws IOException, ClassNotFoundException, InterruptedException {
     Job job = new Job();
     job.setJarByClass(MahoutEvaluator.class);
     Configuration conf = job.getConfiguration();
@@ -78,7 +79,7 @@ public final class MahoutEvaluator {
    *          population to store
    * @return input <code>Path</code>
    */
-  private static Path prepareInput(FileSystem fs, List<?> population) throws IOException {
+  private static Path prepareInput(FileSystem fs, Iterable<?> population) throws IOException {
     Path inpath = new Path(fs.getWorkingDirectory(), "input");
     HadoopUtil.overwriteOutput(inpath);
     storePopulation(fs, new Path(inpath, "population"), population);
@@ -122,7 +123,7 @@ public final class MahoutEvaluator {
    * @param population
    *          population to store
    */
-  static void storePopulation(FileSystem fs, Path f, List<?> population) throws IOException {
+  static void storePopulation(FileSystem fs, Path f, Iterable<?> population) throws IOException {
     FSDataOutputStream out = fs.create(f);
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
     

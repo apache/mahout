@@ -50,11 +50,12 @@ public class CachingStaticWordValueEncoder extends StaticWordValueEncoder {
   }
 
   protected int hashForProbe(String originalForm, int dataSize, String name, int probe) {
-    Preconditions.checkArgument(dataSize == this.dataSize, "dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + "]");
+    Preconditions.checkArgument(dataSize == this.dataSize,
+        "dataSize argument [" + dataSize + "] does not match expected dataSize [" + this.dataSize + ']');
     if (caches[probe].containsKey(originalForm.hashCode())) {
       return caches[probe].get(originalForm.hashCode());
     }
-    int hash = super.hashForProbe(originalForm.getBytes(), dataSize, name, probe);
+    int hash = hashForProbe(originalForm.getBytes(), dataSize, name, probe);
     caches[probe].put(originalForm.hashCode(), hash);
     return hash;
   }

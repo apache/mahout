@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -194,7 +195,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     IntWritable iw = new IntWritable();
     for (int i = 0; i < eigenVectors.numRows() - 1; i++) {
       Vector v = eigenVectors.getRow(i);
-      VectorWritable vw = new VectorWritable(v);
+      Writable vw = new VectorWritable(v);
       iw.set(i);
       seqWriter.append(iw, vw);
     }

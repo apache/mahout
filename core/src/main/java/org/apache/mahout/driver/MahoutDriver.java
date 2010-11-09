@@ -100,11 +100,9 @@ public final class MahoutDriver {
 
     try {
       mainClasses.load(propsStream);
-    } catch (Throwable e) {
+    } catch (IOException e) {
       //try getting the default one
-      propsStream = Thread.currentThread()
-                                    .getContextClassLoader()
-                                    .getResourceAsStream("driver.classes.default.props");
+      propsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("driver.classes.default.props");
       mainClasses.load(propsStream);
     }
 

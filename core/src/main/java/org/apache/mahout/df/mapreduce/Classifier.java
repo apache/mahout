@@ -17,6 +17,7 @@
 
 package org.apache.mahout.df.mapreduce;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +153,7 @@ public class Classifier {
    * Will compute the ConfusionMatrix if necessary.
    * @param job
    */
-  private void parseOutput(Job job) throws IOException {
+  private void parseOutput(JobContext job) throws IOException {
     Configuration conf = job.getConfiguration();
     FileSystem fs = mappersOutputPath.getFileSystem(conf);
 
@@ -161,7 +162,7 @@ public class Classifier {
 
     // read all the output
     LongWritable key = new LongWritable();
-    Text value = new Text();
+    Writable value = new Text();
     for (Path path : outfiles) {
       SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
 

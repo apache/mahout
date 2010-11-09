@@ -117,7 +117,7 @@ public class CBayesAlgorithm implements Algorithm {
   @Override
   public double documentWeight(final Datastore datastore,
                                final String label,
-                               String[] document) throws InvalidDatastoreException {
+                               String[] document) {
     OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(document.length / 2);
     for (String word : document) {
       if (wordList.containsKey(word)) {

@@ -32,8 +32,6 @@ import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.vectorizer.collocations.llr.LLRReducer;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
-import org.apache.mahout.vectorizer.DictionaryVectorizer;
-import org.apache.mahout.vectorizer.DocumentProcessor;
 import org.apache.mahout.vectorizer.tfidf.TFIDFConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

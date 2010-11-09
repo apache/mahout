@@ -48,11 +48,6 @@ public class AdaptiveWordValueEncoder extends WordValueEncoder {
   }
 
   @Override
-  protected int hashForProbe(byte[] originalForm, int dataSize, String name, int probe) {
-    return super.hashForProbe(originalForm, dataSize, name, probe);
-  }
-
-  @Override
   protected double getWeight(byte[] originalForm, double w) {
     return w * weight(originalForm);
   }

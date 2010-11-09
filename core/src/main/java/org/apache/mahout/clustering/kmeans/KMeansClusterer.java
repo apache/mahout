@@ -156,7 +156,7 @@ public class KMeansClusterer {
    *          a List<Cluster> to test.
    */
   protected void emitPointToNearestCluster(Vector point, Iterable<Cluster> clusters, Writer writer)
-      throws IOException, InterruptedException {
+    throws IOException {
     AbstractCluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (AbstractCluster cluster : clusters) {

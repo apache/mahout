@@ -141,7 +141,7 @@ public class FrequenciesJob {
     Frequencies[] values = new Frequencies[numMaps];
     
     // read all the outputs
-    LongWritable key = new LongWritable();
+    Writable key = new LongWritable();
     Frequencies value = new Frequencies();
     
     int index = 0;

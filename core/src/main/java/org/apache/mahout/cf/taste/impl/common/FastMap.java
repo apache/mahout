@@ -63,7 +63,7 @@ public final class FastMap<K,V> implements Map<K,V>, Serializable, Cloneable {
   private V[] values;
   private int numEntries;
   private int numSlotsUsed;
-  private int maxSize;
+  private final int maxSize;
   private BitSet recentlyAccessed;
   private final boolean countingAccesses;
   

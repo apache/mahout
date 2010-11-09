@@ -28,10 +28,14 @@ import org.apache.mahout.math.Vector.Element;
  * 
  */
 public abstract class AbstractNaiveBayesClassifier extends AbstractVectorClassifier { 
-  protected NaiveBayesModel model;
+  private final NaiveBayesModel model;
   
-  public AbstractNaiveBayesClassifier(NaiveBayesModel model) {
+  protected AbstractNaiveBayesClassifier(NaiveBayesModel model) {
     this.model = model;
+  }
+
+  protected NaiveBayesModel getModel() {
+    return model;
   }
   
   public abstract double getScoreForLabelFeature(int label, int feature);

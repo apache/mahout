@@ -122,8 +122,11 @@ public final class Cache<K,V> implements Retriever<K,V> {
   
   private V getAndCacheValue(K key) throws TasteException {
     V value = retriever.get(key);
+    if (value == null) {
+      value = (V) NULL;
+    }
     synchronized (cache) {
-      cache.put(key, value == null ? (V) NULL : value);
+      cache.put(key, value);
     }
     return value;
   }

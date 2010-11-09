@@ -65,7 +65,7 @@ public class HashFactory {
     @Override
     public int hash(byte[] bytes) {
       long hashValue = 31;
-      for (byte byteVal : bytes) {
+      for (long byteVal : bytes) {
         hashValue *= seedA * byteVal;
         hashValue += seedB;
       }
@@ -87,7 +87,7 @@ public class HashFactory {
     @Override
     public int hash(byte[] bytes) {
       long hashValue = 31;
-      for (byte byteVal : bytes) {
+      for (long byteVal : bytes) {
         hashValue *= seedA * (byteVal >> 4);
         hashValue += seedB * byteVal + seedC;
       }

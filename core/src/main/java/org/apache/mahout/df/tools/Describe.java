@@ -99,8 +99,8 @@ public final class Describe {
     }
   }
   
-  private static void runTool(String dataPath, List<String> description, String filePath) throws DescriptorException,
-                                                                                         IOException {
+  private static void runTool(String dataPath, Iterable<String> description, String filePath)
+    throws DescriptorException, IOException {
     log.info("Generating the descriptor...");
     String descriptor = DescriptorUtils.generateDescriptor(description);
     
@@ -113,8 +113,7 @@ public final class Describe {
     DFUtils.storeWritable(new Configuration(), fPath, dataset);
   }
   
-  private static Dataset generateDataset(String descriptor, String dataPath) throws IOException,
-                                                                            DescriptorException {
+  private static Dataset generateDataset(String descriptor, String dataPath) throws IOException, DescriptorException {
     Path path = new Path(dataPath);
     FileSystem fs = path.getFileSystem(new Configuration());
     

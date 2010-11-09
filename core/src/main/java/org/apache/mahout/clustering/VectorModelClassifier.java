@@ -16,6 +16,7 @@
 package org.apache.mahout.clustering;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.mahout.classifier.AbstractVectorClassifier;
@@ -43,7 +44,7 @@ public class VectorModelClassifier extends AbstractVectorClassifier {
   public Vector classify(Vector instance) {
     Vector pdfs = new DenseVector(models.size());
     if (models.get(0) instanceof SoftCluster) {
-      List<SoftCluster> clusters = new ArrayList<SoftCluster>();
+      Collection<SoftCluster> clusters = new ArrayList<SoftCluster>();
       List<Double> distances = new ArrayList<Double>();
       for (Model<VectorWritable> model : models) {
         SoftCluster sc = (SoftCluster) model;

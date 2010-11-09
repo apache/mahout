@@ -24,7 +24,7 @@ package org.apache.mahout.vectorizer.encoders;
 public abstract class CachingValueEncoder extends FeatureVectorEncoder {
   private int[] cachedProbes;
 
-  public CachingValueEncoder(String name, int seed) {
+  protected CachingValueEncoder(String name, int seed) {
     super(name);
     cacheProbeLocations(seed);
   }
