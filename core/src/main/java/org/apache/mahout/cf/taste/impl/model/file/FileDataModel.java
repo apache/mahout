@@ -22,9 +22,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
@@ -214,6 +215,7 @@ public class FileDataModel extends AbstractDataModel {
 
     boolean loadFreshData = (delegate == null) || (newLastModified > lastModified + minReloadIntervalMS);
 
+    long oldLastUpdateFileModifieid = lastUpdateFileModified;
     lastModified = newLastModified;
     lastUpdateFileModified = newLastUpdateFileModified;
 
@@ -227,7 +229,7 @@ public class FileDataModel extends AbstractDataModel {
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFile(iterator, data, timestamps, false);
 
-        for (File updateFile : findUpdateFiles()) {
+        for (File updateFile : findUpdateFilesAfter(newLastModified)) {
           processFile(new FileLineIterator(updateFile, false), data, timestamps, false);
         }
 
@@ -237,7 +239,7 @@ public class FileDataModel extends AbstractDataModel {
 
         FastByIDMap<PreferenceArray> rawData = ((GenericDataModel) delegate).getRawUserData();
 
-        for (File updateFile : findUpdateFiles()) {
+        for (File updateFile : findUpdateFilesAfter(Math.max(oldLastUpdateFileModifieid, newLastModified))) {
           processFile(new FileLineIterator(updateFile, false), rawData, timestamps, true);
         }
 
@@ -253,7 +255,7 @@ public class FileDataModel extends AbstractDataModel {
         FileLineIterator iterator = new FileLineIterator(dataFile, false);
         processFileWithoutID(iterator, data, timestamps);
 
-        for (File updateFile : findUpdateFiles()) {
+        for (File updateFile : findUpdateFilesAfter(newLastModified)) {
           processFileWithoutID(new FileLineIterator(updateFile, false), data, timestamps);
         }
 
@@ -263,7 +265,7 @@ public class FileDataModel extends AbstractDataModel {
 
         FastByIDMap<FastIDSet> rawData = ((GenericBooleanPrefDataModel) delegate).getRawUserData();
 
-        for (File updateFile : findUpdateFiles()) {
+        for (File updateFile : findUpdateFilesAfter(Math.max(oldLastUpdateFileModifieid, newLastModified))) {
           processFileWithoutID(new FileLineIterator(updateFile, false), rawData, timestamps);
         }
 
@@ -280,25 +282,26 @@ public class FileDataModel extends AbstractDataModel {
    * data file is /foo/data.txt.gz, you might place update files at /foo/data.1.txt.gz, /foo/data.2.txt.gz,
    * etc.
    */
-  private Iterable<File> findUpdateFiles() {
+  private Iterable<File> findUpdateFilesAfter(long minimumLastModified) {
     String dataFileName = dataFile.getName();
     int period = dataFileName.indexOf('.');
     String startName = period < 0 ? dataFileName : dataFileName.substring(0, period);
     File parentDir = dataFile.getParentFile();
-    List<File> updateFiles = new ArrayList<File>();
+    Map<Long, File> modTimeToUpdateFile = new TreeMap<Long,File>();
     for (File updateFile : parentDir.listFiles()) {
       String updateFileName = updateFile.getName();
-      if (updateFileName.startsWith(startName) && !updateFileName.equals(dataFileName)) {
-        updateFiles.add(updateFile);
+      if (updateFileName.startsWith(startName)
+          && !updateFileName.equals(dataFileName)
+          && updateFile.lastModified() >= minimumLastModified) {
+        modTimeToUpdateFile.put(updateFile.lastModified(), updateFile);
       }
     }
-    Collections.sort(updateFiles);
-    return updateFiles;
+    return modTimeToUpdateFile.values();
   }
 
   private long readLastUpdateFileModified() {
     long mostRecentModification = Long.MIN_VALUE;
-    for (File updateFile : findUpdateFiles()) {
+    for (File updateFile : findUpdateFilesAfter(0L)) {
       mostRecentModification = Math.max(mostRecentModification, updateFile.lastModified());
     }
     return mostRecentModification;
