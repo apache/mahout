@@ -79,7 +79,7 @@ public class InMemoryBayesDatastore implements Datastore {
     try {
       SequenceFileModelReader.loadModel(this, FileSystem.get(new Path(basePath).toUri(), conf), params, conf);
     } catch (IOException e) {
-      throw new InvalidDatastoreException(e.getMessage());
+      throw new InvalidDatastoreException(e);
     }
     for (String label : getKeys("")) {
       log.info("{} {} {} {}", new Object[] {

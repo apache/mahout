@@ -28,4 +28,12 @@ public final class InvalidDatastoreException extends Exception {
   public InvalidDatastoreException(String message) {
     super(message);
   }
+
+  public InvalidDatastoreException(String msg, Throwable throwable) {
+    super(msg, throwable);
+  }
+
+  public InvalidDatastoreException(Throwable throwable) {
+    super(throwable);
+  }
 }
