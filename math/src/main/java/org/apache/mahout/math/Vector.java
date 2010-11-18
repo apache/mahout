@@ -384,7 +384,9 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   /** Get the square of the distance between this vector and the other vector. */
   double getDistanceSquared(Vector v);
 
-  /** Add the elements to the other vector and results are stored in that vector. */
+  /** Add the elements of this Vector to the vector <code>v</code> and store the results in the vector <code>v</code>.
+   * @param v The Vector that this Vector gets added to.  The results of the addition will be stored in v.
+   * */
   void addTo(Vector v);
 
 }

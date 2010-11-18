@@ -204,6 +204,27 @@ public final class VectorTest extends MahoutTestCase {
     
   }
 
+  @Test
+  public void testAddTo() throws Exception {
+    Vector v = new DenseVector(4);
+    Vector w = new DenseVector(4);
+    v.setQuick(0, 1);
+    v.setQuick(1, 2);
+    v.setQuick(2, 0);
+    v.setQuick(3, 4);
+
+    w.setQuick(0, 1);
+    w.setQuick(1, 1);
+    w.setQuick(2, 1);
+    w.setQuick(3, 1);
+
+    v.addTo(w);
+    Vector gold = new DenseVector(new double[]{2, 3, 1, 5});
+    assertTrue(w.equals(gold));
+    assertFalse(v.equals(gold));
+  }
+
+
   private static void setUpV(Vector v) {
     v.setQuick(1, 2);
     v.setQuick(2, -4);
