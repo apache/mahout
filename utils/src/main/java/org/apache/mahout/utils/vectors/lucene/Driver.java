@@ -92,7 +92,7 @@ public final class Driver {
 
     Option delimiterOpt = obuilder.withLongName("delimiter").withRequired(false).withArgument(
       abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The delimiter for outputing the dictionary").withShortName("l").create();
+      "The delimiter for outputting the dictionary").withShortName("l").create();
 
     Option powerOpt = obuilder.withLongName("norm").withRequired(false).withArgument(
       abuilder.withName("norm").withMinimum(1).withMaximum(1).create()).withDescription(
