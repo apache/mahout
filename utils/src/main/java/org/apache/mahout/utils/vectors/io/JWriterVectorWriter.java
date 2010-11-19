@@ -22,6 +22,9 @@ import java.io.Writer;
 
 import org.apache.mahout.math.Vector;
 
+/**
+ * Write out the vectors to any {@link java.io.Writer} using {@link org.apache.mahout.math.Vector#asFormatString()}.
+ */
 public class JWriterVectorWriter implements VectorWriter {
   private final Writer writer;
   
