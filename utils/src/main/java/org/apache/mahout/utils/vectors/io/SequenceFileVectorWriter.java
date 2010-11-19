@@ -26,6 +26,8 @@ import org.apache.mahout.math.VectorWritable;
 
 
 /**
+ * Writes out Vectors to a SequenceFile.
+ *
  * Closes the writer when done
  */
 public class SequenceFileVectorWriter implements VectorWriter {
