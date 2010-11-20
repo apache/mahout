@@ -180,9 +180,7 @@ public abstract class AbstractCluster implements Cluster {
     // compute the component stds
     if (s0 > 1) {
       radius = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
-    } else {
-      radius.assign(Double.MIN_NORMAL);
-    }
+    } 
     s0 = 0;
     s1 = null;
     s2 = null;
