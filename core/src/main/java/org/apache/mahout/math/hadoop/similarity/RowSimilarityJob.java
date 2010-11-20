@@ -77,7 +77,7 @@ public class RowSimilarityJob extends AbstractJob {
 
   public static final String DISTRIBUTED_SIMILARITY_CLASSNAME =
       RowSimilarityJob.class.getName() + ".distributedSimilarityClassname";
-  public static final String NUMBER_OF_COLUMNS = RowSimilarityJob.class.getName() + ".numberOfRows";
+  public static final String NUMBER_OF_COLUMNS = RowSimilarityJob.class.getName() + ".numberOfColumns";
   public static final String MAX_SIMILARITIES_PER_ROW = RowSimilarityJob.class.getName() + ".maxSimilaritiesPerRow";
 
   private static final int DEFAULT_MAX_SIMILARITIES_PER_ROW = 100;
