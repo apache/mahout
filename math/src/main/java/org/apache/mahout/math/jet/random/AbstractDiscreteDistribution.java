@@ -24,6 +24,4 @@ public abstract class AbstractDiscreteDistribution extends AbstractDistribution 
     return (double) nextInt();
   }
 
-  @Override
-  public abstract int nextInt();
 }

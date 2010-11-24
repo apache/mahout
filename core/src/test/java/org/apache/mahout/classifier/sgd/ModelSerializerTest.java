@@ -101,9 +101,9 @@ public final class ModelSerializerTest extends MahoutTestCase {
   }
 
   public static class Foo {
-    OnlineAuc foo;
-    double pig;
-    int dog;
+    private OnlineAuc foo;
+    private double pig;
+    private int dog;
   }
 
   @Test

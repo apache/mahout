@@ -25,7 +25,7 @@ public final class InvertedRunningAverageTest extends TasteTestCase {
   @Test
   public void testAverage() {
     RunningAverage avg = new FullRunningAverage();
-    InvertedRunningAverage inverted = new InvertedRunningAverage(avg);
+    RunningAverage inverted = new InvertedRunningAverage(avg);
     assertEquals(0, inverted.getCount());
     avg.addDatum(1.0);
     assertEquals(1, inverted.getCount());
@@ -38,7 +38,7 @@ public final class InvertedRunningAverageTest extends TasteTestCase {
   @Test
   public void testUnsupported() {
     RunningAverage avg = new FullRunningAverage();
-    InvertedRunningAverage inverted = new InvertedRunningAverage(avg);
+    RunningAverage inverted = new InvertedRunningAverage(avg);
     try {
       inverted.addDatum(1.0);
       fail("Should have thrown exception");

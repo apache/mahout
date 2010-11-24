@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseVector;
@@ -40,7 +41,7 @@ public class TestVectorCache extends MahoutTestCase {
   public void testSave() throws Exception {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    IntWritable key = new IntWritable(0);
+    Writable key = new IntWritable(0);
     Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
     
@@ -54,7 +55,7 @@ public class TestVectorCache extends MahoutTestCase {
     reader.close();
     
     // test if the values are identical
-    assertTrue("Saved vector is identical to original", old.get().equals(value));
+    assertEquals("Saved vector is identical to original", old.get(), value);
   }
   
   @Test
@@ -62,7 +63,7 @@ public class TestVectorCache extends MahoutTestCase {
     // save a vector manually
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    IntWritable key = new IntWritable(0);
+    Writable key = new IntWritable(0);
     Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
     

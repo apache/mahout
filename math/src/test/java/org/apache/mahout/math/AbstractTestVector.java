@@ -59,7 +59,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testIterator() throws Exception {
+  public void testIterator() {
     Iterator<Vector.Element> iterator = test.iterateNonZero();
     checkIterator(iterator, gold);
 
@@ -97,7 +97,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testIteratorSet() throws Exception {
+  public void testIteratorSet() {
     Vector clone = test.clone();
     Iterator<Vector.Element> it = clone.iterateNonZero();
     while (it.hasNext()) {
@@ -123,7 +123,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testCopy() throws Exception {
+  public void testCopy() {
     Vector copy = test.clone();
     for (int i = 0; i < test.size(); i++) {
       assertEquals("copy [" + i + ']', test.get(i), copy.get(i), EPSILON);
@@ -131,7 +131,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testGet() throws Exception {
+  public void testGet() {
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
         assertEquals("get [" + i + ']', 0.0, test.get(i), EPSILON);
@@ -152,7 +152,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testSet() throws Exception {
+  public void testSet() {
     test.set(3, 4.5);
     for (int i = 0; i < test.size(); i++) {
       if (i % 2 == 0) {
@@ -171,7 +171,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testViewPart() throws Exception {
+  public void testViewPart() {
     Vector part = test.viewPart(1, 2);
     assertEquals("part size", 2, part.getNumNondefaultElements());
     for (int i = 0; i < part.size(); i++) {
@@ -195,7 +195,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testDecodeVector() throws Exception {
+  public void testDecodeVector() {
     Vector val = AbstractVector.decodeVector(test.asFormatString());
     for (int i = 0; i < test.size(); i++) {
       assertEquals("get [" + i + ']', test.get(i), val.get(i), EPSILON);
@@ -203,7 +203,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testSparseDoubleVectorInt() throws Exception {
+  public void testSparseDoubleVectorInt() {
     Vector val = new RandomAccessSparseVector(4);
     assertEquals("size", 4, val.size());
     for (int i = 0; i < 4; i++) {
@@ -212,14 +212,14 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testDot() throws Exception {
+  public void testDot() {
     double res = test.dot(test);
     double expected = 3.3 * 3.3 + 2.2 * 2.2 + 1.1 * 1.1;
     assertEquals("dot", expected, res, EPSILON);
   }
 
   @Test
-  public void testDot2() throws Exception {
+  public void testDot2() {
     Vector test2 = test.clone();
     test2.set(1, 0.0);
     test2.set(3, 0.0);
@@ -232,7 +232,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testNormalize() throws Exception {
+  public void testNormalize() {
     Vector val = test.normalize();
     double mag = Math.sqrt(1.1 * 1.1 + 2.2 * 2.2 + 3.3 * 3.3);
     for (int i = 0; i < test.size(); i++) {
@@ -245,7 +245,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testMinus() throws Exception {
+  public void testMinus() {
     Vector val = test.minus(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
@@ -272,7 +272,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testPlusDouble() throws Exception {
+  public void testPlusDouble() {
     Vector val = test.plus(1);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
@@ -285,7 +285,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testPlusVector() throws Exception {
+  public void testPlusVector() {
     Vector val = test.plus(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
@@ -303,7 +303,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testTimesDouble() throws Exception {
+  public void testTimesDouble() {
     Vector val = test.times(3);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
@@ -316,7 +316,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testDivideDouble() throws Exception {
+  public void testDivideDouble() {
     Vector val = test.divide(3);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
@@ -329,7 +329,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testTimesVector() throws Exception {
+  public void testTimesVector() {
     Vector val = test.times(test);
     assertEquals("size", test.size(), val.size());
     for (int i = 0; i < test.size(); i++) {
@@ -376,7 +376,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignDoubleArray() throws Exception {
+  public void testAssignDoubleArray() {
     double[] array = new double[test.size()];
     test.assign(array);
     for (int i = 0; i < values.length; i++) {
@@ -391,7 +391,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignVector() throws Exception {
+  public void testAssignVector() {
     Vector other = new DenseVector(test.size());
     test.assign(other);
     for (int i = 0; i < values.length; i++) {
@@ -414,7 +414,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignBinaryFunction() throws Exception {
+  public void testAssignBinaryFunction() {
     test.assign(test, Functions.PLUS);
     for (int i = 0; i < values.length; i++) {
       if (i % 2 == 0) {
@@ -426,7 +426,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignBinaryFunction2() throws Exception {
+  public void testAssignBinaryFunction2() {
     test.assign(Functions.plus(4));
     for (int i = 0; i < values.length; i++) {
       if (i % 2 == 0) {
@@ -438,7 +438,7 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testAssignBinaryFunction3() throws Exception {
+  public void testAssignBinaryFunction3() {
     test.assign(Functions.mult(4));
     for (int i = 0; i < values.length; i++) {
       if (i % 2 == 0) {

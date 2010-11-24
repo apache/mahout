@@ -48,8 +48,6 @@ class DisplaySpectralKMeans extends DisplayClustering {
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
-    int maxIter = 10;
-    double convergenceDelta = 0.001;
     Path affinities = new Path(output, "affinities");
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -61,12 +59,14 @@ class DisplaySpectralKMeans extends DisplayClustering {
     try {
       for (int i = 0; i < SAMPLE_DATA.size(); i++) {
         for (int j = 0; j < SAMPLE_DATA.size(); j++) {
-          out.println(i + "," + j + "," + measure.distance(SAMPLE_DATA.get(i).get(), SAMPLE_DATA.get(j).get()));
+          out.println(i + "," + j + ',' + measure.distance(SAMPLE_DATA.get(i).get(), SAMPLE_DATA.get(j).get()));
         }
       }
     } finally {
       out.close();
     }
+    int maxIter = 10;
+    double convergenceDelta = 0.001;
     SpectralKMeansDriver.run(new Configuration(), affinities, output, 1100, 5, measure, convergenceDelta, maxIter);
     loadClusters(output);
     new DisplaySpectralKMeans();

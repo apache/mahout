@@ -509,8 +509,7 @@ public class Bessel extends Constants {
     }
 
     double z = 8.0 / x - 2.0;
-    double y = Math.exp(-x) * Arithmetic.chbevl(z, bSubK0, 25) / Math.sqrt(x);
-    return y;
+    return Math.exp(-x) * Arithmetic.chbevl(z, bSubK0, 25) / Math.sqrt(x);
   }
 
   /**

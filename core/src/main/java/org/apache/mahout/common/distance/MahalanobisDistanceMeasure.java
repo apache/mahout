@@ -119,7 +119,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
                                               "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);
 
-    ClassParameter matrixClass =
+    Parameter matrixClass =
         new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class,
                            "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
     parameters.add(matrixClass);      

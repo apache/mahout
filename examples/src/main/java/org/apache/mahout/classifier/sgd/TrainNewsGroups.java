@@ -118,10 +118,13 @@ public final class TrainNewsGroups {
     new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss")
   };
 
-  private static Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
-  private static FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
-  private static FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
+  private static final Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
+  private static final FeatureVectorEncoder encoder = new StaticWordValueEncoder("body");
+  private static final FeatureVectorEncoder bias = new ConstantValueEncoder("Intercept");
   private static Multiset<String> overallCounts;
+
+  private TrainNewsGroups() {
+  }
 
   public static void main(String[] args) throws IOException {
     File base = new File(args[0]);

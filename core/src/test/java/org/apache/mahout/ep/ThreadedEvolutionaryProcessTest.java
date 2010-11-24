@@ -18,14 +18,16 @@
 package org.apache.mahout.ep;
 
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutionException;
+import java.util.Random;
 
 public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
   @Test
-  public void testOptimize() throws ExecutionException, InterruptedException {
+  public void testOptimize() throws Exception {
     ThreadedEvolutionaryProcess ep = new ThreadedEvolutionaryProcess(50);
+    final Random random = RandomUtils.getRandom();
     ep.optimize(new ThreadedEvolutionaryProcess.Function() {
       /**
        * Implements a skinny quadratic bowl.
@@ -41,7 +43,7 @@ public final class ThreadedEvolutionaryProcessTest extends MahoutTestCase {
         }
         try {
           // variable delays to emulate a tricky function
-          Thread.sleep((long) Math.floor(-2 * Math.log(1 - Math.random())));
+          Thread.sleep((long) Math.floor(-2 * Math.log(1 - random.nextDouble())));
         } catch (InterruptedException e) {
           // ignore interruptions
         }

@@ -184,9 +184,6 @@ public final class AbstractJobTest extends MahoutTestCase {
     assertEquals("-1 for missing input option", -1, ret);
     
     String testInputPath = "testInputPath";
-    String testOutputPath = "testOutputPath";
-    String testInputPropertyPath = "testInputPropertyPath";
-    String testOutputPropertyPath = "testOutputPropertyPath";
 
     AbstractJob job = fact.getJob();
     ret = ToolRunner.run(job, new String[]{
@@ -195,6 +192,7 @@ public final class AbstractJobTest extends MahoutTestCase {
     assertEquals("input path is correct", testInputPath, job.getInputPath().toString());
     
     job = fact.getJob();
+    String testOutputPath = "testOutputPath";
     ret = ToolRunner.run(job, new String[]{
         "--output", testOutputPath });
     assertEquals("-1 for missing input option", -1, ret);
@@ -215,7 +213,9 @@ public final class AbstractJobTest extends MahoutTestCase {
     assertEquals("output path is correct", testOutputPath, job.getOutputPath().toString());
     
     job = fact.getJob();
-    ret = ToolRunner.run(job, new String[]{ 
+    String testInputPropertyPath = "testInputPropertyPath";
+    String testOutputPropertyPath = "testOutputPropertyPath";
+    ret = ToolRunner.run(job, new String[]{
         "-Dmapred.input.dir=" + testInputPropertyPath, 
         "-Dmapred.output.dir=" + testOutputPropertyPath });
     assertEquals("0 for complete options", 0, ret);

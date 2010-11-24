@@ -21,6 +21,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.junit.Test;
 
 
@@ -33,8 +34,8 @@ public final class TestMahalanobisDistanceMeasure extends MahoutTestCase {
   public void testMeasure() {
     double[][] invCovValues = { { 2.2, 0.4 }, { 0.4, 2.8 } };
     double[] meanValues = { -2.3, -0.9 };
-    DenseMatrix invCov = new DenseMatrix(invCovValues);
-    DenseVector meanVector = new DenseVector(meanValues);
+    Matrix invCov = new DenseMatrix(invCovValues);
+    Vector meanVector = new DenseVector(meanValues);
     MahalanobisDistanceMeasure distanceMeasure = new MahalanobisDistanceMeasure();
     distanceMeasure.setInverseCovarianceMatrix(invCov);
     distanceMeasure.setMeanVector(meanVector);

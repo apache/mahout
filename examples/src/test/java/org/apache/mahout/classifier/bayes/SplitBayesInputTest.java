@@ -18,8 +18,6 @@
 package org.apache.mahout.classifier.bayes;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -40,7 +38,6 @@ public final class SplitBayesInputTest extends MahoutTestCase {
   private OpenObjectIntHashMap<String> countMap;
   private Charset charset;
   private FileSystem fs;
-  private Configuration conf;
   private Path tempInputFile;
   private Path tempTrainingDirectory;
   private Path tempTestDirectory;
@@ -50,7 +47,7 @@ public final class SplitBayesInputTest extends MahoutTestCase {
   @Override
   @Before
   public void setUp() throws Exception {
-    conf = new Configuration();
+    Configuration conf = new Configuration();
     fs   = FileSystem.get(conf);
     
     super.setUp();

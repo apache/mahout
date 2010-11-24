@@ -36,7 +36,7 @@ import java.util.Map;
  * Provides a very flexible matrix that is based on a simple list of vectors.
  */
 public class VectorList extends AbstractMatrix {
-  private int columns;
+  private final int columns;
   private List<Vector> data = Lists.newArrayList();
 
   public VectorList(int columns) {
@@ -61,7 +61,7 @@ public class VectorList extends AbstractMatrix {
 
   @Override
   public int[] size() {
-    super.cardinality[ROW] = data.size();
+    cardinality[ROW] = data.size();
     return cardinality;
   }
 
@@ -117,7 +117,7 @@ public class VectorList extends AbstractMatrix {
               return endOfData();
             } else {
               return new Element() {
-                int row = i++;
+                final int row = i++;
 
                 public double get() {
                   return VectorList.this.get(row, column);
@@ -243,7 +243,7 @@ public class VectorList extends AbstractMatrix {
    *                              receiver
    */
   public Matrix viewPart(int[] offset, int[] size) {
-    super.cardinality[ROW] = data.size();
+    cardinality[ROW] = data.size();
     return new MatrixView(this, offset, size);
   }
 
@@ -266,10 +266,11 @@ public class VectorList extends AbstractMatrix {
   }
 
   protected static class JsonVectorListAdapter implements JsonDeserializer<VectorList> {
-    private Type collectionType = new TypeToken<List<Vector>>(){}.getType();
-    private Type labelType = new TypeToken<Map<String, Integer>>(){}.getType();
+    private final Type collectionType = new TypeToken<List<Vector>>(){}.getType();
+    private final Type labelType = new TypeToken<Map<String, Integer>>(){}.getType();
 
-    public VectorList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public VectorList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
       JsonObject jo = json.getAsJsonObject();
       VectorList r = new VectorList(jo.get("columns").getAsInt());
       r.data = context.deserialize(jo.get("data"), collectionType);

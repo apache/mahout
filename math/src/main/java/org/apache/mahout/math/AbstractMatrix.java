@@ -195,8 +195,7 @@ public abstract class AbstractMatrix implements Matrix {
     builder.registerTypeAdapter(VectorList.class, new VectorList.JsonVectorListAdapter());
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
     builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    Gson gson = builder.create();
-    return gson;
+    return builder.create();
   }
 
   public Matrix assign(double value) {

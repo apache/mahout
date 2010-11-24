@@ -220,7 +220,7 @@ public final class VectorTest extends MahoutTestCase {
 
     v.addTo(w);
     Vector gold = new DenseVector(new double[]{2, 3, 1, 5});
-    assertTrue(w.equals(gold));
+    assertEquals(w, gold);
     assertFalse(v.equals(gold));
   }
 

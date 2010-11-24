@@ -259,12 +259,12 @@ public class TestEigencutsAffinityCutsJob extends MahoutTestCase {
           // not on the diagonal...if it was an element labeled to be cut,
           // it should have a value of 0. Otherwise, it should have kept its
           // previous value
-          if (this.sensitivity[row.get()][e.index()] != 0.0) {
-            // should be 0
-            assertEquals("Cut element", 0.0, e.get(),EPSILON);
-          } else {
+          if (this.sensitivity[row.get()][e.index()] == 0.0) {
             // should be what it was originally
-            assertEquals("Preserved element", this.affinity[row.get()][e.index()], e.get(),EPSILON);
+            assertEquals("Preserved element", this.affinity[row.get()][e.index()], e.get(), EPSILON);
+          } else {
+            // should be 0
+            assertEquals("Cut element", 0.0, e.get(), EPSILON);
           }
         }
       }

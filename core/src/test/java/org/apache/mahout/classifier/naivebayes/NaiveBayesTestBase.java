@@ -75,9 +75,8 @@ public class NaiveBayesTestBase extends MahoutTestCase {
                                    naiveBayesThetaWeight(2, weightMatrix, labelSum, featureSum),
                                    naiveBayesThetaWeight(3, weightMatrix, labelSum, featureSum)};
     // now generate the model
-    NaiveBayesModel model = new NaiveBayesModel(weightMatrix, featureSum,
+    return new NaiveBayesModel(weightMatrix, featureSum,
         labelSum, new DenseVector(thetaNormalizerSum), 1.0f);
-    return model;
   }
   
   public NaiveBayesModel createComplementaryNaiveBayesModel() {
@@ -95,9 +94,8 @@ public class NaiveBayesTestBase extends MahoutTestCase {
                                    complementaryNaiveBayesThetaWeight(2, weightMatrix, labelSum, featureSum),
                                    complementaryNaiveBayesThetaWeight(3, weightMatrix, labelSum, featureSum)};
     // now generate the model
-    NaiveBayesModel model = new NaiveBayesModel(weightMatrix, featureSum,
+    return new NaiveBayesModel(weightMatrix, featureSum,
         labelSum, new DenseVector(thetaNormalizerSum), 1.0f);
-    return model;
   }
   
   public int maxIndex(Vector instance) {

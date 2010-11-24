@@ -336,7 +336,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
-      List<SoftCluster> clusterList = new ArrayList<SoftCluster>();
+      Collection<SoftCluster> clusterList = new ArrayList<SoftCluster>();
 
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
@@ -399,7 +399,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
-      List<SoftCluster> clusterList = new ArrayList<SoftCluster>();
+      Collection<SoftCluster> clusterList = new ArrayList<SoftCluster>();
 
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
@@ -457,7 +457,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
-      List<SoftCluster> clusterList = new ArrayList<SoftCluster>();
+      Collection<SoftCluster> clusterList = new ArrayList<SoftCluster>();
 
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
@@ -545,7 +545,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
     for (int k = 0; k < points.size(); k++) {
       System.out.println("testKFuzzyKMeansMRJob k= " + k);
       // pick k initial cluster centers at random
-      List<SoftCluster> clusterList = new ArrayList<SoftCluster>();
+      Collection<SoftCluster> clusterList = new ArrayList<SoftCluster>();
 
       for (int i = 0; i < k + 1; i++) {
         Vector vec = tweakValue(points.get(i).get());
@@ -602,7 +602,7 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
 
       // run clusterMapper
-      List<SoftCluster> reducerClusters = new ArrayList<SoftCluster>();
+      Collection<SoftCluster> reducerClusters = new ArrayList<SoftCluster>();
       for (Text key : reducerWriter.getKeys()) {
         List<SoftCluster> values = reducerWriter.getValue(key);
         reducerClusters.add(values.get(0));

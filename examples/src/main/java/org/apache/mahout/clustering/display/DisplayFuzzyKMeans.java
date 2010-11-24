@@ -52,13 +52,13 @@ class DisplayFuzzyKMeans extends DisplayClustering {
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     //boolean b = true;
+    //if (b) {
+    writeSampleData(samples);
+    Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3, measure);
     double threshold = 0.001;
     int numIterations = 10;
     int m = 3;
-    //if (b) {
-      writeSampleData(samples);
-      Path clusters = RandomSeedGenerator.buildRandom(samples, new Path(output, "clusters-0"), 3, measure);
-      FuzzyKMeansDriver.run(samples,
+    FuzzyKMeansDriver.run(samples,
                             clusters,
                             output,
                             measure,

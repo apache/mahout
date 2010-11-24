@@ -29,7 +29,7 @@ import java.util.Random;
 
 public final class InfiniteRecursionTest extends MahoutTestCase {
 
-  static private double[][] dData = {
+  private static final double[][] dData = {
           {0.25, 0.0, 0.0, 5.143998668220409E-4, 0.019847102289905324, 3.5216524641879855E-4, 0.0, 0.6225857142857143, 4},
           {0.25, 0.0, 0.0, 0.0010504411519893459, 0.005462138323171171, 0.0026130744829756746, 0.0, 0.4964857142857143, 3},
           {0.25, 0.0, 0.0, 0.0010504411519893459, 0.005462138323171171, 0.0026130744829756746, 0.0, 0.4964857142857143, 4},
@@ -43,7 +43,7 @@ public final class InfiniteRecursionTest extends MahoutTestCase {
   public void testBuild() throws Exception {
     Random rng = RandomUtils.getRandom();
 
-    DefaultTreeBuilder builder = new DefaultTreeBuilder();
+    TreeBuilder builder = new DefaultTreeBuilder();
 
     String[] source = Utils.double2String(dData);
     String descriptor = "N N N N N N N N L";

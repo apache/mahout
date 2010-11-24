@@ -30,14 +30,14 @@ public final class RefreshHelperTest extends TasteTestCase {
   @Test
   public void testCallable() {
     MockRefreshable mock = new MockRefreshable();
-    RefreshHelper helper = new RefreshHelper(mock);
+    Refreshable helper = new RefreshHelper(mock);
     helper.refresh(null);
     assertEquals(1, mock.getCallCount());
   }
 
   @Test
   public void testNoCallable() {
-    RefreshHelper helper = new RefreshHelper(null);
+    Refreshable helper = new RefreshHelper(null);
     helper.refresh(null);
   }
 

@@ -141,7 +141,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
       DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
       Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
           .build(mapper, conf, mapWriter);
-      List<Cluster> clusters = new ArrayList<Cluster>();
+      Collection<Cluster> clusters = new ArrayList<Cluster>();
 
       for (int i = 0; i < k + 1; i++) {
         Cluster cluster = new Cluster(points.get(i).get(), i, measure);
@@ -188,7 +188,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
       DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
       Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
           .build(mapper, conf, mapWriter);
-      List<Cluster> clusters = new ArrayList<Cluster>();
+      Collection<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
 
@@ -248,7 +248,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
       DummyRecordWriter<Text, ClusterObservations> mapWriter = new DummyRecordWriter<Text, ClusterObservations>();
       Mapper<WritableComparable<?>, VectorWritable, Text, ClusterObservations>.Context mapContext = DummyRecordWriter
           .build(mapper, conf, mapWriter);
-      List<Cluster> clusters = new ArrayList<Cluster>();
+      Collection<Cluster> clusters = new ArrayList<Cluster>();
       for (int i = 0; i < k + 1; i++) {
         Vector vec = points.get(i).get();
         Cluster cluster = new Cluster(vec, i, measure);

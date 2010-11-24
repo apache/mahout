@@ -24,6 +24,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.NamedVector;
@@ -141,7 +142,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     });
 
     int count = 0;
-    Text key = new Text();
+    Writable key = new Text();
     VectorWritable vw = new VectorWritable();
     for (FileStatus s: stats) {
       SequenceFile.Reader tfidfReader = new SequenceFile.Reader(fs, s.getPath(), conf);

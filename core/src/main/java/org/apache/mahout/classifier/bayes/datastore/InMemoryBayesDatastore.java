@@ -27,6 +27,7 @@ import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -51,7 +52,7 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private final OpenIntDoubleHashMap thetaNormalizerPerLabel = new OpenIntDoubleHashMap();
   
-  private final SparseMatrix weightMatrix = new SparseMatrix(new int[] {1, 0});
+  private final Matrix weightMatrix = new SparseMatrix(new int[] {1, 0});
   
   private final Parameters params;
   

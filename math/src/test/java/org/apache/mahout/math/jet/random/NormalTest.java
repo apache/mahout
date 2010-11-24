@@ -45,7 +45,7 @@ public final class NormalTest extends MahoutTestCase {
   }
 
   @Test
-  public void consistency() throws ConvergenceException, FunctionEvaluationException {
+  public void consistency() throws Exception {
     Random gen = RandomUtils.getRandom();
     double offset = 0;
     double scale = 1;

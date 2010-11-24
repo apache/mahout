@@ -18,13 +18,14 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.junit.Test;
 
 public final class GenericUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testUserID() {
-    GenericUserPreferenceArray prefs = new GenericUserPreferenceArray(3);
+    PreferenceArray prefs = new GenericUserPreferenceArray(3);
     assertEquals(3, prefs.length());
     prefs.setUserID(0, 1L);
     assertEquals(1L, prefs.getUserID(0));
@@ -34,7 +35,7 @@ public final class GenericUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testItemID() {
-    GenericUserPreferenceArray prefs = new GenericUserPreferenceArray(3);
+    PreferenceArray prefs = new GenericUserPreferenceArray(3);
     assertEquals(3, prefs.length());
     prefs.setItemID(0, 1L);
     prefs.setItemID(1, 2L);
@@ -46,7 +47,7 @@ public final class GenericUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testSetValue() {
-    GenericUserPreferenceArray prefs = new GenericUserPreferenceArray(3);
+    PreferenceArray prefs = new GenericUserPreferenceArray(3);
     assertEquals(3, prefs.length());
     prefs.setValue(0, 1.0f);
     prefs.setValue(1, 2.0f);
@@ -58,7 +59,7 @@ public final class GenericUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testHasPref() {
-    GenericUserPreferenceArray prefs = new GenericUserPreferenceArray(3);
+    PreferenceArray prefs = new GenericUserPreferenceArray(3);
     prefs.set(0, new GenericPreference(1L, 3L, 5.0f));
     assertTrue(prefs.hasPrefWithItemID(3L));
     assertTrue(prefs.hasPrefWithUserID(1L));
@@ -68,7 +69,7 @@ public final class GenericUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testSort() {
-    GenericUserPreferenceArray prefs = new GenericUserPreferenceArray(3);
+    PreferenceArray prefs = new GenericUserPreferenceArray(3);
     prefs.set(0, new GenericPreference(1L, 3L, 5.0f));
     prefs.set(1, new GenericPreference(1L, 1L, 5.0f));
     prefs.set(2, new GenericPreference(1L, 2L, 5.0f));
@@ -80,7 +81,7 @@ public final class GenericUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testSortValue() {
-    GenericUserPreferenceArray prefs = new GenericUserPreferenceArray(3);
+    PreferenceArray prefs = new GenericUserPreferenceArray(3);
     prefs.set(0, new GenericPreference(1L, 3L, 5.0f));
     prefs.set(1, new GenericPreference(1L, 1L, 4.0f));
     prefs.set(2, new GenericPreference(1L, 2L, 3.0f));

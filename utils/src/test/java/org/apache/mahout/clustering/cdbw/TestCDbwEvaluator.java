@@ -19,6 +19,7 @@ package org.apache.mahout.clustering.cdbw;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
 
   private FileSystem fs;
 
-  private final List<VectorWritable> sampleData = new ArrayList<VectorWritable>();
+  private final Collection<VectorWritable> sampleData = new ArrayList<VectorWritable>();
 
   private List<VectorWritable> referenceData = new ArrayList<VectorWritable>();
 
@@ -153,7 +154,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
    *          double standard deviation of the samples
    * @throws Exception 
    */
-  private void generateSamples(int num, double mx, double my, double sd) throws Exception {
+  private void generateSamples(int num, double mx, double my, double sd) {
     log.info("Generating {} samples m=[{}, {}] sd={}", new Object[] { num, mx, my, sd });
     for (int i = 0; i < num; i++) {
       sampleData.add(new VectorWritable(new DenseVector(new double[] { UncommonDistributions.rNorm(mx, sd),
@@ -161,7 +162,7 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     }
   }
 
-  private void generateSamples() throws Exception {
+  private void generateSamples() {
     generateSamples(500, 1, 1, 3);
     generateSamples(300, 1, 0, 0.5);
     generateSamples(300, 0, 2, 0.1);

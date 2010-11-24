@@ -83,12 +83,8 @@ public final class PFPGrowth {
   
   /**
    * Generates the fList from the serialized string representation
-   * 
-   * @param params
-   * @param key
-   * @param conf
+   *
    * @return Deserialized Feature Frequency List
-   * @throws IOException
    */
   public static List<Pair<String,Long>> deserializeList(Parameters params,
                                                         String key,
@@ -107,12 +103,8 @@ public final class PFPGrowth {
   /**
    * Generates the gList(Group ID Mapping of Various frequent Features) Map from the corresponding serialized
    * representation
-   * 
-   * @param params
-   * @param key
-   * @param conf
+   *
    * @return Deserialized Group List
-   * @throws IOException
    */
   public static Map<String,Long> deserializeMap(Parameters params, String key, Configuration conf) throws IOException {
     Map<String,Long> map = new HashMap<String,Long>();

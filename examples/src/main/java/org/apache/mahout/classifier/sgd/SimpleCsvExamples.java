@@ -20,6 +20,7 @@ package org.apache.mahout.classifier.sgd;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.list.IntArrayList;
@@ -54,9 +55,13 @@ import java.util.Random;
  * idea of caching hash locations and byte level parsing still very much applies to text, however.
  */
 public class SimpleCsvExamples {
+
   public static final int SEPARATOR_CHAR = '\t';
   public static final String SEPARATOR = "\t";
   private static final int FIELDS = 100;
+
+  private SimpleCsvExamples() {
+  }
 
   public static void main(String[] args) throws IOException {
     FeatureVectorEncoder[] encoder = new FeatureVectorEncoder[FIELDS];
@@ -121,15 +126,15 @@ public class SimpleCsvExamples {
     private static final Splitter onTabs = Splitter.on(SEPARATOR).trimResults();
     public static final Joiner withCommas = Joiner.on(SEPARATOR);
 
-    public static final Random rand = new Random(1);
+    public static final Random rand = RandomUtils.getRandom();
 
-    private List<String> data;
+    private final List<String> data;
 
-    private Line(String line) {
+    private Line(CharSequence line) {
       data = Lists.newArrayList(onTabs.split(line));
     }
 
-    public Line() {
+    private Line() {
       data = Lists.newArrayList();
     }
 
@@ -174,11 +179,11 @@ public class SimpleCsvExamples {
 
   private static class FastLine {
 
-    private ByteBuffer base;
-    private IntArrayList start = new IntArrayList();
-    private IntArrayList length = new IntArrayList();
+    private final ByteBuffer base;
+    private final IntArrayList start = new IntArrayList();
+    private final IntArrayList length = new IntArrayList();
 
-    public FastLine(ByteBuffer base) {
+    private FastLine(ByteBuffer base) {
       this.base = base;
     }
 
@@ -222,10 +227,10 @@ public class SimpleCsvExamples {
   }
 
   private static class FastLineReader {
-    private InputStream in;
-    private ByteBuffer buf = ByteBuffer.allocate(100000);
+    private final InputStream in;
+    private final ByteBuffer buf = ByteBuffer.allocate(100000);
 
-    public FastLineReader(InputStream in) throws IOException {
+    private FastLineReader(InputStream in) throws IOException {
       this.in = in;
       buf.limit(0);
       fillBuffer();
@@ -244,11 +249,11 @@ public class SimpleCsvExamples {
       if (buf.remaining() < 10000) {
         buf.compact();
         int n = in.read(buf.array(), buf.position(), buf.remaining());
-        if (n != -1) {
+        if (n == -1) {
+          buf.flip();
+        } else {
           buf.limit(buf.position() + n);
           buf.position(0);
-        } else {
-          buf.flip();
         }
       }
     }

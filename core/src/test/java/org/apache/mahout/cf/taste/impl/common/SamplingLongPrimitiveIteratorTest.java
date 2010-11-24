@@ -27,7 +27,7 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
   @Test
   public void testEmpty() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[0]);
-    SamplingLongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
+    LongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
     assertFalse(sample.hasNext());
     try {
       sample.next();
@@ -40,7 +40,7 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
   @Test
   public void testNext() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[] {5,4,3,2,1});
-    SamplingLongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
+    LongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
     assertTrue(sample.hasNext());
     assertEquals(4, (long) sample.next());
     assertTrue(sample.hasNext());
@@ -59,7 +59,7 @@ public final class SamplingLongPrimitiveIteratorTest extends TasteTestCase {
   @Test
   public void testPeekSkip() {
     LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[] {8,7,6,5,4,3,2,1});
-    SamplingLongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
+    LongPrimitiveIterator sample = new SamplingLongPrimitiveIterator(it, 0.5);
     assertEquals(7, sample.peek());
     sample.skip(1);
     assertEquals(4, sample.peek());

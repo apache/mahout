@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.hadoop.item;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -141,7 +142,7 @@ public class RecommenderJobTest extends TasteTestCase {
 
     EasyMock.replay(context);
 
-    List<VarLongWritable> varLongWritables = new LinkedList<VarLongWritable>();
+    Collection<VarLongWritable> varLongWritables = new LinkedList<VarLongWritable>();
     varLongWritables.add(new EntityPrefWritable(34L, 1.0f));
     varLongWritables.add(new EntityPrefWritable(56L, 2.0f));
 

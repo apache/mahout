@@ -186,7 +186,7 @@ public final class Job extends AbstractJob {
                                   ModelDistribution<VectorWritable> modelDistribution,
                                   int numIterations,
                                   int numModels,
-                                  double alpha0) throws NoSuchMethodException, InvocationTargetException {
+                                  double alpha0) {
     Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
     Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());

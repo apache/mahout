@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.minhash;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -52,12 +53,12 @@ public final class LastfmClusterEvaluator {
     for (Integer ele : listenerVector1) {
       first.add(ele);
     }
-    Set<Integer> second = new HashSet<Integer>();
+    Collection<Integer> second = new HashSet<Integer>();
     for (Integer ele : listenerVector2) {
       second.add(ele);
     }
 
-    Set<Integer> intersection = new HashSet<Integer>(first);
+    Collection<Integer> intersection = new HashSet<Integer>(first);
     intersection.retainAll(second);
     double intersectSize = intersection.size();
 

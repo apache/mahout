@@ -26,7 +26,7 @@ public final class LongPrimitiveArrayIteratorTest extends TasteTestCase {
 
   @Test
   public void testEmpty() {
-    LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[0]);
+    LongPrimitiveIterator it = new LongPrimitiveArrayIterator(new long[0]);
     assertFalse(it.hasNext());
     try {
       it.next();
@@ -38,7 +38,7 @@ public final class LongPrimitiveArrayIteratorTest extends TasteTestCase {
 
   @Test
   public void testNext() {
-    LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[] {3,2,1});
+    LongPrimitiveIterator it = new LongPrimitiveArrayIterator(new long[] {3,2,1});
     assertTrue(it.hasNext());
     assertEquals(3, (long) it.next());
     assertTrue(it.hasNext());
@@ -56,7 +56,7 @@ public final class LongPrimitiveArrayIteratorTest extends TasteTestCase {
 
   @Test
   public void testPeekSkip() {
-    LongPrimitiveArrayIterator it = new LongPrimitiveArrayIterator(new long[] {3,2,1});
+    LongPrimitiveIterator it = new LongPrimitiveArrayIterator(new long[] {3,2,1});
     assertEquals(3, it.peek());
     it.skip(2);
     assertEquals(1, it.nextLong());

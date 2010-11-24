@@ -18,13 +18,14 @@
 package org.apache.mahout.cf.taste.impl.model;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.junit.Test;
 
 public final class BooleanUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testUserID() {
-    BooleanUserPreferenceArray prefs = new BooleanUserPreferenceArray(3);
+    PreferenceArray prefs = new BooleanUserPreferenceArray(3);
     assertEquals(3, prefs.length());
     prefs.setUserID(0, 1L);
     assertEquals(1L, prefs.getUserID(0));
@@ -34,7 +35,7 @@ public final class BooleanUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testItemID() {
-    BooleanUserPreferenceArray prefs = new BooleanUserPreferenceArray(3);
+    PreferenceArray prefs = new BooleanUserPreferenceArray(3);
     assertEquals(3, prefs.length());
     prefs.setItemID(0, 1L);
     prefs.setItemID(1, 2L);
@@ -46,7 +47,7 @@ public final class BooleanUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testSetValue() {
-    BooleanUserPreferenceArray prefs = new BooleanUserPreferenceArray(3);
+    PreferenceArray prefs = new BooleanUserPreferenceArray(3);
     assertEquals(3, prefs.length());
     try {
       prefs.setValue(0, 1.0f);
@@ -59,7 +60,7 @@ public final class BooleanUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testHasPref() {
-    BooleanUserPreferenceArray prefs = new BooleanUserPreferenceArray(3);
+    PreferenceArray prefs = new BooleanUserPreferenceArray(3);
     prefs.set(0, new GenericPreference(1L, 3L, 5.0f));
     assertTrue(prefs.hasPrefWithItemID(3L));
     assertTrue(prefs.hasPrefWithUserID(1L));
@@ -69,7 +70,7 @@ public final class BooleanUserPreferenceArrayTest extends TasteTestCase {
 
   @Test
   public void testSort() {
-    BooleanUserPreferenceArray prefs = new BooleanUserPreferenceArray(3);
+    PreferenceArray prefs = new BooleanUserPreferenceArray(3);
     prefs.set(0, new BooleanPreference(1L, 3L));
     prefs.set(1, new BooleanPreference(1L, 1L));
     prefs.set(2, new BooleanPreference(1L, 2L));

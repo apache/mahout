@@ -24,7 +24,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
@@ -82,7 +81,7 @@ final class ItineraryPanel extends JPanel {
    * Returns the cities that have been selected as part of the itinerary.
    */
   public Collection<String> getSelectedCities() {
-    Set<String> cities = new TreeSet<String>();
+    Collection<String> cities = new TreeSet<String>();
     for (JCheckBox checkBox : checkBoxes) {
       if (checkBox.isSelected()) {
         cities.add(checkBox.getText());

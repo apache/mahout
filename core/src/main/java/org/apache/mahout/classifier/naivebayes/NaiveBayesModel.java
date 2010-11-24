@@ -255,10 +255,9 @@ public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonS
     // now decode the original model
     JsonObject obj = json.getAsJsonObject();
     String modelString = obj.get(MODEL).getAsString();
-    NaiveBayesModel model = gson.fromJson(modelString, NaiveBayesModel.class);
-   
+
     // return the model
-    return model;
+    return gson.fromJson(modelString, NaiveBayesModel.class);
   }
   
   public static void validate(NaiveBayesModel model) {

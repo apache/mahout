@@ -19,7 +19,6 @@ package org.apache.mahout.df.data;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
@@ -51,7 +50,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
-    List<Integer> missings = new ArrayList<Integer>();
+    Collection<Integer> missings = new ArrayList<Integer>();
     String[] sData = prepareData(data, attrs, missings);
     Dataset dataset = DataLoader.generateDataset(descriptor, sData);
     Data loaded = DataLoader.loadData(dataset, sData);
@@ -75,7 +74,7 @@ public final class DataLoaderTest extends MahoutTestCase {
 
     // prepare the data
     double[][] data = Utils.randomDoubles(rng, descriptor, datasize);
-    List<Integer> missings = new ArrayList<Integer>();
+    Collection<Integer> missings = new ArrayList<Integer>();
     String[] sData = prepareData(data, attrs, missings);
     Dataset expected = DataLoader.generateDataset(descriptor, sData);
 

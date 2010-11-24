@@ -371,7 +371,7 @@ public final class TestMeanShift extends MahoutTestCase {
     Path outPart = new Path(output, "clusters-4/part-r-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outPart, conf);
     Writable key = new Text();
-    MeanShiftCanopy value = new MeanShiftCanopy();
+    Writable value = new MeanShiftCanopy();
     int count = 0;
     while (reader.next(key, value)) {
       count++;

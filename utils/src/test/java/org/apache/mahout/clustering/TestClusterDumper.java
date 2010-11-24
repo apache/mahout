@@ -266,12 +266,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
-    int desiredRank = 15;
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Configuration conf = new Configuration();
     solver.setConf(conf);
     Path testData = getTestTempDirPath("testdata");
     int sampleDimension = sampleData.get(0).get().size();
+    int desiredRank = 15;
     solver.run(testData, output, tmp, sampleData.size(), sampleDimension, false, desiredRank, 0.5, 0.0, true);
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
 
@@ -331,13 +331,13 @@ public final class TestClusterDumper extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
-    int desiredRank = 13;
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Configuration config = new Configuration();
     solver.setConf(config);
     Path testData = getTestTempDirPath("testdata");
     int sampleDimension = sampleData.get(0).get().size();
     // Run EigenVerificationJob from within DistributedLanczosSolver.run(...)
+    int desiredRank = 13;
     solver.run(testData, output, tmp, sampleData.size(), sampleDimension, false, desiredRank, 0.5, 0.0, false);
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
 
@@ -364,13 +364,13 @@ public final class TestClusterDumper extends MahoutTestCase {
     DistanceMeasure measure = new EuclideanDistanceMeasure();
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
-    int desiredRank = 13;
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     Configuration config = new Configuration();
     solver.setConf(config);
     Path testData = getTestTempDirPath("testdata");
     int sampleDimension = sampleData.get(0).get().size();
     // call EigenVerificationJob separately
+    int desiredRank = 13;
     solver.run(testData, output, tmp, sampleData.size(), sampleDimension, false, desiredRank);
     Path rawEigenvectors = new Path(output, DistributedLanczosSolver.RAW_EIGENVECTORS);
     JobConf conf = new JobConf(config);

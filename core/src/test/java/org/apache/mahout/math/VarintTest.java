@@ -133,8 +133,8 @@ public final class VarintTest extends MahoutTestCase {
       assertEquals(i-1, Varint.readSignedVarInt(in));
       assertEquals(i, Varint.readSignedVarInt(in));
     }
-    assertEquals((1 << 30) - 1, Varint.readSignedVarInt(in));
-    assertEquals((1 << 30), Varint.readSignedVarInt(in));    
+    assertEquals((1L << 30) - 1, Varint.readSignedVarInt(in));
+    assertEquals((1L << 30), Varint.readSignedVarInt(in));
     assertEquals(Integer.MAX_VALUE, Varint.readSignedVarInt(in));
   }
 
