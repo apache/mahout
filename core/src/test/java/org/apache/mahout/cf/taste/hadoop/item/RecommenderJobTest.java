@@ -796,10 +796,17 @@ public class RecommenderJobTest extends TasteTestCase {
     List<RecommendedItem> recommendedToCow = recommendations.get(3L);
     assertEquals(2, recommendedToCow.size());
 
-    long itemID1 = recommendedToCow.get(0).getItemID();
-    long itemID2 = recommendedToCow.get(1).getItemID();
+    RecommendedItem item1 = recommendedToCow.get(0);
+    RecommendedItem item2 = recommendedToCow.get(1);
 
-    assertTrue((itemID1 == 1L && itemID2 == 3L) || (itemID1 == 3L && itemID2 == 1L));
+    assertEquals(1L, item1.getItemID());
+    assertEquals(3L, item2.getItemID());
+
+    /* predicted pref must be the sum of similarities:
+    *    item1: coocc(burger, hotdog) + coocc(burger, icecream) = 3 
+    *    item2: coocc(berries, hotdog) + coocc(berries, icecream) = 2 */
+    assertEquals(3, item1.getValue(), 0.05);
+    assertEquals(2, item2.getValue(), 0.05);
   }
 
   /**

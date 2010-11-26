@@ -121,32 +121,16 @@ public final class AggregateAndRecommendReducer extends
   private void reduceBooleanData(VarLongWritable userID,
                                  Iterable<PrefAndSimilarityColumnWritable> values,
                                  Context context) throws IOException, InterruptedException {
-
     /* having boolean data, each estimated preference can only be 1,
-     * so the computation is much simpler */
+     * however we can't use this to rank the recommended items,
+     * so we use the sum of similarities for that. */
     Vector predictionVector = null;
     for (PrefAndSimilarityColumnWritable prefAndSimilarityColumn : values) {
       predictionVector = predictionVector == null
           ? prefAndSimilarityColumn.getSimilarityColumn()
           : predictionVector.plus(prefAndSimilarityColumn.getSimilarityColumn());
     }
-
-    Iterator<Vector.Element> predictions = predictionVector.iterateNonZero();
-    List<RecommendedItem> recommendations = new ArrayList<RecommendedItem>();
-    while (predictions.hasNext() && recommendations.size() < recommendationsPerUser) {
-      Vector.Element prediction = predictions.next();
-      /* NaN means the user already knows this item */
-      if (!Double.isNaN(prediction.get())) {
-        long itemID = indexItemIDMap.get(prediction.index());
-        if (itemsToRecommendFor == null || itemsToRecommendFor.contains(itemID)) {
-          recommendations.add(new GenericRecommendedItem(itemID, BOOLEAN_PREF_VALUE));
-        }
-      }
-    }
-
-    if (!recommendations.isEmpty()) {
-      context.write(userID, new RecommendedItemsWritable(recommendations));
-    }
+    writeRecommendedItems(userID, predictionVector, context);
   }
 
   private void reduceNonBooleanData(VarLongWritable userID,
@@ -193,7 +177,20 @@ public final class AggregateAndRecommendReducer extends
         recommendationVector.setQuick(itemIDIndex, prediction);
       }
     }
+    writeRecommendedItems(userID, recommendationVector, context);
+  }
 
+  /**
+   * find the top entries in recommendationVector, map them to the real itemIDs and write back the result
+   *
+   * @param userID
+   * @param recommendationVector
+   * @param context
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  private void writeRecommendedItems(VarLongWritable userID, Vector recommendationVector, Context context)
+      throws IOException, InterruptedException {
     Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
     Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
 
