@@ -160,6 +160,13 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   public FastByIDMap<FastIDSet> getRawUserData() {
     return this.preferenceFromUsers;
   }
+
+  /**
+   * This is used mostly internally to the framework, and shouldn't be relied upon otherwise.
+   */
+  public FastByIDMap<FastIDSet> getRawItemData() {
+    return this.preferenceForItems;
+  }
   
   @Override
   public LongPrimitiveArrayIterator getUserIDs() {
