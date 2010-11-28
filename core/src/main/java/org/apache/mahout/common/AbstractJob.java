@@ -236,7 +236,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * 
    * @return a Map<String,Sting> containing options and their argument values.
    *  The presence of a flag can be tested using <code>containsKey</code>, while
-   *  argument values can be retrieved using <code>get(optionName</code>. The
+   *  argument values can be retrieved using <code>get(optionName)</code>. The
    *  names used for keys are the option name parameter prefixed by '--'.
    *  
    * 
