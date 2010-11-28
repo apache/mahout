@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -78,7 +79,13 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     super(dataModel, candidateItemsStrategy);
     Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
-    this.refreshHelper = new RefreshHelper(null);
+    this.refreshHelper = new RefreshHelper(new Callable<Void>() {
+      @Override
+      public Void call() {
+        capper = buildCapper();
+        return null;
+      }
+    });
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
     capper = buildCapper();
@@ -219,7 +226,6 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
-    capper = buildCapper();
   }
   
   @Override

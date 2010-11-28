@@ -24,6 +24,7 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -131,6 +132,16 @@ public final class FastMapTest extends TasteTestCase {
     Set<String> actual = map.keySet();
     assertTrue(expected.containsAll(actual));
     assertTrue(actual.containsAll(expected));
+    Iterator<String> it = actual.iterator();
+    while (it.hasNext()) {
+      String value = it.next();
+      if (!value.equals("baz")) {
+        it.remove();
+      }
+    }
+    assertTrue(map.containsKey("baz"));
+    assertFalse(map.containsKey("foo"));
+    assertFalse(map.containsKey("alpha"));
   }
 
   @Test
@@ -143,6 +154,16 @@ public final class FastMapTest extends TasteTestCase {
     Collection<String> actual = map.values();
     assertTrue(expected.containsAll(actual));
     assertTrue(actual.containsAll(expected));
+    Iterator<String> it = actual.iterator();
+    while (it.hasNext()) {
+      String value = it.next();
+      if (!value.equals("bang")) {
+        it.remove();
+      }
+    }
+    assertTrue(map.containsValue("bang"));
+    assertFalse(map.containsValue("bar"));
+    assertFalse(map.containsValue("beta"));
   }
 
   @Test

@@ -22,6 +22,7 @@ import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
 /**
  * A {@link DataModel} which loads, and can re-load, data from a JDBC-backed {@link JDBCDataModel} into memory, as a
@@ -43,11 +45,20 @@ public final class ReloadFromJDBCDataModel implements DataModel {
 
   private DataModel delegateInMemory;
   private final JDBCDataModel delegate;
+  private final RefreshHelper refreshHelper;
 
   public ReloadFromJDBCDataModel(JDBCDataModel delegate) throws TasteException {
     Preconditions.checkNotNull(delegate);
     this.delegate = delegate;
-    refresh(null);
+    refreshHelper = new RefreshHelper(new Callable<Void>() {
+      @Override
+      public Void call() {
+        reload();
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+      }
+    });
+    refreshHelper.addDependency(delegate);
+    reload();
     if (delegateInMemory == null) {
       throw new TasteException("Failed to load data into memory");
     }
@@ -55,7 +66,10 @@ public final class ReloadFromJDBCDataModel implements DataModel {
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    delegate.refresh(alreadyRefreshed);
+    refreshHelper.refresh(alreadyRefreshed);
+  }
+
+  private void reload() {
     try {
       // Load new in-memory representation,
       log.info("Loading new JDBC delegate data...");

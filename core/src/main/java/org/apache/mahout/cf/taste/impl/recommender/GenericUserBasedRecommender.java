@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.impl.recommender;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -60,7 +61,13 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
     Preconditions.checkArgument(neighborhood != null, "neighborhood is null");
     this.neighborhood = neighborhood;
     this.similarity = similarity;
-    this.refreshHelper = new RefreshHelper(null);
+    this.refreshHelper = new RefreshHelper(new Callable<Void>() {
+      @Override
+      public Void call() {
+        capper = buildCapper();
+        return null;
+      }
+    });
     refreshHelper.addDependency(dataModel);
     refreshHelper.addDependency(similarity);
     refreshHelper.addDependency(neighborhood);
@@ -171,7 +178,6 @@ public class GenericUserBasedRecommender extends AbstractRecommender implements 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
-    capper = buildCapper();
   }
   
   @Override

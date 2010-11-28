@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -32,13 +33,13 @@ import org.apache.mahout.common.LongPair;
 import com.google.common.base.Preconditions;
 
 /**
- * Caches the results from an underlying {@link org.apache.mahout.cf.taste.similarity.UserSimilarity}
- * implementation.
+ * Caches the results from an underlying {@link UserSimilarity} implementation.
  */
 public final class CachingUserSimilarity implements UserSimilarity {
   
   private final UserSimilarity similarity;
   private final Cache<LongPair,Double> similarityCache;
+  private final RefreshHelper refreshHelper;
 
   /**
    * Creates a {@link CachingUserSimilarity} on top of the given {@link UserSimilarity}.
@@ -56,6 +57,14 @@ public final class CachingUserSimilarity implements UserSimilarity {
     Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
     this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
+    this.refreshHelper = new RefreshHelper(new Callable<Void>() {
+      @Override
+      public Void call() {
+        similarityCache.clear();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(similarity);
   }
   
   @Override
@@ -69,12 +78,14 @@ public final class CachingUserSimilarity implements UserSimilarity {
     similarityCache.clear();
     similarity.setPreferenceInferrer(inferrer);
   }
+
+  public void clearCacheForUser(long userID) {
+    similarityCache.removeKeysMatching(new LongPairMatchPredicate(userID));
+  }
   
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    similarityCache.clear();
-    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
+    refreshHelper.refresh(alreadyRefreshed);
   }
   
   private static final class SimilarityRetriever implements Retriever<LongPair,Double> {

@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.impl.similarity;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -29,11 +30,13 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.common.LongPair;
 import com.google.common.base.Preconditions;
 
-/** Caches the results from an underlying {@link ItemSimilarity} implementation. */
+/**
+ * Caches the results from an underlying {@link ItemSimilarity} implementation.
+ */
 public final class CachingItemSimilarity implements ItemSimilarity {
   
-  private final ItemSimilarity similarity;
   private final Cache<LongPair,Double> similarityCache;
+  private final RefreshHelper refreshHelper;
 
   /**
    * Creates a {@link CachingItemSimilarity} on top of the given {@link ItemSimilarity}.
@@ -49,8 +52,15 @@ public final class CachingItemSimilarity implements ItemSimilarity {
    */
   public CachingItemSimilarity(ItemSimilarity similarity, int maxCacheSize) {
     Preconditions.checkArgument(similarity != null, "similarity is null");
-    this.similarity = similarity;
     this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
+    this.refreshHelper = new RefreshHelper(new Callable<Void>() {
+      @Override
+      public Void call() {
+        similarityCache.clear();
+        return null;
+      }
+    });
+    refreshHelper.addDependency(similarity);
   }
   
   @Override
@@ -71,9 +81,11 @@ public final class CachingItemSimilarity implements ItemSimilarity {
   
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    similarityCache.clear();
-    alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, similarity);
+    refreshHelper.refresh(alreadyRefreshed);
+  }
+
+  public void clearCacheForItem(long itemID) {
+    similarityCache.removeKeysMatching(new LongPairMatchPredicate(itemID));
   }
   
   private static final class SimilarityRetriever implements Retriever<LongPair,Double> {
@@ -88,5 +100,5 @@ public final class CachingItemSimilarity implements ItemSimilarity {
       return similarity.itemSimilarity(key.getFirst(), key.getSecond());
     }
   }
-  
+
 }

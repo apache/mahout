@@ -20,6 +20,8 @@ package org.apache.mahout.cf.taste.impl.common;
 import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.TasteException;
 
+import java.util.Iterator;
+
 /**
  * <p>
  * An efficient Map-like class which caches values for keys. Values are not "put" into a ;
@@ -108,6 +110,36 @@ public final class Cache<K,V> implements Retriever<K,V> {
       cache.remove(key);
     }
   }
+
+  /**
+   * Clears all cache entries whose key matches the given predicate.
+   */
+  public void removeKeysMatching(MatchPredicate<K> predicate) {
+    synchronized (cache) {
+      Iterator<K> it = cache.keySet().iterator();
+      while (it.hasNext()) {
+        K key = it.next();
+        if (predicate.matches(key)) {
+          it.remove();
+        }
+      }
+    }
+  }
+
+  /**
+   * Clears all cache entries whose value matches the given predicate.
+   */
+  public void removeValueMatching(MatchPredicate<V> predicate) {
+    synchronized (cache) {
+      Iterator<V> it = cache.values().iterator();
+      while (it.hasNext()) {
+        V value = it.next();
+        if (predicate.matches(value)) {
+          it.remove();
+        }
+      }
+    }
+  }
   
   /**
    * <p>
@@ -134,6 +166,13 @@ public final class Cache<K,V> implements Retriever<K,V> {
   @Override
   public String toString() {
     return "Cache[retriever:" + retriever + ']';
+  }
+
+  /**
+   * Used by {#link #removeKeysMatching(Object)} to decide things that are matching.
+   */
+  public interface MatchPredicate<T> {
+    boolean matches(T thing);
   }
   
 }
