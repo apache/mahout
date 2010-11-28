@@ -23,7 +23,7 @@ package org.apache.mahout.cf.taste.hadoop;
  * <p>
  * Intended for use with {@link org.apache.hadoop.mapreduce.lib.input.TextInputFormat};
  * accepts line number / line pairs as
- * {@link org.apache.mahout.math.VarLongWritable}/{@link org.apache.hadoop.io.Text} pairs.
+ * {@link org.apache.hadoop.io.LongWritable}/{@link org.apache.hadoop.io.Text} pairs.
  * </p>
  * 
  * <p>
