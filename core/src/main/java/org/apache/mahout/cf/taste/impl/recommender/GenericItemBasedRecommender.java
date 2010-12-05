@@ -73,6 +73,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   private final RefreshHelper refreshHelper;
   private EstimatedPreferenceCapper capper;
 
+  private static final boolean EXCLUDE_ITEM_IF_NOT_SIMILAR_TO_ALL_BY_DEFAULT = true;
+
   public GenericItemBasedRecommender(DataModel dataModel,
                                      ItemSimilarity similarity,
                                      CandidateItemsStrategy candidateItemsStrategy) {
@@ -144,16 +146,36 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany) throws TasteException {
-    return mostSimilarItems(itemIDs, howMany, null);
+    TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, null,
+        EXCLUDE_ITEM_IF_NOT_SIMILAR_TO_ALL_BY_DEFAULT);
+    return doMostSimilarItems(itemIDs, howMany, estimator);
   }
   
   @Override
   public List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany,
                                                 Rescorer<LongPair> rescorer) throws TasteException {
-    TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, rescorer);
+    TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, rescorer,
+        EXCLUDE_ITEM_IF_NOT_SIMILAR_TO_ALL_BY_DEFAULT);
     return doMostSimilarItems(itemIDs, howMany, estimator);
   }
-  
+
+  public List<RecommendedItem> mostSimilarItems(long[] itemIDs,
+                                         int howMany,
+                                         boolean excludeItemIfNotSimilarToAll) throws TasteException {
+    TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, null,
+        excludeItemIfNotSimilarToAll);
+    return doMostSimilarItems(itemIDs, howMany, estimator);
+  }
+
+  @Override
+  public List<RecommendedItem> mostSimilarItems(long[] itemIDs, int howMany,
+                                                Rescorer<LongPair> rescorer,
+                                                boolean excludeItemIfNotSimilarToAll) throws TasteException {
+    TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, rescorer,
+        excludeItemIfNotSimilarToAll);
+    return doMostSimilarItems(itemIDs, howMany, estimator);
+  }
+
   @Override
   public List<RecommendedItem> recommendedBecause(long userID, long itemID, int howMany) throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
@@ -284,11 +306,14 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     private final long[] toItemIDs;
     private final ItemSimilarity similarity;
     private final Rescorer<LongPair> rescorer;
+    private final boolean excludeItemIfNotSimilarToAll;
     
-    private MultiMostSimilarEstimator(long[] toItemIDs, ItemSimilarity similarity, Rescorer<LongPair> rescorer) {
+    private MultiMostSimilarEstimator(long[] toItemIDs, ItemSimilarity similarity, Rescorer<LongPair> rescorer,
+        boolean excludeItemIfNotSimilarToAll) {
       this.toItemIDs = toItemIDs;
       this.similarity = similarity;
       this.rescorer = rescorer;
+      this.excludeItemIfNotSimilarToAll = excludeItemIfNotSimilarToAll;
     }
     
     @Override
@@ -305,9 +330,12 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
         if (rescorer != null) {
           estimate = rescorer.rescore(pair, estimate);
         }
-        average.addDatum(estimate);
+        if (excludeItemIfNotSimilarToAll || !Double.isNaN(estimate)) {
+          average.addDatum(estimate);
+        }
       }
-      return average.getAverage();
+      double averageEstimate = average.getAverage();
+      return averageEstimate == 0 ? Double.NaN : averageEstimate;
     }
   }
   

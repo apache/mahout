@@ -80,7 +80,41 @@ public interface ItemBasedRecommender extends Recommender {
   List<RecommendedItem> mostSimilarItems(long[] itemIDs,
                                          int howMany,
                                          Rescorer<LongPair> rescorer) throws TasteException;
-  
+
+  /**
+   * @param itemIDs
+   *          IDs of item for which to find most similar other items
+   * @param howMany
+   *          desired number of most similar items to find
+   * @param excludeItemIfNotSimilarToAll
+   *          exclude an item if it is not similar to each of the input items
+   * @return items most similar to the given items, ordered from most similar to least
+   * @throws TasteException
+   *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   */
+  List<RecommendedItem> mostSimilarItems(long[] itemIDs,
+                                         int howMany,
+                                         boolean excludeItemIfNotSimilarToAll) throws TasteException;
+
+  /**
+   * @param itemIDs
+   *          IDs of item for which to find most similar other items
+   * @param howMany
+   *          desired number of most similar items to find
+   * @param rescorer
+   *          {@link Rescorer} which can adjust item-item similarity estimates used to determine most similar
+   *          items
+   * @param excludeItemIfNotSimilarToAll
+   *          exclude an item if it is not similar to each of the input items
+   * @return items most similar to the given items, ordered from most similar to least
+   * @throws TasteException
+   *           if an error occurs while accessing the {@link org.apache.mahout.cf.taste.model.DataModel}
+   */
+  List<RecommendedItem> mostSimilarItems(long[] itemIDs,
+                                         int howMany,
+                                         Rescorer<LongPair> rescorer,
+                                         boolean excludeItemIfNotSimilarToAll) throws TasteException;
+
   /**
    * <p>
    * Lists the items that were most influential in recommending a given item to a given user. Exactly how this

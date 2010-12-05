@@ -167,6 +167,32 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
   }
 
   @Test
+  public void testMostSimilarToMultipleExcludeIfNotSimilarToAll() throws Exception {
+    ItemBasedRecommender recommender = buildRecommender2();
+    List<RecommendedItem> similar = recommender.mostSimilarItems(new long[] {3, 4}, 2);
+    assertNotNull(similar);
+    assertEquals(1, similar.size());
+    RecommendedItem first = similar.get(0);
+    assertEquals(0, first.getItemID());
+    assertEquals(0.2f, first.getValue(), EPSILON);
+  }
+
+  @Test
+  public void testMostSimilarToMultipleDontExcludeIfNotSimilarToAll() throws Exception {
+    ItemBasedRecommender recommender = buildRecommender2();
+    List<RecommendedItem> similar = recommender.mostSimilarItems(new long[] {1, 2, 4}, 10, false);
+    assertNotNull(similar);
+    assertEquals(2, similar.size());
+    RecommendedItem first = similar.get(0);
+    RecommendedItem second = similar.get(1);
+    assertEquals(0, first.getItemID());
+    assertEquals(0.933333333f, first.getValue(), EPSILON);
+    assertEquals(3, second.getItemID());
+    assertEquals(-0.2f, second.getValue(), EPSILON);
+  }
+
+
+  @Test
   public void testRecommendedBecause() throws Exception {
     ItemBasedRecommender recommender = buildRecommender2();
     List<RecommendedItem> recommendedBecause = recommender.recommendedBecause(1, 4, 3);
