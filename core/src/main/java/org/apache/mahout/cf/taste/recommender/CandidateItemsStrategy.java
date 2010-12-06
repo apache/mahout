@@ -27,7 +27,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 public interface CandidateItemsStrategy {
 
   /**
-   * #return IDs of all items that could be recommended to the user
+   * @return IDs of all items that could be recommended to the user
    */
   FastIDSet getCandidateItems(long userID, DataModel dataModel) throws TasteException;
   

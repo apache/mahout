@@ -29,7 +29,7 @@ import com.google.common.base.Preconditions;
 /**
  * @see FastByIDMap
  */
-public final class FastIDSet implements Serializable, Cloneable {
+public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> {
   
   private static final double ALLOWED_LOAD_FACTOR = 1.5;
   

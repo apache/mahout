@@ -17,6 +17,8 @@
 
 package org.apache.mahout.cf.taste.hadoop;
 
+import java.util.Arrays;
+
 import org.apache.hadoop.io.ArrayWritable;
 
 /**
@@ -35,4 +37,10 @@ public class EntityPrefWritableArrayWritable extends ArrayWritable {
   public EntityPrefWritable[] getPrefs() {
     return (EntityPrefWritable[]) toArray();
   }
+
+  @Override
+  public String toString() {
+    return Arrays.toString(toStrings());
+  }
+
 }
