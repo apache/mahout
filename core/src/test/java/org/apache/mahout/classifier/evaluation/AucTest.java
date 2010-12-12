@@ -39,6 +39,29 @@ public class AucTest extends MahoutTestCase{
   }
 
   @Test
+  public void testTies() {
+    Auc auc = new Auc();
+    Random gen = RandomUtils.getRandom();
+    auc.setProbabilityScore(false);
+    for (int i=0;i<100000;i++) {
+      auc.add(0, gen.nextGaussian());
+      auc.add(1, gen.nextGaussian() + 1);
+    }
+
+    // ties outside the normal range could cause index out of range
+    auc.add(0, 5.0);
+    auc.add(0, 5.0);
+    auc.add(0, 5.0);
+    auc.add(0, 5.0);
+
+    auc.add(1, 5.0);
+    auc.add(1, 5.0);
+    auc.add(1, 5.0);
+
+    assertEquals(0.76, auc.auc(), 0.05);
+  }
+
+  @Test
   public void testEntropy() {
     Auc auc = new Auc();
     Random gen = RandomUtils.getRandom();

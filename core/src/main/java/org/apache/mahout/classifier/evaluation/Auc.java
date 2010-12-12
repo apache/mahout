@@ -157,18 +157,16 @@ public class Auc {
 
         // how many negatives are tied?
         int k0 = 0;
-        while (i0 < n0 && v0 == tieScore) {
+        while (i0 < n0 && scores[0].get(i0) == tieScore) {
           k0++;
           i0++;
-          v0 = scores[0].get(i0);
         }
 
         // and how many positives
         int k1 = 0;
-        while (i1 < n1 && v1 == tieScore) {
+        while (i1 < n1 && scores[1].get(i1) == tieScore) {
           k1++;
           i1++;
-          v1 = scores[1].get(i1);
         }
 
         // we found k0 + k1 tied values which have
