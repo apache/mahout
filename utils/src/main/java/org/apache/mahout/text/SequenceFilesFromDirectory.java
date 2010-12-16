@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.cli2.CommandLine;
@@ -63,9 +65,17 @@ public final class SequenceFilesFromDirectory {
                                   String outputDir,
                                   String prefix,
                                   int chunkSizeInMB,
-                                  Charset charset) throws IOException {
+                                  Charset charset,
+                                  String filter) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
     ChunkedWriter writer = createNewChunkedWriter(chunkSizeInMB, outputDir);
-    parentDir.listFiles(new PrefixAdditionFilter(prefix, writer, charset));
+    if ("PrefixAdditionFilter".equals(filter)) {
+      parentDir.listFiles(new PrefixAdditionFilter(prefix, writer, charset));
+    } else {
+      Class filterClass = Class.forName(filter);
+      Constructor<FileFilter> constructor = filterClass.getConstructor(String.class, ChunkedWriter.class, Charset.class);
+      FileFilter fileFilter = constructor.newInstance(prefix, writer, charset);
+      parentDir.listFiles(fileFilter);
+    }
     writer.close();
   }
   
@@ -173,12 +183,16 @@ public final class SequenceFilesFromDirectory {
     Option charsetOpt = obuilder.withLongName("charset").withRequired(true).withArgument(
       abuilder.withName("charset").withMinimum(1).withMaximum(1).create()).withDescription(
       "The name of the character encoding of the input files").withShortName("c").create();
+
+    Option fileFilterOpt = obuilder.withLongName("fileFilterClass").withArgument(
+      abuilder.withName("fileFilterClass").withMinimum(1).withMaximum(1).create()).withDescription(
+      "The name of the class to use for file parsing. Default: PrefixAdditionFilter").withShortName("filter").create();
     
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     
     Group group = gbuilder.withName("Options").withOption(keyPrefixOpt).withOption(chunkSizeOpt).withOption(
-      charsetOpt).withOption(outputDirOpt).withOption(helpOpt).withOption(parentOpt).create();
+      charsetOpt).withOption(outputDirOpt).withOption(fileFilterOpt).withOption(helpOpt).withOption(parentOpt).create();
     
     try {
       Parser parser = new Parser();
@@ -201,10 +215,16 @@ public final class SequenceFilesFromDirectory {
       if (cmdLine.hasOption(keyPrefixOpt)) {
         prefix = (String) cmdLine.getValue(keyPrefixOpt);
       }
+
+      String filter = "PrefixAdditionFilter";
+      if (cmdLine.hasOption(fileFilterOpt)) {
+        filter = (String) cmdLine.getValue(fileFilterOpt);
+      }
+
       Charset charset = Charset.forName((String) cmdLine.getValue(charsetOpt));
       SequenceFilesFromDirectory dir = new SequenceFilesFromDirectory();
       
-      dir.createSequenceFiles(parentDir, outputDir, prefix, chunkSize, charset);
+      dir.createSequenceFiles(parentDir, outputDir, prefix, chunkSize, charset, filter);
     } catch (OptionException e) {
       log.error("Exception", e);
       CommandLineUtil.printHelp(group);
