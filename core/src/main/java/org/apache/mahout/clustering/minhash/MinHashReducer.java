@@ -29,13 +29,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MinHashReducer extends Reducer<Text, Writable, Text, Writable> {
-
+public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
+  
   private int minClusterSize;
   private boolean debugOutput;
-
+  
   enum Clusters {
-    Accepted, Discarded
+    Accepted,
+    Discarded
   }
   
   @Override
@@ -45,13 +46,13 @@ public class MinHashReducer extends Reducer<Text, Writable, Text, Writable> {
     this.minClusterSize = conf.getInt(MinhashOptionCreator.MIN_CLUSTER_SIZE, 5);
     this.debugOutput = conf.getBoolean(MinhashOptionCreator.DEBUG_OUTPUT, false);
   }
-
+  
   /**
    * output the items clustered
    */
   @Override
-  protected void reduce(Text cluster, Iterable<Writable> points, Context context)
-    throws IOException, InterruptedException {
+  protected void reduce(Text cluster, Iterable<Writable> points, Context context) throws IOException,
+                                                                                 InterruptedException {
     Collection<Writable> pointList = new ArrayList<Writable>();
     for (Writable point : points) {
       if (debugOutput) {
@@ -72,5 +73,5 @@ public class MinHashReducer extends Reducer<Text, Writable, Text, Writable> {
       context.getCounter(Clusters.Discarded).increment(1);
     }
   }
-
+  
 }

@@ -32,7 +32,7 @@ public class HashFactory {
 
   public static HashFunction[] createHashFunctions(HashType type, int numFunctions) {
     HashFunction[] hashFunction = new HashFunction[numFunctions];
-    Random seed = new Random(11);
+    Random seed = RandomUtils.getRandom(11);
     switch (type) {
       case LINEAR:
         for (int i = 0; i < numFunctions; i++) {

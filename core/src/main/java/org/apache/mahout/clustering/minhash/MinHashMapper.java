@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class MinHashMapper extends Mapper<Text, Writable, Text, Writable> {
-
+public class MinHashMapper extends Mapper<Text,Writable,Text,Writable> {
+  
   private static final Logger log = LoggerFactory.getLogger(MinHashMapper.class);
-
+  
   private HashFunction[] hashFunction;
   private int numHashFunctions;
   private int keyGroups;
@@ -41,9 +41,9 @@ public class MinHashMapper extends Mapper<Text, Writable, Text, Writable> {
   private boolean debugOutput;
   private int[] minHashValues;
   private byte[] bytesToHash;
-
+  
   @Override
-  protected void setup(Context context) throws IOException,  InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
     this.numHashFunctions = conf.getInt(MinhashOptionCreator.NUM_HASH_FUNCTIONS, 10);
@@ -53,7 +53,7 @@ public class MinHashMapper extends Mapper<Text, Writable, Text, Writable> {
     this.minVectorSize = conf.getInt(MinhashOptionCreator.MIN_VECTOR_SIZE, 5);
     String htype = conf.get(MinhashOptionCreator.HASH_TYPE, "linear");
     this.debugOutput = conf.getBoolean(MinhashOptionCreator.DEBUG_OUTPUT, false);
-
+    
     HashType hashType;
     try {
       hashType = HashType.valueOf(htype);
@@ -63,13 +63,13 @@ public class MinHashMapper extends Mapper<Text, Writable, Text, Writable> {
     }
     hashFunction = HashFactory.createHashFunctions(hashType, numHashFunctions);
   }
-
+  
   /**
-   * Hash all items with each function and retain min. value for each iteration.
-   * We up with X number of minhash signatures.
+   * Hash all items with each function and retain min. value for each iteration. We up with X number of
+   * minhash signatures.
    * 
-   * Now depending upon the number of key-groups (1 - 4) concatenate that many
-   * minhash values to form cluster-id as 'key' and item-id as 'value'
+   * Now depending upon the number of key-groups (1 - 4) concatenate that many minhash values to form
+   * cluster-id as 'key' and item-id as 'value'
    */
   @Override
   public void map(Text item, Writable features, Context context) throws IOException, InterruptedException {
@@ -81,6 +81,7 @@ public class MinHashMapper extends Mapper<Text, Writable, Text, Writable> {
     for (int i = 0; i < numHashFunctions; i++) {
       minHashValues[i] = Integer.MAX_VALUE;
     }
+    
     for (int i = 0; i < numHashFunctions; i++) {
       for (Vector.Element ele : featureVector) {
         int value = (int) ele.get();
@@ -95,10 +96,10 @@ public class MinHashMapper extends Mapper<Text, Writable, Text, Writable> {
       }
     }
     // output the cluster information
-    for (int i = 0; i < numHashFunctions; i += keyGroups) {
+    for (int i = 0; i < numHashFunctions; i++) {
       StringBuilder clusterIdBuilder = new StringBuilder();
-      for (int j = 0; j < keyGroups && (i + j) < numHashFunctions; j++) {
-        clusterIdBuilder.append(minHashValues[i + j]).append('-');
+      for (int j = 0; j < keyGroups; j++) {
+        clusterIdBuilder.append(minHashValues[(i + j) % numHashFunctions]).append('-');
       }
       String clusterId = clusterIdBuilder.toString();
       clusterId = clusterId.substring(0, clusterId.lastIndexOf('-'));
