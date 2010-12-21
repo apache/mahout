@@ -84,7 +84,8 @@ public abstract class SolverTest extends MahoutTestCase {
                                                           double entryMean) {
     SparseRowMatrix m = new SparseRowMatrix(new int[]{numRows, numCols});
     //double n = 0;
-    Random r = RandomUtils.getRandom();
+    //Random r = RandomUtils.getRandom();
+    Random r = new Random(1234L);
     for (int i = 0; i < nonNullRows; i++) {
       SequentialAccessSparseVector v = new SequentialAccessSparseVector(numCols);
       for (int j = 0; j < entriesPerRow; j++) {
