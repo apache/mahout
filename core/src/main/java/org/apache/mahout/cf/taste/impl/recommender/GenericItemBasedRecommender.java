@@ -159,9 +159,10 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     return doMostSimilarItems(itemIDs, howMany, estimator);
   }
 
+  @Override
   public List<RecommendedItem> mostSimilarItems(long[] itemIDs,
-                                         int howMany,
-                                         boolean excludeItemIfNotSimilarToAll) throws TasteException {
+                                                int howMany,
+                                                boolean excludeItemIfNotSimilarToAll) throws TasteException {
     TopItems.Estimator<Long> estimator = new MultiMostSimilarEstimator(itemIDs, similarity, null,
         excludeItemIfNotSimilarToAll);
     return doMostSimilarItems(itemIDs, howMany, estimator);

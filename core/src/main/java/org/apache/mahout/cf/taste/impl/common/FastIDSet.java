@@ -137,6 +137,7 @@ public final class FastIDSet implements Serializable, Cloneable, Iterable<Long> 
     return false;
   }
   
+  @Override
   public LongPrimitiveIterator iterator() {
     return new KeyIterator();
   }

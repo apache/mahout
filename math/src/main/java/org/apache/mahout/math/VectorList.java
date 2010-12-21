@@ -190,7 +190,7 @@ public class VectorList extends AbstractMatrix {
    */
   public Matrix like() {
     VectorList r = new VectorList(columns);
-    int i = 0;
+    //int i = 0;
     for (Vector vector : data) {
       r.adjoinRow(vector.like());
     }

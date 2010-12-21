@@ -78,7 +78,7 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
       long userID1 = someUsers.next();
       LongPrimitiveIterator it2 = cluster2.iterator();
       while (it2.hasNext()) {
-        double theSimilarity = similarity.userSimilarity(userID1, it2.next());
+        double theSimilarity = similarity.userSimilarity(userID1, it2.nextLong());
         if (theSimilarity < leastSimilarity) {
           leastSimilarity = theSimilarity;
         }

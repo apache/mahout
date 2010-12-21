@@ -103,13 +103,13 @@ public class TestMinHashClustering extends MahoutTestCase {
     return values;
   }
   
-  private void runPairwiseSimilarity(List<Vector> clusteredItems, double simThreshold, String msg) {
+  private static void runPairwiseSimilarity(List<Vector> clusteredItems, double simThreshold, String msg) {
     if (clusteredItems.size() > 1) {
       for (int i = 0; i < clusteredItems.size(); i++) {
         Set<Integer> itemSet1 = getValues(clusteredItems.get(i));
         for (int j = i + 1; j < clusteredItems.size(); j++) {
           Set<Integer> itemSet2 = getValues(clusteredItems.get(j));
-          Set<Integer> union = new HashSet<Integer>();
+          Collection<Integer> union = new HashSet<Integer>();
           union.addAll(itemSet1);
           union.addAll(itemSet2);
           Collection<Integer> intersect = new HashSet<Integer>();

@@ -374,15 +374,13 @@ public final class TransactionTree implements Writable {
       int transactionSetSize = transactionSet.size();
       vInt.set(transactionSetSize);
       vInt.write(out);
-      for (int i = 0; i < transactionSetSize; i++) {
-        Pair<List<Integer>,Long> transaction = transactionSet.get(i);
-        
+      for (Pair<List<Integer>, Long> transaction : transactionSet) {
         vLong.set(transaction.getSecond());
         vLong.write(out);
-        
+
         vInt.set(transaction.getFirst().size());
         vInt.write(out);
-        
+
         for (Integer item : transaction.getFirst()) {
           vInt.set(item);
           vInt.write(out);

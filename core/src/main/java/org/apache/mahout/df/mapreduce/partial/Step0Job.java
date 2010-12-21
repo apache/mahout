@@ -176,9 +176,9 @@ public class Step0Job {
     }
     
     // update the values' first ids
-    for (int p = 0; p < numMaps; p++) {
-      int order = ArrayUtils.indexOf(sorted, values.get(p));
-      values.get(p).firstId = orderedIds[order];
+    for (Step0Output value : values) {
+      int order = ArrayUtils.indexOf(sorted, value);
+      value.firstId = orderedIds[order];
     }
     
     // reorder the values in hadoop's order

@@ -247,9 +247,9 @@ public class CDbwEvaluator {
       int r = repPtsI.size();
       double sumJ = 0.0;
       // compute the term density (eqn 6)
-      for (int j = 0; j < r; j++) {
+      for (VectorWritable pt : repPtsI) {
         // compute f(x, vIJ) (eqn 7)
-        Vector repJ = repPtsI.get(j).get();
+        Vector repJ = pt.get();
         double densityIJ = (measure.distance(cluster.getCenter(), repJ) <= stdev ? 1.0 : 0.0);
         // accumulate sumJ
         sumJ += densityIJ / stdev;

@@ -74,7 +74,7 @@ public class SamplingCandidateItemsStrategy implements CandidateItemsStrategy {
     FastIDSet itemIDs = dataModel.getItemIDsFromUser(userID);
     LongPrimitiveIterator itemIDIterator = itemIDs.iterator();
     while (itemIDIterator.hasNext()) {
-      long itemID = itemIDIterator.next();
+      long itemID = itemIDIterator.nextLong();
       PreferenceArray prefs = dataModel.getPreferencesForItem(itemID);
       int prefsConsidered = Math.min(prefs.length(), maxPrefsPerItemConsidered);
       Iterator<Preference> sampledPrefs = new FixedSizeSamplingIterator(prefsConsidered, prefs.iterator());

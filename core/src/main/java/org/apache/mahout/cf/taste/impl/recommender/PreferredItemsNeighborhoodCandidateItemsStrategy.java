@@ -36,7 +36,7 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategy implements C
     FastIDSet itemIDs = dataModel.getItemIDsFromUser(userID);
     LongPrimitiveIterator itemIDIterator = itemIDs.iterator();
     while (itemIDIterator.hasNext()) {
-      long itemID = itemIDIterator.next();
+      long itemID = itemIDIterator.nextLong();
       PreferenceArray prefs2 = dataModel.getPreferencesForItem(itemID);
       int size2 = prefs2.length();
       for (int j = 0; j < size2; j++) {

@@ -295,7 +295,7 @@ public class EigenVerificationJob extends AbstractJob {
 
     eigenVerifier = new SimpleEigenVerifier();
     //OrthonormalityVerifier orthoVerifier = new OrthonormalityVerifier();
-    VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
+    //VectorIterable pairwiseInnerProducts = computePairwiseInnerProducts();
     // FIXME: Why is the above vector computed if it is never used?
 
     Map<MatrixSlice, EigenStatus> eigenMetaData = verifyEigens();

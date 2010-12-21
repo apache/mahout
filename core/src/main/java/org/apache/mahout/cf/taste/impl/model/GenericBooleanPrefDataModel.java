@@ -82,7 +82,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
       itemIDSet.addAll(itemIDs);
       LongPrimitiveIterator it = itemIDs.iterator();
       while (it.hasNext()) {
-        long itemID = it.next();
+        long itemID = it.nextLong();
         FastIDSet userIDs = preferenceForItems.get(itemID);
         if (userIDs == null) {
           userIDs = new FastIDSet(2);
@@ -188,7 +188,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     LongPrimitiveIterator it = itemIDs.iterator();
     while (it.hasNext()) {
       prefArray.setUserID(i, userID);
-      prefArray.setItemID(i, it.next());
+      prefArray.setItemID(i, it.nextLong());
       i++;
     }
     return prefArray;
@@ -218,7 +218,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     int i = 0;
     LongPrimitiveIterator it = userIDs.iterator();
     while (it.hasNext()) {
-      prefArray.setUserID(i, it.next());
+      prefArray.setUserID(i, it.nextLong());
       prefArray.setItemID(i, itemID);
       i++;
     }
