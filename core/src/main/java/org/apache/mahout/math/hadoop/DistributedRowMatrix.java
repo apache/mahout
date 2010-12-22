@@ -153,8 +153,9 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       throw new CardinalityException(numRows, other.numRows());
     }
     Path outPath = new Path(outputTmpBasePath.getParent(), "productWith-" + (System.nanoTime() & 0xFF));
-    JobConf conf = MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
-    JobClient.runJob(conf);
+    Configuration conf =
+        MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
+    JobClient.runJob(new JobConf(conf));
     DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numCols, other.numCols());
     out.setConf(conf);
     return out;
@@ -162,8 +163,8 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
 
   public DistributedRowMatrix transpose() throws IOException {
     Path outputPath = new Path(rowPath.getParent(), "transpose-" + (System.nanoTime() & 0xFF));
-    JobConf conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
-    JobClient.runJob(conf);
+    Configuration conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
+    JobClient.runJob(new JobConf(conf));
     DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
     m.setConf(this.conf);
     return m;
@@ -172,12 +173,12 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   @Override
   public Vector times(Vector v) {
     try {
-      JobConf conf = TimesSquaredJob.createTimesJobConf(v,
-                                                        numRows,
-                                                        rowPath,
-                                                        new Path(outputTmpPath,
-                                                                 Long.toString(System.nanoTime())));
-      JobClient.runJob(conf);
+      Configuration conf =
+          TimesSquaredJob.createTimesJobConf(v,
+                                             numRows,
+                                             rowPath,
+                                             new Path(outputTmpPath, Long.toString(System.nanoTime())));
+      JobClient.runJob(new JobConf(conf));
       return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);
@@ -187,11 +188,12 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   @Override
   public Vector timesSquared(Vector v) {
     try {
-      JobConf conf = TimesSquaredJob.createTimesSquaredJobConf(v,
-                                                               rowPath,
-                                                               new Path(outputTmpBasePath,
-                                                                        new Path(Long.toString(System.nanoTime()))));
-      JobClient.runJob(conf);
+      Configuration conf =
+          TimesSquaredJob.createTimesSquaredJobConf(v,
+                                                    rowPath,
+                                                    new Path(outputTmpBasePath,
+                                                             new Path(Long.toString(System.nanoTime()))));
+      JobClient.runJob(new JobConf(conf));
       return TimesSquaredJob.retrieveTimesSquaredOutputVector(conf);
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);

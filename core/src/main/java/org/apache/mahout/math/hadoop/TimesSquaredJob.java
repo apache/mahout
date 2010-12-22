@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -58,9 +59,9 @@ public final class TimesSquaredJob {
 
   private TimesSquaredJob() { }
 
-  public static JobConf createTimesSquaredJobConf(Vector v, 
-                                                  Path matrixInputPath, 
-                                                  Path outputVectorPath) throws IOException {
+  public static Configuration createTimesSquaredJobConf(Vector v,
+                                                        Path matrixInputPath,
+                                                        Path outputVectorPath) throws IOException {
     return createTimesSquaredJobConf(v,
                                      matrixInputPath,
                                      outputVectorPath,
@@ -68,10 +69,10 @@ public final class TimesSquaredJob {
                                      VectorSummingReducer.class);
   }
 
-  public static JobConf createTimesJobConf(Vector v,
-                                           int outDim,
-                                           Path matrixInputPath,
-                                           Path outputVectorPath) throws IOException {
+  public static Configuration createTimesJobConf(Vector v,
+                                                 int outDim,
+                                                 Path matrixInputPath,
+                                                 Path outputVectorPath) throws IOException {
     return createTimesSquaredJobConf(v,
                                      outDim,
                                      matrixInputPath,
@@ -81,20 +82,22 @@ public final class TimesSquaredJob {
   }
 
 
-  public static JobConf createTimesSquaredJobConf(Vector v,
-                                                  Path matrixInputPath,
-                                                  Path outputVectorPathBase,
-                                                  Class<? extends TimesSquaredMapper> mapClass,
-                                                  Class<? extends VectorSummingReducer> redClass) throws IOException {
+  public static Configuration createTimesSquaredJobConf(Vector v,
+                                                        Path matrixInputPath,
+                                                        Path outputVectorPathBase,
+                                                        Class<? extends TimesSquaredMapper> mapClass,
+                                                        Class<? extends VectorSummingReducer> redClass)
+    throws IOException {
     return createTimesSquaredJobConf(v, v.size(), matrixInputPath, outputVectorPathBase, mapClass, redClass);
   }
 
-  public static JobConf createTimesSquaredJobConf(Vector v,
-                                                  int outputVectorDim,
-                                                  Path matrixInputPath,
-                                                  Path outputVectorPathBase,
-                                                  Class<? extends TimesSquaredMapper> mapClass,
-                                                  Class<? extends VectorSummingReducer> redClass) throws IOException {
+  public static Configuration createTimesSquaredJobConf(Vector v,
+                                                        int outputVectorDim,
+                                                        Path matrixInputPath,
+                                                        Path outputVectorPathBase,
+                                                        Class<? extends TimesSquaredMapper> mapClass,
+                                                        Class<? extends VectorSummingReducer> redClass)
+    throws IOException {
     JobConf conf = new JobConf(TimesSquaredJob.class);
     conf.setJobName("TimesSquaredJob: " + matrixInputPath);
     FileSystem fs = FileSystem.get(conf);
@@ -129,8 +132,8 @@ public final class TimesSquaredJob {
     return conf;
   }
 
-  public static Vector retrieveTimesSquaredOutputVector(JobConf conf) throws IOException {
-    Path outputPath = FileOutputFormat.getOutputPath(conf);
+  public static Vector retrieveTimesSquaredOutputVector(Configuration conf) throws IOException {
+    Path outputPath = FileOutputFormat.getOutputPath(new JobConf(conf));
     FileSystem fs = FileSystem.get(conf);
     Path outputFile = new Path(outputPath, "part-00000");
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, outputFile, conf);
