@@ -111,7 +111,7 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
   }
   
   /**
-   * Useful for testing. Configures the mapper without using a JobConf<br>
+   * Useful for testing. Configures the mapper without using a Configuration<br>
    * TODO we don't need the keys partitions, the tree ids should suffice
    * 
    * @param partition

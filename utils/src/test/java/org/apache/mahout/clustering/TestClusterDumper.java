@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -343,12 +342,12 @@ public final class TestClusterDumper extends MahoutTestCase {
 
     // now multiply the testdata matrix and the eigenvector matrix
     DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank - 1, sampleDimension);
-    JobConf conf = new JobConf(config);
-    svdT.configure(conf);
+    Configuration conf = new Configuration(config);
+    svdT.setConf(conf);
     DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(), sampleDimension);
-    a.configure(conf);
+    a.setConf(conf);
     DistributedRowMatrix sData = a.transpose().times(svdT.transpose());
-    sData.configure(conf);
+    sData.setConf(conf);
 
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false, false);
@@ -373,17 +372,17 @@ public final class TestClusterDumper extends MahoutTestCase {
     int desiredRank = 13;
     solver.run(testData, output, tmp, sampleData.size(), sampleDimension, false, desiredRank);
     Path rawEigenvectors = new Path(output, DistributedLanczosSolver.RAW_EIGENVECTORS);
-    JobConf conf = new JobConf(config);
+    Configuration conf = new Configuration(config);
     new EigenVerificationJob().run(testData, rawEigenvectors, output, tmp, 0.5, 0.0, true, conf);
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
 
     // now multiply the testdata matrix and the eigenvector matrix
     DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank - 1, sampleDimension);
-    svdT.configure(conf);
+    svdT.setConf(conf);
     DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(), sampleDimension);
-    a.configure(conf);
+    a.setConf(conf);
     DistributedRowMatrix sData = a.transpose().times(svdT.transpose());
-    sData.configure(conf);
+    sData.setConf(conf);
 
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false, false);

@@ -17,12 +17,12 @@
 
 package org.apache.mahout.common.parameters;
 
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 
 public class IntegerParameter extends AbstractParameter<Integer> {
   
-  public IntegerParameter(String prefix, String name, JobConf jobConf, int defaultValue, String description) {
-    super(Integer.class, prefix, name, jobConf, defaultValue, description);
+  public IntegerParameter(String prefix, String name, Configuration conf, int defaultValue, String description) {
+    super(Integer.class, prefix, name, conf, defaultValue, description);
   }
   
   @Override

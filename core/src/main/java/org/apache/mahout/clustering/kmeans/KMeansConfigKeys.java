@@ -18,7 +18,7 @@
 package org.apache.mahout.clustering.kmeans;
 
 /**
- * This class holds all config keys that are relevant to be used in the KMeans MapReduce JobConf.
+ * This class holds all config keys that are relevant to be used in the KMeans MapReduce configuration.
  * */
 public interface KMeansConfigKeys {
   /** Configuration key for distance measure to use. */

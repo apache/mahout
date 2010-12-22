@@ -22,8 +22,6 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.mahout.clustering.kmeans.KMeansDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +32,7 @@ public final class HadoopUtil {
   private HadoopUtil() { }
   
   public static void overwriteOutput(Path output) throws IOException {
-    Configuration conf = new JobConf(KMeansDriver.class);
-    FileSystem fs = FileSystem.get(output.toUri(), conf);
+    FileSystem fs = FileSystem.get(output.toUri(), new Configuration());
     //boolean wasFile = fs.isFile(output);
     if (fs.exists(output)) {
       log.info("Deleting {}", output);

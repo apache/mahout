@@ -128,9 +128,6 @@ public class FuzzyKMeansClusterer {
 
   /**
    * Configure the distance measure from the job
-   * 
-   * @param job
-   *          the JobConf for the job
    */
   private void configure(Configuration job) {
     try {

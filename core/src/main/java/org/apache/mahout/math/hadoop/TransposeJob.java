@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -68,7 +69,7 @@ public class TransposeJob extends AbstractJob {
     int numCols = Integer.parseInt(parsedArgs.get("--numCols"));
 
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
-    matrix.configure(new JobConf(getConf()));
+    matrix.setConf(new Configuration(getConf()));
     matrix.transpose();
 
     return 0;
@@ -122,12 +123,10 @@ public class TransposeJob extends AbstractJob {
   public static class TransposeReducer extends MapReduceBase
       implements Reducer<IntWritable,DistributedRowMatrix.MatrixEntryWritable,IntWritable,VectorWritable> {
 
-    //private JobConf conf;
     private int newNumCols;
 
     @Override
     public void configure(JobConf conf) {
-      //this.conf = conf;
       newNumCols = conf.getInt(NUM_ROWS_KEY, Integer.MAX_VALUE);
     }
 

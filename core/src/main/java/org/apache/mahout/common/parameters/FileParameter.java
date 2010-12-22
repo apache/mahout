@@ -19,12 +19,12 @@ package org.apache.mahout.common.parameters;
 
 import java.io.File;
 
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 
 public class FileParameter extends AbstractParameter<File> {
   
-  public FileParameter(String prefix, String name, JobConf jobConf, File defaultValue, String description) {
-    super(File.class, prefix, name, jobConf, defaultValue, description);
+  public FileParameter(String prefix, String name, Configuration conf, File defaultValue, String description) {
+    super(File.class, prefix, name, conf, defaultValue, description);
   }
   
   @Override

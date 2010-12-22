@@ -369,10 +369,6 @@ public class KMeansDriver extends AbstractJob {
    * 
    * @param filePath
    *          the file path to the single file containing the clusters
-   * @param conf
-   *          the JobConf
-   * @param fs
-   *          the FileSystem
    * @return true if all Clusters are converged
    * @throws IOException
    *           if there was an IO error

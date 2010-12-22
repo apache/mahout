@@ -32,7 +32,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -126,7 +125,8 @@ public class EigenVerificationJob extends AbstractJob {
    * @param maxError a double representing the maximum error
    * @param minEigenValue a double representing the minimum eigenvalue
    * @param inMemory a boolean requesting in-memory preparation
-   * @param config the JobConf to use, or null if a default is ok (saves referencing JobConf in calling classes unless needed)
+   * @param conf the Configuration to use, or null if a default is ok
+   *  (saves referencing Configuration in calling classes unless needed)
    */
   public int run(Path corpusInput,
                  Path eigenInput,
@@ -135,17 +135,17 @@ public class EigenVerificationJob extends AbstractJob {
                  double maxError,
                  double minEigenValue,
                  boolean inMemory,
-                 JobConf config) throws IOException {
+                 Configuration conf) throws IOException {
     this.outPath = output;
     this.tmpOut = tempOut;
     this.maxError = maxError;
     this.minEigenValue = minEigenValue;
 
     if (eigenInput != null && eigensToVerify == null) {
-      prepareEigens(config, eigenInput, inMemory);
+      prepareEigens(conf, eigenInput, inMemory);
     }
     DistributedRowMatrix c = new DistributedRowMatrix(corpusInput, tempOut, 1, 1);
-    c.configure(config);
+    c.setConf(conf);
     corpus = c;
 
     // set up eigenverifier and orthoverifier TODO: allow multithreaded execution
@@ -243,9 +243,9 @@ public class EigenVerificationJob extends AbstractJob {
     return eigenMetaData;
   }
 
-  private void prepareEigens(JobConf conf, Path eigenInput, boolean inMemory) {
+  private void prepareEigens(Configuration conf, Path eigenInput, boolean inMemory) {
     DistributedRowMatrix eigens = new DistributedRowMatrix(eigenInput, tmpOut, 1, 1);
-    eigens.configure(conf);
+    eigens.setConf(conf);
     if (inMemory) {
       List<Vector> eigenVectors = new ArrayList<Vector>();
       for (MatrixSlice slice : eigens) {
@@ -286,11 +286,11 @@ public class EigenVerificationJob extends AbstractJob {
     maxEigensToKeep = maxEigens;
     this.maxError = maxError;
     if (eigenInput != null && eigensToVerify == null) {
-      prepareEigens(new JobConf(conf), eigenInput, inMemory);
+      prepareEigens(new Configuration(conf), eigenInput, inMemory);
     }
 
     DistributedRowMatrix c = new DistributedRowMatrix(corpusInput, tmpOut, 1, 1);
-    c.configure(new JobConf(conf));
+    c.setConf(new Configuration(conf));
     corpus = c;
 
     eigenVerifier = new SimpleEigenVerifier();

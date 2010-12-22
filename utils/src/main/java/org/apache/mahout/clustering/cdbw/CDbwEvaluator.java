@@ -82,7 +82,7 @@ public class CDbwEvaluator {
    * Initialize a new instance from job information
    * 
    * @param conf
-   *            a JobConf with appropriate parameters
+   *            a Configuration with appropriate parameters
    * @param clustersIn
    *            a String path to the input clusters directory
    */

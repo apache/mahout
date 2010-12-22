@@ -17,7 +17,7 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.decomposer.SolverTest;
@@ -36,7 +36,7 @@ public final class TestDistributedLanczosSolver extends SolverTest {
     File testData = getTestTempDir("testdata");
     DistributedRowMatrix corpus = new TestDistributedRowMatrix().randomDistributedMatrix(500,
         450, 400, 10, 10.0, symmetric, testData.getAbsolutePath());
-    corpus.configure(new JobConf());
+    corpus.setConf(new Configuration());
     DistributedLanczosSolver solver = new DistributedLanczosSolver();
     int desiredRank = 30;
     Matrix eigenVectors = new DenseMatrix(desiredRank, corpus.numCols());

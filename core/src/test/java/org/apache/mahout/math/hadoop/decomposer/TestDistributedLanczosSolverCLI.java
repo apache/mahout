@@ -22,7 +22,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.DenseMatrix;
@@ -40,7 +39,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     Path testData = getTestTempDirPath("testdata");
     DistributedRowMatrix corpus =
         new TestDistributedRowMatrix().randomDistributedMatrix(500, 450, 500, 10, 10.0, true, testData.toString());
-    corpus.configure(new JobConf());
+    corpus.setConf(new Configuration());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
     String[] args = {
@@ -81,7 +80,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     Path testData = getTestTempDirPath("testdata");
     DistributedRowMatrix corpus =
         new TestDistributedRowMatrix().randomDistributedMatrix(500, 450, 500, 10, 10.0, true, testData.toString());
-    corpus.configure(new JobConf());
+    corpus.setConf(new Configuration());
     Path output = getTestTempDirPath("output");
     Path tmp = getTestTempDirPath("tmp");
     String[] args = {

@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.spectral.common.AffinityMatrixInputJob;
 import org.apache.mahout.clustering.spectral.common.MatrixDiagonalizeJob;
@@ -123,14 +122,14 @@ public class EigencutsDriver extends AbstractJob {
       DistributedRowMatrix L =
           VectorMatrixMultiplicationJob.runJob(A.getRowPath(), D,
               new Path(outputCalc, "laplacian-" + (System.nanoTime() & 0xFF)));
-      L.configure(new JobConf(conf));
+      L.setConf(new Configuration(conf));
 
       // eigendecomposition (step 3)
       int overshoot = (int) ((double) dimensions * OVERSHOOT_MULTIPLIER);
       List<Double> eigenValues = new ArrayList<Double>(overshoot);
       Matrix eigenVectors = new DenseMatrix(overshoot, dimensions);
       DistributedRowMatrix U = performEigenDecomposition(conf, L, dimensions, overshoot, eigenValues, eigenVectors, outputCalc);
-      U.configure(new JobConf(conf));
+      U.setConf(new Configuration(conf));
       eigenValues = eigenValues.subList(0, dimensions);
 
       // here's where things get interesting: steps 4, 5, and 6 are unique
@@ -152,7 +151,7 @@ public class EigencutsDriver extends AbstractJob {
       if (numCuts > 0) {
         // recalculate A
         A = new DistributedRowMatrix(input, new Path(outputTmp, Long.toString(System.nanoTime())), dimensions, dimensions);
-        A.configure(new JobConf());
+        A.setConf(new Configuration());
       }
     } while (numCuts > 0);
 

@@ -20,7 +20,6 @@ package org.apache.mahout.math.hadoop;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.math.Matrix;
@@ -140,14 +139,18 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
         final Iterator<MatrixSlice> it = m.iterator();
         return new Iterator<VectorWritable>() {
           @Override
-          public boolean hasNext() { return it.hasNext(); }
+          public boolean hasNext() {
+            return it.hasNext();
+          }
           @Override
           public VectorWritable next() {
             MatrixSlice slice = it.next();
             return new VectorWritable(slice.vector());
           }
           @Override
-          public void remove() { it.remove(); }
+          public void remove() {
+            it.remove();
+          }
         };
       }
     }, true, new Path(baseTmpDirPath, "distMatrix/part-00000"), fs, conf);
@@ -156,7 +159,7 @@ public final class TestDistributedRowMatrix extends MahoutTestCase {
                                                                new Path(baseTmpDirPath, "tmpOut"),
                                                                m.numRows(),
                                                                m.numCols());
-    distMatrix.configure(new JobConf(conf));
+    distMatrix.setConf(new Configuration(conf));
 
     return distMatrix;
   }

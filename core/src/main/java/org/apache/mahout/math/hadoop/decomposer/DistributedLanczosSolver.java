@@ -28,7 +28,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
@@ -75,7 +74,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 	  DistributedRowMatrix matrix = new DistributedRowMatrix(
 			  							inputPath, outputTmpPath, 
 			  							numRows, numCols);
-	  matrix.configure(new JobConf(originalConfig));
+	  matrix.setConf(new Configuration(originalConfig));
 	  setConf(originalConfig);
 	  solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
 	  serializeOutput(eigenVectors, eigenValues, new Path(outputEigenVectorPathString));
@@ -147,7 +146,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
                                           maxError,
                                           minEigenvalue,
                                           inMemory,
-                                          getConf() != null ? new JobConf(getConf()) : new JobConf());
+                                          getConf() != null ? new Configuration(getConf()) : new Configuration());
   }
 
   /**
@@ -173,7 +172,7 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
     List<Double> eigenValues = new ArrayList<Double>();
 
     DistributedRowMatrix matrix = new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
-    matrix.configure(new JobConf(getConf() != null ? getConf() : new Configuration()));
+    matrix.setConf(new Configuration(getConf() != null ? getConf() : new Configuration()));
     solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
 
     Path outputEigenVectorPath = new Path(outputPath, RAW_EIGENVECTORS);

@@ -17,6 +17,8 @@
 
 package org.apache.mahout.math.hadoop;
 
+import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -50,7 +52,7 @@ import java.util.NoSuchElementException;
  * <pre>
  *   // the path must already contain an already created SequenceFile!
  *   DistributedRowMatrix m = new DistributedRowMatrix("path/to/vector/sequenceFile", "tmp/path", 10000000, 250000);
- *   m.configure(new JobConf());
+ *   m.setConf(new Configuration());
  *   // now if we want to multiply a vector by this matrix, it's dimension must equal the row dimension of this
  *   // matrix.  If we want to timesSquared() a vector by this matrix, its dimension must equal the column dimension
  *   // of the matrix.
@@ -60,13 +62,13 @@ import java.util.NoSuchElementException;
  * </pre>
  *
  */
-public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
+public class DistributedRowMatrix implements VectorIterable, Configurable {
 
   private static final Logger log = LoggerFactory.getLogger(DistributedRowMatrix.class);
 
   private final Path inputPath;
   private final Path outputTmpPath;
-  private JobConf conf;
+  private Configuration conf;
   private Path rowPath;
   private Path outputTmpBasePath;
   private final int numRows;
@@ -83,7 +85,12 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
   }
 
   @Override
-  public void configure(JobConf conf) {
+  public Configuration getConf() {
+    return conf;
+  }
+
+  @Override
+  public void setConf(Configuration conf) {
     this.conf = conf;
     try {
       rowPath = FileSystem.get(conf).makeQualified(inputPath);
@@ -149,7 +156,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     JobConf conf = MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
     JobClient.runJob(conf);
     DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numCols, other.numCols());
-    out.configure(conf);
+    out.setConf(conf);
     return out;
   }
 
@@ -158,7 +165,7 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     JobConf conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
     JobClient.runJob(conf);
     DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
-    m.configure(this.conf);
+    m.setConf(this.conf);
     return m;
   }
 
@@ -203,11 +210,11 @@ public class DistributedRowMatrix implements VectorIterable, JobConfigurable {
     private boolean hasNext;
     private int statusIndex;
     private final FileSystem fs;
-    private final JobConf conf;
+    private final Configuration conf;
     private final IntWritable i = new IntWritable();
     private final VectorWritable v = new VectorWritable();
 
-    public DistributedMatrixIterator(FileSystem fs, Path rowPath, JobConf conf) throws IOException {
+    public DistributedMatrixIterator(FileSystem fs, Path rowPath, Configuration conf) throws IOException {
       this.fs = fs;
       this.conf = conf;
       statuses = fs.globStatus(new Path(rowPath, "*"));

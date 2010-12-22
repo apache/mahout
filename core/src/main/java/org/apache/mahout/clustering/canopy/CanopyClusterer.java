@@ -62,9 +62,6 @@ public class CanopyClusterer {
 
   /**
    * Configure the Canopy and its distance measure
-   * 
-   * @param configuration
-   *          the JobConf for this job
    */
   public void configure(Configuration configuration) {
     try {

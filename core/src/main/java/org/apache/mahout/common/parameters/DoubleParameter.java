@@ -17,12 +17,12 @@
 
 package org.apache.mahout.common.parameters;
 
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.conf.Configuration;
 
 public class DoubleParameter extends AbstractParameter<Double> {
   
-  public DoubleParameter(String prefix, String name, JobConf jobConf, double defaultValue, String description) {
-    super(Double.class, prefix, name, jobConf, defaultValue, description);
+  public DoubleParameter(String prefix, String name, Configuration conf, double defaultValue, String description) {
+    super(Double.class, prefix, name, conf, defaultValue, description);
   }
   
   @Override

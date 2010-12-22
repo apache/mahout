@@ -27,7 +27,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
@@ -136,8 +135,8 @@ public class SpectralKMeansDriver extends AbstractJob {
                                                       new Path(outputTmp, "afftmp-" + (System.nanoTime() & 0xFF)),
                                                       numDims,
                                                       numDims);
-    JobConf depConf = new JobConf(conf);
-    A.configure(depConf);
+    Configuration depConf = new Configuration(conf);
+    A.setConf(depConf);
 
     // Next step: construct the diagonal matrix D (represented as a vector)
     // and calculate the normalized Laplacian of the form:
@@ -146,7 +145,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     DistributedRowMatrix L =
         VectorMatrixMultiplicationJob.runJob(affSeqFiles, D,
             new Path(outputCalc, "laplacian-" + (System.nanoTime() & 0xFF)));
-    L.configure(depConf);
+    L.setConf(depConf);
 
     // Next step: perform eigen-decomposition using LanczosSolver
     // since some of the eigen-output is spurious and will be eliminated
@@ -174,7 +173,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     verifier.runJob(conf, lanczosSeqFiles, L.getRowPath(), verifiedEigensPath, true, 1.0, 0.0, clusters);
     Path cleanedEigens = verifier.getCleanedEigensPath();
     DistributedRowMatrix W = new DistributedRowMatrix(cleanedEigens, new Path(cleanedEigens, "tmp"), clusters, numDims);
-    W.configure(depConf);
+    W.setConf(depConf);
     DistributedRowMatrix Wtrans = W.transpose();
     //    DistributedRowMatrix Wt = W.transpose();
 
@@ -182,7 +181,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path unitVectors = new Path(outputCalc, "unitvectors-" + (System.nanoTime() & 0xFF));
     UnitVectorizerJob.runJob(Wtrans.getRowPath(), unitVectors);
     DistributedRowMatrix Wt = new DistributedRowMatrix(unitVectors, new Path(unitVectors, "tmp"), clusters, numDims);
-    Wt.configure(depConf);
+    Wt.setConf(depConf);
 
     // Finally, perform k-means clustering on the rows of L (or W)
     // generate random initial clusters
