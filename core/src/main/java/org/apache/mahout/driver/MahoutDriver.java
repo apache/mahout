@@ -172,9 +172,10 @@ public final class MahoutDriver {
         if (argMap.get(arg).length > 0 && !argMap.get(arg)[0].trim().isEmpty()) {
           arg += '=' + argMap.get(arg)[0].trim();
         }
+        argsList.add(1, arg);
       }
-      argsList.add(arg);
-      if (!arg.startsWith("-D")) {
+      else {
+        argsList.add(arg);
         argsList.addAll(Arrays.asList(argMap.get(arg)));
       }
     }
