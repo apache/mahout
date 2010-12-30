@@ -19,11 +19,15 @@ package org.apache.mahout.classifier.sgd;
 
 import org.apache.commons.math.special.Gamma;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 /**
  * Provides a t-distribution as a prior.
  */
 public class TPrior implements PriorFunction {
-  private final double df;
+  private double df;
 
   public TPrior(double df) {
     this.df = df;
@@ -43,5 +47,15 @@ public class TPrior implements PriorFunction {
         - Math.log(df * Math.PI)
         - Gamma.logGamma(df / 2.0)
         - (df + 1.0) / 2.0 * Math.log(1.0 + betaIJ * betaIJ);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeDouble(df);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    df = in.readDouble();
   }
 }

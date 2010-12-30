@@ -17,18 +17,20 @@
 
 package org.apache.mahout.ep;
 
+import org.apache.hadoop.io.Writable;
+
 /**
- * Payloads for evolutionary state must be copyable and updatable.  The copy should be
- * a deep copy unless some aspect of the state is sharable or immutable.
+ * Payloads for evolutionary state must be copyable and updatable.  The copy should be a deep copy
+ * unless some aspect of the state is sharable or immutable.
+ * <p/>
+ * During mutation, a copy is first made and then after the parameters in the State structure are
+ * suitably modified, update is called with the scaled versions of the parameters.
  *
- * During mutation, a copy is first made and then after the parameters in the State
- * structure are suitably modified, update is called with the scaled versions of the
- * parameters.
- *
- * @see State
  * @param <T>
+ * @see State
  */
-public interface Payload<T> {
-  T copy();
+public interface Payload<T> extends Writable {
+  Payload<T> copy();
+
   void update(double[] params);
 }

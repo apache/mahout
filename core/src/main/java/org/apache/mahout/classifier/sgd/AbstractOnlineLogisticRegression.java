@@ -17,6 +17,7 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.math.DenseVector;
@@ -24,8 +25,6 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.UnaryFunction;
-
-import com.google.common.base.Preconditions;
 
 import java.util.Iterator;
 
@@ -46,7 +45,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   // number of categories we are classifying.  This should the number of rows of beta plus one.
   protected int numCategories;
 
-  private int step = 0;
+  protected int step = 0;
 
   // information about how long since coefficient rows were updated.  This allows lazy regularization.
   protected Vector updateSteps;

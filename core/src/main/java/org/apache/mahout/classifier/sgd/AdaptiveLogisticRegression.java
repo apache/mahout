@@ -18,14 +18,19 @@
 package org.apache.mahout.classifier.sgd;
 
 import com.google.common.collect.Lists;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.ep.Payload;
 import org.apache.mahout.ep.EvolutionaryProcess;
 import org.apache.mahout.ep.Mapping;
 import org.apache.mahout.ep.State;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.stats.OnlineAuc;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -46,19 +51,19 @@ import java.util.concurrent.ExecutionException;
  * increase the cost of training since if we are using 5-fold cross-validation, each vector is used
  * 4 times for training and once for classification.  If this becomes a problem, then we should
  * probably use a 2-way unbalanced train/test split rather than full cross validation.  With the
- * current default settings, we have 100 learners running.  This is better than the alternative
- * of running hundreds of training passes to find good hyper-parameters because we only have to
- * parse and feature-ize our inputs once.  If you already have good hyper-parameters, then you
- * might prefer to just run one CrossFoldLearner with those settings.
+ * current default settings, we have 100 learners running.  This is better than the alternative of
+ * running hundreds of training passes to find good hyper-parameters because we only have to parse
+ * and feature-ize our inputs once.  If you already have good hyper-parameters, then you might
+ * prefer to just run one CrossFoldLearner with those settings.
  * <p/>
- * The fitness used here is AUC.  Another alternative would be to try log-likelihood, but it is
- * much easier to get bogus values of log-likelihood than with AUC and the results seem to
- * accord pretty well.  It would be nice to allow the fitness function to be pluggable. This
- * use of AUC means that AdaptiveLogisticRegression is mostly suited for binary target variables.
- * This will be fixed before long by extending OnlineAuc to handle non-binary cases or by using
- * a different fitness value in non-binary cases.
+ * The fitness used here is AUC.  Another alternative would be to try log-likelihood, but it is much
+ * easier to get bogus values of log-likelihood than with AUC and the results seem to accord pretty
+ * well.  It would be nice to allow the fitness function to be pluggable. This use of AUC means that
+ * AdaptiveLogisticRegression is mostly suited for binary target variables. This will be fixed
+ * before long by extending OnlineAuc to handle non-binary cases or by using a different fitness
+ * value in non-binary cases.
  */
-public class AdaptiveLogisticRegression implements OnlineLearner {
+public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
 
   private static final int SURVIVORS = 2;
 
@@ -70,23 +75,24 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   private int bufferSize = 1000;
 
   private List<TrainingExample> buffer = Lists.newArrayList();
-  private EvolutionaryProcess<Wrapper> ep;
-  private State<Wrapper> best;
+  private EvolutionaryProcess<Wrapper, CrossFoldLearner> ep;
+  private State<Wrapper, CrossFoldLearner> best;
   private int threadCount = 20;
   private int poolSize = 20;
-  private State<Wrapper> seed;
+  private State<Wrapper, CrossFoldLearner> seed;
   private int numFeatures;
 
   private boolean freezeSurvivors = true;
 
-  // for GSON
-  private AdaptiveLogisticRegression() {
+  public AdaptiveLogisticRegression() {
   }
 
   public AdaptiveLogisticRegression(int numCategories, int numFeatures, PriorFunction prior) {
     this.numFeatures = numFeatures;
-    seed = new State<Wrapper>(new double[2], 10);
+    seed = new State<Wrapper, CrossFoldLearner>(new double[2], 10);
     Wrapper w = new Wrapper(numCategories, numFeatures, prior);
+    seed.setPayload(w);
+
     w.setMappings(seed);
     seed.setPayload(w);
     setPoolSize(poolSize);
@@ -114,9 +120,10 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   private void trainWithBufferedExamples() {
     try {
-      this.best = ep.parallelDo(new EvolutionaryProcess.Function<Wrapper>() {
+      this.best = ep.parallelDo(new EvolutionaryProcess.Function<Payload<CrossFoldLearner>>() {
         @Override
-        public double apply(Wrapper x, double[] params) {
+        public double apply(Payload<CrossFoldLearner> z, double[] params) {
+          Wrapper x = (Wrapper) z;
           for (TrainingExample example : buffer) {
             x.train(example);
           }
@@ -148,7 +155,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
         // now grossly hack the top survivors so they stick around.  Set their
         // mutation rates small and also hack their learning rate to be small
         // as well.
-        for (State<Wrapper> state : ep.getPopulation().subList(0, SURVIVORS)) {
+        for (State<Wrapper, CrossFoldLearner> state : ep.getPopulation().subList(0, SURVIVORS)) {
           state.getPayload().freeze(state);
         }
       }
@@ -188,11 +195,12 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   public void close() {
     trainWithBufferedExamples();
     try {
-      ep.parallelDo(new EvolutionaryProcess.Function<Wrapper>() {
+      ep.parallelDo(new EvolutionaryProcess.Function<Payload<CrossFoldLearner>>() {
         @Override
-        public double apply(Wrapper payload, double[] params) {
-          payload.getLearner().close();
-          return payload.getLearner().logLikelihood();
+        public double apply(Payload<CrossFoldLearner> payload, double[] params) {
+          CrossFoldLearner learner = ((Wrapper) payload).getLearner();
+          learner.close();
+          return learner.logLikelihood();
         }
       });
       ep.close();
@@ -205,7 +213,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
 
   /**
    * How often should the evolutionary optimization of learning parameters occur?
-   * @param interval  Number of training examples to use in each epoch of optimization.
+   *
+   * @param interval Number of training examples to use in each epoch of optimization.
    */
   public void setInterval(int interval) {
     setInterval(interval, interval);
@@ -216,8 +225,8 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    * number of steps per decade.  Note that values < 200 are not accepted.  Values even that small
    * are unlikely to be useful.
    *
-   * @param minInterval  The minimum epoch length for the evolutionary optimization
-   * @param maxInterval  The maximum epoch length
+   * @param minInterval The minimum epoch length for the evolutionary optimization
+   * @param maxInterval The maximum epoch length
    */
   public void setInterval(int minInterval, int maxInterval) {
     this.minInterval = Math.max(200, minInterval);
@@ -243,13 +252,13 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   }
 
   private void setupOptimizer(int poolSize) {
-    ep = new EvolutionaryProcess<Wrapper>(threadCount, poolSize, seed);
+    ep = new EvolutionaryProcess<Wrapper, CrossFoldLearner>(threadCount, poolSize, seed);
   }
 
   /**
-   * Returns the size of the internal feature vector.  Note that this is not the
-   * same as the number of distinct features, especially if feature hashing is
-   * being used.
+   * Returns the size of the internal feature vector.  Note that this is not the same as the number
+   * of distinct features, especially if feature hashing is being used.
+   *
    * @return The internal feature vector size.
    */
   public int numFeatures() {
@@ -257,23 +266,25 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
   }
 
   /**
-   * What is the AUC for the current best member of the population.  If no member is best,
-   * usually because we haven't done any training yet, then the result is set to NaN.
-   * @return  The AUC of the best member of the population or NaN if we can't figure that out.
+   * What is the AUC for the current best member of the population.  If no member is best, usually
+   * because we haven't done any training yet, then the result is set to NaN.
+   *
+   * @return The AUC of the best member of the population or NaN if we can't figure that out.
    */
   public double auc() {
     if (best == null) {
       return Double.NaN;
     } else {
-      return best.getPayload().getLearner().auc();
+      Wrapper payload = best.getPayload();
+      return payload.getLearner().auc();
     }
   }
 
-  public State<Wrapper> getBest() {
+  public State<Wrapper, CrossFoldLearner> getBest() {
     return best;
   }
 
-  public void setBest(State<Wrapper> best) {
+  public void setBest(State<Wrapper, CrossFoldLearner> best) {
     this.best = best;
   }
 
@@ -309,19 +320,19 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     return buffer;
   }
 
-  public EvolutionaryProcess<Wrapper> getEp() {
+  public EvolutionaryProcess<Wrapper, CrossFoldLearner> getEp() {
     return ep;
   }
 
-  public void setEp(EvolutionaryProcess<Wrapper> ep) {
+  public void setEp(EvolutionaryProcess<Wrapper, CrossFoldLearner> ep) {
     this.ep = ep;
   }
 
-  public State<Wrapper> getSeed() {
+  public State<Wrapper, CrossFoldLearner> getSeed() {
     return seed;
   }
 
-  public void setSeed(State<Wrapper> seed) {
+  public void setSeed(State<Wrapper, CrossFoldLearner> seed) {
     this.seed = seed;
   }
 
@@ -344,15 +355,14 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
    * params in the following order <ul> <li> regularization constant lambda <li> learningRate </ul>.
    * All other parameters are set in such a way so as to defeat annealing to the extent possible.
    * This lets the evolutionary algorithm handle the annealing.
-   * <p>
+   * <p/>
    * Note that per coefficient annealing is still done and no optimization of the per coefficient
    * offset is done.
    */
-  public static class Wrapper implements Payload<Wrapper> {
+  public static class Wrapper implements Payload<CrossFoldLearner> {
     private CrossFoldLearner wrapped;
 
-    private Wrapper() {
-      // just here to help copy
+    public Wrapper() {
     }
 
     public Wrapper(int numCategories, int numFeatures, PriorFunction prior) {
@@ -377,7 +387,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
       wrapped.decayExponent(0);
     }
 
-    public void freeze(State<Wrapper> s) {
+    public void freeze(State<Wrapper, CrossFoldLearner> s) {
       // radically decrease learning rate
       s.getParams()[1] -= 10;
 
@@ -389,7 +399,7 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
       }
     }
 
-    public void setMappings(State<Wrapper> x) {
+    public void setMappings(State<Wrapper, CrossFoldLearner> x) {
       int i = 0;
       // set the range for regularization (lambda)
       x.setMap(i++, Mapping.logLimit(1.0e-8, 0.1));
@@ -413,15 +423,27 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     public void setAucEvaluator(OnlineAuc auc) {
       wrapped.setAucEvaluator(auc);
     }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+      wrapped.write(out);
+    }
+
+    @Override
+    public void readFields(DataInput input) throws IOException {
+      wrapped = new CrossFoldLearner();
+      wrapped.readFields(input);
+    }
   }
 
-  public static class TrainingExample {
+  public static class TrainingExample implements Writable {
     private long key;
     private String groupKey;
     private int actual;
     private Vector instance;
 
     // for GSON
+
     private TrainingExample() {
     }
 
@@ -447,6 +469,87 @@ public class AdaptiveLogisticRegression implements OnlineLearner {
     public String getGroupKey() {
       return groupKey;
     }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+      out.writeLong(key);
+      if (groupKey != null) {
+        out.writeBoolean(true);
+        out.writeUTF(groupKey);
+      } else {
+        out.writeBoolean(false);
+      }
+      out.writeInt(actual);
+      VectorWritable.writeVector(out, instance, true);
+    }
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+      key = in.readLong();
+      if (in.readBoolean()) {
+        groupKey = in.readUTF();
+      }
+      actual = in.readInt();
+      instance = VectorWritable.readVector(in);
+    }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(record);
+    out.writeInt(cutoff);
+    out.writeInt(minInterval);
+    out.writeInt(maxInterval);
+    out.writeInt(currentStep);
+    out.writeInt(bufferSize);
+
+    out.writeInt(buffer.size());
+    for (TrainingExample example : buffer) {
+      example.write(out);
+    }
+
+    ep.write(out);
+
+    best.write(out);
+
+    out.writeInt(threadCount);
+    out.writeInt(poolSize);
+    seed.write(out);
+    out.writeInt(numFeatures);
+
+    out.writeBoolean(freezeSurvivors);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    record = in.readInt();
+    cutoff = in.readInt();
+    minInterval = in.readInt();
+    maxInterval = in.readInt();
+    currentStep = in.readInt();
+    bufferSize = in.readInt();
+
+    int n = in.readInt();
+    buffer = Lists.newArrayList();
+    for (int i = 0; i < n; i++) {
+      TrainingExample example = new TrainingExample();
+      example.readFields(in);
+      buffer.add(example);
+    }
+
+    ep = new EvolutionaryProcess<Wrapper, CrossFoldLearner>();
+    ep.readFields(in);
+
+    best = new State<Wrapper, CrossFoldLearner>();
+    best.readFields(in);
+
+    threadCount = in.readInt();
+    poolSize = in.readInt();
+    seed = new State<Wrapper, CrossFoldLearner>();
+    seed.readFields(in);
+
+    numFeatures = in.readInt();
+    freezeSurvivors = in.readBoolean();
   }
 }
 

@@ -29,7 +29,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
-import org.apache.mahout.classifier.AbstractVectorClassifier;
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.ep.EvolutionaryProcess;
 import org.apache.mahout.ep.Mapping;
@@ -40,8 +40,14 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.stats.OnlineAuc;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
@@ -98,8 +104,24 @@ public final class ModelSerializer {
    * @param clazz The class of the object we expect to read.
    * @return The LogisticModelParameters object that we read.
    */
-  public static AbstractVectorClassifier loadJsonFrom(Reader in, Class<? extends AbstractVectorClassifier> clazz) {
+  public static <T> T loadJsonFrom(Reader in, Class<T> clazz) {
     return gson().fromJson(in, clazz);
+  }
+
+  public static void writeBinary(String path, CrossFoldLearner model) throws IOException {
+    PolymorphicWritable.write(new DataOutputStream(new FileOutputStream(path)), model);
+  }
+
+  public static void writeBinary(String path, OnlineLogisticRegression model) throws IOException {
+    PolymorphicWritable.write(new DataOutputStream(new FileOutputStream(path)), model);
+  }
+
+  public static void writeBinary(String path, AdaptiveLogisticRegression model) throws IOException {
+    PolymorphicWritable.write(new DataOutputStream(new FileOutputStream(path)), model);
+  }
+
+  public static <T extends Writable> T readBinary(InputStream in, Class<T> clazz) throws IOException {
+    return PolymorphicWritable.read(new DataInputStream(in), clazz);
   }
 
   private static class PolymorphicTypeAdapter<T> implements JsonDeserializer<T>, JsonSerializer<T> {
@@ -162,7 +184,7 @@ public final class ModelSerializer {
           new AdaptiveLogisticRegression(x.get("numCategories").getAsInt(),
                                          x.get("numFeatures").getAsInt(),
                                          jdc.<PriorFunction>deserialize(x.get("prior"), PriorFunction.class));
-      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
+      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>() {}.getType();
       if (x.get("evaluationInterval")!=null) {
         r.setInterval(x.get("evaluationInterval").getAsInt());
       } else {
@@ -170,11 +192,11 @@ public final class ModelSerializer {
       }
       r.setRecord(x.get("record").getAsInt());
 
-      Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
-      r.setEp(jdc.<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("ep"), epType));
-      r.setSeed(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("seed"), stateType));
+      Type epType = new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>() {}.getType();
+      r.setEp(jdc.<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>deserialize(x.get("ep"), epType));
+      r.setSeed(jdc.<State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>deserialize(x.get("seed"), stateType));
       if (x.get("best") != null) {
-        r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper>>deserialize(x.get("best"), stateType));
+        r.setBest(jdc.<State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>deserialize(x.get("best"), stateType));
       }
 
       if (x.get("buffer") != null) {
@@ -189,10 +211,10 @@ public final class ModelSerializer {
     public JsonElement serialize(AdaptiveLogisticRegression x, Type type, JsonSerializationContext jsc) {
       JsonObject r = new JsonObject();
       r.add("ep", jsc.serialize(x.getEp(),
-          new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>() {}.getType()));
+          new TypeToken<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>() {}.getType()));
       r.add("minInterval", jsc.serialize(x.getMinInterval()));
       r.add("maxInterval", jsc.serialize(x.getMaxInterval()));
-      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
+      Type stateType = new TypeToken<State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>() {}.getType();
       r.add("best", jsc.serialize(x.getBest(), stateType));
       r.add("numFeatures", jsc.serialize(x.getNumFeatures()));
       r.add("numCategories", jsc.serialize(x.getNumCategories()));
@@ -286,16 +308,16 @@ public final class ModelSerializer {
     }
   }
 
-  private static class StateTypeAdapter implements JsonSerializer<State<AdaptiveLogisticRegression.Wrapper>>,
-    JsonDeserializer<State<AdaptiveLogisticRegression.Wrapper>> {
+  private static class StateTypeAdapter implements JsonSerializer<State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>,
+    JsonDeserializer<State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>> {
     @Override
-    public State<AdaptiveLogisticRegression.Wrapper> deserialize(
+    public State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> deserialize(
       JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
 
       JsonObject v = (JsonObject) jsonElement;
       double[] params = asArray(v, "params");
       double omni = v.get("omni").getAsDouble();
-      State<AdaptiveLogisticRegression.Wrapper> r = new State<AdaptiveLogisticRegression.Wrapper>(params, omni);
+      State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> r = new State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>(params, omni);
 
       double[] step = asArray(v, "step");
       r.setId(v.get("id").getAsInt());
@@ -313,7 +335,7 @@ public final class ModelSerializer {
     }
 
     @Override
-    public JsonElement serialize(State<AdaptiveLogisticRegression.Wrapper> state,
+    public JsonElement serialize(State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> state,
                                  Type type,
                                  JsonSerializationContext jsonSerializationContext) {
       JsonObject r = new JsonObject();
@@ -339,41 +361,41 @@ public final class ModelSerializer {
   }
 
   private static class EvolutionaryProcessTypeAdapter implements
-    InstanceCreator<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>,
-    JsonDeserializer<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>>,
-    JsonSerializer<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>> {
-    private static final Type STATE_TYPE = new TypeToken<State<AdaptiveLogisticRegression.Wrapper>>() {}.getType();
+    InstanceCreator<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>,
+    JsonDeserializer<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>,
+    JsonSerializer<EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>> {
+    private static final Type STATE_TYPE = new TypeToken<State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>>() {}.getType();
 
     @Override
-    public EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> createInstance(Type type) {
-      return new EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>();
+    public EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> createInstance(Type type) {
+      return new EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>();
     }
 
     @Override
-    public EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> deserialize(
+    public EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> deserialize(
         JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) {
       JsonObject x = (JsonObject) jsonElement;
       int threadCount = x.get("threadCount").getAsInt();
 
-      EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> r =
-          new EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper>();
+      EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> r =
+          new EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner>();
       r.setThreadCount(threadCount);
 
       for (JsonElement element : x.get("population").getAsJsonArray()) {
-        State<AdaptiveLogisticRegression.Wrapper> state = jsonDeserializationContext.deserialize(element, STATE_TYPE);
+        State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> state = jsonDeserializationContext.deserialize(element, STATE_TYPE);
         r.add(state);
       }
       return r;
     }
 
     @Override
-    public JsonElement serialize(EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper> x,
+    public JsonElement serialize(EvolutionaryProcess<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> x,
                                  Type type,
                                  JsonSerializationContext jsc) {
       JsonObject r = new JsonObject();
       r.add("threadCount", new JsonPrimitive(x.getThreadCount()));
       JsonArray v = new JsonArray();
-      for (State<AdaptiveLogisticRegression.Wrapper> state : x.getPopulation()) {
+      for (State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> state : x.getPopulation()) {
         v.add(jsc.serialize(state, STATE_TYPE));
       }
       r.add("population", v);
@@ -389,5 +411,9 @@ public final class ModelSerializer {
       params[i++] = element.getAsDouble();
     }
     return params;
+  }
+
+  public static void main(String[] args) throws FileNotFoundException {
+    OnlineLogisticRegression m = ModelSerializer.loadJsonFrom(new FileReader("/tmp/news-group-1000.model"), OnlineLogisticRegression.class);
   }
 }

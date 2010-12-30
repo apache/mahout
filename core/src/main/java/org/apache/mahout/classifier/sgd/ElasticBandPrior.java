@@ -17,14 +17,18 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 /**
  * Implements a linear combination of L1 and L2 priors.  This can give an
  * interesting mixture of sparsity and load-sharing between redundant predictors.
  */
 public class ElasticBandPrior implements PriorFunction {
-  private final double alphaByLambda;
-  private final L1 l1;
-  private final L2 l2;
+  private double alphaByLambda;
+  private L1 l1;
+  private L2 l2;
 
   public ElasticBandPrior(double alphaByLambda) {
     this.alphaByLambda = alphaByLambda;
@@ -47,5 +51,21 @@ public class ElasticBandPrior implements PriorFunction {
   @Override
   public double logP(double betaIJ) {
     return l1.logP(betaIJ) + alphaByLambda * l2.logP(betaIJ);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeDouble(alphaByLambda);
+    l1.write(out);
+    l2.write(out);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    alphaByLambda = in.readDouble();
+    l1 = new L1();
+    l1.readFields(in);
+    l2 = new L2();
+    l2.readFields(in);
   }
 }

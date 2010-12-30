@@ -17,15 +17,20 @@
 
 package org.apache.mahout.ep;
 
+import com.google.common.base.Preconditions;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 import org.apache.mahout.math.function.UnaryFunction;
 
-import com.google.common.base.Preconditions;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * Provides coordinate tranformations so that evolution can proceed on the entire space of
  * reals but have the output limited and squished in convenient (and safe) ways.
  */
-public abstract class Mapping implements UnaryFunction {
+public abstract class Mapping implements UnaryFunction, Writable {
 
   private Mapping() {
   }
@@ -35,7 +40,7 @@ public abstract class Mapping implements UnaryFunction {
     private double max;
     private double scale;
 
-    private SoftLimit() {
+    public SoftLimit() {
     }
 
     private SoftLimit(double min, double max, double scale) {
@@ -49,12 +54,25 @@ public abstract class Mapping implements UnaryFunction {
       return min + (max - min) * 1 / (1 + Math.exp(-v * scale));
     }
 
+    @Override
+    public void write(DataOutput out) throws IOException {
+      out.writeDouble(min);
+      out.writeDouble(max);
+      out.writeDouble(scale);
+    }
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+      min = in.readDouble();
+      max = in.readDouble();
+      scale = in.readDouble();
+    }
   }
 
   public static final class LogLimit extends Mapping {
     private Mapping wrapped;
 
-    private LogLimit() {
+    public LogLimit() {
     }
 
     private LogLimit(double low, double high) {
@@ -65,12 +83,22 @@ public abstract class Mapping implements UnaryFunction {
     public double apply(double v) {
       return Math.exp(wrapped.apply(v));
     }
+
+    @Override
+    public void write(DataOutput dataOutput) throws IOException {
+      PolymorphicWritable.write(dataOutput, wrapped);
+    }
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+      wrapped = PolymorphicWritable.read(in, Mapping.class);
+    }
   }
 
   public static final class Exponential extends Mapping {
     private double scale;
 
-    private Exponential() {
+    public Exponential() {
     }
 
     private Exponential(double scale) {
@@ -81,15 +109,35 @@ public abstract class Mapping implements UnaryFunction {
     public double apply(double v) {
       return Math.exp(v * scale);
     }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+      out.writeDouble(scale);
+    }
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+      scale = in.readDouble();
+    }
   }
 
   public static final class Identity extends Mapping {
-    private Identity() {
+    public Identity() {
     }
 
     @Override
     public double apply(double v) {
       return v;
+    }
+
+    @Override
+    public void write(DataOutput dataOutput) throws IOException {
+      // stateless
+    }
+
+    @Override
+    public void readFields(DataInput dataInput) throws IOException {
+      // stateless
     }
   }
 

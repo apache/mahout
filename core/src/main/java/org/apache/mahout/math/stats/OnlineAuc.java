@@ -17,13 +17,15 @@
 
 package org.apache.mahout.math.stats;
 
+import org.apache.hadoop.io.Writable;
+
 /**
  * Describes the generic outline of how to compute AUC.  Currently there are two
  * implementations of this, one for computing a global estimate of AUC and the other
  * for computing average grouped AUC.  Grouped AUC is useful when misusing a classifier
  * as a recommendation system.
  */
-public interface OnlineAuc {
+public interface OnlineAuc extends Writable {
   double addSample(int category, String groupKey, double score);
 
   double addSample(int category, double score);

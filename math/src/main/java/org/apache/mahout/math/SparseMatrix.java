@@ -17,9 +17,9 @@
 
 package org.apache.mahout.math;
 
-import java.util.Map;
-
 import org.apache.mahout.math.map.OpenIntObjectHashMap;
+
+import java.util.Map;
 
 /** Doubly sparse matrix. Implemented as a Map of RandomAccessSparseVector rows */
 public class SparseMatrix extends AbstractMatrix {
@@ -54,6 +54,13 @@ public class SparseMatrix extends AbstractMatrix {
   public SparseMatrix(int[] cardinality) {
     this.cardinality = cardinality.clone();
     this.rows = new OpenIntObjectHashMap<Vector>();
+  }
+
+  /**
+   * Construct a matrix with specified number of rows and columns.
+   */
+  public SparseMatrix(int rows, int columns) {
+    this(new int[]{rows, columns});
   }
   
   @Override

@@ -18,7 +18,12 @@
 package org.apache.mahout.ep;
 
 import com.google.common.collect.Lists;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +64,7 @@ import java.util.concurrent.Future;
  *
  * @param <T> The payload class.
  */
-public class EvolutionaryProcess<T extends Payload<T>> {
+public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable {
   // used to execute operations on the population in thread parallel.
   private transient ExecutorService pool;
 
@@ -67,7 +72,7 @@ public class EvolutionaryProcess<T extends Payload<T>> {
   private int threadCount;
 
   // list of members of the population
-  private List<State<T>> population;
+  private List<State<T, U>> population;
 
   // how big should the population be.  If this is changed, it will take effect
   // the next time the population is mutated.
@@ -85,20 +90,20 @@ public class EvolutionaryProcess<T extends Payload<T>> {
    * @param populationSize            How large a population to use
    * @param seed                      An initial population member
    */
-  public EvolutionaryProcess(int threadCount, int populationSize, State<T> seed) {
+  public EvolutionaryProcess(int threadCount, int populationSize, State<T, U> seed) {
     this.populationSize = populationSize;
     setThreadCount(threadCount);
     initializePopulation(populationSize, seed);
   }
 
-  private void initializePopulation(int populationSize, State<T> seed) {
+  private void initializePopulation(int populationSize, State<T, U> seed) {
     population = Lists.newArrayList(seed);
     for (int i = 0; i < populationSize; i++) {
       population.add(seed.mutate());
     }
   }
 
-  public void add(State<T> value) {
+  public void add(State<T, U> value) {
     population.add(value);
   }
 
@@ -112,7 +117,7 @@ public class EvolutionaryProcess<T extends Payload<T>> {
     Collections.sort(population);
 
     // we copy here to avoid concurrent modification
-    List<State<T>> parents = Lists.newArrayList(population.subList(0, survivors));
+    List<State<T, U>> parents = Lists.newArrayList(population.subList(0, survivors));
     population.subList(survivors, population.size()).clear();
 
     // fill out the population with offspring from the survivors
@@ -132,12 +137,12 @@ public class EvolutionaryProcess<T extends Payload<T>> {
    * @throws ExecutionException        If fn throws an exception, that exception will be collected
    * and rethrown nested in an ExecutionException.
    */
-  public State<T> parallelDo(final Function<T> fn) throws InterruptedException, ExecutionException {
-    Collection<Callable<State<T>>> tasks = Lists.newArrayList();
-    for (final State<T> state : population) {
-      tasks.add(new Callable<State<T>>() {
+  public State<T, U> parallelDo(final Function<Payload<U>> fn) throws InterruptedException, ExecutionException {
+    Collection<Callable<State<T, U>>> tasks = Lists.newArrayList();
+    for (final State<T, U> state : population) {
+      tasks.add(new Callable<State<T, U>>() {
         @Override
-        public State<T> call() {
+        public State<T, U> call() {
           double v = fn.apply(state.getPayload(), state.getMappedParams());
           state.setValue(v);
           return state;
@@ -145,13 +150,13 @@ public class EvolutionaryProcess<T extends Payload<T>> {
       });
     }
 
-    List<Future<State<T>>> r = pool.invokeAll(tasks);
+    List<Future<State<T, U>>> r = pool.invokeAll(tasks);
 
     // zip through the results and find the best one
     double max = Double.NEGATIVE_INFINITY;
-    State<T> best = null;
-    for (Future<State<T>> future : r) {
-      State<T> s = future.get();
+    State<T, U> best = null;
+    for (Future<State<T, U>> future : r) {
+      State<T, U> s = future.get();
       double value = s.getValue();
       if (!Double.isNaN(value) && value >= max) {
         max = value;
@@ -178,7 +183,7 @@ public class EvolutionaryProcess<T extends Payload<T>> {
     return populationSize;
   }
 
-  public List<State<T>> getPopulation() {
+  public List<State<T, U>> getPopulation() {
     return population;
   }
 
@@ -196,6 +201,26 @@ public class EvolutionaryProcess<T extends Payload<T>> {
   public static class EarlyTerminationException extends RuntimeException {
     public EarlyTerminationException(String message) {
       super(message);
+    }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(threadCount);
+    out.writeInt(population.size());
+    for (State<T, U> state : population) {
+      PolymorphicWritable.write(out, state);
+    }
+  }
+
+  @Override
+  public void readFields(DataInput input) throws IOException {
+    setThreadCount(input.readInt());
+    int n = input.readInt();
+    population = Lists.newArrayList();
+    for (int i = 0; i < n; i++) {
+      State<T, U> state = PolymorphicWritable.read(input, State.class);
+      population.add(state);
     }
   }
 }

@@ -17,6 +17,10 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 /**
  * A uniform prior.  This is an improper prior that corresponds to no regularization at all.
  */
@@ -29,5 +33,15 @@ public class UniformPrior implements PriorFunction {
   @Override
   public double logP(double betaIJ) {
     return 0;
+  }
+
+  @Override
+  public void write(DataOutput dataOutput) throws IOException {
+    // nothing to write
+  }
+
+  @Override
+  public void readFields(DataInput dataInput) throws IOException {
+    // stateless class is trivial to read
   }
 }

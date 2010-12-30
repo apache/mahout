@@ -18,8 +18,13 @@
 package org.apache.mahout.ep;
 
 import com.google.common.collect.Lists;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 import org.apache.mahout.common.RandomUtils;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
@@ -44,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @see Mapping
  */
-public class State<T extends Payload<T>> implements Comparable<State<T>> {
+public class State<T extends Payload<U>, U> implements Comparable<State<T, U>>, Writable {
 
   // object count is kept to break ties in comparison.
   private static final AtomicInteger OBJECT_COUNT = new AtomicInteger();
@@ -61,7 +66,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
   private double[] step;
   // current fitness value
   private double value;
-  private T payload;
+  private Payload<U> payload;
 
   public State() {
   }
@@ -79,8 +84,8 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
   /**
    * Deep copies a state, useful in mutation.
    */
-  public State<T> copy() {
-    State<T> r = new State<T>();
+  public State<T, U> copy() {
+    State<T, U> r = new State<T, U>();
     r.params = Arrays.copyOf(this.params, this.params.length);
     r.omni = this.omni;
     r.step = Arrays.copyOf(this.step, this.step.length);
@@ -98,7 +103,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
    *
    * @return A new state.
    */
-  public State<T> mutate() {
+  public State<T, U> mutate() {
     double sum = 0;
     for (double v : step) {
       sum += v * v;
@@ -106,7 +111,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
     sum = Math.sqrt(sum);
     double lambda = 1 + gen.nextGaussian();
 
-    State<T> r = this.copy();
+    State<T, U> r = this.copy();
     double magnitude = 0.9 * omni + sum / 10;
     r.omni = magnitude * -Math.log(1 - gen.nextDouble());
     for (int i = 0; i < step.length; i++) {
@@ -172,7 +177,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
   }
 
   public T getPayload() {
-    return payload;
+    return (T) payload;
   }
 
   public double getValue() {
@@ -213,7 +218,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
     if (!(o instanceof State)) {
       return false;
     }
-    State<?> other = (State<?>) o;
+    State<?,?> other = (State<?,?>) o;
     return id == other.id && value == other.value;
   }
 
@@ -229,7 +234,7 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
    * @return -1, 0, 1 if the other state is better, identical or worse than this one.
    */
   @Override
-  public int compareTo(State<T> other) {
+  public int compareTo(State<T, U> other) {
     int r = Double.compare(other.value, this.value);
     if (r != 0) {
       return r;
@@ -248,5 +253,47 @@ public class State<T extends Payload<T>> implements Comparable<State<T>> {
       sum += v * v;
     }
     return String.format(Locale.ENGLISH, "<S/%s %.3f %.3f>", payload, omni + Math.sqrt(sum), value);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(id);
+    out.writeInt(params.length);
+    for (double v : params) {
+      out.writeDouble(v);
+    }
+    for (Mapping map : maps) {
+      PolymorphicWritable.write(out, map);
+    }
+
+    out.writeDouble(omni);
+    for (double v : step) {
+      out.writeDouble(v);
+    }
+
+    out.writeDouble(value);
+    PolymorphicWritable.write(out, payload);
+  }
+
+  @Override
+  public void readFields(DataInput input) throws IOException {
+    id = input.readInt();
+    int n = input.readInt();
+    params = new double[n];
+    for (int i = 0; i < n; i++) {
+      params[i] = input.readDouble();
+    }
+
+    maps = new Mapping[n];
+    for (int i = 0; i < n; i++) {
+      maps[i] = PolymorphicWritable.read(input, Mapping.class);
+    }
+    omni = input.readDouble();
+    step = new double[n];
+    for (int i = 0; i < n; i++) {
+      step[i] = input.readDouble();
+    }
+    value = input.readDouble();
+    payload = PolymorphicWritable.read(input, Payload.class);
   }
 }

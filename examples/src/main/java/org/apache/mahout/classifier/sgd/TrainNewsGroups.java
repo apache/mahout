@@ -159,7 +159,7 @@ public final class TrainNewsGroups {
     int k = 0;
     double step = 0;
     int[] bumps = {1, 2, 5};
-    for (File file : files.subList(0, 10000)) {
+    for (File file : files.subList(0, 3000)) {
       String ng = file.getParentFile().getName();
       int actual = newsGroups.intern(ng);
 
@@ -170,7 +170,7 @@ public final class TrainNewsGroups {
 
       int bump = bumps[(int) Math.floor(step) % bumps.length];
       int scale = (int) Math.pow(10, Math.floor(step / bumps.length));
-      State<AdaptiveLogisticRegression.Wrapper> best = learningAlgorithm.getBest();
+      State<AdaptiveLogisticRegression.Wrapper, CrossFoldLearner> best = learningAlgorithm.getBest();
       double maxBeta;
       double nonZeros;
       double positive;
@@ -214,7 +214,7 @@ public final class TrainNewsGroups {
       }
       if (k % (bump * scale) == 0) {
         if (learningAlgorithm.getBest() != null) {
-          ModelSerializer.writeJson("/tmp/news-group-" + k + ".model", learningAlgorithm.getBest().getPayload().getLearner());
+          ModelSerializer.writeBinary("/tmp/news-group-" + k + ".model", learningAlgorithm.getBest().getPayload().getLearner().getModels().get(0));
         }
 
         step += 0.25;
@@ -227,7 +227,7 @@ public final class TrainNewsGroups {
     dissect(leakType, newsGroups, learningAlgorithm, files);
     System.out.println("exiting main");
 
-    ModelSerializer.writeJson("/tmp/news-group.model", learningAlgorithm);
+    ModelSerializer.writeBinary("/tmp/news-group.model", learningAlgorithm.getBest().getPayload().getLearner().getModels().get(0));
 
     List<Integer> counts = Lists.newArrayList();
     System.out.printf("Word counts\n");

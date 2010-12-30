@@ -17,12 +17,12 @@
 
 package org.apache.mahout.ep;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -41,37 +41,37 @@ import java.util.concurrent.Future;
  */
 public class ThreadedEvolutionaryProcess {
 
-  private static final PriorityQueue<State<?>> resultPopulation = new PriorityQueue<State<?>>();
+  private static final PriorityQueue<State<?, ?>> resultPopulation = new PriorityQueue<State<?, ?>>();
 
   private volatile int taskCount;
   private volatile int processCount;
 
   private volatile int maxTask;
 
-  private final Deque<State<?>> pending = new LinkedList<State<?>>();
-  private final Set<Future<State<?>>> working = Sets.newHashSet();
+  private final Deque<State<?, ?>> pending = Lists.newLinkedList();
+  private final Set<Future<State<?,?>>> working = Sets.newHashSet();
 
   private final ExecutorService pool;
-  private final ExecutorCompletionService<State<?>> ecs;
+  private final ExecutorCompletionService<State<?, ?>> ecs;
   private final int threadCount;
   private final Map<Integer, Mapping> mappingTable = Maps.newHashMap();
 
   public ThreadedEvolutionaryProcess(int threadCount) {
     this.threadCount = threadCount;
     pool = Executors.newFixedThreadPool(threadCount);
-    ecs = new ExecutorCompletionService<State<?>>(pool);
+    ecs = new ExecutorCompletionService<State<?, ?>>(pool);
   }
 
   public void setMap(int i, Mapping m) {
     mappingTable.put(i, m);
   }
 
-  public State<?> optimize(Function f, int dim, long timeLimit, int parentDepth)
+  public State<?, ?> optimize(Function f, int dim, long timeLimit, int parentDepth)
     throws InterruptedException, ExecutionException {
     long t0 = System.currentTimeMillis();
 
     // start with a few points near 0.  These will get transformed
-    State<?> s0 = new State(new double[dim], 0.5);
+    State<?, ?> s0 = new State(new double[dim], 0.5);
     for (Map.Entry<Integer, Mapping> entry : mappingTable.entrySet()) {
       s0.setMap(entry.getKey(), entry.getValue());
     }
@@ -85,37 +85,37 @@ public class ThreadedEvolutionaryProcess {
     do {
       // launch new tasks until we fill the available slots
       while (working.size() < threadCount && !pending.isEmpty()) {
-        State<?> next = pending.removeFirst();
+        State<?, ?> next = pending.removeFirst();
         working.add(ecs.submit(new EvalTask(f, next)));
         processCount++;
       }
 
       // wait for at least one result, then grab any additional results
-      Future<State<?>> result = ecs.take();
+      Future<State<?, ?>> result = ecs.take();
       while (result != null) {
-        State<?> r = result.get();
+        State<?, ?> r = result.get();
         resultPopulation.add(r);
         working.remove(result);
         result = ecs.poll();
       }
 
       // now spawn new pending tasks from the best in recent history
-      State<?>[] parents = new State[parentDepth];
-      Iterator<State<?>> j = resultPopulation.iterator();
+      State<?, ?>[] parents = new State[parentDepth];
+      Iterator<State<?, ?>> j = resultPopulation.iterator();
       for (int i = 0; i < parentDepth && j.hasNext(); i++) {
         parents[i] = j.next();
       }
 
       int k = 0;
       while (pending.size() + working.size() < threadCount) {
-        State<?> tmp = parents[(k++) % parentDepth];
+        State<?, ?> tmp = parents[(k++) % parentDepth];
         pending.add(tmp.mutate());
       }
     } while (System.currentTimeMillis() - t0 < timeLimit);
 
     // wait for last results to dribble in
     while (!working.isEmpty()) {
-      Future<State<?>> result = ecs.take();
+      Future<State<?, ?>> result = ecs.take();
       working.remove(result);
       resultPopulation.add(result.get());
     }
@@ -131,11 +131,11 @@ public class ThreadedEvolutionaryProcess {
     return String.format(Locale.ENGLISH, "Launched %d function evaluations\nMaximum threading width was %d", processCount, maxTask);
   }
 
-  public class EvalTask implements Callable<State<?>> {
+  public class EvalTask implements Callable<State<?, ?>> {
     private final Function f;
-    private final State<?> what;
+    private final State<?, ?> what;
 
-    public EvalTask(Function f, State<?> what) {
+    public EvalTask(Function f, State<?, ?> what) {
       this.f = f;
       this.what = what;
     }
@@ -146,7 +146,7 @@ public class ThreadedEvolutionaryProcess {
      * @return computed result
      */
     @Override
-    public State<?> call() {
+    public State<?, ?> call() {
       taskCount++;
       maxTask = Math.max(taskCount, maxTask);
       try {

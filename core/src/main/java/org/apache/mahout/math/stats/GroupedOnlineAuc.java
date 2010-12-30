@@ -18,7 +18,11 @@
 package org.apache.mahout.math.stats;
 
 import com.google.common.collect.Maps;
+import org.apache.mahout.classifier.sgd.PolymorphicWritable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -82,5 +86,28 @@ public class GroupedOnlineAuc implements OnlineAuc {
     for (OnlineAuc auc : map.values()) {
       auc.setWindowSize(windowSize);
     }
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(map.size());
+    for (String key : map.keySet()) {
+      out.writeUTF(key);
+      PolymorphicWritable.write(out, map.get(key));
+    }
+    out.writeInt(policy.ordinal());
+    out.writeInt(windowSize);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    int n = in.readInt();
+    map.clear();
+    for (int i = 0; i < n; i++) {
+      String key = in.readUTF();
+      map.put(key, PolymorphicWritable.read(in, OnlineAuc.class));
+    }
+    policy = GlobalOnlineAuc.ReplacementPolicy.values()[in.readInt()];
+    windowSize = in.readInt();
   }
 }

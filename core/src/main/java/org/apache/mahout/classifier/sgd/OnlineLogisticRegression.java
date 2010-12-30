@@ -17,14 +17,23 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.MatrixWritable;
+import org.apache.mahout.math.VectorWritable;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * Extends the basic on-line logistic regression learner with a specific set of learning
  * rate annealing schedules.
  */
-public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
+public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression implements Writable {
+  public static final int WRITABLE_VERSION = 1;
+
   // these next two control decayFactor^steps exponential type of annealing
   // learning rate and decay factor
   private double mu0 = 1;
@@ -38,7 +47,7 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
   // controls how per term annealing works
   private int perTermAnnealingOffset = 20;
 
-  private OnlineLogisticRegression() {
+  public OnlineLogisticRegression() {
     // private constructor available for Gson, but not normal use
   }
 
@@ -120,5 +129,42 @@ public class OnlineLogisticRegression extends AbstractOnlineLogisticRegression {
     OnlineLogisticRegression r = new OnlineLogisticRegression(numCategories(), numFeatures(), prior);
     r.copyFrom(this);
     return r;
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(WRITABLE_VERSION);
+    out.writeDouble(mu0);
+    out.writeDouble(decayFactor);
+    out.writeInt(stepOffset);
+    out.writeInt(step);
+    out.writeDouble(forgettingExponent);
+    out.writeInt(perTermAnnealingOffset);
+    out.writeInt(numCategories);
+    MatrixWritable.writeMatrix(out, beta);
+    PolymorphicWritable.write(out, prior);
+    VectorWritable.writeVector(out, updateCounts);
+    VectorWritable.writeVector(out, updateSteps);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    int version = in.readInt();
+    if (version == WRITABLE_VERSION) {
+      mu0 = in.readDouble();
+      decayFactor = in.readDouble();
+      stepOffset = in.readInt();
+      step = in.readInt();
+      forgettingExponent = in.readDouble();
+      perTermAnnealingOffset = in.readInt();
+      numCategories = in.readInt();
+      beta = MatrixWritable.readMatrix(in);
+      prior = PolymorphicWritable.read(in, PriorFunction.class);
+
+      updateCounts = VectorWritable.readVector(in);
+      updateSteps = VectorWritable.readVector(in);
+    } else {
+      throw new IOException("Incorrect object version, wanted " + WRITABLE_VERSION + " got " + version);
+    }
   }
 }

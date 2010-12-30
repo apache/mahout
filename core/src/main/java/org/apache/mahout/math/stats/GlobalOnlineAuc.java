@@ -21,8 +21,13 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -32,6 +37,7 @@ import java.util.Random;
  * batch fashion.  The probabilistic definition (the probability that a random element of one set
  * has a higher score than a random element of another set) gives us a way to estimate this
  * on-line.
+ *
  * @see GroupedOnlineAuc
  */
 public class GlobalOnlineAuc implements OnlineAuc {
@@ -50,9 +56,9 @@ public class GlobalOnlineAuc implements OnlineAuc {
   // FIFO has distinctly the best properties as a policy.  See OnlineAucTest for details
   private ReplacementPolicy policy = ReplacementPolicy.FIFO;
   private final transient Random random = RandomUtils.getRandom();
-  private final Matrix scores;
-  private final Vector averages;
-  private final Vector samples;
+  private Matrix scores;
+  private Vector averages;
+  private Vector samples;
 
   public GlobalOnlineAuc() {
     int numCategories = 2;
@@ -67,7 +73,7 @@ public class GlobalOnlineAuc implements OnlineAuc {
   public double addSample(int category, String groupKey, double score) {
     return addSample(category, score);
   }
-  
+
   @Override
   public double addSample(int category, double score) {
     int n = (int) samples.get(category);
@@ -108,14 +114,14 @@ public class GlobalOnlineAuc implements OnlineAuc {
         count++;
         if (score > v) {
           m++;
-        // } else if (score < v) {
+          // } else if (score < v) {
           // m += 0
         } else if (score == v) {
           m += 0.5;
         }
       }
       averages.set(category, averages.get(category)
-          + (m / count - averages.get(category)) / Math.min(windowSize, samples.get(category)));
+        + (m / count - averages.get(category)) / Math.min(windowSize, samples.get(category)));
     }
     return auc();
   }
@@ -139,4 +145,24 @@ public class GlobalOnlineAuc implements OnlineAuc {
   public void setWindowSize(int windowSize) {
     this.windowSize = windowSize;
   }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeInt(windowSize);
+    out.writeInt(policy.ordinal());
+    MatrixWritable.writeMatrix(out, scores);
+    VectorWritable.writeVector(out, averages);
+    VectorWritable.writeVector(out, samples);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    windowSize = in.readInt();
+    policy = ReplacementPolicy.values()[in.readInt()];
+
+    scores = MatrixWritable.readMatrix(in);
+    averages = VectorWritable.readVector(in);
+    samples = VectorWritable.readVector(in);
+  }
+
 }

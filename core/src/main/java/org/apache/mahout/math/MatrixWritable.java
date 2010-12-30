@@ -17,6 +17,7 @@
 
 package org.apache.mahout.math;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.Writable;
 
 import java.io.DataInput;
@@ -27,6 +28,9 @@ import java.util.Map;
 public class MatrixWritable implements Writable {
 
   private Matrix matrix;
+  private static final int NUM_FLAGS = 2;
+  private static final int FLAG_DENSE = 1;
+  private static final int FLAG_SEQUENTIAL = 2;
 
   public MatrixWritable() {
   }
@@ -95,25 +99,45 @@ public class MatrixWritable implements Writable {
 
   /** Reads a typed Matrix instance from the input stream */
   public static Matrix readMatrix(DataInput in) throws IOException {
-    String matrixClassName = in.readUTF();
-    Matrix matrix;
-    try {
-      matrix = Class.forName(matrixClassName).asSubclass(Matrix.class)
-          .newInstance();
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalAccessException e) {
-      throw new IllegalStateException(e);
-    } catch (InstantiationException e) {
-      throw new IllegalStateException(e);
+    int flags = in.readInt();
+    Preconditions.checkArgument(flags >> NUM_FLAGS == 0, "Unknown flags set: %d", Integer.toString(flags, 2));
+    boolean dense = (flags & FLAG_DENSE) != 0;
+    boolean sequential = (flags & FLAG_SEQUENTIAL) != 0;
+
+    int rows = in.readInt();
+    int columns = in.readInt();
+
+    Matrix r ;
+    if (dense) {
+      r = new DenseMatrix(rows, columns);
+    } else {
+      r = new SparseRowMatrix(new int[]{rows, columns}, !sequential);
     }
-   // matrix.readFields(in);
-    return matrix;
+
+    for (int row = 0; row < rows; row++) {
+      r.viewRow(row).assign(VectorWritable.readVector(in));
+    }
+
+    return r;
   }
 
   /** Writes a typed Matrix instance to the output stream */
   public static void writeMatrix(DataOutput out, Matrix matrix) throws IOException {
-    out.writeUTF(matrix.getClass().getName());
-   // matrix.write(out);
+    int flags = 0;
+    Vector row = matrix.viewRow(0);
+    if (row.isDense()) {
+      flags |= FLAG_DENSE;
+    }
+    if (row.isSequentialAccess()) {
+      flags |= FLAG_SEQUENTIAL;
+    }
+    out.writeInt(flags);
+
+    out.writeInt(matrix.rowSize());
+    out.writeInt(matrix.columnSize());
+
+    for (int i = 0; i < matrix.rowSize(); i++) {
+      VectorWritable.writeVector(out, matrix.viewRow(i), false);
+    }
   }
 }

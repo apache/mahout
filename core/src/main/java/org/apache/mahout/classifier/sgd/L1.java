@@ -17,6 +17,10 @@
 
 package org.apache.mahout.classifier.sgd;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 /**
  * Implements the Laplacian or bi-exponential prior.  This prior has a strong tendency to set coefficients to zero
  * and thus is useful as an alternative to variable selection.  This version implements truncation which prevents
@@ -41,5 +45,15 @@ public class L1 implements PriorFunction {
   @Override
   public double logP(double betaIJ) {
     return -Math.abs(betaIJ);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    // stateless class has nothing to serialize
+  }
+
+  @Override
+  public void readFields(DataInput dataInput) throws IOException {
+    // stateless class has nothing to serialize
   }
 }

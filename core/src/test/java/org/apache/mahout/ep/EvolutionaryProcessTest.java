@@ -20,19 +20,23 @@ package org.apache.mahout.ep;
 import org.apache.mahout.common.MahoutTestCase;
 import org.junit.Test;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 public final class EvolutionaryProcessTest extends MahoutTestCase {
 
   @Test
   public void testConverges() throws Exception {
-    State<Foo> s0 = new State<Foo>(new double[5], 1);
+    State<Foo, Double> s0 = new State<Foo, Double>(new double[5], 1);
     s0.setPayload(new Foo());
-    EvolutionaryProcess<Foo> ep = new EvolutionaryProcess<Foo>(10, 100, s0);
+    EvolutionaryProcess<Foo, Double> ep = new EvolutionaryProcess<Foo, Double>(10, 100, s0);
 
-    State<Foo> best = null;
-    for (int i = 0; i < 20  ; i++) {
-      best = ep.parallelDo(new EvolutionaryProcess.Function<Foo>() {
+    State<Foo, Double> best = null;
+    for (int i = 0; i < 20; i++) {
+      best = ep.parallelDo(new EvolutionaryProcess.Function<Payload<Double>>() {
         @Override
-        public double apply(Foo payload, double[] params) {
+        public double apply(Payload<Double> payload, double[] params) {
           int i = 1;
           double sum = 0;
           for (double x : params) {
@@ -52,7 +56,7 @@ public final class EvolutionaryProcessTest extends MahoutTestCase {
     assertEquals(0.0, best.getValue(), 0.02);
   }
 
-  private static class Foo implements Payload<Foo> {
+  private static class Foo implements Payload<Double> {
     @Override
     public Foo copy() {
       return this;
@@ -61,6 +65,16 @@ public final class EvolutionaryProcessTest extends MahoutTestCase {
     @Override
     public void update(double[] params) {
       // ignore
+    }
+
+    @Override
+    public void write(DataOutput dataOutput) throws IOException {
+      // no-op
+    }
+
+    @Override
+    public void readFields(DataInput dataInput) throws IOException {
+      // no-op
     }
   }
 }
