@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
+import org.apache.mahout.cf.taste.recommender.MostSimilarItemsCandidateItemsStrategy;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 /**
@@ -35,10 +36,10 @@ public final class GenericBooleanPrefItemBasedRecommender extends GenericItemBas
     super(dataModel, similarity);
   }
 
-  public GenericBooleanPrefItemBasedRecommender(DataModel dataModel,
-                                                ItemSimilarity similarity,
-                                                CandidateItemsStrategy candidateItemsStrategy) {
-    super(dataModel, similarity, candidateItemsStrategy);
+  public GenericBooleanPrefItemBasedRecommender(DataModel dataModel, ItemSimilarity similarity,
+      CandidateItemsStrategy candidateItemsStrategy, MostSimilarItemsCandidateItemsStrategy
+      mostSimilarItemsCandidateItemsStrategy) {
+    super(dataModel, similarity, candidateItemsStrategy, mostSimilarItemsCandidateItemsStrategy);
   }
   
   /**

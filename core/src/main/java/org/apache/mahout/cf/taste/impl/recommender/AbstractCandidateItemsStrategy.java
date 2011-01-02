@@ -19,22 +19,27 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
+import org.apache.mahout.cf.taste.recommender.MostSimilarItemsCandidateItemsStrategy;
 
-public final class AllUnknownItemsCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
+/**
+ * Abstract base implementation for retrieving candidate items to recommend
+ */
+public abstract class AbstractCandidateItemsStrategy implements CandidateItemsStrategy,
+    MostSimilarItemsCandidateItemsStrategy {
 
-  /**
-   * return all items the user has not yet seen
-   */
   @Override
-  protected FastIDSet doGetCandidateItems(FastIDSet preferredItemIDs, DataModel dataModel) throws TasteException {
-    FastIDSet possibleItemIDs = new FastIDSet(dataModel.getNumItems());
-    LongPrimitiveIterator allItemIDs = dataModel.getItemIDs();
-    while (allItemIDs.hasNext()) {
-      possibleItemIDs.add(allItemIDs.nextLong());
-    }
-    possibleItemIDs.removeAll(preferredItemIDs);
-    return possibleItemIDs;
+  public FastIDSet getCandidateItems(long userID, DataModel dataModel) throws TasteException {
+    return doGetCandidateItems(dataModel.getItemIDsFromUser(userID), dataModel);
   }
+
+  @Override
+  public FastIDSet getCandidateItems(long[] itemIDs, DataModel dataModel) throws TasteException {
+    FastIDSet preferredItemIDs = new FastIDSet(itemIDs.length);
+    preferredItemIDs.addAll(itemIDs);
+    return doGetCandidateItems(preferredItemIDs, dataModel);
+  }
+
+  abstract FastIDSet doGetCandidateItems(FastIDSet preferredItemIDs, DataModel dataModel) throws TasteException;
 }

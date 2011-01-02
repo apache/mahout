@@ -17,24 +17,22 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
-import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
-/**
- * returns all items that have not been rated by the user and that were preferred by another user
- * that has preferred at least one item that the current user has preferred too
- */
-public final class PreferredItemsNeighborhoodCandidateItemsStrategy implements CandidateItemsStrategy {
+public final class PreferredItemsNeighborhoodCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
 
+  /**
+   * returns all items that have not been rated by the user and that were preferred by another user
+   * that has preferred at least one item that the current user has preferred too
+   */
   @Override
-  public FastIDSet getCandidateItems(long userID, DataModel dataModel) throws TasteException {
+  protected FastIDSet doGetCandidateItems(FastIDSet preferredItemIDs, DataModel dataModel) throws TasteException {
     FastIDSet possibleItemsIDs = new FastIDSet();
-    FastIDSet itemIDs = dataModel.getItemIDsFromUser(userID);
-    LongPrimitiveIterator itemIDIterator = itemIDs.iterator();
+    LongPrimitiveIterator itemIDIterator = preferredItemIDs.iterator();
     while (itemIDIterator.hasNext()) {
       long itemID = itemIDIterator.nextLong();
       PreferenceArray prefs2 = dataModel.getPreferencesForItem(itemID);
@@ -43,8 +41,8 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategy implements C
         possibleItemsIDs.addAll(dataModel.getItemIDsFromUser(prefs2.getUserID(j)));
       }
     }
-    possibleItemsIDs.removeAll(itemIDs);
+    possibleItemsIDs.removeAll(preferredItemIDs);
     return possibleItemsIDs;
   }
-  
+
 }

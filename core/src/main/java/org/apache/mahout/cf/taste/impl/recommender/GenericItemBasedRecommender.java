@@ -33,6 +33,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
+import org.apache.mahout.cf.taste.recommender.MostSimilarItemsCandidateItemsStrategy;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Rescorer;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -70,6 +71,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   private static final Logger log = LoggerFactory.getLogger(GenericItemBasedRecommender.class);
   
   private final ItemSimilarity similarity;
+  private final MostSimilarItemsCandidateItemsStrategy mostSimilarItemsCandidateItemsStrategy;
   private final RefreshHelper refreshHelper;
   private EstimatedPreferenceCapper capper;
 
@@ -77,10 +79,14 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
 
   public GenericItemBasedRecommender(DataModel dataModel,
                                      ItemSimilarity similarity,
-                                     CandidateItemsStrategy candidateItemsStrategy) {
+                                     CandidateItemsStrategy candidateItemsStrategy,
+                                     MostSimilarItemsCandidateItemsStrategy mostSimilarItemsCandidateItemsStrategy) {
     super(dataModel, candidateItemsStrategy);
     Preconditions.checkArgument(similarity != null, "similarity is null");
     this.similarity = similarity;
+    Preconditions.checkArgument(mostSimilarItemsCandidateItemsStrategy != null,
+        "mostSimilarItemsCandidateItemsStrategy is null");
+    this.mostSimilarItemsCandidateItemsStrategy = mostSimilarItemsCandidateItemsStrategy;
     this.refreshHelper = new RefreshHelper(new Callable<Void>() {
       @Override
       public Void call() {
@@ -93,9 +99,13 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     capper = buildCapper();
   }
 
-  public GenericItemBasedRecommender(DataModel dataModel,
-                                     ItemSimilarity similarity) {
-    this(dataModel, similarity, AbstractRecommender.getDefaultCandidateItemsStrategy());
+  public GenericItemBasedRecommender(DataModel dataModel, ItemSimilarity similarity) {
+    this(dataModel, similarity, AbstractRecommender.getDefaultCandidateItemsStrategy(),
+        getDefaultMostSimilarItemsCandidateItemsStrategy());
+  }
+
+  protected static MostSimilarItemsCandidateItemsStrategy getDefaultMostSimilarItemsCandidateItemsStrategy() {
+    return new PreferredItemsNeighborhoodCandidateItemsStrategy();
   }
 
   public ItemSimilarity getSimilarity() {
@@ -198,18 +208,8 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   private List<RecommendedItem> doMostSimilarItems(long[] itemIDs,
                                                    int howMany,
                                                    TopItems.Estimator<Long> estimator) throws TasteException {
-    DataModel model = getDataModel();
-    FastIDSet possibleItemsIDs = new FastIDSet();
-    for (long itemID : itemIDs) {
-      PreferenceArray prefs = model.getPreferencesForItem(itemID);
-      int size = prefs.length();
-      for (int i = 0; i < size; i++) {
-        long userID = prefs.get(i).getUserID();
-        possibleItemsIDs.addAll(model.getItemIDsFromUser(userID));
-      }
-    }
-    possibleItemsIDs.removeAll(itemIDs);
-    return TopItems.getTopItems(howMany, possibleItemsIDs.iterator(), null, estimator);
+    FastIDSet possibleItemIDs = mostSimilarItemsCandidateItemsStrategy.getCandidateItems(itemIDs, getDataModel());
+    return TopItems.getTopItems(howMany, possibleItemIDs.iterator(), null, estimator);
   }
   
   protected float doEstimatePreference(long userID, long itemID) throws TasteException {

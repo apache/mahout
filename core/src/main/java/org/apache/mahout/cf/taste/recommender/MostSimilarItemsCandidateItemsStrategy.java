@@ -15,26 +15,16 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.recommender;
+package org.apache.mahout.cf.taste.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 
-public final class AllUnknownItemsCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
+/**
+ * Used to retrieve all items that could possibly be similar
+ */
+public interface MostSimilarItemsCandidateItemsStrategy {
 
-  /**
-   * return all items the user has not yet seen
-   */
-  @Override
-  protected FastIDSet doGetCandidateItems(FastIDSet preferredItemIDs, DataModel dataModel) throws TasteException {
-    FastIDSet possibleItemIDs = new FastIDSet(dataModel.getNumItems());
-    LongPrimitiveIterator allItemIDs = dataModel.getItemIDs();
-    while (allItemIDs.hasNext()) {
-      possibleItemIDs.add(allItemIDs.nextLong());
-    }
-    possibleItemIDs.removeAll(preferredItemIDs);
-    return possibleItemIDs;
-  }
+  FastIDSet getCandidateItems(long[] itemIDs, DataModel dataModel) throws TasteException;
 }
