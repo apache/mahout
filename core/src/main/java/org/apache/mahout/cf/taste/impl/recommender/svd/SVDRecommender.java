@@ -17,171 +17,53 @@
 
 package org.apache.mahout.cf.taste.impl.recommender.svd;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Callable;
 
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
-import org.apache.mahout.cf.taste.common.NoSuchUserException;
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
-import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.cf.taste.impl.recommender.AbstractRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.common.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 /**
- * <p>
- * A {@link org.apache.mahout.cf.taste.recommender.Recommender} which uses Single Value Decomposition
- * to find the main features of the data set. Thanks to Simon Funk for the hints in the implementation.
+ * A {@link org.apache.mahout.cf.taste.recommender.Recommender} that uses matrix factorization (a projection of users
+ * and items onto a feature space)
  */
 public final class SVDRecommender extends AbstractRecommender {
-  
-  private static final Logger log = LoggerFactory.getLogger(SVDRecommender.class);
-  private static final Random random = RandomUtils.getRandom();
-  
+
+  private Factorization factorization;
   private final RefreshHelper refreshHelper;
-  
-  /** Number of features */
-  private final int numFeatures;
-  
-  private final FastByIDMap<Integer> userMap;
-  private final FastByIDMap<Integer> itemMap;
-  private final ExpectationMaximizationSVD emSvd;
-  private final List<Preference> cachedPreferences;
-  
-  /**
-   * @param numFeatures
-   *          the number of features
-   * @param initialSteps
-   *          number of initial training steps
-   */
-  public SVDRecommender(DataModel dataModel,
-                        CandidateItemsStrategy candidateItemsStrategy,
-                        int numFeatures,
-                        int initialSteps) throws TasteException {
+
+  private static final Logger log = LoggerFactory.getLogger(SVDRecommender.class);
+
+  public SVDRecommender(DataModel dataModel, Factorizer factorizer) throws TasteException {
+    this(dataModel, factorizer, getDefaultCandidateItemsStrategy());
+  }
+
+  public SVDRecommender(DataModel dataModel, Factorizer factorizer, CandidateItemsStrategy candidateItemsStrategy)
+      throws TasteException {
     super(dataModel, candidateItemsStrategy);
-    
-    this.numFeatures = numFeatures;
-    
-    int numUsers = dataModel.getNumUsers();
-    userMap = new FastByIDMap<Integer>(numUsers);
-    
-    int idx = 0;
-    LongPrimitiveIterator userIterator = dataModel.getUserIDs();
-    while (userIterator.hasNext()) {
-      userMap.put(userIterator.nextLong(), idx++);
-    }
-    
-    int numItems = dataModel.getNumItems();
-    itemMap = new FastByIDMap<Integer>(numItems);
-    
-    idx = 0;
-    LongPrimitiveIterator itemIterator = dataModel.getItemIDs();
-    while (itemIterator.hasNext()) {
-      itemMap.put(itemIterator.nextLong(), idx++);
-    }
-    
-    double average = getAveragePreference();
-    double defaultValue = Math.sqrt((average - 1.0) / numFeatures);
-    
-    emSvd = new ExpectationMaximizationSVD(numUsers, numItems, numFeatures, defaultValue);
-    cachedPreferences = new ArrayList<Preference>(numUsers);
-    recachePreferences();
-    
+    factorization = factorizer.factorize();
     refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
       public Object call() throws TasteException {
-        recachePreferences();
         // TODO: train again
         return null;
       }
     });
-    refreshHelper.addDependency(dataModel);
-    
-    train(initialSteps);
+    refreshHelper.addDependency(getDataModel());
   }
 
-  public SVDRecommender(DataModel dataModel,
-                        int numFeatures,
-                        int initialSteps) throws TasteException {
-    this(dataModel, getDefaultCandidateItemsStrategy(), numFeatures, initialSteps);
-  }
-  
-  private void recachePreferences() throws TasteException {
-    cachedPreferences.clear();
-    DataModel dataModel = getDataModel();
-    LongPrimitiveIterator it = dataModel.getUserIDs();
-    while (it.hasNext()) {
-      for (Preference pref : dataModel.getPreferencesFromUser(it.nextLong())) {
-        cachedPreferences.add(pref);
-      }
-    }
-  }
-  
-  private double getAveragePreference() throws TasteException {
-    RunningAverage average = new FullRunningAverage();
-    DataModel dataModel = getDataModel();
-    LongPrimitiveIterator it = dataModel.getUserIDs();
-    while (it.hasNext()) {
-      for (Preference pref : dataModel.getPreferencesFromUser(it.nextLong())) {
-        average.addDatum(pref.getValue());
-      }
-    }
-    return average.getAverage();
-  }
-  
-  public void train(int steps) {
-    for (int i = 0; i < steps; i++) {
-      nextTrainStep();
-    }
-  }
-  
-  private void nextTrainStep() {
-    Collections.shuffle(cachedPreferences, random);
-    for (int i = 0; i < numFeatures; i++) {
-      for (Preference pref : cachedPreferences) {
-        int useridx = userMap.get(pref.getUserID());
-        int itemidx = itemMap.get(pref.getItemID());
-        emSvd.train(useridx, itemidx, i, pref.getValue());
-      }
-    }
-  }
-  
-  private float predictRating(int user, int item) {
-    return (float) emSvd.getDotProduct(user, item);
-  }
-  
-  @Override
-  public float estimatePreference(long userID, long itemID) throws TasteException {
-    Integer useridx = userMap.get(userID);
-    if (useridx == null) {
-      throw new NoSuchUserException();
-    }
-    Integer itemidx = itemMap.get(itemID);
-    if (itemidx == null) {
-      throw new NoSuchItemException();
-    }
-    return predictRating(useridx, itemidx);
-  }
-  
   @Override
   public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
@@ -189,37 +71,43 @@ public final class SVDRecommender extends AbstractRecommender {
 
     FastIDSet possibleItemIDs = getAllOtherItems(userID);
 
-    TopItems.Estimator<Long> estimator = new Estimator(userID);
-
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
-      estimator);
-
+        new Estimator(userID));
     log.debug("Recommendations are: {}", topItems);
+
     return topItems;
   }
-  
+
+  /**
+   * a preference is estimated by computing the dot-product of the user and item feature vectors
+   */
   @Override
-  public void refresh(Collection<Refreshable> alreadyRefreshed) {
-    refreshHelper.refresh(alreadyRefreshed);
+  public float estimatePreference(long userID, long itemID) throws TasteException {
+    double[] userFeatures = factorization.getUserFeatures(userID);
+    double[] itemFeatures = factorization.getItemFeatures(itemID);
+    double estimate = 0;
+    for (int feature = 0; feature < userFeatures.length; feature++) {
+      estimate += userFeatures[feature] * itemFeatures[feature];
+    }
+    return (float) estimate;
   }
-  
-  @Override
-  public String toString() {
-    return "SVDRecommender[numFeatures:" + numFeatures + ']';
-  }
-  
+
   private final class Estimator implements TopItems.Estimator<Long> {
-    
+
     private final long theUserID;
-    
+
     private Estimator(long theUserID) {
       this.theUserID = theUserID;
     }
-    
+
     @Override
     public double estimate(Long itemID) throws TasteException {
       return estimatePreference(theUserID, itemID);
     }
   }
-  
+
+  @Override
+  public void refresh(Collection<Refreshable> alreadyRefreshed) {
+    refreshHelper.refresh(alreadyRefreshed);
+  }
 }
