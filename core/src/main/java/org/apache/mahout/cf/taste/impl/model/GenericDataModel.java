@@ -189,7 +189,14 @@ public final class GenericDataModel extends AbstractDataModel {
   public FastByIDMap<PreferenceArray> getRawUserData() {
     return this.preferenceFromUsers;
   }
-  
+
+  /**
+   * This is used mostly internally to the framework, and shouldn't be relied upon otherwise.
+   */
+  public FastByIDMap<PreferenceArray> getRawItemData() {
+    return this.preferenceForItems;
+  }
+
   @Override
   public LongPrimitiveArrayIterator getUserIDs() {
     return new LongPrimitiveArrayIterator(userIDs);
