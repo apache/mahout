@@ -162,18 +162,6 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
     }
   }
 
-  /**
-   * Sanity check for operations requiring matrices with the same number of columns and rows.
-   *
-   * @throws IllegalArgumentException if <tt>columns() != B.columns() || rows() != B.rows() || columns() != C.columns()
-   *                                  || rows() != C.rows()</tt>.
-   */
-  public void checkShape(AbstractMatrix2D B, AbstractMatrix2D C) {
-    if (columns != B.columns || rows != B.rows || columns != C.columns || rows != C.rows) {
-      throw new IllegalArgumentException("Incompatible dimensions");
-    }
-  }
-
   /** Returns the number of columns. */
   public int columns() {
     return columns;
@@ -297,24 +285,4 @@ public abstract class AbstractMatrix2D extends AbstractMatrix {
     return this;
   }
 
-  /**
-   * Self modifying version of viewStrides().
-   *
-   * @throws IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
-   */
-  protected AbstractMatrix2D vStrides(int rowStride, int columnStride) {
-    if (rowStride <= 0 || columnStride <= 0) {
-      throw new IndexOutOfBoundsException("illegal strides: " + rowStride + ", " + columnStride);
-    }
-    this.rowStride *= rowStride;
-    this.columnStride *= columnStride;
-    if (this.rows != 0) {
-      this.rows = (this.rows - 1) / rowStride + 1;
-    }
-    if (this.columns != 0) {
-      this.columns = (this.columns - 1) / columnStride + 1;
-    }
-    this.isNoView = false;
-    return this;
-  }
 }

@@ -8,13 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
-import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.list.ObjectArrayList;
-import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
+import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -23,7 +21,7 @@ import java.util.TreeMap;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class Property extends PersistentObject {
+public final class Property {
 
   /** The default Property object; currently has <tt>tolerance()==1.0E-9</tt>. */
   public static final Property DEFAULT = new Property(1.0E-9);
@@ -31,31 +29,11 @@ public class Property extends PersistentObject {
   /** A Property object with <tt>tolerance()==0.0</tt>. */
   public static final Property ZERO = new Property(0.0);
 
-  /** A Property object with <tt>tolerance()==1.0E-12</tt>. */
-  public static final Property TWELVE = new Property(1.0E-12);
-
-  private double tolerance;
-
-  /** Not instantiable by no-arg constructor. */
-  private Property() {
-    this(1.0E-9); // just to be on the safe side
-  }
+  private final double tolerance;
 
   /** Constructs an instance with a tolerance of <tt>Math.abs(newTolerance)</tt>. */
   public Property(double newTolerance) {
     tolerance = Math.abs(newTolerance);
-  }
-
-  /** Returns a String with <tt>length</tt> blanks. */
-  protected static String blanks(int length) {
-    if (length < 0) {
-      length = 0;
-    }
-    StringBuilder buf = new StringBuilder(length);
-    for (int k = 0; k < length; k++) {
-      buf.append(' ');
-    }
-    return buf.toString();
   }
 
   /**
@@ -228,30 +206,6 @@ public class Property extends PersistentObject {
   }
 
   /**
-   * Modifies the given matrix square matrix <tt>A</tt> such that it is diagonally dominant by row and column, hence
-   * non-singular, hence invertible. For testing purposes only.
-   *
-   * @param a the square matrix to modify.
-   * @throws IllegalArgumentException if <tt>!isSquare(A)</tt>.
-   */
-  public static void generateNonSingular(DoubleMatrix2D a) {
-    checkSquare(a);
-    int min = Math.min(a.rows(), a.columns());
-    for (int i = min; --i >= 0;) {
-      a.setQuick(i, i, 0);
-    }
-    for (int i = min; --i >= 0;) {
-      double rowSum = a.viewRow(i).aggregate(Functions.PLUS, Functions.ABS);
-      double colSum = a.viewColumn(i).aggregate(Functions.PLUS, Functions.ABS);
-      a.setQuick(i, i, Math.max(rowSum, colSum) + i + 1);
-    }
-  }
-
-  protected static String get(ObjectArrayList<String> list, int index) {
-    return list.get(index);
-  }
-
-  /**
    * A matrix <tt>A</tt> is <i>diagonal</i> if <tt>A[i,j] == 0</tt> whenever <tt>i != j</tt>. Matrix may but need not be
    * square.
    */
@@ -393,7 +347,7 @@ public class Property extends PersistentObject {
   public boolean isOrthogonal(DoubleMatrix2D a) {
     checkSquare(a);
     return equals(a.zMult(a, null, 1, 0, false, true),
-        DoubleFactory2D.DENSE.identity(a.rows()));
+                  DenseDoubleMatrix2D.identity(a.rows()));
   }
 
   /** A matrix <tt>A</tt> is <i>positive</i> if <tt>A[i,j] &gt; 0</tt> holds for all cells.
@@ -690,19 +644,6 @@ public class Property extends PersistentObject {
       }
     }
     return 1;
-  }
-
-  /**
-   * Sets the tolerance to <tt>Math.abs(newTolerance)</tt>.
-   *
-   * @throws UnsupportedOperationException if <tt>this==DEFAULT || this==ZERO || this==TWELVE</tt>.
-   */
-  public void setTolerance(double newTolerance) {
-    if (this == DEFAULT || this == ZERO || this == TWELVE) {
-      throw new IllegalArgumentException("Attempted to modify immutable object.");
-      //throw new UnsupportedOperationException("Attempted to modify object."); // since JDK1.2
-    }
-    tolerance = Math.abs(newTolerance);
   }
 
   /** Returns the current tolerance. */

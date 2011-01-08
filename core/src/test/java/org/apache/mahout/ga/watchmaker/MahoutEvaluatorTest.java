@@ -27,6 +27,7 @@ import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.FileLineIterable;
 import org.junit.Test;
+import org.uncommons.watchmaker.framework.FitnessEvaluator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public final class MahoutEvaluatorTest extends MahoutTestCase {
 
     // fitness evaluator
     DummyEvaluator.clearEvaluations();
-    DummyEvaluator evaluator = new DummyEvaluator();
+    FitnessEvaluator<DummyCandidate> evaluator = new DummyEvaluator();
 
     // run MahoutEvaluator
     List<Double> results = new ArrayList<Double>();

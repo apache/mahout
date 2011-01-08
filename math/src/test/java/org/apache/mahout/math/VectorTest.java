@@ -846,7 +846,7 @@ public final class VectorTest extends MahoutTestCase {
   public void testHashCodeEquivalence() {
     // Hash codes must be equal if the vectors are considered equal
     Vector sparseLeft = new RandomAccessSparseVector(3);
-    DenseVector denseRight = new DenseVector(3);
+    Vector denseRight = new DenseVector(3);
     sparseLeft.setQuick(0, 1);
     sparseLeft.setQuick(1, 2);
     sparseLeft.setQuick(2, 3);
@@ -863,7 +863,7 @@ public final class VectorTest extends MahoutTestCase {
     assertEquals(sparseLeft, denseRight);
     assertEquals(sparseLeft.hashCode(), denseRight.hashCode());
 
-    DenseVector denseLeft = new DenseVector(3);
+    Vector denseLeft = new DenseVector(3);
     denseLeft.setQuick(0, 1);
     denseLeft.setQuick(1, 2);
     denseLeft.setQuick(2, 3);

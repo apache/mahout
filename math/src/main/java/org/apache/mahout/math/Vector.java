@@ -18,8 +18,8 @@
 package org.apache.mahout.math;
 
 
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 
 import java.util.Iterator;
 
@@ -62,29 +62,29 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   /**
    * Apply the function to each element of the receiver
    *
-   * @param function a UnaryFunction to apply
+   * @param function a DoubleFunction to apply
    * @return the modified receiver
    */
-  Vector assign(UnaryFunction function);
+  Vector assign(DoubleFunction function);
 
   /**
    * Apply the function to each element of the receiver and the corresponding element of the other argument
    *
    * @param other    a Vector containing the second arguments to the function
-   * @param function a BinaryFunction to apply
+   * @param function a DoubleDoubleFunction to apply
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
-  Vector assign(Vector other, BinaryFunction function);
+  Vector assign(Vector other, DoubleDoubleFunction function);
 
   /**
-   * Apply the function to each element of the receiver, using the y value as the second argument of the BinaryFunction
+   * Apply the function to each element of the receiver, using the y value as the second argument of the DoubleDoubleFunction
    *
-   * @param f a BinaryFunction to be applied
+   * @param f a DoubleDoubleFunction to be applied
    * @param y a double value to be argument to the function
    * @return the modified receiver
    */
-  Vector assign(BinaryFunction f, double y);
+  Vector assign(DoubleDoubleFunction f, double y);
 
   /**
    * Return the cardinality of the recipient (the maximum number of values)
@@ -350,8 +350,8 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    */
   // void getNonZeros(IntArrayList jx, DoubleArrayList values);
   // void foreachNonZero(IntDoubleFunction f);
-  // BinaryFunction map);
-  // NewVector assign(Vector y, BinaryFunction function, IntArrayList
+  // DoubleDoubleFunction map);
+  // NewVector assign(Vector y, DoubleDoubleFunction function, IntArrayList
   // nonZeroIndexes);
 
   /**
@@ -362,7 +362,7 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    * @param map a function to apply to each element of the vector in turn before passing to the aggregator
    * @return the final aggregation
    */
-  double aggregate(BinaryFunction aggregator, UnaryFunction map);
+  double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map);
 
   /**
    * <p>Generalized inner product - take two vectors, iterate over them both, using the combiner to combine together
@@ -376,7 +376,7 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    * @param combiner
    * @return the final aggregation
    */
-  double aggregate(Vector other, BinaryFunction aggregator, BinaryFunction combiner);
+  double aggregate(Vector other, DoubleDoubleFunction aggregator, DoubleDoubleFunction combiner);
 
   /** Return the sum of squares of all elements in the vector. Square root of this value is the length of the vector. */
   double getLengthSquared();

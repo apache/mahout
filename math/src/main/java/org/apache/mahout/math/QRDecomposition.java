@@ -130,25 +130,6 @@ public class QRDecomposition {
   }
 
   /**
-   * Returns the Householder vectors <tt>H</tt>.  Not covered by tests yet.
-   *
-   * @return A lower trapezoidal matrix whose columns define the householder reflections.
-   *
-   */
-  @Deprecated
-  public Matrix getH() {
-    Matrix h = qr.clone();
-    int rows = h.numRows();
-    int columns = h.numCols();
-    for (int i = 0; i < rows; i++) {
-      for (int j = i + 1; j < columns; j++) {
-        h.setQuick(i, j, 0);
-      }
-    }
-    return h;
-  }
-
-  /**
    * Generates and returns the (economy-sized) orthogonal factor <tt>Q</tt>.
    *
    * @return <tt>Q</tt>

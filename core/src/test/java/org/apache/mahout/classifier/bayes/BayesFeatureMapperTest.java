@@ -41,7 +41,9 @@ public final class BayesFeatureMapperTest extends MahoutTestCase {
     conf.set("io.serializations",
       "org.apache.hadoop.io.serializer.JavaSerialization,"
           + "org.apache.hadoop.io.serializer.WritableSerialization");
-    conf.set("bayes.parameters", new BayesParameters(3).toString());
+    BayesParameters bayesParams = new BayesParameters();
+    bayesParams.setGramSize(3);
+    conf.set("bayes.parameters", bayesParams.toString());
     mapper.configure(conf);
     
     DummyOutputCollector<StringTuple,DoubleWritable> output = new DummyOutputCollector<StringTuple,DoubleWritable>();

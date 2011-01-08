@@ -25,13 +25,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random;
 
-import org.apache.mahout.math.PersistentObject;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.IntFunction;
 
 import java.util.Random;
 
-public abstract class AbstractDistribution extends PersistentObject implements UnaryFunction, IntFunction {
+public abstract class AbstractDistribution implements DoubleFunction, IntFunction {
   protected Random randomGenerator;
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
@@ -66,14 +65,6 @@ public abstract class AbstractDistribution extends PersistentObject implements U
    * method if necessary.
    */
   public abstract int nextInt();
-
-  /**
-   * Returns the used uniform random number generator;
-   * @return The current PRNG underlying this distribution.
-   */
-  public Random getRandomGenerator() {
-    return randomGenerator;
-  }
 
   /**
    * Sets the uniform random generator internally used.

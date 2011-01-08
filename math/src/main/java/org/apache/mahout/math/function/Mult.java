@@ -37,7 +37,7 @@ package org.apache.mahout.math.function;
  * Intended to be passed to <tt>matrix.assign(function)</tt> methods.
  */
 
-public final class Mult implements UnaryFunction {
+public final class Mult implements DoubleFunction {
 
   private double multiplicator;
 

@@ -17,8 +17,8 @@
 
 package org.apache.mahout.math;
 
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.VectorFunction;
 
 import java.util.Map;
@@ -58,20 +58,20 @@ public interface Matrix extends Cloneable, VectorIterable {
   /**
    * Apply the function to each element of the receiver
    *
-   * @param function a UnaryFunction to apply
+   * @param function a DoubleFunction to apply
    * @return the modified receiver
    */
-  Matrix assign(UnaryFunction function);
+  Matrix assign(DoubleFunction function);
 
   /**
    * Apply the function to each element of the receiver and the corresponding element of the other argument
    *
    * @param other    a Matrix containing the second arguments to the function
-   * @param function a BinaryFunction to apply
+   * @param function a DoubleDoubleFunction to apply
    * @return the modified receiver
    * @throws CardinalityException if the cardinalities differ
    */
-  Matrix assign(Matrix other, BinaryFunction function);
+  Matrix assign(Matrix other, DoubleDoubleFunction function);
 
   /**
    * Assign the other vector values to the column of the receiver
@@ -114,7 +114,7 @@ public interface Matrix extends Cloneable, VectorIterable {
    * @param mapper  A function to apply to each element.
    * @return  The result.
    */
-  double aggregate(BinaryFunction combiner, UnaryFunction mapper);
+  double aggregate(DoubleDoubleFunction combiner, DoubleFunction mapper);
 
   /**
    * Return the cardinality of the recipient (the maximum number of values)
@@ -400,10 +400,10 @@ public interface Matrix extends Cloneable, VectorIterable {
    */
   // void getNonZeros(IntArrayList jx, DoubleArrayList values);
   // void foreachNonZero(IntDoubleFunction f);
-  // double aggregate(BinaryFunction aggregator, UnaryFunction map);
-  // double aggregate(Matrix other, BinaryFunction aggregator,
-  // BinaryFunction map);
-  // NewMatrix assign(Matrix y, BinaryFunction function, IntArrayList
+  // double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map);
+  // double aggregate(Matrix other, DoubleDoubleFunction aggregator,
+  // DoubleDoubleFunction map);
+  // NewMatrix assign(Matrix y, DoubleDoubleFunction function, IntArrayList
   // nonZeroIndexes);
 
   Vector viewRow(int row);

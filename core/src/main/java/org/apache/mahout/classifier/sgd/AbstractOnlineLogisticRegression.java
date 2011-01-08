@@ -24,7 +24,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 
 import java.util.Iterator;
 
@@ -309,7 +309,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   }
 
   public boolean validModel() {
-    double k = beta.aggregate(Functions.PLUS, new UnaryFunction() {
+    double k = beta.aggregate(Functions.PLUS, new DoubleFunction() {
       @Override
       public double apply(double v) {
         return Double.isNaN(v) || Double.isInfinite(v) ? 1 : 0;

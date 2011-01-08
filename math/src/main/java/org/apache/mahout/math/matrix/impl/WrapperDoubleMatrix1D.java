@@ -101,28 +101,6 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
   }
 
   /**
-   * Constructs and returns a new <i>flip view</i>. What used to be index <tt>0</tt> is now index <tt>size()-1</tt>,
-   * ..., what used to be index <tt>size()-1</tt> is now index <tt>0</tt>. The returned view is backed by this matrix,
-   * so changes in the returned view are reflected in this matrix, and vice-versa.
-   *
-   * @return a new flip view.
-   */
-  @Override
-  public DoubleMatrix1D viewFlip() {
-    return new WrapperDoubleMatrix1D(WrapperDoubleMatrix1D.this) {
-      @Override
-      public double getQuick(int index) {
-        return content.get(size - 1 - index);
-      }
-
-      @Override
-      public void setQuick(int index, double value) {
-        content.set(size - 1 - index, value);
-      }
-    };
-  }
-
-  /**
    * Constructs and returns a new <i>sub-range view</i> that is a <tt>width</tt> sub matrix starting at <tt>index</tt>.
    *
    * Operations on the returned view can only be applied to the restricted range. Any attempt to access coordinates not
@@ -157,52 +135,6 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
   }
 
   /**
-   * Constructs and returns a new <i>selection view</i> that is a matrix holding the indicated cells. There holds
-   * <tt>view.size() == indexes.length</tt> and <tt>view.get(i) == this.get(indexes[i])</tt>. Indexes can occur multiple
-   * times and can be in arbitrary order. <p> <b>Example:</b> <br>
-   * <pre>
-   * this     = (0,0,8,0,7)
-   * indexes  = (0,2,4,2)
-   * -->
-   * view     = (0,8,7,8)
-   * </pre>
-   * Note that modifying <tt>indexes</tt> after this call has returned has no effect on the view. The returned view is
-   * backed by this matrix, so changes in the returned view are reflected in this matrix, and vice-versa.
-   *
-   * @param indexes The indexes of the cells that shall be visible in the new view. To indicate that <i>all</i> cells
-   *                shall be visible, simply set this parameter to <tt>null</tt>.
-   * @return the new view.
-   * @throws IndexOutOfBoundsException if <tt>!(0 <= indexes[i] < size())</tt> for any <tt>i=0..indexes.length()-1</tt>.
-   */
-  @Override
-  public DoubleMatrix1D viewSelection(int[] indexes) {
-    // check for "all"
-    if (indexes == null) {
-      indexes = new int[size];
-      for (int i = size; --i >= 0;) {
-        indexes[i] = i;
-      }
-    }
-
-    checkIndexes(indexes);
-    final int[] idx = indexes;
-
-    DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
-      @Override
-      public double getQuick(int i) {
-        return content.get(idx[i]);
-      }
-
-      @Override
-      public void setQuick(int i, double value) {
-        content.set(idx[i], value);
-      }
-    };
-    view.size = indexes.length;
-    return view;
-  }
-
-  /**
    * Construct and returns a new selection view.
    *
    * @param offsets the offsets of the visible elements.
@@ -213,35 +145,4 @@ class WrapperDoubleMatrix1D extends DoubleMatrix1D {
     throw new UnsupportedOperationException(); // should never get called
   }
 
-  /**
-   * Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell. More
-   * specifically, the view has size <tt>this.size()/stride</tt> holding cells <tt>this.get(i*stride)</tt> for all <tt>i
-   * = 0..size()/stride - 1</tt>.
-   *
-   * @param theStride the step factor.
-   * @return the new view.
-   * @throws IndexOutOfBoundsException if <tt>stride <= 0</tt>.
-   */
-  @Override
-  public DoubleMatrix1D viewStrides(final int theStride) {
-    if (stride <= 0) {
-      throw new IndexOutOfBoundsException("illegal stride: " + stride);
-    }
-    DoubleMatrix1D view = new WrapperDoubleMatrix1D(this) {
-      @Override
-      public double getQuick(int index) {
-        return content.get(index * theStride);
-      }
-
-      @Override
-      public void setQuick(int index, double value) {
-        content.set(index * theStride, value);
-      }
-    };
-    view.size = size;
-    if (size != 0) {
-      view.size = (size - 1) / theStride + 1;
-    }
-    return view;
-  }
 }

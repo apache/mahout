@@ -23,22 +23,7 @@ import org.apache.mahout.common.Parameters;
  * BayesParameter used for passing parameters to the Map/Reduce Jobs parameters include gramSize,
  */
 public class BayesParameters extends Parameters {
-  
-  
-  public BayesParameters() {
-    
-  }
-  
-  /** Create BayesParameters with the specified gram size
-   *  
-   * @param gramSize
-   * @deprecated use {@link #BayesParameters()} and {@link #setGramSize(int)} instead
-   */
-  @Deprecated
-  public BayesParameters(int gramSize) {
-    this.setGramSize(gramSize);
-  }
-  
+
   public void setGramSize(int gramSize) {
     set("gramSize", Integer.toString(gramSize));
   }

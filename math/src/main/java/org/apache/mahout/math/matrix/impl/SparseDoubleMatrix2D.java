@@ -8,10 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.IntDoubleProcedure;
 import org.apache.mahout.math.function.IntIntDoubleFunction;
 import org.apache.mahout.math.function.Mult;
@@ -75,26 +75,6 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
   }
 
   /**
-   * Constructs a view with the given parameters.
-   *
-   * @param rows         the number of rows the matrix shall have.
-   * @param columns      the number of columns the matrix shall have.
-   * @param elements     the cells.
-   * @param rowZero      the position of the first element.
-   * @param columnZero   the position of the first element.
-   * @param rowStride    the number of elements between two rows, i.e. <tt>index(i+1,j)-index(i,j)</tt>.
-   * @param columnStride the number of elements between two columns, i.e. <tt>index(i,j+1)-index(i,j)</tt>.
-   * @throws IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or
-   *                                  flip's are illegal.
-   */
-  SparseDoubleMatrix2D(int rows, int columns, AbstractIntDoubleMap elements, int rowZero, int columnZero,
-                                 int rowStride, int columnStride) {
-    setUp(rows, columns, rowZero, columnZero, rowStride, columnStride);
-    this.elements = elements;
-    this.isNoView = false;
-  }
-
-  /**
    * Sets all cells to the state specified by <tt>value</tt>.
    *
    * @param value the value to be filled into the cells.
@@ -128,17 +108,15 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
    * For further examples, see the <a href="package-summary.html#FunctionObjects">package doc</a>.
    *
    * @param function a function object taking as argument the current cell's value.
-   * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix2D assign(UnaryFunction function) {
+  public void assign(DoubleFunction function) {
     if (this.isNoView && function instanceof Mult) { // x[i] = mult*x[i]
       this.elements.assign(function);
     } else {
       super.assign(function);
     }
-    return this;
   }
 
   /**
@@ -172,7 +150,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
 
   @Override
   public DoubleMatrix2D assign(final DoubleMatrix2D y,
-                               BinaryFunction function) {
+                               DoubleDoubleFunction function) {
     if (!this.isNoView) {
       return super.assign(y, function);
     }
@@ -251,7 +229,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
   }
 
   @Override
-  public DoubleMatrix2D forEachNonZero(final org.apache.mahout.math.function.IntIntDoubleFunction function) {
+  public void forEachNonZero(final org.apache.mahout.math.function.IntIntDoubleFunction function) {
     if (this.isNoView) {
       this.elements.forEachPair(
           new IntDoubleProcedure() {
@@ -269,7 +247,6 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
     } else {
       super.forEachNonZero(function);
     }
-    return this;
   }
 
   /**
@@ -393,22 +370,6 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
     } else {
       this.elements.put(index, value);
     }
-  }
-
-  /**
-   * Releases any superfluous memory created by explicitly putting zero values into cells formerly having non-zero
-   * values; An application can use this operation to minimize the storage of the receiver. <p> <b>Background:</b> <p>
-   * Cells that <ul> <li>are never set to non-zero values do not use any memory. <li>switch from zero to non-zero state
-   * do use memory. <li>switch back from non-zero to zero state also do use memory. However, their memory can be
-   * reclaimed by calling <tt>trimToSize()</tt>. </ul> A sequence like <tt>set(r,c,5); set(r,c,0);</tt> sets a cell to
-   * non-zero state and later back to zero state. Such as sequence generates obsolete memory that is automatically
-   * reclaimed from time to time or can manually be reclaimed by calling <tt>trimToSize()</tt>. Putting zeros into cells
-   * already containing zeros does not generate obsolete memory since no memory was allocated to them in the first
-   * place.
-   */
-  @Override
-  public void trimToSize() {
-    this.elements.trimToSize();
   }
 
   /**
@@ -538,10 +499,10 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
             int i = key / columns;
             int j = key % columns;
             fun.setMultiplicator(value * alpha);
-            if (!transposeA) {
-              Crows[i].assign(Brows[j], fun);
-            } else {
+            if (transposeA) {
               Crows[j].assign(Brows[i], fun);
+            } else {
+              Crows[i].assign(Brows[j], fun);
             }
             return true;
           }

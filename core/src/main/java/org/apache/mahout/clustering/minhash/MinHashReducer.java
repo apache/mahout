@@ -35,8 +35,8 @@ public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
   private boolean debugOutput;
   
   enum Clusters {
-    Accepted,
-    Discarded
+    ACCEPTED,
+    DISCARDED
   }
   
   @Override
@@ -51,8 +51,8 @@ public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
    * output the items clustered
    */
   @Override
-  protected void reduce(Text cluster, Iterable<Writable> points, Context context) throws IOException,
-                                                                                 InterruptedException {
+  protected void reduce(Text cluster, Iterable<Writable> points, Context context)
+    throws IOException, InterruptedException {
     Collection<Writable> pointList = new ArrayList<Writable>();
     for (Writable point : points) {
       if (debugOutput) {
@@ -65,12 +65,12 @@ public class MinHashReducer extends Reducer<Text,Writable,Text,Writable> {
       }
     }
     if (pointList.size() >= minClusterSize) {
-      context.getCounter(Clusters.Accepted).increment(1);
+      context.getCounter(Clusters.ACCEPTED).increment(1);
       for (Writable point : pointList) {
         context.write(cluster, point);
       }
     } else {
-      context.getCounter(Clusters.Discarded).increment(1);
+      context.getCounter(Clusters.DISCARDED).increment(1);
     }
   }
   

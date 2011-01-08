@@ -31,6 +31,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -91,7 +92,7 @@ public final class LastfmClusterEvaluator {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Reader reader = new SequenceFile.Reader(fs, clusterFile, conf);
-    Random rand = new Random(11);
+    Random rand = RandomUtils.getRandom();
     Writable cluster = new Text();
     Text prevCluster = new Text();
     VectorWritable point = new VectorWritable();

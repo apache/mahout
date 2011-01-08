@@ -117,15 +117,14 @@ public class PartialSequentialBuilder extends PartialBuilder {
     // to compute firstIds, process the splits in file order
     long slowest = 0; // duration of slowest map
     int firstId = 0;
-    for (int p = 0; p < nbSplits; p++) {
-      InputSplit split = splits.get(p);
+    for (InputSplit split : splits) {
       int hp = ArrayUtils.indexOf(sorted, split); // hadoop's partition
-      
+
       RecordReader<LongWritable, Text> reader = input.createRecordReader(split, task);
       reader.initialize(split, task);
-      
+
       Step1Mapper mapper = new MockStep1Mapper(getTreeBuilder(), dataset, getSeed(),
-          hp, nbSplits, numTrees);
+                                               hp, nbSplits, numTrees);
 
       long time = System.currentTimeMillis();
 

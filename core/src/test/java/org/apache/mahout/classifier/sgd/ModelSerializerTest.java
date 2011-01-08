@@ -28,7 +28,7 @@ import org.apache.mahout.ep.Mapping;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.stats.GlobalOnlineAuc;
 import org.apache.mahout.math.stats.OnlineAuc;
 import org.junit.Test;
@@ -239,7 +239,7 @@ public final class ModelSerializerTest extends MahoutTestCase {
 
   private static Vector randomVector(final Random gen, int n) {
     Vector x = new DenseVector(n);
-    x.assign(new UnaryFunction() {
+    x.assign(new DoubleFunction() {
       @Override
       public double apply(double v) {
         return gen.nextGaussian();

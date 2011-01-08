@@ -86,7 +86,7 @@ public final class UnitVectorizerJob {
      * @param u
      * @return
      */
-    private static double vectorNorm(Vector u) {
+    private static double vectorNorm(Iterable<Vector.Element> u) {
       double retval = 0.0;
       for (Vector.Element e : u) {
         retval += Functions.POW.apply(e.get(), 2);

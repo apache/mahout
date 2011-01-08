@@ -28,11 +28,9 @@ package org.apache.mahout.math.jet.math;
 /**
  * Polynomial functions.
  */
+public final class Polynomial {
 
-public class Polynomial extends Constants {
-
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected Polynomial() {
+  private Polynomial() {
   }
 
   /**

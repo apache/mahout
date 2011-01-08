@@ -8,11 +8,11 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.Mult;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
@@ -66,11 +66,10 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    * matrix, and vice-versa.
    *
    * @param values the values to be filled into the cells.
-   * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>values.length != size()</tt>.
    */
   @Override
-  public DoubleMatrix1D assign(double[] values) {
+  public void assign(double[] values) {
     if (isNoView) {
       if (values.length != size) {
         throw new IllegalArgumentException(
@@ -80,17 +79,15 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     } else {
       super.assign(values);
     }
-    return this;
   }
 
   /**
    * Sets all cells to the state specified by <tt>value</tt>.
    *
    * @param value the value to be filled into the cells.
-   * @return <tt>this</tt> (for convenience only).
    */
   @Override
-  public DoubleMatrix1D assign(double value) {
+  public void assign(double value) {
     int index = index(0);
     int s = this.stride;
     double[] elems = this.elements;
@@ -98,7 +95,6 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
       elems[index] = value;
       index += s;
     }
-    return this;
   }
 
   /**
@@ -114,11 +110,10 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    * For further examples, see the <a href="package-summary.html#FunctionObjects">package doc</a>.
    *
    * @param function a function object taking as argument the current cell's value.
-   * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix1D assign(UnaryFunction function) {
+  public void assign(DoubleFunction function) {
     int s = stride;
     int i = index(0);
     double[] elems = this.elements;
@@ -130,7 +125,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
     if (function instanceof Mult) { // x[i] = mult*x[i]
       double multiplicator = ((Mult) function).getMultiplicator();
       if (multiplicator == 1) {
-        return this;
+        return;
       }
       for (int k = size; --k >= 0;) {
         elems[i] *= multiplicator;
@@ -142,7 +137,6 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
         i += s;
       }
     }
-    return this;
   }
 
   /**
@@ -208,7 +202,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    *
    * // for non-standard functions there is no shortcut:
    * m1.assign(m2,
-   * &nbsp;&nbsp;&nbsp;new BinaryFunction() {
+   * &nbsp;&nbsp;&nbsp;new DoubleDoubleFunction() {
    * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(double x, double y) { return Math.pow(x,y); }
    * &nbsp;&nbsp;&nbsp;}
    * );
@@ -223,7 +217,7 @@ public class DenseDoubleMatrix1D extends DoubleMatrix1D {
    * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix1D assign(DoubleMatrix1D y, BinaryFunction function) {
+  public DoubleMatrix1D assign(DoubleMatrix1D y, DoubleDoubleFunction function) {
     // overriden for performance only
     if (!(y instanceof DenseDoubleMatrix1D)) {
       return super.assign(y, function);

@@ -9,14 +9,13 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random;
 
 import org.apache.mahout.math.jet.math.Arithmetic;
-import org.apache.mahout.math.jet.stat.Probability;
 
 import java.util.Random;
 
 /** Partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-public class Poisson extends AbstractDiscreteDistribution {
+public final class Poisson extends AbstractDiscreteDistribution {
 
-  private double mean;
+  private final double mean;
 
   // precomputed and cached values (for performance only)
   // cache for < SWITCH_MEAN
@@ -24,7 +23,7 @@ public class Poisson extends AbstractDiscreteDistribution {
   private double p;
   private double q;
   private double p0;
-  private double[] pp = new double[36];
+  private final double[] pp = new double[36];
   private int llll;
 
   // cache for >= SWITCH_MEAN
@@ -68,28 +67,6 @@ public class Poisson extends AbstractDiscreteDistribution {
     this.mean = mean;
   }
 
-  /** Returns the cumulative distribution function. */
-  @Deprecated
-  public double cdf(int k) {
-    return Probability.poisson(k, this.mean);
-  }
-
-  /**
-   * Returns a deep copy of the receiver; the copy will produce identical sequences. After this call has returned, the
-   * copy and the receiver have equal but separate state.
-   *
-   * @return a copy of the receiver.
-   */
-  @Override
-  @Deprecated
-  public Object clone() {
-    Poisson copy = (Poisson) super.clone();
-    if (this.pp != null) {
-      copy.pp = this.pp.clone();
-    }
-    return copy;
-  }
-
   private static double f(int k, double lNu, double cPm) {
     return Math.exp(k * lNu - Arithmetic.logFactorial(k) - cPm);
   }
@@ -98,13 +75,6 @@ public class Poisson extends AbstractDiscreteDistribution {
   public int nextInt() {
     return nextInt(mean);
   }
-
-  /** Returns a random number from the distribution.
-  @Override
-  public int nextInt() {
-    return nextInt(this.mean);
-  }
-
 
   /** Returns a random number from the distribution; bypasses the internal state. */
   public int nextInt(double theMean) {
@@ -321,27 +291,6 @@ public class Poisson extends AbstractDiscreteDistribution {
     } else { // mean is too large
       return (int) theMean;
     }
-  }
-
-  /** Returns the probability distribution function. */
-  @Deprecated
-  public double pdf(int k) {
-    return Math.exp(k * Math.log(this.mean) - Arithmetic.logFactorial(k) - this.mean);
-
-    // Overflow sensitive:
-    // return (Math.pow(mean,k) / cephes.Arithmetic.factorial(k)) * Math.exp(-this.mean);
-  }
-
-  /** Sets the mean. */
-  @Deprecated
-  public void setMean(double mean) {
-    this.mean = mean;
-  }
-
-  /** Returns a String representation of the receiver. */
-  @Deprecated
-  public String toString() {
-    return this.getClass().getName() + '(' + mean + ')';
   }
 
 }

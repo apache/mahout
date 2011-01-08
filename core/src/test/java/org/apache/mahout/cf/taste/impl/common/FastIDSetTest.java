@@ -123,7 +123,7 @@ public final class FastIDSetTest extends TasteTestCase {
     expected.add(3L);
     LongPrimitiveIterator it = set.iterator();
     while (it.hasNext()) {
-      expected.remove(it.next());
+      expected.remove(it.nextLong());
     }
     assertTrue(expected.isEmpty());
   }

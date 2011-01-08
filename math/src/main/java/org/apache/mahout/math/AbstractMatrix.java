@@ -20,10 +20,10 @@ package org.apache.mahout.math;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.VectorFunction;
 
 import java.util.HashMap;
@@ -225,7 +225,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  public Matrix assign(Matrix other, BinaryFunction function) {
+  public Matrix assign(Matrix other, DoubleDoubleFunction function) {
     int[] c = size();
     int[] o = other.size();
     if (c[ROW] != o[ROW]) {
@@ -260,7 +260,7 @@ public abstract class AbstractMatrix implements Matrix {
     return this;
   }
 
-  public Matrix assign(UnaryFunction function) {
+  public Matrix assign(DoubleFunction function) {
     int[] c = size();
     for (int row = 0; row < c[ROW]; row++) {
       for (int col = 0; col < c[COL]; col++) {
@@ -325,7 +325,7 @@ public abstract class AbstractMatrix implements Matrix {
    * @param mapper   A function to apply to each element.
    * @return The result.
    */
-  public double aggregate(final BinaryFunction combiner, final UnaryFunction mapper) {
+  public double aggregate(final DoubleDoubleFunction combiner, final DoubleFunction mapper) {
     return aggregateRows(new VectorFunction() {
       public double apply(Vector v) {
         return v.aggregate(combiner, mapper);

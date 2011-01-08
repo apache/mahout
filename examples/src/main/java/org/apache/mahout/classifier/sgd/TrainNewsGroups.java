@@ -34,7 +34,7 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.vectorizer.encoders.ConstantValueEncoder;
 import org.apache.mahout.vectorizer.encoders.Dictionary;
 import org.apache.mahout.vectorizer.encoders.FeatureVectorEncoder;
@@ -190,13 +190,13 @@ public final class TrainNewsGroups {
         
         Matrix beta = model.getBeta();
         maxBeta = beta.aggregate(Functions.MAX, Functions.ABS);
-        nonZeros = beta.aggregate(Functions.PLUS, new UnaryFunction() {
+        nonZeros = beta.aggregate(Functions.PLUS, new DoubleFunction() {
           @Override
           public double apply(double v) {
             return Math.abs(v) > 1.0e-6 ? 1 : 0;
           }
         });
-        positive = beta.aggregate(Functions.PLUS, new UnaryFunction() {
+        positive = beta.aggregate(Functions.PLUS, new DoubleFunction() {
           @Override
           public double apply(double v) {
             return v > 0 ? 1 : 0;

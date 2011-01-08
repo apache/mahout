@@ -19,8 +19,8 @@ package org.apache.mahout.math;
 
 import java.util.Iterator;
 
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 
 public class NamedVector implements Vector {
 
@@ -83,15 +83,15 @@ public class NamedVector implements Vector {
     return delegate.assign(other);
   }
 
-  public Vector assign(UnaryFunction function) {
+  public Vector assign(DoubleFunction function) {
     return delegate.assign(function);
   }
 
-  public Vector assign(Vector other, BinaryFunction function) {
+  public Vector assign(Vector other, DoubleDoubleFunction function) {
     return delegate.assign(other, function);
   }
 
-  public Vector assign(BinaryFunction f, double y) {
+  public Vector assign(DoubleDoubleFunction f, double y) {
     return delegate.assign(f, y);
   }
 
@@ -219,11 +219,11 @@ public class NamedVector implements Vector {
     return delegate.cross(other);
   }
 
-  public double aggregate(BinaryFunction aggregator, UnaryFunction map) {
+  public double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map) {
     return delegate.aggregate(aggregator, map);
   }
 
-  public double aggregate(Vector other, BinaryFunction aggregator, BinaryFunction combiner) {
+  public double aggregate(Vector other, DoubleDoubleFunction aggregator, DoubleDoubleFunction combiner) {
     return delegate.aggregate(other, aggregator, combiner);
   }
 

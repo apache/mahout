@@ -9,14 +9,13 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix.linalg;
 
 import org.apache.mahout.math.GenericPermuting;
-import org.apache.mahout.math.PersistentObject;
 import org.apache.mahout.math.Swapper;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public final class Algebra extends PersistentObject {
+public final class Algebra {
 
   /**
    * A default Algebra object; has {@link Property#DEFAULT} attached for tolerance. Allows ommiting to construct an
@@ -62,17 +61,6 @@ public final class Algebra extends PersistentObject {
    */
   public Algebra(double tolerance) {
     setProperty(new Property(tolerance));
-  }
-
-  /**
-   * Returns a copy of the receiver. The attached property object is also copied. Hence, the property object of the copy
-   * is mutable.
-   *
-   * @return a copy of the receiver.
-   */
-  @Override
-  public Object clone() {
-    return new Algebra(property.tolerance());
   }
 
   /**
@@ -124,10 +112,9 @@ public final class Algebra extends PersistentObject {
    *                < A.size()</tt>;
    * @param work    the working storage, must satisfy <tt>work.length >= A.size()</tt>; set <tt>work==null</tt> if you
    *                don't care about performance.
-   * @return the modified <tt>A</tt> (for convenience only).
    * @throws IndexOutOfBoundsException if <tt>indexes.length != A.size()</tt>.
    */
-  public static DoubleMatrix1D permute(DoubleMatrix1D A, int[] indexes, double[] work) {
+  public static void permute(DoubleMatrix1D A, int[] indexes, double[] work) {
     // check validity
     int size = A.size();
     if (indexes.length != size) {
@@ -150,36 +137,6 @@ public final class Algebra extends PersistentObject {
     for (int i = size; --i >= 0;) {
       A.setQuick(i, work[indexes[i]]);
     }
-    return A;
-  }
-
-  /**
-   * Constructs and returns a new row and column permuted <i>selection view</i> of matrix <tt>A</tt>; equivalent to
-   * {@link DoubleMatrix2D#viewSelection(int[],int[])}. The returned matrix is backed by this matrix, so changes in the
-   * returned matrix are reflected in this matrix, and vice-versa. Use idioms like <tt>result = permute(...).copy()</tt>
-   * to generate an independent sub matrix.
-   *
-   * @return the new permuted selection view.
-   */
-  public static DoubleMatrix2D permute(DoubleMatrix2D A, int[] rowIndexes, int[] columnIndexes) {
-    return A.viewSelection(rowIndexes, columnIndexes);
-  }
-
-  /**
-   * Modifies the given matrix <tt>A</tt> such that it's columns are permuted as specified; Useful for pivoting. Column
-   * <tt>A[i]</tt> will go into column <tt>A[indexes[i]]</tt>. Equivalent to <tt>permuteRows(transpose(A), indexes,
-   * work)</tt>.
-   *
-   * @param A       the matrix to permute.
-   * @param indexes the permutation indexes, must satisfy <tt>indexes.length==A.columns() && indexes[i] >= 0 &&
-   *                indexes[i] < A.columns()</tt>;
-   * @param work    the working storage, must satisfy <tt>work.length >= A.columns()</tt>; set <tt>work==null</tt> if
-   *                you don't care about performance.
-   * @return the modified <tt>A</tt> (for convenience only).
-   * @throws IndexOutOfBoundsException if <tt>indexes.length != A.columns()</tt>.
-   */
-  public static DoubleMatrix2D permuteColumns(DoubleMatrix2D A, int[] indexes, int[] work) {
-    return permuteRows(A.viewDice(), indexes, work);
   }
 
   /**
@@ -202,10 +159,9 @@ public final class Algebra extends PersistentObject {
    *                < A.rows()</tt>;
    * @param work    the working storage, must satisfy <tt>work.length >= A.rows()</tt>; set <tt>work==null</tt> if you
    *                don't care about performance.
-   * @return the modified <tt>A</tt> (for convenience only).
    * @throws IndexOutOfBoundsException if <tt>indexes.length != A.rows()</tt>.
    */
-  public static DoubleMatrix2D permuteRows(final DoubleMatrix2D A, int[] indexes, int[] work) {
+  public static void permuteRows(final DoubleMatrix2D A, int[] indexes, int[] work) {
     // check validity
     int size = A.rows();
     if (indexes.length != size) {
@@ -226,7 +182,7 @@ public final class Algebra extends PersistentObject {
       for (int j = A.columns(); --j >= 0;) {
         permute(A.viewColumn(j), indexes, doubleWork);
       }
-      return A;
+      return;
     }
 
     Swapper swapper = new Swapper() {
@@ -236,7 +192,6 @@ public final class Algebra extends PersistentObject {
     };
 
     GenericPermuting.permute(indexes, swapper, work, null);
-    return A;
   }
 
   /**
@@ -247,11 +202,6 @@ public final class Algebra extends PersistentObject {
    */
   public Property property() {
     return property;
-  }
-
-  /** Constructs and returns the QR-decomposition of the given matrix. */
-  private static QRDecomposition qr(DoubleMatrix2D matrix) {
-    return new QRDecomposition(matrix);
   }
 
   /**
@@ -272,15 +222,6 @@ public final class Algebra extends PersistentObject {
       throw new IllegalArgumentException("Attempted to modify immutable object.");
     }
     this.property = property;
-  }
-
-  /**
-   * Solves A*X = B.
-   *
-   * @return X; a new independent matrix; solution if A is square, least squares solution otherwise.
-   */
-  public static DoubleMatrix2D solve(DoubleMatrix2D A, DoubleMatrix2D B) {
-    return A.rows() == A.columns() ? (lu(A).solve(B)) : (qr(A).solve(B));
   }
 
   /**

@@ -19,8 +19,8 @@ package org.apache.mahout.math;
 
 import java.util.Iterator;
 
-import org.apache.mahout.math.function.BinaryFunction;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,7 +35,7 @@ public abstract class AbstractVector implements Vector {
     this.size = size;
   }
 
-  public double aggregate(BinaryFunction aggregator, UnaryFunction map) {
+  public double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map) {
     if (size < 1) {
       throw new IllegalArgumentException("Cannot aggregate empty vector");
     }
@@ -46,7 +46,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
-  public double aggregate(Vector other, BinaryFunction aggregator, BinaryFunction combiner) {
+  public double aggregate(Vector other, DoubleDoubleFunction aggregator, DoubleDoubleFunction combiner) {
     if (size < 1) {
       throw new IllegalArgumentException("Cannot aggregate empty vector");
     }
@@ -471,7 +471,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
-  public Vector assign(BinaryFunction f, double y) {
+  public Vector assign(DoubleDoubleFunction f, double y) {
     Iterator<Element> it = f.apply(0, y) == 0 ? iterateNonZero() : iterator();
     while (it.hasNext()) {
       Element e = it.next();
@@ -480,7 +480,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
-  public Vector assign(UnaryFunction function) {
+  public Vector assign(DoubleFunction function) {
     Iterator<Element> it = function.apply(0) == 0 ? iterateNonZero() : iterator();
     while (it.hasNext()) {
       Element e = it.next();
@@ -489,7 +489,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
-  public Vector assign(Vector other, BinaryFunction function) {
+  public Vector assign(Vector other, DoubleDoubleFunction function) {
     if (size != other.size()) {
       throw new CardinalityException(size, other.size());
     }

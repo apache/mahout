@@ -39,7 +39,7 @@ package org.apache.mahout.math.function;
  * Intended to be passed to <tt>matrix.assign(otherMatrix,function)</tt> methods.
  */
 
-public final class PlusMult implements BinaryFunction {
+public final class PlusMult implements DoubleDoubleFunction {
 
   private double multiplicator;
 
@@ -52,19 +52,9 @@ public final class PlusMult implements BinaryFunction {
     return a + b * multiplicator;
   }
 
-  /** <tt>a - b/constant</tt>. */
-  public static PlusMult minusDiv(double constant) {
-    return new PlusMult(-1 / constant);
-  }
-
   /** <tt>a - b*constant</tt>. */
   public static PlusMult minusMult(double constant) {
     return new PlusMult(-constant);
-  }
-
-  /** <tt>a + b/constant</tt>. */
-  public static PlusMult plusDiv(double constant) {
-    return new PlusMult(1 / constant);
   }
 
   /** <tt>a + b*constant</tt>. */

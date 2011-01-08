@@ -8,10 +8,10 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.Mult;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
@@ -53,24 +53,13 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
     this.elements = new double[rows * columns];
   }
 
-  /**
-   * Constructs a view with the given parameters.
-   *
-   * @param rows         the number of rows the matrix shall have.
-   * @param columns      the number of columns the matrix shall have.
-   * @param elements     the cells.
-   * @param rowZero      the position of the first element.
-   * @param columnZero   the position of the first element.
-   * @param rowStride    the number of elements between two rows, i.e. <tt>index(i+1,j)-index(i,j)</tt>.
-   * @param columnStride the number of elements between two columns, i.e. <tt>index(i,j+1)-index(i,j)</tt>.
-   * @throws IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or
-   *                                  flip's are illegal.
-   */
-  DenseDoubleMatrix2D(int rows, int columns, double[] elements, int rowZero, int columnZero, int rowStride,
-                                int columnStride) {
-    setUp(rows, columns, rowZero, columnZero, rowStride, columnStride);
-    this.elements = elements;
-    this.isNoView = false;
+  /** Constructs an identity matrix (having ones on the diagonal and zeros elsewhere). */
+  public static DoubleMatrix2D identity(int rowsAndColumns) {
+    DoubleMatrix2D matrix = new DenseDoubleMatrix2D(rowsAndColumns, rowsAndColumns);
+    for (int i = rowsAndColumns; --i >= 0;) {
+      matrix.setQuick(i, i, 1);
+    }
+    return matrix;
   }
 
   /**
@@ -79,12 +68,11 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * are copied. So subsequent changes in <tt>values</tt> are not reflected in the matrix, and vice-versa.
    *
    * @param values the values to be filled into the cells.
-   * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>values.length != rows() || for any 0 &lt;= row &lt; rows():
    *                                  values[row].length != columns()</tt>.
    */
   @Override
-  public DoubleMatrix2D assign(double[][] values) {
+  public void assign(double[][] values) {
     if (this.isNoView) {
       if (values.length != rows) {
         throw new IllegalArgumentException("Must have same number of rows: rows=" + values.length + "rows()=" + rows());
@@ -102,7 +90,6 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
     } else {
       super.assign(values);
     }
-    return this;
   }
 
   /**
@@ -144,11 +131,10 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * For further examples, see the <a href="package-summary.html#FunctionObjects">package doc</a>.
    *
    * @param function a function object taking as argument the current cell's value.
-   * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix2D assign(UnaryFunction function) {
+  public void assign(DoubleFunction function) {
     double[] elems = this.elements;
     if (elems == null) {
       throw new IllegalStateException();
@@ -161,10 +147,11 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
     if (function instanceof Mult) { // x[i] = mult*x[i]
       double multiplicator = ((Mult) function).getMultiplicator();
       if (multiplicator == 1) {
-        return this;
+        return;
       }
       if (multiplicator == 0) {
-        return assign(0);
+        assign(0);
+        return;
       }
       for (int row = rows; --row >= 0;) { // the general case
         for (int i = index, column = columns; --column >= 0;) {
@@ -182,7 +169,6 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
         index += rs;
       }
     }
-    return this;
   }
 
   /**
@@ -273,7 +259,7 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
    * @see org.apache.mahout.math.function.Functions
    */
   @Override
-  public DoubleMatrix2D assign(DoubleMatrix2D y, BinaryFunction function) {
+  public DoubleMatrix2D assign(DoubleMatrix2D y, DoubleDoubleFunction function) {
     // overriden for performance only
     if (!(y instanceof DenseDoubleMatrix2D)) {
       return super.assign(y, function);
@@ -490,123 +476,6 @@ public final class DenseDoubleMatrix2D extends DoubleMatrix2D {
   @Override
   protected DoubleMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets) {
     return new SelectedDenseDoubleMatrix2D(this.elements, rowOffsets, columnOffsets, 0);
-  }
-
-  /**
-   * 8 neighbor stencil transformation. For efficient finite difference operations. Applies a function to a moving <tt>3
-   * x 3</tt> window. Does nothing if <tt>rows() < 3 || columns() < 3</tt>.
-   * <pre>
-   * B[i,j] = function.apply(
-   * &nbsp;&nbsp;&nbsp;A[i-1,j-1], A[i-1,j], A[i-1,j+1],
-   * &nbsp;&nbsp;&nbsp;A[i,  j-1], A[i,  j], A[i,  j+1],
-   * &nbsp;&nbsp;&nbsp;A[i+1,j-1], A[i+1,j], A[i+1,j+1]
-   * &nbsp;&nbsp;&nbsp;)
-   *
-   * x x x - &nbsp;&nbsp;&nbsp; - x x x &nbsp;&nbsp;&nbsp; - - - -
-   * x o x - &nbsp;&nbsp;&nbsp; - x o x &nbsp;&nbsp;&nbsp; - - - -
-   * x x x - &nbsp;&nbsp;&nbsp; - x x x ... - x x x
-   * - - - - &nbsp;&nbsp;&nbsp; - - - - &nbsp;&nbsp;&nbsp; - x o x
-   * - - - - &nbsp;&nbsp;&nbsp; - - - - &nbsp;&nbsp;&nbsp; - x x x
-   * </pre>
-   * Make sure that cells of <tt>this</tt> and <tt>B</tt> do not overlap. In case of overlapping views, behaviour is
-   * unspecified. </pre> <p> <b>Example:</b> <pre> final double alpha = 0.25; final double beta = 0.75;
-   *
-   * // 8 neighbors org.apache.mahout.math.function.Double9Function f = new Double9Function() {
-   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
-   * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 +
-   * alpha*(a00+a01+a02 + a10+a12 + a20+a21+a22); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} }; A.zAssign8Neighbors(B,f);
-   *
-   * // 4 neighbors org.apache.mahout.math.function.Double9Function g = new Double9Function() {
-   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
-   * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 + alpha*(a01+a10+a12+a21);
-   * &nbsp;&nbsp;&nbsp;} C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it }; </pre>
-   *
-   * @param B        the matrix to hold the results.
-   * @param function the function to be applied to the 9 cells.
-   * @throws NullPointerException     if <tt>function==null</tt>.
-   * @throws IllegalArgumentException if <tt>rows() != B.rows() || columns() != B.columns()</tt>.
-   */
-  @Override
-  public void zAssign8Neighbors(DoubleMatrix2D B, org.apache.mahout.math.function.Double9Function function) {
-    // 1. using only 4-5 out of the 9 cells in "function" is *not* the limiting factor for performance.
-
-    // 2. if the "function" would be hardwired into the innermost loop, a speedup of 1.5-2.0 would be seen
-    // but then the multi-purpose interface is gone...
-
-    if (!(B instanceof DenseDoubleMatrix2D)) {
-      super.zAssign8Neighbors(B, function);
-      return;
-    }
-    if (function == null) {
-      throw new IllegalArgumentException("function must not be null.");
-    }
-    checkShape(B);
-    int r = rows - 1;
-    int c = columns - 1;
-    if (rows < 3 || columns < 3) {
-      return;
-    } // nothing to do
-
-    DenseDoubleMatrix2D BB = (DenseDoubleMatrix2D) B;
-    int A_rs = rowStride;
-    int B_rs = BB.rowStride;
-    int A_cs = columnStride;
-    int B_cs = BB.columnStride;
-    double[] elems = this.elements;
-    double[] B_elems = BB.elements;
-    if (elems == null || B_elems == null) {
-      throw new IllegalStateException();
-    }
-
-    int A_index = index(1, 1);
-    int B_index = BB.index(1, 1);
-    for (int i = 1; i < r; i++) {
-
-      int B11 = B_index;
-
-      int A02 = A_index - A_rs - A_cs;
-      int A12 = A02 + A_rs;
-      int A22 = A12 + A_rs;
-
-      // in each step six cells can be remembered in registers - they don't need to be reread from slow memory
-      double a00 = elems[A02];
-      A02 += A_cs;
-      double a01 = elems[A02];
-      double a10 = elems[A12];
-      A12 += A_cs;
-      double a11 = elems[A12];
-      double a20 = elems[A22];
-      A22 += A_cs;
-      double a21 = elems[A22];
-
-      for (int j = 1; j < c; j++) {
-        //in each step 3 instead of 9 cells need to be read from memory.
-        double a02 = elems[A02 += A_cs];
-        double a12 = elems[A12 += A_cs];
-        double a22 = elems[A22 += A_cs];
-
-        B_elems[B11] = function.apply(
-            a00, a01, a02,
-            a10, a11, a12,
-            a20, a21, a22);
-        B11 += B_cs;
-
-        // move remembered cells
-        a00 = a01;
-        a01 = a02;
-        a10 = a11;
-        a11 = a12;
-        a20 = a21;
-        a21 = a22;
-      }
-      A_index += A_rs;
-      B_index += B_rs;
-    }
-
   }
 
   @Override

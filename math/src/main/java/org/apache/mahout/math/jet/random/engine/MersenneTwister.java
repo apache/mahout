@@ -165,7 +165,7 @@ public final class MersenneTwister extends RandomEngine {
   private static final int DEFAULT_SEED = 4357;
 
   private int mti;
-  private int[] mt = new int[N]; /* set initial seeds: N = 624 words */  
+  private final int[] mt = new int[N]; /* set initial seeds: N = 624 words */
 
   /**
    * Constructs and returns a random number generator with a default seed, which is a <b>constant</b>. Thus using this
@@ -190,19 +190,6 @@ public final class MersenneTwister extends RandomEngine {
    */
   public MersenneTwister(Date d) {
     this((int) d.getTime());
-  }
-
-  /**
-   * Returns a copy of the receiver; the copy will produce identical sequences. After this call has returned, the copy
-   * and the receiver have equal but separate state.
-   *
-   * @return a copy of the receiver.
-   */
-  @Override
-  public Object clone() {
-    MersenneTwister clone = (MersenneTwister) super.clone();
-    clone.mt = this.mt.clone();
-    return clone;
   }
 
   /** Generates N words at one time */

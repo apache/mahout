@@ -265,10 +265,39 @@ public class Gamma extends AbstractContinousDistribution {
     if (alpha == 1.0) {
       return rate * Math.exp(-x * rate);
     }
-    return rate * Math.exp((alpha - 1.0) * Math.log(x * rate) - x * rate - Fun.logGamma(alpha));
+    return rate * Math.exp((alpha - 1.0) * Math.log(x * rate) - x * rate - logGamma(alpha));
   }
 
   public String toString() {
     return this.getClass().getName() + '(' + rate + ',' + alpha + ')';
   }
+
+  /** Returns a quick approximation of <tt>log(gamma(x))</tt>. */
+  public static double logGamma(double x) {
+
+    if (x <= 0.0 /* || x > 1.3e19 */) {
+      return -999;
+    }
+
+    double z;
+    for (z = 1.0; x < 11.0; x++) {
+      z *= x;
+    }
+
+    double r = 1.0 / (x * x);
+    double c6 = -1.9175269175269175e-03;
+    double c5 = 8.4175084175084175e-04;
+    double c4 = -5.9523809523809524e-04;
+    double c3 = 7.9365079365079365e-04;
+    double c2 = -2.7777777777777777e-03;
+    double c1 = 8.3333333333333333e-02;
+    double g = c1 + r * (c2 + r * (c3 + r * (c4 + r * (c5 + r + c6))));
+    double c0 = 9.1893853320467274e-01;
+    g = (x - 0.5) * Math.log(x) - x + c0 + g / x;
+    if (z == 1.0) {
+      return g;
+    }
+    return g - Math.log(z);
+  }
+
 }

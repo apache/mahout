@@ -23,7 +23,7 @@ import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.OnlineLearner;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.stats.GlobalOnlineAuc;
 import org.apache.mahout.math.stats.OnlineAuc;
@@ -165,7 +165,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   @Override
   public Vector classify(Vector instance) {
     Vector r = new DenseVector(numCategories() - 1);
-    BinaryFunction scale = Functions.plusMult(1.0 / models.size());
+    DoubleDoubleFunction scale = Functions.plusMult(1.0 / models.size());
     for (OnlineLogisticRegression model : models) {
       r.assign(model.classify(instance), scale);
     }
@@ -175,7 +175,7 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
   @Override
   public Vector classifyNoLink(Vector instance) {
     Vector r = new DenseVector(numCategories() - 1);
-    BinaryFunction scale = Functions.plusMult(1.0 / models.size());
+    DoubleDoubleFunction scale = Functions.plusMult(1.0 / models.size());
     for (OnlineLogisticRegression model : models) {
       r.assign(model.classifyNoLink(instance), scale);
     }

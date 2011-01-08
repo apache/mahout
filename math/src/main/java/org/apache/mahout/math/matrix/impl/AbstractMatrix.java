@@ -8,8 +8,6 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
-import org.apache.mahout.math.PersistentObject;
-
 /**
  Abstract base class for arbitrary-dimensional matrices holding objects or primitive data types such as <code>int</code>, <code>float</code>, etc.
  First see the <a href="package-summary.html">package summary</a> and javadoc <a href="package-tree.html">tree view</a> to get the broad picture.
@@ -22,11 +20,9 @@ import org.apache.mahout.math.PersistentObject;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class AbstractMatrix extends PersistentObject {
+public abstract class AbstractMatrix {
 
   protected boolean isNoView = true;
-
-  //public static boolean debug = true;
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected AbstractMatrix() {
@@ -42,18 +38,7 @@ public abstract class AbstractMatrix extends PersistentObject {
   public void ensureCapacity(int minNonZeros) {
   }
 
-  /** Returns whether the receiver is a view or not. */
-  protected boolean isView() {
-    return !this.isNoView;
-  }
-
   /** Returns the number of cells. */
   public abstract int size();
 
-  /**
-   * Releases any superfluous internal memory. An application can use this operation to minimize the storage of the
-   * receiver. <p> This default implementation does nothing. Override this method if necessary.
-   */
-  public void trimToSize() {
-  }
 }

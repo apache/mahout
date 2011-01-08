@@ -25,13 +25,13 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.stat;
 
+import org.apache.mahout.math.jet.math.Constants;
 import org.apache.mahout.math.jet.math.Polynomial;
 
 /** Partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-public class Gamma extends org.apache.mahout.math.jet.math.Constants {
+public final class Gamma {
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected Gamma() {
+  private Gamma() {
   }
 
   /**
@@ -217,7 +217,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
 
     if (flag && (b * x) <= 1.0 && x <= 0.95) {
       t = powerSeries(a, b, x);
-      t = t <= MACHEP ? 1.0 - MACHEP : 1.0 - t;
+      t = t <= Constants.MACHEP ? 1.0 - Constants.MACHEP : 1.0 - t;
       return t;
     }
 
@@ -231,24 +231,24 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
 
     y = a * Math.log(x);
     t = b * Math.log(xc);
-    if ((a + b) < MAXGAM && Math.abs(y) < MAXLOG && Math.abs(t) < MAXLOG) {
+    if ((a + b) < Constants.MAXGAM && Math.abs(y) < Constants.MAXLOG && Math.abs(t) < Constants.MAXLOG) {
       t = Math.pow(xc, b);
       t *= Math.pow(x, a);
       t /= a;
       t *= w;
       t *= gamma(a + b) / (gamma(a) * gamma(b));
       if (flag) {
-        t = t <= MACHEP ? 1.0 - MACHEP : 1.0 - t;
+        t = t <= Constants.MACHEP ? 1.0 - Constants.MACHEP : 1.0 - t;
       }
       return t;
     }
     /* Resort to logarithms.  */
     y += t + logGamma(a + b) - logGamma(a) - logGamma(b);
     y += Math.log(w / a);
-    t = y < MINLOG ? 0.0 : Math.exp(y);
+    t = y < Constants.MINLOG ? 0.0 : Math.exp(y);
 
     if (flag) {
-      t = t <= MACHEP ? 1.0 - MACHEP : 1.0 - t;
+      t = t <= Constants.MACHEP ? 1.0 - Constants.MACHEP : 1.0 - t;
     }
     return t;
   }
@@ -272,7 +272,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     double ans = 1.0;
     double r = 1.0;
     int n = 0;
-    double thresh = 3.0 * MACHEP;
+    double thresh = 3.0 * Constants.MACHEP;
     do {
       double xk = -(x * k1 * k2) / (k3 * k4);
       double pk = pkm1 + pkm2 * xk;
@@ -314,17 +314,17 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       k7 += 2.0;
       k8 += 2.0;
 
-      if ((Math.abs(qk) + Math.abs(pk)) > BIG) {
-        pkm2 *= BIG_INVERSE;
-        pkm1 *= BIG_INVERSE;
-        qkm2 *= BIG_INVERSE;
-        qkm1 *= BIG_INVERSE;
+      if ((Math.abs(qk) + Math.abs(pk)) > Constants.BIG) {
+        pkm2 *= Constants.BIG_INVERSE;
+        pkm1 *= Constants.BIG_INVERSE;
+        qkm2 *= Constants.BIG_INVERSE;
+        qkm1 *= Constants.BIG_INVERSE;
       }
-      if ((Math.abs(qk) < BIG_INVERSE) || (Math.abs(pk) < BIG_INVERSE)) {
-        pkm2 *= BIG;
-        pkm1 *= BIG;
-        qkm2 *= BIG;
-        qkm1 *= BIG;
+      if ((Math.abs(qk) < Constants.BIG_INVERSE) || (Math.abs(pk) < Constants.BIG_INVERSE)) {
+        pkm2 *= Constants.BIG;
+        pkm1 *= Constants.BIG;
+        qkm2 *= Constants.BIG;
+        qkm1 *= Constants.BIG;
       }
     } while (++n < 300);
 
@@ -351,7 +351,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     double ans = 1.0;
     double r = 1.0;
     int n = 0;
-    double thresh = 3.0 * MACHEP;
+    double thresh = 3.0 * Constants.MACHEP;
     do {
       double xk = -(z * k1 * k2) / (k3 * k4);
       double pk = pkm1 + pkm2 * xk;
@@ -393,17 +393,17 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       k7 += 2.0;
       k8 += 2.0;
 
-      if ((Math.abs(qk) + Math.abs(pk)) > BIG) {
-        pkm2 *= BIG_INVERSE;
-        pkm1 *= BIG_INVERSE;
-        qkm2 *= BIG_INVERSE;
-        qkm1 *= BIG_INVERSE;
+      if ((Math.abs(qk) + Math.abs(pk)) > Constants.BIG) {
+        pkm2 *= Constants.BIG_INVERSE;
+        pkm1 *= Constants.BIG_INVERSE;
+        qkm2 *= Constants.BIG_INVERSE;
+        qkm1 *= Constants.BIG_INVERSE;
       }
-      if ((Math.abs(qk) < BIG_INVERSE) || (Math.abs(pk) < BIG_INVERSE)) {
-        pkm2 *= BIG;
-        pkm1 *= BIG;
-        qkm2 *= BIG;
-        qkm1 *= BIG;
+      if ((Math.abs(qk) < Constants.BIG_INVERSE) || (Math.abs(pk) < Constants.BIG_INVERSE)) {
+        pkm2 *= Constants.BIG;
+        pkm1 *= Constants.BIG;
+        qkm2 *= Constants.BIG;
+        qkm1 *= Constants.BIG;
       }
     } while (++n < 300);
 
@@ -428,7 +428,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
 
     /* Compute  x**a * exp(-x) / gamma(a)  */
     double ax = alpha * Math.log(x) - x - logGamma(alpha);
-    if (ax < -MAXLOG) {
+    if (ax < -Constants.MAXLOG) {
       return 0.0;
     }
 
@@ -444,7 +444,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       c *= x / r;
       ans += c;
     }
-    while (c / ans > MACHEP);
+    while (c / ans > Constants.MACHEP);
 
     return ans * ax / alpha;
 
@@ -467,7 +467,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     }
 
     double ax = alpha * Math.log(x) - x - logGamma(alpha);
-    if (ax < -MAXLOG) {
+    if (ax < -Constants.MAXLOG) {
       return 0.0;
     }
 
@@ -503,13 +503,13 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
       pkm1 = pk;
       qkm2 = qkm1;
       qkm1 = qk;
-      if (Math.abs(pk) > BIG) {
-        pkm2 *= BIG_INVERSE;
-        pkm1 *= BIG_INVERSE;
-        qkm2 *= BIG_INVERSE;
-        qkm1 *= BIG_INVERSE;
+      if (Math.abs(pk) > Constants.BIG) {
+        pkm2 *= Constants.BIG_INVERSE;
+        pkm1 *= Constants.BIG_INVERSE;
+        qkm2 *= Constants.BIG_INVERSE;
+        qkm1 *= Constants.BIG_INVERSE;
       }
-    } while (t > MACHEP);
+    } while (t > Constants.MACHEP);
 
     return ans * ax;
   }
@@ -562,7 +562,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
         throw new
             ArithmeticException("lgamma: Overflow");
       }
-      z = LOGPI - Math.log(z) - w;
+      z = Constants.LOGPI - Math.log(z) - w;
       return z;
     }
 
@@ -624,7 +624,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     double t = u;
     double n = 2.0;
     double s = 0.0;
-    double z = MACHEP * ai;
+    double z = Constants.MACHEP * ai;
     while (Math.abs(v) > z) {
       u = (n - b) * x / n;
       t *= u;
@@ -636,12 +636,12 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     s += ai;
 
     u = a * Math.log(x);
-    if ((a + b) < MAXGAM && Math.abs(u) < MAXLOG) {
+    if ((a + b) < Constants.MAXGAM && Math.abs(u) < Constants.MAXLOG) {
       t = gamma(a + b) / (gamma(a) * gamma(b));
       s = s * t * Math.pow(x, a);
     } else {
       t = logGamma(a + b) - logGamma(a) - logGamma(b) + u + Math.log(s);
-      s = t < MINLOG ? 0.0 : Math.exp(t);
+      s = t < Constants.MINLOG ? 0.0 : Math.exp(t);
     }
     return s;
   }
@@ -672,7 +672,7 @@ public class Gamma extends org.apache.mahout.math.jet.math.Constants {
     } else {
       y = Math.pow(x, x - 0.5) / y;
     }
-    y = SQTPI * y * w;
+    y = Constants.SQTPI * y * w;
     return y;
   }
 }

@@ -28,7 +28,7 @@ import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import static org.apache.mahout.math.function.Functions.*;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
@@ -77,9 +77,9 @@ public class LanczosSolver {
 
   private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
   private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
-  protected double scaleFactor = 0;
+  protected double scaleFactor = 0.0;
 
-  private static final class Scale implements UnaryFunction {
+  private static final class Scale implements DoubleFunction {
     private final double d;
 
     private Scale(double d) {

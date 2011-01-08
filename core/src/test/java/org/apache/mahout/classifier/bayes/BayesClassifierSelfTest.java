@@ -66,7 +66,8 @@ public final class BayesClassifierSelfTest extends MahoutTestCase {
 
   @Test
   public void testSelfTestBayes() throws Exception {
-    BayesParameters params = new BayesParameters(1);
+    BayesParameters params = new BayesParameters();
+    params.setGramSize(1);
     params.set("alpha_i", "1.0");
     params.set("dataSource", "hdfs");
     Path bayesInputPath = getTestTempFilePath("bayesinput");
@@ -118,7 +119,8 @@ public final class BayesClassifierSelfTest extends MahoutTestCase {
 
   @Test
   public void testSelfTestCBayes() throws Exception {
-    BayesParameters params = new BayesParameters(1);
+    BayesParameters params = new BayesParameters();
+    params.setGramSize(1);
     params.set("alpha_i", "1.0");
     params.set("dataSource", "hdfs");
     Path bayesInputPath = getTestTempFilePath("bayesinput");

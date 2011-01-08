@@ -36,8 +36,8 @@ import java.util.Date;
  * in a generic manner. Essentially, a function object is an object that can perform a function on some arguments. It
  * has a minimal interface: a method <tt>apply</tt> that takes the arguments, computes something and returns some result
  * value. Function objects are comparable to function pointers in C used for call-backs. <p>Unary functions are of type
- * {@link org.apache.mahout.math.function.UnaryFunction}, binary functions of type {@link
- * org.apache.mahout.math.function.BinaryFunction}. All can be retrieved via <tt>public static final</tt>
+ * {@link org.apache.mahout.math.function.DoubleFunction}, binary functions of type {@link
+ * org.apache.mahout.math.function.DoubleDoubleFunction}. All can be retrieved via <tt>public static final</tt>
  * variables named after the function. Unary predicates are of type
  * {@link org.apache.mahout.math.function.DoubleProcedure},
  * binary predicates of type {@link org.apache.mahout.math.function.DoubleDoubleProcedure}. All can be retrieved via
@@ -48,29 +48,29 @@ import java.util.Date;
  * <li><tt>Functions.pow</tt> gives the function <tt>a<sup>b</sup></tt>. <li><tt>Functions.pow.apply(2,3)==8</tt>.
  * <li><tt>Functions.pow(3)</tt> gives the function <tt>a<sup>3</sup></tt>. <li><tt>Functions.pow(3).apply(2)==8</tt>.
  * </ul> More general, any binary function can be made an unary functions by fixing either the first or the second
- * argument. See methods {@link #bindArg1(org.apache.mahout.math.function.BinaryFunction ,double)} and {@link
- * #bindArg2(org.apache.mahout.math.function.BinaryFunction ,double)}. The order of arguments can
+ * argument. See methods {@link #bindArg1(org.apache.mahout.math.function.DoubleDoubleFunction ,double)} and {@link
+ * #bindArg2(org.apache.mahout.math.function.DoubleDoubleFunction ,double)}. The order of arguments can
  * be swapped so that the first argument becomes the
- * second and vice-versa. See method {@link #swapArgs(org.apache.mahout.math.function.BinaryFunction)}.
+ * second and vice-versa. See method {@link #swapArgs(org.apache.mahout.math.function.DoubleDoubleFunction)}.
  * Example: <ul> <li><tt>Functions.pow</tt>
  * gives the function <tt>a<sup>b</sup></tt>. <li><tt>Functions.bindArg2(Functions.pow,3)</tt> gives the function
  * <tt>x<sup>3</sup></tt>. <li><tt>Functions.bindArg1(Functions.pow,3)</tt> gives the function <tt>3<sup>x</sup></tt>.
  * <li><tt>Functions.swapArgs(Functions.pow)</tt> gives the function <tt>b<sup>a</sup></tt>. </ul> <p> Even more
  * general, functions can be chained (composed, assembled). Assume we have two unary functions <tt>g</tt> and
  * <tt>h</tt>. The unary function <tt>g(h(a))</tt> applying both in sequence can be generated via {@link
- * #chain(org.apache.mahout.math.function.UnaryFunction , org.apache.mahout.math.function.UnaryFunction)}:
+ * #chain(org.apache.mahout.math.function.DoubleFunction , org.apache.mahout.math.function.DoubleFunction)}:
  * <ul> <li><tt>Functions.chain(g,h);</tt> </ul> Assume further we have a binary
  * function <tt>f</tt>. The binary function <tt>g(f(a,b))</tt> can be generated via {@link
- * #chain(org.apache.mahout.math.function.UnaryFunction , org.apache.mahout.math.function.BinaryFunction)}:
+ * #chain(org.apache.mahout.math.function.DoubleFunction , org.apache.mahout.math.function.DoubleDoubleFunction)}:
  * <ul> <li><tt>Functions.chain(g,f);</tt> </ul> The binary function
  * <tt>f(g(a),h(b))</tt> can be generated via
- * {@link #chain(org.apache.mahout.math.function.BinaryFunction , org.apache.mahout.math.function.UnaryFunction ,
- * org.apache.mahout.math.function.UnaryFunction)}: <ul>
+ * {@link #chain(org.apache.mahout.math.function.DoubleDoubleFunction , org.apache.mahout.math.function.DoubleFunction ,
+ * org.apache.mahout.math.function.DoubleFunction)}: <ul>
  * <li><tt>Functions.chain(f,g,h);</tt> </ul> Arbitrarily complex functions can be composed from these building blocks.
  * For example <tt>sin(a) + cos<sup>2</sup>(b)</tt> can be specified as follows: <ul>
  * <li><tt>chain(plus,sin,chain(square,cos));</tt> </ul> or, of course, as
  * <pre>
- * new BinaryFunction() {
+ * new DoubleDoubleFunction() {
  * &nbsp;&nbsp;&nbsp;public final double apply(double a, double b) { return Math.sin(a) + Math.pow(Math.cos(b),2); }
  * }
  * </pre>
@@ -82,9 +82,9 @@ import java.util.Date;
  * double v = Math.sin(a) + Math.pow(Math.cos(b),2);
  * log.info(v);
  * Functions F = Functions.functions;
- * BinaryFunction f = F.chain(F.plus,F.sin,F.chain(F.square,F.cos));
+ * DoubleDoubleFunction f = F.chain(F.plus,F.sin,F.chain(F.square,F.cos));
  * log.info(f.apply(a,b));
- * BinaryFunction g = new BinaryFunction() {
+ * DoubleDoubleFunction g = new DoubleDoubleFunction() {
  * &nbsp;&nbsp;&nbsp;public double apply(double a, double b) { return Math.sin(a) + Math.pow(Math.cos(b),2); }
  * };
  * log.info(g.apply(a,b));
@@ -116,35 +116,35 @@ public final class Functions {
    * <H3>Unary functions</H3>
    */
   /** Function that returns <tt>Math.abs(a)</tt>. */
-  public static final UnaryFunction ABS = new UnaryFunction() {
+  public static final DoubleFunction ABS = new DoubleFunction() {
     public double apply(double a) {
       return Math.abs(a);
     }
   };
 
   /** Function that returns <tt>Math.acos(a)</tt>. */
-  public static final UnaryFunction ACOS = new UnaryFunction() {
+  public static final DoubleFunction ACOS = new DoubleFunction() {
     public double apply(double a) {
       return Math.acos(a);
     }
   };
 
   /** Function that returns <tt>Math.asin(a)</tt>. */
-  public static final UnaryFunction ASIN = new UnaryFunction() {
+  public static final DoubleFunction ASIN = new DoubleFunction() {
     public double apply(double a) {
       return Math.asin(a);
     }
   };
 
   /** Function that returns <tt>Math.atan(a)</tt>. */
-  public static final UnaryFunction ATAN = new UnaryFunction() {
+  public static final DoubleFunction ATAN = new DoubleFunction() {
     public double apply(double a) {
       return Math.atan(a);
     }
   };
 
   /** Function that returns <tt>Math.ceil(a)</tt>. */
-  public static final UnaryFunction CEIL = new UnaryFunction() {
+  public static final DoubleFunction CEIL = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.ceil(a);
@@ -152,7 +152,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.cos(a)</tt>. */
-  public static final UnaryFunction COS = new UnaryFunction() {
+  public static final DoubleFunction COS = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.cos(a);
@@ -160,7 +160,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.exp(a)</tt>. */
-  public static final UnaryFunction EXP = new UnaryFunction() {
+  public static final DoubleFunction EXP = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.exp(a);
@@ -168,7 +168,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.floor(a)</tt>. */
-  public static final UnaryFunction FLOOR = new UnaryFunction() {
+  public static final DoubleFunction FLOOR = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.floor(a);
@@ -176,7 +176,7 @@ public final class Functions {
   };
 
   /** Function that returns its argument. */
-  public static final UnaryFunction IDENTITY = new UnaryFunction() {
+  public static final DoubleFunction IDENTITY = new DoubleFunction() {
 
     public double apply(double a) {
       return a;
@@ -184,7 +184,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>1.0 / a</tt>. */
-  public static final UnaryFunction INV = new UnaryFunction() {
+  public static final DoubleFunction INV = new DoubleFunction() {
 
     public double apply(double a) {
       return 1.0 / a;
@@ -192,7 +192,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.log(a)</tt>. */
-  public static final UnaryFunction LOGARITHM = new UnaryFunction() {
+  public static final DoubleFunction LOGARITHM = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.log(a);
@@ -200,7 +200,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.log(a) / Math.log(2)</tt>. */
-  public static final UnaryFunction LOG2 = new UnaryFunction() {
+  public static final DoubleFunction LOG2 = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.log(a) * 1.4426950408889634;
@@ -208,7 +208,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>-a</tt>. */
-  public static final UnaryFunction NEGATE = new UnaryFunction() {
+  public static final DoubleFunction NEGATE = new DoubleFunction() {
 
     public double apply(double a) {
       return -a;
@@ -216,7 +216,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.rint(a)</tt>. */
-  public static final UnaryFunction RINT = new UnaryFunction() {
+  public static final DoubleFunction RINT = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.rint(a);
@@ -224,7 +224,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a < 0 ? -1 : a > 0 ? 1 : 0</tt>. */
-  public static final UnaryFunction SIGN = new UnaryFunction() {
+  public static final DoubleFunction SIGN = new DoubleFunction() {
 
     public double apply(double a) {
       return a < 0 ? -1 : a > 0 ? 1 : 0;
@@ -232,7 +232,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.sin(a)</tt>. */
-  public static final UnaryFunction SIN = new UnaryFunction() {
+  public static final DoubleFunction SIN = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.sin(a);
@@ -240,7 +240,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.sqrt(a)</tt>. */
-  public static final UnaryFunction SQRT = new UnaryFunction() {
+  public static final DoubleFunction SQRT = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.sqrt(a);
@@ -248,7 +248,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a * a</tt>. */
-  public static final UnaryFunction SQUARE = new UnaryFunction() {
+  public static final DoubleFunction SQUARE = new DoubleFunction() {
 
     public double apply(double a) {
       return a * a;
@@ -256,7 +256,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.tan(a)</tt>. */
-  public static final UnaryFunction TAN = new UnaryFunction() {
+  public static final DoubleFunction TAN = new DoubleFunction() {
 
     public double apply(double a) {
       return Math.tan(a);
@@ -269,7 +269,7 @@ public final class Functions {
    */
 
   /** Function that returns <tt>Math.atan2(a,b)</tt>. */
-  public static final BinaryFunction ATAN2 = new BinaryFunction() {
+  public static final DoubleDoubleFunction ATAN2 = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return Math.atan2(a, b);
@@ -277,7 +277,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. */
-  public static final BinaryFunction COMPARE = new BinaryFunction() {
+  public static final DoubleDoubleFunction COMPARE = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return a < b ? -1 : a > b ? 1 : 0;
@@ -285,7 +285,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a / b</tt>. */
-  public static final BinaryFunction DIV = new BinaryFunction() {
+  public static final DoubleDoubleFunction DIV = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return a / b;
@@ -293,7 +293,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a == b ? 1 : 0</tt>. */
-  public static final BinaryFunction EQUALS = new BinaryFunction() {
+  public static final DoubleDoubleFunction EQUALS = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return a == b ? 1 : 0;
@@ -301,7 +301,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a > b ? 1 : 0</tt>. */
-  public static final BinaryFunction GREATER = new BinaryFunction() {
+  public static final DoubleDoubleFunction GREATER = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return a > b ? 1 : 0;
@@ -309,7 +309,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.IEEEremainder(a,b)</tt>. */
-  public static final BinaryFunction IEEE_REMAINDER = new BinaryFunction() {
+  public static final DoubleDoubleFunction IEEE_REMAINDER = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return Math.IEEEremainder(a, b);
@@ -341,7 +341,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a < b ? 1 : 0</tt>. */
-  public static final BinaryFunction LESS = new BinaryFunction() {
+  public static final DoubleDoubleFunction LESS = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return a < b ? 1 : 0;
@@ -349,7 +349,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.log(a) / Math.log(b)</tt>. */
-  public static final BinaryFunction LG = new BinaryFunction() {
+  public static final DoubleDoubleFunction LG = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return Math.log(a) / Math.log(b);
@@ -357,7 +357,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.max(a,b)</tt>. */
-  public static final BinaryFunction MAX = new BinaryFunction() {
+  public static final DoubleDoubleFunction MAX = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return Math.max(a, b);
@@ -365,7 +365,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.min(a,b)</tt>. */
-  public static final BinaryFunction MIN = new BinaryFunction() {
+  public static final DoubleDoubleFunction MIN = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return Math.min(a, b);
@@ -373,15 +373,15 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a - b</tt>. */
-  public static final BinaryFunction MINUS = plusMult(-1);
+  public static final DoubleDoubleFunction MINUS = plusMult(-1);
   /*
-  new BinaryFunction() {
+  new DoubleDoubleFunction() {
     public final double apply(double a, double b) { return a - b; }
   };
   */
 
   /** Function that returns <tt>a % b</tt>. */
-  public static final BinaryFunction MOD = new BinaryFunction() {
+  public static final DoubleDoubleFunction MOD = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return a % b;
@@ -389,7 +389,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>a * b</tt>. */
-  public static final BinaryFunction MULT = new BinaryFunction() {
+  public static final DoubleDoubleFunction MULT = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return a * b;
@@ -397,7 +397,7 @@ public final class Functions {
   };
   
   /** Function that returns <tt>a + b</tt>. */
-  public static final BinaryFunction PLUS = new BinaryFunction() {
+  public static final DoubleDoubleFunction PLUS = new DoubleDoubleFunction() {
     
     public double apply(double a, double b) {
       return a + b;
@@ -405,7 +405,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.abs(a) + Math.abs(b)</tt>. */
-  public static final BinaryFunction PLUS_ABS = new BinaryFunction() {
+  public static final DoubleDoubleFunction PLUS_ABS = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return Math.abs(a) + Math.abs(b);
@@ -413,7 +413,7 @@ public final class Functions {
   };
 
   /** Function that returns <tt>Math.pow(a,b)</tt>. */
-  public static final BinaryFunction POW = new BinaryFunction() {
+  public static final DoubleDoubleFunction POW = new DoubleDoubleFunction() {
 
     public double apply(double a, double b) {
       return Math.pow(a, b);
@@ -427,8 +427,8 @@ public final class Functions {
    * Constructs a function that returns <tt>(from<=a && a<=to) ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>from</tt> and
    * <tt>to</tt> are fixed.
    */
-  public static UnaryFunction between(final double from, final double to) {
-    return new UnaryFunction() {
+  public static DoubleFunction between(final double from, final double to) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return (from <= a && a <= to) ? 1 : 0;
@@ -443,8 +443,8 @@ public final class Functions {
    * @param function a binary function taking operands in the form <tt>function.apply(c,var)</tt>.
    * @return the unary function <tt>function(c,var)</tt>.
    */
-  public static UnaryFunction bindArg1(final BinaryFunction function, final double c) {
-    return new UnaryFunction() {
+  public static DoubleFunction bindArg1(final DoubleDoubleFunction function, final double c) {
+    return new DoubleFunction() {
 
       public double apply(double var) {
         return function.apply(c, var);
@@ -459,8 +459,8 @@ public final class Functions {
    * @param function a binary function taking operands in the form <tt>function.apply(var,c)</tt>.
    * @return the unary function <tt>function(var,c)</tt>.
    */
-  public static UnaryFunction bindArg2(final BinaryFunction function, final double c) {
-    return new UnaryFunction() {
+  public static DoubleFunction bindArg2(final DoubleDoubleFunction function, final double c) {
+    return new DoubleFunction() {
 
       public double apply(double var) {
         return function.apply(var, c);
@@ -476,9 +476,9 @@ public final class Functions {
    * @param h a unary function.
    * @return the binary function <tt>f( g(a), h(b) )</tt>.
    */
-  public static BinaryFunction chain(final BinaryFunction f, final UnaryFunction g,
-                                           final UnaryFunction h) {
-    return new BinaryFunction() {
+  public static DoubleDoubleFunction chain(final DoubleDoubleFunction f, final DoubleFunction g,
+                                           final DoubleFunction h) {
+    return new DoubleDoubleFunction() {
 
       public double apply(double a, double b) {
         return f.apply(g.apply(a), h.apply(b));
@@ -493,8 +493,8 @@ public final class Functions {
    * @param h a binary function.
    * @return the unary function <tt>g( h(a,b) )</tt>.
    */
-  public static BinaryFunction chain(final UnaryFunction g, final BinaryFunction h) {
-    return new BinaryFunction() {
+  public static DoubleDoubleFunction chain(final DoubleFunction g, final DoubleDoubleFunction h) {
+    return new DoubleDoubleFunction() {
 
       public double apply(double a, double b) {
         return g.apply(h.apply(a, b));
@@ -509,8 +509,8 @@ public final class Functions {
    * @param h a unary function.
    * @return the unary function <tt>g( h(a) )</tt>.
    */
-  public static UnaryFunction chain(final UnaryFunction g, final UnaryFunction h) {
-    return new UnaryFunction() {
+  public static DoubleFunction chain(final DoubleFunction g, final DoubleFunction h) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return g.apply(h.apply(a));
@@ -522,8 +522,8 @@ public final class Functions {
    * Constructs a function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is
    * fixed.
    */
-  public static UnaryFunction compare(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction compare(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return a < b ? -1 : a > b ? 1 : 0;
@@ -532,8 +532,8 @@ public final class Functions {
   }
 
   /** Constructs a function that returns the constant <tt>c</tt>. */
-  public static UnaryFunction constant(final double c) {
-    return new UnaryFunction() {
+  public static DoubleFunction constant(final double c) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return c;
@@ -543,13 +543,13 @@ public final class Functions {
 
 
   /** Constructs a function that returns <tt>a / b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction div(double b) {
+  public static DoubleFunction div(double b) {
     return mult(1 / b);
   }
 
   /** Constructs a function that returns <tt>a == b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction equals(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction equals(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return a == b ? 1 : 0;
@@ -558,8 +558,8 @@ public final class Functions {
   }
 
   /** Constructs a function that returns <tt>a > b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction greater(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction greater(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return a > b ? 1 : 0;
@@ -571,8 +571,8 @@ public final class Functions {
    * Constructs a function that returns <tt>Math.IEEEremainder(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is
    * fixed.
    */
-  public static UnaryFunction IEEEremainder(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction IEEEremainder(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return Math.IEEEremainder(a, b);
@@ -624,8 +624,8 @@ public final class Functions {
   }
 
   /** Constructs a function that returns <tt>a < b ? 1 : 0</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction less(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction less(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return a < b ? 1 : 0;
@@ -637,8 +637,8 @@ public final class Functions {
    * Constructs a function that returns <tt><tt>Math.log(a) / Math.log(b)</tt></tt>. <tt>a</tt> is a variable,
    * <tt>b</tt> is fixed.
    */
-  public static UnaryFunction lg(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction lg(final double b) {
+    return new DoubleFunction() {
       private final double logInv = 1 / Math.log(b); // cached for speed
 
 
@@ -649,8 +649,8 @@ public final class Functions {
   }
 
   /** Constructs a function that returns <tt>Math.max(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction max(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction max(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return Math.max(a, b);
@@ -659,8 +659,8 @@ public final class Functions {
   }
 
   /** Constructs a function that returns <tt>Math.min(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction min(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction min(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return Math.min(a, b);
@@ -669,7 +669,7 @@ public final class Functions {
   }
 
   /** Constructs a function that returns <tt>a - b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction minus(double b) {
+  public static DoubleFunction minus(double b) {
     return plus(-b);
   }
 
@@ -677,13 +677,13 @@ public final class Functions {
    * Constructs a function that returns <tt>a - b*constant</tt>. <tt>a</tt> and <tt>b</tt> are variables,
    * <tt>constant</tt> is fixed.
    */
-  public static BinaryFunction minusMult(double constant) {
+  public static DoubleDoubleFunction minusMult(double constant) {
     return plusMult(-constant);
   }
 
   /** Constructs a function that returns <tt>a % b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction mod(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction mod(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return a % b;
@@ -692,18 +692,18 @@ public final class Functions {
   }
 
   /** Constructs a function that returns <tt>a * b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction mult(double b) {
+  public static DoubleFunction mult(double b) {
     return new Mult(b);
     /*
-    return new UnaryFunction() {
+    return new DoubleFunction() {
       public final double apply(double a) { return a * b; }
     };
     */
   }
 
   /** Constructs a function that returns <tt>a + b</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction plus(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction plus(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return a + b;
@@ -715,18 +715,18 @@ public final class Functions {
    * Constructs a function that returns <tt>a + b*constant</tt>. <tt>a</tt> and <tt>b</tt> are variables,
    * <tt>constant</tt> is fixed.
    */
-  public static BinaryFunction plusMult(double constant) {
+  public static DoubleDoubleFunction plusMult(double constant) {
     return new PlusMult(constant);
     /*
-    return new BinaryFunction() {
+    return new DoubleDoubleFunction() {
       public final double apply(double a, double b) { return a + b*constant; }
     };
     */
   }
 
   /** Constructs a function that returns <tt>Math.pow(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is fixed. */
-  public static UnaryFunction pow(final double b) {
-    return new UnaryFunction() {
+  public static DoubleFunction pow(final double b) {
+    return new DoubleFunction() {
 
       public double apply(double a) {
         return Math.pow(a, b);
@@ -743,7 +743,7 @@ public final class Functions {
    * interfaces. Thus, if you are not happy with the default, just pass your favourite random generator to function
    * evaluating methods.
    */
-  public static UnaryFunction random() {
+  public static DoubleFunction random() {
     return new MersenneTwister(new Date());
   }
 
@@ -755,8 +755,8 @@ public final class Functions {
    * precision = 10   rounds 123   --> 120 , 127   --> 130
    * </pre>
    */
-  public static UnaryFunction round(final double precision) {
-    return new UnaryFunction() {
+  public static DoubleFunction round(final double precision) {
+    return new DoubleFunction() {
       public double apply(double a) {
         return Math.rint(a / precision) * precision;
       }
@@ -770,8 +770,8 @@ public final class Functions {
    * @param function a function taking operands in the form <tt>function.apply(a,b)</tt>.
    * @return the binary function <tt>function(b,a)</tt>.
    */
-  public static BinaryFunction swapArgs(final BinaryFunction function) {
-    return new BinaryFunction() {
+  public static DoubleDoubleFunction swapArgs(final DoubleDoubleFunction function) {
+    return new DoubleDoubleFunction() {
       public double apply(double a, double b) {
         return function.apply(b, a);
       }

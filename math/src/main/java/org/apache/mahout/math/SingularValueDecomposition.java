@@ -579,7 +579,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
    *  of the squares of the singular values.
    */
   Matrix getCovariance(double minSingularValue) {
-    DenseMatrix j = new DenseMatrix(s.length,s.length);
+    Matrix j = new DenseMatrix(s.length,s.length);
     Matrix vMat = new DenseMatrix(this.v);
     for (int i = 0; i < s.length; i++) {
       j.set(i, i, (s[i] >= minSingularValue) ? 1 / (s[i] * s[i]) : 0.0);

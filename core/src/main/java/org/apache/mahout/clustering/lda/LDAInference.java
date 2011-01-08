@@ -24,7 +24,7 @@ import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 
 /**
  * Class for performing infererence on a document, which involves computing (an approximation to)
@@ -217,7 +217,7 @@ public class LDAInference {
   
   private static Vector digamma(Vector v) {
     Vector digammaGamma = new DenseVector(v.size());
-    digammaGamma.assign(v, new BinaryFunction() {
+    digammaGamma.assign(v, new DoubleDoubleFunction() {
       @Override
       public double apply(double unused, double g) {
         return digamma(g);

@@ -25,7 +25,7 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 
 public final class RandomVectorIterable implements Iterable<Vector> {
 
@@ -66,7 +66,7 @@ public final class RandomVectorIterable implements Iterable<Vector> {
         throw new NoSuchElementException();
       }
       Vector result = type == VectorType.SPARSE ? new RandomAccessSparseVector(numItems) : new DenseVector(numItems);
-      result.assign(new UnaryFunction(){
+      result.assign(new DoubleFunction(){
         @Override
         public double apply(double arg1) {
           return random.nextDouble();

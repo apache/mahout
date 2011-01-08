@@ -20,7 +20,7 @@ package org.apache.mahout.ep;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.sgd.PolymorphicWritable;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -30,7 +30,7 @@ import java.io.IOException;
  * Provides coordinate tranformations so that evolution can proceed on the entire space of
  * reals but have the output limited and squished in convenient (and safe) ways.
  */
-public abstract class Mapping implements UnaryFunction, Writable {
+public abstract class Mapping implements DoubleFunction, Writable {
 
   private Mapping() {
   }
@@ -122,21 +122,18 @@ public abstract class Mapping implements UnaryFunction, Writable {
   }
 
   public static final class Identity extends Mapping {
-    public Identity() {
-    }
-
     @Override
     public double apply(double v) {
       return v;
     }
 
     @Override
-    public void write(DataOutput dataOutput) throws IOException {
+    public void write(DataOutput dataOutput) {
       // stateless
     }
 
     @Override
-    public void readFields(DataInput dataInput) throws IOException {
+    public void readFields(DataInput dataInput) {
       // stateless
     }
   }

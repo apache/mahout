@@ -57,33 +57,4 @@ public final class NegativeBinomialTest extends MahoutTestCase {
     }
   }
 
-  // TODO "fix" this test? Seems very sensitive to sequence of random numbers and
-  // having trouble making it work reliably on all environments
-  /*
-  @Test
-  public void sample() {
-    for (double p : new double[]{0.1, 0.2, 0.5, 0.9}) {
-      for (int r = 1; r < 5; r++) {
-        NegativeBinomial nb = new NegativeBinomial(r, p, RandomUtils.getRandom());
-        int[] counts = new int[N];
-        for (int i = 0; i < N; i++) {
-          int k = nb.nextInt();
-          if (k < counts.length) {
-            counts[k]++;
-          }
-        }
-
-        // probably should do a chi^2 or LLR test here especially since we know the PDF
-        for (int k = 0; k < counts.length; k++) {
-          assertEquals(String.format(Locale.ENGLISH, "r=%d,p=%.3f,k=%d,count=%d,pdf=%.3f",
-                                     r, p, k, counts[k], nb.pdf(k)),
-                       N * nb.pdf(k),
-                       counts[k],
-                       Math.max(3, 4 * Math.sqrt(N * nb.pdf(k) * (1 - nb.pdf(k)))));
-        }
-      }
-    }
-  }
-   */
-
 }

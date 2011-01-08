@@ -67,7 +67,8 @@ public class BayesFeatureDriver implements BayesJob {
   public static void main(String[] args) throws IOException {
     // test harness, delete me
     BayesFeatureDriver driver = new BayesFeatureDriver();
-    BayesParameters p = new BayesParameters(1);
+    BayesParameters p = new BayesParameters();
+    p.setGramSize(1);
     Path input = new Path("/home/drew/mahout/bayes/20news-input");
     Path output = new Path("/home/drew/mahout/bayes/20-news-features");
     driver.runJob(input, output, p);

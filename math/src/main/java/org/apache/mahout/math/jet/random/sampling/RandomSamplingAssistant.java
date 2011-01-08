@@ -8,18 +8,16 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.jet.random.sampling;
 
-import org.apache.mahout.math.PersistentObject;
-
 import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public final class RandomSamplingAssistant extends PersistentObject {
+public final class RandomSamplingAssistant {
 
   private static final int MAX_BUFFER_SIZE = 200;
 
   //public class RandomSamplingAssistant extends Object implements java.io.Serializable {
-  private RandomSampler sampler;
+  private final RandomSampler sampler;
   private final long[] buffer;
   private int bufferPosition;
 
@@ -43,14 +41,6 @@ public final class RandomSamplingAssistant extends PersistentObject {
     } // start with the right offset
 
     fetchNextBlock();
-  }
-
-  /** Returns a deep copy of the receiver. */
-  @Override
-  public Object clone() {
-    RandomSamplingAssistant copy = (RandomSamplingAssistant) super.clone();
-    copy.sampler = (RandomSampler) this.sampler.clone();
-    return copy;
   }
 
   /** Not yet commented. */

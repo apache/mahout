@@ -9,18 +9,16 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.matrix;
 
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.function.UnaryFunction;
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.IntIntDoubleFunction;
-import org.apache.mahout.math.list.DoubleArrayList;
-import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix1D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class DoubleMatrix2D extends AbstractMatrix2D {
+public abstract class DoubleMatrix2D extends AbstractMatrix2D implements Cloneable {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected DoubleMatrix2D() {
@@ -48,8 +46,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @return the aggregated measure.
    * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(BinaryFunction aggr,
-                          UnaryFunction f) {
+  public double aggregate(DoubleDoubleFunction aggr,
+                          DoubleFunction f) {
     if (size() == 0) {
       return Double.NaN;
     }
@@ -95,8 +93,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
    * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleMatrix2D other, BinaryFunction aggr,
-                          BinaryFunction f) {
+  public double aggregate(DoubleMatrix2D other, DoubleDoubleFunction aggr,
+                          DoubleDoubleFunction f) {
     checkShape(other);
     if (size() == 0) {
       return Double.NaN;
@@ -118,11 +116,10 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * are copied. So subsequent changes in <tt>values</tt> are not reflected in the matrix, and vice-versa.
    *
    * @param values the values to be filled into the cells.
-   * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>values.length != rows() || for any 0 &lt;= row &lt; rows():
    *                                  values[row].length != columns()</tt>.
    */
-  public DoubleMatrix2D assign(double[][] values) {
+  public void assign(double[][] values) {
     if (values.length != rows) {
       throw new IllegalArgumentException("Must have same number of rows: rows=" + values.length + "rows()=" + rows());
     }
@@ -136,7 +133,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
         setQuick(row, column, currentRow[column]);
       }
     }
-    return this;
   }
 
   /**
@@ -175,16 +171,14 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * For further examples, see the <a href="package-summary.html#FunctionObjects">package doc</a>.
    *
    * @param function a function object taking as argument the current cell's value.
-   * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix2D assign(UnaryFunction function) {
+  public void assign(DoubleFunction function) {
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         setQuick(row, column, function.apply(getQuick(row, column)));
       }
     }
-    return this;
   }
 
   /**
@@ -244,7 +238,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @throws IllegalArgumentException if <tt>columns() != other.columns() || rows() != other.rows()</tt>
    * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix2D assign(DoubleMatrix2D y, BinaryFunction function) {
+  public DoubleMatrix2D assign(DoubleMatrix2D y, DoubleDoubleFunction function) {
     checkShape(y);
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
@@ -318,9 +312,8 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * Parameters to function are as follows: <tt>first==row</tt>, <tt>second==column</tt>, <tt>third==nonZeroValue</tt>.
    *
    * @param function a function object taking as argument the current non-zero cell's row, column and value.
-   * @return <tt>this</tt> (for convenience only).
    */
-  public DoubleMatrix2D forEachNonZero(IntIntDoubleFunction function) {
+  public void forEachNonZero(IntIntDoubleFunction function) {
     for (int row = rows; --row >= 0;) {
       for (int column = columns; --column >= 0;) {
         double value = getQuick(row, column);
@@ -332,7 +325,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
         }
       }
     }
-    return this;
   }
 
   /**
@@ -356,46 +348,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    */
   protected DoubleMatrix2D getContent() {
     return this;
-  }
-
-  /**
-   * Fills the coordinates and values of cells having non-zero values into the specified lists. Fills into the lists,
-   * starting at index 0. After this call returns the specified lists all have a new size, the number of non-zero
-   * values. <p> In general, fill order is <i>unspecified</i>. This implementation fills like <tt>for (row = 0..rows-1)
-   * for (column = 0..columns-1) do ... </tt>. However, subclasses are free to us any other order, even an order that
-   * may change over time as cell values are changed. (Of course, result lists indexes are guaranteed to correspond to
-   * the same cell). <p> <b>Example:</b> <br>
-   * <pre>
-   * 2 x 3 matrix:
-   * 0, 0, 8
-   * 0, 7, 0
-   * -->
-   * rowList    = (0,1)
-   * columnList = (2,1)
-   * valueList  = (8,7)
-   * </pre>
-   * In other words, <tt>get(0,2)==8, get(1,1)==7</tt>.
-   *
-   * @param rowList    the list to be filled with row indexes, can have any size.
-   * @param columnList the list to be filled with column indexes, can have any size.
-   * @param valueList  the list to be filled with values, can have any size.
-   */
-  public void getNonZeros(IntArrayList rowList, IntArrayList columnList, DoubleArrayList valueList) {
-    rowList.clear();
-    columnList.clear();
-    valueList.clear();
-    int r = rows;
-    int c = columns;
-    for (int row = 0; row < r; row++) {
-      for (int column = 0; column < c; column++) {
-        double value = getQuick(row, column);
-        if (value != 0) {
-          rowList.add(row);
-          columnList.add(column);
-          valueList.add(value);
-        }
-      }
-    }
   }
 
   /**
@@ -532,7 +484,11 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @return a new view of the receiver.
    */
   protected DoubleMatrix2D view() {
-    return (DoubleMatrix2D) clone();
+    try {
+      return (DoubleMatrix2D) clone();
+    } catch (CloneNotSupportedException cnse) {
+      throw new IllegalStateException();
+    }
   }
 
   /**
@@ -735,6 +691,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    * @param condition The condition to be matched.
    * @return the new view.
    */
+  /*
   public DoubleMatrix2D viewSelection(DoubleMatrix1DProcedure condition) {
     IntArrayList matches = new IntArrayList();
     for (int i = 0; i < rows; i++) {
@@ -746,6 +703,7 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
     matches.trimToSize();
     return viewSelection(matches.elements(), null); // take all columns
   }
+   */
 
   /**
    * Construct and returns a new selection view.
@@ -756,108 +714,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
    */
   protected abstract DoubleMatrix2D viewSelectionLike(int[] rowOffsets, int[] columnOffsets);
 
-  /**
-   * Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell. More
-   * specifically, the view has <tt>this.rows()/rowStride</tt> rows and <tt>this.columns()/columnStride</tt> columns
-   * holding cells <tt>this.get(i*rowStride,j*columnStride)</tt> for all <tt>i = 0..rows()/rowStride - 1, j =
-   * 0..columns()/columnStride - 1</tt>. The returned view is backed by this matrix, so changes in the returned view are
-   * reflected in this matrix, and vice-versa.
-   *
-   * @param rowStride    the row step factor.
-   * @param columnStride the column step factor.
-   * @return a new view.
-   * @throws IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
-   */
-  public DoubleMatrix2D viewStrides(int rowStride, int columnStride) {
-    return (DoubleMatrix2D) (view().vStrides(rowStride, columnStride));
-  }
-
-  /**
-   * 8 neighbor stencil transformation. For efficient finite difference operations. Applies a function to a moving <tt>3
-   * x 3</tt> window. Does nothing if <tt>rows() < 3 || columns() < 3</tt>.
-   * <pre>
-   * B[i,j] = function.apply(
-   * &nbsp;&nbsp;&nbsp;A[i-1,j-1], A[i-1,j], A[i-1,j+1],
-   * &nbsp;&nbsp;&nbsp;A[i,  j-1], A[i,  j], A[i,  j+1],
-   * &nbsp;&nbsp;&nbsp;A[i+1,j-1], A[i+1,j], A[i+1,j+1]
-   * &nbsp;&nbsp;&nbsp;)
-   *
-   * x x x - &nbsp;&nbsp;&nbsp; - x x x &nbsp;&nbsp;&nbsp; - - - -
-   * x o x - &nbsp;&nbsp;&nbsp; - x o x &nbsp;&nbsp;&nbsp; - - - -
-   * x x x - &nbsp;&nbsp;&nbsp; - x x x ... - x x x
-   * - - - - &nbsp;&nbsp;&nbsp; - - - - &nbsp;&nbsp;&nbsp; - x o x
-   * - - - - &nbsp;&nbsp;&nbsp; - - - - &nbsp;&nbsp;&nbsp; - x x x
-   * </pre>
-   * Make sure that cells of <tt>this</tt> and <tt>B</tt> do not overlap. In case of overlapping views, behaviour is
-   * unspecified. </pre> <p> <b>Example:</b> <pre> final double alpha = 0.25; final double beta = 0.75;
-   *
-   * // 8 neighbors org.apache.mahout.math.function.Double9Function f = new Double9Function() {
-   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
-   * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 +
-   * alpha*(a00+a01+a02 + a10+a12 + a20+a21+a22); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} }; A.zAssign8Neighbors(B,f);
-   *
-   * // 4 neighbors org.apache.mahout.math.function.Double9Function g = new Double9Function() {
-   * &nbsp;&nbsp;&nbsp;public final double apply( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a00, double a01, double
-   * a02, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double a10, double a11, double a12,
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double
-   * a20, double a21, double a22) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return beta*a11 + alpha*(a01+a10+a12+a21);
-   * &nbsp;&nbsp;&nbsp;} C.zAssign8Neighbors(B,g); // fast, even though it doesn't look like it }; </pre>
-   *
-   * @param B        the matrix to hold the results.
-   * @param function the function to be applied to the 9 cells.
-   * @throws NullPointerException     if <tt>function==null</tt>.
-   * @throws IllegalArgumentException if <tt>rows() != B.rows() || columns() != B.columns()</tt>.
-   */
-  public void zAssign8Neighbors(DoubleMatrix2D B, org.apache.mahout.math.function.Double9Function function) {
-    if (function == null) {
-      throw new IllegalArgumentException("function must not be null.");
-    }
-    checkShape(B);
-    if (rows < 3 || columns < 3) {
-      return;
-    } // nothing to do
-    int r = rows - 1;
-    int c = columns - 1;
-    for (int i = 1; i < r; i++) {
-      double a00 = getQuick(i - 1, 0);
-      double a01 = getQuick(i - 1, 1);
-      double a10 = getQuick(i, 0);
-      double a11 = getQuick(i, 1);
-      double a20 = getQuick(i + 1, 0);
-      double a21 = getQuick(i + 1, 1);
-
-      for (int j = 1; j < c; j++) {
-        // in each step six cells can be remembered in registers - they don't need to be reread from slow memory
-        // in each step 3 instead of 9 cells need to be read from memory.
-        double a02 = getQuick(i - 1, j + 1);
-        double a12 = getQuick(i, j + 1);
-        double a22 = getQuick(i + 1, j + 1);
-
-        B.setQuick(i, j, function.apply(
-            a00, a01, a02,
-            a10, a11, a12,
-            a20, a21, a22));
-
-        a00 = a01;
-        a10 = a11;
-        a20 = a21;
-
-        a01 = a02;
-        a11 = a12;
-        a21 = a22;
-      }
-    }
-  }
-
-  /**
-   * Linear algebraic matrix-vector multiplication; <tt>z = A * y</tt>;
-   * Equivalent to <tt>return A.zMult(y,z,1,0);</tt>
-   */
-  public DoubleMatrix1D zMult(DoubleMatrix1D y, DoubleMatrix1D z) {
-    return zMult(y, z, 1, z == null ? 1 : 0, false);
-  }
 
   /**
    * Linear algebraic matrix-vector multiplication; <tt>z = alpha * A * y + beta*z</tt>. <tt>z[i] = alpha*Sum(A[i,j] *
@@ -890,14 +746,6 @@ public abstract class DoubleMatrix2D extends AbstractMatrix2D {
       z.setQuick(i, alpha * s + beta * z.getQuick(i));
     }
     return z;
-  }
-
-  /**
-   * Linear algebraic matrix-matrix multiplication; <tt>C = A x B</tt>; Equivalent to
-   * <tt>A.zMult(B,C,1,0,false,false)</tt>.
-   */
-  public DoubleMatrix2D zMult(DoubleMatrix2D B, DoubleMatrix2D C) {
-    return zMult(B, C, 1, C == null ? 1 : 0, false, false);
   }
 
   /**

@@ -107,8 +107,8 @@ public final class Classify {
       
     }
     
-    BayesParameters params = new BayesParameters(gramSize);
-    
+    BayesParameters params = new BayesParameters();
+    params.setGramSize(gramSize);
     String modelBasePath = (String) cmdLine.getValue(pathOpt);
     
     log.info("Loading model from: {}", params.print());

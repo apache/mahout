@@ -24,7 +24,7 @@ package org.apache.mahout.classifier.bayes.mapreduce.common;
 public final class BayesConstants {
   
   // Ensure all the strings are unique
-  public static final String ALPHA_SMOOTHING_FACTOR = "__SF"; // -
+  //public static final String ALPHA_SMOOTHING_FACTOR = "__SF"; // -
   
   public static final String DOCUMENT_FREQUENCY = "__DF"; // -
   

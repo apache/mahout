@@ -29,26 +29,7 @@ package org.apache.mahout.math.jet.math;
 /**
  * Arithmetic functions.
  */
-public class Arithmetic extends Constants {
-  // for method stirlingCorrection(...)
-  private static final double[] STIRLING_CORRECTION_TABLE = {
-    0.0,
-    8.106146679532726e-02, 4.134069595540929e-02,
-    2.767792568499834e-02, 2.079067210376509e-02,
-    1.664469118982119e-02, 1.387612882307075e-02,
-    1.189670994589177e-02, 1.041126526197209e-02,
-    9.255462182712733e-03, 8.330563433362871e-03,
-    7.573675487951841e-03, 6.942840107209530e-03,
-    6.408994188004207e-03, 5.951370112758848e-03,
-    5.554733551962801e-03, 5.207655919609640e-03,
-    4.901395948434738e-03, 4.629153749334029e-03,
-    4.385560249232324e-03, 4.166319691996922e-03,
-    3.967954218640860e-03, 3.787618068444430e-03,
-    3.622960224683090e-03, 3.472021382978770e-03,
-    3.333155636728090e-03, 3.204970228055040e-03,
-    3.086278682608780e-03, 2.976063983550410e-03,
-    2.873449362352470e-03, 2.777674929752690e-03,
-  };
+public final class Arithmetic {
 
   // for method logFactorial(...)
   // log(k!) for k = 0, ..., 29
@@ -244,37 +225,7 @@ public class Arithmetic extends Constants {
     7.257415615308004E306
   };
 
-  /** Makes this class non instantiable, but still let's others inherit from it. */
-  protected Arithmetic() {
-  }
-
-  /**
-   * Efficiently returns the binomial coefficient, often also referred to as "n over k" or "n choose k". The binomial
-   * coefficient is defined as <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>. <ul> <li>k<0<tt>: <tt>0</tt>.
-   * <li>k==0<tt>: <tt>1</tt>. <li>k==1<tt>: <tt>n</tt>. <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k
-   * )</tt>. </ul>
-   *
-   * @return the binomial coefficient.
-   */
-  public static double binomial(double n, long k) {
-    if (k < 0) {
-      return 0;
-    }
-    if (k == 0) {
-      return 1;
-    }
-    if (k == 1) {
-      return n;
-    }
-
-    // binomial(n,k) = (n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )
-    double a = n - k + 1;
-    double b = 1;
-    double binomial = 1;
-    for (long i = k; i-- > 0;) {
-      binomial *= (a++) / (b++);
-    }
-    return binomial;
+  private Arithmetic() {
   }
 
   /**
@@ -325,53 +276,6 @@ public class Arithmetic extends Constants {
   }
 
   /**
-   * Returns the smallest <code>long &gt;= value</code>. <dt>Examples: <code>1.0 -> 1, 1.2 -> 2, 1.9 -> 2</code>. This
-   * method is safer than using (long) Math.ceil(value), because of possible rounding error.
-   */
-  public static long ceil(double value) {
-    return Math.round(Math.ceil(value));
-  }
-
-  /**
-   * Evaluates the series of Chebyshev polynomials Ti at argument x/2. The series is given by
-   * <pre>
-   *        N-1
-   *         - '
-   *  y  =   >   coef[i] T (x/2)
-   *         -            i
-   *        i=0
-   * </pre>
-   * Coefficients are stored in reverse order, i.e. the zero order term is last in the array.  Note N is the number of
-   * coefficients, not the order. <p> If coefficients are for the interval a to b, x must have been transformed to x ->
-   * 2(2x - b - a)/(b-a) before entering the routine.  This maps x from (a, b) to (-1, 1), over which the Chebyshev
-   * polynomials are defined. <p> If the coefficients are for the inverted interval, in which (a, b) is mapped to (1/b,
-   * 1/a), the transformation required is x -> 2(2ab/x - b - a)/(b-a).  If b is infinity, this becomes x -> 4a/x - 1.
-   * <p> SPEED: <p> Taking advantage of the recurrence properties of the Chebyshev polynomials, the routine requires one
-   * more addition per loop than evaluating a nested polynomial of the same degree.
-   *
-   * @param x    argument to the polynomial.
-   * @param coef the coefficients of the polynomial.
-   * @param n    the number of coefficients.
-   */
-  public static double chbevl(double x, double[] coef, int n) {
-
-    int p = 0;
-
-    double b0 = coef[p++];
-    double b1 = 0.0;
-    int i = n - 1;
-
-    double b2;
-    do {
-      b2 = b1;
-      b1 = b0;
-      b0 = x * b1 - b2 + coef[p++];
-    } while (--i > 0);
-
-    return 0.5 * (b0 - b2);
-  }
-
-  /**
    * Instantly returns the factorial <tt>k!</tt>.
    *
    * @param k must hold <tt>k &gt;= 0</tt>.
@@ -395,32 +299,6 @@ public class Arithmetic extends Constants {
   }
 
   /**
-   * Returns the largest <code>long &lt;= value</code>. <dt>Examples: <code> 1.0 -> 1, 1.2 -> 1, 1.9 -> 1 <dt> 2.0 -> 2,
-   * 2.2 -> 2, 2.9 -> 2 </code><dt> This method is safer than using (long) Math.floor(value), because of possible
-   * rounding error.
-   */
-  public static long floor(double value) {
-    return Math.round(Math.floor(value));
-  }
-
-  /** Returns <tt>log<sub>base</sub>value</tt>. */
-  public static double log(double base, double value) {
-    return Math.log(value) / Math.log(base);
-  }
-
-  /** Returns <tt>log<sub>10</sub>value</tt>. */
-  public static double log10(double value) {
-    // 1.0 / Math.log(10) == 0.43429448190325176
-    return Math.log(value) * 0.43429448190325176;
-  }
-
-  /** Returns <tt>log<sub>2</sub>value</tt>. */
-  public static double log2(double value) {
-    // 1.0 / Math.log(2) == 1.4426950408889634
-    return Math.log(value) * 1.4426950408889634;
-  }
-
-  /**
    * Returns <tt>log(k!)</tt>. Tries to avoid overflows. For <tt>k<30</tt> simply looks up a table in O(1). For
    * <tt>k>=30</tt> uses stirlings approximation.
    *
@@ -439,43 +317,6 @@ public class Arithmetic extends Constants {
       return (k + 0.5) * Math.log(k) - k + c0 + r * (c1 + rr * (c3 + rr * (c5 + rr * c7)));
     } else {
       return LOG_FACTORIAL_TABLE[k];
-    }
-  }
-
-  /**
-   * Instantly returns the factorial <tt>k!</tt>.
-   *
-   * @param k must hold <tt>k &gt;= 0 && k &lt; 21</tt>.
-   */
-  public static long longFactorial(int k) {
-    if (k < 0) {
-      throw new IllegalArgumentException("Negative k");
-    }
-
-    if (k < FACTORIAL_TABLE.length) {
-      return FACTORIAL_TABLE[k];
-    }
-    throw new IllegalArgumentException("Overflow");
-  }
-
-  /**
-   * Returns the StirlingCorrection. <p> Correction term of the Stirling approximation for <tt>log(k!)</tt> (series in
-   * 1/k, or table values for small k) with int parameter k. <p> <tt> log k! = (k + 1/2)log(k + 1) - (k + 1) +
-   * (1/2)log(2Pi) + stirlingCorrection(k + 1) <p> log k! = (k + 1/2)log(k)     -  k      + (1/2)log(2Pi) +
-   * stirlingCorrection(k) </tt>
-   */
-  public static double stirlingCorrection(int k) {
-
-    if (k > 30) {
-      double r = 1.0 / (double) k;
-      double rr = r * r;
-      double c7 = -5.95238095238095238e-04;     //  -1/1680
-      double c5 = 7.93650793650793651e-04;     //  +1/1260
-      double c3 = -2.77777777777777778e-03;     //  -1/360
-      double c1 = 8.33333333333333333e-02;     //  +1/12
-      return r * (c1 + rr * (c3 + rr * (c5 + rr * c7)));
-    } else {
-      return STIRLING_CORRECTION_TABLE[k];
     }
   }
 

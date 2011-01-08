@@ -24,9 +24,9 @@ package org.apache.mahout.classifier.naivebayes;
 public final class BayesConstants {
   
   // Ensure all the strings are unique
-  public static final String ALPHA_SMOOTHING_FACTOR = "__SF"; // -
+  //public static final String ALPHA_SMOOTHING_FACTOR = "__SF"; // -
   
-  public static final String WEIGHT = "__WT";
+  //public static final String WEIGHT = "__WT";
   
   public static final String FEATURE_SUM = "__SJ";
   

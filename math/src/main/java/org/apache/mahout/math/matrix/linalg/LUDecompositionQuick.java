@@ -13,12 +13,14 @@ import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
+import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix1D;
+import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 
 import java.io.Serializable;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class LUDecompositionQuick implements Serializable {
+public final class LUDecompositionQuick implements Serializable {
 
   /** Array for internal storage of decomposition. */
   private DoubleMatrix2D lu;
@@ -35,14 +37,6 @@ public class LUDecompositionQuick implements Serializable {
 
   private transient double[] workDouble;
   private transient int[] work1;
-
-  /**
-   * Constructs and returns a new LU Decomposition object with default tolerance <tt>1.0E-9</tt> for singularity
-   * detection.
-   */
-  public LUDecompositionQuick() {
-    this(Property.DEFAULT.tolerance());
-  }
 
   /** Constructs and returns a new LU Decomposition object which uses the given tolerance for singularity detection; */
   public LUDecompositionQuick(double tolerance) {
@@ -465,7 +459,7 @@ public class LUDecompositionQuick implements Serializable {
 
     IntArrayList nonZeroIndexes =
         new IntArrayList(); // sparsity
-    DoubleMatrix1D bRowk = org.apache.mahout.math.matrix.DoubleFactory1D.dense.make(nx); // blocked row k
+    DoubleMatrix1D bRowk = new DenseDoubleMatrix1D(nx); // blocked row k
 
     // Solve L*Y = B(piv,:)
     int cutOff = 10;
@@ -648,7 +642,7 @@ public class LUDecompositionQuick implements Serializable {
     }
 
     buf.append("\n\ninverse(A) = ");
-    DoubleMatrix2D identity = org.apache.mahout.math.matrix.DoubleFactory2D.DENSE.identity(lu.rows());
+    DoubleMatrix2D identity = DenseDoubleMatrix2D.identity(lu.rows());
     try {
       this.solve(identity);
       buf.append(String.valueOf(identity));

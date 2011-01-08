@@ -9,7 +9,6 @@ It is provided "as is" without expressed or implied warranty.
 package org.apache.mahout.math.jet.random.sampling;
 
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.PersistentObject;
 
 import java.util.Random;
 
@@ -128,7 +127,7 @@ import java.util.Random;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class RandomSampler extends PersistentObject {
+public class RandomSampler {
 
   //public class RandomSampler extends Object implements java.io.Serializable {
   private long n;

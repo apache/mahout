@@ -37,7 +37,9 @@ public final class CBayesClassifierTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     algorithm = new CBayesAlgorithm();
-    store = new InMemoryBayesDatastore(new BayesParameters(1));
+    BayesParameters bayesParams = new BayesParameters();
+    bayesParams.setGramSize(1);
+    store = new InMemoryBayesDatastore(bayesParams);
     // String[] labels = new String[]{"a", "b", "c", "d", "e"};
     // long[] labelCounts = new long[]{6, 20, 60, 100, 200};
     // String[] features = new String[]{"aa", "bb", "cc", "dd", "ee"};

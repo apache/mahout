@@ -17,8 +17,6 @@
 
 package org.apache.mahout.math.jet.random;
 
-import org.apache.commons.math.ConvergenceException;
-import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.MahoutTestCase;
 import org.junit.Test;
@@ -26,6 +24,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 public final class ExponentialTest extends MahoutTestCase {
+
   @Test
   public void consistency() throws Exception {
     Exponential dist = new Exponential(1, RandomUtils.getRandom());

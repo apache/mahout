@@ -93,7 +93,7 @@ package org.apache.mahout.math;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class GenericPermuting {
+public final class GenericPermuting {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   private GenericPermuting() {

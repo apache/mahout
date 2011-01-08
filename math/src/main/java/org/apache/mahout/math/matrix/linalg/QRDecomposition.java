@@ -8,10 +8,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
+import java.io.Serializable;
+
 import org.apache.mahout.math.function.Functions;
-import org.apache.mahout.math.matrix.DoubleFactory2D;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
+import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 
 /**
  For an <tt>m x n</tt> matrix <tt>A</tt> with <tt>m >= n</tt>, the QR decomposition is an <tt>m x n</tt>
@@ -27,7 +29,7 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public class QRDecomposition implements java.io.Serializable {
+public class QRDecomposition implements Serializable {
 
   /** Array for internal storage of decomposition. */
   private final DoubleMatrix2D QR;
@@ -57,7 +59,7 @@ public class QRDecomposition implements java.io.Serializable {
     n = A.columns();
     Rdiag = A.like1D(n);
     //Rdiag = new double[n];
-    //org.apache.mahout.math.function.BinaryFunction hypot = Algebra.hypotFunction();
+    //org.apache.mahout.math.function.DoubleDoubleFunction hypot = Algebra.hypotFunction();
 
     // precompute and cache some views to avoid regenerating them time and again
     DoubleMatrix1D[] QRcolumns = new DoubleMatrix1D[n];
@@ -279,7 +281,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     buf.append("\n\npseudo inverse(A) = ");
     try {
-      buf.append(String.valueOf(this.solve(DoubleFactory2D.DENSE.identity(QR.rows()))));
+      buf.append(String.valueOf(this.solve(DenseDoubleMatrix2D.identity(QR.rows()))));
     } catch (IllegalArgumentException exc) {
       buf.append(unknown).append(exc.getMessage());
     }

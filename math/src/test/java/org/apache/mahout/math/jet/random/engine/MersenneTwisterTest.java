@@ -88,25 +88,6 @@ public final class MersenneTwisterTest extends MahoutTestCase {
     }
   }
 
-  @Test
-  public void testClone() {
-    MersenneTwister r1 = new MersenneTwister(1275264362);
-    MersenneTwister r2 = (MersenneTwister) r1.clone();
-
-    // the two generators should produce the same sequence, but still be independent
-    int x = r1.nextInt();
-    int y = r2.nextInt();
-    assertEquals(x, y);
-    // r1 is one ahead in these tests
-    assertFalse(r1.nextInt() == y);
-    assertFalse(r1.nextInt() == r2.nextInt());
-    // if r2 catches up, all is identical
-    r2.nextInt();
-    for (int i = 0; i < 100; i++) {
-      assertEquals("date-"+i, r1.nextInt(), r2.nextInt());
-    }
-  }
-
   // output of first 1000 values of nextInt() as determined by a slight modification of
   // the reference C implementation
   private final long[] reference1 = {

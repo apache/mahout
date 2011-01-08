@@ -74,8 +74,10 @@ public final class JobExecutor {
       
       Path input = new Path(cmdLine.getValue(inputOpt).toString());
       Path output = new Path(cmdLine.getValue(outputOpt).toString());
-      
-      job.runJob(input, output, new BayesParameters(1));
+
+      BayesParameters bayesParams = new BayesParameters();
+      bayesParams.setGramSize(1);
+      job.runJob(input, output, bayesParams);
     } catch (OptionException e) {
       log.error(e.getMessage());
       CommandLineUtil.printHelp(group);

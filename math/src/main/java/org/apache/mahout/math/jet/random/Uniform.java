@@ -17,9 +17,6 @@ public class Uniform extends AbstractContinousDistribution {
   private double min;
   private double max;
 
-  // The uniform random number generated shared by all <b>static</b> methods.
-  protected static final Uniform shared = new Uniform(RandomUtils.getRandom());
-
   /**
    * Constructs a uniform distribution with the given minimum and maximum, using a {@link
    * org.apache.mahout.math.jet.random.engine.MersenneTwister} seeded with the given seed.
@@ -158,62 +155,6 @@ public class Uniform extends AbstractContinousDistribution {
     this.max = max;
   }
 
-  /** Returns a uniformly distributed random <tt>boolean</tt>. */
-  public static boolean staticNextBoolean() {
-    synchronized (shared) {
-      return shared.nextBoolean();
-    }
-  }
-
-  /**
-   * Returns a uniformly distributed random number in the open interval <tt>(0,1)</tt> (excluding <tt>0</tt> and
-   * <tt>1</tt>).
-   */
-  public static double staticNextDouble() {
-    synchronized (shared) {
-      return shared.nextDouble();
-    }
-  }
-
-  /**
-   * Returns a uniformly distributed random number in the open interval <tt>(from,to)</tt> (excluding <tt>from</tt> and
-   * <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
-   */
-  public static double staticNextDoubleFromTo(double from, double to) {
-    synchronized (shared) {
-      return shared.nextDoubleFromTo(from, to);
-    }
-  }
-
-  /**
-   * Returns a uniformly distributed random number in the open interval <tt>(from,to)</tt> (excluding <tt>from</tt> and
-   * <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
-   */
-  public static float staticNextFloatFromTo(float from, float to) {
-    synchronized (shared) {
-      return shared.nextFloatFromTo(from, to);
-    }
-  }
-
-  /**
-   * Returns a uniformly distributed random number in the closed interval <tt>[from,to]</tt> (including <tt>from</tt>
-   * and <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
-   */
-  public static int staticNextIntFromTo(int from, int to) {
-    synchronized (shared) {
-      return shared.nextIntFromTo(from, to);
-    }
-  }
-
-  /**
-   * Returns a uniformly distributed random number in the closed interval <tt>[from,to]</tt> (including <tt>from</tt>
-   * and <tt>to</tt>). Pre conditions: <tt>from &lt;= to</tt>.
-   */
-  public static long staticNextLongFromTo(long from, long to) {
-    synchronized (shared) {
-      return shared.nextLongFromTo(from, to);
-    }
-  }
 
   /** Returns a String representation of the receiver. */
   public String toString() {

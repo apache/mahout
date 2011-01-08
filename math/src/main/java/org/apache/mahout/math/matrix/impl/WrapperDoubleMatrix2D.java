@@ -371,42 +371,4 @@ class WrapperDoubleMatrix2D extends DoubleMatrix2D {
     throw new UnsupportedOperationException(); // should never be called
   }
 
-  /**
-   * Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell. More
-   * specifically, the view has <tt>this.rows()/rowStride</tt> rows and <tt>this.columns()/columnStride</tt> columns
-   * holding cells <tt>this.get(i*rowStride,j*columnStride)</tt> for all <tt>i = 0..rows()/rowStride - 1, j =
-   * 0..columns()/columnStride - 1</tt>. The returned view is backed by this matrix, so changes in the returned view are
-   * reflected in this matrix, and vice-versa.
-   *
-   * @param theRowStride    the row step factor.
-   * @param theColumnStride the column step factor.
-   * @return a new view.
-   * @throws IndexOutOfBoundsException if <tt>rowStride<=0 || columnStride<=0</tt>.
-   */
-  @Override
-  public DoubleMatrix2D viewStrides(final int theRowStride, final int theColumnStride) {
-    if (theRowStride <= 0 || theColumnStride <= 0) {
-      throw new IndexOutOfBoundsException("illegal stride");
-    }
-    DoubleMatrix2D view = new WrapperDoubleMatrix2D(this) {
-      @Override
-      public double getQuick(int row, int column) {
-        return content.get(theRowStride * row, theColumnStride * column);
-      }
-
-      @Override
-      public void setQuick(int row, int column, double value) {
-        content.set(theRowStride * row, theColumnStride * column, value);
-      }
-    };
-    view.rows = rows;
-    view.columns = columns;
-    if (rows != 0) {
-      view.rows = (rows - 1) / theRowStride + 1;
-    }
-    if (columns != 0) {
-      view.columns = (columns - 1) / theColumnStride + 1;
-    }
-    return view;
-  }
 }

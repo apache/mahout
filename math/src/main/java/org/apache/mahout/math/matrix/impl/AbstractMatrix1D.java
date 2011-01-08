@@ -26,11 +26,8 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
 
   /** the number of cells this matrix (view) has */
   protected int size;
-
-
   /** the index of the first element */
   protected int zero;
-
   /** the number of indexes between any two elements, i.e. <tt>index(i+1) - index(i)</tt>. */
   protected int stride;
 
@@ -73,20 +70,6 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
   }
 
   /**
-   * Checks whether indexes are legal and throws an exception, if necessary.
-   *
-   * @throws IndexOutOfBoundsException if <tt>! (0 <= indexes[i] < size())</tt> for any i=0..indexes.length()-1.
-   */
-  protected void checkIndexes(int[] indexes) {
-    for (int i = indexes.length; --i >= 0;) {
-      int index = indexes[i];
-      if (index < 0 || index >= size) {
-        checkIndex(index);
-      }
-    }
-  }
-
-  /**
    * Checks whether the receiver contains the given range and throws an exception, if necessary.
    *
    * @throws IndexOutOfBoundsException if <tt>index<0 || index+width>size()</tt>.
@@ -94,17 +77,6 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
   protected void checkRange(int index, int width) {
     if (index < 0 || index + width > size) {
       throw new IndexOutOfBoundsException("index: " + index + ", width: " + width + ", size=" + size);
-    }
-  }
-
-  /**
-   * Sanity check for operations requiring two matrices with the same size.
-   *
-   * @throws IllegalArgumentException if <tt>size() != b.size()</tt>.
-   */
-  protected void checkSize(double[] b) {
-    if (size != b.length) {
-      throw new IllegalArgumentException("Incompatible sizes: " + size + " and " + b.length);
     }
   }
 
@@ -178,19 +150,6 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
   }
 
   /**
-   * Self modifying version of viewFlip(). What used to be index <tt>0</tt> is now index <tt>size()-1</tt>, ..., what
-   * used to be index <tt>size()-1</tt> is now index <tt>0</tt>.
-   */
-  protected AbstractMatrix1D vFlip() {
-    if (size > 0) {
-      this.zero += (this.size - 1) * this.stride;
-      this.stride = -this.stride;
-      this.isNoView = false;
-    }
-    return this;
-  }
-
-  /**
    * Self modifying version of viewPart().
    *
    * @throws IndexOutOfBoundsException if <tt>index<0 || index+width>size()</tt>.
@@ -203,20 +162,4 @@ public abstract class AbstractMatrix1D extends AbstractMatrix {
     return this;
   }
 
-  /**
-   * Self modifying version of viewStrides().
-   *
-   * @throws IndexOutOfBoundsException if <tt>stride <= 0</tt>.
-   */
-  protected AbstractMatrix1D vStrides(int stride) {
-    if (stride <= 0) {
-      throw new IndexOutOfBoundsException("illegal stride: " + stride);
-    }
-    this.stride *= stride;
-    if (this.size != 0) {
-      this.size = (this.size - 1) / stride + 1;
-    }
-    this.isNoView = false;
-    return this;
-  }
 }

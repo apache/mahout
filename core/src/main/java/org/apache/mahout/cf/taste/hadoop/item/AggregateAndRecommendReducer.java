@@ -33,7 +33,7 @@ import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.function.UnaryFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
 
 import java.io.IOException;
@@ -100,7 +100,7 @@ public final class AggregateAndRecommendReducer extends
     }
   }
 
-  private static final UnaryFunction ABSOLUTE_VALUES = new UnaryFunction() {
+  private static final DoubleFunction ABSOLUTE_VALUES = new DoubleFunction() {
     @Override
     public double apply(double value) {
       return value < 0 ? value * -1 : value;
@@ -182,12 +182,6 @@ public final class AggregateAndRecommendReducer extends
 
   /**
    * find the top entries in recommendationVector, map them to the real itemIDs and write back the result
-   *
-   * @param userID
-   * @param recommendationVector
-   * @param context
-   * @throws IOException
-   * @throws InterruptedException
    */
   private void writeRecommendedItems(VarLongWritable userID, Vector recommendationVector, Context context)
       throws IOException, InterruptedException {

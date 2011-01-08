@@ -8,6 +8,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
+import java.io.Serializable;
+
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 
 /**
@@ -17,13 +19,8 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
  * m</tt> and <tt>U</tt> is <tt>m x n</tt>. <P> The LU decomposition with pivoting always exists, even if the matrix is
  * singular, so the constructor will never fail.  The primary use of the LU decomposition is in the solution of square
  * systems of simultaneous linear equations.  This will fail if <tt>isNonsingular()</tt> returns false.
- *
- * @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported.
  */
-
-/** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-@Deprecated
-public class LUDecomposition implements java.io.Serializable {
+public final class LUDecomposition implements Serializable {
 
   private final LUDecompositionQuick quick;
 
@@ -45,53 +42,6 @@ public class LUDecomposition implements java.io.Serializable {
    */
   public double det() {
     return quick.det();
-  }
-
-  /**
-   * Returns pivot permutation vector as a one-dimensional double array
-   *
-   * @return (double) piv
-   */
-  /*
-  private double[] getDoublePivot() {
-    return quick.getDoublePivot();
-  }
-   */
-
-  /**
-   * Returns the lower triangular factor, <tt>L</tt>.
-   *
-   * @return <tt>L</tt>
-   */
-  public DoubleMatrix2D getL() {
-    return quick.getL();
-  }
-
-  /**
-   * Returns a copy of the pivot permutation vector.
-   *
-   * @return piv
-   */
-  public int[] getPivot() {
-    return quick.getPivot().clone();
-  }
-
-  /**
-   * Returns the upper triangular factor, <tt>U</tt>.
-   *
-   * @return <tt>U</tt>
-   */
-  public DoubleMatrix2D getU() {
-    return quick.getU();
-  }
-
-  /**
-   * Returns whether the matrix is nonsingular (has an inverse).
-   *
-   * @return true if <tt>U</tt>, and hence <tt>A</tt>, is nonsingular; false otherwise.
-   */
-  public boolean isNonsingular() {
-    return quick.isNonsingular();
   }
 
   /**

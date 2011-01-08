@@ -8,18 +8,17 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
-import org.apache.mahout.math.function.BinaryFunction;
+import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.UnaryFunction;
-import org.apache.mahout.math.function.DoubleProcedure;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix1D;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
-public abstract class DoubleMatrix1D extends AbstractMatrix1D {
+public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneable {
 
   /** Makes this class non instantiable, but still let's others inherit from it. */
   protected DoubleMatrix1D() {
@@ -45,8 +44,8 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @return the aggregated measure.
    * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(BinaryFunction aggr,
-                          UnaryFunction f) {
+  public double aggregate(DoubleDoubleFunction aggr,
+                          DoubleFunction f) {
     if (size == 0) {
       return Double.NaN;
     }
@@ -83,8 +82,8 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @throws IllegalArgumentException if <tt>size() != other.size()</tt>.
    * @see org.apache.mahout.math.function.Functions
    */
-  public double aggregate(DoubleMatrix1D other, BinaryFunction aggr,
-                          BinaryFunction f) {
+  public double aggregate(DoubleMatrix1D other, DoubleDoubleFunction aggr,
+                          DoubleDoubleFunction f) {
     checkSize(other);
     if (size == 0) {
       return Double.NaN;
@@ -102,10 +101,9 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * matrix, and vice-versa.
    *
    * @param values the values to be filled into the cells.
-   * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>values.length != size()</tt>.
    */
-  public DoubleMatrix1D assign(double[] values) {
+  public void assign(double[] values) {
     if (values.length != size) {
       throw new IllegalArgumentException(
           "Must have same number of cells: length=" + values.length + "size()=" + size());
@@ -113,20 +111,17 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
     for (int i = size; --i >= 0;) {
       setQuick(i, values[i]);
     }
-    return this;
   }
 
   /**
    * Sets all cells to the state specified by <tt>value</tt>.
    *
    * @param value the value to be filled into the cells.
-   * @return <tt>this</tt> (for convenience only).
    */
-  public DoubleMatrix1D assign(double value) {
+  public void assign(double value) {
     for (int i = size; --i >= 0;) {
       setQuick(i, value);
     }
-    return this;
   }
 
   /**
@@ -142,14 +137,12 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * For further examples, see the <a href="package-summary.html#FunctionObjects">package doc</a>.
    *
    * @param function a function object taking as argument the current cell's value.
-   * @return <tt>this</tt> (for convenience only).
    * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix1D assign(UnaryFunction function) {
+  public void assign(DoubleFunction function) {
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i)));
     }
-    return this;
   }
 
   /**
@@ -195,7 +188,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @throws IllegalArgumentException if <tt>size() != y.size()</tt>.
    * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix1D assign(DoubleMatrix1D y, BinaryFunction function) {
+  public DoubleMatrix1D assign(DoubleMatrix1D y, DoubleDoubleFunction function) {
     checkSize(y);
     for (int i = size; --i >= 0;) {
       setQuick(i, function.apply(getQuick(i), y.getQuick(i)));
@@ -216,7 +209,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    *
    * // for non-standard functions there is no shortcut:
    * m1.assign(m2,
-   * &nbsp;&nbsp;&nbsp;new BinaryFunction() {
+   * &nbsp;&nbsp;&nbsp;new DoubleDoubleFunction() {
    * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public double apply(double x, double y) { return Math.pow(x,y); }
    * &nbsp;&nbsp;&nbsp;}
    * );
@@ -226,12 +219,11 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @param y        the secondary matrix to operate on.
    * @param function a function object taking as first argument the current cell's value of <tt>this</tt>, and as second
    *                 argument the current cell's value of <tt>y</tt>,
-   * @return <tt>this</tt> (for convenience only).
    * @throws IllegalArgumentException if <tt>size() != y.size()</tt>.
    * @see org.apache.mahout.math.function.Functions
    */
-  public DoubleMatrix1D assign(DoubleMatrix1D y, BinaryFunction function,
-                               IntArrayList nonZeroIndexes) {
+  public void assign(DoubleMatrix1D y, DoubleDoubleFunction function,
+                     IntArrayList nonZeroIndexes) {
     checkSize(y);
     int[] nonZeroElements = nonZeroIndexes.elements();
 
@@ -249,7 +241,7 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
     } else if (function instanceof PlusMult) {
       double multiplicator = ((PlusMult) function).getMultiplicator();
       if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
-        return this;
+        // do nothing
       } else if (multiplicator == 1) { // x[i] = x[i] + y[i]
         for (int index = nonZeroIndexes.size(); --index >= 0;) {
           int i = nonZeroElements[index];
@@ -267,9 +259,8 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
         }
       }
     } else { // the general case x[i] = f(x[i],y[i])
-      return assign(y, function);
+      assign(y, function);
     }
-    return this;
   }
 
   /** Returns the number of cells having non-zero values; ignores tolerance. */
@@ -598,18 +589,11 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
    * @return a new view of the receiver.
    */
   protected DoubleMatrix1D view() {
-    return (DoubleMatrix1D) clone();
-  }
-
-  /**
-   * Constructs and returns a new <i>flip view</i>. What used to be index <tt>0</tt> is now index <tt>size()-1</tt>,
-   * ..., what used to be index <tt>size()-1</tt> is now index <tt>0</tt>. The returned view is backed by this matrix,
-   * so changes in the returned view are reflected in this matrix, and vice-versa.
-   *
-   * @return a new flip view.
-   */
-  public DoubleMatrix1D viewFlip() {
-    return (DoubleMatrix1D) (view().vFlip());
+    try {
+      return (DoubleMatrix1D) clone();
+    } catch (CloneNotSupportedException cnse) {
+      throw new IllegalStateException();
+    }
   }
 
   /**
@@ -633,92 +617,12 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D {
   }
 
   /**
-   * Constructs and returns a new <i>selection view</i> that is a matrix holding the indicated cells. There holds
-   * <tt>view.size() == indexes.length</tt> and <tt>view.get(i) == this.get(indexes[i])</tt>. Indexes can occur multiple
-   * times and can be in arbitrary order. <p> <b>Example:</b> <br>
-   * <pre>
-   * this     = (0,0,8,0,7)
-   * indexes  = (0,2,4,2)
-   * -->
-   * view     = (0,8,7,8)
-   * </pre>
-   * Note that modifying <tt>indexes</tt> after this call has returned has no effect on the view. The returned view is
-   * backed by this matrix, so changes in the returned view are reflected in this matrix, and vice-versa.
-   *
-   * @param indexes The indexes of the cells that shall be visible in the new view. To indicate that <i>all</i> cells
-   *                shall be visible, simply set this parameter to <tt>null</tt>.
-   * @return the new view.
-   * @throws IndexOutOfBoundsException if <tt>!(0 <= indexes[i] < size())</tt> for any <tt>i=0..indexes.length()-1</tt>.
-   */
-  public DoubleMatrix1D viewSelection(int[] indexes) {
-    // check for "all"
-    if (indexes == null) {
-      indexes = new int[size];
-      for (int i = size; --i >= 0;) {
-        indexes[i] = i;
-      }
-    }
-
-    checkIndexes(indexes);
-    int[] offsets = new int[indexes.length];
-    for (int i = indexes.length; --i >= 0;) {
-      offsets[i] = index(indexes[i]);
-    }
-    return viewSelectionLike(offsets);
-  }
-
-  /**
-   * Constructs and returns a new <i>selection view</i> that is a matrix holding the cells matching the given condition.
-   * Applies the condition to each cell and takes only those cells where <tt>condition.apply(get(i))</tt> yields
-   * <tt>true</tt>. <p> <b>Example:</b> <br>
-   * <pre>
-   * // extract and view all cells with even value
-   * matrix = 0 1 2 3
-   * matrix.viewSelection(
-   * &nbsp;&nbsp;&nbsp;new DoubleProcedure() {
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public final boolean apply(double a) { return a % 2 == 0; }
-   * &nbsp;&nbsp;&nbsp;}
-   * );
-   * -->
-   * matrix ==  0 2
-   * </pre>
-   * For further examples, see the <a href="package-summary.html#FunctionObjects">package doc</a>. The returned view is
-   * backed by this matrix, so changes in the returned view are reflected in this matrix, and vice-versa.
-   *
-   * @param condition The condition to be matched.
-   * @return the new view.
-   */
-  public DoubleMatrix1D viewSelection(DoubleProcedure condition) {
-    IntArrayList matches = new IntArrayList();
-    for (int i = 0; i < size; i++) {
-      if (condition.apply(getQuick(i))) {
-        matches.add(i);
-      }
-    }
-    matches.trimToSize();
-    return viewSelection(matches.elements());
-  }
-
-  /**
    * Construct and returns a new selection view.
    *
    * @param offsets the offsets of the visible elements.
    * @return a new view.
    */
   protected abstract DoubleMatrix1D viewSelectionLike(int[] offsets);
-
-  /**
-   * Constructs and returns a new <i>stride view</i> which is a sub matrix consisting of every i-th cell. More
-   * specifically, the view has size <tt>this.size()/stride</tt> holding cells <tt>this.get(i*stride)</tt> for all <tt>i
-   * = 0..size()/stride - 1</tt>.
-   *
-   * @param stride the step factor.
-   * @return the new view.
-   * @throws IndexOutOfBoundsException if <tt>stride <= 0</tt>.
-   */
-  public DoubleMatrix1D viewStrides(int stride) {
-    return (DoubleMatrix1D) (view().vStrides(stride));
-  }
 
   /**
    * Returns the dot product of two vectors x and y, which is <tt>Sum(x[i]*y[i])</tt>. Where <tt>x == this</tt>.

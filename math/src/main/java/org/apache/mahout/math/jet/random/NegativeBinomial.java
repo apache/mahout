@@ -31,13 +31,13 @@ import org.apache.mahout.math.jet.stat.Probability;
 import java.util.Random;
 
 /** Mostly deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
-public class NegativeBinomial extends AbstractDiscreteDistribution {
+public final class NegativeBinomial extends AbstractDiscreteDistribution {
 
-  private int r;
-  private double p;
+  private final int r;
+  private final double p;
 
-  private Gamma gamma;
-  private Poisson poisson;
+  private final Gamma gamma;
+  private final Poisson poisson;
 
   /**
    * Constructs a Negative Binomial distribution which describes the probability of getting
@@ -70,27 +70,6 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
     return Arithmetic.binomial(k + r - 1, r - 1) * Math.pow(p, r) * Math.pow(1.0 - p, k);
   }
 
-  /**
-   * Returns a deep copy of the receiver; the copy will produce identical sequences. After this call has returned, the
-   * copy and the receiver have equal but separate state.
-   *
-   * @return a copy of the receiver.
-   */
-  @Deprecated
-  @Override
-  public Object clone() {
-    NegativeBinomial copy = (NegativeBinomial) super.clone();
-    if (this.poisson != null) {
-      copy.poisson = (Poisson) this.poisson.clone();
-    }
-    copy.poisson.setRandomGenerator(copy.getRandomGenerator());
-    if (this.gamma != null) {
-      copy.gamma = (Gamma) this.gamma.clone();
-    }
-    copy.gamma.setRandomGenerator(copy.getRandomGenerator());
-    return copy;
-  }
-
   @Override
   public int nextInt() {
     return nextInt(r, p);
@@ -114,17 +93,6 @@ public class NegativeBinomial extends AbstractDiscreteDistribution {
    */
   public int nextInt(int r, double p) {
     return this.poisson.nextInt(gamma.nextDouble(r, p / (1.0 - p)));
-  }
-
-  /**
-   * Sets the parameters number of trials and the probability of success.
-   *
-   * @param r the number of trials
-   * @param p the probability of success.
-   */
-  public void setRandP(int r, double p) {
-    this.r = r;
-    this.p = p;
   }
 
   /**

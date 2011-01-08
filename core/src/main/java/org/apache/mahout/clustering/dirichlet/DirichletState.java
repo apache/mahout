@@ -104,7 +104,7 @@ public class DirichletState {
    * Update the receiver with the new models
    * 
    * @param newModels
-   *          a Model<Observation>[] of new models
+   *          a Model[] of new models
    */
   public void update(Cluster[] newModels) {
     // compute new model parameters based upon observations and update models
@@ -131,7 +131,6 @@ public class DirichletState {
     return mix * pdf;
   }
   
-  @SuppressWarnings("unchecked")
   public Model<VectorWritable>[] getModels() {
     Model<VectorWritable>[] result = new Model[numClusters];
     for (int i = 0; i < numClusters; i++) {

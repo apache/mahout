@@ -38,12 +38,12 @@ import java.util.Map;
 
 public final class TestDistributedRowMatrix extends MahoutTestCase {
 
-  public static void assertEquals(VectorIterable m, VectorIterable mtt, double errorTolerance) {
+  private static void assertEquals(VectorIterable m, VectorIterable mtt, double errorTolerance) {
     Iterator<MatrixSlice> mIt = m.iterateAll();
     Iterator<MatrixSlice> mttIt = mtt.iterateAll();
     Map<Integer, Vector> mMap = new HashMap<Integer,Vector>();
     Map<Integer, Vector> mttMap = new HashMap<Integer, Vector>();
-    while(mIt.hasNext() && mttIt.hasNext()) {
+    while (mIt.hasNext() && mttIt.hasNext()) {
       MatrixSlice ms = mIt.next();
       mMap.put(ms.index(), ms.vector());
       MatrixSlice mtts = mttIt.next();

@@ -27,7 +27,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.CardinalityException;
 import org.apache.mahout.math.MatrixSlice;
