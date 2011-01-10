@@ -368,7 +368,9 @@ public class FileDataModel extends AbstractDataModel {
       return;
     }
 
-    String[] tokens = delimiterPattern.split(line);
+    // Consume up to 4 tokens, and gather whatever is left in an unused 5th token:
+    String[] tokens = delimiterPattern.split(line, 5);
+
     Preconditions.checkArgument(tokens.length >= 3, "Bad line: %s", line);
 
     String userIDString = tokens[0];
