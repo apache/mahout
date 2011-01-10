@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile.Writer;
@@ -44,8 +43,6 @@ public class KMeansClusterer {
   /** Distance to use for point to cluster comparison. */
   private final DistanceMeasure measure;
 
-  private final double convergenceDelta;
-
   /**
    * Init the k-means clusterer with the distance measure to use for comparison.
    * 
@@ -55,17 +52,6 @@ public class KMeansClusterer {
    */
   public KMeansClusterer(DistanceMeasure measure) {
     this.measure = measure;
-    this.convergenceDelta = 0;
-  }
-
-  public KMeansClusterer(Configuration conf)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    this.measure = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY))
-        .asSubclass(DistanceMeasure.class).newInstance();
-    this.measure.configure(conf);
-
-    this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
   }
 
   /**
@@ -121,7 +107,7 @@ public class KMeansClusterer {
   protected boolean testConvergence(Iterable<Cluster> clusters, double distanceThreshold) {
     boolean converged = true;
     for (Cluster cluster : clusters) {
-      if (!computeConvergence(cluster)) {
+      if (!computeConvergence(cluster, distanceThreshold)) {
         converged = false;
       }
       cluster.computeParameters();
@@ -232,8 +218,8 @@ public class KMeansClusterer {
     return clusterer.testConvergence(clusters, distanceThreshold);
   }
 
-  public boolean computeConvergence(Cluster cluster) {
-    return cluster.computeConvergence(measure, convergenceDelta);
+  public boolean computeConvergence(Cluster cluster, double distanceThreshold) {
+    return cluster.computeConvergence(measure, distanceThreshold);
   }
 
 }

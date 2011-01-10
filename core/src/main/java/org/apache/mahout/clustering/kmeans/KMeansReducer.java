@@ -32,17 +32,18 @@ import org.apache.mahout.common.distance.DistanceMeasure;
 public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Cluster> {
 
   private Map<String, Cluster> clusterMap;
-
+  private double convergenceDelta;
   private KMeansClusterer clusterer;
 
   @Override
-  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<ClusterObservations> values, Context context)
+    throws IOException, InterruptedException {
     Cluster cluster = clusterMap.get(key.toString());
     for (ClusterObservations delta : values) {
       cluster.observe(delta);
     }
     // force convergence calculation
-    boolean converged = clusterer.computeConvergence(cluster);
+    boolean converged = clusterer.computeConvergence(cluster, convergenceDelta);
     if (converged) {
       context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
@@ -55,7 +56,13 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
     super.setup(context);
     Configuration conf = context.getConfiguration();
     try {
-      this.clusterer = new KMeansClusterer(conf);
+      ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+      DistanceMeasure measure = ccl.loadClass(conf.get(KMeansConfigKeys.DISTANCE_MEASURE_KEY))
+          .asSubclass(DistanceMeasure.class).newInstance();
+      measure.configure(conf);
+
+      this.convergenceDelta = Double.parseDouble(conf.get(KMeansConfigKeys.CLUSTER_CONVERGENCE_KEY));
+      this.clusterer = new KMeansClusterer(measure);
       this.clusterMap = new HashMap<String, Cluster>();
 
       String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
