@@ -110,7 +110,8 @@ public final class Classify {
     BayesParameters params = new BayesParameters();
     params.setGramSize(gramSize);
     String modelBasePath = (String) cmdLine.getValue(pathOpt);
-    
+    params.setBasePath(modelBasePath);
+
     log.info("Loading model from: {}", params.print());
     
     Algorithm algorithm;
@@ -136,11 +137,11 @@ public final class Classify {
       if ("bayes".equalsIgnoreCase(classifierType)) {
         log.info("Using Bayes Classifier");
         algorithm = new BayesAlgorithm();
-        datastore = new HBaseBayesDatastore(modelBasePath, params);
+        datastore = new HBaseBayesDatastore(params);
       } else if ("cbayes".equalsIgnoreCase(classifierType)) {
         log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
-        datastore = new HBaseBayesDatastore(modelBasePath, params);
+        datastore = new HBaseBayesDatastore(params);
       } else {
         throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
       }

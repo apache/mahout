@@ -29,7 +29,7 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.mahout.common.Parameters;
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.common.StringTuple;
 
 import com.google.common.base.Preconditions;
@@ -39,9 +39,6 @@ public class BayesFeatureReducer extends MapReduceBase implements
     Reducer<StringTuple,DoubleWritable,StringTuple,DoubleWritable> {
   
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureReducer.class);
-  
-  private static final String DEFAULT_MIN_SUPPORT = "-1";
-  private static final String DEFAULT_MIN_DF = "-1";
   
   private double minSupport = -1;  
   private double minDf      = -1;
@@ -112,10 +109,10 @@ public class BayesFeatureReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      BayesParameters params = new BayesParameters(job.get("bayes.parameters", ""));
       log.info("Bayes Parameter {}", params.print());
-      minSupport = Integer.valueOf(params.get("minSupport", DEFAULT_MIN_SUPPORT));
-      minDf      = Integer.valueOf(params.get("minDf", DEFAULT_MIN_DF));
+      minSupport = params.getMinSupport();
+      minDf      = params.getMinDF();
     } catch (IOException ex) {
       log.warn(ex.toString(), ex);
     }

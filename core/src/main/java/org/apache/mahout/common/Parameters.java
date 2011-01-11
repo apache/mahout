@@ -32,17 +32,19 @@ public class Parameters {
   private static final Logger log = LoggerFactory.getLogger(Parameters.class);
   
   private Map<String,String> params = new HashMap<String,String>();
-  
-  // private Configuration conf = new Configuration();
-  
+
   public Parameters() {
 
   }
-  
-  private Parameters(Map<String,String> params) {
+
+  public Parameters(String serializedString) throws IOException {
+    this(parseParams(serializedString));
+  }
+
+  protected Parameters(Map<String,String> params) {
     this.params = params;
   }
-  
+
   public String get(String key) {
     return params.get(key);
   }
@@ -59,9 +61,9 @@ public class Parameters {
   @Override
   public String toString() {
     Configuration conf = new Configuration();
-    conf
-        .set("io.serializations",
-          "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,"
+             + "org.apache.hadoop.io.serializer.WritableSerialization");
     DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<Map<String,String>>(conf,
         GenericsUtil.getClass(params));
     try {
@@ -76,16 +78,16 @@ public class Parameters {
   public String print() {
     return params.toString();
   }
-  
-  public static Parameters fromString(String serializedString) throws IOException {
+
+  public static Map<String,String> parseParams(String serializedString) throws IOException {
     Configuration conf = new Configuration();
-    conf
-        .set("io.serializations",
-          "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,"
+             + "org.apache.hadoop.io.serializer.WritableSerialization");
     Map<String,String> params = new HashMap<String,String>();
     DefaultStringifier<Map<String,String>> mapStringifier = new DefaultStringifier<Map<String,String>>(conf,
         GenericsUtil.getClass(params));
-    params = mapStringifier.fromString(serializedString);
-    return new Parameters(params);
+    return mapStringifier.fromString(serializedString);
   }
+
 }

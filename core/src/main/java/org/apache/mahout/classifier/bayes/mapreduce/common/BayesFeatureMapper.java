@@ -32,7 +32,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
-import org.apache.mahout.common.Parameters;
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.common.StringTuple;
 import org.apache.mahout.common.iterator.ArrayIterator;
 import org.apache.mahout.math.function.ObjectIntProcedure;
@@ -170,9 +170,9 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      BayesParameters params = new BayesParameters(job.get("bayes.parameters", ""));
       log.info("Bayes Parameter {}", params.print());
-      gramSize = Integer.valueOf(params.get("gramSize"));
+      gramSize = params.getGramSize();
       
     } catch (IOException ex) {
       log.warn(ex.toString(), ex);

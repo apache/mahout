@@ -30,6 +30,7 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.mapreduce.common.BayesConstants;
@@ -67,8 +68,8 @@ public class HBaseBayesDatastore implements Datastore {
   
   private double sigmaJSigmaK = -1.0;
   
-  public HBaseBayesDatastore(String hbaseTable, Parameters params) {
-    this.hbaseTable = hbaseTable;
+  public HBaseBayesDatastore(BayesParameters params) {
+    this.hbaseTable = params.getBasePath();
     this.parameters = params;
     this.tableCache = new HybridCache<String,Result>(50000, 100000);
     alphaI = Double.valueOf(parameters.get("alpha_i", "1.0"));

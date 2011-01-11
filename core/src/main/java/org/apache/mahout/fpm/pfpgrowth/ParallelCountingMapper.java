@@ -54,7 +54,7 @@ public class ParallelCountingMapper extends Mapper<LongWritable,Text,Text,LongWr
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
+    Parameters params = new Parameters(context.getConfiguration().get(PFPGrowth.PFP_PARAMETERS, ""));
     splitter = Pattern.compile(params.get(PFPGrowth.SPLIT_PATTERN, PFPGrowth.SPLITTER.toString()));
   }
 }

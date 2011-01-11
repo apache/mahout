@@ -17,26 +17,64 @@
 
 package org.apache.mahout.classifier.bayes.common;
 
+import java.io.IOException;
+
 import org.apache.mahout.common.Parameters;
 
 /**
  * BayesParameter used for passing parameters to the Map/Reduce Jobs parameters include gramSize,
  */
-public class BayesParameters extends Parameters {
+public final class BayesParameters extends Parameters {
+
+  private static final String DEFAULT_MIN_SUPPORT = "-1";
+  private static final String DEFAULT_MIN_DF = "-1";
+
+  public BayesParameters() {
+
+  }
+
+  public BayesParameters(String serializedString) throws IOException {
+    super(parseParams(serializedString));
+  }
+
+  public int getGramSize() {
+    return Integer.parseInt(get("gramSize"));
+  }
 
   public void setGramSize(int gramSize) {
     set("gramSize", Integer.toString(gramSize));
+  }
+
+  public int getMinSupport() {
+    return Integer.parseInt(get("minSupport", DEFAULT_MIN_SUPPORT));
   }
   
   public void setMinSupport(int minSupport) {
     set("minSupport", Integer.toString(minSupport));
   }
+
+  public int getMinDF() {
+    return Integer.parseInt(get("minDf", DEFAULT_MIN_DF));
+  }
   
   public void setMinDF(int minDf) {
     set("minDf", Integer.toString(minDf)); 
+  }
+
+  public boolean isSkipCleanup() {
+    return Boolean.parseBoolean(get("skipCleanup", "false"));
   }
   
   public void setSkipCleanup(boolean b) {
     set("skipCleanup", Boolean.toString(b));
   }
+
+  public String getBasePath() {
+    return get("basePath");
+  }
+
+  public void setBasePath(String basePath) {
+    set("basePath", basePath);
+  }
+
 }

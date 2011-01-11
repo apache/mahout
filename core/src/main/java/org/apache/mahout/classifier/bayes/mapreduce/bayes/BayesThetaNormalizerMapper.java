@@ -97,7 +97,7 @@ public class BayesThetaNormalizerMapper extends MapReduceBase implements
       vocabCountString = job.get("cnaivebayes.vocabCount", vocabCountString);
       vocabCount = stringifier.fromString(vocabCountString);
       
-      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      Parameters params = new Parameters(job.get("bayes.parameters", ""));
       alphaI = Double.valueOf(params.get("alpha_i", "1.0"));
       
     } catch (IOException ex) {

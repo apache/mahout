@@ -49,7 +49,7 @@ public class AggregatorReducer extends Reducer<Text,TopKStringPatterns,Text,TopK
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("pfp.parameters", ""));
+    Parameters params = new Parameters(context.getConfiguration().get("pfp.parameters", ""));
     maxHeapSize = Integer.valueOf(params.get("maxHeapSize", "50"));
     
   }

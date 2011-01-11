@@ -174,7 +174,7 @@ public final class TestClassifier {
       
       params.setGramSize(gramSize);
       params.set("verbose", Boolean.toString(verbose));
-      params.set("basePath", modelBasePath);
+      params.setBasePath(modelBasePath);
       params.set("classifierType", classifierType);
       params.set("dataSource", dataSource);
       params.set("defaultCat", defaultCat);
@@ -223,11 +223,11 @@ public final class TestClassifier {
       if (params.get("classifierType").equalsIgnoreCase("bayes")) {
         log.info("Testing Bayes Classifier");
         algorithm = new BayesAlgorithm();
-        datastore = new HBaseBayesDatastore(params.get("basePath"), params);
+        datastore = new HBaseBayesDatastore(params);
       } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
         log.info("Testing Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
-        datastore = new HBaseBayesDatastore(params.get("basePath"), params);
+        datastore = new HBaseBayesDatastore(params);
       } else {
         throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
       }

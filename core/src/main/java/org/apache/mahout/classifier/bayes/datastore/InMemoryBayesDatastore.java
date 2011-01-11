@@ -23,10 +23,10 @@ import java.util.Collection;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
 import org.apache.mahout.classifier.bayes.io.SequenceFileModelReader;
-import org.apache.mahout.common.Parameters;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
@@ -54,7 +54,7 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private final Matrix weightMatrix = new SparseMatrix(new int[] {1, 0});
   
-  private final Parameters params;
+  private final BayesParameters params;
   
   private double thetaNormalizer = 1.0;
   
@@ -62,8 +62,8 @@ public class InMemoryBayesDatastore implements Datastore {
   
   private double sigmaJsigmaK = 1.0;
   
-  public InMemoryBayesDatastore(Parameters params) {
-    String basePath = params.get("basePath");
+  public InMemoryBayesDatastore(BayesParameters params) {
+    String basePath = params.getBasePath();
     this.params = params;
     params.set("sigma_j", basePath + "/trainer-weights/Sigma_j/part-*");
     params.set("sigma_k", basePath + "/trainer-weights/Sigma_k/part-*");
@@ -76,7 +76,7 @@ public class InMemoryBayesDatastore implements Datastore {
   @Override
   public void initialize() throws InvalidDatastoreException {
     Configuration conf = new Configuration();
-    String basePath = params.get("basePath");
+    String basePath = params.getBasePath();
     try {
       SequenceFileModelReader.loadModel(this, FileSystem.get(new Path(basePath).toUri(), conf), params, conf);
     } catch (IOException e) {

@@ -71,7 +71,7 @@ public class KeyBasedStringTupleMapper extends Mapper<LongWritable,Text,Text,Str
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("job.parameters", ""));
+    Parameters params = new Parameters(context.getConfiguration().get("job.parameters", ""));
     splitter = Pattern.compile(params.get("splitPattern", "[ \t]*\t[ \t]*"));
     
     int selectedFieldCount = Integer.valueOf(params.get("selectedFieldCount", "0"));

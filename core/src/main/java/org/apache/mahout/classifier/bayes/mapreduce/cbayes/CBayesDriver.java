@@ -59,7 +59,7 @@ public class CBayesDriver implements BayesJob {
     CBayesThetaNormalizerDriver normalizer = new CBayesThetaNormalizerDriver();
     normalizer.runJob(input, output, params);
     
-    if (Boolean.parseBoolean(params.get("skipCleanup"))) {
+    if (params.isSkipCleanup()) {
       return;
     }
     

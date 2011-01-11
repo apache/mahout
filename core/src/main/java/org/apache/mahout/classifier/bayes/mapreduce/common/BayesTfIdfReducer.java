@@ -99,7 +99,7 @@ public class BayesTfIdfReducer extends MapReduceBase implements
   @Override
   public void configure(JobConf job) {
     try {
-      Parameters params = Parameters.fromString(job.get("bayes.parameters", ""));
+      Parameters params = new Parameters(job.get("bayes.parameters", ""));
       if (params.get("dataSource").equals("hbase")) {
         useHbase = true;
       } else {

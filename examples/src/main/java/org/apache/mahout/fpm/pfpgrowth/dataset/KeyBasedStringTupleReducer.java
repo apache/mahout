@@ -31,8 +31,8 @@ public class KeyBasedStringTupleReducer extends Reducer<Text,StringTuple,Text,Te
   private int maxTransactionLength = 100;
   
   @Override
-  protected void reduce(Text key, Iterable<StringTuple> values, Context context) throws IOException,
-                                                                                InterruptedException {
+  protected void reduce(Text key, Iterable<StringTuple> values, Context context)
+    throws IOException, InterruptedException {
     Collection<String> items = new HashSet<String>();
     
     for (StringTuple value : values) {
@@ -68,7 +68,7 @@ public class KeyBasedStringTupleReducer extends Reducer<Text,StringTuple,Text,Te
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    Parameters params = Parameters.fromString(context.getConfiguration().get("job.parameters", ""));
+    Parameters params = new Parameters(context.getConfiguration().get("job.parameters", ""));
     maxTransactionLength = Integer.valueOf(params.get("maxTransactionLength", "100"));
   }
 }
