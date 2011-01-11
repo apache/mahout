@@ -186,4 +186,15 @@ public final class FileDataModelTest extends TasteTestCase {
     assertTrue(model.toString().length() > 0);
   }
 
+  @Test
+  public void testEmptyFile() throws Exception {
+    File file = getTestTempFile("empty");
+    writeLines(file, new String[0]); //required to create file.
+    try {
+      new FileDataModel(file);
+      fail("Should throw an IllegalArgumentException");
+    } catch (IllegalArgumentException iae) {
+      // good
+    }
+  }
 }
