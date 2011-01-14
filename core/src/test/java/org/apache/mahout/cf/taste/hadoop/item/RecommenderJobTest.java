@@ -687,7 +687,7 @@ public class RecommenderJobTest extends TasteTestCase {
    *  Prediction(cow, burger)     = (0.25 * 5 + 0.5 * 3) / (0.25 + 0.5)                     ~ 3,7
    *  Prediction(cow, berries)    = (0.33 * 5 + 0.25 * 3) / (0.33 + 0.25)                   ~ 4,1
    *  Prediction(donkey, hotdog)  = (0.25 * 3 + 0.25 * 5) / (0.25 + 0.25)                   ~ 4
-   *  Prediction(donkey, berries) = (0.66 * 3 + 0.25 * 5) / (0.66 + 0.25)                   ~ 3,6
+   *  Prediction(donkey, berries) = (0.66 * 3 + 0.25 * 5) / (0.66 + 0.25)                   ~ 3,5
    *
    * </pre>
    */
@@ -721,7 +721,7 @@ public class RecommenderJobTest extends TasteTestCase {
     recommenderJob.setConf(conf);
 
     recommenderJob.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--similarityClassname",
-       DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--numRecommendations", "1" });
+       DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--numRecommendations", "4" });
 
     Map<Long,List<RecommendedItem>> recommendations = readRecommendations(new File(outputDir, "part-r-00000"));
 
@@ -731,24 +731,33 @@ public class RecommenderJobTest extends TasteTestCase {
       long userID = entry.getKey();
       List<RecommendedItem> items = entry.getValue();
       assertNotNull(items);
-      assertEquals(1, items.size());
-      RecommendedItem item = items.get(0);
+      RecommendedItem item1 = items.get(0);
 
       if (userID == 1L) {
-        assertEquals(4L, item.getItemID());
-        assertEquals(4.3, item.getValue(), 0.05);
+        assertEquals(1, items.size());
+        assertEquals(4L, item1.getItemID());
+        assertEquals(4.3, item1.getValue(), 0.05);
       }
       if (userID == 2L) {
-        assertEquals(2L, item.getItemID());
-        assertEquals(3.3, item.getValue(), 0.05);
+        assertEquals(1, items.size());
+        assertEquals(2L, item1.getItemID());
+        assertEquals(3.3, item1.getValue(), 0.05);
       }
       if (userID == 3L) {
-        assertEquals(3L, item.getItemID());
-        assertEquals(4.1, item.getValue(), 0.05);
+        assertEquals(2, items.size());
+        assertEquals(3L, item1.getItemID());
+        assertEquals(4.1, item1.getValue(), 0.05);
+        RecommendedItem item2 = items.get(1);
+        assertEquals(1L, item2.getItemID());
+        assertEquals(3.7, item2.getValue(), 0.05);
       }
       if (userID == 4L) {
-        assertEquals(2L, item.getItemID());
-        assertEquals(4.0, item.getValue(), 0.05);
+        assertEquals(2, items.size());
+        assertEquals(2L, item1.getItemID());
+        assertEquals(4.0, item1.getValue(), 0.05);
+        RecommendedItem item2 = items.get(1);
+        assertEquals(3L, item2.getItemID());
+        assertEquals(3.5, item2.getValue(), 0.05);
       }
     }
   }
