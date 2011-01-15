@@ -28,6 +28,7 @@ import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.conversion.InputDriver;
 import org.apache.mahout.clustering.kmeans.KMeansDriver;
+import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -55,7 +56,7 @@ public final class Job extends AbstractJob {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.overwriteOutput(output);
-      new Job().run(new Configuration(), new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55, 0.5, 10);
+      new Job().run(new Configuration(), new Path("testdata"), output, new EuclideanDistanceMeasure(), 6, 0.5, 10);
     }
   }
 
@@ -65,6 +66,7 @@ public final class Job extends AbstractJob {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.distanceMeasureOption().create());
+    addOption(DefaultOptionCreator.numClustersOption().create());
     addOption(DefaultOptionCreator.t1Option().create());
     addOption(DefaultOptionCreator.t2Option().create());
     addOption(DefaultOptionCreator.convergenceOption().create());
@@ -90,10 +92,65 @@ public final class Job extends AbstractJob {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = ccl.loadClass(measureClass);
     DistanceMeasure measure = (DistanceMeasure) cl.newInstance();
-    double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
-    double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
-    run(getConf(), input, output, measure, t1, t2, convergenceDelta, maxIterations);
+    if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
+      int k = Integer.parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION));
+      run(getConf(), input, output, measure, k, convergenceDelta, maxIterations);
+    } else {
+      double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
+      double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
+      run(getConf(), input, output, measure, t1, t2, convergenceDelta, maxIterations);
+    }
     return 0;
+  }
+  
+  /**
+   * Run the kmeans clustering job on an input dataset using the given the number of clusters k and iteration
+   * parameters. All output data will be written to the output directory, which will be initially deleted if
+   * it exists. The clustered points will reside in the path <output>/clustered-points. By default, the job
+   * expects a file containing equal length space delimited data that resides in a directory named
+   * "testdata", and writes output to a directory named "output".
+   * @param conf the Configuration to use
+   * @param input
+   *          the String denoting the input directory path
+   * @param output
+   *          the String denoting the output directory path
+   * @param measure
+   *          the DistanceMeasure to use
+   * @param k 
+   *          the number of clusters in Kmeans
+   * @param convergenceDelta
+   *          the double convergence criteria for iterations
+   * @param maxIterations
+   *          the int maximum number of iterations
+   */
+  public void run(Configuration conf,
+                  Path input,
+                  Path output,
+                  DistanceMeasure measure,
+                  int k,
+                  double convergenceDelta,
+                  int maxIterations)
+    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+    Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
+    log.info("Preparing Input");
+    InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
+    log.info("Running random seed to get initial clusters");
+    Path clusters= new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
+    clusters = RandomSeedGenerator.buildRandom(directoryContainingConvertedInput, clusters, k, measure);
+    log.info("Running KMeans");
+    KMeansDriver.run(conf,
+                     directoryContainingConvertedInput,
+                     clusters,
+                     output,
+                     measure,
+                     convergenceDelta,
+                     maxIterations,
+                     true,
+                     false);
+    // run ClusterDumper
+    ClusterDumper clusterDumper =
+        new ClusterDumper(finalClusterPath(conf, output, maxIterations), new Path(output, "clusteredPoints"));
+    clusterDumper.printClusters(null);
   }
 
   /**
