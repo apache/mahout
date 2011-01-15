@@ -144,6 +144,16 @@ public class DenseVector extends AbstractVector {
     return this;
   }
 
+  public Vector assign(DenseVector vector) {
+    // make sure the data field has the correct length
+    if (vector.values.length != this.values.length) {
+      this.values = new double[vector.values.length];
+    }
+    // now copy the values
+    System.arraycopy(vector.values, 0, this.values, 0, this.values.length);
+    return this;
+  }
+
   public int getNumNondefaultElements() {
     return values.length;
   }

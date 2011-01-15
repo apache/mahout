@@ -21,7 +21,8 @@ import java.util.Arrays;
 
 /** Matrix of doubles implemented using a 2-d array */
 public class DenseMatrix extends AbstractMatrix {
-  protected double[][] values;
+
+  private double[][] values;
 
   public DenseMatrix() {
   }
@@ -117,6 +118,18 @@ public class DenseMatrix extends AbstractMatrix {
   public Matrix assign(double value) {
     for (int row = 0; row < rowSize(); row++) {
       Arrays.fill(values[row], value);
+    }
+    return this;
+  }
+  
+  public Matrix assign(DenseMatrix matrix) {
+    // make sure the data field has the correct length
+    if (matrix.values[0].length != this.values[0].length || matrix.values.length != this.values.length) {
+      this.values = new double[matrix.values.length][matrix.values[0].length];
+    }
+    // now copy the values
+    for (int i = 0; i < this.values.length; i++) {
+      System.arraycopy(matrix.values[i], 0, this.values[i], 0, this.values[0].length);
     }
     return this;
   }
