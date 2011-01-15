@@ -55,20 +55,32 @@ public interface DiffStorage extends Refreshable {
   
   /** @return {@link RunningAverage} encapsulating the average preference for the given item */
   RunningAverage getAverageItemPref(long itemID) throws TasteException;
-  
+
   /**
-   * <p>
-   * Updates internal data structures to reflect an update in a preference value for an item.
-   * </p>
-   * 
-   * @param itemID
-   *          item to update preference value for
-   * @param prefDelta
-   *          amount by which preference value changed (or its old value, if being removed
-   * @param remove
-   *          if <code>true</code>, operation reflects a removal rather than change of preference
+   * <p>Updates internal data structures to reflect a new preference value for an item.</p>
+   *
+   * @param userID user whose pref is being added
+   * @param itemID item to add preference value for
+   * @param prefValue new preference value
    */
-  void updateItemPref(long itemID, float prefDelta, boolean remove) throws TasteException;
+  void addItemPref(long userID, long itemID, float prefValue) throws TasteException;
+
+  /**
+   * <p>Updates internal data structures to reflect an update in a preference value for an item.</p>
+   * 
+   * @param itemID item to update preference value for
+   * @param prefDelta amount by which preference value changed
+   */
+  void updateItemPref(long itemID, float prefDelta) throws TasteException;
+
+  /**
+   * <p>Updates internal data structures to reflect an update in a preference value for an item.</p>
+   *
+   * @param userID user whose pref is being removed
+   * @param itemID item to update preference value for
+   * @param prefValue old preference value
+   */
+  void removeItemPref(long userID, long itemID, float prefValue) throws TasteException;
   
   /**
    * @return item IDs that may possibly be recommended to the given user, which may not be all items since the

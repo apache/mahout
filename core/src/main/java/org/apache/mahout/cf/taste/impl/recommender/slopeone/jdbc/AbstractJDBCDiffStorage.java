@@ -63,12 +63,16 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   public static final String DEFAULT_AVERAGE_DIFF_COLUMN = "average_diff";
   public static final String DEFAULT_STDEV_COLUMN = "standard_deviation";
 
+  private final JDBCDataModel dataModel;
   private final DataSource dataSource;
   private final String getDiffSQL;
   private final String getDiffsSQL;
   private final String getAverageItemPrefSQL;
+  private final String getDiffsAffectedByUserSQL;
   private final String[] updateDiffSQLs;
-  private final String[] removeDiffSQLs;
+  private final String updateOneDiffSQL;
+  private final String addDiffSQL;
+  private final String removeDiffSQL;
   private final String getRecommendableItemsSQL;
   private final String deleteDiffsSQL;
   private final String createDiffsSQL;
@@ -80,8 +84,11 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
                                     String getDiffSQL,
                                     String getDiffsSQL,
                                     String getAverageItemPrefSQL,
+                                    String getDiffsAffectedByUserSQL,
                                     String[] updateDiffSQLs,
-                                    String[] removeDiffSQLs,
+                                    String updateOneDiffSQL,
+                                    String addDiffSQL,
+                                    String removeDiffSQL,
                                     String getRecommendableItemsSQL,
                                     String deleteDiffsSQL,
                                     String createDiffsSQL,
@@ -92,21 +99,28 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     AbstractJDBCComponent.checkNotNullAndLog("getDiffSQL", getDiffSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getDiffsSQL", getDiffsSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getAverageItemPrefSQL", getAverageItemPrefSQL);
+    AbstractJDBCComponent.checkNotNullAndLog("getDiffsAffectedByUserSQL", getDiffsAffectedByUserSQL);
     AbstractJDBCComponent.checkNotNullAndLog("updateDiffSQLs", updateDiffSQLs);
-    AbstractJDBCComponent.checkNotNullAndLog("removeDiffSQLs", removeDiffSQLs);
+    AbstractJDBCComponent.checkNotNullAndLog("updateOneDiffSQL", updateOneDiffSQL);
+    AbstractJDBCComponent.checkNotNullAndLog("addDiffSQL", addDiffSQL);
+    AbstractJDBCComponent.checkNotNullAndLog("removeDiffSQL", removeDiffSQL);
     AbstractJDBCComponent.checkNotNullAndLog("getRecommendableItemsSQL", getRecommendableItemsSQL);
     AbstractJDBCComponent.checkNotNullAndLog("deleteDiffsSQL", deleteDiffsSQL);
     AbstractJDBCComponent.checkNotNullAndLog("createDiffsSQL", createDiffsSQL);
     AbstractJDBCComponent.checkNotNullAndLog("diffsExistSQL", diffsExistSQL);
 
     Preconditions.checkArgument(minDiffCount >= 0, "minDiffCount is not positive");
-    
+
+    this.dataModel = dataModel;
     this.dataSource = dataModel.getDataSource();
     this.getDiffSQL = getDiffSQL;
     this.getDiffsSQL = getDiffsSQL;
     this.getAverageItemPrefSQL = getAverageItemPrefSQL;
+    this.getDiffsAffectedByUserSQL = getDiffsAffectedByUserSQL;
     this.updateDiffSQLs = updateDiffSQLs;
-    this.removeDiffSQLs = removeDiffSQLs;
+    this.updateOneDiffSQL = updateOneDiffSQL;
+    this.addDiffSQL = addDiffSQL;
+    this.removeDiffSQL = removeDiffSQL;
     this.getRecommendableItemsSQL = getRecommendableItemsSQL;
     this.deleteDiffsSQL = deleteDiffsSQL;
     this.createDiffsSQL = createDiffsSQL;
@@ -223,28 +237,167 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
     }
   }
 
+
+  @Override
+  public void addItemPref(long userID, long itemID, float prefValue) throws TasteException {
+
+    PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+    FastIDSet unupdatedItemIDs = new FastIDSet();
+    for (long anItemID : prefs.getIDs()) {
+      unupdatedItemIDs.add(anItemID);
+    }
+
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.prepareStatement(getDiffsAffectedByUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+      stmt.setLong(1, userID);
+      log.debug("Executing SQL query: {}", getDiffsAffectedByUserSQL);
+      rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        int count = rs.getInt(1);
+        float average = rs.getFloat(2);
+        long itemIDA = rs.getLong(3);
+        long itemIDB = rs.getLong(4);
+        float currentOtherPrefValue = rs.getFloat(5);
+        float prefDelta;
+        long otherItemID;
+        if (itemID == itemIDA) {
+          prefDelta = currentOtherPrefValue - prefValue;
+          otherItemID = itemIDB;
+        } else {
+          prefDelta = prefValue - currentOtherPrefValue;
+          otherItemID = itemIDA;
+        }
+        float newAverage = (average * count + prefDelta) / (count + 1);
+        updateOneDiff(conn, count + 1, newAverage, itemIDA, itemIDB);
+        unupdatedItemIDs.remove(otherItemID);
+      }
+
+    } catch (SQLException sqle) {
+      log.warn("Exception while adding item diff", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(rs, stmt, conn);
+    }
+
+    // Catch antyhing that wasn't already covered in the diff table
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.prepareStatement(addDiffSQL);
+      for (long unupdatedItemID : unupdatedItemIDs) {
+        if (unupdatedItemID < itemID) {
+          stmt.setLong(1, unupdatedItemID);
+          stmt.setLong(2, itemID);
+          stmt.setFloat(3, prefValue);
+        } else {
+          stmt.setLong(1, itemID);
+          stmt.setLong(2, unupdatedItemID);
+          stmt.setFloat(3, -prefValue);
+        }
+        log.debug("Executing SQL query: {}", getDiffsAffectedByUserSQL);
+        stmt.executeUpdate();
+      }
+    } catch (SQLException sqle) {
+      log.warn("Exception while adding item diff", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(null, stmt, conn);
+    }
+  }
+
+  private void updateOneDiff(Connection conn, int newCount, float newAverage, long itemIDA, long itemIDB)
+    throws SQLException {
+    PreparedStatement stmt = conn.prepareStatement(updateOneDiffSQL);
+    try {
+      stmt.setInt(1, newCount);
+      stmt.setFloat(2, newAverage);
+      stmt.setLong(3, itemIDA);
+      stmt.setLong(4, itemIDB);
+      log.debug("Executing SQL update: {}", updateOneDiffSQL);
+      stmt.executeUpdate();
+    } finally {
+      IOUtils.quietClose(stmt);
+    }
+  }
+
   /**
    * Note that this implementation does <em>not</em> update standard deviations. This would
    * be expensive relative to the value of slightly adjusting these values, which are merely
    * used as weighted. Rebuilding the diffs table will update standard deviations.
    */
   @Override
-  public void updateItemPref(long itemID, float prefDelta, boolean remove) throws TasteException {
+  public void updateItemPref(long itemID, float prefDelta) throws TasteException {
     Connection conn = null;
     try {
       conn = dataSource.getConnection();
-      if (remove) {
-        doPartialUpdate(removeDiffSQLs[0], itemID, prefDelta, conn);
-        doPartialUpdate(removeDiffSQLs[1], itemID, prefDelta, conn);
-      } else {
-        doPartialUpdate(updateDiffSQLs[0], itemID, prefDelta, conn);
-        doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
-      }
+      doPartialUpdate(updateDiffSQLs[0], itemID, prefDelta, conn);
+      doPartialUpdate(updateDiffSQLs[1], itemID, prefDelta, conn);
     } catch (SQLException sqle) {
       log.warn("Exception while updating item diff", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(conn);
+    }
+  }
+
+  @Override
+  public void removeItemPref(long userID, long itemID, float prefValue) throws TasteException {
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.prepareStatement(getDiffsAffectedByUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+      stmt.setLong(1, userID);
+      log.debug("Executing SQL query: {}", getDiffsAffectedByUserSQL);
+      rs = stmt.executeQuery();
+
+      while (rs.next()) {
+        int count = rs.getInt(1);
+        long itemIDA = rs.getLong(3);
+        long itemIDB = rs.getLong(4);
+        if (count == minDiffCount) {
+          // going to remove the diff
+          removeOneDiff(conn, itemIDA, itemIDB);
+        } else {
+          float average = rs.getFloat(2);
+          float currentOtherPrefValue = rs.getFloat(5);
+          float prefDelta;
+          if (itemID == itemIDA) {
+            prefDelta = currentOtherPrefValue - prefValue;
+          } else {
+            prefDelta = prefValue - currentOtherPrefValue;
+          }
+          float newAverage = (average * count - prefDelta) / (count - 1);
+          updateOneDiff(conn, count - 1, newAverage, itemIDA, itemIDB);
+        }
+      }
+    } catch (SQLException sqle) {
+      log.warn("Exception while removing item diff", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(rs, stmt, conn);
+    }
+  }
+
+  private void removeOneDiff(Connection conn, long itemIDA, long itemIDB)
+    throws SQLException {
+    PreparedStatement stmt = conn.prepareStatement(removeDiffSQL);
+    try {
+      stmt.setLong(1, itemIDA);
+      stmt.setLong(2, itemIDB);
+      log.debug("Executing SQL update: {}", removeDiffSQL);
+      stmt.executeUpdate();
+    } finally {
+      IOUtils.quietClose(stmt);
     }
   }
   

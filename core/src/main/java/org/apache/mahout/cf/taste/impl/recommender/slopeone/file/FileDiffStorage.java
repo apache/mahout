@@ -250,9 +250,15 @@ public final class FileDiffStorage implements DiffStorage {
   public RunningAverage getAverageItemPref(long itemID) {
     return null; // TODO can't do this without a DataModel
   }
-  
+
   @Override
-  public void updateItemPref(long itemID, float prefDelta, boolean remove) {
+  public void addItemPref(long userID, long itemIDA, float prefValue) {
+    // Can't do this without a DataModel; should it just be a no-op?
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void updateItemPref(long itemID, float prefDelta) {
     try {
       buildAverageDiffsLock.readLock().lock();
       for (Map.Entry<Long,FastByIDMap<RunningAverage>> entry : averageDiffs.entrySet()) {
@@ -260,17 +266,9 @@ public final class FileDiffStorage implements DiffStorage {
         for (Map.Entry<Long,RunningAverage> entry2 : entry.getValue().entrySet()) {
           RunningAverage average = entry2.getValue();
           if (matchesItemID1) {
-            if (remove) {
-              average.removeDatum(prefDelta);
-            } else {
-              average.changeDatum(-prefDelta);
-            }
+            average.changeDatum(-prefDelta);
           } else if (itemID == entry2.getKey()) {
-            if (remove) {
-              average.removeDatum(-prefDelta);
-            } else {
-              average.changeDatum(prefDelta);
-            }
+            average.changeDatum(prefDelta);
           }
         }
       }
@@ -281,6 +279,12 @@ public final class FileDiffStorage implements DiffStorage {
     } finally {
       buildAverageDiffsLock.readLock().unlock();
     }
+  }
+
+  @Override
+  public void removeItemPref(long userID, long itemIDA, float prefValue) {
+    // Can't do this without a DataModel; should it just be a no-op?
+    throw new UnsupportedOperationException();
   }
   
   @Override

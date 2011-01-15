@@ -125,22 +125,29 @@ public final class MySQLJDBCDiffStorage extends AbstractJDBCDiffStorage {
         // getAverageItemPrefSQL
         "SELECT COUNT(1), AVG(" + dataModel.getPreferenceColumn() + ") FROM "
             + dataModel.getPreferenceTable() + " WHERE " + dataModel.getItemIDColumn() + "=?",
+        // getDiffsAffectedByUserSQL
+        "SELECT diffs." + countColumn + ", diffs." + avgColumn + ", diffs." + itemIDAColumn
+            + ", diffs." + itemIDBColumn + ", prefs." + dataModel.getPreferenceColumn()
+            + " FROM " + diffsTable + " AS diffs, " + dataModel.getPreferenceTable() + " AS prefs WHERE prefs."
+            + dataModel.getUserIDColumn() + "=? AND (prefs." + dataModel.getItemIDColumn()
+            + " = diffs." + itemIDAColumn + " OR prefs." + dataModel.getItemIDColumn()
+            + " = diffs." + itemIDBColumn + ')',
         // updateDiffSQLs
         new String[] {
-          "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " - (? / "
-              + countColumn + ") WHERE " + itemIDAColumn + "=?",
-          "UPDATE " + diffsTable + " SET " + avgColumn + " = " + avgColumn + " + (? / "
-              + countColumn + ") WHERE " + itemIDBColumn + "=?"},
+          "UPDATE " + diffsTable + " SET "
+              + avgColumn + " = " + avgColumn + " - (? / " + countColumn
+              + ") WHERE " + itemIDAColumn + "=?",
+          "UPDATE " + diffsTable + " SET "
+              + avgColumn + " = " + avgColumn + " + (? / " + countColumn
+              + ") WHERE " + itemIDBColumn + "=?"},
+        // updateOneDiffSQL
+        "UPDATE " + diffsTable + " SET " + countColumn + "=?, " + avgColumn + "=? WHERE "
+            + itemIDAColumn + "=? AND " + itemIDBColumn + "=?",
+        // addDiffSQL
+        "INSERT INTO " + diffsTable + " (" + itemIDAColumn + ", " + itemIDBColumn + ", " + avgColumn
+            + ", " + stdevColumn + ", " + countColumn + ") VALUES (?,?,?,0,1)",
         // removeDiffSQL
-        new String[] {
-          "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, "
-              + avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST("
-              + countColumn + " AS DECIMAL)) + ? / CAST(" + countColumn + " AS DECIMAL) WHERE "
-              + itemIDAColumn + "=?",
-          "UPDATE " + diffsTable + " SET " + countColumn + " = " + countColumn + "-1, "
-              + avgColumn + " = " + avgColumn + " * ((" + countColumn + " + 1) / CAST("
-              + countColumn + " AS DECIMAL)) - ? / CAST(" + countColumn + " AS DECIMAL) WHERE "
-              + itemIDBColumn + "=?"},
+        "DELETE FROM " + diffsTable + " WHERE " + itemIDAColumn + "=? AND " + itemIDBColumn + "=?",
         // getRecommendableItemsSQL
         "SELECT id FROM " + "(SELECT " + itemIDAColumn + " AS id FROM " + diffsTable + ", "
             + dataModel.getPreferenceTable() + " WHERE " + itemIDBColumn + " = "

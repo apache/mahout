@@ -69,10 +69,6 @@ public final class MemoryDiffStorage implements DiffStorage {
   
   /**
    * <p>
-   * Creates a new .
-   * </p>
-   * 
-   * <p>
    * See {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender} for the meaning of
    * <code>stdDevWeighted</code>. If <code>compactAverages</code> is set, this uses alternate data structures
    * ({@link CompactRunningAverage} versus {@link FullRunningAverage}) that use almost 50% less memory but
@@ -175,10 +171,53 @@ public final class MemoryDiffStorage implements DiffStorage {
   public RunningAverage getAverageItemPref(long itemID) {
     return averageItemPref.get(itemID);
   }
+
+  @Override
+  public void addItemPref(long userID, long itemIDA, float prefValue) throws TasteException {
+    PreferenceArray userPreferences = dataModel.getPreferencesFromUser(userID);
+    try {
+      buildAverageDiffsLock.writeLock().lock();
+
+      FastByIDMap<RunningAverage> aMap = averageDiffs.get(itemIDA);
+      if (aMap == null) {
+        aMap = new FastByIDMap<RunningAverage>();
+        averageDiffs.put(itemIDA, aMap);
+      }
+
+      int length = userPreferences.length();
+      for (int i = 0; i < length; i++) {
+        long itemIDB = userPreferences.getItemID(i);
+        float bValue = userPreferences.getValue(i);
+        if (itemIDA < itemIDB) {
+          RunningAverage average = aMap.get(itemIDB);
+          if (average == null) {
+            average = buildRunningAverage();
+            aMap.put(itemIDB, average);
+          }
+          average.addDatum(bValue - prefValue);
+        } else {
+          FastByIDMap<RunningAverage> bMap = averageDiffs.get(itemIDB);
+          if (bMap == null) {
+            bMap = new FastByIDMap<RunningAverage>();
+            averageDiffs.put(itemIDB, bMap);
+          }
+          RunningAverage average = bMap.get(itemIDA);
+          if (average == null) {
+            average = buildRunningAverage();
+            bMap.put(itemIDA, average);
+          }
+          average.addDatum(prefValue - bValue);
+        }
+      }
+
+    } finally {
+      buildAverageDiffsLock.writeLock().unlock();
+    }
+  }
   
   @Override
-  public void updateItemPref(long itemID, float prefDelta, boolean remove) {
-    if (!remove && stdDevWeighted) {
+  public void updateItemPref(long itemID, float prefDelta) {
+    if (stdDevWeighted) {
       throw new UnsupportedOperationException("Can't update only when stdDevWeighted is set");
     }
     try {
@@ -188,17 +227,9 @@ public final class MemoryDiffStorage implements DiffStorage {
         for (Map.Entry<Long,RunningAverage> entry2 : entry.getValue().entrySet()) {
           RunningAverage average = entry2.getValue();
           if (matchesItemID1) {
-            if (remove) {
-              average.removeDatum(prefDelta);
-            } else {
-              average.changeDatum(-prefDelta);
-            }
+            average.changeDatum(-prefDelta);
           } else if (itemID == entry2.getKey()) {
-            if (remove) {
-              average.removeDatum(-prefDelta);
-            } else {
-              average.changeDatum(prefDelta);
-            }
+            average.changeDatum(prefDelta);
           }
         }
       }
@@ -208,6 +239,55 @@ public final class MemoryDiffStorage implements DiffStorage {
       }
     } finally {
       buildAverageDiffsLock.readLock().unlock();
+    }
+  }
+
+  @Override
+  public void removeItemPref(long userID, long itemIDA, float prefValue) throws TasteException {
+    PreferenceArray userPreferences = dataModel.getPreferencesFromUser(userID);
+    try {
+      buildAverageDiffsLock.writeLock().lock();
+
+      FastByIDMap<RunningAverage> aMap = averageDiffs.get(itemIDA);
+
+      int length = userPreferences.length();
+      for (int i = 0; i < length; i++) {
+
+        long itemIDB = userPreferences.getItemID(i);
+        float bValue = userPreferences.getValue(i);
+
+        if (itemIDA < itemIDB) {
+
+          if (aMap != null) {
+            RunningAverage average = aMap.get(itemIDB);
+            if (average != null) {
+              if (average.getCount() <= 1) {
+                aMap.remove(itemIDB);
+              } else {
+                average.removeDatum(bValue - prefValue);
+              }
+            }
+          }
+
+        } else  if (itemIDA > itemIDB) {
+
+          FastByIDMap<RunningAverage> bMap = averageDiffs.get(itemIDB);
+          if (bMap != null) {
+            RunningAverage average = bMap.get(itemIDA);
+            if (average != null) {
+              if (average.getCount() <= 1) {
+                aMap.remove(itemIDA);
+              } else {
+                average.removeDatum(prefValue - bValue);
+              }
+            }
+          }
+
+        }
+      }
+
+    } finally {
+      buildAverageDiffsLock.writeLock().unlock();
     }
   }
   

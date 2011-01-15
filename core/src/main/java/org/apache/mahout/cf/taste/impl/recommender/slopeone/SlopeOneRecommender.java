@@ -172,15 +172,20 @@ public final class SlopeOneRecommender extends AbstractRecommender {
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     DataModel dataModel = getDataModel();
-    float prefDelta;
+    Float oldPref;
     try {
-      Float oldPref = dataModel.getPreferenceValue(userID, itemID);
-      prefDelta = oldPref == null ? value : value - oldPref;
+      oldPref = dataModel.getPreferenceValue(userID, itemID);
     } catch (NoSuchUserException nsee) {
-      prefDelta = value;
+      oldPref = null;
     }
     super.setPreference(userID, itemID, value);
-    diffStorage.updateItemPref(itemID, prefDelta, false);
+    if (oldPref == null) {
+      // Add new preference
+      diffStorage.addItemPref(userID, itemID, value);
+    } else {
+      // Update preference
+      diffStorage.updateItemPref(itemID, value - oldPref);
+    }
   }
   
   @Override
@@ -189,7 +194,7 @@ public final class SlopeOneRecommender extends AbstractRecommender {
     Float oldPref = dataModel.getPreferenceValue(userID, itemID);
     super.removePreference(userID, itemID);
     if (oldPref != null) {
-      diffStorage.updateItemPref(itemID, oldPref, true);
+      diffStorage.removeItemPref(userID, itemID, oldPref);
     }
   }
   

@@ -24,7 +24,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.junit.Test;
 
 /** Tests {@link MemoryDiffStorage}. */
-public class MemoryDiffStorageTest extends TasteTestCase {
+public final class MemoryDiffStorageTest extends TasteTestCase {
 
   @Test
   public void testGetDiff() throws Exception {
@@ -36,11 +36,41 @@ public class MemoryDiffStorageTest extends TasteTestCase {
   }
 
   @Test
+  public void testAdd() throws Exception {
+    DataModel model = getDataModel();
+    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
+
+    RunningAverage average1 = storage.getDiff(0, 2);
+    assertEquals(0.1, average1.getAverage(), EPSILON);
+    assertEquals(3, average1.getCount());
+
+    RunningAverage average2 = storage.getDiff(1, 2);
+    assertEquals(0.23333332935969034, average2.getAverage(), EPSILON);
+    assertEquals(3, average2.getCount());
+
+    storage.addItemPref(1, 2, 0.8f);
+
+    average1 = storage.getDiff(0, 2);
+    assertEquals(0.25, average1.getAverage(), EPSILON);
+    assertEquals(4, average1.getCount());
+
+    average2 = storage.getDiff(1, 2);
+    assertEquals(0.3, average2.getAverage(), EPSILON);
+    assertEquals(4, average2.getCount());
+  }
+
+  @Test
   public void testUpdate() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
-    storage.updateItemPref(1, 0.5f, false);
+
     RunningAverage average = storage.getDiff(1, 2);
+    assertEquals(0.23333332935969034, average.getAverage(), EPSILON);
+    assertEquals(3, average.getCount());
+
+    storage.updateItemPref(1, 0.5f);
+
+    average = storage.getDiff(1, 2);
     assertEquals(0.06666666666666668, average.getAverage(), EPSILON);
     assertEquals(3, average.getCount());
   }
@@ -49,10 +79,24 @@ public class MemoryDiffStorageTest extends TasteTestCase {
   public void testRemove() throws Exception {
     DataModel model = getDataModel();
     MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
-    storage.updateItemPref(1, 0.5f, true);
-    RunningAverage average = storage.getDiff(1, 2);
-    assertEquals(0.1, average.getAverage(), EPSILON);
-    assertEquals(2, average.getCount());
+
+    RunningAverage average1 = storage.getDiff(0, 2);
+    assertEquals(0.1, average1.getAverage(), EPSILON);
+    assertEquals(3, average1.getCount());
+
+    RunningAverage average2 = storage.getDiff(1, 2);
+    assertEquals(0.23333332935969034, average2.getAverage(), EPSILON);
+    assertEquals(3, average2.getCount());
+
+    storage.removeItemPref(4, 2, 0.8f);
+
+    average1 = storage.getDiff(0, 2);
+    assertEquals(0.1, average1.getAverage(), EPSILON);
+    assertEquals(2, average1.getCount());
+
+    average2 = storage.getDiff(1, 2);
+    assertEquals(0.1, average2.getAverage(), EPSILON);
+    assertEquals(2, average2.getCount());
   }
 
 }
