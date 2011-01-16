@@ -139,13 +139,13 @@ public final class TestClassifier {
       }
 
       String classifierType = "bayes";
-      if (cmdLine.hasOption(classifierType)) {
+      if (cmdLine.hasOption(typeOpt)) {
         classifierType = (String) cmdLine.getValue(typeOpt);
       }
 
       String dataSource = "hdfs";
-      if (cmdLine.hasOption(dataSource)) {
-        dataSource = (String) cmdLine.getValue(dataSource);
+      if (cmdLine.hasOption(dataSourceOpt)) {
+        dataSource = (String) cmdLine.getValue(dataSourceOpt);
       }
 
       String defaultCat = "unknown";
