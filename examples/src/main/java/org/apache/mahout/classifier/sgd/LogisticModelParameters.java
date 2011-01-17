@@ -134,9 +134,7 @@ public class LogisticModelParameters {
    * @return The LogisticModelParameters object that we read.
    */
   public static LogisticModelParameters loadFrom(Reader in) {
-    GsonBuilder gb = new GsonBuilder();
-    gb.registerTypeAdapter(Matrix.class, new MatrixTypeAdapter());
-    return gb.create().fromJson(in, LogisticModelParameters.class);
+    return ModelSerializer.gson().fromJson(in, LogisticModelParameters.class);
   }
 
   /**
