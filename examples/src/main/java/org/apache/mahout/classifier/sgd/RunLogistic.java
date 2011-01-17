@@ -33,6 +33,7 @@ import org.apache.mahout.classifier.evaluation.Auc;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 public final class RunLogistic {
 
@@ -41,6 +42,7 @@ public final class RunLogistic {
   private static boolean showAuc;
   private static boolean showScores;
   private static boolean showConfusion;
+  static PrintStream output = System.out;
 
   private RunLogistic() {
   }
@@ -62,29 +64,29 @@ public final class RunLogistic {
       csv.firstLine(line);
       line = in.readLine();
       if (showScores) {
-        System.out.printf("\"%s\",\"%s\",\"%s\"\n", "target", "model-output", "log-likelihood");
+        output.printf("\"%s\",\"%s\",\"%s\"\n", "target", "model-output", "log-likelihood");
       }
       while (line != null) {
         Vector v = new SequentialAccessSparseVector(lmp.getNumFeatures());
         int target = csv.processLine(line, v);
         double score = lr.classifyScalar(v);
         if (showScores) {
-          System.out.printf("%d,%.3f,%.6f\n", target, score, lr.logLikelihood(target, v));
+          output.printf("%d,%.3f,%.6f\n", target, score, lr.logLikelihood(target, v));
         }
         collector.add(target, score);
         line = in.readLine();
       }
 
       if (showAuc) {
-        System.out.printf("AUC = %.2f\n", collector.auc());
+        output.printf("AUC = %.2f\n", collector.auc());
       }
       if (showConfusion) {
         Matrix m = collector.confusion();
-        System.out.printf("confusion: [[%.1f, %.1f], [%.1f, %.1f]]\n",
-            m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
+        output.printf("confusion: [[%.1f, %.1f], [%.1f, %.1f]]\n",
+          m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
         m = collector.entropy();
-        System.out.printf("entropy: [[%.1f, %.1f], [%.1f, %.1f]]\n",
-            m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
+        output.printf("entropy: [[%.1f, %.1f], [%.1f, %.1f]]\n",
+          m.get(0, 0), m.get(1, 0), m.get(0, 1), m.get(1, 1));
       }
     }
   }

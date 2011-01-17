@@ -36,6 +36,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.List;
 
@@ -52,6 +53,7 @@ public final class TrainLogistic {
   private static int passes;
   private static boolean scores;
   private static OnlineLogisticRegression model;
+  static PrintStream output = System.out;
 
   private TrainLogistic() {
   }
@@ -87,8 +89,8 @@ public final class TrainLogistic {
           }
           double p = lr.classifyScalar(input);
           if (scores) {
-            System.out.printf("%10d %2d %10.2f %2.4f %10.4f %10.4f\n",
-                samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
+            output.printf("%10d %2d %10.2f %2.4f %10.4f %10.4f\n",
+              samples, targetValue, lr.currentLearningRate(), p, logP, logPEstimate);
           }
 
           // now update model
@@ -106,29 +108,29 @@ public final class TrainLogistic {
         modelOutput.close();
       }
       
-      System.out.printf("%d\n", lmp.getNumFeatures());
-      System.out.printf("%s ~ ", lmp.getTargetVariable());
+      output.printf("%d\n", lmp.getNumFeatures());
+      output.printf("%s ~ ", lmp.getTargetVariable());
       String sep = "";
       for (String v : csv.getPredictors()) {
         double weight = predictorWeight(lr, 0, csv, v);
         if (weight != 0) {
-          System.out.printf("%s%.3f*%s", sep, weight, v);
+          output.printf("%s%.3f*%s", sep, weight, v);
           sep = " + ";
         }
       }
-      System.out.printf("\n");
+      output.printf("\n");
       model = lr;
       for (int row = 0; row < lr.getBeta().numRows(); row++) {
         for (String key : csv.getTraceDictionary().keySet()) {
           double weight = predictorWeight(lr, row, csv, key);
           if (weight != 0) {
-            System.out.printf("%20s %.5f\n", key, weight);
+            output.printf("%20s %.5f\n", key, weight);
           }
         }
         for (int column = 0; column < lr.getBeta().numCols(); column++) {
-          System.out.printf("%15.9f ", lr.getBeta().get(row, column));
+          output.printf("%15.9f ", lr.getBeta().get(row, column));
         }
-        System.out.println();
+        output.println();
       }
     }
   }
