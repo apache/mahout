@@ -67,7 +67,7 @@ class DisplaySpectralKMeans extends DisplayClustering {
     }
     int maxIter = 10;
     double convergenceDelta = 0.001;
-    SpectralKMeansDriver.run(new Configuration(), affinities, output, 1100, 5, measure, convergenceDelta, maxIter);
+    SpectralKMeansDriver.run(new Configuration(), affinities, output, 1100, 2, measure, convergenceDelta, maxIter);
     loadClusters(output);
     new DisplaySpectralKMeans();
   }
