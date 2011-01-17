@@ -17,6 +17,14 @@
 
 package org.apache.mahout.math.stats;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Ordering;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.PriorityQueue;
+
 /**
  * Utility methods for working with log-likelihood
  */
@@ -26,7 +34,7 @@ public final class LogLikelihood {
   }
 
   /**
-   * Calculate the unnormalized Shannon entropy.  This is
+   * Calculates the unnormalized Shannon entropy.  This is
    *
    * -sum x_i log x_i / N = -N sum x_i/N log x_i/N
    *
@@ -55,7 +63,7 @@ public final class LogLikelihood {
   }
 
   /**
-   * Calculate the Raw Log-likelihood ratio for two events, call them A and B.  Then we have:
+   * Calculates the Raw Log-likelihood ratio for two events, call them A and B.  Then we have:
    * <p/>
    * <table border="1" cellpadding="5" cellspacing="0">
    * <tbody><tr><td>&nbsp;</td><td>Event A</td><td>Everything but A</td></tr>
@@ -85,7 +93,7 @@ public final class LogLikelihood {
   }
   
   /** 
-   * Calculate the root log-likelihood ratio for two events.
+   * Calculates the root log-likelihood ratio for two events.
    * See {@link #logLikelihoodRatio(int, int, int, int)}.
 
    * @param k11 The number of times the two events occurred together
@@ -105,5 +113,69 @@ public final class LogLikelihood {
       sqrt = -sqrt;
     }
     return sqrt;
+  }
+
+  /**
+   * Compares two sets of counts to see which items are interestingly over-represented in the first
+   * set.
+   * @param a  The first counts.
+   * @param b  The reference counts.
+   * @param maxReturn  The maximum number of items to return.  Use maxReturn >= a.elementSet.size() to return all
+   * scores above the threshold.
+   * @param threshold  The minimum score for items to be returned.  Use 0 to return all items more common
+   * in a than b.  Use -Double.MAX_VALUE (not Double.MIN_VALUE !) to not use a threshold.
+   * @return  A list of scored items with their scores.
+   */
+  public static <T> List<ScoredItem<T>> compareFrequencies(Multiset<T> a, Multiset<T> b, int maxReturn, double threshold) {
+    int totalA = a.size();
+    int totalB = b.size();
+
+    Ordering<ScoredItem<T>> byScoreAscending = new Ordering<ScoredItem<T>>() {
+      public int compare(ScoredItem<T> tScoredItem, ScoredItem<T> tScoredItem1) {
+        return Double.compare(tScoredItem.score, tScoredItem1.score);
+      }
+    };
+    PriorityQueue<ScoredItem<T>> best = new PriorityQueue<ScoredItem<T>>(maxReturn + 1, byScoreAscending);
+
+    for (T t : a.elementSet()) {
+      compareAndAdd(a, b, maxReturn, threshold, totalA, totalB, best, t);
+    }
+
+    // if threshold >= 0 we only iterate through a because anything not there can't be as or more common than in b.
+    if (threshold < 0) {
+      for (T t : b.elementSet()) {
+        // only items missing from a need be scored
+        if (a.count(t) == 0) {
+          compareAndAdd(a, b, maxReturn, threshold, totalA, totalB, best, t);
+        }
+      }
+    }
+
+    List<ScoredItem<T>> r = Lists.newArrayList(best);
+    Collections.sort(r, byScoreAscending.reverse());
+    return r;
+  }
+
+  private static <T> void compareAndAdd(Multiset<T> a, Multiset<T> b, int maxReturn, double threshold, int totalA, int totalB, PriorityQueue<ScoredItem<T>> best, T t) {
+    int kA = a.count(t);
+    int kB = b.count(t);
+    double score = rootLogLikelihoodRatio(kA, totalA - kA, kB, totalB - kB);
+    if (score >= threshold) {
+      ScoredItem<T> x = new ScoredItem<T>(t, score);
+      best.add(x);
+      while (best.size() > maxReturn) {
+        best.poll();
+      }
+    }
+  }
+
+  public final static class ScoredItem<T> {
+    public T item;
+    public double score;
+
+    public ScoredItem(T item, double score) {
+      this.item = item;
+      this.score = score;
+    }
   }
 }
