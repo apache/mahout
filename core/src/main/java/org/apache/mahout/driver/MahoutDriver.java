@@ -93,17 +93,13 @@ public final class MahoutDriver {
 
   public static void main(String[] args) throws Throwable {
     ProgramDriver programDriver = new ProgramDriver();
-    Properties mainClasses = new Properties();
-    InputStream propsStream = Thread.currentThread()
-                                    .getContextClassLoader()
-                                    .getResourceAsStream("driver.classes.props");
 
-    try {
-      mainClasses.load(propsStream);
-    } catch (IOException e) {
-      //try getting the default one
-      propsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("driver.classes.default.props");
-      mainClasses.load(propsStream);
+    Properties mainClasses = loadProperties("driver.classes.props");
+    if (mainClasses == null) {
+      mainClasses = loadProperties("driver.classes.default.props");
+    }
+    if (mainClasses == null) {
+      throw new IOException("Can't load any properties file?");
     }
 
     boolean foundShortName = false;
@@ -123,15 +119,10 @@ public final class MahoutDriver {
     }
     shift(args);
 
-    InputStream defaultsStream = Thread.currentThread()
-                                       .getContextClassLoader()
-                                       .getResourceAsStream(progName + ".props");
-
-    Properties mainProps = new Properties();
-    if (defaultsStream != null) { // can't find props file, use empty props.
-      mainProps.load(defaultsStream);
-    } else {
+    Properties mainProps = loadProperties(progName + ".props");
+    if (mainProps == null) {
       log.warn("No " + progName + ".props found on classpath, will use command-line arguments only");
+      mainProps = new Properties();
     }
     Map<String,String[]> argMap = new HashMap<String,String[]>();
     int i = 0;
@@ -185,6 +176,24 @@ public final class MahoutDriver {
     if (log.isInfoEnabled()) {
       log.info("Program took " + (finish - start) + " ms");
     }
+  }
+
+  private static Properties loadProperties(String resource) throws IOException {
+    InputStream propsStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("driver.classes.props");
+    if (propsStream != null) {
+      try {
+        Properties properties = new Properties();
+        properties.load(propsStream);
+        return properties;
+      } catch (IOException ioe) {
+        log.warn("Error while loading {}", resource, ioe);
+        // Continue
+      } finally {
+        propsStream.close();
+      }
+    }
+    return null;
   }
 
   private static String[] shift(String[] args) {
