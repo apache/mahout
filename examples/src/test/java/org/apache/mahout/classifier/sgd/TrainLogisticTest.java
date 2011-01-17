@@ -52,9 +52,9 @@ public class TrainLogisticTest extends MahoutTestCase {
 
     String trainOut = runMain(TrainLogistic.class, new String[]{
       "--input", "donut.csv",
-      " --output", outputFile,
-      " --target", "color", "--categories", "2" +
-        "--predictors", "x", "y",
+      "--output", outputFile,
+      "--target", "color", "--categories", "2",
+      "--predictors", "x", "y",
       "--types", "numeric",
       "--features", "20",
       "--passes", "100",
