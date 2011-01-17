@@ -121,9 +121,7 @@ public class LogisticModelParameters {
       lr.close();
     }
     targetCategories = csv.getTargetCategories();
-    GsonBuilder gb = new GsonBuilder();
-    gb.registerTypeAdapter(Matrix.class, new MatrixTypeAdapter());
-    Gson gson = gb.setPrettyPrinting().create();
+    Gson gson = ModelSerializer.gson();
 
     String savedForm = gson.toJson(this);
     out.write(savedForm);
