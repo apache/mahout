@@ -174,13 +174,12 @@ public final class MahoutDriver {
     programDriver.driver(argsList.toArray(new String[argsList.size()]));
     long finish = System.currentTimeMillis();
     if (log.isInfoEnabled()) {
-      log.info("Program took " + (finish - start) + " ms");
+      log.info("Program took {} ms", (finish - start));
     }
   }
 
   private static Properties loadProperties(String resource) throws IOException {
-    InputStream propsStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream("driver.classes.props");
+    InputStream propsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
     if (propsStream != null) {
       try {
         Properties properties = new Properties();
@@ -215,9 +214,9 @@ public final class MahoutDriver {
       Class<?> clazz = Class.forName(classString);
       driver.addClass(shortName(descString), clazz, desc(descString));
     } catch (ClassNotFoundException e) {
-      log.warn("Unable to add class: " + classString, e);
+      log.warn("Unable to add class: {}", classString, e);
     } catch (Throwable t) {
-      log.warn("Unable to add class: " + classString, t);
+      log.warn("Unable to add class: {}", classString, t);
     }
   }
 
