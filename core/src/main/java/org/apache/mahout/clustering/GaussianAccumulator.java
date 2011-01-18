@@ -50,8 +50,9 @@ public interface GaussianAccumulator {
    * Observe the vector 
    * 
    * @param x a Vector
+   * @param weight the double observation weight (usually 1.0)
    */
-  void observe(Vector x);
+  void observe(Vector x, double weight);
 
   /**
    * Compute the mean, variance and standard deviation

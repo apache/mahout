@@ -50,13 +50,9 @@ public class CDbwEvaluator {
   private static final Logger log = LoggerFactory.getLogger(CDbwEvaluator.class);
 
   private final Map<Integer, List<VectorWritable>> representativePoints;
-
   private final Map<Integer, Double> stDevs = new HashMap<Integer, Double>();
-
   private final List<Cluster> clusters;
-
   private final DistanceMeasure measure;
-
   private boolean pruned;
 
   /**
@@ -136,7 +132,7 @@ public class CDbwEvaluator {
     List<VectorWritable> repPts = representativePoints.get(cI);
     GaussianAccumulator accumulator = new OnlineGaussianAccumulator();
     for (VectorWritable vw : repPts) {
-      accumulator.observe(vw.get());
+      accumulator.observe(vw.get(), 1.0);
     }
     accumulator.compute();
     double d = accumulator.getAverageStd();

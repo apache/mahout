@@ -25,14 +25,11 @@ import org.apache.mahout.math.function.SquareRootFunction;
  * Suffers from overflow, underflow and roundoff error but has minimal observe-time overhead
  */
 public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
-  private double s0 = 0;
 
+  private double s0 = 0.0;
   private Vector s1;
-
   private Vector s2;
-
   private Vector mean;
-
   private Vector std;
 
   @Override
@@ -52,8 +49,8 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public double getAverageStd() {
-    if (s0 == 0) {
-      return 0;
+    if (s0 == 0.0) {
+      return 0.0;
     } else {
       return std.zSum() / std.size();
     }
@@ -65,14 +62,15 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
   }
 
   @Override
-  public void observe(Vector x) {
-    s0++;
+  public void observe(Vector x, double weight) {
+    s0 += weight;
+    Vector weightedX = x.times(weight);
     if (s1 == null) {
-      s1 = x.clone();
+      s1 = weightedX;
     } else {
-      x.addTo(s1);
+      weightedX.addTo(s1);
     }
-    Vector x2 = x.times(x);
+    Vector x2 = x.times(x).times(weight);
     if (s2 == null) {
       s2 = x2;
     } else {
@@ -82,11 +80,10 @@ public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
 
   @Override
   public void compute() {
-    if (s0 == 0) {
-      return;
+    if (s0 != 0.0) {
+      mean = s1.divide(s0);
+      std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
     }
-    mean = s1.divide(s0);
-    std = s2.times(s0).minus(s1.times(s1)).assign(new SquareRootFunction()).divide(s0);
   }
 
 }
