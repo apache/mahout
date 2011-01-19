@@ -258,8 +258,8 @@ public final class ClusterDumper extends AbstractJob {
     return this.numTopFeatures;
   }
 
-  private static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir,
-                                                                       Configuration conf) throws IOException {
+  public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir,
+                                                                      Configuration conf) throws IOException {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
 
     FileSystem fs = pointsPathDir.getFileSystem(conf);
@@ -311,7 +311,7 @@ public final class ClusterDumper extends AbstractJob {
     }
   }
 
-  private static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
+  public static String getTopFeatures(Vector vector, String[] dictionary, int numTerms) {
 
     List<TermIndexWeight> vectorTerms = new ArrayList<TermIndexWeight>();
 
