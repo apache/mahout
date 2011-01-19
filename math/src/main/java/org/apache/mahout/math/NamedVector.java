@@ -19,6 +19,9 @@ package org.apache.mahout.math;
 
 import java.util.Iterator;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
@@ -68,7 +71,10 @@ public class NamedVector implements Vector {
   }
 
   public String asFormatString() {
-    return delegate.asFormatString();
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    Gson gson = builder.create();
+    return gson.toJson(this, Vector.class);
   }
 
   public Vector assign(double value) {
