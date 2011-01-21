@@ -30,7 +30,6 @@ import org.apache.hadoop.util.ProgramDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * General-purpose driver class for Mahout programs.  Utilizes org.apache.hadoop.util.ProgramDriver to run
  * main methods of other classes, but first loads up default properties from a properties file.
@@ -92,6 +91,7 @@ public final class MahoutDriver {
   }
 
   public static void main(String[] args) throws Throwable {
+
     ProgramDriver programDriver = new ProgramDriver();
 
     Properties mainClasses = loadProperties("driver.classes.props");
@@ -110,9 +110,11 @@ public final class MahoutDriver {
       }
       addClass(programDriver, keyString, mainClasses.getProperty(keyString));
     }
+
     if (args.length < 1 || args[0] == null || args[0].equals("-h") || args[0].equals("--help")) {
       programDriver.driver(args);
     }
+
     String progName = args[0];
     if (!foundShortName) {
       addClass(programDriver, progName, progName);
@@ -124,13 +126,14 @@ public final class MahoutDriver {
       log.warn("No " + progName + ".props found on classpath, will use command-line arguments only");
       mainProps = new Properties();
     }
+
     Map<String,String[]> argMap = new HashMap<String,String[]>();
     int i = 0;
     while (i < args.length && args[i] != null) {
       List<String> argValues = new ArrayList<String>();
       String arg = args[i];
       i++;
-      if (arg.length() > 2 && arg.charAt(1) == 'D') { // '-Dkey=value' or '-Dkey=value1,value2,etc' case
+      if (arg.startsWith("-D")) { // '-Dkey=value' or '-Dkey=value1,value2,etc' case
         String[] argSplit = arg.split("=");
         arg = argSplit[0];
         if (argSplit.length == 2) {
@@ -138,16 +141,17 @@ public final class MahoutDriver {
         }
       } else {                                      // '-key [values]' or '--key [values]' case.
         while (i < args.length && args[i] != null) {
-          if (args[i].length() > 0 && args[i].charAt(0) != '-') {
-            argValues.add(args[i]);
-            i++;
-          } else {
+          if (args[i].startsWith("-")) {
             break;
           }
+          argValues.add(args[i]);
+          i++;
         }
       }
       argMap.put(arg, argValues.toArray(new String[argValues.size()]));
     }
+
+    // Add properties from the .props file that are not overridden on the command line
     for (String key : mainProps.stringPropertyNames()) {
       String[] argNamePair = key.split("\\|");
       String shortArg = '-' + argNamePair[0].trim();
@@ -156,25 +160,34 @@ public final class MahoutDriver {
         argMap.put(longArg, new String[] {mainProps.getProperty(key)});
       }
     }
+
+    // Now add command-line args
     List<String> argsList = new ArrayList<String>();
     argsList.add(progName);
-    for (String arg : argMap.keySet()) {
+    for (Map.Entry<String,String[]> entry : argMap.entrySet()) {
+      String arg = entry.getKey();
       if (arg.startsWith("-D")) { // arg is -Dkey - if value for this !isEmpty(), then arg -> -Dkey + "=" + value
-        if (argMap.get(arg).length > 0 && !argMap.get(arg)[0].trim().isEmpty()) {
-          arg += '=' + argMap.get(arg)[0].trim();
+        String[] argValues = entry.getValue();
+        if (argValues.length > 0 && !argValues[0].trim().isEmpty()) {
+          arg += '=' + argValues[0].trim();
         }
         argsList.add(1, arg);
-      }
-      else {
+      } else {
         argsList.add(arg);
-        argsList.addAll(Arrays.asList(argMap.get(arg)));
+        for (String argValue : Arrays.asList(argMap.get(arg))) {
+          if (argValue.length() > 0) {
+            argsList.add(argValue);
+          }
+        }
       }
     }
+
     long start = System.currentTimeMillis();
+
     programDriver.driver(argsList.toArray(new String[argsList.size()]));
-    long finish = System.currentTimeMillis();
+
     if (log.isInfoEnabled()) {
-      log.info("Program took {} ms", (finish - start));
+      log.info("Program took {} ms", System.currentTimeMillis() - start);
     }
   }
 
