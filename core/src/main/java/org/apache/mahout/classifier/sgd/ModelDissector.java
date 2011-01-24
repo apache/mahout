@@ -127,15 +127,10 @@ public class ModelDissector {
     @Override
     public int compareTo(Category o) {
       int r = Double.compare(Math.abs(weight), Math.abs(o.weight));
-      if (r == 0) {
-        if (index < o.index) {
-          return -1;
-        } else if (index > o.index) {
-          return 1;
-        }
-        return 0;
-      } else {
+      if (r != 0) {
         return r;
+      } else {
+        return o.index - index;
       }
     }
   }
@@ -153,7 +148,7 @@ public class ModelDissector {
     public Weight(String feature, Vector weights, int n) {
       this.feature = feature;
       // pick out the weight with the largest abs value, but don't forget the sign
-      Queue<Category> biggest = new PriorityQueue<Category>(n + 1, Ordering.natural().reverse());
+      Queue<Category> biggest = new PriorityQueue<Category>(n + 1, Ordering.natural());
       for (Vector.Element element : weights) {
         biggest.add(new Category(element.index(), element.get()));
         while (biggest.size() > n) {
