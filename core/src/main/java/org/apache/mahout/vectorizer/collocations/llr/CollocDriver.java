@@ -143,7 +143,7 @@ public final class CollocDriver extends AbstractJob {
 
       Path tokenizedPath = new Path(output, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
 
-      DocumentProcessor.tokenizeDocuments(input, analyzerClass, tokenizedPath);
+      DocumentProcessor.tokenizeDocuments(input, analyzerClass, tokenizedPath, getConf());
       input = tokenizedPath;
     } else {
       log.info("Input will NOT be preprocessed");
@@ -166,6 +166,8 @@ public final class CollocDriver extends AbstractJob {
    *          input path containing tokenized documents
    * @param output
    *          output path where ngrams are generated including unigrams
+   * @param baseConf
+   *          job configuration
    * @param maxNGramSize
    *          minValue = 2.
    * @param minSupport

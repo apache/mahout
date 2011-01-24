@@ -116,6 +116,7 @@ public final class TFIDFConverter {
    */
   public static void processTfIdf(Path input,
                                   Path output,
+                                  Configuration baseConf,
                                   int chunkSizeInMegabytes,
                                   int minDf,
                                   int maxDFPercent,
@@ -146,8 +147,8 @@ public final class TFIDFConverter {
 
     Path wordCountPath = new Path(output, WORDCOUNT_OUTPUT_FOLDER);
 
-    startDFCounting(input, wordCountPath);
-    Pair<Long[], List<Path>> datasetFeatures = createDictionaryChunks(wordCountPath, output, chunkSizeInMegabytes);
+    startDFCounting(input, wordCountPath, baseConf);
+    Pair<Long[], List<Path>> datasetFeatures = createDictionaryChunks(wordCountPath, output, baseConf, chunkSizeInMegabytes);
 
     int partialVectorIndex = 0;
     List<Path> partialVectorPaths = new ArrayList<Path>();
@@ -156,6 +157,7 @@ public final class TFIDFConverter {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
       makePartialVectors(input,
+                         baseConf,
                          datasetFeatures.getFirst()[0],
                          datasetFeatures.getFirst()[1],
                          minDf,
@@ -166,13 +168,14 @@ public final class TFIDFConverter {
                          namedVector);
     }
 
-    Configuration conf = new Configuration();
+    Configuration conf = new Configuration(baseConf);
     FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
 
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     
     PartialVectorMerger.mergePartialVectors(partialVectorPaths,
                                             outputDir,
+                                            baseConf,
                                             normPower,
                                             logNormalize,
                                             datasetFeatures.getFirst()[0].intValue(),
@@ -189,12 +192,13 @@ public final class TFIDFConverter {
    */
   private static Pair<Long[], List<Path>> createDictionaryChunks(Path featureCountPath,
                                                                  Path dictionaryPathBase,
+                                                                 Configuration baseConf,
                                                                  int chunkSizeInMegabytes) throws IOException {
     List<Path> chunkPaths = new ArrayList<Path>();
 
     IntWritable key = new IntWritable();
     LongWritable value = new LongWritable();
-    Configuration conf = new Configuration();
+    Configuration conf = new Configuration(baseConf);
 
     FileSystem fs = FileSystem.get(featureCountPath.toUri(), conf);
     FileStatus[] outputFiles = fs.globStatus(new Path(featureCountPath, OUTPUT_FILES_PATTERN));
@@ -267,6 +271,7 @@ public final class TFIDFConverter {
    *          output vectors should be named, retaining key (doc id) as a label
    */
   private static void makePartialVectors(Path input,
+                                         Configuration baseConf,
                                          Long featureCount,
                                          Long vectorCount,
                                          int minDf,
@@ -277,7 +282,7 @@ public final class TFIDFConverter {
                                          boolean namedVector)
     throws IOException, InterruptedException, ClassNotFoundException {
 
-    Configuration conf = new Configuration();
+    Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");
@@ -313,10 +318,10 @@ public final class TFIDFConverter {
    * Count the document frequencies of features in parallel using Map/Reduce. The input documents have to be
    * in {@link SequenceFile} format
    */
-  private static void startDFCounting(Path input, Path output)
+  private static void startDFCounting(Path input, Path output, Configuration baseConf)
     throws IOException, InterruptedException, ClassNotFoundException {
 
-    Configuration conf = new Configuration();
+    Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");

@@ -68,6 +68,8 @@ public final class PartialVectorMerger {
    *          input directory of the vectors in {@link org.apache.hadoop.io.SequenceFile} format
    * @param output
    *          output directory were the partial vectors have to be created
+   * @param baseConf
+   *          job configuration
    * @param normPower
    *          The normalization value. Must be greater than or equal to 0 or equal to {@link #NO_NORMALIZING}
    * @param dimension
@@ -80,6 +82,7 @@ public final class PartialVectorMerger {
    */
   public static void mergePartialVectors(Iterable<Path> partialVectorPaths,
                                          Path output,
+                                         Configuration baseConf,
                                          float normPower,
                                          boolean logNormalize,
                                          int dimension,
@@ -94,7 +97,7 @@ public final class PartialVectorMerger {
                                 || !logNormalize,
         "normPower must be > 1 and not infinite if log normalization is chosen", normPower);
 
-    Configuration conf = new Configuration();
+    Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
         + "org.apache.hadoop.io.serializer.WritableSerialization");

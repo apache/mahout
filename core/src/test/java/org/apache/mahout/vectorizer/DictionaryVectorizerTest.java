@@ -95,7 +95,8 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     Path tfidf = getTestTempDirPath("output/tfidf");
     Path tfidfVectors = new Path(tfidf, "tfidf-vectors");
     
-    DocumentProcessor.tokenizeDocuments(inputPath, analyzer, tokenizedDocuments);
+    Configuration conf = new Configuration();
+    DocumentProcessor.tokenizeDocuments(inputPath, analyzer, tokenizedDocuments, conf);
     
     DictionaryVectorizer.createTermFrequencyVectors(tokenizedDocuments,
                                                     wordCount,
@@ -114,6 +115,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     
     TFIDFConverter.processTfIdf(tfVectors,
                                 tfidf,
+                                conf,
                                 100,
                                 1,
                                 99,

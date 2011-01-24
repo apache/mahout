@@ -65,13 +65,12 @@ public final class DocumentProcessor {
    *          output directory were the {@link StringTuple} token array of each document has to be created
    * @param analyzerClass
    *          The Lucene {@link Analyzer} for tokenizing the UTF-8 text
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  public static void tokenizeDocuments(Path input, Class<? extends Analyzer> analyzerClass,
-                                       Path output) throws IOException, InterruptedException, ClassNotFoundException {
-    Configuration conf = new Configuration();
+  public static void tokenizeDocuments(Path input,
+                                       Class<? extends Analyzer> analyzerClass,
+                                       Path output,
+                                       Configuration baseConf) throws IOException, InterruptedException, ClassNotFoundException {
+    Configuration conf = new Configuration(baseConf);
     // this conf parameter needs to be set enable serialisation of conf values
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization"); 

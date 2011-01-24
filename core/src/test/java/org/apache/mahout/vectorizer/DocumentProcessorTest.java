@@ -35,7 +35,7 @@ public class DocumentProcessorTest extends MahoutTestCase {
     writer.append(new Text(documentId2), new Text(text2));
     writer.close();
 
-    DocumentProcessor.tokenizeDocuments(input, DefaultAnalyzer.class, output);
+    DocumentProcessor.tokenizeDocuments(input, DefaultAnalyzer.class, output, configuration);
 
     FileStatus[] statuses = fs.listStatus(output);
     assertEquals(1, statuses.length);
