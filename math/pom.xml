@@ -69,6 +69,11 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
