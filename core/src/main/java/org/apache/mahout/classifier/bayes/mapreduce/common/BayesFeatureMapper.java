@@ -73,7 +73,6 @@ public class BayesFeatureMapper extends MapReduceBase implements Mapper<Text,Tex
                   Text value,
                   final OutputCollector<StringTuple,DoubleWritable> output,
                   Reporter reporter) throws IOException {
-    // String line = value.toString();
     final String label = key.toString();
     String[] tokens = SPACE_PATTERN.split(value.toString());
     OpenObjectIntHashMap<String> wordList = new OpenObjectIntHashMap<String>(tokens.length * gramSize);

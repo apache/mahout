@@ -56,8 +56,7 @@ public class BayesThetaNormalizerReducer extends MapReduceBase implements
     // Key is label,word, value is the number of times we've seen this label
     // word per local node. Output is the same
     
-    // String token = key.toString();
-    
+
     double weightSumPerLabel = 0.0;
     
     while (values.hasNext()) {

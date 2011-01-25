@@ -15,6 +15,7 @@ import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 
 import java.io.Serializable;
 
+import static org.apache.mahout.math.Algebra.hypot;
 import static org.apache.mahout.math.matrix.linalg.Property.*;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
@@ -774,7 +775,7 @@ public final class EigenvalueDecomposition implements Serializable {
 
           double g = d[l];
           double p = (d[l + 1] - g) / (2.0 * e[l]);
-          double r = Algebra.hypot(p, 1.0);
+          double r = hypot(p, 1.0);
           if (p < 0) {
             r = -r;
           }
@@ -802,7 +803,7 @@ public final class EigenvalueDecomposition implements Serializable {
             s2 = s;
             g = c * e[i];
             h = c * p;
-            r = Algebra.hypot(p, e[i]);
+            r = hypot(p, e[i]);
             e[i + 1] = s * r;
             s = e[i] / r;
             c = p / r;

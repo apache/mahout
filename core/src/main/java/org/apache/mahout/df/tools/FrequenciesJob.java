@@ -190,7 +190,6 @@ public class FrequenciesJob {
      */
     protected void setup(Dataset dataset) {
       converter = new DataConverter(dataset);
-      //log.info("labels: {}", Arrays.toString(dataset.labels()));
     }
     
     @Override
