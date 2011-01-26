@@ -31,13 +31,16 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.net.URL;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.List;
 
 
@@ -101,7 +104,7 @@ public final class TrainLogistic {
         in.close();
       }
 
-      OutputStreamWriter modelOutput = new FileWriter(outputFile);
+      Writer modelOutput = new OutputStreamWriter(new FileOutputStream(outputFile), Charset.forName("UTF-8"));
       try {
         lmp.saveTo(modelOutput);
       } finally {
@@ -299,13 +302,12 @@ public final class TrainLogistic {
   }
 
   static BufferedReader open(String inputFile) throws IOException {
-    InputStreamReader s;
+    InputStream in;
     try {
-      URL resource = Resources.getResource(inputFile);
-      s = new InputStreamReader(resource.openStream());
+      in= Resources.getResource(inputFile).openStream();
     } catch (IllegalArgumentException e) {
-      s = new FileReader(inputFile);
+      in = new FileInputStream(new File(inputFile));
     }
-    return new BufferedReader(s);
+    return new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
   }
 }

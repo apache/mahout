@@ -18,10 +18,11 @@
 package org.apache.mahout.utils.clustering;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -158,7 +159,12 @@ public final class ClusterDumper extends AbstractJob {
       }
     }
 
-    Writer writer = this.outputFile == null ? new OutputStreamWriter(System.out) : new FileWriter(this.outputFile);
+    Writer writer;
+    if (this.outputFile == null) {
+      writer = new OutputStreamWriter(System.out);
+    } else {
+      writer = new OutputStreamWriter(new FileOutputStream(new File(this.outputFile)), Charset.forName("UTF-8"));
+    }
     try {
       FileSystem fs = seqFileDir.getFileSystem(conf);
       for (FileStatus seqFile : fs.globStatus(new Path(seqFileDir, "part-*"))) {

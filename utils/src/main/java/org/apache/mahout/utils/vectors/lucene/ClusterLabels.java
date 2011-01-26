@@ -18,10 +18,11 @@
 package org.apache.mahout.utils.vectors.lucene;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -144,7 +145,12 @@ public class ClusterLabels {
 
   public void getLabels() throws IOException {
 
-    Writer writer = this.output == null ? new OutputStreamWriter(System.out) : new FileWriter(this.output);
+    Writer writer;
+    if (this.output == null) {
+      writer = new OutputStreamWriter(System.out);
+    } else {
+      writer = new OutputStreamWriter(new FileOutputStream(new File(this.output)), Charset.forName("UTF-8"));
+    }
     try {
       for (Map.Entry<Integer, List<WeightedVectorWritable>> integerListEntry : clusterIdToPoints.entrySet()) {
         List<WeightedVectorWritable> wvws = integerListEntry.getValue();

@@ -17,12 +17,11 @@
 
 package org.apache.mahout.utils.vectors.lucene;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 
 import org.apache.commons.cli2.CommandLine;
@@ -214,7 +213,7 @@ public final class Driver {
         if (cmdLine.hasOption(outWriterOpt)) {
           String outWriter = cmdLine.getValue(outWriterOpt).toString();
           if ("file".equals(outWriter)) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
+            Writer writer = new OutputStreamWriter(new FileOutputStream(new File(outFile)), Charset.forName("UTF8"));
             vectorWriter = new JWriterVectorWriter(writer);
           } else {
             vectorWriter = getSeqFileWriter(outFile);
@@ -231,8 +230,7 @@ public final class Driver {
         
         File dictOutFile = new File(cmdLine.getValue(dictOutOpt).toString());
         log.info("Dictionary Output file: {}", dictOutFile);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-            new FileOutputStream(dictOutFile), Charset.forName("UTF8")));
+        Writer writer = new OutputStreamWriter(new FileOutputStream(dictOutFile), Charset.forName("UTF8"));
         JWriterTermInfoWriter tiWriter = new JWriterTermInfoWriter(writer, delimiter, field);
         tiWriter.write(termInfo);
         tiWriter.close();

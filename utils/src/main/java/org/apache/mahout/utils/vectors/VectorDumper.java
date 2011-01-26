@@ -38,9 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 /**
  * Can read in a {@link SequenceFile} of {@link Vector}s and dump
@@ -129,9 +130,13 @@ public final class VectorDumper {
         Writable valueWritable = reader.getValueClass().asSubclass(Writable.class).newInstance();
         boolean transposeKeyValue = cmdLine.hasOption(vectorAsKeyOpt);
         try {
-          Writer writer = cmdLine.hasOption(outputOpt)
-                  ? new FileWriter(cmdLine.getValue(outputOpt).toString())
-                  : new OutputStreamWriter(System.out);
+          Writer writer;
+          if (cmdLine.hasOption(outputOpt)) {
+            writer = new OutputStreamWriter(
+                new FileOutputStream(new File(cmdLine.getValue(outputOpt).toString())), Charset.forName("UTF-8"));
+          } else {
+            writer = new OutputStreamWriter(System.out);
+          }
           try {
             boolean printKey = cmdLine.hasOption(printKeyOpt);
             long i = 0;

@@ -27,8 +27,11 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,7 +100,8 @@ public final class LastfmDataConverter {
     Map<String, Integer> featureIdxMap = new HashMap<String, Integer>();
     Map<String, List<Integer>> itemFeaturesMap = new HashMap<String, List<Integer>>();
     String msg = usedMemory() + "Converting data to internal vector format: ";
-    BufferedReader br = new BufferedReader(new FileReader(inputFile));
+    BufferedReader br = new BufferedReader(
+        new InputStreamReader(new FileInputStream(new File(inputFile)), Charset.forName("UTF-8")));
     try {
       System.out.print(msg);
       int prevPercentDone = 1;
@@ -194,8 +198,7 @@ public final class LastfmDataConverter {
       return;
     }
     Lastfm dataSet = Lastfm.valueOf(args[2]);
-    Map<String, List<Integer>> itemFeatures = convertToItemFeatures(args[0],
-        dataSet);
+    Map<String, List<Integer>> itemFeatures = convertToItemFeatures(args[0], dataSet);
     if (itemFeatures.isEmpty()) {
       throw new IllegalStateException("Error converting the data file: [" + args[0] + ']');
     }

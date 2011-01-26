@@ -19,8 +19,11 @@ package org.apache.mahout.clustering.display;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -54,16 +57,16 @@ class DisplaySpectralKMeans extends DisplayClustering {
     if (!fs.exists(output)) {
       fs.mkdirs(output);
     }
-    FileWriter writer = new FileWriter(affinities.toString());
-    PrintWriter out = new PrintWriter(writer);
+    Writer writer = new OutputStreamWriter(
+        new FileOutputStream(new File(affinities.toString())), Charset.forName("UTF-8"));
     try {
       for (int i = 0; i < SAMPLE_DATA.size(); i++) {
         for (int j = 0; j < SAMPLE_DATA.size(); j++) {
-          out.println(i + "," + j + ',' + measure.distance(SAMPLE_DATA.get(i).get(), SAMPLE_DATA.get(j).get()));
+          writer.write(i + "," + j + ',' + measure.distance(SAMPLE_DATA.get(i).get(), SAMPLE_DATA.get(j).get()) + '\n');
         }
       }
     } finally {
-      out.close();
+      writer.close();
     }
     int maxIter = 10;
     double convergenceDelta = 0.001;

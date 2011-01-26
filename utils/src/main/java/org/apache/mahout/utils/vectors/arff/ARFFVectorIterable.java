@@ -20,7 +20,6 @@ package org.apache.mahout.utils.vectors.arff;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -61,7 +60,7 @@ public class ARFFVectorIterable implements Iterable<Vector> {
   private final ARFFModel model;
   
   public ARFFVectorIterable(File file, ARFFModel model) throws IOException {
-    this(new FileReader(file), model);
+    this(file, Charset.forName("UTF-8"), model);
   }
   
   public ARFFVectorIterable(File file, Charset encoding, ARFFModel model) throws IOException {

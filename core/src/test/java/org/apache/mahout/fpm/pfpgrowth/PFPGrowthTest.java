@@ -17,9 +17,11 @@
 
 package org.apache.mahout.fpm.pfpgrowth;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,7 +56,7 @@ public final class PFPGrowthTest extends MahoutTestCase {
     File input = new File(inputDir, "test.txt");
     params.set(PFPGrowth.INPUT, input.getAbsolutePath());
     params.set(PFPGrowth.OUTPUT, outputDir.getAbsolutePath());
-    BufferedWriter writer = new BufferedWriter(new FileWriter(input));
+    Writer writer = new OutputStreamWriter(new FileOutputStream(input), Charset.forName("UTF-8"));
     try {
       Collection<List<String>> transactions = new ArrayList<List<String>>();
       transactions.add(Arrays.asList("E", "A", "D", "B"));

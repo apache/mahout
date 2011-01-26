@@ -17,10 +17,12 @@
 
 package org.apache.mahout.utils;
 
-import java.io.FileWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 import org.apache.commons.cli2.CommandLine;
 import org.apache.commons.cli2.Group;
@@ -86,7 +88,8 @@ public final class SequenceFileDumper {
         
         Writer writer;
         if (cmdLine.hasOption(outputOpt)) {
-          writer = new FileWriter(cmdLine.getValue(outputOpt).toString());
+          writer = new OutputStreamWriter(
+              new FileOutputStream(new File(cmdLine.getValue(outputOpt).toString())), Charset.forName("UTF-8"));
         } else {
           writer = new OutputStreamWriter(System.out);
         }

@@ -18,9 +18,11 @@
 package org.apache.mahout.clustering.lda;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -233,14 +235,17 @@ public final class LDAPrintTopics {
   private static void writeTopWords(List<List<String>> topWords, File output) throws IOException {
     for (int i = 0; i < topWords.size(); ++i) {
       List<String> topK = topWords.get(i);
-      File out = new File(output, "topic-" + i);
-      PrintWriter writer = new PrintWriter(new FileWriter(out));
-      writer.println("Topic " + i);
-      writer.println("===========");
-      for (String word : topK) {
-        writer.println(word);
+      Writer writer = new OutputStreamWriter(
+          new FileOutputStream(new File(output, "topic-" + i)), Charset.forName("UTF-8"));
+      try {
+        writer.write("Topic " + i + '\n');
+        writer.write("===========\n");
+        for (String word : topK) {
+          writer.write(word + '\n');
+        }
+      } finally {
+        writer.close();
       }
-      writer.close();
     }
   }
   

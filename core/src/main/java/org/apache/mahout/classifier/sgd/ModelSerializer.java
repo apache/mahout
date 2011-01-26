@@ -42,15 +42,18 @@ import org.apache.mahout.math.stats.OnlineAuc;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -89,7 +92,7 @@ public final class ModelSerializer {
   }
 
   public static void writeJson(String path, OnlineLearner model) throws IOException {
-    OutputStreamWriter out = new FileWriter(path);
+    Writer out = new OutputStreamWriter(new FileOutputStream(new File(path)), Charset.forName("UTF-8"));
     try {
       out.write(gson().toJson(model));
     } finally {
@@ -414,6 +417,8 @@ public final class ModelSerializer {
   }
 
   public static void main(String[] args) throws FileNotFoundException {
-    OnlineLogisticRegression m = ModelSerializer.loadJsonFrom(new FileReader("/tmp/news-group-1000.model"), OnlineLogisticRegression.class);
+    loadJsonFrom(new InputStreamReader(new FileInputStream(new File("/tmp/news-group-1000.model")),
+                                       Charset.forName("UTF-8")),
+                 OnlineLogisticRegression.class);
   }
 }

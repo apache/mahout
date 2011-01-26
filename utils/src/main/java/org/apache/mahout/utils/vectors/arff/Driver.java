@@ -20,7 +20,6 @@ package org.apache.mahout.utils.vectors.arff;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -173,7 +172,8 @@ public final class Driver {
       vectorWriter = getSeqFileWriter(outFile);
     } else {
       if ("file".equals(outWriter)) {
-        vectorWriter = new JWriterVectorWriter(new BufferedWriter(new FileWriter(outFile)));
+        vectorWriter = new JWriterVectorWriter(
+            new OutputStreamWriter(new FileOutputStream(new File(outFile)), Charset.forName("UTF-8")));
       } else {
         vectorWriter = getSeqFileWriter(outFile);
       }
