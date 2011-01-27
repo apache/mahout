@@ -144,6 +144,14 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
   
   @Override
   public RunningAverage getDiff(long itemID1, long itemID2) throws TasteException {
+
+    boolean flipped = itemID1 > itemID2;
+    if (flipped) {
+      long temp = itemID1;
+      itemID1 = itemID2;
+      itemID2 = temp;
+    }
+
     Connection conn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -154,11 +162,17 @@ public abstract class AbstractJDBCDiffStorage extends AbstractJDBCComponent impl
       stmt.setFetchSize(getFetchSize());
       stmt.setLong(1, itemID1);
       stmt.setLong(2, itemID2);
-      stmt.setLong(3, itemID2);
-      stmt.setLong(4, itemID1);
       log.debug("Executing SQL query: {}", getDiffSQL);
       rs = stmt.executeQuery();
-      return rs.next() ? new FixedRunningAverageAndStdDev(rs.getDouble(2), rs.getDouble(3), rs.getInt(1)) : null;
+      if (rs.next()) {
+        double average = rs.getDouble(2);
+        if (flipped) {
+          average = -average;
+        }
+        return new FixedRunningAverageAndStdDev(average, rs.getDouble(3), rs.getInt(1));
+      } else {
+        return null;
+      }
     } catch (SQLException sqle) {
       log.warn("Exception while retrieving diff", sqle);
       throw new TasteException(sqle);
