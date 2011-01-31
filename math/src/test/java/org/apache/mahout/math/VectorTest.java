@@ -504,14 +504,14 @@ public final class VectorTest extends MahoutTestCase {
       0.2672612419124244, 0.4235990463273581, 0.5345224838248488
     });
 
-    assertVectorEquals(expected, norm, 1e-16);
-    assertVectorEquals(expected, norm2, 1e-16);
+    assertVectorEquals(expected, norm, 1e-15);
+    assertVectorEquals(expected, norm2, 1e-15);
 
     norm = vec1.logNormalize(2);
-    assertVectorEquals(expected, norm, 1e-16);
+    assertVectorEquals(expected, norm, 1e-15);
     
     norm2 = vec2.logNormalize(2);
-    assertVectorEquals(expected, norm2, 1e-16);
+    assertVectorEquals(expected, norm2, 1e-15);
     
     try {
       vec1.logNormalize(1);
