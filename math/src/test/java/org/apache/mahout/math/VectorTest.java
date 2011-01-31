@@ -499,42 +499,47 @@ public final class VectorTest extends MahoutTestCase {
     vec2.setQuick(2, 3);
     Vector norm2 = vec2.logNormalize();
     assertNotNull("norm1 is null and it shouldn't be", norm2);
-    
-    Vector expected = new RandomAccessSparseVector(3);
-    
-    expected.setQuick(0, 0.2672612419124244);
-    expected.setQuick(1, 0.4235990463273581);
-    expected.setQuick(2, 0.5345224838248488);
-    
-    assertEquals(expected, norm);
-    
+
+    Vector expected = new DenseVector(new double[]{
+      0.2672612419124244, 0.4235990463273581, 0.5345224838248488
+    });
+
+    assertVectorEquals(expected, norm, 1e-16);
+    assertVectorEquals(expected, norm2, 1e-16);
+
     norm = vec1.logNormalize(2);
-    assertEquals(expected, norm);
+    assertVectorEquals(expected, norm, 1e-16);
     
     norm2 = vec2.logNormalize(2);
-    assertEquals(expected, norm2);
+    assertVectorEquals(expected, norm2, 1e-16);
     
     try {
-      norm = vec1.logNormalize(1);
-      fail();
+      vec1.logNormalize(1);
+      fail("Should fail with power == 1");
     } catch (IllegalArgumentException e) {
       // expected
     }
-    norm = vec1.logNormalize(3);
-  
+
     try {
       vec1.logNormalize(-1);
-      fail();
+      fail("Should fail with negative power");
     } catch (IllegalArgumentException e) {
       // expected
     }
     
     try {
-      vec2.logNormalize(Double.POSITIVE_INFINITY);
-      fail();
+      norm = vec2.logNormalize(Double.POSITIVE_INFINITY);
+      fail("Should fail with positive infinity norm");
     } catch (IllegalArgumentException e) {
       // expected
     }  
+  }
+
+  private void assertVectorEquals(Vector expected, Vector actual, double epsilon) {
+    assertEquals(expected.size(), actual.size());
+    for (Vector.Element x : expected) {
+      assertEquals(x.get(), actual.get(x.index()), epsilon);
+    }
   }
 
   @Test

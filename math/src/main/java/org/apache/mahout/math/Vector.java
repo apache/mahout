@@ -219,7 +219,7 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    *
    * @param power The power to use. Must be >= 0. May also be {@link Double#POSITIVE_INFINITY}. See the Wikipedia link
    *              for more on this.
-   * @return a new Vector
+   * @return a new Vector x such that norm(x, power) == 1
    */
   Vector normalize(double power);
   
