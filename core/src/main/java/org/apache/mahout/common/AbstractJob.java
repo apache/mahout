@@ -199,7 +199,7 @@ public abstract class AbstractJob extends Configured implements Tool {
    * @param defaultValue default argument value, can be null.
    * @return the option.
    */
-  private static Option buildOption(String name,
+  protected static Option buildOption(String name,
                                     String shortName,
                                     String description,
                                     boolean hasArg,
