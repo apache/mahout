@@ -30,6 +30,13 @@ import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
+/**
+ * The {@link org.apache.mahout.clustering.kmeans.KMeansClusterMapper} is responsible for calculating which points belong
+ * to which clusters and outputting the information.  This is an optional step, as some applications only care about
+ * what the Centroids are.
+ *
+ * @see KMeansDriver for more information on how to invoke this process
+ */
 public class KMeansClusterMapper extends Mapper<WritableComparable<?>,VectorWritable,IntWritable,WeightedVectorWritable> {
   
   private final Collection<Cluster> clusters = new ArrayList<Cluster>();
