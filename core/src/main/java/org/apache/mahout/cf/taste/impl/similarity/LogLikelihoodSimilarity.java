@@ -27,6 +27,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.apache.mahout.math.stats.LogLikelihood;
 
 /**
  * See <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.14.5962">
@@ -64,10 +65,11 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
       return Double.NaN;
     }
     int numItems = dataModel.getNumItems();
-    double logLikelihood = twoLogLambda(intersectionSize,
-                                        prefs1Size - intersectionSize,
-                                        prefs2Size,
-                                        numItems - prefs2Size);
+    double logLikelihood =
+        LogLikelihood.logLikelihoodRatio(intersectionSize,
+                                         prefs1Size - intersectionSize,
+                                         prefs2Size - intersectionSize,
+                                         numItems - prefs1Size - prefs2Size + intersectionSize);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
   
@@ -96,29 +98,14 @@ public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimila
       return Double.NaN;
     }
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
-    double logLikelihood = twoLogLambda(preferring1and2,
-                                        preferring1 - preferring1and2,
-                                        preferring2,
-                                        numUsers - preferring2);
+    double logLikelihood =
+        LogLikelihood.logLikelihoodRatio(preferring1and2,
+                                         preferring1 - preferring1and2,
+                                         preferring2 - preferring1and2,
+                                         numUsers - preferring1 - preferring2 + preferring1and2);
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
-  
-  static double twoLogLambda(double k1, double k2, double n1, double n2) {
-    double p = (k1 + k2) / (n1 + n2);
-    return 2.0 * (logL(k1 / n1, k1, n1)
-                  + logL(k2 / n2, k2, n2)
-                  - logL(p, k1, n1)
-                  - logL(p, k2, n2));
-  }
-  
-  private static double logL(double p, double k, double n) {
-    return k * safeLog(p) + (n - k) * safeLog(1.0 - p);
-  }
-  
-  private static double safeLog(double d) {
-    return d <= 0.0 ? 0.0 : Math.log(d);
-  }
-  
+
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);

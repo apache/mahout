@@ -24,6 +24,7 @@ import com.google.common.collect.Ordering;
 import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Queue;
 
 /**
  * Utility methods for working with log-likelihood
@@ -126,7 +127,10 @@ public final class LogLikelihood {
    * in a than b.  Use -Double.MAX_VALUE (not Double.MIN_VALUE !) to not use a threshold.
    * @return  A list of scored items with their scores.
    */
-  public static <T> List<ScoredItem<T>> compareFrequencies(Multiset<T> a, Multiset<T> b, int maxReturn, double threshold) {
+  public static <T> List<ScoredItem<T>> compareFrequencies(Multiset<T> a,
+                                                           Multiset<T> b,
+                                                           int maxReturn,
+                                                           double threshold) {
     int totalA = a.size();
     int totalB = b.size();
 
@@ -135,7 +139,7 @@ public final class LogLikelihood {
         return Double.compare(tScoredItem.score, tScoredItem1.score);
       }
     };
-    PriorityQueue<ScoredItem<T>> best = new PriorityQueue<ScoredItem<T>>(maxReturn + 1, byScoreAscending);
+    Queue<ScoredItem<T>> best = new PriorityQueue<ScoredItem<T>>(maxReturn + 1, byScoreAscending);
 
     for (T t : a.elementSet()) {
       compareAndAdd(a, b, maxReturn, threshold, totalA, totalB, best, t);
@@ -156,7 +160,14 @@ public final class LogLikelihood {
     return r;
   }
 
-  private static <T> void compareAndAdd(Multiset<T> a, Multiset<T> b, int maxReturn, double threshold, int totalA, int totalB, PriorityQueue<ScoredItem<T>> best, T t) {
+  private static <T> void compareAndAdd(Multiset<T> a,
+                                        Multiset<T> b,
+                                        int maxReturn,
+                                        double threshold,
+                                        int totalA,
+                                        int totalB,
+                                        Queue<ScoredItem<T>> best,
+                                        T t) {
     int kA = a.count(t);
     int kB = b.count(t);
     double score = rootLogLikelihoodRatio(kA, totalA - kA, kB, totalB - kB);
@@ -169,13 +180,21 @@ public final class LogLikelihood {
     }
   }
 
-  public final static class ScoredItem<T> {
-    public T item;
-    public double score;
+  public static final class ScoredItem<T> {
+    private final T item;
+    private final double score;
 
     public ScoredItem(T item, double score) {
       this.item = item;
       this.score = score;
+    }
+
+    public double getScore() {
+      return score;
+    }
+
+    public T getItem() {
+      return item;
     }
   }
 }

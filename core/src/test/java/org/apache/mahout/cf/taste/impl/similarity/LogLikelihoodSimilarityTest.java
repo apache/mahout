@@ -35,23 +35,40 @@ public final class LogLikelihoodSimilarityTest extends SimilarityTestCase {
                     {null, 1.0, 1.0, 1.0, 1.0},
             });
 
-    double correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(1, 0);
-    assertCorrelationEquals(0.12160727029227925, correlation);
+    LogLikelihoodSimilarity similarity = new LogLikelihoodSimilarity(dataModel);
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(0, 1);
-    assertCorrelationEquals(0.12160727029227925, correlation);
+    assertCorrelationEquals(0.12160727029227925, similarity.itemSimilarity(1, 0));
+    assertCorrelationEquals(0.12160727029227925, similarity.itemSimilarity(0, 1));
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(2, 1);
-    assertCorrelationEquals(0.5423213660693733, correlation);
+    assertCorrelationEquals(0.5423213660693732, similarity.itemSimilarity(1, 2));
+    assertCorrelationEquals(0.5423213660693732, similarity.itemSimilarity(2, 1));
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(2, 3);
-    assertCorrelationEquals(0.6905400104897509, correlation);
+    assertCorrelationEquals(0.6905400104897509, similarity.itemSimilarity(2, 3));
+    assertCorrelationEquals(0.6905400104897509, similarity.itemSimilarity(3, 2));
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(3, 4);
-    assertCorrelationEquals(0.8706358464330881, correlation);
+    assertCorrelationEquals(0.8706358464330881, similarity.itemSimilarity(3, 4));
+    assertCorrelationEquals(0.8706358464330881, similarity.itemSimilarity(4, 3));
+  }
 
-    correlation = new LogLikelihoodSimilarity(dataModel).itemSimilarity(4, 3);
-    assertCorrelationEquals(0.8706358464330881, correlation);
+  @Test
+  public void testNoSimilarity() throws Exception {
+
+    DataModel dataModel = getDataModel(
+        new long[] {1, 2, 3, 4},
+        new Double[][] {
+                {1.0, null, 1.0, 1.0},
+                {1.0, null, 1.0, 1.0},
+                {null, 1.0, 1.0, 1.0},
+                {null, 1.0, 1.0, 1.0},
+        });
+
+    LogLikelihoodSimilarity similarity = new LogLikelihoodSimilarity(dataModel);
+
+    assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(1, 0));
+    assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(0, 1));
+
+    assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(2, 3));
+    assertCorrelationEquals(Double.NaN, similarity.itemSimilarity(3, 2));
   }
 
   @Test

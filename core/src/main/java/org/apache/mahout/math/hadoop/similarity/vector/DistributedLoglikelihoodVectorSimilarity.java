@@ -19,6 +19,7 @@ package org.apache.mahout.math.hadoop.similarity.vector;
 
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.hadoop.similarity.Cooccurrence;
+import org.apache.mahout.math.stats.LogLikelihood;
 
 /**
  * distributed implementation of loglikelihood as vector similarity measure
@@ -38,10 +39,11 @@ public class DistributedLoglikelihoodVectorSimilarity extends
     int occurrencesA = (int) weightOfVectorA;
     int occurrencesB = (int) weightOfVectorB;
 
-    double logLikelihood = twoLogLambda(cooccurrenceCount,
-                                        occurrencesA - cooccurrenceCount,
-                                        occurrencesB,
-                                        numberOfColumns - occurrencesB);
+    double logLikelihood =
+        LogLikelihood.logLikelihoodRatio(cooccurrenceCount,
+                                         occurrencesA - cooccurrenceCount,
+                                         occurrencesB - cooccurrenceCount,
+                                         numberOfColumns - occurrencesA - occurrencesB + cooccurrenceCount);
 
     return 1.0 - 1.0 / (1.0 + logLikelihood);
   }
@@ -51,19 +53,4 @@ public class DistributedLoglikelihoodVectorSimilarity extends
     return (double) countElements(v.iterateNonZero());
   }
 
-  private static double twoLogLambda(double k1, double k2, double n1, double n2) {
-    double p = (k1 + k2) / (n1 + n2);
-    return 2.0 * (logL(k1 / n1, k1, n1)
-                  + logL(k2 / n2, k2, n2)
-                  - logL(p, k1, n1)
-                  - logL(p, k2, n2));
-  }
-
-  private static double logL(double p, double k, double n) {
-    return k * safeLog(p) + (n - k) * safeLog(1.0 - p);
-  }
-
-  private static double safeLog(double d) {
-    return d <= 0.0 ? 0.0 : Math.log(d);
-  }
 }

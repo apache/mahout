@@ -66,6 +66,10 @@ public abstract class DistributedVectorSimilarityTestCase extends MahoutTestCase
     }
 
     double result = similarity.similarity(rowA, rowB, cooccurrences, weightA, weightB, numberOfColumns);
-    assertEquals(expectedSimilarity, result, EPSILON);
+    if (Double.isNaN(expectedSimilarity)) {
+      assertTrue(Double.isNaN(result));
+    } else {
+      assertEquals(expectedSimilarity, result, EPSILON);
+    }
   }
 }
