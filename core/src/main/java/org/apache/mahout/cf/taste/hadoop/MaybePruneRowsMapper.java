@@ -42,6 +42,10 @@ public class MaybePruneRowsMapper
   private int maxCooccurrences;
   private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
 
+  static enum Elements {
+    USED, NEGLECTED;
+  }
+
   @Override
   protected void setup(Context ctx) throws IOException, InterruptedException {
     super.setup(ctx);
@@ -56,7 +60,13 @@ public class MaybePruneRowsMapper
     throws IOException, InterruptedException {
     Vector vector = vectorWritable.get();
     countSeen(vector);
+
+    int numElementsBeforePruning = vector.getNumNondefaultElements();
     vector = maybePruneVector(vector);
+    int numElementsAfterPruning = vector.getNumNondefaultElements();
+
+    ctx.getCounter(Elements.USED).increment(numElementsAfterPruning);
+    ctx.getCounter(Elements.NEGLECTED).increment(numElementsBeforePruning - numElementsAfterPruning);
 
     DistributedRowMatrix.MatrixEntryWritable entry = new DistributedRowMatrix.MatrixEntryWritable();
     int colIndex = TasteHadoopUtils.idToIndex(rowIndex.get());

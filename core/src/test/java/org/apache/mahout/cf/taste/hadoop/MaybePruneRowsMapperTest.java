@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -51,21 +52,37 @@ public class MaybePruneRowsMapperTest extends TasteTestCase {
 
     Mapper<VarLongWritable,VectorWritable, IntWritable, DistributedRowMatrix.MatrixEntryWritable>.Context ctx =
       EasyMock.createMock(Mapper.Context.class);
+    Counter usedElementsCounter = EasyMock.createMock(Counter.class);
+    Counter neglectedElementsCounter = EasyMock.createMock(Counter.class);
 
     ctx.write(EasyMock.eq(new IntWritable(1)), MathHelper.matrixEntryMatches(1, 123, 1));
     ctx.write(EasyMock.eq(new IntWritable(3)), MathHelper.matrixEntryMatches(3, 123, 1));
+    EasyMock.expect(ctx.getCounter(MaybePruneRowsMapper.Elements.USED)).andReturn(usedElementsCounter);
+    usedElementsCounter.increment(2);
+    EasyMock.expect(ctx.getCounter(MaybePruneRowsMapper.Elements.NEGLECTED)).andReturn(neglectedElementsCounter);
+    neglectedElementsCounter.increment(0);
+
     ctx.write(EasyMock.eq(new IntWritable(1)), MathHelper.matrixEntryMatches(1, 456, 1));
-    ctx.write(EasyMock.eq(new IntWritable(7)), MathHelper.matrixEntryMatches(7, 456, 1));    
+    ctx.write(EasyMock.eq(new IntWritable(7)), MathHelper.matrixEntryMatches(7, 456, 1));
+    EasyMock.expect(ctx.getCounter(MaybePruneRowsMapper.Elements.USED)).andReturn(usedElementsCounter);
+    usedElementsCounter.increment(2);
+    EasyMock.expect(ctx.getCounter(MaybePruneRowsMapper.Elements.NEGLECTED)).andReturn(neglectedElementsCounter);
+    neglectedElementsCounter.increment(0);
+
     ctx.write(EasyMock.eq(new IntWritable(5)), MathHelper.matrixEntryMatches(5, 789, 1));
     ctx.write(EasyMock.eq(new IntWritable(9)), MathHelper.matrixEntryMatches(9, 789, 1));
+        EasyMock.expect(ctx.getCounter(MaybePruneRowsMapper.Elements.USED)).andReturn(usedElementsCounter);
+    usedElementsCounter.increment(2);
+    EasyMock.expect(ctx.getCounter(MaybePruneRowsMapper.Elements.NEGLECTED)).andReturn(neglectedElementsCounter);
+    neglectedElementsCounter.increment(1);
 
-    EasyMock.replay(ctx);
+    EasyMock.replay(ctx, usedElementsCounter, neglectedElementsCounter);
 
     mapper.map(new VarLongWritable(123L), new VectorWritable(v1), ctx);
     mapper.map(new VarLongWritable(456L), new VectorWritable(v2), ctx);
     mapper.map(new VarLongWritable(789L), new VectorWritable(v3), ctx);
 
-    EasyMock.verify(ctx);
+    EasyMock.verify(ctx, usedElementsCounter, neglectedElementsCounter);
   }
 
 }
