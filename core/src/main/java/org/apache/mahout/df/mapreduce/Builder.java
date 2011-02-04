@@ -102,10 +102,10 @@ public abstract class Builder {
     // if we are in 'local' mode, correct the number of maps
     // or the mappers won't be able to compute the right indexes
     String tracker = conf.get("mapred.job.tracker", "local");
-    if ("local".equals(tracker)) {
-      log.warn("Hadoop running in 'local' mode, only one map task will be launched");
-      return 1;
-    }
+//    if ("local".equals(tracker)) {
+//      log.warn("Hadoop running in 'local' mode, only one map task will be launched");
+//      return 1;
+//    }
     
     return conf.getInt("mapred.map.tasks", -1);
   }
