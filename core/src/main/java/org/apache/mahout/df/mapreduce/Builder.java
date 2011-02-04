@@ -92,24 +92,16 @@ public abstract class Builder {
   }
   
   /**
-   * Return the value of "mapred.map.tasks". In case the 'local' runner is detected, returns 1
+   * Return the value of "mapred.map.tasks".
    * 
    * @param conf
    *          configuration
    * @return number of map tasks
    */
   public static int getNumMaps(Configuration conf) {
-    // if we are in 'local' mode, correct the number of maps
-    // or the mappers won't be able to compute the right indexes
-    String tracker = conf.get("mapred.job.tracker", "local");
-//    if ("local".equals(tracker)) {
-//      log.warn("Hadoop running in 'local' mode, only one map task will be launched");
-//      return 1;
-//    }
-    
     return conf.getInt("mapred.map.tasks", -1);
   }
-  
+
   /**
    * Used only for DEBUG purposes. if false, the mappers doesn't output anything, so the builder has nothing
    * to process
