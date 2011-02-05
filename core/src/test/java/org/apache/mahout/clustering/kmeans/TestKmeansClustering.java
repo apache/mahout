@@ -97,7 +97,7 @@ public final class TestKmeansClustering extends MahoutTestCase {
    * Tests {@link KMeansClusterer#runKMeansIteration) single run convergence with a given distance threshold.
    */
   @Test
-  public void testRunKMeansIteration_convergesInOneRunWithGivenDistanceThreshold() {
+  public void testRunKMeansIterationConvergesInOneRunWithGivenDistanceThreshold() {
     double[][] rawPoints = { {0,0}, {0,0.25}, {0,0.75}, {0, 1}};
     List<Vector> points = getPoints(rawPoints);
 

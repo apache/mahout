@@ -42,13 +42,13 @@ import org.slf4j.LoggerFactory;
 public class DefaultTreeBuilder implements TreeBuilder {
   
   private static final Logger log = LoggerFactory.getLogger(DefaultTreeBuilder.class);
-  
+
+  private static final int[] NO_ATTRIBUTES = new int[0];
+
   /** indicates which CATEGORICAL attributes have already been selected in the parent nodes */
   private boolean[] selected;
-  
   /** number of attributes to select randomly at each node */
   private int m = 1;
-  
   /** IgSplit implementation */
   private IgSplit igSplit;
   
@@ -82,7 +82,8 @@ public class DefaultTreeBuilder implements TreeBuilder {
     }
     
     int[] attributes = randomAttributes(rng, selected, m);
-    if (attributes == null) { // we tried all the attributes and could not split the data anymore
+    if (attributes == null || attributes.length == 0) {
+      // we tried all the attributes and could not split the data anymore
       return new Leaf(data.majorityLabel(rng));
     }
 
@@ -212,7 +213,7 @@ public class DefaultTreeBuilder implements TreeBuilder {
     
     if (nbNonSelected == 0) {
       log.warn("All attributes are selected !");
-      return null;
+      return NO_ATTRIBUTES;
     }
     
     int[] result;

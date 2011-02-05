@@ -96,7 +96,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   private final String getUsersSQL;
   private final String getItemsSQL;
   private final String getPrefsForItemSQL;
-  private final String getNumPreferenceForItemSQL;
+  //private final String getNumPreferenceForItemSQL;
   private final String getNumPreferenceForItemsSQL;
   private final String getMaxPreferenceSQL;
   private final String getMinPreferenceSQL;
@@ -212,7 +212,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
     this.getUsersSQL = getUsersSQL;
     this.getItemsSQL = getItemsSQL;
     this.getPrefsForItemSQL = getPrefsForItemSQL;
-    this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
+    //this.getNumPreferenceForItemSQL = getNumPreferenceForItemSQL;
     this.getNumPreferenceForItemsSQL = getNumPreferenceForItemsSQL;
     this.getMaxPreferenceSQL = getMaxPreferenceSQL;
     this.getMinPreferenceSQL = getMinPreferenceSQL;

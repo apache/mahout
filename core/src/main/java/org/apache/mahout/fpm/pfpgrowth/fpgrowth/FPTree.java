@@ -29,60 +29,35 @@ import java.util.TreeSet;
 public class FPTree {
   
   public static final int ROOTNODEID = 0;
-  
   private static final int DEFAULT_CHILDREN_INITIAL_SIZE = 2;
-  
   private static final int DEFAULT_HEADER_TABLE_INITIAL_SIZE = 4;
-  
   private static final int DEFAULT_INITIAL_SIZE = 8;
-  
   private static final float GROWTH_RATE = 1.5f;
-  
   private static final int HEADERTABLEBLOCKSIZE = 2;
-  
   private static final int HT_LAST = 1;
-  
   private static final int HT_NEXT = 0;
   
   private int[] attribute;
-  
   private int[] childCount;
-  
   private int[] conditional;
-  
   private long[] headerTableAttributeCount;
-  
   private int[] headerTableAttributes;
-  
   private int headerTableCount;
-  
   private int[] headerTableLookup;
-  
   private int[][] headerTableProperties;
-  
   private int[] next;
-  
   private int[][] nodeChildren;
-  
   private long[] nodeCount;
-  
   private int nodes;
-  
   private int[] parent;
-  
   private boolean singlePath;
-  
   private final Collection<Integer> sortedSet = new TreeSet<Integer>();
   
   public FPTree() {
-    this(DEFAULT_INITIAL_SIZE, DEFAULT_HEADER_TABLE_INITIAL_SIZE);
+    this(DEFAULT_INITIAL_SIZE);
   }
   
   public FPTree(int size) {
-    this(size, DEFAULT_HEADER_TABLE_INITIAL_SIZE);
-  }
-  
-  private FPTree(int size, int headersize) {
     if (size < DEFAULT_INITIAL_SIZE) {
       size = DEFAULT_INITIAL_SIZE;
     }

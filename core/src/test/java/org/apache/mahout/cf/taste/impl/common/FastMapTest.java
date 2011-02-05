@@ -135,7 +135,7 @@ public final class FastMapTest extends TasteTestCase {
     Iterator<String> it = actual.iterator();
     while (it.hasNext()) {
       String value = it.next();
-      if (!value.equals("baz")) {
+      if (!"baz".equals(value)) {
         it.remove();
       }
     }
@@ -157,7 +157,7 @@ public final class FastMapTest extends TasteTestCase {
     Iterator<String> it = actual.iterator();
     while (it.hasNext()) {
       String value = it.next();
-      if (!value.equals("bang")) {
+      if (!"bang".equals(value)) {
         it.remove();
       }
     }

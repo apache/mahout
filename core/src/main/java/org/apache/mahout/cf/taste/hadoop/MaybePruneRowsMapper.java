@@ -42,8 +42,8 @@ public class MaybePruneRowsMapper
   private int maxCooccurrences;
   private final OpenIntIntHashMap indexCounts = new OpenIntIntHashMap();
 
-  static enum Elements {
-    USED, NEGLECTED;
+  enum Elements {
+    USED, NEGLECTED
   }
 
   @Override

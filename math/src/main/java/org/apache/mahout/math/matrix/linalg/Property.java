@@ -14,11 +14,6 @@ import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix2D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 
-import java.util.Formatter;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
-
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
 public final class Property {

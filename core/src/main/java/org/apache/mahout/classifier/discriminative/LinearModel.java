@@ -86,7 +86,7 @@ public class LinearModel {
    * Shift the bias of the model.
    * @param factor factor to multiply the bias by.
    */
-  public synchronized void shiftBias(double factor) {
+  public void shiftBias(double factor) {
     this.bias += factor;
   }
   

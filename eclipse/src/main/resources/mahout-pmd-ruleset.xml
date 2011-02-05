@@ -145,7 +145,7 @@
     <!--<rule ref="rulesets/naming.xml/ShortVariable"/>-->
     <!--<rule ref="rulesets/naming.xml/LongVariable"/>-->
     <!--<rule ref="rulesets/naming.xml/ShortMethodName"/>-->
-    <rule ref="rulesets/naming.xml/VariableNamingConventions"/>
+    <!--<rule ref="rulesets/naming.xml/VariableNamingConventions"/>-->
     <rule ref="rulesets/naming.xml/MethodNamingConventions"/>
     <rule ref="rulesets/naming.xml/ClassNamingConventions"/>
     <!--<rule ref="rulesets/naming.xml/AbstractNaming"/>-->

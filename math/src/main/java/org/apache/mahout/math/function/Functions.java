@@ -571,7 +571,7 @@ public final class Functions {
    * Constructs a function that returns <tt>Math.IEEEremainder(a,b)</tt>. <tt>a</tt> is a variable, <tt>b</tt> is
    * fixed.
    */
-  public static DoubleFunction IEEEremainder(final double b) {
+  public static DoubleFunction mathIEEEremainder(final double b) {
     return new DoubleFunction() {
 
       public double apply(double a) {

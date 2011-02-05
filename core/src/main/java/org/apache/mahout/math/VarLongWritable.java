@@ -44,7 +44,7 @@ public class VarLongWritable implements WritableComparable<VarLongWritable>, Clo
 
   @Override
   public boolean equals(Object other) {
-    return other != null && VarLongWritable.class.equals(other.getClass()) && ((VarLongWritable) other).value == value;
+    return other != null && getClass().equals(other.getClass()) && ((VarLongWritable) other).value == value;
   }
 
   @Override

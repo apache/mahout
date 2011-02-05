@@ -55,6 +55,7 @@ public final class DefaultTreeBuilderTest extends MahoutTestCase {
 
       int[] attrs = DefaultTreeBuilder.randomAttributes(rng, selected, m);
 
+      assertNotNull(attrs);
       assertEquals(Math.min(m, nbAttributes - nbSelected), attrs.length);
 
       for (int attr : attrs) {

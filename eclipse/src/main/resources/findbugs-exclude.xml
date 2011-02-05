@@ -37,6 +37,9 @@
     <Bug pattern="SE_NO_SERIALVERSIONID"/>
   </Match>
   <Match>
+    <Bug pattern="SE_NO_SUITABLE_CONSTRUCTOR"/>
+  </Match>
+  <Match>
     <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
   </Match>
   <Match>

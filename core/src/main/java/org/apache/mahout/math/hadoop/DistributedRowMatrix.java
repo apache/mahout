@@ -219,6 +219,7 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       this.fs = fs;
       this.conf = conf;
       statuses = fs.globStatus(new Path(rowPath, "*"));
+      statusIndex = 0;
       reader = new SequenceFile.Reader(fs, statuses[statusIndex].getPath(), conf);
     }
 

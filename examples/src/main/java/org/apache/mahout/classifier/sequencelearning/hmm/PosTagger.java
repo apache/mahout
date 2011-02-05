@@ -22,12 +22,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.math.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +49,9 @@ import org.slf4j.LoggerFactory;
 public final class PosTagger {
 
   private static final Logger log = LoggerFactory.getLogger(PosTagger.class);
+
+  private static final Pattern SPACE = Pattern.compile(" ");
+  private static final Pattern SPACES = Pattern.compile("[ ]+");
 
   /**
    * No public constructors for utility classes.
@@ -110,54 +116,60 @@ public final class PosTagger {
    */
   private static void readFromURL(String url, boolean assignIDs) throws IOException {
     URLConnection connection = (new URL(url)).openConnection();
-    BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
     // initialize the data structure
     hiddenSequences = new LinkedList<int[]>();
     observedSequences = new LinkedList<int[]>();
     readLines = 0;
 
     // now read line by line of the input file
-    String line;
     List<Integer> observedSequence = new LinkedList<Integer>();
     List<Integer> hiddenSequence = new LinkedList<Integer>();
-    while ((line = input.readLine()) != null) {
-      if (line.isEmpty()) {
-        // new sentence starts
-        int[] observedSequenceArray = new int[observedSequence.size()];
-        int[] hiddenSequenceArray = new int[hiddenSequence.size()];
-        for (int i = 0; i < observedSequence.size(); ++i) {
-          observedSequenceArray[i] = observedSequence.get(i);
-          hiddenSequenceArray[i] = hiddenSequence.get(i);
+
+    BufferedReader input =
+        new BufferedReader(new InputStreamReader(connection.getInputStream(), Charset.forName("UTF-8")));
+    try {
+      String line;
+      while ((line = input.readLine()) != null) {
+        if (line.isEmpty()) {
+          // new sentence starts
+          int[] observedSequenceArray = new int[observedSequence.size()];
+          int[] hiddenSequenceArray = new int[hiddenSequence.size()];
+          for (int i = 0; i < observedSequence.size(); ++i) {
+            observedSequenceArray[i] = observedSequence.get(i);
+            hiddenSequenceArray[i] = hiddenSequence.get(i);
+          }
+          // now register those arrays
+          hiddenSequences.add(hiddenSequenceArray);
+          observedSequences.add(observedSequenceArray);
+          // and reset the linked lists
+          observedSequence.clear();
+          hiddenSequence.clear();
+          continue;
         }
-        // now register those arrays
-        hiddenSequences.add(hiddenSequenceArray);
-        observedSequences.add(observedSequenceArray);
-        // and reset the linked lists
-        observedSequence.clear();
-        hiddenSequence.clear();
-        continue;
+        readLines++;
+        // we expect the format [word] [POS tag] [NP tag]
+        String[] tags = SPACE.split(line);
+        // when analyzing the training set, assign IDs
+        if (assignIDs) {
+          if (!wordIDs.containsKey(tags[0])) {
+            wordIDs.put(tags[0], nextWordId++);
+          }
+          if (!tagIDs.containsKey(tags[1])) {
+            tagIDs.put(tags[1], nextTagId++);
+          }
+        }
+        // determine the IDs
+        Integer wordID = wordIDs.get(tags[0]);
+        Integer tagID = tagIDs.get(tags[1]);
+        // handle unknown values
+        wordID = (wordID == null) ? 0 : wordID;
+        tagID = (tagID == null) ? 0 : tagID;
+        // now construct the current sequence
+        observedSequence.add(wordID);
+        hiddenSequence.add(tagID);
       }
-      readLines++;
-      // we expect the format [word] [POS tag] [NP tag]
-      String[] tags = line.split(" ");
-      // when analyzing the training set, assign IDs
-      if (assignIDs) {
-        if (!wordIDs.containsKey(tags[0])) {
-          wordIDs.put(tags[0], nextWordId++);
-        }
-        if (!tagIDs.containsKey(tags[1])) {
-          tagIDs.put(tags[1], nextTagId++);
-        }
-      }
-      // determine the IDs
-      Integer wordID = wordIDs.get(tags[0]);
-      Integer tagID = tagIDs.get(tags[1]);
-      // handle unknown values
-      wordID = (wordID == null) ? 0 : wordID;
-      tagID = (tagID == null) ? 0 : tagID;
-      // now construct the current sequence
-      observedSequence.add(wordID);
-      hiddenSequence.add(tagID);
+    } finally {
+      IOUtils.quietClose(input);
     }
     // if there is still something in the pipe, register it
     if (!observedSequence.isEmpty()) {
@@ -244,7 +256,7 @@ public final class PosTagger {
     sentence = sentence.replaceAll("[,.!?:;\"]", " $0 ");
     sentence = sentence.replaceAll("''", " '' ");
     // now we tokenize the sentence
-    String[] tokens = sentence.split("[ ]+");
+    String[] tokens = SPACES.split(sentence);
     // now generate the observed sequence
     int[] observedSequence = HmmUtils.encodeStateSequence(taggingModel, Arrays.asList(tokens), true, 0);
     // POS tag this observedSequence
@@ -259,7 +271,7 @@ public final class PosTagger {
     testModel("http://www.jaist.ac.jp/~hieuxuan/flexcrfs/CoNLL2000-NP/test.txt");
     // tag an exemplary sentence
     String test = "McDonalds is a huge company with many employees .";
-    String[] testWords = test.split(" ");
+    String[] testWords = SPACE.split(test);
     List<String> posTags = tagSentence(test);
     for (int i = 0; i < posTags.size(); ++i) {
       log.info("{}[{}]", testWords[i], posTags.get(i));

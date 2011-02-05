@@ -27,15 +27,10 @@ import org.apache.mahout.math.map.OpenLongObjectHashMap;
 public final class FrequentPatternMaxHeap {
   
   private int count;
-  
   private Pattern least;
-  
   private final int maxSize;
-  
   private final boolean subPatternCheck;
-  
   private final OpenLongObjectHashMap<Set<Pattern>> patternIndex;
-  
   private final PriorityQueue<Pattern> queue;
   
   public FrequentPatternMaxHeap(int numResults, boolean subPatternCheck) {
@@ -64,15 +59,13 @@ public final class FrequentPatternMaxHeap {
     if (subPatternCheck) {
       PriorityQueue<Pattern> ret = new PriorityQueue<Pattern>(maxSize);
       for (Pattern p : queue) {
-        
         if (patternIndex.get(p.support()).contains(p)) {
           ret.add(p);
         }
       }
       return ret;
-    } else {
-      return queue;
     }
+    return queue;
   }
   
   public void addAll(FrequentPatternMaxHeap patterns,
@@ -93,25 +86,22 @@ public final class FrequentPatternMaxHeap {
     }
     
     if (count == maxSize) {
-      if (frequentPattern.compareTo(least) > 0) {
-        if (addPattern(frequentPattern)) {
-          Pattern evictedItem = queue.poll();
-          least = queue.peek();
-          if (subPatternCheck) {
-            patternIndex.get(evictedItem.support()).remove(evictedItem);
-          }
-          
+      if (frequentPattern.compareTo(least) > 0 && addPattern(frequentPattern)) {
+        Pattern evictedItem = queue.poll();
+        least = queue.peek();
+        if (subPatternCheck) {
+          patternIndex.get(evictedItem.support()).remove(evictedItem);
         }
       }
     } else {
       if (addPattern(frequentPattern)) {
         count++;
-        if (least != null) {
+        if (least == null) {
+          least = frequentPattern;
+        } else {
           if (least.compareTo(frequentPattern) < 0) {
             least = frequentPattern;
           }
-        } else {
-          least = frequentPattern;
         }
       }
     }
@@ -157,7 +147,6 @@ public final class FrequentPatternMaxHeap {
         }
         queue.add(frequentPattern);
         indexSet.add(frequentPattern);
-        return true;
       } else {
         queue.add(frequentPattern);
         Set<Pattern> patternList;
@@ -167,12 +156,10 @@ public final class FrequentPatternMaxHeap {
         }
         patternList = patternIndex.get(index);
         patternList.add(frequentPattern);
-
-        return true;
       }
     } else {
       queue.add(frequentPattern);
-      return true;
     }
+    return true;
   }
 }

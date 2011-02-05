@@ -167,7 +167,7 @@ public final class SequenceFilesFromDirectory extends AbstractJob {
             writer.write(prefix + Path.SEPARATOR + name, file.toString());
           }
         }
-      } catch (Exception e) {
+      } catch (IOException e) {
         throw new IllegalStateException(e);
       }
       return false;

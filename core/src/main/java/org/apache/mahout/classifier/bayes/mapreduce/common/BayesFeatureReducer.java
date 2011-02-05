@@ -40,8 +40,8 @@ public class BayesFeatureReducer extends MapReduceBase implements
   
   private static final Logger log = LoggerFactory.getLogger(BayesFeatureReducer.class);
   
-  private double minSupport = -1;  
-  private double minDf      = -1;
+  private double minSupport = -1.0;
+  private double minDf      = -1.0;
   
   private String currentDfFeature;
   private double currentCorpusDf;
@@ -65,7 +65,8 @@ public class BayesFeatureReducer extends MapReduceBase implements
     }
     reporter.setStatus("Bayes Feature Reducer: " + key + " => " + sum);
 
-    Preconditions.checkArgument(key.length() >= 2 && key.length() <= 3, "StringTuple length out of bounds, not (2 < length < 3)");
+    Preconditions.checkArgument(key.length() >= 2 && key.length() <= 3,
+                                "StringTuple length out of bounds, not (2 < length < 3)");
     
     int featureIndex = key.length() == 2 ? 1 : 2;
     
@@ -75,35 +76,45 @@ public class BayesFeatureReducer extends MapReduceBase implements
     // the FeaturePartitioner guarantees that all tuples containing a given term
     // will be handled by the same reducer.
     if (key.stringAt(0).equals(BayesConstants.LABEL_COUNT)) {
-      /* no-op, just collect */
+      // no-op, just collect
+      output.collect(key, new DoubleWritable(sum));
+
     } else if (key.stringAt(0).equals(BayesConstants.FEATURE_TF)) {
       currentDfFeature = key.stringAt(1);
       currentCorpusTf = sum;
       currentCorpusDf = -1;
       
-      if (minSupport > 0 && currentCorpusTf < minSupport) {
+      if (minSupport > 0.0 && currentCorpusTf < minSupport) {
         reporter.incrCounter("skipped", "less_than_minSupport", 1);
       }
-      return; // never emit FEATURE_TF tuples.
+      // never emit FEATURE_TF tuples.
+
     } else if (!key.stringAt(featureIndex).equals(currentDfFeature)) {
       throw new IllegalStateException("Found feature data " + key + " prior to feature tf");
-    } else if (minSupport > 0 && currentCorpusTf < minSupport) {
+
+    } else if (minSupport > 0.0 && currentCorpusTf < minSupport) {
       reporter.incrCounter("skipped", "less_than_minSupport_label-term", 1);
-      return; // skip items that have less than a specified frequency.
+      // skip items that have less than a specified frequency.
+
     } else if (key.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
       currentCorpusDf = sum;
-      
-      if (minDf > 0 && currentCorpusDf < minDf) {
+      if (minDf > 0.0 && currentCorpusDf < minDf) {
         reporter.incrCounter("skipped", "less_than_minDf", 1);
-        return; // skip items that have less than the specified minSupport.
+        // skip items that have less than the specified minSupport.
+      } else {
+        output.collect(key, new DoubleWritable(sum));
       }
-    } else if (currentCorpusDf == -1) {
+
+    } else if (currentCorpusDf == -1.0) {
       throw new IllegalStateException("Found feature data " + key + " prior to feature count");
-    } else if (minDf > 0 && currentCorpusDf < minDf) {
+
+    } else if (minDf > 0.0 && currentCorpusDf < minDf) {
       reporter.incrCounter("skipped", "less_than_minDf_label-term", 1);
-      return; // skip items that have less than a specified frequency.
-    } 
-    output.collect(key, new DoubleWritable(sum));
+      // skip items that have less than a specified frequency.
+
+    } else {
+      output.collect(key, new DoubleWritable(sum));
+    }
   }
 
   @Override

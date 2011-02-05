@@ -348,39 +348,44 @@ public class SplitBayesInput {
     Writer trainingWriter = new OutputStreamWriter(fs.create(trainingOutputFile), charset);
     Writer testWriter     = new OutputStreamWriter(fs.create(testOutputFile), charset);
 
-    int pos = 0;
     int trainCount = 0;
     int testCount = 0;
 
-    String line;
-    while ((line = reader.readLine()) != null) {
-      pos++;
+    try {
 
-      Writer writer;
-      if (testRandomSelectionPct > 0) { // Randomly choose
-        writer =  randomSel.get(pos) ? testWriter : trainingWriter;
-      } else { // Choose based on location
-        writer = pos > testSplitStart ? testWriter : trainingWriter;
-      }
+      String line;
+      int pos = 0;
+      while ((line = reader.readLine()) != null) {
+        pos++;
 
-      if (writer == testWriter) {
-        if (testCount >= testSplitSize) {
-          writer = trainingWriter;
-        } else {
-          testCount++;
+        Writer writer;
+        if (testRandomSelectionPct > 0) { // Randomly choose
+          writer =  randomSel.get(pos) ? testWriter : trainingWriter;
+        } else { // Choose based on location
+          writer = pos > testSplitStart ? testWriter : trainingWriter;
         }
+
+        if (writer == testWriter) {
+          if (testCount >= testSplitSize) {
+            writer = trainingWriter;
+          } else {
+            testCount++;
+          }
+        }
+
+        if (writer == trainingWriter) {
+          trainCount++;
+        }
+
+        writer.write(line);
+        writer.write('\n');
       }
-      
-      if (writer == trainingWriter) {
-        trainCount++;
-      }
-      
-      writer.write(line);
-      writer.write('\n');
+
+    } finally {
+      IOUtils.quietClose(reader);
+      IOUtils.quietClose(trainingWriter);
+      IOUtils.quietClose(testWriter);
     }
-    
-    IOUtils.quietClose(trainingWriter);
-    IOUtils.quietClose(testWriter);
     
     log.info("file: {}, input: {} train: {}, test: {} starting at {}",
              new Object[] {inputFile.getName(), lineCount, trainCount, testCount, testSplitStart});
