@@ -79,11 +79,12 @@ public class ALSWRFactorizerTest extends TasteTestCase {
 
   @Test
   public void setFeatureColumn() throws Exception {
-    double[][] matrix = new double[3][3];
+    ALSWRFactorizer.Features features = new ALSWRFactorizer.Features(factorizer);
     Vector vector = new DenseVector(new double[] { 0.5, 2.0, 1.5 });
     int index = 1;
 
-    factorizer.setFeatureColumn(matrix, index, vector);
+    features.setFeatureColumnInM(index, vector);
+    double[][] matrix = features.getM();
 
     assertEquals(vector.get(0), matrix[index][0], EPSILON);
     assertEquals(vector.get(1), matrix[index][1], EPSILON);
@@ -104,12 +105,14 @@ public class ALSWRFactorizerTest extends TasteTestCase {
 
   @Test
   public void averageRating() throws Exception {
-    assertEquals(2.5, factorizer.averateRating(3l), EPSILON);
+    ALSWRFactorizer.Features features = new ALSWRFactorizer.Features(factorizer);
+    assertEquals(2.5, features.averateRating(3l), EPSILON);
   }
 
   @Test
   public void initializeM() throws Exception {
-    double[][] M = factorizer.initializeM();
+    ALSWRFactorizer.Features features = new ALSWRFactorizer.Features(factorizer);
+    double[][] M = features.getM();
 
     assertEquals(3.333333333, M[0][0], EPSILON);
     assertEquals(5, M[1][0], EPSILON);
