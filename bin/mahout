@@ -15,7 +15,7 @@
 #
 #   MAHOUT_CONF_DIR    The location of the program short-name to class name
 #                      mappings and the default properties files
-#                      defaults to "$MAHOUT_HOME/conf"
+#                      defaults to "$MAHOUT_HOME/src/conf"
 #
 #   MAHOUT_LOCAL       set to anything other than an empty string to force
 #                      mahout to run locally even if
@@ -105,10 +105,10 @@ if [ "$MAHOUT_HEAPSIZE" != "" ]; then
 fi
 
 if [ "x$MAHOUT_CONF_DIR" = "x" ]; then
-  MAHOUT_CONF_DIR=$MAHOUT_HOME/conf
+  MAHOUT_CONF_DIR=$MAHOUT_HOME/src/conf
 fi
 
-# CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/conf
+# CLASSPATH initially contains $MAHOUT_CONF_DIR, or defaults to $MAHOUT_HOME/src/conf
 CLASSPATH=${CLASSPATH}:$MAHOUT_CONF_DIR
 CLASSPATH=${CLASSPATH}:$HADOOP_CONF_DIR
 CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
@@ -202,8 +202,8 @@ if [ "$HADOOP_HOME" = "" ] || [ "$MAHOUT_LOCAL" != "" ] ; then
 else
   echo "Running on hadoop, using HADOOP_HOME=$HADOOP_HOME"
   if [ "$HADOOP_CONF_DIR" = "" ] ; then
-    HADOOP_CONF_DIR=$HADOOP_HOME/conf
-    echo "No HADOOP_CONF_DIR set, using $HADOOP_HOME/conf "
+    HADOOP_CONF_DIR=$HADOOP_HOME/src/conf
+    echo "No HADOOP_CONF_DIR set, using $HADOOP_HOME/src/conf "
   else 
     echo "HADOOP_CONF_DIR=$HADOOP_CONF_DIR"
   fi

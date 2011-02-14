@@ -76,7 +76,7 @@
             <phase>package</phase>
             <configuration>
               <tasks>
-                <ant antfile="../etc/build.xml" target="build-grouplens-jar">
+                <ant antfile="build.xml" target="build-grouplens-jar">
                   <property name="dest" value="${project.build.directory}"/>
                   <property name="examples-base" value="src/main/java"/>
                 </ant>

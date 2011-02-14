@@ -58,7 +58,7 @@
             <phase>compile</phase>
             <configuration>
               <tasks>
-                <copy file="../conf/driver.classes.props"
+                <copy file="../src/conf/driver.classes.props"
                       tofile="${project.build.directory}/classes/driver.classes.default.props"/>
               </tasks>
 

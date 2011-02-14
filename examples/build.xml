@@ -23,7 +23,7 @@
 
  -->
 
-<project name="mahout" default="core-job" basedir=".">
+<project name="mahout" default="core-job" basedir="../etc">
   <!-- Run in examples during the package phase -->
   <target name="build-grouplens-jar">
     <jar jarfile="${dest}/grouplens.jar">

@@ -19,7 +19,7 @@
         <include>**/NOTICE*</include>
         <include>**/pom.xml</include>
         <include>**/src/**</include>
-        <include>conf/**</include>
+        <include>src/conf/**</include>
         <include>**/build.xml</include>
         <include>**/*.properties</include>
       </includes>
