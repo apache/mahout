@@ -91,20 +91,20 @@ public class ConfusionMatrix implements Summarizable {
   }
   
   public int getCount(String correctLabel, String classifiedLabel) {
-    Preconditions.checkArgument(!labelMap.containsKey(correctLabel)
-        || labelMap.containsKey(classifiedLabel)
-        || defaultLabel.equals(classifiedLabel),
-        "Label not found " + correctLabel + ' ' + classifiedLabel);
+    Preconditions.checkArgument(labelMap.containsKey(correctLabel),
+                                "Label not found: " + correctLabel);
+    Preconditions.checkArgument(labelMap.containsKey(classifiedLabel),
+                                "Label not found: " + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
     return confusionMatrix[correctId][classifiedId];
   }
   
   public void putCount(String correctLabel, String classifiedLabel, int count) {
-    Preconditions.checkArgument(!labelMap.containsKey(correctLabel)
-        || labelMap.containsKey(classifiedLabel)
-        || defaultLabel.equals(classifiedLabel),
-        "Label not found " + correctLabel + ' ' + classifiedLabel);
+    Preconditions.checkArgument(labelMap.containsKey(correctLabel),
+                                "Label not found: " + correctLabel);
+    Preconditions.checkArgument(labelMap.containsKey(classifiedLabel),
+                                "Label not found: " + classifiedLabel);
     int correctId = labelMap.get(correctLabel);
     int classifiedId = labelMap.get(classifiedLabel);
     confusionMatrix[correctId][classifiedId] = count;
