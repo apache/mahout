@@ -82,6 +82,10 @@ public class RowSimilarityJob extends AbstractJob {
 
   private static final int DEFAULT_MAX_SIMILARITIES_PER_ROW = 100;
 
+  public static enum Counter {
+    COOCCURRENCES, SIMILAR_ROWS
+  }
+
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new RowSimilarityJob(), args);
   }
@@ -254,6 +258,7 @@ public class RowSimilarityJob extends AbstractJob {
       WeightedRowPair rowPair = new WeightedRowPair();
       Cooccurrence coocurrence = new Cooccurrence();
 
+      int numPairs = 0;
       for (int n = 0; n < weightedOccurrences.length; n++) {
         int rowA = weightedOccurrences[n].getRow();
         double weightA = weightedOccurrences[n].getWeight();
@@ -262,11 +267,17 @@ public class RowSimilarityJob extends AbstractJob {
           int rowB = weightedOccurrences[m].getRow();
           double weightB = weightedOccurrences[m].getWeight();
           double valueB = weightedOccurrences[m].getValue();
-          rowPair.set(rowA, rowB, weightA, weightB);
+          if(rowA <= rowB){
+        	  rowPair.set(rowA, rowB, weightA, weightB);
+          } else {
+        	  rowPair.set(rowB, rowA, weightB, weightA);
+          }
           coocurrence.set(column.get(), valueA, valueB);
           ctx.write(rowPair, coocurrence);
+          numPairs++;
         }
       }
+      ctx.getCounter(Counter.COOCCURRENCES).increment(numPairs);
     }
   }
 
@@ -299,6 +310,7 @@ public class RowSimilarityJob extends AbstractJob {
           rowPair.getWeightB(), numberOfColumns);
 
       if (!Double.isNaN(similarityValue)) {
+        ctx.getCounter(Counter.SIMILAR_ROWS).increment(1);
         SimilarityMatrixEntryKey key = new SimilarityMatrixEntryKey();
         MatrixEntryWritable entry = new MatrixEntryWritable();
         entry.setVal(similarityValue);

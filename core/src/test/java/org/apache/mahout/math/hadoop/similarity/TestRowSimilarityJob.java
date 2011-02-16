@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.common.MahoutTestCase;
@@ -133,36 +134,63 @@ public final class TestRowSimilarityJob extends MahoutTestCase {
   public void testCooccurrencesMapper() throws Exception {
     Mapper<VarIntWritable,WeightedOccurrenceArray,WeightedRowPair,Cooccurrence>.Context context =
       EasyMock.createMock(Mapper.Context.class);
+    Counter counter = EasyMock.createMock(Counter.class);
 
     context.write(new WeightedRowPair(34, 34, 1.0, 1.0), new Cooccurrence(12, 0.5, 0.5));
     context.write(new WeightedRowPair(34, 56, 1.0, 3.0), new Cooccurrence(12, 0.5, 1.0));
     context.write(new WeightedRowPair(56, 56, 3.0, 3.0), new Cooccurrence(12, 1.0, 1.0));
+    EasyMock.expect(context.getCounter(RowSimilarityJob.Counter.COOCCURRENCES)).andReturn(counter);
+    counter.increment(3);
 
-    EasyMock.replay(context);
+    EasyMock.replay(context, counter);
 
     WeightedOccurrenceArray weightedOccurrences = new WeightedOccurrenceArray(new WeightedOccurrence[] {
         new WeightedOccurrence(34, 0.5, 1.0), new WeightedOccurrence(56, 1.0, 3.0) });
 
     new RowSimilarityJob.CooccurrencesMapper().map(new VarIntWritable(12), weightedOccurrences, context);
 
-    EasyMock.verify(context);
+    EasyMock.verify(context, counter);
   }
+
+  public void testCooccurrencesMapperOrdering() throws Exception {
+    Mapper<VarIntWritable,WeightedOccurrenceArray,WeightedRowPair,Cooccurrence>.Context context =
+      EasyMock.createMock(Mapper.Context.class);
+    Counter counter = EasyMock.createMock(Counter.class);
+
+    context.write(new WeightedRowPair(34, 34, 1.0, 1.0), new Cooccurrence(12, 0.5, 0.5));
+    context.write(new WeightedRowPair(34, 56, 1.0, 3.0), new Cooccurrence(12, 0.5, 1.0));
+    context.write(new WeightedRowPair(56, 56, 3.0, 3.0), new Cooccurrence(12, 1.0, 1.0));
+    EasyMock.expect(context.getCounter(RowSimilarityJob.Counter.COOCCURRENCES)).andReturn(counter);
+    counter.increment(3);
+
+    EasyMock.replay(context, counter);
+
+    WeightedOccurrenceArray weightedOccurrences = new WeightedOccurrenceArray(new WeightedOccurrence[] {
+        new WeightedOccurrence(56, 1.0, 3.0), new WeightedOccurrence(34, 0.5, 1.0) });
+
+    new RowSimilarityJob.CooccurrencesMapper().map(new VarIntWritable(12), weightedOccurrences, context);
+
+    EasyMock.verify(context, counter);
+  }
+
 
   /**
    * Tests {@link SimilarityReducer}
    */
   @Test
   public void testSimilarityReducer() throws Exception {
-
     Reducer<WeightedRowPair,Cooccurrence,SimilarityMatrixEntryKey,MatrixEntryWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
+    Counter counter = EasyMock.createMock(Counter.class);
 
     context.write(EasyMock.eq(new SimilarityMatrixEntryKey(12, 0.5)),
         MathHelper.matrixEntryMatches(12, 34, 0.5));
     context.write(EasyMock.eq(new SimilarityMatrixEntryKey(34, 0.5)),
         MathHelper.matrixEntryMatches(34, 12, 0.5));
+    EasyMock.expect(context.getCounter(RowSimilarityJob.Counter.SIMILAR_ROWS)).andReturn(counter);
+    counter.increment(1);
 
-    EasyMock.replay(context);
+    EasyMock.replay(context, counter);
 
     SimilarityReducer reducer = new SimilarityReducer();
     setField(reducer, "similarity", new DistributedTanimotoCoefficientVectorSimilarity());
@@ -170,7 +198,7 @@ public final class TestRowSimilarityJob extends MahoutTestCase {
     reducer.reduce(new WeightedRowPair(12, 34, 3.0, 3.0), Arrays.asList(new Cooccurrence(56, 1.0, 2.0),
         new Cooccurrence(78, 3.0, 6.0)), context);
 
-    EasyMock.verify(context);
+    EasyMock.verify(context, counter);
   }
 
   /**
@@ -179,13 +207,15 @@ public final class TestRowSimilarityJob extends MahoutTestCase {
    */
   @Test
   public void testSimilarityReducerSelfSimilarity() throws Exception {
-
     Reducer<WeightedRowPair,Cooccurrence,SimilarityMatrixEntryKey,MatrixEntryWritable>.Context context =
       EasyMock.createMock(Reducer.Context.class);
+    Counter counter = EasyMock.createMock(Counter.class);
 
     context.write(EasyMock.eq(new SimilarityMatrixEntryKey(90, 1.0)), MathHelper.matrixEntryMatches(90, 90, 1.0));
+    EasyMock.expect(context.getCounter(RowSimilarityJob.Counter.SIMILAR_ROWS)).andReturn(counter);
+    counter.increment(1);
 
-    EasyMock.replay(context);
+    EasyMock.replay(context, counter);
 
     SimilarityReducer reducer = new SimilarityReducer();
     setField(reducer, "similarity", new DistributedTanimotoCoefficientVectorSimilarity());
@@ -193,7 +223,7 @@ public final class TestRowSimilarityJob extends MahoutTestCase {
     reducer.reduce(new WeightedRowPair(90, 90, 2.0, 2.0), Arrays.asList(new Cooccurrence(56, 1.0, 2.0),
         new Cooccurrence(78, 3.0, 6.0)), context);
 
-    EasyMock.verify(context);
+    EasyMock.verify(context, counter);
   }
 
   /**
