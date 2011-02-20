@@ -40,7 +40,7 @@ public final class IOUtils {
   private IOUtils() { }
   
   public static void quietClose(Closeable... closeables) {
-    Preconditions.checkNotNull(closeables);
+    Preconditions.checkNotNull(closeables, "Closables cannot be null");
     for (Closeable closeable : closeables) {
       if (closeable != null) {
         try {

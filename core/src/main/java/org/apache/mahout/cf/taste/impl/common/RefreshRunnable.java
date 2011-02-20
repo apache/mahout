@@ -24,13 +24,15 @@ import java.util.concurrent.Callable;
 
 /**
  * Simply calls {@linkRefreshable#refresh(java.util.Collection)} on a {@link Refreshable}.
+ *
+ * @deprecated Not used by RefreshHelper anymore.
  */
 public final class RefreshRunnable implements Runnable, Callable<Void> {
 
   private final Refreshable refreshable;
 
   public RefreshRunnable(Refreshable refreshable) {
-    Preconditions.checkNotNull(refreshable);
+    Preconditions.checkNotNull(refreshable, "Refreshable cannot be null");
     this.refreshable = refreshable;
   }
 

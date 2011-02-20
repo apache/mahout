@@ -33,9 +33,9 @@ public class AlternateLeastSquaresSolver {
 
   public Vector solve(List<Vector> featureVectors, Vector ratingVector, double lambda, int numFeatures) {
 
-    Preconditions.checkNotNull(featureVectors);
+    Preconditions.checkNotNull(featureVectors, "Feature vectors cannot be null");
     Preconditions.checkArgument(!featureVectors.isEmpty());
-    Preconditions.checkNotNull(ratingVector);    
+    Preconditions.checkNotNull(ratingVector, "Rating vector cannot be null");
     Preconditions.checkArgument(featureVectors.size() == ratingVector.getNumNondefaultElements());
 
     int nui = ratingVector.getNumNondefaultElements();
