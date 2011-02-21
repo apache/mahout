@@ -32,7 +32,8 @@ public final class IntTuple implements WritableComparable<IntTuple> {
   
   private IntArrayList tuple = new IntArrayList();
   
-  public IntTuple() {}
+  public IntTuple() {
+  }
   
   public IntTuple(int firstEntry) {
     add(firstEntry);

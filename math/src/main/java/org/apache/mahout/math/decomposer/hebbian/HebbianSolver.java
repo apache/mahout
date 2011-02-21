@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 public class HebbianSolver {
 
   private static final Logger log = LoggerFactory.getLogger(HebbianSolver.class);
+  private static final boolean DEBUG = false;
 
   private final EigenUpdater updater;
   private final SingularVectorVerifier verifier;
@@ -54,7 +55,6 @@ public class HebbianSolver {
   private final Random rng = RandomUtils.getRandom();
 
   private int numPasses = 0;
-  private static final boolean debug = false;
 
   /**
    * Creates a new HebbianSolver
@@ -198,13 +198,13 @@ public class HebbianSolver {
           }
         }
         state.setFirstPass(false);
-        if (debug) {
+        if (DEBUG) {
           if (previousEigen == null) {
             previousEigen = currentEigen.clone();
           } else {
             double dot = currentEigen.dot(previousEigen);
-            if (dot > 0) {
-              dot /= (currentEigen.norm(2) * previousEigen.norm(2));
+            if (dot > 0.0) {
+              dot /= currentEigen.norm(2) * previousEigen.norm(2);
             }
            // log.info("Current pass * previous pass = {}", dot);
           }
@@ -249,8 +249,7 @@ public class HebbianSolver {
       double r = rng.nextDouble();
       index = (int) (r * corpus.numRows());
       v = corpus.getRow(index);
-    }
-    while (v == null || v.norm(2) == 0 || v.getNumNondefaultElements() < 5);
+    } while (v == null || v.norm(2) == 0 || v.getNumNondefaultElements() < 5);
     return index;
   }
 
@@ -281,7 +280,7 @@ public class HebbianSolver {
       currentPseudoEigen.assign(previousEigen, new PlusMult(-state.getHelperVector().get(i)));
       state.getHelperVector().set(i, 0);
     }
-    if (debug && currentPseudoEigen.norm(2) > 0) {
+    if (DEBUG && currentPseudoEigen.norm(2) > 0) {
       for (int i = 0; i < state.getNumEigensProcessed(); i++) {
         Vector previousEigen = previousEigens.getRow(i);
         log.info("dot with previous: {}", (previousEigen.dot(currentPseudoEigen)) / currentPseudoEigen.norm(2));
@@ -294,10 +293,12 @@ public class HebbianSolver {
     if (status.inProgress()) {
       log.info("Verifier not finished, making another pass...");
     } else {
-      log.info("Has 1 - cosAngle: {}, convergence target is: {}", (1 - status.getCosAngle()), convergenceTarget);
+      log.info("Has 1 - cosAngle: {}, convergence target is: {}", 1.0 - status.getCosAngle(), convergenceTarget);
       state.getStatusProgress().add(status);
     }
-    return (state.getStatusProgress().size() <= maxPassesPerEigen && 1 - status.getCosAngle() > convergenceTarget);
+    return
+        state.getStatusProgress().size() <= maxPassesPerEigen
+        && 1.0 - status.getCosAngle() > convergenceTarget;
   }
 
   protected EigenStatus verify(Matrix corpus, Vector currentPseudoEigen) {
@@ -323,16 +324,15 @@ public class HebbianSolver {
 
     HebbianUpdater updater = new HebbianUpdater();
     SingularVectorVerifier verifier = new AsyncEigenVerifier();
-    HebbianSolver solver = new HebbianSolver(updater,
-        verifier,
-        convergence,
-        maxPasses);
+    HebbianSolver solver = new HebbianSolver(updater, verifier, convergence, maxPasses);
     Matrix corpus = null;
+    /*
     if (numThreads <= 1) {
       //  corpus = new DiskBufferedDoubleMatrix(new File(corpusDir), inBufferSize);
     } else {
       //  corpus = new ParallelMultiplyingDiskBufferedDoubleMatrix(new File(corpusDir), inBufferSize, numThreads);
     }
+     */
     long now = System.currentTimeMillis();
     TrainingState finalState = solver.solve(corpus, rank);
     long time = (System.currentTimeMillis() - now) / 1000;

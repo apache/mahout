@@ -202,7 +202,7 @@ public class PostgreSQLJDBCDataModel extends AbstractJDBCDataModel {
 
       log.debug("Executing SQL update: {}", setPreferenceSQL);
       try {
-      stmt1.executeUpdate();
+        stmt1.executeUpdate();
       } catch (SQLException sqle) {
         if (!POSTGRESQL_DUPLICATE_KEY_STATE.equals(sqle.getSQLState())) {
           throw sqle;

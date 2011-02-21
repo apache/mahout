@@ -180,8 +180,10 @@ public final class CDInfosTool {
     return new Descriptors(desc);
   }
 
-  private static void storeDescriptions(FileSystem fs, Path inpath, Descriptors descriptors, List<String> descriptions)
-      throws IOException {
+  private static void storeDescriptions(FileSystem fs,
+                                        Path inpath,
+                                        Descriptors descriptors,
+                                        List<String> descriptions) throws IOException {
     // TODO should become part of FileInfoParser
 
     Path infpath = FileInfoParser.getInfoFile(fs, inpath);

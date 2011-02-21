@@ -60,14 +60,19 @@ public class ExpectationMaximizationSVDFactorizer extends AbstractFactorizer {
 
   private static final Logger log = LoggerFactory.getLogger(ExpectationMaximizationSVDFactorizer.class);
 
-  public ExpectationMaximizationSVDFactorizer(DataModel dataModel, int numFeatures, int numIterations)
-      throws TasteException {
-    /* use the default parameters from the old SVDRecommender implementation */
+  public ExpectationMaximizationSVDFactorizer(DataModel dataModel,
+                                              int numFeatures,
+                                              int numIterations) throws TasteException {
+    // use the default parameters from the old SVDRecommender implementation    
     this(dataModel, numFeatures, 0.005, 0.02, 0.005, numIterations);
   }
 
-  public ExpectationMaximizationSVDFactorizer(DataModel dataModel, int numFeatures, double learningRate,
-      double preventOverfitting, double randomNoise, int numIterations) throws TasteException {
+  public ExpectationMaximizationSVDFactorizer(DataModel dataModel,
+                                              int numFeatures,
+                                              double learningRate,
+                                              double preventOverfitting,
+                                              double randomNoise,
+                                              int numIterations) throws TasteException {
     super(dataModel);
     random = RandomUtils.getRandom();
     this.dataModel = dataModel;
@@ -151,10 +156,10 @@ public class ExpectationMaximizationSVDFactorizer extends AbstractFactorizer {
     double err = value - getDotProduct(userIndex, itemIndex);
     double[] leftVector = leftVectors[userIndex];
     double[] rightVector = rightVectors[itemIndex];
-    leftVector[currentFeature] += learningRate *
-        (err * rightVector[currentFeature] - preventOverfitting * leftVector[currentFeature]);
-    rightVector[currentFeature] += learningRate *
-        (err * leftVector[currentFeature] - preventOverfitting * rightVector[currentFeature]);
+    leftVector[currentFeature] +=
+        learningRate * (err * rightVector[currentFeature] - preventOverfitting * leftVector[currentFeature]);
+    rightVector[currentFeature] +=
+        learningRate * (err * leftVector[currentFeature] - preventOverfitting * rightVector[currentFeature]);
   }
 
 }

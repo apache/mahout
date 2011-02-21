@@ -135,7 +135,7 @@ public final class Job extends AbstractJob {
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running random seed to get initial clusters");
-    Path clusters= new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
+    Path clusters = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     clusters = RandomSeedGenerator.buildRandom(directoryContainingConvertedInput, clusters, k, measure);
     log.info("Running KMeans");
     KMeansDriver.run(conf,

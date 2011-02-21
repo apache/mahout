@@ -76,26 +76,26 @@ public class EigencutsSensitivityMapper extends
     Map<Integer, EigencutsSensitivityNode> columns = new HashMap<Integer, EigencutsSensitivityNode>();
     Vector ev = vw.get();
     for (int i = 0; i < ev.size(); i++) {
-      double minS_ij = Double.MAX_VALUE;
+      double minsij = Double.MAX_VALUE;
       int minInd = -1;
       for (int j = 0; j < ev.size(); j++) {          
-        double S_ij = performSensitivityCalculation(eigenvalue, ev.get(i), 
+        double sij = performSensitivityCalculation(eigenvalue, ev.get(i),
             ev.get(j), diagonal.get(i), diagonal.get(j));
         
         // perform non-maximal suppression
         // is this the smallest value in the row?
-        if (S_ij < minS_ij) {
-          minS_ij = S_ij;
+        if (sij < minsij) {
+          minsij = sij;
           minInd = j;
         }
       }
       
       // is this the smallest value in the column?
       Integer column = minInd;
-      EigencutsSensitivityNode value = new EigencutsSensitivityNode(i, minInd, minS_ij);
+      EigencutsSensitivityNode value = new EigencutsSensitivityNode(i, minInd, minsij);
       if (!columns.containsKey(column)) {
         columns.put(column, value);
-      } else if (columns.get(column).getSensitivity() > minS_ij) {
+      } else if (columns.get(column).getSensitivity() > minsij) {
         columns.remove(column);
         columns.put(column, value);
       }
@@ -114,36 +114,26 @@ public class EigencutsSensitivityMapper extends
    * (log(2) / lambda_k * log(lambda_k) * log(lambda_k^beta0 / 2)) * [
    * - (((u_i / sqrt(d_i)) - (u_j / sqrt(d_j)))^2 + (1 - lambda) * 
    *   ((u_i^2 / d_i) + (u_j^2 / d_j))) ]
-   * 
-   * @param eigenvalue
-   * @param ev_i
-   * @param ev_j
-   * @param diag_i
-   * @param diag_j
-   * @return
    */
-  private double performSensitivityCalculation(double eigenvalue, double
-      ev_i, double ev_j, double diag_i, double diag_j) {
+  private double performSensitivityCalculation(double eigenvalue,
+                                               double evi,
+                                               double evj,
+                                               double diagi,
+                                               double diagj) {
     
-    double firsthalf = Functions.LOGARITHM.apply(2) / (
-        eigenvalue * Functions.LOGARITHM.apply(eigenvalue) * 
-        Functions.LOGARITHM.apply(Functions.POW.apply(eigenvalue, beta0) / 2));
+    double firsthalf = Functions.LOGARITHM.apply(2)
+        / (eigenvalue * Functions.LOGARITHM.apply(eigenvalue)
+           * Functions.LOGARITHM.apply(Functions.POW.apply(eigenvalue, beta0) / 2));
     
-    double secondhalf = -Functions.POW.apply(((ev_i / 
-        Functions.SQRT.apply(diag_i)) - (ev_j / 
-        Functions.SQRT.apply(diag_j))), 2) + (1 - eigenvalue) * 
-        ((Functions.POW.apply(ev_i, 2) / diag_i) + 
-        (Functions.POW.apply(ev_j, 2) / diag_j));
+    double secondhalf =
+        -Functions.POW.apply(((evi / Functions.SQRT.apply(diagi)) - (evj / Functions.SQRT.apply(diagj))), 2)
+        + (1.0 - eigenvalue) * ((Functions.POW.apply(evi, 2) / diagi) + (Functions.POW.apply(evj, 2) / diagj));
     
     return firsthalf * secondhalf;
   }
   
   /**
    * Utility helper method, used for unit testing.
-   * @param beta0
-   * @param epsilon
-   * @param eigenvalues
-   * @param diagonal
    */
   void setup(double beta0, double epsilon, Vector eigenvalues, Vector diagonal) {
     this.beta0 = beta0;

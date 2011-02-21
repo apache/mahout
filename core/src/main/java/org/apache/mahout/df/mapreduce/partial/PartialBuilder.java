@@ -159,8 +159,8 @@ public class PartialBuilder extends Builder {
                                       Node[] trees,
                                       PredictionCallback callback) throws IOException {
     Preconditions.checkArgument((keys == null && trees == null) || (keys != null && trees != null),
-        "if keys is null, trees should also be null" );
-    Preconditions.checkArgument(keys == null || keys.length == trees.length, "keys.length != trees.length" );
+        "if keys is null, trees should also be null");
+    Preconditions.checkArgument(keys == null || keys.length == trees.length, "keys.length != trees.length");
 
     Configuration conf = job.getConfiguration();
 

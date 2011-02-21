@@ -61,7 +61,8 @@ public final class FarthestNeighborClusterSimilarity implements ClusterSimilarit
    */
   public FarthestNeighborClusterSimilarity(UserSimilarity similarity, double samplingRate) {
     Preconditions.checkArgument(similarity != null, "similarity is null");
-    Preconditions.checkArgument(!Double.isNaN(samplingRate) && samplingRate > 0.0 && samplingRate <= 1.0, "samplingRate is invalid: %.4f", samplingRate);
+    Preconditions.checkArgument(!Double.isNaN(samplingRate) && samplingRate > 0.0 && samplingRate <= 1.0,
+                                "samplingRate is invalid: %.4f", samplingRate);
     this.similarity = similarity;
     this.samplingRate = samplingRate;
   }

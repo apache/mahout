@@ -57,7 +57,7 @@ import java.util.Random;
  * This doesn't demonstrate text encoding which is subject to somewhat different tricks.  The basic
  * idea of caching hash locations and byte level parsing still very much applies to text, however.
  */
-public class SimpleCsvExamples {
+public final class SimpleCsvExamples {
 
   public static final int SEPARATOR_CHAR = '\t';
   public static final String SEPARATOR = "\t";
@@ -137,16 +137,16 @@ public class SimpleCsvExamples {
   }
 
 
-  private static class Line {
-    private static final Splitter onTabs = Splitter.on(SEPARATOR).trimResults();
-    public static final Joiner withCommas = Joiner.on(SEPARATOR);
+  private static final class Line {
+    private static final Splitter ON_TABS = Splitter.on(SEPARATOR).trimResults();
+    public static final Joiner WITH_COMMAS = Joiner.on(SEPARATOR);
 
     public static final Random rand = RandomUtils.getRandom();
 
     private final List<String> data;
 
     private Line(CharSequence line) {
-      data = Lists.newArrayList(onTabs.split(line));
+      data = Lists.newArrayList(ON_TABS.split(line));
     }
 
     private Line() {
@@ -184,7 +184,7 @@ public class SimpleCsvExamples {
 
     @Override
     public String toString() {
-      return withCommas.join(data);
+      return WITH_COMMAS.join(data);
     }
 
     public String get(int field) {
@@ -192,7 +192,7 @@ public class SimpleCsvExamples {
     }
   }
 
-  private static class FastLine {
+  private static final class FastLine {
 
     private final ByteBuffer base;
     private final IntArrayList start = new IntArrayList();
@@ -241,7 +241,8 @@ public class SimpleCsvExamples {
     }
   }
 
-  private static class FastLineReader implements Closeable {
+  private static final
+  class FastLineReader implements Closeable {
     private final InputStream in;
     private final ByteBuffer buf = ByteBuffer.allocate(100000);
 

@@ -184,9 +184,10 @@ public final class AggregateAndRecommendReducer extends
    * find the top entries in recommendationVector, map them to the real itemIDs and write back the result
    */
   private void writeRecommendedItems(VarLongWritable userID, Vector recommendationVector, Context context)
-      throws IOException, InterruptedException {
-    Queue<RecommendedItem> topItems = new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
-    Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
+    throws IOException, InterruptedException {
+    Queue<RecommendedItem> topItems =
+        new PriorityQueue<RecommendedItem>(recommendationsPerUser + 1,
+                                           Collections.reverseOrder(ByValueRecommendedItemComparator.getInstance()));
 
     Iterator<Vector.Element> recommendationVectorIterator = recommendationVector.iterateNonZero();
     while (recommendationVectorIterator.hasNext()) {

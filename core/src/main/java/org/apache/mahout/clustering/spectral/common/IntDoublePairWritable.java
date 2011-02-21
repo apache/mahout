@@ -36,7 +36,8 @@ public class IntDoublePairWritable implements Writable {
   private int key;
   private double value;
   
-  public IntDoublePairWritable() {}
+  public IntDoublePairWritable() {
+  }
   
   public IntDoublePairWritable(int k, double v) {
     this.key = k;

@@ -42,8 +42,7 @@ public class NaiveBayesWeightsMapper extends Mapper<IntWritable, VectorWritable,
   private Vector labelSum;
  
   @Override
-  protected void map(IntWritable key, VectorWritable value, Context context)
-      throws IOException, InterruptedException {
+  protected void map(IntWritable key, VectorWritable value, Context context) throws IOException, InterruptedException {
     Vector vector = value.get();
     if (featureSum == null) {
       featureSum = new RandomAccessSparseVector(vector.size(), vector.getNumNondefaultElements());

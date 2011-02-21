@@ -21,7 +21,7 @@ import org.apache.mahout.vectorizer.encoders.MurmurHash;
 
 import java.util.Random;
 
-public class HashFactory {
+public final class HashFactory {
 
   private HashFactory() {
   }
@@ -49,6 +49,8 @@ public class HashFactory {
           hashFunction[i] = new MurmurHashWrapper(seed.nextInt());
         }
         break;
+      default:
+        throw new IllegalStateException("Unknown type: " + type);
     }
     return hashFunction;
   }

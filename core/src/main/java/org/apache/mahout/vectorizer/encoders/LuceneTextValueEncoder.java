@@ -89,7 +89,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     }
   }
 
-  private static class LuceneTokenIterable implements Iterable<String> {
+  private static final class LuceneTokenIterable implements Iterable<String> {
     private boolean firstTime = true;
     private final TokenStream tokenStream;
 
@@ -118,7 +118,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     }
   }
 
-  private static class TokenStreamIterator implements Iterator<String> {
+  private static final class TokenStreamIterator implements Iterator<String> {
     private final TokenStream tokenStream;
     private String bufferedToken;
 
@@ -175,7 +175,7 @@ public class LuceneTextValueEncoder extends TextValueEncoder {
     }
   }
 
-  private static class TokenizationException extends RuntimeException {
+  private static final class TokenizationException extends RuntimeException {
     private TokenizationException(String msg, Throwable cause) {
       super(msg, cause);
     }

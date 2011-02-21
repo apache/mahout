@@ -49,15 +49,10 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
   private static final Logger log = LoggerFactory.getLogger(Step2Mapper.class);
   
   private TreeID[] keys;
-  
   private Node[] trees;
-  
   private SingleTreePredictions[] callbacks;
-  
   private DataConverter converter;
-  
   private int partition = -1;
-  
   /** num treated instances */
   private int instanceId;
   
@@ -70,7 +65,7 @@ public class Step2Mapper extends Mapper<LongWritable,Text,TreeID,MapredOutput> {
     
     log.info("DistributedCache.getCacheFiles(): {}", ArrayUtils.toString(files));
     
-    Preconditions.checkArgument(files != null && files.length >= 2, "missing paths from the DistributedCache" );
+    Preconditions.checkArgument(files != null && files.length >= 2, "missing paths from the DistributedCache");
     
     Path datasetPath = new Path(files[0].getPath());
     Dataset dataset = Dataset.load(conf, datasetPath);

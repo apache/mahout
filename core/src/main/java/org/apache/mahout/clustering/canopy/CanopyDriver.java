@@ -84,7 +84,8 @@ public class CanopyDriver extends AbstractJob {
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
     double t2 = Double.parseDouble(getOption(DefaultOptionCreator.T2_OPTION));
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
-    boolean runSequential = (getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD));
+    boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
+        DefaultOptionCreator.SEQUENTIAL_METHOD);
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
@@ -158,9 +159,10 @@ public class CanopyDriver extends AbstractJob {
                                    DistanceMeasure measure,
                                    double t1,
                                    double t2,
-                                   boolean runSequential) throws InstantiationException, IllegalAccessException, IOException,
-      InterruptedException, ClassNotFoundException {
-    log.info("Build Clusters Input: {} Out: {} " + "Measure: {} t1: {} t2: {}", new Object[] { input, output, measure, t1, t2 });
+                                   boolean runSequential)
+    throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
+    log.info("Build Clusters Input: {} Out: {} " + "Measure: {} t1: {} t2: {}",
+             new Object[] { input, output, measure, t1, t2 });
     if (runSequential) {
       return buildClustersSeq(input, output, measure, t1, t2);
     } else {
@@ -248,7 +250,7 @@ public class CanopyDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, input);
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
     FileOutputFormat.setOutputPath(job, canopyOutputDir);
-    if (job.waitForCompletion(true) == false) {
+    if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Canopy Job failed processing " + input.toString());
     }
     return canopyOutputDir;
@@ -349,7 +351,7 @@ public class CanopyDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, outPath);
     HadoopUtil.overwriteOutput(outPath);
 
-    if (job.waitForCompletion(true) == false) {
+    if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Canopy Clustering failed processing " + canopies.toString());
     }
   }

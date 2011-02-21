@@ -27,9 +27,9 @@ import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
 import org.apache.mahout.math.SparseRowMatrix;
 import org.apache.mahout.math.VectorIterable;
+import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
 import org.apache.mahout.math.function.DoubleFunction;
-import static org.apache.mahout.math.function.Functions.*;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
@@ -68,7 +68,6 @@ public class LanczosSolver {
   private static final Logger log = LoggerFactory.getLogger(LanczosSolver.class);
 
   public static final double SAFE_MAX = 1.0e150;
-
   private static final double NANOS_IN_MILLI = 1.0e6;
 
   public enum TimingSection {
@@ -77,7 +76,7 @@ public class LanczosSolver {
 
   private final Map<TimingSection, Long> startTimes = new EnumMap<TimingSection, Long>(TimingSection.class);
   private final Map<TimingSection, Long> times = new EnumMap<TimingSection, Long>(TimingSection.class);
-  protected double scaleFactor = 0.0;
+  private double scaleFactor;
 
   private static final class Scale implements DoubleFunction {
     private final double d;
@@ -115,7 +114,7 @@ public class LanczosSolver {
       Vector nextVector = isSymmetric ? corpus.times(currentVector) : corpus.timesSquared(currentVector);
       log.info("{} passes through the corpus so far...", i);
       calculateScaleFactor(nextVector);
-      nextVector.assign(new Scale(1 / scaleFactor));
+      nextVector.assign(new Scale(1.0 / scaleFactor));
       nextVector.assign(previousVector, new PlusMult(-beta));
       // now orthogonalize
       double alpha = currentVector.dot(nextVector);
@@ -170,7 +169,7 @@ public class LanczosSolver {
   }
 
   protected void calculateScaleFactor(Vector nextVector) {
-    if(scaleFactor == 0) {
+    if (scaleFactor == 0.0) {
       scaleFactor = nextVector.norm(2);
     }
   }
@@ -200,10 +199,10 @@ public class LanczosSolver {
       if (v == null) {
         v = new DenseVector(vector.size()).plus(vector);
       } else {
-        v.assign(vector, PLUS);
+        v.assign(vector, Functions.PLUS);
       }
     }
-    v.assign(div(v.norm(2)));
+    v.assign(Functions.div(v.norm(2)));
     return v;
   }
 

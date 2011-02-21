@@ -59,19 +59,12 @@ public class Classifier {
   private static final Logger log = LoggerFactory.getLogger(Classifier.class);
 
   private final Path forestPath;
-
   private final Path inputPath;
-
   private final Path datasetPath;
-
   private final Configuration conf;
-
-  /**
-   * If not null, the Job will build the confusionMatrix.
-   */
+  /** If not null, the Job will build the confusionMatrix. */
   private final ResultAnalyzer analyzer;
   private final Dataset dataset;
-
   private final Path outputPath; // path that will containt the final output of the classifier
   private final Path mappersOutputPath; // mappers will output here
 
@@ -79,7 +72,12 @@ public class Classifier {
     return analyzer;
   }
 
-  public Classifier(Path forestPath, Path inputPath, Path datasetPath, Path outputPath, Configuration conf, boolean analyze) throws IOException {
+  public Classifier(Path forestPath,
+                    Path inputPath,
+                    Path datasetPath,
+                    Path outputPath,
+                    Configuration conf,
+                    boolean analyze) throws IOException {
     this.forestPath = forestPath;
     this.inputPath = inputPath;
     this.datasetPath = datasetPath;
@@ -207,15 +205,10 @@ public class Classifier {
 
     /** used to convert input values to data instances */
     private DataConverter converter;
-
     private DecisionForest forest;
-
     private final Random rng = RandomUtils.getRandom();
-
     private boolean first = true;
-
     private final Text lvalue = new Text();
-
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {

@@ -56,25 +56,13 @@ import org.slf4j.LoggerFactory;
 public class DirichletDriver extends AbstractJob {
 
   public static final String STATE_IN_KEY = "org.apache.mahout.clustering.dirichlet.stateIn";
-
   public static final String MODEL_DISTRIBUTION_KEY = "org.apache.mahout.clustering.dirichlet.modelFactory";
-
-  public static final String MODEL_PROTOTYPE_KEY = "org.apache.mahout.clustering.dirichlet.modelPrototype";
-
-  public static final String PROTOTYPE_SIZE_KEY = "org.apache.mahout.clustering.dirichlet.prototypeSize";
-
   public static final String NUM_CLUSTERS_KEY = "org.apache.mahout.clustering.dirichlet.numClusters";
-
   public static final String ALPHA_0_KEY = "org.apache.mahout.clustering.dirichlet.alpha_0";
-
   public static final String EMIT_MOST_LIKELY_KEY = "org.apache.mahout.clustering.dirichlet.emitMostLikely";
-
   public static final String THRESHOLD_KEY = "org.apache.mahout.clustering.dirichlet.threshold";
-
   public static final String MODEL_PROTOTYPE_CLASS_OPTION = "modelPrototype";
-
   public static final String MODEL_DISTRIBUTION_CLASS_OPTION = "modelDist";
-
   public static final String ALPHA_OPTION = "alpha";
 
   private static final Logger log = LoggerFactory.getLogger(DirichletDriver.class);
@@ -371,7 +359,7 @@ public class DirichletDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, stateOut);
 
-    if (job.waitForCompletion(true) == false) {
+    if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Dirichlet Iteration failed processing " + stateIn.toString());
     }
   }
@@ -511,7 +499,7 @@ public class DirichletDriver extends AbstractJob {
   }
 
   private static void clusterDataSeq(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
-      throws IOException, InstantiationException, IllegalAccessException {
+    throws IOException, InstantiationException, IllegalAccessException {
     Configuration conf = new Configuration();
     List<DirichletCluster> clusters = DirichletClusterMapper.loadClusters(conf, stateIn);
     DirichletClusterer clusterer = new DirichletClusterer(emitMostLikely, threshold);
@@ -562,7 +550,7 @@ public class DirichletDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, input);
     FileOutputFormat.setOutputPath(job, output);
 
-    if (job.waitForCompletion(true) == false) {
+    if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Dirichlet Clustering failed processing " + stateIn.toString());
     }
   }

@@ -27,7 +27,7 @@ public final class OrthonormalityVerifier {
 
   public static VectorIterable pairwiseInnerProducts(Iterable<MatrixSlice> basis) {
     DenseMatrix out = null;
-    for(MatrixSlice slice1 : basis) {
+    for (MatrixSlice slice1 : basis) {
       List<Double> dots = new ArrayList<Double>();
       for (MatrixSlice slice2 : basis) {
         dots.add(slice1.vector().dot(slice2.vector()));

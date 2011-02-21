@@ -40,7 +40,8 @@ public class VertexWritable implements Writable {
   /** an extra type delimeter, can probably be null */
   private String type;
   
-  public VertexWritable() {}
+  public VertexWritable() {
+  }
 
   public VertexWritable(int i, int j, double v, String t) {
     this.i = i;

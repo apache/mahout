@@ -262,8 +262,7 @@ public class SplitBayesInput {
   public void splitDirectory(Path inputDir) throws IOException {
     if (fs.getFileStatus(inputDir) == null) {
       throw new IOException(inputDir + " does not exist");
-    }
-    else if (!fs.getFileStatus(inputDir).isDir()) {
+    } else if (!fs.getFileStatus(inputDir).isDir()) {
       throw new IOException(inputDir + " is not a directory");
     }
 
@@ -283,8 +282,7 @@ public class SplitBayesInput {
   public void splitFile(Path inputFile) throws IOException {
     if (fs.getFileStatus(inputFile) == null) {
       throw new IOException(inputFile + " does not exist");
-    }
-    else if (fs.getFileStatus(inputFile).isDir()) {
+    } else if (fs.getFileStatus(inputFile).isDir()) {
       throw new IOException(inputFile + " is a directory");
     }
     
@@ -558,7 +556,8 @@ public class SplitBayesInput {
                                 "%s is not a directory", testOutputDirectory);
   }
   
-  /** Count the lines in the file specified as returned by <code>BufferedReader.readLine()</code>
+  /**
+   * Count the lines in the file specified as returned by <code>BufferedReader.readLine()</code>
    * 
    * @param inputFile 
    *   the file whose lines will be counted

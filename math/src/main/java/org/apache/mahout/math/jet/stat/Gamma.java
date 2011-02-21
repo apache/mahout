@@ -31,6 +31,8 @@ import org.apache.mahout.math.jet.math.Polynomial;
 /** Partially deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 public final class Gamma {
 
+  private static final double MAXSTIR = 143.01608;
+
   private Gamma() {
   }
 
@@ -664,7 +666,6 @@ public final class Gamma {
 
     w = 1.0 + w * Polynomial.polevl(w, coefficients, 4);
 
-    double MAXSTIR = 143.01608;
     if (x > MAXSTIR) {
       /* Avoid overflow in Math.pow() */
       double v = Math.pow(x, 0.5 * x - 0.25);

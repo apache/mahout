@@ -133,7 +133,7 @@ public final class LastfmClusterEvaluator {
     System.out.println("\nTest Results");
     System.out.println("=============");
     System.out.println(" (A) Listeners in same cluster with simiarity above threshold ("
- + threshold + ") : " + similarListeners);
+                           + threshold + ") : " + similarListeners);
     System.out.println(" (B) All listeners: " + allListeners);
     NumberFormat format = NumberFormat.getInstance();
     format.setMaximumFractionDigits(2);

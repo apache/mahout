@@ -117,7 +117,7 @@ public class ModelDissector {
     return r;
   }
 
-  private static class Category implements Comparable<Category> {
+  private static final class Category implements Comparable<Category> {
     private final int index;
     private final double weight;
 

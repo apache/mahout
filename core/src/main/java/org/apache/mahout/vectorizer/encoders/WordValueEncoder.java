@@ -46,7 +46,7 @@ public abstract class WordValueEncoder extends FeatureVectorEncoder {
     double weight = getWeight(originalForm, w);
     for (int i = 0; i < probes; i++) {
       int n = hashForProbe(originalForm, data.size(), name, i);
-      if(isTraceEnabled()){
+      if (isTraceEnabled()) {
         trace(originalForm, n);        
       }
       data.set(n, data.get(n) + weight);

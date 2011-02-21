@@ -38,7 +38,6 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
   private int sampleN;
   private Vector sampleMean;
   private Vector sampleStd;
-  private Vector sampleVar;
 
   @Override
   @Before
@@ -54,7 +53,7 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
     }
     sampleMean = sum.divide(sampleN);
 
-    sampleVar = new DenseVector(2);
+    Vector sampleVar = new DenseVector(2);
     for (VectorWritable v : sampleData) {
       Vector delta = v.get().minus(sampleMean);
       delta.times(delta).addTo(sampleVar);
@@ -124,8 +123,14 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
       accumulator.observe(vw.get(), 1.0);
     }
     accumulator.compute();
-    log.info("OL Observed {} samples m=[{}, {}] sd=[{}, {}]", new Object[] { accumulator.getN(), accumulator.getMean().get(0),
-        accumulator.getMean().get(1), accumulator.getStd().get(0), accumulator.getStd().get(1) });
+    log.info("OL Observed {} samples m=[{}, {}] sd=[{}, {}]",
+             new Object[] {
+                 accumulator.getN(),
+                 accumulator.getMean().get(0),
+                 accumulator.getMean().get(1),
+                 accumulator.getStd().get(0),
+                 accumulator.getStd().get(1)
+             });
     assertEquals("OL N", sampleN, accumulator.getN(), EPSILON);
     assertEquals("OL Mean", sampleMean.zSum(), accumulator.getMean().zSum(), EPSILON);
     assertEquals("OL Std", sampleStd.zSum(), accumulator.getStd().zSum(), EPSILON);
@@ -138,8 +143,14 @@ public final class TestGaussianAccumulators extends MahoutTestCase {
       accumulator.observe(vw.get(), 1.0);
     }
     accumulator.compute();
-    log.info("RS Observed {} samples m=[{}, {}] sd=[{}, {}]", new Object[] { (int) accumulator.getN(),
-        accumulator.getMean().get(0), accumulator.getMean().get(1), accumulator.getStd().get(0), accumulator.getStd().get(1) });
+    log.info("RS Observed {} samples m=[{}, {}] sd=[{}, {}]",
+             new Object[] {
+                 (int) accumulator.getN(),
+                 accumulator.getMean().get(0),
+                 accumulator.getMean().get(1),
+                 accumulator.getStd().get(0),
+                 accumulator.getStd().get(1)
+             });
     assertEquals("OL N", sampleN, accumulator.getN(), EPSILON);
     assertEquals("OL Mean", sampleMean.zSum(), accumulator.getMean().zSum(), EPSILON);
     assertEquals("OL Std", sampleStd.zSum(), accumulator.getStd().zSum(), 0.0001);

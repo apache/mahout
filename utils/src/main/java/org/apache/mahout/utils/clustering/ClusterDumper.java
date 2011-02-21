@@ -55,39 +55,24 @@ import org.slf4j.LoggerFactory;
 public final class ClusterDumper extends AbstractJob {
 
   public static final String OUTPUT_OPTION = "output";
-
   public static final String DICTIONARY_TYPE_OPTION = "dictionaryType";
-
   public static final String DICTIONARY_OPTION = "dictionary";
-
   public static final String POINTS_DIR_OPTION = "pointsDir";
-
   public static final String JSON_OPTION = "json";
-
   public static final String NUM_WORDS_OPTION = "numWords";
-
   public static final String SUBSTRING_OPTION = "substring";
-
   public static final String SEQ_FILE_DIR_OPTION = "seqFileDir";
 
   private static final Logger log = LoggerFactory.getLogger(ClusterDumper.class);
 
   private Path seqFileDir;
-
   private Path pointsDir;
-
   private String termDictionary;
-
   private String dictionaryFormat;
-
   private String outputFile;
-
   private int subString = Integer.MAX_VALUE;
-
   private int numTopFeatures = 10;
-
   private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
-
   private boolean useJSON;
 
   public ClusterDumper(Path seqFileDir, Path pointsDir) throws IOException {
@@ -306,11 +291,9 @@ public final class ClusterDumper extends AbstractJob {
     return result;
   }
 
-  static class TermIndexWeight {
-    private int index = -1;
-
+  private static class TermIndexWeight {
+    private final int index;
     private final double weight;
-
     TermIndexWeight(int index, double weight) {
       this.index = index;
       this.weight = weight;

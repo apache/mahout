@@ -41,17 +41,14 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 /**
- * 
  * NaiveBayesModel holds the weight Matrix, the feature and label sums and the weight normalizer vectors.
- *
  */
-public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonSerializer<NaiveBayesModel>, Cloneable {
+public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonSerializer<NaiveBayesModel> {
  
   private Vector labelSum;
   private Vector perlabelThetaNormalizer;
@@ -246,7 +243,7 @@ public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonS
   @Override
   public NaiveBayesModel deserialize(JsonElement json,
                                      Type type,
-                                     JsonDeserializationContext context) throws JsonParseException {
+                                     JsonDeserializationContext context) {
     // register the builders for matrix / vector
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
@@ -290,13 +287,13 @@ public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonS
           "Error: The number of labels has to be greater than 0 or defined!");
     }  
     
-    if (model.getPerlabelThetaNormalizer() == null ||
-        model.getPerlabelThetaNormalizer().getNumNondefaultElements() <= 0) {
+    if (model.getPerlabelThetaNormalizer() == null
+        || model.getPerlabelThetaNormalizer().getNumNondefaultElements() <= 0) {
       throw new IllegalArgumentException(
           "Error: The number of theta normalizers has to be greater than 0 or defined!");
     }
     
-    if (model.getFeatureSum() == null ||model.getFeatureSum().getNumNondefaultElements() <= 0) {
+    if (model.getFeatureSum() == null || model.getFeatureSum().getNumNondefaultElements() <= 0) {
       throw new IllegalArgumentException(
           "Error: The number of features has to be greater than 0 or defined!");
     }

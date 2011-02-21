@@ -107,7 +107,7 @@ public class MatrixWritable implements Writable {
     int rows = in.readInt();
     int columns = in.readInt();
 
-    Matrix r ;
+    Matrix r;
     if (dense) {
       r = new DenseMatrix(rows, columns);
     } else {

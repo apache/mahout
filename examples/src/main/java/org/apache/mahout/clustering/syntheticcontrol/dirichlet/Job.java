@@ -148,8 +148,7 @@ public final class Job extends AbstractJob {
                   double alpha0,
                   boolean emitMostLikely,
                   double threshold)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-           SecurityException, InterruptedException {
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     DirichletDriver.run(directoryContainingConvertedInput,

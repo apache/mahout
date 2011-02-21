@@ -28,7 +28,7 @@ public class MostSimilarItemPairsReducer
 
   @Override
   protected void reduce(EntityEntityWritable itemIDPair, Iterable<DoubleWritable> values, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     ctx.write(itemIDPair, values.iterator().next());
   }
 }

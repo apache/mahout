@@ -96,7 +96,7 @@ public abstract class AbstractBooleanPrefJDBCDataModel extends AbstractJDBCDataM
   
   @Override
   public void setPreference(long userID, long itemID, float value) throws TasteException {
-    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value );
+    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value);
     log.debug("Setting preference for user {}, item {}", userID, itemID);
     
     Connection conn = null;

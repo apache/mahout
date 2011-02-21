@@ -98,9 +98,9 @@ public class TextValueEncoder extends FeatureVectorEncoder {
   }
 
   @Override
-  protected Iterable<Integer> hashesForProbe(byte[] originalForm, int dataSize, String name, int probe){
+  protected Iterable<Integer> hashesForProbe(byte[] originalForm, int dataSize, String name, int probe) {
     Collection<Integer> hashes = new ArrayList<Integer>();
-    for (String word : tokenize(new String(originalForm, Charsets.UTF_8))){
+    for (String word : tokenize(new String(originalForm, Charsets.UTF_8))) {
       hashes.add(hashForProbe(bytesForString(word), dataSize, name, probe));
     }
     return hashes;

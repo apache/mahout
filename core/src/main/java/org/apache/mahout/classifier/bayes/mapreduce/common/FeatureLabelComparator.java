@@ -37,7 +37,8 @@ public class FeatureLabelComparator extends WritableComparator implements Serial
   public int compare(WritableComparable a, WritableComparable b) {
     StringTuple ta = (StringTuple) a;
     StringTuple tb = (StringTuple) b;
-    Preconditions.checkArgument(ta.length() >= 2 && ta.length() <= 3 && tb.length() >= 2 && tb.length() <= 3, "StringTuple length out of bounds");
+    Preconditions.checkArgument(ta.length() >= 2 && ta.length() <= 3 && tb.length() >= 2 && tb.length() <= 3,
+                                "StringTuple length out of bounds");
     // token
     String tmpa = ta.length() == 2 ? ta.stringAt(1) : ta.stringAt(2);
     String tmpb = tb.length() == 2 ? tb.stringAt(1) : tb.stringAt(2);
@@ -57,17 +58,15 @@ public class FeatureLabelComparator extends WritableComparator implements Serial
         return -1;
       } else if (tb.stringAt(0).equals(BayesConstants.FEATURE_COUNT)) {
         return 1;
-      } else {
-        return cmp;
       }
+      return cmp;
     }
 
     // label or empty.
     tmpa = ta.length() == 2 ? "" : ta.stringAt(1);
     tmpb = tb.length() == 2 ? "" : tb.stringAt(1);
     
-    cmp = tmpa.compareTo(tmpb);
-    return cmp;
+    return tmpa.compareTo(tmpb);
   }
   
 }

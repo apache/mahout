@@ -49,11 +49,11 @@ public class JWriterTermInfoWriter implements TermInfoWriter {
     writer.write("\n");
     while (entIter.hasNext()) {
       TermEntry entry = entIter.next();
-      writer.write(entry.term);
+      writer.write(entry.getTerm());
       writer.write(delimiter);
-      writer.write(String.valueOf(entry.docFreq));
+      writer.write(String.valueOf(entry.getDocFreq()));
       writer.write(delimiter);
-      writer.write(String.valueOf(entry.termIdx));
+      writer.write(String.valueOf(entry.getTermIdx()));
       writer.write("\n");
     }
     writer.flush();

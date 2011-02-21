@@ -18,13 +18,26 @@
 package org.apache.mahout.utils.vectors;
 
 public class TermEntry {
-  public final String term;
-  public final int termIdx;
-  public final int docFreq;
+
+  private final String term;
+  private final int termIdx;
+  private final int docFreq;
   
   public TermEntry(String term, int termIdx, int docFreq) {
     this.term = term;
     this.termIdx = termIdx;
     this.docFreq = docFreq;
+  }
+
+  public String getTerm() {
+    return term;
+  }
+
+  public int getTermIdx() {
+    return termIdx;
+  }
+
+  public int getDocFreq() {
+    return docFreq;
   }
 }

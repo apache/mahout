@@ -112,7 +112,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
   }
 
   private static void writeInitialState(Path output, Path clustersIn)
-    throws InstantiationException, IllegalAccessException, IOException, SecurityException {
+    throws InstantiationException, IllegalAccessException, IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {

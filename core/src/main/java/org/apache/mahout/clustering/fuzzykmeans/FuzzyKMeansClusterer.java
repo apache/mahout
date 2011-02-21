@@ -40,13 +40,9 @@ public class FuzzyKMeansClusterer {
   private static final double MINIMAL_VALUE = 0.0000000001;
 
   private DistanceMeasure measure;
-
   private double convergenceDelta;
-
   private double m = 2.0; // default value
-
   private boolean emitMostLikely = true;
-
   private double threshold;
 
   /**
@@ -63,7 +59,6 @@ public class FuzzyKMeansClusterer {
   }
 
   public FuzzyKMeansClusterer() {
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -163,7 +158,7 @@ public class FuzzyKMeansClusterer {
   public void emitPointProbToCluster(Vector point,
                                      List<SoftCluster> clusters,
                                      Mapper<?,?,Text,ClusterObservations>.Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
 
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
@@ -216,7 +211,7 @@ public class FuzzyKMeansClusterer {
   public void emitPointToClusters(VectorWritable point,
                                   List<SoftCluster> clusters,
                                   Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     // calculate point distances for all clusters    
     List<Double> clusterDistanceList = new ArrayList<Double>();
     for (SoftCluster cluster : clusters) {
@@ -247,9 +242,9 @@ public class FuzzyKMeansClusterer {
                                      List<SoftCluster> clusters,
                                      Vector pi,
                                      Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     int clusterId = -1;
-    double clusterPdf = 0;
+    double clusterPdf = 0.0;
     for (int i = 0; i < clusters.size(); i++) {
       // System.out.println("cluster-" + clusters.get(i).getId() + "@ " + ClusterBase.formatVector(center, null));
       double pdf = pi.get(i);
@@ -269,7 +264,7 @@ public class FuzzyKMeansClusterer {
                                Collection<SoftCluster> clusters,
                                Vector pi,
                                Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
       if (pdf > threshold) {
@@ -317,7 +312,7 @@ public class FuzzyKMeansClusterer {
   }
 
   private void emitAllClusters(Vector point, Collection<SoftCluster> clusters, Vector pi, Writer writer)
-      throws IOException {
+    throws IOException {
     for (int i = 0; i < clusters.size(); i++) {
       double pdf = pi.get(i);
       if (pdf > threshold) {
@@ -328,9 +323,9 @@ public class FuzzyKMeansClusterer {
   }
 
   private static void emitMostLikelyCluster(Vector point, List<SoftCluster> clusters, Vector pi, Writer writer)
-      throws IOException {
+    throws IOException {
     int clusterId = -1;
-    double clusterPdf = 0;
+    double clusterPdf = 0.0;
     for (int i = 0; i < clusters.size(); i++) {
       // System.out.println("cluster-" + clusters.get(i).getId() + "@ " + ClusterBase.formatVector(center, null));
       double pdf = pi.get(i);

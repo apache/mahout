@@ -300,7 +300,7 @@ public final class TrainNewsGroups {
             countWords(analyzer, words, in);
           }
           line = reader.readLine();
-        } while (line.startsWith(" "));
+        } while (line != null && line.startsWith(" "));
       }
       if (leakType < 3) {
         countWords(analyzer, words, reader);

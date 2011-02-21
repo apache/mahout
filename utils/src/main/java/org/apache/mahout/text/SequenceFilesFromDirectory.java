@@ -64,8 +64,8 @@ public final class SequenceFilesFromDirectory extends AbstractJob {
                   int chunkSizeInMB,
                   Charset charset,
                   String fileFilterClassName)
-    throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException,
-           IOException, SecurityException, NoSuchMethodException, ClassNotFoundException {
+    throws InstantiationException, IllegalAccessException, InvocationTargetException, IOException,
+           NoSuchMethodException, ClassNotFoundException {
     FileSystem fs = FileSystem.get(conf);
     ChunkedWriter writer = new ChunkedWriter(conf, chunkSizeInMB, output);
     

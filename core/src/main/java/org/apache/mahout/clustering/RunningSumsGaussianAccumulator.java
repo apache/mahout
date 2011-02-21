@@ -26,7 +26,7 @@ import org.apache.mahout.math.function.SquareRootFunction;
  */
 public class RunningSumsGaussianAccumulator implements GaussianAccumulator {
 
-  private double s0 = 0.0;
+  private double s0;
   private Vector s1;
   private Vector s2;
   private Vector mean;

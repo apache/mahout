@@ -27,11 +27,12 @@ import org.apache.mahout.math.VectorWritable;
 /**
  * Can also be used as a local Combiner. This accumulates all the features and the weights and sums them up.
  */
-public class NaiveBayesSumReducer extends Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
+public class NaiveBayesSumReducer
+    extends Reducer<WritableComparable<?>, VectorWritable, WritableComparable<?>, VectorWritable> {
 
   @Override
   protected void reduce(WritableComparable<?> key, Iterable<VectorWritable> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Vector vector = null;
     for (VectorWritable v : values) {
       if (vector == null) {

@@ -98,7 +98,7 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
    * Sum frequencies for unigrams and deliver to the collector
    */
   protected void processUnigram(GramKey key, Iterator<Gram> values, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
 
     int freq = 0;
     Gram value = null;
@@ -129,7 +129,8 @@ public class CollocReducer extends Reducer<GramKey, Gram, Gram, Gram> {
    *  some extra work.
    * @throws InterruptedException 
    */
-  protected void processSubgram(GramKey key, Iterator<Gram> values, Context context) throws IOException, InterruptedException {
+  protected void processSubgram(GramKey key, Iterator<Gram> values, Context context)
+    throws IOException, InterruptedException {
 
     Gram subgram = null;
     Gram currentNgram = null;

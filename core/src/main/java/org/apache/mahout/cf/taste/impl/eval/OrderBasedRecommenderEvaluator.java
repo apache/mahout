@@ -247,14 +247,11 @@ public final class OrderBasedRecommenderEvaluator {
     }
     for (int i = 1; i < samples - 1; i++) {
       long itemID = itemsL[i];
-      if ((itemsR[i] == itemID) ||
-          (itemsR[i - 1] == itemID) ||
-          (itemsR[i + 1] == itemID)) {
+      if (itemsR[i] == itemID || itemsR[i - 1] == itemID || itemsR[i + 1] == itemID) {
         count++;
       }
     }
-    if (itemsR[samples - 1].equals(itemsL[samples - 1]) ||
-        itemsR[samples - 1].equals(itemsL[samples - 2])) {
+    if (itemsR[samples - 1].equals(itemsL[samples - 1]) || itemsR[samples - 1].equals(itemsL[samples - 2])) {
       count++;
     }
     return count;
@@ -416,8 +413,7 @@ public final class OrderBasedRecommenderEvaluator {
               jump++;
             }
           }
-          if ((j + jump < length) &&
-              !(reference[j] == sortable[j] && reference[j + jump] == sortable[j + jump])) {
+          if ((j + jump < length) && !(reference[j] == sortable[j] && reference[j + jump] == sortable[j + jump])) {
             long tmp = sortable[j];
             sortable[j] = sortable[j + 1];
             sortable[j + 1] = tmp;

@@ -51,23 +51,14 @@ import com.google.common.base.Preconditions;
 public final class LDADriver extends AbstractJob {
 
   private static final String TOPIC_SMOOTHING_OPTION = "topicSmoothing";
-
   private static final String NUM_WORDS_OPTION = "numWords";
-
   private static final String NUM_TOPICS_OPTION = "numTopics";
-
   static final String STATE_IN_KEY = "org.apache.mahout.clustering.lda.stateIn";
-
   static final String NUM_TOPICS_KEY = "org.apache.mahout.clustering.lda.numTopics";
-
   static final String NUM_WORDS_KEY = "org.apache.mahout.clustering.lda.numWords";
-
   static final String TOPIC_SMOOTHING_KEY = "org.apache.mahout.clustering.lda.topicSmoothing";
-
   static final int LOG_LIKELIHOOD_KEY = -2;
-
   static final int TOPIC_SUM_KEY = -1;
-
   static final double OVERALL_CONVERGENCE = 1.0E-5;
 
   private static final Logger log = LoggerFactory.getLogger(LDADriver.class);
@@ -239,7 +230,6 @@ public final class LDADriver extends AbstractJob {
 
   /**
    * Run the job using supplied arguments
-   * @param conf TODO
    * @param input
    *          the directory pathname for input points
    * @param stateIn
@@ -275,7 +265,7 @@ public final class LDADriver extends AbstractJob {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setJarByClass(LDADriver.class);
 
-    if (job.waitForCompletion(true) == false) {
+    if (!job.waitForCompletion(true)) {
       throw new InterruptedException("LDA Iteration failed processing " + stateIn.toString());
     }
     return findLL(stateOut, conf);

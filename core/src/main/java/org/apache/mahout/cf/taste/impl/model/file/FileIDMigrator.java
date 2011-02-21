@@ -25,7 +25,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.model.AbstractIDMigrator;
-import org.apache.mahout.cf.taste.model.IDMigrator;
 import org.apache.mahout.common.FileLineIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,8 @@ import com.google.common.base.Preconditions;
 
 /**
  * <p>
- * An {@link IDMigrator} backed by a file. This class typically expects a file where each line
+ * An {@link org.apache.mahout.cf.taste.model.IDMigrator} backed by a file.
+ * This class typically expects a file where each line
  * contains a single stringID to be stored in this migrator.
  * </p>
  *

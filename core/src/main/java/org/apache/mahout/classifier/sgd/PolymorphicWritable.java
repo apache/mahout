@@ -26,7 +26,11 @@ import java.io.IOException;
 /**
  * Utilities that write a class name and then serialize using writables.
  */
-public class PolymorphicWritable<T> {
+public final class PolymorphicWritable<T> {
+
+  private PolymorphicWritable() {
+  }
+
   public static <T extends Writable> void write(DataOutput dataOutput, T value) throws IOException {
     dataOutput.writeUTF(value.getClass().getName());
     value.write(dataOutput);

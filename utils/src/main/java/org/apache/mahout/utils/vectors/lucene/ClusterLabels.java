@@ -70,58 +70,18 @@ import org.slf4j.LoggerFactory;
  */
 public class ClusterLabels {
 
-  static class TermInfoClusterInOut implements Comparable<TermInfoClusterInOut> {
-    private final String term;
-
-    private final int inClusterDF;
-
-    private final int outClusterDF;
-
-    private double logLikelihoodRatio;
-
-    TermInfoClusterInOut(String term, int inClusterDF, int outClusterDF) {
-      this.term = term;
-      this.inClusterDF = inClusterDF;
-      this.outClusterDF = outClusterDF;
-    }
-
-    @Override
-    public int compareTo(TermInfoClusterInOut that) {
-      int res = -Double.compare(logLikelihoodRatio, that.logLikelihoodRatio);
-      if (res == 0) {
-        res = term.compareTo(that.term);
-      }
-      return res;
-    }
-
-    public int getInClusterDiff() {
-      return this.inClusterDF - this.outClusterDF;
-    }
-  }
-
   private static final Logger log = LoggerFactory.getLogger(ClusterLabels.class);
 
   public static final int DEFAULT_MIN_IDS = 50;
-
   public static final int DEFAULT_MAX_LABELS = 25;
 
-  private final Path seqFileDir;
-
-  private final Path pointsDir;
-
   private final String indexDir;
-
   private final String contentField;
-
   private String idField;
-
-  private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
-
+  private final Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
   private String output;
-
-  private int minNumIds = DEFAULT_MIN_IDS;
-
-  private int maxLabels = DEFAULT_MAX_LABELS;
+  private int minNumIds;
+  private int maxLabels;
 
   public ClusterLabels(Path seqFileDir,
                        Path pointsDir,
@@ -129,16 +89,12 @@ public class ClusterLabels {
                        String contentField,
                        int minNumIds,
                        int maxLabels) throws IOException {
-    this.seqFileDir = seqFileDir;
-    this.pointsDir = pointsDir;
     this.indexDir = indexDir;
     this.contentField = contentField;
     this.minNumIds = minNumIds;
     this.maxLabels = maxLabels;
-    init();
-  }
-
-  private void init() throws IOException {
+    this.minNumIds = DEFAULT_MIN_IDS;
+    this.maxLabels = DEFAULT_MAX_LABELS;
     ClusterDumper clusterDumper = new ClusterDumper(seqFileDir, pointsDir);
     this.clusterIdToPoints = clusterDumper.getClusterIdToPoints();
   }
@@ -166,13 +122,13 @@ public class ClusterLabels {
           writer.write("Term \t\t LLR \t\t In-ClusterDF \t\t Out-ClusterDF ");
           writer.write('\n');
           for (TermInfoClusterInOut termInfo : termInfos) {
-            writer.write(termInfo.term);
+            writer.write(termInfo.getTerm());
             writer.write("\t\t");
-            writer.write(String.valueOf(termInfo.logLikelihoodRatio));
+            writer.write(String.valueOf(termInfo.getLogLikelihoodRatio()));
             writer.write("\t\t");
-            writer.write(String.valueOf(termInfo.inClusterDF));
+            writer.write(String.valueOf(termInfo.getInClusterDF()));
             writer.write("\t\t");
-            writer.write(String.valueOf(termInfo.outClusterDF));
+            writer.write(String.valueOf(termInfo.getOutClusterDF()));
             writer.write('\n');
           }
         }
@@ -247,7 +203,7 @@ public class ClusterLabels {
       int inclusterDF = (int) termBitset.cardinality();
 
       TermEntry entry = new TermEntry(term.text(), count++, inclusterDF);
-      termEntryMap.put(entry.term, entry);
+      termEntryMap.put(entry.getTerm(), entry);
     } while (te.next());
     te.close();
 
@@ -256,11 +212,12 @@ public class ClusterLabels {
     int clusterSize = wvws.size();
 
     for (TermEntry termEntry : termEntryMap.values()) {
-      int corpusDF = reader.terms(new Term(this.contentField, termEntry.term)).docFreq();
-      int outDF = corpusDF - termEntry.docFreq;
-      int inDF = termEntry.docFreq;
-      TermInfoClusterInOut termInfoCluster = new TermInfoClusterInOut(termEntry.term, inDF, outDF);
-      termInfoCluster.logLikelihoodRatio = scoreDocumentFrequencies(inDF, outDF, clusterSize, numDocs);
+      int corpusDF = reader.terms(new Term(this.contentField, termEntry.getTerm())).docFreq();
+      int outDF = corpusDF - termEntry.getDocFreq();
+      int inDF = termEntry.getDocFreq();
+      double logLikelihoodRatio = scoreDocumentFrequencies(inDF, outDF, clusterSize, numDocs);
+      TermInfoClusterInOut termInfoCluster =
+          new TermInfoClusterInOut(termEntry.getTerm(), inDF, outDF, logLikelihoodRatio);
       clusteredTermInfo.add(termInfoCluster);
     }
 

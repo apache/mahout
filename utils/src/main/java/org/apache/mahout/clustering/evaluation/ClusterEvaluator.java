@@ -46,7 +46,7 @@ public class ClusterEvaluator {
 
   private final DistanceMeasure measure;
 
-  private boolean pruned = false;
+  private boolean pruned;
 
   /**
    * For testing only
@@ -58,7 +58,8 @@ public class ClusterEvaluator {
    * @param measure
    *            an appropriate DistanceMeasure
    */
-  public ClusterEvaluator(Map<Integer, List<VectorWritable>> representativePoints, List<Cluster> clusters, DistanceMeasure measure) {
+  public ClusterEvaluator(Map<Integer, List<VectorWritable>> representativePoints,
+                          List<Cluster> clusters, DistanceMeasure measure) {
     this.representativePoints = representativePoints;
     this.clusters = clusters;
     this.measure = measure;
@@ -72,8 +73,8 @@ public class ClusterEvaluator {
    * @param clustersIn
    *            a String path to the input clusters directory
    */
-  public ClusterEvaluator(Configuration conf, Path clustersIn) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException {
+  public ClusterEvaluator(Configuration conf, Path clustersIn)
+    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     measure = ccl.loadClass(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
         .newInstance();
@@ -88,8 +89,8 @@ public class ClusterEvaluator {
    *            a String pathname to the directory containing input cluster files
    * @return a List<Cluster> of the clusters
    */
-  private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) throws InstantiationException,
-      IllegalAccessException, IOException {
+  private static List<Cluster> loadClusters(Configuration conf, Path clustersIn)
+    throws InstantiationException, IllegalAccessException, IOException {
     List<Cluster> clusters = new ArrayList<Cluster>();
     FileSystem fs = clustersIn.getFileSystem(conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {

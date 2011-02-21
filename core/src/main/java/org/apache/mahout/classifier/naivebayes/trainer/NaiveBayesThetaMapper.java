@@ -44,8 +44,7 @@ public class NaiveBayesThetaMapper extends Mapper<IntWritable, VectorWritable, T
   private double vocabCount;
   
   @Override
-  protected void map(IntWritable key, VectorWritable value, Context context)
-      throws IOException, InterruptedException {
+  protected void map(IntWritable key, VectorWritable value, Context context) throws IOException, InterruptedException {
     Vector vector = value.get();
     int label = key.get();
     double weight = Math.log((vector.zSum() + alphaI) / (labelSum.get(label) + vocabCount));

@@ -51,12 +51,12 @@ public final class SVDRecommender extends AbstractRecommender {
   }
 
   public SVDRecommender(DataModel dataModel, Factorizer factorizer, CandidateItemsStrategy candidateItemsStrategy)
-      throws TasteException {
+    throws TasteException {
     super(dataModel, candidateItemsStrategy);
     factorization = factorizer.factorize();
     refreshHelper = new RefreshHelper(new Callable<Object>() {
       @Override
-      public Object call() throws TasteException {
+      public Object call() {
         // TODO: train again
         return null;
       }

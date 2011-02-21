@@ -63,26 +63,25 @@ public class OnlineGaussianAccumulator implements GaussianAccumulator {
    *  Variance = S / (sumweight-1)  # if sample is the population, omit -1
    *  return Variance
    */
-
   @Override
   public void observe(Vector x, double weight) {
     double temp = weight + sumWeight;
-    Vector Q;
+    Vector q;
     if (mean == null) {
       mean = x.like();
-      Q = x.clone();
+      q = x.clone();
     } else {
-      Q = x.minus(mean);
+      q = x.minus(mean);
     }
-    Vector R = Q.times(weight).divide(temp);
+    Vector r = q.times(weight).divide(temp);
     if (s == null) {
-      s = Q.times(sumWeight).times(R);
+      s = q.times(sumWeight).times(r);
     } else {
-      s = s.plus(Q.times(sumWeight).times(R));
+      s = s.plus(q.times(sumWeight).times(r));
     }
-    mean = mean.plus(R);
+    mean = mean.plus(r);
     sumWeight = temp;
-    variance = s.divide(sumWeight - 1);//  # if sample is the population, omit -1
+    variance = s.divide(sumWeight - 1); //  # if sample is the population, omit -1
   }
 
   @Override

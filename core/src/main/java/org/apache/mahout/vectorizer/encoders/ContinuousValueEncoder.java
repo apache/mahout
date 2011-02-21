@@ -48,7 +48,7 @@ public class ContinuousValueEncoder extends CachingValueEncoder {
 
   @Override
   protected double getWeight(byte[] originalForm, double w) {
-    if (originalForm!=null) {
+    if (originalForm != null) {
       return w * Double.parseDouble(new String(originalForm));
     } else {
       return w;

@@ -44,7 +44,7 @@ public class NaiveBayesThetaComplementaryMapper extends Mapper<IntWritable, Vect
   private Vector perLabelThetaNormalizer;
   private double alphaI = 1.0;
   private double vocabCount;
-  private double totalSum = 0;
+  private double totalSum = 0.0;
   
   @Override
   protected void map(IntWritable key, VectorWritable value, Context context)

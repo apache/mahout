@@ -49,7 +49,7 @@ public class MeanShiftCanopyReducer extends Reducer<Text,MeanShiftCanopy,Text,Me
     for (MeanShiftCanopy canopy : canopies) {
       boolean converged = clusterer.shiftToMean(canopy);
       if (converged) {
-      context.getCounter("Clustering", "Converged Clusters").increment(1);
+        context.getCounter("Clustering", "Converged Clusters").increment(1);
       }
       allConverged = converged && allConverged;
       context.write(new Text(canopy.getIdentifier()), canopy);

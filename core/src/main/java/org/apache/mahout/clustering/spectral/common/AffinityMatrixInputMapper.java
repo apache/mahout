@@ -55,21 +55,18 @@ public class AffinityMatrixInputMapper
 
     // enforce well-formed textual representation of the graph
     if (elements.length != 3) {
-      throw new IOException("Expected input of length 3, received " +
-          elements.length + ". Please make sure you adhere to " +
-          "the structure of (i,j,value) for representing a graph " +
-          "in text.");
+      throw new IOException("Expected input of length 3, received "
+          + elements.length + ". Please make sure you adhere to "
+          + "the structure of (i,j,value) for representing a graph in text.");
     } else if (elements[0].length() == 0 || elements[1].length() == 0 || elements[2].length() == 0) {
-      throw new IOException("Found an element of 0 length. Please " +
-          "be sure you adhere to the structure of (i,j,value) for " +
-          "representing a graph in text.");
+      throw new IOException("Found an element of 0 length. Please be sure you adhere to the structure of "
+          + "(i,j,value) for  representing a graph in text.");
     }
 
     // parse the line of text into a DistributedRowMatrix entry,
     // making the row (elements[0]) the key to the Reducer, and
     // setting the column (elements[1]) in the entry itself
-    DistributedRowMatrix.MatrixEntryWritable toAdd =
-      new DistributedRowMatrix.MatrixEntryWritable();
+    DistributedRowMatrix.MatrixEntryWritable toAdd = new DistributedRowMatrix.MatrixEntryWritable();
     IntWritable row = new IntWritable(Integer.valueOf(elements[0]));
     toAdd.setRow(-1); // already set as the Reducer's key
     toAdd.setCol(Integer.valueOf(elements[1]));

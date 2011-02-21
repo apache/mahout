@@ -88,7 +88,7 @@ public class MinHashMapper extends Mapper<Text,Writable,Text,Writable> {
         bytesToHash[0] = (byte) (value >> 24);
         bytesToHash[1] = (byte) (value >> 16);
         bytesToHash[2] = (byte) (value >> 8);
-        bytesToHash[3] = (byte) (value);
+        bytesToHash[3] = (byte) value;
         int hashIndex = hashFunction[i].hash(bytesToHash);
         if (minHashValues[i] > hashIndex) {
           minHashValues[i] = hashIndex;

@@ -608,7 +608,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     public Iterator<Element> iterator() {
       return new Iterator<Element>() {
-        private int i = 0;
+        private int i;
         public boolean hasNext() {
           return i < size();
         }

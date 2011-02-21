@@ -60,14 +60,12 @@ public abstract class RecommenderWrapper implements Recommender {
   protected abstract Recommender buildRecommender() throws IOException, TasteException;
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany)
-      throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany) throws TasteException {
     return delegate.recommend(userID, howMany);
   }
 
   @Override
-  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer)
-      throws TasteException {
+  public List<RecommendedItem> recommend(long userID, int howMany, IDRescorer rescorer) throws TasteException {
     return delegate.recommend(userID, howMany, rescorer);
   }
 
@@ -77,8 +75,7 @@ public abstract class RecommenderWrapper implements Recommender {
   }
 
   @Override
-  public void setPreference(long userID, long itemID, float value)
-      throws TasteException {
+  public void setPreference(long userID, long itemID, float value) throws TasteException {
     delegate.setPreference(userID, itemID, value);
   }
 

@@ -81,7 +81,7 @@ public abstract class FeatureVectorEncoder {
    * @param weight       The weight to be applied to this feature.
    * @param data         The vector to which the value should be added.
    */
-  public void addToVector(String originalForm, double weight, Vector data){
+  public void addToVector(String originalForm, double weight, Vector data) {
     addToVector(bytesForString(originalForm), weight, data);        
   }
 
@@ -116,7 +116,7 @@ public abstract class FeatureVectorEncoder {
     return Collections.singletonList(hashForProbe(originalForm, dataSize, name, probe));
   }
 
-  protected double getWeight(byte[] originalForm, double w){
+  protected double getWeight(byte[] originalForm, double w) {
     return 1.0;
   }
 
@@ -140,22 +140,21 @@ public abstract class FeatureVectorEncoder {
   }
 
   /**
-    * Hash a byte array and an integer into the range [0..numFeatures-1].
-    *
-    * @param term        The bytes.
-    * @param probe       An integer that modifies the resulting hash.
-    * @param numFeatures The range into which the resulting hash must fit.
-    * @return An integer in the range [0..numFeatures-1] that has good spread for small changes in
-    *         term and probe.
-    */
-   protected int hash(byte[] term, int probe, int numFeatures) {
-     long r = MurmurHash.hash64A(term, probe) % numFeatures;
-     if (r < 0) {
-       r += numFeatures;
-     }
-     return (int) r;
-   }
-
+   * Hash a byte array and an integer into the range [0..numFeatures-1].
+   *
+   * @param term        The bytes.
+   * @param probe       An integer that modifies the resulting hash.
+   * @param numFeatures The range into which the resulting hash must fit.
+   * @return An integer in the range [0..numFeatures-1] that has good spread for small changes in
+   *         term and probe.
+   */
+  protected int hash(byte[] term, int probe, int numFeatures) {
+    long r = MurmurHash.hash64A(term, probe) % numFeatures;
+    if (r < 0) {
+      r += numFeatures;
+    }
+    return (int) r;
+  }
 
   /**
    * Hash two strings and an integer into the range [0..numFeatures-1].
@@ -245,7 +244,7 @@ public abstract class FeatureVectorEncoder {
     return name;
   }
 
-  protected boolean isTraceEnabled(){
+  protected boolean isTraceEnabled() {
     return traceDictionary != null;
   }
 

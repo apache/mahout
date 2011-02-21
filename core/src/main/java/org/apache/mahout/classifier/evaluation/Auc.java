@@ -70,9 +70,9 @@ public class Auc {
    * @param score     The score for this example.
    */
   public void add(int trueValue, double score) {
+    Preconditions.checkArgument(trueValue == 0 || trueValue == 1, "True value must be 0 or 1");
     hasScore = true;
-    Preconditions.checkArgument(trueValue == 0 || trueValue == 1, "True value must be 0 or 1" );
-    
+
     int predictedClass = (score > threshold) ? 1 : 0;
     confusion.set(trueValue, predictedClass, confusion.get(trueValue, predictedClass) + 1);
 

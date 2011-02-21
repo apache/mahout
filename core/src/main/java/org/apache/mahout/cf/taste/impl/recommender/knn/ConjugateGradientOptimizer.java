@@ -72,9 +72,9 @@ public final class ConjugateGradientOptimizer implements Optimizer {
     // w = -r;
     for (int i = 0; i < k; i++) {
       double v = 0.0;
-      double[] Ai = matrix[i];
+      double[] ai = matrix[i];
       for (int j = 0; j < k; j++) {
-        v += Ai[j] * x[j];
+        v += ai[j] * x[j];
       }
       double ri = b[i] - v;
       r[i] = ri;
@@ -86,9 +86,9 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       // z = A*w;
       for (int i = 0; i < k; i++) {
         double v = 0.0;
-        double[] Ai = matrix[i];
+        double[] ai = matrix[i];
         for (int j = 0; j < k; j++) {
-          v += Ai[j] * w[j];
+          v += ai[j] * w[j];
         }
         z[i] = v;
       }
@@ -120,14 +120,14 @@ public final class ConjugateGradientOptimizer implements Optimizer {
       }
       
       // B = (r'*z)/(w'*z);
-      double Bnum = 0.0;
-      double Bden = 0.0;
+      double bnum = 0.0;
+      double bden = 0.0;
       for (int i = 0; i < k; i++) {
         double zi = z[i];
-        Bnum += r[i] * zi;
-        Bden += w[i] * zi;
+        bnum += r[i] * zi;
+        bden += w[i] * zi;
       }
-      double B = Bnum / Bden;
+      double B = bnum / bden;
       
       // w = -r + B*w;
       for (int i = 0; i < k; i++) {

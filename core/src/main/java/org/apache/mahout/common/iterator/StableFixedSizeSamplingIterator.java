@@ -53,7 +53,7 @@ public class StableFixedSizeSamplingIterator<T> extends DelegatingIterator<T> {
     }
     
     Collections.sort(buf);
-    return new DelegateIterator(buf);
+    return new DelegateIterator<T>(buf);
   }
   
   private static final class Entry<T> implements Comparable<Entry<T>> {

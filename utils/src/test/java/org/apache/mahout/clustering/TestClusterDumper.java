@@ -124,7 +124,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     termDictionary = new String[numTerms];
     int i = 0;
     for (Iterator<TermEntry> it = termInfo.getAllEntries(); it.hasNext();) {
-      String term = it.next().term;
+      String term = it.next().getTerm();
       termDictionary[i] = term;
       System.out.println(i + " " + term);
       i++;

@@ -163,7 +163,7 @@ public abstract class AbstractVector implements Vector {
   }
   
   public Vector logNormalize() {
-      return logNormalize(2, Math.sqrt(dotSelf()));
+    return logNormalize(2.0, Math.sqrt(dotSelf()));
   }
   
   public Vector logNormalize(double power) {
@@ -238,7 +238,7 @@ public abstract class AbstractVector implements Vector {
       throw new CardinalityException(size, v.size());
     }
     // if this and v has a cached lengthSquared, dot product is quickest way to compute this.
-    if(lengthSquared >= 0 && v instanceof AbstractVector && ((AbstractVector)v).lengthSquared >= 0) {
+    if (lengthSquared >= 0 && v instanceof AbstractVector && ((AbstractVector)v).lengthSquared >= 0) {
       return lengthSquared + v.getLengthSquared() - 2 * this.dot(v);
     }
     Vector randomlyAccessed;

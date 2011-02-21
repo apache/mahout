@@ -31,7 +31,7 @@ public class ToItemVectorsReducer
   
   @Override
   protected void reduce(IntWritable rowIndex, Iterable<DistributedRowMatrix.MatrixEntryWritable> values, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
 
     Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE, 100);
     for (DistributedRowMatrix.MatrixEntryWritable entry : values) {

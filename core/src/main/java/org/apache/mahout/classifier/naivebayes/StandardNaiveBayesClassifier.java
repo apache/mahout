@@ -36,7 +36,7 @@ public class StandardNaiveBayesClassifier extends AbstractNaiveBayesClassifier {
     double sumLabelWeight = model.getLabelSum().get(label);
     double numerator = result + model.getAlphaI();
     double denominator = sumLabelWeight + vocabCount;
-    double weight = - Math.log(numerator / denominator);
+    double weight = -Math.log(numerator / denominator);
     result = weight / model.getPerlabelThetaNormalizer().get(label);
     return result;
   }

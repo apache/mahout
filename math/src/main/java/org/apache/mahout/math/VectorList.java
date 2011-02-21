@@ -24,7 +24,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -269,8 +268,7 @@ public class VectorList extends AbstractMatrix {
     private final Type collectionType = new TypeToken<List<Vector>>(){}.getType();
     private final Type labelType = new TypeToken<Map<String, Integer>>(){}.getType();
 
-    public VectorList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-      throws JsonParseException {
+    public VectorList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
       JsonObject jo = json.getAsJsonObject();
       VectorList r = new VectorList(jo.get("columns").getAsInt());
       r.data = context.deserialize(jo.get("data"), collectionType);

@@ -66,14 +66,18 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
   /**
    * Factored-out LanczosSolver for the purpose of invoking it programmatically
    */
-  public void runJob(Configuration originalConfig, Path inputPath,
-		  			Path outputTmpPath, int numRows, int numCols,
-		  			boolean isSymmetric, int desiredRank, Matrix eigenVectors, 
-		  			List<Double> eigenValues, String outputEigenVectorPathString) 
-  					throws IOException {
-	  DistributedRowMatrix matrix = new DistributedRowMatrix(
-			  							inputPath, outputTmpPath, 
-			  							numRows, numCols);
+  public void runJob(Configuration originalConfig,
+                     Path inputPath,
+                     Path outputTmpPath,
+                     int numRows,
+                     int numCols,
+                     boolean isSymmetric,
+                     int desiredRank,
+                     Matrix eigenVectors,
+                     List<Double> eigenValues,
+                     String outputEigenVectorPathString) throws IOException {
+	  DistributedRowMatrix matrix =
+        new DistributedRowMatrix(inputPath, outputTmpPath, numRows, numCols);
 	  matrix.setConf(new Configuration(originalConfig));
 	  setConf(originalConfig);
 	  solve(matrix, desiredRank, eigenVectors, eigenValues, isSymmetric);
@@ -184,13 +188,13 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * @param eigenVectors The eigenvectors to be serialized
    * @param eigenValues The eigenvalues to be serialized
    * @param outputPath The path (relative to the current Configuration's FileSystem) to save the output to.
-   * @throws IOException
    */
   public void serializeOutput(Matrix eigenVectors, List<Double> eigenValues, Path outputPath) throws IOException {
     log.info("Persisting {} eigenVectors and eigenValues to: {}", eigenVectors.numRows(), outputPath);
     Configuration conf = getConf() != null ? getConf() : new Configuration();
     FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Writer seqWriter = new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
+    SequenceFile.Writer seqWriter =
+        new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
     for (int i = 0; i < eigenVectors.numRows() - 1; i++) {
       Vector v = eigenVectors.getRow(i);

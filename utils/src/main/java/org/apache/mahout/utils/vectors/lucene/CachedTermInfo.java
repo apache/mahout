@@ -55,7 +55,7 @@ public class CachedTermInfo implements TermInfo {
         continue;
       }
       TermEntry entry = new TermEntry(term.text(), count++, df);
-      termEntries.put(entry.term, entry);
+      termEntries.put(entry.getTerm(), entry);
     } while (te.next());
     te.close();
   }

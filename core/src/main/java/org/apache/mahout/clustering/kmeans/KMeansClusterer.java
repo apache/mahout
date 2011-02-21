@@ -66,7 +66,7 @@ public class KMeansClusterer {
   public void emitPointToNearestCluster(Vector point,
                                         Iterable<Cluster> clusters,
                                         Mapper<?,?,Text,ClusterObservations>.Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     Cluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (Cluster cluster : clusters) {
@@ -118,7 +118,7 @@ public class KMeansClusterer {
   public void outputPointWithClusterInfo(Vector vector,
                                          Iterable<Cluster> clusters,
                                          Mapper<?,?,IntWritable,WeightedVectorWritable>.Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     AbstractCluster nearestCluster = null;
     double nearestDistance = Double.MAX_VALUE;
     for (AbstractCluster cluster : clusters) {

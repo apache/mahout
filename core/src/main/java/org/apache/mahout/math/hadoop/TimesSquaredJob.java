@@ -158,7 +158,7 @@ public final class TimesSquaredJob {
       try {
         URI[] localFiles = DistributedCache.getCacheFiles(conf);
         Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
-          "missing paths from the DistributedCache" );
+                                    "missing paths from the DistributedCache");
         Path inputVectorPath = new Path(localFiles[0].getPath());
         FileSystem fs = inputVectorPath.getFileSystem(conf);
 

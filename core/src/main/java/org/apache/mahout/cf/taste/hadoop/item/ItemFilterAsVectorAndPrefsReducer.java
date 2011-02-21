@@ -37,7 +37,8 @@ public class ItemFilterAsVectorAndPrefsReducer
     extends Reducer<VarLongWritable,VarLongWritable,VarIntWritable,VectorAndPrefsWritable> {
   @Override
   protected void reduce(VarLongWritable itemID, Iterable<VarLongWritable> values, Context ctx)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
+    
     int itemIDIndex = TasteHadoopUtils.idToIndex(itemID.get());
     Vector vector = new RandomAccessSparseVector(Integer.MAX_VALUE, 1);
     /* artificial NaN summand to exclude this item from the recommendations for all users specified in userIDs */

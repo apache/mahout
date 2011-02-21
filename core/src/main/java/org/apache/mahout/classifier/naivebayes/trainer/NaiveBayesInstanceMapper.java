@@ -38,7 +38,7 @@ public class NaiveBayesInstanceMapper extends Mapper<Text, VectorWritable, IntWr
   
   @Override
   protected void map(Text key, VectorWritable value, Context context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException {
     if (!labelMap.containsKey(key.toString())) {
       context.getCounter("NaiveBayes", "Skipped instance: not in label list").increment(1);
       return;

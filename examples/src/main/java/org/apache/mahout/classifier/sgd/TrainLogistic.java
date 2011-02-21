@@ -305,7 +305,7 @@ public final class TrainLogistic {
   static BufferedReader open(String inputFile) throws IOException {
     InputStream in;
     try {
-      in= Resources.getResource(inputFile).openStream();
+      in = Resources.getResource(inputFile).openStream();
     } catch (IllegalArgumentException e) {
       in = new FileInputStream(new File(inputFile));
     }

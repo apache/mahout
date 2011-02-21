@@ -54,17 +54,11 @@ public abstract class Builder {
   
   private static final Logger log = LoggerFactory.getLogger(Builder.class);
   
-  /** Tree Builder Component */
   private final TreeBuilder treeBuilder;
-  
   private final Path dataPath;
-  
   private final Path datasetPath;
-  
   private final Long seed;
-  
   private final Configuration conf;
-  
   private String outputDirName = "output";
   
   protected Builder(TreeBuilder treeBuilder, Path dataPath, Path datasetPath, Long seed, Configuration conf) {
@@ -293,7 +287,7 @@ public abstract class Builder {
     throws IOException, ClassNotFoundException, InterruptedException;
   
   public DecisionForest build(int nbTrees, PredictionCallback callback)
-      throws IOException, ClassNotFoundException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     // int numTrees = getNbTrees(conf);
     
     Path outputPath = getOutputPath(conf);

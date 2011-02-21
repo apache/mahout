@@ -183,9 +183,9 @@ public final class HmmUtils {
     for (int i = 0; i < model.getEmissionMatrix().numRows(); i++) {
       sum = 0;
       for (int j = 0; j < model.getEmissionMatrix().numCols(); j++) {
-        Preconditions.checkArgument(model.getEmissionMatrix().get(i, j) >= 0,
-          "Error: The output state probability from hidden state " + i +
-            " to output state " + j + " is negative");
+        Preconditions.checkArgument(
+            model.getEmissionMatrix().get(i, j) >= 0,
+            "The output state probability from hidden state " + i + " to output state " + j + " is negative");
         sum += model.getEmissionMatrix().get(i, j);
       }
       Preconditions.checkArgument(Maths.approxEquals(sum, 1, 0.00001),

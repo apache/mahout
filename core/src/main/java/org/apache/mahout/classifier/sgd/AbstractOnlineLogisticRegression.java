@@ -45,7 +45,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   // number of categories we are classifying.  This should the number of rows of beta plus one.
   protected int numCategories;
 
-  protected int step = 0;
+  protected int step;
 
   // information about how long since coefficient rows were updated.  This allows lazy regularization.
   protected Vector updateSteps;
@@ -59,7 +59,7 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
   protected PriorFunction prior;
 
   // can we ignore any further regularization when doing classification?
-  private boolean sealed = false;
+  private boolean sealed;
 
   // by default we don't do any fancy training
   private Gradient gradient = new DefaultGradient();
@@ -100,13 +100,13 @@ public abstract class AbstractOnlineLogisticRegression extends AbstractVectorCla
    * @param r  The value to transform.
    * @return   The logit of r.
    */
-  public double link(double r){
-    if (r < 0) {
+  public double link(double r) {
+    if (r < 0.0) {
       double s = Math.exp(r);
-      return s / (1 + s);
+      return s / (1.0 + s);
     } else {
       double s = Math.exp(-r);
-      return 1 / (1 + s);
+      return 1.0 / (1.0 + s);
     }
   }
 

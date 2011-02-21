@@ -48,8 +48,7 @@ public abstract class AbstractJDBCComponent {
   }
   
   protected static void checkNotNullAndLog(String argName, Object[] values) {
-    Preconditions.checkArgument(values != null && values.length != 0,
-      argName + " is null or zero-length" );
+    Preconditions.checkArgument(values != null && values.length != 0, argName + " is null or zero-length");
     for (Object value : values) {
       checkNotNullAndLog(argName, value);
     }

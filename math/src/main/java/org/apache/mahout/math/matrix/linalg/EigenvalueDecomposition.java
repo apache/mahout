@@ -40,8 +40,8 @@ public final class EigenvalueDecomposition implements Serializable {
 
   // Complex scalar division.
 
-  private transient double cdivr;
-  private transient double cdivi;
+  private double cdivr;
+  private double cdivi;
 
   /**
    * Constructs and returns a new eigenvalue decomposition object; The decomposed matrices can be retrieved via instance

@@ -100,7 +100,7 @@ public final class UncommonDistributions {
   /**
    * Returns a vector of random samples from a beta distribution with the given shapes
    * 
-   * @param K
+   * @param k
    *          the number of samples to return
    * @param shape1
    *          a double representing shape1
@@ -108,12 +108,12 @@ public final class UncommonDistributions {
    *          a double representing shape2
    * @return a Vector of samples
    */
-  public static Vector rBeta(int K, double shape1, double shape2) {
+  public static Vector rBeta(int k, double shape1, double shape2) {
     // List<Double> params = new ArrayList<Double>(2);
     // params.add(shape1);
     // params.add(Math.max(0, shape2));
-    Vector result = new DenseVector(K);
-    for (int i = 0; i < K; i++) {
+    Vector result = new DenseVector(k);
+    for (int i = 0; i < k; i++) {
       result.set(i, rBeta(shape1, shape2));
     }
     return result;
@@ -174,11 +174,11 @@ public final class UncommonDistributions {
     double nextDouble = UncommonDistributions.RANDOM.nextDouble();
     double p = nextDouble * total;
     for (int i = 0; i < probabilities.size(); i++) {
-      double p_i = probabilities.get(i);
-      if (p < p_i) {
+      double pi = probabilities.get(i);
+      if (p < pi) {
         return i;
       } else {
-        p -= p_i;
+        p -= pi;
       }
     }
     // can't happen except for round-off error so we don't care what we return here

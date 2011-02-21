@@ -65,7 +65,9 @@ public class CDbwEvaluator {
    * @param measure
    *            an appropriate DistanceMeasure
    */
-  public CDbwEvaluator(Map<Integer, List<VectorWritable>> representativePoints, List<Cluster> clusters, DistanceMeasure measure) {
+  public CDbwEvaluator(Map<Integer, List<VectorWritable>> representativePoints,
+                       List<Cluster> clusters,
+                       DistanceMeasure measure) {
     this.representativePoints = representativePoints;
     this.clusters = clusters;
     this.measure = measure;
@@ -82,8 +84,8 @@ public class CDbwEvaluator {
    * @param clustersIn
    *            a String path to the input clusters directory
    */
-  public CDbwEvaluator(Configuration conf, Path clustersIn) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, IOException {
+  public CDbwEvaluator(Configuration conf, Path clustersIn)
+    throws ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     measure = ccl.loadClass(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
         .newInstance();
@@ -101,8 +103,8 @@ public class CDbwEvaluator {
    *            a String pathname to the directory containing input cluster files
    * @return a List<Cluster> of the clusters
    */
-  private static List<Cluster> loadClusters(Configuration conf, Path clustersIn) throws InstantiationException,
-      IllegalAccessException, IOException {
+  private static List<Cluster> loadClusters(Configuration conf, Path clustersIn)
+    throws InstantiationException, IllegalAccessException, IOException {
     List<Cluster> clusters = new ArrayList<Cluster>();
     FileSystem fs = clustersIn.getFileSystem(conf);
     for (FileStatus part : fs.listStatus(clustersIn)) {
@@ -246,7 +248,7 @@ public class CDbwEvaluator {
       for (VectorWritable pt : repPtsI) {
         // compute f(x, vIJ) (eqn 7)
         Vector repJ = pt.get();
-        double densityIJ = (measure.distance(cluster.getCenter(), repJ) <= stdev ? 1.0 : 0.0);
+        double densityIJ = measure.distance(cluster.getCenter(), repJ) <= stdev ? 1.0 : 0.0;
         // accumulate sumJ
         sumJ += densityIJ / stdev;
       }

@@ -69,7 +69,8 @@ class DisplayFuzzyKMeans extends DisplayClustering {
                             true,
                             threshold,
                             true);
-      loadClusters(output);
+
+    loadClusters(output);
     //} else {
     //  List<Vector> points = new ArrayList<Vector>();
     //  for (VectorWritable sample : SAMPLE_DATA) {
