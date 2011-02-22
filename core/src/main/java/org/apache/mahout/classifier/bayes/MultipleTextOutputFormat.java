@@ -20,12 +20,10 @@ package org.apache.mahout.classifier.bayes;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.util.Progressable;
 
 /**
  * This class extends the MultipleOutputFormat, allowing to write the output
@@ -36,24 +34,11 @@ public class MultipleTextOutputFormat<K, V> extends MultipleOutputFormat<K, V> {
   private TextOutputFormat<K, V> theTextOutputFormat;
 
   @Override
-  protected RecordWriter<K, V> getBaseRecordWriter(FileSystem fs, Configuration conf, String name, Progressable arg3)
-      throws IOException {
+  protected RecordWriter<K, V> getBaseRecordWriter(Configuration conf) throws IOException, InterruptedException {
     if (theTextOutputFormat == null) {
       theTextOutputFormat = new TextOutputFormat<K, V>();
     }
-    try {
-      return theTextOutputFormat.getRecordWriter(new TaskAttemptContext(conf, new TaskAttemptID()));
-    } catch (InterruptedException e) {
-      // continue
-    }
-    return null;
+    return theTextOutputFormat.getRecordWriter(new TaskAttemptContext(conf, new TaskAttemptID()));
   }
 
-  @Override
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext job) throws IOException, InterruptedException {
-    if (theTextOutputFormat == null) {
-      theTextOutputFormat = new TextOutputFormat<K, V>();
-    }
-    return theTextOutputFormat.getRecordWriter(job);
-  }
 }
