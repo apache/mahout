@@ -74,7 +74,7 @@ public final class CachingRecommender implements Recommender {
     refreshHelper.addDependency(recommender);
   }
   
-  private  void setCurrentRescorer(IDRescorer rescorer) {
+  private void setCurrentRescorer(IDRescorer rescorer) {
     if (rescorer == null) {
       if (currentRescorer != null) {
         currentRescorer = null;
@@ -157,9 +157,15 @@ public final class CachingRecommender implements Recommender {
    * @param userID
    *          clear cached data associated with this user ID
    */
-  public void clear(long userID) {
+  public void clear(final long userID) {
     log.debug("Clearing recommendations for user ID '{}'", userID);
     recommendationCache.remove(userID);
+    estimatedPrefCache.removeKeysMatching(new Cache.MatchPredicate<LongPair>() {
+      @Override
+      public boolean matches(LongPair userItemPair) {
+        return userItemPair.getFirst() == userID;
+      }
+    });
   }
   
   /**
@@ -170,6 +176,7 @@ public final class CachingRecommender implements Recommender {
   public void clear() {
     log.debug("Clearing all recommendations...");
     recommendationCache.clear();
+    estimatedPrefCache.clear();
   }
   
   @Override
