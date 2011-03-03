@@ -37,17 +37,17 @@ public final class AverageAbsoluteDifferenceRecommenderEvaluator extends
   private RunningAverage average;
   
   @Override
-  void reset() {
+  protected void reset() {
     average = new FullRunningAverage();
   }
   
   @Override
-  void processOneEstimate(float estimatedPreference, Preference realPref) {
+  protected void processOneEstimate(float estimatedPreference, Preference realPref) {
     average.addDatum(Math.abs(realPref.getValue() - estimatedPreference));
   }
   
   @Override
-  double computeFinalEvaluation() {
+  protected double computeFinalEvaluation() {
     return average.getAverage();
   }
   

@@ -55,7 +55,7 @@ import com.google.common.base.Preconditions;
 /**
  * Abstract superclass of a couple implementations, providing shared functionality.
  */
-abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEvaluator {
+public abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEvaluator {
   
   private static final Logger log = LoggerFactory.getLogger(AbstractDifferenceRecommenderEvaluator.class);
   
@@ -63,7 +63,7 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
   private float maxPreference;
   private float minPreference;
   
-  AbstractDifferenceRecommenderEvaluator() {
+  protected AbstractDifferenceRecommenderEvaluator() {
     random = RandomUtils.getRandom();
     maxPreference = Float.NaN;
     minPreference = Float.NaN;
@@ -90,11 +90,11 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
   }
   
   @Override
-  public final double evaluate(RecommenderBuilder recommenderBuilder,
-                               DataModelBuilder dataModelBuilder,
-                               DataModel dataModel,
-                               double trainingPercentage,
-                               double evaluationPercentage) throws TasteException {
+  public double evaluate(RecommenderBuilder recommenderBuilder,
+                         DataModelBuilder dataModelBuilder,
+                         DataModel dataModel,
+                         double trainingPercentage,
+                         double evaluationPercentage) throws TasteException {
     Preconditions.checkArgument(recommenderBuilder != null, "recommenderBuilder is null");
     Preconditions.checkArgument(dataModel != null, "dataModel is null");
     Preconditions.checkArgument(trainingPercentage >= 0.0 && trainingPercentage <= 1.0,
@@ -183,7 +183,9 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     return computeFinalEvaluation();
   }
   
-  static void execute(Collection<Callable<Void>> callables, AtomicInteger noEstimateCounter) throws TasteException {
+  protected static void execute(Collection<Callable<Void>> callables, AtomicInteger noEstimateCounter)
+    throws TasteException {
+
     callables = wrapWithStatsCallables(callables, noEstimateCounter);
     int numProcessors = Runtime.getRuntime().availableProcessors();
     ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
@@ -215,23 +217,23 @@ abstract class AbstractDifferenceRecommenderEvaluator implements RecommenderEval
     return wrapped;
   }
   
-  abstract void reset();
+  protected abstract void reset();
   
-  abstract void processOneEstimate(float estimatedPreference, Preference realPref);
+  protected abstract void processOneEstimate(float estimatedPreference, Preference realPref);
   
-  abstract double computeFinalEvaluation();
+  protected abstract double computeFinalEvaluation();
   
-  private final class PreferenceEstimateCallable implements Callable<Void> {
+  public final class PreferenceEstimateCallable implements Callable<Void> {
     
     private final Recommender recommender;
     private final long testUserID;
     private final PreferenceArray prefs;
     private final AtomicInteger noEstimateCounter;
     
-    private PreferenceEstimateCallable(Recommender recommender,
-                                       long testUserID,
-                                       PreferenceArray prefs,
-                                       AtomicInteger noEstimateCounter) {
+    public PreferenceEstimateCallable(Recommender recommender,
+                                      long testUserID,
+                                      PreferenceArray prefs,
+                                      AtomicInteger noEstimateCounter) {
       this.recommender = recommender;
       this.testUserID = testUserID;
       this.prefs = prefs;

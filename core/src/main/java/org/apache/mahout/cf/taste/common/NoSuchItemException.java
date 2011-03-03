@@ -20,6 +20,10 @@ package org.apache.mahout.cf.taste.common;
 public final class NoSuchItemException extends TasteException {
   
   public NoSuchItemException() { }
+
+  public NoSuchItemException(long itemID) {
+    this(String.valueOf(itemID));
+  }
   
   public NoSuchItemException(String message) {
     super(message);

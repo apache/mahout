@@ -210,7 +210,7 @@ public final class GenericDataModel extends AbstractDataModel {
   public PreferenceArray getPreferencesFromUser(long userID) throws NoSuchUserException {
     PreferenceArray prefs = preferenceFromUsers.get(userID);
     if (prefs == null) {
-      throw new NoSuchUserException();
+      throw new NoSuchUserException(userID);
     }
     return prefs;
   }
@@ -235,7 +235,7 @@ public final class GenericDataModel extends AbstractDataModel {
   public PreferenceArray getPreferencesForItem(long itemID) throws NoSuchItemException {
     PreferenceArray prefs = preferenceForItems.get(itemID);
     if (prefs == null) {
-      throw new NoSuchItemException();
+      throw new NoSuchItemException(itemID);
     }
     return prefs;
   }
@@ -259,7 +259,7 @@ public final class GenericDataModel extends AbstractDataModel {
     }
     FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
     if (itemTimestamps == null) {
-      throw new NoSuchUserException();
+      throw new NoSuchUserException(userID);
     }
     return itemTimestamps.get(itemID);
   }

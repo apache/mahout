@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.common;
+package org.apache.mahout.cf.taste.example.kddcup;
 
-public final class NoSuchUserException extends TasteException {
-  
-  public NoSuchUserException() { }
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.recommender.Recommender;
 
-  public NoSuchUserException(long userID) {
-    this(String.valueOf(userID));
-  }
+public final class KDDCupRecommenderBuilder implements RecommenderBuilder {
   
-  public NoSuchUserException(String message) {
-    super(message);
+  @Override
+  public Recommender buildRecommender(DataModel dataModel) throws TasteException {
+    return new KDDCupRecommender(dataModel);
   }
   
 }

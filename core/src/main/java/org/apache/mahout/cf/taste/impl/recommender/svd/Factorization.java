@@ -47,7 +47,7 @@ public class Factorization {
   public double[] getUserFeatures(long userID) throws NoSuchUserException {
     Integer index = userIDMapping.get(userID);
     if (index == null) {
-      throw new NoSuchUserException();
+      throw new NoSuchUserException(userID);
     }
     return userFeatures[index];
   }
@@ -55,7 +55,7 @@ public class Factorization {
   public double[] getItemFeatures(long itemID) throws NoSuchItemException {
     Integer index = itemIDMapping.get(itemID);
     if (index == null) {
-      throw new NoSuchItemException();
+      throw new NoSuchItemException(itemID);
     }
     return itemFeatures[index];
   }

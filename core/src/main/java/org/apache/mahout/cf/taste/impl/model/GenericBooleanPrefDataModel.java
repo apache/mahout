@@ -181,7 +181,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   public PreferenceArray getPreferencesFromUser(long userID) throws NoSuchUserException {
     FastIDSet itemIDs = preferenceFromUsers.get(userID);
     if (itemIDs == null) {
-      throw new NoSuchUserException();
+      throw new NoSuchUserException(userID);
     }
     PreferenceArray prefArray = new BooleanUserPreferenceArray(itemIDs.size());
     int i = 0;
@@ -198,7 +198,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     FastIDSet itemIDs = preferenceFromUsers.get(userID);
     if (itemIDs == null) {
-      throw new NoSuchUserException();
+      throw new NoSuchUserException(userID);
     }
     return itemIDs;
   }
@@ -212,7 +212,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   public PreferenceArray getPreferencesForItem(long itemID) throws NoSuchItemException {
     FastIDSet userIDs = preferenceForItems.get(itemID);
     if (userIDs == null) {
-      throw new NoSuchItemException();
+      throw new NoSuchItemException(itemID);
     }
     PreferenceArray prefArray = new BooleanItemPreferenceArray(userIDs.size());
     int i = 0;
@@ -229,7 +229,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
   public Float getPreferenceValue(long userID, long itemID) throws NoSuchUserException {
     FastIDSet itemIDs = preferenceFromUsers.get(userID);
     if (itemIDs == null) {
-      throw new NoSuchUserException();
+      throw new NoSuchUserException(userID);
     }
     if (itemIDs.contains(itemID)) {
       return 1.0f;
@@ -244,7 +244,7 @@ public final class GenericBooleanPrefDataModel extends AbstractDataModel {
     }
     FastByIDMap<Long> itemTimestamps = timestamps.get(userID);
     if (itemTimestamps == null) {
-      throw new NoSuchUserException();
+      throw new NoSuchUserException(userID);
     }
     return itemTimestamps.get(itemID);
   }

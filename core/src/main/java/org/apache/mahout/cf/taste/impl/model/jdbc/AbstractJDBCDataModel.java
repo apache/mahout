@@ -262,9 +262,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    *           if there is no such user
    */
   @Override
-  public PreferenceArray getPreferencesFromUser(long id) throws TasteException {
+  public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
 
-    log.debug("Retrieving user ID '{}'", id);
+    log.debug("Retrieving user ID '{}'", userID);
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -275,7 +275,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      setLongParameter(stmt, 1, id);
+      setLongParameter(stmt, 1, userID);
 
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
@@ -286,7 +286,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       }
 
       if (prefs.isEmpty()) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
 
       return new GenericUserPreferenceArray(prefs);
@@ -397,9 +397,9 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    *           if there is no such user
    */
   @Override
-  public FastIDSet getItemIDsFromUser(long id) throws TasteException {
+  public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
 
-    log.debug("Retrieving items for user ID '{}'", id);
+    log.debug("Retrieving items for user ID '{}'", userID);
 
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -410,7 +410,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       stmt = conn.prepareStatement(getUserSQL, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
       stmt.setFetchSize(getFetchSize());
-      setLongParameter(stmt, 1, id);
+      setLongParameter(stmt, 1, userID);
 
       log.debug("Executing SQL query: {}", getUserSQL);
       rs = stmt.executeQuery();
@@ -421,7 +421,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
       }
 
       if (result.isEmpty()) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
 
       return result;
@@ -506,7 +506,7 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   public PreferenceArray getPreferencesForItem(long itemID) throws TasteException {
     List<Preference> list = doGetPreferencesForItem(itemID);
     if (list.isEmpty()) {
-      throw new NoSuchItemException();
+      throw new NoSuchItemException(itemID);
     }
     return new GenericItemPreferenceArray(list);
   }

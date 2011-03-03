@@ -115,7 +115,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public PreferenceArray getPreferencesFromUser(long userID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
       return tempPrefs;
     }
@@ -126,7 +126,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public FastIDSet getItemIDsFromUser(long userID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
       return prefItemIDs;
     }
@@ -168,7 +168,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
     }
     if (delegatePrefs == null) {
       // No, didn't find it among the anonymous user prefs
-      throw new NoSuchItemException();
+      throw new NoSuchItemException(itemID);
     }
     return delegatePrefs;
   }
@@ -177,7 +177,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public Float getPreferenceValue(long userID, long itemID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
       for (int i = 0; i < tempPrefs.length(); i++) {
         if (tempPrefs.getItemID(i) == itemID) {
@@ -193,7 +193,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public Long getPreferenceTime(long userID, long itemID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
       return null;
     }
@@ -236,7 +236,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public void setPreference(long userID, long itemID, float value) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
       throw new UnsupportedOperationException();
     }
@@ -247,7 +247,7 @@ public final class PlusAnonymousUserDataModel implements DataModel {
   public void removePreference(long userID, long itemID) throws TasteException {
     if (userID == TEMP_USER_ID) {
       if (tempPrefs == null) {
-        throw new NoSuchUserException();
+        throw new NoSuchUserException(userID);
       }
       throw new UnsupportedOperationException();
     }

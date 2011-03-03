@@ -15,18 +15,30 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.common;
+package org.apache.mahout.cf.taste.example.kddcup;
 
-public final class NoSuchUserException extends TasteException {
-  
-  public NoSuchUserException() { }
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
 
-  public NoSuchUserException(long userID) {
-    this(String.valueOf(userID));
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.common.Pair;
+
+public final class DataFileIterable implements Iterable<Pair<PreferenceArray,long[]>> {
+
+  private final File dataFile;
+
+  public DataFileIterable(File dataFile) {
+    this.dataFile = dataFile;
   }
-  
-  public NoSuchUserException(String message) {
-    super(message);
+
+  @Override
+  public Iterator<Pair<PreferenceArray, long[]>> iterator() {
+    try {
+      return new DataFileIterator(dataFile);
+    } catch (IOException ioe) {
+      throw new IllegalStateException(ioe);
+    }
   }
-  
+ 
 }

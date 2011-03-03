@@ -15,30 +15,30 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.example.jester;
+package org.apache.mahout.cf.taste.example.kddcup;
 
 import java.util.Collection;
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
-import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
+import org.apache.mahout.cf.taste.impl.similarity.CachingItemSimilarity;
+import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
-/**
- * A simple {@link org.apache.mahout.cf.taste.recommender.Recommender} implemented for the Book Crossing demo.
- * See the <a href="http://www.informatik.uni-freiburg.de/~cziegler/BX/">Book Crossing site</a>.
- */
-public final class JesterRecommender implements Recommender {
-  
+public final class KDDCupRecommender implements Recommender {
+
   private final Recommender recommender;
-  
-  public JesterRecommender(DataModel dataModel) throws TasteException {
-    recommender = new CachingRecommender(new SlopeOneRecommender(dataModel));
+
+  public KDDCupRecommender(DataModel dataModel) throws TasteException {
+    // Change this to whatever you like!
+    ItemSimilarity similarity = new CachingItemSimilarity(new UncenteredCosineSimilarity(dataModel), dataModel);
+    recommender = new GenericItemBasedRecommender(dataModel, similarity);
   }
   
   @Override
@@ -78,7 +78,7 @@ public final class JesterRecommender implements Recommender {
   
   @Override
   public String toString() {
-    return "JesterRecommender[recommender:" + recommender + ']';
+    return "Track1Recommender[recommender:" + recommender + ']';
   }
   
 }

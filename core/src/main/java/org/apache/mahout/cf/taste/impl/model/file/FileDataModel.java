@@ -120,6 +120,7 @@ public class FileDataModel extends AbstractDataModel {
 
   public static final long DEFAULT_MIN_RELOAD_INTERVAL_MS = 60 * 1000L; // 1 minute?
   private static final char COMMENT_CHAR = '#';
+  private static final char[] DELIMIETERS = {',', '\t'};
 
   private final File dataFile;
   private long lastModified;
@@ -308,11 +309,10 @@ public class FileDataModel extends AbstractDataModel {
   }
 
   public static char determineDelimiter(String line) {
-    if (line.indexOf(',') >= 0) {
-      return ',';
-    }
-    if (line.indexOf('\t') >= 0) {
-      return '\t';
+    for (char possibleDelimieter : DELIMIETERS) {
+      if (line.indexOf(possibleDelimieter) >= 0) {
+        return possibleDelimieter;
+      }
     }
     throw new IllegalArgumentException("Did not find a delimiter in first line");
   }

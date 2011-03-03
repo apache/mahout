@@ -33,18 +33,18 @@ public final class RMSRecommenderEvaluator extends AbstractDifferenceRecommender
   private RunningAverage average;
   
   @Override
-  void reset() {
+  protected void reset() {
     average = new FullRunningAverage();
   }
   
   @Override
-  void processOneEstimate(float estimatedPreference, Preference realPref) {
+  protected void processOneEstimate(float estimatedPreference, Preference realPref) {
     double diff = realPref.getValue() - estimatedPreference;
     average.addDatum(diff * diff);
   }
   
   @Override
-  double computeFinalEvaluation() {
+  protected double computeFinalEvaluation() {
     return Math.sqrt(average.getAverage());
   }
   
