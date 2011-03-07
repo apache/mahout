@@ -28,14 +28,17 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
   private final double precision;
   private final double recall;
   private final double fallOut;
+  private final double ndcg;
   
-  IRStatisticsImpl(double precision, double recall, double fallOut) {
+  IRStatisticsImpl(double precision, double recall, double fallOut, double ndcg) {
     Preconditions.checkArgument(precision >= 0.0 && precision <= 1.0, "Illegal precision: " + precision);
     Preconditions.checkArgument(recall >= 0.0 && recall <= 1.0, "Illegal recall: " + recall);
     Preconditions.checkArgument(fallOut >= 0.0 && fallOut <= 1.0, "Illegal fallOut: " + fallOut);
+    Preconditions.checkArgument(fallOut >= 0.0 && fallOut <= 1.0, "Illegal nDCG: " + ndcg);
     this.precision = precision;
     this.recall = recall;
     this.fallOut = fallOut;
+    this.ndcg = ndcg;
   }
   
   @Override
@@ -63,10 +66,16 @@ public final class IRStatisticsImpl implements IRStatistics, Serializable {
     double sum = n * precision + recall;
     return sum == 0.0 ? Double.NaN : (1.0 + n) * precision * recall / sum;
   }
+
+  @Override
+  public double getNormalizedDiscountedCumulativeGain() {
+    return ndcg;
+  }
   
   @Override
   public String toString() {
-    return "IRStatisticsImpl[precision:" + precision + ",recall:" + recall + ",fallOut:" + fallOut + ']';
+    return "IRStatisticsImpl[precision:" + precision + ",recall:" + recall + ",fallOut:"
+        + fallOut + ",nDCG:" + ndcg + ']';
   }
   
 }

@@ -61,6 +61,8 @@ import com.google.common.base.Preconditions;
 public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRStatsEvaluator {
   
   private static final Logger log = LoggerFactory.getLogger(GenericRecommenderIRStatsEvaluator.class);
+
+  private static final double LOG2 = Math.log(2.0);
   
   /**
    * Pass as "relevanceThreshold" argument to
@@ -83,6 +85,7 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
                                int at,
                                double relevanceThreshold,
                                double evaluationPercentage) throws TasteException {
+
     Preconditions.checkArgument(recommenderBuilder != null, "recommenderBuilder is null");
     Preconditions.checkArgument(dataModel != null, "dataModel is null");
     Preconditions.checkArgument(at >= 1, "at must be at least 1");
@@ -93,74 +96,114 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
     RunningAverage precision = new FullRunningAverage();
     RunningAverage recall = new FullRunningAverage();
     RunningAverage fallOut = new FullRunningAverage();
+    RunningAverage nDCG = new FullRunningAverage();
+
     LongPrimitiveIterator it = dataModel.getUserIDs();
     while (it.hasNext()) {
+
       long userID = it.nextLong();
-      if (random.nextDouble() < evaluationPercentage) {
-        long start = System.currentTimeMillis();
-        FastIDSet relevantItemIDs = new FastIDSet(at);
-        PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
-        int size = prefs.length();
-        if (size < 2 * at) {
-          // Really not enough prefs to meaningfully evaluate this user
-          continue;
-        }
 
-        // List some most-preferred items that would count as (most) "relevant" results
-        double theRelevanceThreshold =
-            Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
-        prefs.sortByValueReversed();
-        for (int i = 0; (i < size) && (relevantItemIDs.size() < at); i++) {
-          if (prefs.getValue(i) >= theRelevanceThreshold) {
-            relevantItemIDs.add(prefs.getItemID(i));
-          }
-        }
-        int numRelevantItems = relevantItemIDs.size();
-        if (numRelevantItems > 0) {
-          FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<PreferenceArray>(dataModel
-              .getNumUsers());
-          LongPrimitiveIterator it2 = dataModel.getUserIDs();
-          while (it2.hasNext()) {
-            processOtherUser(userID, relevantItemIDs, trainingUsers, it2
-                .nextLong(), dataModel);
-          }
+      if (random.nextDouble() >= evaluationPercentage) {
+        // Skipped
+        continue;
+      }
 
-          DataModel trainingModel = dataModelBuilder == null ? new GenericDataModel(trainingUsers)
-              : dataModelBuilder.buildDataModel(trainingUsers);
-          Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
+      long start = System.currentTimeMillis();
 
-          try {
-            trainingModel.getPreferencesFromUser(userID);
-          } catch (NoSuchUserException nsee) {
-            continue; // Oops we excluded all prefs for the user -- just move on
-          }
+      PreferenceArray prefs = dataModel.getPreferencesFromUser(userID);
+      int size = prefs.length();
+      if (size < 2 * at) {
+        // Really not enough prefs to meaningfully evaluate this user
+        continue;
+      }
 
-          int intersectionSize = 0;
-          List<RecommendedItem> recommendedItems = recommender.recommend(userID, at, rescorer);
-          for (RecommendedItem recommendedItem : recommendedItems) {
-            if (relevantItemIDs.contains(recommendedItem.getItemID())) {
-              intersectionSize++;
-            }
-          }
-          int numRecommendedItems = recommendedItems.size();
-          if (numRecommendedItems > 0) {
-            precision.addDatum((double) intersectionSize / (double) numRecommendedItems);
-          }
-          recall.addDatum((double) intersectionSize / (double) numRelevantItems);
-          if (numRelevantItems < size) {
-            fallOut.addDatum((double) (numRecommendedItems - intersectionSize)
-                             / (double) (numItems - numRelevantItems));
-          }
+      FastIDSet relevantItemIDs = new FastIDSet(at);
 
-          long end = System.currentTimeMillis();
-          GenericRecommenderIRStatsEvaluator.log.info("Evaluated with user {} in {}ms", userID, end - start);
-          log.info("Precision/recall/fall-out: {} / {} / {}",
-            new Object[] {precision.getAverage(), recall.getAverage(), fallOut.getAverage()});
+      // List some most-preferred items that would count as (most) "relevant" results
+      double theRelevanceThreshold = Double.isNaN(relevanceThreshold) ? computeThreshold(prefs) : relevanceThreshold;
+
+      prefs.sortByValueReversed();
+
+      for (int i = 0; (i < size) && (relevantItemIDs.size() < at); i++) {
+        if (prefs.getValue(i) >= theRelevanceThreshold) {
+          relevantItemIDs.add(prefs.getItemID(i));
         }
       }
+
+      int numRelevantItems = relevantItemIDs.size();
+      if (numRelevantItems <= 0) {
+        continue;
+      }
+
+      FastByIDMap<PreferenceArray> trainingUsers = new FastByIDMap<PreferenceArray>(dataModel.getNumUsers());
+      LongPrimitiveIterator it2 = dataModel.getUserIDs();
+      while (it2.hasNext()) {
+        processOtherUser(userID, relevantItemIDs, trainingUsers, it2.nextLong(), dataModel);
+      }
+
+      DataModel trainingModel = dataModelBuilder == null ? new GenericDataModel(trainingUsers)
+          : dataModelBuilder.buildDataModel(trainingUsers);
+      Recommender recommender = recommenderBuilder.buildRecommender(trainingModel);
+
+      try {
+        trainingModel.getPreferencesFromUser(userID);
+      } catch (NoSuchUserException nsee) {
+        continue; // Oops we excluded all prefs for the user -- just move on
+      }
+
+      int intersectionSize = 0;
+      List<RecommendedItem> recommendedItems = recommender.recommend(userID, at, rescorer);
+      for (RecommendedItem recommendedItem : recommendedItems) {
+        if (relevantItemIDs.contains(recommendedItem.getItemID())) {
+          intersectionSize++;
+        }
+      }
+
+      int numRecommendedItems = recommendedItems.size();
+
+      // Precision
+      if (numRecommendedItems > 0) {
+        precision.addDatum((double) intersectionSize / (double) numRecommendedItems);
+      }
+
+      // Recall
+      recall.addDatum((double) intersectionSize / (double) numRelevantItems);
+
+      // Fall-out
+      if (numRelevantItems < size) {
+        fallOut.addDatum((double) (numRecommendedItems - intersectionSize)
+                         / (double) (numItems - numRelevantItems));
+      }
+
+      // nDCG
+      // In computing, assume relevant IDs have relevance 1 and others 0
+      double cumulativeGain = 0.0;
+      double idealizedGain = 0.0;
+      for (int i = 0; i < recommendedItems.size(); i++) {
+        RecommendedItem item = recommendedItems.get(i);
+        double discount = i == 0 ? 1.0 : 1.0 / log2(i + 1);
+        if (relevantItemIDs.contains(item.getItemID())) {
+          cumulativeGain += discount;
+        }
+        // otherwise we're multiplying discount by relevance 0 so it doesn't do anything
+
+        // Ideally results would be ordered with all relevant ones first, so this theoretical
+        // ideal list starts with number of relevant items equal to the total number of relevant items
+        if (i < relevantItemIDs.size()) {
+          idealizedGain += discount;
+        }
+      }
+      nDCG.addDatum(cumulativeGain / idealizedGain);
+
+      long end = System.currentTimeMillis();
+
+      log.info("Evaluated with user {} in {}ms", userID, end - start);
+      log.info("Precision/recall/fall-out/nDCG: {} / {} / {} / {}", new Object[] {
+          precision.getAverage(), recall.getAverage(), fallOut.getAverage(), nDCG.getAverage()
+      });
     }
 
-    return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage());
+    return new IRStatisticsImpl(precision.getAverage(), recall.getAverage(), fallOut.getAverage(), nDCG.getAverage());
   }
   
   private static void processOtherUser(long id,
@@ -199,6 +242,10 @@ public final class GenericRecommenderIRStatsEvaluator implements RecommenderIRSt
       stdDev.addDatum(prefs.getValue(i));
     }
     return stdDev.getAverage() + stdDev.getStandardDeviation();
+  }
+
+  private static double log2(double value) {
+    return Math.log(value) / LOG2;
   }
   
 }

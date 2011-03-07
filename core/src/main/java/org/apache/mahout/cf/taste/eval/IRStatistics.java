@@ -63,5 +63,13 @@ public interface IRStatistics {
    * </p>
    */
   double getFNMeasure(double n);
+
+  /**
+   * <p>
+   * See <a href="http://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG">
+   * Normalized Discounted Cumulative Gain</a>.
+   * </p>
+   */
+  double getNormalizedDiscountedCumulativeGain();
   
 }
