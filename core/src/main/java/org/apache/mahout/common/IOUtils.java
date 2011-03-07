@@ -18,11 +18,13 @@
 package org.apache.mahout.common;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
@@ -101,4 +103,92 @@ public final class IOUtils {
     quietClose(connection);
   }
   
+  /**
+   * make sure to close all sources, log all of the problems occurred, clear
+   * <code>closeables</code> (to prevent repeating close attempts), re-throw the
+   * last one at the end. Helps resource scope management (e.g. compositions of
+   * {@link Closeable}s objects)
+   * <P>
+   * <p/>
+   * Typical pattern:
+   * <p/>
+   * 
+   * <pre>
+   *   LinkedList<Closeable> closeables = new LinkedList<Closeable>();
+   *   try {
+   *      InputStream stream1 = new FileInputStream(...);
+   *      closeables.addFirst(stream1);
+   *      ...
+   *      InputStream streamN = new FileInputStream(...);
+   *      closeables.addFirst(streamN);
+   *      ...
+   *   } finally {
+   *      IOUtils.close(closeables);
+   *   }
+   * </pre>
+   * 
+   * @param closeables
+   *          must be a modifiable collection of {@link Closeable}s
+   * @throws IOException
+   *           the last exception (if any) of all closed resources
+   * 
+   * 
+   */
+  public static void close(Collection<? extends Closeable> closeables)
+    throws IOException {
+    Throwable lastThr = null;
+
+    for (Closeable closeable : closeables) {
+      try {
+        closeable.close();
+      } catch (Throwable thr) {
+        log.error(thr.getMessage(), thr);
+        lastThr = thr;
+      }
+    }
+
+    // make sure we don't double-close
+    // but that has to be modifiable collection
+    closeables.clear();
+
+    if (lastThr != null) {
+      if (lastThr instanceof IOException) {
+        throw (IOException) lastThr;
+      } else if (lastThr instanceof RuntimeException) {
+        throw (RuntimeException) lastThr;
+      } else if (lastThr instanceof Error) {
+        throw (Error) lastThr;
+      } else {
+        // should not happen
+        throw (IOException) new IOException("Unexpected exception during close")
+            .initCause(lastThr);
+      }
+    }
+
+  }
+
+
+  /**
+   * for temporary files, a file may be considered as a {@link Closeable} too,
+   * where file is wiped on close and thus the disk resource is released
+   * ('closed').
+   * 
+   * 
+   */
+  public static class DeleteFileOnClose implements Closeable {
+
+    private File file;
+
+    public DeleteFileOnClose(File file) {
+      this.file = file;
+    }
+
+    @Override
+    public void close() throws IOException {
+      if (file.isFile())
+        file.delete();
+    }
+
+  }
+
 }
