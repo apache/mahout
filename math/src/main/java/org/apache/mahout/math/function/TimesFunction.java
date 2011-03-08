@@ -25,6 +25,7 @@ public final class TimesFunction implements DoubleDoubleFunction {
    * @param y second argument
    * @return the product
    */
+  @Override
   public double apply(double x, double y) {
     return x * y;
   }

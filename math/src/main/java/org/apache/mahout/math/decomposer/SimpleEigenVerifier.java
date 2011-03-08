@@ -21,6 +21,7 @@ import org.apache.mahout.math.VectorIterable;
 
 public class SimpleEigenVerifier implements SingularVectorVerifier {
 
+  @Override
   public EigenStatus verify(VectorIterable corpus, Vector vector) {
     Vector resultantVector = corpus.timesSquared(vector);
     double newNorm = resultantVector.norm(2);

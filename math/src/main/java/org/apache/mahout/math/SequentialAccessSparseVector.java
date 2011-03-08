@@ -136,6 +136,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
   /**
    * @return false
    */
+  @Override
   public boolean isDense() {
     return false;
   }
@@ -143,31 +144,38 @@ public class SequentialAccessSparseVector extends AbstractVector {
   /**
    * @return true
    */
+  @Override
   public boolean isSequentialAccess() {
     return true;
   }
 
+  @Override
   public double getQuick(int index) {
     return values.get(index);
   }
 
+  @Override
   public void setQuick(int index, double value) {
     lengthSquared = -1;
     values.set(index, value);
   }
 
+  @Override
   public int getNumNondefaultElements() {
     return values.getNumMappings();
   }
 
+  @Override
   public SequentialAccessSparseVector like() {
     return new SequentialAccessSparseVector(size(), values.getNumMappings());
   }
 
+  @Override
   public Iterator<Element> iterateNonZero() {
     return new NonDefaultIterator();
   }
 
+  @Override
   public Iterator<Element> iterator() {
     return new AllIterator();
   }
@@ -245,11 +253,13 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     private final NonDefaultElement element = new NonDefaultElement();
 
+    @Override
     public boolean hasNext() {
       int numMappings = values.getNumMappings();
       return numMappings > 0 && element.getNextOffset() < numMappings;
     }
 
+    @Override
     public Element next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
@@ -258,6 +268,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return element;
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -267,11 +278,13 @@ public class SequentialAccessSparseVector extends AbstractVector {
 
     private final AllElement element = new AllElement();
 
+    @Override
     public boolean hasNext() {
       int numMappings = values.getNumMappings();
       return numMappings > 0 && element.getNextIndex() <= values.getIndices()[numMappings - 1];
     }
 
+    @Override
     public Element next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
@@ -280,6 +293,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return element;
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -297,14 +311,17 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return offset + 1;
     }
 
+    @Override
     public double get() {
       return values.getValues()[offset];
     }
 
+    @Override
     public int index() {
       return values.getIndices()[offset];
     }
 
+    @Override
     public void set(double value) {
       lengthSquared = -1;      
       values.getValues()[offset] = value;
@@ -327,6 +344,7 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return index + 1;
     }
 
+    @Override
     public double get() {
       if (index == values.getIndices()[nextOffset]) {
         return values.getValues()[nextOffset];
@@ -334,10 +352,12 @@ public class SequentialAccessSparseVector extends AbstractVector {
       return OrderedIntDoubleMapping.DEFAULT_VALUE;
     }
 
+    @Override
     public int index() {
       return index;
     }
 
+    @Override
     public void set(double value) {
       lengthSquared = -1;      
       if (index == values.getIndices()[nextOffset]) {

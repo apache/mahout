@@ -94,13 +94,13 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
   int size();
 
   /**
-   * @return true iff the {@link Vector} implementation should be considered dense -- that it explicitly
+   * @return true iff this implementation should be considered dense -- that it explicitly
    *  represents every value
    */
   boolean isDense();
 
   /**
-   * @return true iff {@link Vector} should be considered to be iterable in index order in an efficient way.
+   * @return true iff this implementation should be considered to be iterable in index order in an efficient way.
    *  In particular this implies that {@link #iterator()} and {@link #iterateNonZero()} return elements
    *  in ascending order by index.
    */
@@ -119,6 +119,7 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
    *
    * @return An {@link Iterator} over all elements
    */
+  @Override
   Iterator<Element> iterator();
 
   /**

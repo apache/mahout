@@ -111,6 +111,7 @@ public class RandomAccessSparseVector extends AbstractVector {
   /**
    * @return false
    */
+  @Override
   public boolean isDense() {
     return false;
   }
@@ -118,14 +119,17 @@ public class RandomAccessSparseVector extends AbstractVector {
   /**
    * @return false
    */
+  @Override
   public boolean isSequentialAccess() {
     return false;
   }
 
+  @Override
   public double getQuick(int index) {
     return values.get(index);
   }
 
+  @Override
   public void setQuick(int index, double value) {
     lengthSquared = -1.0;
     if (value == 0.0) {
@@ -135,10 +139,12 @@ public class RandomAccessSparseVector extends AbstractVector {
     }
   }
 
+  @Override
   public int getNumNondefaultElements() {
     return values.size();
   }
 
+  @Override
   public RandomAccessSparseVector like() {
     return new RandomAccessSparseVector(size(), values.size());
   }
@@ -150,10 +156,12 @@ public class RandomAccessSparseVector extends AbstractVector {
    * @return an {@link Iterator} over the Elements.
    * @see #getElement(int)
    */
+  @Override
   public Iterator<Element> iterateNonZero() {
     return new NonDefaultIterator();
   }
   
+  @Override
   public Iterator<Element> iterator() {
     return new AllIterator();
   }
@@ -199,6 +207,7 @@ public class RandomAccessSparseVector extends AbstractVector {
     private AddToVector(Vector v) {
       this.v = v;
     }
+    @Override
     public boolean apply(int key, double value) {
       v.set(key, value + v.get(key));
       return true;
@@ -215,10 +224,12 @@ public class RandomAccessSparseVector extends AbstractVector {
       values.keys(indices);
     }
 
+    @Override
     public boolean hasNext() {
       return offset < indices.size();
     }
 
+    @Override
     public Element next() {
       if (offset >= indices.size()) {
         throw new NoSuchElementException();
@@ -229,6 +240,7 @@ public class RandomAccessSparseVector extends AbstractVector {
       }
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -242,10 +254,12 @@ public class RandomAccessSparseVector extends AbstractVector {
       element.index = -1;
     }
 
+    @Override
     public boolean hasNext() {
       return element.index + 1 < size();
     }
 
+    @Override
     public Element next() {
       if (element.index + 1 >= size()) {
         throw new NoSuchElementException();
@@ -255,6 +269,7 @@ public class RandomAccessSparseVector extends AbstractVector {
       }
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -264,14 +279,17 @@ public class RandomAccessSparseVector extends AbstractVector {
 
     int index;
 
+    @Override
     public double get() {
       return values.get(index);
     }
 
+    @Override
     public int index() {
       return index;
     }
 
+    @Override
     public void set(double value) {
       lengthSquared = -1;
       if (value == 0.0) {

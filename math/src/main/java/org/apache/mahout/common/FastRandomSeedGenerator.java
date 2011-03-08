@@ -40,6 +40,7 @@ public final class FastRandomSeedGenerator implements SeedGenerator {
    * @throws org.uncommons.maths.random.SeedException
    *          If a seed cannot be generated for any reason.
    */
+  @Override
   public byte[] generateSeed(int length) throws SeedException {
     SeedException savedException = null;
     for (SeedGenerator generator : generators) {

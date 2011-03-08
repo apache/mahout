@@ -64,6 +64,7 @@ public class VectorList extends AbstractMatrix {
     return cardinality;
   }
 
+  @Override
   public Matrix assignColumn(int column, Vector other) {
     if (other.size() != rowSize()) {
       throw new CardinalityException(rowSize(), other.size());
@@ -79,6 +80,7 @@ public class VectorList extends AbstractMatrix {
     return this;
   }
 
+  @Override
   public Matrix assignRow(int row, Vector other) {
     if (other.size() != columns) {
       throw new CardinalityException(columns, other.size());
@@ -88,6 +90,7 @@ public class VectorList extends AbstractMatrix {
     return this;
   }
 
+  @Override
   public Vector getColumn(final int column) {
     if (column < 0 || column >= columnSize()) {
       throw new IndexException(column, columnSize());
@@ -98,14 +101,17 @@ public class VectorList extends AbstractMatrix {
         throw new UnsupportedOperationException("Can't get a matrix like a VectorList");
       }
 
+      @Override
       public boolean isDense() {
         return true;
       }
 
+      @Override
       public boolean isSequentialAccess() {
         return true;
       }
 
+      @Override
       public Iterator<Element> iterator() {
         return new AbstractIterator<Element>() {
           int i = 0;
@@ -118,14 +124,17 @@ public class VectorList extends AbstractMatrix {
               return new Element() {
                 final int row = i++;
 
+                @Override
                 public double get() {
                   return VectorList.this.get(row, column);
                 }
 
+                @Override
                 public int index() {
                   return row;
                 }
 
+                @Override
                 public void set(double value) {
                   VectorList.this.setQuick(row, column, value);
                 }
@@ -135,22 +144,27 @@ public class VectorList extends AbstractMatrix {
         };
       }
 
+      @Override
       public Iterator<Element> iterateNonZero() {
         return iterator();
       }
 
+      @Override
       public double getQuick(int index) {
         return VectorList.this.getQuick(index, column);
       }
 
+      @Override
       public Vector like() {
         return new DenseVector(rowSize());
       }
 
+      @Override
       public void setQuick(int index, double value) {
         VectorList.this.setQuick(index, column, value);
       }
 
+      @Override
       public int getNumNondefaultElements() {
         return data.size();
       }
@@ -164,6 +178,7 @@ public class VectorList extends AbstractMatrix {
    * @return a Vector at the index
    * @throws IndexException if the index is out of bounds
    */
+  @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= rowSize()) {
       throw new IndexException(row, rowSize());
@@ -178,6 +193,7 @@ public class VectorList extends AbstractMatrix {
    * @param column an int column index
    * @return the double at the index
    */
+  @Override
   public double getQuick(int row, int column) {
     return data.get(row).getQuick(column);
   }
@@ -187,6 +203,7 @@ public class VectorList extends AbstractMatrix {
    *
    * @return a Matrix
    */
+  @Override
   public Matrix like() {
     VectorList r = new VectorList(columns);
     //int i = 0;
@@ -203,6 +220,7 @@ public class VectorList extends AbstractMatrix {
    * @param rows    the int number of rows
    * @param columns the int number of columns
    */
+  @Override
   public Matrix like(int rows, int columns) {
     VectorList r = new VectorList(rows, columns);
     for (int i = 0; i < rows; i++) {
@@ -218,6 +236,7 @@ public class VectorList extends AbstractMatrix {
    * @param column an int column index into the receiver
    * @param value  a double value to set
    */
+  @Override
   public void setQuick(int row, int column, double value) {
     data.get(row).setQuick(column, value);
   }
@@ -227,6 +246,7 @@ public class VectorList extends AbstractMatrix {
    *
    * @return an int[2] containing [row, column] count
    */
+  @Override
   public int[] getNumNondefaultElements() {
     return new int[]{data.size(), columns};
   }
@@ -241,6 +261,7 @@ public class VectorList extends AbstractMatrix {
    * @throws IndexException       if the offset is negative or the offset+length is outside of the
    *                              receiver
    */
+  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     cardinality[ROW] = data.size();
     return new MatrixView(this, offset, size);
@@ -268,6 +289,7 @@ public class VectorList extends AbstractMatrix {
     private final Type collectionType = new TypeToken<List<Vector>>(){}.getType();
     private final Type labelType = new TypeToken<Map<String, Integer>>(){}.getType();
 
+    @Override
     public VectorList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
       JsonObject jo = json.getAsJsonObject();
       VectorList r = new VectorList(jo.get("columns").getAsInt());

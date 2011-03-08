@@ -63,6 +63,7 @@ public class AsyncEigenVerifier extends SimpleEigenVerifier {
       this.vector = vector;
     }
 
+    @Override
     public void run() {
       EigenStatus status = innerVerify(corpus, vector);
       synchronized (AsyncEigenVerifier.this) {

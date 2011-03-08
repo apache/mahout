@@ -71,19 +71,23 @@ public class SparseMatrix extends AbstractMatrix {
     return clone;
   }
   
+  @Override
   public double getQuick(int row, int column) {
     Vector r = rows.get(row);
     return r == null ? 0.0 : r.getQuick(column);
   }
   
+  @Override
   public Matrix like() {
     return new SparseMatrix(cardinality);
   }
   
+  @Override
   public Matrix like(int rows, int columns) {
     return new SparseMatrix(new int[] {rows, columns});
   }
   
+  @Override
   public void setQuick(int row, int column, double value) {
     Vector r = rows.get(row);
     if (r == null) {
@@ -93,6 +97,7 @@ public class SparseMatrix extends AbstractMatrix {
     r.setQuick(column, value);
   }
   
+  @Override
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rows.size();
@@ -103,6 +108,7 @@ public class SparseMatrix extends AbstractMatrix {
     return result;
   }
   
+  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (offset[ROW] < 0) {
       throw new IndexException(offset[ROW], cardinality[ROW]);
@@ -119,6 +125,7 @@ public class SparseMatrix extends AbstractMatrix {
     return new MatrixView(this, offset, size);
   }
   
+  @Override
   public Matrix assignColumn(int column, Vector other) {
     if (cardinality[ROW] != other.size()) {
       throw new CardinalityException(cardinality[ROW], other.size());
@@ -140,6 +147,7 @@ public class SparseMatrix extends AbstractMatrix {
     return this;
   }
   
+  @Override
   public Matrix assignRow(int row, Vector other) {
     if (cardinality[COL] != other.size()) {
       throw new CardinalityException(cardinality[COL], other.size());
@@ -151,6 +159,7 @@ public class SparseMatrix extends AbstractMatrix {
     return this;
   }
   
+  @Override
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException(column, cardinality[COL]);
@@ -162,6 +171,7 @@ public class SparseMatrix extends AbstractMatrix {
     return new DenseVector(d);
   }
   
+  @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException(row, cardinality[ROW]);

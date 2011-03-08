@@ -50,18 +50,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of PFGrowth Algorithm with FP-Bonsai pruning
  *
- * Generic parameter A is the object type used as the cell items in a transaction list.
- *
- * @param <A>
- *          the type used
+ * @param <A> object type used as the cell items in a transaction list
  */
 public class FPGrowth<A extends Comparable<? super A>> {
 
   private static final Logger log = LoggerFactory.getLogger(FPGrowth.class);
 
-  public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(FileSystem fs,
-    Configuration conf,
-    Path path) throws IOException {
+  public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(FileSystem fs, Configuration conf, Path path)
+    throws IOException {
 
     List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
     Writable key = new Text();

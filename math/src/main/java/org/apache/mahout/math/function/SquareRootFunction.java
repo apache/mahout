@@ -19,6 +19,7 @@ package org.apache.mahout.math.function;
 
 public final class SquareRootFunction implements DoubleFunction {
 
+  @Override
   public double apply(double arg1) {
     return Math.sqrt(arg1);
   }

@@ -35,6 +35,7 @@ public abstract class AbstractVector implements Vector {
     this.size = size;
   }
 
+  @Override
   public double aggregate(DoubleDoubleFunction aggregator, DoubleFunction map) {
     if (size < 1) {
       throw new IllegalArgumentException("Cannot aggregate empty vector");
@@ -46,6 +47,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public double aggregate(Vector other, DoubleDoubleFunction aggregator, DoubleDoubleFunction combiner) {
     if (size < 1) {
       throw new IllegalArgumentException("Cannot aggregate empty vector");
@@ -66,6 +68,7 @@ public abstract class AbstractVector implements Vector {
    */
   protected abstract Matrix matrixLike(int rows, int columns);
 
+  @Override
   public Vector viewPart(int offset, int length) {
     if (offset < 0) {
       throw new IndexException(offset, size);
@@ -88,6 +91,7 @@ public abstract class AbstractVector implements Vector {
     }
   }
 
+  @Override
   public Vector divide(double x) {
     if (x == 1.0) {
       return like().assign(this);
@@ -101,6 +105,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public double dot(Vector x) {
     if (size != x.size()) {
       throw new CardinalityException(size, x.size());
@@ -127,6 +132,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public double get(int index) {
     if (index < 0 || index >= size) {
       throw new IndexException(index, size);
@@ -134,10 +140,12 @@ public abstract class AbstractVector implements Vector {
     return getQuick(index);
   }
 
+  @Override
   public Element getElement(int index) {
     return new LocalElement(index);
   }
 
+  @Override
   public Vector minus(Vector that) {
     if (size != that.size()) {
       throw new CardinalityException(size, that.size());
@@ -154,18 +162,22 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public Vector normalize() {
     return divide(Math.sqrt(dotSelf()));
   }
 
+  @Override
   public Vector normalize(double power) {
     return divide(norm(power));
   }
   
+  @Override
   public Vector logNormalize() {
     return logNormalize(2.0, Math.sqrt(dotSelf()));
   }
   
+  @Override
   public Vector logNormalize(double power) {
     return logNormalize(power, norm(power));
   }
@@ -186,6 +198,7 @@ public abstract class AbstractVector implements Vector {
     }
   }
 
+  @Override
   public double norm(double power) {
     if (power < 0.0) {
       throw new IllegalArgumentException("Power must be >= 0");
@@ -226,6 +239,7 @@ public abstract class AbstractVector implements Vector {
     }
   }
 
+  @Override
   public double getLengthSquared() {
     if (lengthSquared >= 0.0) {
       return lengthSquared;
@@ -233,6 +247,7 @@ public abstract class AbstractVector implements Vector {
     return lengthSquared = dotSelf();
   }
 
+  @Override
   public double getDistanceSquared(Vector v) {
     if (size != v.size()) {
       throw new CardinalityException(size, v.size());
@@ -262,6 +277,7 @@ public abstract class AbstractVector implements Vector {
     return Math.abs(d);
   }
 
+  @Override
   public double maxValue() {
     double result = Double.NEGATIVE_INFINITY;
     int nonZeroElements = 0;
@@ -277,6 +293,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
   
+  @Override
   public int maxValueIndex() {
     int result = -1;
     double max = Double.NEGATIVE_INFINITY;
@@ -304,6 +321,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public double minValue() {
     double result = Double.POSITIVE_INFINITY;
     int nonZeroElements = 0;
@@ -319,6 +337,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public int minValueIndex() {
     int result = -1;
     double min = Double.POSITIVE_INFINITY;
@@ -346,6 +365,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public Vector plus(double x) {
     Vector result = like().assign(this);
     if (x == 0.0) {
@@ -358,6 +378,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public Vector plus(Vector x) {
     if (size != x.size()) {
       throw new CardinalityException(size, x.size());
@@ -378,6 +399,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public void addTo(Vector v) {
     Iterator<Element> it = iterateNonZero();
     while (it.hasNext()) {
@@ -387,6 +409,7 @@ public abstract class AbstractVector implements Vector {
     }
   }
 
+  @Override
   public void set(int index, double value) {
     if (index < 0 || index >= size) {
       throw new IndexException(index, size);
@@ -394,6 +417,7 @@ public abstract class AbstractVector implements Vector {
     setQuick(index, value);
   }
 
+  @Override
   public Vector times(double x) {
     Vector result = like().assign(this);
     if (x == 1.0) {
@@ -411,6 +435,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public Vector times(Vector x) {
     if (size != x.size()) {
       throw new CardinalityException(size, x.size());
@@ -434,6 +459,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public double zSum() {
     double result = 0.0;
     Iterator<Element> iter = iterateNonZero();
@@ -444,6 +470,7 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
+  @Override
   public Vector assign(double value) {
     for (int i = 0; i < size; i++) {
       setQuick(i, value);
@@ -451,6 +478,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
+  @Override
   public Vector assign(double[] values) {
     if (size != values.length) {
       throw new CardinalityException(size, values.length);
@@ -461,6 +489,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
+  @Override
   public Vector assign(Vector other) {
     if (size != other.size()) {
       throw new CardinalityException(size, other.size());
@@ -471,6 +500,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
+  @Override
   public Vector assign(DoubleDoubleFunction f, double y) {
     Iterator<Element> it = f.apply(0, y) == 0 ? iterateNonZero() : iterator();
     while (it.hasNext()) {
@@ -480,6 +510,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
+  @Override
   public Vector assign(DoubleFunction function) {
     Iterator<Element> it = function.apply(0) == 0 ? iterateNonZero() : iterator();
     while (it.hasNext()) {
@@ -489,6 +520,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
+  @Override
   public Vector assign(Vector other, DoubleDoubleFunction function) {
     if (size != other.size()) {
       throw new CardinalityException(size, other.size());
@@ -499,6 +531,7 @@ public abstract class AbstractVector implements Vector {
     return this;
   }
 
+  @Override
   public Matrix cross(Vector other) {
     Matrix result = matrixLike(size, other.size());
     for (int row = 0; row < size; row++) {
@@ -521,10 +554,12 @@ public abstract class AbstractVector implements Vector {
     return gson.fromJson(formattedString, Vector.class);
   }
 
+  @Override
   public final int size() {
     return size;  
   }
 
+  @Override
   public String asFormatString() {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
@@ -596,14 +631,17 @@ public abstract class AbstractVector implements Vector {
       this.index = index;
     }
 
+    @Override
     public double get() {
       return getQuick(index);
     }
 
+    @Override
     public int index() {
       return index;
     }
 
+    @Override
     public void set(double value) {
       setQuick(index, value);
     }

@@ -164,6 +164,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
       } // nothing to do
       y.forEachNonZero(
           new IntIntDoubleFunction() {
+            @Override
             public double apply(int i, int j, double value) {
               setQuick(i, j, getQuick(i, j) + alpha * value);
               return value;
@@ -176,6 +177,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
     if (function == Functions.MULT) { // x[i] = x[i] * y[i]
       this.elements.forEachPair(
           new IntDoubleProcedure() {
+            @Override
             public boolean apply(int key, double value) {
               int i = key / columns;
               int j = key % columns;
@@ -192,6 +194,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
     if (function == Functions.DIV) { // x[i] = x[i] / y[i]
       this.elements.forEachPair(
           new IntDoubleProcedure() {
+            @Override
             public boolean apply(int key, double value) {
               int i = key / columns;
               int j = key % columns;
@@ -233,6 +236,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
     if (this.isNoView) {
       this.elements.forEachPair(
           new IntDoubleProcedure() {
+            @Override
             public boolean apply(int key, double value) {
               int i = key / columns;
               int j = key % columns;
@@ -426,6 +430,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
 
     this.elements.forEachPair(
         new IntDoubleProcedure() {
+          @Override
           public boolean apply(int key, double value) {
             int i = key / columns;
             int j = key % columns;
@@ -495,6 +500,7 @@ public final class SparseDoubleMatrix2D extends DoubleMatrix2D {
 
     this.elements.forEachPair(
         new IntDoubleProcedure() {
+          @Override
           public boolean apply(int key, double value) {
             int i = key / columns;
             int j = key % columns;

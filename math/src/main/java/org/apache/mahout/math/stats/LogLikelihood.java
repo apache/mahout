@@ -135,6 +135,7 @@ public final class LogLikelihood {
     int totalB = b.size();
 
     Ordering<ScoredItem<T>> byScoreAscending = new Ordering<ScoredItem<T>>() {
+      @Override
       public int compare(ScoredItem<T> tScoredItem, ScoredItem<T> tScoredItem1) {
         return Double.compare(tScoredItem.score, tScoredItem1.score);
       }

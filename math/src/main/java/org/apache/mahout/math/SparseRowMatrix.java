@@ -81,14 +81,17 @@ public class SparseRowMatrix extends AbstractMatrix {
     return clone;
   }
 
+  @Override
   public double getQuick(int row, int column) {
     return rows[row] == null ? 0.0 : rows[row].getQuick(column);
   }
 
+  @Override
   public Matrix like() {
     return new SparseRowMatrix(cardinality, randomAccessRows);
   }
 
+  @Override
   public Matrix like(int rows, int columns) {
     int[] c = new int[2];
     c[ROW] = rows;
@@ -96,10 +99,12 @@ public class SparseRowMatrix extends AbstractMatrix {
     return new SparseRowMatrix(c, randomAccessRows);
   }
 
+  @Override
   public void setQuick(int row, int column, double value) {
     rows[row].setQuick(column, value);
   }
 
+  @Override
   public int[] getNumNondefaultElements() {
     int[] result = new int[2];
     result[ROW] = rows.length;
@@ -109,6 +114,7 @@ public class SparseRowMatrix extends AbstractMatrix {
     return result;
   }
 
+  @Override
   public Matrix viewPart(int[] offset, int[] size) {
     if (offset[ROW] < 0) {
       throw new IndexException(offset[ROW], rows.length);
@@ -125,6 +131,7 @@ public class SparseRowMatrix extends AbstractMatrix {
     return new MatrixView(this, offset, size);
   }
 
+  @Override
   public Matrix assignColumn(int column, Vector other) {
     if (cardinality[ROW] != other.size()) {
       throw new CardinalityException(cardinality[ROW], other.size());
@@ -138,6 +145,7 @@ public class SparseRowMatrix extends AbstractMatrix {
     return this;
   }
 
+  @Override
   public Matrix assignRow(int row, Vector other) {
     if (cardinality[COL] != other.size()) {
       throw new CardinalityException(cardinality[COL], other.size());
@@ -154,6 +162,7 @@ public class SparseRowMatrix extends AbstractMatrix {
    * @param column an int column index
    * @return a shallow view of the column
    */
+  @Override
   public Vector getColumn(int column) {
     if (column < 0 || column >= cardinality[COL]) {
       throw new IndexException(column, cardinality[COL]);
@@ -173,6 +182,7 @@ public class SparseRowMatrix extends AbstractMatrix {
    * @param row an int row index
    * @return a shallow view of the Vector at specified row (ie you may mutate the original matrix using this row)
    */
+  @Override
   public Vector getRow(int row) {
     if (row < 0 || row >= cardinality[ROW]) {
       throw new IndexException(row, cardinality[ROW]);

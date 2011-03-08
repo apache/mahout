@@ -46,6 +46,7 @@ public final class Mult implements DoubleFunction {
   }
 
   /** Returns the result of the function evaluation. */
+  @Override
   public double apply(double a) {
     return a * multiplicator;
   }

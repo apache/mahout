@@ -34,6 +34,7 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
 
   public static final String VECTOR = "vector";
 
+  @Override
   public JsonElement serialize(Vector src, Type typeOfSrc,
                                JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
@@ -45,6 +46,7 @@ public class JsonVectorAdapter implements JsonSerializer<Vector>,
     return obj;
   }
 
+  @Override
   public Vector deserialize(JsonElement json, Type typeOfT,
                             JsonDeserializationContext context) {
     GsonBuilder builder = new GsonBuilder();

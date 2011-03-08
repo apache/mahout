@@ -81,6 +81,7 @@ public class DenseVector extends AbstractVector {
   /**
    * @return true
    */
+  @Override
   public boolean isDense() {
     return true;
   }
@@ -88,6 +89,7 @@ public class DenseVector extends AbstractVector {
   /**
    * @return true
    */
+  @Override
   public boolean isSequentialAccess() {
     return true;
   }
@@ -103,14 +105,17 @@ public class DenseVector extends AbstractVector {
     return result;
   }
 
+  @Override
   public double getQuick(int index) {
     return values[index];
   }
 
+  @Override
   public DenseVector like() {
     return new DenseVector(size());
   }
 
+  @Override
   public void setQuick(int index, double value) {
     lengthSquared = -1.0;
     values[index] = value;
@@ -154,6 +159,7 @@ public class DenseVector extends AbstractVector {
     return this;
   }
 
+  @Override
   public int getNumNondefaultElements() {
     return values.length;
   }
@@ -172,10 +178,12 @@ public class DenseVector extends AbstractVector {
   /**
    * Returns an iterator that traverses this Vector from 0 to cardinality-1, in that order.
    */
+  @Override
   public Iterator<Element> iterateNonZero() {
     return new NonDefaultIterator();
   }
 
+  @Override
   public Iterator<Element> iterator() {
     return new AllIterator();
   }
@@ -269,10 +277,12 @@ public class DenseVector extends AbstractVector {
       }
     }
 
+    @Override
     public boolean hasNext() {
       return index < size();
     }
 
+    @Override
     public Element next() {
       if (index >= size()) {
         throw new NoSuchElementException();
@@ -284,6 +294,7 @@ public class DenseVector extends AbstractVector {
       }
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -297,10 +308,12 @@ public class DenseVector extends AbstractVector {
       element.index = -1;
     }
 
+    @Override
     public boolean hasNext() {
       return element.index + 1 < size();
     }
 
+    @Override
     public Element next() {
       if (element.index + 1 >= size()) {
         throw new NoSuchElementException();
@@ -310,6 +323,7 @@ public class DenseVector extends AbstractVector {
       }
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }
@@ -319,14 +333,17 @@ public class DenseVector extends AbstractVector {
 
     int index;
 
+    @Override
     public double get() {
       return values[index];
     }
 
+    @Override
     public int index() {
       return index;
     }
 
+    @Override
     public void set(double value) {
       lengthSquared = -1;
       values[index] = value;

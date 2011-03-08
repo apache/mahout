@@ -23,6 +23,7 @@ import org.apache.mahout.math.function.PlusMult;
 
 public class HebbianUpdater implements EigenUpdater {
 
+  @Override
   public void update(Vector pseudoEigen,
                      Vector trainingVector,
                      TrainingState currentState) {

@@ -33,6 +33,7 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>, JsonDeserializ
   public static final String CLASS = "class";
   public static final String MATRIX = "matrix";
 
+  @Override
   public JsonElement serialize(Matrix src, Type typeOfSrc,
                                JsonSerializationContext context) {
     JsonObject obj = new JsonObject();
@@ -41,6 +42,7 @@ public class JsonMatrixAdapter implements JsonSerializer<Matrix>, JsonDeserializ
     return obj;
   }
 
+  @Override
   public Matrix deserialize(JsonElement json, Type typeOfT,
                             JsonDeserializationContext context) {
     JsonObject obj = json.getAsJsonObject();

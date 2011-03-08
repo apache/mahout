@@ -117,6 +117,7 @@ public final class Functions {
    */
   /** Function that returns <tt>Math.abs(a)</tt>. */
   public static final DoubleFunction ABS = new DoubleFunction() {
+    @Override
     public double apply(double a) {
       return Math.abs(a);
     }
@@ -124,6 +125,7 @@ public final class Functions {
 
   /** Function that returns <tt>Math.acos(a)</tt>. */
   public static final DoubleFunction ACOS = new DoubleFunction() {
+    @Override
     public double apply(double a) {
       return Math.acos(a);
     }
@@ -131,6 +133,7 @@ public final class Functions {
 
   /** Function that returns <tt>Math.asin(a)</tt>. */
   public static final DoubleFunction ASIN = new DoubleFunction() {
+    @Override
     public double apply(double a) {
       return Math.asin(a);
     }
@@ -138,6 +141,7 @@ public final class Functions {
 
   /** Function that returns <tt>Math.atan(a)</tt>. */
   public static final DoubleFunction ATAN = new DoubleFunction() {
+    @Override
     public double apply(double a) {
       return Math.atan(a);
     }
@@ -146,6 +150,7 @@ public final class Functions {
   /** Function that returns <tt>Math.ceil(a)</tt>. */
   public static final DoubleFunction CEIL = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.ceil(a);
     }
@@ -154,6 +159,7 @@ public final class Functions {
   /** Function that returns <tt>Math.cos(a)</tt>. */
   public static final DoubleFunction COS = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.cos(a);
     }
@@ -162,6 +168,7 @@ public final class Functions {
   /** Function that returns <tt>Math.exp(a)</tt>. */
   public static final DoubleFunction EXP = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.exp(a);
     }
@@ -170,6 +177,7 @@ public final class Functions {
   /** Function that returns <tt>Math.floor(a)</tt>. */
   public static final DoubleFunction FLOOR = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.floor(a);
     }
@@ -178,6 +186,7 @@ public final class Functions {
   /** Function that returns its argument. */
   public static final DoubleFunction IDENTITY = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return a;
     }
@@ -186,6 +195,7 @@ public final class Functions {
   /** Function that returns <tt>1.0 / a</tt>. */
   public static final DoubleFunction INV = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return 1.0 / a;
     }
@@ -194,6 +204,7 @@ public final class Functions {
   /** Function that returns <tt>Math.log(a)</tt>. */
   public static final DoubleFunction LOGARITHM = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.log(a);
     }
@@ -202,6 +213,7 @@ public final class Functions {
   /** Function that returns <tt>Math.log(a) / Math.log(2)</tt>. */
   public static final DoubleFunction LOG2 = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.log(a) * 1.4426950408889634;
     }
@@ -210,6 +222,7 @@ public final class Functions {
   /** Function that returns <tt>-a</tt>. */
   public static final DoubleFunction NEGATE = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return -a;
     }
@@ -218,6 +231,7 @@ public final class Functions {
   /** Function that returns <tt>Math.rint(a)</tt>. */
   public static final DoubleFunction RINT = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.rint(a);
     }
@@ -226,6 +240,7 @@ public final class Functions {
   /** Function that returns <tt>a < 0 ? -1 : a > 0 ? 1 : 0</tt>. */
   public static final DoubleFunction SIGN = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return a < 0 ? -1 : a > 0 ? 1 : 0;
     }
@@ -234,6 +249,7 @@ public final class Functions {
   /** Function that returns <tt>Math.sin(a)</tt>. */
   public static final DoubleFunction SIN = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.sin(a);
     }
@@ -242,6 +258,7 @@ public final class Functions {
   /** Function that returns <tt>Math.sqrt(a)</tt>. */
   public static final DoubleFunction SQRT = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.sqrt(a);
     }
@@ -250,6 +267,7 @@ public final class Functions {
   /** Function that returns <tt>a * a</tt>. */
   public static final DoubleFunction SQUARE = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return a * a;
     }
@@ -258,6 +276,7 @@ public final class Functions {
   /** Function that returns <tt>Math.tan(a)</tt>. */
   public static final DoubleFunction TAN = new DoubleFunction() {
 
+    @Override
     public double apply(double a) {
       return Math.tan(a);
     }
@@ -271,6 +290,7 @@ public final class Functions {
   /** Function that returns <tt>Math.atan2(a,b)</tt>. */
   public static final DoubleDoubleFunction ATAN2 = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return Math.atan2(a, b);
     }
@@ -279,6 +299,7 @@ public final class Functions {
   /** Function that returns <tt>a < b ? -1 : a > b ? 1 : 0</tt>. */
   public static final DoubleDoubleFunction COMPARE = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return a < b ? -1 : a > b ? 1 : 0;
     }
@@ -287,6 +308,7 @@ public final class Functions {
   /** Function that returns <tt>a / b</tt>. */
   public static final DoubleDoubleFunction DIV = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return a / b;
     }
@@ -295,6 +317,7 @@ public final class Functions {
   /** Function that returns <tt>a == b ? 1 : 0</tt>. */
   public static final DoubleDoubleFunction EQUALS = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return a == b ? 1 : 0;
     }
@@ -303,6 +326,7 @@ public final class Functions {
   /** Function that returns <tt>a > b ? 1 : 0</tt>. */
   public static final DoubleDoubleFunction GREATER = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return a > b ? 1 : 0;
     }
@@ -311,6 +335,7 @@ public final class Functions {
   /** Function that returns <tt>Math.IEEEremainder(a,b)</tt>. */
   public static final DoubleDoubleFunction IEEE_REMAINDER = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return Math.IEEEremainder(a, b);
     }
@@ -319,6 +344,7 @@ public final class Functions {
   /** Function that returns <tt>a == b</tt>. */
   public static final DoubleDoubleProcedure IS_EQUAL = new DoubleDoubleProcedure() {
 
+    @Override
     public boolean apply(double a, double b) {
       return a == b;
     }
@@ -327,6 +353,7 @@ public final class Functions {
   /** Function that returns <tt>a < b</tt>. */
   public static final DoubleDoubleProcedure IS_LESS = new DoubleDoubleProcedure() {
 
+    @Override
     public boolean apply(double a, double b) {
       return a < b;
     }
@@ -335,6 +362,7 @@ public final class Functions {
   /** Function that returns <tt>a > b</tt>. */
   public static final DoubleDoubleProcedure IS_GREATER = new DoubleDoubleProcedure() {
 
+    @Override
     public boolean apply(double a, double b) {
       return a > b;
     }
@@ -343,6 +371,7 @@ public final class Functions {
   /** Function that returns <tt>a < b ? 1 : 0</tt>. */
   public static final DoubleDoubleFunction LESS = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return a < b ? 1 : 0;
     }
@@ -351,6 +380,7 @@ public final class Functions {
   /** Function that returns <tt>Math.log(a) / Math.log(b)</tt>. */
   public static final DoubleDoubleFunction LG = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return Math.log(a) / Math.log(b);
     }
@@ -359,6 +389,7 @@ public final class Functions {
   /** Function that returns <tt>Math.max(a,b)</tt>. */
   public static final DoubleDoubleFunction MAX = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return Math.max(a, b);
     }
@@ -367,6 +398,7 @@ public final class Functions {
   /** Function that returns <tt>Math.min(a,b)</tt>. */
   public static final DoubleDoubleFunction MIN = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return Math.min(a, b);
     }
@@ -383,6 +415,7 @@ public final class Functions {
   /** Function that returns <tt>a % b</tt>. */
   public static final DoubleDoubleFunction MOD = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return a % b;
     }
@@ -391,6 +424,7 @@ public final class Functions {
   /** Function that returns <tt>a * b</tt>. */
   public static final DoubleDoubleFunction MULT = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return a * b;
     }
@@ -399,6 +433,7 @@ public final class Functions {
   /** Function that returns <tt>a + b</tt>. */
   public static final DoubleDoubleFunction PLUS = new DoubleDoubleFunction() {
     
+    @Override
     public double apply(double a, double b) {
       return a + b;
     }
@@ -407,6 +442,7 @@ public final class Functions {
   /** Function that returns <tt>Math.abs(a) + Math.abs(b)</tt>. */
   public static final DoubleDoubleFunction PLUS_ABS = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return Math.abs(a) + Math.abs(b);
     }
@@ -415,6 +451,7 @@ public final class Functions {
   /** Function that returns <tt>Math.pow(a,b)</tt>. */
   public static final DoubleDoubleFunction POW = new DoubleDoubleFunction() {
 
+    @Override
     public double apply(double a, double b) {
       return Math.pow(a, b);
     }
@@ -430,6 +467,7 @@ public final class Functions {
   public static DoubleFunction between(final double from, final double to) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return (from <= a && a <= to) ? 1 : 0;
       }
@@ -446,6 +484,7 @@ public final class Functions {
   public static DoubleFunction bindArg1(final DoubleDoubleFunction function, final double c) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double var) {
         return function.apply(c, var);
       }
@@ -462,6 +501,7 @@ public final class Functions {
   public static DoubleFunction bindArg2(final DoubleDoubleFunction function, final double c) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double var) {
         return function.apply(var, c);
       }
@@ -480,6 +520,7 @@ public final class Functions {
                                            final DoubleFunction h) {
     return new DoubleDoubleFunction() {
 
+      @Override
       public double apply(double a, double b) {
         return f.apply(g.apply(a), h.apply(b));
       }
@@ -496,6 +537,7 @@ public final class Functions {
   public static DoubleDoubleFunction chain(final DoubleFunction g, final DoubleDoubleFunction h) {
     return new DoubleDoubleFunction() {
 
+      @Override
       public double apply(double a, double b) {
         return g.apply(h.apply(a, b));
       }
@@ -512,6 +554,7 @@ public final class Functions {
   public static DoubleFunction chain(final DoubleFunction g, final DoubleFunction h) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return g.apply(h.apply(a));
       }
@@ -525,6 +568,7 @@ public final class Functions {
   public static DoubleFunction compare(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return a < b ? -1 : a > b ? 1 : 0;
       }
@@ -535,6 +579,7 @@ public final class Functions {
   public static DoubleFunction constant(final double c) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return c;
       }
@@ -551,6 +596,7 @@ public final class Functions {
   public static DoubleFunction equals(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return a == b ? 1 : 0;
       }
@@ -561,6 +607,7 @@ public final class Functions {
   public static DoubleFunction greater(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return a > b ? 1 : 0;
       }
@@ -574,6 +621,7 @@ public final class Functions {
   public static DoubleFunction mathIEEEremainder(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return Math.IEEEremainder(a, b);
       }
@@ -587,6 +635,7 @@ public final class Functions {
   public static DoubleProcedure isBetween(final double from, final double to) {
     return new DoubleProcedure() {
 
+      @Override
       public boolean apply(double a) {
         return from <= a && a <= to;
       }
@@ -597,6 +646,7 @@ public final class Functions {
   public static DoubleProcedure isEqual(final double b) {
     return new DoubleProcedure() {
 
+      @Override
       public boolean apply(double a) {
         return a == b;
       }
@@ -607,6 +657,7 @@ public final class Functions {
   public static DoubleProcedure isGreater(final double b) {
     return new DoubleProcedure() {
 
+      @Override
       public boolean apply(double a) {
         return a > b;
       }
@@ -617,6 +668,7 @@ public final class Functions {
   public static DoubleProcedure isLess(final double b) {
     return new DoubleProcedure() {
 
+      @Override
       public boolean apply(double a) {
         return a < b;
       }
@@ -627,6 +679,7 @@ public final class Functions {
   public static DoubleFunction less(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return a < b ? 1 : 0;
       }
@@ -642,6 +695,7 @@ public final class Functions {
       private final double logInv = 1 / Math.log(b); // cached for speed
 
 
+      @Override
       public double apply(double a) {
         return Math.log(a) * logInv;
       }
@@ -652,6 +706,7 @@ public final class Functions {
   public static DoubleFunction max(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return Math.max(a, b);
       }
@@ -662,6 +717,7 @@ public final class Functions {
   public static DoubleFunction min(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return Math.min(a, b);
       }
@@ -685,6 +741,7 @@ public final class Functions {
   public static DoubleFunction mod(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return a % b;
       }
@@ -705,6 +762,7 @@ public final class Functions {
   public static DoubleFunction plus(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return a + b;
       }
@@ -728,6 +786,7 @@ public final class Functions {
   public static DoubleFunction pow(final double b) {
     return new DoubleFunction() {
 
+      @Override
       public double apply(double a) {
         return Math.pow(a, b);
       }
@@ -757,6 +816,7 @@ public final class Functions {
    */
   public static DoubleFunction round(final double precision) {
     return new DoubleFunction() {
+      @Override
       public double apply(double a) {
         return Math.rint(a / precision) * precision;
       }
@@ -772,6 +832,7 @@ public final class Functions {
    */
   public static DoubleDoubleFunction swapArgs(final DoubleDoubleFunction function) {
     return new DoubleDoubleFunction() {
+      @Override
       public double apply(double a, double b) {
         return function.apply(b, a);
       }

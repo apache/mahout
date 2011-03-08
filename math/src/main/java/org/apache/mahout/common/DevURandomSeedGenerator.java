@@ -59,6 +59,7 @@ public final class DevURandomSeedGenerator implements SeedGenerator {
    * @return The requested number of random bytes, read directly from {@literal /dev/urandom}.
    * @throws SeedException If {@literal /dev/urandom} does not exist or is not accessible
    */
+  @Override
   public byte[] generateSeed(int length) throws SeedException {
     FileInputStream file = null;
     try {
