@@ -52,6 +52,7 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
   private final DataModel dataModel;
   private final List<SVDPreference> cachedPreferences;
   private final double defaultValue;
+  private final double interval;
 
   public ExpectationMaximizationSVDFactorizer(DataModel dataModel,
                                               int numFeatures,
@@ -79,14 +80,17 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
     rightVectors = new double[dataModel.getNumItems()][numFeatures];
 
     double average = getAveragePreference();
-    defaultValue = Math.sqrt((average - 1.0) / numFeatures);
+
+    double prefInterval = dataModel.getMaxPreference() - dataModel.getMinPreference();
+    defaultValue = Math.sqrt((average - (prefInterval * 0.1)) / numFeatures);
+    interval = (prefInterval * 0.1) / numFeatures;
 
     for (int feature = 0; feature < numFeatures; feature++) {
       for (int userIndex = 0; userIndex < dataModel.getNumUsers(); userIndex++) {
-        leftVectors[userIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * randomNoise;
+          leftVectors[userIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
       }
       for (int itemIndex = 0; itemIndex < dataModel.getNumItems(); itemIndex++) {
-        rightVectors[itemIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * randomNoise;
+          rightVectors[itemIndex][feature] = defaultValue + (random.nextDouble() - 0.5) * interval * randomNoise;
       }
     }
     cachedPreferences = new ArrayList<SVDPreference>(dataModel.getNumUsers());
@@ -96,8 +100,8 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
   public Factorization factorize() throws TasteException {
     cachePreferences();
     double rmse = (dataModel.getMaxPreference() - dataModel.getMinPreference());
-    Collections.shuffle(cachedPreferences, random);
     for (int ii = 0; ii < numFeatures; ii++) {
+      Collections.shuffle(cachedPreferences, random);
       for (int i = 0; (i < numIterations); i++) {
         double err = 0.0;
         for (SVDPreference pref : cachedPreferences) {
@@ -150,8 +154,8 @@ public final class ExpectationMaximizationSVDFactorizer extends AbstractFactoriz
     double sum = pref.getCache();
     sum += leftVectors[i][f] * rightVectors[j][f];
     if (trailing) {
-      sum += (numFeatures - f - 1) * (defaultValue * defaultValue);
-      if (sum > dataModel.getMaxPreference()) {
+      sum += (numFeatures - f - 1) * ((defaultValue + interval) * (defaultValue + interval));
+      if (sum > maxPreference) {
         sum = maxPreference;
       } else if (sum < minPreference) {
         sum = minPreference;
