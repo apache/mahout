@@ -81,6 +81,76 @@ public final class FPGrowthTest extends MahoutTestCase {
       frequentPatterns.toString());
 
   }
+  
+  /**
+   * Trivial test for MAHOUT-617
+   */
+  @Test
+  public void testMaxHeapFPGrowthData1() throws Exception {
+
+    FPGrowth<String> fp = new FPGrowth<String>();
+
+    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("X"), 12L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("Y"), 4L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("X", "Y"), 10L));
+
+    Path path = getTestTempFilePath("fpgrowthTestData1.dat");
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
+    System.out.println(fp.generateFList(transactions.iterator(), 2));
+    SequenceFile.Writer writer =
+        new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
+    fp.generateTopKFrequentPatterns(
+        transactions.iterator(),
+        fp.generateFList(transactions.iterator(), 2),
+        2,
+        100,
+        new HashSet<String>(),
+        new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
+        new ContextStatusUpdater(null));
+    writer.close();
+
+    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
+    assertEquals(
+      "[(Y,([Y],14), ([X, Y],10)), (X,([X],22), ([X, Y],10))]", frequentPatterns.toString());
+  }
+  
+  /**
+   * Trivial test for MAHOUT-617
+   */
+  @Test
+  public void testMaxHeapFPGrowthData2() throws Exception {
+
+    FPGrowth<String> fp = new FPGrowth<String>();
+
+    Collection<Pair<List<String>,Long>> transactions = new ArrayList<Pair<List<String>,Long>>();
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("X"), 12L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("Y"), 4L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("X", "Y"), 10L));
+    transactions.add(new Pair<List<String>,Long>(Arrays.asList("X", "Y", "Z"), 11L));
+
+    Path path = getTestTempFilePath("fpgrowthTestData2.dat");
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
+    System.out.println(fp.generateFList(transactions.iterator(), 2));
+    SequenceFile.Writer writer =
+        new SequenceFile.Writer(fs, conf, path, Text.class, TopKStringPatterns.class);
+    fp.generateTopKFrequentPatterns(
+        transactions.iterator(),
+        fp.generateFList(transactions.iterator(), 2),
+        2,
+        100,
+        new HashSet<String>(),
+        new StringOutputConverter(new SequenceFileOutputCollector<Text,TopKStringPatterns>(writer)),
+        new ContextStatusUpdater(null));
+    writer.close();
+
+    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
+    assertEquals(
+      "[(Z,([X, Y, Z],11)), (Y,([Y],25), ([X, Y],21), ([X, Y, Z],11)), (X,([X],33), ([X, Y],21), ([X, Y, Z],11))]",
+      frequentPatterns.toString());
+  }
 
   /**
    * Trivial test for MAHOUT-355
