@@ -17,21 +17,26 @@
 
 package org.apache.mahout.cf.taste.example.kddcup.track1;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.example.kddcup.DataFileIterable;
 import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
-import org.apache.mahout.cf.taste.example.kddcup.KDDCupRecommender;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Runs "track 1" of the KDD Cup competition using whatever recommender is inside {@link KDDCupRecommender}
+ * <p>Runs "track 1" of the KDD Cup competition using whatever recommender is inside {@link Track1Recommender}
  * and attempts to output the result in the correct contest format.</p>
  *
  * <p>Run as: <code>Track1Runner [track 1 data file directory] [output file]</code></p>
@@ -50,45 +55,42 @@ public final class Track1Runner {
       throw new IllegalArgumentException("Bad data file directory: " + dataFileDirectory);
     }
 
+    long start = System.currentTimeMillis();
+
     KDDCupDataModel model = new KDDCupDataModel(KDDCupDataModel.getTrainingFile(dataFileDirectory));
-    KDDCupRecommender recommender = new KDDCupRecommender(model);
+    Track1Recommender recommender = new Track1Recommender(model);
 
-    File outFile = new File(args[1]);
-    OutputStream out = new FileOutputStream(outFile);
+    long end = System.currentTimeMillis();
+    log.info("Loaded model in {}s", (end - start) / 1000);
+    start = end;
 
+    Collection<Track1Callable> callables = new ArrayList<Track1Callable>();
     for (Pair<PreferenceArray,long[]> tests : new DataFileIterable(KDDCupDataModel.getTestFile(dataFileDirectory))) {
-
       PreferenceArray userTest = tests.getFirst();
-      long userID = userTest.get(0).getUserID();
-      for (int i = 0; i < userTest.length(); i++) {
-        long itemID = userTest.getItemID(i);
-        double estimate;
-        try {
-          estimate = recommender.estimatePreference(userID, itemID);
-        } catch (NoSuchItemException nsie) {
-          // OK in the sample data provided before the contest, should never happen otherwise
-          log.warn("Unknown item {}; OK unless this is the real contest data", itemID);
-          continue;
-        }
-
-        log.info("Estimate for user {}, item {}: ", new Object[] {userID, itemID, estimate});
-
-        int scaledEstimate = (int) ((estimate / 100.0) * 255.0);
-        if (scaledEstimate > 255) {
-          scaledEstimate = 255;
-        } else if (scaledEstimate < 0) {
-          scaledEstimate = 0;
-        }
-
-        out.write(scaledEstimate);
-
-      }
-
+      callables.add(new Track1Callable(recommender, userTest));
     }
 
+    int cores = Runtime.getRuntime().availableProcessors();
+    log.info("Running on {} cores", cores);
+    ExecutorService executor = Executors.newFixedThreadPool(cores);
+    List<Future<byte[]>> results = executor.invokeAll(callables);
+    executor.shutdown();
+
+    end = System.currentTimeMillis();
+    log.info("Ran recommendations in {}s", (end - start) / 1000);
+    start = end;
+
+    OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(args[1])));
+    for (Future<byte[]> result : results) {
+      for (byte estimate : result.get()) {
+        out.write(estimate);
+      }
+    }
+    out.flush();
     out.close();
 
+    end = System.currentTimeMillis();
+    log.info("Wrote output in {}s", (end - start) / 1000);
   }
-
 
 }

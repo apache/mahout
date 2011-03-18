@@ -24,7 +24,6 @@ import org.apache.commons.cli2.OptionException;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.example.TasteOptionParser;
 import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
-import org.apache.mahout.cf.taste.example.kddcup.KDDCupRecommenderBuilder;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ public final class Track1RecommenderEvaluatorRunner {
     }
     Track1RecommenderEvaluator evaluator = new Track1RecommenderEvaluator(dataFileDirectory);
     DataModel model = new KDDCupDataModel(KDDCupDataModel.getTrainingFile(dataFileDirectory));
-    double evaluation = evaluator.evaluate(new KDDCupRecommenderBuilder(),
+    double evaluation = evaluator.evaluate(new Track1RecommenderBuilder(),
       null,
       model,
       Float.NaN,

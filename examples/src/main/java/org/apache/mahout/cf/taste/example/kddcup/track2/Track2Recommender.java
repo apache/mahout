@@ -15,30 +15,39 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.example.kddcup;
+package org.apache.mahout.cf.taste.example.kddcup.track2;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
+import org.apache.mahout.cf.taste.impl.recommender.GenericBooleanPrefItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.CachingItemSimilarity;
-import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
+import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
-public final class KDDCupRecommender implements Recommender {
+public final class Track2Recommender implements Recommender {
 
   private final Recommender recommender;
 
-  public KDDCupRecommender(DataModel dataModel) throws TasteException {
+  public Track2Recommender(DataModel dataModel, File dataFileDirectory) throws TasteException {
     // Change this to whatever you like!
-    ItemSimilarity similarity = new CachingItemSimilarity(new UncenteredCosineSimilarity(dataModel), dataModel);
-    recommender = new GenericItemBasedRecommender(dataModel, similarity);
+    ItemSimilarity similarity;
+    try {
+      similarity = new TrackItemSimilarity(dataFileDirectory);
+    } catch (IOException ioe) {
+      throw new TasteException(ioe);
+    }
+    recommender = new GenericBooleanPrefItemBasedRecommender(dataModel, similarity);
   }
   
   @Override

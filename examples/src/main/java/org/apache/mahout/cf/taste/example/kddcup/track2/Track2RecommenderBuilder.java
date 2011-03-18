@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.example.kddcup;
+package org.apache.mahout.cf.taste.example.kddcup.track2;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
+import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 
-public final class KDDCupRecommenderBuilder implements RecommenderBuilder {
+final class Track2RecommenderBuilder implements RecommenderBuilder {
   
   @Override
   public Recommender buildRecommender(DataModel dataModel) throws TasteException {
-    return new KDDCupRecommender(dataModel);
+    return new Track2Recommender(dataModel, ((KDDCupDataModel) dataModel).getDataFileDirectory());
   }
   
 }

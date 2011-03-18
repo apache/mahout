@@ -33,6 +33,8 @@ import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.SamplingIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>An {@link DataModel} which reads into memory any of the KDD Cup's rating files; it is really
@@ -44,6 +46,9 @@ import org.apache.mahout.common.iterator.SamplingIterator;
  */
 public final class KDDCupDataModel implements DataModel {
 
+  private static final Logger log = LoggerFactory.getLogger(KDDCupDataModel.class);
+
+  private final File dataFileDirectory;
   private final DataModel delegate;
 
   /**
@@ -61,6 +66,8 @@ public final class KDDCupDataModel implements DataModel {
   public KDDCupDataModel(File dataFile, boolean storeDates, double samplingRate) throws IOException {
 
     Preconditions.checkArgument(!Double.isNaN(samplingRate) && samplingRate > 0.0 && samplingRate <= 1.0);
+
+    dataFileDirectory = dataFile.getParentFile();
 
     Iterator<Pair<PreferenceArray,long[]>> dataIterator = new DataFileIterator(dataFile);
     if (samplingRate < 1.0) {
@@ -95,19 +102,28 @@ public final class KDDCupDataModel implements DataModel {
       delegate = new GenericDataModel(userData);
     }
 
+    Runtime runtime = Runtime.getRuntime();
+    log.info("Loaded data model in about {}MB heap", (runtime.totalMemory() - runtime.freeMemory()) / 1000000);
   }
 
+  public File getDataFileDirectory() {
+    return dataFileDirectory;
+  }
 
   public static File getTrainingFile(File dataFileDirectory) {
-    return getFile(dataFileDirectory, "train");
+    return getFile(dataFileDirectory, "trainIdx");
   }
 
   public static File getValidationFile(File dataFileDirectory) {
-    return getFile(dataFileDirectory, "validation");
+    return getFile(dataFileDirectory, "validationIdx");
   }
 
   public static File getTestFile(File dataFileDirectory) {
-    return getFile(dataFileDirectory, "test");
+    return getFile(dataFileDirectory, "testIdx");
+  }
+
+  public static File getTrackFile(File dataFileDirectory) {
+    return getFile(dataFileDirectory, "trackData");
   }
 
   private static File getFile(File dataFileDirectory, String prefix) {
@@ -115,9 +131,11 @@ public final class KDDCupDataModel implements DataModel {
     for (int set : new int[] {1,2}) {
       // Works on sample data from before contest or real data
       for (String firstLinesOrNot : new String[] {"", ".firstLines"}) {
-        File dataFile = new File(dataFileDirectory, prefix + "Idx" + set + firstLinesOrNot + ".txt");
-        if (dataFile.exists()) {
-          return dataFile;
+        for (String gzippedOrNot : new String[] {".gz", ""}) {
+          File dataFile = new File(dataFileDirectory, prefix + set + firstLinesOrNot + ".txt" + gzippedOrNot);
+          if (dataFile.exists()) {
+            return dataFile;
+          }
         }
       }
     }
