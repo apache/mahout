@@ -396,14 +396,15 @@ public class DirichletDriver extends AbstractJob {
     writeInitialState(output, clustersIn, modelDistribution, numClusters, alpha0);
 
     if (runSequential) {
-      clustersIn = buildClustersSeq(input, output, modelDistribution, numClusters, maxIterations, alpha0, clustersIn);
+      clustersIn = buildClustersSeq(conf, input, output, modelDistribution, numClusters, maxIterations, alpha0, clustersIn);
     } else {
       clustersIn = buildClustersMR(conf, input, output, modelDistribution, numClusters, maxIterations, alpha0, clustersIn);
     }
     return clustersIn;
   }
 
-  private static Path buildClustersSeq(Path input,
+  private static Path buildClustersSeq(Configuration conf,
+                                       Path input,
                                        Path output,
                                        ModelDistribution<VectorWritable> modelDistribution,
                                        int numClusters,
@@ -415,14 +416,21 @@ public class DirichletDriver extends AbstractJob {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
       Path clustersOut = new Path(output, Cluster.CLUSTERS_DIR + iteration);
-      DirichletState state = DirichletMapper.loadState(new Configuration(),
+      DirichletState state = DirichletMapper.loadState(conf,
                                                        clustersIn.toString(),
                                                        modelDistribution,
                                                        alpha0,
                                                        numClusters);
+      
+      List<DirichletCluster> oldModels = state.getClusters();
+      for (DirichletCluster oldModel : oldModels) {
+        oldModel.getModel().configure(conf);
+      }
       Cluster[] newModels = (Cluster[]) state.getModelFactory().sampleFromPosterior(state.getModels());
+      for (Cluster newModel : newModels) {
+        newModel.configure(conf);
+      }
       DirichletClusterer clusterer = new DirichletClusterer(state);
-      Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(input.toUri(), conf);
       FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
       for (FileStatus s : status) {
@@ -492,16 +500,22 @@ public class DirichletDriver extends AbstractJob {
                                  boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     if (runSequential) {
-      clusterDataSeq(input, stateIn, output, emitMostLikely, threshold);
+      clusterDataSeq(conf, input, stateIn, output, emitMostLikely, threshold);
     } else {
       clusterDataMR(conf, input, stateIn, output, emitMostLikely, threshold);
     }
   }
 
-  private static void clusterDataSeq(Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
+  private static void clusterDataSeq(Configuration conf, Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
     throws IOException, InstantiationException, IllegalAccessException {
-    Configuration conf = new Configuration();
     List<DirichletCluster> clusters = DirichletClusterMapper.loadClusters(conf, stateIn);
+    
+    for(int i=0; i<clusters.size(); i++)
+    {
+  	  Cluster cluster = clusters.get(i).getModel();
+  	  cluster.configure(conf);
+    }
+    
     DirichletClusterer clusterer = new DirichletClusterer(emitMostLikely, threshold);
     // iterate over all points, assigning each to the closest canopy and outputing that clustering
     FileSystem fs = FileSystem.get(input.toUri(), conf);

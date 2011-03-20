@@ -18,16 +18,17 @@
 package org.apache.mahout.clustering.dirichlet;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.math.VectorWritable;
 
-public class DirichletReducer extends Reducer<Text, VectorWritable, Text, DirichletCluster> {
-
+public class DirichletReducer extends Reducer<Text,VectorWritable,Text,DirichletCluster> {
+  
   private DirichletClusterer clusterer;
-
   private Cluster[] newModels;
 
   public Cluster[] getNewModels() {
@@ -38,8 +39,16 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     try {
-      clusterer = new DirichletClusterer(DirichletMapper.getDirichletState(context.getConfiguration()));
-      this.newModels = (Cluster[]) clusterer.samplePosteriorModels();
+      DirichletState state = DirichletMapper.getDirichletState(context.getConfiguration());
+      clusterer = new DirichletClusterer(state);
+      List<DirichletCluster> oldModels = state.getClusters();
+      for (DirichletCluster cluster : oldModels) {
+        cluster.getModel().configure(context.getConfiguration());
+      }
+      this.newModels = (Cluster[]) state.getModelFactory().sampleFromPosterior(state.getModels());
+      for (Cluster cluster : newModels) {
+        cluster.configure(context.getConfiguration());
+      }
     } catch (NumberFormatException e) {
       throw new IllegalStateException(e);
     } catch (SecurityException e) {
@@ -50,7 +59,8 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
   }
 
   @Override
-  protected void reduce(Text key, Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
+  protected void reduce(Text key, Iterable<VectorWritable> values, Context context)
+    throws IOException, InterruptedException {
     int k = Integer.parseInt(key.toString());
     Cluster model = newModels[k];
     for (VectorWritable value : values) {
@@ -65,7 +75,14 @@ public class DirichletReducer extends Reducer<Text, VectorWritable, Text, Dirich
 
   public void setup(DirichletState state) {
     clusterer = new DirichletClusterer(state);
-    this.newModels = (Cluster[]) clusterer.samplePosteriorModels();
+    List<DirichletCluster> oldModels = state.getClusters();
+    for (DirichletCluster cluster : oldModels) {
+      cluster.getModel().configure(new Configuration());
+    }
+    this.newModels = (Cluster[]) state.getModelFactory().sampleFromPosterior(state.getModels());
+    for (Cluster cluster : newModels) {
+      cluster.configure(new Configuration());
+    }
   }
 
 }

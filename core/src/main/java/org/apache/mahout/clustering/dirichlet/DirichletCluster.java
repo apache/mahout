@@ -20,9 +20,13 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -49,6 +53,21 @@ public class DirichletCluster implements Cluster {
   }
 
   public DirichletCluster() {
+  }
+  
+  @Override
+  public void configure(Configuration job) {
+    // nothing to do
+  }
+  
+  @Override
+  public Collection<Parameter<?>> getParameters() {
+    return Collections.emptyList();
+  }
+  
+  @Override
+  public void createParameters(String prefix, Configuration jobConf) {
+    // nothing to do
   }
 
   public Cluster getModel() {

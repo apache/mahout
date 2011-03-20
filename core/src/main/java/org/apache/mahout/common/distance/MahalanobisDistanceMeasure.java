@@ -49,6 +49,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
   private Vector meanVector;
   
   private ClassParameter vectorClass;
+  private ClassParameter matrixClass;
   private List<Parameter<?>> parameters;
   private Parameter<Path> inverseCovarianceFile;
   private Parameter<Path> meanVectorFile;
@@ -70,7 +71,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
     try {
       if (inverseCovarianceFile.get() != null) {
         FileSystem fs = FileSystem.get(inverseCovarianceFile.get().toUri(), jobConf);
-        MatrixWritable inverseCovarianceMatrix = (MatrixWritable) vectorClass.get().newInstance();
+        MatrixWritable inverseCovarianceMatrix = (MatrixWritable) matrixClass.get().newInstance();
         if (!fs.exists(inverseCovarianceFile.get())) {
           throw new FileNotFoundException(inverseCovarianceFile.get().toString());
         }
@@ -119,7 +120,7 @@ public class MahalanobisDistanceMeasure implements DistanceMeasure {
                                               "Path on DFS to a file containing the inverse covariance matrix.");
     parameters.add(inverseCovarianceFile);
 
-    Parameter matrixClass =
+    matrixClass =
         new ClassParameter(prefix, "maxtrixClass", jobConf, DenseMatrix.class,
                            "Class<Matix> file specified in parameter inverseCovarianceFile has been serialized with.");
     parameters.add(matrixClass);      

@@ -53,6 +53,9 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     super.setup(context);
     try {
       DirichletState dirichletState = getDirichletState(context.getConfiguration());
+      for (DirichletCluster cluster : dirichletState.getClusters()) {
+        cluster.getModel().configure(context.getConfiguration());
+      }
       clusterer = new DirichletClusterer(dirichletState);
       for (int i = 0; i < dirichletState.getNumClusters(); i++) {
         // write an empty vector to each clusterId so that all will be seen by a reducer

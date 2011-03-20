@@ -15,6 +15,7 @@
  */
 package org.apache.mahout.clustering;
 
+import org.apache.mahout.common.parameters.Parametered;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -23,7 +24,7 @@ import org.apache.mahout.math.VectorWritable;
  * attributes that are common across all clustering implementations
  * 
  */
-public interface Cluster extends Model<VectorWritable> {
+public interface Cluster extends Model<VectorWritable>, Parametered {
   
   // default directory for all clustered points
   String CLUSTERED_POINTS_DIR = "clusteredPoints";

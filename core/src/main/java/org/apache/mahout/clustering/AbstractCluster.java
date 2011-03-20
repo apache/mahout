@@ -21,9 +21,13 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Locale;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -64,6 +68,21 @@ public abstract class AbstractCluster implements Cluster {
     this.center = new RandomAccessSparseVector(center2);
     this.radius = new RandomAccessSparseVector(radius2);
     this.id = id2;
+  }
+  
+  @Override
+  public void configure(Configuration job) {
+    // nothing to do
+  }
+  
+  @Override
+  public Collection<Parameter<?>> getParameters() {
+    return Collections.emptyList();
+  }
+  
+  @Override
+  public void createParameters(String prefix, Configuration jobConf) {
+    // nothing to do
   }
 
   /**

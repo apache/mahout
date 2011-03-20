@@ -52,6 +52,9 @@ public class DirichletClusterMapper extends Mapper<WritableComparable<?>, Vector
     Configuration conf = context.getConfiguration();
     try {
       clusters = getClusters(conf);
+      for (DirichletCluster cluster : clusters) {
+        cluster.getModel().configure(conf);
+      }
       String emitMostLikely = conf.get(DirichletDriver.EMIT_MOST_LIKELY_KEY);
       String threshold = conf.get(DirichletDriver.THRESHOLD_KEY);
       clusterer = new DirichletClusterer(Boolean.parseBoolean(emitMostLikely), Double.parseDouble(threshold));

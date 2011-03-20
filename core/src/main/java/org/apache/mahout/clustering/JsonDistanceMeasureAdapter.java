@@ -19,7 +19,9 @@ package org.apache.mahout.clustering;
 import java.lang.reflect.Type;
 
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.math.JsonMatrixAdapter;
 import org.apache.mahout.math.JsonVectorAdapter;
+import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,7 @@ public class JsonDistanceMeasureAdapter implements JsonSerializer<DistanceMeasur
   public JsonElement serialize(DistanceMeasure src, Type typeOfSrc, JsonSerializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = new JsonObject();
     obj.add("class", new JsonPrimitive(src.getClass().getName()));
@@ -53,6 +56,7 @@ public class JsonDistanceMeasureAdapter implements JsonSerializer<DistanceMeasur
   public DistanceMeasure deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
+    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
     Gson gson = builder.create();
     JsonObject obj = json.getAsJsonObject();
     String klass = obj.get("class").getAsString();

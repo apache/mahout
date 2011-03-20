@@ -16,6 +16,7 @@
  */
 package org.apache.mahout.clustering.dirichlet;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
+import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModel;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.SampledNormalDistribution;
@@ -44,7 +46,11 @@ import org.apache.mahout.clustering.dirichlet.models.SampledNormalModel;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.distance.MahalanobisDistanceMeasure;
+import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.junit.Before;
@@ -82,6 +88,27 @@ public final class TestMapReduce extends MahoutTestCase {
     System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=" + sd);
     for (int i = 0; i < num; i++) {
       addSample(new double[] { UncommonDistributions.rNorm(mx, sd), UncommonDistributions.rNorm(my, sd) });
+    }
+  }
+  
+  /**
+   * Generate random samples with asymmetric standard deviations and add them to the sampleData
+   * 
+   * @param num
+   *          int number of samples to generate
+   * @param mx
+   *          double x-value of the sample mean
+   * @param my
+   *          double y-value of the sample mean
+   * @param sdx
+   *          double standard deviation in x of the samples
+   * @param sdy
+   *          double standard deviation in y of the samples
+   */
+  private void generateAsymmetricSamples(int num, double mx, double my, double sdx, double sdy) {
+    System.out.println("Generating " + num + " samples m=[" + mx + ", " + my + "] sd=[" + sdx + ", " + sdy + "]");
+    for (int i = 0; i < num; i++) {
+      addSample(new double[] { UncommonDistributions.rNorm(mx, sdx), UncommonDistributions.rNorm(my, sdy) });
     }
   }
 
@@ -239,7 +266,9 @@ public final class TestMapReduce extends MahoutTestCase {
         maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0", optKey(DefaultOptionCreator.OVERWRITE_OPTION),
         optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
         DefaultOptionCreator.SEQUENTIAL_METHOD };
-    new DirichletDriver().run(args);
+    DirichletDriver dirichletDriver = new DirichletDriver();
+    dirichletDriver.setConf(conf);
+    dirichletDriver.run(args);
     // and inspect results
     Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
     Configuration conf = new Configuration();
@@ -306,6 +335,138 @@ public final class TestMapReduce extends MahoutTestCase {
                         false);
     // and inspect results
     List<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());
+    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
+    conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
+    for (int i = 0; i <= maxIterations; i++) {
+      conf.set(DirichletDriver.STATE_IN_KEY, new Path(getTestTempDirPath("output"), "clusters-" + i).toString());
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
+    }
+    printResults(clusters, 0);
+  }
+  
+  /** Test the Driver in sequential execution mode using MahalanobisDistanceMeasure */
+  @Test
+  public void testDriverIterationsMahalanobisSeq() throws Exception {
+    generateAsymmetricSamples(100, 0, 0, 0.5, 3.0);
+    generateAsymmetricSamples(100, 0, 3, 0.3, 4.0);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
+    // Now run the driver using the run() method. Others can use runJob() as before
+    Integer maxIterations = 5;
+    MahalanobisDistanceMeasure measure = new MahalanobisDistanceMeasure();
+    AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)), measure);
+    
+    Vector meanVector = new DenseVector(new double [] {0.0, 0.0});
+    ((MahalanobisDistanceMeasure)measure).setMeanVector(meanVector);
+    Matrix m= new DenseMatrix(new double [][] {{0.5, 0.0}, {0.0, 4.0}});
+    ((MahalanobisDistanceMeasure)measure).setCovarianceMatrix(m);
+    
+    Path inverseCovarianceFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureInverseCovarianceFile");
+    conf.set("MahalanobisDistanceMeasure.inverseCovarianceFile", inverseCovarianceFile.toString());
+    FileSystem fs = FileSystem.get(inverseCovarianceFile.toUri(), conf);
+    MatrixWritable inverseCovarianceMatrix = new MatrixWritable(((MahalanobisDistanceMeasure)measure).getInverseCovarianceMatrix());
+    DataOutputStream out = fs.create(inverseCovarianceFile);
+    try {
+      inverseCovarianceMatrix.write(out);
+    } finally {
+      out.close();
+    }
+    
+    Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
+    conf.set("MahalanobisDistanceMeasure.meanVectorFile", meanVectorFile.toString());
+    fs = FileSystem.get(meanVectorFile.toUri(), conf);
+    VectorWritable meanVectorWritable = new VectorWritable(meanVector);
+    out = fs.create(meanVectorFile);
+    try {
+      meanVectorWritable.write(out);
+    } finally {
+      out.close();
+    }
+    
+    conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
+    conf.set("MahalanobisDistanceMeasure.vectorClass", VectorWritable.class.getName());
+    
+    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
+        optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), modelDistribution.getClass().getName(),
+        optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), measure.getClass().getName(),
+        optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), modelDistribution.getModelPrototype().get().getClass().getName(),
+        optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
+        maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0", optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION), optKey(DefaultOptionCreator.METHOD_OPTION),
+        DefaultOptionCreator.SEQUENTIAL_METHOD };
+    DirichletDriver dirichletDriver = new DirichletDriver();
+    dirichletDriver.setConf(conf);
+    dirichletDriver.run(args);
+    // and inspect results
+    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Configuration conf = new Configuration();
+    conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());
+    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
+    conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
+    for (int i = 0; i <= maxIterations; i++) {
+      conf.set(DirichletDriver.STATE_IN_KEY, new Path(getTestTempDirPath("output"), "clusters-" + i).toString());
+      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
+    }
+    printResults(clusters, 0);
+  }
+  
+  /** Test the Mapper and Reducer using the Driver in mapreduce mode */
+  @Test
+  public void testDriverIterationsMahalanobisMR() throws Exception {
+    generateAsymmetricSamples(100, 0, 0, 0.5, 3.0);
+    generateAsymmetricSamples(100, 0, 3, 0.3, 4.0);
+    ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
+    // Now run the driver using the run() method. Others can use runJob() as before
+    Integer maxIterations = 5;
+    
+    MahalanobisDistanceMeasure measure = new MahalanobisDistanceMeasure();
+    AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)), measure);
+    
+    Vector meanVector = new DenseVector(new double [] {0.0, 0.0});
+    ((MahalanobisDistanceMeasure)measure).setMeanVector(meanVector);
+    Matrix m= new DenseMatrix(new double [][] {{0.5, 0.0}, {0.0, 4.0}});
+    ((MahalanobisDistanceMeasure)measure).setCovarianceMatrix(m);
+    
+    Path inverseCovarianceFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureInverseCovarianceFile");
+    conf.set("MahalanobisDistanceMeasure.inverseCovarianceFile", inverseCovarianceFile.toString());
+    FileSystem fs = FileSystem.get(inverseCovarianceFile.toUri(), conf);
+    MatrixWritable inverseCovarianceMatrix = new MatrixWritable(((MahalanobisDistanceMeasure)measure).getInverseCovarianceMatrix());
+    DataOutputStream out = fs.create(inverseCovarianceFile);
+    try {
+      inverseCovarianceMatrix.write(out);
+    } finally {
+      out.close();
+    }
+    
+    Path meanVectorFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureMeanVectorFile");
+    conf.set("MahalanobisDistanceMeasure.meanVectorFile", meanVectorFile.toString());
+    fs = FileSystem.get(meanVectorFile.toUri(), conf);
+    VectorWritable meanVectorWritable = new VectorWritable(meanVector);
+    out = fs.create(meanVectorFile);
+    try {
+      meanVectorWritable.write(out);
+    } finally {
+      out.close();
+    }
+    
+    conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
+    conf.set("MahalanobisDistanceMeasure.vectorClass", VectorWritable.class.getName());
+    
+    String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
+        optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
+        optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), modelDistribution.getClass().getName(),
+        optKey(DefaultOptionCreator.DISTANCE_MEASURE_OPTION), measure.getClass().getName(),
+        optKey(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION), modelDistribution.getModelPrototype().get().getClass().getName(),
+        optKey(DefaultOptionCreator.NUM_CLUSTERS_OPTION), "20", optKey(DefaultOptionCreator.MAX_ITERATIONS_OPTION),
+        maxIterations.toString(), optKey(DirichletDriver.ALPHA_OPTION), "1.0", optKey(DefaultOptionCreator.OVERWRITE_OPTION),
+        optKey(DefaultOptionCreator.CLUSTERING_OPTION) };
+    DirichletDriver dirichletDriver = new DirichletDriver();
+    dirichletDriver.setConf(conf);
+    ToolRunner.run(conf, dirichletDriver, args);
+    // and inspect results
+    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Configuration conf = new Configuration();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
     conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
