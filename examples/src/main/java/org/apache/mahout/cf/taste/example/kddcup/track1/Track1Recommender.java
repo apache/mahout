@@ -25,6 +25,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.CachingItemSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
+import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -37,7 +38,7 @@ public final class Track1Recommender implements Recommender {
 
   public Track1Recommender(DataModel dataModel) throws TasteException {
     // Change this to whatever you like!
-    ItemSimilarity similarity = new CachingItemSimilarity(new LogLikelihoodSimilarity(dataModel), dataModel);
+    ItemSimilarity similarity = new UncenteredCosineSimilarity(dataModel);
     recommender = new GenericItemBasedRecommender(dataModel, similarity);
   }
   

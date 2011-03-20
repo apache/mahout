@@ -24,11 +24,7 @@ import java.util.List;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
 import org.apache.mahout.cf.taste.impl.recommender.GenericBooleanPrefItemBasedRecommender;
-import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
-import org.apache.mahout.cf.taste.impl.similarity.CachingItemSimilarity;
-import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.recommender.IDRescorer;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
@@ -43,7 +39,7 @@ public final class Track2Recommender implements Recommender {
     // Change this to whatever you like!
     ItemSimilarity similarity;
     try {
-      similarity = new TrackItemSimilarity(dataFileDirectory);
+      similarity = new HybridSimilarity(dataModel, dataFileDirectory);
     } catch (IOException ioe) {
       throw new TasteException(ioe);
     }

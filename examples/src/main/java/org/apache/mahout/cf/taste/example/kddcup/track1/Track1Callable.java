@@ -18,6 +18,7 @@
 package org.apache.mahout.cf.taste.example.kddcup.track1;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 final class Track1Callable implements Callable<byte[]> {
 
   private static final Logger log = LoggerFactory.getLogger(Track1Callable.class);
+  private static final AtomicInteger COUNT = new AtomicInteger();
 
   private final Recommender recommender;
   private final PreferenceArray userTest;
@@ -53,15 +55,24 @@ final class Track1Callable implements Callable<byte[]> {
         continue;
       }
 
-      int scaledEstimate = (int) (estimate * 2.55);
-      if (scaledEstimate > 255) {
-        scaledEstimate = 255;
-      } else if (scaledEstimate < 0) {
-        scaledEstimate = 0;
+      if (Double.isNaN(estimate)) {
+        log.warn("Unable to compute estimate for user {}, item {}", userID, itemID);
+        result[i] = 0x7F;
+      } else {
+        int scaledEstimate = (int) (estimate * 2.55);
+        if (scaledEstimate > 255) {
+          scaledEstimate = 255;
+        } else if (scaledEstimate < 0) {
+          scaledEstimate = 0;
+        }
+        result[i] = (byte) scaledEstimate;
       }
-
-      result[i] = (byte) scaledEstimate;
     }
+
+    if (COUNT.incrementAndGet() % 10000 == 0) {
+      log.info("Completed {} users", COUNT.get());
+    }
+
     return result;
   }
 

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mahout.cf.taste.common.NoSuchItemException;
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 final class Track2Callable implements Callable<UserResult> {
 
   private static final Logger log = LoggerFactory.getLogger(Track2Callable.class);
+  private static final AtomicInteger COUNT = new AtomicInteger();
 
   private final Recommender recommender;
   private final PreferenceArray userTest;
@@ -94,6 +96,11 @@ final class Track2Callable implements Callable<UserResult> {
     for (int i = 0; i < testSize; i++) {
       result[i] = topThree.contains(userTest.getItemID(i));
     }
+
+    if (COUNT.incrementAndGet() % 1000 == 0) {
+      log.info("Completed {} users", COUNT.get());
+    }
+
     return new UserResult(userID, result);
   }
 }
