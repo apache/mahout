@@ -111,6 +111,7 @@ public class LocalSSVDSolverTest extends MahoutTestCase {
         ablockRows, k, p, 3);
     // ssvd.setcUHalfSigma(true);
     // ssvd.setcVHalfSigma(true);
+    ssvd.setOverwrite(true);
     ssvd.run();
 
     double[] stochasticSValues = ssvd.getSingularValues();

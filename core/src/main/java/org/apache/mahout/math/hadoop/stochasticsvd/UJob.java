@@ -41,8 +41,6 @@ import org.apache.mahout.math.VectorWritable;
 /**
  * Computes U=Q*Uhat of SSVD (optionally adding x pow(Sigma, 0.5) )
  * 
- * @author Dmitriy
- * 
  */
 public class UJob {
   private static final String OUTPUT_U = "u";
@@ -115,13 +113,16 @@ public class UJob {
     protected void map(Writable key, VectorWritable value, Context context)
       throws IOException, InterruptedException {
       Vector qRow = value.get();
-      if (sValues != null)
-        for (int i = 0; i < k; i++)
+      if (sValues != null) {
+        for (int i = 0; i < k; i++) {
           uRow.setQuick(i,
-              qRow.dot(uHat.getColumn(i)) * sValues.getQuick(i));
-      else
-        for (int i = 0; i < k; i++)
+                        qRow.dot(uHat.getColumn(i)) * sValues.getQuick(i));
+        }
+      } else {
+        for (int i = 0; i < k; i++) {
           uRow.setQuick(i, qRow.dot(uHat.getColumn(i)));
+        }
+      }
 
       context.write(key, uRowWritable); // U inherits original A row labels.
     }

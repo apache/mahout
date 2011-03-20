@@ -109,6 +109,7 @@ public class SSVDSolver {
   private int minSplitSize = -1;
   private boolean cUHalfSigma;
   private boolean cVHalfSigma;
+  private boolean overwrite;
 
   /**
    * create new SSVD solver. Required parameters are passed to constructor to
@@ -212,6 +213,19 @@ public class SSVDSolver {
   public String getVPath() {
     return vPath;
   }
+  
+  public boolean isOverwrite() {
+    return overwrite;
+  }
+
+  /**
+   * if true, driver to clean output folder first if exists.
+   * 
+   * @param overwrite
+   */
+  public void setOverwrite(boolean overwrite) {
+    this.overwrite = overwrite;
+  }
 
   /**
    * run all SSVD jobs.
@@ -235,13 +249,9 @@ public class SSVDSolver {
       Path uPath = new Path(outputPath, "U");
       Path vPath = new Path(outputPath, "V");
 
-      fs.delete(qPath, true); // or we can't re-run it repeatedly, just in case.
-      fs.delete(btPath, true);
-      fs.delete(bbtPath, true);
-      fs.delete(uHatPath, true);
-      fs.delete(svPath, true);
-      fs.delete(uPath, true);
-      fs.delete(vPath, true);
+      if (overwrite) {
+        fs.delete(outputPath, true);
+      }
 
       Random rnd = new Random();
       long seed = rnd.nextLong();

@@ -28,6 +28,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -54,6 +55,7 @@ public class SSVDCli extends AbstractJob {
         "false");
     addOption("reduceTasks", "t", "number of reduce tasks (where applicable)",
         "1");
+    addOption(DefaultOptionCreator.overwriteOption().create());
 
     Map<String, String> pargs = parseArguments(args);
     if (pargs == null)
@@ -71,6 +73,7 @@ public class SSVDCli extends AbstractJob {
     boolean cUHalfSigma = Boolean.parseBoolean(pargs.get("--uHalfSigma"));
     boolean cVHalfSigma = Boolean.parseBoolean(pargs.get("--vHalfSigma"));
     int reduceTasks = Integer.parseInt(pargs.get("--reduceTasks"));
+    boolean overwrite = pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
 
     Configuration conf = getConf();
     if (conf == null)
@@ -83,6 +86,7 @@ public class SSVDCli extends AbstractJob {
     solver.setComputeV(computeV);
     solver.setcUHalfSigma(cUHalfSigma);
     solver.setcVHalfSigma(cVHalfSigma);
+    solver.setOverwrite(overwrite);
 
     solver.run();
 
