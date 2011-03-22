@@ -35,7 +35,7 @@ public class GenericPreference implements Preference, Serializable {
   private float value;
   
   public GenericPreference(long userID, long itemID, float value) {
-    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value);
+    Preconditions.checkArgument(!Float.isNaN(value), "NaN value");
     this.userID = userID;
     this.itemID = itemID;
     this.value = value;
@@ -58,7 +58,7 @@ public class GenericPreference implements Preference, Serializable {
   
   @Override
   public void setValue(float value) {
-    Preconditions.checkArgument(!Float.isNaN(value), "Invalid value: " + value);
+    Preconditions.checkArgument(!Float.isNaN(value), "NaN value");
     this.value = value;
   }
   
