@@ -54,22 +54,22 @@ import org.junit.Test;
  * Unit tests for the mappers and reducers in org.apache.mahout.cf.taste.hadoop.similarity.item
  * some integration tests with tiny data sets at the end
  */
-public final class ItemSimilarityTest extends TasteTestCase {
+public final class ItemSimilarityJobTest extends TasteTestCase {
 
   /**
    * Tests {@link CountUsersMapper}
    */
   @Test
   public void testCountUsersMapper() throws Exception {
-    Mapper<LongWritable,Text,CountUsersKeyWritable,VarLongWritable>.Context context =
+    Mapper<VarLongWritable,VectorWritable,CountUsersKeyWritable,VarLongWritable>.Context context =
         EasyMock.createMock(Mapper.Context.class);
     context.write(keyForUserID(12L), EasyMock.eq(new VarLongWritable(12L)));
     context.write(keyForUserID(35L), EasyMock.eq(new VarLongWritable(35L)));
     EasyMock.replay(context);
 
     CountUsersMapper mapper = new CountUsersMapper();
-    mapper.map(null, new Text("12,100,1.3"), context);
-    mapper.map(null, new Text("35,100,3.0"), context);
+    mapper.map(new VarLongWritable(12), new VectorWritable(), context);
+    mapper.map(new VarLongWritable(35), new VectorWritable(), context);
 
     EasyMock.verify(context);
   }

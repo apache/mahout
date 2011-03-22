@@ -100,6 +100,7 @@ public final class RecommenderJob extends AbstractJob {
   
   private static final int DEFAULT_MAX_SIMILARITIES_PER_ITEM = 100;
   private static final int DEFAULT_MAX_COOCCURRENCES_PER_ITEM = 100;
+  private static final int DEFAULT_MIN_PREFS_PER_USER = 1;
 
   @Override
   public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
@@ -116,6 +117,8 @@ public final class RecommenderJob extends AbstractJob {
     addOption("maxPrefsPerUser", "mp",
         "Maximum number of preferences considered per user in final recommendation phase",
         String.valueOf(UserVectorSplitterMapper.DEFAULT_MAX_PREFS_PER_USER_CONSIDERED));
+    addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this in the similarity computation "
+        + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("maxSimilaritiesPerItem", "m", "Maximum number of similarities considered per item ",
         String.valueOf(DEFAULT_MAX_SIMILARITIES_PER_ITEM));
     addOption("maxCooccurrencesPerItem", "mo", "try to cap the number of cooccurrences per item to this "
@@ -139,6 +142,7 @@ public final class RecommenderJob extends AbstractJob {
     String filterFile = parsedArgs.get("--filterFile");
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
     int maxPrefsPerUser = Integer.parseInt(parsedArgs.get("--maxPrefsPerUser"));
+    int minPrefsPerUser = Integer.parseInt(parsedArgs.get("--minPrefsPerUser"));
     int maxSimilaritiesPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
     int maxCooccurrencesPerItem = Integer.parseInt(parsedArgs.get("--maxCooccurrencesPerItem"));
     String similarityClassname = parsedArgs.get("--similarityClassname");
@@ -172,13 +176,14 @@ public final class RecommenderJob extends AbstractJob {
         ToUserVectorReducer.class, VarLongWritable.class, VectorWritable.class,
         SequenceFileOutputFormat.class);
       toUserVector.getConfiguration().setBoolean(BOOLEAN_DATA, booleanData);
+      toUserVector.getConfiguration().setInt(ToUserVectorReducer.MIN_PREFERENCES_PER_USER, minPrefsPerUser);
       toUserVector.waitForCompletion(true);
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job countUsers = prepareJob(inputPath,
+      Job countUsers = prepareJob(userVectorPath,
                                   countUsersPath,
-                                  TextInputFormat.class,
+                                  SequenceFileInputFormat.class,
                                   CountUsersMapper.class,
                                   CountUsersKeyWritable.class,
                                   VarLongWritable.class,

@@ -46,7 +46,17 @@ import org.apache.mahout.math.VectorWritable;
  */
 public final class ToUserVectorReducer extends
     Reducer<VarLongWritable,VarLongWritable,VarLongWritable,VectorWritable> {
-  
+
+  public static final String MIN_PREFERENCES_PER_USER = ToUserVectorReducer.class.getName() +
+      ".minPreferencesPerUser";
+  private int minPreferences;
+
+  @Override
+  protected void setup(Context ctx) throws IOException, InterruptedException {
+    super.setup(ctx);
+    minPreferences = ctx.getConfiguration().getInt(MIN_PREFERENCES_PER_USER, 1);
+  }
+
   @Override
   protected void reduce(VarLongWritable userID,
                         Iterable<VarLongWritable> itemPrefs,
@@ -58,9 +68,11 @@ public final class ToUserVectorReducer extends
       userVector.set(index, value);
     }
 
-    VectorWritable vw = new VectorWritable(userVector);
-    vw.setWritesLaxPrecision(true);
-    context.write(userID, vw);
+    if (userVector.getNumNondefaultElements() >= minPreferences) {
+      VectorWritable vw = new VectorWritable(userVector);
+      vw.setWritesLaxPrecision(true);
+      context.write(userID, vw);
+    }
   }
   
 }

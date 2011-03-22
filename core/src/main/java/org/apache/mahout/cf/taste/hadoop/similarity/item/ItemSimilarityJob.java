@@ -87,6 +87,7 @@ public final class ItemSimilarityJob extends AbstractJob {
 
   private static final int DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM = 100;
   private static final int DEFAULT_MAX_COOCCURRENCES_PER_ITEM = 100;
+  private static final int DEFAULT_MIN_PREFS_PER_USER = 1;
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new ItemSimilarityJob(), args);
@@ -100,9 +101,13 @@ public final class ItemSimilarityJob extends AbstractJob {
     addOption("similarityClassname", "s", "Name of distributed similarity class to instantiate, alternatively use "
         + "one of the predefined similarities (" + SimilarityType.listEnumNames() + ')');
     addOption("maxSimilaritiesPerItem", "m", "try to cap the number of similar items per item to this number "
-        + "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
+        + "(default: " + DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM + ')',
+        String.valueOf(DEFAULT_MAX_SIMILAR_ITEMS_PER_ITEM));
     addOption("maxCooccurrencesPerItem", "mo", "try to cap the number of cooccurrences per item to this number "
-        + "(default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')', String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
+        + "(default: " + DEFAULT_MAX_COOCCURRENCES_PER_ITEM + ')',
+        String.valueOf(DEFAULT_MAX_COOCCURRENCES_PER_ITEM));
+    addOption("minPrefsPerUser", "mp", "ignore users with less preferences than this "
+        + "(default: " + DEFAULT_MIN_PREFS_PER_USER + ')', String.valueOf(DEFAULT_MIN_PREFS_PER_USER));
     addOption("booleanData", "b", "Treat input as without pref values", Boolean.FALSE.toString());
 
     Map<String,String> parsedArgs = parseArguments(args);
@@ -113,6 +118,7 @@ public final class ItemSimilarityJob extends AbstractJob {
     String similarityClassName = parsedArgs.get("--similarityClassname");
     int maxSimilarItemsPerItem = Integer.parseInt(parsedArgs.get("--maxSimilaritiesPerItem"));
     int maxCooccurrencesPerItem = Integer.parseInt(parsedArgs.get("--maxCooccurrencesPerItem"));
+    int minPrefsPerUser = Integer.parseInt(parsedArgs.get("--minPrefsPerUser"));
     boolean booleanData = Boolean.valueOf(parsedArgs.get("--booleanData"));
 
     Path inputPath = getInputPath();
@@ -137,21 +143,6 @@ public final class ItemSimilarityJob extends AbstractJob {
       itemIDIndex.waitForCompletion(true);
     }
 
-    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
-      Job countUsers = prepareJob(inputPath,
-                                  countUsersPath,
-                                  TextInputFormat.class,
-                                  CountUsersMapper.class,
-                                  CountUsersKeyWritable.class,
-                                  VarLongWritable.class,
-                                  CountUsersReducer.class,
-                                  VarIntWritable.class,
-                                  NullWritable.class,
-                                  TextOutputFormat.class);
-      countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
-      countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
-      countUsers.waitForCompletion(true);
-    }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {
       Job toUserVector = prepareJob(inputPath,
@@ -165,7 +156,24 @@ public final class ItemSimilarityJob extends AbstractJob {
                                   VectorWritable.class,
                                   SequenceFileOutputFormat.class);
       toUserVector.getConfiguration().setBoolean(RecommenderJob.BOOLEAN_DATA, booleanData);
+      toUserVector.getConfiguration().setInt(ToUserVectorReducer.MIN_PREFERENCES_PER_USER, minPrefsPerUser);
       toUserVector.waitForCompletion(true);
+    }
+
+    if (shouldRunNextPhase(parsedArgs, currentPhase)) {
+      Job countUsers = prepareJob(userVectorPath,
+                                  countUsersPath,
+                                  SequenceFileInputFormat.class,
+                                  CountUsersMapper.class,
+                                  CountUsersKeyWritable.class,
+                                  VarLongWritable.class,
+                                  CountUsersReducer.class,
+                                  VarIntWritable.class,
+                                  NullWritable.class,
+                                  TextOutputFormat.class);
+      countUsers.setPartitionerClass(CountUsersKeyWritable.CountUsersPartitioner.class);
+      countUsers.setGroupingComparatorClass(CountUsersKeyWritable.CountUsersGroupComparator.class);
+      countUsers.waitForCompletion(true);
     }
 
     if (shouldRunNextPhase(parsedArgs, currentPhase)) {

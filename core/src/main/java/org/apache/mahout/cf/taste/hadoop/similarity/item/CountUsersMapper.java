@@ -24,21 +24,19 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.math.VarLongWritable;
+import org.apache.mahout.math.VectorWritable;
 
 /**
  * Maps out the userIDs in a way that we can use a secondary sort on them
  */
 public class CountUsersMapper extends
-    Mapper<LongWritable,Text,CountUsersKeyWritable, VarLongWritable> {
+    Mapper<VarLongWritable,VectorWritable,CountUsersKeyWritable,VarLongWritable> {
 
   @Override
-  protected void map(LongWritable key,
-                     Text value,
+  protected void map(VarLongWritable key,
+                     VectorWritable value,
                      Context context) throws IOException, InterruptedException {
-
-    String[] tokens = TasteHadoopUtils.splitPrefTokens(value.toString());
-    long userID = Long.parseLong(tokens[0]);
-
+    long userID = key.get();
     context.write(new CountUsersKeyWritable(userID), new VarLongWritable(userID));
   }
 
