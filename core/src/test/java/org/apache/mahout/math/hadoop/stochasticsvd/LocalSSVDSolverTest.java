@@ -67,14 +67,10 @@ public class LocalSSVDSolverTest extends MahoutTestCase {
 
     double muAmplitude = 5e+1;
 
-    File tmpDir = new File("svdtmp");
-    tmpDir.mkdir();
+    File tmpDir = getTestTempDir("svdtmp");
     conf.set("hadoop.tmp.dir", tmpDir.getAbsolutePath());
 
-    File aDir = new File(tmpDir, "A");
-    aDir.mkdir();
-
-    Path aLocPath = new Path(new Path(aDir.getAbsolutePath()), "A.seq");
+    Path aLocPath = new Path(getTestTempDirPath("svdtmp/A"), "A.seq");
 
     // create distributed row matrix-like struct
     SequenceFile.Writer w = SequenceFile.createWriter(
@@ -98,7 +94,7 @@ public class LocalSSVDSolverTest extends MahoutTestCase {
 
     FileSystem fs = FileSystem.get(conf);
 
-    Path tempDirPath = new Path(fs.getWorkingDirectory(), "svd-proc");
+    Path tempDirPath = getTestTempDirPath("svd-proc");
     Path aPath = new Path(tempDirPath, "A/A.seq");
     fs.copyFromLocalFile(aLocPath, aPath);
 
