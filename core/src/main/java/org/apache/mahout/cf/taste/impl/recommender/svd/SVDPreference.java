@@ -26,8 +26,7 @@ final class SVDPreference extends GenericPreference {
 
   SVDPreference(long userID, long itemID, float value, double cache) {
     super(userID, itemID, value);
-    Preconditions.checkArgument(!Double.isNaN(cache), "Invalid cache value: " + cache);
-    this.cache = cache;
+    setCache(cache);
   }
 
   public double getCache() {
@@ -35,7 +34,7 @@ final class SVDPreference extends GenericPreference {
   }
 
   public void setCache(double value) {
-    Preconditions.checkArgument(!Double.isNaN(value), "Invalid cache value: " + value);
+    Preconditions.checkArgument(!Double.isNaN(value), "NaN cache value");
     this.cache = value;
   }
 
