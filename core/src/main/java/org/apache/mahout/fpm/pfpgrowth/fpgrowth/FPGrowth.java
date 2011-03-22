@@ -646,6 +646,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
           int prevNodeId = prevNode.get(parent);
           if (tree.childCount(prevNodeId) <= 1 && tree.childCount(nextNode) <= 1) {
             tree.addCount(prevNodeId, tree.count(nextNode));
+            tree.addCount(nextNode, -1 * tree.count(nextNode));
             if (tree.childCount(nextNode) == 1) {
               tree.addChild(prevNodeId, tree.childAtIndex(nextNode, 0));
               tree.setParent(tree.childAtIndex(nextNode, 0), prevNodeId);
