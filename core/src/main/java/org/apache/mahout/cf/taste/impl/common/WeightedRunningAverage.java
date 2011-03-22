@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 import com.google.common.base.Preconditions;
 
-public final class WeightedRunningAverage implements RunningAverage, Serializable {
+public class WeightedRunningAverage implements RunningAverage, Serializable {
   
   private double totalWeight;
   private double average;
@@ -42,7 +42,7 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
     if (oldTotalWeight <= 0.0) {
       average = datum * weight;
     } else {
-      average = average * oldTotalWeight / totalWeight + datum / totalWeight;
+      average = average * oldTotalWeight / totalWeight + datum * weight / totalWeight;
     }
   }
   
@@ -58,7 +58,7 @@ public final class WeightedRunningAverage implements RunningAverage, Serializabl
       average = Double.NaN;
       totalWeight = 0.0;
     } else {
-      average = average * oldTotalWeight / totalWeight - datum / totalWeight;
+      average = average * oldTotalWeight / totalWeight - datum * weight / totalWeight;
     }
   }
   
