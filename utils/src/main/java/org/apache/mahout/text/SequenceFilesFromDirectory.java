@@ -17,23 +17,20 @@
 
 package org.apache.mahout.text;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.slf4j.Logger;
@@ -46,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * parent directory prepended with a specified prefix. You can also specify the input encoding of the text
  * files. The content of the output SequenceFiles are encoded as UTF-8 text.
  */
-public final class SequenceFilesFromDirectory extends AbstractJob {
+public class SequenceFilesFromDirectory extends AbstractJob {
 
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromDirectory.class);
 
@@ -58,122 +55,30 @@ public final class SequenceFilesFromDirectory extends AbstractJob {
   public static final String[] CHARSET_OPTION = {"charset", "c"};
 
   public void run(Configuration conf,
+                  String keyPrefix,
+                  Map<String, String> options,
                   Path input,
-                  Path output,
-                  String prefix,
-                  int chunkSizeInMB,
-                  Charset charset,
-                  String fileFilterClassName)
+                  Path output)
     throws InstantiationException, IllegalAccessException, InvocationTargetException, IOException,
            NoSuchMethodException, ClassNotFoundException {
     FileSystem fs = FileSystem.get(conf);
-    ChunkedWriter writer = new ChunkedWriter(conf, chunkSizeInMB, output);
+    ChunkedWriter writer = new ChunkedWriter(conf, Integer.parseInt(options.get(CHUNK_SIZE_OPTION[0])), output);
     
-    PathFilter pathFilter;
-    
+    SequenceFilesFromDirectoryFilter pathFilter;
+
+    String fileFilterClassName = options.get(FILE_FILTER_CLASS_OPTION[0]);
     if (PrefixAdditionFilter.class.getName().equals(fileFilterClassName)) {
-      pathFilter = new PrefixAdditionFilter(conf, prefix, writer, charset);
+      pathFilter = new PrefixAdditionFilter(conf, keyPrefix, options, writer);
     } else {
-      Class<? extends PathFilter> pathFilterClass = Class.forName(fileFilterClassName).asSubclass(PathFilter.class);
-      Constructor<? extends PathFilter> constructor =
-          pathFilterClass.getConstructor(Configuration.class, String.class, ChunkedWriter.class, Charset.class);
-      pathFilter = constructor.newInstance(conf, prefix, writer, charset);
+      Class<? extends SequenceFilesFromDirectoryFilter> pathFilterClass = Class.forName(fileFilterClassName).asSubclass(SequenceFilesFromDirectoryFilter.class);
+      Constructor<? extends SequenceFilesFromDirectoryFilter> constructor =
+          pathFilterClass.getConstructor(Configuration.class, String.class, Map.class, ChunkedWriter.class);
+      pathFilter = constructor.newInstance(conf, keyPrefix, options, writer);
     }
     fs.listStatus(input, pathFilter);
     writer.close();
   }
   
-  private static final class ChunkedWriter implements Closeable {
-
-    private final int maxChunkSizeInBytes;
-    private final Path output;
-    private SequenceFile.Writer writer;
-    private int currentChunkID;
-    private int currentChunkSize;
-    private final FileSystem fs;
-    private final Configuration conf;
-    
-    private ChunkedWriter(Configuration conf, int chunkSizeInMB, Path output) throws IOException {
-      this.output = output;
-      this.conf = conf;
-      if (chunkSizeInMB > 1984) {
-        chunkSizeInMB = 1984;
-      }
-      maxChunkSizeInBytes = chunkSizeInMB * 1024 * 1024;
-      fs = FileSystem.get(conf);
-      currentChunkID = 0;
-      writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID), Text.class, Text.class);
-    }
-    
-    private Path getPath(int chunkID) {
-      return new Path(output, "chunk-" + chunkID);
-    }
-    
-    public void write(String key, String value) throws IOException {
-      if (currentChunkSize > maxChunkSizeInBytes) {
-        writer.close();
-        writer = new SequenceFile.Writer(fs, conf, getPath(currentChunkID++), Text.class, Text.class);
-        currentChunkSize = 0;
-      }
-      
-      Text keyT = new Text(key);
-      Text valueT = new Text(value);
-      currentChunkSize += keyT.getBytes().length + valueT.getBytes().length; // Overhead
-      writer.append(keyT, valueT);
-    }
-    
-    @Override
-    public void close() throws IOException {
-      writer.close();
-    }
-  }
-  
-  private final class PrefixAdditionFilter implements PathFilter {
-
-    private final String prefix;
-    private final ChunkedWriter writer;
-    private final Charset charset;
-    private final Configuration conf;
-    private final FileSystem fs;
-    
-    private PrefixAdditionFilter(Configuration conf, String prefix, ChunkedWriter writer, Charset charset)
-      throws IOException {
-      this.conf = conf;
-      this.prefix = prefix;
-      this.writer = writer;
-      this.charset = charset;
-      this.fs = FileSystem.get(conf);
-    }
-    
-    @Override
-    public boolean accept(Path current) {
-      log.debug("CURRENT: {}", current.getName());
-      try {
-        FileStatus[] fstatus = fs.listStatus(current);
-        for (FileStatus fst : fstatus) {
-          log.debug("CHILD: {}", fst.getPath().getName());
-          if (fst.isDir()) {
-            fs.listStatus(fst.getPath(),
-                          new PrefixAdditionFilter(conf, prefix + Path.SEPARATOR + current.getName(), writer, charset));
-          } else {
-            StringBuilder file = new StringBuilder();
-            InputStream in = fs.open(fst.getPath());
-            for (String aFit : new FileLineIterable(in, charset, false)) {
-              file.append(aFit).append('\n');
-            }
-            String name = current.getName().equals(fst.getPath().getName())
-                ? current.getName()
-                : current.getName() + Path.SEPARATOR + fst.getPath().getName();
-            writer.write(prefix + Path.SEPARATOR + name, file.toString());
-          }
-        }
-      } catch (IOException e) {
-        throw new IllegalStateException(e);
-      }
-      return false;
-    }
-  }
-
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new SequenceFilesFromDirectory(), args);
   }
@@ -185,7 +90,29 @@ public final class SequenceFilesFromDirectory extends AbstractJob {
   public int run(String[] args)
     throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
            InvocationTargetException {
+    addOptions();    
     
+    if (parseArguments(args) == null) {
+      return -1;
+    }
+   
+    Map<String, String> options = parseOptions();
+    Path input = getInputPath();
+    Path output = getOutputPath();
+    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
+      HadoopUtil.overwriteOutput(output);
+    }
+    String keyPrefix = getOption(KEY_PREFIX_OPTION[0]);
+
+    run(getConf(), keyPrefix, options, input, output);
+    return 0;
+  }
+
+  /**
+   * Override this method in order to add additional options to the command line of the SequenceFileFromDirectory job.
+   * Do not forget to call super() otherwise all standard options (input/output dirs etc) will not be available.
+   * */
+  protected void addOptions() {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.overwriteOption().create());
@@ -195,22 +122,17 @@ public final class SequenceFilesFromDirectory extends AbstractJob {
     addOption(KEY_PREFIX_OPTION[0], KEY_PREFIX_OPTION[1], "The prefix to be prepended to the key", "");
     addOption(CHARSET_OPTION[0], CHARSET_OPTION[1],
         "The name of the character encoding of the input files. Default to UTF-8", "UTF-8");
-    
-    if (parseArguments(args) == null) {
-      return -1;
-    }
-    
-    Path input = getInputPath();
-    Path output = getOutputPath();
-    if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
-    }
-    int chunkSize = Integer.parseInt(getOption(CHUNK_SIZE_OPTION[0]));
-    String fileFilterClassName = getOption(FILE_FILTER_CLASS_OPTION[0]);
-    String keyPrefix = getOption(KEY_PREFIX_OPTION[0]);
-    Charset charset = Charset.forName(getOption(CHARSET_OPTION[0]));
-    
-    run(getConf(), input, output, keyPrefix, chunkSize, charset, fileFilterClassName);
-    return 0;
+  }
+
+  /**
+   * Override this method in order to parse your additional options from the command line. Do not forget to call
+   * super() otherwise standard options (input/output dirs etc) will not be available.
+   */
+  protected Map<String, String> parseOptions() throws IOException {
+    Map<String, String> options = new HashMap<String, String>();
+    options.put(CHUNK_SIZE_OPTION[0], getOption(CHUNK_SIZE_OPTION[0]));
+    options.put(FILE_FILTER_CLASS_OPTION[0], getOption(FILE_FILTER_CLASS_OPTION[0]));
+    options.put(CHARSET_OPTION[0], getOption(CHARSET_OPTION[0]));
+    return options;
   }
 }
