@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import org.apache.mahout.math.Vector;
 
-public interface VectorWriter {
+public abstract class VectorWriter {
   /**
    * Write all values in the Iterable to the output
    * @param iterable The {@link Iterable} to loop over
@@ -29,7 +29,15 @@ public interface VectorWriter {
    * @throws IOException if there was a problem writing
    *
    */
-  long write(Iterable<Vector> iterable) throws IOException;
+  public abstract long write(Iterable<Vector> iterable) throws IOException;
+
+  /**
+   * Write out a vector
+   *
+   * @param vector The {@link org.apache.mahout.math.Vector} to write
+   * @throws IOException
+   */
+  public abstract void write(Vector vector) throws IOException;
   
   /**
    * Write the first <code>maxDocs</code> to the output.
@@ -38,12 +46,12 @@ public interface VectorWriter {
    * @return The number of docs written
    * @throws IOException if there was a problem writing
    */
-  long write(Iterable<Vector> iterable, long maxDocs) throws IOException;
+  public abstract long write(Iterable<Vector> iterable, long maxDocs) throws IOException;
   
   /**
    * Close any internally held resources.  If external Writers are passed in, the implementation should indicate
    * whether it also closes them
    * @throws IOException if there was an issue closing the item
    */
-  void close() throws IOException;
+  public abstract void close() throws IOException;
 }

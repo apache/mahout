@@ -25,8 +25,8 @@ import org.apache.mahout.math.Vector;
 /**
  * Write out the vectors to any {@link java.io.Writer} using {@link org.apache.mahout.math.Vector#asFormatString()}.
  */
-public class JWriterVectorWriter implements VectorWriter {
-  private final Writer writer;
+public class JWriterVectorWriter extends VectorWriter {
+  protected final Writer writer;
   
   public JWriterVectorWriter(Writer writer) {
     this.writer = writer;
@@ -45,14 +45,22 @@ public class JWriterVectorWriter implements VectorWriter {
       if (result >= maxDocs) {
         break;
       }
-      writer.write(vector.asFormatString());
-      writer.write('\n');
-      
+      formatVector(vector);
       result++;
     }
     return result;
   }
-  
+
+  protected void formatVector(Vector vector) throws IOException {
+    writer.write(vector.asFormatString());
+    writer.write('\n');
+  }
+
+  @Override
+  public void write(Vector vector) throws IOException {
+    formatVector(vector);
+  }
+
   @Override
   public void close() throws IOException {
     writer.flush();

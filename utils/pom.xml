@@ -142,6 +142,11 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-commons-csv</artifactId>
+      <version>1.4.1</version>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>

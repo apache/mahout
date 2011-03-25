@@ -30,16 +30,16 @@ import org.apache.mahout.math.VectorWritable;
  *
  * Closes the writer when done
  */
-public class SequenceFileVectorWriter implements VectorWriter {
+public class SequenceFileVectorWriter extends VectorWriter {
   private final SequenceFile.Writer writer;
-  
+  long recNum = 0;
   public SequenceFileVectorWriter(SequenceFile.Writer writer) {
     this.writer = writer;
   }
   
   @Override
   public long write(Iterable<Vector> iterable, long maxDocs) throws IOException {
-    long recNum = 0;
+
     for (Vector point : iterable) {
       if (recNum >= maxDocs) {
         break;
@@ -51,7 +51,13 @@ public class SequenceFileVectorWriter implements VectorWriter {
     }
     return recNum;
   }
-  
+
+  @Override
+  public void write(Vector vector) throws IOException {
+    writer.append(new LongWritable(recNum++), new VectorWritable(vector));
+
+  }
+
   @Override
   public long write(Iterable<Vector> iterable) throws IOException {
     return write(iterable, Long.MAX_VALUE);

@@ -77,16 +77,22 @@ public final class VectorDumper {
     Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
             abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
             "The dictionary file type (text|sequencefile)").withShortName("dt").create();
-    Option centroidJSonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
-            "Output the centroid as JSON.  Otherwise it substitutes in the terms for vector cell entries")
+    Option jsonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
+            "Output the Vector as JSON.  Otherwise it substitutes in the terms for vector cell entries")
             .withShortName("j").create();
+    Option csvOpt = obuilder.withLongName("csv").withRequired(false).withDescription(
+            "Output the Vector as CSV.  Otherwise it substitutes in the terms for vector cell entries")
+            .withShortName("c").create();
+    Option namesAsCommentsOpt = obuilder.withLongName("namesAsComments").withRequired(false).withDescription(
+            "If using CSV output, optionally add a comment line for each NamedVector (if the vector is one) printing out the name")
+            .withShortName("n").create();
     Option sizeOpt = obuilder.withLongName("sizeOnly").withRequired(false).
             withDescription("Dump only the size of the vector").withShortName("sz").create();
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
             .create();
 
     Group group = gbuilder.withName("Options").withOption(seqOpt).withOption(outputOpt).withOption(
-            dictTypeOpt).withOption(dictOpt).withOption(centroidJSonOpt).withOption(vectorAsKeyOpt).withOption(
+            dictTypeOpt).withOption(dictOpt).withOption(csvOpt).withOption(vectorAsKeyOpt).withOption(
             printKeyOpt).withOption(sizeOpt).create();
 
     try {
@@ -122,10 +128,12 @@ public final class VectorDumper {
             throw new OptionException(dictTypeOpt);
           }
         }
-        boolean useJSON = cmdLine.hasOption(centroidJSonOpt);
+        boolean useJSON = cmdLine.hasOption(jsonOpt);
+        boolean useCSV = cmdLine.hasOption(csvOpt);
+
         boolean sizeOnly = cmdLine.hasOption(sizeOpt);
         SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-
+        boolean namesAsComments = cmdLine.hasOption(namesAsCommentsOpt);
         Writable keyWritable = reader.getKeyClass().asSubclass(Writable.class).newInstance();
         Writable valueWritable = reader.getValueClass().asSubclass(Writable.class).newInstance();
         boolean transposeKeyValue = cmdLine.hasOption(vectorAsKeyOpt);
@@ -140,6 +148,16 @@ public final class VectorDumper {
           try {
             boolean printKey = cmdLine.hasOption(printKeyOpt);
             long i = 0;
+            if (useCSV && dictionary != null){
+              writer.write("#");
+              for (int j = 0; j < dictionary.length; j++) {
+                writer.write(dictionary[j]);
+                if (j < dictionary.length - 1){
+                  writer.write(',');
+                }
+              }
+              writer.write('\n');
+            }
             while (reader.next(keyWritable, valueWritable)) {
               if (printKey) {
                 Writable notTheVectorWritable = transposeKeyValue ? valueWritable : keyWritable;
@@ -159,7 +177,14 @@ public final class VectorDumper {
                 writer.write(String.valueOf(vector.size()));
                 writer.write('\n');
               } else {
-                String fmtStr = useJSON ? vector.asFormatString() : VectorHelper.vectorToString(vector, dictionary);
+                String fmtStr;
+                if (useJSON){
+                  fmtStr = VectorHelper.vectorToJSONString(vector, dictionary);
+                } else if (useCSV){
+                  fmtStr = VectorHelper.vectorToCSVString(vector, namesAsComments);
+                } else {
+                  fmtStr = vector.asFormatString();
+                }
                 writer.write(fmtStr);
                 writer.write('\n');
               }

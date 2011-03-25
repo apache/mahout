@@ -40,14 +40,45 @@ import org.apache.mahout.math.map.OpenObjectIntHashMap;
 public final class VectorHelper {
 
   private static final Pattern TAB_PATTERN = Pattern.compile("\t");
+
   
   private VectorHelper() { }
-  
+
+  public static String vectorToCSVString(Vector vector, boolean namesAsComments){
+    StringBuilder bldr = new StringBuilder(2048);
+    try {
+      vectorToCSVString(vector, namesAsComments, bldr);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return bldr.toString();
+  }
+
+  public static void vectorToCSVString(Vector vector, boolean namesAsComments,
+                                       Appendable bldr) throws IOException {
+    if (namesAsComments && vector instanceof NamedVector){
+      bldr.append("#").append(((NamedVector)vector).getName()).append('\n');
+    }
+    Iterator<Vector.Element> iter = vector.iterator();
+    boolean first = true;
+    while (iter.hasNext()) {
+      if (first) {
+        first = false;
+      } else {
+        bldr.append(",");
+      }
+      Vector.Element elt = iter.next();
+      bldr.append(String.valueOf(elt.get()));
+    }
+    bldr.append('\n');
+  }
+
+
   /**
    * @return a String from a vector that fills in the values with the appropriate value from a dictionary where
    * each the ith entry is the term for the ith vector cell.
    */
-  public static String vectorToString(Vector vector, String[] dictionary) {
+  public static String vectorToJSONString(Vector vector, String[] dictionary) {
     StringBuilder bldr = new StringBuilder(2048);
     
     if (vector instanceof NamedVector) {
@@ -67,12 +98,13 @@ public final class VectorHelper {
       if (dictionary != null) {
         bldr.append(dictionary[elt.index()]);
       } else {
-        bldr.append(elt.index());
+        bldr.append(String.valueOf(elt.index()));
       }
-      bldr.append(':').append(elt.get());
+      bldr.append(':').append(String.valueOf(elt.get()));
     }
     return bldr.append('}').toString();
   }
+
   
   /**
    * Read in a dictionary file. Format is:
