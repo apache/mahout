@@ -1,0 +1,171 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.mahout.text;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.ASCIIFoldingFilter;
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.LengthFilter;
+import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.PorterStemFilter;
+import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.TokenFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.lucene.util.Version;
+
+/**
+ * Custom Lucene Analyzer designed for aggressive feature reduction
+ * for clustering the ASF Mail Archives using an extended set of
+ * stop words, excluding non-alpha-numeric tokens, and porter stemming.
+ */
+public class MailArchivesClusteringAnalyzer extends Analyzer {
+  
+  // extended set of stop words composed of common mail terms like "hi",
+  // HTML tags, and Java keywords asmany of the messages in the archives
+  // are subversion check-in notifications
+	private static final String[] STOP_WORDS = new String[] {
+	  "3d","7bit","a0","about","above","abstract","across","additional","after",
+	  "afterwards","again","against","align","all","almost","alone","along",
+	  "already","also","although","always","am","among","amongst","amoungst",
+	  "amount","an","and","another","any","anybody","anyhow","anyone","anything",
+	  "anyway","anywhere","are","arial","around","as","ascii","assert","at",
+	  "back","background","base64","bcc","be","became","because","become","becomes",
+	  "becoming","been","before","beforehand","behind","being","below","beside",
+	  "besides","between","beyond","bgcolor","blank","blockquote","body","boolean",
+	  "border","both","br","break","but","by","can","cannot","cant","case","catch",
+	  "cc","cellpadding","cellspacing","center","char","charset","cheers","class",
+	  "co","color","colspan","com","con","const","continue","could","couldnt",
+	  "cry","css","de","dear","default","did","didnt","different","div","do",
+	  "does","doesnt","done","dont","double","down","due","during","each","eg",
+	  "eight","either","else","elsewhere","empty","encoding","enough","enum",
+	  "etc","eu","even","ever","every","everyone","everything","everywhere",
+	  "except","extends","face","family","few","ffffff","final","finally","float",
+	  "font","for","former","formerly","fri","from","further","get","give","go",
+	  "good","got","goto","gt","h1","ha","had","has","hasnt","have","he","head",
+	  "height","hello","helvetica","hence","her","here","hereafter","hereby",
+	  "herein","hereupon","hers","herself","hi","him","himself","his","how",
+	  "however","hr","href","html","http","https","id","ie","if","ill","im",
+	  "image","img","implements","import","in","inc","instanceof","int","interface",
+	  "into","is","isnt","iso-8859-1","it","its","itself","ive","just","keep",
+	  "last","latter","latterly","least","left","less","li","like","long","look",
+	  "lt","ltd","mail","mailto","many","margin","may","me","meanwhile","message",
+	  "meta","might","mill","mine","mon","more","moreover","most","mostly","mshtml",
+	  "mso","much","must","my","myself","name","namely","native","nbsp","need",
+	  "neither","never","nevertheless","new","next","nine","no","nobody","none",
+	  "noone","nor","not","nothing","now","nowhere","null","of","off","often",
+	  "ok","on","once","only","onto","or","org","other","others","otherwise",
+	  "our","ours","ourselves","out","over","own","package","pad","per","perhaps",
+	  "plain","please","pm","printable","private","protected","public","put",
+	  "quot","quote","r1","r2","rather","re","really","regards","reply","return",
+	  "right","said","same","sans","sat","say","saying","see","seem","seemed",
+	  "seeming","seems","serif","serious","several","she","short","should","show",
+	  "side","since","sincere","six","sixty","size","so","solid","some","somehow",
+	  "someone","something","sometime","sometimes","somewhere","span","src",
+	  "static","still","strictfp","string","strong","style","stylesheet","subject",
+	  "such","sun","super","sure","switch","synchronized","table","take","target",
+	  "td","text","th","than","thanks","that","the","their","them","themselves",
+	  "then","thence","there","thereafter","thereby","therefore","therein","thereupon",
+	  "these","they","thick","thin","think","third","this","those","though",
+	  "three","through","throughout","throw","throws","thru","thu","thus","tm",
+	  "to","together","too","top","toward","towards","tr","transfer","transient",
+	  "try","tue","type","ul","un","under","unsubscribe","until","up","upon",
+	  "us","use","used","uses","using","valign","verdana","very","via","void",
+	  "volatile","want","was","we","wed","weight","well","were","what","whatever",
+	  "when","whence","whenever","where","whereafter","whereas","whereby","wherein",
+	  "whereupon","wherever","whether","which","while","whither","who","whoever",
+	  "whole","whom","whose","why","width","will","with","within","without",
+	  "wont","would","wrote","www","yes","yet","you","your","yours","yourself",
+	  "yourselves"
+	};
+
+	// Regex used to exclude non-alpha-numeric tokens
+  private static final Pattern alphaNumeric = Pattern.compile("^[a-z][a-z0-9_]+$");
+  private final CharArraySet stopSet;
+
+	public MailArchivesClusteringAnalyzer() {
+		stopSet = (CharArraySet)StopFilter.makeStopSet(Arrays.asList(STOP_WORDS));
+		java.util.TreeSet<String> tmp = new java.util.TreeSet<String>();
+		java.util.Iterator iter = stopSet.iterator();
+		while (iter.hasNext()) {
+		  tmp.add((String)iter.next());
+		}
+	}
+
+	public MailArchivesClusteringAnalyzer(CharArraySet stopSet) {
+		this.stopSet = stopSet;
+	}
+
+	@Override
+	public TokenStream tokenStream(String fieldName, java.io.Reader reader) {
+		@SuppressWarnings("deprecation")
+		TokenStream result = new StandardTokenizer(Version.LUCENE_CURRENT, reader);
+		result = new StandardFilter(result);
+		result = new LowerCaseFilter(result);
+    result = new ASCIIFoldingFilter(result);
+    result = new AlphaNumericMaxLengthFilter(result);
+		result = new StopFilter(false, result, stopSet);
+		return new PorterStemFilter(result);
+	}
+
+  /**
+   * Matches alpha-numeric tokens between 2 and 40 chars long.
+   */
+	class AlphaNumericMaxLengthFilter extends TokenFilter {
+    private TermAttribute termAtt;
+    private final char[] output = new char[28];
+    private Matcher matcher;
+
+	  public AlphaNumericMaxLengthFilter(TokenStream in) {
+	    super(in);
+	    termAtt = addAttribute(TermAttribute.class);
+	    matcher = alphaNumeric.matcher("foo");
+	  }
+
+	  @Override
+	  public final boolean incrementToken() throws IOException {
+	    // return the first alpha-numeric token between 2 and 40 length
+	    while (input.incrementToken()) {
+	      final int length = termAtt.termLength();
+	      if (length >= 2 && length <= 28) {
+	        final char[] buf = termAtt.termBuffer();
+	        int at = 0;
+	        for (int c=0; c < length; c++) {
+	          final char ch = buf[c];
+	          if (ch != '\'') {
+	            output[at++] = ch;
+	          }
+	        }
+	        final String term = new String(output, 0, at);
+	        matcher.reset(term);
+	        if (matcher.matches() && !term.startsWith("a0")) {
+            termAtt.setTermBuffer(term);
+            return true;	            
+	        }
+	      }
+	    }
+	    return false;
+	  }
+  }
+}
