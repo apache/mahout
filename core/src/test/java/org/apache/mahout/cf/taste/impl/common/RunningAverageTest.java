@@ -25,15 +25,7 @@ public final class RunningAverageTest extends TasteTestCase {
 
   @Test
   public void testFull() {
-    doTestRunningAverage(new FullRunningAverage());
-  }
-
-  @Test
-  public void testCompact() {
-    doTestRunningAverage(new CompactRunningAverage());
-  }
-
-  private static void doTestRunningAverage(RunningAverage runningAverage) {
+    RunningAverage runningAverage = new FullRunningAverage();
 
     assertEquals(0, runningAverage.getCount());
     assertTrue(Double.isNaN(runningAverage.getAverage()));

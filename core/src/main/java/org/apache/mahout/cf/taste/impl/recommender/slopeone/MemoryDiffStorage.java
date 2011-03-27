@@ -27,8 +27,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.common.Weighting;
-import org.apache.mahout.cf.taste.impl.common.CompactRunningAverage;
-import org.apache.mahout.cf.taste.impl.common.CompactRunningAverageAndStdDev;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
@@ -59,7 +57,6 @@ public final class MemoryDiffStorage implements DiffStorage {
   
   private final DataModel dataModel;
   private final boolean stdDevWeighted;
-  private final boolean compactAverages;
   private final long maxEntries;
   private final FastByIDMap<FastByIDMap<RunningAverage>> averageDiffs;
   private final FastByIDMap<RunningAverage> averageItemPref;
@@ -70,9 +67,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   /**
    * <p>
    * See {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender} for the meaning of
-   * <code>stdDevWeighted</code>. If <code>compactAverages</code> is set, this uses alternate data structures
-   * ({@link CompactRunningAverage} versus {@link FullRunningAverage}) that use almost 50% less memory but
-   * store item-item averages less accurately. <code>maxEntries</code> controls the maximum number of
+   * <code>stdDevWeighted</code>. <code>maxEntries</code> controls the maximum number of
    * item-item average preference differences that will be tracked internally. After the limit is reached, if
    * a new item-item pair is observed in the data it will be ignored. This is recommended for large datasets.
    * The first <code>maxEntries</code> item-item pairs observed in the data are tracked. Assuming that item
@@ -85,9 +80,6 @@ public final class MemoryDiffStorage implements DiffStorage {
    * 
    * @param stdDevWeighted
    *          see {@link org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender}
-   * @param compactAverages
-   *          if <code>true</code>, use {@link CompactRunningAverage} instead of {@link FullRunningAverage}
-   *          internally
    * @param maxEntries
    *          maximum number of item-item average preference differences to track internally
    * @throws IllegalArgumentException
@@ -95,14 +87,12 @@ public final class MemoryDiffStorage implements DiffStorage {
    */
   public MemoryDiffStorage(DataModel dataModel,
                            Weighting stdDevWeighted,
-                           boolean compactAverages,
                            long maxEntries) throws TasteException {
     Preconditions.checkArgument(dataModel != null, "dataModel is null");
     Preconditions.checkArgument(dataModel.getNumItems() >= 1, "dataModel has no items");
     Preconditions.checkArgument(maxEntries > 0L, "maxEntries must be positive");
     this.dataModel = dataModel;
     this.stdDevWeighted = stdDevWeighted == Weighting.WEIGHTED;
-    this.compactAverages = compactAverages;
     this.maxEntries = maxEntries;
     this.averageDiffs = new FastByIDMap<FastByIDMap<RunningAverage>>();
     this.averageItemPref = new FastByIDMap<RunningAverage>();
@@ -401,11 +391,7 @@ public final class MemoryDiffStorage implements DiffStorage {
   }
   
   private RunningAverage buildRunningAverage() {
-    if (stdDevWeighted) {
-      return compactAverages ? new CompactRunningAverageAndStdDev() : new FullRunningAverageAndStdDev();
-    } else {
-      return compactAverages ? new CompactRunningAverage() : new FullRunningAverage();
-    }
+    return stdDevWeighted ? new FullRunningAverageAndStdDev() : new FullRunningAverage();
   }
   
   @Override

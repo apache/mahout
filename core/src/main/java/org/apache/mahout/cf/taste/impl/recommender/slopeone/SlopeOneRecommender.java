@@ -64,13 +64,12 @@ public final class SlopeOneRecommender extends AbstractRecommender {
    * <p>
    * Creates a default (weighted)  based on the given {@link DataModel}.
    * </p>
-   * 
-   * @param dataModel
-   *          data model
    */
   public SlopeOneRecommender(DataModel dataModel) throws TasteException {
-    this(dataModel, Weighting.WEIGHTED, Weighting.WEIGHTED, new MemoryDiffStorage(dataModel,
-        Weighting.WEIGHTED, false, Long.MAX_VALUE));
+    this(dataModel,
+         Weighting.WEIGHTED,
+         Weighting.WEIGHTED,
+         new MemoryDiffStorage(dataModel, Weighting.WEIGHTED, Long.MAX_VALUE));
   }
   
   /**

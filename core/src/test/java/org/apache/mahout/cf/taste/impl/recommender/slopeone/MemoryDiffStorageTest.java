@@ -29,7 +29,7 @@ public final class MemoryDiffStorageTest extends TasteTestCase {
   @Test
   public void testGetDiff() throws Exception {
     DataModel model = getDataModel();
-    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
+    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, Long.MAX_VALUE);
     RunningAverage average = storage.getDiff(1, 2);
     assertEquals(0.23333333333333334, average.getAverage(), EPSILON);
     assertEquals(3, average.getCount());
@@ -38,7 +38,7 @@ public final class MemoryDiffStorageTest extends TasteTestCase {
   @Test
   public void testAdd() throws Exception {
     DataModel model = getDataModel();
-    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
+    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, Long.MAX_VALUE);
 
     RunningAverage average1 = storage.getDiff(0, 2);
     assertEquals(0.1, average1.getAverage(), EPSILON);
@@ -62,7 +62,7 @@ public final class MemoryDiffStorageTest extends TasteTestCase {
   @Test
   public void testUpdate() throws Exception {
     DataModel model = getDataModel();
-    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
+    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, Long.MAX_VALUE);
 
     RunningAverage average = storage.getDiff(1, 2);
     assertEquals(0.23333332935969034, average.getAverage(), EPSILON);
@@ -78,7 +78,7 @@ public final class MemoryDiffStorageTest extends TasteTestCase {
   @Test
   public void testRemove() throws Exception {
     DataModel model = getDataModel();
-    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, false, Long.MAX_VALUE);
+    MemoryDiffStorage storage = new MemoryDiffStorage(model, Weighting.UNWEIGHTED, Long.MAX_VALUE);
 
     RunningAverage average1 = storage.getDiff(0, 2);
     assertEquals(0.1, average1.getAverage(), EPSILON);

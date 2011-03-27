@@ -26,29 +26,10 @@ import java.util.Random;
 public final class RunningAverageAndStdDevTest extends TasteTestCase {
 
   private static final double SMALL_EPSILON = 1.0;
-  private static final double BIG_EPSILON = 100 * SMALL_EPSILON;
 
   @Test
   public void testFull() {
-    doTestAverageAndStdDev(new FullRunningAverageAndStdDev());
-  }
-
-  @Test
-  public void testCompact() {
-    doTestAverageAndStdDev(new CompactRunningAverageAndStdDev());
-  }
-
-  @Test
-  public void testFullBig() {
-    doTestBig(new FullRunningAverageAndStdDev(), SMALL_EPSILON);
-  }
-
-  @Test
-  public void testCompactBig() {
-    doTestBig(new CompactRunningAverageAndStdDev(), BIG_EPSILON);
-  }
-
-  private static void doTestAverageAndStdDev(RunningAverageAndStdDev average) {
+    RunningAverageAndStdDev average = new FullRunningAverageAndStdDev();
 
     assertEquals(0, average.getCount());
     assertTrue(Double.isNaN(average.getAverage()));
@@ -81,14 +62,16 @@ public final class RunningAverageAndStdDevTest extends TasteTestCase {
 
   }
 
-  private static void doTestBig(RunningAverageAndStdDev average, double epsilon) {
+  @Test
+  public void testFullBig() {
+    RunningAverageAndStdDev average = new FullRunningAverageAndStdDev();
 
     Random r = RandomUtils.getRandom();
     for (int i = 0; i < 100000; i++) {
       average.addDatum(r.nextDouble() * 1000.0);
     }
-    assertEquals(500.0, average.getAverage(), epsilon);
-    assertEquals(1000.0 / Math.sqrt(12.0), average.getStandardDeviation(), epsilon);
+    assertEquals(500.0, average.getAverage(), SMALL_EPSILON);
+    assertEquals(1000.0 / Math.sqrt(12.0), average.getStandardDeviation(), SMALL_EPSILON);
 
   }
 
