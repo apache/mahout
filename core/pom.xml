@@ -22,10 +22,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.mahout</groupId>
-  <artifactId>mahout-core</artifactId>
-  <version>0.5-SNAPSHOT</version>
-
   <parent>
     <groupId>org.apache.mahout</groupId>
     <artifactId>mahout</artifactId>
@@ -33,6 +29,8 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
+  <!-- modules inherit parent's group id and version. -->
+  <artifactId>mahout-core</artifactId>
   <name>Mahout Core</name>
   <description>Scalable machine learning libraries</description>
 
@@ -129,12 +127,21 @@
   </build>
 
   <dependencies>
+  
+    <!-- our modules -->
     <dependency>
-      <groupId>org.apache.mahout</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>mahout-math</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>mahout-math</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Third Party -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
@@ -143,56 +150,47 @@
     <dependency>
       <groupId>org.apache.mahout.hbase</groupId>
       <artifactId>hbase</artifactId>
-      <version>0.20.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>1.3</version>
     </dependency>
 
     <dependency>
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>
-      <version>1.2.2</version>
     </dependency>
 
     <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
-      <version>1.4</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
-      <version>1.6.0</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
     </dependency>
 
     <dependency>
       <groupId>org.uncommons.watchmaker</groupId>
       <artifactId>watchmaker-framework</artifactId>
-      <version>0.6.2</version>
     </dependency>
 
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.3.1</version>
     </dependency>
 
     <dependency>
@@ -208,70 +206,37 @@
     <dependency>
       <groupId>org.apache.mahout.commons</groupId>
       <artifactId>commons-cli</artifactId>
-      <version>2.0-mahout</version>
     </dependency>
 
     <dependency>
-<!--      <groupId>commons-math</groupId>-->
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math</artifactId>
-      <!--  version>1.2</version -->
-      <version>2.1</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymockclassextension</artifactId>
-    </dependency>
-
-
-    <dependency>
-      <groupId>org.apache.mahout</groupId>
-      <artifactId>mahout-math</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
-      <version>3.2.1</version>
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>Apache snapshots</id>
-      <url>http://people.apache.org/maven-snapshot-repository</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>gson</id>
-      <url>http://google-gson.googlecode.com/svn/mavenrepo</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
 
   <scm>
     <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/core</connection>

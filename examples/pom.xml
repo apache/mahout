@@ -163,7 +163,6 @@
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-wikipedia</artifactId>
-      <version>${lucene.version}</version>
     </dependency>
 
     <!-- core test -->
