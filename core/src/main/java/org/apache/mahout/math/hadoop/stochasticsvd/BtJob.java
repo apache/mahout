@@ -42,6 +42,8 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.hadoop.stochasticsvd.QJob.QJobKeyWritable;
@@ -148,14 +150,25 @@ public class BtJob {
                                                                         // A row
                                                                         // labels.
 
-      int n = aRow.size();
       Vector btRow = btValue.get();
-      for (int i = 0; i < n; i++) {
-        double mul = aRow.getQuick(i);
-        for (int j = 0; j < kp; j++)
-          btRow.setQuick(j, mul * qRow.getQuick(j));
-        btKey.set(i);
-        context.write(btKey, btValue);
+      if ( (aRow instanceof SequentialAccessSparseVector) ||
+          (aRow instanceof RandomAccessSparseVector )) {
+        for ( Vector.Element el:aRow ) { 
+          double mul=el.get();
+          for ( int j =0; j < kp; j++ ) 
+            btRow.setQuick(j, mul * qRow.getQuick(j));
+          btKey.set(el.index());
+          context.write(btKey, btValue);
+        }
+      } else { 
+        int n = aRow.size();
+        for (int i = 0; i < n; i++) {
+          double mul = aRow.getQuick(i);
+          for (int j = 0; j < kp; j++)
+            btRow.setQuick(j, mul * qRow.getQuick(j));
+          btKey.set(i);
+          context.write(btKey, btValue);
+        }
       }
 
     }
