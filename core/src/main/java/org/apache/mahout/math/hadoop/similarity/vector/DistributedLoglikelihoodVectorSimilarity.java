@@ -41,8 +41,8 @@ public class DistributedLoglikelihoodVectorSimilarity extends
 
     double logLikelihood =
         LogLikelihood.logLikelihoodRatio(cooccurrenceCount,
-                                         occurrencesA - cooccurrenceCount,
                                          occurrencesB - cooccurrenceCount,
+                                         occurrencesA - cooccurrenceCount,
                                          numberOfColumns - occurrencesA - occurrencesB + cooccurrenceCount);
 
     return 1.0 - 1.0 / (1.0 + logLikelihood);
