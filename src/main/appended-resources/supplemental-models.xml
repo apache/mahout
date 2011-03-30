@@ -280,25 +280,6 @@
     </licenses>
     </project>
   </supplement>
-  <!-- Apache Hadoop Hbase  -->
-  <supplement>
-    <project>
-    <groupId>org.apache.mahout.hbase</groupId>
-    <artifactId>hbase</artifactId>
-    <name>Apache Hadoop</name>
-    <url>http://hadoop.apache.org/hbase/</url>
-    <organization>
-          <name>Apache Software Foundation</name>
-          <url>http://www.apache.org/</url>
-    </organization>
-    <licenses>
-      <license>
-        <name>The Apache Software License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      </license>
-    </licenses>
-    </project>
-  </supplement>
   <!-- jets3d  -->
   <supplement>
     <project>
@@ -306,21 +287,6 @@
     <artifactId>jets3t</artifactId>
     <name>jets3t</name>
     <url>https://jets3t.dev.java.net/</url>
-    <licenses>
-      <license>
-        <name>The Apache Software License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      </license>
-    </licenses>
-    </project>
-  </supplement>
-  <!-- kosmofs  -->
-  <supplement>
-    <project>
-    <name>KFS</name>
-    <groupId>org.apache.mahout.kosmofs</groupId>
-    <artifactId>kfs</artifactId>
-    <url>http://kosmosfs.sourceforge.net/index.html</url>
     <licenses>
       <license>
         <name>The Apache Software License, Version 2.0</name>

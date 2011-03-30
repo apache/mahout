@@ -37,7 +37,6 @@ import org.apache.mahout.classifier.ResultAnalyzer;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
-import org.apache.mahout.classifier.bayes.datastore.HBaseBayesDatastore;
 import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
@@ -72,7 +71,7 @@ public final class TestClassifier {
     
     Option pathOpt = obuilder.withLongName("model").withRequired(true).withArgument(
       abuilder.withName("model").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The path on HDFS / Name of Hbase Table as defined by the -source parameter").withShortName("m")
+      "The path on HDFS as defined by the -source parameter").withShortName("m")
         .create();
     
     Option dirOpt = obuilder.withLongName("testDir").withRequired(true).withArgument(
@@ -106,7 +105,7 @@ public final class TestClassifier {
     
     Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(false).withArgument(
       abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Location of model: hdfs|hbase Default Value: hdfs").withShortName("source").create();
+      "Location of model: hdfs").withShortName("source").create();
     
     Option methodOpt = obuilder.withLongName("method").withRequired(false).withArgument(
       abuilder.withName("method").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -215,19 +214,6 @@ public final class TestClassifier {
         log.info("Testing Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
-      } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
-      }
-      
-    } else if (params.get("dataSource").equals("hbase")) {
-      if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-        log.info("Testing Bayes Classifier");
-        algorithm = new BayesAlgorithm();
-        datastore = new HBaseBayesDatastore(params);
-      } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-        log.info("Testing Complementary Bayes Classifier");
-        algorithm = new CBayesAlgorithm();
-        datastore = new HBaseBayesDatastore(params);
       } else {
         throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
       }

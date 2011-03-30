@@ -120,16 +120,8 @@
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>org.apache.mahout.hbase</groupId>
-          <artifactId>hbase</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.mahout.kosmofs</groupId>
-          <artifactId>kfs</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.apache.mahout.jets3t</groupId>

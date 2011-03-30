@@ -25,9 +25,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.Pair;
+import com.google.common.base.Charsets;
 
 /**
  * A class which collects Top K string patterns
@@ -115,7 +115,7 @@ public final class TopKStringPatterns implements Writable {
         int itemLength = in.readInt();
         byte[] data = new byte[itemLength];
         in.readFully(data);
-        items.add(Bytes.toString(data));
+        items.add(new String(data, Charsets.UTF_8));
       }
       frequentPatterns.add(new Pair<List<String>,Long>(items, support));
     }
@@ -128,7 +128,7 @@ public final class TopKStringPatterns implements Writable {
       out.writeInt(pattern.getFirst().size());
       out.writeLong(pattern.getSecond());
       for (String item : pattern.getFirst()) {
-        byte[] data = Bytes.toBytes(item);
+        byte[] data = item.getBytes(Charsets.UTF_8);
         out.writeInt(data.length);
         out.write(data);
       }

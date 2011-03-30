@@ -36,7 +36,6 @@ import org.apache.lucene.util.Version;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
-import org.apache.mahout.classifier.bayes.datastore.HBaseBayesDatastore;
 import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
@@ -46,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Runs the Bayes classifier using the given model location(HDFS/HBASE)
+ * Runs the Bayes classifier using the given model location on HDFS
  * 
  */
 public final class Classify {
@@ -91,7 +90,7 @@ public final class Classify {
     
     Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(true).withArgument(
       abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Location of model: hdfs|hbase").withShortName("source").create();
+      "Location of model: hdfs").withShortName("source").create();
     
     Group options = gbuilder.withName("Options").withOption(pathOpt).withOption(classifyOpt).withOption(
       encodingOpt).withOption(analyzerOpt).withOption(defaultCatOpt).withOption(gramSizeOpt).withOption(
@@ -129,19 +128,6 @@ public final class Classify {
         log.info("Using Complementary Bayes Classifier");
         algorithm = new CBayesAlgorithm();
         datastore = new InMemoryBayesDatastore(params);
-      } else {
-        throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
-      }
-      
-    } else if ("hbase".equals(dataSource)) {
-      if ("bayes".equalsIgnoreCase(classifierType)) {
-        log.info("Using Bayes Classifier");
-        algorithm = new BayesAlgorithm();
-        datastore = new HBaseBayesDatastore(params);
-      } else if ("cbayes".equalsIgnoreCase(classifierType)) {
-        log.info("Using Complementary Bayes Classifier");
-        algorithm = new CBayesAlgorithm();
-        datastore = new HBaseBayesDatastore(params);
       } else {
         throw new IllegalArgumentException("Unrecognized classifier type: " + classifierType);
       }

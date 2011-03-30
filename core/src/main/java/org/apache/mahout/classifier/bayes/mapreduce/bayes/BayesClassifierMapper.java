@@ -31,7 +31,6 @@ import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.algorithm.CBayesAlgorithm;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
-import org.apache.mahout.classifier.bayes.datastore.HBaseBayesDatastore;
 import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
@@ -111,19 +110,6 @@ public class BayesClassifierMapper extends MapReduceBase implements
           log.info("Testing Complementary Bayes Classifier");
           algorithm = new CBayesAlgorithm();
           datastore = new InMemoryBayesDatastore(params);
-        } else {
-          throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
-        }
-        
-      } else if (params.get("dataSource").equals("hbase")) {
-        if (params.get("classifierType").equalsIgnoreCase("bayes")) {
-          log.info("Testing Bayes Classifier");
-          algorithm = new BayesAlgorithm();
-          datastore = new HBaseBayesDatastore(params);
-        } else if (params.get("classifierType").equalsIgnoreCase("cbayes")) {
-          log.info("Testing Complementary Bayes Classifier");
-          algorithm = new CBayesAlgorithm();
-          datastore = new HBaseBayesDatastore(params);
         } else {
           throw new IllegalArgumentException("Unrecognized classifier type: " + params.get("classifierType"));
         }

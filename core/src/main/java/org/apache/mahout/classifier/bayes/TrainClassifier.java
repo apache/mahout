@@ -98,7 +98,7 @@ public final class TrainClassifier {
     
     Option dataSourceOpt = obuilder.withLongName("dataSource").withRequired(false).withArgument(
       abuilder.withName("dataSource").withMinimum(1).withMaximum(1).create()).withDescription(
-      "Location of model: hdfs|hbase. Default Value: hdfs").withShortName("source").create();
+      "Location of model: hdfs. Default Value: hdfs").withShortName("source").create();
     
     Option skipCleanupOpt = obuilder.withLongName("skipCleanup").withRequired(false).withDescription(
         "Skip cleanup of feature extraction output").withShortName("sc").create();
