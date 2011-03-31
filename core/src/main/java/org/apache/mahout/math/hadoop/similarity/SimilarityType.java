@@ -19,6 +19,7 @@ package org.apache.mahout.math.hadoop.similarity;
 
 import java.util.Arrays;
 
+import org.apache.mahout.math.hadoop.similarity.vector.DistributedCityBlockVectorSimilarity;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedCooccurrenceVectorSimilarity;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedEuclideanDistanceVectorSimilarity;
 import org.apache.mahout.math.hadoop.similarity.vector.DistributedLoglikelihoodVectorSimilarity;
@@ -36,7 +37,8 @@ public enum SimilarityType {
   SIMILARITY_PEARSON_CORRELATION(DistributedPearsonCorrelationVectorSimilarity.class),
   SIMILARITY_TANIMOTO_COEFFICIENT(DistributedTanimotoCoefficientVectorSimilarity.class),
   SIMILARITY_UNCENTERED_COSINE(DistributedUncenteredCosineVectorSimilarity.class),
-  SIMILARITY_UNCENTERED_ZERO_ASSUMING_COSINE(DistributedUncenteredZeroAssumingCosineVectorSimilarity.class);
+  SIMILARITY_UNCENTERED_ZERO_ASSUMING_COSINE(DistributedUncenteredZeroAssumingCosineVectorSimilarity.class),
+  SIMILARITY_CITY_BLOCK(DistributedCityBlockVectorSimilarity.class);
 
   private final Class<? extends DistributedVectorSimilarity> similarityImplementation;
 
