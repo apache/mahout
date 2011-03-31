@@ -17,12 +17,9 @@
 
 package org.apache.mahout.classifier.bayes.datastore;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
 import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
 import org.apache.mahout.classifier.bayes.interfaces.Datastore;
@@ -76,12 +73,7 @@ public class InMemoryBayesDatastore implements Datastore {
   @Override
   public void initialize() throws InvalidDatastoreException {
     Configuration conf = new Configuration();
-    String basePath = params.getBasePath();
-    try {
-      SequenceFileModelReader.loadModel(this, FileSystem.get(new Path(basePath).toUri(), conf), params, conf);
-    } catch (IOException e) {
-      throw new InvalidDatastoreException(e);
-    }
+    SequenceFileModelReader.loadModel(this, params, conf);
     for (String label : getKeys("")) {
       log.info("{} {} {} {}", new Object[] {
         label,

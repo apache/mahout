@@ -93,12 +93,8 @@ public class LDAMapper extends Mapper<WritableComparable<?>,VectorWritable,IntPa
   }
   
   public void configure(Configuration job) {
-    try {
-      LDAState myState = LDADriver.createState(job);
-      configure(myState);
-    } catch (IOException e) {
-      throw new IllegalStateException("Error creating LDA State!", e);
-    }
+    LDAState myState = LDADriver.createState(job);
+    configure(myState);
   }
   
   @Override

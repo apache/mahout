@@ -18,43 +18,32 @@
 package org.apache.mahout.cf.taste.impl.similarity.file;
 
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
-import org.apache.mahout.common.FileLineIterator;
+import org.apache.mahout.common.iterator.FileLineIterator;
+import org.apache.mahout.common.iterator.TransformingIterator;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
- * a simple iterator using a {@link org.apache.mahout.common.FileLineIterator} internally, parsing each
+ * a simple iterator using a {@link FileLineIterator} internally, parsing each
  * line into an {@link org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity.ItemItemSimilarity}
  */
-final class FileItemItemSimilarityIterator implements Iterator<GenericItemSimilarity.ItemItemSimilarity> {
+final class FileItemItemSimilarityIterator
+  extends TransformingIterator<String,GenericItemSimilarity.ItemItemSimilarity> {
 
   private static final Pattern SEPARATOR = Pattern.compile("[,\t]");
 
-  private final FileLineIterator lineIterator;
-
   FileItemItemSimilarityIterator(File similaritiesFile) throws IOException {
-    lineIterator = new FileLineIterator(similaritiesFile);
+    super(new FileLineIterator(similaritiesFile));
   }
 
   @Override
-  public boolean hasNext() {
-    return lineIterator.hasNext();
-  }
-
-  @Override
-  public GenericItemSimilarity.ItemItemSimilarity next() {
-    String line = lineIterator.next();
-    String[] tokens = SEPARATOR.split(line);
+  protected GenericItemSimilarity.ItemItemSimilarity transform(String in) {
+    String[] tokens = SEPARATOR.split(in);
     return new GenericItemSimilarity.ItemItemSimilarity(Long.parseLong(tokens[0]),
                                                         Long.parseLong(tokens[1]),
                                                         Double.parseDouble(tokens[2]));
   }
 
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
 }

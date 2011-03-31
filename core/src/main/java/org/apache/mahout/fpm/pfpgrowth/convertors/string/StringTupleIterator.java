@@ -21,33 +21,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.iterator.TransformingIterator;
 
 /**
  * Iterate over the StringTuple as an iterator of <code>List&lt;String&gt;</code>
- *
  */
-public final class StringTupleIterator implements Iterator<List<String>> {
-  
-  private final Iterator<StringTuple> iterator;
-  
+public final class StringTupleIterator extends TransformingIterator<StringTuple,List<String>> {
+
   public StringTupleIterator(Iterator<StringTuple> iterator) {
-    this.iterator = iterator;
+    super(iterator);
   }
-  
+
   @Override
-  public boolean hasNext() {
-    return iterator.hasNext();
-  }
-  
-  @Override
-  public List<String> next() {
-    StringTuple transaction = iterator.next();
-    return transaction.getEntries();
-  }
-  
-  @Override
-  public void remove() {
-    iterator.remove();
+  protected List<String> transform(StringTuple in) {
+    return in.getEntries();
   }
   
 }

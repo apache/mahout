@@ -25,7 +25,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.ga.watchmaker.utils.DummyCandidate;
 import org.apache.mahout.ga.watchmaker.utils.DummyEvaluator;
 import org.apache.mahout.common.StringUtils;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.junit.Test;
 import org.uncommons.watchmaker.framework.FitnessEvaluator;
 

@@ -18,10 +18,14 @@
 package org.apache.mahout.common;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,27 +34,32 @@ public final class HadoopUtil {
   private static final Logger log = LoggerFactory.getLogger(HadoopUtil.class);
   
   private HadoopUtil() { }
-  
-  public static void overwriteOutput(Path output) throws IOException {
-    FileSystem fs = FileSystem.get(output.toUri(), new Configuration());
-    //boolean wasFile = fs.isFile(output);
-    if (fs.exists(output)) {
-      log.info("Deleting {}", output);
-      fs.delete(output, true);
+
+  public static void delete(Configuration conf, Iterable<Path> paths) throws IOException {
+    if (conf == null) {
+      conf = new Configuration();
     }
-    //if (!wasFile) {
-    //  log.info("Creating dir {}", output);
-    //  fs.mkdirs(output);
-    //}
-  }
-  
-  public static void deletePaths(Iterable<Path> paths, FileSystem fs) throws IOException {
     for (Path path : paths) {
+      FileSystem fs = path.getFileSystem(conf);
       if (fs.exists(path)) {
         log.info("Deleting {}", path);
         fs.delete(path, true);
       }
     }
+  }
+  
+  public static void delete(Configuration conf, Path... paths) throws IOException {
+    delete(conf, Arrays.asList(paths));
+  }
+
+  public static long countRecords(Path path, Configuration conf) throws IOException {
+    long count = 0;
+    Iterator<?> iterator = new SequenceFileValueIterator<Writable>(path, true, conf);
+    while (iterator.hasNext()) {
+      iterator.next();
+      count++;
+    }
+    return count;
   }
 
 }

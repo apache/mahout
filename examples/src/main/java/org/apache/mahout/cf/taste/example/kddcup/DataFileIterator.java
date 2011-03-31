@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.apache.mahout.common.FileLineIterator;
+import org.apache.mahout.common.iterator.FileLineIterator;
 import org.apache.mahout.common.Pair;
 
 /**

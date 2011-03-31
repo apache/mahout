@@ -30,7 +30,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -41,6 +40,7 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.data.DataConverter;
 import org.apache.mahout.df.data.Dataset;
@@ -79,9 +79,6 @@ public class FrequenciesJob {
   
   /**
    * @return counts[partition][label] = num tuples from 'partition' with class == label
-   * @throws IOException
-   * @throws ClassNotFoundException
-   * @throws InterruptedException
    */
   public int[][] run(Configuration conf) throws IOException, ClassNotFoundException, InterruptedException {
     
@@ -117,7 +114,7 @@ public class FrequenciesJob {
     
     int[][] counts = parseOutput(job);
 
-    HadoopUtil.overwriteOutput(outputPath);
+    HadoopUtil.delete(conf, outputPath);
     
     return counts;
   }
@@ -126,7 +123,6 @@ public class FrequenciesJob {
    * Extracts the output and processes it
    * 
    * @return counts[partition][label] = num tuples from 'partition' with class == label
-   * @throws java.io.IOException
    */
   protected int[][] parseOutput(JobContext job) throws IOException {
     Configuration conf = job.getConfiguration();
@@ -141,19 +137,10 @@ public class FrequenciesJob {
     Frequencies[] values = new Frequencies[numMaps];
     
     // read all the outputs
-    Writable key = new LongWritable();
-    Frequencies value = new Frequencies();
-    
     int index = 0;
     for (Path path : outfiles) {
-      Reader reader = new Reader(fs, path, conf);
-      
-      try {
-        while (reader.next(key, value)) {
-          values[index++] = value.clone();
-        }
-      } finally {
-        reader.close();
+      for (Frequencies value : new SequenceFileValueIterable<Frequencies>(path, conf)) {
+        values[index++] = value;
       }
     }
     
@@ -225,8 +212,8 @@ public class FrequenciesJob {
     }
     
     @Override
-    protected void reduce(LongWritable key, Iterable<IntWritable> values, Context context) throws IOException,
-                                                                                          InterruptedException {
+    protected void reduce(LongWritable key, Iterable<IntWritable> values, Context context)
+      throws IOException, InterruptedException {
       int[] counts = new int[nblabels];
       for (IntWritable value : values) {
         counts[value.get()]++;
@@ -242,28 +229,15 @@ public class FrequenciesJob {
    */
   private static class Frequencies implements Writable, Comparable<Frequencies>, Cloneable {
     
-    /**
-     * first key of the partition<br>
-     * used to sort the partitions
-     */
+    /** first key of the partition used to sort the partitions */
     private long firstId;
     
     /** counts[c] = num tuples from the partition with label == c */
     private int[] counts;
     
-    protected Frequencies() { }
-    
     protected Frequencies(long firstId, int[] counts) {
       this.firstId = firstId;
       this.counts = Arrays.copyOf(counts, counts.length);
-    }
-    
-    protected long getFirstId() {
-      return firstId;
-    }
-    
-    protected int[] getCounts() {
-      return counts;
     }
     
     @Override
@@ -304,23 +278,11 @@ public class FrequenciesJob {
       }
     }
     
-    public static int[] extractFirstIds(Frequencies[] partitions) {
-      int[] ids = new int[partitions.length];
-      
-      for (int p = 0; p < partitions.length; p++) {
-        ids[p] = (int) partitions[p].firstId;
-      }
-      
-      return ids;
-    }
-    
     public static int[][] extractCounts(Frequencies[] partitions) {
       int[][] counts = new int[partitions.length][];
-      
       for (int p = 0; p < partitions.length; p++) {
         counts[p] = partitions[p].counts;
       }
-      
       return counts;
     }
   }

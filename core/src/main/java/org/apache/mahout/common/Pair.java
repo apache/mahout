@@ -20,7 +20,7 @@ package org.apache.mahout.common;
 import java.io.Serializable;
 
 /** A simple (ordered) pair of two objects. Elements may be null. */
-public final class Pair<A, B> implements Serializable {
+public final class Pair<A,B> implements Comparable<Pair<A,B>>, Serializable {
   
   private final A first;
   private final B second;
@@ -72,5 +72,24 @@ public final class Pair<A, B> implements Serializable {
   public String toString() {
     return '(' + String.valueOf(first) + ',' + second + ')';
   }
-  
+
+  /**
+   * Defines an ordering on pairs that sorts by first value's natural ordering, ascending,
+   * and then by second value's natural ordering.
+   *
+   * @throws ClassCastException if types are not actually {@link Comparable}
+   */
+  @Override
+  public int compareTo(Pair<A,B> other) {
+    Comparable<A> thisFirst = (Comparable<A>) first;
+    A thatFirst = other.getFirst();
+    int compare = thisFirst.compareTo(thatFirst);
+    if (compare != 0) {
+      return compare;
+    }
+    Comparable<B> thisSecond = (Comparable<B>) second;
+    B thatSecond = other.getSecond();
+    return thisSecond.compareTo(thatSecond);
+  }
+
 }

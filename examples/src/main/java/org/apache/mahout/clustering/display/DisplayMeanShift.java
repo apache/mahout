@@ -21,15 +21,11 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopy;
-import org.apache.mahout.clustering.meanshift.MeanShiftCanopyClusterer;
 import org.apache.mahout.clustering.meanshift.MeanShiftCanopyDriver;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.RandomUtils;
@@ -102,27 +98,27 @@ final class DisplayMeanShift extends DisplayClustering {
 
     Path samples = new Path("samples");
     Path output = new Path("output");
-    HadoopUtil.overwriteOutput(samples);
-    HadoopUtil.overwriteOutput(output);
+    Configuration conf = new Configuration();
+    HadoopUtil.delete(conf, samples);
+    HadoopUtil.delete(conf, output);
 
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
-    boolean b = true;
-    if (b) {
-      new MeanShiftCanopyDriver().run(
-          new Configuration(), samples, output, measure, t1, t2, 0.005, 20, false, true, true);
-      loadClusters(output);
-    } else {
-      Collection<Vector> points = new ArrayList<Vector>();
-      for (VectorWritable sample : SAMPLE_DATA) {
-        points.add(sample.get());
-      }
-      List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, measure, 0.005, t1, t2, 20);
-      for (MeanShiftCanopy canopy : canopies) {
-        log.info(canopy.toString());
-      }
-    }
+    //boolean b = true;
+    //if (b) {
+    new MeanShiftCanopyDriver().run(conf, samples, output, measure, t1, t2, 0.005, 20, false, true, true);
+    loadClusters(output);
+    //} else {
+    //  Collection<Vector> points = new ArrayList<Vector>();
+    //  for (VectorWritable sample : SAMPLE_DATA) {
+    //    points.add(sample.get());
+    //  }
+    //  List<MeanShiftCanopy> canopies = MeanShiftCanopyClusterer.clusterPoints(points, measure, 0.005, t1, t2, 20);
+    //  for (MeanShiftCanopy canopy : canopies) {
+    //    log.info(canopy.toString());
+    // }
+    //}
     new DisplayMeanShift();
   }
 }

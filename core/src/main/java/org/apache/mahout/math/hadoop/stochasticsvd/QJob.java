@@ -23,6 +23,7 @@ import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.common.iterator.CopyConstructorIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -54,7 +56,6 @@ import org.apache.mahout.math.VectorWritable;
  * 
  * 
  */
-@SuppressWarnings("deprecation")
 public class QJob {
 
   public static final String PROP_OMEGA_SEED = "ssvd.omegaseed";
@@ -64,11 +65,13 @@ public class QJob {
 
   public static final String OUTPUT_R = "R";
   public static final String OUTPUT_QHAT = "QHat";
-  // public static final String OUTPUT_Q="Q";
-  public static final String OUTPUT_BT = "Bt";
 
-  public static class QJobKeyWritable implements
-      WritableComparable<QJobKeyWritable> {
+  private QJob() {
+  }
+  // public static final String OUTPUT_Q="Q";
+  //public static final String OUTPUT_BT = "Bt";
+
+  public static class QJobKeyWritable implements WritableComparable<QJobKeyWritable> {
 
     private int taskId;
     private int taskRowOrdinal;
@@ -87,21 +90,22 @@ public class QJob {
 
     @Override
     public int compareTo(QJobKeyWritable o) {
-      if (taskId < o.taskId)
+      if (taskId < o.taskId) {
         return -1;
-      else if (taskId > o.taskId)
+      } else if (taskId > o.taskId) {
         return 1;
-      if (taskRowOrdinal < o.taskRowOrdinal)
+      }
+      if (taskRowOrdinal < o.taskRowOrdinal) {
         return -1;
-      else if (taskRowOrdinal > o.taskRowOrdinal)
+      } else if (taskRowOrdinal > o.taskRowOrdinal) {
         return 1;
+      }
       return 0;
     }
 
   }
 
-  public static class QMapper extends
-      Mapper<Writable, VectorWritable, QJobKeyWritable, VectorWritable> {
+  public static class QMapper extends Mapper<Writable, VectorWritable, QJobKeyWritable, VectorWritable> {
 
     private int kp;
     private Omega omega;
@@ -110,17 +114,16 @@ public class QJob {
     private int blockCnt;
     // private int m_reducerCount;
     private int r;
-    private DenseBlockWritable value = new DenseBlockWritable();
-    private QJobKeyWritable key = new QJobKeyWritable();
-    private IntWritable tempKey = new IntWritable();
+    private final DenseBlockWritable value = new DenseBlockWritable();
+    private final QJobKeyWritable key = new QJobKeyWritable();
+    private final Writable tempKey = new IntWritable();
     private MultipleOutputs outputs;
-    private LinkedList<Closeable> closeables = new LinkedList<Closeable>();
+    private final Deque<Closeable> closeables = new LinkedList<Closeable>();
     private SequenceFile.Writer tempQw;
     private Path tempQPath;
-    private List<UpperTriangular> rSubseq = new ArrayList<UpperTriangular>();
+    private final List<UpperTriangular> rSubseq = new ArrayList<UpperTriangular>();
 
-    private void flushSolver(Context context) throws IOException,
-        InterruptedException {
+    private void flushSolver(Context context) throws IOException {
       UpperTriangular r = qSolver.getRTilde();
       double[][] qt = qSolver.getThinQtTilde();
 
@@ -138,9 +141,7 @@ public class QJob {
     }
 
     // second pass to run a modified version of computeQHatSequence.
-    @SuppressWarnings("unchecked")
-    private void flushQBlocks(Context ctx) throws IOException,
-        InterruptedException {
+    private void flushQBlocks(Context ctx) throws IOException {
       if (blockCnt == 1) {
         // only one block, no temp file, no second pass. should be the default
         // mode
@@ -153,47 +154,45 @@ public class QJob {
             new VectorWritable(new DenseVector(qSolver.getRTilde().getData(),
                 true)));
 
-      } else
+      } else {
         secondPass(ctx);
+      }
     }
 
-    @SuppressWarnings("unchecked")
-    private void secondPass(Context ctx) throws IOException,
-        InterruptedException {
+    private void secondPass(Context ctx) throws IOException {
       qSolver = null; // release mem
       FileSystem localFs = FileSystem.getLocal(ctx.getConfiguration());
-      SequenceFile.Reader tempQr = new SequenceFile.Reader(localFs,
-          tempQPath, ctx.getConfiguration());
+      SequenceFile.Reader tempQr = new SequenceFile.Reader(localFs, tempQPath, ctx.getConfiguration());
       closeables.addFirst(tempQr);
       int qCnt = 0;
       while (tempQr.next(tempKey, value)) {
-        value
-            .setBlock(GivensThinSolver.computeQtHat(value.getBlock(), qCnt,
-                new GivensThinSolver.DeepCopyUTIterator(rSubseq.iterator())));
-        if (qCnt == 1) // just merge r[0] <- r[1] so it doesn't have to repeat
-                       // in subsequent computeQHat iterators
+        value.setBlock(GivensThinSolver.computeQtHat(value.getBlock(),
+                                                     qCnt,
+                                                     new CopyConstructorIterator<UpperTriangular>(rSubseq.iterator())));
+        if (qCnt == 1) {
+          // just merge r[0] <- r[1] so it doesn't have to repeat
+          // in subsequent computeQHat iterators
           GivensThinSolver.mergeR(rSubseq.get(0), rSubseq.remove(1));
-
-        else
+        } else {
           qCnt++;
+        }
         outputs.getCollector(OUTPUT_QHAT, null).collect(key, value);
       }
 
       assert rSubseq.size() == 1;
 
       // m_value.setR(m_rSubseq.get(0));
-      outputs.getCollector(OUTPUT_R, null)
-          .collect(
-              key,
-              new VectorWritable(new DenseVector(rSubseq.get(0).getData(),
-                  true)));
+      outputs.getCollector(OUTPUT_R, null).collect(
+          key,
+          new VectorWritable(new DenseVector(rSubseq.get(0).getData(),
+                                             true)));
 
     }
 
     @Override
     protected void map(Writable key, VectorWritable value, Context context)
       throws IOException, InterruptedException {
-      double[] yRow = null;
+      double[] yRow;
       if (yLookahead.size() == kp) {
         if (qSolver.isFull()) {
 
@@ -204,23 +203,21 @@ public class QJob {
         yRow = yLookahead.remove(0);
 
         qSolver.appendRow(yRow);
-      } else
+      } else {
         yRow = new double[kp];
+      }
       omega.computeYRow(value.get(), yRow);
       yLookahead.add(yRow);
     }
 
     @Override
-    protected void setup(final Context context) throws IOException,
-        InterruptedException {
+    protected void setup(Context context) throws IOException, InterruptedException {
 
       int k = Integer.parseInt(context.getConfiguration().get(PROP_K));
       int p = Integer.parseInt(context.getConfiguration().get(PROP_P));
       kp = k + p;
-      long omegaSeed = Long.parseLong(context.getConfiguration().get(
-          PROP_OMEGA_SEED));
-      r = Integer.parseInt(context.getConfiguration()
-          .get(PROP_AROWBLOCK_SIZE));
+      long omegaSeed = Long.parseLong(context.getConfiguration().get(PROP_OMEGA_SEED));
+      r = Integer.parseInt(context.getConfiguration().get(PROP_AROWBLOCK_SIZE));
       omega = new Omega(omegaSeed, k, p);
       yLookahead = new ArrayList<double[]>(kp);
       qSolver = new GivensThinSolver(r, kp);
@@ -235,17 +232,18 @@ public class QJob {
     }
 
     @Override
-    protected void cleanup(Context context) throws IOException,
-        InterruptedException {
+    protected void cleanup(Context context) throws IOException, InterruptedException {
       try {
-        if (qSolver == null && yLookahead.size() == 0)
+        if (qSolver == null && yLookahead.isEmpty()) {
           return;
-        if (qSolver == null)
+        }
+        if (qSolver == null) {
           qSolver = new GivensThinSolver(yLookahead.size(), kp);
+        }
         // grow q solver up if necessary
 
         qSolver.adjust(qSolver.getCnt() + yLookahead.size());
-        while (yLookahead.size() > 0) {
+        while (!yLookahead.isEmpty()) {
 
           qSolver.appendRow(yLookahead.remove(0));
 
@@ -280,18 +278,21 @@ public class QJob {
             context.getConfiguration(), tempQPath, IntWritable.class,
             DenseBlockWritable.class, CompressionType.BLOCK);
         closeables.addFirst(tempQw);
-        closeables.addFirst(new IOUtils.DeleteFileOnClose(new File(tempQw
-            .toString())));
-
+        closeables.addFirst(new IOUtils.DeleteFileOnClose(new File(tempQPath.toString())));
       }
       return tempQw;
     }
   }
 
-  public static void run(Configuration conf, Path[] inputPaths,
-      Path outputPath, int aBlockRows, int minSplitSize, int k, int p,
-      long seed, int numReduceTasks) throws ClassNotFoundException,
-      InterruptedException, IOException {
+  public static void run(Configuration conf,
+                         Path[] inputPaths,
+                         Path outputPath,
+                         int aBlockRows,
+                         int minSplitSize,
+                         int k,
+                         int p,
+                         long seed,
+                         int numReduceTasks) throws ClassNotFoundException, InterruptedException, IOException {
 
     JobConf oldApiJob = new JobConf(conf);
     MultipleOutputs.addNamedOutput(oldApiJob, OUTPUT_QHAT,
@@ -307,8 +308,9 @@ public class QJob {
 
     job.setInputFormatClass(SequenceFileInputFormat.class);
     FileInputFormat.setInputPaths(job, inputPaths);
-    if (minSplitSize > 0)
+    if (minSplitSize > 0) {
       SequenceFileInputFormat.setMinInputSplitSize(job, minSplitSize);
+    }
 
     FileOutputFormat.setOutputPath(job, outputPath);
 
@@ -339,13 +341,10 @@ public class QJob {
     job.submit();
     job.waitForCompletion(false);
 
-    if (!job.isSuccessful())
+    if (!job.isSuccessful()) {
       throw new IOException("Q job unsuccessful.");
+    }
 
-  }
-
-  public static enum QJobCntEnum {
-    NUM_Q_BLOCKS;
   }
 
 }

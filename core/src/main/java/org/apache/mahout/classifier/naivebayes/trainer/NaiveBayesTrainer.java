@@ -99,7 +99,7 @@ public final class NaiveBayesTrainer {
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
     job.setNumReduceTasks(numReducers);
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     job.waitForCompletion(true);
   }
 
@@ -127,7 +127,7 @@ public final class NaiveBayesTrainer {
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(VectorWritable.class);
     job.setNumReduceTasks(numReducers);
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     job.waitForCompletion(true);
   }
   
@@ -156,7 +156,7 @@ public final class NaiveBayesTrainer {
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
     job.setNumReduceTasks(numReducers);
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     job.waitForCompletion(true);
   }
 
@@ -185,7 +185,7 @@ public final class NaiveBayesTrainer {
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
     job.setNumReduceTasks(numReducers);
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     job.waitForCompletion(true);
   }
 

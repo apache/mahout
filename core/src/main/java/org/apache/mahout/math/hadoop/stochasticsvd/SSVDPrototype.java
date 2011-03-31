@@ -20,11 +20,12 @@ package org.apache.mahout.math.hadoop.stochasticsvd;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.iterator.CopyConstructorIterator;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.SingularValueDecomposition;
@@ -34,26 +35,21 @@ import org.apache.mahout.math.ssvd.EigenSolverWrapper;
 /**
  * SSVD protoptype: non-MR concept verification for Givens QR & SSVD basic
  * algorithms
- * 
- * @author Dmitriy
- * 
  */
 public class SSVDPrototype {
 
-
-  private Omega omega;
-  private int kp; // k+p
+  private final Omega omega;
+  private final int kp; // k+p
   private GivensThinSolver qSolver;
-  private double[] yRow;
+  private final double[] yRow;
   private int cnt;
   private int blckCnt;
-  private int r;
-  private List<UpperTriangular> rBlocks = new ArrayList<UpperTriangular>();
-  private List<double[][]> qtBlocks = new ArrayList<double[][]>();
-  private List<double[]> yLookahead;
+  private final int r;
+  private final List<UpperTriangular> rBlocks = new ArrayList<UpperTriangular>();
+  private final List<double[][]> qtBlocks = new ArrayList<double[][]>();
+  private final List<double[]> yLookahead;
 
   public SSVDPrototype(long seed, int kp, int r) {
-    super();
     this.kp = kp;
     omega = new Omega(seed, kp / 2, kp - (kp / 2));
     yRow = new double[kp];
@@ -62,7 +58,7 @@ public class SSVDPrototype {
     yLookahead = new ArrayList<double[]>(kp);
   }
 
-  void firstPass(int aRowId, Vector aRow) throws IOException {
+  void firstPass(Vector aRow) {
 
     omega.computeYRow(aRow, yRow);
 
@@ -72,8 +68,9 @@ public class SSVDPrototype {
 
     while (yLookahead.size() > kp) {
 
-      if (qSolver == null)
+      if (qSolver == null) {
         qSolver = new GivensThinSolver(r, kp);
+      }
 
       qSolver.appendRow(yLookahead.remove(0));
       if (qSolver.isFull()) {
@@ -90,14 +87,16 @@ public class SSVDPrototype {
 
   void finishFirstPass() {
 
-    if (qSolver == null && yLookahead.size() == 0)
+    if (qSolver == null && yLookahead.isEmpty()) {
       return;
-    if (qSolver == null)
+    }
+    if (qSolver == null) {
       qSolver = new GivensThinSolver(yLookahead.size(), kp);
+    }
     // grow q solver up if necessary
 
     qSolver.adjust(qSolver.getCnt() + yLookahead.size());
-    while (yLookahead.size() > 0) {
+    while (!yLookahead.isEmpty()) {
 
       qSolver.appendRow(yLookahead.remove(0));
       if (qSolver.isFull()) {
@@ -111,14 +110,16 @@ public class SSVDPrototype {
     }
 
     // simulate reducers -- produce qHats
-    for (int i = 0; i < rBlocks.size(); i++)
-      qtBlocks.set(i, GivensThinSolver.computeQtHat(qtBlocks.get(i), i,
-          new DeepCopyIterator(rBlocks.listIterator())));
+    for (int i = 0; i < rBlocks.size(); i++) {
+      qtBlocks.set(i,
+                   GivensThinSolver.computeQtHat(qtBlocks.get(i), i,
+                                                 new CopyConstructorIterator<UpperTriangular>(rBlocks.listIterator())));
+    }
     cnt = 0;
     blckCnt = 0;
   }
 
-  void secondPass(int aRowId, Vector aRow, PartialRowEmitter btEmitter)
+  void secondPass(Vector aRow, PartialRowEmitter btEmitter)
     throws IOException {
     int n = aRow.size();
     double[][] qtHat = qtBlocks.get(blckCnt);
@@ -127,8 +128,9 @@ public class SSVDPrototype {
     int qRowBlckIndex = r - cnt - 1; // <-- reverse order since we fed A in
                                        // reverse
     double[] qRow = new double[kp];
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       qRow[i] = qtHat[i][qRowBlckIndex];
+    }
     Vector qRowV = new DenseVector(qRow, true);
 
     if (++cnt == r) {
@@ -136,37 +138,14 @@ public class SSVDPrototype {
       cnt = 0;
     }
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) {
       btEmitter.emitRow(i, qRowV.times(aRow.getQuick(i)));
-
-  }
-
-  private static class DeepCopyIterator implements Iterator<UpperTriangular> {
-
-    private Iterator<UpperTriangular> delegate;
-
-    public DeepCopyIterator(Iterator<UpperTriangular> del) {
-      super();
-      delegate = del;
-    }
-
-    public boolean hasNext() {
-      return delegate.hasNext();
-    }
-
-    public UpperTriangular next() {
-
-      return new UpperTriangular(delegate.next());
-    }
-
-    public void remove() {
-      delegate.remove();
     }
 
   }
 
-  public static void testThinQr(int dims, int kp, final long rndSeed)
-    throws Exception {
+
+  public static void testThinQr(int dims, int kp) throws IOException {
 
     DenseMatrix mx = new DenseMatrix(dims << 2, dims);
     // mx.assign(new UnaryFunction() {
@@ -179,10 +158,12 @@ public class SSVDPrototype {
     // }
     // });
 
-    Random rnd = new Random();
-    for (int i = 0; i < mx.rowSize(); i++)
-      for (int j = 0; j < mx.columnSize(); j++)
+    Random rnd = RandomUtils.getRandom();
+    for (int i = 0; i < mx.rowSize(); i++) {
+      for (int j = 0; j < mx.columnSize(); j++) {
         mx.set(i, j, rnd.nextDouble() * 1000);
+      }
+    }
 
     mx.setQuick(0, 0, 1);
     mx.setQuick(0, 1, 2);
@@ -197,34 +178,38 @@ public class SSVDPrototype {
     SingularValueDecomposition svd2 = new SingularValueDecomposition(mx);
     double[] svaluesControl = svd2.getSingularValues();
 
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       System.out.printf("%.3e ", svaluesControl[i]);
+    }
     System.out.println();
 
     int m = mx.rowSize(); /* ,n=mx.columnSize(); */
 
-    long seed = new Random().nextLong();
+    long seed = RandomUtils.getRandom().nextLong();
 
     final Map<Integer, Vector> btRows = new HashMap<Integer, Vector>();
 
     PartialRowEmitter btEmitter = new PartialRowEmitter() {
       @Override
-      public void emitRow(int rowNum, Vector row) throws IOException {
+      public void emitRow(int rowNum, Vector row) {
         Vector btRow = btRows.get(rowNum);
-        if (btRow != null)
+        if (btRow != null) {
           row.addTo(btRow);
+        }
         btRows.put(rowNum, btRow == null ? new DenseVector(row) : btRow);
       }
     };
 
     SSVDPrototype mapperSimulation = new SSVDPrototype(seed, kp, 3000);
-    for (int i = 0; i < m; i++)
-      mapperSimulation.firstPass(i, mx.getRow(i));
+    for (int i = 0; i < m; i++) {
+      mapperSimulation.firstPass(mx.getRow(i));
+    }
 
     mapperSimulation.finishFirstPass();
 
-    for (int i = 0; i < m; i++)
-      mapperSimulation.secondPass(i, mx.getRow(i), btEmitter);
+    for (int i = 0; i < m; i++) {
+      mapperSimulation.secondPass(mx.getRow(i), btEmitter);
+    }
 
     // LocalSSVDTest.assertOrthonormality(mapperSimulation.m_qt.transpose(),
     // false,1e-10);
@@ -234,10 +219,11 @@ public class SSVDPrototype {
     PartialRowEmitter bbtEmitter = new PartialRowEmitter() {
 
       @Override
-      public void emitRow(int rowNum, Vector row) throws IOException {
+      public void emitRow(int rowNum, Vector row) {
         Vector bbtRow = bbt.get(rowNum);
-        if (bbtRow != null)
+        if (bbtRow != null) {
           row.addTo(bbtRow);
+        }
         bbt.put(rowNum, bbtRow == null ? new DenseVector(row) : bbtRow);
       }
     };
@@ -245,32 +231,35 @@ public class SSVDPrototype {
     for (Map.Entry<Integer, Vector> btRowEntry : btRows.entrySet()) {
       Vector btRow = btRowEntry.getValue();
       assert btRow.size() == kp;
-      for (int i = 0; i < kp; i++)
+      for (int i = 0; i < kp; i++) {
         bbtEmitter.emitRow(i, btRow.times(btRow.getQuick(i)));
+      }
     }
 
     double[][] bbtValues = new double[kp][];
     for (int i = 0; i < kp; i++) {
       bbtValues[i] = new double[kp];
       Vector bbtRow = bbt.get(i);
-      for (int j = 0; j < kp; j++)
+      for (int j = 0; j < kp; j++) {
         bbtValues[i][j] = bbtRow.getQuick(j);
+      }
     }
 
     EigenSolverWrapper eigenWrapper = new EigenSolverWrapper(bbtValues);
     double[] eigenva2 = eigenWrapper.getEigenValues();
     double[] svalues = new double[kp];
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       svalues[i] = Math.sqrt(eigenva2[i]); // sqrt?
+    }
 
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       System.out.printf("%.3e ", svalues[i]);
+    }
     System.out.println();
 
   }
 
-  public static void testBlockQrWithSSVD(int dims, int kp, int r,
-      final long rndSeed) throws Exception {
+  public static void testBlockQrWithSSVD(int dims, int kp, int r, long rndSeed) throws IOException {
 
     DenseMatrix mx = new DenseMatrix(dims << 2, dims);
     // mx.assign(new UnaryFunction() {
@@ -283,10 +272,12 @@ public class SSVDPrototype {
     // }
     // });
 
-    Random rnd = new Random();
-    for (int i = 0; i < mx.rowSize(); i++)
-      for (int j = 0; j < mx.columnSize(); j++)
+    Random rnd = RandomUtils.getRandom();
+    for (int i = 0; i < mx.rowSize(); i++) {
+      for (int j = 0; j < mx.columnSize(); j++) {
         mx.set(i, j, (rnd.nextDouble() - 0.5) * 1000);
+      }
+    }
     mx.setQuick(0, 0, 1);
     mx.setQuick(0, 1, 2);
     mx.setQuick(0, 2, 3);
@@ -300,8 +291,9 @@ public class SSVDPrototype {
     SingularValueDecomposition svd2 = new SingularValueDecomposition(mx);
     double[] svaluesControl = svd2.getSingularValues();
 
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       System.out.printf("%e ", svaluesControl[i]);
+    }
     System.out.println();
 
     int m = mx.rowSize(); /* ,n=mx.columnSize(); */
@@ -310,22 +302,25 @@ public class SSVDPrototype {
 
     PartialRowEmitter btEmitter = new PartialRowEmitter() {
       @Override
-      public void emitRow(int rowNum, Vector row) throws IOException {
+      public void emitRow(int rowNum, Vector row) {
         Vector btRow = btRows.get(rowNum);
-        if (btRow != null)
+        if (btRow != null) {
           row.addTo(btRow);
+        }
         btRows.put(rowNum, btRow == null ? new DenseVector(row) : btRow);
       }
     };
 
     SSVDPrototype mapperSimulation = new SSVDPrototype(rndSeed, kp, r);
-    for (int i = 0; i < m; i++)
-      mapperSimulation.firstPass(i, mx.getRow(i));
+    for (int i = 0; i < m; i++) {
+      mapperSimulation.firstPass(mx.getRow(i));
+    }
 
     mapperSimulation.finishFirstPass();
 
-    for (int i = 0; i < m; i++)
-      mapperSimulation.secondPass(i, mx.getRow(i), btEmitter);
+    for (int i = 0; i < m; i++) {
+      mapperSimulation.secondPass(mx.getRow(i), btEmitter);
+    }
 
     // LocalSSVDTest.assertOrthonormality(mapperSimulation.m_qt.transpose(),
     // false,1e-10);
@@ -335,10 +330,11 @@ public class SSVDPrototype {
     PartialRowEmitter bbtEmitter = new PartialRowEmitter() {
 
       @Override
-      public void emitRow(int rowNum, Vector row) throws IOException {
+      public void emitRow(int rowNum, Vector row) {
         Vector bbtRow = bbt.get(rowNum);
-        if (bbtRow != null)
+        if (bbtRow != null) {
           row.addTo(bbtRow);
+        }
         bbt.put(rowNum, bbtRow == null ? new DenseVector(row) : bbtRow);
       }
     };
@@ -346,33 +342,37 @@ public class SSVDPrototype {
     for (Map.Entry<Integer, Vector> btRowEntry : btRows.entrySet()) {
       Vector btRow = btRowEntry.getValue();
       assert btRow.size() == kp;
-      for (int i = 0; i < kp; i++)
+      for (int i = 0; i < kp; i++) {
         bbtEmitter.emitRow(i, btRow.times(btRow.getQuick(i)));
+      }
     }
 
     double[][] bbtValues = new double[kp][];
     for (int i = 0; i < kp; i++) {
       bbtValues[i] = new double[kp];
       Vector bbtRow = bbt.get(i);
-      for (int j = 0; j < kp; j++)
+      for (int j = 0; j < kp; j++) {
         bbtValues[i][j] = bbtRow.getQuick(j);
+      }
     }
 
     EigenSolverWrapper eigenWrapper = new EigenSolverWrapper(bbtValues);
 
     double[] eigenva2 = eigenWrapper.getEigenValues();
     double[] svalues = new double[kp];
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       svalues[i] = Math.sqrt(eigenva2[i]); // sqrt?
+    }
 
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       System.out.printf("%e ", svalues[i]);
+    }
     System.out.println();
   }
 
   public static void main(String[] args) throws Exception {
     // testThinQr();
-    long seed = new Random().nextLong();
+    long seed = RandomUtils.getRandom().nextLong();
     testBlockQrWithSSVD(200, 200, 800, seed);
     testBlockQrWithSSVD(200, 20, 800, seed);
     testBlockQrWithSSVD(200, 20, 850, seed); // test trimming

@@ -48,15 +48,14 @@ public class GivensThinSolver {
   private int qtStartRow;
   private int rStartRow;
   private int m;
-  private int n; // m-row cnt, n- column count, m>=n
+  private final int n; // m-row cnt, n- column count, m>=n
   private int cnt;
-  private double[] cs = new double[2];
+  private final double[] cs = new double[2];
 
   public GivensThinSolver(int m, int n) {
-    super();
-
-    if (!(m >= n))
+    if (!(m >= n)) {
       throw new IllegalArgumentException("Givens thin QR: must be true: m>=n");
+    }
 
     this.m = m;
     this.n = n;
@@ -86,8 +85,9 @@ public class GivensThinSolver {
     double[] aRow = new double[n];
     for (int i = 0; i < m; i++) {
       Vector aRowV = a.getRow(i);
-      for (int j = 0; j < n; j++)
+      for (int j = 0; j < n; j++) {
         aRow[j] = aRowV.getQuick(j);
+      }
       appendRow(aRow);
     }
   }
@@ -109,13 +109,16 @@ public class GivensThinSolver {
   }
 
   public void adjust(int newM) {
-    if (newM == m)
+    if (newM == m) {
       return; // no adjustment is required.
-    if (newM < n)
+    }
+    if (newM < n) {
       throw new IllegalArgumentException("new m can't be less than n");
-    if (newM < cnt)
+    }
+    if (newM < cnt) {
       throw new IllegalArgumentException(
           "new m can't be less than rows accumulated");
+    }
     vQtRow = new double[newM];
 
     // grow or shrink qt rows
@@ -147,9 +150,9 @@ public class GivensThinSolver {
    * @param aRow
    */
   public void appendRow(double[] aRow) {
-    if (cnt >= m)
-      throw new RuntimeException(
-          "thin QR solver fed more rows than initialized for");
+    if (cnt >= m) {
+      throw new IllegalStateException("thin QR solver fed more rows than initialized for");
+    }
     try {
       // moving pointers around is inefficient but
       // for the sanity's sake i am keeping it this way so i don't
@@ -231,8 +234,9 @@ public class GivensThinSolver {
   // not interesting.
   public UpperTriangular getRTilde() {
     UpperTriangular packedR = new UpperTriangular(n);
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) {
       packedR.assignRow(i, getRRow(i));
+    }
     return packedR;
   }
 
@@ -317,12 +321,14 @@ public class GivensThinSolver {
   }
 
   public static double toRho(double c, double s) {
-    if (c == 0)
+    if (c == 0) {
       return 1;
-    if (Math.abs(s) < Math.abs(c))
+    }
+    if (Math.abs(s) < Math.abs(c)) {
       return Math.signum(c) * s / 2;
-    else
+    } else {
       return Math.signum(s) * 2 / c;
+    }
   }
 
   public static void mergeR(UpperTriangular r1, UpperTriangular r2) {
@@ -412,46 +418,47 @@ public class GivensThinSolver {
     int r = qt1[0].length;
 
     double[][] qTilde = new double[kp][];
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       qTilde[i] = new double[r];
+    }
     mergeRonQ(r1, r2, qt1, qTilde);
     return qt1;
   }
 
   // returns merged Q (which in this case is the qt1)
-  public static double[][] mergeQrUp(double[][] qt1, UpperTriangular r1,
-      UpperTriangular r2) {
+  public static double[][] mergeQrUp(double[][] qt1, UpperTriangular r1, UpperTriangular r2) {
     int kp = qt1.length;
     int r = qt1[0].length;
 
     double[][] qTilde = new double[kp][];
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       qTilde[i] = new double[r];
+    }
     mergeRonQ(r1, r2, qt1, qTilde);
     return qt1;
   }
 
-  public static double[][] mergeQrDown(double[][] r1, double[][] qt2,
-      double[][] r2) {
+  public static double[][] mergeQrDown(double[][] r1, double[][] qt2, double[][] r2) {
     int kp = qt2.length;
     int r = qt2[0].length;
 
     double[][] qTilde = new double[kp][];
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       qTilde[i] = new double[r];
+    }
     mergeRonQ(r1, r2, qTilde, qt2);
     return qTilde;
 
   }
 
-  public static double[][] mergeQrDown(UpperTriangular r1, double[][] qt2,
-      UpperTriangular r2) {
+  public static double[][] mergeQrDown(UpperTriangular r1, double[][] qt2, UpperTriangular r2) {
     int kp = qt2.length;
     int r = qt2[0].length;
 
     double[][] qTilde = new double[kp][];
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       qTilde[i] = new double[r];
+    }
     mergeRonQ(r1, r2, qTilde, qt2);
     return qTilde;
 
@@ -460,18 +467,20 @@ public class GivensThinSolver {
   public static double[][] computeQtHat(double[][] qt, int i,
       Iterator<UpperTriangular> rIter) {
     UpperTriangular rTilde = rIter.next();
-    for (int j = 1; j < i; j++)
+    for (int j = 1; j < i; j++) {
       mergeR(rTilde, rIter.next());
-    if (i > 0)
+    }
+    if (i > 0) {
       qt = mergeQrDown(rTilde, qt, rIter.next());
-    for (int j = i + 1; rIter.hasNext(); j++)
+    }
+    while (rIter.hasNext()) {
       qt = mergeQrUp(qt, rTilde, rIter.next());
+    }
     return qt;
   }
 
   // test helpers
-  public static boolean isOrthonormal(double[][] qt, boolean insufficientRank,
-      double epsilon) {
+  public static boolean isOrthonormal(double[][] qt, boolean insufficientRank, double epsilon) {
     int n = qt.length;
     int rank = 0;
     for (int i = 0; i < n; i++) {
@@ -479,16 +488,18 @@ public class GivensThinSolver {
 
       double norm = ei.norm(2);
 
-      if (Math.abs(1 - norm) < epsilon)
+      if (Math.abs(1 - norm) < epsilon) {
         rank++;
-      else if (Math.abs(norm) > epsilon)
+      } else if (Math.abs(norm) > epsilon) {
         return false; // not a rank deficiency, either
+      }
 
       for (int j = 0; j <= i; j++) {
         Vector ej = new DenseVector(qt[j], true);
         double dot = ei.dot(ej);
-        if (!(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon))
+        if (!(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon)) {
           return false;
+        }
       }
     }
     return (!insufficientRank && rank == n) || (insufficientRank && rank < n);
@@ -502,29 +513,35 @@ public class GivensThinSolver {
     for (int i = 0; i < n; i++) {
       List<Vector> ei = new ArrayList<Vector>();
       // Vector e_i=new DenseVector (qt[i],true);
-      for (double[][] qtHat : qtHats)
+      for (double[][] qtHat : qtHats) {
         ei.add(new DenseVector(qtHat[i], true));
+      }
 
       double norm = 0;
-      for (Vector v : ei)
+      for (Vector v : ei) {
         norm += v.dot(v);
+      }
       norm = Math.sqrt(norm);
-      if (Math.abs(1 - norm) < epsilon)
+      if (Math.abs(1 - norm) < epsilon) {
         rank++;
-      else if (Math.abs(norm) > epsilon)
+      } else if (Math.abs(norm) > epsilon) {
         return false; // not a rank deficiency, either
+      }
 
       for (int j = 0; j <= i; j++) {
         List<Vector> ej = new ArrayList<Vector>();
-        for (double[][] qtHat : qtHats)
+        for (double[][] qtHat : qtHats) {
           ej.add(new DenseVector(qtHat[j], true));
+        }
 
         // Vector e_j = new DenseVector ( qt[j], true);
         double dot = 0;
-        for (int k = 0; k < ei.size(); k++)
+        for (int k = 0; k < ei.size(); k++) {
           dot += ei.get(k).dot(ej.get(k));
-        if (!(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon))
+        }
+        if (!(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon)) {
           return false;
+        }
       }
     }
     return (!insufficientRank && rank == n) || (insufficientRank && rank < n);
@@ -532,10 +549,10 @@ public class GivensThinSolver {
   }
 
   private static class TriangularRowView extends AbstractVector {
-    private UpperTriangular viewed;
+    private final UpperTriangular viewed;
     private int rowNum;
 
-    public TriangularRowView(UpperTriangular viewed) {
+    private TriangularRowView(UpperTriangular viewed) {
       super(viewed.columnSize());
       this.viewed = viewed;
 
@@ -590,30 +607,6 @@ public class GivensThinSolver {
     @Override
     protected Matrix matrixLike(int rows, int columns) {
       throw new UnsupportedOperationException();
-    }
-
-  }
-
-  public static class DeepCopyUTIterator implements Iterator<UpperTriangular> {
-
-    private Iterator<UpperTriangular> delegate;
-
-    public DeepCopyUTIterator(Iterator<UpperTriangular> del) {
-      super();
-      delegate = del;
-    }
-
-    public boolean hasNext() {
-      return delegate.hasNext();
-    }
-
-    public UpperTriangular next() {
-
-      return new UpperTriangular(delegate.next());
-    }
-
-    public void remove() {
-      delegate.remove();
     }
 
   }

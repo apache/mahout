@@ -17,7 +17,6 @@
 
 package org.apache.mahout.clustering.minhash;
 
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,12 +25,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.HashSet;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -88,19 +86,18 @@ public final class LastfmClusterEvaluator {
    * @param samplePercentage
    *          Percentage of clusters to sample. Must be between 0.0 and 1.0
    */
-  private static void testPrecision(Path clusterFile, double threshold, double samplePercentage) throws IOException {
+  private static void testPrecision(Path clusterFile, double threshold, double samplePercentage) {
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, clusterFile, conf);
     Random rand = RandomUtils.getRandom();
-    Writable cluster = new Text();
     Text prevCluster = new Text();
-    VectorWritable point = new VectorWritable();
     List<List<Integer>> listenerVectors = new ArrayList<List<Integer>>();
     long similarListeners = 0;
     long allListeners = 0;
     int clustersProcessed = 0;
-    while (reader.next(cluster, point)) {
+    for (Pair<Text,VectorWritable> record :
+         new SequenceFileIterable<Text,VectorWritable>(clusterFile, true, conf)) {
+      Text cluster = record.getFirst();
+      VectorWritable point = record.getSecond();
       if (!cluster.equals(prevCluster)) {
         // We got a new cluster
         prevCluster.set(cluster.toString());
@@ -141,7 +138,7 @@ public final class LastfmClusterEvaluator {
     System.out.println(" Average cluster precision: A/B = " + format.format(precision));
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     if (args.length < 3) {
       System.out.println("LastfmClusterEvaluation <cluster-file> <threshold> <sample-percentage>");
       System.out.println("      <cluster-file>: Absolute Path of file containing cluster information in DEBUG format");

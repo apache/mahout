@@ -25,13 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.ModelDistribution;
@@ -92,29 +87,6 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
     referenceData = TestKmeansClustering.getPointsWritable(REFERENCE);
     // generate larger test data set for the clustering tests to chew on
     generateSamples();
-  }
-
-  void printRepPoints(int numIterations) throws IOException {
-    for (int i = 0; i <= numIterations; i++) {
-      Path out = new Path(getTestTempDirPath("output"), "representativePoints-" + i);
-      System.out.println("Representative Points for iteration " + i);
-      Configuration conf = new Configuration();
-      FileSystem fs = FileSystem.get(conf);
-      for (FileStatus file : fs.listStatus(out)) {
-        if (!file.getPath().getName().startsWith(".")) {
-          SequenceFile.Reader reader = new SequenceFile.Reader(fs, file.getPath(), conf);
-          try {
-            Writable clusterId = new IntWritable(0);
-            VectorWritable point = new VectorWritable();
-            while (reader.next(clusterId, point)) {
-              System.out.println("\tC-" + clusterId + ": " + AbstractCluster.formatVector(point.get(), null));
-            }
-          } finally {
-            reader.close();
-          }
-        }
-      }
-    }
   }
 
   /**

@@ -90,21 +90,17 @@ public class WikipediaMapper extends Mapper<LongWritable, Text, Text, Text> {
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    try {
-      if (inputCategories == null) {
-        Set<String> newCategories = new HashSet<String>();
+    if (inputCategories == null) {
+      Set<String> newCategories = new HashSet<String>();
 
-        DefaultStringifier<Set<String>> setStringifier = new DefaultStringifier<Set<String>>(conf, GenericsUtil
-            .getClass(newCategories));
+      DefaultStringifier<Set<String>> setStringifier =
+          new DefaultStringifier<Set<String>>(conf, GenericsUtil.getClass(newCategories));
 
-        String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
-        inputCategories = setStringifier.fromString(categoriesStr);
-      }
-      exactMatchOnly = conf.getBoolean("exact.match.only", false);
-      all = conf.getBoolean("all.files", true);
-    } catch (IOException ex) {
-      throw new IllegalStateException(ex);
+      String categoriesStr = conf.get("wikipedia.categories", setStringifier.toString(newCategories));
+      inputCategories = setStringifier.fromString(categoriesStr);
     }
+    exactMatchOnly = conf.getBoolean("exact.match.only", false);
+    all = conf.getBoolean("all.files", true);
     log.info("Configure: Input Categories size: {} All: {} Exact Match: {}",
              new Object[] {inputCategories.size(), all, exactMatchOnly});
   }

@@ -57,8 +57,9 @@ public final class Job extends AbstractJob {
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
-      HadoopUtil.overwriteOutput(output);
-      new Job().run(new Configuration(),
+      Configuration conf = new Configuration();
+      HadoopUtil.delete(conf, output);
+      new Job().run(conf,
                     new Path("testdata"),
                     output,
                     new EuclideanDistanceMeasure(),
@@ -99,7 +100,7 @@ public final class Job extends AbstractJob {
         .withDescription("coefficient normalization factor, must be greater than 1").withShortName(M_OPTION)
         .create());
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
@@ -154,7 +155,7 @@ public final class Job extends AbstractJob {
                   int maxIterations,
                   float fuzziness,
                   double convergenceDelta)
-    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");

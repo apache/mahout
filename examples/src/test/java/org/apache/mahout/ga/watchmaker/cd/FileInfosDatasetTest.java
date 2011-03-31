@@ -20,7 +20,7 @@ package org.apache.mahout.ga.watchmaker.cd;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 
 import com.google.common.io.Resources;
 import org.apache.mahout.examples.MahoutTestCase;

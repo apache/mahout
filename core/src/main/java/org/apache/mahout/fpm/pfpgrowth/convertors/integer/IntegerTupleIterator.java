@@ -21,31 +21,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.mahout.common.IntegerTuple;
+import org.apache.mahout.common.iterator.TransformingIterator;
 
 /**
  * Iterates over an integer tuple and output it as a list
  */
-public final class IntegerTupleIterator implements Iterator<List<Integer>> {
-  
-  private final Iterator<IntegerTuple> iterator;
-  
+public final class IntegerTupleIterator extends TransformingIterator<IntegerTuple,List<Integer>> {
+
   public IntegerTupleIterator(Iterator<IntegerTuple> iterator) {
-    this.iterator = iterator;
+    super(iterator);
   }
-  
+
   @Override
-  public boolean hasNext() {
-    return iterator.hasNext();
+  protected List<Integer> transform(IntegerTuple in) {
+    return in.getEntries();
   }
-  
-  @Override
-  public List<Integer> next() {
-    IntegerTuple transaction = iterator.next();
-    return transaction.getEntries();
-  }
-  
-  @Override
-  public void remove() {
-    iterator.remove();
-  }
+
 }

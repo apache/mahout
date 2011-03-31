@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 import org.apache.mahout.cf.taste.example.grouplens.GroupLensDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.IOUtils;
 
 /**

@@ -22,17 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.kmeans.OutputLogFilter;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 
 public class MeanShiftCanopyClusterMapper
   extends Mapper<WritableComparable<?>, MeanShiftCanopy, IntWritable, WeightedVectorWritable> {
@@ -57,39 +54,18 @@ public class MeanShiftCanopyClusterMapper
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    try {
-      canopies = getCanopies(context.getConfiguration());
-    } catch (SecurityException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
-    }
+    canopies = getCanopies(context.getConfiguration());
   }
 
   public static List<MeanShiftCanopy> getCanopies(Configuration conf) {
     String statePath = conf.get(MeanShiftCanopyDriver.STATE_IN_KEY);
     List<MeanShiftCanopy> canopies = new ArrayList<MeanShiftCanopy>();
-    try {
-      Path path = new Path(statePath);
-      FileSystem fs = FileSystem.get(path.toUri(), conf);
-      FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
-      for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-        try {
-          Writable key = new Text();
-          MeanShiftCanopy canopy = new MeanShiftCanopy();
-          while (reader.next(key, canopy)) {
-            canopies.add(canopy);
-            canopy = new MeanShiftCanopy();
-          }
-        } finally {
-          reader.close();
-        }
-      }
-      return canopies;
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
+    Path path = new Path(statePath);
+    for (MeanShiftCanopy value :
+         new SequenceFileDirValueIterable<MeanShiftCanopy>(path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      canopies.add(value);
     }
+    return canopies;
   }
 
 }

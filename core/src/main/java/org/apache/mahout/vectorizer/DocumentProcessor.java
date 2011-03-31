@@ -89,7 +89,7 @@ public final class DocumentProcessor {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setNumReduceTasks(0);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
 
     job.waitForCompletion(true);
   }

@@ -17,17 +17,15 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.classifier.naivebayes.trainer.NaiveBayesTrainer;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.JsonMatrixAdapter;
 import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Matrix;
@@ -143,23 +141,21 @@ public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonS
   }
   
   // CODE USED FOR SERIALIZATION
-  public static NaiveBayesModel fromMRTrainerOutput(Path output, Configuration conf) throws IOException {
+  public static NaiveBayesModel fromMRTrainerOutput(Path output, Configuration conf) {
     Path classVectorPath = new Path(output, NaiveBayesTrainer.CLASS_VECTORS);
     Path sumVectorPath = new Path(output, NaiveBayesTrainer.SUM_VECTORS);
     Path thetaSumPath = new Path(output, NaiveBayesTrainer.THETA_SUM);
 
     NaiveBayesModel model = new NaiveBayesModel();
     model.setAlphaI(conf.getFloat(NaiveBayesTrainer.ALPHA_I, 1.0f));
-    
-    FileSystem fs = sumVectorPath.getFileSystem(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, sumVectorPath, conf);
-    Writable key = new Text();
-    VectorWritable value = new VectorWritable();
 
     int featureCount = 0;
     int labelCount = 0;
     // read feature sums and label sums
-    while (reader.next(key, value)) {
+    for (Pair<Text,VectorWritable> record :
+         new SequenceFileIterable<Text, VectorWritable>(sumVectorPath, true, conf)) {
+      Text key = record.getFirst();
+      VectorWritable value = record.getSecond();
       if (key.toString().equals(BayesConstants.FEATURE_SUM)) {
         model.setFeatureSum(value.get());
         featureCount = value.get().getNumNondefaultElements();
@@ -170,30 +166,28 @@ public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonS
         labelCount = value.get().size();
       }
     }
-    reader.close();
-    
+
     // read the class matrix
-    reader = new SequenceFile.Reader(fs, classVectorPath, conf);
-    IntWritable label = new IntWritable();
     Matrix matrix = new SparseMatrix(new int[] {labelCount, featureCount});
-    while (reader.next(label, value)) {
+    for (Pair<IntWritable,VectorWritable> record :
+         new SequenceFileIterable<IntWritable,VectorWritable>(classVectorPath, true, conf)) {
+      IntWritable label = record.getFirst();
+      VectorWritable value = record.getSecond();
       matrix.assignRow(label.get(), value.get());
     }
-    reader.close();
     
     model.setWeightMatrix(matrix);
-   
-    
-    
-    reader = new SequenceFile.Reader(fs, thetaSumPath, conf);
+
     // read theta normalizer
-    while (reader.next(key, value)) {
+    for (Pair<Text,VectorWritable> record :
+         new SequenceFileIterable<Text,VectorWritable>(thetaSumPath, true, conf)) {
+      Text key = record.getFirst();
+      VectorWritable value = record.getSecond();
       if (key.toString().equals(BayesConstants.LABEL_THETA_NORMALIZER)) {
         model.setPerlabelThetaNormalizer(value.get());
       }
     }
-    reader.close();
-    
+
     return model;
   }
   

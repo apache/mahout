@@ -34,7 +34,6 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   private static final int NUM_DOCS = 100;
   
   private Configuration conf;
-  private FileSystem fs;
   private Path inputPath;
   
   @Override
@@ -42,7 +41,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     conf = new Configuration();
-    fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(conf);
 
     inputPath = getTestTempFilePath("documents/docs.file");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
@@ -101,7 +100,7 @@ public class SparseVectorsFromSequenceFilesTest extends MahoutTestCase {
     Path tfVectors = new Path(outputPath, "tf-vectors");
     Path tfidfVectors = new Path(outputPath, "tfidf-vectors");
     
-    DictionaryVectorizerTest.validateVectors(fs, conf, NUM_DOCS, tfVectors, sequential, named);
-    DictionaryVectorizerTest.validateVectors(fs, conf, NUM_DOCS, tfidfVectors, sequential, named);
+    DictionaryVectorizerTest.validateVectors(conf, NUM_DOCS, tfVectors, sequential, named);
+    DictionaryVectorizerTest.validateVectors(conf, NUM_DOCS, tfidfVectors, sequential, named);
   }  
 }

@@ -38,23 +38,15 @@ public class DirichletReducer extends Reducer<Text,VectorWritable,Text,Dirichlet
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    try {
-      DirichletState state = DirichletMapper.getDirichletState(context.getConfiguration());
-      clusterer = new DirichletClusterer(state);
-      List<DirichletCluster> oldModels = state.getClusters();
-      for (DirichletCluster cluster : oldModels) {
-        cluster.getModel().configure(context.getConfiguration());
-      }
-      this.newModels = (Cluster[]) state.getModelFactory().sampleFromPosterior(state.getModels());
-      for (Cluster cluster : newModels) {
-        cluster.configure(context.getConfiguration());
-      }
-    } catch (NumberFormatException e) {
-      throw new IllegalStateException(e);
-    } catch (SecurityException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
+    DirichletState state = DirichletMapper.getDirichletState(context.getConfiguration());
+    clusterer = new DirichletClusterer(state);
+    List<DirichletCluster> oldModels = state.getClusters();
+    for (DirichletCluster cluster : oldModels) {
+      cluster.getModel().configure(context.getConfiguration());
+    }
+    this.newModels = (Cluster[]) state.getModelFactory().sampleFromPosterior(state.getModels());
+    for (Cluster cluster : newModels) {
+      cluster.configure(context.getConfiguration());
     }
   }
 

@@ -296,7 +296,7 @@ public final class TestRowSimilarityJob extends MahoutTestCase {
         DistributedTanimotoCoefficientVectorSimilarity.class.getName(), "--tempDir", tmpDir.getAbsolutePath() });
 
     Matrix similarityMatrix =
-      MathHelper.readEntries(fs, conf, new Path(outputDir.getAbsolutePath(), "part-r-00000"), 3, 3);
+      MathHelper.readEntries(conf, new Path(outputDir.getAbsolutePath(), "part-r-00000"), 3, 3);
     
     assertNotNull(similarityMatrix);
     assertEquals(3, similarityMatrix.numCols());
@@ -387,7 +387,7 @@ public final class TestRowSimilarityJob extends MahoutTestCase {
         "--tempDir", tmpDir.getAbsolutePath() });
 
     Matrix similarityMatrix =
-        MathHelper.readEntries(fs, conf, new Path(outputDir.getAbsolutePath(), "part-r-00000"), 3, 3);
+        MathHelper.readEntries(conf, new Path(outputDir.getAbsolutePath(), "part-r-00000"), 3, 3);
     
     assertNotNull(similarityMatrix);
     assertEquals(3, similarityMatrix.numCols());

@@ -18,7 +18,6 @@
 package org.apache.mahout.cf.taste.hadoop.als;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -28,6 +27,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
+import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixSlice;
@@ -81,12 +81,12 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
   public void initializeMReducer() throws Exception {
     Reducer<VarLongWritable,FloatWritable,VarIntWritable,FeatureVectorWithRatingWritable>.Context ctx =
         EasyMock.createMock(Reducer.Context.class);
-    ctx.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(123L))), matchInitializedFeatureVector(3d, 3));
+    ctx.write(EasyMock.eq(new VarIntWritable(TasteHadoopUtils.idToIndex(123L))), matchInitializedFeatureVector(3.0, 3));
     EasyMock.replay(ctx);
 
     ParallelALSFactorizationJob.InitializeMReducer reducer = new ParallelALSFactorizationJob.InitializeMReducer();
     setField(reducer, "numFeatures", 3);
-    reducer.reduce(new VarLongWritable(123L), Arrays.asList(new FloatWritable(4f), new FloatWritable(2f)), ctx);
+    reducer.reduce(new VarLongWritable(123L), Arrays.asList(new FloatWritable(4.0f), new FloatWritable(2.0f)), ctx);
     EasyMock.verify(ctx);
   }
 
@@ -215,10 +215,10 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
 
     Double na = Double.NaN;
     Matrix preferences = new SparseRowMatrix(new int[] { 4, 4 }, new Vector[] {
-        new DenseVector(new double[] { 5d, 5d, 2d, na }),
-        new DenseVector(new double[] { 2d, na, 3d, 5d }),
-        new DenseVector(new double[] { na, 5d, na, 3d }),
-        new DenseVector(new double[] { 3d, na, na, 5d }) });
+        new DenseVector(new double[] {5.0, 5.0, 2.0,  na }),
+        new DenseVector(new double[] {2.0,  na, 3.0, 5.0 }),
+        new DenseVector(new double[] { na, 5.0,  na, 3.0 }),
+        new DenseVector(new double[] {3.0,  na,  na, 5.0 }) });
 
     StringBuilder prefsAsText = new StringBuilder();
     String separator = "";
@@ -229,7 +229,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
       while (elementIterator.hasNext()) {
         Vector.Element e = elementIterator.next();
         if (!Double.isNaN(e.get())) {
-          prefsAsText.append(separator).append(slice.index()).append(",").append(e.index()).append(",").append(e.get());
+          prefsAsText.append(separator).append(slice.index()).append(',').append(e.index()).append(',').append(e.get());
           separator = "\n";
         }
       }
@@ -244,23 +244,19 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     conf.set("mapred.output.dir", outputDir.getAbsolutePath());
     conf.setBoolean("mapred.output.compress", false);
 
+    alsFactorization.setConf(conf);
     int numFeatures = 3;
     int numIterations = 5;
     double lambda = 0.065;
-
-    alsFactorization.setConf(conf);
     alsFactorization.run(new String[] { "--tempDir", tmpDir.getAbsolutePath(), "--lambda", String.valueOf(lambda),
         "--numFeatures", String.valueOf(numFeatures), "--numIterations", String.valueOf(numIterations) });
 
-    Path inputPath = new Path(inputFile.getAbsolutePath());
-    FileSystem fs = FileSystem.get(inputPath.toUri(), conf);
-
-    Matrix u = MathHelper.readEntries(fs, conf, new Path(outputDir.getAbsolutePath(), "U/part-r-00000"),
+    Matrix u = MathHelper.readEntries(conf, new Path(outputDir.getAbsolutePath(), "U/part-r-00000"),
         preferences.numRows(), numFeatures);
-    Matrix m = MathHelper.readEntries(fs, conf, new Path(outputDir.getAbsolutePath(), "M/part-r-00000"),
+    Matrix m = MathHelper.readEntries(conf, new Path(outputDir.getAbsolutePath(), "M/part-r-00000"),
       preferences.numCols(), numFeatures);
 
-    FullRunningAverage avg = new FullRunningAverage();
+    RunningAverage avg = new FullRunningAverage();
     sliceIterator = preferences.iterateAll();
     while (sliceIterator.hasNext()) {
       MatrixSlice slice = sliceIterator.next();
@@ -273,7 +269,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
           double err = pref - estimate;
           avg.addDatum(err * err);
           logger.info("Comparing preference of user [" + slice.index() + "] towards item [" + e.index() + "], " +
-              "was [" + pref + "] estimate is [" + estimate + "]");
+              "was [" + pref + "] estimate is [" + estimate + ']');
         }
       }
     }

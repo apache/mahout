@@ -20,6 +20,7 @@ package org.apache.mahout.clustering.display;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
 import org.apache.mahout.clustering.kmeans.RandomSeedGenerator;
@@ -47,8 +48,9 @@ class DisplayFuzzyKMeans extends DisplayClustering {
 
     Path samples = new Path("samples");
     Path output = new Path("output");
-    HadoopUtil.overwriteOutput(samples);
-    HadoopUtil.overwriteOutput(output);
+    Configuration conf = new Configuration();
+    HadoopUtil.delete(conf, samples);
+    HadoopUtil.delete(conf, output);
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     //boolean b = true;

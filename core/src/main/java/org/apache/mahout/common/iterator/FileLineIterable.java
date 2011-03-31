@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common;
+package org.apache.mahout.common.iterator;
 
 import java.io.File;
 import java.io.IOException;

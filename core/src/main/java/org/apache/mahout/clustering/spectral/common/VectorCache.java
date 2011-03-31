@@ -28,6 +28,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -46,13 +47,17 @@ public final class VectorCache {
    * @param key SequenceFile key
    * @param vector Vector to save, to be wrapped as VectorWritable
    */
-  public static void save(Writable key, Vector vector, Path output, Configuration
-      conf, boolean overwritePath, boolean deleteOnExit) throws IOException {
+  public static void save(Writable key,
+                          Vector vector,
+                          Path output,
+                          Configuration conf,
+                          boolean overwritePath,
+                          boolean deleteOnExit) throws IOException {
     
     FileSystem fs = FileSystem.get(conf);
     output = fs.makeQualified(output);
     if (overwritePath) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(conf, output);
     }
 
     // set the cache
@@ -78,27 +83,24 @@ public final class VectorCache {
   }
   
   /**
-   * Loads the vector with the specified key from the cache. Returns null
-   * if nothing is found (up to the caller to handle this accordingly)
+   * Loads the vector from {@link DistributedCache}. Returns null if no vector exists.
    */
-  public static Vector load(Writable key, Configuration conf) throws IOException {
-    URI [] files = DistributedCache.getCacheFiles(conf);
+  public static Vector load(Configuration conf) throws IOException {
+    URI[] files = DistributedCache.getCacheFiles(conf);
     if (files == null || files.length < 1) {
       return null;
     }
-    return load(key, conf, new Path(files[0].getPath()));
+    return load(conf, new Path(files[0].getPath()));
   }
   
   /**
-   * Loads a Vector from the specified path
+   * Loads a Vector from the specified path. Returns null if no vector exists.
    */
-  public static Vector load(Writable key, Configuration conf, Path input) throws IOException {
-
-    FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, input, conf);
-    VectorWritable retval = new VectorWritable();
-    reader.next(key, retval);
-    reader.close();
-    return retval.get();
+  public static Vector load(Configuration conf, Path input) throws IOException {
+    SequenceFileValueIterator<VectorWritable> iterator =
+        new SequenceFileValueIterator<VectorWritable>(input, true, conf);
+    VectorWritable vectorWritable = iterator.next();
+    iterator.close();
+    return vectorWritable.get();
   }
 }

@@ -45,14 +45,14 @@ class DisplaySpectralKMeans extends DisplayClustering {
     DistanceMeasure measure = new ManhattanDistanceMeasure();
     Path samples = new Path("samples");
     Path output = new Path("output");
-    HadoopUtil.overwriteOutput(samples);
-    HadoopUtil.overwriteOutput(output);
+    Configuration conf = new Configuration();
+    HadoopUtil.delete(conf, samples);
+    HadoopUtil.delete(conf, output);
 
     RandomUtils.useTestSeed();
     DisplayClustering.generateSamples();
     writeSampleData(samples);
     Path affinities = new Path(output, "affinities");
-    Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     if (!fs.exists(output)) {
       fs.mkdirs(output);

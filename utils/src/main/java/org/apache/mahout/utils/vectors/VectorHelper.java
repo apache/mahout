@@ -25,14 +25,14 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.common.FileLineIterator;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.FileLineIterator;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
@@ -44,17 +44,14 @@ public final class VectorHelper {
   
   private VectorHelper() { }
 
-  public static String vectorToCSVString(Vector vector, boolean namesAsComments){
-    StringBuilder bldr = new StringBuilder(2048);
-    try {
-      vectorToCSVString(vector, namesAsComments, bldr);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public static String vectorToCSVString(Vector vector, boolean namesAsComments) throws IOException {
+    Appendable bldr = new StringBuilder(2048);
+    vectorToCSVString(vector, namesAsComments, bldr);
     return bldr.toString();
   }
 
-  public static void vectorToCSVString(Vector vector, boolean namesAsComments,
+  public static void vectorToCSVString(Vector vector,
+                                       boolean namesAsComments,
                                        Appendable bldr) throws IOException {
     if (namesAsComments && vector instanceof NamedVector){
       bldr.append("#").append(((NamedVector)vector).getName()).append('\n');
@@ -124,18 +121,11 @@ public final class VectorHelper {
    * @param filePattern
    *          <PATH TO DICTIONARY>/dictionary.file-*
    */
-  public static String[] loadTermDictionary(Configuration conf, FileSystem fs, String filePattern) throws IOException {
-    FileStatus[] dictionaryFiles = fs.globStatus(new Path(filePattern));
+  public static String[] loadTermDictionary(Configuration conf, String filePattern) {
     OpenObjectIntHashMap<String> dict = new OpenObjectIntHashMap<String>();
-    Writable key = new Text();
-    IntWritable value = new IntWritable();
-    for (FileStatus fileStatus : dictionaryFiles) {
-      Path path = fileStatus.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      // key is term value is id
-      while (reader.next(key, value)) {
-        dict.put(key.toString(), value.get());
-      }
+    for (Pair<Text,IntWritable> record :
+         new SequenceFileDirIterable<Text,IntWritable>(new Path(filePattern), PathType.GLOB, null, null, true, conf)) {
+      dict.put(record.getFirst().toString(), record.getSecond().get());
     }
     String[] dictionary = new String[dict.size()];
     for (String feature : dict.keys()) {

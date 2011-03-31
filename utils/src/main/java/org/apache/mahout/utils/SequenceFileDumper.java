@@ -19,7 +19,6 @@ package org.apache.mahout.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -34,10 +33,10 @@ import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.commons.cli2.util.HelpFormatter;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public final class SequenceFileDumper {
   private SequenceFileDumper() {
   }
   
-  public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException {
+  public static void main(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
     GroupBuilder gbuilder = new GroupBuilder();
@@ -83,9 +82,7 @@ public final class SequenceFileDumper {
       if (cmdLine.hasOption(seqOpt)) {
         Path path = new Path(cmdLine.getValue(seqOpt).toString());
         Configuration conf = new Configuration();
-        FileSystem fs = FileSystem.get(path.toUri(), conf);
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-        
+
         Writer writer;
         if (cmdLine.hasOption(outputOpt)) {
           writer = new OutputStreamWriter(
@@ -101,24 +98,23 @@ public final class SequenceFileDumper {
             sub = Integer.parseInt(cmdLine.getValue(substringOpt).toString());
           }
           boolean countOnly = cmdLine.hasOption(countOpt);
-          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-          writer.append("Key class: ").append(String.valueOf(reader.getKeyClass()));
-          writer.append(" Value Class: ").append(String.valueOf(value.getClass())).append('\n');
-          writer.flush();
+          SequenceFileIterator<?,?> iterator = new SequenceFileIterator<Writable,Writable>(path, true, conf);
+          writer.append("Key class: ").append(iterator.getKeyClass().toString());
+          writer.append(" Value Class: ").append(iterator.getValueClass().toString()).append('\n');
           long count = 0;
           if (countOnly) {
-            while (reader.next(key, value)) {
+            while (iterator.hasNext()) {
+              iterator.next();
               count++;
             }
             writer.append("Count: ").append(String.valueOf(count)).append('\n');
           } else {
-            while (reader.next(key, value)) {
-              writer.append("Key: ").append(String.valueOf(key));
-              String str = value.toString();
+            while (iterator.hasNext()) {
+              Pair<?,?> record = iterator.next();
+              writer.append("Key: ").append(record.getFirst().toString());
+              String str = record.getSecond().toString();
               writer.append(": Value: ").append(str.length() > sub ? str.substring(0, sub) : str);
               writer.write('\n');
-              writer.flush();
               count++;
             }
             writer.append("Count: ").append(String.valueOf(count)).append('\n');

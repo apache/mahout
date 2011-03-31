@@ -20,18 +20,16 @@ package org.apache.mahout.fpm.pfpgrowth;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.Pair;
-import org.apache.mahout.common.StringRecordIterator;
+import org.apache.mahout.common.iterator.FileLineIterable;
+import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.junit.Test;
@@ -69,7 +67,7 @@ public class FPGrowthRetailDataTest {
       new OutputCollector<String,List<Pair<List<String>,Long>>>() {
         
         @Override
-        public void collect(String key, List<Pair<List<String>,Long>> value) throws IOException {
+        public void collect(String key, List<Pair<List<String>,Long>> value) {
           
           for (Pair<List<String>,Long> v : value) {
             List<String> l = v.getFirst();
@@ -83,7 +81,7 @@ public class FPGrowthRetailDataTest {
         public void update(String status) {}
       });
     
-    assertEquals(new Long(pattern_41_36_39), results.get(returnableFeatures));
+    assertEquals(Long.valueOf(pattern_41_36_39), results.get(returnableFeatures));
     
   }
   

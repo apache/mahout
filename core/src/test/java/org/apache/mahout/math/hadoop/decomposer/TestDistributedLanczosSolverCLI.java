@@ -18,12 +18,9 @@
 package org.apache.mahout.math.hadoop.decomposer;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
-import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
@@ -56,23 +53,13 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     Matrix eigenVectors = new DenseMatrix(10, corpus.numCols());
     Configuration conf = new Configuration();
 
-    FileSystem fs = FileSystem.get(rawEigenvectors.toUri(), conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, rawEigenvectors, conf);
-    try {
-      Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-      Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-      int i = 0;
-      while (reader.next(key, value)) {
-        Vector v = ((VectorWritable) value).get();
-        eigenVectors.assignRow(i, v);
-        System.out.println("k=" + key.toString() + " V=" + AbstractCluster.formatVector(v, null));
-        value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        i++;
-      }
-      assertEquals("number of eigenvectors", 9, i);
-    } finally {
-      reader.close();
+    int i = 0;
+    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(rawEigenvectors, conf)) {
+      Vector v = value.get();
+      eigenVectors.assignRow(i, v);
+      i++;
     }
+    assertEquals("number of eigenvectors", 9, i);
   }
 
   @Test
@@ -98,24 +85,14 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
     Matrix eigenVectors = new DenseMatrix(10, corpus.numCols());
     Configuration conf = new Configuration();
-  
-    FileSystem fs = FileSystem.get(cleanEigenvectors.toUri(), conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, cleanEigenvectors, conf);
-    try {
-      Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-      Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-      int i = 0;
-      while (reader.next(key, value)) {
-        Vector v = ((VectorWritable) value).get();
-        eigenVectors.assignRow(i, v);
-        System.out.println("k=" + key.toString() + " V=" + AbstractCluster.formatVector(v, null));
-        value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        i++;
-      }
-      assertEquals("number of clean eigenvectors", 4, i);
-    } finally {
-      reader.close();
+
+    int i = 0;
+    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(cleanEigenvectors, conf)) {
+      Vector v = value.get();
+      eigenVectors.assignRow(i, v);
+      i++;
     }
+    assertEquals("number of clean eigenvectors", 4, i);
   }
 
 }

@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,7 +50,10 @@ public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFrom
     this.options = null;
   }
 
-  public SequenceFilesFromDirectoryFilter(Configuration conf, String keyPrefix, Map<String, String> options, ChunkedWriter writer)
+  protected SequenceFilesFromDirectoryFilter(Configuration conf,
+                                             String keyPrefix,
+                                             Map<String, String> options,
+                                             ChunkedWriter writer)
     throws IOException {
     this.conf = conf;
     this.prefix = keyPrefix;
@@ -69,13 +71,12 @@ public abstract class SequenceFilesFromDirectoryFilter extends SequenceFilesFrom
   public final boolean accept(Path current) {
     log.debug("CURRENT: {}", current.getName());
     try {
-      FileStatus[] fstatus = fs.listStatus(current);
-      for (FileStatus fst : fstatus) {
+      for (FileStatus fst : fs.listStatus(current)) {
         log.debug("CHILD: {}", fst.getPath().getName());
         process(fst, current);
       }
-    } catch (Exception e) {
-      throw new IllegalStateException(e);
+    } catch (IOException ioe) {
+      throw new IllegalStateException(ioe);
     }
     return false;
   }

@@ -56,7 +56,7 @@ public class BayesFeatureDriver implements BayesJob {
           "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
     // this conf parameter needs to be set enable serialisation of conf values
 
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     conf.set("bayes.parameters", params.toString());
     
     client.setConf(conf);

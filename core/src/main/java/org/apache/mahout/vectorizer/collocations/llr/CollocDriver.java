@@ -106,7 +106,7 @@ public final class CollocDriver extends AbstractJob {
     log.info("Maximum n-gram size is: {}", maxNGramSize);
 
     if (argMap.containsKey("--overwrite")) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
 
     int minSupport = CollocReducer.DEFAULT_MIN_SUPPORT;

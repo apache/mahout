@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -42,11 +41,14 @@ import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
-import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -72,9 +74,7 @@ public class DirichletDriver extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-    NoSuchMethodException, InvocationTargetException, InterruptedException {
+  public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.maxIterationsOption().create());
@@ -102,7 +102,7 @@ public class DirichletDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     String modelFactory = getOption(MODEL_DISTRIBUTION_CLASS_OPTION);
     String modelPrototype = getOption(MODEL_PROTOTYPE_CLASS_OPTION);
@@ -171,7 +171,7 @@ public class DirichletDriver extends AbstractJob {
                          boolean emitMostLikely,
                          double threshold,
                          boolean runSequential)
-    throws IOException, InstantiationException, ClassNotFoundException, InterruptedException, IllegalAccessException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     Path clustersOut =
         buildClusters(conf, input, output, modelDistribution, numModels, maxIterations, alpha0, runSequential);
     if (runClustering) {
@@ -220,7 +220,7 @@ public class DirichletDriver extends AbstractJob {
                          boolean emitMostLikely,
                          double threshold,
                          boolean runSequential)
-    throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     run(new Configuration(),
         input,
         output,
@@ -276,20 +276,16 @@ public class DirichletDriver extends AbstractJob {
   /**
    * Read the first input vector to determine the prototype size for the modelPrototype
    */
-  public static int readPrototypeSize(Path input) throws IOException, InstantiationException, IllegalAccessException {
+  public static int readPrototypeSize(Path input) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
+    FileStatus[] status = fs.listStatus(input, PathFilters.logsCRCFilter());
     int protoSize = 0;
     if (status.length > 0) {
       FileStatus s = status[0];
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-      VectorWritable value = new VectorWritable();
-      if (reader.next(key, value)) {
+      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), true, conf)) {
         protoSize = value.get().size();
       }
-      reader.close();
     }
     return protoSize;
   }
@@ -391,7 +387,7 @@ public class DirichletDriver extends AbstractJob {
                                    int maxIterations,
                                    double alpha0,
                                    boolean runSequential)
-    throws IOException, InstantiationException, ClassNotFoundException, InterruptedException, IllegalAccessException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     Path clustersIn = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
     writeInitialState(output, clustersIn, modelDistribution, numClusters, alpha0);
 
@@ -410,8 +406,7 @@ public class DirichletDriver extends AbstractJob {
                                        int numClusters,
                                        int maxIterations,
                                        double alpha0,
-                                       Path clustersIn)
-    throws IOException, InstantiationException, IllegalAccessException {
+                                       Path clustersIn) throws IOException {
     for (int iteration = 1; iteration <= maxIterations; iteration++) {
       log.info("Iteration {}", iteration);
       // point the output to a new directory per iteration
@@ -431,20 +426,10 @@ public class DirichletDriver extends AbstractJob {
         newModel.configure(conf);
       }
       DirichletClusterer clusterer = new DirichletClusterer(state);
-      FileSystem fs = FileSystem.get(input.toUri(), conf);
-      FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
-      for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-        try {
-          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-          while (reader.next(key, vw)) {
-            clusterer.observe(newModels, vw);
-            vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-          }
-        } finally {
-          reader.close();
-        }
+      for (VectorWritable value :
+           new SequenceFileDirValueIterable<VectorWritable>(
+               input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+        clusterer.observe(newModels, value);
       }
       clusterer.updateModels(newModels);
       writeState(output, clustersOut, numClusters, state);
@@ -498,7 +483,7 @@ public class DirichletDriver extends AbstractJob {
                                  boolean emitMostLikely,
                                  double threshold,
                                  boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       clusterDataSeq(conf, input, stateIn, output, emitMostLikely, threshold);
     } else {
@@ -506,37 +491,35 @@ public class DirichletDriver extends AbstractJob {
     }
   }
 
-  private static void clusterDataSeq(Configuration conf, Path input, Path stateIn, Path output, boolean emitMostLikely, double threshold)
-    throws IOException, InstantiationException, IllegalAccessException {
+  private static void clusterDataSeq(Configuration conf,
+                                     Path input,
+                                     Path stateIn,
+                                     Path output,
+                                     boolean emitMostLikely,
+                                     double threshold) throws IOException {
+
     List<DirichletCluster> clusters = DirichletClusterMapper.loadClusters(conf, stateIn);
-    
-    for(int i=0; i<clusters.size(); i++)
-    {
-  	  Cluster cluster = clusters.get(i).getModel();
-  	  cluster.configure(conf);
+
+    for (DirichletCluster cluster : clusters) {
+      cluster.getModel().configure(conf);
     }
     
     DirichletClusterer clusterer = new DirichletClusterer(emitMostLikely, threshold);
     // iterate over all points, assigning each to the closest canopy and outputing that clustering
     FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
+    FileStatus[] status = fs.listStatus(input, PathFilters.logsCRCFilter());
     int part = 0;
     for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs,
                                                            conf,
                                                            new Path(output, "part-m-" + part++),
                                                            IntWritable.class,
                                                            WeightedVectorWritable.class);
       try {
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-        while (reader.next(key, vw)) {
-          clusterer.emitPointToClusters(vw, clusters, writer);
-          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
+        for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), conf)) {
+          clusterer.emitPointToClusters(value, clusters, writer);
         }
       } finally {
-        reader.close();
         writer.close();
       }
     }

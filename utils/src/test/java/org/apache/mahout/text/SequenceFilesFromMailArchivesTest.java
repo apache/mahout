@@ -16,25 +16,20 @@
  */
 package org.apache.mahout.text;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.Text;
 
+import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,11 +64,7 @@ public class SequenceFilesFromMailArchivesTest {
       gzOut.write(testMailMessages.getBytes("UTF-8"));
       gzOut.finish();
     } finally {
-      if (gzOut != null) {
-        try {
-          gzOut.close();
-        } catch (Exception ignore) {}
-      }
+      IOUtils.quietClose(gzOut);
     }    
   }
 
@@ -83,7 +74,7 @@ public class SequenceFilesFromMailArchivesTest {
    */
   @Test
   public void testMain() throws Exception {
-    String[] args = new String[] {
+    String[] args = {
       "--input", inputDir.getAbsolutePath(),  
       "--output", outputDir.getAbsolutePath(),
       "--charset", "UTF-8",
@@ -97,66 +88,59 @@ public class SequenceFilesFromMailArchivesTest {
     // in the output dir
     File expectedChunkFile = new File(outputDir, "chunk-0");
     String expectedChunkPath = expectedChunkFile.getAbsolutePath();
-    assertTrue("Expected chunk file "+expectedChunkPath+" not found!", 
-        expectedChunkFile.isFile());
+    Assert.assertTrue("Expected chunk file "+expectedChunkPath+" not found!", expectedChunkFile.isFile());
 
-    Text key = new Text();
-    Text value = new Text();
+
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Reader seqFileReader = null;
-    try {
-      seqFileReader = new SequenceFile.Reader(fs, new Path(expectedChunkPath), conf);
-      assertTrue("First key/value pair not found!", seqFileReader.next(key, value));
-      
-      assertEquals("TEST/subdir/mail-messages.gz/"+testVars[0][0], key.toString());
-      assertEquals(testVars[0][1]+testVars[0][2], value.toString());
-  
-      assertTrue("Second key/value pair not found!", seqFileReader.next(key, value));
-      assertEquals("TEST/subdir/mail-messages.gz/"+testVars[1][0], key.toString());
-      assertEquals(testVars[1][1]+testVars[1][2], value.toString());
-  
-      assertFalse("Only two key/value pairs expected!", seqFileReader.next(key, value));
-    } finally {
-      if (seqFileReader != null) {
-        try {
-          seqFileReader.close();
-        } catch (Exception ignore) {}
-      }
-    }
+    SequenceFileIterator<Text,Text> iterator =
+        new SequenceFileIterator<Text,Text>(new Path(expectedChunkPath), true, conf);
+
+    Assert.assertTrue("First key/value pair not found!", iterator.hasNext());
+    Pair<Text,Text> record = iterator.next();
+
+    Assert.assertEquals("TEST/subdir/mail-messages.gz/" + testVars[0][0], record.getFirst().toString());
+    Assert.assertEquals(testVars[0][1]+testVars[0][2], record.getSecond().toString());
+
+    Assert.assertTrue("Second key/value pair not found!", iterator.hasNext());
+    record = iterator.next();
+    Assert.assertEquals("TEST/subdir/mail-messages.gz/"+testVars[1][0], record.getFirst().toString());
+    Assert.assertEquals(testVars[1][1]+testVars[1][2], record.getSecond().toString());
+
+    Assert.assertFalse("Only two key/value pairs expected!", iterator.hasNext());
   }
 
   @After
   public void cleanupAfterTesting() {
-    if (inputDir != null)
+    if (inputDir != null) {
       rmdir(inputDir);
-    
-    if (outputDir != null)
+    }
+    if (outputDir != null) {
       rmdir(outputDir);
+    }
   }
 
   // creates a temp directory for storing test input / output
   // fails if the directory cannot be created
-  private File createTempDir(String dirName) {
+  private static File createTempDir(String dirName) {
     File tempDir = new File(System.getProperty("java.io.tmpdir"), dirName);
     if (!tempDir.isDirectory()) {
       tempDir.mkdirs();
       if (!tempDir.isDirectory()) {
-        fail("Failed to create temp directory "+tempDir.getAbsolutePath());
+        Assert.fail("Failed to create temp directory "+tempDir.getAbsolutePath());
       }
     }
     return tempDir;
   }
 
   // recursively delete the temp directories created by this test
-  private void rmdir(File dir) {
+  private static void rmdir(File dir) {
     if (dir.isDirectory()) {
       File[] files = dir.listFiles();
-      for (int f=0; f<files.length; f++) {
-        if (files[f].isDirectory()) {
-          rmdir(files[f]);
+      for (File file : files) {
+        if (file.isDirectory()) {
+          rmdir(file);
         } else {
-          files[f].delete();
+          file.delete();
         }
       }
     }
@@ -164,7 +148,7 @@ public class SequenceFilesFromMailArchivesTest {
   }
   
   // Messages extracted and anonymized from the ASF mail archives
-  private static final String[][] testVars = new String[][] {
+  private static final String[][] testVars = {
     new String[] {
       "user@example.com",
       "Ant task for JDK1.1 collections build option", 

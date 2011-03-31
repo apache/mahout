@@ -57,21 +57,17 @@ public final class RecommenderReducer extends
   private int recommendationsPerUser;
 
   @Override
-  protected void setup(Context context) {
+  protected void setup(Context context) throws IOException {
     Configuration jobConf = context.getConfiguration();
     String dataModelFile = jobConf.get(DATA_MODEL_FILE);
     String recommenderClassName = jobConf.get(RECOMMENDER_CLASS_NAME);
-    FileDataModel fileDataModel;
-    try {
-      Path dataModelPath = new Path(dataModelFile);
-      FileSystem fs = FileSystem.get(dataModelPath.toUri(), jobConf);
-      File tempDataFile = File.createTempFile("mahout-taste-hadoop", "txt");
-      tempDataFile.deleteOnExit();
-      fs.copyToLocalFile(dataModelPath, new Path(tempDataFile.getAbsolutePath()));
-      fileDataModel = new FileDataModel(tempDataFile);
-    } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
-    }
+    Path dataModelPath = new Path(dataModelFile);
+    FileSystem fs = FileSystem.get(dataModelPath.toUri(), jobConf);
+    File tempDataFile = File.createTempFile("mahout-taste-hadoop", "txt");
+    tempDataFile.deleteOnExit();
+    fs.copyToLocalFile(dataModelPath, new Path(tempDataFile.getAbsolutePath()));
+    FileDataModel fileDataModel = new FileDataModel(tempDataFile);
+
     try {
       Class<? extends Recommender> recommenderClass = Class.forName(recommenderClassName).asSubclass(
         Recommender.class);

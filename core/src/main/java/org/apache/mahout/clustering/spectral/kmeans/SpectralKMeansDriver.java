@@ -23,10 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
@@ -38,8 +36,10 @@ import org.apache.mahout.clustering.spectral.common.UnitVectorizerJob;
 import org.apache.mahout.clustering.spectral.common.VectorMatrixMultiplicationJob;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
@@ -83,7 +83,7 @@ public class SpectralKMeansDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(conf, output);
     }
     int numDims = Integer.parseInt(parsedArgs.get("--dimensions"));
     int clusters = Integer.parseInt(parsedArgs.get("--clusters"));
@@ -118,7 +118,7 @@ public class SpectralKMeansDriver extends AbstractJob {
                          DistanceMeasure measure,
                          double convergenceDelta,
                          int maxIterations)
-    throws IOException, InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     // create a few new Paths for temp files and transformations
     Path outputCalc = new Path(output, "calculations");
     Path outputTmp = new Path(output, "temporary");
@@ -193,20 +193,12 @@ public class SpectralKMeansDriver extends AbstractJob {
 
     // Read through the cluster assignments
     Path clusteredPointsPath = new Path(output, "clusteredPoints");
-    FileSystem fs = FileSystem.get(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-m-00000"), conf);
-    // The key is the clusterId
-    IntWritable clusterId = new IntWritable(0);
-    // The value is the weighted vector
-    WeightedVectorWritable value = new WeightedVectorWritable();
-
+    Path inputPath = new Path(clusteredPointsPath, "part-m-00000");
     int id = 0;
-    while (reader.next(clusterId, value)) {
-      log.info("{}: {}", id++, clusterId.get());
-      clusterId = new IntWritable(0);
-      value = new WeightedVectorWritable();
+    for (Pair<IntWritable,WeightedVectorWritable> record :
+         new SequenceFileIterable<IntWritable, WeightedVectorWritable>(inputPath, conf)) {
+      log.info("{}: {}", id++, record.getFirst().get());
     }
-    reader.close();
 
     // TODO: output format???
   }

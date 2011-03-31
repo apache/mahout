@@ -26,7 +26,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -46,15 +46,9 @@ public final class VectorWriterTest extends MahoutTestCase {
     Iterable<Vector> iter = new RandomVectorIterable(50);
     writer.write(iter);
     writer.close();
-    
-    SequenceFile.Reader seqReader = new SequenceFile.Reader(fs, path, conf);
-    Writable key = new LongWritable();
-    Writable value = new VectorWritable();
-    int count = 0;
-    while (seqReader.next(key, value)){
-      count++;
-    }
-    assertEquals(count + " does not equal: " + 50, 50, count);
+
+    long count = HadoopUtil.countRecords(path, conf);
+    assertEquals(50, count);
   }
 
   @Test

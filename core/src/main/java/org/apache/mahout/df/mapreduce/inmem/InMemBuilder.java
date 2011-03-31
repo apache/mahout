@@ -28,10 +28,11 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
@@ -88,18 +89,9 @@ public class InMemBuilder extends Builder {
     Path[] outfiles = DFUtils.listOutputFiles(fs, outputPath);
     
     // import the InMemOutputs
-    IntWritable key = new IntWritable();
-    MapredOutput value = new MapredOutput();
-    
     for (Path path : outfiles) {
-      Reader reader = new Reader(fs, path, conf);
-      
-      try {
-        while (reader.next(key, value)) {
-          output.put(key.get(), value.clone());
-        }
-      } finally {
-        reader.close();
+      for (Pair<IntWritable,MapredOutput> record : new SequenceFileIterable<IntWritable,MapredOutput>(path, conf)) {
+        output.put(record.getFirst().get(), record.getSecond());
       }
     }
     

@@ -95,7 +95,7 @@ public final class VectorMatrixMultiplicationJob {
       // read in the diagonal vector from the distributed cache
       super.setup(context);
       Configuration config = context.getConfiguration();
-      diagonal = VectorCache.load(new IntWritable(EigencutsKeys.DIAGONAL_CACHE_INDEX), config);
+      diagonal = VectorCache.load(config);
       if (diagonal == null) {
         throw new IOException("No vector loaded from cache!");
       }

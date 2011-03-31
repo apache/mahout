@@ -1,4 +1,3 @@
-package org.apache.mahout.text;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,17 +15,18 @@ package org.apache.mahout.text;
  * limitations under the License.
  */
 
+package org.apache.mahout.text;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
  * Implements an example csv to sequence file parser.
  */
 public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectoryFilter {
+
   private static final Logger log = LoggerFactory.getLogger(SequenceFilesFromCsvFilter.class);
   private static final Pattern TAB = Pattern.compile("\\t");
 
@@ -47,8 +48,10 @@ public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectory
     // not initializing anything here.
   }
 
-  public SequenceFilesFromCsvFilter(Configuration conf, String keyPrefix, Map<String, String> options, ChunkedWriter writer)
-    throws IOException {
+  public SequenceFilesFromCsvFilter(Configuration conf,
+                                    String keyPrefix,
+                                    Map<String, String> options,
+                                    ChunkedWriter writer) throws IOException {
     super(conf, keyPrefix, options, writer);
     this.keyColumn = Integer.parseInt(options.get(KEY_COLUMN_OPTION[0]));
     this.valueColumn = Integer.parseInt(options.get(VALUE_COLUMN_OPTION[0]));
@@ -77,18 +80,16 @@ public final class SequenceFilesFromCsvFilter extends SequenceFilesFromDirectory
   }
 
   @Override
-  protected final void process(FileStatus fst, Path current) throws IOException {
+  protected void process(FileStatus fst, Path current) throws IOException {
     if (fst.isDir()) {
       fs.listStatus(fst.getPath(),
                     new SequenceFilesFromCsvFilter(conf, prefix + Path.SEPARATOR + current.getName(),
                         this.options, writer));
     } else {
-      StringBuilder file = new StringBuilder();
       InputStream in = fs.open(fst.getPath());
-      for (String aFit : new FileLineIterable(in, charset, false)) {
+      for (CharSequence aFit : new FileLineIterable(in, charset, false)) {
         String[] columns = TAB.split(aFit);
-        log.info("key : " + columns[keyColumn] + ", value : "
-            + columns[valueColumn]);
+        log.info("key : {}, value : {}", columns[keyColumn], columns[valueColumn]);
         String key = columns[keyColumn];
         String value = columns[valueColumn];
         writer.write(prefix + key, value);

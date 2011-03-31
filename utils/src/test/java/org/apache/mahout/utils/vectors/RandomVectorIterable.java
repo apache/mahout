@@ -31,15 +31,15 @@ public final class RandomVectorIterable implements Iterable<Vector> {
 
   public enum VectorType {DENSE, SPARSE}
 
-  private int numItems = 100;
-
-  private VectorType type = VectorType.SPARSE;
+  private final int numItems;
+  private final VectorType type;
   
   public RandomVectorIterable() {
+    this(100, VectorType.SPARSE);
   }
   
   public RandomVectorIterable(int numItems) {
-    this.numItems = numItems;
+    this(numItems, VectorType.SPARSE);
   }
   
   public RandomVectorIterable(int numItems, VectorType type) {

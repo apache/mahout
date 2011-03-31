@@ -17,16 +17,18 @@
 
 package org.apache.mahout.vectorizer;
 
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -42,17 +44,15 @@ import org.junit.Test;
 public final class DictionaryVectorizerTest extends MahoutTestCase {
 
   private static final int NUM_DOCS = 100;
-  
-  private Configuration conf;
-  private FileSystem fs;
+
   private Path inputPath;
   
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    conf = new Configuration();
-    fs = FileSystem.get(conf);
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
 
     inputPath = getTestTempFilePath("documents/docs.file");
     SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, inputPath, Text.class, Text.class);
@@ -85,7 +85,8 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
     runTest(true, true);
   }
   
-  public void runTest(boolean sequential, boolean named) throws Exception {
+  private void runTest(boolean sequential, boolean named)
+    throws IOException, ClassNotFoundException, InterruptedException {
     
     Class<? extends Analyzer> analyzer = DefaultAnalyzer.class;
     
@@ -111,7 +112,7 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
                                                     sequential,
                                                     named);
     
-    validateVectors(fs, conf, NUM_DOCS, tfVectors, sequential, named);
+    validateVectors(conf, NUM_DOCS, tfVectors, sequential, named);
     
     TFIDFConverter.processTfIdf(tfVectors,
                                 tfidf,
@@ -126,47 +127,33 @@ public final class DictionaryVectorizerTest extends MahoutTestCase {
                                 1);
     
     
-    validateVectors(fs, conf, NUM_DOCS, tfidfVectors, sequential, named);
+    validateVectors(conf, NUM_DOCS, tfidfVectors, sequential, named);
   }
   
-  public static void validateVectors(FileSystem fs,
-                                     Configuration conf,
+  public static void validateVectors(Configuration conf,
                                      int numDocs,
                                      Path vectorPath,
                                      boolean sequential,
-                                     boolean named) throws Exception {
-    FileStatus[] stats = fs.listStatus(vectorPath, new PathFilter() {
-      @Override
-      public boolean accept(Path path) {
-        return path.getName().startsWith("part-");
-      }
-      
-    });
-
+                                     boolean named) {
     int count = 0;
-    Writable key = new Text();
-    VectorWritable vw = new VectorWritable();
-    for (FileStatus s: stats) {
-      SequenceFile.Reader tfidfReader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      while (tfidfReader.next(key, vw)) {
-        count++;
-        Vector v = vw.get();
-        if (named) {
-          assertTrue("Expected NamedVector", v instanceof NamedVector);
-          v = ((NamedVector) v).getDelegate();
-        }
-        
-        if (sequential) {
-          assertTrue("Expected SequentialAccessSparseVector", v instanceof SequentialAccessSparseVector);
-        }
-        else {
-          assertTrue("Expected RandomAccessSparseVector", v instanceof RandomAccessSparseVector);
-        }
-        
+    for (VectorWritable value :
+         new SequenceFileDirValueIterable<VectorWritable>(
+             vectorPath, PathType.LIST, PathFilters.partFilter(), null, true, conf)) {
+      count++;
+      Vector v = value.get();
+      if (named) {
+        assertTrue("Expected NamedVector", v instanceof NamedVector);
+        v = ((NamedVector) v).getDelegate();
       }
-      tfidfReader.close();
+
+      if (sequential) {
+        assertTrue("Expected SequentialAccessSparseVector", v instanceof SequentialAccessSparseVector);
+      } else {
+        assertTrue("Expected RandomAccessSparseVector", v instanceof RandomAccessSparseVector);
+      }
+
     }
 
-    assertEquals("Expected " + numDocs + " documents", numDocs, count);
+  assertEquals("Expected " + numDocs + " documents", numDocs, count);
   }
 }

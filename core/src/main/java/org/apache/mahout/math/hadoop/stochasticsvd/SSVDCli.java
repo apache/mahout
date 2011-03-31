@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -58,8 +59,9 @@ public class SSVDCli extends AbstractJob {
     addOption(DefaultOptionCreator.overwriteOption().create());
 
     Map<String, String> pargs = parseArguments(args);
-    if (pargs == null)
+    if (pargs == null) {
       return -1;
+    }
 
     String input = pargs.get("--input");
     String output = pargs.get("--output");
@@ -76,8 +78,9 @@ public class SSVDCli extends AbstractJob {
     boolean overwrite = pargs.containsKey(keyFor(DefaultOptionCreator.OVERWRITE_OPTION));
 
     Configuration conf = getConf();
-    if (conf == null)
+    if (conf == null) {
       throw new IOException("No Hadoop configuration present");
+    }
 
     SSVDSolver solver = new SSVDSolver(conf, new Path[] { new Path(input) },
         new Path(tempDir), r, k, p, reduceTasks);
@@ -99,7 +102,7 @@ public class SSVDCli extends AbstractJob {
     SequenceFile.Writer sigmaW = SequenceFile.createWriter(fs, conf, new Path(
         outPath, "sigma"), NullWritable.class, VectorWritable.class);
     try {
-      VectorWritable sValues = new VectorWritable(new DenseVector(
+      Writable sValues = new VectorWritable(new DenseVector(
           Arrays.copyOf(solver.getSingularValues(), k), true));
       sigmaW.append(NullWritable.get(), sValues);
 
@@ -109,15 +112,19 @@ public class SSVDCli extends AbstractJob {
 
     if (computeU) {
       FileStatus[] uFiles = fs.globStatus(new Path(solver.getUPath()));
-      if (uFiles != null)
-        for (FileStatus uf : uFiles)
+      if (uFiles != null) {
+        for (FileStatus uf : uFiles) {
           fs.rename(uf.getPath(), outPath);
+        }
+      }
     }
     if (computeV) {
       FileStatus[] vFiles = fs.globStatus(new Path(solver.getVPath()));
-      if (vFiles != null)
-        for (FileStatus vf : vFiles)
+      if (vFiles != null) {
+        for (FileStatus vf : vFiles) {
           fs.rename(vf.getPath(), outPath);
+        }
+      }
 
     }
     return 0;

@@ -74,7 +74,7 @@ public class EigencutsDriver extends AbstractJob {
     Path input = new Path(parsedArgs.get("--input"));
     Path output = new Path(parsedArgs.get("--output"));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     int dimensions = Integer.parseInt(parsedArgs.get("--dimensions"));
     double halflife = Double.parseDouble(parsedArgs.get("--half-life"));

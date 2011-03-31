@@ -27,13 +27,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-
-/**
- *
- *
- **/
 public class CSVVectorIterableTest extends MahoutTestCase {
-
 
   @Test
   public void test() throws Exception {
@@ -41,6 +35,7 @@ public class CSVVectorIterableTest extends MahoutTestCase {
     StringWriter sWriter = new StringWriter();
     JWriterVectorWriter jwvw = new JWriterVectorWriter(sWriter) {
 
+      @Override
       protected void formatVector(Vector vector) throws IOException {
         String vecStr = VectorHelper.vectorToCSVString(vector, false);
         writer.write(vecStr);
@@ -49,7 +44,7 @@ public class CSVVectorIterableTest extends MahoutTestCase {
     Iterable<Vector> iter = new RandomVectorIterable(50);
     jwvw.write(iter);
     jwvw.close();
-    CSVVectorIterable csvIter = new CSVVectorIterable(new StringReader(sWriter.getBuffer().toString()));
+    Iterable<Vector> csvIter = new CSVVectorIterable(new StringReader(sWriter.getBuffer().toString()));
     int count = 0;
     for (Vector vector : csvIter) {
       //System.out.println("Vec: " + vector);

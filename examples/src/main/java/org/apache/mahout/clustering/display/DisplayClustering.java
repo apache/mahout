@@ -39,12 +39,13 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
-import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -244,40 +245,26 @@ public class DisplayClustering extends Frame {
     }
   }
 
-  protected static List<Cluster> readClusters(Path clustersIn)
-    throws IOException, InstantiationException, IllegalAccessException {
+  protected static List<Cluster> readClusters(Path clustersIn) {
     List<Cluster> clusters = new ArrayList<Cluster>();
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(clustersIn.toUri(), conf);
-    FileStatus[] status = fs.listStatus(clustersIn, new OutputLogFilter());
-    for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      try {
-        Writable key = new Text();
-        Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        while (reader.next(key, value)) {
-          Cluster cluster = (Cluster) value;
-          log.info("Reading Cluster:{} center:{} numPoints:{} radius:{}", new Object[] {
-              cluster.getId(),
-              AbstractCluster.formatVector(cluster.getCenter(), null),
-              cluster.getNumPoints(),
-              AbstractCluster.formatVector(cluster.getRadius(), null)
-          });
-          clusters.add(cluster);
-          value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        }
-      } finally {
-        reader.close();
-      }
+    for (Cluster value :
+         new SequenceFileDirValueIterable<Cluster>(clustersIn, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      log.info("Reading Cluster:{} center:{} numPoints:{} radius:{}", new Object[] {
+          value.getId(),
+          AbstractCluster.formatVector(value.getCenter(), null),
+          value.getNumPoints(),
+          AbstractCluster.formatVector(value.getRadius(), null)
+      });
+      clusters.add(value);
     }
     return clusters;
   }
   
-  protected static void loadClusters(Path output) throws IOException, InstantiationException, IllegalAccessException {
+  protected static void loadClusters(Path output) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
-    FileStatus[] status = fs.listStatus(output, new ClustersFilter());
-    for (FileStatus s : status) {
+    for (FileStatus s : fs.listStatus(output, new ClustersFilter())) {
       List<Cluster> clusters = readClusters(s.getPath());
       CLUSTERS.add(clusters);
     }

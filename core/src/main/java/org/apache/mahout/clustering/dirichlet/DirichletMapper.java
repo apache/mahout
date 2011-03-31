@@ -20,10 +20,7 @@ package org.apache.mahout.clustering.dirichlet;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -31,7 +28,10 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.JsonModelDistributionAdapter;
 import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
-import org.apache.mahout.clustering.kmeans.OutputLogFilter;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -43,7 +43,8 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
   private DirichletClusterer clusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable v, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable v, Context context)
+    throws IOException, InterruptedException {
     int k = clusterer.assignToModel(v);
     context.write(new Text(String.valueOf(k)), v);
   }
@@ -51,23 +52,15 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
-    try {
-      DirichletState dirichletState = getDirichletState(context.getConfiguration());
-      for (DirichletCluster cluster : dirichletState.getClusters()) {
-        cluster.getModel().configure(context.getConfiguration());
-      }
-      clusterer = new DirichletClusterer(dirichletState);
-      for (int i = 0; i < dirichletState.getNumClusters(); i++) {
-        // write an empty vector to each clusterId so that all will be seen by a reducer
-        // Reducers will ignore these points but every model will be processed by one of them
-        context.write(new Text(Integer.toString(i)), new VectorWritable(new DenseVector(0)));
-      }
-    } catch (NumberFormatException e) {
-      throw new IllegalStateException(e);
-    } catch (SecurityException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
+    DirichletState dirichletState = getDirichletState(context.getConfiguration());
+    for (DirichletCluster cluster : dirichletState.getClusters()) {
+      cluster.getModel().configure(context.getConfiguration());
+    }
+    clusterer = new DirichletClusterer(dirichletState);
+    for (int i = 0; i < dirichletState.getNumClusters(); i++) {
+      // write an empty vector to each clusterId so that all will be seen by a reducer
+      // Reducers will ignore these points but every model will be processed by one of them
+      context.write(new Text(Integer.toString(i)), new VectorWritable(new DenseVector(0)));
     }
   }
 
@@ -86,35 +79,21 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
     String numClusters = conf.get(DirichletDriver.NUM_CLUSTERS_KEY);
     String alpha0 = conf.get(DirichletDriver.ALPHA_0_KEY);
 
-    try {
-      return loadState(conf, statePath, modelDistribution, Double.parseDouble(alpha0), Integer.parseInt(numClusters));
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+    return loadState(conf, statePath, modelDistribution, Double.parseDouble(alpha0), Integer.parseInt(numClusters));
   }
 
   protected static DirichletState loadState(Configuration conf,
                                             String statePath,
                                             ModelDistribution<VectorWritable> modelDistribution,
                                             double alpha,
-                                            int k) throws IOException {
+                                            int k) {
     DirichletState state = DirichletDriver.createState(modelDistribution, k, alpha);
     Path path = new Path(statePath);
-    FileSystem fs = FileSystem.get(path.toUri(), conf);
-    FileStatus[] status = fs.listStatus(path, new OutputLogFilter());
-    for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      try {
-        Writable key = new Text();
-        DirichletCluster cluster = new DirichletCluster();
-        while (reader.next(key, cluster)) {
-          int index = Integer.parseInt(key.toString());
-          state.getClusters().set(index, cluster);
-          cluster = new DirichletCluster();
-        }
-      } finally {
-        reader.close();
-      }
+    for (Pair<Writable,DirichletCluster> record :
+         new SequenceFileDirIterable<Writable,DirichletCluster>(
+             path, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      int index = Integer.parseInt(record.getFirst().toString());
+      state.getClusters().set(index, record.getSecond());
     }
     // TODO: with more than one mapper, they will all have different mixtures. Will this matter?
     state.setMixture(UncommonDistributions.rDirichlet(state.totalCounts(), alpha));

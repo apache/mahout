@@ -87,7 +87,7 @@ public final class PartitionBugTest extends MahoutTestCase {
 
     // remove the output path (its only used for testing)
     Path outputPath = builder.getOutputPath(conf);
-    HadoopUtil.overwriteOutput(outputPath);
+    HadoopUtil.delete(conf, outputPath);
 
     builder.build(NUM_TREES, new MockCallback(data));
   }

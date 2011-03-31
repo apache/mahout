@@ -42,10 +42,12 @@ import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.common.DummyOutputCollector;
 import org.apache.mahout.common.DummyRecordWriter;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -395,20 +397,15 @@ public final class TestKmeansClustering extends MahoutTestCase {
 
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-m-0"), conf);
       int[] expect = EXPECTED_NUM_POINTS[k];
       DummyOutputCollector<IntWritable, WeightedVectorWritable> collector =
           new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
-      // The key is the clusterId
-      IntWritable clusterId = new IntWritable(0);
-      // The value is the weighted vector
-      WeightedVectorWritable value = new WeightedVectorWritable();
-      while (reader.next(clusterId, value)) {
-        collector.collect(clusterId, value);
-        clusterId = new IntWritable(0);
-        value = new WeightedVectorWritable();
+      // The key is the clusterId, the value is the weighted vector
+      for (Pair<IntWritable,WeightedVectorWritable> record :
+           new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+               new Path(clusteredPointsPath, "part-m-0"), conf)) {
+        collector.collect(record.getFirst(), record.getSecond());
       }
-      reader.close();
       assertEquals("clusters[" + k + ']', expect.length, collector.getKeys().size());
     }
   }
@@ -453,20 +450,15 @@ public final class TestKmeansClustering extends MahoutTestCase {
       // now compare the expected clusters with actual
       Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
       // assertEquals("output dir files?", 4, outFiles.length);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-m-00000"), conf);
       int[] expect = EXPECTED_NUM_POINTS[k];
       DummyOutputCollector<IntWritable, WeightedVectorWritable> collector =
           new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
-      // The key is the clusterId
-      IntWritable clusterId = new IntWritable(0);
-      // The value is the weighted vector
-      WeightedVectorWritable value = new WeightedVectorWritable();
-      while (reader.next(clusterId, value)) {
-        collector.collect(clusterId, value);
-        clusterId = new IntWritable(0);
-        value = new WeightedVectorWritable();
+      // The key is the clusterId, the value is the weighted vector
+      for (Pair<IntWritable,WeightedVectorWritable> record :
+           new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+               new Path(clusteredPointsPath, "part-m-00000"), conf)) {
+        collector.collect(record.getFirst(), record.getSecond());
       }
-      reader.close();
       if (k == 2) {
         // cluster 3 is empty so won't appear in output
         assertEquals("clusters[" + k + ']', expect.length - 1, collector.getKeys().size());
@@ -504,19 +496,13 @@ public final class TestKmeansClustering extends MahoutTestCase {
     Path clusteredPointsPath = new Path(outputPath, "clusteredPoints");
     DummyOutputCollector<IntWritable, WeightedVectorWritable> collector =
         new DummyOutputCollector<IntWritable, WeightedVectorWritable>();
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(clusteredPointsPath, "part-m-00000"), conf);
 
-    // The key is the clusterId
-    IntWritable clusterId = new IntWritable(0);
-    // The value is the vector
-    WeightedVectorWritable value = new WeightedVectorWritable();
-    while (reader.next(clusterId, value)) {
-      collector.collect(clusterId, value);
-      clusterId = new IntWritable(0);
-      value = new WeightedVectorWritable();
-
+    // The key is the clusterId, the value is the weighted vector
+    for (Pair<IntWritable,WeightedVectorWritable> record :
+         new SequenceFileIterable<IntWritable,WeightedVectorWritable>(
+             new Path(clusteredPointsPath, "part-m-00000"), conf)) {
+      collector.collect(record.getFirst(), record.getSecond());
     }
-    reader.close();
 
     assertEquals("num points[0]", 4, collector.getValue(new IntWritable(0)).size());
     assertEquals("num points[1]", 5, collector.getValue(new IntWritable(1)).size());

@@ -25,13 +25,12 @@ import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -75,14 +74,11 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
     ClusteringTestUtils.writePointsToFile(points, input, fs, conf);
     
     RandomSeedGenerator.buildRandom(input, output, 4, new ManhattanDistanceMeasure());
-    
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "part-randomSeed"), conf);
-    Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-    AbstractCluster value = (AbstractCluster) reader.getValueClass().newInstance();
-    
+
     int clusterCount = 0;
     Collection<Integer> set = new HashSet<Integer>();
-    while (reader.next(key, value)) {
+    for (AbstractCluster value :
+         new SequenceFileValueIterable<AbstractCluster>(new Path(output, "part-randomSeed"), true, conf)) {
       clusterCount++;
       int id = value.getId();
       assertTrue(set.add(id)); // validate unique id's

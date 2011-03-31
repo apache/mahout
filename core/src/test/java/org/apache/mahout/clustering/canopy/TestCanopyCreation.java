@@ -35,16 +35,17 @@ import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.DummyRecordWriter;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.distance.UserDefinedDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -435,27 +436,15 @@ public final class TestCanopyCreation extends MahoutTestCase {
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0/part-r-00000");
-    FileSystem fs = FileSystem.get(path.toUri(), config);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
-    Writable key = new Text();
-    Canopy canopy = new Canopy();
     int ix = 0;
-    while (reader.next(key, canopy)) {
-      assertEquals("Center [" + ix + ']', manhattanCentroids.get(ix), canopy.getCenter());
+    for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true, config)) {
+      assertEquals("Center [" + ix + ']', manhattanCentroids.get(ix), value.getCenter());
       ix++;
     }
-    reader.close();
+
     path = new Path(output, "clusteredPoints/part-m-0");
-    reader = new SequenceFile.Reader(fs, path, config);
-    int count = 0;
-    Writable clusterId = new IntWritable(0);
-    WeightedVectorWritable vector = new WeightedVectorWritable();
-    while (reader.next(clusterId, vector)) {
-      count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector(), null));
-    }
+    long count = HadoopUtil.countRecords(path, config);
     assertEquals("number of points", points.size(), count);
-    reader.close();
   }
 
   /** Story: User can cluster points using sequential execution */
@@ -476,27 +465,16 @@ public final class TestCanopyCreation extends MahoutTestCase {
 
     // verify output from sequence file
     Path path = new Path(output, "clusters-0/part-r-00000");
-    FileSystem fs = FileSystem.get(path.toUri(), config);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, config);
-    Writable key = new Text();
-    Canopy canopy = new Canopy();
+
     int ix = 0;
-    while (reader.next(key, canopy)) {
-      assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), canopy.getCenter());
+    for (Canopy value : new SequenceFileValueIterable<Canopy>(path, true, config)) {
+      assertEquals("Center [" + ix + ']', euclideanCentroids.get(ix), value.getCenter());
       ix++;
     }
-    reader.close();
+
     path = new Path(output, "clusteredPoints/part-m-0");
-    reader = new SequenceFile.Reader(fs, path, config);
-    int count = 0;
-    Writable clusterId = new IntWritable(0);
-    WeightedVectorWritable vector = new WeightedVectorWritable();
-    while (reader.next(clusterId, vector)) {
-      count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector(), null));
-    }
+    long count = HadoopUtil.countRecords(path, config);
     assertEquals("number of points", points.size(), count);
-    reader.close();
   }
 
   /**
@@ -513,16 +491,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
     Path output = getTestTempDirPath("output");
     CanopyDriver.run(conf, getTestTempDirPath("testdata"), output, manhattanDistanceMeasure, 3.1, 2.1, true, false);
     Path path = new Path(output, "clusteredPoints/part-m-00000");
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-    int count = 0;
-    Writable clusterId = new IntWritable(0);
-    WeightedVectorWritable vector = new WeightedVectorWritable();
-    while (reader.next(clusterId, vector)) {
-      count++;
-      System.out.println("Txt: " + clusterId + " Vec: " + AbstractCluster.formatVector(vector.getVector(), null));
-    }
+    long count = HadoopUtil.countRecords(path, conf);
     assertEquals("number of points", points.size(), count);
-    reader.close();
   }
 
   /**
@@ -544,16 +514,8 @@ public final class TestCanopyCreation extends MahoutTestCase {
         optKey(DefaultOptionCreator.OVERWRITE_OPTION) };
     ToolRunner.run(new Configuration(), new CanopyDriver(), args);
     Path path = new Path(output, "clusteredPoints/part-m-00000");
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-    int count = 0;
-    Writable canopyId = new IntWritable(0);
-    WeightedVectorWritable vw = new WeightedVectorWritable();
-    while (reader.next(canopyId, vw)) {
-      count++;
-      System.out.println("Txt: " + canopyId.toString() + " Vec: " + AbstractCluster.formatVector(vw.getVector(), null));
-    }
+    long count = HadoopUtil.countRecords(path, conf);
     assertEquals("number of points", points.size(), count);
-    reader.close();
   }
 
   /** Story: Clustering algorithm must support arbitrary user defined distance measure */

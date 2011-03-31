@@ -20,15 +20,14 @@ package org.apache.mahout.vectorizer;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
@@ -41,7 +40,10 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.vectorizer.collocations.llr.CollocDriver;
 import org.apache.mahout.vectorizer.common.PartialVectorMerger;
@@ -152,19 +154,22 @@ public final class DictionaryVectorizer {
     List<Path> dictionaryChunks;
     if (maxNGramSize == 1) {
       startWordCounting(input, dictionaryJobPath, baseConf, minSupport);
-      dictionaryChunks = createDictionaryChunks(dictionaryJobPath, output,
-        baseConf, chunkSizeInMegabytes, new LongWritable(), maxTermDimension);
+      dictionaryChunks =
+          createDictionaryChunks(dictionaryJobPath, output, baseConf, chunkSizeInMegabytes, maxTermDimension);
     } else {
       CollocDriver.generateAllGrams(input, dictionaryJobPath, baseConf, maxNGramSize,
         minSupport, minLLRValue, numReducers);
-      dictionaryChunks = createDictionaryChunks(new Path(
-          new Path(output, DICTIONARY_JOB_FOLDER), CollocDriver.NGRAM_OUTPUT_DIRECTORY), output,
-          baseConf,
-        chunkSizeInMegabytes, new DoubleWritable(), maxTermDimension);
+      dictionaryChunks =
+          createDictionaryChunks(new Path(new Path(output, DICTIONARY_JOB_FOLDER),
+                                          CollocDriver.NGRAM_OUTPUT_DIRECTORY),
+                                 output,
+                                 baseConf,
+                                 chunkSizeInMegabytes,
+                                 maxTermDimension);
     }
     
     int partialVectorIndex = 0;
-    List<Path> partialVectorPaths = new ArrayList<Path>();
+    Collection<Path> partialVectorPaths = new ArrayList<Path>();
     for (Path dictionaryChunk : dictionaryChunks) {
       Path partialVectorOutputPath = new Path(output, VECTOR_OUTPUT_FOLDER + partialVectorIndex++);
       partialVectorPaths.add(partialVectorOutputPath);
@@ -173,12 +178,11 @@ public final class DictionaryVectorizer {
     }
     
     Configuration conf = new Configuration(baseConf);
-    FileSystem fs = FileSystem.get(partialVectorPaths.get(0).toUri(), conf);
-    
+
     Path outputDir = new Path(output, DOCUMENT_VECTOR_OUTPUT_FOLDER);
     PartialVectorMerger.mergePartialVectors(partialVectorPaths, outputDir, conf, normPower, logNormalize,
       maxTermDimension[0], sequentialAccess, namedVectors, numReducers);
-    HadoopUtil.deletePaths(partialVectorPaths, fs);  
+    HadoopUtil.delete(conf, partialVectorPaths);
   }
   
   /**
@@ -189,48 +193,40 @@ public final class DictionaryVectorizer {
                                                    Path dictionaryPathBase,
                                                    Configuration baseConf,
                                                    int chunkSizeInMegabytes,
-                                                   Writable value,
                                                    int[] maxTermDimension) throws IOException {
     List<Path> chunkPaths = new ArrayList<Path>();
     
-    Writable key = new Text();
     Configuration conf = new Configuration(baseConf);
     
     FileSystem fs = FileSystem.get(wordCountPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(wordCountPath, OUTPUT_FILES_PATTERN));
-    
+
     long chunkSizeLimit = chunkSizeInMegabytes * 1024L * 1024L;
     int chunkIndex = 0;
     Path chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
     chunkPaths.add(chunkPath);
     
-    SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class,
-        IntWritable.class);
+    SequenceFile.Writer dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
     
     long currentChunkSize = 0;
-    
+    Path filesPattern = new Path(wordCountPath, OUTPUT_FILES_PATTERN);
     int i = 0;
-    for (FileStatus fileStatus : outputFiles) {
-      Path path = fileStatus.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      // key is feature value is count
-      while (reader.next(key, value)) {
-        if (currentChunkSize > chunkSizeLimit) {
-          dictWriter.close();
-          chunkIndex++;
-          
-          chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
-          chunkPaths.add(chunkPath);
-          
-          dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
-          currentChunkSize = 0;
-        }
-        
-        int fieldSize = DICTIONARY_BYTE_OVERHEAD + key.toString().length() * 2
-                        + Integer.SIZE / 8;
-        currentChunkSize += fieldSize;
-        dictWriter.append(key, new IntWritable(i++));
+    for (Pair<Writable,Writable> record :
+         new SequenceFileDirIterable<Writable,Writable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+      if (currentChunkSize > chunkSizeLimit) {
+        dictWriter.close();
+        chunkIndex++;
+
+        chunkPath = new Path(dictionaryPathBase, DICTIONARY_FILE + chunkIndex);
+        chunkPaths.add(chunkPath);
+
+        dictWriter = new SequenceFile.Writer(fs, conf, chunkPath, Text.class, IntWritable.class);
+        currentChunkSize = 0;
       }
+
+      Writable key = record.getFirst();
+      int fieldSize = DICTIONARY_BYTE_OVERHEAD + key.toString().length() * 2 + Integer.SIZE / 8;
+      currentChunkSize += fieldSize;
+      dictWriter.append(key, new IntWritable(i++));
     }
     maxTermDimension[0] = i;
     dictWriter.close();
@@ -300,7 +296,7 @@ public final class DictionaryVectorizer {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setNumReduceTasks(numReducers);
 
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     
     job.waitForCompletion(true);
   }
@@ -336,7 +332,7 @@ public final class DictionaryVectorizer {
     job.setReducerClass(TermCountReducer.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     
     job.waitForCompletion(true);
   }

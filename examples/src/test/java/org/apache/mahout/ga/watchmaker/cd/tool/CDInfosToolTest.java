@@ -210,8 +210,9 @@ public final class CDInfosToolTest extends MahoutTestCase {
       // random dataset
       Path inpath = getTestTempDirPath("input");
       Path output = getTestTempDirPath("output");
-      FileSystem fs = FileSystem.get(inpath.toUri(), new Configuration());
-      HadoopUtil.overwriteOutput(inpath);
+      Configuration conf = new Configuration();
+      FileSystem fs = FileSystem.get(inpath.toUri(), conf);
+      HadoopUtil.delete(conf, inpath);
 
       randomDataset(fs, inpath, descriptors, descriptions);
 

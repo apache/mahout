@@ -27,9 +27,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.SequenceFile.Reader;
-import org.apache.hadoop.io.SequenceFile.Sorter;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 
 /** Utility Class that deals with the output. */
 public final class OutputUtils {
@@ -74,7 +73,7 @@ public final class OutputUtils {
                                        Configuration conf,
                                        Path outpath,
                                        Collection<Double> evaluations) throws IOException {
-    Sorter sorter = new Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
+    SequenceFile.Sorter sorter = new SequenceFile.Sorter(fs, LongWritable.class, DoubleWritable.class, conf);
     
     // merge and sort the outputs
     Path[] outfiles = listOutputFiles(fs, outpath);
@@ -82,15 +81,8 @@ public final class OutputUtils {
     sorter.merge(outfiles, output);
     
     // import the evaluations
-    Writable key = new LongWritable();
-    DoubleWritable value = new DoubleWritable();
-    Reader reader = new Reader(fs, output, conf);
-    try {
-      while (reader.next(key, value)) {
-        evaluations.add(value.get());
-      }
-    } finally {
-      reader.close();
+    for (DoubleWritable value : new SequenceFileValueIterable<DoubleWritable>(output, true, conf)) {
+      evaluations.add(value.get());
     }
   }
   

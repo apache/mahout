@@ -34,7 +34,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -42,6 +41,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.df.DFUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +124,6 @@ public class Step0Job {
    * Extracts the output and processes it
    * 
    * @return info for each partition in Hadoop's order
-   * @throws IOException
    */
   protected Step0Output[] parseOutput(JobContext job) throws IOException {
     Configuration conf = job.getConfiguration();
@@ -138,19 +138,10 @@ public class Step0Job {
     List<Step0Output> values = new ArrayList<Step0Output>();
     
     // read all the outputs
-    IntWritable key = new IntWritable();
-    Step0Output value = new Step0Output(0L, 0);
-    
     for (Path path : outfiles) {
-      Reader reader = new Reader(fs, path, conf);
-      
-      try {
-        while (reader.next(key, value)) {
-          keys.add(key.get());
-          values.add(value.clone());
-        }
-      } finally {
-        reader.close();
+      for (Pair<IntWritable,Step0Output> record : new SequenceFileIterable<IntWritable,Step0Output>(path, conf)) {
+        keys.add(record.getFirst().get());
+        values.add(record.getSecond());
       }
     }
     

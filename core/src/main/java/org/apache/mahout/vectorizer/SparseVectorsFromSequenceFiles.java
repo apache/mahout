@@ -52,6 +52,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
     ToolRunner.run(new SparseVectorsFromSequenceFiles(), args);
   }
   
+  @Override
   public int run(String[] args) throws Exception {
     DefaultOptionBuilder obuilder = new DefaultOptionBuilder();
     ArgumentBuilder abuilder = new ArgumentBuilder();
@@ -172,7 +173,7 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       log.info("Maximum n-gram size is: {}", maxNGramSize);
       
       if (cmdLine.hasOption(overwriteOutput)) {
-        HadoopUtil.overwriteOutput(outputDir);
+        HadoopUtil.delete(getConf(), outputDir);
       }
       
       float minLLRValue = LLRReducer.DEFAULT_MIN_LLR;
@@ -234,9 +235,9 @@ public final class SparseVectorsFromSequenceFiles extends AbstractJob {
       if (cmdLine.hasOption(logNormalizeOpt)) {
         logNormalize = true;
       }
-      
-      HadoopUtil.overwriteOutput(outputDir);
+
       Configuration conf = getConf();
+      HadoopUtil.delete(conf, outputDir);
       Path tokenizedPath = new Path(outputDir, DocumentProcessor.TOKENIZED_DOCUMENT_OUTPUT_FOLDER);
       DocumentProcessor.tokenizeDocuments(inputDir, analyzerClass, tokenizedPath, conf);
       

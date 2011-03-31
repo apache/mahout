@@ -18,12 +18,13 @@
 package org.apache.mahout.cf.taste.hadoop;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.map.OpenIntLongHashMap;
@@ -53,16 +54,6 @@ public final class TasteHadoopUtils {
   }
 
   /**
-   * A path filter used to read files written by Hadoop.
-   */
-  public static final PathFilter PARTS_FILTER = new PathFilter() {
-    @Override
-    public boolean accept(Path path) {
-      return path.getName().startsWith("part-");
-    }
-  };
-
-  /**
    * Maps a long to an int
    */
   public static int idToIndex(long id) {
@@ -74,23 +65,11 @@ public final class TasteHadoopUtils {
    */
   public static OpenIntLongHashMap readItemIDIndexMap(String itemIDIndexPathStr, Configuration conf) {
     OpenIntLongHashMap indexItemIDMap = new OpenIntLongHashMap();
-    try {
-      Path unqualifiedItemIDIndexPath = new Path(itemIDIndexPathStr);
-      FileSystem fs = FileSystem.get(unqualifiedItemIDIndexPath.toUri(), conf);
-      Path itemIDIndexPath = new Path(itemIDIndexPathStr).makeQualified(fs);
-
-      VarIntWritable index = new VarIntWritable();
-      VarLongWritable id = new VarLongWritable();
-      for (FileStatus status : fs.listStatus(itemIDIndexPath, PARTS_FILTER)) {
-        String path = status.getPath().toString();
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(path).makeQualified(fs), conf);
-        while (reader.next(index, id)) {
-          indexItemIDMap.put(index.get(), id.get());
-        }
-        reader.close();
-      }
-    } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
+    Path itemIDIndexPath = new Path(itemIDIndexPathStr);
+    for (Pair<VarIntWritable,VarLongWritable> record :
+         new SequenceFileDirIterable<VarIntWritable,VarLongWritable>(
+             itemIDIndexPath, PathType.LIST, PathFilters.partFilter(), null, true, conf)) {
+      indexItemIDMap.put(record.getFirst().get(), record.getSecond().get());
     }
     return indexItemIDMap;
   }
@@ -99,8 +78,8 @@ public final class TasteHadoopUtils {
    * Reads a text-based outputfile that only contains an int
    */
   public static int readIntFromFile(Configuration conf, Path outputDir) throws IOException {
-    FileSystem fs = FileSystem.get(outputDir.toUri(), conf);
-    Path outputFile = fs.listStatus(outputDir, PARTS_FILTER)[0].getPath();
+    FileSystem fs = outputDir.getFileSystem(conf);
+    Path outputFile = fs.listStatus(outputDir, PathFilters.partFilter())[0].getPath();
     InputStream in = null;
     try  {
       in = fs.open(outputFile);

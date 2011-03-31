@@ -38,11 +38,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
-import org.apache.mahout.common.StringRecordIterator;
+import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.ContextStatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.SequenceFileOutputCollector;
@@ -162,7 +162,8 @@ public final class FPGrowthDriver {
       if (classificationMethod.equalsIgnoreCase("sequential")) {
         runFPGrowth(params);
       } else if (classificationMethod.equalsIgnoreCase("mapreduce")) {
-        HadoopUtil.overwriteOutput(outputDir);
+        Configuration conf = new Configuration();
+        HadoopUtil.delete(conf, outputDir);
         PFPGrowth.runPFPGrowth(params);
       }
     } catch (OptionException e) {
@@ -203,7 +204,7 @@ public final class FPGrowthDriver {
         new ContextStatusUpdater(null));
     writer.close();
     
-    List<Pair<String,TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
+    List<Pair<String,TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     for (Pair<String,TopKStringPatterns> entry : frequentPatterns) {
       log.info("Dumping Patterns for Feature: {} \n{}", entry.getFirst(), entry.getSecond());
     }

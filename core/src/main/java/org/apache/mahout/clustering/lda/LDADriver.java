@@ -36,8 +36,12 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.IntPairWritable;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
 import org.apache.mahout.math.DenseMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,42 +74,38 @@ public final class LDADriver extends AbstractJob {
     ToolRunner.run(new Configuration(), new LDADriver(), args);
   }
 
-  static LDAState createState(Configuration job) throws IOException {
+  static LDAState createState(Configuration job) {
     String statePath = job.get(STATE_IN_KEY);
     int numTopics = Integer.parseInt(job.get(NUM_TOPICS_KEY));
     int numWords = Integer.parseInt(job.get(NUM_WORDS_KEY));
     double topicSmoothing = Double.parseDouble(job.get(TOPIC_SMOOTHING_KEY));
 
     Path dir = new Path(statePath);
-    FileSystem fs = dir.getFileSystem(job);
 
     DenseMatrix pWgT = new DenseMatrix(numTopics, numWords);
     double[] logTotals = new double[numTopics];
     double ll = 0.0;
 
-    IntPairWritable key = new IntPairWritable();
-    DoubleWritable value = new DoubleWritable();
-    for (FileStatus status : fs.globStatus(new Path(dir, "part-*"))) {
-      Path path = status.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-      while (reader.next(key, value)) {
-        int topic = key.getFirst();
-        int word = key.getSecond();
-        if (word == TOPIC_SUM_KEY) {
-          logTotals[topic] = value.get();
-          Preconditions.checkArgument(!Double.isInfinite(value.get()));
-        } else if (topic == LOG_LIKELIHOOD_KEY) {
-          ll = value.get();
-        } else {
-          Preconditions.checkArgument(topic >= 0, "topic should be non-negative, not %d", topic);
-          Preconditions.checkArgument(word >= 0, "word should be non-negative not %d", word);
-          Preconditions.checkArgument(pWgT.getQuick(topic, word) == 0.0);
+    for (Pair<IntPairWritable,DoubleWritable> record :
+         new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(
+             new Path(dir, "part-*"), PathType.GLOB, null, null, true, job)) {
+      IntPairWritable key = record.getFirst();
+      DoubleWritable value = record.getSecond();
+      int topic = key.getFirst();
+      int word = key.getSecond();
+      if (word == TOPIC_SUM_KEY) {
+        logTotals[topic] = value.get();
+        Preconditions.checkArgument(!Double.isInfinite(value.get()));
+      } else if (topic == LOG_LIKELIHOOD_KEY) {
+        ll = value.get();
+      } else {
+        Preconditions.checkArgument(topic >= 0, "topic should be non-negative, not %d", topic);
+        Preconditions.checkArgument(word >= 0, "word should be non-negative not %d", word);
+        Preconditions.checkArgument(pWgT.getQuick(topic, word) == 0.0);
 
-          pWgT.setQuick(topic, word, value.get());
-          Preconditions.checkArgument(!Double.isInfinite(pWgT.getQuick(topic, word)));
-        }
+        pWgT.setQuick(topic, word, value.get());
+        Preconditions.checkArgument(!Double.isInfinite(pWgT.getQuick(topic, word)));
       }
-      reader.close();
     }
 
     return new LDAState(numTopics, numWords, topicSmoothing, pWgT, logTotals, ll);
@@ -131,7 +131,7 @@ public final class LDADriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     int numTopics = Integer.parseInt(getOption(NUM_TOPICS_OPTION));
@@ -208,23 +208,20 @@ public final class LDADriver extends AbstractJob {
 
   private static double findLL(Path statePath, Configuration job) throws IOException {
     FileSystem fs = statePath.getFileSystem(job);
-
     double ll = 0.0;
-
-    IntPairWritable key = new IntPairWritable();
-    DoubleWritable value = new DoubleWritable();
     for (FileStatus status : fs.globStatus(new Path(statePath, "part-*"))) {
       Path path = status.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-      while (reader.next(key, value)) {
-        if (key.getFirst() == LOG_LIKELIHOOD_KEY) {
-          ll = value.get();
+      SequenceFileIterator<IntPairWritable,DoubleWritable> iterator =
+          new SequenceFileIterator<IntPairWritable,DoubleWritable>(path, true, job);
+      while (iterator.hasNext()) {
+        Pair<IntPairWritable,DoubleWritable> record = iterator.next();
+        if (record.getFirst().getFirst() == LOG_LIKELIHOOD_KEY) {
+          ll = record.getSecond().get();
           break;
         }
       }
-      reader.close();
+      iterator.close();
     }
-
     return ll;
   }
 

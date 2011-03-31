@@ -36,6 +36,7 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -136,12 +137,10 @@ public final class TimesSquaredJob {
     Path outputPath = FileOutputFormat.getOutputPath(new JobConf(conf));
     FileSystem fs = FileSystem.get(conf);
     Path outputFile = new Path(outputPath, "part-00000");
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, outputFile, conf);
-    NullWritable n = NullWritable.get();
-    VectorWritable v = new VectorWritable();
-    reader.next(n,v);
-    Vector vector = v.get();
-    reader.close();
+    SequenceFileValueIterator<VectorWritable> iterator =
+        new SequenceFileValueIterator<VectorWritable>(outputFile, true, conf);
+    Vector vector = iterator.next().get();
+    iterator.close();
     fs.deleteOnExit(outputFile);
     return vector;
   }
@@ -160,14 +159,12 @@ public final class TimesSquaredJob {
         Preconditions.checkArgument(localFiles != null && localFiles.length >= 1,
                                     "missing paths from the DistributedCache");
         Path inputVectorPath = new Path(localFiles[0].getPath());
-        FileSystem fs = inputVectorPath.getFileSystem(conf);
 
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inputVectorPath, conf);
-        VectorWritable val = new VectorWritable();
-        NullWritable nw = NullWritable.get();
-        reader.next(nw, val);
-        reader.close();
-        inputVector = val.get();
+        SequenceFileValueIterator<VectorWritable> iterator =
+            new SequenceFileValueIterator<VectorWritable>(inputVectorPath, true, conf);
+        inputVector = iterator.next().get();
+        iterator.close();
+
         if (!(inputVector instanceof SequentialAccessSparseVector || inputVector instanceof DenseVector)) {
           inputVector = new SequentialAccessSparseVector(inputVector);
         }

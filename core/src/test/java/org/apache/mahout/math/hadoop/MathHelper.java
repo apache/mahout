@@ -27,6 +27,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -167,26 +169,18 @@ public final class MathHelper {
   /**
    * read a {@link Matrix} from a SequenceFile<IntWritable,VectorWritable>
    */
-  public static Matrix readEntries(FileSystem fs, Configuration conf, Path path, int rows, int columns)
-      throws IOException {
-
+  public static Matrix readEntries(Configuration conf, Path path, int rows, int columns) {
     Matrix matrix = new DenseMatrix(rows, columns);
-
-    SequenceFile.Reader reader = null;
-    try {
-      reader = new SequenceFile.Reader(fs, path, conf);
-      IntWritable key = new IntWritable();
-      VectorWritable value = new VectorWritable();
-      while (reader.next(key, value)) {
-        int row = key.get();
-        Iterator<Vector.Element> elementsIterator = value.get().iterateNonZero();
-        while (elementsIterator.hasNext()) {
-          Vector.Element element = elementsIterator.next();
-          matrix.set(row, element.index(), element.get());
-        }
+    for (Pair<IntWritable,VectorWritable> record :
+         new SequenceFileIterable<IntWritable,VectorWritable>(path, true, conf)) {
+      IntWritable key = record.getFirst();
+      VectorWritable value = record.getSecond();
+      int row = key.get();
+      Iterator<Vector.Element> elementsIterator = value.get().iterateNonZero();
+      while (elementsIterator.hasNext()) {
+        Vector.Element element = elementsIterator.next();
+        matrix.set(row, element.index(), element.get());
       }
-    } finally {
-      IOUtils.quietClose(reader);
     }
     return matrix;
   }

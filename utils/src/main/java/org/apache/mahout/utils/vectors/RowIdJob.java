@@ -18,15 +18,16 @@
 package org.apache.mahout.utils.vectors;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,25 +54,21 @@ public class RowIdJob extends AbstractJob {
                                                                  IntWritable.class,
                                                                  VectorWritable.class);
     IntWritable docId = new IntWritable();
-    Writable inputKey = new Text();
-    VectorWritable v = new VectorWritable();
-
     int i = 0;
-    for (FileStatus status : fs.listStatus(inputPath)) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, status.getPath(), conf);
-      while (reader.next(inputKey, v)) {
-        docId.set(i);
-        indexWriter.append(docId, inputKey);
-        matrixWriter.append(docId, v);
-        i++;
-      }
-      reader.close();
+    int numCols = 0;
+    for (Pair<Text,VectorWritable> record :
+         new SequenceFileDirIterable<Text,VectorWritable>(inputPath, PathType.LIST, null, null, true, conf)) {
+      VectorWritable value = record.getSecond();
+      docId.set(i);
+      indexWriter.append(docId, record.getFirst());
+      matrixWriter.append(docId, value);
+      i++;
+      numCols = value.get().size();
     }
-    
-    int numCols = v.get().size();
+
     matrixWriter.close();
     indexWriter.close();
-    log.info("Wrote out matrix with {} rows and {} columns to " + matrixPath, i, numCols);
+    log.info("Wrote out matrix with {} rows and {} columns to {}", new Object[] { i, numCols, matrixPath });
     return 0;
   }
 

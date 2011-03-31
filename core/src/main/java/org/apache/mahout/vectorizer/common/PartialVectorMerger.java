@@ -124,7 +124,7 @@ public final class PartialVectorMerger {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     job.setNumReduceTasks(numReducers);
 
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
 
     job.waitForCompletion(true);
   }

@@ -26,95 +26,55 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.kmeans.Cluster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 
 final class FuzzyKMeansUtil {
-  private static final Logger log = LoggerFactory.getLogger(FuzzyKMeansUtil.class);
 
   private FuzzyKMeansUtil() {
   }
 
   /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(Path clusterPathStr, Collection<SoftCluster> clusters) {
+  public static void configureWithClusterInfo(Path clusterPathStr, Collection<SoftCluster> clusters)
+    throws IOException {
     // Get the path location where the cluster Info is stored
-    Configuration job = new Configuration();
+    Configuration conf = new Configuration();
     Path clusterPath = new Path(clusterPathStr, "*");
     Collection<Path> result = new ArrayList<Path>();
-    // filter out the files
-    PathFilter clusterFileFilter = new PathFilter() {
-      @Override
-      public boolean accept(Path path) {
-        return path.getName().startsWith("part");
-      }
-    };
 
-    try {
-      // get all filtered file names in result list
-      FileSystem fs = clusterPath.getFileSystem(job);
-      FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(
-          fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
+    // get all filtered file names in result list
+    FileSystem fs = clusterPath.getFileSystem(conf);
+    FileStatus[] matches = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters.partFilter())),
+                                         PathFilters.partFilter());
 
-      for (FileStatus match : matches) {
-        result.add(fs.makeQualified(match.getPath()));
-      }
+    for (FileStatus match : matches) {
+      result.add(fs.makeQualified(match.getPath()));
+    }
 
-      // iterate thru the result path list
-      for (Path path : result) {
-        // RecordReader<Text, Text> recordReader = null;
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-        try {
-          // recordReader = new KeyValueLineRecordReader(job, new FileSplit(path, 0,
-          // fs.getFileStatus(path).getLen(), (String[]) null));
-          Class<?> valueClass = reader.getValueClass();
-          Writable key;
-          try {
-            key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          } catch (InstantiationException e) { // Should not be possible
-            log.error("Exception", e);
-            throw new IllegalStateException(e);
-          } catch (IllegalAccessException e) {
-            log.error("Exception", e);
-            throw new IllegalStateException(e);
-          }
-          if (valueClass.equals(Cluster.class)) {
-            Cluster value = new Cluster();
-            while (reader.next(key, value)) {
-              // get the cluster info
-              SoftCluster theCluster = new SoftCluster(value.getCenter(), value.getId(), value.getMeasure());
-              clusters.add(theCluster);
-              value = new Cluster();
-            }
-          } else if (valueClass.equals(SoftCluster.class)) {
-            SoftCluster value = new SoftCluster();
-            while (reader.next(key, value)) {
-              // get the cluster info
-              clusters.add(value);
-              value = new SoftCluster();
-            }
-          } else if (valueClass.equals(Canopy.class)) {
-            Canopy value = new Canopy();
-            while (reader.next(key, value)) {
-              // get the cluster info
-              SoftCluster theCluster = new SoftCluster(value.getCenter(), value.getId(), value.getMeasure());
-              clusters.add(theCluster);
-              value = new Canopy();
-            }
-          }
-        } finally {
-          reader.close();
+    // iterate thru the result path list
+    for (Path path : result) {
+      for (Writable value : new SequenceFileValueIterable<Writable>(path, conf)) {
+        Class<? extends Writable> valueClass = value.getClass();
+        if (valueClass.equals(Cluster.class)) {
+          // get the cluster info
+          Cluster cluster = (Cluster) value;
+          clusters.add(new SoftCluster(cluster.getCenter(), cluster.getId(), cluster.getMeasure()));
+        } else if (valueClass.equals(SoftCluster.class)) {
+          // get the cluster info
+          clusters.add((SoftCluster) value);
+        } else if (valueClass.equals(Canopy.class)) {
+          // get the cluster info
+          Canopy canopy = (Canopy) value;
+          clusters.add(new SoftCluster(canopy.getCenter(), canopy.getId(), canopy.getMeasure()));
+        } else {
+          throw new IllegalStateException("Bad value class: " + valueClass);
         }
       }
-
-    } catch (IOException e) {
-      log.info("Exception occurred in loading clusters:", e);
-      throw new IllegalStateException(e);
     }
+
   }
 
 }

@@ -27,7 +27,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -49,6 +48,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.distance.CosineDistanceMeasure;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.NamedVector;
@@ -228,7 +228,7 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    AbstractVectorModelDistribution modelDistribution = new SampledNormalDistribution(new VectorWritable(prototype));
+    ModelDistribution<VectorWritable> modelDistribution = new SampledNormalDistribution(new VectorWritable(prototype));
     Configuration conf = new Configuration();
     DirichletDriver.run(conf, getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, true, true, 0, false);
     // run ClusterDumper
@@ -240,7 +240,7 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet2() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    AbstractVectorModelDistribution modelDistribution = new GaussianClusterDistribution(new VectorWritable(prototype));
+    ModelDistribution<VectorWritable> modelDistribution = new GaussianClusterDistribution(new VectorWritable(prototype));
     Configuration conf = new Configuration();
     DirichletDriver.run(conf, getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, true, true, 0, true);
     // run ClusterDumper
@@ -252,7 +252,8 @@ public final class TestClusterDumper extends MahoutTestCase {
   public void testDirichlet3() throws Exception {
     Path output = getTestTempDirPath("output");
     NamedVector prototype = (NamedVector) sampleData.get(0).get();
-    AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(prototype));
+    ModelDistribution<VectorWritable> modelDistribution =
+        new DistanceMeasureClusterDistribution(new VectorWritable(prototype));
     Configuration conf = new Configuration();
     DirichletDriver.run(conf, getTestTempDirPath("testdata"), output, modelDistribution, 15, 10, 1.0, true, true, 0, true);
     // run ClusterDumper
@@ -283,20 +284,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     // extract the eigenvectors into P
     Matrix p = new DenseMatrix(39, desiredRank - 1);
     FileSystem fs = FileSystem.get(cleanEigenvectors.toUri(), conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, cleanEigenvectors, conf);
-    try {
-      Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-      Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-      i = 0;
-      while (reader.next(key, value)) {
-        Vector v = ((VectorWritable) value).get();
-        p.assignColumn(i, v);
-        System.out.println("k=" + key.toString() + " V=" + AbstractCluster.formatVector(v, termDictionary));
-        value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        i++;
-      }
-    } finally {
-      reader.close();
+
+    i = 0;
+    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(cleanEigenvectors, conf)) {
+      Vector v = value.get();
+      p.assignColumn(i, v);
+      i++;
     }
     // sData = A P
     Matrix sData = a.times(p);

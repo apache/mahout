@@ -26,14 +26,12 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -42,7 +40,8 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
   private CanopyClusterer canopyClusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context)
+    throws IOException, InterruptedException {
     canopyClusterer.emitPointToClosestCanopy(point.get(), canopies, context);
   }
 
@@ -50,9 +49,6 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
 
   /**
    * Configure the mapper by providing its canopies. Used by unit tests.
-   * 
-   * @param canopies
-   *          a List<Canopy>
    */
   public void config(Collection<Canopy> canopies) {
     this.canopies.clear();
@@ -69,32 +65,14 @@ public class ClusterMapper extends Mapper<WritableComparable<?>, VectorWritable,
     String clustersIn = conf.get(CanopyConfigKeys.CANOPY_PATH_KEY);
 
     // filter out the files
-    PathFilter clusterFileFilter = new PathFilter() {
-      @Override
-      public boolean accept(Path path) {
-        return path.getName().startsWith("part");
-      }
-    };
-    if ((clustersIn != null) && (clustersIn.length() > 0)) {
-      try {
-        Path clusterPath = new Path(clustersIn,"*");
-        FileSystem fs = clusterPath.getFileSystem(conf);
-        FileStatus[] files = fs.listStatus(FileUtil.stat2Paths(fs.globStatus(clusterPath, clusterFileFilter)), clusterFileFilter);
-        for (FileStatus file : files) {
-          SequenceFile.Reader reader = new SequenceFile.Reader(fs, file.getPath(), conf);
-          try {
-            Writable key = new Text();
-            Canopy value = new Canopy();
-            while (reader.next(key, value)) {
-              canopies.add(value);
-              value = new Canopy();
-            }
-          } finally {
-            reader.close();
-          }
+    if (clustersIn != null && clustersIn.length() > 0) {
+      Path clusterPath = new Path(clustersIn,"*");
+      FileSystem fs = clusterPath.getFileSystem(conf);
+      Path[] paths = FileUtil.stat2Paths(fs.globStatus(clusterPath, PathFilters.partFilter()));
+      for (FileStatus file : fs.listStatus(paths, PathFilters.partFilter())) {
+        for (Canopy value : new SequenceFileValueIterable<Canopy>(file.getPath(), conf)) {
+          canopies.add(value);
         }
-      } catch (IOException e) {
-        throw new IllegalStateException(e);
       }
 
       if (canopies.isEmpty()) {

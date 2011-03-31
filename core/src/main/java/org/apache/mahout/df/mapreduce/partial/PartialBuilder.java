@@ -23,13 +23,14 @@ import java.util.Arrays;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.df.DFUtils;
 import org.apache.mahout.df.DecisionForest;
 import org.apache.mahout.df.builder.TreeBuilder;
@@ -101,9 +102,8 @@ public class PartialBuilder extends Builder {
   }
   
   @Override
-  protected DecisionForest parseOutput(Job job, PredictionCallback callback) throws IOException,
-                                                                            ClassNotFoundException,
-                                                                            InterruptedException {
+  protected DecisionForest parseOutput(Job job, PredictionCallback callback)
+    throws IOException, ClassNotFoundException, InterruptedException {
     Configuration conf = job.getConfiguration();
     
     int numTrees = Builder.getNbTrees(conf);
@@ -150,7 +150,6 @@ public class PartialBuilder extends Builder {
    *          can be null
    * @param callback
    *          can be null
-   * @throws IOException
    */
   protected static void processOutput(JobContext job,
                                       Path outputPath,
@@ -169,34 +168,24 @@ public class PartialBuilder extends Builder {
     Path[] outfiles = DFUtils.listOutputFiles(fs, outputPath);
 
     // read all the outputs
-    TreeID key = new TreeID();
-    MapredOutput value = new MapredOutput();
-
     int index = 0;
     for (Path path : outfiles) {
-      Reader reader = new Reader(fs, path, conf);
-
-      try {
-        while (reader.next(key, value)) {
-          if (keys != null) {
-            keys[index] = key.clone();
-          }
-
-          if (trees != null) {
-            trees[index] = value.getTree();
-          }
-
-          processOutput(firstIds, key, value, callback);
-
-          index++;
+      for (Pair<TreeID,MapredOutput> record : new SequenceFileIterable<TreeID, MapredOutput>(path, conf)) {
+        TreeID key = record.getFirst();
+        MapredOutput value = record.getSecond();
+        if (keys != null) {
+          keys[index] = key;
         }
-      } finally {
-        reader.close();
+        if (trees != null) {
+          trees[index] = value.getTree();
+        }
+        processOutput(firstIds, key, value, callback);
+        index++;
       }
     }
 
     // make sure we got all the keys/values
-    if ((keys != null) && (index != keys.length)) {
+    if (keys != null && index != keys.length) {
       throw new IllegalStateException("Some key/values are missing from the output");
     }
   }

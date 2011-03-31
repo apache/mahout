@@ -32,7 +32,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
@@ -45,6 +44,8 @@ import org.apache.hadoop.util.GenericsUtil;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.apache.mahout.fpm.pfpgrowth.fpgrowth.FPGrowth;
 import org.slf4j.Logger;
@@ -123,16 +124,10 @@ public final class PFPGrowth {
    * 
    * @return Feature Frequency List
    */
-  public static List<Pair<String,Long>> readFList(Parameters params) throws IOException {
-    Writable key = new Text();
-    LongWritable value = new LongWritable();
+  public static List<Pair<String,Long>> readFList(Parameters params) {
     int minSupport = Integer.valueOf(params.get(MIN_SUPPORT, "3"));
     Configuration conf = new Configuration();
-      
-    Path parallelCountingPath = new Path(params.get(OUTPUT), PARALLEL_COUNTING);
-    FileSystem fs = FileSystem.get(parallelCountingPath.toUri(), conf);
-    FileStatus[] outputFiles = fs.globStatus(new Path(parallelCountingPath, FILE_PATTERN));
-    
+
     PriorityQueue<Pair<String,Long>> queue = new PriorityQueue<Pair<String,Long>>(11,
         new Comparator<Pair<String,Long>>() {
           
@@ -146,14 +141,14 @@ public final class PFPGrowth {
           }
           
         });
-    for (FileStatus fileStatus : outputFiles) {
-      Path path = fileStatus.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      // key is feature value is count
-      while (reader.next(key, value)) {
-        if (value.get() >= minSupport) {
-          queue.add(new Pair<String, Long>(key.toString(), value.get()));
-        }
+
+    Path parallelCountingPath = new Path(params.get(OUTPUT), PARALLEL_COUNTING);
+    Path filesPattern = new Path(parallelCountingPath, FILE_PATTERN);
+    for (Pair<Writable,LongWritable> record :
+         new SequenceFileDirIterable<Writable,LongWritable>(filesPattern, PathType.GLOB, null, null, true, conf)) {
+      long value = record.getSecond().get();
+      if (value >= minSupport) {
+        queue.add(new Pair<String,Long>(record.getFirst().toString(), value));
       }
     }
     List<Pair<String,Long>> fList = new ArrayList<Pair<String,Long>>();
@@ -178,8 +173,7 @@ public final class PFPGrowth {
     
     List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
     for (FileStatus fileStatus : outputFiles) {
-      Path path = fileStatus.getPath();
-      ret.addAll(FPGrowth.readFrequentPattern(fs, conf, path));
+      ret.addAll(FPGrowth.readFrequentPattern(conf, fileStatus.getPath()));
     }
     return ret;
   }
@@ -232,7 +226,7 @@ public final class PFPGrowth {
     job.setReducerClass(AggregatorReducer.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
     job.waitForCompletion(true);
   }
   
@@ -296,7 +290,7 @@ public final class PFPGrowth {
     Path outPath = new Path(params.get(OUTPUT), PARALLEL_COUNTING);
     FileOutputFormat.setOutputPath(job, outPath);
     
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
     
     job.setInputFormatClass(TextInputFormat.class);
     job.setMapperClass(ParallelCountingMapper.class);
@@ -335,7 +329,7 @@ public final class PFPGrowth {
     Path outPath = new Path(params.get(OUTPUT), SORTED_OUTPUT);
     FileOutputFormat.setOutputPath(job, outPath);
     
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
     
     job.setInputFormatClass(TextInputFormat.class);
     job.setMapperClass(TransactionSortingMapper.class);
@@ -371,7 +365,7 @@ public final class PFPGrowth {
     Path outPath = new Path(params.get(OUTPUT), FPGROWTH);
     FileOutputFormat.setOutputPath(job, outPath);
     
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
     
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setMapperClass(ParallelFPGrowthMapper.class);

@@ -28,14 +28,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.SequenceFile.Reader;
-import org.apache.hadoop.io.SequenceFile.Sorter;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.StringUtils;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.CDFitness;
 import org.apache.mahout.ga.watchmaker.cd.DataSet;
@@ -87,7 +86,6 @@ public final class CDMahoutEvaluator {
    * Initializes the dataset
    * 
    * @param inpath input path (the dataset)
-   * @throws IOException
    */
   public static void initializeDataSet(Path inpath) throws IOException {
     Configuration conf = new Configuration();
@@ -105,11 +103,9 @@ public final class CDMahoutEvaluator {
    * @param inpath input path (the dataset)
    * @param split DatasetSplit used to separate training and testing input
    * @return the evaluation
-   * @throws IOException
-   * @throws ClassNotFoundException 
-   * @throws InterruptedException 
    */
-  public static CDFitness evaluate(Rule rule, int target, Path inpath, Path output, DatasetSplit split) throws IOException, InterruptedException, ClassNotFoundException {
+  public static CDFitness evaluate(Rule rule, int target, Path inpath, Path output, DatasetSplit split)
+    throws IOException, InterruptedException, ClassNotFoundException {
     List<CDFitness> evals = new ArrayList<CDFitness>();
 
     evaluate(Arrays.asList(rule), target, inpath, output, evals, split);
@@ -189,7 +185,7 @@ public final class CDMahoutEvaluator {
                                         Configuration conf, Path outpath,
                                         Collection<CDFitness> evaluations)
     throws IOException {
-    Sorter sorter = new Sorter(fs, LongWritable.class, CDFitness.class, conf);
+    SequenceFile.Sorter sorter = new SequenceFile.Sorter(fs, LongWritable.class, CDFitness.class, conf);
 
     // merge and sort the outputs
     Path[] outfiles = OutputUtils.listOutputFiles(fs, outpath);
@@ -197,15 +193,10 @@ public final class CDMahoutEvaluator {
     sorter.merge(outfiles, output);
 
     // import the evaluations
-    Writable key = new LongWritable();
-    CDFitness value = new CDFitness();
-    Reader reader = new Reader(fs, output, conf);
-
-    while (reader.next(key, value)) {
-      evaluations.add(new CDFitness(value));
+    for (CDFitness value : new SequenceFileValueIterable<CDFitness>(output, conf)) {
+      evaluations.add(value);
     }
 
-    reader.close();
   }
 
 }

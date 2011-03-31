@@ -32,13 +32,11 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.fpm.pfpgrowth.convertors.StatusUpdater;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TopKPatternsOutputConverter;
 import org.apache.mahout.fpm.pfpgrowth.convertors.TransactionIterator;
@@ -56,17 +54,13 @@ public class FPGrowth<A extends Comparable<? super A>> {
 
   private static final Logger log = LoggerFactory.getLogger(FPGrowth.class);
 
-  public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(FileSystem fs, Configuration conf, Path path)
-    throws IOException {
-
+  public static List<Pair<String,TopKStringPatterns>> readFrequentPattern(Configuration conf, Path path) {
     List<Pair<String,TopKStringPatterns>> ret = new ArrayList<Pair<String,TopKStringPatterns>>();
-    Writable key = new Text();
-    TopKStringPatterns value = new TopKStringPatterns();
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
     // key is feature value is count
-    while (reader.next(key, value)) {
-      ret.add(new Pair<String,TopKStringPatterns>(key.toString(),
-          new TopKStringPatterns(value.getPatterns())));
+    for (Pair<Writable,TopKStringPatterns> record :
+         new SequenceFileIterable<Writable,TopKStringPatterns>(path, true, conf)) {
+      ret.add(new Pair<String,TopKStringPatterns>(record.getFirst().toString(),
+                                                  new TopKStringPatterns(record.getSecond().getPatterns())));
     }
     return ret;
   }
@@ -81,8 +75,7 @@ public class FPGrowth<A extends Comparable<? super A>> {
    *          minSupport of the feature to be included
    * @return the List of features and their associated frequency as a Pair
    */
-  public final List<Pair<A,Long>> generateFList(Iterator<Pair<List<A>,Long>> transactions,
-    int minSupport) {
+  public final List<Pair<A,Long>> generateFList(Iterator<Pair<List<A>,Long>> transactions, int minSupport) {
 
     Map<A,MutableLong> attributeSupport = new HashMap<A,MutableLong>();
     // int count = 0;

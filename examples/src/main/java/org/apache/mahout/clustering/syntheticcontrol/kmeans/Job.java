@@ -55,8 +55,9 @@ public final class Job extends AbstractJob {
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
-      HadoopUtil.overwriteOutput(output);
-      new Job().run(new Configuration(), new Path("testdata"), output, new EuclideanDistanceMeasure(), 6, 0.5, 10);
+      Configuration conf = new Configuration();
+      HadoopUtil.delete(conf, output);
+      new Job().run(conf, new Path("testdata"), output, new EuclideanDistanceMeasure(), 6, 0.5, 10);
     }
   }
 
@@ -87,7 +88,7 @@ public final class Job extends AbstractJob {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     Class<?> cl = ccl.loadClass(measureClass);

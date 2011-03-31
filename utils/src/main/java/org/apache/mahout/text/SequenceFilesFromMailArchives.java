@@ -39,11 +39,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.hadoop.io.SequenceFile.CompressionType;
 
 /**
  * Converts a directory of gzipped mail archives into SequenceFiles of specified chunkSize.
@@ -155,14 +153,18 @@ public final class SequenceFilesFromMailArchives {
         log.info("Parsed "+dirCount+" messages from directory "+current.getAbsolutePath());
         messageCount += dirCount;
       } else {
-        parseFileLineByLine(current);
+        try {
+          parseFileLineByLine(current);
+        } catch (IOException e) {
+          throw new IllegalStateException(e);
+        }
       }
       return false;
     }
     
     // extracts mail subject and body text from 0 or more mail messages
     // embedded in the supplied file using simple pattern matching
-    private final void parseFileLineByLine(File current) {      
+    private void parseFileLineByLine(File current) throws IOException {
       try {
         file.setLength(0); // reset the buffer
         
@@ -224,10 +226,9 @@ public final class SequenceFilesFromMailArchives {
         }
       } catch (FileNotFoundException e) {
         // Skip file.
-      } catch (IOException e) {
-        // TODO: report exceptions and continue;
-        throw new IllegalStateException(e);
-      }      
+      }
+      // TODO: report exceptions and continue;
+
     }
   }
   

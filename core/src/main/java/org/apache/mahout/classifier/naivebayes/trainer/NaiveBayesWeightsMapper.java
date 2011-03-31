@@ -22,14 +22,14 @@ import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.classifier.naivebayes.BayesConstants;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -58,23 +58,16 @@ public class NaiveBayesWeightsMapper extends Mapper<IntWritable, VectorWritable,
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    try {
-      URI[] localFiles = DistributedCache.getCacheFiles(conf);
-      if (localFiles == null || localFiles.length < 1) {
-        throw new IllegalArgumentException("missing paths from the DistributedCache");
-      }
-      Path labelMapFile = new Path(localFiles[0].getPath());
-      FileSystem fs = labelMapFile.getFileSystem(conf);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, labelMapFile, conf);
-      Writable key = new Text();
-      IntWritable value = new IntWritable();
+    URI[] localFiles = DistributedCache.getCacheFiles(conf);
+    if (localFiles == null || localFiles.length < 1) {
+      throw new IllegalArgumentException("missing paths from the DistributedCache");
+    }
+    Path labelMapFile = new Path(localFiles[0].getPath());
 
-      // key is word value is id
-      while (reader.next(key, value)) {
-        labelMap.put(key.toString(), value.get());
-      }
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
+    // key is word value is id
+    for (Pair<Writable,IntWritable> record :
+         new SequenceFileIterable<Writable,IntWritable>(labelMapFile, true, conf)) {
+      labelMap.put(record.getFirst().toString(), record.getSecond().get());
     }
   }
   

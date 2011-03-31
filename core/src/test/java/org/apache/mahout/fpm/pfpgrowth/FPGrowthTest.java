@@ -71,7 +71,7 @@ public final class FPGrowthTest extends MahoutTestCase {
         new ContextStatusUpdater(null));
     writer.close();
 
-    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
+    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     assertEquals(
       "[(C,([B, C],3)), "
           + "(E,([A, E],4), ([A, B, E],3), ([A, D, E],3)), "
@@ -111,7 +111,7 @@ public final class FPGrowthTest extends MahoutTestCase {
         new ContextStatusUpdater(null));
     writer.close();
 
-    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
+    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     assertEquals(
       "[(Y,([Y],14), ([X, Y],10)), (X,([X],22), ([X, Y],10))]", frequentPatterns.toString());
   }
@@ -146,7 +146,7 @@ public final class FPGrowthTest extends MahoutTestCase {
         new ContextStatusUpdater(null));
     writer.close();
 
-    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(fs, conf, path);
+    List<Pair<String, TopKStringPatterns>> frequentPatterns = FPGrowth.readFrequentPattern(conf, path);
     assertEquals(
       "[(Z,([X, Y, Z],11)), (Y,([Y],25), ([X, Y],21), ([X, Y, Z],11)), (X,([X],33), ([X, Y],21), ([X, Y, Z],11))]",
       frequentPatterns.toString());

@@ -35,18 +35,17 @@ import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.vectors.VectorHelper;
 import org.slf4j.Logger;
@@ -75,7 +74,7 @@ public final class ClusterDumper extends AbstractJob {
   private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
   private boolean useJSON;
 
-  public ClusterDumper(Path seqFileDir, Path pointsDir) throws IOException {
+  public ClusterDumper(Path seqFileDir, Path pointsDir) {
     this.seqFileDir = seqFileDir;
     this.pointsDir = pointsDir;
     init();
@@ -130,15 +129,14 @@ public final class ClusterDumper extends AbstractJob {
     return 0;
   }
 
-  public void printClusters(String[] dictionary) throws IOException, InstantiationException, IllegalAccessException {
+  public void printClusters(String[] dictionary) throws IOException {
     Configuration conf = new Configuration();
 
     if (this.termDictionary != null) {
       if ("text".equals(dictionaryFormat)) {
         dictionary = VectorHelper.loadTermDictionary(new File(this.termDictionary));
       } else if ("sequencefile".equals(dictionaryFormat)) {
-        FileSystem fs = FileSystem.get(new Path(this.termDictionary).toUri(), conf);
-        dictionary = VectorHelper.loadTermDictionary(conf, fs, this.termDictionary);
+        dictionary = VectorHelper.loadTermDictionary(conf, this.termDictionary);
       } else {
         throw new IllegalArgumentException("Invalid dictionary format");
       }
@@ -151,50 +149,38 @@ public final class ClusterDumper extends AbstractJob {
       writer = new OutputStreamWriter(new FileOutputStream(new File(this.outputFile)), Charset.forName("UTF-8"));
     }
     try {
-      FileSystem fs = seqFileDir.getFileSystem(conf);
-      for (FileStatus seqFile : fs.globStatus(new Path(seqFileDir, "part-*"))) {
-        Path path = seqFile.getPath();
-        //System.out.println("Input Path: " + path); doesn't this interfere with output?
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-        try {
-          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-          while (reader.next(key, value)) {
-            Cluster cluster = (Cluster) value;
-            String fmtStr = useJSON ? cluster.asJsonString() : cluster.asFormatString(dictionary);
-            if (subString > 0 && fmtStr.length() > subString) {
-              writer.write(':');
-              writer.write(fmtStr, 0, Math.min(subString, fmtStr.length()));
-            } else {
-              writer.write(fmtStr);
-            }
+      for (Cluster value :
+           new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf)) {
+        String fmtStr = useJSON ? value.asJsonString() : value.asFormatString(dictionary);
+        if (subString > 0 && fmtStr.length() > subString) {
+          writer.write(':');
+          writer.write(fmtStr, 0, Math.min(subString, fmtStr.length()));
+        } else {
+          writer.write(fmtStr);
+        }
 
-            writer.write('\n');
+        writer.write('\n');
 
-            if (dictionary != null) {
-              String topTerms = getTopFeatures(cluster.getCenter(), dictionary, numTopFeatures);
-              writer.write("\tTop Terms: ");
-              writer.write(topTerms);
-              writer.write('\n');
-            }
+        if (dictionary != null) {
+          String topTerms = getTopFeatures(value.getCenter(), dictionary, numTopFeatures);
+          writer.write("\tTop Terms: ");
+          writer.write(topTerms);
+          writer.write('\n');
+        }
 
-            List<WeightedVectorWritable> points = clusterIdToPoints.get(cluster.getId());
-            if (points != null) {
-              writer.write("\tWeight:  Point:\n\t");
-              for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
-                WeightedVectorWritable point = iterator.next();
-                writer.write(String.valueOf(point.getWeight()));
-                writer.write(": ");
-                writer.write(AbstractCluster.formatVector(point.getVector(), dictionary));
-                if (iterator.hasNext()) {
-                  writer.write("\n\t");
-                }
-              }
-              writer.write('\n');
+        List<WeightedVectorWritable> points = clusterIdToPoints.get(value.getId());
+        if (points != null) {
+          writer.write("\tWeight:  Point:\n\t");
+          for (Iterator<WeightedVectorWritable> iterator = points.iterator(); iterator.hasNext();) {
+            WeightedVectorWritable point = iterator.next();
+            writer.write(String.valueOf(point.getWeight()));
+            writer.write(": ");
+            writer.write(AbstractCluster.formatVector(point.getVector(), dictionary));
+            if (iterator.hasNext()) {
+              writer.write("\n\t");
             }
           }
-        } finally {
-          reader.close();
+          writer.write('\n');
         }
       }
     } finally {
@@ -202,7 +188,7 @@ public final class ClusterDumper extends AbstractJob {
     }
   }
 
-  private void init() throws IOException {
+  private void init() {
     if (this.pointsDir != null) {
       Configuration conf = new Configuration();
       // read in the points
@@ -249,45 +235,23 @@ public final class ClusterDumper extends AbstractJob {
     return this.numTopFeatures;
   }
 
-  public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir,
-                                                                      Configuration conf) throws IOException {
+  public static Map<Integer, List<WeightedVectorWritable>> readPoints(Path pointsPathDir, Configuration conf) {
     Map<Integer, List<WeightedVectorWritable>> result = new TreeMap<Integer, List<WeightedVectorWritable>>();
-
-    FileSystem fs = pointsPathDir.getFileSystem(conf);
-    FileStatus[] children = fs.listStatus(pointsPathDir, new PathFilter() {
-      @Override
-      public boolean accept(Path path) {
-        String name = path.getName();
-        return !(name.endsWith(".crc") || name.startsWith("_"));
+    for (Pair<IntWritable,WeightedVectorWritable> record :
+         new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(
+             pointsPathDir, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      // value is the cluster id as an int, key is the name/id of the
+      // vector, but that doesn't matter because we only care about printing
+      // it
+      //String clusterId = value.toString();
+      int keyValue = record.getFirst().get();
+      List<WeightedVectorWritable> pointList = result.get(keyValue);
+      if (pointList == null) {
+        pointList = new ArrayList<WeightedVectorWritable>();
+        result.put(keyValue, pointList);
       }
-    });
-
-    for (FileStatus file : children) {
-      Path path = file.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      try {
-        IntWritable key = reader.getKeyClass().asSubclass(IntWritable.class).newInstance();
-        WeightedVectorWritable value = reader.getValueClass().asSubclass(WeightedVectorWritable.class).newInstance();
-        while (reader.next(key, value)) {
-          // value is the cluster id as an int, key is the name/id of the
-          // vector, but that doesn't matter because we only care about printing
-          // it
-          //String clusterId = value.toString();
-          List<WeightedVectorWritable> pointList = result.get(key.get());
-          if (pointList == null) {
-            pointList = new ArrayList<WeightedVectorWritable>();
-            result.put(key.get(), pointList);
-          }
-          pointList.add(value);
-          value = reader.getValueClass().asSubclass(WeightedVectorWritable.class).newInstance();
-        }
-      } catch (InstantiationException e) {
-        log.error("Exception", e);
-      } catch (IllegalAccessException e) {
-        log.error("Exception", e);
-      }
+      pointList.add(record.getSecond());
     }
-
     return result;
   }
 

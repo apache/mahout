@@ -42,9 +42,9 @@ public final class AffinityMatrixInputJob {
    */
   public static void runJob(Path input, Path output, int rows, int cols)
     throws IOException, InterruptedException, ClassNotFoundException {
-    HadoopUtil.overwriteOutput(output);
-
     Configuration conf = new Configuration();
+    HadoopUtil.delete(conf, output);
+
     conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, rows);
     Job job = new Job(conf, "AffinityMatrixInputJob: " + input + " -> M/R -> " + output);
 

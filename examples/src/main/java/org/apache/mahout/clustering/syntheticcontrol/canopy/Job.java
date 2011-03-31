@@ -50,7 +50,7 @@ public final class Job extends AbstractJob {
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(new Configuration(), output);
       run(new Path("testdata"), output, new EuclideanDistanceMeasure(), 80, 55);
     }
   }
@@ -74,8 +74,8 @@ public final class Job extends AbstractJob {
    * @param t2
    *          the canopy T2 threshold
    */
-  private static void run(Path input, Path output, DistanceMeasure measure, double t1, double t2) throws IOException,
-      InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+  private static void run(Path input, Path output, DistanceMeasure measure, double t1, double t2)
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     CanopyDriver.run(new Configuration(), directoryContainingConvertedInput, output, measure, t1, t2, true, false);
@@ -103,7 +103,7 @@ public final class Job extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(new Configuration(), output);
     }
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));

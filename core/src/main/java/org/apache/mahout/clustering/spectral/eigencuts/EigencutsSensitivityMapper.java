@@ -47,10 +47,8 @@ public class EigencutsSensitivityMapper extends
     epsilon = Double.parseDouble(config.get(EigencutsKeys.EPSILON));
     
     // read in the two vectors from the cache
-    eigenvalues = VectorCache.load(
-        new IntWritable(EigencutsKeys.EIGENVALUES_CACHE_INDEX), config);
-    diagonal = VectorCache.load(
-        new IntWritable(EigencutsKeys.DIAGONAL_CACHE_INDEX), config);
+    eigenvalues = VectorCache.load(config);
+    diagonal = VectorCache.load(config);
     if (!(eigenvalues instanceof SequentialAccessSparseVector || eigenvalues instanceof DenseVector)) {
       eigenvalues = new SequentialAccessSparseVector(eigenvalues);
     }

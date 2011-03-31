@@ -60,15 +60,7 @@ public class RepresentativePointsReducer
   protected void setup(Context context) throws IOException, InterruptedException {
     super.setup(context);
     Configuration conf = context.getConfiguration();
-    try {
-      representativePoints = RepresentativePointsMapper.getRepresentativePoints(conf);
-    } catch (NumberFormatException e) {
-      throw new IllegalStateException(e);
-    } catch (SecurityException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
-    }
+    representativePoints = RepresentativePointsMapper.getRepresentativePoints(conf);
   }
 
   public void configure(Map<Integer, List<VectorWritable>> representativePoints) {

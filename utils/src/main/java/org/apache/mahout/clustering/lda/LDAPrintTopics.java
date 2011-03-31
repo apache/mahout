@@ -40,13 +40,13 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.commons.cli2.builder.GroupBuilder;
 import org.apache.commons.cli2.commandline.Parser;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.IntPairWritable;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.utils.vectors.VectorHelper;
 
 /**
@@ -149,8 +149,7 @@ public final class LDAPrintTopics {
       if ("text".equals(dictionaryType)) {
         wordList = Arrays.asList(VectorHelper.loadTermDictionary(new File(dictFile)));
       } else if ("sequencefile".equals(dictionaryType)) {
-        FileSystem fs = FileSystem.get(new Path(dictFile).toUri(), config);
-        wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, fs, dictFile));
+        wordList = Arrays.asList(VectorHelper.loadTermDictionary(config, dictFile));
       } else {
         throw new IllegalArgumentException("Invalid dictionary format");
       }
@@ -197,28 +196,22 @@ public final class LDAPrintTopics {
   private static List<List<String>> topWordsForTopics(String dir,
                                                       Configuration job,
                                                       List<String> wordList,
-                                                      int numWordsToPrint) throws IOException {
-    FileSystem fs = new Path(dir).getFileSystem(job);
-    
+                                                      int numWordsToPrint) {
     List<PriorityQueue<StringDoublePair>> queues = new ArrayList<PriorityQueue<StringDoublePair>>();
-    
-    IntPairWritable key = new IntPairWritable();
-    DoubleWritable value = new DoubleWritable();
-    for (FileStatus status : fs.globStatus(new Path(dir, "part-*"))) {
-      Path path = status.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, job);
-      while (reader.next(key, value)) {
-        int topic = key.getFirst();
-        int word = key.getSecond();
-        
-        ensureQueueSize(queues, topic);
-        if (word >= 0 && topic >= 0) {
-          double score = value.get();
-          String realWord = wordList.get(word);
-          maybeEnqueue(queues.get(topic), realWord, score, numWordsToPrint);
-        }
+
+    for (Pair<IntPairWritable,DoubleWritable> record :
+         new SequenceFileDirIterable<IntPairWritable, DoubleWritable>(
+             new Path(dir, "part-*"), PathType.GLOB, null, null, true, job)) {
+      IntPairWritable key = record.getFirst();
+      int topic = key.getFirst();
+      int word = key.getSecond();
+
+      ensureQueueSize(queues, topic);
+      if (word >= 0 && topic >= 0) {
+        double score = record.getSecond().get();
+        String realWord = wordList.get(word);
+        maybeEnqueue(queues.get(topic), realWord, score, numWordsToPrint);
       }
-      reader.close();
     }
     
     List<List<String>> result = new ArrayList<List<String>>();

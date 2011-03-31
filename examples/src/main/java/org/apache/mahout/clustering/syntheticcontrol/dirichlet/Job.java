@@ -63,7 +63,7 @@ public final class Job extends AbstractJob {
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(new Configuration(), output);
       ModelDistribution<VectorWritable> modelDistribution = 
           new GaussianClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
       new Job().run(new Path("testdata"), output, modelDistribution, 10, 5, 1.0, true, 0);
@@ -105,7 +105,7 @@ public final class Job extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     String modelFactory = getOption(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION);
     String modelPrototype = getOption(DirichletDriver.MODEL_PROTOTYPE_CLASS_OPTION);

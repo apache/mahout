@@ -31,7 +31,6 @@ import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -42,6 +41,7 @@ import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.WeightedVectorWritable;
 import org.apache.mahout.clustering.kmeans.TestKmeansClustering;
 import org.apache.mahout.common.DummyRecordWriter;
+import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
@@ -242,13 +242,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           DefaultOptionCreator.SEQUENTIAL_METHOD
       };
       new FuzzyKMeansDriver().run(args);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-0"), conf);
-      Writable key = new IntWritable();
-      Writable out = new WeightedVectorWritable();
-      while (reader.next(key, out)) {
-        // make sure we can read all the clusters
-      }
-      reader.close();
+      long count = HadoopUtil.countRecords(new Path(output, "clusteredPoints/part-m-0"), conf);
+      assertTrue(count > 0);
     }
 
   }
@@ -318,13 +313,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
           optKey(DefaultOptionCreator.OVERWRITE_OPTION)
       };
       ToolRunner.run(new Configuration(), new FuzzyKMeansDriver(), args);
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path(output, "clusteredPoints/part-m-00000"), conf);
-      Writable key = new IntWritable();
-      Writable out = new WeightedVectorWritable();
-      while (reader.next(key, out)) {
-        // make sure we can read all the clusters
-      }
-      reader.close();
+      long count = HadoopUtil.countRecords(new Path(output, "clusteredPoints/part-m-00000"), conf);
+      assertTrue(count > 0);
     }
 
   }
@@ -612,7 +602,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
       }
 
       FuzzyKMeansClusterMapper clusterMapper = new FuzzyKMeansClusterMapper();
-      DummyRecordWriter<IntWritable, WeightedVectorWritable> clusterWriter = new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
+      DummyRecordWriter<IntWritable, WeightedVectorWritable> clusterWriter =
+          new DummyRecordWriter<IntWritable, WeightedVectorWritable>();
       Mapper<WritableComparable<?>, VectorWritable, IntWritable, WeightedVectorWritable>.Context clusterContext =
           DummyRecordWriter.build(clusterMapper, conf, clusterWriter);
       clusterMapper.setup(reducerClusters, conf);
@@ -640,9 +631,8 @@ public final class TestFuzzyKmeansClustering extends MahoutTestCase {
                                                                             2,
                                                                             1);
 
-      computeCluster(pointsVectors, clusters.get(clusters.size() - 1), new FuzzyKMeansClusterer(new EuclideanDistanceMeasure(),
-                                                                                                0.001,
-                                                                                                2), refClusters);
+      computeCluster(pointsVectors, clusters.get(clusters.size() - 1),
+                     new FuzzyKMeansClusterer(new EuclideanDistanceMeasure(), 0.001, 2), refClusters);
 
       // Now compare the clustermapper results with reference implementation
       assertEquals("mapper and reference sizes", refClusters.size(), clusterWriter.getKeys().size());

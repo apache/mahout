@@ -41,8 +41,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.SequenceFile.Reader;
-import org.apache.hadoop.io.SequenceFile.Sorter;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -52,6 +51,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.common.StringUtils;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.ga.watchmaker.OutputUtils;
 import org.apache.mahout.ga.watchmaker.cd.FileInfoParser;
 import org.slf4j.Logger;
@@ -129,7 +129,7 @@ public final class CDInfosTool {
                                          Configuration conf, Path outpath,
                                          Collection<String> descriptions)
     throws IOException {
-    Sorter sorter = new Sorter(fs, LongWritable.class, Text.class, conf);
+    SequenceFile.Sorter sorter = new SequenceFile.Sorter(fs, LongWritable.class, Text.class, conf);
 
     // merge and sort the outputs
     Path[] outfiles = OutputUtils.listOutputFiles(fs, outpath);
@@ -137,15 +137,9 @@ public final class CDInfosTool {
     sorter.merge(outfiles, output);
 
     // import the descriptions
-    Writable key = new LongWritable();
-    Writable value = new Text();
-    Reader reader = new Reader(fs, output, conf);
-
-    while (reader.next(key, value)) {
+    for (Writable value : new SequenceFileValueIterable<Writable>(output, true, conf)) {
       descriptions.add(value.toString());
     }
-
-    reader.close();
   }
 
   /**

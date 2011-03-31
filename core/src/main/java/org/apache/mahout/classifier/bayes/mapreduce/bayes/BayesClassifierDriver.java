@@ -23,11 +23,8 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -36,8 +33,11 @@ import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.mahout.classifier.ConfusionMatrix;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,46 +74,35 @@ public final class BayesClassifierDriver {
     conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,"
                                   + "org.apache.hadoop.io.serializer.WritableSerialization");
     
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
     conf.set("bayes.parameters", params.toString());
     
     client.setConf(conf);
     JobClient.runJob(conf);
     
     Path outputFiles = new Path(outPath, "part*");
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);    
-    ConfusionMatrix matrix = readResult(dfs, outputFiles, conf, params);
+    ConfusionMatrix matrix = readResult(outputFiles, conf, params);
     log.info("{}", matrix.summarize());
   }
   
-  public static ConfusionMatrix readResult(FileSystem fs,
-                                           Path pathPattern,
-                                           Configuration conf,
-                                           Parameters params) throws IOException {
-    
-    StringTuple key = new StringTuple();
-    DoubleWritable value = new DoubleWritable();
+  public static ConfusionMatrix readResult(Path pathPattern, Configuration conf, Parameters params) {
     String defaultLabel = params.get("defaultCat");
-    FileStatus[] outputFiles = fs.globStatus(pathPattern);
     Map<String,Map<String,Integer>> confusionMatrix = new HashMap<String,Map<String,Integer>>();
-    
-    for (FileStatus fileStatus : outputFiles) {
-      Path path = fileStatus.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-      while (reader.next(key, value)) {
-        String correctLabel = key.stringAt(1);
-        String classifiedLabel = key.stringAt(2);
-        Map<String,Integer> rowMatrix = confusionMatrix.get(correctLabel);
-        if (rowMatrix == null) {
-          rowMatrix = new HashMap<String,Integer>();
-        }
-        Integer count = Double.valueOf(value.get()).intValue();
-        rowMatrix.put(classifiedLabel, count);
-        confusionMatrix.put(correctLabel, rowMatrix);
-        
+    for (Pair<StringTuple,DoubleWritable> record :
+         new SequenceFileDirIterable<StringTuple,DoubleWritable>(pathPattern, PathType.GLOB, null, null, true, conf)) {
+      StringTuple key = record.getFirst();
+      DoubleWritable value = record.getSecond();
+      String correctLabel = key.stringAt(1);
+      String classifiedLabel = key.stringAt(2);
+      Map<String,Integer> rowMatrix = confusionMatrix.get(correctLabel);
+      if (rowMatrix == null) {
+        rowMatrix = new HashMap<String,Integer>();
       }
+      Integer count = Double.valueOf(value.get()).intValue();
+      rowMatrix.put(classifiedLabel, count);
+      confusionMatrix.put(correctLabel, rowMatrix);
     }
-    
+
     ConfusionMatrix matrix = new ConfusionMatrix(confusionMatrix.keySet(), defaultLabel);
     for (Map.Entry<String,Map<String,Integer>> correctLabelSet : confusionMatrix.entrySet()) {
       Map<String,Integer> rowMatrix = correctLabelSet.getValue();

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
@@ -64,17 +63,16 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     conf.setCombinerClass(CBayesThetaNormalizerReducer.class);
     conf.setReducerClass(CBayesThetaNormalizerReducer.class);
     conf.setOutputFormat(SequenceFileOutputFormat.class);
-    conf
-        .set("io.serializations",
-          "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+    conf.set("io.serializations",
+             "org.apache.hadoop.io.serializer.JavaSerialization,"
+             + "org.apache.hadoop.io.serializer.WritableSerialization");
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters and make or break a piece of code
     
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
     
     Path sigmaKFiles = new Path(output, "trainer-weights/Sigma_k/*");
-    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(dfs, sigmaKFiles, conf);
+    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(sigmaKFiles, conf);
     DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(conf,
         GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
@@ -85,7 +83,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     conf.set("cnaivebayes.sigma_k", labelWeightSumString);
     
     Path sigmaKSigmaJFile = new Path(output, "trainer-weights/Sigma_kSigma_j/*");
-    double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(dfs, sigmaKSigmaJFile, conf);
+    double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(sigmaKSigmaJFile, conf);
     DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
     String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
     
@@ -95,7 +93,7 @@ public class CBayesThetaNormalizerDriver implements BayesJob {
     conf.set("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
     
     Path vocabCountFile = new Path(output, "trainer-tfIdf/trainer-vocabCount/*");
-    double vocabCount = SequenceFileModelReader.readVocabCount(dfs, vocabCountFile, conf);
+    double vocabCount = SequenceFileModelReader.readVocabCount(vocabCountFile, conf);
     String vocabCountString = stringifier.toString(vocabCount);
     
     log.info("Vocabulary Count");

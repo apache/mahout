@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
@@ -69,11 +68,10 @@ public class BayesThetaNormalizerDriver implements BayesJob {
     // Dont ever forget this. People should keep track of how hadoop conf
     // parameters and make or break a piece of code
     
-    HadoopUtil.overwriteOutput(outPath);
-    FileSystem dfs = FileSystem.get(outPath.toUri(), conf);    
-    
+    HadoopUtil.delete(conf, outPath);
+
     Path sigmaKFiles = new Path(output, "trainer-weights/Sigma_k/*");
-    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(dfs, sigmaKFiles, conf);
+    Map<String,Double> labelWeightSum = SequenceFileModelReader.readLabelSums(sigmaKFiles, conf);
     DefaultStringifier<Map<String,Double>> mapStringifier = new DefaultStringifier<Map<String,Double>>(conf,
         GenericsUtil.getClass(labelWeightSum));
     String labelWeightSumString = mapStringifier.toString(labelWeightSum);
@@ -84,7 +82,7 @@ public class BayesThetaNormalizerDriver implements BayesJob {
     conf.set("cnaivebayes.sigma_k", labelWeightSumString);
     
     Path sigmaJSigmaKFile = new Path(output, "trainer-weights/Sigma_kSigma_j/*");
-    double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(dfs, sigmaJSigmaKFile, conf);
+    double sigmaJSigmaK = SequenceFileModelReader.readSigmaJSigmaK(sigmaJSigmaKFile, conf);
     DefaultStringifier<Double> stringifier = new DefaultStringifier<Double>(conf, Double.class);
     String sigmaJSigmaKString = stringifier.toString(sigmaJSigmaK);
     
@@ -94,7 +92,7 @@ public class BayesThetaNormalizerDriver implements BayesJob {
     conf.set("cnaivebayes.sigma_jSigma_k", sigmaJSigmaKString);
     
     Path vocabCountFile = new Path(output, "trainer-tfIdf/trainer-vocabCount/*");
-    double vocabCount = SequenceFileModelReader.readVocabCount(dfs, vocabCountFile, conf);
+    double vocabCount = SequenceFileModelReader.readVocabCount(vocabCountFile, conf);
     String vocabCountString = stringifier.toString(vocabCount);
     
     log.info("Vocabulary Count");

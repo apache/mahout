@@ -24,13 +24,13 @@ import java.util.Iterator;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -114,14 +114,10 @@ public class TFIDFPartialVectorReducer extends
     namedVector = conf.getBoolean(PartialVectorMerger.NAMED_VECTOR, false);
 
     Path dictionaryFile = new Path(localFiles[0].getPath());
-    FileSystem fs = dictionaryFile.getFileSystem(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
-    IntWritable key = new IntWritable();
-    LongWritable value = new LongWritable();
-
     // key is feature, value is the document frequency
-    while (reader.next(key, value)) {
-      dictionary.put(key.get(), value.get());
+    for (Pair<IntWritable,LongWritable> record :
+         new SequenceFileIterable<IntWritable,LongWritable>(dictionaryFile, true, conf)) {
+      dictionary.put(record.getFirst().get(), record.getSecond().get());
     }
   }
 

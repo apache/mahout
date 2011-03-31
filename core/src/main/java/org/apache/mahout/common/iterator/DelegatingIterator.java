@@ -19,33 +19,18 @@ package org.apache.mahout.common.iterator;
 
 import java.util.Iterator;
 
-import com.google.common.base.Preconditions;
-
 /**
  * An iterator that delegates to another iterator.
  */
-public abstract class DelegatingIterator<T> implements Iterator<T> {
-  
-  private final Iterator<? extends T> delegate;
-  
+public abstract class DelegatingIterator<T> extends TransformingIterator<T,T> {
+
   protected DelegatingIterator(Iterator<T> delegate) {
-    Preconditions.checkArgument(delegate != null, "delegate is null");
-    this.delegate = delegate;
+    super(delegate);
   }
-  
+
   @Override
-  public final boolean hasNext() {
-    return delegate.hasNext();
-  }
-  
-  @Override
-  public final T next() {
-    return delegate.next();
-  }
-  
-  @Override
-  public final void remove() {
-    delegate.remove();
+  public T transform(T in) {
+    return in;
   }
   
 }

@@ -33,11 +33,9 @@ public final class IteratorIterable<T> implements Iterable<T> {
   
   /**
    * <p>
-   * Constructs an  for an {@link Iterator}.
+   * Constructs an {@link Iterable} for an {@link Iterator}. It will return the {@link Iterator}
+   * exactly once.
    * </p>
-   * 
-   * @param iterator
-   *          {@link Iterator} on which to base this
    */
   public IteratorIterable(Iterator<T> iterator) {
     Preconditions.checkArgument(iterator != null, "iterator is null");

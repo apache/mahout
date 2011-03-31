@@ -42,7 +42,7 @@ import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
 import org.apache.mahout.common.CommandLineUtil;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.HadoopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,7 +190,7 @@ public final class WikipediaDatasetCreatorDriver {
     FileInputFormat.setInputPaths(job, new Path(input));
     Path outPath = new Path(output);
     FileOutputFormat.setOutputPath(job, outPath);
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
     
     job.waitForCompletion(true);
   }

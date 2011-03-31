@@ -107,8 +107,7 @@ public final class BayesClassifierSelfTest extends MahoutTestCase {
     TestClassifier.classifyParallel(params);
     Configuration conf = new Configuration();
     Path outputFiles = getTestTempFilePath("bayesinput-output/part*");
-    FileSystem fs = FileSystem.get(outputFiles.toUri(), conf);
-    matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
+    matrix = BayesClassifierDriver.readResult(outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         assertEquals(i == j ? 4 : 0, matrix[i][j]);
@@ -158,8 +157,7 @@ public final class BayesClassifierSelfTest extends MahoutTestCase {
     TestClassifier.classifyParallel(params);
     Configuration conf = new Configuration();
     Path outputFiles = getTestTempFilePath("bayesinput-output/part*");
-    FileSystem fs = FileSystem.get(outputFiles.toUri(), conf);
-    matrix = BayesClassifierDriver.readResult(fs, outputFiles, conf, params).getConfusionMatrix();
+    matrix = BayesClassifierDriver.readResult(outputFiles, conf, params).getConfusionMatrix();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         assertEquals(i == j ? 4 : 0, matrix[i][j]);

@@ -22,51 +22,35 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.mahout.common.Pair;
+import org.apache.mahout.common.iterator.TransformingIterator;
 
 /**
  * Iterates over a Transaction and outputs the transaction integer id mapping and the support of the
  * transaction
- * 
- * @param <AP>
  */
-public class TransactionIterator<AP> implements Iterator<Pair<int[],Long>> {
-  private final Map<AP,Integer> attributeIdMapping;
-  
-  private final Iterator<Pair<List<AP>,Long>> iterator;
-  
+public class TransactionIterator<T> extends TransformingIterator<Pair<List<T>,Long>,Pair<int[],Long>> {
+
+  private final Map<T,Integer> attributeIdMapping;
   private final int[] transactionBuffer;
   
-  public TransactionIterator(Iterator<Pair<List<AP>,Long>> iterator, Map<AP,Integer> attributeIdMapping) {
+  public TransactionIterator(Iterator<Pair<List<T>,Long>> iterator, Map<T,Integer> attributeIdMapping) {
+    super(iterator);
     this.attributeIdMapping = attributeIdMapping;
-    this.iterator = iterator;
     transactionBuffer = new int[attributeIdMapping.size()];
   }
-  
+
   @Override
-  public final boolean hasNext() {
-    return iterator.hasNext();
-  }
-  
-  @Override
-  public final Pair<int[],Long> next() {
-    Pair<List<AP>,Long> transaction = iterator.next();
+  protected Pair<int[],Long> transform(Pair<List<T>, Long> in) {
     int index = 0;
-    
-    for (AP attribute : transaction.getFirst()) {
+    for (T attribute : in.getFirst()) {
       if (attributeIdMapping.containsKey(attribute)) {
         transactionBuffer[index++] = attributeIdMapping.get(attribute);
       }
     }
-    
     int[] transactionList = new int[index];
     System.arraycopy(transactionBuffer, 0, transactionList, 0, index);
-    return new Pair<int[],Long>(transactionList, transaction.getSecond());
-    
+    return new Pair<int[],Long>(transactionList, in.getSecond());
   }
-  
-  @Override
-  public final void remove() {
-    iterator.remove();
-  }
+
   
 }

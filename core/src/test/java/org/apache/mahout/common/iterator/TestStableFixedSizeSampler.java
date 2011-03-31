@@ -22,7 +22,7 @@ import java.util.Iterator;
 public final class TestStableFixedSizeSampler extends SamplerCase {
   
   @Override
-  protected DelegatingIterator<Integer> createSampler(int n, Iterator<Integer> source) {
+  protected Iterator<Integer> createSampler(int n, Iterator<Integer> source) {
     return new StableFixedSizeSamplingIterator<Integer>(n, source);
   }
 

@@ -15,40 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common;
+package org.apache.mahout.common.iterator;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class StringRecordIterator implements Iterator<Pair<List<String>,Long>> {
+import org.apache.mahout.common.Pair;
+
+public class StringRecordIterator extends TransformingIterator<String,Pair<List<String>,Long>> {
   
   private static final Long ONE = 1L;
   
-  private final Iterator<String> lineIterator;
   private final Pattern splitter;
   
   public StringRecordIterator(FileLineIterable iterable, String pattern) {
-    this.lineIterator = iterable.iterator();
+    super(iterable.iterator());
     this.splitter = Pattern.compile(pattern);
   }
-  
+
   @Override
-  public boolean hasNext() {
-    return lineIterator.hasNext();
-  }
-  
-  @Override
-  public Pair<List<String>,Long> next() {
-    String line = lineIterator.next();
-    String[] items = splitter.split(line);
+  protected Pair<List<String>, Long> transform(String in) {
+    String[] items = splitter.split(in);
     return new Pair<List<String>,Long>(Arrays.asList(items), ONE);
-  }
-  
-  @Override
-  public void remove() {
-    lineIterator.remove();
   }
   
 }

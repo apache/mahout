@@ -24,16 +24,16 @@ import java.util.Iterator;
 import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.StringTuple;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -122,14 +122,10 @@ public class TFPartialVectorReducer extends Reducer<Text, StringTuple, Text, Vec
     maxNGramSize = conf.getInt(DictionaryVectorizer.MAX_NGRAMS, maxNGramSize);
 
     Path dictionaryFile = new Path(localFiles[0].getPath());
-    FileSystem fs = dictionaryFile.getFileSystem(conf);
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, dictionaryFile, conf);
-    Writable key = new Text();
-    IntWritable value = new IntWritable();
-
     // key is word value is id
-    while (reader.next(key, value)) {
-      dictionary.put(key.toString(), value.get());
+    for (Pair<Writable,IntWritable> record :
+         new SequenceFileIterable<Writable,IntWritable>(dictionaryFile, true, conf)) {
+      dictionary.put(record.getFirst().toString(), record.getSecond().get());
     }
   }
 

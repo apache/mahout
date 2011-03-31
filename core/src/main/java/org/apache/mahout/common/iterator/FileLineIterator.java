@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.common;
+package org.apache.mahout.common.iterator;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -30,6 +30,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
 import org.apache.mahout.cf.taste.impl.common.SkippingIterator;
+import org.apache.mahout.common.IOUtils;
 
 /**
  * Iterates over the lines of a text file. This assumes the text file's lines are delimited in a manner

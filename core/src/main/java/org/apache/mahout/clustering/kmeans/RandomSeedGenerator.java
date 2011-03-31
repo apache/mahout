@@ -30,9 +30,11 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.Vector;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +43,6 @@ import org.slf4j.LoggerFactory;
  * Given an Input Path containing a {@link org.apache.hadoop.io.SequenceFile}, randomly select k vectors and
  * write them to the output file as a {@link org.apache.mahout.clustering.kmeans.Cluster} representing the
  * initial centroid to use.
- * <p/>
  */
 public final class RandomSeedGenerator {
   
@@ -52,13 +53,11 @@ public final class RandomSeedGenerator {
   private RandomSeedGenerator() {
   }
   
-  public static Path buildRandom(Path input, Path output, int k, DistanceMeasure measure) throws IOException,
-                                                                    IllegalAccessException,
-                                                                    InstantiationException {
+  public static Path buildRandom(Path input, Path output, int k, DistanceMeasure measure) throws IOException {
     // delete the output directory
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     Path outFile = new Path(output, "part-randomSeed");
     boolean newFile = fs.createNewFile(outFile);
     if (newFile) {
@@ -70,7 +69,7 @@ public final class RandomSeedGenerator {
         inputPathPattern = input;
       }
       
-      FileStatus[] inputFiles = fs.globStatus(inputPathPattern);
+      FileStatus[] inputFiles = fs.globStatus(inputPathPattern, PathFilters.logsCRCFilter());
       SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, outFile, Text.class, Cluster.class);
       Random random = RandomUtils.getRandom();
       List<Text> chosenTexts = new ArrayList<Text>(k);
@@ -78,13 +77,13 @@ public final class RandomSeedGenerator {
       int nextClusterId = 0;
       
       for (FileStatus fileStatus : inputFiles) {
-        if (fileStatus.isDir() || fileStatus.getPath().getName().startsWith("_")) {
-          continue; // select only the top level files that do not begin with "_" (Cloudera CHD3 adds _SUCCESS file)
+        if (fileStatus.isDir()) {
+          continue;
         }
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, fileStatus.getPath(), conf);
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable value = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-        while (reader.next(key, value)) {
+        for (Pair<Writable,VectorWritable> record :
+             new SequenceFileIterable<Writable,VectorWritable>(fileStatus.getPath(), true, conf)) {
+          Writable key = record.getFirst();
+          VectorWritable value = record.getSecond();
           Cluster newCluster = new Cluster(value.get(), nextClusterId++, measure);
           newCluster.observe(value.get(), 1);
           Text newText = new Text(key.toString());
@@ -100,7 +99,6 @@ public final class RandomSeedGenerator {
             chosenClusters.add(newCluster);
           }
         }
-        reader.close();
       }
       
       for (int i = 0; i < k; i++) {
@@ -112,20 +110,5 @@ public final class RandomSeedGenerator {
     
     return outFile;
   }
-  
-  public static List<Vector> chooseRandomPoints(Iterable<Vector> vectors, int k) {
-    List<Vector> chosenPoints = new ArrayList<Vector>(k);
-    Random random = RandomUtils.getRandom();
-    for (Vector value : vectors) {
-      int currentSize = chosenPoints.size();
-      if (currentSize < k) {
-        chosenPoints.add(value);
-      } else if (random.nextInt(currentSize + 1) == 0) { // with chance 1/(currentSize+1) pick new element
-        int indexToRemove = random.nextInt(currentSize); // evict one chosen randomly
-        chosenPoints.remove(indexToRemove);
-        chosenPoints.add(value);
-      }
-    }
-    return chosenPoints;
-  }
+
 }

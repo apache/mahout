@@ -322,7 +322,7 @@ public abstract class Builder {
     if (isOutput(conf)) {
       log.debug("Parsing the output...");
       DecisionForest forest = parseOutput(job, callback);
-      HadoopUtil.overwriteOutput(outputPath);
+      HadoopUtil.delete(conf, outputPath);
       return forest;
     }
     

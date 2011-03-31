@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -39,10 +38,14 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +97,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
                          DistanceMeasure measure,
                          int numIterations,
                          boolean runSequential)
-    throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path stateIn = new Path(output, "representativePoints-0");
     writeInitialState(stateIn, clustersIn);
 
@@ -111,25 +114,18 @@ public final class RepresentativePointsDriver extends AbstractJob {
     conf.set(DISTANCE_MEASURE_KEY, measure.getClass().getName());
   }
 
-  private static void writeInitialState(Path output, Path clustersIn)
-    throws InstantiationException, IllegalAccessException, IOException {
+  private static void writeInitialState(Path output, Path clustersIn) throws IOException {
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
-    for (FileStatus part : fs.listStatus(clustersIn)) {
-      if (!part.getPath().getName().startsWith(".")) {
-        Path inPart = part.getPath();
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, inPart, conf);
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        Writable value = reader.getValueClass().asSubclass(Writable.class).newInstance();
-        Path path = new Path(output, inPart.getName());
-        SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
-        while (reader.next(key, value)) {
-          Cluster cluster = (Cluster) value;
-          log.debug("C-" + cluster.getId() + ": " + AbstractCluster.formatVector(cluster.getCenter(), null));
-          writer.append(new IntWritable(cluster.getId()), new VectorWritable(cluster.getCenter()));
-        }
-        writer.close();
+    for (FileStatus part : fs.listStatus(clustersIn, PathFilters.logsCRCFilter())) {
+      Path inPart = part.getPath();
+      Path path = new Path(output, inPart.getName());
+      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
+      for (Cluster value : new SequenceFileValueIterable<Cluster>(inPart, true, conf)) {
+        log.debug("C-{}: {}", value.getId(), AbstractCluster.formatVector(value.getCenter(), null));
+        writer.append(new IntWritable(value.getId()), new VectorWritable(value.getCenter()));
       }
+      writer.close();
     }
   }
 
@@ -139,7 +135,7 @@ public final class RepresentativePointsDriver extends AbstractJob {
                                    Path stateOut,
                                    DistanceMeasure measure,
                                    boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       runIterationSeq(conf, clusteredPointsIn, stateIn, stateOut, measure);
     } else {
@@ -164,24 +160,16 @@ public final class RepresentativePointsDriver extends AbstractJob {
                                       Path clusteredPointsIn,
                                       Path stateIn,
                                       Path stateOut,
-                                      DistanceMeasure measure)
-    throws IOException, InstantiationException, IllegalAccessException {
+                                      DistanceMeasure measure) throws IOException {
 
     Map<Integer, List<VectorWritable>> repPoints = RepresentativePointsMapper.getRepresentativePoints(conf, stateIn);
     Map<Integer, WeightedVectorWritable> mostDistantPoints = new HashMap<Integer, WeightedVectorWritable>();
     FileSystem fs = FileSystem.get(clusteredPointsIn.toUri(), conf);
-    FileStatus[] status = fs.listStatus(clusteredPointsIn, new OutputLogFilter());
-    for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      try {
-        IntWritable key = (IntWritable) reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        WeightedVectorWritable vw = reader.getValueClass().asSubclass(WeightedVectorWritable.class).newInstance();
-        while (reader.next(key, vw)) {
-          RepresentativePointsMapper.mapPoint(key, vw, measure, repPoints, mostDistantPoints);
-        }
-      } finally {
-        reader.close();
-      }
+    for (Pair<IntWritable,WeightedVectorWritable> record :
+         new SequenceFileDirIterable<IntWritable,WeightedVectorWritable>(
+             clusteredPointsIn, PathType.LIST, PathFilters.logsCRCFilter(), null, true, conf)) {
+      RepresentativePointsMapper.mapPoint(
+          record.getFirst(), record.getSecond(), measure, repPoints, mostDistantPoints);
     }
     int part = 0;
     SequenceFile.Writer writer = new SequenceFile.Writer(fs,

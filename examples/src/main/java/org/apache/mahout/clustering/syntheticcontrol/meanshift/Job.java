@@ -52,8 +52,9 @@ public final class Job extends AbstractJob {
     } else {
       log.info("Running with default arguments");
       Path output = new Path("output");
-      HadoopUtil.overwriteOutput(output);
-      new Job().run(new Configuration(), new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
+      Configuration conf = new Configuration();
+      HadoopUtil.delete(conf, output);
+      new Job().run(conf, new Path("testdata"), output, new EuclideanDistanceMeasure(), 47.6, 1, 0.5, 10);
     }
   }
 
@@ -82,7 +83,7 @@ public final class Job extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(new Configuration(), output);
     }
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));

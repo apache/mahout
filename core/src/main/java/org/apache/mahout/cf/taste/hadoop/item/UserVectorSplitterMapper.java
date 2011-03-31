@@ -24,7 +24,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.VarIntWritable;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
@@ -45,7 +45,7 @@ public final class UserVectorSplitterMapper extends
   private FastIDSet usersToRecommendFor;
 
   @Override
-  protected void setup(Context context) {
+  protected void setup(Context context) throws IOException {
     Configuration jobConf = context.getConfiguration();
     maxPrefsPerUserConsidered = jobConf.getInt(MAX_PREFS_PER_USER_CONSIDERED, DEFAULT_MAX_PREFS_PER_USER_CONSIDERED);
     String usersFilePathString = jobConf.get(USERS_FILE);
@@ -59,9 +59,7 @@ public final class UserVectorSplitterMapper extends
         in = fs.open(usersFilePath);
         for (String line : new FileLineIterable(in)) {
           usersToRecommendFor.add(Long.parseLong(line));
-        }     
-      } catch (IOException ioe) {
-        throw new IllegalStateException(ioe);
+        }
       } finally {
         IOUtils.closeStream(in);
       }

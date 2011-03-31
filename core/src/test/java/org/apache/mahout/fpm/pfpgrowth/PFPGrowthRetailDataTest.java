@@ -19,7 +19,6 @@ package org.apache.mahout.fpm.pfpgrowth;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -33,11 +32,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.mahout.common.FileLineIterable;
 import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.Parameters;
-import org.apache.mahout.common.StringRecordIterator;
+import org.apache.mahout.common.iterator.FileLineIterable;
+import org.apache.mahout.common.iterator.StringRecordIterator;
 import org.apache.mahout.fpm.pfpgrowth.convertors.string.TopKStringPatterns;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -89,11 +88,11 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
   }
   
   @Test
-  public void testRetailDataMinSup100() throws IOException, InterruptedException, ClassNotFoundException {
+  public void testRetailDataMinSup100() throws Exception {
     StringRecordIterator it = new StringRecordIterator(new FileLineIterable(Resources.getResource(
       "retail_results_with_min_sup_100.dat").openStream()), "\\s+");
     
-    final Map<Set<String>,Long> expectedResults = new HashMap<Set<String>,Long>();
+    Map<Set<String>,Long> expectedResults = new HashMap<Set<String>,Long>();
     while (it.hasNext()) {
       Pair<List<String>,Long> next = it.next();
       List<String> items = new ArrayList<String>(next.getFirst());
@@ -114,7 +113,7 @@ public class PFPGrowthRetailDataTest extends MahoutTestCase {
     PFPGrowth.startAggregating(params);
     List<Pair<String,TopKStringPatterns>> frequentPatterns = PFPGrowth.readFrequentPattern(params);
     
-    final Map<Set<String>,Long> results = new HashMap<Set<String>,Long>();
+    Map<Set<String>,Long> results = new HashMap<Set<String>,Long>();
     for (Pair<String,TopKStringPatterns> topK : frequentPatterns) {
       Iterator<Pair<List<String>,Long>> topKIt = topK.getSecond().iterator();
       while (topKIt.hasNext()) {

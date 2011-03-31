@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -37,6 +38,8 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.IOUtils;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -86,9 +89,6 @@ import org.apache.mahout.math.ssvd.EigenSolverWrapper;
  * containing n x k V matrix file(s).
  * 
  * </UL>
- * 
- * 
- * 
  */
 public class SSVDSolver {
 
@@ -99,13 +99,13 @@ public class SSVDSolver {
   private String vPath;
 
   // configured stuff
-  private Configuration conf;
-  private Path[] inputPath;
-  private Path outputPath;
-  private int ablockRows;
-  private int k;
-  private int p;
-  private int reduceTasks;
+  private final Configuration conf;
+  private final Path[] inputPath;
+  private final Path outputPath;
+  private final int ablockRows;
+  private final int k;
+  private final int p;
+  private final int reduceTasks;
   private int minSplitSize = -1;
   private boolean cUHalfSigma;
   private boolean cVHalfSigma;
@@ -135,9 +135,13 @@ public class SSVDSolver {
    * @throws IOException
    *           when IO condition occurs.
    */
-
-  public SSVDSolver(Configuration conf, Path[] inputPath, Path outputPath,
-      int ablockRows, int k, int p, int reduceTasks) throws IOException {
+  public SSVDSolver(Configuration conf,
+                    Path[] inputPath,
+                    Path outputPath,
+                    int ablockRows,
+                    int k,
+                    int p,
+                    int reduceTasks) {
     this.conf = conf;
     this.inputPath = inputPath;
     this.outputPath = outputPath;
@@ -235,10 +239,9 @@ public class SSVDSolver {
    */
   public void run() throws IOException {
 
-    LinkedList<Closeable> closeables = new LinkedList<Closeable>();
+    Deque<Closeable> closeables = new LinkedList<Closeable>();
     try {
-      Class<? extends Writable> labelType = sniffInputLabelType(inputPath,
-          conf, closeables);
+      Class<? extends Writable> labelType = sniffInputLabelType(inputPath, conf);
       FileSystem fs = FileSystem.get(conf);
 
       Path qPath = new Path(outputPath, "Q-job");
@@ -253,30 +256,30 @@ public class SSVDSolver {
         fs.delete(outputPath, true);
       }
 
-      Random rnd = new Random();
+      Random rnd = RandomUtils.getRandom();
       long seed = rnd.nextLong();
 
-      QJob.run(conf, inputPath, qPath, ablockRows, minSplitSize, k, p, seed,
-          reduceTasks);
+      QJob.run(conf, inputPath, qPath, ablockRows, minSplitSize, k, p, seed, reduceTasks);
 
-      BtJob.run(conf, inputPath, qPath, btPath, minSplitSize, k, p,
-          reduceTasks, labelType);
+      BtJob.run(conf, inputPath, qPath, btPath, minSplitSize, k, p, reduceTasks, labelType);
 
       BBtJob.run(conf, new Path(btPath, BtJob.OUTPUT_BT + "-*"), bbtPath, 1);
 
-      UpperTriangular bbt = loadUpperTriangularMatrix(fs, new Path(bbtPath,
-          BBtJob.OUTPUT_BBT + "-*"), conf);
+      UpperTriangular bbt = loadUpperTriangularMatrix(fs, new Path(bbtPath, BBtJob.OUTPUT_BBT + "-*"), conf);
 
       // convert bbt to something our eigensolver could understand
       assert bbt.columnSize() == k + p;
 
       double[][] bbtSquare = new double[k + p][];
-      for (int i = 0; i < k + p; i++)
+      for (int i = 0; i < k + p; i++) {
         bbtSquare[i] = new double[k + p];
+      }
 
-      for (int i = 0; i < k + p; i++)
-        for (int j = i; j < k + p; j++)
+      for (int i = 0; i < k + p; i++) {
+        for (int j = i; j < k + p; j++) {
           bbtSquare[i][j] = bbtSquare[j][i] = bbt.getQuick(i, j);
+        }
+      }
 
       svalues = new double[k + p];
 
@@ -284,8 +287,9 @@ public class SSVDSolver {
       EigenSolverWrapper eigenWrapper = new EigenSolverWrapper(bbtSquare);
 
       double[] eigenva2 = eigenWrapper.getEigenValues();
-      for (int i = 0; i < k + p; i++)
+      for (int i = 0; i < k + p; i++) {
         svalues[i] = Math.sqrt(eigenva2[i]); // sqrt?
+      }
 
       // save/redistribute UHat
       //
@@ -322,17 +326,21 @@ public class SSVDSolver {
       svWriter.close();
 
       UJob ujob = null;
-      VJob vjob = null;
-      if (computeU)
-        (ujob = new UJob()).start(conf,
-            new Path(btPath, BtJob.OUTPUT_Q + "-*"), uHatPath, svPath, uPath,
-            k, reduceTasks, labelType, cUHalfSigma); // actually this is
-                                                     // map-only job anyway
+      if (computeU) {
+        ujob = new UJob();
+        ujob.start(conf,
+                   new Path(btPath, BtJob.OUTPUT_Q + "-*"),
+                   uHatPath, svPath, uPath, k, reduceTasks, labelType, cUHalfSigma);
+                                  // actually this is  map-only job anyway
+      }
 
-      if (computeV)
-        (vjob = new VJob()).start(conf,
-            new Path(btPath, BtJob.OUTPUT_BT + "-*"), uHatPath, svPath, vPath,
-            k, reduceTasks, cVHalfSigma);
+      VJob vjob = null;
+      if (computeV) {
+        vjob = new VJob();
+        vjob.start(conf,
+                   new Path(btPath, BtJob.OUTPUT_BT + "-*"),
+                   uHatPath, svPath, vPath, k, reduceTasks, cVHalfSigma);
+      }
 
       if (ujob != null) {
         ujob.waitForCompletion();
@@ -354,49 +362,40 @@ public class SSVDSolver {
 
   }
 
-  private static Class<? extends Writable> sniffInputLabelType(
-      Path[] inputPath, Configuration conf, LinkedList<Closeable> closeables)
+  private static Class<? extends Writable> sniffInputLabelType(Path[] inputPath, Configuration conf)
     throws IOException {
     FileSystem fs = FileSystem.get(conf);
     for (Path p : inputPath) {
       FileStatus[] fstats = fs.globStatus(p);
-      if (fstats == null || fstats.length == 0)
+      if (fstats == null || fstats.length == 0) {
         continue;
-      SequenceFile.Reader r = new SequenceFile.Reader(fs, fstats[0].getPath(),
-          conf);
-      closeables.addFirst(r);
-
+      }
+      SequenceFile.Reader r = new SequenceFile.Reader(fs, fstats[0].getPath(), conf);
       try {
         return r.getKeyClass().asSubclass(Writable.class);
       } finally {
-        closeables.remove(r);
         r.close();
       }
     }
-
-    throw new IOException(
-        "Unable to open input files to determine input label type.");
+    throw new IOException("Unable to open input files to determine input label type.");
   }
 
-  private static final Pattern OUTPUT_FILE_PATTERN = Pattern
-      .compile("(\\w+)-(m|r)-(\\d+)(\\.\\w+)?");
+  private static final Pattern OUTPUT_FILE_PATTERN = Pattern.compile("(\\w+)-(m|r)-(\\d+)(\\.\\w+)?");
 
-  static Comparator<FileStatus> partitionComparator = new Comparator<FileStatus>() {
-    private Matcher matcher = OUTPUT_FILE_PATTERN.matcher("");
+  static final Comparator<FileStatus> partitionComparator = new Comparator<FileStatus>() {
+    private final Matcher matcher = OUTPUT_FILE_PATTERN.matcher("");
 
     @Override
     public int compare(FileStatus o1, FileStatus o2) {
       matcher.reset(o1.getPath().getName());
-      if (!matcher.matches())
-        throw new RuntimeException(String.format(
-            "Unexpected file name, unable to deduce partition #:%s", o1
-                .getPath().toString()));
+      if (!matcher.matches()) {
+        throw new IllegalArgumentException("Unexpected file name, unable to deduce partition #:" + o1.getPath());
+      }
       int p1 = Integer.parseInt(matcher.group(3));
       matcher.reset(o2.getPath().getName());
-      if (!matcher.matches())
-        throw new RuntimeException(String.format(
-            "Unexpected file name, unable to deduce partition #:%s", o2
-                .getPath().toString()));
+      if (!matcher.matches()) {
+        throw new IllegalArgumentException("Unexpected file name, unable to deduce partition #:" + o2.getPath());
+      }
 
       int p2 = Integer.parseInt(matcher.group(3));
       return p1 - p2;
@@ -418,16 +417,14 @@ public class SSVDSolver {
    * @throws IOException
    *           when I/O occurs.
    */
-  public static double[][] loadDistributedRowMatrix(FileSystem fs, Path glob,
-      Configuration conf) throws IOException {
+  public static double[][] loadDistributedRowMatrix(FileSystem fs, Path glob, Configuration conf) throws IOException {
 
     FileStatus[] files = fs.globStatus(glob);
-    if (files == null)
+    if (files == null) {
       return null;
+    }
 
     List<double[]> denseData = new ArrayList<double[]>();
-    IntWritable iw = new IntWritable();
-    VectorWritable vw = new VectorWritable();
 
     // int m=0;
 
@@ -436,22 +433,15 @@ public class SSVDSolver {
     Arrays.sort(files, partitionComparator);
 
     for (FileStatus fstat : files) {
-      Path file = fstat.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, file, conf);
-      try {
-        while (reader.next(iw, vw)) {
-          Vector v = vw.get();
-          int size;
-          double[] row = new double[size = v.size()];
-          for (int i = 0; i < size; i++)
-            row[i] = v.get(i);
-          // ignore row label.
-          // int rowIndex=iw.get();
-          denseData.add(row);
-
+      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat.getPath(), true, conf)) {
+        Vector v = value.get();
+        int size = v.size();
+        double[] row = new double[size];
+        for (int i = 0; i < size; i++) {
+          row[i] = v.get(i);
         }
-      } finally {
-        reader.close();
+        // ignore row label.
+        denseData.add(row);
       }
     }
 
@@ -462,37 +452,29 @@ public class SSVDSolver {
       Path glob, Configuration conf) throws IOException {
 
     FileStatus[] files = fs.globStatus(glob);
-    if (files == null)
+    if (files == null) {
       return null;
-
-    IntWritable iw = new IntWritable();
-    VectorWritable vw = new VectorWritable();
-    UpperTriangular result = null;
+    }
 
     // assume it is partitioned output, so we need to read them up
     // in order of partitions.
     Arrays.sort(files, partitionComparator);
 
+    UpperTriangular result = null;
     for (FileStatus fstat : files) {
-      Path file = fstat.getPath();
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, file, conf);
-      try {
-        while (reader.next(iw, vw)) {
-          Vector v = vw.get();
-          if (result == null)
-            result = new UpperTriangular(v);
-          else
-            throw new IOException(
-                "Unexpected overrun in upper triangular matrix files");
+      for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(fstat.getPath(), true, conf)) {
+        Vector v = value.get();
+        if (result == null) {
+          result = new UpperTriangular(v);
+        } else {
+          throw new IOException("Unexpected overrun in upper triangular matrix files");
         }
-      } finally {
-        reader.close();
       }
     }
 
-    if (result == null)
-      throw new IOException(
-          "Unexpected underrun in upper triangular matrix files");
+    if (result == null) {
+      throw new IOException("Unexpected underrun in upper triangular matrix files");
+    }
     return result;
   }
 

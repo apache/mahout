@@ -29,7 +29,7 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.recommender.ByValueRecommendedItemComparator;
 import org.apache.mahout.cf.taste.impl.recommender.GenericRecommendedItem;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.common.FileLineIterable;
+import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.VarLongWritable;
 import org.apache.mahout.math.Vector;
@@ -72,7 +72,7 @@ public final class AggregateAndRecommendReducer extends
   private static final float BOOLEAN_PREF_VALUE = 1.0f;
 
   @Override
-  protected void setup(Context context) {
+  protected void setup(Context context) throws IOException {
     Configuration jobConf = context.getConfiguration();
     recommendationsPerUser = jobConf.getInt(NUM_RECOMMENDATIONS, DEFAULT_NUM_RECOMMENDATIONS);
     booleanData = jobConf.getBoolean(RecommenderJob.BOOLEAN_DATA, false);
@@ -93,8 +93,6 @@ public final class AggregateAndRecommendReducer extends
           itemsToRecommendFor.add(Long.parseLong(line));
         }
       }
-    } catch (IOException ioe) {
-      throw new IllegalStateException(ioe);
     } finally {
       IOUtils.closeStream(in);
     }

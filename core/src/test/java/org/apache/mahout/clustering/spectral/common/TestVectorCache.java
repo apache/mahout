@@ -28,6 +28,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -40,7 +41,6 @@ public class TestVectorCache extends MahoutTestCase {
   @Test
   public void testSave() throws Exception {
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
     Writable key = new IntWritable(0);
     Vector value = new DenseVector(VECTOR);
     Path path = getTestTempDirPath("output");
@@ -49,10 +49,10 @@ public class TestVectorCache extends MahoutTestCase {
     VectorCache.save(key, value, path, conf, true, true);
     
     // can we read it from here?
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
-    VectorWritable old = new VectorWritable();
-    reader.next(key, old);
-    reader.close();
+    SequenceFileValueIterator<VectorWritable> iterator =
+        new SequenceFileValueIterator<VectorWritable>(path, true, conf);
+    VectorWritable old = iterator.next();
+    iterator.close();
     
     // test if the values are identical
     assertEquals("Saved vector is identical to original", old.get(), value);
@@ -70,15 +70,14 @@ public class TestVectorCache extends MahoutTestCase {
     // write the vector
     path = fs.makeQualified(path);
     fs.deleteOnExit(path);
-    HadoopUtil.overwriteOutput(path);
+    HadoopUtil.delete(conf, path);
     DistributedCache.setCacheFiles(new URI[] {path.toUri()}, conf);
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, 
-        IntWritable.class, VectorWritable.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, path, IntWritable.class, VectorWritable.class);
     writer.append(key, new VectorWritable(value));
     writer.close();
     
     // load it
-    Vector result = VectorCache.load(key, conf);
+    Vector result = VectorCache.load(conf);
     
     // are they the same?
     assertNotNull("Vector is not null", result);
@@ -90,14 +89,13 @@ public class TestVectorCache extends MahoutTestCase {
     Configuration conf = new Configuration();
     Vector v = new DenseVector(VECTOR);
     Path toSave = getTestTempDirPath("output");
-    IntWritable key = new IntWritable(0);
+    Writable key = new IntWritable(0);
     
     // save it
     VectorCache.save(key, v, toSave, conf);
     
     // now, load it back
-    key = new IntWritable(0);
-    Vector v2 = VectorCache.load(key, conf);
+    Vector v2 = VectorCache.load(conf);
     
     // are they the same?
     assertNotNull("Vector is not null", v2);

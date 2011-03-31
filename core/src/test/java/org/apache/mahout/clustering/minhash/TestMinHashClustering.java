@@ -25,8 +25,10 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.minhash.HashFactory.HashType;
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.commandline.MinhashOptionCreator;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -45,8 +47,7 @@ public class TestMinHashClustering extends MahoutTestCase {
                                               {4, 7, 8, 9, 6, 1}, {5, 8, 10, 4, 1}, {6, 17, 14, 15},
                                               {8, 9, 11, 6, 12, 1, 7}, {10, 13, 9, 7, 4, 6, 3},
                                               {3, 5, 7, 9, 2, 11}, {13, 7, 6, 8, 5}};
-  
-  private FileSystem fs;
+
   private Path input;
   private Path output;
   
@@ -64,13 +65,12 @@ public class TestMinHashClustering extends MahoutTestCase {
   public void setUp() throws Exception {
     super.setUp();
     Configuration conf = new Configuration();
-    fs = FileSystem.get(conf);
+    FileSystem fs = FileSystem.get(conf);
     List<VectorWritable> points = getPointsWritable(REFERENCE);
     input = getTestTempDirPath("points");
     output = new Path(getTestTempDirPath(), "output");
     Path pointFile = new Path(input, "file1");
-    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, pointFile, Text.class,
-        VectorWritable.class);
+    SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, pointFile, Text.class, VectorWritable.class);
     int id = 0;
     for (VectorWritable point : points) {
       writer.append(new Text("Id-" + id++), point);
@@ -123,22 +123,21 @@ public class TestMinHashClustering extends MahoutTestCase {
     }
   }
   
-  private void verify(Path output, double simThreshold, String msg) throws Exception {
+  private static void verify(Path output, double simThreshold, String msg) {
     Configuration conf = new Configuration();
     Path outputFile = new Path(output, "part-r-00000");
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs, outputFile, conf);
-    Writable clusterId = new Text();
-    VectorWritable point = new VectorWritable();
     List<Vector> clusteredItems = new ArrayList<Vector>();
     String prevClusterId = "";
-    while (reader.next(clusterId, point)) {
+    for (Pair<Writable,VectorWritable> record : new SequenceFileIterable<Writable,VectorWritable>(outputFile, conf)) {
+      Writable clusterId = record.getFirst();
+      VectorWritable point = record.getSecond();
       if (prevClusterId.equals(clusterId.toString())) {
-        clusteredItems.add(point.get().clone());
+        clusteredItems.add(point.get());
       } else {
         runPairwiseSimilarity(clusteredItems, simThreshold, msg);
         clusteredItems.clear();
         prevClusterId = clusterId.toString();
-        clusteredItems.add(point.get().clone());
+        clusteredItems.add(point.get());
       }
     }
     runPairwiseSimilarity(clusteredItems, simThreshold, msg);

@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -39,11 +38,14 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.WeightedVectorWritable;
-import org.apache.mahout.clustering.kmeans.OutputLogFilter;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +80,7 @@ public class CanopyDriver extends AbstractJob {
     Path input = getInputPath();
     Path output = getOutputPath();
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     String measureClass = getOption(DefaultOptionCreator.DISTANCE_MEASURE_OPTION);
     double t1 = Double.parseDouble(getOption(DefaultOptionCreator.T1_OPTION));
@@ -110,8 +112,7 @@ public class CanopyDriver extends AbstractJob {
                          double t1,
                          double t2,
                          boolean runClustering,
-                         boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+                         boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
     Path clustersOut = buildClusters(conf, input, output, measure, t1, t2, runSequential);
     if (runClustering) {
       clusterData(conf, input, clustersOut, output, measure, t1, t2, runSequential);
@@ -135,8 +136,7 @@ public class CanopyDriver extends AbstractJob {
                          double t1,
                          double t2,
                          boolean runClustering,
-                         boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+                         boolean runSequential) throws IOException, InterruptedException, ClassNotFoundException {
     run(new Configuration(), input, output, measure, t1, t2, runClustering, runSequential);
   }
 
@@ -160,7 +160,7 @@ public class CanopyDriver extends AbstractJob {
                                    double t1,
                                    double t2,
                                    boolean runSequential)
-    throws InstantiationException, IllegalAccessException, IOException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     log.info("Build Clusters Input: {} Out: {} " + "Measure: {} t1: {} t2: {}",
              new Object[] { input, output, measure, t1, t2 });
     if (runSequential) {
@@ -182,24 +182,14 @@ public class CanopyDriver extends AbstractJob {
    * @return the canopy output directory Path
    */
   private static Path buildClustersSeq(Path input, Path output, DistanceMeasure measure, double t1, double t2)
-      throws InstantiationException, IllegalAccessException, IOException {
+    throws IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
     Collection<Canopy> canopies = new ArrayList<Canopy>();
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
-    for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      try {
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-        while (reader.next(key, vw)) {
-          clusterer.addPointToCanopies(vw.get(), canopies);
-          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-        }
-      } finally {
-        reader.close();
-      }
+    for (VectorWritable value :
+         new SequenceFileDirValueIterable<VectorWritable>(input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      clusterer.addPointToCanopies(value.get(), canopies);
     }
     Path canopyOutputDir = new Path(output, Cluster.CLUSTERS_DIR + '0');
     Path path = new Path(canopyOutputDir, "part-r-00000");
@@ -207,8 +197,13 @@ public class CanopyDriver extends AbstractJob {
     try {
       for (Canopy canopy : canopies) {
         canopy.computeParameters();
-        log.debug("Writing Canopy:" + canopy.getIdentifier() + " center:" + AbstractCluster.formatVector(canopy.getCenter(), null)
-            + " numPoints:" + canopy.getNumPoints() + " radius:" + AbstractCluster.formatVector(canopy.getRadius(), null));
+        log.debug("Writing Canopy:{} center:{} numPoints:{} radius:{}",
+                  new Object[] {
+                      canopy.getIdentifier(),
+                      AbstractCluster.formatVector(canopy.getCenter(), null),
+                      canopy.getNumPoints(),
+                      AbstractCluster.formatVector(canopy.getRadius(), null)
+                  });
         writer.append(new Text(canopy.getIdentifier()), canopy);
       }
     } finally {
@@ -229,8 +224,12 @@ public class CanopyDriver extends AbstractJob {
    * @param t2 the double T2 distance metric
    * @return the canopy output directory Path
    */
-  private static Path buildClustersMR(Configuration conf, Path input, Path output, DistanceMeasure measure, double t1, double t2)
-      throws IOException, InterruptedException, ClassNotFoundException {
+  private static Path buildClustersMR(Configuration conf,
+                                      Path input,
+                                      Path output,
+                                      DistanceMeasure measure,
+                                      double t1, double t2)
+    throws IOException, InterruptedException, ClassNotFoundException {
     conf.set(CanopyConfigKeys.DISTANCE_MEASURE_KEY, measure.getClass().getName());
     conf.set(CanopyConfigKeys.T1_KEY, String.valueOf(t1));
     conf.set(CanopyConfigKeys.T2_KEY, String.valueOf(t2));
@@ -263,8 +262,8 @@ public class CanopyDriver extends AbstractJob {
                                  DistanceMeasure measure,
                                  double t1,
                                  double t2,
-                                 boolean runSequential) throws InstantiationException, IllegalAccessException, IOException,
-      InterruptedException, ClassNotFoundException {
+                                 boolean runSequential)
+    throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       clusterDataSeq(points, canopies, output, measure, t1, t2);
     } else {
@@ -277,49 +276,32 @@ public class CanopyDriver extends AbstractJob {
                                      Path output,
                                      DistanceMeasure measure,
                                      double t1,
-                                     double t2)
-    throws InstantiationException, IllegalAccessException, IOException {
+                                     double t2) throws IOException {
     CanopyClusterer clusterer = new CanopyClusterer(measure, t1, t2);
 
     Collection<Canopy> clusters = new ArrayList<Canopy>();
     Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(canopies.toUri(), conf);
-    FileStatus[] status = fs.listStatus(canopies, new OutputLogFilter());
-    for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-      try {
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        Canopy value = reader.getValueClass().asSubclass(Canopy.class).newInstance();
-        while (reader.next(key, value)) {
-          clusters.add(value);
-          value = reader.getValueClass().asSubclass(Canopy.class).newInstance();
-        }
-      } finally {
-        reader.close();
-      }
+    for (Canopy value :
+         new SequenceFileDirValueIterable<Canopy>(canopies, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+      clusters.add(value);
     }
     // iterate over all points, assigning each to the closest canopy and outputing that clustering
-    fs = FileSystem.get(points.toUri(), conf);
-    status = fs.listStatus(points, new OutputLogFilter());
+    FileSystem fs = FileSystem.get(points.toUri(), conf);
+    FileStatus[] status = fs.listStatus(points, PathFilters.logsCRCFilter());
     Path outPath = new Path(output, DEFAULT_CLUSTERED_POINTS_DIRECTORY);
     int part = 0;
     for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs,
                                                            conf,
                                                            new Path(outPath, "part-m-" + part++),
                                                            IntWritable.class,
                                                            WeightedVectorWritable.class);
       try {
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-        while (reader.next(key, vw)) {
-          Canopy closest = clusterer.findClosestCanopy(vw.get(), clusters);
-          writer.append(new IntWritable(closest.getId()), new WeightedVectorWritable(1, vw.get()));
-          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
+        for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), conf)) {
+          Canopy closest = clusterer.findClosestCanopy(value.get(), clusters);
+          writer.append(new IntWritable(closest.getId()), new WeightedVectorWritable(1, value.get()));
         }
       } finally {
-        reader.close();
         writer.close();
       }
     }
@@ -349,7 +331,7 @@ public class CanopyDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, points);
     Path outPath = new Path(output, DEFAULT_CLUSTERED_POINTS_DIRECTORY);
     FileOutputFormat.setOutputPath(job, outPath);
-    HadoopUtil.overwriteOutput(outPath);
+    HadoopUtil.delete(conf, outPath);
 
     if (!job.waitForCompletion(true)) {
       throw new InterruptedException("Canopy Clustering failed processing " + canopies.toString());

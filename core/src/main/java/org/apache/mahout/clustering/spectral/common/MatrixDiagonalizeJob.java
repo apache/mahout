@@ -51,7 +51,7 @@ public final class MatrixDiagonalizeJob {
     // set up all the job tasks
     Configuration conf = new Configuration();
     Path diagOutput = new Path(affInput.getParent(), "diagonal");
-    HadoopUtil.overwriteOutput(diagOutput);
+    HadoopUtil.delete(conf, diagOutput);
     conf.setInt(EigencutsKeys.AFFINITY_DIMENSIONS, dimensions);
     Job job = new Job(conf, "MatrixDiagonalizeJob");
     
@@ -70,8 +70,7 @@ public final class MatrixDiagonalizeJob {
     job.waitForCompletion(true);
     
     // read the results back from the path
-    return VectorCache.load(NullWritable.get(), conf, 
-        new Path(diagOutput, "part-r-00000"));
+    return VectorCache.load(conf, new Path(diagOutput, "part-r-00000"));
   }
   
   public static class MatrixDiagonalizeMapper

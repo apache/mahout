@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -54,6 +55,7 @@ import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.TanimotoDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.SequentialAccessSparseVector;
@@ -317,51 +319,21 @@ public class VectorBenchmarks implements Summarizable {
   }
   
   public void deserializeBenchmark() throws IOException {
-    Configuration conf = new Configuration();
-    FileSystem fs = FileSystem.get(conf);
-    
-    SequenceFile.Reader reader = new SequenceFile.Reader(fs,
-      new Path("/tmp/dense-vector"), conf);
+    doDeserializeBenchmark("DenseVector", "/tmp/dense-vector");
+    doDeserializeBenchmark("RandSparseVector", "/tmp/randsparse-vector");
+    doDeserializeBenchmark("SeqSparseVector", "/tmp/seqsparse-vector");
+  }
 
-    Writable one = new IntWritable(0);
-    Writable vec = new VectorWritable();
+  private void doDeserializeBenchmark(String name, String pathString) throws IOException {
     TimingStatistics stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++) {
-      for (int i = 0; i < numVectors; i++) {
-        TimingStatistics.Call call = stats.newCall();
-        reader.next(one, vec);
-        call.end();
-      }
+    TimingStatistics.Call call = stats.newCall();
+    Iterator<?> iterator = new SequenceFileValueIterator<Writable>(new Path(pathString), true, new Configuration());
+    while (iterator.hasNext()) {
+      iterator.next();
+      call.end();
+      call = stats.newCall();
     }
-    reader.close();
-    printStats(stats, "Deserialize", "DenseVector");
-    
-    reader = new SequenceFile.Reader(fs,
-      new Path("/tmp/randsparse-vector"), conf);
-    stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++) {
-      for (int i = 0; i < numVectors; i++) {
-        TimingStatistics.Call call = stats.newCall();
-        reader.next(one, vec);
-        call.end();
-      }
-    }
-    reader.close();
-    printStats(stats, "Deserialize", "RandSparseVector");
-    
-    reader = new SequenceFile.Reader(fs,
-      new Path("/tmp/seqsparse-vector"), conf);
-    stats = new TimingStatistics();
-    for (int l = 0; l < loop; l++) {
-      for (int i = 0; i < numVectors; i++) {
-        TimingStatistics.Call call = stats.newCall();
-        reader.next(one, vec);
-        call.end();
-      }
-    }
-    reader.close();
-    printStats(stats, "Deserialize", "SeqSparseVector");
-    
+    printStats(stats, "Deserialize", name);
   }
   
   public void dotBenchmark() {

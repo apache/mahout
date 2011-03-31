@@ -80,7 +80,8 @@ public final class MahoutEvaluator {
    */
   private static Path prepareInput(FileSystem fs, Iterable<?> population) throws IOException {
     Path inpath = new Path(fs.getWorkingDirectory(), "input");
-    HadoopUtil.overwriteOutput(inpath);
+    Configuration conf = fs.getConf();
+    HadoopUtil.delete(conf, inpath);
     storePopulation(fs, new Path(inpath, "population"), population);
     return inpath;
   }
@@ -95,7 +96,11 @@ public final class MahoutEvaluator {
    * @param outpath
    *          output <code>Path</code>
    */
-  private static void configureJob(Job job, Configuration conf, FitnessEvaluator<?> evaluator, Path inpath, Path outpath) {
+  private static void configureJob(Job job,
+                                   Configuration conf,
+                                   FitnessEvaluator<?> evaluator,
+                                   Path inpath,
+                                   Path outpath) {
 
     conf.set("mapred.input.dir", inpath.toString());
     conf.set("mapred.output.dir", outpath.toString());

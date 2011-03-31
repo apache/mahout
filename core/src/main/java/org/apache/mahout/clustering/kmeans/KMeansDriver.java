@@ -27,7 +27,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
@@ -42,6 +41,11 @@ import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.SquaredEuclideanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirValueIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +92,7 @@ public class KMeansDriver extends AbstractJob {
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
-      HadoopUtil.overwriteOutput(output);
+      HadoopUtil.delete(getConf(), output);
     }
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
@@ -132,7 +136,7 @@ public class KMeansDriver extends AbstractJob {
                          int maxIterations,
                          boolean runClustering,
                          boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     // iterate until the clusters converge
     String delta = Double.toString(convergenceDelta);
@@ -183,7 +187,7 @@ public class KMeansDriver extends AbstractJob {
                          int maxIterations,
                          boolean runClustering,
                          boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     run(new Configuration(),
         input,
         clustersIn,
@@ -223,7 +227,7 @@ public class KMeansDriver extends AbstractJob {
                                    int maxIterations,
                                    String delta,
                                    boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
       return buildClustersSeq(input, clustersIn, output, measure, maxIterations, delta);
     } else {
@@ -237,7 +241,7 @@ public class KMeansDriver extends AbstractJob {
                                        DistanceMeasure measure,
                                        int maxIterations,
                                        String delta)
-    throws InstantiationException, IllegalAccessException, IOException {
+    throws IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
     Collection<Cluster> clusters = new ArrayList<Cluster>();
@@ -252,19 +256,10 @@ public class KMeansDriver extends AbstractJob {
       log.info("K-Means Iteration: " + iteration);
       Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(input.toUri(), conf);
-      FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
-      for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-        try {
-          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-          while (reader.next(key, vw)) {
-            clusterer.addPointToNearestCluster(vw.get(), clusters);
-            vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-          }
-        } finally {
-          reader.close();
-        }
+      for (VectorWritable value :
+           new SequenceFileDirValueIterable<VectorWritable>(
+               input, PathType.LIST, PathFilters.logsCRCFilter(), conf)) {
+        clusterer.addPointToNearestCluster(value.get(), clusters);
       }
       converged = clusterer.testConvergence(clusters, Double.parseDouble(delta));
       Path clustersOut = new Path(output, AbstractCluster.CLUSTERS_DIR + iteration);
@@ -313,7 +308,6 @@ public class KMeansDriver extends AbstractJob {
 
   /**
    * Run the job using supplied arguments
-   * @param conf TODO
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
@@ -355,7 +349,7 @@ public class KMeansDriver extends AbstractJob {
     FileOutputFormat.setOutputPath(job, clustersOut);
 
     job.setJarByClass(KMeansDriver.class);
-    HadoopUtil.overwriteOutput(clustersOut);
+    HadoopUtil.delete(conf, clustersOut);
     if (!job.waitForCompletion(true)) {
       throw new InterruptedException("K-Means Iteration failed processing " + clustersIn.toString());
     }
@@ -374,27 +368,13 @@ public class KMeansDriver extends AbstractJob {
    *           if there was an IO error
    */
   private static boolean isConverged(Path filePath, Configuration conf, FileSystem fs) throws IOException {
-    FileStatus[] parts = fs.listStatus(filePath);
-    for (FileStatus part : parts) {
-      String name = part.getPath().getName();
-      if (name.startsWith("part") && !name.endsWith(".crc")) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, part.getPath(), conf);
-        try {
-          Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-          Cluster value = new Cluster();
-          while (reader.next(key, value)) {
-            if (!value.isConverged()) {
-              return false;
-            }
-          }
-        } catch (InstantiationException e) { // shouldn't happen
-          log.error("Exception", e);
-          throw new IllegalStateException(e);
-        } catch (IllegalAccessException e) {
-          log.error("Exception", e);
-          throw new IllegalStateException(e);
-        } finally {
-          reader.close();
+    for (FileStatus part : fs.listStatus(filePath, PathFilters.partFilter())) {
+      SequenceFileValueIterator<Cluster> iterator = new SequenceFileValueIterator<Cluster>(part.getPath(), true, conf);
+      while (iterator.hasNext()) {
+        Cluster value = iterator.next();
+        if (!value.isConverged()) {
+          iterator.close();
+          return false;
         }
       }
     }
@@ -403,7 +383,6 @@ public class KMeansDriver extends AbstractJob {
 
   /**
    * Run the job using supplied arguments
-   * @param conf TODO
    * @param input
    *          the directory pathname for input points
    * @param clustersIn
@@ -423,7 +402,7 @@ public class KMeansDriver extends AbstractJob {
                                  DistanceMeasure measure,
                                  String convergenceDelta,
                                  boolean runSequential)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
 
     if (log.isInfoEnabled()) {
       log.info("Running Clustering");
@@ -438,7 +417,7 @@ public class KMeansDriver extends AbstractJob {
   }
 
   private static void clusterDataSeq(Path input, Path clustersIn, Path output, DistanceMeasure measure)
-    throws IOException, InstantiationException, IllegalAccessException {
+    throws IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
     Collection<Cluster> clusters = new ArrayList<Cluster>();
@@ -448,24 +427,19 @@ public class KMeansDriver extends AbstractJob {
     }
     Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
-    FileStatus[] status = fs.listStatus(input, new OutputLogFilter());
+    FileStatus[] status = fs.listStatus(input, PathFilters.logsCRCFilter());
     int part = 0;
     for (FileStatus s : status) {
-      SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
       SequenceFile.Writer writer = new SequenceFile.Writer(fs,
                                                            conf,
                                                            new Path(output, "part-m-" + part),
                                                            IntWritable.class,
                                                            WeightedVectorWritable.class);
       try {
-        Writable key = reader.getKeyClass().asSubclass(Writable.class).newInstance();
-        VectorWritable vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
-        while (reader.next(key, vw)) {
-          clusterer.emitPointToNearestCluster(vw.get(), clusters, writer);
-          vw = reader.getValueClass().asSubclass(VectorWritable.class).newInstance();
+        for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), conf)) {
+          clusterer.emitPointToNearestCluster(value.get(), clusters, writer);
         }
       } finally {
-        reader.close();
         writer.close();
       }
     }
@@ -491,7 +465,7 @@ public class KMeansDriver extends AbstractJob {
     job.setOutputValueClass(WeightedVectorWritable.class);
 
     FileInputFormat.setInputPaths(job, input);
-    HadoopUtil.overwriteOutput(output);
+    HadoopUtil.delete(conf, output);
     FileOutputFormat.setOutputPath(job, output);
 
     job.setMapperClass(KMeansClusterMapper.class);

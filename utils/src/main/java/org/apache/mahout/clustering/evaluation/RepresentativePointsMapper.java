@@ -24,19 +24,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.OutputLogFilter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.WeightedVectorWritable;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.VectorWritable;
 
-public class RepresentativePointsMapper extends Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
+public class RepresentativePointsMapper
+  extends Mapper<IntWritable, WeightedVectorWritable, IntWritable, WeightedVectorWritable> {
 
   private Map<Integer, List<VectorWritable>> representativePoints;
 
@@ -53,7 +54,8 @@ public class RepresentativePointsMapper extends Mapper<IntWritable, WeightedVect
   }
 
   @Override
-  protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context) throws IOException, InterruptedException {
+  protected void map(IntWritable clusterId, WeightedVectorWritable point, Context context)
+    throws IOException, InterruptedException {
     mapPoint(clusterId, point, measure, representativePoints, mostDistantPoints);
   }
 
@@ -84,12 +86,6 @@ public class RepresentativePointsMapper extends Mapper<IntWritable, WeightedVect
       measure = ccl.loadClass(conf.get(RepresentativePointsDriver.DISTANCE_MEASURE_KEY)).asSubclass(DistanceMeasure.class)
           .newInstance();
       representativePoints = getRepresentativePoints(conf);
-    } catch (NumberFormatException e) {
-      throw new IllegalStateException(e);
-    } catch (SecurityException e) {
-      throw new IllegalStateException(e);
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException(e);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(e);
     } catch (InstantiationException e) {
@@ -111,30 +107,17 @@ public class RepresentativePointsMapper extends Mapper<IntWritable, WeightedVect
 
   public static Map<Integer, List<VectorWritable>> getRepresentativePoints(Configuration conf, Path statePath) {
     Map<Integer, List<VectorWritable>> representativePoints = new HashMap<Integer, List<VectorWritable>>();
-    try {
-      FileSystem fs = FileSystem.get(statePath.toUri(), conf);
-      FileStatus[] status = fs.listStatus(statePath, new OutputLogFilter());
-      for (FileStatus s : status) {
-        SequenceFile.Reader reader = new SequenceFile.Reader(fs, s.getPath(), conf);
-        try {
-          IntWritable key = new IntWritable(0);
-          VectorWritable point = new VectorWritable();
-          while (reader.next(key, point)) {
-            List<VectorWritable> repPoints = representativePoints.get(key.get());
-            if (repPoints == null) {
-              repPoints = new ArrayList<VectorWritable>();
-              representativePoints.put(key.get(), repPoints);
-            }
-            repPoints.add(point);
-            point = new VectorWritable();
-          }
-        } finally {
-          reader.close();
-        }
+    for (Pair<IntWritable,VectorWritable> record :
+         new SequenceFileDirIterable<IntWritable,VectorWritable>(
+             statePath, PathType.LIST, new OutputLogFilter(), conf)) {
+      int keyValue = record.getFirst().get();
+      List<VectorWritable> repPoints = representativePoints.get(keyValue);
+      if (repPoints == null) {
+        repPoints = new ArrayList<VectorWritable>();
+        representativePoints.put(keyValue, repPoints);
       }
-      return representativePoints;
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
+      repPoints.add(record.getSecond());
     }
+    return representativePoints;
   }
 }
