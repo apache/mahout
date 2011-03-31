@@ -78,7 +78,7 @@ public class TFIDFPartialVectorReducer extends
         continue;
       }
       long df = dictionary.get(e.index());
-      if (df / vectorCount > maxDfPercent) {
+      if (df * 100.0 / vectorCount > maxDfPercent) {
         continue;
       }
       if (df < minDf) {

@@ -253,7 +253,8 @@ public final class CollocDriver extends AbstractJob {
     Configuration conf = new Configuration(baseConf);
     conf.setLong(LLRReducer.NGRAM_TOTAL, nGramTotal);
     conf.setBoolean(EMIT_UNIGRAMS, emitUnigrams);
- 
+    conf.setFloat(LLRReducer.MIN_LLR, minLLRValue);
+
     Job job = new Job(conf);
     job.setJobName(CollocDriver.class.getSimpleName() + ".computeNGrams: " + output);
     job.setJarByClass(CollocDriver.class);
@@ -274,7 +275,6 @@ public final class CollocDriver extends AbstractJob {
     job.setReducerClass(LLRReducer.class);
     job.setNumReduceTasks(reduceTasks);
 
-    conf.setFloat(LLRReducer.MIN_LLR, minLLRValue);
     job.waitForCompletion(true);
   }
 }
