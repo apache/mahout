@@ -46,8 +46,19 @@ public class MatrixMultiplicationJob extends AbstractJob {
 
   private static final String OUT_CARD = "output.vector.cardinality";
 
-  public static Configuration createMatrixMultiplyJobConf(Path aPath, Path bPath, Path outPath, int outCardinality) {
-    JobConf conf = new JobConf(MatrixMultiplicationJob.class);
+  public static Configuration createMatrixMultiplyJobConf(Path aPath, 
+                                                          Path bPath, 
+                                                          Path outPath, 
+                                                          int outCardinality) {
+    return createMatrixMultiplyJobConf(new Configuration(), aPath, bPath, outPath, outCardinality);
+  }
+  
+  public static Configuration createMatrixMultiplyJobConf(Configuration initialConf, 
+                                                          Path aPath, 
+                                                          Path bPath, 
+                                                          Path outPath, 
+                                                          int outCardinality) {
+    JobConf conf = new JobConf(initialConf, MatrixMultiplicationJob.class);
     conf.setInputFormat(CompositeInputFormat.class);
     conf.set("mapred.join.expr", CompositeInputFormat.compose(
           "inner", SequenceFileInputFormat.class, aPath, bPath));

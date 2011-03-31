@@ -60,10 +60,17 @@ public final class TimesSquaredJob {
 
   private TimesSquaredJob() { }
 
-  public static Configuration createTimesSquaredJobConf(Vector v,
+  public static Configuration createTimesSquaredJobConf(Vector v, Path matrixInputPath, Path outputVectorPath)
+    throws IOException {
+    return createTimesSquaredJobConf(new Configuration(), v, matrixInputPath, outputVectorPath);
+  }
+  
+  public static Configuration createTimesSquaredJobConf(Configuration initialConf,
+                                                        Vector v,
                                                         Path matrixInputPath,
                                                         Path outputVectorPath) throws IOException {
-    return createTimesSquaredJobConf(v,
+    return createTimesSquaredJobConf(initialConf, 
+                                     v,
                                      matrixInputPath,
                                      outputVectorPath,
                                      TimesSquaredMapper.class,
@@ -74,7 +81,16 @@ public final class TimesSquaredJob {
                                                  int outDim,
                                                  Path matrixInputPath,
                                                  Path outputVectorPath) throws IOException {
-    return createTimesSquaredJobConf(v,
+    return createTimesJobConf(new Configuration(), v, outDim, matrixInputPath, outputVectorPath);
+  }
+    
+  public static Configuration createTimesJobConf(Configuration initialConf, 
+                                                 Vector v,
+                                                 int outDim,
+                                                 Path matrixInputPath,
+                                                 Path outputVectorPath) throws IOException {
+    return createTimesSquaredJobConf(initialConf,
+                                     v,
                                      outDim,
                                      matrixInputPath,
                                      outputVectorPath,
@@ -82,14 +98,29 @@ public final class TimesSquaredJob {
                                      VectorSummingReducer.class);
   }
 
-
   public static Configuration createTimesSquaredJobConf(Vector v,
                                                         Path matrixInputPath,
                                                         Path outputVectorPathBase,
                                                         Class<? extends TimesSquaredMapper> mapClass,
                                                         Class<? extends VectorSummingReducer> redClass)
     throws IOException {
-    return createTimesSquaredJobConf(v, v.size(), matrixInputPath, outputVectorPathBase, mapClass, redClass);
+    return createTimesSquaredJobConf(new Configuration(), v, matrixInputPath, outputVectorPathBase, mapClass, redClass);
+  }
+  
+  public static Configuration createTimesSquaredJobConf(Configuration initialConf,
+                                                        Vector v,
+                                                        Path matrixInputPath,
+                                                        Path outputVectorPathBase,
+                                                        Class<? extends TimesSquaredMapper> mapClass,
+                                                        Class<? extends VectorSummingReducer> redClass)
+    throws IOException {
+    return createTimesSquaredJobConf(initialConf, 
+                                     v, 
+                                     v.size(), 
+                                     matrixInputPath, 
+                                     outputVectorPathBase, 
+                                     mapClass, 
+                                     redClass);
   }
 
   public static Configuration createTimesSquaredJobConf(Vector v,
@@ -99,7 +130,25 @@ public final class TimesSquaredJob {
                                                         Class<? extends TimesSquaredMapper> mapClass,
                                                         Class<? extends VectorSummingReducer> redClass)
     throws IOException {
-    JobConf conf = new JobConf(TimesSquaredJob.class);
+
+    return createTimesSquaredJobConf(new Configuration(),
+                                     v,
+                                     outputVectorDim,
+                                     matrixInputPath,
+                                     outputVectorPathBase,
+                                     mapClass,
+                                     redClass);
+  }
+  
+  public static Configuration createTimesSquaredJobConf(Configuration initialConf, 
+                                                        Vector v,
+                                                        int outputVectorDim,
+                                                        Path matrixInputPath,
+                                                        Path outputVectorPathBase,
+                                                        Class<? extends TimesSquaredMapper> mapClass,
+                                                        Class<? extends VectorSummingReducer> redClass)
+    throws IOException {
+    JobConf conf = new JobConf(initialConf, TimesSquaredJob.class);
     conf.setJobName("TimesSquaredJob: " + matrixInputPath);
     FileSystem fs = FileSystem.get(conf);
     matrixInputPath = fs.makeQualified(matrixInputPath);

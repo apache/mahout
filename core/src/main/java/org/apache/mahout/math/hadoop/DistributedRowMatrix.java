@@ -149,8 +149,14 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
       throw new CardinalityException(numRows, other.numRows());
     }
     Path outPath = new Path(outputTmpBasePath.getParent(), "productWith-" + (System.nanoTime() & 0xFF));
+    
+    Configuration initialConf = getConf() == null ? new Configuration() : getConf();
     Configuration conf =
-        MatrixMultiplicationJob.createMatrixMultiplyJobConf(rowPath, other.rowPath, outPath, other.numCols);
+        MatrixMultiplicationJob.createMatrixMultiplyJobConf(initialConf, 
+                                                            rowPath, 
+                                                            other.rowPath, 
+                                                            outPath, 
+                                                            other.numCols);
     JobClient.runJob(new JobConf(conf));
     DistributedRowMatrix out = new DistributedRowMatrix(outPath, outputTmpPath, numCols, other.numCols());
     out.setConf(conf);
@@ -159,7 +165,8 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
 
   public DistributedRowMatrix transpose() throws IOException {
     Path outputPath = new Path(rowPath.getParent(), "transpose-" + (System.nanoTime() & 0xFF));
-    Configuration conf = TransposeJob.buildTransposeJobConf(rowPath, outputPath, numRows);
+    Configuration initialConf = getConf() == null ? new Configuration() : getConf();
+    Configuration conf = TransposeJob.buildTransposeJobConf(initialConf, rowPath, outputPath, numRows);
     JobClient.runJob(new JobConf(conf));
     DistributedRowMatrix m = new DistributedRowMatrix(outputPath, outputTmpPath, numCols, numRows);
     m.setConf(this.conf);
@@ -169,8 +176,10 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   @Override
   public Vector times(Vector v) {
     try {
+      Configuration initialConf = getConf() == null ? new Configuration() : getConf();
       Configuration conf =
-          TimesSquaredJob.createTimesJobConf(v,
+          TimesSquaredJob.createTimesJobConf(initialConf, 
+                                             v,
                                              numRows,
                                              rowPath,
                                              new Path(outputTmpPath, Long.toString(System.nanoTime())));
@@ -184,8 +193,10 @@ public class DistributedRowMatrix implements VectorIterable, Configurable {
   @Override
   public Vector timesSquared(Vector v) {
     try {
+      Configuration initialConf = getConf() == null ? new Configuration() : getConf();
       Configuration conf =
-          TimesSquaredJob.createTimesSquaredJobConf(v,
+          TimesSquaredJob.createTimesSquaredJobConf(initialConf,
+                                                    v,
                                                     rowPath,
                                                     new Path(outputTmpBasePath,
                                                              new Path(Long.toString(System.nanoTime()))));
