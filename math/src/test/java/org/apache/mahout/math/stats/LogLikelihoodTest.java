@@ -79,6 +79,7 @@ public final class LogLikelihoodTest extends MahoutTestCase {
     // this will have lots of little positive values and a few big ones
     Vector p1 = new DenseVector(25)
       .assign(new DoubleFunction() {
+        @Override
         public double apply(double arg1) {
           return -Math.log(1 - rand.nextDouble());
         }

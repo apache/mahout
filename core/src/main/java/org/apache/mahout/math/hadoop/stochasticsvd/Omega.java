@@ -31,12 +31,12 @@ import org.apache.mahout.math.Vector.Element;
  */
 public class Omega {
 
-  private long seed;
-  private Random rnd = new Random();
-  private int kp;
+  private final long seed;
+  // TODO find way to make the test pass while using RandomUtils.getRandom()
+  private final Random rnd = new Random();
+  private final int kp;
 
   public Omega(long seed, int k, int p) {
-    super();
     this.seed = seed;
     kp = k + p;
 
@@ -44,8 +44,9 @@ public class Omega {
 
   public void accumDots(int aIndex, double aElement, double[] yRow) {
     rnd.setSeed(getOmegaRowSeed(aIndex, seed, rnd));
-    for (int i = 0; i < kp; i++)
+    for (int i = 0; i < kp; i++) {
       yRow[i] += rnd.nextGaussian() * aElement;
+    }
   }
 
   /**
@@ -70,8 +71,9 @@ public class Omega {
       
     } else {
       int n = aRow.size();
-      for (int j = 0; j < n; j++)
+      for (int j = 0; j < n; j++) {
         accumDots(j, aRow.getQuick(j), yRow);
+      }
     }
 
   }
@@ -105,9 +107,9 @@ public class Omega {
       h ^= k;
       h *= m;
     }
-    long k = 0;
 
     if (offset < len) {
+      long k = 0;
       for (; offset < len; offset++) {
         k <<= 8;
         k |= val[offset] & 0xff;

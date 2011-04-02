@@ -45,7 +45,7 @@ public class MailArchivesClusteringAnalyzerTest {
     
     // if you change the text above, then you may need to change this as well
     // order matters too
-    String[] expectedTokens = new String[] {
+    String[] expectedTokens = {
         "test", "mahout", "scalabl", "machin", "learn", "librari", "weve", "ad",
         "stopword", "apach", "hadoop", "provid", "foundat", "scalabl"
     };

@@ -45,6 +45,9 @@ public class BBtJob {
 
   public static final String OUTPUT_BBT = "part";
 
+  private BBtJob() {
+  }
+
   public static void run(Configuration conf, Path btPath, Path outputPath,
       int numReduceTasks) throws IOException, ClassNotFoundException,
       InterruptedException {
@@ -72,16 +75,15 @@ public class BBtJob {
     FileOutputFormat.setOutputPath(job, outputPath);
     SequenceFileOutputFormat.setOutputCompressionType(job,
         CompressionType.BLOCK);
-    SequenceFileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
+    FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
     job.getConfiguration().set("mapreduce.output.basename", OUTPUT_BBT);
 
     // run
     job.submit();
     job.waitForCompletion(false);
-    if (!job.isSuccessful())
+    if (!job.isSuccessful()) {
       throw new IOException("BBt job failed.");
-    return;
-
+    }
   }
 
   // actually, B*Bt matrix is small enough so that we don't need to rely on
@@ -89,8 +91,8 @@ public class BBtJob {
   public static class BBtMapper extends
       Mapper<IntWritable, VectorWritable, IntWritable, VectorWritable> {
 
-    private VectorWritable vw = new VectorWritable();
-    private IntWritable iw = new IntWritable();
+    private final VectorWritable vw = new VectorWritable();
+    private final IntWritable iw = new IntWritable();
     private UpperTriangular bbtPartial; // are all partial BBt products
                                           // symmetrical as well? yes.
 
@@ -105,9 +107,10 @@ public class BBtJob {
       for (int i = 0; i < kp; i++) {
         // this approach should reduce GC churn rate
         double mul = btVec.getQuick(i);
-        for (int j = i; j < kp; j++)
+        for (int j = i; j < kp; j++) {
           bbtPartial.setQuick(i, j,
-              bbtPartial.getQuick(i, j) + mul * btVec.getQuick(j));
+                              bbtPartial.getQuick(i, j) + mul * btVec.getQuick(j));
+        }
       }
     }
 
@@ -132,9 +135,10 @@ public class BBtJob {
     protected void cleanup(Context context) throws IOException,
         InterruptedException {
       try {
-        if (accum != null)
+        if (accum != null) {
           context.write(new IntWritable(), new VectorWritable(new DenseVector(
               accum, true)));
+        }
       } finally {
         super.cleanup(context);
       }
@@ -149,8 +153,9 @@ public class BBtJob {
         accum = new double[bbtPartial.size()];
       }
       do {
-        for (int i = 0; i < accum.length; i++)
+        for (int i = 0; i < accum.length; i++) {
           accum[i] += bbtPartial.getQuick(i);
+        }
       } while (vwIter.hasNext() && null != (bbtPartial = vwIter.next().get()));
     }
 

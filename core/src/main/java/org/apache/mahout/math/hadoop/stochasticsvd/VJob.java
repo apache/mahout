@@ -67,11 +67,9 @@ public class VJob {
 
     // Warn: tight hadoop integration here:
     job.getConfiguration().set("mapreduce.output.basename", OUTPUT_V);
-    SequenceFileOutputFormat.setCompressOutput(job, true);
-    SequenceFileOutputFormat
-        .setOutputCompressorClass(job, DefaultCodec.class);
-    SequenceFileOutputFormat.setOutputCompressionType(job,
-        CompressionType.BLOCK);
+    FileOutputFormat.setCompressOutput(job, true);
+    FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
+    SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
 
     job.setMapOutputKeyClass(IntWritable.class);
     job.setMapOutputValueClass(VectorWritable.class);
@@ -83,8 +81,9 @@ public class VJob {
 
     job.getConfiguration().set(PROP_UHAT_PATH, inputUHatPath.toString());
     job.getConfiguration().set(PROP_SIGMA_PATH, inputSigmaPath.toString());
-    if (vHalfSigma)
+    if (vHalfSigma) {
       job.getConfiguration().set(PROP_V_HALFSIGMA, "y");
+    }
     job.getConfiguration().setInt(PROP_K, k);
     job.setNumReduceTasks(0);
     job.submit();
@@ -95,8 +94,9 @@ public class VJob {
       InterruptedException {
     job.waitForCompletion(false);
 
-    if (!job.isSuccessful())
+    if (!job.isSuccessful()) {
       throw new IOException("V job unsuccessful.");
+    }
 
   }
 
@@ -114,9 +114,10 @@ public class VJob {
     protected void map(IntWritable key, VectorWritable value, Context context)
       throws IOException, InterruptedException {
       Vector qRow = value.get();
-      for (int i = 0; i < k; i++)
+      for (int i = 0; i < k; i++) {
         vRow.setQuick(i,
-            qRow.dot(uHat.getColumn(i)) / sValues.getQuick(i));
+                      qRow.dot(uHat.getColumn(i)) / sValues.getQuick(i));
+      }
       context.write(key, vRowWritable); // U inherits original A row labels.
     }
 
@@ -139,9 +140,11 @@ public class VJob {
 
       sValues = new DenseVector(SSVDSolver.loadDistributedRowMatrix(fs,
           sigmaPath, context.getConfiguration())[0], true);
-      if (context.getConfiguration().get(PROP_V_HALFSIGMA) != null)
-        for (int i = 0; i < k; i++)
+      if (context.getConfiguration().get(PROP_V_HALFSIGMA) != null) {
+        for (int i = 0; i < k; i++) {
           sValues.setQuick(i, Math.sqrt(sValues.getQuick(i)));
+        }
+      }
 
     }
 

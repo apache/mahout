@@ -30,9 +30,9 @@ import org.apache.mahout.math.VectorWritable;
  *
  * Closes the writer when done
  */
-public class SequenceFileVectorWriter extends VectorWriter {
+public class SequenceFileVectorWriter implements VectorWriter {
   private final SequenceFile.Writer writer;
-  long recNum = 0;
+  private long recNum = 0;
   public SequenceFileVectorWriter(SequenceFile.Writer writer) {
     this.writer = writer;
   }

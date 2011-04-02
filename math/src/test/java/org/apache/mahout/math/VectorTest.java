@@ -504,14 +504,14 @@ public final class VectorTest extends MahoutTestCase {
       0.2672612419124244, 0.4235990463273581, 0.5345224838248488
     });
 
-    assertVectorEquals(expected, norm, 1e-15);
-    assertVectorEquals(expected, norm2, 1e-15);
+    assertVectorEquals(expected, norm, 1.0e-15);
+    assertVectorEquals(expected, norm2, 1.0e-15);
 
     norm = vec1.logNormalize(2);
-    assertVectorEquals(expected, norm, 1e-15);
+    assertVectorEquals(expected, norm, 1.0e-15);
     
     norm2 = vec2.logNormalize(2);
-    assertVectorEquals(expected, norm2, 1e-15);
+    assertVectorEquals(expected, norm2, 1.0e-15);
     
     try {
       vec1.logNormalize(1);
@@ -535,7 +535,7 @@ public final class VectorTest extends MahoutTestCase {
     }  
   }
 
-  private void assertVectorEquals(Vector expected, Vector actual, double epsilon) {
+  private static void assertVectorEquals(Vector expected, Vector actual, double epsilon) {
     assertEquals(expected.size(), actual.size());
     for (Vector.Element x : expected) {
       assertEquals(x.get(), actual.get(x.index()), epsilon);

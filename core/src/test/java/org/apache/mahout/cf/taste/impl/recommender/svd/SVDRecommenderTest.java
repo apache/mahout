@@ -73,9 +73,9 @@ public class SVDRecommenderTest extends TasteTestCase {
     List<RecommendedItem> recommendedItems = svdRecommender.recommend(1L, 5);
     assertEquals(2, recommendedItems.size());
     assertEquals(3L, recommendedItems.get(0).getItemID());
-    assertEquals(2f, recommendedItems.get(0).getValue(), EPSILON);
+    assertEquals(2.0f, recommendedItems.get(0).getValue(), EPSILON);
     assertEquals(5L, recommendedItems.get(1).getItemID());
-    assertEquals(1f, recommendedItems.get(1).getValue(), EPSILON);
+    assertEquals(1.0f, recommendedItems.get(1).getValue(), EPSILON);
 
     EasyMock.verify(dataModel, candidateItemsStrategy, factorizer, factorization);
   }

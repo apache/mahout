@@ -294,6 +294,7 @@ public abstract class MatrixTest extends MahoutTestCase {
   @Test
   public void testAggregateRows() {
     Vector v = test.aggregateRows(new VectorFunction() {
+      @Override
       public double apply(Vector v) {
         return v.zSum();
       }
@@ -307,6 +308,7 @@ public abstract class MatrixTest extends MahoutTestCase {
   @Test
   public void testAggregateCols() {
     Vector v = test.aggregateColumns(new VectorFunction() {
+      @Override
       public double apply(Vector v) {
         return v.zSum();
       }
@@ -321,6 +323,7 @@ public abstract class MatrixTest extends MahoutTestCase {
   public void testAggregate() {
     double total = test.aggregate(Functions.PLUS, Functions.IDENTITY);
     assertEquals(test.aggregateRows(new VectorFunction() {
+      @Override
       public double apply(Vector v) {
         return v.zSum();
       }

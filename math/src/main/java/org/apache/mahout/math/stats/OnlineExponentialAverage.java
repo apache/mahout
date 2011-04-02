@@ -21,7 +21,7 @@ package org.apache.mahout.math.stats;
  * Computes an online average that is exponentially weighted toward recent time-embedded samples.
  */
 public class OnlineExponentialAverage {
-  private double alpha;
+  private final double alpha;
   private double lastT = 0;
   private double s = 0;
   private double w = 0;

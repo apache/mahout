@@ -67,11 +67,9 @@ public class UJob {
 
     // Warn: tight hadoop integration here:
     job.getConfiguration().set("mapreduce.output.basename", OUTPUT_U);
-    SequenceFileOutputFormat.setCompressOutput(job, true);
-    SequenceFileOutputFormat
-        .setOutputCompressorClass(job, DefaultCodec.class);
-    SequenceFileOutputFormat.setOutputCompressionType(job,
-        CompressionType.BLOCK);
+    FileOutputFormat.setCompressOutput(job, true);
+    FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
+    SequenceFileOutputFormat.setOutputCompressionType(job, CompressionType.BLOCK);
 
     job.setMapperClass(UMapper.class);
     job.setMapOutputKeyClass(IntWritable.class);
@@ -82,8 +80,9 @@ public class UJob {
 
     job.getConfiguration().set(PROP_UHAT_PATH, inputUHatPath.toString());
     job.getConfiguration().set(PROP_SIGMA_PATH, sigmaPath.toString());
-    if (uHalfSigma)
+    if (uHalfSigma) {
       job.getConfiguration().set(PROP_U_HALFSIGMA, "y");
+    }
     job.getConfiguration().setInt(PROP_K, k);
     job.setNumReduceTasks(0);
     job.submit();
@@ -94,8 +93,9 @@ public class UJob {
       InterruptedException {
     job.waitForCompletion(false);
 
-    if (!job.isSuccessful())
+    if (!job.isSuccessful()) {
       throw new IOException("U job unsuccessful.");
+    }
 
   }
 
@@ -146,8 +146,9 @@ public class UJob {
       if (context.getConfiguration().get(PROP_U_HALFSIGMA) != null) {
         sValues = new DenseVector(SSVDSolver.loadDistributedRowMatrix(fs,
             sigmaPath, context.getConfiguration())[0], true);
-        for (int i = 0; i < k; i++)
+        for (int i = 0; i < k; i++) {
           sValues.setQuick(i, Math.sqrt(sValues.getQuick(i)));
+        }
       }
 
     }

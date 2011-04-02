@@ -127,7 +127,7 @@ public final class Job extends AbstractJob {
                   double t2,
                   double convergenceDelta,
                   int maxIterations)
-    throws IOException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput);
     new MeanShiftCanopyDriver().run(conf,

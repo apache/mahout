@@ -35,7 +35,14 @@ import org.apache.mahout.cf.taste.hadoop.TasteHadoopUtils;
 import org.apache.mahout.cf.taste.impl.common.FullRunningAverage;
 import org.apache.mahout.cf.taste.impl.common.RunningAverage;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.math.*;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
+import org.apache.mahout.math.VarIntWritable;
+import org.apache.mahout.math.VarLongWritable;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.als.AlternateLeastSquaresSolver;
 
 import java.io.IOException;
@@ -44,8 +51,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * <p>MapReduce implementation of the factorization algorithm described in "Large-scale Parallel Collaborative Filtering for the Netﬂix Prize"
@@ -207,7 +212,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       Map<Integer,Float> ratings = new HashMap<Integer,Float>();
       for (FeatureVectorWithRatingWritable value : values) {
         if (value.getFeatureVector() == null) {
-          ratings.put(value.getIDIndex(), new Float(value.getRating()));
+          ratings.put(value.getIDIndex(), value.getRating());
         } else {
           featureVector = value.getFeatureVector().clone();          
         }
@@ -268,7 +273,7 @@ public class ParallelALSFactorizationJob extends AbstractJob {
       extends Reducer<VarLongWritable,FloatWritable,VarIntWritable,FeatureVectorWithRatingWritable> {
 
     private int numFeatures;
-    private static final Random random = new Random();
+    private static final Random random = RandomUtils.getRandom();
 
     @Override
     protected void setup(Context ctx) throws IOException, InterruptedException {

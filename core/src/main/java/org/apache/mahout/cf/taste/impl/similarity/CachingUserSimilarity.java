@@ -42,7 +42,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
   private final RefreshHelper refreshHelper;
 
   /**
-   * Creates a {@link CachingUserSimilarity} on top of the given {@link UserSimilarity}.
+   * Creates this on top of the given {@link UserSimilarity}.
    * The cache is sized according to properties of the given {@link DataModel}.
    */
   public CachingUserSimilarity(UserSimilarity similarity, DataModel dataModel) throws TasteException {
@@ -50,7 +50,7 @@ public final class CachingUserSimilarity implements UserSimilarity {
   }
 
   /**
-   * Creates a {@link CachingUserSimilarity} on top of the given {@link UserSimilarity}.
+   * Creates this on top of the given {@link UserSimilarity}.
    * The cache size is capped by the given size.
    */
   public CachingUserSimilarity(UserSimilarity similarity, int maxCacheSize) {

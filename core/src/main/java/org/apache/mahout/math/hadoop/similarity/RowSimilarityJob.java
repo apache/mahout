@@ -81,7 +81,7 @@ public class RowSimilarityJob extends AbstractJob {
 
   private static final int DEFAULT_MAX_SIMILARITIES_PER_ROW = 100;
 
-  public static enum Counter {
+  public enum Counter {
     COOCCURRENCES, SIMILAR_ROWS
   }
 

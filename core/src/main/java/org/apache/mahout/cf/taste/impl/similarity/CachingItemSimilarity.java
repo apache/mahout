@@ -39,7 +39,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
   private final RefreshHelper refreshHelper;
 
   /**
-   * Creates a {@link CachingItemSimilarity} on top of the given {@link ItemSimilarity}.
+   * Creates this on top of the given {@link ItemSimilarity}.
    * The cache is sized according to properties of the given {@link DataModel}.
    */
   public CachingItemSimilarity(ItemSimilarity similarity, DataModel dataModel) throws TasteException {
@@ -47,7 +47,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
   }
 
   /**
-   * Creates a {@link CachingItemSimilarity} on top of the given {@link ItemSimilarity}.
+   * Creates this on top of the given {@link ItemSimilarity}.
    * The cache size is capped by the given size.
    */
   public CachingItemSimilarity(ItemSimilarity similarity, int maxCacheSize) {

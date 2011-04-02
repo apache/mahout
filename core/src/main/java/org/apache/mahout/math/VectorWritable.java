@@ -46,7 +46,7 @@ public final class VectorWritable extends Configured implements Writable {
   }
 
   /**
-   * @return {@link Vector} that this {@link VectorWritable} is to write, or has
+   * @return {@link Vector} that this is to write, or has
    *  just read
    */
   public Vector get() {
@@ -58,7 +58,7 @@ public final class VectorWritable extends Configured implements Writable {
   }
 
   /**
-   * @return true if this {@link VectorWritable} is allowed to encode {@link Vector}
+   * @return true if this is allowed to encode {@link Vector}
    *  values using fewer bytes, possibly losing precision. In particular this means
    *  that floating point values will be encoded as floats, not doubles.
    */

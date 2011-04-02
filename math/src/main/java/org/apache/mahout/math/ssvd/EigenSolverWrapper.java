@@ -17,6 +17,7 @@
 package org.apache.mahout.math.ssvd;
 
 import org.apache.commons.math.linear.Array2DRowRealMatrix;
+import org.apache.commons.math.linear.EigenDecomposition;
 import org.apache.commons.math.linear.EigenDecompositionImpl;
 import org.apache.commons.math.linear.RealMatrix;
 
@@ -38,19 +39,19 @@ import org.apache.commons.math.linear.RealMatrix;
  */
 public class EigenSolverWrapper {
 
-  private double[] eigenvalues;
+  private final double[] eigenvalues;
   private double[][] uHat;
 
   public EigenSolverWrapper(double[][] bbt) {
-    super();
     int dim = bbt.length;
-    EigenDecompositionImpl evd2 = new EigenDecompositionImpl(
+    EigenDecomposition evd2 = new EigenDecompositionImpl(
         new Array2DRowRealMatrix(bbt), 0);
     eigenvalues = evd2.getRealEigenvalues();
     RealMatrix uHatrm = evd2.getV();
     uHat = new double[dim][];
-    for (int i = 0; i < dim; i++)
+    for (int i = 0; i < dim; i++) {
       uHat[i] = uHatrm.getRow(i);
+    }
   }
 
   public double[][] getUHat() {

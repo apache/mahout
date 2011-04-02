@@ -62,11 +62,11 @@ public class PredictionJobTest extends TasteTestCase {
         "--tempDir", tempDir.getAbsolutePath() });
 
     FileDataModel dataModel = new FileDataModel(new File(outputDir, "part-r-00000"));
-    assertEquals(dataModel.getNumUsers(), 3);
-    assertEquals(dataModel.getNumItems(), 2);
-    assertEquals(dataModel.getPreferenceValue(0, 0), 2.45, EPSILON);
-    assertEquals(dataModel.getPreferenceValue(2, 1), -6.6, EPSILON);
-    assertEquals(dataModel.getPreferenceValue(1, 0), -0.61, EPSILON);
+    assertEquals(3, dataModel.getNumUsers());
+    assertEquals(2, dataModel.getNumItems());
+    assertEquals(2.45f, dataModel.getPreferenceValue(0, 0), EPSILON);
+    assertEquals(-6.6f, dataModel.getPreferenceValue(2, 1), EPSILON);
+    assertEquals(-0.61f, dataModel.getPreferenceValue(1, 0), EPSILON);
   }
 
 }

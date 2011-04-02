@@ -29,7 +29,7 @@ import org.apache.mahout.math.Vector;
  */
 public class UpperTriangular extends AbstractMatrix {
 
-  private static final double EPSILON = 1e-12; // assume anything less than
+  private static final double EPSILON = 1.0e-12; // assume anything less than
                                                  // that to be 0 during
                                                  // non-upper assignments
 
@@ -43,8 +43,6 @@ public class UpperTriangular extends AbstractMatrix {
    */
 
   public UpperTriangular(int n) {
-    super();
-
     values = new double[n * (n + 1) / 2];
     this.n = n;
     cardinality[0] = cardinality[1] = n;
@@ -59,14 +57,15 @@ public class UpperTriangular extends AbstractMatrix {
     // ((DenseVector)data).
     // system.arraycopy would've been much faster, but this way it's a drag
     // on B-t job.
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) {
       values[i] = data.getQuick(i);
+    }
   }
 
   public UpperTriangular(double[] data, boolean shallow) {
-    super();
-    if (data == null)
+    if (data == null) {
       throw new IllegalArgumentException("data");
+    }
     values = shallow ? data : data.clone();
     n = (int) Math.round((-1 + Math.sqrt(1 + 8 * data.length)) / 2);
     cardinality[0] = cardinality[1] = n;
@@ -85,11 +84,14 @@ public class UpperTriangular extends AbstractMatrix {
 
   @Override
   public Matrix assignRow(int row, Vector other) {
-    for (int i = 0; i < row; i++)
-      if (other.getQuick(i) > EPSILON)
-        throw new RuntimeException("non-triangular source");
-    for (int i = row; i < n; i++)
+    for (int i = 0; i < row; i++) {
+      if (other.getQuick(i) > EPSILON) {
+        throw new IllegalArgumentException("non-triangular source");
+      }
+    }
+    for (int i = row; i < n; i++) {
       setQuick(row, i, other.get(i));
+    }
     return this;
   }
 
@@ -110,8 +112,9 @@ public class UpperTriangular extends AbstractMatrix {
 
   @Override
   public double getQuick(int row, int column) {
-    if (row > column)
+    if (row > column) {
       return 0;
+    }
     return values[getL(row, column)];
   }
 

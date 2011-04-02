@@ -309,13 +309,13 @@ public class QJob {
     job.setInputFormatClass(SequenceFileInputFormat.class);
     FileInputFormat.setInputPaths(job, inputPaths);
     if (minSplitSize > 0) {
-      SequenceFileInputFormat.setMinInputSplitSize(job, minSplitSize);
+      FileInputFormat.setMinInputSplitSize(job, minSplitSize);
     }
 
     FileOutputFormat.setOutputPath(job, outputPath);
 
-    SequenceFileOutputFormat.setCompressOutput(job, true);
-    SequenceFileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
+    FileOutputFormat.setCompressOutput(job, true);
+    FileOutputFormat.setOutputCompressorClass(job, DefaultCodec.class);
     SequenceFileOutputFormat.setOutputCompressionType(job,
         CompressionType.BLOCK);
 

@@ -80,6 +80,7 @@ public abstract class MahoutTestCase extends Assert {
   }
 
   private static class DeletingVisitor implements FileFilter {
+    @Override
     public boolean accept(File f) {
       if (!f.isFile()) {
         f.listFiles(this);

@@ -21,10 +21,10 @@ import org.apache.commons.csv.CSVStrategy;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -35,12 +35,11 @@ import java.util.Iterator;
  * Assumes DenseVector for now, but in the future may have the option of mapping columns to sparse format
  * <p/>
  * The Iterator is not thread-safe.
- *
- *
- **/
+ */
 public class CSVVectorIterable implements Iterable<Vector> {
-  protected CSVParser parser;
-  protected String [] line;
+
+  private final CSVParser parser;
+  private String [] line;
 
   public CSVVectorIterable(Reader reader) throws IOException {
     parser = new CSVParser(reader);
@@ -52,17 +51,12 @@ public class CSVVectorIterable implements Iterable<Vector> {
     line = parser.getLine();
   }
 
-
   @Override
   public Iterator<Vector> iterator() {
     return new CSVIterator();
   }
 
   private class CSVIterator implements Iterator<Vector>{
-
-
-    public CSVIterator() {
-    }
 
     @Override
     public boolean hasNext() {
@@ -72,8 +66,11 @@ public class CSVVectorIterable implements Iterable<Vector> {
     @Override
     public Vector next() {
 
-      Vector result = null;
-      result = new DenseVector(line.length);
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
+
+      Vector result = new DenseVector(line.length);
       for (int i = 0; i < line.length; i++) {
         result.setQuick(i, Double.parseDouble(line[i]));
       }
@@ -81,7 +78,7 @@ public class CSVVectorIterable implements Iterable<Vector> {
       try {
         line = parser.getLine();
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new IllegalStateException(e);
       }
       return result;
     }

@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -36,6 +37,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Cluster;
 import org.apache.mahout.clustering.ClusteringTestUtils;
 import org.apache.mahout.clustering.Model;
+import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
 import org.apache.mahout.clustering.dirichlet.models.AsymmetricSampledNormalModel;
 import org.apache.mahout.clustering.dirichlet.models.DistanceMeasureClusterDistribution;
@@ -320,7 +322,8 @@ public final class TestMapReduce extends MahoutTestCase {
     generate4Datasets();
     // Now run the driver
     int maxIterations = 3;
-    AbstractVectorModelDistribution modelDistribution = new SampledNormalDistribution(new VectorWritable(new DenseVector(2)));
+    ModelDistribution<VectorWritable> modelDistribution =
+        new SampledNormalDistribution(new VectorWritable(new DenseVector(2)));
     Configuration conf = new Configuration();
     DirichletDriver.run(conf,
                         getTestTempDirPath("input"),
@@ -334,7 +337,7 @@ public final class TestMapReduce extends MahoutTestCase {
                         0,
                         false);
     // and inspect results
-    List<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
+    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
     conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());
     conf.set(DirichletDriver.NUM_CLUSTERS_KEY, "20");
     conf.set(DirichletDriver.ALPHA_0_KEY, "1.0");
@@ -352,19 +355,18 @@ public final class TestMapReduce extends MahoutTestCase {
     generateAsymmetricSamples(100, 0, 3, 0.3, 4.0);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver using the run() method. Others can use runJob() as before
-    Integer maxIterations = 5;
     MahalanobisDistanceMeasure measure = new MahalanobisDistanceMeasure();
     AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)), measure);
     
     Vector meanVector = new DenseVector(new double [] {0.0, 0.0});
-    ((MahalanobisDistanceMeasure)measure).setMeanVector(meanVector);
+    measure.setMeanVector(meanVector);
     Matrix m= new DenseMatrix(new double [][] {{0.5, 0.0}, {0.0, 4.0}});
-    ((MahalanobisDistanceMeasure)measure).setCovarianceMatrix(m);
+    measure.setCovarianceMatrix(m);
     
     Path inverseCovarianceFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureInverseCovarianceFile");
     conf.set("MahalanobisDistanceMeasure.inverseCovarianceFile", inverseCovarianceFile.toString());
     FileSystem fs = FileSystem.get(inverseCovarianceFile.toUri(), conf);
-    MatrixWritable inverseCovarianceMatrix = new MatrixWritable(((MahalanobisDistanceMeasure)measure).getInverseCovarianceMatrix());
+    MatrixWritable inverseCovarianceMatrix = new MatrixWritable(measure.getInverseCovarianceMatrix());
     DataOutputStream out = fs.create(inverseCovarianceFile);
     try {
       inverseCovarianceMatrix.write(out);
@@ -385,7 +387,8 @@ public final class TestMapReduce extends MahoutTestCase {
     
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
     conf.set("MahalanobisDistanceMeasure.vectorClass", VectorWritable.class.getName());
-    
+
+    Integer maxIterations = 5;
     String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
         optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
         optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), modelDistribution.getClass().getName(),
@@ -418,20 +421,19 @@ public final class TestMapReduce extends MahoutTestCase {
     generateAsymmetricSamples(100, 0, 3, 0.3, 4.0);
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("input/data.txt"), fs, conf);
     // Now run the driver using the run() method. Others can use runJob() as before
-    Integer maxIterations = 5;
-    
+
     MahalanobisDistanceMeasure measure = new MahalanobisDistanceMeasure();
     AbstractVectorModelDistribution modelDistribution = new DistanceMeasureClusterDistribution(new VectorWritable(new DenseVector(2)), measure);
     
     Vector meanVector = new DenseVector(new double [] {0.0, 0.0});
-    ((MahalanobisDistanceMeasure)measure).setMeanVector(meanVector);
+    measure.setMeanVector(meanVector);
     Matrix m= new DenseMatrix(new double [][] {{0.5, 0.0}, {0.0, 4.0}});
-    ((MahalanobisDistanceMeasure)measure).setCovarianceMatrix(m);
+    measure.setCovarianceMatrix(m);
     
     Path inverseCovarianceFile = new Path(getTestTempDirPath("mahalanobis"), "MahalanobisDistanceMeasureInverseCovarianceFile");
     conf.set("MahalanobisDistanceMeasure.inverseCovarianceFile", inverseCovarianceFile.toString());
     FileSystem fs = FileSystem.get(inverseCovarianceFile.toUri(), conf);
-    MatrixWritable inverseCovarianceMatrix = new MatrixWritable(((MahalanobisDistanceMeasure)measure).getInverseCovarianceMatrix());
+    MatrixWritable inverseCovarianceMatrix = new MatrixWritable(measure.getInverseCovarianceMatrix());
     DataOutputStream out = fs.create(inverseCovarianceFile);
     try {
       inverseCovarianceMatrix.write(out);
@@ -452,7 +454,8 @@ public final class TestMapReduce extends MahoutTestCase {
     
     conf.set("MahalanobisDistanceMeasure.maxtrixClass", MatrixWritable.class.getName());
     conf.set("MahalanobisDistanceMeasure.vectorClass", VectorWritable.class.getName());
-    
+
+    Integer maxIterations = 5;
     String[] args = { optKey(DefaultOptionCreator.INPUT_OPTION), getTestTempDirPath("input").toString(),
         optKey(DefaultOptionCreator.OUTPUT_OPTION), getTestTempDirPath("output").toString(),
         optKey(DirichletDriver.MODEL_DISTRIBUTION_CLASS_OPTION), modelDistribution.getClass().getName(),
@@ -494,10 +497,10 @@ public final class TestMapReduce extends MahoutTestCase {
   @Test
   public void testNormalModelWritableSerialization() throws Exception {
     double[] m = { 1.1, 2.2, 3.3 };
-    Model<?> model = new NormalModel(5, new DenseVector(m), 3.3);
+    Writable model = new NormalModel(5, new DenseVector(m), 3.3);
     DataOutputBuffer out = new DataOutputBuffer();
     model.write(out);
-    Model<?> model2 = new NormalModel();
+    Writable model2 = new NormalModel();
     DataInputBuffer in = new DataInputBuffer();
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
@@ -507,10 +510,10 @@ public final class TestMapReduce extends MahoutTestCase {
   @Test
   public void testSampledNormalModelWritableSerialization() throws Exception {
     double[] m = { 1.1, 2.2, 3.3 };
-    Model<?> model = new SampledNormalModel(5, new DenseVector(m), 3.3);
+    Writable model = new SampledNormalModel(5, new DenseVector(m), 3.3);
     DataOutputBuffer out = new DataOutputBuffer();
     model.write(out);
-    Model<?> model2 = new SampledNormalModel();
+    Writable model2 = new SampledNormalModel();
     DataInputBuffer in = new DataInputBuffer();
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);
@@ -521,10 +524,10 @@ public final class TestMapReduce extends MahoutTestCase {
   public void testAsymmetricSampledNormalModelWritableSerialization() throws Exception {
     double[] m = { 1.1, 2.2, 3.3 };
     double[] s = { 3.3, 4.4, 5.5 };
-    Model<?> model = new AsymmetricSampledNormalModel(5, new DenseVector(m), new DenseVector(s));
+    Writable model = new AsymmetricSampledNormalModel(5, new DenseVector(m), new DenseVector(s));
     DataOutputBuffer out = new DataOutputBuffer();
     model.write(out);
-    Model<?> model2 = new AsymmetricSampledNormalModel();
+    Writable model2 = new AsymmetricSampledNormalModel();
     DataInputBuffer in = new DataInputBuffer();
     in.reset(out.getData(), out.getLength());
     model2.readFields(in);

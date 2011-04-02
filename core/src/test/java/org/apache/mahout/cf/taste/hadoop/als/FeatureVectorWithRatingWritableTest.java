@@ -34,12 +34,12 @@ public class FeatureVectorWithRatingWritableTest extends MahoutTestCase {
   @Test
   public void rating() throws Exception {
 
-    FeatureVectorWithRatingWritable rating = new FeatureVectorWithRatingWritable(1, 3f);
+    FeatureVectorWithRatingWritable rating = new FeatureVectorWithRatingWritable(1, 3.0f);
 
     assertTrue(rating.containsRating());
     assertFalse(rating.containsFeatureVector());
     assertEquals(1, rating.getIDIndex());
-    assertEquals(3f, rating.getRating(), 0f);
+    assertEquals(3.0f, rating.getRating(), 0.0f);
     assertNull(rating.getFeatureVector());
 
     FeatureVectorWithRatingWritable clonedRating = recreate(FeatureVectorWithRatingWritable.class, rating);
@@ -48,7 +48,7 @@ public class FeatureVectorWithRatingWritableTest extends MahoutTestCase {
     assertTrue(clonedRating.containsRating());
     assertFalse(clonedRating.containsFeatureVector());
     assertEquals(1, clonedRating.getIDIndex());
-    assertEquals(3f, clonedRating.getRating(), 0f);
+    assertEquals(3.0f, clonedRating.getRating(), 0.0f);
     assertNull(clonedRating.getFeatureVector());    
   }
 

@@ -177,7 +177,7 @@ public final class IOUtils {
    */
   public static class DeleteFileOnClose implements Closeable {
 
-    private File file;
+    private final File file;
 
     public DeleteFileOnClose(File file) {
       this.file = file;
@@ -185,8 +185,9 @@ public final class IOUtils {
 
     @Override
     public void close() throws IOException {
-      if (file.isFile())
+      if (file.isFile()) {
         file.delete();
+      }
     }
 
   }

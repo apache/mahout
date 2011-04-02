@@ -17,14 +17,14 @@
 
 package org.apache.mahout.math.stats;
 
-import junit.framework.TestCase;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.MahoutTestCase;
 import org.apache.mahout.math.jet.random.Poisson;
 import org.junit.Test;
 
 import java.util.Random;
 
-public class OnlineExponentialAverageTest extends TestCase {
+public class OnlineExponentialAverageTest extends MahoutTestCase {
   @Test
   public void testAverage() {
     double[] t = {11.35718, 21.54637, 28.91061, 33.03586, 39.57767};
@@ -35,7 +35,7 @@ public class OnlineExponentialAverageTest extends TestCase {
 
     for (int i = 0; i < t.length; i++) {
       averager.add(t[i], x[i]);
-      assertEquals("Step " + i, m[i], averager.mean(), 1e-6);
+      assertEquals("Step " + i, m[i], averager.mean(), 1.0e-6);
     }
   }
 
@@ -54,7 +54,7 @@ public class OnlineExponentialAverageTest extends TestCase {
       t[i] = lastT + dt;
 
       // at those points, we get a Poisson count
-      k[i] = p.nextInt(dt * .2);
+      k[i] = p.nextInt(dt * 0.2);
       lastT = t[i];
     }
 
@@ -64,6 +64,6 @@ public class OnlineExponentialAverageTest extends TestCase {
       averager.add(t[i], k[i]);
     }
 
-    assertEquals("Expected rate", .2, averager.meanRate(), 0.01);
+    assertEquals("Expected rate", 0.2, averager.meanRate(), 0.01);
   }
 }

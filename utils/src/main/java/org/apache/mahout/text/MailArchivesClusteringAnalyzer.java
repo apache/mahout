@@ -17,14 +17,12 @@
 package org.apache.mahout.text;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.LengthFilter;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.PorterStemFilter;
 import org.apache.lucene.analysis.StopFilter;
@@ -45,7 +43,7 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
   // extended set of stop words composed of common mail terms like "hi",
   // HTML tags, and Java keywords asmany of the messages in the archives
   // are subversion check-in notifications
-	private static final String[] STOP_WORDS = new String[] {
+	private static final String[] STOP_WORDS = {
 	  "3d","7bit","a0","about","above","abstract","across","additional","after",
 	  "afterwards","again","against","align","all","almost","alone","along",
 	  "already","also","although","always","am","among","amongst","amoungst",
@@ -106,11 +104,12 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
 
 	public MailArchivesClusteringAnalyzer() {
 		stopSet = (CharArraySet)StopFilter.makeStopSet(Arrays.asList(STOP_WORDS));
-		java.util.TreeSet<String> tmp = new java.util.TreeSet<String>();
-		java.util.Iterator iter = stopSet.iterator();
-		while (iter.hasNext()) {
-		  tmp.add((String)iter.next());
-		}
+    /*
+		Collection<String> tmp = new java.util.TreeSet<String>();
+    for (Object entry : stopSet) {
+      tmp.add(entry.toString());
+    }
+     */
 	}
 
 	public MailArchivesClusteringAnalyzer(CharArraySet stopSet) {
@@ -132,12 +131,12 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
   /**
    * Matches alpha-numeric tokens between 2 and 40 chars long.
    */
-	class AlphaNumericMaxLengthFilter extends TokenFilter {
-    private TermAttribute termAtt;
+  static class AlphaNumericMaxLengthFilter extends TokenFilter {
+    private final TermAttribute termAtt;
     private final char[] output = new char[28];
-    private Matcher matcher;
+    private final Matcher matcher;
 
-	  public AlphaNumericMaxLengthFilter(TokenStream in) {
+	  AlphaNumericMaxLengthFilter(TokenStream in) {
 	    super(in);
 	    termAtt = addAttribute(TermAttribute.class);
 	    matcher = alphaNumeric.matcher("foo");
@@ -147,17 +146,17 @@ public class MailArchivesClusteringAnalyzer extends Analyzer {
 	  public final boolean incrementToken() throws IOException {
 	    // return the first alpha-numeric token between 2 and 40 length
 	    while (input.incrementToken()) {
-	      final int length = termAtt.termLength();
+	      int length = termAtt.termLength();
 	      if (length >= 2 && length <= 28) {
-	        final char[] buf = termAtt.termBuffer();
+	        char[] buf = termAtt.termBuffer();
 	        int at = 0;
 	        for (int c=0; c < length; c++) {
-	          final char ch = buf[c];
+	          char ch = buf[c];
 	          if (ch != '\'') {
 	            output[at++] = ch;
 	          }
 	        }
-	        final String term = new String(output, 0, at);
+	        String term = new String(output, 0, at);
 	        matcher.reset(term);
 	        if (matcher.matches() && !term.startsWith("a0")) {
             termAtt.setTermBuffer(term);

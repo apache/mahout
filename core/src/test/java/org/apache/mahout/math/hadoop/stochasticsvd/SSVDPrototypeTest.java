@@ -22,6 +22,7 @@ import java.util.Random;
 import junit.framework.Assert;
 
 import org.apache.mahout.common.MahoutTestCase;
+import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
@@ -37,8 +38,8 @@ import org.junit.Test;
  */
 public class SSVDPrototypeTest extends MahoutTestCase {
 
-  private static double s_scale = 1000;
-  private static double s_epsilon = 1e-10;
+  private static final double SCALE = 1000;
+  private static final double SVD_EPSILON = 1.0e-10;
 
   public void testSSVDPrototype() throws Exception {
     SSVDPrototype.main(null);
@@ -47,14 +48,12 @@ public class SSVDPrototypeTest extends MahoutTestCase {
   @Test
   public void testGivensQR() throws Exception {
     // DenseMatrix m = new DenseMatrix(dims<<2,dims);
-    DenseMatrix m = new DenseMatrix(3, 3);
+    Matrix m = new DenseMatrix(3, 3);
     m.assign(new DoubleFunction() {
-
-      Random m_rnd = new Random();
-
+      private final Random rnd = RandomUtils.getRandom();
       @Override
       public double apply(double arg0) {
-        return m_rnd.nextDouble() * s_scale;
+        return rnd.nextDouble() * SCALE;
       }
     });
 
@@ -68,13 +67,12 @@ public class SSVDPrototypeTest extends MahoutTestCase {
     m.setQuick(2, 1, 8);
     m.setQuick(2, 2, 9);
 
-    GivensThinSolver qrSolver = new GivensThinSolver(m.rowSize(),
-        m.columnSize());
+    GivensThinSolver qrSolver = new GivensThinSolver(m.rowSize(), m.columnSize());
     qrSolver.solve(m);
 
     Matrix qtm = new DenseMatrix(qrSolver.getThinQtTilde());
 
-    assertOrthonormality(qtm.transpose(), false, s_epsilon);
+    assertOrthonormality(qtm.transpose(), false, SVD_EPSILON);
 
     Matrix aClone = new DenseMatrix(qrSolver.getThinQtTilde()).transpose()
         .times(qrSolver.getRTilde());
@@ -83,29 +81,28 @@ public class SSVDPrototypeTest extends MahoutTestCase {
 
   }
 
-  public static void assertOrthonormality(Matrix mtx, boolean insufficientRank,
-      double epsilon) {
+  public static void assertOrthonormality(Matrix mtx, boolean insufficientRank, double epsilon) {
     int n = mtx.columnSize();
     int rank = 0;
     for (int i = 0; i < n; i++) {
-      Vector e_i = mtx.getColumn(i);
+      Vector ei = mtx.getColumn(i);
 
-      double norm = e_i.norm(2);
+      double norm = ei.norm(2);
 
-      if (Math.abs(1 - norm) < epsilon)
+      if (Math.abs(1 - norm) < epsilon) {
         rank++;
-      else
+      } else {
         Assert.assertTrue(Math.abs(norm) < epsilon);
+      }
 
       for (int j = 0; j <= i; j++) {
         Vector e_j = mtx.getColumn(j);
-        double dot = e_i.dot(e_j);
+        double dot = ei.dot(e_j);
         Assert
             .assertTrue(Math.abs((i == j && rank > j ? 1 : 0) - dot) < epsilon);
       }
     }
-    Assert.assertTrue((!insufficientRank && rank == n)
-        || (insufficientRank && rank < n));
+    Assert.assertTrue((!insufficientRank && rank == n) || (insufficientRank && rank < n));
 
   }
 

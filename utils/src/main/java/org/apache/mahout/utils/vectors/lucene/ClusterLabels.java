@@ -88,7 +88,7 @@ public class ClusterLabels {
                        String indexDir,
                        String contentField,
                        int minNumIds,
-                       int maxLabels) throws IOException {
+                       int maxLabels) {
     this.indexDir = indexDir;
     this.contentField = contentField;
     this.minNumIds = minNumIds;

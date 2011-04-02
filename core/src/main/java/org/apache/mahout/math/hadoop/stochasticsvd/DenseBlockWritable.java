@@ -39,11 +39,7 @@ import org.apache.mahout.math.MatrixWritable;
  * 
  */
 public class DenseBlockWritable implements Writable {
-  double[][] block;
-
-  public DenseBlockWritable() {
-    super();
-  }
+  private double[][] block;
 
   public void setBlock(double[][] block) {
     this.block = block;
@@ -57,15 +53,18 @@ public class DenseBlockWritable implements Writable {
   public void readFields(DataInput in) throws IOException {
     int m = in.readInt();
     int n = in.readInt();
-    if (block == null)
+    if (block == null) {
       block = new double[m][0];
-    else if (block.length != m)
+    } else if (block.length != m) {
       block = Arrays.copyOf(block, m);
+    }
     for (int i = 0; i < m; i++) {
-      if (block[i] == null || block[i].length != n)
+      if (block[i] == null || block[i].length != n) {
         block[i] = new double[n];
-      for (int j = 0; j < n; j++)
+      }
+      for (int j = 0; j < n; j++) {
         block[i][j] = in.readDouble();
+      }
 
     }
   }
@@ -77,9 +76,11 @@ public class DenseBlockWritable implements Writable {
 
     out.writeInt(m);
     out.writeInt(n);
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j < n; j++)
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
         out.writeDouble(block[i][j]);
+      }
+    }
   }
 
 }

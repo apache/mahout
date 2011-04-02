@@ -56,8 +56,7 @@ public class SampledNormalDistribution extends NormalModelDistribution {
   public Model<VectorWritable>[] sampleFromPosterior(Model<VectorWritable>[] posterior) {
     Model<VectorWritable>[] result = new SampledNormalModel[posterior.length];
     for (int i = 0; i < posterior.length; i++) {
-      SampledNormalModel m = (SampledNormalModel) posterior[i];
-      result[i] = m.sampleFromPosterior();
+      result[i] = posterior[i].sampleFromPosterior();
     }
     return result;
   }

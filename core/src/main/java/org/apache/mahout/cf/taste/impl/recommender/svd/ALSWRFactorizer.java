@@ -69,8 +69,8 @@ public class ALSWRFactorizer extends AbstractFactorizer {
     private final DataModel dataModel;
     private final int numFeatures;
 
-    private double[][] M;
-    private double[][] U;
+    private final double[][] M;
+    private final double[][] U;
 
     Features(ALSWRFactorizer factorizer) throws TasteException {
       this.dataModel = factorizer.dataModel;

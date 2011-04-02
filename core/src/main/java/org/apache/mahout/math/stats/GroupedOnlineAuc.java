@@ -91,9 +91,9 @@ public class GroupedOnlineAuc implements OnlineAuc {
   @Override
   public void write(DataOutput out) throws IOException {
     out.writeInt(map.size());
-    for (String key : map.keySet()) {
-      out.writeUTF(key);
-      PolymorphicWritable.write(out, map.get(key));
+    for (Map.Entry<String,OnlineAuc> entry : map.entrySet()) {
+      out.writeUTF(entry.getKey());
+      PolymorphicWritable.write(out, entry.getValue());
     }
     out.writeInt(policy.ordinal());
     out.writeInt(windowSize);
