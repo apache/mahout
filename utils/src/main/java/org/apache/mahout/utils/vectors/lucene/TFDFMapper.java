@@ -30,10 +30,7 @@ import org.apache.mahout.vectorizer.Weight;
  * Not thread-safe
  */
 public class TFDFMapper extends VectorMapper {
-  
-  //public static final int DEFAULT_CACHE_SIZE = 256;
-  
-  //private final IndexReader reader; // TODO never used?
+
   private Vector vector;
   
   private final Weight weight;
@@ -43,7 +40,6 @@ public class TFDFMapper extends VectorMapper {
   private final int numDocs;
   
   public TFDFMapper(IndexReader reader, Weight weight, TermInfo termInfo) {
-    //this.reader = reader;
     this.weight = weight;
     this.termInfo = termInfo;
     this.numDocs = reader.numDocs();
