@@ -51,8 +51,10 @@ public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
     prefsOfUser789.add(new GenericPreference(789L, 1L, 0.5f));
     prefsOfUser789.add(new GenericPreference(789L, 3L, 1.0f));
 
+    GenericUserPreferenceArray prefArrayOfUser123 = new GenericUserPreferenceArray(prefsOfUser123);
+
     FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
-    userData.put(123L, new GenericUserPreferenceArray(prefsOfUser123));
+    userData.put(123L, prefArrayOfUser123);
     userData.put(456L, new GenericUserPreferenceArray(prefsOfUser456));
     userData.put(789L, new GenericUserPreferenceArray(prefsOfUser789));
 
@@ -60,7 +62,7 @@ public final class SamplingCandidateItemsStrategyTest extends TasteTestCase {
 
     CandidateItemsStrategy strategy = new SamplingCandidateItemsStrategy(1, 1);
 
-    FastIDSet candidateItems = strategy.getCandidateItems(123L, dataModel);
+    FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel);
     /* result can be either item2 or item3 or empty */
     assertTrue(candidateItems.size() <= 1);
     assertFalse(candidateItems.contains(1L));

@@ -76,7 +76,8 @@ public final class ItemAverageRecommender extends AbstractRecommender {
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
 
-    FastIDSet possibleItemIDs = getAllOtherItems(userID);
+    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
+    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser);
 
     TopItems.Estimator<Long> estimator = new Estimator();
 

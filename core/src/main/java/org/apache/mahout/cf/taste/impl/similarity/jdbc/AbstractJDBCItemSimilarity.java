@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
 import org.apache.mahout.cf.taste.impl.model.jdbc.ConnectionPoolDataSource;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -52,15 +53,18 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
   private final String itemBIDColumn;
   private final String similarityColumn;
   private final String getItemItemSimilaritySQL;
+  private final String getAllSimilarItemIDsSQL;
 
   protected AbstractJDBCItemSimilarity(DataSource dataSource,
-                                       String getItemItemSimilaritySQL) {
+                                       String getItemItemSimilaritySQL,
+                                       String getAllSimilarItemIDsSQL) {
     this(dataSource,
          DEFAULT_SIMILARITY_TABLE,
          DEFAULT_ITEM_A_ID_COLUMN,
          DEFAULT_ITEM_B_ID_COLUMN,
          DEFAULT_SIMILARITY_COLUMN,
-         getItemItemSimilaritySQL);
+         getItemItemSimilaritySQL,
+         getAllSimilarItemIDsSQL);
   }
   
   protected AbstractJDBCItemSimilarity(DataSource dataSource,
@@ -68,13 +72,15 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
                                        String itemAIDColumn,
                                        String itemBIDColumn,
                                        String similarityColumn,
-                                       String getItemItemSimilaritySQL) {
+                                       String getItemItemSimilaritySQL,
+                                       String getAllSimilarItemIDsSQL) {
     AbstractJDBCComponent.checkNotNullAndLog("similarityTable", similarityTable);
     AbstractJDBCComponent.checkNotNullAndLog("itemAIDColumn", itemAIDColumn);
     AbstractJDBCComponent.checkNotNullAndLog("itemBIDColumn", itemBIDColumn);
     AbstractJDBCComponent.checkNotNullAndLog("similarityColumn", similarityColumn);
     
     AbstractJDBCComponent.checkNotNullAndLog("getItemItemSimilaritySQL", getItemItemSimilaritySQL);
+    AbstractJDBCComponent.checkNotNullAndLog("getAllSimilarItemIDsSQL", getAllSimilarItemIDsSQL);
 
     if (!(dataSource instanceof ConnectionPoolDataSource)) {
       log.warn("You are not using ConnectionPoolDataSource. Make sure your DataSource pools connections "
@@ -87,6 +93,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
     this.itemBIDColumn = itemBIDColumn;
     this.similarityColumn = similarityColumn;
     this.getItemItemSimilaritySQL = getItemItemSimilaritySQL;
+    this.getAllSimilarItemIDsSQL = getAllSimilarItemIDsSQL;
   }
   
   protected String getSimilarityTable() {
@@ -119,7 +126,7 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
       stmt.setFetchSize(getFetchSize());
       return doItemSimilarity(stmt, itemID1, itemID2);
     } catch (SQLException sqle) {
-      log.warn("Exception while retrieving user", sqle);
+      log.warn("Exception while retrieving similarity", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(null, stmt, conn);
@@ -140,12 +147,41 @@ public abstract class AbstractJDBCItemSimilarity extends AbstractJDBCComponent i
         result[i] = doItemSimilarity(stmt, itemID1, itemID2s[i]);
       }
     } catch (SQLException sqle) {
-      log.warn("Exception while retrieving user", sqle);
+      log.warn("Exception while retrieving item similarities", sqle);
       throw new TasteException(sqle);
     } finally {
       IOUtils.quietClose(null, stmt, conn);
     }
     return result;
+  }
+
+  @Override
+  public long[] allSimilarItemIDs(long itemID) throws TasteException {
+    FastIDSet allSimilarItemIDs = new FastIDSet();
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      conn = dataSource.getConnection();
+      stmt = conn.prepareStatement(getAllSimilarItemIDsSQL, ResultSet.TYPE_FORWARD_ONLY,
+          ResultSet.CONCUR_READ_ONLY);
+      stmt.setFetchDirection(ResultSet.FETCH_FORWARD);
+      stmt.setFetchSize(getFetchSize());
+      stmt.setLong(1, itemID);
+      stmt.setLong(2, itemID);
+      rs = stmt.executeQuery();
+      while (rs.next()) {
+        allSimilarItemIDs.add(rs.getLong(1));
+        allSimilarItemIDs.add(rs.getLong(2));
+      }
+    } catch (SQLException sqle) {
+      log.warn("Exception while retrieving all similar itemIDs", sqle);
+      throw new TasteException(sqle);
+    } finally {
+      IOUtils.quietClose(rs, stmt, conn);
+    }
+    allSimilarItemIDs.remove(itemID);
+    return allSimilarItemIDs.toArray();
   }
   
   @Override

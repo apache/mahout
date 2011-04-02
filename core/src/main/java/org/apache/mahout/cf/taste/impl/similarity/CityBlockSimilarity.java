@@ -23,7 +23,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
@@ -31,12 +30,10 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
  * Implementation of City Block distance (also known as Manhattan distance) - the absolute value of the difference of
  * each direction is summed.  The resulting unbounded distance is then mapped between 0 and 1.
  */
-public final class CityBlockSimilarity implements UserSimilarity, ItemSimilarity {
-
-  private final DataModel dataModel;
+public final class CityBlockSimilarity extends AbstractItemSimilarity implements UserSimilarity {
 
   public CityBlockSimilarity(DataModel dataModel) {
-    this.dataModel = dataModel;
+    super(dataModel);
   }
 
   /**

@@ -18,15 +18,20 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
+import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.recommender.ItemBasedRecommender;
-import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.model.Preference;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.cf.taste.recommender.*;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
+import org.easymock.classextension.EasyMock;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -247,4 +252,44 @@ public final class GenericItemBasedRecommenderTest extends TasteTestCase {
     return new GenericItemBasedRecommender(dataModel, similarity);
   }
 
+
+  /**
+   * we're making sure that a user's preferences are fetched only once from the {@link DataModel} for one call to
+   * {@link GenericItemBasedRecommender#recommend(long, int)}
+   *
+   * @throws Exception
+   */
+  @Test
+  public void preferencesFetchedOnlyOnce() throws Exception {
+
+    DataModel dataModel = EasyMock.createMock(DataModel.class);
+    ItemSimilarity itemSimilarity = EasyMock.createMock(ItemSimilarity.class);
+    CandidateItemsStrategy candidateItemsStrategy = EasyMock.createMock(CandidateItemsStrategy.class);
+    MostSimilarItemsCandidateItemsStrategy mostSimilarItemsCandidateItemsStrategy =
+        EasyMock.createMock(MostSimilarItemsCandidateItemsStrategy.class);
+
+    PreferenceArray preferencesFromUser = new GenericUserPreferenceArray(Arrays.asList(new Preference[] {
+        new GenericPreference(1L, 1L, 5f), new GenericPreference(1L, 2L, 4f) }));
+
+    EasyMock.expect(dataModel.getMinPreference()).andReturn(Float.NaN);
+    EasyMock.expect(dataModel.getMaxPreference()).andReturn(Float.NaN);
+
+    EasyMock.expect(dataModel.getPreferencesFromUser(1L)).andReturn(preferencesFromUser);
+    EasyMock.expect(candidateItemsStrategy.getCandidateItems(1L, preferencesFromUser, dataModel))
+        .andReturn(new FastIDSet(new long[] { 3L, 4L }));
+
+    EasyMock.expect(itemSimilarity.itemSimilarities(3L, preferencesFromUser.getIDs()))
+        .andReturn(new double[] { 0.5d, 0.3d });
+    EasyMock.expect(itemSimilarity.itemSimilarities(4L, preferencesFromUser.getIDs()))
+        .andReturn(new double[] { 0.4d, 0.1d });
+
+    EasyMock.replay(dataModel, itemSimilarity, candidateItemsStrategy, mostSimilarItemsCandidateItemsStrategy);
+
+    ItemBasedRecommender recommender = new GenericItemBasedRecommender(dataModel, itemSimilarity,
+        candidateItemsStrategy, mostSimilarItemsCandidateItemsStrategy);
+
+    recommender.recommend(1L, 3);
+
+    EasyMock.verify(dataModel, itemSimilarity, candidateItemsStrategy, mostSimilarItemsCandidateItemsStrategy);
+  }
 }

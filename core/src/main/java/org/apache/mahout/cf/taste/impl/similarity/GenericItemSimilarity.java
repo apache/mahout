@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
@@ -50,7 +51,8 @@ import com.google.common.base.Preconditions;
 public final class GenericItemSimilarity implements ItemSimilarity {
   
   private final FastByIDMap<FastByIDMap<Double>> similarityMaps = new FastByIDMap<FastByIDMap<Double>>();
-  
+  private final FastByIDMap<FastIDSet> similarItemIDsIndex = new FastByIDMap<FastIDSet>();
+
   /**
    * <p>
    * Creates a  from a precomputed list of {@link ItemItemSimilarity}s. Each
@@ -58,18 +60,18 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * not necessary to specify similarity between item1 and item2, and item2 and item1. Both are the same. It
    * is also not necessary to specify a similarity between any item and itself; these are assumed to be 1.0.
    * </p>
-   * 
+   *
    * <p>
    * Note that specifying a similarity between two items twice is not an error, but, the later value will win.
    * </p>
-   * 
+   *
    * @param similarities
    *          set of {@link ItemItemSimilarity}s on which to base this instance
    */
   public GenericItemSimilarity(Iterable<ItemItemSimilarity> similarities) {
     initSimilarityMaps(similarities);
   }
-  
+
   /**
    * <p>
    * Like {@link #GenericItemSimilarity(Iterable)}, but will only keep the specified number of similarities
@@ -91,7 +93,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       similarities);
     initSimilarityMaps(keptSimilarities);
   }
-  
+
   /**
    * <p>
    * Builds a list of item-item similarities given an {@link ItemSimilarity} implementation and a
@@ -112,12 +114,13 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel} items
    */
-  public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel) throws TasteException {
+  public GenericItemSimilarity(ItemSimilarity otherSimilarity, DataModel dataModel)
+      throws TasteException {
     long[] itemIDs = IteratorUtils.longIteratorToList(dataModel.getItemIDs());
     Iterator<ItemItemSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, itemIDs);
     initSimilarityMaps(new IteratorIterable<ItemItemSimilarity>(it));
   }
-  
+
   /**
    * <p>
    * Like {@link #GenericItemSimilarity(ItemSimilarity, DataModel)} )}, but will only keep the specified
@@ -138,7 +141,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
    * @throws TasteException
    *           if an error occurs while accessing the {@link DataModel} items
    */
-  public GenericItemSimilarity(ItemSimilarity otherSimilarity,
+public GenericItemSimilarity(ItemSimilarity otherSimilarity,
                                DataModel dataModel, int maxToKeep) throws TasteException {
     long[] itemIDs = IteratorUtils.longIteratorToList(dataModel.getItemIDs());
     Iterator<ItemItemSimilarity> it = new DataModelSimilaritiesIterator(otherSimilarity, itemIDs);
@@ -146,7 +149,7 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       new IteratorIterable<ItemItemSimilarity>(it));
     initSimilarityMaps(keptSimilarities);
   }
-  
+
   private void initSimilarityMaps(Iterable<ItemItemSimilarity> similarities) {
     for (ItemItemSimilarity iic : similarities) {
       long similarityItemID1 = iic.getItemID1();
@@ -168,11 +171,23 @@ public final class GenericItemSimilarity implements ItemSimilarity {
           similarityMaps.put(itemID1, map);
         }
         map.put(itemID2, iic.getValue());
+
+        doIndex(itemID1, itemID2);
+        doIndex(itemID2, itemID1);
       }
       // else similarity between item and itself already assumed to be 1.0
     }
   }
-  
+
+  private void doIndex(long fromItemID, long toItemID) {
+    FastIDSet similarItemIDs = similarItemIDsIndex.get(fromItemID);
+    if (similarItemIDs == null) {
+      similarItemIDs = new FastIDSet();
+      similarItemIDsIndex.put(fromItemID, similarItemIDs);
+    }
+    similarItemIDs.add(toItemID);
+  }
+
   /**
    * <p>
    * Returns the similarity between two items. Note that similarity is assumed to be symmetric, that
@@ -217,6 +232,12 @@ public final class GenericItemSimilarity implements ItemSimilarity {
       result[i] = itemSimilarity(itemID1, itemID2s[i]);
     }
     return result;
+  }
+
+  @Override
+  public long[] allSimilarItemIDs(long itemID) throws TasteException {
+    FastIDSet similarItemIDs = similarItemIDsIndex.get(itemID);
+    return similarItemIDs != null ? similarItemIDs.toArray() : new long[0];
   }
   
   @Override

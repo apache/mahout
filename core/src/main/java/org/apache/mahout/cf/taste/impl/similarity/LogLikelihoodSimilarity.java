@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.math.stats.LogLikelihood;
@@ -35,12 +34,10 @@ import org.apache.mahout.math.stats.LogLikelihood;
  * <a href="http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html">
  * http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html</a>.
  */
-public final class LogLikelihoodSimilarity implements UserSimilarity, ItemSimilarity {
-  
-  private final DataModel dataModel;
-  
+public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implements UserSimilarity {
+
   public LogLikelihoodSimilarity(DataModel dataModel) {
-    this.dataModel = dataModel;
+    super(dataModel);
   }
   
   /**

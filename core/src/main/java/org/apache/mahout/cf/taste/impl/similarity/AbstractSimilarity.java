@@ -26,7 +26,6 @@ import org.apache.mahout.cf.taste.common.Weighting;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.apache.mahout.cf.taste.transforms.PreferenceTransform;
@@ -35,9 +34,8 @@ import org.apache.mahout.cf.taste.transforms.SimilarityTransform;
 import com.google.common.base.Preconditions;
 
 /** Abstract superclass encapsulating functionality that is common to most implementations in this package. */
-abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
-  
-  private final DataModel dataModel;
+abstract class AbstractSimilarity extends AbstractItemSimilarity implements UserSimilarity {
+
   private PreferenceInferrer inferrer;
   private PreferenceTransform prefTransform;
   private SimilarityTransform similarityTransform;
@@ -46,15 +44,14 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   private int cachedNumItems;
   private int cachedNumUsers;
   private final RefreshHelper refreshHelper;
-  
+
   /**
    * <p>
    * Creates a possibly weighted AbstractSimilarity.
    * </p>
    */
   AbstractSimilarity(final DataModel dataModel, Weighting weighting, boolean centerData) throws TasteException {
-    Preconditions.checkArgument(dataModel != null, "dataModel is null");
-    this.dataModel = dataModel;
+    super(dataModel);
     this.weighted = weighting == Weighting.WEIGHTED;
     this.centerData = centerData;
     this.cachedNumItems = dataModel.getNumItems();
@@ -67,13 +64,8 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
         return null;
       }
     });
-    this.refreshHelper.addDependency(this.dataModel);
   }
-  
-  final DataModel getDataModel() {
-    return dataModel;
-  }
-  
+
   final PreferenceInferrer getPreferenceInferrer() {
     return inferrer;
   }
@@ -379,6 +371,7 @@ abstract class AbstractSimilarity implements UserSimilarity, ItemSimilarity {
   
   @Override
   public final void refresh(Collection<Refreshable> alreadyRefreshed) {
+    super.refresh(alreadyRefreshed);
     refreshHelper.refresh(alreadyRefreshed);
   }
   

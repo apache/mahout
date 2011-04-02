@@ -100,6 +100,11 @@ public class FileItemSimilarity implements ItemSimilarity {
   }
 
   @Override
+  public long[] allSimilarItemIDs(long itemID) throws TasteException {
+    return delegate.allSimilarItemIDs(itemID);
+  }
+
+  @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
     return delegate.itemSimilarity(itemID1, itemID2);
   }

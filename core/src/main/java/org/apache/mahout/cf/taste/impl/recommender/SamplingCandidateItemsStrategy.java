@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -66,13 +65,11 @@ public class SamplingCandidateItemsStrategy extends AbstractCandidateItemsStrate
   }
 
   @Override
-  protected FastIDSet doGetCandidateItems(FastIDSet preferredItemIDs, DataModel dataModel) throws TasteException {
+  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
     int maxPrefsPerItemConsidered = (int) Math.max(defaultMaxPrefsPerItemConsidered,
         userItemCountMultiplier * Math.log(Math.max(dataModel.getNumUsers(), dataModel.getNumItems())));
     FastIDSet possibleItemsIDs = new FastIDSet();
-    LongPrimitiveIterator itemIDIterator = preferredItemIDs.iterator();
-    while (itemIDIterator.hasNext()) {
-      long itemID = itemIDIterator.nextLong();
+    for (long itemID : preferredItemIDs) {
       PreferenceArray prefs = dataModel.getPreferencesForItem(itemID);
       int prefsConsidered = Math.min(prefs.length(), maxPrefsPerItemConsidered);
       Iterator<Preference> sampledPrefs = new FixedSizeSamplingIterator(prefsConsidered, prefs.iterator());

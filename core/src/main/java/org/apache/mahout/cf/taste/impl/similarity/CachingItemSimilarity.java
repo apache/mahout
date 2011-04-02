@@ -34,7 +34,8 @@ import com.google.common.base.Preconditions;
  * Caches the results from an underlying {@link ItemSimilarity} implementation.
  */
 public final class CachingItemSimilarity implements ItemSimilarity {
-  
+
+  private final ItemSimilarity similarity;
   private final Cache<LongPair,Double> similarityCache;
   private final RefreshHelper refreshHelper;
 
@@ -52,6 +53,7 @@ public final class CachingItemSimilarity implements ItemSimilarity {
    */
   public CachingItemSimilarity(ItemSimilarity similarity, int maxCacheSize) {
     Preconditions.checkArgument(similarity != null, "similarity is null");
+    this.similarity = similarity;
     this.similarityCache = new Cache<LongPair,Double>(new SimilarityRetriever(similarity), maxCacheSize);
     this.refreshHelper = new RefreshHelper(new Callable<Void>() {
       @Override
@@ -78,7 +80,12 @@ public final class CachingItemSimilarity implements ItemSimilarity {
     }
     return result;
   }
-  
+
+  @Override
+  public long[] allSimilarItemIDs(long itemID) throws TasteException {
+    return similarity.allSimilarItemIDs(itemID);
+  }
+
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);

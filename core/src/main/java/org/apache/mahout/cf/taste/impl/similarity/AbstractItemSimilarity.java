@@ -15,56 +15,46 @@
  * limitations under the License.
  */
 
-package org.apache.mahout.cf.taste.impl.neighborhood;
+package org.apache.mahout.cf.taste.impl.similarity;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
-import org.apache.mahout.cf.taste.impl.similarity.AbstractItemSimilarity;
+import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.util.Collection;
 
-final class DummySimilarity extends AbstractItemSimilarity implements UserSimilarity {
+public abstract class AbstractItemSimilarity implements ItemSimilarity {
 
-  DummySimilarity(DataModel dataModel) {
-    super(dataModel);
-  }
-  
-  @Override
-  public double userSimilarity(long userID1, long userID2) throws TasteException {
-    return 1.0 / (1.0 + Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue()
-                                 - dataModel.getPreferencesFromUser(userID2).get(0).getValue()));
-  }
-  
-  @Override
-  public double itemSimilarity(long itemID1, long itemID2) {
-    // Make up something wacky
-    return 1.0 / (1.0 + Math.abs(itemID1 - itemID2));
+  protected final DataModel dataModel;
+  private final RefreshHelper refreshHelper;
+
+  public AbstractItemSimilarity(DataModel dataModel) {
+    Preconditions.checkArgument(dataModel != null, "dataModel is null");
+    this.dataModel = dataModel;
+    this.refreshHelper = new RefreshHelper(null);
+    refreshHelper.addDependency(this.dataModel);
   }
 
   @Override
-  public double[] itemSimilarities(long itemID1, long[] itemID2s) {
-    int length = itemID2s.length;
-    double[] result = new double[length];
-    for (int i = 0; i < length; i++) {
-      result[i] = itemSimilarity(itemID1, itemID2s[i]);
+  public long[] allSimilarItemIDs(long itemID) throws TasteException {
+    FastIDSet allSimilarItemIDs = new FastIDSet();
+    LongPrimitiveIterator allItemIDs = dataModel.getItemIDs();
+    while (allItemIDs.hasNext()) {
+      long possiblySimilarItemID = allItemIDs.nextLong();
+      if (!Double.isNaN(itemSimilarity(itemID, possiblySimilarItemID))) {
+        allSimilarItemIDs.add(possiblySimilarItemID);
+      }
     }
-    return result;
-  }
-  
-  @Override
-  public void setPreferenceInferrer(PreferenceInferrer inferrer) {
-    throw new UnsupportedOperationException();
+    return allSimilarItemIDs.toArray();
   }
 
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
-  // do nothing
+     refreshHelper.refresh(alreadyRefreshed);
   }
-  
 }

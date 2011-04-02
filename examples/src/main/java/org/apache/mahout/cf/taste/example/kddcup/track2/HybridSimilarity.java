@@ -23,16 +23,18 @@ import java.util.Collection;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.similarity.AbstractItemSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
-final class HybridSimilarity implements ItemSimilarity {
+final class HybridSimilarity extends AbstractItemSimilarity {
 
   private final ItemSimilarity cfSimilarity;
   private final ItemSimilarity contentSimilarity;
 
   HybridSimilarity(DataModel dataModel, File dataFileDirectory) throws IOException {
+    super(dataModel);
     cfSimilarity = new LogLikelihoodSimilarity(dataModel);
     contentSimilarity = new TrackItemSimilarity(dataFileDirectory);
   }

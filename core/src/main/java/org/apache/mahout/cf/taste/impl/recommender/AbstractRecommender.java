@@ -17,6 +17,7 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
 import java.util.List;
 
@@ -99,15 +100,17 @@ public abstract class AbstractRecommender implements Recommender {
   }
   
   /**
-   * @param theUserID
+   * @param userID
    *          ID of user being evaluated
+   * @param preferencesFromUser
+   *          the preferences from the user
    * @return all items in the {@link DataModel} for which the user has not expressed a preference and could
    *         possibly be recommended to the user
    * @throws TasteException
    *           if an error occurs while listing items
    */
-  protected FastIDSet getAllOtherItems(long theUserID) throws TasteException {
-    return candidateItemsStrategy.getCandidateItems(theUserID, dataModel);
+  protected FastIDSet getAllOtherItems(long userID, PreferenceArray preferencesFromUser) throws TasteException {
+    return candidateItemsStrategy.getCandidateItems(userID, preferencesFromUser, dataModel);
   }
   
 }

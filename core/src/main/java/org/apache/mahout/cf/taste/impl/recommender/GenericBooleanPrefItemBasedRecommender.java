@@ -49,9 +49,9 @@ public final class GenericBooleanPrefItemBasedRecommender extends GenericItemBas
    * sum of similarities.
    */
   @Override
-  protected float doEstimatePreference(long userID, long itemID) throws TasteException {
-    PreferenceArray prefs = getDataModel().getPreferencesFromUser(userID);
-    double[] similarities = getSimilarity().itemSimilarities(itemID, prefs.getIDs());
+  protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
+      throws TasteException {
+    double[] similarities = getSimilarity().itemSimilarities(itemID, preferencesFromUser.getIDs());
     boolean foundAPref = false;
     double totalSimilarity = 0.0;
     for (double theSimilarity : similarities) {

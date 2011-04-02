@@ -17,29 +17,31 @@
 
 package org.apache.mahout.cf.taste.impl.recommender;
 
+import com.google.common.base.Preconditions;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.model.PreferenceArray;
-import org.apache.mahout.cf.taste.recommender.CandidateItemsStrategy;
-import org.apache.mahout.cf.taste.recommender.MostSimilarItemsCandidateItemsStrategy;
+import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 /**
- * Abstract base implementation for retrieving candidate items to recommend
+ * returns the result of {@link ItemSimilarity#allSimilarItemIDs(long)} as candidate items
  */
-public abstract class AbstractCandidateItemsStrategy implements CandidateItemsStrategy,
-    MostSimilarItemsCandidateItemsStrategy {
+public class AllSimilarItemsCandidateItemsStrategy extends AbstractCandidateItemsStrategy {
 
-  @Override
-  public FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel)
-      throws TasteException {
-    return doGetCandidateItems(preferencesFromUser.getIDs(), dataModel);
+  private final ItemSimilarity similarity;
+
+  public AllSimilarItemsCandidateItemsStrategy(ItemSimilarity similarity) {
+    Preconditions.checkArgument(similarity != null, "similarity is null");
+    this.similarity = similarity;
   }
 
   @Override
-  public FastIDSet getCandidateItems(long[] itemIDs, DataModel dataModel) throws TasteException {
-    return doGetCandidateItems(itemIDs, dataModel);
+  FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
+    FastIDSet candidateItemIDs = new FastIDSet();
+    for (long itemID : preferredItemIDs) {
+      candidateItemIDs.addAll(similarity.allSimilarItemIDs(itemID));
+    }
+    candidateItemIDs.removeAll(preferredItemIDs);
+    return candidateItemIDs;
   }
-
-  abstract FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException;
 }

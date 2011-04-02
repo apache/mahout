@@ -19,7 +19,6 @@ package org.apache.mahout.cf.taste.impl.recommender;
 
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 
@@ -30,11 +29,9 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategy extends Abst
    * that has preferred at least one item that the current user has preferred too
    */
   @Override
-  protected FastIDSet doGetCandidateItems(FastIDSet preferredItemIDs, DataModel dataModel) throws TasteException {
+  protected FastIDSet doGetCandidateItems(long[] preferredItemIDs, DataModel dataModel) throws TasteException {
     FastIDSet possibleItemsIDs = new FastIDSet();
-    LongPrimitiveIterator itemIDIterator = preferredItemIDs.iterator();
-    while (itemIDIterator.hasNext()) {
-      long itemID = itemIDIterator.nextLong();
+    for (long itemID : preferredItemIDs) {
       PreferenceArray prefs2 = dataModel.getPreferencesForItem(itemID);
       int size2 = prefs2.length();
       for (int j = 0; j < size2; j++) {

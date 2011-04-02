@@ -16,11 +16,14 @@
  */
 package org.apache.mahout.cf.taste.impl.similarity;
 
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /** <p>Tests {@link GenericItemSimilarity}.</p> */
@@ -55,6 +58,50 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     ItemSimilarity itemSimilarity = new GenericItemSimilarity(otherSimilarity, dataModel);
     assertCorrelationEquals(1.0, itemSimilarity.itemSimilarity(0, 0));
     assertCorrelationEquals(0.960768922830523, itemSimilarity.itemSimilarity(0, 1));
+  }
+
+  @Test
+  public void testAllSimilaritiesWithoutIndex() throws TasteException {
+
+    List<GenericItemSimilarity.ItemItemSimilarity> itemItemSimilarities =
+        Arrays.asList(new GenericItemSimilarity.ItemItemSimilarity[]{
+        new GenericItemSimilarity.ItemItemSimilarity(1L, 2L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(1L, 3L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(2L, 1L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(3L, 5L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(3L, 4L, 0.2)});
+
+    ItemSimilarity similarity = new GenericItemSimilarity(itemItemSimilarities);
+
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(1L), 2L, 3L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(2L), 1L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(3L), 1L, 5L, 4L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(4L), 3L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(5L), 3L));
+  }
+
+  @Test
+  public void testAllSimilaritiesWithIndex() throws TasteException {
+
+    List<GenericItemSimilarity.ItemItemSimilarity> itemItemSimilarities =
+        Arrays.asList(new GenericItemSimilarity.ItemItemSimilarity[]{
+        new GenericItemSimilarity.ItemItemSimilarity(1L, 2L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(1L, 3L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(2L, 1L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(3L, 5L, 0.2),
+        new GenericItemSimilarity.ItemItemSimilarity(3L, 4L, 0.2)});
+
+    ItemSimilarity similarity = new GenericItemSimilarity(itemItemSimilarities);
+
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(1L), 2L, 3L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(2L), 1L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(3L), 1L, 5L, 4L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(4L), 3L));
+    assertTrue(containsExactly(similarity.allSimilarItemIDs(5L), 3L));
+  }
+
+  private boolean containsExactly(long[] allIDs, long... shouldContainID) {
+    return new FastIDSet(allIDs).intersectionSize(new FastIDSet(shouldContainID)) == shouldContainID.length;
   }
 
 }

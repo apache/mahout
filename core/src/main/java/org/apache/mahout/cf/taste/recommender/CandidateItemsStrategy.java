@@ -20,6 +20,7 @@ package org.apache.mahout.cf.taste.recommender;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
 
 /**
  * Used to retrieve all items that could possibly be recommended to the user
@@ -29,6 +30,7 @@ public interface CandidateItemsStrategy {
   /**
    * @return IDs of all items that could be recommended to the user
    */
-  FastIDSet getCandidateItems(long userID, DataModel dataModel) throws TasteException;
+  FastIDSet getCandidateItems(long userID, PreferenceArray preferencesFromUser, DataModel dataModel)
+      throws TasteException;
   
 }

@@ -117,13 +117,14 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     Preconditions.checkArgument(howMany >= 1, "howMany must be at least 1");
     log.debug("Recommending items for user ID '{}'", userID);
 
-    if (getNumPreferences(userID) == 0) {
+    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
+    if (preferencesFromUser.length() == 0) {
       return Collections.emptyList();
     }
 
-    FastIDSet possibleItemIDs = getAllOtherItems(userID);
+    FastIDSet possibleItemIDs = getAllOtherItems(userID, preferencesFromUser);
 
-    TopItems.Estimator<Long> estimator = new Estimator(userID);
+    TopItems.Estimator<Long> estimator = new Estimator(userID, preferencesFromUser);
 
     List<RecommendedItem> topItems = TopItems.getTopItems(howMany, possibleItemIDs.iterator(), rescorer,
       estimator);
@@ -134,14 +135,24 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   
   @Override
   public float estimatePreference(long userID, long itemID) throws TasteException {
-    DataModel model = getDataModel();
-    Float actualPref = model.getPreferenceValue(userID, itemID);
+    PreferenceArray preferencesFromUser = getDataModel().getPreferencesFromUser(userID);
+    Float actualPref = getPreferenceForItem(preferencesFromUser, itemID);
     if (actualPref != null) {
       return actualPref;
     }
-    return doEstimatePreference(userID, itemID);
+    return doEstimatePreference(userID, preferencesFromUser, itemID);
   }
-  
+
+  private Float getPreferenceForItem(PreferenceArray preferencesFromUser, long itemID) {
+    int size = preferencesFromUser.length();
+    for (int i = 0; i < size; i++) {
+      if (preferencesFromUser.getItemID(i) == itemID) {
+        return preferencesFromUser.getValue(i);
+      }
+    }
+    return null;
+  }
+
   @Override
   public List<RecommendedItem> mostSimilarItems(long itemID, int howMany) throws TasteException {
     return mostSimilarItems(itemID, howMany, null);
@@ -212,17 +223,17 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     return TopItems.getTopItems(howMany, possibleItemIDs.iterator(), null, estimator);
   }
   
-  protected float doEstimatePreference(long userID, long itemID) throws TasteException {
+  protected float doEstimatePreference(long userID, PreferenceArray preferencesFromUser, long itemID)
+      throws TasteException {
     double preference = 0.0;
     double totalSimilarity = 0.0;
     int count = 0;
-    PreferenceArray prefs = getDataModel().getPreferencesFromUser(userID);
-    double[] similarities = similarity.itemSimilarities(itemID, prefs.getIDs());
+    double[] similarities = similarity.itemSimilarities(itemID, preferencesFromUser.getIDs());
     for (int i = 0; i < similarities.length; i++) {
       double theSimilarity = similarities[i];
       if (!Double.isNaN(theSimilarity)) {
         // Weights can be negative!
-        preference += theSimilarity * prefs.getValue(i);
+        preference += theSimilarity * preferencesFromUser.getValue(i);
         totalSimilarity += theSimilarity;
         count++;
       }
@@ -241,11 +252,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     }
     return estimate;
   }
-  
-  private int getNumPreferences(long userID) throws TasteException {
-    return getDataModel().getPreferencesFromUser(userID).length();
-  }
-  
+
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     refreshHelper.refresh(alreadyRefreshed);
@@ -291,14 +298,16 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
   private final class Estimator implements TopItems.Estimator<Long> {
     
     private final long userID;
+    private final PreferenceArray preferencesFromUser;
     
-    private Estimator(long userID) {
+    private Estimator(long userID, PreferenceArray preferencesFromUser) {
       this.userID = userID;
+      this.preferencesFromUser = preferencesFromUser;
     }
     
     @Override
     public double estimate(Long itemID) throws TasteException {
-      return doEstimatePreference(userID, itemID);
+      return doEstimatePreference(userID, preferencesFromUser, itemID);
     }
   }
   

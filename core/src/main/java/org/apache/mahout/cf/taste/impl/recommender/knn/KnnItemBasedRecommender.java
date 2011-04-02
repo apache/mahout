@@ -126,14 +126,14 @@ public final class KnnItemBasedRecommender extends GenericItemBasedRecommender {
   }
   
   @Override
-  protected float doEstimatePreference(long theUserID, long itemID) throws TasteException {
+  protected float doEstimatePreference(long theUserID, PreferenceArray preferencesFromUser, long itemID)
+      throws TasteException {
     
     DataModel dataModel = getDataModel();
-    PreferenceArray prefs = dataModel.getPreferencesFromUser(theUserID);
-    int size = prefs.length();
+    int size = preferencesFromUser.length();
     FastIDSet possibleItemIDs = new FastIDSet(size);
     for (int i = 0; i < size; i++) {
-      possibleItemIDs.add(prefs.getItemID(i));
+      possibleItemIDs.add(preferencesFromUser.getItemID(i));
     }
     possibleItemIDs.remove(itemID);
     

@@ -24,7 +24,6 @@ import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.RefreshHelper;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
@@ -45,12 +44,10 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
  * The value returned is in [0,1].
  * </p>
  */
-public final class TanimotoCoefficientSimilarity implements UserSimilarity, ItemSimilarity {
-  
-  private final DataModel dataModel;
-  
+public final class TanimotoCoefficientSimilarity extends AbstractItemSimilarity implements UserSimilarity {
+
   public TanimotoCoefficientSimilarity(DataModel dataModel) {
-    this.dataModel = dataModel;
+    super(dataModel);
   }
   
   /**

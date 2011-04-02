@@ -18,12 +18,14 @@
 package org.apache.mahout.cf.taste.impl.recommender;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.TasteTestCase;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.Preference;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
@@ -51,16 +53,18 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends 
     PreferenceArray preferencesForItem1 = new GenericItemPreferenceArray(prefs);
 
     DataModel dataModel = EasyMock.createMock(DataModel.class);
-    EasyMock.expect(dataModel.getItemIDsFromUser(123L)).andReturn(itemIDsFromUser123);
     EasyMock.expect(dataModel.getPreferencesForItem(1L)).andReturn(preferencesForItem1);
     EasyMock.expect(dataModel.getItemIDsFromUser(123L)).andReturn(itemIDsFromUser123);
     EasyMock.expect(dataModel.getItemIDsFromUser(456L)).andReturn(itemIDsFromUser456);
+
+    GenericUserPreferenceArray prefArrayOfUser123 = new GenericUserPreferenceArray(Arrays.asList(new Preference[] {
+        new GenericPreference(123L, 1L, 1.0f) }));
 
     CandidateItemsStrategy strategy = new PreferredItemsNeighborhoodCandidateItemsStrategy();
 
     EasyMock.replay(dataModel);
 
-    FastIDSet candidateItems = strategy.getCandidateItems(123L, dataModel);
+    FastIDSet candidateItems = strategy.getCandidateItems(123L, prefArrayOfUser123, dataModel);
     assertEquals(1, candidateItems.size());
     assertTrue(candidateItems.contains(2L));
 

@@ -102,7 +102,9 @@ public final class MySQLJDBCItemSimilarity extends AbstractJDBCItemSimilarity {
           itemAIDColumn,
           itemBIDColumn, similarityColumn,
           "SELECT " + similarityColumn + " FROM " + similarityTable + " WHERE "
-              + itemAIDColumn + "=? AND " + itemBIDColumn + "=?");
+              + itemAIDColumn + "=? AND " + itemBIDColumn + "=?",
+          "SELECT " + itemAIDColumn + ", " + itemBIDColumn + " FROM " + similarityTable + " WHERE "
+              + itemAIDColumn + "=? OR " + itemBIDColumn + "=?");
   }
   
   @Override
