@@ -38,6 +38,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericsUtil;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.mahout.analysis.WikipediaAnalyzer;
@@ -185,7 +186,7 @@ public final class WikipediaDatasetCreatorDriver {
     //TODO: job.setNumMapTasks(100);
     job.setInputFormatClass(XmlInputFormat.class);
     job.setReducerClass(WikipediaDatasetCreatorReducer.class);
-    job.setOutputFormatClass(WikipediaDatasetCreatorOutputFormat.class);
+    job.setOutputFormatClass(TextOutputFormat.class);
     
     FileInputFormat.setInputPaths(job, new Path(input));
     Path outPath = new Path(output);
