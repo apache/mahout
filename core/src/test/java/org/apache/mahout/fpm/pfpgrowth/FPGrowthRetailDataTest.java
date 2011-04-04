@@ -17,8 +17,6 @@
 
 package org.apache.mahout.fpm.pfpgrowth;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.FileLineIterable;
 import org.apache.mahout.common.iterator.StringRecordIterator;
@@ -36,7 +35,8 @@ import org.junit.Test;
 
 import com.google.common.io.Resources;
 
-public class FPGrowthRetailDataTest {
+public final class FPGrowthRetailDataTest extends MahoutTestCase {
+
   @Test
   public void testSpecificCaseFromRetailDataMinSup500() throws IOException {
     FPGrowth<String> fp = new FPGrowth<String>();

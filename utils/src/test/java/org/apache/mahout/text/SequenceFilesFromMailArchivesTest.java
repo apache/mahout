@@ -28,7 +28,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.mahout.common.IOUtils;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterator;
-import org.junit.After;
+import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +36,7 @@ import org.junit.Test;
 /**
  * Test case for the SequenceFilesFromMailArchives command-line application.
  */
-public class SequenceFilesFromMailArchivesTest {
+public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
   
   // TODO: Negative tests
 
@@ -48,11 +48,10 @@ public class SequenceFilesFromMailArchivesTest {
    * the SequenceFilesFromMailArchives application.
    */
   @Before
-  public void setupBeforeTesting() throws IOException {
-    // tread-lightly, create folder names using the timestamp
-    long now = System.currentTimeMillis();
-    inputDir = createTempDir("mail-archives-"+now+"-in");
-    outputDir = createTempDir("mail-archives-"+now+"-out");
+  public void setUp() throws Exception {
+    super.setUp();
+    inputDir = getTestTempDir("mail-archives-in");
+    outputDir = getTestTempDir("mail-archives-out");
     
     // write test mail messages to a gzipped file in a nested directory
     File subDir = new File(inputDir, "subdir");
@@ -98,54 +97,18 @@ public class SequenceFilesFromMailArchivesTest {
     Assert.assertTrue("First key/value pair not found!", iterator.hasNext());
     Pair<Text,Text> record = iterator.next();
 
-    Assert.assertEquals("TEST/subdir/mail-messages.gz/" + testVars[0][0], record.getFirst().toString());
+    File parentFile = new File(new File(new File("TEST"), "subdir"), "mail-messages.gz");
+    Assert.assertEquals(new File(parentFile, testVars[0][0]).toString(), record.getFirst().toString());
     Assert.assertEquals(testVars[0][1]+testVars[0][2], record.getSecond().toString());
 
     Assert.assertTrue("Second key/value pair not found!", iterator.hasNext());
     record = iterator.next();
-    Assert.assertEquals("TEST/subdir/mail-messages.gz/"+testVars[1][0], record.getFirst().toString());
+    Assert.assertEquals(new File(parentFile, testVars[1][0]).toString(), record.getFirst().toString());
     Assert.assertEquals(testVars[1][1]+testVars[1][2], record.getSecond().toString());
 
     Assert.assertFalse("Only two key/value pairs expected!", iterator.hasNext());
   }
 
-  @After
-  public void cleanupAfterTesting() {
-    if (inputDir != null) {
-      rmdir(inputDir);
-    }
-    if (outputDir != null) {
-      rmdir(outputDir);
-    }
-  }
-
-  // creates a temp directory for storing test input / output
-  // fails if the directory cannot be created
-  private static File createTempDir(String dirName) {
-    File tempDir = new File(System.getProperty("java.io.tmpdir"), dirName);
-    if (!tempDir.isDirectory()) {
-      tempDir.mkdirs();
-      if (!tempDir.isDirectory()) {
-        Assert.fail("Failed to create temp directory "+tempDir.getAbsolutePath());
-      }
-    }
-    return tempDir;
-  }
-
-  // recursively delete the temp directories created by this test
-  private static void rmdir(File dir) {
-    if (dir.isDirectory()) {
-      File[] files = dir.listFiles();
-      for (File file : files) {
-        if (file.isDirectory()) {
-          rmdir(file);
-        } else {
-          file.delete();
-        }
-      }
-    }
-    dir.delete();
-  }
   
   // Messages extracted and anonymized from the ASF mail archives
   private static final String[][] testVars = {

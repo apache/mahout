@@ -16,19 +16,17 @@
  */
 package org.apache.mahout.text;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.StringReader;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TermAttribute;
 
+import org.apache.mahout.utils.MahoutTestCase;
 import org.junit.Test;
 
 /**
  * Unit tests for the MailArchivesClusteringAnalyzer text analyzer.
  */
-public class MailArchivesClusteringAnalyzerTest {
+public class MailArchivesClusteringAnalyzerTest extends MahoutTestCase {
   
   @Test
   public void testAnalysis() throws Exception {
