@@ -73,7 +73,7 @@ public final class TestRandomSeedGenerator extends MahoutTestCase {
     Path output = getTestTempDirPath("random-output");
     ClusteringTestUtils.writePointsToFile(points, input, fs, conf);
     
-    RandomSeedGenerator.buildRandom(input, output, 4, new ManhattanDistanceMeasure());
+    RandomSeedGenerator.buildRandom(conf, input, output, 4, new ManhattanDistanceMeasure());
 
     int clusterCount = 0;
     Collection<Integer> set = new HashSet<Integer>();

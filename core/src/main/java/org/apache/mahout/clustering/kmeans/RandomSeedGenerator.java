@@ -53,9 +53,12 @@ public final class RandomSeedGenerator {
   private RandomSeedGenerator() {
   }
   
-  public static Path buildRandom(Path input, Path output, int k, DistanceMeasure measure) throws IOException {
+  public static Path buildRandom(Configuration conf,
+                                 Path input,
+                                 Path output,
+                                 int k,
+                                 DistanceMeasure measure) throws IOException {
     // delete the output directory
-    Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(output.toUri(), conf);
     HadoopUtil.delete(conf, output);
     Path outFile = new Path(output, "part-randomSeed");

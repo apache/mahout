@@ -68,7 +68,7 @@ public class KMeansReducer extends Reducer<Text, ClusterObservations, Text, Clus
       String path = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if (path.length() > 0) {
         Collection<Cluster> clusters = new ArrayList<Cluster>();
-        KMeansUtil.configureWithClusterInfo(new Path(path), clusters);
+        KMeansUtil.configureWithClusterInfo(conf, new Path(path), clusters);
         setClusterMap(clusters);
         if (clusterMap.isEmpty()) {
           throw new IllegalStateException("Cluster is empty!");

@@ -37,10 +37,11 @@ final class KMeansUtil {
   }
 
   /** Configure the mapper with the cluster info */
-  public static void configureWithClusterInfo(Path clusterPathStr, Collection<Cluster> clusters) throws IOException {
+  public static void configureWithClusterInfo(Configuration conf,
+                                              Path clusterPathStr,
+                                              Collection<Cluster> clusters) throws IOException {
 
     // Get the path location where the cluster Info is stored
-    Configuration conf = new Configuration();
     Path clusterPath = new Path(clusterPathStr, "*");
     Collection<Path> result = new ArrayList<Path>();
 

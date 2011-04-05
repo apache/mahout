@@ -55,7 +55,7 @@ public class KMeansMapper extends Mapper<WritableComparable<?>, VectorWritable, 
 
       String clusterPath = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if ((clusterPath != null) && (clusterPath.length() > 0)) {
-        KMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
+        KMeansUtil.configureWithClusterInfo(conf, new Path(clusterPath), clusters);
         if (clusters.isEmpty()) {
           throw new IllegalStateException("No clusters found. Check your -c path.");
         }

@@ -131,13 +131,13 @@ public final class Job extends AbstractJob {
                   int k,
                   double convergenceDelta,
                   int maxIterations)
-    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     log.info("Running random seed to get initial clusters");
     Path clusters = new Path(output, Cluster.INITIAL_CLUSTERS_DIR);
-    clusters = RandomSeedGenerator.buildRandom(directoryContainingConvertedInput, clusters, k, measure);
+    clusters = RandomSeedGenerator.buildRandom(conf, directoryContainingConvertedInput, clusters, k, measure);
     log.info("Running KMeans");
     KMeansDriver.run(conf,
                      directoryContainingConvertedInput,
@@ -185,7 +185,7 @@ public final class Job extends AbstractJob {
                   double t2,
                   double convergenceDelta,
                   int maxIterations)
-    throws IOException, InstantiationException, IllegalAccessException, InterruptedException, ClassNotFoundException {
+    throws IOException, InterruptedException, ClassNotFoundException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     log.info("Preparing Input");
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");

@@ -98,12 +98,15 @@ public class KMeansDriver extends AbstractJob {
     DistanceMeasure measure = ccl.loadClass(measureClass).asSubclass(DistanceMeasure.class).newInstance();
 
     if (hasOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)) {
-      clusters = RandomSeedGenerator.buildRandom(input, clusters, Integer
+      clusters = RandomSeedGenerator.buildRandom(getConf(), input, clusters, Integer
           .parseInt(getOption(DefaultOptionCreator.NUM_CLUSTERS_OPTION)), measure);
     }
     boolean runClustering = hasOption(DefaultOptionCreator.CLUSTERING_OPTION);
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION).equalsIgnoreCase(
         DefaultOptionCreator.SEQUENTIAL_METHOD);
+    if(getConf() == null) {
+      setConf(new Configuration());
+    }
     run(getConf(), input, clusters, output, measure, convergenceDelta, maxIterations, runClustering, runSequential);
     return 0;
   }
@@ -229,13 +232,14 @@ public class KMeansDriver extends AbstractJob {
                                    boolean runSequential)
     throws IOException, InterruptedException, ClassNotFoundException {
     if (runSequential) {
-      return buildClustersSeq(input, clustersIn, output, measure, maxIterations, delta);
+      return buildClustersSeq(conf, input, clustersIn, output, measure, maxIterations, delta);
     } else {
       return buildClustersMR(conf, input, clustersIn, output, measure, maxIterations, delta);
     }
   }
 
-  private static Path buildClustersSeq(Path input,
+  private static Path buildClustersSeq(Configuration conf,
+                                       Path input,
                                        Path clustersIn,
                                        Path output,
                                        DistanceMeasure measure,
@@ -246,7 +250,7 @@ public class KMeansDriver extends AbstractJob {
     KMeansClusterer clusterer = new KMeansClusterer(measure);
     Collection<Cluster> clusters = new ArrayList<Cluster>();
 
-    KMeansUtil.configureWithClusterInfo(clustersIn, clusters);
+    KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
     }
@@ -254,7 +258,6 @@ public class KMeansDriver extends AbstractJob {
     int iteration = 1;
     while (!converged && iteration <= maxIterations) {
       log.info("K-Means Iteration: " + iteration);
-      Configuration conf = new Configuration();
       FileSystem fs = FileSystem.get(input.toUri(), conf);
       for (VectorWritable value :
            new SequenceFileDirValueIterable<VectorWritable>(
@@ -410,22 +413,24 @@ public class KMeansDriver extends AbstractJob {
       log.info("convergence: {} Input Vectors: {}", convergenceDelta, VectorWritable.class.getName());
     }
     if (runSequential) {
-      clusterDataSeq(input, clustersIn, output, measure);
+      clusterDataSeq(conf, input, clustersIn, output, measure);
     } else {
       clusterDataMR(conf, input, clustersIn, output, measure, convergenceDelta);
     }
   }
 
-  private static void clusterDataSeq(Path input, Path clustersIn, Path output, DistanceMeasure measure)
-    throws IOException {
+  private static void clusterDataSeq(Configuration conf,
+                                     Path input,
+                                     Path clustersIn,
+                                     Path output,
+                                     DistanceMeasure measure) throws IOException {
 
     KMeansClusterer clusterer = new KMeansClusterer(measure);
     Collection<Cluster> clusters = new ArrayList<Cluster>();
-    KMeansUtil.configureWithClusterInfo(clustersIn, clusters);
+    KMeansUtil.configureWithClusterInfo(conf, clustersIn, clusters);
     if (clusters.isEmpty()) {
       throw new IllegalStateException("Clusters is empty!");
     }
-    Configuration conf = new Configuration();
     FileSystem fs = FileSystem.get(input.toUri(), conf);
     FileStatus[] status = fs.listStatus(input, PathFilters.logsCRCFilter());
     int part = 0;

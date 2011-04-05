@@ -185,7 +185,8 @@ public class SpectralKMeansDriver extends AbstractJob {
 
     // Finally, perform k-means clustering on the rows of L (or W)
     // generate random initial clusters
-    Path initialclusters = RandomSeedGenerator.buildRandom(Wt.getRowPath(),
+    Path initialclusters = RandomSeedGenerator.buildRandom(conf,
+                                                           Wt.getRowPath(),
                                                            new Path(output, Cluster.INITIAL_CLUSTERS_DIR),
                                                            clusters,
                                                            measure);

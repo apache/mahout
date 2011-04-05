@@ -43,7 +43,8 @@ public class KMeansClusterMapper extends Mapper<WritableComparable<?>,VectorWrit
   private KMeansClusterer clusterer;
 
   @Override
-  protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
+  protected void map(WritableComparable<?> key, VectorWritable point, Context context)
+    throws IOException, InterruptedException {
     clusterer.outputPointWithClusterInfo(point.get(), clusters, context);
   }
 
@@ -59,7 +60,7 @@ public class KMeansClusterMapper extends Mapper<WritableComparable<?>,VectorWrit
       
       String clusterPath = conf.get(KMeansConfigKeys.CLUSTER_PATH_KEY);
       if ((clusterPath != null) && (clusterPath.length() > 0)) {
-        KMeansUtil.configureWithClusterInfo(new Path(clusterPath), clusters);
+        KMeansUtil.configureWithClusterInfo(conf, new Path(clusterPath), clusters);
         if (clusters.isEmpty()) {
           throw new IllegalStateException("No clusters found. Check your -c path.");
         }
