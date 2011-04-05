@@ -29,9 +29,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>org.apache.mahout</groupId>
   <artifactId>mahout-utils</artifactId>
-  <version>0.5-SNAPSHOT</version>
   <name>Mahout Utilities</name>
   <description>Utilities for preparing content into formats for Mahout.</description>
 
@@ -118,34 +116,32 @@
 
   <dependencies>
 
+    <!-- own modules -->
     <dependency>
-      <groupId>org.apache.mahout</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>mahout-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.mahout</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>mahout-core</artifactId>
-      <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.mahout</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>mahout-math</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.mahout</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>mahout-math</artifactId>
-      <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    
+    <!-- 3rd party -->
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-commons-csv</artifactId>
-      <version>1.4.1</version>
     </dependency>
 
     <dependency>
@@ -157,13 +153,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.6.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jcl</artifactId>
-      <version>1.6.0</version>
     </dependency>
 
     <dependency>
