@@ -46,7 +46,7 @@ public class Cluster extends DistanceMeasureCluster {
 
   /**
    * Format the cluster for output
-   * 
+   *
    * @param cluster
    *          the Cluster
    * @return the String representation of the Cluster

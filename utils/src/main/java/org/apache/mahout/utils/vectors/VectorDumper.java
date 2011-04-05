@@ -78,9 +78,6 @@ public final class VectorDumper {
     Option dictTypeOpt = obuilder.withLongName("dictionaryType").withRequired(false).withArgument(
             abuilder.withName("dictionaryType").withMinimum(1).withMaximum(1).create()).withDescription(
             "The dictionary file type (text|sequencefile)").withShortName("dt").create();
-    Option jsonOpt = obuilder.withLongName("json").withRequired(false).withDescription(
-            "Output the Vector as JSON.  Otherwise it substitutes in the terms for vector cell entries")
-            .withShortName("j").create();
     Option csvOpt = obuilder.withLongName("csv").withRequired(false).withDescription(
             "Output the Vector as CSV.  Otherwise it substitutes in the terms for vector cell entries")
             .withShortName("c").create();
@@ -127,7 +124,6 @@ public final class VectorDumper {
             throw new OptionException(dictTypeOpt);
           }
         }
-        boolean useJSON = cmdLine.hasOption(jsonOpt);
         boolean useCSV = cmdLine.hasOption(csvOpt);
 
         boolean sizeOnly = cmdLine.hasOption(sizeOpt);
@@ -175,9 +171,7 @@ public final class VectorDumper {
               writer.write('\n');
             } else {
               String fmtStr;
-              if (useJSON){
-                fmtStr = VectorHelper.vectorToJSONString(vector, dictionary);
-              } else if (useCSV){
+              if (useCSV){
                 fmtStr = VectorHelper.vectorToCSVString(vector, namesAsComments);
               } else {
                 fmtStr = vector.asFormatString();

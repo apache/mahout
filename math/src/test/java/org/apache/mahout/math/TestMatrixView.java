@@ -44,15 +44,6 @@ public final class TestMatrixView extends MahoutTestCase {
   }
 
   @Test
-  public void testAsFormatString() {
-    String string = test.asFormatString();
-    Matrix m = AbstractMatrix.decodeMatrix(string);
-    int[] c = m.size();
-    assertEquals("row cardinality", values.length - 2, c[ROW]);
-    assertEquals("col cardinality", values[0].length - 1, c[COL]);
-  }
-
-  @Test
   public void testCardinality() {
     int[] c = test.size();
     assertEquals("row cardinality", values.length - 2, c[ROW]);
@@ -502,9 +493,7 @@ public final class TestMatrixView extends MahoutTestCase {
     colBindings.put("Bar", 1);
     colBindings.put("Baz", 2);
     test.setColumnLabelBindings(colBindings);
-    String json = test.asFormatString();
-    Matrix mm = AbstractMatrix.decodeMatrix(json);
-    assertEquals("Fee", test.get(0, 1), mm.get("Fee", "Bar"), EPSILON);
+    assertEquals("col", colBindings, test.getColumnLabelBindings());
   }
 
 }

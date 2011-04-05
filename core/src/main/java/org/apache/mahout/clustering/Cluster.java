@@ -62,23 +62,15 @@ public interface Cluster extends Model<VectorWritable>, Parametered {
    * @return an integer 
    */
   int getNumPoints();
-
+  
   /**
    * Produce a custom, human-friendly, printable representation of the Cluster.
-   * 
+   *
    * @param bindings
    *          an optional String[] containing labels used to format the primary Vector/s of this
    *          implementation.
    * @return a String
    */
   String asFormatString(String[] bindings);
-  
-  /**
-   * Produce a textual representation of the Cluster using Json format. (Label bindings are transient and not part
-   * of the Json representation)
-   * 
-   * @return a Json String
-   */
-  String asJsonString();
-  
+
 }

@@ -25,18 +25,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.clustering.JsonModelDistributionAdapter;
-import org.apache.mahout.clustering.ModelDistribution;
-import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.VectorWritable;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritable, Text, VectorWritable> {
 
@@ -70,24 +65,20 @@ public class DirichletMapper extends Mapper<WritableComparable<?>, VectorWritabl
 
   public static DirichletState getDirichletState(Configuration conf) {
     String statePath = conf.get(DirichletDriver.STATE_IN_KEY);
-    String json = conf.get(DirichletDriver.MODEL_DISTRIBUTION_KEY);
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(ModelDistribution.class, new JsonModelDistributionAdapter());
-    Gson gson = builder.create();
-    ModelDistribution<VectorWritable> modelDistribution = gson.fromJson(json,
-                                                                        AbstractVectorModelDistribution.MODEL_DISTRIBUTION_TYPE);
+    String descriptionString = conf.get(DirichletDriver.MODEL_DISTRIBUTION_KEY);
     String numClusters = conf.get(DirichletDriver.NUM_CLUSTERS_KEY);
     String alpha0 = conf.get(DirichletDriver.ALPHA_0_KEY);
 
-    return loadState(conf, statePath, modelDistribution, Double.parseDouble(alpha0), Integer.parseInt(numClusters));
+    DistributionDescription description = DistributionDescription.fromString(descriptionString);
+    return loadState(conf, statePath, description, Double.parseDouble(alpha0), Integer.parseInt(numClusters));
   }
 
   protected static DirichletState loadState(Configuration conf,
                                             String statePath,
-                                            ModelDistribution<VectorWritable> modelDistribution,
+                                            DistributionDescription description,
                                             double alpha,
                                             int k) {
-    DirichletState state = DirichletDriver.createState(modelDistribution, k, alpha);
+    DirichletState state = DirichletDriver.createState(description, k, alpha);
     Path path = new Path(statePath);
     for (Pair<Writable,DirichletCluster> record :
          new SequenceFileDirIterable<Writable,DirichletCluster>(

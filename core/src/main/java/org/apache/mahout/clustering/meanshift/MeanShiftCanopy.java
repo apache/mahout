@@ -20,19 +20,13 @@ package org.apache.mahout.clustering.meanshift;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.Type;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.mahout.clustering.kmeans.Cluster;
 import org.apache.mahout.common.distance.DistanceMeasure;
-import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.list.IntArrayList;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * This class models a canopy as a center point, the number of points that are contained within it according
@@ -40,9 +34,6 @@ import com.google.gson.reflect.TypeToken;
  * used to compute the centroid when needed.
  */
 public class MeanShiftCanopy extends Cluster {
-
-  private static final Type VECTOR_TYPE = new TypeToken<Vector>() {
-  }.getType();
 
   // TODO: this is still problematic from a scalability perspective, but how else to encode membership?
   private IntArrayList boundPoints = new IntArrayList();
@@ -143,10 +134,7 @@ public class MeanShiftCanopy extends Cluster {
 
   @Override
   public String asFormatString() {
-    GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
-    Gson gson = gBuilder.create();
-    return gson.toJson(this, MeanShiftCanopy.class);
+    return toString();
   }
 
   public void setBoundPoints(IntArrayList boundPoints) {

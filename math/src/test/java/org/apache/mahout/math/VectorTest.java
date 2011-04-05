@@ -175,11 +175,6 @@ public final class VectorTest extends MahoutTestCase {
     right.setQuick(2, 6);
     double result = left.dot(right);
     assertEquals(32.0, result, EPSILON);
-    String formattedString = left.asFormatString();
-    //System.out.println("Vec: " + formattedString);
-    Vector vec = AbstractVector.decodeVector(formattedString);
-    assertNotNull(vec);
-    assertEquals(vec, left);
   }
 
   @Test
@@ -445,8 +440,7 @@ public final class VectorTest extends MahoutTestCase {
     double cube = Math.pow(36, 1.0 / 3);
     expected = vec1.divide(cube);
 
-    assertEquals("norm: " + norm.asFormatString() + " is not equal to expected: "
-        + expected.asFormatString(), norm, expected);
+    assertEquals(norm, expected);
 
     norm = vec1.normalize(Double.POSITIVE_INFINITY);
     norm2 = vec2.normalize(Double.POSITIVE_INFINITY);
@@ -454,18 +448,15 @@ public final class VectorTest extends MahoutTestCase {
     expected.setQuick(0, 1.0 / 3);
     expected.setQuick(1, 2.0 / 3);
     expected.setQuick(2, 3.0 / 3);
-    assertEquals("norm: " + norm.asFormatString() + " is not equal to expected: "
-        + expected.asFormatString(), norm, expected);
-    assertEquals("norm: " + norm2.asFormatString() + " is not equal to expected: "
-        + expected.asFormatString(), norm2, expected);
+    assertEquals(norm, expected);
+    assertEquals(norm2, expected);
 
     norm = vec1.normalize(0);
     // The max is 3, so we divide by that.
     expected.setQuick(0, 1.0 / 3);
     expected.setQuick(1, 2.0 / 3);
     expected.setQuick(2, 3.0 / 3);
-    assertEquals("norm: " + norm.asFormatString() + " is not equal to expected: "
-        + expected.asFormatString(), norm, expected);
+    assertEquals(norm, expected);
 
     try {
       vec1.normalize(-1);
@@ -829,22 +820,6 @@ public final class VectorTest extends MahoutTestCase {
     v.setQuick(1, -1.5);
     v.setQuick(2, -5);
     v.setQuick(3, 2);
-  }
-
-  @Test
-  public void testNameSerialization()  {
-    double[] values = {1.1, 2.2, 3.3};
-    Vector test = new DenseVector(values);
-    String formatString = test.asFormatString();
-
-    Vector decode = AbstractVector.decodeVector(formatString);
-    assertEquals("test and decode are not equal", test, decode);
-
-    Vector noName = new DenseVector(values);
-    formatString = noName.asFormatString();
-
-    decode = AbstractVector.decodeVector(formatString);
-    assertEquals("noName and decode are not equal", noName, decode);
   }
 
   @Test

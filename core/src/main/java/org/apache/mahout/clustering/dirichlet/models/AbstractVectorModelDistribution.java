@@ -16,22 +16,10 @@
 
 package org.apache.mahout.clustering.dirichlet.models;
 
-import java.lang.reflect.Type;
-
-import org.apache.mahout.clustering.JsonDistanceMeasureAdapter;
-import org.apache.mahout.clustering.JsonModelDistributionAdapter;
 import org.apache.mahout.clustering.ModelDistribution;
-import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.math.VectorWritable;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 public abstract class AbstractVectorModelDistribution implements ModelDistribution<VectorWritable> {
-
-  public static final Type MODEL_DISTRIBUTION_TYPE = new TypeToken<ModelDistribution<VectorWritable>>() {
-  }.getType();
 
   // a prototype instance used for creating prior model distributions using like(). It
   // should be of the class and cardinality desired for the particular application.
@@ -42,15 +30,6 @@ public abstract class AbstractVectorModelDistribution implements ModelDistributi
 
   protected AbstractVectorModelDistribution(VectorWritable modelPrototype) {
     this.modelPrototype = modelPrototype;
-  }
-
-  @Override
-  public String asJsonString() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(ModelDistribution.class, new JsonModelDistributionAdapter());
-    builder.registerTypeAdapter(DistanceMeasure.class, new JsonDistanceMeasureAdapter());
-    Gson gson = builder.create();
-    return gson.toJson(this, MODEL_DISTRIBUTION_TYPE);
   }
 
   /**

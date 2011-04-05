@@ -18,9 +18,6 @@
 package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,12 +27,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.Model;
-import org.apache.mahout.clustering.ModelDistribution;
 import org.apache.mahout.clustering.conversion.InputDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
-import org.apache.mahout.clustering.dirichlet.DirichletMapper;
-import org.apache.mahout.clustering.dirichlet.models.AbstractVectorModelDistribution;
+import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.dirichlet.models.NormalModelDistribution;
 import org.apache.mahout.common.AbstractJob;
@@ -64,16 +59,18 @@ public final class Job extends AbstractJob {
       log.info("Running with default arguments");
       Path output = new Path("output");
       HadoopUtil.delete(new Configuration(), output);
-      ModelDistribution<VectorWritable> modelDistribution = 
-          new GaussianClusterDistribution(new VectorWritable(new RandomAccessSparseVector(60)));
-      new Job().run(new Path("testdata"), output, modelDistribution, 10, 5, 1.0, true, 0);
+      DistributionDescription description =
+          new DistributionDescription(GaussianClusterDistribution.class.getName(),
+                                      RandomAccessSparseVector.class.getName(),
+                                      null,
+                                      60);
+      new Job().run(new Path("testdata"), output, description, 10, 5, 1.0, true, 0);
     }
   }
 
   @Override
   public int run(String[] args)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException,
-           NoSuchMethodException, InvocationTargetException, InterruptedException {
+    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.maxIterationsOption().create());
@@ -115,12 +112,10 @@ public final class Job extends AbstractJob {
     boolean emitMostLikely = Boolean.parseBoolean(getOption(DefaultOptionCreator.EMIT_MOST_LIKELY_OPTION));
     double threshold = Double.parseDouble(getOption(DefaultOptionCreator.THRESHOLD_OPTION));
     double alpha0 = Double.parseDouble(getOption(DirichletDriver.ALPHA_OPTION));
-    AbstractVectorModelDistribution modelDistribution = DirichletDriver.createModelDistribution(modelFactory,
-                                                                                                modelPrototype,
-                                                                                                distanceMeasure,
-                                                                                                60);
+    DistributionDescription description =
+        new DistributionDescription(modelFactory, modelPrototype, distanceMeasure, 60);
 
-    run(input, output, modelDistribution, numModels, maxIterations, alpha0, emitMostLikely, threshold);
+    run(input, output, description, numModels, maxIterations, alpha0, emitMostLikely, threshold);
     return 0;
   }
 
@@ -131,8 +126,7 @@ public final class Job extends AbstractJob {
    *          the directory pathname for input points
    * @param output
    *          the directory pathname for output points
-   * @param modelDistribution
-   *          the ModelDistribution
+   * @param description the model distribution description
    * @param numModels
    *          the number of Models
    * @param maxIterations
@@ -142,18 +136,18 @@ public final class Job extends AbstractJob {
    */
   public void run(Path input,
                   Path output,
-                  ModelDistribution<VectorWritable> modelDistribution,
+                  DistributionDescription description,
                   int numModels,
                   int maxIterations,
                   double alpha0,
                   boolean emitMostLikely,
                   double threshold)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+    throws IOException, ClassNotFoundException, InterruptedException {
     Path directoryContainingConvertedInput = new Path(output, DIRECTORY_CONTAINING_CONVERTED_INPUT);
     InputDriver.runJob(input, directoryContainingConvertedInput, "org.apache.mahout.math.RandomAccessSparseVector");
     DirichletDriver.run(directoryContainingConvertedInput,
                         output,
-                        modelDistribution,
+                        description,
                         numModels,
                         maxIterations,
                         alpha0,
@@ -165,38 +159,6 @@ public final class Job extends AbstractJob {
     ClusterDumper clusterDumper =
         new ClusterDumper(new Path(output, "clusters-" + maxIterations), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(null);
-  }
-
-  /**
-   * Prints out all of the clusters for each iteration
-   * 
-   * @param output
-   *          the String output directory
-   * @param modelDistribution
-   *          the ModelDistribution
-   * @param numIterations
-   *          the int number of Iterations
-   * @param numModels
-   *          the int number of models
-   * @param alpha0
-   *          the double alpha_0 value
-   */
-  public static void printResults(String output,
-                                  ModelDistribution<VectorWritable> modelDistribution,
-                                  int numIterations,
-                                  int numModels,
-                                  double alpha0) {
-    Collection<List<DirichletCluster>> clusters = new ArrayList<List<DirichletCluster>>();
-    Configuration conf = new Configuration();
-    conf.set(DirichletDriver.MODEL_DISTRIBUTION_KEY, modelDistribution.asJsonString());
-    conf.set(DirichletDriver.NUM_CLUSTERS_KEY, Integer.toString(numModels));
-    conf.set(DirichletDriver.ALPHA_0_KEY, Double.toString(alpha0));
-    for (int i = 0; i < numIterations; i++) {
-      conf.set(DirichletDriver.STATE_IN_KEY, output + "/clusters-" + i);
-      clusters.add(DirichletMapper.getDirichletState(conf).getClusters());
-    }
-    printClusters(clusters, 0);
-
   }
 
   /**

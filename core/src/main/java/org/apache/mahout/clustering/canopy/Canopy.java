@@ -46,7 +46,7 @@ public class Canopy extends DistanceMeasureCluster {
   public String asFormatString() {
     return "C" + this.getId() + ": " + this.computeCentroid().asFormatString();
   }
-  
+
   @Override
   public String toString() {
     return getIdentifier() + ": " + getCenter().asFormatString();

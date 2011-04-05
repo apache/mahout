@@ -28,14 +28,5 @@ public class NaiveBayesModelTest extends NaiveBayesTestBase {
     // check whether the model is valid
     NaiveBayesModel.validate(model);
   }
-  
-  @Test
-  public void testSerialization() {
-    String serialized = getModel().toJson();
-    NaiveBayesModel model2 = NaiveBayesModel.fromJson(serialized);
-    String serialized2 = model2.toJson();
-    // since there are no equals methods for the underlying objects, we
-    // check identity via the serialization string
-    assertEquals(serialized, serialized2);
-  }  
+
 }

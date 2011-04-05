@@ -113,12 +113,6 @@
       <artifactId>mahout-collections</artifactId>
     </dependency>
 
-    <!--  Gson: Java to Json conversion -->
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -151,16 +145,6 @@
       </snapshots>
       <releases>
         <enabled>false</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>gson</id>
-      <url>http://google-gson.googlecode.com/svn/mavenrepo</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
       </releases>
     </repository>
   </repositories>

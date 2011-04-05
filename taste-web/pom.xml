@@ -179,10 +179,6 @@
           <groupId>org.apache.mahout.commons</groupId>
           <artifactId>commons-cli</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
 

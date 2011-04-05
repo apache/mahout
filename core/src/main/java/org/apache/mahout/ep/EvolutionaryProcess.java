@@ -66,7 +66,7 @@ import java.util.concurrent.Future;
  */
 public class EvolutionaryProcess<T extends Payload<U>, U> implements Writable {
   // used to execute operations on the population in thread parallel.
-  private transient ExecutorService pool;
+  private ExecutorService pool;
 
   // threadCount is serialized so that we can reconstruct the thread pool
   private int threadCount;

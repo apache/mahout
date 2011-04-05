@@ -20,16 +20,9 @@ package org.apache.mahout.math;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides a very flexible matrix that is based on a simple list of vectors.
@@ -285,23 +278,4 @@ public class VectorList extends AbstractMatrix {
     }
   }
 
-  protected static class JsonVectorListAdapter implements JsonDeserializer<VectorList> {
-    private final Type collectionType = new TypeToken<List<Vector>>(){}.getType();
-    private final Type labelType = new TypeToken<Map<String, Integer>>(){}.getType();
-
-    @Override
-    public VectorList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-      JsonObject jo = json.getAsJsonObject();
-      VectorList r = new VectorList(jo.get("columns").getAsInt());
-      r.data = context.deserialize(jo.get("data"), collectionType);
-      if (jo.get("columnLabelBindings") != null) {
-        r.columnLabelBindings = context.deserialize(jo.get("columnLabelBindings"), labelType);
-      }
-      if (jo.get("rowLabelBindings") != null) {
-        r.rowLabelBindings = context.deserialize(jo.get("rowLabelBindings"), labelType);
-      }
-
-      return r;
-    }
-  }
 }

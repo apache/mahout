@@ -20,7 +20,6 @@ package org.apache.mahout.clustering;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,21 +27,13 @@ import java.util.Locale;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.common.parameters.Parameter;
-import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.function.SquareRootFunction;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 public abstract class AbstractCluster implements Cluster {
-
-  private static final Type VECTOR_TYPE = new TypeToken<Vector>() {
-  }.getType();
 
   // cluster persistent state
   private int id;
@@ -114,11 +105,11 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   // the observation statistics, initialized by the first observation
-  private transient double s0;
+  private double s0;
 
-  private transient Vector s1;
+  private Vector s1;
 
-  private transient Vector s2;
+  private Vector s2;
 
   /**
    * @return the s0
@@ -241,14 +232,6 @@ public abstract class AbstractCluster implements Cluster {
   public abstract String getIdentifier();
 
   @Override
-  public String asJsonString() {
-    GsonBuilder gBuilder = new GsonBuilder();
-    gBuilder.registerTypeAdapter(VECTOR_TYPE, new JsonVectorAdapter());
-    Gson gson = gBuilder.create();
-    return gson.toJson(this, this.getClass());
-  }
-
-  @Override
   public Vector getCenter() {
     return center;
   }
@@ -274,11 +257,7 @@ public abstract class AbstractCluster implements Cluster {
 
   /**
    * Return a human-readable formatted string representation of the vector, not intended to be complete nor
-   * usable as an input/output representation such as Json
-   * 
-   * @param v
-   *          a Vector
-   * @return a String
+   * usable as an input/output representation
    */
   public static String formatVector(Vector v, String[] bindings) {
     StringBuilder buf = new StringBuilder();

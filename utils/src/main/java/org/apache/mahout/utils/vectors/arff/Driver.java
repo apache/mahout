@@ -88,7 +88,7 @@ public final class Driver {
     Option outWriterOpt = obuilder.withLongName("outputWriter").withRequired(false).withArgument(
       abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).withDescription(
       "The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or"
-          + "file (Writes to a File using JSON format)").withShortName("e").create();
+          + "file (Writes to a File)").withShortName("e").create();
     
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();

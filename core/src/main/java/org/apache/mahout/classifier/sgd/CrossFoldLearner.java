@@ -57,7 +57,6 @@ public class CrossFoldLearner extends AbstractVectorClassifier implements Online
 
   private int windowSize = Integer.MAX_VALUE;
 
-  // pretty much just for GSON
   public CrossFoldLearner() {
   }
 

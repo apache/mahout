@@ -57,7 +57,6 @@ public final class ClusterDumper extends AbstractJob {
   public static final String DICTIONARY_TYPE_OPTION = "dictionaryType";
   public static final String DICTIONARY_OPTION = "dictionary";
   public static final String POINTS_DIR_OPTION = "pointsDir";
-  public static final String JSON_OPTION = "json";
   public static final String NUM_WORDS_OPTION = "numWords";
   public static final String SUBSTRING_OPTION = "substring";
   public static final String SEQ_FILE_DIR_OPTION = "seqFileDir";
@@ -72,7 +71,6 @@ public final class ClusterDumper extends AbstractJob {
   private int subString = Integer.MAX_VALUE;
   private int numTopFeatures = 10;
   private Map<Integer, List<WeightedVectorWritable>> clusterIdToPoints;
-  private boolean useJSON;
 
   public ClusterDumper(Path seqFileDir, Path pointsDir) {
     this.seqFileDir = seqFileDir;
@@ -94,8 +92,6 @@ public final class ClusterDumper extends AbstractJob {
     addOption(OUTPUT_OPTION, "o", "Optional output directory. Default is to output to the console.");
     addOption(SUBSTRING_OPTION, "b", "The number of chars of the asFormatString() to print");
     addOption(NUM_WORDS_OPTION, "n", "The number of top terms to print");
-    addOption(JSON_OPTION, "j",
-        "Output the centroid as JSON.  Otherwise it substitues in the terms for vector cell entries");
     addOption(POINTS_DIR_OPTION, "p",
         "The directory containing points sequence files mapping input vectors to their cluster.  "
             + "If specified, then the program will output the points associated with a cluster");
@@ -115,9 +111,6 @@ public final class ClusterDumper extends AbstractJob {
       if (sub >= 0) {
         subString = sub;
       }
-    }
-    if (hasOption(JSON_OPTION)) {
-      useJSON = true;
     }
     termDictionary = getOption(DICTIONARY_OPTION);
     dictionaryFormat = getOption(DICTIONARY_TYPE_OPTION);
@@ -151,7 +144,7 @@ public final class ClusterDumper extends AbstractJob {
     try {
       for (Cluster value :
            new SequenceFileDirValueIterable<Cluster>(new Path(seqFileDir, "part-*"), PathType.GLOB, conf)) {
-        String fmtStr = useJSON ? value.asJsonString() : value.asFormatString(dictionary);
+        String fmtStr = value.asFormatString(dictionary);
         if (subString > 0 && fmtStr.length() > subString) {
           writer.write(':');
           writer.write(fmtStr, 0, Math.min(subString, fmtStr.length()));

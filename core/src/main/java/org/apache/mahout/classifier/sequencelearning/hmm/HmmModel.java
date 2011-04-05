@@ -17,7 +17,6 @@
 
 package org.apache.mahout.classifier.sequencelearning.hmm;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Random;
 
@@ -26,34 +25,13 @@ import org.apache.commons.collections.bidimap.TreeBidiMap;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.JsonMatrixAdapter;
-import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Main class defining a Hidden Markov Model
  */
-public class HmmModel implements JsonDeserializer<HmmModel>,
-    JsonSerializer<HmmModel>, Cloneable {
-
-  /**
-   * No-args constructed needed for json de-serialization
-   */
-  private HmmModel() {
-    // do nothing
-  }
+public class HmmModel implements Cloneable {
 
   /**
    * Get a copy of this model
@@ -411,96 +389,4 @@ public class HmmModel implements JsonDeserializer<HmmModel>,
     return (tmp == null) ? -1 : tmp;
   }
 
-  /**
-   * Encode this HMMmodel as a JSON string
-   *
-   * @return String containing the JSON of this model
-   */
-  public String toJson() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(HmmModel.class, this);
-    Gson gson = builder.create();
-    return gson.toJson(this);
-  }
-
-  /**
-   * Decode this HmmModel from a JSON string
-   *
-   * @param json String containing JSON representation of this model
-   * @return Initialized model
-   */
-  public static HmmModel fromJson(String json) {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(HmmModel.class, new HmmModel());
-    Gson gson = builder.create();
-    return gson.fromJson(json, HmmModel.class);
-  }
-
-  // CODE USED FOR SERIALIZATION
-
-  private static final String MODEL = "HMMModel";
-  private static final String OUTNAMES = "HMMOutNames";
-  private static final String HIDDENNAMES = "HmmHiddenNames";
-
-  @Override
-  public HmmModel deserialize(JsonElement json, Type type,
-                              JsonDeserializationContext context) {
-    // register the builders for matrix / vector
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    // now decode the original model
-    JsonObject obj = json.getAsJsonObject();
-    String modelString = obj.get(MODEL).getAsString();
-    HmmModel model = gson.fromJson(modelString, HmmModel.class);
-    // now decode the names
-    JsonElement names = obj.get(HIDDENNAMES);
-    if (names != null) {
-      Map<String, Integer> tmpMap = gson.fromJson(names.getAsString(),
-          new TypeToken<Map<String, Integer>>() {
-          } .getType());
-      model.registerHiddenStateNames(tmpMap);
-    }
-    names = obj.get(OUTNAMES);
-    if (names != null) {
-      Map<String, Integer> tmpMap = gson.fromJson(names.getAsString(),
-          new TypeToken<Map<String, Integer>>() {
-          } .getType());
-      model.registerOutputStateNames(tmpMap);
-    }
-    // return the model
-    return model;
-  }
-
-  @Override
-  public JsonElement serialize(HmmModel model, Type arg1,
-                               JsonSerializationContext arg2) {
-    // we need to make sure that we serialize the bidimaps separately, since
-    // GSON is unable to do this naively
-    BidiMap hiddenNames = model.hiddenStateNames;
-    model.hiddenStateNames = null;
-    BidiMap outNames = model.outputStateNames;
-    model.outputStateNames = null;
-    // now register the builders for matrix / vector
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    // create a model
-    JsonObject json = new JsonObject();
-    // first, we add the model
-    json.add(MODEL, new JsonPrimitive(gson.toJson(model)));
-    // now, we add the state names
-    if (outNames != null) {
-      json.add(OUTNAMES, new JsonPrimitive(gson.toJson(outNames)));
-    }
-    if (hiddenNames != null) {
-      json.add(HIDDENNAMES, new JsonPrimitive(gson.toJson(hiddenNames)));
-    }
-    // return the model to its original state :)
-    model.hiddenStateNames = hiddenNames;
-    model.outputStateNames = outNames;
-    return json;
-  }
 }

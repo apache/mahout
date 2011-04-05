@@ -31,13 +31,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +75,7 @@ public class TrainLogisticTest extends MahoutTestCase {
     verifyModel(lmp, csv, data, model, expectedValues);
 
     // test saved model
-    Reader in = new InputStreamReader(new FileInputStream(new File(outputFile)), Charset.forName("UTF-8"));
+    InputStream in = new FileInputStream(new File(outputFile));
     LogisticModelParameters lmpOut = LogisticModelParameters.loadFrom(in);
     in.close();
     CsvRecordFactory csvOut = lmpOut.getCsvRecordFactory();

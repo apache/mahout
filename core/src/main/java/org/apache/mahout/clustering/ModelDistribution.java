@@ -17,8 +17,6 @@
 
 package org.apache.mahout.clustering;
 
-
-
 /** A model distribution allows us to sample a model from its prior distribution. */
 public interface ModelDistribution<O> {
   
@@ -39,11 +37,5 @@ public interface ModelDistribution<O> {
    * @return a Model<Observation>[] representing what is known apriori
    */
   Model<O>[] sampleFromPosterior(Model<O>[] posterior);
-  
-  /**
-   * Return a JSON string representing the receiver. Needed to pass persistent state.
-   * @return a String
-   */
-  String asJsonString();
   
 }

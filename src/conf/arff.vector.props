@@ -5,5 +5,5 @@
 
 # The following parameters all have default values if not specified
 #m|max = <Max number of vectors to output. Defaults to Long.MAX_VALUE>
-#e|outputWriter <Defaults to 'seq' for SequenceFileVectorWriter or 'file' for JSON output>
+#e|outputWriter <Defaults to 'seq' for SequenceFileVectorWriter>
 #l|delimiter <Delimiter for outputing the dictionary. Defaults to '\t'>

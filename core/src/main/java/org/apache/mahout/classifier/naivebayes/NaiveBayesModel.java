@@ -17,8 +17,6 @@
 
 package org.apache.mahout.classifier.naivebayes;
 
-import java.lang.reflect.Type;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -26,28 +24,18 @@ import org.apache.hadoop.io.Text;
 import org.apache.mahout.classifier.naivebayes.trainer.NaiveBayesTrainer;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
-import org.apache.mahout.math.JsonMatrixAdapter;
-import org.apache.mahout.math.JsonVectorAdapter;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.SparseMatrix;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-
 /**
  * NaiveBayesModel holds the weight Matrix, the feature and label sums and the weight normalizer vectors.
  */
-public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonSerializer<NaiveBayesModel> {
- 
+public class NaiveBayesModel {
+
+  private static final String MODEL = "NaiveBayesModel";
+
   private Vector labelSum;
   private Vector perlabelThetaNormalizer;
   private Vector featureSum;
@@ -189,66 +177,6 @@ public class NaiveBayesModel implements JsonDeserializer<NaiveBayesModel>, JsonS
     }
 
     return model;
-  }
-  
-  /**
-   * Encode this NaiveBayesModel as a JSON string
-   *
-   * @return String containing the JSON of this model
-   */
-  public String toJson() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(NaiveBayesModel.class, this);
-    Gson gson = builder.create();
-    return gson.toJson(this);
-  }
-
-  /**
-   * Decode this NaiveBayesModel from a JSON string
-   *
-   * @param json String containing JSON representation of this model
-   * @return Initialized model
-   */
-  public static NaiveBayesModel fromJson(String json) {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(NaiveBayesModel.class, new NaiveBayesModel());
-    Gson gson = builder.create();
-    return gson.fromJson(json, NaiveBayesModel.class);
-  }
-   
-  private static final String MODEL = "NaiveBayesModel";
-
-  @Override
-  public JsonElement serialize(NaiveBayesModel model,
-                               Type type,
-                               JsonSerializationContext context) {
-    // now register the builders for matrix / vector
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    // create a model
-    JsonObject json = new JsonObject();
-    // first, we add the model
-    json.add(MODEL, new JsonPrimitive(gson.toJson(model)));
-    return json;
-  }
-
-  @Override
-  public NaiveBayesModel deserialize(JsonElement json,
-                                     Type type,
-                                     JsonDeserializationContext context) {
-    // register the builders for matrix / vector
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    // now decode the original model
-    JsonObject obj = json.getAsJsonObject();
-    String modelString = obj.get(MODEL).getAsString();
-
-    // return the model
-    return gson.fromJson(modelString, NaiveBayesModel.class);
   }
   
   public static void validate(NaiveBayesModel model) {

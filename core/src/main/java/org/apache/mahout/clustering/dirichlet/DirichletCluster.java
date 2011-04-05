@@ -19,7 +19,6 @@ package org.apache.mahout.clustering.dirichlet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -30,13 +29,7 @@ import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 public class DirichletCluster implements Cluster {
-
-  private static final Type CLUSTER_TYPE = new TypeToken<DirichletCluster>() {}.getType();
 
   private Cluster model; // the model for this iteration
 
@@ -123,14 +116,6 @@ public class DirichletCluster implements Cluster {
   @Override
   public String asFormatString(String[] bindings) {
     return "C-" + model.getId() + ": " + model.asFormatString(bindings);
-  }
-
-  @Override
-  public String asJsonString() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Cluster.class, new JsonClusterModelAdapter());
-    Gson gson = builder.create();
-    return gson.toJson(this, CLUSTER_TYPE);
   }
 
   @Override

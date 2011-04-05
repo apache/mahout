@@ -29,14 +29,4 @@ public class HMMModelTest extends HMMTestBase {
     HmmUtils.validate(model);
   }
 
-  @Test
-  public void testSerialization() {
-    String serialized = getModel().toJson();
-    HmmModel model2 = HmmModel.fromJson(serialized);
-    String serialized2 = model2.toJson();
-    // since there are no equals methods for the underlying objects, we
-    // check identity via the serialization string
-    assertEquals(serialized, serialized2);
-  }
-
 }

@@ -19,29 +19,21 @@ package org.apache.mahout.clustering.dirichlet.models;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.mahout.clustering.AbstractCluster;
 import org.apache.mahout.clustering.Cluster;
-import org.apache.mahout.clustering.JsonModelAdapter;
-import org.apache.mahout.clustering.Model;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.parameters.Parameter;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 public class L1Model implements Cluster {
 
   private static final DistanceMeasure MEASURE = new ManhattanDistanceMeasure();
-  private static final Type MODEL_TYPE = new TypeToken<Model<Vector>>() {}.getType();
 
   private int id;
 
@@ -132,14 +124,6 @@ public class L1Model implements Cluster {
     }
     buf.append('}');
     return buf.toString();
-  }
-
-  @Override
-  public String asJsonString() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Model.class, new JsonModelAdapter());
-    Gson gson = builder.create();
-    return gson.toJson(this, MODEL_TYPE);
   }
 
   @Override

@@ -19,27 +19,19 @@ package org.apache.mahout.classifier.sgd;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.InstanceCreator;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.Matrix;
+import org.apache.hadoop.io.Writable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Writer;
-import java.lang.reflect.Type;
-import java.nio.charset.Charset;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +41,7 @@ import java.util.Map;
  * This encapsulation allows us to coherently save and restore a model from a file.  This also
  * allows us to keep command line arguments that affect learning in a coherent way.
  */
-public class LogisticModelParameters {
+public class LogisticModelParameters implements Writable {
   private String targetVariable;
   private Map<String, String> typeMap;
   private int numFeatures;
@@ -58,7 +50,7 @@ public class LogisticModelParameters {
   private List<String> targetCategories;
   private double lambda;
   private double learningRate;
-  private transient CsvRecordFactory csv;
+  private CsvRecordFactory csv;
   private OnlineLogisticRegression lr;
 
   /**
@@ -96,61 +88,84 @@ public class LogisticModelParameters {
     return lr;
   }
 
-  public static void saveModel(Writer out,
-                               OnlineLogisticRegression model,
-                               List<String> targetCategories) throws IOException {
-    LogisticModelParameters x = new LogisticModelParameters();
-    x.setTargetCategories(targetCategories);
-    x.setLambda(model.getLambda());
-    x.setLearningRate(model.currentLearningRate());
-    x.setNumFeatures(model.numFeatures());
-    x.setUseBias(true);
-    x.setTargetCategories(targetCategories);
-    x.saveTo(out);
-  }
-
   /**
-   * Saves a model in JSON format.  This includes the current state of the logistic regression
-   * trainer and the dictionary for the target categories.
-   *
-   * @param out Where to write the model.
-   * @throws IOException If we can't write the model.
+   * Saves a model to an output stream.
    */
-  public void saveTo(Writer out) throws IOException {
+  public void saveTo(OutputStream out) throws IOException {
     if (lr != null) {
       lr.close();
     }
     targetCategories = csv.getTargetCategories();
-    Gson gson = ModelSerializer.gson();
-
-    String savedForm = gson.toJson(this);
-    out.write(savedForm);
+    write(new DataOutputStream(out));
   }
 
   /**
-   * Reads a model in JSON format.
-   *
-   * @param in Where to read the model from.
-   * @return The LogisticModelParameters object that we read.
+   * Reads a model from a stream.
    */
-  public static LogisticModelParameters loadFrom(Reader in) {
-    return ModelSerializer.gson().fromJson(in, LogisticModelParameters.class);
+  public static LogisticModelParameters loadFrom(InputStream in) throws IOException {
+    LogisticModelParameters result = new LogisticModelParameters();
+    result.readFields(new DataInputStream(in));
+    return result;
   }
 
   /**
-   * Reads a model in JSON format from a File.
-   *
-   * @param in Where to read the model from.
-   * @return The LogisticModelParameters object that we read.
+   * Reads a model from a file.
    * @throws IOException If there is an error opening or closing the file.
    */
   public static LogisticModelParameters loadFrom(File in) throws IOException {
-    Reader input = new InputStreamReader(new FileInputStream(in), Charset.forName("UTF-8"));
+    InputStream input = new FileInputStream(in);
     try {
       return loadFrom(input);
     } finally {
       input.close();
     }
+  }
+
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    out.writeUTF(targetVariable);
+    out.writeInt(typeMap.size());
+    for (Map.Entry<String,String> entry : typeMap.entrySet()) {
+      out.writeUTF(entry.getKey());
+      out.writeUTF(entry.getValue());
+    }
+    out.writeInt(numFeatures);
+    out.writeBoolean(useBias);
+    out.writeInt(maxTargetCategories);
+    out.writeInt(targetCategories.size());
+    for (String category : targetCategories) {
+      out.writeUTF(category);
+    }
+    out.writeDouble(lambda);
+    out.writeDouble(learningRate);
+    // skip csv
+    lr.write(out);
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    targetVariable = in.readUTF();
+    int typeMapSize = in.readInt();
+    typeMap = new HashMap<String,String>(typeMapSize);
+    for (int i = 0; i < typeMapSize; i++) {
+      String key = in.readUTF();
+      String value = in.readUTF();
+      typeMap.put(key, value);
+    }
+    numFeatures = in.readInt();
+    useBias = in.readBoolean();
+    maxTargetCategories = in.readInt();
+    int targetCategoriesSize = in.readInt();
+    targetCategories = new ArrayList<String>(targetCategoriesSize);
+    for (int i = 0; i < targetCategoriesSize; i++) {
+      targetCategories.add(in.readUTF());
+    }
+    lambda = in.readDouble();
+    learningRate = in.readDouble();
+    csv = null;
+    lr = new OnlineLogisticRegression();
+    lr.readFields(in);
   }
 
   /**
@@ -239,50 +254,5 @@ public class LogisticModelParameters {
 
   public void setLearningRate(double learningRate) {
     this.learningRate = learningRate;
-  }
-
-  /**
-   * Tells GSON how to (de)serialize a Mahout matrix.  We assume on deserialization that
-   * the matrix is dense.
-   */
-  public static class MatrixTypeAdapter
-    implements JsonDeserializer<Matrix>, JsonSerializer<Matrix>, InstanceCreator<Matrix> {
-    @Override
-    public JsonElement serialize(Matrix m, Type type, JsonSerializationContext jsonSerializationContext) {
-      JsonObject r = new JsonObject();
-      r.add("rows", new JsonPrimitive(m.numRows()));
-      r.add("cols", new JsonPrimitive(m.numCols()));
-      JsonArray v = new JsonArray();
-      for (int row = 0; row < m.numRows(); row++) {
-        JsonArray rowData = new JsonArray();
-        for (int col = 0; col < m.numCols(); col++) {
-          rowData.add(new JsonPrimitive(m.get(row, col)));
-        }
-        v.add(rowData);
-      }
-      r.add("data", v);
-      return r;
-    }
-
-    @Override
-    public Matrix deserialize(JsonElement x, Type type, JsonDeserializationContext jsonDeserializationContext) {
-      JsonObject data = x.getAsJsonObject();
-      Matrix r = new DenseMatrix(data.get("rows").getAsInt(), data.get("cols").getAsInt());
-      int i = 0;
-      for (JsonElement row : data.get("data").getAsJsonArray()) {
-        int j = 0;
-        for (JsonElement element : row.getAsJsonArray()) {
-          r.set(i, j, element.getAsDouble());
-          j++;
-        }
-        i++;
-      }
-      return r;
-    }
-
-    @Override
-    public Matrix createInstance(Type type) {
-      return new DenseMatrix();
-    }
   }
 }

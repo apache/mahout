@@ -18,8 +18,6 @@
 package org.apache.mahout.math;
 
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
@@ -202,21 +200,9 @@ public abstract class AbstractMatrix implements Matrix {
     return size()[COL];
   }
 
-  public static Matrix decodeMatrix(String formatString) {
-    return gson().fromJson(formatString, Matrix.class);
-  }
-
   @Override
   public String asFormatString() {
-    return gson().toJson(this, Matrix.class);
-  }
-
-  static Gson gson() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(VectorList.class, new VectorList.JsonVectorListAdapter());
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    builder.registerTypeAdapter(Matrix.class, new JsonMatrixAdapter());
-    return builder.create();
+    return toString();
   }
 
   @Override

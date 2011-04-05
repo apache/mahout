@@ -442,8 +442,6 @@ public class AdaptiveLogisticRegression implements OnlineLearner, Writable {
     private int actual;
     private Vector instance;
 
-    // for GSON
-
     private TrainingExample() {
     }
 

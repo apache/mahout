@@ -37,9 +37,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
@@ -105,7 +104,7 @@ public final class TrainLogistic {
         in.close();
       }
 
-      Writer modelOutput = new OutputStreamWriter(new FileOutputStream(outputFile), Charset.forName("UTF-8"));
+      OutputStream modelOutput = new FileOutputStream(outputFile);
       try {
         lmp.saveTo(modelOutput);
       } finally {

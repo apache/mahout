@@ -34,13 +34,6 @@ public final class TestVectorView extends MahoutTestCase {
   private final Vector test = new VectorView(new DenseVector(values), OFFSET, CARDINALITY);
 
   @Test
-  public void testAsFormatString() {
-    String formatString = test.asFormatString();
-    Vector v = AbstractVector.decodeVector(formatString);
-    assertEquals("size", test.size(), v.size());
-  }
-
-  @Test
   public void testCardinality() {
     assertEquals("size", 3, test.size());
   }

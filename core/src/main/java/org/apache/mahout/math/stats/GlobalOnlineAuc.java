@@ -55,7 +55,7 @@ public class GlobalOnlineAuc implements OnlineAuc {
 
   // FIFO has distinctly the best properties as a policy.  See OnlineAucTest for details
   private ReplacementPolicy policy = ReplacementPolicy.FIFO;
-  private final transient Random random = RandomUtils.getRandom();
+  private final Random random = RandomUtils.getRandom();
   private Matrix scores;
   private Vector averages;
   private Vector samples;

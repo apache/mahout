@@ -22,9 +22,6 @@ import java.util.Iterator;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.DoubleFunction;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 /** Implementations of generic capabilities like sum of elements and dot products */
 public abstract class AbstractVector implements Vector {
 
@@ -540,20 +537,6 @@ public abstract class AbstractVector implements Vector {
     return result;
   }
 
-  /**
-   * Decodes a point from its string representation.
-   *
-   * @param formattedString a formatted String produced by asFormatString. Note the payload remainder: it is optional,
-   *                        but can be present.
-   * @return the n-dimensional point
-   */
-  public static Vector decodeVector(String formattedString) {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    return gson.fromJson(formattedString, Vector.class);
-  }
-
   @Override
   public final int size() {
     return size;  
@@ -561,10 +544,7 @@ public abstract class AbstractVector implements Vector {
 
   @Override
   public String asFormatString() {
-    GsonBuilder builder = new GsonBuilder();
-    builder.registerTypeAdapter(Vector.class, new JsonVectorAdapter());
-    Gson gson = builder.create();
-    return gson.toJson(this, Vector.class);
+    return toString();
   }
 
   @Override

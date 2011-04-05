@@ -35,6 +35,7 @@ import org.apache.mahout.clustering.canopy.Canopy;
 import org.apache.mahout.clustering.canopy.CanopyDriver;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.UncommonDistributions;
+import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
 import org.apache.mahout.clustering.evaluation.RepresentativePointsDriver;
 import org.apache.mahout.clustering.fuzzykmeans.FuzzyKMeansDriver;
@@ -337,8 +338,12 @@ public final class TestCDbwEvaluator extends MahoutTestCase {
   @Test
   public void testDirichlet() throws Exception {
     ClusteringTestUtils.writePointsToFile(sampleData, getTestTempFilePath("testdata/file1"), fs, conf);
-    ModelDistribution<VectorWritable> modelDistribution = new GaussianClusterDistribution(new VectorWritable(new DenseVector(2)));
-    DirichletDriver.run(testdata, output, modelDistribution, 15, 5, 1.0, true, true, 0, true);
+    DistributionDescription description =
+        new DistributionDescription(GaussianClusterDistribution.class.getName(),
+                                    DenseVector.class.getName(),
+                                    null,
+                                    2);
+    DirichletDriver.run(testdata, output, description, 15, 5, 1.0, true, true, 0, true);
     int numIterations = 10;
     Path clustersIn = new Path(output, "clusters-0");
     RepresentativePointsDriver.run(conf,

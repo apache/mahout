@@ -47,13 +47,6 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   }
 
   @Test
-  public void testAsFormatString() {
-    String formatString = test.asFormatString();
-    Vector vec = AbstractVector.decodeVector(formatString);
-    assertEquals(vec, test);
-  }
-
-  @Test
   public void testCardinality() {
     assertEquals("size", 7, test.size());
   }
@@ -192,14 +185,6 @@ public abstract class AbstractTestVector extends MahoutTestCase {
   @Test(expected = IndexException.class)
   public void testViewPartCardinality() {
     test.viewPart(1, 8);
-  }
-
-  @Test
-  public void testDecodeVector() {
-    Vector val = AbstractVector.decodeVector(test.asFormatString());
-    for (int i = 0; i < test.size(); i++) {
-      assertEquals("get [" + i + ']', test.get(i), val.get(i), EPSILON);
-    }
   }
 
   @Test
