@@ -18,6 +18,7 @@
 package org.apache.mahout.math.hadoop.decomposer;
 
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 
 import java.util.regex.Pattern;
 
@@ -31,8 +32,8 @@ public class EigenVector extends DenseVector {
 
   private final String name;
 
-  public EigenVector(DenseVector v, double eigenValue, double cosAngleError, int order) {
-    super(v, false);
+  public EigenVector(Vector v, double eigenValue, double cosAngleError, int order) {
+    super(v instanceof DenseVector ? (DenseVector) v : new DenseVector(v), false);
     name = "e|" + order + "| = |" + eigenValue + "|, err = " + cosAngleError;
   }
 

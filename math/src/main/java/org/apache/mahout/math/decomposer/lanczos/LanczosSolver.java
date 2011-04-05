@@ -18,25 +18,20 @@
 package org.apache.mahout.math.decomposer.lanczos;
 
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.mahout.math.DenseVector;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.MatrixSlice;
-import org.apache.mahout.math.SparseRowMatrix;
-import org.apache.mahout.math.VectorIterable;
+import org.apache.mahout.math.*;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 import org.apache.mahout.math.matrix.linalg.EigenvalueDecomposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Simple implementation of the <a href="http://en.wikipedia.org/wiki/Lanczos_algorithm">Lanczos algorithm</a> for
@@ -152,7 +147,7 @@ public class LanczosSolver {
     endTime(TimingSection.TRIDIAG_DECOMP);
     startTime(TimingSection.FINAL_EIGEN_CREATE);
 
-    for (int i = 0; i < basis.numRows() - 1; i++) {
+    for (int i = 0; i < basis.numRows(); i++) {
       Vector realEigen = new DenseVector(corpus.numCols());
       // the eigenvectors live as columns of V, in reverse order.  Weird but true.
       DoubleMatrix1D ejCol = eigenVects.viewColumn(basis.numRows() - i - 1);
@@ -162,8 +157,9 @@ public class LanczosSolver {
       }
       realEigen = realEigen.normalize();
       eigenVectors.assignRow(i, realEigen);
-      log.info("Eigenvector {} found with eigenvalue {}", i, eigenVals.get(i));
-      eigenValues.add(eigenVals.get(i));
+      double e = Math.sqrt(eigenVals.get(i) * scaleFactor);
+      log.info("Eigenvector {} found with eigenvalue {}", i, e);
+      eigenValues.add(e);
     }
     log.info("LanczosSolver finished.");
     endTime(TimingSection.FINAL_EIGEN_CREATE);

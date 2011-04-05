@@ -17,12 +17,8 @@
 
 package org.apache.mahout.math.decomposer;
 
-import org.apache.mahout.math.MahoutTestCase;
-import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.SequentialAccessSparseVector;
-import org.apache.mahout.math.SparseRowMatrix;
-import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorIterable;
+import org.apache.mahout.math.*;
+import org.apache.mahout.math.function.Functions;
 
 import java.util.Random;
 
@@ -67,7 +63,7 @@ public abstract class SolverTest extends MahoutTestCase {
       Vector afterMultiply = isSymmetric ? corpus.times(e) : corpus.timesSquared(e);
       double dot = afterMultiply.dot(e);
       double afterNorm = afterMultiply.getLengthSquared();
-      double error = 1 - dot / Math.sqrt(afterNorm * e.getLengthSquared());
+      double error = 1 - Math.abs(dot / Math.sqrt(afterNorm * e.getLengthSquared()));
       assertTrue("Error margin: {" + error + " too high! (for eigen " + i + ')', Math.abs(error) < errorMargin);
     }
   }
@@ -104,5 +100,32 @@ public abstract class SolverTest extends MahoutTestCase {
       //n += m.getRow(c).getLengthSquared();
     }
     return m;
+  }
+
+  public static Matrix randomHierarchicalMatrix(int numRows, int numCols, boolean symmetric) {
+    DenseMatrix matrix = new DenseMatrix(numRows, numCols);
+    Random r = new Random(1234L);
+    for(int row = 0; row < numRows; row++) {
+      Vector v = new DenseVector(numCols);
+      for(int col = 0; col < numCols; col++) {
+        double val = r.nextGaussian();
+        v.set(col, val);
+      }
+      v.assign(Functions.MULT, 1/((row + 1) * v.norm(2)));
+      matrix.assignRow(row, v);
+    }
+    if(symmetric) {
+      if(true) return matrix.times(matrix.transpose());
+      for(int i = 0; i < numRows; i++) {
+        for(int j = 0; j < i; j++) {
+          matrix.set(j, i, matrix.get(i, j));
+        }
+      }
+    }
+    return matrix;
+  }
+
+  public static Matrix randomHierarchicalSymmetricMatrix(int size) {
+    return randomHierarchicalMatrix(size, size, true);
   }
 }

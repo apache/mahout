@@ -8,10 +8,12 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix;
 
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
+import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.PlusMult;
-import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.list.IntArrayList;
 import org.apache.mahout.math.matrix.impl.AbstractMatrix1D;
@@ -167,6 +169,14 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
       setQuick(i, other.getQuick(i));
     }
     return this;
+  }
+
+  public Vector toVector() {
+    final DenseVector vector = new DenseVector(cardinality());
+    for(int i=0; i<cardinality(); i++) {
+      vector.set(i, get(i));
+    }
+    return vector;
   }
 
   /**

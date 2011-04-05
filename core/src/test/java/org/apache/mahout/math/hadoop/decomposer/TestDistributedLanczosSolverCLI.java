@@ -59,7 +59,7 @@ public final class TestDistributedLanczosSolverCLI extends MahoutTestCase {
       eigenVectors.assignRow(i, v);
       i++;
     }
-    assertEquals("number of eigenvectors", 9, i);
+    assertEquals("number of eigenvectors", 10, i);
   }
 
   @Test

@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.MatrixSlice;
+import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
 import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix1D;
@@ -16,7 +19,7 @@ import org.apache.mahout.math.matrix.impl.DenseDoubleMatrix2D;
 import java.io.Serializable;
 
 import static org.apache.mahout.math.Algebra.hypot;
-import static org.apache.mahout.math.matrix.linalg.Property.*;
+import static org.apache.mahout.math.matrix.linalg.Property.checkSquare;
 
 /** @deprecated until unit tests are in place.  Until this time, this class/interface is unsupported. */
 @Deprecated
@@ -43,30 +46,16 @@ public final class EigenvalueDecomposition implements Serializable {
   private double cdivr;
   private double cdivi;
 
-  /**
-   * Constructs and returns a new eigenvalue decomposition object; The decomposed matrices can be retrieved via instance
-   * methods of the returned decomposition object. Checks for symmetry, then constructs the eigenvalue decomposition.
-   *
-   * @param A A square matrix.
-   * @throws IllegalArgumentException if <tt>A</tt> is not square.
-   */
-  public EigenvalueDecomposition(DoubleMatrix2D A) {
-    checkSquare(A);
-
-    n = A.columns();
-    V = new double[n][n];
+  public EigenvalueDecomposition(double[][] v) {
+    if(v.length != v[0].length) {
+      throw new IllegalArgumentException("Matrix must be square");
+    }
+    n = v.length;
+    V = v;
     d = new double[n];
     e = new double[n];
 
-    boolean issymmetric = DEFAULT.isSymmetric(A);
-
-    if (issymmetric) {
-      for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-          V[i][j] = A.getQuick(i, j);
-        }
-      }
-
+    if (isSymmetric(v)) {
       // Tridiagonalize.
       tred2();
 
@@ -79,7 +68,7 @@ public final class EigenvalueDecomposition implements Serializable {
 
       for (int j = 0; j < n; j++) {
         for (int i = 0; i < n; i++) {
-          H[i][j] = A.getQuick(i, j);
+          H[i][j] = v[i][j];
         }
       }
 
@@ -89,6 +78,58 @@ public final class EigenvalueDecomposition implements Serializable {
       // Reduce Hessenberg to real Schur form.
       hqr2();
     }
+  }
+
+  public EigenvalueDecomposition(Matrix A) {
+    this(toArray(A));
+  }
+
+  private static double[][] toArray(Matrix A) {
+    checkSquare(A);
+
+    int n = A.numCols();
+    double[][] V = new double[n][n];
+    for(MatrixSlice slice : A) {
+      int row = slice.index();
+      for(Vector.Element element : slice.vector()) {
+        V[row][element.index()] = element.get();
+      }
+    }
+    return V;
+  }
+
+  private static boolean isSymmetric(double[][] matrix) {
+    for(int i=0; i<matrix.length; i++) {
+      for(int j=0; j<i; j++) {
+        if(matrix[i][j] != matrix[j][i]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private static double[][] toArray(DoubleMatrix2D A) {
+    checkSquare(A);
+
+    int n = A.columns();
+    double[][] V = new double[n][n];
+    for(int row = 0; row < A.rows(); row++) {
+      for(int col = 0; col < A.rows(); col++) {
+        V[row][col] = A.getQuick(row, col);
+      }
+    }
+    return V;
+  }
+  /**
+   * Constructs and returns a new eigenvalue decomposition object; The decomposed matrices can be retrieved via instance
+   * methods of the returned decomposition object. Checks for symmetry, then constructs the eigenvalue decomposition.
+   *
+   * @param A A square matrix.
+   * @throws IllegalArgumentException if <tt>A</tt> is not square.
+   */
+  public EigenvalueDecomposition(DoubleMatrix2D A) {
+    this(toArray(A));
   }
 
   private void cdiv(double xr, double xi, double yr, double yi) {

@@ -17,11 +17,6 @@
 
 package org.apache.mahout.clustering;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -67,6 +62,11 @@ import org.apache.mahout.vectorizer.TFIDF;
 import org.apache.mahout.vectorizer.Weight;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public final class TestClusterDumper extends MahoutTestCase {
 
@@ -329,11 +329,14 @@ public final class TestClusterDumper extends MahoutTestCase {
     int sampleDimension = sampleData.get(0).get().size();
     // Run EigenVerificationJob from within DistributedLanczosSolver.run(...)
     int desiredRank = 13;
-    solver.run(testData, output, tmp, sampleData.size(), sampleDimension, false, desiredRank, 0.5, 0.0, false);
+    solver.run(testData, output, tmp, sampleData.size(), sampleDimension,
+        false, desiredRank, 0.5, 0.0, false);
+
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
 
     // now multiply the testdata matrix and the eigenvector matrix
-    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank - 1, sampleDimension);
+    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp,
+        desiredRank, sampleDimension);
     Configuration conf = new Configuration(config);
     svdT.setConf(conf);
     DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(), sampleDimension);
@@ -348,6 +351,7 @@ public final class TestClusterDumper extends MahoutTestCase {
     // run ClusterDumper
     ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
+    assertTrue(true);
   }
 
   @Test
@@ -369,9 +373,11 @@ public final class TestClusterDumper extends MahoutTestCase {
     Path cleanEigenvectors = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
 
     // now multiply the testdata matrix and the eigenvector matrix
-    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank - 1, sampleDimension);
+    DistributedRowMatrix svdT = new DistributedRowMatrix(cleanEigenvectors, tmp, desiredRank,
+        sampleDimension);
     svdT.setConf(conf);
-    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(), sampleDimension);
+    DistributedRowMatrix a = new DistributedRowMatrix(testData, tmp, sampleData.size(),
+        sampleDimension);
     a.setConf(conf);
     DistributedRowMatrix sData = a.transpose().times(svdT.transpose());
     sData.setConf(conf);
@@ -379,9 +385,12 @@ public final class TestClusterDumper extends MahoutTestCase {
     // now run the Canopy job to prime kMeans canopies
     CanopyDriver.run(conf, sData.getRowPath(), output, measure, 8, 4, false, false);
     // now run the KMeans job
-    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"), output, measure, 0.001, 10, true, false);
+    KMeansDriver.run(sData.getRowPath(), new Path(output, "clusters-0"), output, measure,
+        0.001, 10, true, false);
     // run ClusterDumper
-    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10),
+        new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
+    assertTrue(true);
   }
 }

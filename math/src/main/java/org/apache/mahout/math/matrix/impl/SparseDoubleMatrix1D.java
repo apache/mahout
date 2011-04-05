@@ -8,6 +8,9 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.impl;
 
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.IntDoubleProcedure;
 import org.apache.mahout.math.map.AbstractIntDoubleMap;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
@@ -75,6 +78,19 @@ public final class SparseDoubleMatrix1D extends DoubleMatrix1D {
     this.elements = elements;
     this.isNoView = false;
   }
+
+
+  public Vector toVector() {
+    final RandomAccessSparseVector vector = new RandomAccessSparseVector(cardinality());
+    elements.forEachPair(new IntDoubleProcedure() {
+      public boolean apply(int i, double v) {
+        vector.setQuick(i, v);
+        return true;
+      }
+    });
+    return vector;
+  }
+
 
   /**
    * Sets all cells to the state specified by <tt>value</tt>.

@@ -8,6 +8,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 package org.apache.mahout.math.matrix.linalg;
 
+import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.matrix.DoubleMatrix1D;
 import org.apache.mahout.math.matrix.DoubleMatrix2D;
@@ -50,6 +51,12 @@ public final class Property {
   public static void checkSquare(AbstractMatrix2D a) {
     if (a.rows() != a.columns()) {
       throw new IllegalArgumentException("Matrix must be square");
+    }
+  }
+
+  public static void checkSquare(Matrix matrix) {
+    if(matrix.numRows() != matrix.numCols()) {
+      throw new IllegalArgumentException("Matrix must be square");      
     }
   }
 

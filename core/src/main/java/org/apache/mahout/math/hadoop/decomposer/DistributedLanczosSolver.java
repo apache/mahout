@@ -17,11 +17,6 @@
 
 package org.apache.mahout.math.hadoop.decomposer;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -34,6 +29,7 @@ import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.VectorWritable;
@@ -41,6 +37,11 @@ import org.apache.mahout.math.decomposer.lanczos.LanczosSolver;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class DistributedLanczosSolver extends LanczosSolver implements Tool {
 
@@ -190,14 +191,17 @@ public class DistributedLanczosSolver extends LanczosSolver implements Tool {
    * @param outputPath The path (relative to the current Configuration's FileSystem) to save the output to.
    */
   public void serializeOutput(Matrix eigenVectors, List<Double> eigenValues, Path outputPath) throws IOException {
-    log.info("Persisting {} eigenVectors and eigenValues to: {}", eigenVectors.numRows(), outputPath);
+    int numEigenVectors = eigenVectors.numRows();
+    log.info("Persisting {} eigenVectors and eigenValues to: {}", numEigenVectors, outputPath); 
     Configuration conf = getConf() != null ? getConf() : new Configuration();
     FileSystem fs = FileSystem.get(conf);
     SequenceFile.Writer seqWriter =
         new SequenceFile.Writer(fs, conf, outputPath, IntWritable.class, VectorWritable.class);
     IntWritable iw = new IntWritable();
-    for (int i = 0; i < eigenVectors.numRows() - 1; i++) {
-      Vector v = eigenVectors.getRow(i);
+    for (int i = 0; i < numEigenVectors; i++) {
+      // Persist eigenvectors sorted by eigenvalues in descending order
+      NamedVector v = new NamedVector(eigenVectors.getRow(numEigenVectors-1-i),
+          "eigenVector" + i + ", eigenvalue = " + eigenValues.get(numEigenVectors-1-i));
       Writable vw = new VectorWritable(v);
       iw.set(i);
       seqWriter.append(iw, vw);
