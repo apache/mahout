@@ -239,6 +239,8 @@ public class Step0Job {
     
     /** number of instances in the partition */
     private int size;
+
+    protected Step0Output() { }
     
     protected Step0Output(long firstId, int size) {
       this.firstId = firstId;
