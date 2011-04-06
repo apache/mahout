@@ -43,7 +43,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.common.CommandLineUtil;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
-import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
 import org.apache.mahout.utils.vectors.io.SequenceFileVectorWriter;
 import org.apache.mahout.utils.vectors.io.VectorWriter;
 import org.slf4j.Logger;
@@ -85,15 +84,10 @@ public final class Driver {
       abuilder.withName("delimiter").withMinimum(1).withMaximum(1).create()).withDescription(
       "The delimiter for outputing the dictionary").withShortName("l").create();
     
-    Option outWriterOpt = obuilder.withLongName("outputWriter").withRequired(false).withArgument(
-      abuilder.withName("outputWriter").withMinimum(1).withMaximum(1).create()).withDescription(
-      "The VectorWriter to use, either seq (SequenceFileVectorWriter - default) or"
-          + "file (Writes to a File)").withShortName("e").create();
-    
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
     Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(outputOpt).withOption(maxOpt)
-        .withOption(helpOpt).withOption(dictOutOpt).withOption(outWriterOpt).withOption(delimiterOpt)
+        .withOption(helpOpt).withOption(dictOutOpt).withOption(delimiterOpt)
         .create();
     try {
       Parser parser = new Parser();
@@ -116,10 +110,7 @@ public final class Driver {
         }
         String outDir = cmdLine.getValue(outputOpt).toString();
         log.info("Output Dir: {}", outDir);
-        String outWriter = null;
-        if (cmdLine.hasOption(outWriterOpt)) {
-          outWriter = cmdLine.getValue(outWriterOpt).toString();
-        }
+
         String delimiter = cmdLine.hasOption(delimiterOpt) ? cmdLine.getValue(delimiterOpt).toString() : "\t";
         File dictOut = new File(cmdLine.getValue(dictOutOpt).toString());
         ARFFModel model = new MapBackedARFFModel();
@@ -132,10 +123,10 @@ public final class Driver {
           });
           
           for (File file : files) {
-            writeFile(outWriter, outDir, file, maxDocs, model);
+            writeFile(outDir, file, maxDocs, model);
           }
         } else {
-          writeFile(outWriter, outDir, input, maxDocs, model);
+          writeFile(outDir, input, maxDocs, model);
         }
         log.info("Dictionary Output file: {}", dictOut);
         Map<String,Integer> labels = model.getLabelBindings();
@@ -159,25 +150,14 @@ public final class Driver {
     }
   }
   
-  private static void writeFile(String outWriter, String outDir, File file,
-                                long maxDocs, ARFFModel arffModel) throws IOException {
+  private static void writeFile(String outDir, File file, long maxDocs, ARFFModel arffModel) throws IOException {
     log.info("Converting File: {}", file);
     ARFFModel model = new MapBackedARFFModel(arffModel.getWords(), arffModel.getWordCount() + 1, arffModel
         .getNominalMap());
     Iterable<Vector> iteratable = new ARFFVectorIterable(file, model);
     String outFile = outDir + '/' + file.getName() + ".mvc";
     
-    VectorWriter vectorWriter;
-    if (outWriter == null) {
-      vectorWriter = getSeqFileWriter(outFile);
-    } else {
-      if ("file".equals(outWriter)) {
-        vectorWriter = new JWriterVectorWriter(
-            new OutputStreamWriter(new FileOutputStream(new File(outFile)), Charset.forName("UTF-8")));
-      } else {
-        vectorWriter = getSeqFileWriter(outFile);
-      }
-    }
+    VectorWriter vectorWriter = getSeqFileWriter(outFile);
     try {
       long numDocs = vectorWriter.write(iteratable, maxDocs);
       log.info("Wrote: {} vectors", numDocs);

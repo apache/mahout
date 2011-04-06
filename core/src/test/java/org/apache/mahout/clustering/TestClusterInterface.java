@@ -84,14 +84,6 @@ public final class TestClusterInterface extends MahoutTestCase {
   }
 
   @Test
-  public void testDirichletNormalModelClusterAsJsonString() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    NormalModel model = new NormalModel(5, m, 0.75);
-    Cluster cluster = new DirichletCluster(model, 35.0);
-  }
-
-  @Test
   public void testDirichletAsymmetricSampledNormalModelClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -102,14 +94,6 @@ public final class TestClusterInterface extends MahoutTestCase {
   }
 
   @Test
-  public void testDirichletAsymmetricSampledNormalModelClusterAsJsonString() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    AsymmetricSampledNormalModel model = new AsymmetricSampledNormalModel(5, m, m);
-    Cluster cluster = new DirichletCluster(model, 35.0);
-  }
-
-  @Test
   public void testDirichletL1ModelClusterAsFormatString() {
     double[] d = { 1.1, 2.2, 3.3 };
     Vector m = new DenseVector(d);
@@ -117,14 +101,6 @@ public final class TestClusterInterface extends MahoutTestCase {
     Cluster cluster = new DirichletCluster(model, 35.0);
     String format = cluster.asFormatString(null);
     assertEquals("C-5: l1m{n=0 c=[1.100, 2.200, 3.300]}", format);
-  }
-
-  @Test
-  public void testDirichletL1ModelClusterAsJsonString() {
-    double[] d = { 1.1, 2.2, 3.3 };
-    Vector m = new DenseVector(d);
-    L1Model model = new L1Model(5, m);
-    Cluster cluster = new DirichletCluster(model, 35.0);
   }
 
   @Test

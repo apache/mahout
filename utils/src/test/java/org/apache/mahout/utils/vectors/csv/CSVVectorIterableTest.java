@@ -20,7 +20,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.utils.MahoutTestCase;
 import org.apache.mahout.utils.vectors.RandomVectorIterable;
 import org.apache.mahout.utils.vectors.VectorHelper;
-import org.apache.mahout.utils.vectors.io.JWriterVectorWriter;
+import org.apache.mahout.utils.vectors.io.TextualVectorWriter;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,15 +30,14 @@ import java.io.StringWriter;
 public class CSVVectorIterableTest extends MahoutTestCase {
 
   @Test
-  public void test() throws Exception {
+  public void testCount() throws Exception {
 
     StringWriter sWriter = new StringWriter();
-    JWriterVectorWriter jwvw = new JWriterVectorWriter(sWriter) {
-
+    TextualVectorWriter jwvw = new TextualVectorWriter(sWriter) {
       @Override
-      protected void formatVector(Vector vector) throws IOException {
+      public void write(Vector vector) throws IOException {
         String vecStr = VectorHelper.vectorToCSVString(vector, false);
-        writer.write(vecStr);
+        getWriter().write(vecStr);
       }
     };
     Iterable<Vector> iter = new RandomVectorIterable(50);

@@ -54,7 +54,7 @@ public final class VectorHelper {
                                        boolean namesAsComments,
                                        Appendable bldr) throws IOException {
     if (namesAsComments && vector instanceof NamedVector){
-      bldr.append("#").append(((NamedVector)vector).getName()).append('\n');
+      bldr.append('#').append(((NamedVector) vector).getName()).append('\n');
     }
     Iterator<Vector.Element> iter = vector.iterator();
     boolean first = true;
@@ -62,46 +62,13 @@ public final class VectorHelper {
       if (first) {
         first = false;
       } else {
-        bldr.append(",");
+        bldr.append(',');
       }
       Vector.Element elt = iter.next();
       bldr.append(String.valueOf(elt.get()));
     }
     bldr.append('\n');
   }
-
-
-  /**
-   * @return a String from a vector that fills in the values with the appropriate value from a dictionary where
-   * each the ith entry is the term for the ith vector cell.
-   */
-  public static String vectorToJSONString(Vector vector, String[] dictionary) {
-    StringBuilder bldr = new StringBuilder(2048);
-    
-    if (vector instanceof NamedVector) {
-      bldr.append("name: ").append(((NamedVector) vector).getName()).append('\t');
-    }
-    
-    bldr.append("elts: {");
-    Iterator<Vector.Element> iter = vector.iterateNonZero();
-    boolean first = true;
-    while (iter.hasNext()) {
-      if (first) {
-        first = false;
-      } else {
-        bldr.append(", ");
-      }
-      Vector.Element elt = iter.next();
-      if (dictionary != null) {
-        bldr.append(dictionary[elt.index()]);
-      } else {
-        bldr.append(String.valueOf(elt.index()));
-      }
-      bldr.append(':').append(String.valueOf(elt.get()));
-    }
-    return bldr.append('}').toString();
-  }
-
   
   /**
    * Read in a dictionary file. Format is:

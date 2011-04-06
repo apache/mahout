@@ -52,9 +52,9 @@ public final class VectorWriterTest extends MahoutTestCase {
   }
 
   @Test
-  public void test() throws Exception {
+  public void testTextOutputSize() throws Exception {
     StringWriter strWriter = new StringWriter();
-    VectorWriter writer = new JWriterVectorWriter(strWriter);
+    VectorWriter writer = new TextualVectorWriter(strWriter);
     Collection<Vector> vectors = new ArrayList<Vector>();
     vectors.add(new DenseVector(new double[]{0.3, 1.5, 4.5}));
     vectors.add(new DenseVector(new double[]{1.3, 1.5, 3.5}));

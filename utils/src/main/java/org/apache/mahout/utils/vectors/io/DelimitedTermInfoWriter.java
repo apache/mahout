@@ -24,15 +24,15 @@ import org.apache.mahout.utils.vectors.TermEntry;
 import org.apache.mahout.utils.vectors.TermInfo;
 
 /**
- * Write ther TermInfo out to a {@link java.io.Writer}
+ * Write {@link TermInfo} to a {@link Writer} in a textual, delimited format with header.
  */
-public class JWriterTermInfoWriter implements TermInfoWriter {
+public class DelimitedTermInfoWriter implements TermInfoWriter {
   
   private final Writer writer;
   private final String delimiter;
   private final String field;
   
-  public JWriterTermInfoWriter(Writer writer, String delimiter, String field) {
+  public DelimitedTermInfoWriter(Writer writer, String delimiter, String field) {
     this.writer = writer;
     this.delimiter = delimiter;
     this.field = field;
@@ -44,9 +44,9 @@ public class JWriterTermInfoWriter implements TermInfoWriter {
     Iterator<TermEntry> entIter = ti.getAllEntries();
     
     writer.write(String.valueOf(ti.totalTerms(field)));
-    writer.write("\n");
+    writer.write('\n');
     writer.write("#term" + delimiter + "doc freq" + delimiter + "idx");
-    writer.write("\n");
+    writer.write('\n');
     while (entIter.hasNext()) {
       TermEntry entry = entIter.next();
       writer.write(entry.getTerm());
@@ -54,7 +54,7 @@ public class JWriterTermInfoWriter implements TermInfoWriter {
       writer.write(String.valueOf(entry.getDocFreq()));
       writer.write(delimiter);
       writer.write(String.valueOf(entry.getTermIdx()));
-      writer.write("\n");
+      writer.write('\n');
     }
     writer.flush();
     writer.close();

@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Provides the ability to store SGD model-related objects as JSON.
+ * Provides the ability to store SGD model-related objects as binary files.
  */
 public final class ModelSerializer {
 

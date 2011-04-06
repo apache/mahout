@@ -23,13 +23,19 @@ import java.io.Writer;
 import org.apache.mahout.math.Vector;
 
 /**
- * Write out the vectors to any {@link java.io.Writer} using {@link org.apache.mahout.math.Vector#asFormatString()}.
+ * Write out the vectors to any {@link Writer} using {@link Vector#asFormatString()},
+ * one per line by default.
  */
-public class JWriterVectorWriter implements VectorWriter {
-  protected final Writer writer;
+public class TextualVectorWriter implements VectorWriter {
+
+  private final Writer writer;
   
-  public JWriterVectorWriter(Writer writer) {
+  public TextualVectorWriter(Writer writer) {
     this.writer = writer;
+  }
+
+  protected Writer getWriter() {
+    return writer;
   }
   
   @Override
@@ -40,25 +46,20 @@ public class JWriterVectorWriter implements VectorWriter {
   @Override
   public long write(Iterable<Vector> iterable, long maxDocs) throws IOException {
     long result = 0;
-    
     for (Vector vector : iterable) {
       if (result >= maxDocs) {
         break;
       }
-      formatVector(vector);
+      write(vector);
       result++;
     }
     return result;
   }
 
-  protected void formatVector(Vector vector) throws IOException {
-    writer.write(vector.asFormatString());
-    writer.write('\n');
-  }
-
   @Override
   public void write(Vector vector) throws IOException {
-    formatVector(vector);
+    writer.write(vector.asFormatString());
+    writer.write('\n');
   }
 
   @Override
