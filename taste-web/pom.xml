@@ -124,10 +124,6 @@
           <artifactId>hadoop-core</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.apache.mahout.jets3t</groupId>
-          <artifactId>jets3t</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>xmlenc</groupId>
           <artifactId>xmlenc</artifactId>
         </exclusion>
@@ -154,14 +150,6 @@
         <exclusion>
           <groupId>commons-lang</groupId>
           <artifactId>commons-lang</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.mahout.watchmaker</groupId>
-          <artifactId>watchmaker-framework</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.mahout.watchmaker</groupId>
-          <artifactId>watchmaker-swing</artifactId>
         </exclusion>
         <exclusion>
           <groupId>com.thoughtworks.xstream</groupId>
