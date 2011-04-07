@@ -41,35 +41,29 @@ public class MySQLJDBCInMemoryItemSimilarityTest extends TasteTestCase {
     EasyMock.expect(connection.prepareStatement(MySQLJDBCInMemoryItemSimilarity.DEFAULT_GET_ALL_ITEMSIMILARITIES_SQL,
         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)).andReturn(statement);
     statement.setFetchDirection(ResultSet.FETCH_FORWARD);
-    statement.setFetchSize(Integer.MIN_VALUE);
     EasyMock.expect(statement.executeQuery()).andReturn(resultSet);
 
     EasyMock.expect(resultSet.next()).andReturn(true);
 
-    EasyMock.expect(resultSet.isAfterLast()).andReturn(false);
     EasyMock.expect(resultSet.getLong(1)).andReturn(1L);
     EasyMock.expect(resultSet.getLong(2)).andReturn(2L);
     EasyMock.expect(resultSet.getDouble(3)).andReturn(0.5);
     EasyMock.expect(resultSet.next()).andReturn(true);
 
-    EasyMock.expect(resultSet.isAfterLast()).andReturn(false);
     EasyMock.expect(resultSet.getLong(1)).andReturn(1L);
     EasyMock.expect(resultSet.getLong(2)).andReturn(3L);
     EasyMock.expect(resultSet.getDouble(3)).andReturn(0.4);
     EasyMock.expect(resultSet.next()).andReturn(true);
 
-    EasyMock.expect(resultSet.isAfterLast()).andReturn(false);
     EasyMock.expect(resultSet.getLong(1)).andReturn(3L);
     EasyMock.expect(resultSet.getLong(2)).andReturn(4L);
     EasyMock.expect(resultSet.getDouble(3)).andReturn(0.1);
 
-    EasyMock.expect(resultSet.isAfterLast()).andReturn(true);
+    EasyMock.expect(resultSet.next()).andReturn(false);
 
     resultSet.close();
     statement.close();
     connection.close();
-
-    EasyMock.expect(resultSet.next()).andReturn(false);
 
     EasyMock.replay(dataSource, connection, statement, resultSet);
 

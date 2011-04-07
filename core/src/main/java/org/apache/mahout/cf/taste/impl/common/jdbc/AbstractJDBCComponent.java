@@ -88,8 +88,4 @@ public abstract class AbstractJDBCComponent {
     return DEFAULT_FETCH_SIZE;
   }
   
-  protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
-    resultSet.relative(n);
-  }
-  
 }

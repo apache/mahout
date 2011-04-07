@@ -17,9 +17,6 @@
 
 package org.apache.mahout.cf.taste.impl.model.jdbc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -159,15 +156,6 @@ public class MySQLBooleanPrefJDBCDataModel extends AbstractBooleanPrefJDBCDataMo
   protected int getFetchSize() {
     // Need to return this for MySQL Connector/J to make it use streaming mode
     return Integer.MIN_VALUE;
-  }
-  
-  @Override
-  protected void advanceResultSet(ResultSet resultSet, int n) throws SQLException {
-    // Can't use relative on MySQL Connector/J
-    int i = 0;
-    while ((i < n) && resultSet.next()) {
-      i++;
-    }
   }
   
 }

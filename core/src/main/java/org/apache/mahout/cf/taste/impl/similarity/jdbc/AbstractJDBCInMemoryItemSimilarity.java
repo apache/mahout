@@ -20,21 +20,18 @@ package org.apache.mahout.cf.taste.impl.similarity.jdbc;
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
+import org.apache.mahout.cf.taste.impl.common.jdbc.ResultSetIterator;
 import org.apache.mahout.cf.taste.impl.model.jdbc.ConnectionPoolDataSource;
 import org.apache.mahout.cf.taste.impl.similarity.GenericItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
-import org.apache.mahout.common.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -97,88 +94,28 @@ abstract class AbstractJDBCInMemoryItemSimilarity extends AbstractJDBCComponent 
     }
   }
 
-  class JDBCSimilaritiesIterable implements Iterable<GenericItemSimilarity.ItemItemSimilarity> {
+  private class JDBCSimilaritiesIterable implements Iterable<GenericItemSimilarity.ItemItemSimilarity> {
     @Override
     public Iterator<GenericItemSimilarity.ItemItemSimilarity> iterator() {
-      return new JDBCSimilaritiesIterator();
+      try {
+        return new JDBCSimilaritiesIterator();
+      } catch (SQLException sqle) {
+        throw new IllegalStateException(sqle);
+      }
     }
   }
 
-  private class JDBCSimilaritiesIterator implements Iterator<GenericItemSimilarity.ItemItemSimilarity> {
+  private class JDBCSimilaritiesIterator extends ResultSetIterator<GenericItemSimilarity.ItemItemSimilarity> {
 
-    private final Connection connection;
-    private final PreparedStatement statement;
-    private final ResultSet resultSet;
-    private boolean closed;
-
-    private JDBCSimilaritiesIterator() {
-      try {
-        connection = dataSource.getConnection();
-        statement = connection.prepareStatement(getAllItemSimilaritiesSQL, ResultSet.TYPE_FORWARD_ONLY,
-            ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchDirection(ResultSet.FETCH_FORWARD);
-        statement.setFetchSize(getFetchSize());
-        log.debug("Executing SQL query: {}", getAllItemSimilaritiesSQL);
-        resultSet = statement.executeQuery();
-        boolean anyResults = resultSet.next();
-        if (!anyResults) {
-          close();
-        }
-      } catch (SQLException e) {
-        close();
-        throw new IllegalStateException("Unable to read similarities!", e);
-      }
+    private JDBCSimilaritiesIterator() throws SQLException {
+      super(dataSource, getAllItemSimilaritiesSQL);
     }
 
     @Override
-    public boolean hasNext() {
-      boolean nextExists = false;
-      if (!closed) {
-        try {
-          if (resultSet.isAfterLast()) {
-            close();
-          } else {
-            nextExists = true;
-          }
-        } catch (SQLException sqle) {
-          log.warn("Unexpected exception while accessing ResultSet; continuing...", sqle);
-          close();
-        }
-      }
-      return nextExists;
-    }
-
-    @Override
-    public GenericItemSimilarity.ItemItemSimilarity next() {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-      try {
-        GenericItemSimilarity.ItemItemSimilarity similarity = new GenericItemSimilarity.ItemItemSimilarity(
-            resultSet.getLong(1), resultSet.getLong(2), resultSet.getDouble(3));
-        resultSet.next();
-        return similarity;
-      } catch (SQLException e) {
-        // No good way to handle this since we can't throw an exception
-        log.warn("Exception while iterating", e);
-        close();
-        throw new IllegalStateException("Unable to read similarities!", e);
-      }
-    }
-
-    /**
-     * @throws UnsupportedOperationException
-     */
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-
-    private void close() {
-      if (!closed) {
-        closed = true;
-        IOUtils.quietClose(resultSet, statement, connection);
-      }
+    protected GenericItemSimilarity.ItemItemSimilarity parseElement(ResultSet resultSet) throws SQLException {
+      return new GenericItemSimilarity.ItemItemSimilarity(resultSet.getLong(1),
+                                                          resultSet.getLong(2),
+                                                          resultSet.getDouble(3));
     }
   }
 

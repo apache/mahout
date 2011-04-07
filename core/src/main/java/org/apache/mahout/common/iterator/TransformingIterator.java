@@ -35,6 +35,10 @@ public abstract class TransformingIterator<I,O> implements Iterator<O> {
    * @return the transformed value returned from this iterator
    */
   protected abstract O transform(I in);
+
+  protected Iterator<? extends I> getDelegate() {
+    return delegate;
+  }
   
   @Override
   public final boolean hasNext() {

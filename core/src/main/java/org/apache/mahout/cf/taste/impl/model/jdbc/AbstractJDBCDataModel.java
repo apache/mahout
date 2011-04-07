@@ -25,7 +25,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import javax.sql.DataSource;
 
@@ -39,6 +38,7 @@ import org.apache.mahout.cf.taste.impl.common.FastIDSet;
 import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.common.Retriever;
 import org.apache.mahout.cf.taste.impl.common.jdbc.AbstractJDBCComponent;
+import org.apache.mahout.cf.taste.impl.common.jdbc.ResultSetIterator;
 import org.apache.mahout.cf.taste.impl.model.GenericItemPreferenceArray;
 import org.apache.mahout.cf.taste.impl.model.GenericPreference;
 import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
@@ -254,7 +254,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   @Override
   public LongPrimitiveIterator getUserIDs() throws TasteException {
     log.debug("Retrieving all users...");
-    return new ResultSetIDIterator(getUsersSQL);
+    try {
+      return new ResultSetIDIterator(getUsersSQL);
+    } catch (SQLException sqle) {
+      throw new TasteException(sqle);
+    }
   }
 
   /**
@@ -499,7 +503,11 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
   @Override
   public LongPrimitiveIterator getItemIDs() throws TasteException {
     log.debug("Retrieving all items...");
-    return new ResultSetIDIterator(getItemsSQL);
+    try {
+      return new ResultSetIDIterator(getItemsSQL);
+    } catch (SQLException sqle) {
+      throw new TasteException(sqle);
+    }
   }
 
   @Override
@@ -743,127 +751,30 @@ public abstract class AbstractJDBCDataModel extends AbstractJDBCComponent implem
    * make sure to "drain" the entire set of data to avoid tying up database resources.
    * </p>
    */
-  private final class ResultSetIDIterator implements LongPrimitiveIterator {
+  private final class ResultSetIDIterator extends ResultSetIterator<Long> implements LongPrimitiveIterator {
 
-    private final Connection connection;
-    private final Statement statement;
-    private final ResultSet resultSet;
-    private boolean closed;
-
-    private ResultSetIDIterator(String sql) throws TasteException {
-      try {
-        connection = dataSource.getConnection();
-        statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchDirection(ResultSet.FETCH_FORWARD);
-        statement.setFetchSize(getFetchSize());
-        log.debug("Executing SQL query: {}", sql);
-        resultSet = statement.executeQuery(sql);
-        boolean anyResults = resultSet.next();
-        if (!anyResults) {
-          close();
-        }
-      } catch (SQLException sqle) {
-        close();
-        throw new TasteException(sqle);
-      }
+    private ResultSetIDIterator(String sql) throws SQLException {
+      super(dataSource, sql);
     }
 
     @Override
-    public boolean hasNext() {
-      boolean nextExists = false;
-      if (!closed) {
-        try {
-          if (resultSet.isAfterLast()) {
-            close();
-          } else {
-            nextExists = true;
-          }
-        } catch (SQLException sqle) {
-          log.warn("Unexpected exception while accessing ResultSet; continuing...",
-            sqle);
-          close();
-        }
-      }
-      return nextExists;
-    }
-
-    @Override
-    public Long next() {
-      return nextLong();
+    protected Long parseElement(ResultSet resultSet) throws SQLException {
+      return getLongColumn(resultSet, 1);
     }
 
     @Override
     public long nextLong() {
-
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-
-      try {
-        long id = getLongColumn(resultSet, 1);
-        resultSet.next();
-        return id;
-      } catch (SQLException sqle) {
-        // No good way to handle this since we can't throw an exception
-        log.warn("Exception while iterating", sqle);
-        close();
-        throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
-      }
-
-    }
-
-    @Override
-    public long peek() {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-      try {
-        return getLongColumn(resultSet, 1);
-      } catch (SQLException sqle) {
-        // No good way to handle this since we can't throw an exception
-        log.warn("Exception while iterating", sqle);
-        close();
-        throw new NoSuchElementException("Can't retrieve more due to exception: " + sqle);
-      }
-
+      return next();
     }
 
     /**
      * @throws UnsupportedOperationException
      */
     @Override
-    public void remove() {
+    public long peek() {
+      // This could be supported; is it worth it?
       throw new UnsupportedOperationException();
     }
-
-    private void close() {
-      if (!closed) {
-        closed = true;
-        IOUtils.quietClose(resultSet, statement, connection);
-      }
-    }
-    
-    @Override
-    public void skip(int n) {
-      if (n >= 1) {
-        try {
-          advanceResultSet(resultSet, n);
-        } catch (SQLException sqle) {
-          log.warn("Exception while iterating over items", sqle);
-          close();
-        }
-      }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-      try {
-        close();
-      } finally {
-        super.finalize();
-      }
-    }
-
   }
 
   private final class ItemPrefCountRetriever implements Retriever<Long,Integer> {
