@@ -54,19 +54,7 @@ final class Track1Callable implements Callable<byte[]> {
         log.warn("Unknown item {}; OK unless this is the real contest data", itemID);
         continue;
       }
-
-      if (Double.isNaN(estimate)) {
-        log.warn("Unable to compute estimate for user {}, item {}", userID, itemID);
-        result[i] = 0x7F;
-      } else {
-        int scaledEstimate = (int) (estimate * 2.55);
-        if (scaledEstimate > 255) {
-          scaledEstimate = 255;
-        } else if (scaledEstimate < 0) {
-          scaledEstimate = 0;
-        }
-        result[i] = (byte) scaledEstimate;
-      }
+      result[i] = EstimateConverter.convert(estimate, userID, itemID);
     }
 
     if (COUNT.incrementAndGet() % 10000 == 0) {
