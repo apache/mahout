@@ -32,6 +32,10 @@ import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.math.DenseVector;
 
+/**
+ * Java desktop graphics class that runs canopy clustering and displays the results.
+ * This class generates random data and clusters it.
+ */
 class DisplayCanopy extends DisplayClustering {
 
   DisplayCanopy() {
