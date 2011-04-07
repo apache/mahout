@@ -130,22 +130,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/math</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/math</url>
-  </scm>
-  <repositories>
-    <repository>
-      <id>Apache snapshots</id>
-      <url>http://people.apache.org/maven-snapshot-repository</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 </project>

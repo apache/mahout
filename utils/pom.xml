@@ -176,10 +176,4 @@
     </dependency>
 
   </dependencies>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/utils</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/utils</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/utils</url>
-  </scm>
 </project>

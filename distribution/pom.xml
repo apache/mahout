@@ -116,9 +116,4 @@
       <type>war</type>
     </dependency>
   </dependencies>
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/distribution</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/distribution</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/distribution</url>
-  </scm>
 </project>

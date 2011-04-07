@@ -226,11 +226,4 @@
       <artifactId>commons-collections</artifactId>
     </dependency>
   </dependencies>
-
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/core</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/core</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/core</url>
-  </scm>
 </project>

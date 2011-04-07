@@ -198,24 +198,4 @@
     </dependency>
 
   </dependencies>
-
-  <repositories>
-    <repository>
-      <id>Apache snapshots</id>
-      <url>http://people.apache.org/maven-snapshot-repository</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</developerConnection>
-    <url>https://svn.apache.org/repos/asf/mahout/trunk/taste-webapp</url>
-  </scm>
-
 </project>
