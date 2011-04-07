@@ -33,14 +33,13 @@ import java.util.List;
 public final class TestLanczosSolver extends SolverTest {
   private static final Logger log = LoggerFactory.getLogger(TestLanczosSolver.class);
 
-  private static final double ERROR_TOLERANCE = 1e-5;
+  private static final double ERROR_TOLERANCE = 1.0e-5;
 
   @Test
   public void testEigenvalueCheck() throws Exception {
     int size = 100;
     Matrix m = randomHierarchicalSymmetricMatrix(size);
     int desiredRank = 80;
-    float fractionOfEigensExpectedGood = 0.75f;
     LanczosSolver solver = new LanczosSolver();
     Matrix eigenvectors = new DenseMatrix(desiredRank, size);
     List<Double> eigenvalueList = new ArrayList<Double>();
@@ -49,6 +48,7 @@ public final class TestLanczosSolver extends SolverTest {
     EigenvalueDecomposition decomposition = new EigenvalueDecomposition(m);
     DoubleMatrix1D eigenvalues = decomposition.getRealEigenvalues();
 
+    float fractionOfEigensExpectedGood = 0.75f;
     for(int i = 0; i < fractionOfEigensExpectedGood * desiredRank; i++) {
       log.info(i + " : L = {}, E = {}",
           eigenvalueList.get(desiredRank - i - 1),

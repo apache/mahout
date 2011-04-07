@@ -30,14 +30,18 @@ import java.util.Collection;
 
 public abstract class AbstractItemSimilarity implements ItemSimilarity {
 
-  protected final DataModel dataModel;
+  private final DataModel dataModel;
   private final RefreshHelper refreshHelper;
 
-  public AbstractItemSimilarity(DataModel dataModel) {
+  protected AbstractItemSimilarity(DataModel dataModel) {
     Preconditions.checkArgument(dataModel != null, "dataModel is null");
     this.dataModel = dataModel;
     this.refreshHelper = new RefreshHelper(null);
     refreshHelper.addDependency(this.dataModel);
+  }
+
+  protected DataModel getDataModel() {
+    return dataModel;
   }
 
   @Override

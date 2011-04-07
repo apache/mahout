@@ -19,11 +19,8 @@ package org.apache.mahout.cf.taste.impl.neighborhood;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.FastIDSet;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.similarity.AbstractItemSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.PreferenceInferrer;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
@@ -37,6 +34,7 @@ final class DummySimilarity extends AbstractItemSimilarity implements UserSimila
   
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
+    DataModel dataModel = getDataModel();
     return 1.0 / (1.0 + Math.abs(dataModel.getPreferencesFromUser(userID1).get(0).getValue()
                                  - dataModel.getPreferencesFromUser(userID2).get(0).getValue()));
   }

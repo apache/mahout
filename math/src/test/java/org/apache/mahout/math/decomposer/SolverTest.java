@@ -17,7 +17,14 @@
 
 package org.apache.mahout.math.decomposer;
 
-import org.apache.mahout.math.*;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.MahoutTestCase;
+import org.apache.mahout.math.Matrix;
+import org.apache.mahout.math.SequentialAccessSparseVector;
+import org.apache.mahout.math.SparseRowMatrix;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.VectorIterable;
 import org.apache.mahout.math.function.Functions;
 
 import java.util.Random;
@@ -115,12 +122,14 @@ public abstract class SolverTest extends MahoutTestCase {
       matrix.assignRow(row, v);
     }
     if(symmetric) {
-      if(true) return matrix.times(matrix.transpose());
-      for(int i = 0; i < numRows; i++) {
-        for(int j = 0; j < i; j++) {
-          matrix.set(j, i, matrix.get(i, j));
-        }
-      }
+      //if(true) {
+        return matrix.times(matrix.transpose());
+      //}
+      //for(int i = 0; i < numRows; i++) {
+      //  for(int j = 0; j < i; j++) {
+      //    matrix.set(j, i, matrix.get(i, j));
+      //  }
+      //}
     }
     return matrix;
   }

@@ -72,7 +72,7 @@ public class MatrixVectorView extends AbstractVector {
 
   /**
    * Iterates over all elements <p/> * NOTE: Implementations may choose to reuse the Element returned
-   * for performance reasons, so if you need a copy of it, you should call {@link #getElement} for
+   * for performance reasons, so if you need a copy of it, you should call {@link #getElement(int)} for
    * the given index
    *
    * @return An {@link java.util.Iterator} over all elements
@@ -107,7 +107,7 @@ public class MatrixVectorView extends AbstractVector {
   /**
    * Iterates over all non-zero elements. <p/> NOTE: Implementations may choose to reuse the Element
    * returned for performance reasons, so if you need a copy of it, you should call {@link
-   * #getElement} for the given index
+   * #getElement(int)} for the given index
    *
    * @return An {@link java.util.Iterator} over all non-zero elements
    */

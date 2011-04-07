@@ -18,7 +18,6 @@ package org.apache.mahout.text;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.hadoop.conf.Configuration;
@@ -47,6 +46,7 @@ public final class SequenceFilesFromMailArchivesTest extends MahoutTestCase {
    * Create the input and output directories needed for testing
    * the SequenceFilesFromMailArchives application.
    */
+  @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();

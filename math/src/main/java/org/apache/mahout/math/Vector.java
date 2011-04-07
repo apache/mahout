@@ -115,7 +115,7 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
 
   /**
    * Iterates over all elements <p/> * NOTE: Implementations may choose to reuse the Element returned for performance
-   * reasons, so if you need a copy of it, you should call {@link #getElement} for the given index
+   * reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
    *
    * @return An {@link Iterator} over all elements
    */
@@ -124,7 +124,7 @@ public interface Vector extends Cloneable, Iterable<Vector.Element> {
 
   /**
    * Iterates over all non-zero elements. <p/> NOTE: Implementations may choose to reuse the Element returned for
-   * performance reasons, so if you need a copy of it, you should call {@link #getElement} for the given index
+   * performance reasons, so if you need a copy of it, you should call {@link #getElement(int)} for the given index
    *
    * @return An {@link Iterator} over all non-zero elements
    */

@@ -18,7 +18,6 @@
 package org.apache.mahout.clustering.syntheticcontrol.dirichlet;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli2.builder.ArgumentBuilder;
@@ -26,9 +25,7 @@ import org.apache.commons.cli2.builder.DefaultOptionBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.clustering.Model;
 import org.apache.mahout.clustering.conversion.InputDriver;
-import org.apache.mahout.clustering.dirichlet.DirichletCluster;
 import org.apache.mahout.clustering.dirichlet.DirichletDriver;
 import org.apache.mahout.clustering.dirichlet.models.DistributionDescription;
 import org.apache.mahout.clustering.dirichlet.models.GaussianClusterDistribution;
@@ -37,7 +34,6 @@ import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.math.RandomAccessSparseVector;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.clustering.ClusterDumper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +65,7 @@ public final class Job extends AbstractJob {
   }
 
   @Override
-  public int run(String[] args)
-    throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, InterruptedException {
+  public int run(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
     addInputOption();
     addOutputOption();
     addOption(DefaultOptionCreator.maxIterationsOption().create());
@@ -169,6 +164,7 @@ public final class Job extends AbstractJob {
    * @param significant
    *          the minimum number of samples to enable printing a model
    */
+  /*
   private static void printClusters(Iterable<List<DirichletCluster>> clusters, int significant) {
     int row = 0;
     StringBuilder result = new StringBuilder(100);
@@ -186,4 +182,5 @@ public final class Job extends AbstractJob {
     result.append('\n');
     log.info(result.toString());
   }
+   */
 }

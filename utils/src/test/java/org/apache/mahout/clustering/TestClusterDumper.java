@@ -46,7 +46,6 @@ import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
 import org.apache.mahout.common.distance.ManhattanDistanceMeasure;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterable;
 import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -380,7 +379,6 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 
   @Test
@@ -420,6 +418,5 @@ public final class TestClusterDumper extends MahoutTestCase {
     ClusterDumper clusterDumper =
         new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
     clusterDumper.printClusters(termDictionary);
-    assertTrue(true);
   }
 }

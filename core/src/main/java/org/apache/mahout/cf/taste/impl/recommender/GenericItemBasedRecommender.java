@@ -143,7 +143,7 @@ public class GenericItemBasedRecommender extends AbstractRecommender implements 
     return doEstimatePreference(userID, preferencesFromUser, itemID);
   }
 
-  private Float getPreferenceForItem(PreferenceArray preferencesFromUser, long itemID) {
+  private static Float getPreferenceForItem(PreferenceArray preferencesFromUser, long itemID) {
     int size = preferencesFromUser.length();
     for (int i = 0; i < size; i++) {
       if (preferencesFromUser.getItemID(i) == itemID) {

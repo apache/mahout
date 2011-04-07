@@ -47,11 +47,12 @@ public final class CityBlockSimilarity extends AbstractItemSimilarity implements
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, getDataModel());
   }
 
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
+    DataModel dataModel = getDataModel();
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     int preferring2 = dataModel.getNumUsersWithPreferenceFor(itemID2);
     int intersection = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
@@ -60,6 +61,7 @@ public final class CityBlockSimilarity extends AbstractItemSimilarity implements
 
   @Override
   public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
+    DataModel dataModel = getDataModel();
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     double[] distance = new double[itemID2s.length];
     for (int i = 0; i < itemID2s.length; ++i) {
@@ -72,6 +74,7 @@ public final class CityBlockSimilarity extends AbstractItemSimilarity implements
 
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
+    DataModel dataModel = getDataModel();
     FastIDSet prefs1 = dataModel.getItemIDsFromUser(userID1);
     FastIDSet prefs2 = dataModel.getItemIDsFromUser(userID2);
     int prefs1Size = prefs1.size();

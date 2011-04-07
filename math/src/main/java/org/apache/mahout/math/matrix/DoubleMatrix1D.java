@@ -172,8 +172,8 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
   }
 
   public Vector toVector() {
-    final DenseVector vector = new DenseVector(cardinality());
-    for(int i=0; i<cardinality(); i++) {
+    Vector vector = new DenseVector(cardinality());
+    for (int i = 0; i < cardinality(); i++) {
       vector.set(i, get(i));
     }
     return vector;
@@ -250,14 +250,14 @@ public abstract class DoubleMatrix1D extends AbstractMatrix1D implements Cloneab
       }
     } else if (function instanceof PlusMult) {
       double multiplicator = ((PlusMult) function).getMultiplicator();
-      if (multiplicator == 0) { // x[i] = x[i] + 0*y[i]
+      if (multiplicator == 0.0) { // x[i] = x[i] + 0*y[i]
         // do nothing
-      } else if (multiplicator == 1) { // x[i] = x[i] + y[i]
+      } else if (multiplicator == 1.0) { // x[i] = x[i] + y[i]
         for (int index = nonZeroIndexes.size(); --index >= 0;) {
           int i = nonZeroElements[index];
           setQuick(i, getQuick(i) + y.getQuick(i));
         }
-      } else if (multiplicator == -1) { // x[i] = x[i] - y[i]
+      } else if (multiplicator == -1.0) { // x[i] = x[i] - y[i]
         for (int index = nonZeroIndexes.size(); --index >= 0;) {
           int i = nonZeroElements[index];
           setQuick(i, getQuick(i) - y.getQuick(i));

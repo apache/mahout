@@ -38,7 +38,7 @@ public class DirichletState {
   
   private Vector mixture; // the mixture vector
   
-  private double alpha0; // alpha0
+  private final double alpha0; // alpha0
 
   public DirichletState(ModelDistribution<VectorWritable> modelFactory,
                         int numClusters,

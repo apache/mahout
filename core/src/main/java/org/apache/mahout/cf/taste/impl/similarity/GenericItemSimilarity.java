@@ -49,6 +49,8 @@ import com.google.common.base.Preconditions;
  * </p>
  */
 public final class GenericItemSimilarity implements ItemSimilarity {
+
+  private static final long[] NO_IDS = new long[0];
   
   private final FastByIDMap<FastByIDMap<Double>> similarityMaps = new FastByIDMap<FastByIDMap<Double>>();
   private final FastByIDMap<FastIDSet> similarItemIDsIndex = new FastByIDMap<FastIDSet>();
@@ -235,9 +237,9 @@ public GenericItemSimilarity(ItemSimilarity otherSimilarity,
   }
 
   @Override
-  public long[] allSimilarItemIDs(long itemID) throws TasteException {
+  public long[] allSimilarItemIDs(long itemID) {
     FastIDSet similarItemIDs = similarItemIDsIndex.get(itemID);
-    return similarItemIDs != null ? similarItemIDs.toArray() : new long[0];
+    return similarItemIDs != null ? similarItemIDs.toArray() : NO_IDS;
   }
   
   @Override

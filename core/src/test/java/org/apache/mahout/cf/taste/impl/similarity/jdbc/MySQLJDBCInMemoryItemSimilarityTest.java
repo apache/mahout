@@ -49,19 +49,19 @@ public class MySQLJDBCInMemoryItemSimilarityTest extends TasteTestCase {
     EasyMock.expect(resultSet.isAfterLast()).andReturn(false);
     EasyMock.expect(resultSet.getLong(1)).andReturn(1L);
     EasyMock.expect(resultSet.getLong(2)).andReturn(2L);
-    EasyMock.expect(resultSet.getDouble(3)).andReturn(0.5d);
+    EasyMock.expect(resultSet.getDouble(3)).andReturn(0.5);
     EasyMock.expect(resultSet.next()).andReturn(true);
 
     EasyMock.expect(resultSet.isAfterLast()).andReturn(false);
     EasyMock.expect(resultSet.getLong(1)).andReturn(1L);
     EasyMock.expect(resultSet.getLong(2)).andReturn(3L);
-    EasyMock.expect(resultSet.getDouble(3)).andReturn(0.4d);
+    EasyMock.expect(resultSet.getDouble(3)).andReturn(0.4);
     EasyMock.expect(resultSet.next()).andReturn(true);
 
     EasyMock.expect(resultSet.isAfterLast()).andReturn(false);
     EasyMock.expect(resultSet.getLong(1)).andReturn(3L);
     EasyMock.expect(resultSet.getLong(2)).andReturn(4L);
-    EasyMock.expect(resultSet.getDouble(3)).andReturn(0.1d);
+    EasyMock.expect(resultSet.getDouble(3)).andReturn(0.1);
 
     EasyMock.expect(resultSet.isAfterLast()).andReturn(true);
 
@@ -75,9 +75,9 @@ public class MySQLJDBCInMemoryItemSimilarityTest extends TasteTestCase {
 
     ItemSimilarity similarity = new MySQLJDBCInMemoryItemSimilarity(dataSource);
 
-    assertEquals(similarity.itemSimilarity(1L, 2L), 0.5d, EPSILON);
-    assertEquals(similarity.itemSimilarity(1L, 3L), 0.4d, EPSILON);
-    assertEquals(similarity.itemSimilarity(3L, 4L), 0.1d, EPSILON);
+    assertEquals(0.5, similarity.itemSimilarity(1L, 2L), EPSILON);
+    assertEquals(0.4, similarity.itemSimilarity(1L, 3L), EPSILON);
+    assertEquals(0.1, similarity.itemSimilarity(3L, 4L), EPSILON);
     assertTrue(Double.isNaN(similarity.itemSimilarity(1L, 4L)));
 
     EasyMock.verify(dataSource, connection, statement, resultSet);

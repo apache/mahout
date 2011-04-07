@@ -34,6 +34,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -49,7 +50,7 @@ abstract class AbstractJDBCInMemoryItemSimilarity extends AbstractJDBCComponent 
 
   private static final Logger log = LoggerFactory.getLogger(AbstractJDBCInMemoryItemSimilarity.class);
 
-  public AbstractJDBCInMemoryItemSimilarity(DataSource dataSource, String getAllItemSimilaritiesSQL) {
+  AbstractJDBCInMemoryItemSimilarity(DataSource dataSource, String getAllItemSimilaritiesSQL) {
 
     AbstractJDBCComponent.checkNotNullAndLog("getAllItemSimilaritiesSQL", getAllItemSimilaritiesSQL);
 
@@ -149,6 +150,9 @@ abstract class AbstractJDBCInMemoryItemSimilarity extends AbstractJDBCComponent 
 
     @Override
     public GenericItemSimilarity.ItemItemSimilarity next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
       try {
         GenericItemSimilarity.ItemItemSimilarity similarity = new GenericItemSimilarity.ItemItemSimilarity(
             resultSet.getLong(1), resultSet.getLong(2), resultSet.getDouble(3));

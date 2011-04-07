@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class VectorList extends AbstractMatrix {
   private final int columns;
-  private List<Vector> data = Lists.newArrayList();
+  private final List<Vector> data = Lists.newArrayList();
 
   public VectorList(int columns) {
     this.columns = columns;

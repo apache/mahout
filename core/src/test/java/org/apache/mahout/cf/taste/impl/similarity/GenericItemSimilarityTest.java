@@ -64,12 +64,11 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
   public void testAllSimilaritiesWithoutIndex() throws TasteException {
 
     List<GenericItemSimilarity.ItemItemSimilarity> itemItemSimilarities =
-        Arrays.asList(new GenericItemSimilarity.ItemItemSimilarity[]{
-        new GenericItemSimilarity.ItemItemSimilarity(1L, 2L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(1L, 3L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(2L, 1L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(3L, 5L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(3L, 4L, 0.2)});
+        Arrays.asList(new GenericItemSimilarity.ItemItemSimilarity(1L, 2L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(1L, 3L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(2L, 1L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(3L, 5L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(3L, 4L, 0.2));
 
     ItemSimilarity similarity = new GenericItemSimilarity(itemItemSimilarities);
 
@@ -84,12 +83,11 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
   public void testAllSimilaritiesWithIndex() throws TasteException {
 
     List<GenericItemSimilarity.ItemItemSimilarity> itemItemSimilarities =
-        Arrays.asList(new GenericItemSimilarity.ItemItemSimilarity[]{
-        new GenericItemSimilarity.ItemItemSimilarity(1L, 2L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(1L, 3L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(2L, 1L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(3L, 5L, 0.2),
-        new GenericItemSimilarity.ItemItemSimilarity(3L, 4L, 0.2)});
+        Arrays.asList(new GenericItemSimilarity.ItemItemSimilarity(1L, 2L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(1L, 3L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(2L, 1L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(3L, 5L, 0.2),
+                      new GenericItemSimilarity.ItemItemSimilarity(3L, 4L, 0.2));
 
     ItemSimilarity similarity = new GenericItemSimilarity(itemItemSimilarities);
 
@@ -100,7 +98,7 @@ public final class GenericItemSimilarityTest extends SimilarityTestCase {
     assertTrue(containsExactly(similarity.allSimilarItemIDs(5L), 3L));
   }
 
-  private boolean containsExactly(long[] allIDs, long... shouldContainID) {
+  private static boolean containsExactly(long[] allIDs, long... shouldContainID) {
     return new FastIDSet(allIDs).intersectionSize(new FastIDSet(shouldContainID)) == shouldContainID.length;
   }
 

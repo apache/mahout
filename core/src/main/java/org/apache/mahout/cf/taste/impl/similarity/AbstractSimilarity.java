@@ -132,6 +132,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
   
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
+    DataModel dataModel = getDataModel();
     PreferenceArray xPrefs = dataModel.getPreferencesFromUser(userID1);
     PreferenceArray yPrefs = dataModel.getPreferencesFromUser(userID2);
     int xLength = xPrefs.length();
@@ -261,6 +262,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
   
   @Override
   public final double itemSimilarity(long itemID1, long itemID2) throws TasteException {
+    DataModel dataModel = getDataModel();
     PreferenceArray xPrefs = dataModel.getPreferencesForItem(itemID1);
     PreferenceArray yPrefs = dataModel.getPreferencesForItem(itemID2);
     int xLength = xPrefs.length();
@@ -377,7 +379,7 @@ abstract class AbstractSimilarity extends AbstractItemSimilarity implements User
   
   @Override
   public final String toString() {
-    return this.getClass().getSimpleName() + "[dataModel:" + dataModel + ",inferrer:" + inferrer + ']';
+    return this.getClass().getSimpleName() + "[dataModel:" + getDataModel() + ",inferrer:" + inferrer + ']';
   }
   
 }

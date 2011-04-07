@@ -276,7 +276,7 @@ public class ParallelALSFactorizationJobTest extends TasteTestCase {
     double rmse = Math.sqrt(avg.getAverage());
     logger.info("RMSE: " + rmse);
 
-    assertTrue(rmse < 0.2d);
+    assertTrue(rmse < 0.2);
   }
 
 }

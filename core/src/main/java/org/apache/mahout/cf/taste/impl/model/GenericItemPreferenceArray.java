@@ -51,7 +51,7 @@ public final class GenericItemPreferenceArray implements PreferenceArray {
     this.id = Long.MIN_VALUE; // as a sort of 'unspecified' value
   }
   
-  public GenericItemPreferenceArray(List<Preference> prefs) {
+  public GenericItemPreferenceArray(List<? extends Preference> prefs) {
     this(prefs.size());
     int size = prefs.size();
     long itemID = Long.MIN_VALUE;

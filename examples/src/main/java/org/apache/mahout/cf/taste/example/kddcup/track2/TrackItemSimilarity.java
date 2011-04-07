@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.mahout.cf.taste.common.Refreshable;
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.example.kddcup.KDDCupDataModel;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
 import org.apache.mahout.cf.taste.impl.common.FastIDSet;
@@ -87,7 +86,7 @@ final class TrackItemSimilarity implements ItemSimilarity {
   }
 
   @Override
-  public long[] allSimilarItemIDs(long itemID) throws TasteException {
+  public long[] allSimilarItemIDs(long itemID) {
     FastIDSet allSimilarItemIDs = new FastIDSet();
     LongPrimitiveIterator allItemIDs = trackData.keySetIterator();
     while (allItemIDs.hasNext()) {

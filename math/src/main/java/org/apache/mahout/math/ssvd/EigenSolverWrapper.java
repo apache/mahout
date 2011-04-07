@@ -40,7 +40,7 @@ import org.apache.commons.math.linear.RealMatrix;
 public class EigenSolverWrapper {
 
   private final double[] eigenvalues;
-  private double[][] uHat;
+  private final double[][] uHat;
 
   public EigenSolverWrapper(double[][] bbt) {
     int dim = bbt.length;

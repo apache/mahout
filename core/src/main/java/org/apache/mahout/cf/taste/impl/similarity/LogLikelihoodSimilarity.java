@@ -50,7 +50,8 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   
   @Override
   public double userSimilarity(long userID1, long userID2) throws TasteException {
-    
+
+    DataModel dataModel = getDataModel();
     FastIDSet prefs1 = dataModel.getItemIDsFromUser(userID1);
     FastIDSet prefs2 = dataModel.getItemIDsFromUser(userID2);
     
@@ -72,6 +73,7 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   
   @Override
   public double itemSimilarity(long itemID1, long itemID2) throws TasteException {
+    DataModel dataModel = getDataModel();
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     int numUsers = dataModel.getNumUsers();    
     return doItemSimilarity(itemID1, itemID2, preferring1, numUsers);
@@ -79,6 +81,7 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
 
   @Override
   public double[] itemSimilarities(long itemID1, long[] itemID2s) throws TasteException {
+    DataModel dataModel = getDataModel();
     int preferring1 = dataModel.getNumUsersWithPreferenceFor(itemID1);
     int numUsers = dataModel.getNumUsers();
     int length = itemID2s.length;
@@ -90,6 +93,7 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   }
 
   private double doItemSimilarity(long itemID1, long itemID2, int preferring1, int numUsers) throws TasteException {
+    DataModel dataModel = getDataModel();
     int preferring1and2 = dataModel.getNumUsersWithPreferenceFor(itemID1, itemID2);
     if (preferring1and2 == 0) {
       return Double.NaN;
@@ -106,12 +110,12 @@ public final class LogLikelihoodSimilarity extends AbstractItemSimilarity implem
   @Override
   public void refresh(Collection<Refreshable> alreadyRefreshed) {
     alreadyRefreshed = RefreshHelper.buildRefreshed(alreadyRefreshed);
-    RefreshHelper.maybeRefresh(alreadyRefreshed, dataModel);
+    RefreshHelper.maybeRefresh(alreadyRefreshed, getDataModel());
   }
   
   @Override
   public String toString() {
-    return "LogLikelihoodSimilarity[dataModel:" + dataModel + ']';
+    return "LogLikelihoodSimilarity[dataModel:" + getDataModel() + ']';
   }
   
 }

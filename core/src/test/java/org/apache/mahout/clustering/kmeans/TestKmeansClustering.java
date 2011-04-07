@@ -96,7 +96,8 @@ public final class TestKmeansClustering extends MahoutTestCase {
   }
 
   /**
-   * Tests {@link KMeansClusterer#runKMeansIteration) single run convergence with a given distance threshold.
+   * Tests {@link KMeansClusterer#runKMeansIteration(Iterable, Iterable, DistanceMeasure, double)} )
+   * single run convergence with a given distance threshold.
    */
   @Test
   public void testRunKMeansIterationConvergesInOneRunWithGivenDistanceThreshold() {

@@ -80,9 +80,11 @@ public final class SparseDoubleMatrix1D extends DoubleMatrix1D {
   }
 
 
+  @Override
   public Vector toVector() {
-    final RandomAccessSparseVector vector = new RandomAccessSparseVector(cardinality());
+    final Vector vector = new RandomAccessSparseVector(cardinality());
     elements.forEachPair(new IntDoubleProcedure() {
+      @Override
       public boolean apply(int i, double v) {
         vector.setQuick(i, v);
         return true;

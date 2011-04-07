@@ -57,8 +57,8 @@ public final class PreferredItemsNeighborhoodCandidateItemsStrategyTest extends 
     EasyMock.expect(dataModel.getItemIDsFromUser(123L)).andReturn(itemIDsFromUser123);
     EasyMock.expect(dataModel.getItemIDsFromUser(456L)).andReturn(itemIDsFromUser456);
 
-    GenericUserPreferenceArray prefArrayOfUser123 = new GenericUserPreferenceArray(Arrays.asList(new Preference[] {
-        new GenericPreference(123L, 1L, 1.0f) }));
+    PreferenceArray prefArrayOfUser123 =
+        new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(123L, 1L, 1.0f)));
 
     CandidateItemsStrategy strategy = new PreferredItemsNeighborhoodCandidateItemsStrategy();
 

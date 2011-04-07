@@ -45,7 +45,7 @@ public final class BooleanUserPreferenceArray implements PreferenceArray {
     this.id = Long.MIN_VALUE; // as a sort of 'unspecified' value
   }
   
-  public BooleanUserPreferenceArray(List<Preference> prefs) {
+  public BooleanUserPreferenceArray(List<? extends Preference> prefs) {
     this(prefs.size());
     int size = prefs.size();
     for (int i = 0; i < size; i++) {

@@ -31,7 +31,7 @@ public class NaiveBayesTestBase extends MahoutTestCase {
                                                    Vector labelSum,
                                                    Vector featureSum) {
     double weight = 0.0;
-    double alpha = 1.0d;
+    double alpha = 1.0;
     for (int i = 0; i < featureSum.size(); i++) {
       double score = weightMatrix.get(i, label);
       double lSum = labelSum.get(label);
@@ -49,7 +49,7 @@ public class NaiveBayesTestBase extends MahoutTestCase {
                                       Vector labelSum,
                                       Vector featureSum) {
     double weight = 0.0;
-    double alpha = 1.0d;
+    double alpha = 1.0;
     for (int i = 0; i < featureSum.size(); i++) {
       double score = weightMatrix.get(i, label);
       double lSum = labelSum.get(label);

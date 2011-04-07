@@ -55,23 +55,19 @@ public class ALSWRFactorizerTest extends TasteTestCase {
     super.setUp();
     FastByIDMap<PreferenceArray> userData = new FastByIDMap<PreferenceArray>();
 
-    userData.put(1L, new GenericUserPreferenceArray(Arrays.asList(new Preference[] {
-        new GenericPreference(1L, 1L, 5.0f),
-        new GenericPreference(1L, 2L, 5.0f),
-        new GenericPreference(1L, 3L, 2.0f) })));
+    userData.put(1L, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(1L, 1L, 5.0f),
+                                                                  new GenericPreference(1L, 2L, 5.0f),
+                                                                  new GenericPreference(1L, 3L, 2.0f))));
 
-    userData.put(2L, new GenericUserPreferenceArray(Arrays.asList(new Preference[] {
-        new GenericPreference(2L, 1L, 2.0f),
-        new GenericPreference(2L, 3L, 3.0f),
-        new GenericPreference(2L, 4L, 5.0f) })));
+    userData.put(2L, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(2L, 1L, 2.0f),
+                                                                  new GenericPreference(2L, 3L, 3.0f),
+                                                                  new GenericPreference(2L, 4L, 5.0f))));
 
-    userData.put(3L, new GenericUserPreferenceArray(Arrays.asList(new Preference[] {
-        new GenericPreference(3L, 2L, 5.0f),
-        new GenericPreference(3L, 4L, 3.0f) })));
+    userData.put(3L, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(3L, 2L, 5.0f),
+                                                                  new GenericPreference(3L, 4L, 3.0f))));
 
-    userData.put(4L, new GenericUserPreferenceArray(Arrays.asList(new Preference[] {
-        new GenericPreference(4L, 1L, 3.0f),
-        new GenericPreference(4L, 4L, 5.0f) })));
+    userData.put(4L, new GenericUserPreferenceArray(Arrays.asList(new GenericPreference(4L, 1L, 3.0f),
+                                                                  new GenericPreference(4L, 4L, 5.0f))));
 
     dataModel = new GenericDataModel(userData);
     factorizer = new ALSWRFactorizer(dataModel, 3, 0.065, 10);
@@ -147,6 +143,6 @@ public class ALSWRFactorizerTest extends TasteTestCase {
     }
 
     double rmse = Math.sqrt(avg.getAverage());
-    assertTrue(rmse < 0.2d);
+    assertTrue(rmse < 0.2);
   }
 }
