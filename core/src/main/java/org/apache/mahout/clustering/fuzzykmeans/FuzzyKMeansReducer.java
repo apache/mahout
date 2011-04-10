@@ -50,6 +50,7 @@ public class FuzzyKMeansReducer extends Reducer<Text, ClusterObservations, Text,
     if (converged) {
       context.getCounter("Clustering", "Converged Clusters").increment(1);
     }
+    cluster.computeParameters();
     context.write(new Text(cluster.getIdentifier()), cluster);
   }
 
