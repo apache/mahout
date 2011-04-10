@@ -55,6 +55,20 @@ public class MeanShiftCanopy extends Cluster {
     super(point, id, measure);
     boundPoints.add(id);
   }
+  
+  /**
+   * Create an initial Canopy, retaining the original type of the given point (e.g. NamedVector)
+   * @param point a Vector
+   * @param id an int
+   * @param measure a DistanceMeasure
+   * @return a MeanShiftCanopy
+   */
+  public static MeanShiftCanopy initialCanopy(Vector point, int id, DistanceMeasure measure){
+	  MeanShiftCanopy result = new MeanShiftCanopy(point, id, measure);
+	  // overwrite center so original point type is retained 
+	  result.setCenter(point);
+	  return result;
+  }
 
   /**
    * Create a new Canopy containing the given point, id and bound points

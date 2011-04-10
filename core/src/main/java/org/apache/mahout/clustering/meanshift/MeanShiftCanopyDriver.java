@@ -209,7 +209,7 @@ public class MeanShiftCanopyDriver extends AbstractJob {
                                                            MeanShiftCanopy.class);
       try {
         for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(s.getPath(), conf)) {
-          writer.append(new Text(), new MeanShiftCanopy(value.get(), id++, measure));
+          writer.append(new Text(), MeanShiftCanopy.initialCanopy(value.get(), id++, measure));
         }
       } finally {
         writer.close();

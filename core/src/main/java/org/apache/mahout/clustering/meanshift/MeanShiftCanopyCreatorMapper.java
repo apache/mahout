@@ -38,7 +38,7 @@ public class MeanShiftCanopyCreatorMapper extends Mapper<WritableComparable<?>, 
 
   @Override
   protected void map(WritableComparable<?> key, VectorWritable point, Context context) throws IOException, InterruptedException {
-    MeanShiftCanopy canopy = new MeanShiftCanopy(point.get(), nextCanopyId++, measure);
+    MeanShiftCanopy canopy = MeanShiftCanopy.initialCanopy(point.get(), nextCanopyId++, measure);
     context.write(new Text(key.toString()), canopy);
   }
 

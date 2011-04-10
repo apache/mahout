@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -39,6 +41,7 @@ import org.apache.mahout.common.MahoutTestCase;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.distance.DistanceMeasure;
 import org.apache.mahout.common.distance.EuclideanDistanceMeasure;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileValueIterator;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -327,6 +330,13 @@ public final class TestMeanShift extends MahoutTestCase {
     Path outPart = new Path(output, "clusters-3/part-r-00000");
     long count = HadoopUtil.countRecords(outPart, conf);
     assertEquals("count", 3, count);
+    outPart = new Path(output, "clusters-0/part-m-00000");
+	Iterator<?> iterator = new SequenceFileValueIterator<Writable>(outPart, true, conf);
+	// now test the initial clusters to ensure the type of their centers has been retained
+	while (iterator.hasNext()) {
+	  MeanShiftCanopy canopy = (MeanShiftCanopy) iterator.next();
+	  assertTrue(canopy.getCenter()instanceof DenseVector);
+	}
   }
 
   /**
